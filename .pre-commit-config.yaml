@@ -1,0 +1,44 @@
+---
+# Dogfood-lite: mirrors the tests the CI gate enforces, but fast enough to run
+# on every commit. Install once with `pre-commit install` inside this directory.
+#
+# What we DON'T run here (intentionally):
+#   - Full `pytest` suite: that belongs in pre-push + CI, not pre-commit.
+#   - Pyright: too slow on every commit; runs in CI.
+# What we DO run:
+#   - Hygiene (trailing ws, fix EOF, yaml/toml/json syntax).
+#   - Ruff lint.
+#   - A fast subset: the TDD-gate unit tests.
+
+default_language_version:
+  python: python3
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: detect-private-key
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: [--fix]
+        files: ^projects/lyra/packages/.*\.py$
+
+  - repo: local
+    hooks:
+      - id: tdd-gate-unit-tests
+        name: TDD-gate unit tests (fast)
+        entry: python3 -m pytest packages/lyra-core/tests/test_red_proof.py packages/lyra-core/tests/test_coverage_regression.py packages/lyra-core/tests/test_post_edit_focused_tests.py packages/lyra-core/tests/test_escape_hatch_audit.py -q
+        language: system
+        types: [python]
+        pass_filenames: false
+        files: ^projects/lyra/packages/lyra-core/(src|tests)/.*\.py$
+        stages: [pre-commit]

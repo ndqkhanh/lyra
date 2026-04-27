@@ -1,0 +1,43 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+defaults:
+  run:
+    working-directory: projects/lyra
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: install
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install -U pip wheel
+          .venv/bin/pip install ruff pytest pytest-cov PyYAML typer
+          .venv/bin/pip install \
+            -e packages/lyra-core \
+            -e packages/lyra-skills \
+            -e packages/lyra-mcp \
+            -e packages/lyra-evals \
+            -e packages/lyra-cli
+      - name: lint
+        run: .venv/bin/ruff check packages
+      - name: test
+        run: .venv/bin/pytest packages -q
+      - name: evals smoke
+        run: .venv/bin/lyra evals --corpus golden --drift-gate 0.0
+      - name: cli happy path
+        run: |
+          .venv/bin/lyra --help
+          .venv/bin/lyra doctor

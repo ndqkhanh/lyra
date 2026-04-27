@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lyra-core"
+version = "0.1.0"
+description = "Lyra kernel: TDD-aware loop, permissions, hooks, tools, HIR observability."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Lyra Contributors" }]
+dependencies = [
+    "harness-core",
+    "pydantic>=2.0",
+    "typing-extensions>=4.5",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.4",
+    "pyright>=1.1.350",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib -ra"
+testpaths = ["tests"]
+# Pytest's default ``python_functions = "test"`` matches ``test*`` —
+# greedy enough to scoop up production helpers like
+# ``lyra_core.tdd.impact_map.tests_for_edit`` and try to run them.
+# Pin to the underscore-suffixed pattern (matching every other
+# package in this monorepo) so only real test functions are collected.
+python_functions = "test_*"
+markers = [
+    "phase0_red: v1.8 RED-test scaffolding; xfails (strict) until the corresponding implementation lands.",
+]

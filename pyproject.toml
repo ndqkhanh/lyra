@@ -1,0 +1,51 @@
+[project]
+name = "lyra-workspace"
+version = "0.1.0"
+description = "Lyra monorepo workspace marker. Install real packages under packages/."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+src = [
+    "packages/lyra-core/src",
+    "packages/lyra-cli/src",
+    "packages/lyra-skills/src",
+    "packages/lyra-mcp/src",
+    "packages/lyra-evals/src",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "RUF"]
+ignore = ["E501"]  # line length handled by formatter
+
+[tool.ruff.lint.per-file-ignores]
+# Typer's idiomatic pattern is `x: T = typer.Option(default, ...)`; B008 flags
+# the Option() call as a mutable default, but it's the library contract.
+"packages/lyra-cli/src/lyra_cli/commands/*.py" = ["B008"]
+"packages/lyra-cli/src/lyra_cli/__main__.py" = ["B008"]
+
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib -ra"
+python_functions = "test_*"
+python_classes = "Test*"
+testpaths = [
+    "packages/lyra-core/tests",
+    "packages/lyra-cli/tests",
+    "packages/lyra-skills/tests",
+    "packages/lyra-mcp/tests",
+    "packages/lyra-evals/tests",
+]
+markers = [
+    "phase0_red: v1.8 RED-test scaffolding; xfails (strict) until the corresponding implementation lands. When the test starts passing, the marker is removed in the same PR.",
+]
+
+[tool.pyright]
+include = [
+    "packages/lyra-core/src",
+    "packages/lyra-cli/src",
+]
+pythonVersion = "3.9"
+typeCheckingMode = "basic"
