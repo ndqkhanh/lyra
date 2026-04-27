@@ -1,0 +1,9 @@
+title: Lyra
+description: >-
+  Lightweight Yielding Reasoning Agent — a general-purpose, CLI-native,
+  open-source coding agent harness supporting 16 LLM providers,
+  80+ slash commands, subagent orchestration, and 2200+ tests.
+theme: jekyll-theme-cayman
+url: "https://ndqkhanh.github.io"
+baseurl: "/lyra"
+show_downloads: true
