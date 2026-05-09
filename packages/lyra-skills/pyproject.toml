@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lyra-skills"
+version = "0.1.0"
+description = "Lyra skill engine: loader, router, extractor, shipped packs."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    "lyra-core",
+    "PyYAML>=6",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.setuptools.package-data]
+"lyra_skills" = ["packs/**/SKILL.md", "packs/**/*.md"]
+
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib -ra"
+python_functions = "test_*"
+python_classes = "Test*"
+testpaths = ["tests"]

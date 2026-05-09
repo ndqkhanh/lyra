@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pyright_cache/
+build/
+dist/
+
+# Lyra session state — keep root dir, gitignore sessions
+.lyra/*
+!.lyra/.gitkeep
+!.lyra/policy.yaml
+
+# MkDocs Material build output (source of truth lives in docs/*.md)
+site/

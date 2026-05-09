@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lyra-evals"
+version = "0.1.0"
+description = "Lyra evaluation harness: golden, red-team, long-horizon corpora."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    "lyra-core",
+    "lyra-skills",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.setuptools.package-data]
+"lyra_evals" = ["corpora/**/*.json"]
+
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib -ra"
+python_functions = "test_*"
+python_classes = "Test*"
+testpaths = ["tests"]
+markers = [
+    "phase0_red: v1.8 RED-test scaffolding; xfails (strict) until the corresponding implementation lands.",
+]

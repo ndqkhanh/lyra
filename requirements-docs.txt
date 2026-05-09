@@ -1,0 +1,15 @@
+# Documentation site dependencies (independent of runtime install).
+#
+# Install with: pip install -r requirements-docs.txt
+# Build with:   mkdocs build
+# Live serve:   mkdocs serve
+#
+# Pin majors only; the Material theme moves fast and we want patch fixes.
+
+mkdocs>=1.6,<2
+mkdocs-material>=9.5,<10
+pymdown-extensions>=10.7,<11
+
+# Optional but enabled in mkdocs.yml — comment out if you don't want them:
+mkdocs-glightbox>=0.4,<1     # image lightbox
+mkdocs-minify-plugin>=0.8,<1 # smaller HTML/CSS/JS in build output

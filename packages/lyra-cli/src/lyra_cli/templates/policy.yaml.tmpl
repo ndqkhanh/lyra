@@ -1,0 +1,47 @@
+# Lyra permission policy
+# Loaded at start of every session. Edits require PR review.
+
+version: 1
+
+deny_globs:
+  - ".env"
+  - ".env.*"
+  - "secrets/**"
+  - "**/id_rsa*"
+  - "**/*.pem"
+  - ".git/**"
+
+ask_globs:
+  - "package.json"
+  - "package-lock.json"
+  - "pnpm-lock.yaml"
+  - "yarn.lock"
+  - "pyproject.toml"
+  - "poetry.lock"
+  - "uv.lock"
+  - ".github/workflows/**"
+  - "Dockerfile*"
+  - "docker-compose*.yml"
+
+allow_globs:
+  - "src/**"
+  - "tests/**"
+  - "docs/**"
+
+bash_denylist:
+  - "rm -rf /"
+  - "rm -rf ~"
+  - "git push --force"
+  - "git push -f"
+  - ":(){ :|:& };:"
+  - "sudo "
+  - "curl | sh"
+  - "wget | bash"
+
+bash_asklist:
+  - "git push"
+  - "git reset --hard"
+  - "git rebase"
+  - "npm publish"
+  - "cargo publish"
+  - "pip install"
