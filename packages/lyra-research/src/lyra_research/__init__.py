@@ -102,6 +102,18 @@ from lyra_research.evaluation import (
     QualityTrendTracker,
     SelfEvaluationAgent,
 )
+from lyra_research.learning import (
+    ExtractedStrategy,
+    ResearchStrategyExtractor,
+    CaseMatch,
+    CaseSelectionPolicy,
+    DomainModel,
+    DomainExpertiseAccumulator,
+    WorkflowInsight,
+    ResearchWorkflowOptimizer,
+    GateDecision,
+    SelfImprovementGate,
+)
 
 __version__ = "0.1.0"
 
@@ -188,4 +200,14 @@ __all__ = [
     "ResearchQualityEvaluator",
     "QualityTrendTracker",
     "SelfEvaluationAgent",
+    "ExtractedStrategy",
+    "ResearchStrategyExtractor",
+    "CaseMatch",
+    "CaseSelectionPolicy",
+    "DomainModel",
+    "DomainExpertiseAccumulator",
+    "WorkflowInsight",
+    "ResearchWorkflowOptimizer",
+    "GateDecision",
+    "SelfImprovementGate",
 ]
