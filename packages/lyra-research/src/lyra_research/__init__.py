@@ -13,6 +13,14 @@ from lyra_research.discovery import (
     SourceType,
 )
 from lyra_research.fetchers import ContentFetcher, ParsedContent, PDFExtractor, READMEParser, WebScraper
+from lyra_research.analysis import (
+    PaperAnalysis,
+    PaperAnalyzer,
+    QualityScore,
+    QualityScorer,
+    RepositoryAnalysis,
+    RepositoryAnalyzer,
+)
 
 __version__ = "0.1.0"
 
@@ -28,4 +36,10 @@ __all__ = [
     "PDFExtractor",
     "READMEParser",
     "WebScraper",
+    "PaperAnalysis",
+    "PaperAnalyzer",
+    "RepositoryAnalysis",
+    "RepositoryAnalyzer",
+    "QualityScore",
+    "QualityScorer",
 ]
