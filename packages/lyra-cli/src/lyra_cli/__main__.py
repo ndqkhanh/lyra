@@ -28,6 +28,7 @@ import typer
 from . import __version__
 from .commands.acp import acp_app
 from .commands.context_opt import context_opt_app
+from .commands.ps import ps_app
 from .commands.brain import brain_app
 from .commands.burn import burn_app
 from .commands.connect import connect_command
@@ -259,6 +260,7 @@ app.add_typer(burn_app, name="burn")
 app.add_typer(skill_app, name="skill")
 app.add_typer(memory_app, name="memory")
 app.add_typer(context_opt_app, name="context-opt")
+app.add_typer(ps_app, name="ps")
 
 # Optional: harness-tui shell (decoupled from Lyra's primary REPL).
 try:  # pragma: no cover — optional import
