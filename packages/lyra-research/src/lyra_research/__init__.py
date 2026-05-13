@@ -96,6 +96,12 @@ from lyra_research.skills import (
 )
 
 from lyra_research.orchestrator import ResearchOrchestrator, ResearchProgress
+from lyra_research.evaluation import (
+    ResearchQualityMetrics,
+    ResearchQualityEvaluator,
+    QualityTrendTracker,
+    SelfEvaluationAgent,
+)
 
 __version__ = "0.1.0"
 
@@ -178,4 +184,8 @@ __all__ = [
     "StrategyAdaptationSkill",
     "SkillEvolutionRecord",
     "SkillEvolutionTracker",
+    "ResearchQualityMetrics",
+    "ResearchQualityEvaluator",
+    "QualityTrendTracker",
+    "SelfEvaluationAgent",
 ]
