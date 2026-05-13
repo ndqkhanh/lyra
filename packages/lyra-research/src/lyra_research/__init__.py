@@ -50,6 +50,20 @@ from lyra_research.sources import (
     PapersWithCodeDiscovery,
     SourceQualityScorer,
 )
+from lyra_research.intelligence import (
+    AuditReport,
+    ChecklistItem,
+    ClaimEvidence,
+    Contradiction,
+    ContradictionDetector,
+    EvidenceAudit,
+    FalsificationChecker,
+    FalsificationNote,
+    GapAnalyzer,
+    ResearchChecklist,
+    ResearchGap,
+    VerifiableChecklistGenerator,
+)
 
 __version__ = "0.1.0"
 
@@ -94,4 +108,16 @@ __all__ = [
     "OpenReviewDiscovery",
     "PapersWithCodeDiscovery",
     "SourceQualityScorer",
+    "VerifiableChecklistGenerator",
+    "ResearchChecklist",
+    "ChecklistItem",
+    "EvidenceAudit",
+    "AuditReport",
+    "ClaimEvidence",
+    "ContradictionDetector",
+    "Contradiction",
+    "GapAnalyzer",
+    "ResearchGap",
+    "FalsificationChecker",
+    "FalsificationNote",
 ]
