@@ -48,6 +48,7 @@ from .commands.session import session_app
 from .commands.setup import setup_command
 from .commands.skill import skill_app
 from .commands.status import status_app
+from .commands.trace import trace_app
 from .commands.tree import tree_app
 
 
@@ -264,6 +265,7 @@ app.add_typer(memory_app, name="memory")
 app.add_typer(context_opt_app, name="context-opt")
 app.add_typer(ps_app, name="ps")
 app.add_typer(status_app, name="status")
+app.add_typer(trace_app, name="trace")
 app.add_typer(tree_app, name="tree")
 
 # Optional: harness-tui shell (decoupled from Lyra's primary REPL).
