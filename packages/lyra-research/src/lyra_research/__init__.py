@@ -85,6 +85,15 @@ from lyra_research.intelligence import (
     ResearchGap,
     VerifiableChecklistGenerator,
 )
+from lyra_research.skills import (
+    QueryRefinementSkill,
+    RefinementSuggestion,
+    ResearchSkill,
+    ResearchSkillStore,
+    SkillEvolutionRecord,
+    SkillEvolutionTracker,
+    StrategyAdaptationSkill,
+)
 
 __version__ = "0.1.0"
 
@@ -158,4 +167,11 @@ __all__ = [
     "ResearchStrategyMemory",
     "ResearchCase",
     "SessionCaseBank",
+    "ResearchSkill",
+    "ResearchSkillStore",
+    "RefinementSuggestion",
+    "QueryRefinementSkill",
+    "StrategyAdaptationSkill",
+    "SkillEvolutionRecord",
+    "SkillEvolutionTracker",
 ]
