@@ -95,9 +95,13 @@ from lyra_research.skills import (
     StrategyAdaptationSkill,
 )
 
+from lyra_research.orchestrator import ResearchOrchestrator, ResearchProgress
+
 __version__ = "0.1.0"
 
 __all__ = [
+    "ResearchOrchestrator",
+    "ResearchProgress",
     "ArXivDiscovery",
     "GitHubDiscovery",
     "SemanticScholarDiscovery",
