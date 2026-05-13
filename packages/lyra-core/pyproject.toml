@@ -14,6 +14,7 @@ dependencies = [
     "harness-core",
     "pydantic>=2.0",
     "typing-extensions>=4.5",
+    "watchdog>=3.0",
 ]
 
 [project.optional-dependencies]
