@@ -7,8 +7,10 @@ This package implements a production-grade memory system with:
 - Hybrid BM25 + vector retrieval
 - Contradiction detection
 - Verifier-gated writes
+- Automatic memory extraction from conversations
 """
 
+from lyra_memory.extractor import MemoryExtractor, extract_memories_from_conversation
 from lyra_memory.schema import MemoryRecord, MemoryScope, MemoryType, VerifierStatus
 from lyra_memory.store import MemoryStore
 
@@ -20,4 +22,6 @@ __all__ = [
     "MemoryType",
     "VerifierStatus",
     "MemoryStore",
+    "MemoryExtractor",
+    "extract_memories_from_conversation",
 ]
