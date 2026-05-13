@@ -60,6 +60,17 @@ from lyra_research.memory import (
     ResearchStrategyMemory,
     SessionCaseBank,
 )
+from lyra_research.reporter import (
+    BoundCitation,
+    CitationBinder,
+    CrossSourceSynthesizer,
+    FieldTaxonomy,
+    QualityReport,
+    ReportQualityChecker,
+    ResearchReport,
+    ResearchReportGenerator,
+    SynthesisResult,
+)
 from lyra_research.intelligence import (
     AuditReport,
     ChecklistItem,
@@ -118,6 +129,15 @@ __all__ = [
     "OpenReviewDiscovery",
     "PapersWithCodeDiscovery",
     "SourceQualityScorer",
+    "BoundCitation",
+    "CitationBinder",
+    "CrossSourceSynthesizer",
+    "FieldTaxonomy",
+    "QualityReport",
+    "ReportQualityChecker",
+    "ResearchReport",
+    "ResearchReportGenerator",
+    "SynthesisResult",
     "VerifiableChecklistGenerator",
     "ResearchChecklist",
     "ChecklistItem",
