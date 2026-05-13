@@ -50,6 +50,16 @@ from lyra_research.sources import (
     PapersWithCodeDiscovery,
     SourceQualityScorer,
 )
+from lyra_research.memory import (
+    CorpusEntry,
+    LocalCorpus,
+    ResearchCase,
+    ResearchNote,
+    ResearchNoteStore,
+    ResearchStrategy,
+    ResearchStrategyMemory,
+    SessionCaseBank,
+)
 from lyra_research.intelligence import (
     AuditReport,
     ChecklistItem,
@@ -120,4 +130,12 @@ __all__ = [
     "ResearchGap",
     "FalsificationChecker",
     "FalsificationNote",
+    "ResearchNote",
+    "ResearchNoteStore",
+    "CorpusEntry",
+    "LocalCorpus",
+    "ResearchStrategy",
+    "ResearchStrategyMemory",
+    "ResearchCase",
+    "SessionCaseBank",
 ]
