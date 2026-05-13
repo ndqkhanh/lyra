@@ -21,8 +21,8 @@ stub agent; the bench-harness itself is what we're testing here.
 """
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable
 
 AgentFn = Callable[[int, str, dict[str, object]], str]
 

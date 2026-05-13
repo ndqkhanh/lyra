@@ -240,7 +240,8 @@ class MultiSourceDiscovery:
     """
     Unified discovery across multiple sources.
 
-    Aggregates results from ArXiv, Semantic Scholar, and GitHub.
+    Aggregates results from ArXiv, Semantic Scholar, GitHub, OpenReview,
+    HuggingFace Papers, Papers with Code, and ACL Anthology.
     """
 
     def __init__(
@@ -255,9 +256,23 @@ class MultiSourceDiscovery:
             semantic_scholar_key: Semantic Scholar API key
             github_token: GitHub API token
         """
+        # Import here to avoid circular imports at module load time
+        from lyra_research.sources import (
+            ACLAnthologyDiscovery,
+            CitationTraversal,
+            HuggingFacePapersDiscovery,
+            OpenReviewDiscovery,
+            PapersWithCodeDiscovery,
+        )
+
         self.arxiv = ArXivDiscovery()
         self.semantic_scholar = SemanticScholarDiscovery(semantic_scholar_key)
         self.github = GitHubDiscovery(github_token)
+        self.openreview = OpenReviewDiscovery()
+        self.huggingface = HuggingFacePapersDiscovery()
+        self.papers_with_code = PapersWithCodeDiscovery()
+        self.acl = ACLAnthologyDiscovery(semantic_scholar_key)
+        self.citation_traversal = CitationTraversal(semantic_scholar_key)
 
     def discover(
         self,
@@ -270,7 +285,9 @@ class MultiSourceDiscovery:
 
         Args:
             query: Search query
-            sources: List of sources to search
+            sources: List of sources to search. Supported values:
+                "arxiv", "semantic_scholar", "github",
+                "openreview", "huggingface", "papers_with_code", "acl"
             max_per_source: Maximum results per source
 
         Returns:
@@ -292,6 +309,26 @@ class MultiSourceDiscovery:
             print(f"Searching GitHub for: {query}")
             results["github"] = self.github.search(query, max_per_source)
             print(f"  Found {len(results['github'])} repositories")
+
+        if "openreview" in sources:
+            print(f"Searching OpenReview for: {query}")
+            results["openreview"] = self.openreview.search(query, max_per_source)
+            print(f"  Found {len(results['openreview'])} papers")
+
+        if "huggingface" in sources:
+            print(f"Searching HuggingFace Papers for: {query}")
+            results["huggingface"] = self.huggingface.search(query, max_per_source)
+            print(f"  Found {len(results['huggingface'])} papers")
+
+        if "papers_with_code" in sources:
+            print(f"Searching Papers with Code for: {query}")
+            results["papers_with_code"] = self.papers_with_code.search(query, max_per_source)
+            print(f"  Found {len(results['papers_with_code'])} papers")
+
+        if "acl" in sources:
+            print(f"Searching ACL Anthology for: {query}")
+            results["acl"] = self.acl.search(query, max_per_source)
+            print(f"  Found {len(results['acl'])} papers")
 
         return results
 

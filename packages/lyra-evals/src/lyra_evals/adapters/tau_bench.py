@@ -19,9 +19,9 @@ Phase 0: contracts only.
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable
 
 from ..corpora import Task
 from ..runner import TaskResult

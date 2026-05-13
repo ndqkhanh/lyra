@@ -41,6 +41,15 @@ from lyra_research.strategies import (
     SearchStrategy,
     StoppingCriteria,
 )
+from lyra_research.sources import (
+    ACLAnthologyDiscovery,
+    CitationTraversal,
+    GitHubActivityScorer,
+    HuggingFacePapersDiscovery,
+    OpenReviewDiscovery,
+    PapersWithCodeDiscovery,
+    SourceQualityScorer,
+)
 
 __version__ = "0.1.0"
 
@@ -78,4 +87,11 @@ __all__ = [
     "SearchPlan",
     "SearchStrategy",
     "StoppingCriteria",
+    "ACLAnthologyDiscovery",
+    "CitationTraversal",
+    "GitHubActivityScorer",
+    "HuggingFacePapersDiscovery",
+    "OpenReviewDiscovery",
+    "PapersWithCodeDiscovery",
+    "SourceQualityScorer",
 ]
