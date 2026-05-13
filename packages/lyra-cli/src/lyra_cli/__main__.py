@@ -47,6 +47,7 @@ from .commands.serve import serve_command
 from .commands.session import session_app
 from .commands.setup import setup_command
 from .commands.skill import skill_app
+from .commands.status import status_app
 
 
 def _version_callback(value: bool) -> None:
@@ -261,6 +262,7 @@ app.add_typer(skill_app, name="skill")
 app.add_typer(memory_app, name="memory")
 app.add_typer(context_opt_app, name="context-opt")
 app.add_typer(ps_app, name="ps")
+app.add_typer(status_app, name="status")
 
 # Optional: harness-tui shell (decoupled from Lyra's primary REPL).
 try:  # pragma: no cover — optional import
