@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"python -m pytest tests/test_database.py -v\",\"description\":\"Run database tests\"}",
+  "error": "Exit code 1\n============================= test session starts ==============================\nplatform darwin -- Python 3.11.8, pytest-9.0.2, pluggy-1.6.0 -- /Users/khanhnguyen/miniconda3/bin/python\ncachedir: .pytest_cache\nrootdir: /Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-memory\nconfigfile: pyproject.toml\nplugins: anyio-4.12.1, cov-7.1.0\ncollecting ... collected 11 items\n\ntests/test_database.py::test_database_initialization PASSED              [  ...",
+  "timestamp": "2026-05-13T13:20:16.437Z",
+  "retry_count": 1
+}
