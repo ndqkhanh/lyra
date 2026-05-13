@@ -19,6 +19,7 @@ bar, and a graceful non-TTY fallback.
 """
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Optional
 
@@ -26,6 +27,7 @@ import typer
 
 from . import __version__
 from .commands.acp import acp_app
+from .commands.context_opt import context_opt_app
 from .commands.brain import brain_app
 from .commands.burn import burn_app
 from .commands.connect import connect_command
@@ -34,6 +36,7 @@ from .commands.evals import evals_command
 from .commands.evolve import evolve_command
 from .commands.hud import hud_app
 from .commands.init import init_command
+from .commands.investigate import investigate_command
 from .commands.mcp import mcp_app
 from .commands.memory import memory_app
 from .commands.plan import plan_command
@@ -148,10 +151,59 @@ def _root(
             "this exact run. Useful for scripting and CI."
         ),
     ),
+    bare: bool = typer.Option(
+        False,
+        "--bare",
+        help=(
+            "Boot in deterministic / no-auto-discovery mode. Skips "
+            "skills injection, memory injection, MCP server autoload, "
+            "the cron daemon, and ignores any ``permissions``/``hooks`` "
+            "blocks in settings.json. Mirrors Claude Code's ``--bare`` "
+            "and is the right flag for CI, headless harnesses, or any "
+            "time you want a session whose behaviour is fully derived "
+            "from the CLI flags alone."
+        ),
+    ),
+    legacy: bool = typer.Option(
+        False,
+        "--legacy",
+        help=(
+            "Boot the legacy prompt_toolkit REPL instead of the v3.14 "
+            "Textual shell. Set ``LYRA_TUI=legacy`` in your shell rc "
+            "to make this the default for your account. The legacy "
+            "REPL is scheduled for removal in v3.15."
+        ),
+    ),
 ) -> None:
     """Lyra."""
     if ctx.invoked_subcommand is not None:
         return
+
+    # v3.14 / Phase 6 — default-entry flip. Bare ``lyra`` now opens the
+    # Textual shell. Two escape hatches for users who depend on the
+    # legacy prompt_toolkit REPL during the transition:
+    #   * ``lyra --legacy``  — per-invocation
+    #   * ``LYRA_TUI=legacy`` — per-shell
+    # ``LYRA_TUI=v2`` remains a no-op opt-in (kept so users who set it
+    # during Phases 1–5 don't need to unset it now).
+    tui_pref = os.environ.get("LYRA_TUI", "").strip().lower()
+    use_legacy = legacy or tui_pref == "legacy"
+    if not use_legacy:
+        from .tui_v2 import launch_tui_v2
+
+        raise typer.Exit(
+            launch_tui_v2(repo_root=repo_root.resolve(), model=model)
+        )
+
+    # Legacy path — surface a one-line deprecation hint via Click's
+    # stderr stream so CliRunner can capture it without monkeypatching.
+    typer.echo(
+        "lyra: launching legacy prompt_toolkit REPL. The v3.14 Textual "
+        "shell is now the default; drop --legacy / unset "
+        "LYRA_TUI=legacy to use it. (Legacy removed in v3.15.)",
+        err=True,
+    )
+
     from .interactive.driver import run as _run_interactive
 
     # v3.2.0 (Phase L): unify --resume / --continue / --session into
@@ -182,6 +234,7 @@ def _root(
             budget_cap_usd=budget,
             resume_id=resume_target,
             pin_session_id=pin_id,
+            bare=bare,
         )
     )
 
@@ -189,6 +242,7 @@ def _root(
 app.command("init")(init_command)
 app.command("run")(run_command)
 app.command("plan")(plan_command)
+app.command("investigate")(investigate_command)
 app.command("connect")(connect_command)
 app.command("doctor")(doctor_command)
 app.command("setup")(setup_command)
@@ -204,6 +258,7 @@ app.add_typer(hud_app, name="hud")
 app.add_typer(burn_app, name="burn")
 app.add_typer(skill_app, name="skill")
 app.add_typer(memory_app, name="memory")
+app.add_typer(context_opt_app, name="context-opt")
 
 # Optional: harness-tui shell (decoupled from Lyra's primary REPL).
 try:  # pragma: no cover — optional import
