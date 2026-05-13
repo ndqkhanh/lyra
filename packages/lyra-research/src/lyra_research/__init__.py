@@ -21,6 +21,16 @@ from lyra_research.analysis import (
     RepositoryAnalysis,
     RepositoryAnalyzer,
 )
+from lyra_research.synthesis import (
+    CitationNetworkBuilder,
+    Concept,
+    ConceptExtractor,
+    KnowledgeEdge,
+    KnowledgeGraph,
+    KnowledgeNode,
+    Relationship,
+    RelationshipDiscovery,
+)
 
 __version__ = "0.1.0"
 
@@ -42,4 +52,12 @@ __all__ = [
     "RepositoryAnalyzer",
     "QualityScore",
     "QualityScorer",
+    "CitationNetworkBuilder",
+    "Concept",
+    "ConceptExtractor",
+    "KnowledgeGraph",
+    "KnowledgeNode",
+    "KnowledgeEdge",
+    "Relationship",
+    "RelationshipDiscovery",
 ]
