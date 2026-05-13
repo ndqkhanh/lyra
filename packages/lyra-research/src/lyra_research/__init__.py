@@ -31,6 +31,16 @@ from lyra_research.synthesis import (
     Relationship,
     RelationshipDiscovery,
 )
+from lyra_research.strategies import (
+    QueryExpander,
+    RankedResult,
+    ResearchPlanner,
+    ResultFilter,
+    ResultRanker,
+    SearchPlan,
+    SearchStrategy,
+    StoppingCriteria,
+)
 
 __version__ = "0.1.0"
 
@@ -60,4 +70,12 @@ __all__ = [
     "KnowledgeEdge",
     "Relationship",
     "RelationshipDiscovery",
+    "QueryExpander",
+    "ResultFilter",
+    "ResultRanker",
+    "RankedResult",
+    "ResearchPlanner",
+    "SearchPlan",
+    "SearchStrategy",
+    "StoppingCriteria",
 ]
