@@ -39,6 +39,7 @@ from .commands.hud import hud_app
 from .commands.init import init_command
 from .commands.investigate import investigate_command
 from .commands.mcp import mcp_app
+from .commands.mcp_memory import mcp_memory_app
 from .commands.memory import memory_app
 from .commands.plan import plan_command
 from .commands.retro import retro_command
@@ -256,6 +257,7 @@ app.command("evals")(evals_command)
 app.command("evolve")(evolve_command)
 app.add_typer(session_app, name="session")
 app.add_typer(mcp_app, name="mcp")
+app.add_typer(mcp_memory_app, name="mcp-memory")
 app.add_typer(acp_app, name="acp")
 app.add_typer(brain_app, name="brain")
 app.add_typer(hud_app, name="hud")
