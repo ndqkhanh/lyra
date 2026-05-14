@@ -1,6 +1,8 @@
 """lyra-evals: eval runner + corpora + public-benchmark adapters."""
 from __future__ import annotations
 
+from .aer import AERStore, AgentExecutionRecord, new_aer
+from .slo import DEFAULT_SLOS, SLOBreach, SLOTracker
 from .adapters import (
     ConversationDriver,
     LoCoEvalResult,
@@ -24,6 +26,14 @@ from .snapshot import HarnessSnapshot, snapshot_hash
 __version__ = "0.1.0"
 
 __all__ = [
+    # Phase A — AER + SLO
+    "AERStore",
+    "AgentExecutionRecord",
+    "DEFAULT_SLOS",
+    "SLOBreach",
+    "SLOTracker",
+    "new_aer",
+    # Legacy
     "ContaminationError",
     "ContaminationGuard",
     "ConversationDriver",
