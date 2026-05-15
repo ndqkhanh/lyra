@@ -1,333 +1,321 @@
 # lyra-cli
 
-The user-facing front-end for **Lyra**, the general-purpose
-CLI-native coding agent. `lyra-cli` ships:
+The user-facing CLI for Lyra, a self-evolving coding agent. Provides an interactive REPL (Claude-Code style) and headless commands.
 
-* a Typer-based command surface (`lyra init`, `run`, `plan`,
-  `connect`, `doctor`, `retro`, `evals`, `session`, `mcp`, `acp`);
-* a Claude-Code-style interactive REPL when invoked with no
-  subcommand (`lyra` → status banner → slash commands);
-* the **provider catalogue** (DeepSeek, Anthropic, OpenAI, Gemini,
-  xAI, Groq, Cerebras, Mistral, Qwen, OpenRouter, GitHub Copilot, AWS
-  Bedrock, GCP Vertex, LM Studio, Ollama, OpenAI-compatible) wired
-  through a single `build_llm` factory that the rest of the harness
-  (subagent runner, cron daemon, planner, evaluator) reuses;
-* an **opt-in TDD plugin** (`/tdd-gate on`, `/phase`, `/red-proof`)
-  for teams that want a hard gate around `src/**` writes — off by
-  default in v3.0.0 to match `claw-code`, `opencode`, and
-  `hermes-agent`.
-
-Everything below is current as of **v3.2.0** (2026-04-27 —
-Claude-Code 4-mode taxonomy + screenshot-bug fix + docs sweep).
-v3.2.0 supersedes v3.1.0 (Phase J research synthesis) and v3.0.0
-(TDD opt-in repositioning + DeepSeek small/smart split). For the
-per-release narrative see
-[`projects/lyra/CHANGELOG.md`](../../CHANGELOG.md).
+**Current version: 3.14.0** | Python 3.11+ | MIT License
 
 ## Install
 
-The CLI is published as a stand-alone Python package; the only hard
-requirement is Python ≥ 3.11.
-
 ```bash
-pipx install lyra-cli            # recommended (isolated venv on PATH)
+pip install -e packages/lyra-cli[dev]    # From repo root
 # or
-pip install --user lyra-cli      # plain user install
-
-lyra --version                   # → lyra 3.2.0
+pipx install lyra-cli                    # Isolated environment
 ```
 
-The shipping binary uses **DeepSeek** by default so a single API key
-is enough to drive every role (chat, planning, subagents). Configure
-it once and persist it:
+Lyra defaults to **DeepSeek**, so you only need one API key to start:
 
 ```bash
 lyra connect deepseek
-# Paste sk-… ; auth.json is written to ~/.lyra/auth.json (chmod 600).
+# Paste your API key; saved to ~/.lyra/auth.json (chmod 600)
+
+lyra                                     # Start the interactive REPL
 ```
 
-`lyra connect` understands every provider in the catalogue (run
-`lyra connect --help` for the list) and validates the key against the
-provider's `/models` endpoint before saving so a typo fails fast
-instead of mid-turn.
-
-## Quick start
+## Quick Start
 
 ```bash
-lyra                       # opens the interactive REPL in $PWD
-lyra --repo-root path/to/checkout  # pin a different repo
-lyra --model claude-opus-4-5       # pin the *universal* model
-lyra --budget 5.00         # cap this session at USD 5.00
+lyra                                     # Open REPL in current directory
+lyra --model claude-opus-4-5             # Pin a specific model
+lyra --budget 5.00                       # Cap session spend at $5.00
 ```
 
-In the REPL (default mode is `agent` since v3.2.0):
+In the REPL:
 
 ```text
-agent › /help                 # list every slash command
-agent › /status               # model + slot + budget + tools
-agent › what does session.py do?     # ordinary chat turn
-agent › /mode plan                   # switch to read-only design mode
-plan  › /plan ship tests for X       # propose a numbered plan
-plan  › /approve                     # hand off to agent for execution
-agent › /spawn refactor migrations   # subagent in an isolated worktree
-agent › /budget set 10               # one-shot cap raise
-agent › /exit
+agent › /help                             # List all slash commands
+agent › what does session.py do?          # Ordinary chat
+agent › /model                            # Show current model + slots
+agent › /research "transformers"          # 10-step deep research
+agent › /mode plan                        # Switch to design mode
+agent › /plan implement feature X         # Create a numbered plan
+agent › /approve                          # Hand off to agent for execution
+agent › /exit                             # Leave the REPL
 ```
 
-Non-TTY environments (CI, piped stdin) fall back automatically to
-plain `input()` and strip ANSI; `echo /exit | lyra` works.
+## Modes (4-Mode Taxonomy, v3.2.0+)
 
-## Model routing — fast vs. smart
+Tab cycles through modes. Prompt prefix shows active mode.
 
-v2.7.1 introduces a Claude-Code-style **two-tier model split** on top
-of DeepSeek's catalog (cheapest competitive frontier API). The
-session carries two slots, both re-pinnable per session:
+| Mode | Prompt | Reads | Writes | Tools | When to Use |
+|------|--------|-------|--------|-------|------------|
+| `agent` | `agent ›` | yes | yes | yes | Default: implement, refactor, execute tasks |
+| `plan` | `plan ›` | yes | no | read-only | Design before coding; `/approve` hands off to agent |
+| `debug` | `debug ›` | yes | yes | yes | Investigate failures; use live evidence over guesses |
+| `ask` | `ask ›` | yes | no | read-only | Codebase Q&A; tutorials and explanations |
 
-| Slot      | Default alias       | Resolves to            | Used by |
-|-----------|---------------------|------------------------|---------|
-| **fast**  | `deepseek-v4-flash` | `deepseek-chat`        | chat turns, tool calls, summaries, `/compact`, status helpers |
-| **smart** | `deepseek-v4-pro`   | `deepseek-reasoner`    | `lyra plan`, `/spawn` subagents, cron fan-out, `/review --auto`, evaluator |
+Legacy mode names (`build`, `run`, `explore`, `retro` from v3.1) still work and remap to canonical modes with a one-shot notice.
 
-Resolution is performed by a single helper,
-`_resolve_model_for_role(session, role)`, with this mapping:
+## Slash Commands (109+)
+
+### Conversation
+
+- `/exit`, `/quit` — Leave the REPL
+- `/clear` — Wipe visible chat (history kept on disk)
+- `/compact` — Heuristic chat-history compactor
+- `/history`, `/replay` — List and replay past sessions
+
+### Models & Budget
+
+- `/model` — Show current model + fast/smart slots
+- `/model list` — List every available model alias
+- `/model <slug>` — Pin a specific model (one-shot or persistent)
+- `/model fast=<slug>` / `/model smart=<slug>` — Re-pin the slot
+- `/model auto` — Restore slot-based routing
+- `/budget`, `/budget set <usd>`, `/budget save <usd>` — Manage spend cap
+- `/status` — Show model, slots, mode, budget, MCP, plugins
+
+### Working Code
+
+- `/plan <task>` — Invoke the planner (smart slot)
+- `/spawn <description>` — Fork a subagent in isolated `git worktree` (smart slot)
+- `/review`, `/review --auto` — Post-turn diff review
+- `/verify` — Replay the verifier (smart slot)
+- `/diff`, `/diff --staged` — Show working tree diff
+
+### Tools, Skills, Memory
+
+- `/tools` — List registered tools (built-in + MCP + plugins)
+- `/skills` — Show injected SKILL.md files
+- `/memory` — Show recalled memory window
+- `/mcp list|add|remove|doctor` — Manage MCP servers
+
+### Sessions
+
+- `/session list|show <id>|export <id>` — Local session store (FTS5)
+- `/handoff` — Print paste-ready handoff message
+- `/retro` — Session retrospective
+
+### Lifecycle Commands (Waves A–G, 30+ total)
+
+**Memory:**
+- `/memory consolidate` — Merge learned patterns
+- `/memory distill` — Extract key insights
+- `/memory audit` — Validate stored facts
+- `/memory evolve` — Auto-improve memory structure
+- `/memory promote` — Mark important for fast recall
+
+**Context:**
+- `/context checkpoint` — Save execution state
+- `/context prune` — Remove low-signal history
+- `/context playbook` — Show decision checklist
+- `/context inject` — Load external context
+
+**Research:**
+- `/research plan` — Design a research strategy
+- `/research verify` — Falsify claims with evidence
+- `/research falsify` — Test opposite hypothesis
+- `/research sandbox` — Safe exploration
+- `/deepsearch <query>` — Find code/papers
+
+**Skills:**
+- `/skills create` — Synthesize new skill
+- `/skills admit` — Import external skill
+- `/skills audit` — Check skill quality
+- `/skills distill` — Extract from traces
+- `/skills compose` — Combine skills
+- `/skills merge` — Unify overlapping skills
+- `/skills prune` — Remove unused skills
+
+**Specification-Driven:**
+- `/specify` — Create formal spec
+- `/tasks` — Generate task breakdown
+- `/bmad <role>` — Behavioral modeling
+
+**Closed-Loop:**
+- `/verify` — Run verification gate
+- `/checkpoint [label]` — Save snapshot
+- `/rollback [id]` — Restore to snapshot
+
+**Routing & Monitoring:**
+- `/route` — Show routing decision
+- `/monitor` — Live trace viewer
+- `/aer [session-id]` — View Automated Execution Representation traces
+
+### Diagnostics
+
+- `/doctor` — Environment health check
+- `/keys` — Show registered keybinds
+
+### Optional TDD Plugin (opt-in, off by default)
+
+- `/tdd-gate [on|off|status]` — Toggle gate hook (`src/**` writes blocked without RED proof)
+- `/red-proof <cmd>` — Run failing test and attach proof
+- `/phase` — Show TDD state machine (IDLE → PLAN → RED → GREEN → REFACTOR → SHIP)
+
+## TUI Features (Waves 1–5, all shipped)
+
+**Wave 1: Full-Screen Model Picker**
+- Press `/model` to open interactive picker with all models
+- Use ←/→ to adjust effort slider (low/medium/high/xhigh/max)
+- Shows live speed vs. intelligence axis
+- Confirm with Enter
+
+**Wave 2: Status Bar Footer**
+- `cwd · ◆ model · mode · △ perms · N shell · bg tasks ↓ · esc to interrupt`
+- Yolo mode displays `⏵⏵ bypass permissions on` in red
+- Always visible, updated in real-time
+
+**Wave 3: Background-Turn Mode**
+- Press `Ctrl+B` to toggle (one-shot; auto-resets after turn)
+- Non-blocking execution; continue working while turn runs
+- Great for long-running operations
+
+**Wave 4: Verbose Tool Output**
+- Press `Ctrl+O` to expand tool calls
+- Shows full output of tools instead of summaries
+- Hint on tool calls: `ctrl+o to expand`
+
+**Wave 5: Smart Spinner**
+- Shows reasoning tokens, elapsed time, background task count
+- `⠋ Thinking  ↓ 1.2k  3s  [ctrl+b: bg]`
+- Tips panel in welcome banner with quick reference
+
+## Key Keybindings
+
+| Key | Action |
+|-----|--------|
+| `Tab` | Cycle REPL modes (agent → plan → debug → ask) |
+| `Alt+M` | Cycle permission levels (normal → strict → yolo) |
+| `Alt+T` | Toggle extended reasoning (deep-think) |
+| `Ctrl+B` | Background-turn mode (non-blocking) |
+| `Ctrl+O` | Verbose tool output |
+| `Ctrl+N` | New chat (preserves mode/model) |
+| `Ctrl+T` | Task panel |
+| `Ctrl+F` | Focus most recent subagent |
+| `Esc Esc` | Rewind last turn |
+| `Ctrl+X m` | Leader chord for `/mode` |
+
+## Model Routing
+
+Lyra uses a **2-slot system** for fast context-switching:
+
+| Slot | Default | Usage |
+|------|---------|-------|
+| **fast** | `deepseek-chat` | Chat, tool calls, summaries, status |
+| **smart** | `deepseek-reasoner` | Planning, spawning subagents, verification |
+
+**Resolution Logic:**
 
 ```
-chat      → fast
-plan      → smart
-spawn     → smart
-cron      → smart
-review    → smart
-verify    → smart
-subagent  → smart
-(unknown) → session.model      # legacy "auto" pin escape hatch
+chat      → fast slot
+plan      → smart slot
+spawn     → smart slot
+review    → smart slot
+verify    → smart slot
+(default) → session model (universal pin)
 ```
 
-When a role resolves a different alias than the cached provider's
-`model` attribute, Lyra **mutates the cached provider in place**
-(setting `provider.model = "<resolved-slug>"`) and stamps both
-`HARNESS_LLM_MODEL` (the universal env the `build_llm` factory reads)
-and the provider-specific override (`DEEPSEEK_MODEL`,
-`ANTHROPIC_MODEL`, `OPENAI_MODEL`, `GEMINI_MODEL`) so a freshly built
-provider lands on the same slug. The chat history, the budget meter,
-and the in-memory MCP plumbing all stay attached — only the next
-`generate` / `stream` call talks to a different model.
-
-### `/model` cheatsheet
-
-```text
-agent › /model
-current model: auto (resolves through fast/smart slots)
-fast slot:     deepseek-v4-flash  →  deepseek-chat
-smart slot:    deepseek-v4-pro    →  deepseek-reasoner
-
-agent › /model list                       # show every alias the registry knows
-agent › /model fast                       # next turn → fast slot (one-shot)
-agent › /model smart                      # next turn → smart slot (one-shot)
-agent › /model fast=qwen-coder-flash      # re-pin the fast slot persistently
-agent › /model smart=claude-opus-4-5      # re-pin the smart slot persistently
-agent › /model claude-sonnet-4-5          # legacy: pin the universal model
-                                           # (overrides the slots until /model auto)
-agent › /model auto                       # restore slot-based routing
-```
-
-To re-pin the slots **across sessions**, drop them into
-`~/.lyra/settings.json`:
+**Configure Slots (persistent):**
 
 ```json
 {
   "fast_model": "claude-sonnet-4-5",
   "smart_model": "claude-opus-4-5",
-  "default_model": "auto",
-  "budget_cap_usd": 5.00
+  "default_model": "auto"
 }
 ```
 
-API keys are stored separately in `~/.lyra/auth.json` (created by
-`lyra connect`, `chmod 600` enforced).
+Save in `~/.lyra/settings.json`.
 
-## Provider catalogue
+**One-Shot Overrides (in REPL):**
 
-The factory honours a fixed precedence when `--model auto` is in
-effect: **DeepSeek → Anthropic → OpenAI → Gemini → xAI → Groq →
-Cerebras → Mistral → Qwen → OpenRouter → LM Studio → Ollama → mock**.
-The first one with valid credentials wins; you can pin any of them
-explicitly with `--model <name>` or `/model <slug>` inside the REPL.
-
-| Provider                         | Connect command            | Default models (fast / smart)            |
-|----------------------------------|----------------------------|------------------------------------------|
-| DeepSeek (default)               | `lyra connect deepseek`    | `deepseek-chat` / `deepseek-reasoner`    |
-| Anthropic                        | `lyra connect anthropic`   | `claude-sonnet-4-5` / `claude-opus-4-5`  |
-| OpenAI                           | `lyra connect openai`      | `gpt-4o-mini` / `gpt-4o`                 |
-| Google Gemini                    | `lyra connect gemini`      | `gemini-2.5-flash` / `gemini-2.5-pro`    |
-| xAI / Groq / Cerebras / Mistral  | `lyra connect <name>`      | provider-published defaults              |
-| Qwen / OpenRouter                | `lyra connect <name>`      | `qwen3-coder-flash` / `qwen3-coder-plus` |
-| GitHub Copilot                   | `lyra connect copilot`     | OAuth, copilot-chat models               |
-| AWS Bedrock / GCP Vertex         | `lyra connect <name>`      | uses cloud SDK creds                     |
-| Ollama / LM Studio               | (auto-detect)              | whatever your local server exposes       |
-
-## Modes (v3.2.0)
-
-Lyra mirrors Claude Code's 4-mode REPL taxonomy. The active mode
-appears in the prompt prefix (`agent ›`, `plan ›`, `debug ›`, `ask ›`)
-and in the status bar's `mode` chip. Tab cycles forward through the
-list.
-
-| Mode    | Prompt prefix | Reads files | Writes files | Calls tools | Use when                                                 |
-| ------- | ------------- | ----------- | ------------ | ----------- | -------------------------------------------------------- |
-| `agent` | `agent ›`     | yes         | yes          | yes         | Default. Implementing, refactoring, executing tasks.     |
-| `plan`  | `plan ›`      | yes         | no           | no (read)   | Designing before coding; `/approve` ships to `agent`.    |
-| `debug` | `debug ›`     | yes         | yes          | yes         | Investigating a failure; runtime evidence over guesses.  |
-| `ask`   | `ask ›`       | yes         | no           | no (read)   | Codebase Q&A; tutorial / explanation requests.           |
-
-Switch modes with `/mode <name>` or by hitting **Tab**. Legacy v3.1
-names (`build`, `run`, `explore`, `retro`) are still accepted —
-they remap to the canonical mode and emit a one-shot
-`'<old>' was renamed to '<new>' in v3.2.0` notice. The legacy →
-canonical map:
-
-| v3.1 (legacy) | v3.2 (canonical) |
-| ------------- | ---------------- |
-| `build`       | `agent`          |
-| `run`         | `agent`          |
-| `explore`     | `ask`            |
-| `retro`       | `debug`          |
-
-> **Why four?** v3.2.0 collapsed Lyra's older 5-mode taxonomy onto
-> the same surface as `claw-code` / `opencode` / `hermes-agent`.
-> The system prompts now ENUMERATE the four modes verbatim and
-> explicitly disclaim that TDD's RED → GREEN → REFACTOR phases are
-> a plugin's internal phases, **not modes** — fixing a bug where
-> the model would list `BUILD / RED / GREEN / REFACTOR` as four
-> peer modes when asked. See
-> [`CHANGELOG.md`](../../CHANGELOG.md#v320--2026-04-27--claude-code-4-mode-taxonomy).
-
-## Slash command surface (v3.2.0)
-
-This is the canonical list as of v3.2.0. `/help` always wins if this
-README drifts.
-
-### Conversation
-
-* `/exit`, `/quit`              — leave the REPL.
-* `/clear`                      — wipe the visible chat (history kept on disk).
-* `/compact`                    — heuristic chat-history compactor (keeps the last 6 turns verbatim, collapses the rest into a digest, recomputes `tokens_used`).
-* `/history` / `/replay`        — list and replay past sessions.
-
-### Models, budget, status
-
-* `/model`                       — show current model + fast/smart slots.
-* `/model list`                  — list every alias the registry knows.
-* `/model <slug>`                — pin the universal model.
-* `/model fast` / `/model smart` — one-shot switch the next turn to that slot.
-* `/model fast=<slug>` / `/model smart=<slug>` — re-pin the slot persistently.
-* `/model auto`                  — restore slot-based routing.
-* `/budget`, `/budget set <usd>`, `/budget save <usd>` — inspect / raise the cap.
-* `/status`                      — model, slots, mode, budget, MCP, plugins.
-
-### Working code
-
-* `/plan <task>`                 — invoke the planner (smart slot).
-* `/spawn <description>`         — fork a subagent in an isolated `git worktree` (smart slot).
-* `/review`, `/review --auto`    — post-turn diff review.
-* `/verify`                      — replay the verifier (smart slot).
-* `/diff`, `/diff --staged`      — show the working tree diff.
-
-### Tools, skills, memory
-
-* `/tools`                       — list registered tools (built-in + MCP + plugins).
-* `/skills`                      — show injected SKILL.md files.
-* `/memory`                      — show the recalled memory window.
-* `/mcp list|add|remove|doctor`  — manage MCP servers.
-
-### Sessions
-
-* `/session list|show <id>|export <id>` — local session store (FTS5 by default).
-* `/handoff`                     — print a paste-ready handoff message.
-* `/retro`                       — session retrospective.
-
-### Diagnostics
-
-* `/doctor`                      — environment health check.
-* `/keys`                        — show registered keybinds.
-
-### Optional TDD plugin (v3.0.0+ opt-in)
-
-* `/tdd-gate [on|off|status]`    — toggle the gate hook (`src/**`
-  writes blocked without a passing RED proof). Off by default; flip
-  it on per-session, or persist via `/config set tdd_gate=on`.
-* `/red-proof <cmd>`             — run a test command and attach its
-  failing output as a `RedProof` to the session.
-* `/phase`                       — surface the TDD state machine
-  (`IDLE → PLAN → RED → GREEN → REFACTOR → SHIP`).
-* `/review` and `/ultrareview`   — when the gate is on, the
-  reviewer voices include "TDD discipline"; when off they fall back
-  to a generic "test coverage" rubric so the verifier doesn't
-  punish sessions that opt out of TDD.
-
-## Headless commands
-
-Every interactive feature also exists as a headless subcommand for
-scripting and CI:
-
-```bash
-lyra init                         # scaffold SOUL.md + .lyra/
-lyra run "ship tests for X"       # plan-gated end-to-end task
-lyra run --no-plan "..."          # bypass the planner (for trusted scripts)
-lyra plan "..."                   # plan artifact only, no execution
-lyra retro <session-id>           # session retrospective
-lyra evals --bundle golden        # run the evals harness
-lyra session list
-lyra session show <id>
-lyra mcp list                     # manage MCP servers (and validate config)
-lyra acp serve                    # host Lyra as an ACP stdio server
-lyra doctor                       # health check
+```text
+agent › /model fast=qwen-coder-flash
+agent › /model smart=claude-opus-4-5
+agent › /model auto                    # Back to slot-based routing
 ```
 
-`lyra run` honours `--llm` / `--model`, `--budget`, and `--repo-root`
-the same way the interactive entry point does, and it routes the
-planner stage through the **smart** slot and the executor stage
-through the **fast** slot — same role-driven router as the REPL.
+## Provider Catalogue (16 Providers)
 
-## Where things live
+Auto-cascade fallback order: DeepSeek → Anthropic → OpenAI → Gemini → xAI → Groq → Cerebras → Mistral → Qwen → OpenRouter → GitHub Copilot → AWS Bedrock → GCP Vertex → LM Studio → Ollama → OpenAI-compatible.
+
+| Provider | Connect Command | Default Models |
+|----------|-----------------|-----------------|
+| DeepSeek | `lyra connect deepseek` | `deepseek-chat` / `deepseek-reasoner` |
+| Anthropic | `lyra connect anthropic` | `claude-sonnet-4-5` / `claude-opus-4-5` |
+| OpenAI | `lyra connect openai` | `gpt-4o-mini` / `gpt-4o` |
+| Google Gemini | `lyra connect gemini` | `gemini-2.5-flash` / `gemini-2.5-pro` |
+| xAI | `lyra connect xai` | `grok-4` / `grok-4-vision` |
+| Groq | `lyra connect groq` | Provider defaults |
+| Cerebras | `lyra connect cerebras` | Provider defaults |
+| Mistral | `lyra connect mistral` | `mistral-large` |
+| Qwen | `lyra connect qwen` | `qwen3-coder-flash` / `qwen3-coder-plus` |
+| OpenRouter | `lyra connect openrouter` | Aggregator (any model) |
+| GitHub Copilot | `lyra connect copilot` | OAuth, copilot-chat models |
+| AWS Bedrock | `lyra connect bedrock` | Uses cloud SDK creds |
+| GCP Vertex | `lyra connect vertex` | Uses cloud SDK creds |
+| LM Studio | (auto-detect) | Your local server |
+| Ollama | (auto-detect) | Your local server |
+| OpenAI-compatible | `lyra connect custom` | Any OpenAI-compatible endpoint |
+
+## Headless Commands
+
+Every interactive feature has a headless equivalent for scripting and CI:
+
+```bash
+lyra init                         # Scaffold SOUL.md + .lyra/
+lyra run "ship tests for X"       # Plan-gated end-to-end task
+lyra run --no-plan "..."          # Bypass the planner
+lyra plan "..."                   # Plan artifact only
+lyra retro <session-id>           # Session retrospective
+lyra evals --bundle golden        # Run the evals harness
+lyra session list|show <id>       # Session management
+lyra mcp list                     # List MCP servers
+lyra acp serve                    # Host as ACP stdio server
+lyra doctor                       # Health check
+```
+
+Model routing applies to headless commands: planner runs on **smart** slot, executor on **fast** slot.
+
+## Where Things Live
 
 ```
 src/lyra_cli/
-    __main__.py             # Typer app + version flag + interactive entrypoint
-    commands/               # subcommand handlers (run, plan, connect, doctor, retro, evals, mcp, acp, session, init)
+    __main__.py             # Typer app + version + REPL entrypoint
+    commands/               # Subcommand handlers (run, plan, connect, etc.)
     interactive/
-        driver.py           # REPL loop wiring (status bar, prompt, slash dispatch)
-        session.py          # InteractiveSession dataclass + slash command handlers
-                            #   incl. fast_model / smart_model slots, /model, /spawn, ...
-        budget.py           # BudgetMeter (per-turn pricing, cap enforcement)
-        cron.py             # cron daemon (smart slot)
+        driver.py           # REPL loop (status bar, prompt, slash dispatch)
+        session.py          # InteractiveSession dataclass + slash handlers
+                            #   (fast_model/smart_model slots, /model, /spawn, ...)
+        budget.py           # BudgetMeter (pricing, cap enforcement)
+        cron.py             # Cron daemon (smart slot)
         mcp_autoload.py     # MCP server discovery + injection
         skills_inject.py    # SKILL.md surfacer
-        memory_inject.py    # recall window builder
-        tool_renderers/     # human-readable per-tool output formatters
+        memory_inject.py    # Memory recall window builder
+        tool_renderers/     # Per-tool output formatters
         ...
-    providers/              # per-backend LLM clients (anthropic, openai, gemini,
+    providers/              # LLM clients (anthropic, openai, gemini,
                             #   deepseek, qwen, ollama, copilot, bedrock, vertex, ...)
-    llm_factory.py          # build_llm — single seam every consumer routes through
-    channels/               # outbound notification channels (slack, discord, ...)
+    llm_factory.py          # build_llm factory (single seam)
+    channels/               # Outbound notification channels (slack, discord, ...)
 ```
 
 ## Testing
 
+Run the CLI test suite:
+
 ```bash
-# from projects/lyra/packages/lyra-cli/
-uv run pytest -q             # 1016 tests in v3.0.0 (2 sandbox-skipped)
+pytest packages/lyra-cli/tests/ -v        # All tests with verbose output
+pytest --cov=packages/lyra-cli/src        # With coverage
+pytest packages/lyra-cli/tests/test_slash_*.py -v  # Just slash command tests
 ```
 
-The CLI's tests cover every slash command (`test_slash_*.py`), the
-fast/smart routing layer (`test_model_slot_routing.py`), the chat
-loop and billing (`test_chat_mode_handlers.py`), the alias registry
-contract (`test_providers_aliases.py`), and the headless commands
-(`test_run_command.py`, `test_plan_command.py`, …).
+**Coverage:** ~1,016 tests covering every slash command, model routing, chat loop, billing, provider aliases, and headless commands.
 
-## See also
+## See Also
 
-* [`projects/lyra/README.md`](../../README.md) — top-level intro.
-* [`projects/lyra/docs/architecture.md`](../../docs/architecture.md) — invariants + topology.
-* [`projects/lyra/docs/blocks/`](../../docs/blocks/) — per-feature design docs.
-* [`projects/lyra/docs/feature-parity.md`](../../docs/feature-parity.md) — claw-code / opencode / hermes-agent ↔ Lyra parity matrix.
-* [`projects/lyra/CHANGELOG.md`](../../CHANGELOG.md) — release log.
+- [`projects/lyra/README.md`](../../README.md) — Main project intro
+- [`projects/lyra/docs/ARCHITECTURE_DIAGRAMS.md`](../../docs/ARCHITECTURE_DIAGRAMS.md) — Detailed system design
+- [`projects/lyra/docs/`](../../docs/) — Per-feature documentation
+- [`projects/lyra/CHANGELOG.md`](../../CHANGELOG.md) — Release history
+- [`projects/lyra/CONTRIBUTING.md`](../../CONTRIBUTING.md) — Contributing guidelines

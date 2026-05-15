@@ -6,15 +6,18 @@ conventions you are expected to follow when sending changes.
 
 ## Project layout
 
-Lyra is a Python monorepo with five installable packages:
+Lyra is a Python monorepo with eight installable packages:
 
 | Package         | Role                                                      |
 | --------------- | --------------------------------------------------------- |
 | `lyra-core`    | Kernel: agent loop, hooks, tools, context, memory, HIR    |
 | `lyra-cli`     | User-facing CLI (`lyra`, `ly`) — Typer + Rich + prompt_toolkit |
 | `lyra-skills`  | SKILL.md loader, router, ledger, extractor, packs         |
-| `lyra-mcp`     | MCP client + server adapters                              |
+| `lyra-research` | 10-step deep research pipeline with paper discovery       |
+| `lyra-evolution` | Self-evolution: Ctx2Skill, Voyager, Reflexion           |
+| `lyra-memory`   | Long-term memory: codebase graph, FTS5 search            |
 | `lyra-evals`   | Eval harness: golden corpus, drift gate, public-benchmark adapters |
+| `lyra-mcp`     | MCP client + server adapters                              |
 
 `lyra-core` depends on the sibling library [`harness_core`](../orion-code/harness_core/),
 which is **not** part of this repo. Clone it next to `harness-engineering/`
@@ -33,8 +36,11 @@ make install-dev
 python3 -m pip install ruff pyright pytest pytest-cov PyYAML
 python3 -m pip install -e packages/lyra-core \
                         -e packages/lyra-skills \
-                        -e packages/lyra-mcp \
+                        -e packages/lyra-research \
+                        -e packages/lyra-evolution \
+                        -e packages/lyra-memory \
                         -e packages/lyra-evals \
+                        -e packages/lyra-mcp \
                         -e packages/lyra-cli
 ```
 
@@ -49,9 +55,9 @@ make ci    # = lint + typecheck + test + evals
 Individual targets:
 
 ```bash
-make lint       # ruff check on all 5 packages
-make typecheck  # pyright on all 5 packages (strict on lyra-core / lyra-cli)
-make test       # full pytest suite (~2,200 tests)
+make lint       # ruff check on all 8 packages
+make typecheck  # pyright on all 8 packages (strict on lyra-core / lyra-cli)
+make test       # full pytest suite (~2,115 tests)
 make test-fast  # stop on first failure
 make evals      # golden-corpus smoke
 ```
