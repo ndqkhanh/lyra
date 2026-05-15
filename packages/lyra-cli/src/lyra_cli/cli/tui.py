@@ -314,6 +314,9 @@ class LyraTUI:
         elif cmd == "/research" or cmd == "/deep-research":
             self._handle_research_command(args)
 
+        elif cmd == "/team":
+            self._handle_team_command(args)
+
         elif cmd == "/usage" or cmd == "/cost":
             self._print_output(f"\n\033[1mUsage Statistics:\033[0m\n")
             self._print_output(f"  Total Tokens: \033[33m{self._total_tokens:,}\033[0m\n")
@@ -350,6 +353,19 @@ class LyraTUI:
 
         # Queue research task
         self._pending_input.put(f"__RESEARCH__{topic}")
+
+    def _handle_team_command(self, args: list[str]):
+        """Handle /team command."""
+        if not args or args[0] != "run":
+            self._print_output("\n\033[33mUsage:\033[0m /team run <task>\n")
+            self._print_output("\033[2mExample: /team run \"Build a REST API with tests\"\033[0m\n\n")
+            return
+
+        task = " ".join(args[1:])
+        self._print_output(f"\n\033[1m👥 Starting team on:\033[0m {task}\n\n")
+
+        # Queue team task
+        self._pending_input.put(f"__TEAM__{task}")
 
     def _handle_model_command(self, args: list[str]):
         """Handle /model command."""
