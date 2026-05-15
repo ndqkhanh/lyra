@@ -8,9 +8,6 @@ from __future__ import annotations
 import asyncio
 from typing import AsyncIterator
 
-from lyra_core.agent import AgentLoop
-# ToolKernel import removed - using simplified integration
-
 
 class TUIAgentIntegration:
     """Integrates AgentLoop with TUI."""
@@ -28,10 +25,14 @@ class TUIAgentIntegration:
         # Build LLM provider
         llm = build_llm_auto(model_hint=self.model)
 
-        # Create agent loop (simplified for now)
-        # TODO: Integrate with full AgentLoop when ready
-        self._agent_loop = None  # Placeholder
-        self.llm = llm
+        # For now, create a simple agent loop without ToolKernel
+        # TODO: Integrate with actual lyra_core agent loop when available
+        self._agent_loop = {
+            "llm": llm,
+            "total_tokens": 0,
+            "total_cost": 0.0,
+            "context_tokens": 0,
+        }
 
     async def run_agent(
         self, user_input: str
@@ -44,24 +45,19 @@ class TUIAgentIntegration:
                 - content: str
                 - metadata: dict (optional)
         """
-        if not self.llm:
+        if not self._agent_loop:
             await self.initialize()
 
-        # Simplified response for now
-        # TODO: Integrate full streaming when AgentLoop is ready
+        # Simple response for now
+        # TODO: Implement actual streaming when lyra_core is ready
         yield {
             "type": "text",
-            "content": f"Processing: {user_input}\n\n",
+            "content": "Agent integration in progress. ",
         }
 
         yield {
             "type": "text",
-            "content": "Lyra v1.0 is ready! All features implemented.\n",
-        }
-
-        yield {
-            "type": "text",
-            "content": "Use /help to see all 80+ commands.\n",
+            "content": f"Received: {user_input}\n",
         }
 
     def get_usage_stats(self) -> dict:
@@ -72,6 +68,13 @@ class TUIAgentIntegration:
                 "total_cost": 0.0,
                 "context_tokens": 0,
             }
+
+        return {
+            "total_tokens": self._agent_loop.get("total_tokens", 0),
+            "total_cost": self._agent_loop.get("total_cost", 0.0),
+            "context_tokens": self._agent_loop.get("context_tokens", 0),
+        }
+
 
         return {
             "total_tokens": self._agent_loop.total_tokens,
