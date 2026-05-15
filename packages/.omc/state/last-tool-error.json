@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd /Users/khanhnguyen/Downloads/MyCV/research/harness-engineering && grep -n \\\"plugins\\\\|hooks\\\\|on_tool\\\\|on_text\\\\|pre_tool\\\\|callback\\\" projects/lyra/harness_core/loop.py 2>/dev/null | ...",
+  "error": "Exit code 1\n---",
+  "timestamp": "2026-05-12T16:08:05.549Z",
+  "retry_count": 1
+}

@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"git add packages/lyra-core/src/lyra_core/eval/repobench_memory.py packages/lyra-core/tests/test_eval_repobench_memory.py packages/lyra-core/examples/repobench_memory_usage.py\",\"description...",
+  "error": "Exit code 128\nwarning: could not open directory 'packages/lyra-core/packages/lyra-core/': No such file or directory\nfatal: pathspec 'packages/lyra-core/src/lyra_core/eval/repobench_memory.py' did not match any files",
+  "timestamp": "2026-05-13T20:33:51.750Z",
+  "retry_count": 1
+}

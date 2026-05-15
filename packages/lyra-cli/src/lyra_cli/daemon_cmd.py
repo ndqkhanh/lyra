@@ -40,14 +40,48 @@ import sys
 from pathlib import Path
 from typing import Any, Callable
 
-from harness_eternal import (
-    Budget,
-    CircuitBreaker,
-    EternalLoop,
-    MemoryCap,
-)
-from harness_eternal.restate import LocalRuntime, step, workflow
-from harness_eternal.supervisor import generate_units
+# ``harness_eternal`` is an optional sibling — see eternal_factory.py
+# for context. Daemon mode is the heaviest consumer of this dependency
+# (Budget / EternalLoop / MemoryCap / Restate workflow + step). We
+# import lazily so that ``import lyra_cli.daemon_cmd`` does not crash
+# in lean environments. Calling ``main()`` without harness_eternal will
+# raise a clear RuntimeError at the top of the entry point instead.
+try:
+    from harness_eternal import (  # type: ignore[import-untyped]
+        Budget,
+        CircuitBreaker,
+        EternalLoop,
+        MemoryCap,
+    )
+    from harness_eternal.restate import (  # type: ignore[import-untyped]
+        LocalRuntime,
+        step,
+        workflow,
+    )
+    from harness_eternal.supervisor import (  # type: ignore[import-untyped]
+        generate_units,
+    )
+
+    _HARNESS_ETERNAL_OK = True
+    _HARNESS_ETERNAL_ERR: str | None = None
+except ImportError as _exc:  # pragma: no cover — exercised in lean envs
+    _HARNESS_ETERNAL_OK = False
+    _HARNESS_ETERNAL_ERR = str(_exc)
+    Budget = CircuitBreaker = EternalLoop = MemoryCap = None  # type: ignore[assignment]
+    LocalRuntime = None  # type: ignore[assignment]
+    generate_units = None  # type: ignore[assignment]
+
+    def step(*_a: Any, **_kw: Any):  # type: ignore[no-redef]
+        def _decorator(fn: Any) -> Any:
+            return fn
+
+        return _decorator
+
+    def workflow(*_a: Any, **_kw: Any):  # type: ignore[no-redef]
+        def _decorator(cls_or_fn: Any) -> Any:
+            return cls_or_fn
+
+        return _decorator
 
 from lyra_core.cron import CronDaemon, CronJob, CronStore
 

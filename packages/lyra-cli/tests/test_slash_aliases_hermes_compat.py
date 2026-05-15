@@ -29,9 +29,15 @@ from lyra_cli.interactive.session import (
 # ``hermes_name`` is what hermes-agent users type; ``lyra_canonical_name``
 # is the handler the alias must resolve to. The third column is the
 # single-line "why" so CI failures explain themselves.
+#
+# v3.10 note: ``usage`` was promoted from an alias of ``/cost`` to a
+# canonical command of its own (the consolidated cost+stats panel,
+# matching Claude Code's v2.1.x merge). Hermes muscle-memory still
+# works because typing ``/usage`` lands on the new handler — which
+# *includes* the cost numbers — so it's removed from this alias map
+# but still tested below by ``test_usage_is_canonical_consolidator``.
 HERMES_ALIASES: list[tuple[str, str, str]] = [
     ("compress", "compact", "hermes `/compress` = compact context window"),
-    ("usage", "cost", "hermes `/usage` = show token usage / cost (NOT /context)"),
     ("insights", "stats", "hermes `/insights` = session analytics"),
     ("skin", "theme", "hermes `/skin` = switch colour theme"),
 ]
@@ -69,23 +75,31 @@ def test_hermes_alias_is_in_slash_commands_lookup(
     )
 
 
-def test_usage_alias_points_at_cost_not_context() -> None:
-    """Regression guard for the specific bug the audit surfaced.
+def test_usage_is_canonical_consolidator() -> None:
+    """v3.10 contract: ``/usage`` resolves to its own consolidator command.
 
-    Prior to v1.7.2 the ``usage`` alias was attached to the ``/context``
-    spec, which is the context-window grid (a totally different
-    command). Hermes' ``/usage`` shows **token spend**, which is Lyra's
-    ``/cost``. If someone accidentally re-lands the old wiring this
-    test fails with a pointed message.
+    History:
+      * pre-v1.7.2 — ``/usage`` was an alias of ``/context`` (wrong).
+      * v1.7.2     — fixed to alias ``/cost`` (token spend).
+      * v3.10      — promoted to a *canonical* command that combines
+        cost numbers and session-shape metrics in one panel, matching
+        Claude Code's v2.1.x merge of ``/cost`` + ``/stats``.
+
+    Hermes muscle memory still works: typing ``/usage`` lands on the
+    consolidator, which *includes* the cost output. The regression
+    we're guarding against is anyone re-aliasing ``/usage`` back to
+    ``/context`` (the original bug) — that would lose the cost
+    numbers entirely.
     """
     spec = command_spec("usage")
     assert spec is not None, "/usage must resolve"
-    assert spec.name != "context", (
-        "/usage must NOT alias /context — that was the pre-v1.7.2 bug. "
-        "/usage is hermes for /cost (token spend), not the context grid."
+    assert spec.name == "usage", (
+        f"/usage must be its own canonical command (got /{spec.name}) — "
+        "v3.10 promoted it from a /cost alias to the consolidated "
+        "cost+stats panel."
     )
-    assert spec.name == "cost", (
-        f"/usage must alias /cost (got /{spec.name})"
+    assert spec.name != "context", (
+        "/usage must NOT alias /context — that was the pre-v1.7.2 bug."
     )
 
 

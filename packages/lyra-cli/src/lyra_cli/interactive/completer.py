@@ -23,7 +23,7 @@ Four trigger surfaces:
 """
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from pathlib import Path
 
 from prompt_toolkit.completion import Completer, Completion
@@ -77,13 +77,21 @@ class SlashCompleter(Completer):
         text = document.text_before_cursor
         last_token = _last_token(text)
 
-        # Subcommand palette: when the line is ``/<cmd> [stem]`` (one or
-        # more chars after the cmd, including empty stem after a space),
-        # delegate to the command's subcommand list. Falls through to the
-        # slash palette if the command doesn't have any.
+        # Subcommand / argument palette: when the line is ``/<cmd> [stem]``
+        # (one or more chars after the cmd, including empty stem after a
+        # space), first try the command's subcommand list. If nothing
+        # matches there, fall through to a per-command argument completer
+        # (e.g. ``/model deepseek-chat`` surfaces alias slugs). This is
+        # the v3.5.x fix for the empty-menu UX bug — before, the branch
+        # always returned, leaving ``/model `` with zero completions.
         if text.startswith("/") and (last_token == "" or not last_token.startswith("/")):
+            yielded_any = False
             for sub in self._subcommand_completions(text, last_token):
+                yielded_any = True
                 yield sub
+            if yielded_any:
+                return
+            yield from self._argument_completions(text, last_token)
             return
 
         if last_token.startswith("/") and text.startswith("/"):
@@ -150,6 +158,30 @@ class SlashCompleter(Completer):
                 display_meta=f"sub-arg of /{spec.name}",
             )
 
+    # ---- /<cmd> <argument> ----------------------------------------------
+
+    def _argument_completions(
+        self, text: str, stem: str
+    ) -> Iterable[Completion]:
+        """Per-command argument suggestions when no subcommand matched.
+
+        Dispatches by the resolved command name (canonicalised through
+        ``command_spec`` so ``/llm`` and ``/model`` share a handler).
+        Returns nothing for commands that don't register an arg
+        completer — the menu just stays empty rather than crashing.
+        """
+        without_slash = text[1:]
+        space_idx = without_slash.find(" ")
+        if space_idx == -1:
+            return
+        raw_name = without_slash[:space_idx].lower()
+        spec = command_spec(raw_name)
+        cmd_name = spec.name if spec is not None else raw_name
+        handler = _ARG_COMPLETERS.get(cmd_name)
+        if handler is None:
+            return
+        yield from handler(stem)
+
     # ---- @file path -------------------------------------------------------
 
     def _path_completions(self, token: str) -> Iterable[Completion]:
@@ -158,17 +190,18 @@ class SlashCompleter(Completer):
         stem = token[1:]
         stem_lower = stem.lower()
         count = 0
-        for rel in _walk_repo(self.repo_root):
+        for rel, is_dir in _walk_repo(self.repo_root):
             if count >= _PATH_LIMIT:
                 break
             if stem and stem_lower not in rel.lower():
                 continue
             count += 1
+            display_path = f"{rel}/" if is_dir else rel
             yield Completion(
-                rel,
+                display_path,
                 start_position=-len(stem),
-                display=f"@{rel}",
-                display_meta="file",
+                display=f"@{display_path}",
+                display_meta="dir" if is_dir else "file",
             )
 
     # ---- #skill ----------------------------------------------------------
@@ -186,6 +219,80 @@ class SlashCompleter(Completer):
             )
 
 
+def _model_arg_completions(stem: str) -> Iterable[Completion]:
+    """Surface canonical model slugs for ``/model`` and ``/llm``.
+
+    Pulls from :data:`lyra_core.providers.aliases.DEFAULT_ALIASES` so
+    new aliases surface in the menu without a code change here.
+    """
+    stem_lower = stem.lower()
+    items: list[tuple[str, str]] = []
+
+    # Slot syntax — ``/model fast=<slug>`` and ``/model smart=<slug>``
+    # let the user re-pin the two-tier model split (v2.7.1 pattern).
+    # These appear in the dropdown so the user discovers the syntax
+    # without having to read the docs.
+    for slot in ("fast=", "smart="):
+        if not stem or slot.startswith(stem_lower):
+            items.append((slot, "slot"))
+
+    # Canonical slugs + every registered alias name. ``canonical_slugs``
+    # alone returns only the *target* of each alias (``deepseek-chat``)
+    # which means the friendly user-facing forms users actually type
+    # (``deepseek-v4-flash`` / ``deepseek-v4-pro`` / ``opus`` / ``sonnet``
+    # / ``haiku``) never reach the dropdown. We walk the full alias map
+    # so every name registered in :func:`_seed` is reachable via
+    # type-ahead, with a ``model`` / ``alias`` meta tag so the user
+    # sees which is the canonical slug.
+    try:
+        from lyra_core.providers.aliases import DEFAULT_ALIASES
+    except Exception:
+        canonical: set[str] = set()
+        alias_to_slug: dict[str, str] = {}
+    else:
+        canonical = set(DEFAULT_ALIASES.canonical_slugs())
+        alias_to_slug = {
+            name: entry.slug for name, entry in DEFAULT_ALIASES._aliases.items()
+        }
+
+    # Canonical slugs first so the picker leads with the API-true names.
+    for slug in sorted(canonical):
+        if stem and stem_lower not in slug.lower():
+            continue
+        items.append((slug, "model"))
+    # Aliases that don't already appear as canonical (so ``deepseek-chat``
+    # doesn't render twice but ``deepseek-v4-flash`` does).
+    for name, slug in sorted(alias_to_slug.items()):
+        if name in canonical:
+            continue
+        if stem and stem_lower not in name.lower():
+            continue
+        items.append((name, f"alias → {slug}"))
+
+    # Provider-prefixed forms — the explicit way to override auto.
+    for prov in ("anthropic:", "openai:", "deepseek:", "gemini:", "ollama:"):
+        if not stem or prov.startswith(stem_lower) or stem_lower in prov:
+            items.append((prov, "provider"))
+
+    seen: set[str] = set()
+    for text, meta in items:
+        if text in seen:
+            continue
+        seen.add(text)
+        yield Completion(
+            text,
+            start_position=-len(stem),
+            display=text,
+            display_meta=meta,
+        )
+
+
+_ARG_COMPLETERS: dict[str, Callable[[str], Iterable[Completion]]] = {
+    "model": _model_arg_completions,
+    "llm": _model_arg_completions,
+}
+
+
 def _last_token(text: str) -> str:
     """Return the last whitespace-delimited token (empty string if none)."""
     if not text:
@@ -199,8 +306,13 @@ def _last_token(text: str) -> str:
     return text
 
 
-def _walk_repo(root: Path) -> Iterable[str]:
-    """Yield repo-relative paths as POSIX strings, skipping noisy dirs."""
+def _walk_repo(root: Path) -> Iterable[tuple[str, bool]]:
+    """Yield ``(rel_posix, is_dir)`` pairs, skipping noisy dirs.
+
+    Both files and directories surface so the ``@`` palette can offer
+    folder mentions (e.g. ``@src/lyra_cli/interactive/``). Hidden dirs
+    listed in :data:`_IGNORE_DIRS` are pruned entirely.
+    """
     root = root.resolve()
     stack: list[Path] = [root]
     while stack:
@@ -210,16 +322,14 @@ def _walk_repo(root: Path) -> Iterable[str]:
         except (OSError, PermissionError):
             continue
         for entry in entries:
-            if entry.is_dir():
-                if entry.name in _IGNORE_DIRS or entry.name.startswith("."):
-                    # Still allow hidden files users might reference (e.g.
-                    # `.github`), but prune the big hidden dirs above.
-                    if entry.name in _IGNORE_DIRS:
-                        continue
-                stack.append(entry)
-                continue
             try:
-                rel = entry.relative_to(root)
+                rel = entry.relative_to(root).as_posix()
             except ValueError:
                 continue
-            yield rel.as_posix()
+            if entry.is_dir():
+                if entry.name in _IGNORE_DIRS:
+                    continue
+                yield rel, True
+                stack.append(entry)
+                continue
+            yield rel, False

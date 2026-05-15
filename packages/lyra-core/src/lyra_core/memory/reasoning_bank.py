@@ -192,6 +192,29 @@ class ReasoningBank:
 
         return tuple(ranked[:k])
 
+    def all_lessons(
+        self,
+        *,
+        polarity: TrajectoryOutcome | None = None,
+        limit: int | None = None,
+    ) -> tuple[Lesson, ...]:
+        """All stored lessons in insertion order (most recent last).
+
+        Parity helper with :class:`SqliteReasoningBank.all_lessons`
+        so both stores satisfy the same protocol — needed by the
+        v3.13 session-index surface
+        (:mod:`lyra_core.memory.session_index`).
+        """
+        if polarity is None:
+            filtered = list(self._lessons)
+        else:
+            filtered = [l for l in self._lessons if l.polarity is polarity]
+        # Most-recent-first ordering matches SQLite store.
+        filtered.reverse()
+        if limit is not None:
+            filtered = filtered[:limit]
+        return tuple(filtered)
+
     def matts_prefix(
         self,
         task_signature: str,

@@ -405,17 +405,144 @@ def _resolve(path: Path | str | None) -> Path:
     return Path(path).expanduser()
 
 
+# ── Mutation log (Phase O.7 — closed-loop optimizer) ────────────
+#
+# The mutation log is a sibling of ``skill_ledger.json``. It records
+# every accepted-or-rejected mutation from ``lyra skill optimize`` so
+# users can audit how a SKILL.md drifted over time. Append-only JSONL
+# is the right shape here:
+#
+# * mutations are emitted in time order and read by tail
+# * one bad row never poisons the whole file
+# * the file can get long without blowing memory on load
+#
+# Storage path: ``$LYRA_HOME/skill_mutations.jsonl``.
+
+
+@dataclass
+class MutationRecord:
+    """One round of an optimizer loop, persisted to the mutation log."""
+
+    ts: float
+    skill_id: str
+    round_no: int
+    strategy: str  # one of MutationStrategy values, free-form for forward-compat
+    pre_score: float
+    post_score: float
+    accepted: bool
+    target_section: str = ""
+    reasoning: str = ""
+    error: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "ts": float(self.ts),
+            "skill_id": self.skill_id,
+            "round_no": int(self.round_no),
+            "strategy": self.strategy,
+            "pre_score": float(self.pre_score),
+            "post_score": float(self.post_score),
+            "accepted": bool(self.accepted),
+            "target_section": self.target_section,
+            "reasoning": self.reasoning,
+            "error": self.error,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "MutationRecord":
+        return cls(
+            ts=float(data.get("ts", 0.0)),
+            skill_id=str(data.get("skill_id", "")),
+            round_no=int(data.get("round_no", 0)),
+            strategy=str(data.get("strategy", "")),
+            pre_score=float(data.get("pre_score", 0.0)),
+            post_score=float(data.get("post_score", 0.0)),
+            accepted=bool(data.get("accepted", False)),
+            target_section=str(data.get("target_section", "")),
+            reasoning=str(data.get("reasoning", "")),
+            error=str(data.get("error", "")),
+        )
+
+
+def default_mutation_log_path() -> Path:
+    """``$LYRA_HOME/skill_mutations.jsonl`` (or ``~/.lyra/...``)."""
+    home_env = os.environ.get("LYRA_HOME")
+    if home_env:
+        return Path(home_env).expanduser() / "skill_mutations.jsonl"
+    return (
+        Path(os.environ.get("HOME", ".")).expanduser()
+        / ".lyra"
+        / "skill_mutations.jsonl"
+    )
+
+
+def append_mutation(
+    record: MutationRecord,
+    *,
+    path: Path | str | None = None,
+) -> Path:
+    """Append *record* to the mutation log as one JSON line."""
+    p = _resolve_mutation(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    line = json.dumps(record.to_dict(), sort_keys=True) + "\n"
+    with open(p, "a", encoding="utf-8") as f:
+        f.write(line)
+    return p
+
+
+def load_mutations(
+    skill_id: str | None = None,
+    *,
+    path: Path | str | None = None,
+) -> list[MutationRecord]:
+    """Read the mutation log; optionally filter to one skill id.
+
+    Malformed lines are skipped silently (the file is append-only and
+    a partial write at the tail shouldn't poison reads). For typical
+    usage the log is short — bounded by mutations per skill times
+    skills optimized — so we don't bother with streaming.
+    """
+    p = _resolve_mutation(path)
+    if not p.is_file():
+        return []
+    out: list[MutationRecord] = []
+    for line in p.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            data = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(data, dict):
+            continue
+        rec = MutationRecord.from_dict(data)
+        if skill_id is None or rec.skill_id == skill_id:
+            out.append(rec)
+    return out
+
+
+def _resolve_mutation(path: Path | str | None) -> Path:
+    if path is None:
+        return default_mutation_log_path()
+    return Path(path).expanduser()
+
+
 __all__ = [
     "LEDGER_VERSION",
     "MAX_HISTORY",
     "OUTCOME_FAILURE",
     "OUTCOME_NEUTRAL",
     "OUTCOME_SUCCESS",
+    "MutationRecord",
     "SkillLedger",
     "SkillOutcome",
     "SkillStats",
+    "append_mutation",
     "default_ledger_path",
+    "default_mutation_log_path",
     "load_ledger",
+    "load_mutations",
     "record_outcome",
     "save_ledger",
     "top_n",

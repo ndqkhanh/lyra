@@ -38,12 +38,21 @@ from __future__ import annotations
 
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
 import time
 from pathlib import Path
 from typing import Any
+
+
+def _terminal_columns_safe() -> int:
+    """Best-effort terminal width for layout decisions. Floors at 60."""
+    try:
+        return max(60, shutil.get_terminal_size(fallback=(80, 24)).columns)
+    except (OSError, ValueError):
+        return 80
 
 from prompt_toolkit import PromptSession
 from prompt_toolkit.application.current import get_app
@@ -57,12 +66,24 @@ from .suggest import CommandAutoSuggest
 from rich.console import Console
 from rich.text import Text
 
+from .keybindings_help import show_keybindings_help
+
 from . import output as _out
 from . import keybinds as _keybinds
-from .banner import render_banner
+from .banner import render_banner, render_sparse_banner
+from .banner_claude import (
+    render_claude_style_banner,
+    render_input_frame,
+    render_using_line,
+)
 from .completer import SlashCompleter
 from .hir import HIRLogger, default_event_path
-from .session import CommandResult, InteractiveSession, _MODE_CYCLE
+from .session import (
+    CommandResult,
+    InteractiveSession,
+    _MODE_CYCLE,
+    display_mode,
+)
 from .spinner import Spinner
 from . import store as _store
 from . import themes as _themes
@@ -416,15 +437,76 @@ def _wire_plugins_to_lifecycle(session: InteractiveSession) -> None:
     _bind(LifecycleEvent.SESSION_END, "on_session_end")
 
 
+def _read_ui_settings() -> dict:
+    """Return the ``ui`` block from ``$LYRA_HOME/settings.json`` (or {})."""
+    try:
+        from lyra_core.auth.store import lyra_home
+        from ..config_io import load_settings
+
+        settings = load_settings(lyra_home() / "settings.json")
+    except Exception:
+        return {}
+    ui = settings.get("ui")
+    return ui if isinstance(ui, dict) else {}
+
+
 def _print_banner(
     *, repo_root: Path, model: str, mode: str, plain: bool
 ) -> None:
-    banner = render_banner(
-        repo_root=repo_root,
-        model=_resolve_banner_model(model),
-        mode=mode,
-        plain=plain,
-    )
+    ui = _read_ui_settings()
+    # Phase 1 (May 2026 redesign): the new default is the sparse,
+    # one-line banner — see ``render_sparse_banner``. Users who liked
+    # the old gradient logo or the multi-line Claude-style frame can
+    # still opt in via ``ui.banner_style = "fancy" | "claude"``.
+    style = ui.get("banner_style", "sparse")
+
+    if style == "claude" and not plain:
+        resolved_model = _resolve_banner_model(model)
+        banner = render_claude_style_banner(
+            user_name=ui.get("user_name") or os.environ.get("USER", "there"),
+            model=resolved_model,
+            plan=ui.get("plan", "Lyra Pro"),
+            organization=ui.get("organization", ""),
+            cwd=repo_root,
+            tips=ui.get("tips", [
+                "Run /init to create a LYRA.md",
+                f"Note: You have launched in {mode}",
+            ]),
+            whats_new=ui.get("whats_new", [
+                "/release-notes for more",
+            ]),
+        )
+        using = render_using_line(
+            model=resolved_model,
+            settings_source=ui.get("settings_source", ".lyra/settings.json"),
+        )
+        frame = render_input_frame(
+            mode=mode,
+            effort=ui.get("effort", "high"),
+        )
+        sys.stdout.write(banner)
+        sys.stdout.write("\n")
+        sys.stdout.write(using)
+        sys.stdout.write("\n")
+        sys.stdout.write(frame)
+        sys.stdout.flush()
+        return
+
+    if style == "fancy":
+        banner = render_banner(
+            repo_root=repo_root,
+            model=_resolve_banner_model(model),
+            mode=mode,
+            plain=plain,
+        )
+    else:
+        # Default: the new sparse one-liner.
+        banner = render_sparse_banner(
+            repo_root=repo_root,
+            model=_resolve_banner_model(model),
+            mode=mode,
+            plain=plain,
+        )
     sys.stdout.write(banner)
     sys.stdout.flush()
 
@@ -438,6 +520,7 @@ def run(
     resume_id: str | None = None,
     pin_session_id: str | None = None,
     budget_cap_usd: float | None = None,
+    bare: bool = False,
 ) -> int:
     """Start the REPL. Returns the process exit code.
 
@@ -546,6 +629,22 @@ def run(
                 fresh_kwargs["session_id"] = pin_session_id
             session = InteractiveSession(**fresh_kwargs)
 
+    # v3.10 ``--bare`` mode: disable every auto-discovery surface so
+    # headless / CI / debugging runs are deterministic. Setting these
+    # *before* the budget / MCP / cron blocks below means a single
+    # flag flips the whole posture rather than threading a flag into
+    # each subsystem. The fields below are pre-existing session
+    # toggles; ``--bare`` just flips them all off in one move.
+    if bare:
+        session.skills_inject_enabled = False
+        session.memory_inject_enabled = False
+        # Pre-cache an empty policy + hooks tuple so the agent loop's
+        # lazy loader skips the disk read entirely. None as the policy
+        # means "no user rules" → falls back to the LOW_RISK + ASK
+        # legacy path, which is exactly the deterministic posture
+        # ``--bare`` is supposed to produce.
+        session._policy_hooks_cache = (None, [], False)
+
     # Auto-budget: explicit CLI flag wins, otherwise use the persisted
     # default. Only seeds *fresh* sessions — when ``--resume`` carries a
     # cap from disk we leave it alone unless the user supplied a flag.
@@ -583,24 +682,29 @@ def run(
     # <repo>/.lyra/mcp.json so chat tool calls in this session can route
     # through them. Cheap (no child spawned yet); each server only spins
     # up on first actual ``/mcp connect`` or first chat tool dispatch.
-    try:
-        from .mcp_autoload import autoload_mcp_servers
+    # ``--bare`` skips the autoload entirely so a CI run never makes a
+    # network call against a config left on disk by a prior dev session.
+    if not bare:
+        try:
+            from .mcp_autoload import autoload_mcp_servers
 
-        autoload_mcp_servers(session)
-    except Exception:
-        # Never block REPL boot on MCP problems — chat still works.
-        pass
+            autoload_mcp_servers(session)
+        except Exception:
+            # Never block REPL boot on MCP problems — chat still works.
+            pass
 
     # v2.6.0 (Phase D.2): start the cron daemon so scheduled jobs fire
     # while the REPL is alive. Best-effort — missing lyra-core or
     # ``LYRA_DISABLE_CRON_DAEMON=1`` keeps the REPL fully functional
-    # without it.
-    try:
-        from .cron_daemon import start_cron_daemon
+    # without it. ``--bare`` skips the daemon — scheduled jobs are an
+    # auto-discovery surface and bare mode is precisely "no surprises".
+    if not bare:
+        try:
+            from .cron_daemon import start_cron_daemon
 
-        start_cron_daemon(session)
-    except Exception:
-        pass
+            start_cron_daemon(session)
+        except Exception:
+            pass
 
     # v2.6.0 (Phase D.4): discover plugins and wire them onto the
     # session-scoped LifecycleBus so they receive the events emitted
@@ -732,7 +836,14 @@ def _run_prompt_toolkit(
         bottom_toolbar=lambda: _bottom_toolbar(session),
         key_bindings=kb,
         mouse_support=False,
-        enable_history_search=True,
+        # Intentionally NOT setting ``enable_history_search=True``: prompt_toolkit
+        # silently disables the buffer-level ``complete_while_typing`` filter when
+        # history search is on (see prompt_toolkit/shortcuts/prompt.py — the Buffer
+        # is wired with ``Condition(complete_while_typing AND NOT enable_history_search)``).
+        # That nukes the dropdown after the first keystroke (e.g. ``/`` opens the
+        # palette via our explicit ``start_completion``, but typing ``m`` clears
+        # ``complete_state`` and never re-fires). Up/Down history walk still works;
+        # Ctrl-R reverse-search remains available via the ``c-r`` keybinding below.
         multiline=False,
         prompt_continuation=_prompt_continuation,
         # Ghost text colour follows the skin's ``dim`` token so it
@@ -948,7 +1059,9 @@ def _prompt_fragments(
     danger = skin.color("danger", "#FF2D95")
     secondary = skin.color("secondary", "#7C4DFF")
     dim = skin.color("dim", "#6B7280")
-    glyph = skin.brand("prompt_symbol", "›")
+    from . import glyphs as _glyphs
+
+    glyph = skin.brand("prompt_symbol", _glyphs.PROMPT)
     colour = {
         "plan": accent,
         "build": warning,
@@ -958,7 +1071,7 @@ def _prompt_fragments(
     }.get(session.mode, warning)
     fragments = [
         ("", "\n"),
-        (f"bold fg:{colour}", f" {session.mode}"),
+        (f"bold fg:{colour}", f" {display_mode(session.mode)}"),
     ]
     if session.deep_think:
         fragments.append((f"bold fg:{danger}", " ●"))
@@ -1043,69 +1156,99 @@ def _bottom_toolbar(session: InteractiveSession) -> HTML:
     sep = skin.color("status_bar_dim", "#3E4048")
 
     repo_label = session.repo_root.name or str(session.repo_root)
+    # Mode colour keyed off the *short display label* so the v3.6
+    # canonical IDs (``edit_automatically`` etc.) actually resolve
+    # rather than always falling through to ``warning``.
+    mode_short = display_mode(session.mode)
     mode_colour = {
-        "plan": accent,
-        "build": warning,
-        "run": danger,
+        "agent": warning,
+        "plan":  accent,
+        "ask":   secondary,
+        "auto":  success,
+        # Pre-v3.6 names — preserved for legacy snapshots / themes.
+        "build":   warning,
+        "run":     danger,
         "explore": accent,
-        "retro": secondary,
-    }.get(session.mode, warning)
+        "retro":   secondary,
+    }.get(mode_short, warning)
+
+    # Tighter separator — 7 chars (`   │   `) per gap × 6 gaps wasted
+    # ~24 cols on every render and pushed the keybind hint strip off
+    # narrow terminals (the user's screenshot showed ``skin au`` cut
+    # off mid-word). 3 chars (` │ `) is enough visual separation.
+    bar = f"<style fg='{sep}'> │ </style>"
 
     deep_badge = (
-        f"<style fg='{sep}'>   │   </style>"
-        f"<style fg='{text}'>deep </style>"
+        f"{bar}<style fg='{text}'>deep </style>"
         f"<style fg='{danger}'><b>on</b></style>"
         if session.deep_think
         else ""
     )
     budget_badge = (
-        f"<style fg='{sep}'>   │   </style>"
-        f"<style fg='{text}'>cap </style>"
+        f"{bar}<style fg='{text}'>cap </style>"
         f"<style fg='{warning}'><b>${session.budget_cap_usd:.2f}</b></style>"
         if session.budget_cap_usd is not None
         else ""
     )
+    # Skin badge only when the user has switched off the default. Saves
+    # a segment on every line in the common case while still surfacing
+    # the active theme when the user is exploring skins.
     skin_badge = (
-        f"<style fg='{sep}'>   │   </style>"
-        f"<style fg='{text}'>skin </style>"
+        f"{bar}<style fg='{text}'>skin </style>"
         f"<style fg='{accent}'>{_xml_escape(skin.name)}</style>"
+        if skin.name not in ("aurora", "")
+        else ""
     )
 
     left = (
         f"<style fg='{accent}'> ◆ </style>"
         f"<style fg='{text}'>repo </style>"
         f"<style fg='ansiwhite'>{_xml_escape(repo_label)}</style>"
-        f"<style fg='{sep}'>   │   </style>"
-        f"<style fg='{text}'>mode </style>"
-        f"<style fg='{mode_colour}'><b>{_xml_escape(session.mode)}</b></style>"
-        f"<style fg='{sep}'>   │   </style>"
-        f"<style fg='{text}'>model </style>"
-        f"<style fg='{success}'><b>{_xml_escape(session.model)}</b></style>"
-        f"<style fg='{sep}'>   │   </style>"
-        f"<style fg='{text}'>turn </style>"
+        f"{bar}<style fg='{text}'>mode </style>"
+        f"<style fg='{mode_colour}'><b>{_xml_escape(mode_short)}</b></style>"
+        f"{bar}<style fg='{text}'>model </style>"
+        f"<style fg='{success}'><b>{_xml_escape(_resolve_banner_model(session.model))}</b></style>"
+        f"{bar}<style fg='{text}'>turn </style>"
         f"<style fg='{accent}'>{session.turn}</style>"
-        f"<style fg='{sep}'>   │   </style>"
-        f"<style fg='{text}'>tok </style>"
+        f"{bar}<style fg='{text}'>tok </style>"
         f"<style fg='ansiwhite'>{session.tokens_used:,}</style>"
-        f"<style fg='{sep}'>   │   </style>"
-        f"<style fg='{text}'>cost </style>"
+        f"{bar}<style fg='{text}'>cost </style>"
         f"<style fg='ansiwhite'>${session.cost_usd:.4f}</style>"
         + deep_badge
         + budget_badge
         + skin_badge
     )
-    right = (
-        f"<style fg='{sep}'>│   </style>"
-        f"<style fg='{accent}'><b>/</b></style><style fg='{text}'>cmd</style>"
-        f"  <style fg='{danger}'><b>!</b></style><style fg='{text}'>sh</style>"
-        f"  <style fg='{success}'><b>@</b></style><style fg='{text}'>file</style>"
-        f"  <style fg='{success}'><b>⇥</b></style><style fg='{text}'> mode</style>"
-        f"  <style fg='{danger}'><b>⌥T</b></style><style fg='{text}'> deep</style>"
-        f"  <style fg='{secondary}'><b>^G</b></style><style fg='{text}'> editor</style>"
-        f"  <style fg='{warning}'><b>^L</b></style><style fg='{text}'> clr</style>"
-        f"  <style fg='{error}'><b>^D</b></style><style fg='{text}'> exit</style>"
-    )
-    return HTML(left + "   " + right)
+    # Compact keybind strip — same glyphs, single-space separator so the
+    # full hint row fits beside the status segments on an 80-col panel.
+    # Terminal-width-adaptive: on narrow terminals drop the right strip
+    # entirely so the left status line ("turn N · tok N · cost $") isn't
+    # truncated mid-word. Users can /help for the full keybind list.
+    cols = _terminal_columns_safe()
+    if cols >= 140:
+        right = (
+            f"<style fg='{accent}'><b>/</b></style><style fg='{text}'>cmd</style>"
+            f" <style fg='{danger}'><b>!</b></style><style fg='{text}'>sh</style>"
+            f" <style fg='{success}'><b>@</b></style><style fg='{text}'>file</style>"
+            f" <style fg='{success}'><b>⇥</b></style><style fg='{text}'>mode</style>"
+            f" <style fg='{accent}'><b>⌥P</b></style><style fg='{text}'>plan</style>"
+            f" <style fg='{secondary}'><b>⌥R</b></style><style fg='{text}'>review</style>"
+            f" <style fg='{danger}'><b>⌥T</b></style><style fg='{text}'>deep</style>"
+            f" <style fg='{secondary}'><b>^G</b></style><style fg='{text}'>edit</style>"
+            f" <style fg='{warning}'><b>^L</b></style><style fg='{text}'>clr</style>"
+            f" <style fg='{error}'><b>^D</b></style><style fg='{text}'>exit</style>"
+        )
+        return HTML(f"{left}{bar}{right}")
+    if cols >= 100:
+        # Mid-width: the four most-used hints only.
+        right = (
+            f"<style fg='{accent}'><b>/</b></style><style fg='{text}'>cmd</style>"
+            f" <style fg='{success}'><b>⇥</b></style><style fg='{text}'>mode</style>"
+            f" <style fg='{warning}'><b>^L</b></style><style fg='{text}'>clr</style>"
+            f" <style fg='{error}'><b>^D</b></style><style fg='{text}'>exit</style>"
+        )
+        return HTML(f"{left}{bar}{right}")
+    # Narrow terminal: status segments only. /help has the keybinds.
+    return HTML(left)
 
 
 def _build_key_bindings(
@@ -1132,6 +1275,59 @@ def _build_key_bindings(
             return
         buf.insert_text("/")
         buf.start_completion(select_first=False)
+
+    @kb.add("@")
+    def _(event: Any) -> None:
+        """Typing ``@`` opens the in-repo file picker on a word boundary.
+
+        Trigger when ``@`` would start a new word — buffer empty, or
+        the previous char (immediately before the cursor) is whitespace
+        — so ``hello @packages/`` mid-prompt pops the picker. Skip when
+        the previous char is part of a word (``user@host``, ``a@b.com``)
+        so legitimate email/path tokens keep working without ambushing
+        the user with a dropdown over their own text.
+        """
+        buf = event.app.current_buffer
+        text_before = buf.document.text_before_cursor
+        prev = text_before[-1] if text_before else ""
+        if prev and not prev.isspace():
+            buf.insert_text("@")
+            return
+        buf.insert_text("@")
+        buf.start_completion(select_first=False)
+
+    @kb.add("#")
+    def _(event: Any) -> None:
+        """Typing ``#`` opens the skill-pack picker on a word boundary.
+
+        Mirrors ``/`` and ``@``: trigger when ``#`` would start a new
+        token (buffer empty, or previous char is whitespace) so
+        ``find me #python-testing`` mid-prompt pops the picker. Skip
+        when the previous char is part of a word so issue refs like
+        ``GH#123`` and CSS-style ``id#name`` selectors stay literal.
+        """
+        buf = event.app.current_buffer
+        text_before = buf.document.text_before_cursor
+        prev = text_before[-1] if text_before else ""
+        if prev and not prev.isspace():
+            buf.insert_text("#")
+            return
+        buf.insert_text("#")
+        buf.start_completion(select_first=False)
+
+    @kb.add("backspace")
+    def _(event: Any) -> None:
+        """Keep the /, @, # palette open after backspace.
+
+        prompt_toolkit closes the completion menu by default when a
+        character is deleted. For our prefix-driven palettes that's
+        wrong — the user is still browsing /mode ↔ /model ↔ /models
+        and needs the dropdown to stay live as the stem shrinks.
+        """
+        buf = event.app.current_buffer
+        buf.delete_before_cursor(1)
+        if buf.text and buf.text[0] in ("/", "@", "#"):
+            buf.start_completion(select_first=False)
 
     @kb.add("c-l")
     def _(event: Any) -> None:
@@ -1185,14 +1381,27 @@ def _build_key_bindings(
         """Reverse history search (prompt_toolkit built-in)."""
         event.app.current_buffer.start_history_lines_completion()
 
-    @kb.add("c-g")
-    def _(event: Any) -> None:
+    def _editor_handler(event: Any) -> None:
         """Open $EDITOR for the current buffer, replace it with the edit."""
         buf = event.app.current_buffer
         text = _open_in_editor(buf.text)
         if text is not None:
             buf.text = text
             buf.cursor_position = len(text)
+
+    @kb.add("c-g")
+    def _(event: Any) -> None:
+        """Ctrl-G — open $EDITOR for the current buffer."""
+        _editor_handler(event)
+
+    @kb.add("c-x", "c-e")
+    def _(event: Any) -> None:
+        """Ctrl-X Ctrl-E — bash/zsh/aider canonical editor binding.
+
+        Same behaviour as Ctrl-G but uses the muscle memory most shell
+        users already have. Both are kept so neither group has to relearn.
+        """
+        _editor_handler(event)
 
     @kb.add("c-e")
     def _(event: Any) -> None:
@@ -1260,9 +1469,10 @@ def _build_key_bindings(
         _keybinds.toggle_task_panel(session)
         get_app().invalidate()
 
-    @kb.add("c-o")
+    @kb.add("escape", "v")
     def _(event: Any) -> None:
-        """Toggle verbose tool-call output."""
+        """Alt-V → toggle verbose tool-call output (was Ctrl-O before
+        Ctrl-O was repurposed to expand the last tool output)."""
         _keybinds.toggle_verbose_tool_output(session)
         get_app().invalidate()
 
@@ -1301,11 +1511,84 @@ def _build_key_bindings(
         )
         get_app().invalidate()
 
+    def _jump_mode(target: str) -> None:
+        """Snap directly to ``target`` mode (Hermes / Claude-Code style)."""
+        toast = _keybinds.set_mode(session, target)
+        console.print(Text(f" → {toast}", style="#7C4DFF"))
+        get_app().invalidate()
+
     @kb.add("escape", "p")
     def _(event: Any) -> None:
-        """Alt-P pops open the model catalog (same as /models)."""
+        """Alt-P → jump straight to plan_mode (read-only design pass)."""
+        _jump_mode("plan_mode")
+
+    @kb.add("escape", "e")
+    def _(event: Any) -> None:
+        """Alt-E → jump straight to edit_automatically (default)."""
+        _jump_mode("edit_automatically")
+
+    @kb.add("escape", "a")
+    def _(event: Any) -> None:
+        """Alt-A → jump straight to ask_before_edits."""
+        _jump_mode("ask_before_edits")
+
+    @kb.add("escape", "u")
+    def _(event: Any) -> None:
+        """Alt-U → jump straight to auto_mode (per-turn router)."""
+        _jump_mode("auto_mode")
+
+    @kb.add("escape", "l")
+    def _(event: Any) -> None:
+        """Alt-L → list configured model providers (former Alt-P)."""
         result = session.dispatch("/models")
         _render_result(console, result)
+
+    @kb.add("escape", "r")
+    def _(event: Any) -> None:
+        """Alt-R → run /review on the most recent code-touching turn."""
+        result = session.dispatch("/review")
+        _render_result(console, result)
+
+    @kb.add("escape", "s")
+    def _(event: Any) -> None:
+        """Alt-S → open the /spawn subagent picker."""
+        result = session.dispatch("/spawn")
+        _render_result(console, result)
+
+    @kb.add("escape", "c")
+    def _(event: Any) -> None:
+        """Alt-C → /compact the conversation context."""
+        result = session.dispatch("/compact")
+        _render_result(console, result)
+
+    @kb.add("escape", "i")
+    def _(event: Any) -> None:
+        """Alt-I → open the /skills picker (Claude-Code style)."""
+        result = session.dispatch("/skills")
+        _render_result(console, result)
+
+    @kb.add("escape", "g")
+    def _(event: Any) -> None:
+        """Alt-G → open the /agents picker (Claude-Code style)."""
+        result = session.dispatch("/agents")
+        _render_result(console, result)
+
+    @kb.add("c-o")
+    def _(event: Any) -> None:
+        """Ctrl-O → expand the last collapsed tool output.
+
+        The chat-tool render stashes the full output on
+        ``session._last_tool_output`` whenever a tool finishes. This
+        dumps it to scrollback so the user can read past the truncated
+        ``… +N lines`` footer.
+        """
+        full = getattr(session, "_last_tool_output", None)
+        if not full:
+            console.print(Text(" → no captured tool output to expand", style="#6B7280"))
+            return
+        console.rule("[dim]expanded tool output (Ctrl+O)[/]", style="#3E4048")
+        console.print(full)
+        console.rule(style="#3E4048")
 
     @kb.add("escape", "escape")
     def _(event: Any) -> None:
@@ -1323,6 +1606,44 @@ def _build_key_bindings(
         """Ctrl-F = re-focus the foreground subagent (Wave-D Task 2)."""
         toast = _keybinds.focus_foreground_subagent(session)
         console.print(Text(f" → {toast}", style="#6B7280"))
+
+    @kb.add("escape", "k")
+    def _(event: Any) -> None:
+        """Esc-K — wipe the input buffer.
+
+        Distinct from Ctrl-L (which redraws the screen) and Esc Esc
+        (which rewinds a turn). Esc-K just empties what you've typed
+        so you can start a message over without losing chat history.
+        """
+        buf = event.app.current_buffer
+        buf.text = ""
+        buf.cursor_position = 0
+
+    @kb.add("escape", "?")
+    def _(event: Any) -> None:
+        """Alt-? — pop the keybindings cheatsheet overlay.
+
+        Mirrors Claude Code's discoverability story: new users hit a
+        single key and see every chord that's wired up, with one-line
+        descriptions. Rendered as a Rich table over the Console (the
+        prompt is still active behind it).
+        """
+        show_keybindings_help(console)
+        get_app().invalidate()
+
+    @kb.add("c-n")
+    def _(event: Any) -> None:
+        """Ctrl-N — start a new chat (clear messages, keep mode/model).
+
+        Wipes the in-memory message log, input history, turn counter,
+        and per-turn snapshots. Preserves: mode, model, repo_root,
+        MCP servers, permission settings, deep-think flag. The on-disk
+        JSONL session file (if any) is left intact — use `/fork` if
+        you want to branch instead of starting fresh.
+        """
+        toast = _keybinds.new_chat(session)
+        console.print(Text(f" → {toast}", style="#7C4DFF"))
+        get_app().invalidate()
         get_app().invalidate()
 
     return kb
@@ -1372,7 +1693,7 @@ _AGENT_VERB_BY_MODE: dict[str, str] = {
 # return in <1 ms today and a "agent thought for 0.0s" line would be
 # pure noise. Once a real LLM is wired in, turns will trivially exceed
 # the threshold and the completion line will start showing up.
-_AGENT_COMPLETION_THRESHOLD_SEC: float = 0.4
+_AGENT_COMPLETION_THRESHOLD_SEC: float = 3.0
 
 
 def agent_verb_for_mode(mode: str, skin: _themes.Skin | None = None) -> str:
@@ -1416,8 +1737,22 @@ def _run_agent_turn(
     skin = _themes.get_active_skin()
     verb = agent_verb_for_mode(session.mode, skin)
     started = time.monotonic()
+    # Skip the outer ``Spinner`` for plain (non-slash) turns — the chat
+    # handler downstream paints its own visible output (a streaming
+    # ``rich.live.Live`` panel, tool-call cards via ``console.print``,
+    # or a final Markdown panel). Running both at once meant the
+    # spinner's ``\r``-rewinds raced with Rich's cursor positioning,
+    # leaving truncated panel borders ("╭─ agent ───") stranded above
+    # the real panel and overwriting tool-call lines with spinner
+    # frames. Slash commands keep the spinner because most return
+    # silently in <1ms and the user wants *some* feedback that the
+    # keystroke registered.
+    use_spinner = line.lstrip().startswith("/")
     try:
-        with Spinner(verb):
+        if use_spinner:
+            with Spinner(verb):
+                result = session.dispatch(line)
+        else:
             result = session.dispatch(line)
     except Exception:
         duration = time.monotonic() - started
@@ -1580,7 +1915,7 @@ def _run_plain(
 ) -> int:
     while True:
         prompt_text = Text.assemble(
-            ("\n" + session.mode, "cyan bold"),
+            ("\n" + display_mode(session.mode), "cyan bold"),
             (" ", ""),
             ("\u203a", "magenta"),
             (" ", ""),

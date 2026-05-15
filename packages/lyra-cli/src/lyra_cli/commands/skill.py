@@ -911,4 +911,473 @@ def consolidate(
     _console.print(table)
 
 
+# ---------------------------------------------------------------------------
+# optimize (Phase O.7 — closed-loop SKILL.md optimizer)
+# ---------------------------------------------------------------------------
+
+
+def _call_llm_for_optimize(
+    prompt: str, *, system: str = "", max_tokens: int = 2048
+) -> str:
+    """One LLM call used by the optimizer Executor/Analyst/Mutator triple.
+
+    Kept module-level so tests can monkeypatch a deterministic stub.
+    The lyra provider doesn't natively expose Pydantic structured
+    output, so the optimizer parses JSON from text — we just need a
+    sync ``str -> str`` call here.
+    """
+    from harness_core.messages import Message
+
+    from ..llm_factory import build_llm
+
+    provider = build_llm("auto")
+    messages: list = []
+    if system:
+        messages.append(Message.system(system))
+    messages.append(Message.user(prompt))
+    reply = provider.generate(messages, max_tokens=max_tokens, temperature=0.0)
+    text = getattr(reply, "text", None) or getattr(reply, "content", None)
+    if not isinstance(text, str):
+        raise typer.Exit(code=1)
+    return text
+
+
+def _load_scenarios_yaml(path: Path) -> list:
+    """Parse ``scenarios.yaml`` into a list of OptimizeScenario.
+
+    Expected shape::
+
+        - prompt: "user says X"
+          eval: "did the agent do Y?"
+        - prompt: "..."
+          eval: "..."
+
+    Accepts ``eval_criterion`` as an alias for ``eval`` so the YAML
+    reads cleanly without quoting the reserved word.
+    """
+    import yaml
+
+    from lyra_skills.optimizer import OptimizeScenario
+
+    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(raw, list):
+        raise typer.BadParameter(
+            f"scenarios YAML at {path} must be a list of {{prompt, eval}} entries"
+        )
+    out: list = []
+    for i, row in enumerate(raw):
+        if not isinstance(row, dict):
+            raise typer.BadParameter(
+                f"scenarios[{i}] must be a mapping (got {type(row).__name__})"
+            )
+        prompt = str(row.get("prompt") or "").strip()
+        criterion = str(
+            row.get("eval_criterion") or row.get("eval") or ""
+        ).strip()
+        if not prompt or not criterion:
+            raise typer.BadParameter(
+                f"scenarios[{i}] needs both 'prompt' and 'eval' (got {row!r})"
+            )
+        out.append(OptimizeScenario(prompt=prompt, eval_criterion=criterion))
+    if not out:
+        raise typer.BadParameter(f"no scenarios in {path}")
+    return out
+
+
+class _ProviderLLMRunner:
+    """Adapter binding lyra's provider call to the optimizer's protocol."""
+
+    def call(self, prompt: str, *, system: str = "", max_tokens: int = 2048) -> str:
+        return _call_llm_for_optimize(
+            prompt, system=system, max_tokens=max_tokens
+        )
+
+
+@skill_app.command("optimize")
+def optimize(
+    skill_id: str = typer.Argument(
+        ..., help="Skill id to optimize (must be installed locally)."
+    ),
+    scenarios: str = typer.Option(
+        ...,
+        "--scenarios",
+        help="Path to scenarios YAML: list of {prompt, eval} entries.",
+    ),
+    target: Optional[str] = typer.Option(
+        None,
+        "--target",
+        help="Override install root (default: ~/.lyra/skills).",
+    ),
+    max_rounds: int = typer.Option(
+        20,
+        "--max-rounds",
+        min=1,
+        max=50,
+        help="Cap on optimizer iterations (each round = ~scenarios+2 LLM calls).",
+    ),
+    target_rate: float = typer.Option(
+        1.0,
+        "--target-rate",
+        min=0.0,
+        max=1.0,
+        help="Stop early once pass rate hits this threshold.",
+    ),
+    apply: bool = typer.Option(
+        False,
+        "--apply",
+        help=(
+            "Write the optimized SKILL.md to disk (with .bak backup). "
+            "Default is dry-run: print final score + unified diff."
+        ),
+    ),
+    update_argus: bool = typer.Option(
+        True,
+        "--argus/--no-argus",
+        help="Emit per-round telemetry to the Argus cascade (default on).",
+    ),
+    json_out: bool = typer.Option(False, "--json"),
+) -> None:
+    """Run the Executor/Analyst/Mutator loop against a skill.
+
+    Phase O.7 closes the lyra reflective-learning loop. Unlike
+    ``lyra skill reflect`` (one-shot LLM rewrite), this command runs
+    an iterative scored loop: score scenarios → analyse failures →
+    propose ONE constrained mutation → re-score → accept if better,
+    revert otherwise. Mutations are persisted to
+    ``$LYRA_HOME/skill_mutations.jsonl`` for audit.
+
+    Argus integration is on by default: each accepted round emits a
+    ``SKILL_EXECUTED`` event and each rejected round emits
+    ``SKILL_REJECTED``, so the Argus telemetry-driven promoter sees
+    optimization wins as success signal.
+    """
+    import time as _time
+
+    from lyra_skills.ledger import MutationRecord, append_mutation
+    from lyra_skills.optimizer import (
+        OptimizeResult,
+        OptimizeRound,
+        optimize_skill,
+    )
+
+    root = Path(target) if target else _user_skills_root()
+    skill_dir = root / skill_id
+    skill_md = skill_dir / "SKILL.md"
+    if not skill_md.is_file():
+        msg = f"skill '{skill_id}' is not installed under {root}"
+        if json_out:
+            typer.echo(_json.dumps({"ok": False, "error": msg}))
+        else:
+            _console.print(f"[red]optimize failed:[/] {msg}")
+        raise typer.Exit(code=1)
+
+    scenarios_path = Path(scenarios).expanduser()
+    if not scenarios_path.is_file():
+        msg = f"scenarios YAML not found: {scenarios_path}"
+        if json_out:
+            typer.echo(_json.dumps({"ok": False, "error": msg}))
+        else:
+            _console.print(f"[red]optimize failed:[/] {msg}")
+        raise typer.Exit(code=1)
+
+    try:
+        scenario_list = _load_scenarios_yaml(scenarios_path)
+    except typer.BadParameter as e:
+        if json_out:
+            typer.echo(_json.dumps({"ok": False, "error": str(e)}))
+        else:
+            _console.print(f"[red]optimize failed:[/] {e}")
+        raise typer.Exit(code=1)
+
+    current_md = skill_md.read_text(encoding="utf-8")
+
+    cascade = None
+    if update_argus:
+        try:
+            cascade, _argus_root, _argus_skills = _build_argus_cascade(target)
+        except Exception as e:  # noqa: BLE001 — argus is optional
+            if not json_out:
+                _console.print(
+                    f"[yellow]argus telemetry disabled:[/] {e}"
+                )
+            cascade = None
+
+    def _on_round(r: OptimizeRound) -> None:
+        record = MutationRecord(
+            ts=_time.time(),
+            skill_id=skill_id,
+            round_no=r.round_no,
+            strategy=(
+                r.mutation.strategy.value if r.mutation else ""
+            ),
+            pre_score=r.pre_score,
+            post_score=r.post_score,
+            accepted=r.accepted,
+            target_section=(
+                r.mutation.target_section if r.mutation else ""
+            ),
+            reasoning=(
+                r.mutation.reasoning if r.mutation else ""
+            ),
+            error=r.error,
+        )
+        append_mutation(record)
+
+        if cascade is not None:
+            try:
+                cascade.record_outcome(
+                    skill_id,
+                    success=r.accepted,
+                    query=f"optimize round {r.round_no}",
+                    score=r.post_score,
+                    detail=(
+                        r.mutation.reasoning if r.mutation else r.error
+                    ),
+                )
+            except Exception:  # noqa: BLE001 — telemetry must never fail the loop
+                pass
+
+        if not json_out:
+            verb = "[green]accept[/]" if r.accepted else "[yellow]revert[/]"
+            strat = r.mutation.strategy.value if r.mutation else "-"
+            note = r.error or (r.mutation.reasoning if r.mutation else "")
+            _console.print(
+                f"  round {r.round_no:>2}  {verb}  "
+                f"{r.pre_score:.2f}→{r.post_score:.2f}  "
+                f"[cyan]{strat}[/]  [dim]{note}[/]"
+            )
+
+    if not json_out:
+        _console.print(
+            f"[cyan]optimize[/] [bold]{skill_id}[/]  "
+            f"({len(scenario_list)} scenarios, max {max_rounds} rounds, "
+            f"target {target_rate:.2f})"
+        )
+
+    try:
+        result: OptimizeResult = optimize_skill(
+            skill_id,
+            current_md=current_md,
+            scenarios=scenario_list,
+            llm=_ProviderLLMRunner(),
+            max_rounds=max_rounds,
+            target_pass_rate=target_rate,
+            on_round=_on_round,
+        )
+    except Exception as e:  # noqa: BLE001 — surface LLM/IO errors uniformly
+        if json_out:
+            typer.echo(_json.dumps({"ok": False, "error": str(e)}))
+        else:
+            _console.print(f"[red]optimize failed:[/] {e}")
+        raise typer.Exit(code=1)
+
+    applied = False
+    if apply and result.final_md != current_md:
+        backup = skill_md.with_suffix(".md.bak")
+        backup.write_text(current_md, encoding="utf-8")
+        skill_md.write_text(result.final_md, encoding="utf-8")
+        applied = True
+
+    if json_out:
+        payload = {
+            "ok": True,
+            "skill_id": result.skill_id,
+            "initial_score": result.initial_score,
+            "final_score": result.final_score,
+            "rounds": [r.to_dict() for r in result.rounds],
+            "target_reached": result.target_reached,
+            "accepted_rounds": result.accepted_rounds,
+            "applied": applied,
+            "path": str(skill_md),
+        }
+        typer.echo(_json.dumps(payload))
+        return
+
+    _console.print(
+        f"\n[bold]done[/]  initial={result.initial_score:.2f}  "
+        f"final={result.final_score:.2f}  "
+        f"rounds={len(result.rounds)} (accepted {result.accepted_rounds})  "
+        f"target_reached={result.target_reached}"
+    )
+    if applied:
+        _console.print(
+            f"[green]applied[/] new SKILL.md to {skill_md} "
+            f"(backup at {skill_md.with_suffix('.md.bak')})"
+        )
+    elif result.final_md != current_md:
+        _console.print(
+            "[dim]dry-run — re-run with --apply to write the new SKILL.md[/]"
+        )
+        if result.diff:
+            _console.print(result.diff)
+
+
+# ---------------------------------------------------------------------------
+# Argus cascade commands (V3.8 Theme A)
+# ---------------------------------------------------------------------------
+
+
+def _build_argus_cascade(target: Optional[str]):
+    """Construct a :class:`LyraArgusCascade` and index every installed skill.
+
+    Lazy import keeps the ``harness_skill_router`` dependency off the
+    cold path of unrelated commands.
+    """
+    from lyra_skills.argus_cascade import LyraArgusCascade
+    from lyra_skills.installer import list_installed
+
+    root = Path(target) if target else _user_skills_root()
+    skills = list_installed(root)
+    cascade = LyraArgusCascade()
+    cascade.index_manifests(skills)
+    return cascade, root, skills
+
+
+@skill_app.command("route")
+def route(
+    query: str = typer.Argument(..., help="Natural-language description of what you need."),
+    target: Optional[str] = typer.Option(
+        None, "--target", help="Override install root (default: ~/.lyra/skills).",
+    ),
+    mode: str = typer.Option(
+        "auto", "--mode",
+        help="Cascade mode: auto, keyword, or semantic.",
+    ),
+    top_k: int = typer.Option(3, "--top-k", min=1, max=20),
+    trace: bool = typer.Option(
+        False, "--trace",
+        help="Emit the full reasoning trace (per-tier elapsed_ms + bright lines).",
+    ),
+    json_out: bool = typer.Option(False, "--json"),
+) -> None:
+    """Route a query through Argus's five-tier cascade and rank the picks."""
+    cascade, root, skills = _build_argus_cascade(target)
+    if not skills:
+        if json_out:
+            typer.echo(_json.dumps({"ok": True, "picks": [], "reason": "no skills"}))
+            return
+        _console.print(f"[dim]no skills installed under {root}[/]")
+        return
+
+    result = cascade.route(query, mode=mode, top_k=top_k)
+
+    if json_out:
+        payload = {
+            "ok": True,
+            "query": query,
+            "mode": mode,
+            "picks": [
+                {"id": p.manifest.id, "score": p.score, "reason": p.reason}
+                for p in result.picks
+            ],
+        }
+        if trace:
+            payload["trace"] = {
+                "tiers": list(result.tier_names),
+                "elapsed_ms": result.total_elapsed_ms,
+                "cost_usd": result.total_cost_usd,
+                "bright_lines": list(result.bright_lines_tripped),
+            }
+        typer.echo(_json.dumps(payload))
+        return
+
+    if result.is_empty:
+        _console.print(f"[dim]no skill matched '{query}' (mode={mode})[/]")
+        return
+
+    table = Table(title=f"argus route — {query!r} (mode={mode})")
+    table.add_column("rank", justify="right")
+    table.add_column("id", style="cyan")
+    table.add_column("score", justify="right")
+    table.add_column("reason", overflow="fold")
+    for idx, pick in enumerate(result.picks, start=1):
+        table.add_row(str(idx), pick.manifest.id, f"{pick.score:.3f}", pick.reason)
+    _console.print(table)
+
+    if trace:
+        _console.print(
+            f"[dim]tiers={list(result.tier_names)} "
+            f"elapsed_ms={result.total_elapsed_ms:.2f} "
+            f"bright_lines={list(result.bright_lines_tripped)}[/]"
+        )
+
+
+@skill_app.command("quality")
+def quality(
+    target: Optional[str] = typer.Option(None, "--target"),
+    json_out: bool = typer.Option(False, "--json"),
+) -> None:
+    """Run Argus's A7 description-quality scorer over the catalog."""
+    cascade, root, skills = _build_argus_cascade(target)
+    if not skills:
+        _console.print(f"[dim]no skills installed under {root}[/]")
+        return
+
+    report = cascade.quality_score()
+
+    if json_out:
+        try:
+            payload = report.to_json()  # type: ignore[attr-defined]
+        except AttributeError:
+            payload = {"summary": str(report)}
+        typer.echo(_json.dumps(payload, default=str))
+        return
+
+    _console.print(report)
+
+
+@skill_app.command("heartbeat")
+def heartbeat(
+    target: Optional[str] = typer.Option(None, "--target"),
+    json_out: bool = typer.Option(False, "--json"),
+) -> None:
+    """Run one Argus refinement pass — drift detection + telemetry rollup."""
+    cascade, root, skills = _build_argus_cascade(target)
+    if not skills:
+        _console.print(f"[dim]no skills installed under {root}[/]")
+        return
+
+    result = cascade.heartbeat()
+
+    if json_out:
+        try:
+            payload = {
+                "ok": True,
+                "drift_reports": [str(r) for r in getattr(result, "drift_reports", [])],
+            }
+        except Exception:
+            payload = {"ok": True, "summary": str(result)}
+        typer.echo(_json.dumps(payload))
+        return
+
+    _console.print(result)
+
+
+@skill_app.command("retract")
+def retract(
+    skill_id: str = typer.Argument(..., help="Skill id to tombstone."),
+    reason: str = typer.Option(
+        ..., "--reason",
+        help="Reason for retraction (lands in the Argus tombstone ledger).",
+    ),
+    target: Optional[str] = typer.Option(None, "--target"),
+    json_out: bool = typer.Option(False, "--json"),
+) -> None:
+    """Tombstone a skill so Argus never re-imports it (failure mode F-24)."""
+    cascade, root, _skills = _build_argus_cascade(target)
+    try:
+        cascade.retract(skill_id, reason=reason)
+    except KeyError:
+        if json_out:
+            typer.echo(_json.dumps({"ok": False, "error": f"unknown skill {skill_id!r}"}))
+            raise typer.Exit(code=1)
+        _console.print(f"[red]unknown skill {skill_id!r}[/]")
+        raise typer.Exit(code=1)
+
+    if json_out:
+        typer.echo(_json.dumps({"ok": True, "skill_id": skill_id, "reason": reason}))
+        return
+    _console.print(f"[green]retracted {skill_id!r}[/]: {reason}")
+
+
 __all__ = ["skill_app"]

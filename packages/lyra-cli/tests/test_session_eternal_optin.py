@@ -45,13 +45,6 @@ def _patch_provider_stack(monkeypatch):
     fake_provider_module.build_llm = _build_llm
     monkeypatch.setitem(sys.modules, "lyra_cli.llm_factory", fake_provider_module)
 
-    # Provide stubs for _apply_role_model and _resolve_model_for_role inside
-    # the session module; they are no-ops for tests.
-    import lyra_cli.interactive.session as session_mod
-
-    monkeypatch.setattr(session_mod, "_apply_role_model", lambda *a, **k: None)
-    monkeypatch.setattr(session_mod, "_resolve_model_for_role", lambda *a, **k: None)
-
 
 def test_env_unset_does_not_call_make_eternal_loop_factory(tmp_path, monkeypatch):
     monkeypatch.delenv("LYRA_ETERNAL_SUBAGENT_DIR", raising=False)

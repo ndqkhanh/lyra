@@ -310,7 +310,7 @@ def test_session_list_text_shows_recency_msgs_mode_model(tmp_path: Path) -> None
         ],
     )
 
-    runner = CliRunner(mix_stderr=False)
+    runner = CliRunner()
     result = runner.invoke(app, ["session", "list", "--repo-root", str(tmp_path)])
     assert result.exit_code == 0, result.output
     out = result.output
@@ -325,7 +325,7 @@ def test_session_list_text_shows_recency_msgs_mode_model(tmp_path: Path) -> None
 def test_session_list_json_emits_structured_payload(tmp_path: Path) -> None:
     _seed_session(tmp_path, "gamma", name="rename-me")
 
-    runner = CliRunner(mix_stderr=False)
+    runner = CliRunner()
     result = runner.invoke(
         app,
         ["session", "list", "--repo-root", str(tmp_path), "--json"],
@@ -355,7 +355,7 @@ def test_session_list_json_emits_structured_payload(tmp_path: Path) -> None:
 
 def test_session_list_empty_dir_prints_friendly_hint(tmp_path: Path) -> None:
     """Zero sessions → no traceback, friendly hint instead."""
-    runner = CliRunner(mix_stderr=False)
+    runner = CliRunner()
     result = runner.invoke(app, ["session", "list", "--repo-root", str(tmp_path)])
     assert result.exit_code == 0
     assert "no sessions yet" in result.output or "lyra --continue" in result.output
@@ -365,7 +365,7 @@ def test_session_show_resolves_latest_and_prints_manifest(tmp_path: Path) -> Non
     _seed_session(tmp_path, "delta-001")
     _seed_session(tmp_path, "delta-002")
 
-    runner = CliRunner(mix_stderr=False)
+    runner = CliRunner()
     result = runner.invoke(
         app,
         ["session", "show", "latest", "--repo-root", str(tmp_path)],
@@ -381,7 +381,7 @@ def test_session_show_unique_prefix_resolves(tmp_path: Path) -> None:
     _seed_session(tmp_path, "epsilon-aaa")
     _seed_session(tmp_path, "zeta-bbb")
 
-    runner = CliRunner(mix_stderr=False)
+    runner = CliRunner()
     result = runner.invoke(
         app,
         ["session", "show", "eps", "--repo-root", str(tmp_path)],
@@ -393,7 +393,7 @@ def test_session_show_unique_prefix_resolves(tmp_path: Path) -> None:
 def test_session_show_unknown_id_exits_nonzero_with_hint(tmp_path: Path) -> None:
     _seed_session(tmp_path, "eta-001")
 
-    runner = CliRunner(mix_stderr=False)
+    runner = CliRunner()
     result = runner.invoke(
         app,
         ["session", "show", "nope", "--repo-root", str(tmp_path)],
@@ -407,7 +407,7 @@ def test_session_show_unknown_id_exits_nonzero_with_hint(tmp_path: Path) -> None
 def test_session_show_verbose_walks_jsonl(tmp_path: Path) -> None:
     _seed_session(tmp_path, "theta")
 
-    runner = CliRunner(mix_stderr=False)
+    runner = CliRunner()
     result = runner.invoke(
         app,
         [
@@ -428,7 +428,7 @@ def test_session_show_verbose_walks_jsonl(tmp_path: Path) -> None:
 def test_session_show_json_includes_events_when_verbose(tmp_path: Path) -> None:
     _seed_session(tmp_path, "iota")
 
-    runner = CliRunner(mix_stderr=False)
+    runner = CliRunner()
     result = runner.invoke(
         app,
         [
@@ -466,7 +466,7 @@ def test_root_callback_continue_maps_to_latest(tmp_path: Path, monkeypatch) -> N
     import lyra_cli.interactive.driver as drv
 
     monkeypatch.setattr(drv, "run", fake_run)
-    runner = CliRunner(mix_stderr=False)
+    runner = CliRunner()
     result = runner.invoke(
         app,
         ["--repo-root", str(tmp_path), "--continue"],
@@ -486,7 +486,7 @@ def test_root_callback_resume_id_passed_through(tmp_path: Path, monkeypatch) -> 
     import lyra_cli.interactive.driver as drv
 
     monkeypatch.setattr(drv, "run", fake_run)
-    runner = CliRunner(mix_stderr=False)
+    runner = CliRunner()
     result = runner.invoke(
         app,
         ["--repo-root", str(tmp_path), "--resume", "abc-123"],
@@ -508,7 +508,7 @@ def test_root_callback_session_pins_id(tmp_path: Path, monkeypatch) -> None:
     import lyra_cli.interactive.driver as drv
 
     monkeypatch.setattr(drv, "run", fake_run)
-    runner = CliRunner(mix_stderr=False)
+    runner = CliRunner()
     result = runner.invoke(
         app,
         ["--repo-root", str(tmp_path), "--session", "pin-me"],

@@ -1,0 +1,9 @@
+{"t":0,"agent":"system","event":"keyword_detected","keyword":"code-review"}
+{"t":0,"agent":"a49177b","agent_type":"general-purpose","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"a759b7e","agent_type":"document-specialist","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"a678274","agent_type":"general-purpose","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"aef4a3c","agent_type":"general-purpose","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"a95a1af","agent_type":"document-specialist","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"a95a1af","agent_type":"document-specialist","event":"agent_stop","success":true,"duration_ms":144723}
+{"t":0,"agent":"aef4a3c","agent_type":"general-purpose","event":"agent_stop","success":true,"duration_ms":157594}
+{"t":0,"agent":"a25e1aa","agent_type":"unknown","event":"agent_stop","success":true}

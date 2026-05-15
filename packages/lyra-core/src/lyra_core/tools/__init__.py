@@ -14,8 +14,8 @@ from .toolsets import (
     list_toolsets,
     register_toolset,
 )
-from .web_fetch import make_web_fetch_tool
-from .web_search import make_web_search_tool
+from .web_fetch import make_web_fetch_tool, WebFetchTool
+from .web_search import make_web_search_tool, WebSearchTool
 
 __all__ = [
     "AskCallback",
@@ -25,6 +25,8 @@ __all__ = [
     "ReadTool",
     "ToolsetApplication",
     "ToolsetRegistry",
+    "WebFetchTool",
+    "WebSearchTool",
     "WriteTool",
     "apply_toolset",
     "default_toolsets",

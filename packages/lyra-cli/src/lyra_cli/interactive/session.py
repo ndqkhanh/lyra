@@ -72,6 +72,28 @@ _VALID_MODES: tuple[str, ...] = (
     "auto_mode",
 )
 
+# Short, terminal-friendly labels surfaced in the prompt, bottom toolbar,
+# banner, and ``/mode`` output. The canonical IDs above remain the
+# permission-posture source of truth (used by tests, snapshots, the
+# router, and the CLI flag), but every UI surface shows the short form
+# so the REPL doesn't read like database column names.
+_MODE_DISPLAY: dict[str, str] = {
+    "edit_automatically": "agent",
+    "plan_mode":          "plan",
+    "ask_before_edits":   "ask",
+    "auto_mode":          "auto",
+}
+
+
+def display_mode(mode: str) -> str:
+    """Return the short display label for *mode*.
+
+    Falls through to the input when the mode isn't in the canonical
+    table, so unknown / future / test-only modes still print rather
+    than vanishing.
+    """
+    return _MODE_DISPLAY.get(mode, mode)
+
 # Legacy mode names from every prior taxonomy → canonical v3.6 mode.
 # We honour them everywhere the user can supply a string (CLI flags,
 # /mode, snapshots on disk, settings.json) so a fresh ``lyra`` upgrade
@@ -238,30 +260,6 @@ class InteractiveSession:
 
     repo_root: Path
     model: str = "auto"
-    # v2.7.1: Claude-Code-style small/smart split.
-    #
-    # ``fast_model`` is the cheap/quick alias used for plain chat
-    # turns, summarisation, /compact, completion, status banter, and
-    # any cron job that doesn't need deep reasoning. ``smart_model``
-    # is the slower, more capable alias used for /plan, /spawn, /review,
-    # /ultrareview, agent-loop tool reasoning, and verifier rounds.
-    #
-    # Defaults map to the DeepSeek catalog (``deepseek-v4-flash`` →
-    # ``deepseek-chat``, ``deepseek-v4-pro`` → ``deepseek-reasoner``)
-    # because DeepSeek is Lyra's cost-aware default backend. Users on
-    # other providers (Anthropic, OpenAI, Vertex, Bedrock, etc.) can
-    # override via ``/model fast=<slug>`` and ``/model smart=<slug>``,
-    # or by setting ``HARNESS_LLM_MODEL`` directly.
-    #
-    # ``model`` (above) remains the *canonical* slot for back-compat:
-    # legacy callers that pass ``--model`` keep getting their pin
-    # honoured. When ``model == "auto"`` the routing logic in
-    # :func:`_resolve_model_for_role` reads from these two slots; when
-    # ``model`` is pinned explicitly it overrides both slots so power
-    # users keep their hard pins. See ``docs/blocks/01-agent-loop.md``
-    # for the routing table.
-    fast_model: str = "deepseek-v4-flash"
-    smart_model: str = "deepseek-v4-pro"
     # v3.6.0: Lyra's interactive modes are permission-flavoured —
     # ``edit_automatically`` (default; full-access execution, edits
     # apply without confirmation), ``ask_before_edits`` (full-access
@@ -1156,74 +1154,166 @@ class InteractiveSession:
     # ---- v1.7.4: /model list + /models -----------------------------------
 
     def _cmd_model_list(self, _rest: str) -> str:
-        """Render every known LLM provider with configured/selected markers.
+        """Render every known model grouped by provider.
 
-        Output legend: ``●`` = currently selected, ``✓`` = configured
-        (key set or local endpoint reachable), ``—`` = not configured.
+        Each provider section shows its display name, configured-status
+        glyph, env-var, and the canonical model slugs the alias
+        registry resolves into. The currently-selected model is
+        marked with ``●``; the active provider gets a ``▸`` chevron.
 
-        Combines ``known_llm_names`` (curated short names) with the
-        OpenAI-compatible ``PRESETS`` registry so adding a new preset
-        in v1.7.4 (DashScope / vLLM / llama-server / TGI / Llamafile /
-        MLX) automatically appears here without touching this file.
+        Output legend:
+        * ``●`` — current model
+        * ``✓`` — provider configured (env var or auth.json key, or
+          local endpoint reachable)
+        * ``—`` — provider not configured
         """
         import os
 
-        from lyra_cli.llm_factory import known_llm_names
+        from lyra_cli.llm_factory import (
+            provider_env_var,
+            provider_has_credentials,
+        )
         from lyra_cli.providers.openai_compatible import PRESETS
+        from lyra_core.providers.aliases import (
+            DEFAULT_ALIASES,
+            resolve_alias,
+        )
 
-        selected = (self.current_llm_name or "").lower().strip()
-        seen: set[str] = set()
-        rows: list[tuple[str, str, bool]] = []  # (name, detail, configured)
+        # Display names + ordering. Local backends sit at the bottom so
+        # the cloud catalog dominates the picker.
+        provider_meta: list[tuple[str, str]] = [
+            ("anthropic",        "Anthropic Claude"),
+            ("openai",           "OpenAI GPT"),
+            ("openai-reasoning", "OpenAI o-series (reasoning)"),
+            ("gemini",           "Google Gemini"),
+            ("deepseek",         "DeepSeek"),
+            ("xai",              "xAI Grok"),
+            ("dashscope",        "Alibaba Qwen / Moonshot Kimi"),
+            ("groq",             "Groq (Llama hosted)"),
+            ("cerebras",         "Cerebras"),
+            ("mistral",          "Mistral"),
+            ("openrouter",       "OpenRouter (meta)"),
+            ("vllm",             "vLLM (local)"),
+            ("lmstudio",         "LM Studio (local)"),
+            ("ollama",           "Ollama (local)"),
+            ("mock",             "mock (offline)"),
+        ]
 
-        for name in known_llm_names():
-            if name == "auto" or name in seen:
-                continue
-            seen.add(name)
-            configured = False
-            detail = ""
-            if name == "mock":
-                configured = True
-                detail = "canned outputs"
-            elif name == "anthropic":
-                configured = bool(os.environ.get("ANTHROPIC_API_KEY", "").strip())
-                detail = os.environ.get("HARNESS_LLM_MODEL", "claude-*")
-            elif name == "gemini":
-                configured = bool(
-                    os.environ.get("GEMINI_API_KEY", "").strip()
-                    or os.environ.get("GOOGLE_API_KEY", "").strip()
-                )
-                detail = "gemini-*"
-            elif name == "ollama":
+        # Group every canonical slug from the alias registry by provider.
+        # Aliases that map to the same canonical slug collapse into one
+        # entry; the user sees the canonical slug + the friendly v4
+        # forms users actually type (DeepSeek's flash/pro split, the
+        # ``opus`` / ``sonnet`` shorthand, etc.).
+        slugs_by_provider: dict[str, list[str]] = {}
+        for alias_name, entry in DEFAULT_ALIASES._aliases.items():
+            slugs_by_provider.setdefault(entry.provider, []).append(entry.slug)
+
+        # Friendly user-facing labels per provider — surface the slot
+        # syntax users muscle-memory ("deepseek-v4-flash" / "-pro",
+        # "haiku" / "sonnet" / "opus") alongside the API slugs. The
+        # alias registry already routes them; this just makes them
+        # visible in the picker.
+        friendly_extras: dict[str, list[str]] = {
+            "deepseek": ["deepseek-v4-flash", "deepseek-v4-pro"],
+            "anthropic": ["opus", "sonnet", "haiku"],
+            "openai": ["gpt-5", "gpt-4o"],
+            "gemini": ["gemini-2.5-pro", "gemini-2.5-flash"],
+            "xai": ["grok-4", "grok-code-fast-1"],
+            "dashscope": ["kimi-k2.5", "qwen-max"],
+        }
+        for prov, extras in friendly_extras.items():
+            slugs_by_provider.setdefault(prov, []).extend(extras)
+
+        # Dedup + stable sort
+        for k in slugs_by_provider:
+            slugs_by_provider[k] = sorted(set(slugs_by_provider[k]))
+
+        selected_model_raw = (getattr(self, "model", "") or "").strip()
+        selected_canonical = resolve_alias(selected_model_raw) if selected_model_raw else ""
+        selected_provider = ""
+        for prov, slugs in slugs_by_provider.items():
+            if selected_canonical in slugs:
+                selected_provider = prov
+                break
+        # Legacy fallback — ``current_llm_name`` is the v1 way to pin
+        # the active backend by provider rather than model. Tests +
+        # older snapshots still set it, so honour it when the alias
+        # lookup didn't already settle on a provider.
+        if not selected_provider:
+            llm_name = (getattr(self, "current_llm_name", "") or "").strip().lower()
+            if llm_name:
+                selected_provider = llm_name
+
+        # Per-preset configured-state lookup for non-auth-store providers
+        # (mock / ollama / lmstudio that don't show up in auth.json).
+        def _provider_configured(prov: str) -> bool:
+            if prov == "mock":
+                return True
+            if prov == "ollama":
                 try:
                     from lyra_cli.providers.ollama import ollama_reachable
-
-                    configured = ollama_reachable()
+                    return ollama_reachable()
                 except Exception:
-                    configured = False
-                detail = "local"
-            else:
-                preset = next((p for p in PRESETS if p.name == name), None)
-                if preset is not None:
-                    try:
-                        configured = preset.configured()
-                    except Exception:
-                        configured = False
-                    detail = preset.default_model
-                    if preset.auth_scheme == "none":
-                        detail = f"{detail} (local)"
-            rows.append((name, detail, configured))
+                    return False
+            if prov == "lmstudio":
+                preset = next((p for p in PRESETS if p.name == "lmstudio"), None)
+                if preset is None:
+                    return False
+                try:
+                    return preset.configured()
+                except Exception:
+                    return False
+            return provider_has_credentials(prov)
 
-        lines = ["Available providers:"]
-        for name, detail, configured in rows:
-            if name == selected:
-                marker = "●"
-            elif configured:
-                marker = "✓"
-            else:
-                marker = "—"
-            lines.append(f"  {marker}  {name:<22}  {detail}")
+        # ---- compose -----------------------------------------------
+        lines: list[str] = []
+        lines.append("─" * 72)
+        lines.append(" Models")
+        lines.append("─" * 72)
+
+        for provider, display_name in provider_meta:
+            slugs = slugs_by_provider.get(provider, [])
+            # Always render Anthropic / OpenAI / DeepSeek even when the
+            # alias registry has none yet — but skip empty buckets for
+            # truly absent providers so the picker stays compact.
+            if not slugs and provider not in {"mock", "ollama", "lmstudio", "vllm"}:
+                continue
+
+            configured = _provider_configured(provider)
+            chevron = "▶" if provider == selected_provider else " "
+            status = "✓" if configured else "—"
+            env_name = provider_env_var(provider) or ""
+            # Local backends have no env-var; surface the provider key
+            # so the picker still shows a stable handle the user can
+            # type into ``/model``.
+            env_tail = f"  ({env_name})" if env_name else f"  ({provider})"
+            header = (
+                f"\n{chevron} {status}  {display_name:<32}{env_tail}"
+            )
+            lines.append(header)
+
+            if not slugs:
+                if provider == "mock":
+                    lines.append("       canned outputs (no key needed)")
+                elif provider == "ollama":
+                    lines.append("       local — http://127.0.0.1:11434")
+                elif provider == "lmstudio":
+                    lines.append("       local — http://localhost:1234/v1")
+                elif provider == "vllm":
+                    lines.append("       local — OpenAI-compatible server")
+                continue
+
+            for slug in slugs:
+                is_active = slug == selected_canonical
+                glyph = "●" if is_active else "·"
+                lines.append(f"     {glyph}  {slug}")
+
         lines.append("")
-        lines.append("Legend: ●=selected  ✓=configured  —=not configured")
+        lines.append("─" * 72)
+        lines.append(
+            " ●=current   ✓=configured   —=needs key   "
+            "▶=active provider"
+        )
         return "\n".join(lines)
 
     def _cmd_models(self, rest: str) -> str:
@@ -1625,148 +1715,16 @@ _MODE_SYSTEM_PROMPTS: dict[str, str] = {
 _CHAT_HISTORY_TURNS = 20
 
 
-def _resolve_model_for_role(session: InteractiveSession, role: str) -> Optional[str]:
-    """Pick the user-facing model alias for a given task role.
-
-    v2.7.1 introduced a Claude-Code-style **small/smart split**: cheap
-    chat turns (default REPL conversation, /compact, status banter,
-    completion) flow through ``session.fast_model`` while reasoning-
-    heavy paths (/plan, /spawn, /review, /ultrareview, agent-loop tool
-    reasoning, verifier rounds) flow through ``session.smart_model``.
-
-    The defaults are ``deepseek-v4-flash`` → ``deepseek-chat`` and
-    ``deepseek-v4-pro`` → ``deepseek-reasoner`` because DeepSeek is
-    Lyra's cost-aware default backend. Users on other providers can
-    override the slot pins via ``/model fast=<slug>`` and
-    ``/model smart=<slug>``.
-
-    The function returns ``None`` if the slot is empty (e.g. the
-    user explicitly cleared it) — callers treat ``None`` as "honour
-    whatever the provider reads from env" and skip env-stamping.
-    """
-    role_norm = (role or "chat").lower().strip()
-    if role_norm in ("smart", "reasoning", "plan", "review", "verify", "spawn", "subagent"):
-        slot = (getattr(session, "smart_model", "") or "").strip()
-    else:
-        slot = (getattr(session, "fast_model", "") or "").strip()
-    return slot or None
-
-
-# Map provider keys (as registered in ``lyra_core.providers.aliases``) to
-# the env vars each preset reads model slugs from. We stamp every entry
-# in the list so the resolved alias survives whichever lookup priority
-# the active backend uses.
-#
-# ``HARNESS_LLM_MODEL`` is always stamped first because it's the canonical
-# Lyra-wide override that Anthropic / Vertex / Bedrock / Copilot all
-# read; the preset-specific keys catch the OpenAI-compatible lane that
-# bypasses ``HARNESS_LLM_MODEL`` and prefers its own env var.
-_PROVIDER_MODEL_ENV: dict[str, tuple[str, ...]] = {
-    "anthropic":  ("HARNESS_LLM_MODEL",),
-    "deepseek":   ("HARNESS_LLM_MODEL", "DEEPSEEK_MODEL", "OPEN_HARNESS_DEEPSEEK_MODEL"),
-    "openai":     ("HARNESS_LLM_MODEL", "OPENAI_MODEL", "OPEN_HARNESS_OPENAI_MODEL"),
-    "xai":        ("HARNESS_LLM_MODEL", "XAI_MODEL", "OPEN_HARNESS_XAI_MODEL"),
-    "groq":       ("HARNESS_LLM_MODEL", "GROQ_MODEL", "OPEN_HARNESS_GROQ_MODEL"),
-    "cerebras":   ("HARNESS_LLM_MODEL", "CEREBRAS_MODEL", "OPEN_HARNESS_CEREBRAS_MODEL"),
-    "mistral":    ("HARNESS_LLM_MODEL", "MISTRAL_MODEL", "OPEN_HARNESS_MISTRAL_MODEL"),
-    "openrouter": ("HARNESS_LLM_MODEL", "OPENROUTER_MODEL", "OPEN_HARNESS_OPENROUTER_MODEL"),
-    "dashscope":  ("HARNESS_LLM_MODEL", "DASHSCOPE_MODEL", "QWEN_MODEL",
-                   "OPEN_HARNESS_DASHSCOPE_MODEL", "OPEN_HARNESS_QWEN_MODEL"),
-    "gemini":     ("HARNESS_LLM_MODEL", "GEMINI_MODEL", "OPEN_HARNESS_GEMINI_MODEL"),
-    "ollama":     ("HARNESS_LLM_MODEL", "OLLAMA_MODEL", "OPEN_HARNESS_LOCAL_MODEL"),
-    "bedrock":    ("HARNESS_LLM_MODEL", "BEDROCK_MODEL"),
-    "vertex":     ("HARNESS_LLM_MODEL", "VERTEX_MODEL"),
-    "copilot":    ("HARNESS_LLM_MODEL", "COPILOT_MODEL"),
-}
-
-
-def _stamp_model_env(alias: str) -> Optional[str]:
-    """Resolve an alias and stamp it into provider-specific env vars.
-
-    Returns the resolved canonical slug (e.g. ``deepseek-reasoner``)
-    or ``None`` if the alias was empty / unknown to the registry. The
-    function intentionally **overwrites** matching env vars even if
-    the user pre-set them — fast/smart slots are the source of truth
-    when role-based routing is engaged. Callers wanting a hard pin
-    should set ``HARNESS_LLM_MODEL`` *before* booting the REPL or use
-    ``--model`` on the CLI; those paths skip role routing entirely.
-    """
-    import os as _os
-
-    if not alias:
-        return None
-    try:
-        from lyra_core.providers.aliases import provider_key_for, resolve_alias
-    except Exception:
-        return None
-
-    slug = resolve_alias(alias)
-    if not slug:
-        return None
-    provider = provider_key_for(alias)
-    keys = _PROVIDER_MODEL_ENV.get(provider or "", ("HARNESS_LLM_MODEL",))
-    for k in keys:
-        _os.environ[k] = slug
-    return slug
-
-
-def _apply_role_model(session: InteractiveSession, role: str) -> Optional[str]:
-    """Stamp the env model for ``role`` and update the cached provider.
-
-    Returns the resolved slug or ``None`` if no slot was applicable.
-    The cached :class:`LLMProvider` (if any) gets ``provider.model``
-    mutated directly so the next ``generate`` call picks up the new
-    slug without rebuilding the entire provider — DeepSeek/Anthropic/
-    OpenAI-compatible providers all expose ``model`` as a settable
-    attribute, so the swap is one assignment.
-
-    The function is a **no-op when the user has pinned the backend
-    via ``/model <kind>`` or ``--llm <kind>`` AND set an explicit
-    model (HARNESS_LLM_MODEL) outside the slot system** — we honour
-    the explicit pin in that case rather than overwrite it. Detection
-    is heuristic: if ``session.model != "auto"`` *and* both fast and
-    smart slots are still at their default DeepSeek aliases, the user
-    almost certainly hand-picked a backend and wants to keep its
-    default model.
-    """
-    alias = _resolve_model_for_role(session, role)
-    slug = _stamp_model_env(alias) if alias else None
-    if slug:
-        prov = getattr(session, "_llm_provider", None)
-        if prov is not None:
-            try:
-                # All Lyra LLM provider classes expose ``model`` as a
-                # plain attribute (anthropic/openai-compat/gemini/
-                # bedrock/vertex/copilot). Best-effort: silently skip
-                # for any future provider that doesn't.
-                setattr(prov, "model", slug)
-            except Exception:
-                pass
-    return slug
-
-
-def _ensure_llm(session: InteractiveSession, *, role: str = "chat"):
+def _ensure_llm(session: InteractiveSession):
     """Resolve and cache the ``LLMProvider`` for ``session.model``.
 
     Lazy: first plain-text turn pays the resolution cost, subsequent
     turns reuse the cached provider. The cache is invalidated by the
     ``/model`` slash so model switches take effect immediately.
 
-    ``role`` (v2.7.1) selects the small/smart slot. ``"chat"`` (the
-    default) uses ``session.fast_model``; reasoning-heavy callers
-    (planner, /spawn, /review) pass ``role="smart"`` to route to
-    ``session.smart_model``. The active provider's ``model`` attribute
-    is mutated in place so the same cached provider serves both
-    slots without an SDK rebuild.
-
     Raises ``RuntimeError`` from :mod:`lyra_cli.llm_factory` when no
     provider is configured (no env var, no ``auth.json`` entry).
     """
-    # Stamp env BEFORE building so the provider's ``__init__`` reads
-    # the right model on first turn. On subsequent turns
-    # ``_apply_role_model`` mutates ``provider.model`` directly.
-    _apply_role_model(session, role)
-
     if session._llm_provider is not None and session._llm_provider_kind == session.model:
         return session._llm_provider
 
@@ -1775,10 +1733,6 @@ def _ensure_llm(session: InteractiveSession, *, role: str = "chat"):
     provider = build_llm(session.model)
     session._llm_provider = provider
     session._llm_provider_kind = session.model
-    # Re-apply on the freshly built provider so its ``model`` attr
-    # reflects the current role even if the env stamp lost a race
-    # with a preset that read its env keys at construction time.
-    _apply_role_model(session, role)
     return provider
 
 
@@ -2293,7 +2247,10 @@ def _augment_system_prompt_with_skills(
             try:
                 from .skills_inject import render_skill_block
 
-                block = render_skill_block(session.repo_root)
+                block = render_skill_block(
+                    session.repo_root,
+                    state=_load_session_skills_state(session),
+                )
             except Exception:
                 block = ""
             session._cached_skill_block = block
@@ -2367,10 +2324,252 @@ def _render_skill_block_live(
         result = render_skill_block_with_activations(
             session.repo_root,
             prompt=line,
+            state=_load_session_skills_state(session),
         )
     except Exception:
         return "", [], {}
     return result.text, list(result.activated_ids), dict(result.activation_reasons)
+
+
+def _load_session_skills_state(session: InteractiveSession):
+    """Return the user's per-skill overrides for this session.
+
+    Cached on the session so each turn doesn't re-read the JSON. The
+    ``/skills`` picker invalidates the cache via
+    ``session._skills_state = None`` after a save.
+    """
+    cached = getattr(session, "_skills_state", None)
+    if cached is not None:
+        return cached
+    try:
+        from lyra_skills.state import load_state
+
+        cached = load_state()
+    except Exception:
+        cached = None
+    session._skills_state = cached
+    return cached
+
+
+def _stdin_is_tty() -> bool:
+    """Best-effort TTY detection — None or detached fds count as headless."""
+    import sys
+
+    try:
+        return bool(sys.stdin and sys.stdin.isatty())
+    except (AttributeError, ValueError):
+        return False
+
+
+def _launch_skills_picker(session: InteractiveSession) -> "CommandResult":
+    """Run the full-screen picker and persist the result.
+
+    Falls back to a friendly error CommandResult if prompt_toolkit is
+    not available or the dialog implodes — the picker is a UX
+    convenience, not load-bearing infrastructure.
+    """
+    try:
+        from .dialog_skills import run_skills_dialog
+        from lyra_skills.state import SkillsState, load_state, save_state
+    except Exception as exc:  # pragma: no cover — defensive
+        return CommandResult(output=f"skills picker unavailable: {exc}")
+
+    try:
+        current = load_state()
+    except Exception:
+        current = SkillsState()
+
+    try:
+        result = run_skills_dialog(session.repo_root, state=current)
+    except Exception as exc:
+        return CommandResult(output=f"skills picker failed: {exc}")
+
+    if result is None:
+        return CommandResult(output="skills picker: no changes saved.")
+
+    try:
+        save_state(result.new_state)
+    except Exception as exc:
+        return CommandResult(output=f"skills picker: save failed: {exc}")
+
+    # Invalidate the per-session cache so the next turn re-renders
+    # the system-prompt block with the new state.
+    session._skills_state = None
+    session._cached_skill_block = None
+
+    if not result.changed_ids:
+        return CommandResult(output="skills picker: no changes.")
+    return CommandResult(
+        output=(
+            f"skills picker: updated {len(result.changed_ids)} skill(s) — "
+            + ", ".join(result.changed_ids)
+        )
+    )
+
+
+def _print_skills_state(session: InteractiveSession) -> "CommandResult":
+    """Show the user's persisted skill overrides as plain text."""
+    try:
+        from lyra_skills.state import SkillsState, load_state
+
+        state = load_state()
+    except Exception as exc:
+        return CommandResult(output=f"skills state unavailable: {exc}")
+
+    if state == SkillsState():
+        return CommandResult(
+            output="no skill overrides — every discovered skill is on by default."
+        )
+    lines = []
+    if state.disabled:
+        lines.append(f"disabled ({len(state.disabled)}):")
+        for sid in sorted(state.disabled):
+            lines.append(f"  - {sid}")
+    if state.enabled:
+        lines.append(f"enabled ({len(state.enabled)}):")
+        for sid in sorted(state.enabled):
+            lines.append(f"  - {sid}")
+    return CommandResult(output="\n".join(lines))
+
+
+def _launch_sessions_picker(sessions_root: Path) -> Optional[str]:
+    """Open the full-screen sessions picker and return the chosen id.
+
+    Returns ``None`` when the user cancels or the picker is otherwise
+    unavailable (no dialog module, no entries). The caller (``/resume``
+    or ``/sessions``) treats ``None`` as a clean cancel.
+    """
+    try:
+        from .dialog_sessions import run_sessions_dialog
+    except Exception:
+        return None
+    try:
+        result = run_sessions_dialog(sessions_root)
+    except Exception:
+        return None
+    return None if result is None else result.session_id
+
+
+def _launch_agents_picker(session: InteractiveSession) -> "CommandResult":
+    """Run the full-screen agents picker (catalog + live views).
+
+    The picker is non-destructive: it returns a chosen preset name
+    (``catalog_pick``) or live record id (``live_pick``) and we
+    print the corresponding detail block. ``/spawn`` and
+    ``/agents kill`` remain the way to actually act on those rows.
+    """
+    try:
+        from .dialog_agents import run_agents_dialog
+    except Exception as exc:  # pragma: no cover — defensive
+        return CommandResult(output=f"agents picker unavailable: {exc}")
+
+    reg = getattr(session, "subagent_registry", None)
+    try:
+        result = run_agents_dialog(registry=reg)
+    except Exception as exc:
+        return CommandResult(output=f"agents picker failed: {exc}")
+
+    if result is None:
+        return CommandResult(output="agents picker: cancelled.")
+
+    if result.catalog_pick is not None:
+        return _render_preset_detail(result.catalog_pick)
+    if result.live_pick is not None:
+        return _render_live_detail(result.live_pick)
+
+    return CommandResult(output="agents picker: no selection.")
+
+
+def _render_preset_detail(entry) -> "CommandResult":
+    """Pretty-print a catalog preset the user picked."""
+    lines = [
+        f"agent preset: {entry.name}",
+        f"  source : {entry.source}",
+        f"  model  : {entry.model}",
+        f"  role   : {entry.role}",
+        f"  tools  : {', '.join(entry.tools) or '(none)'}",
+    ]
+    if entry.aliases:
+        lines.append(f"  aliases: {', '.join(entry.aliases)}")
+    if entry.description:
+        lines.append("")
+        lines.append(entry.description)
+    lines.append("")
+    lines.append(f"hint: /spawn --type {entry.name} <description>")
+    return CommandResult(output="\n".join(lines))
+
+
+def _render_live_detail(entry) -> "CommandResult":
+    """Pretty-print a live subagent record the user picked."""
+    lines = [
+        f"subagent: {entry.record_id}",
+        f"  state : {entry.state}",
+    ]
+    if entry.subagent_type:
+        lines.append(f"  type  : {entry.subagent_type}")
+    if entry.description:
+        lines.append("")
+        lines.append(entry.description)
+    lines.append("")
+    lines.append(f"hint: /agents kill {entry.record_id}")
+    return CommandResult(output="\n".join(lines))
+
+
+def _toggle_skill_id(
+    session: InteractiveSession,
+    skill_id: str,
+    *,
+    enable: bool,
+) -> "CommandResult":
+    """Programmatic equivalent of pressing Space on *skill_id* in the picker.
+
+    Refuses to disable locked skills (packaged packs) — same invariant
+    the picker enforces.
+    """
+    try:
+        from lyra_skills.state import SkillsState, load_state, save_state
+        from .skills_inject import (
+            _load_skills_safely,
+            _packaged_pack_root,
+            discover_skill_roots,
+            is_locked_skill,
+        )
+    except Exception as exc:
+        return CommandResult(output=f"skills toggle unavailable: {exc}")
+
+    skills = _load_skills_safely(discover_skill_roots(session.repo_root))
+    target = next((s for s in skills if getattr(s, "id", "") == skill_id), None)
+    if target is None:
+        return CommandResult(output=f"skill not found: {skill_id}")
+
+    if not enable and is_locked_skill(target, _packaged_pack_root()):
+        return CommandResult(
+            output=(
+                f"{skill_id} is bundled with Lyra — disable via "
+                f"`lyra skill remove {skill_id}` instead."
+            )
+        )
+
+    state = load_state()
+    if enable:
+        new_state = SkillsState(
+            enabled=state.enabled - {skill_id},
+            disabled=state.disabled - {skill_id},
+        )
+    else:
+        new_state = SkillsState(
+            enabled=state.enabled - {skill_id},
+            disabled=state.disabled | {skill_id},
+        )
+    if new_state == state:
+        flag = "enabled" if enable else "disabled"
+        return CommandResult(output=f"{skill_id} already {flag}.")
+
+    save_state(new_state)
+    session._skills_state = None
+    session._cached_skill_block = None
+    flag = "enabled" if enable else "disabled"
+    return CommandResult(output=f"{skill_id} {flag}.")
 
 
 def _augment_system_prompt_with_memory(
@@ -2460,11 +2659,51 @@ def _should_run_chat_tools(session: InteractiveSession, provider: Any) -> bool:
         try:
             from .chat_tools import build_chat_tool_registry
 
+            # v3.10: install ``AskUserQuestion`` only when the session
+            # has a Rich console attached AND stdin is interactive.
+            # Skipping the tool in piped / CI runs prevents the agent
+            # from advertising a capability it would block forever
+            # waiting on. The prompter closure captures the live
+            # console so the dialog inherits the REPL's theme.
+            ask_prompter = None
+            console = getattr(session, "_console", None)
+            stdin_is_tty = False
+            try:
+                import sys as _sys
+                stdin_is_tty = bool(_sys.stdin and _sys.stdin.isatty())
+            except (ValueError, AttributeError):
+                stdin_is_tty = False
+            if console is not None and stdin_is_tty:
+                from .ask_user_prompter import make_prompter
+                ask_prompter = make_prompter(console)
+
             session._chat_tool_registry = build_chat_tool_registry(
-                session.repo_root
+                session.repo_root, ask_user_prompter=ask_prompter
             )
-        except Exception:
+            session._chat_tool_registry_error = None
+        except Exception as exc:
             session._chat_tool_registry = None
+            session._chat_tool_registry_error = (
+                f"{type(exc).__name__}: {exc}"
+            )
+            console = getattr(session, "_console", None)
+            if console is not None:
+                console.print(
+                    f"[yellow]⚠ chat tools disabled: "
+                    f"{type(exc).__name__}: {exc}[/yellow]\n"
+                    f"[dim]Set LYRA_DEBUG=1 for the full traceback. "
+                    f"Inspect via [/dim][cyan]/status[/cyan][dim].[/dim]"
+                )
+            else:
+                import sys
+                print(
+                    f"[lyra] chat tools disabled: "
+                    f"{type(exc).__name__}: {exc}",
+                    file=sys.stderr,
+                )
+            if os.environ.get("LYRA_DEBUG"):
+                import traceback
+                traceback.print_exc()
         session._chat_tools_loaded = True
     return session._chat_tool_registry is not None
 
@@ -2518,12 +2757,83 @@ def _chat_with_tool_loop(
     # approval contract.
     _LOW_RISK = {"Read", "Glob", "Grep"}
 
+    # v3.10: load the declarative permission grammar + user hooks
+    # lazily on first tool call. Caching on the session (a) keeps
+    # ``_approve`` zero-allocation in the hot path and (b) survives a
+    # mid-session settings edit because the cache key is the session
+    # itself, not a global — restart the REPL to pick up changes.
+    def _load_policy_and_hooks() -> tuple[Any, list[Any], bool]:
+        cached = getattr(session, "_policy_hooks_cache", None)
+        if cached is not None:
+            return cached
+        try:
+            from ..policy_loader import load_hooks, load_policy
+
+            policy = load_policy(session.repo_root)
+            hook_specs, hooks_enabled = load_hooks(session.repo_root)
+        except Exception:
+            # Settings file is the user's territory — a malformed
+            # policy block is *their* bug. Log once via the lifecycle
+            # bus and fall back to the legacy approval flow rather
+            # than blocking every tool call.
+            policy, hook_specs, hooks_enabled = None, [], False
+        session._policy_hooks_cache = (policy, hook_specs, hooks_enabled)
+        return session._policy_hooks_cache
+
     def _approve(name: str, _args: dict[str, Any]) -> bool:
+        policy, hook_specs, hooks_enabled = _load_policy_and_hooks()
+        from lyra_core.permissions.grammar import Verdict
+        from lyra_core.hooks.user_hooks import run_hooks
+
+        # Step 1: declarative deny rules short-circuit before we even
+        # consider hooks — saves a subprocess hop on the safe path
+        # and matches CC's deny→ask→allow precedence.
+        if policy is not None and not policy.is_empty():
+            decision = policy.decide(name, _args or {})
+            if decision.verdict is Verdict.DENY:
+                console = getattr(session, "_console", None)
+                if console is not None:
+                    console.print(
+                        f"[red]⎿  denied by rule[/red] [bold]{decision.rule.source}[/bold]",
+                        highlight=False,
+                    )
+                return False
+
+        # Step 2: PreToolUse user hooks. A hook returning
+        # ``continue=false`` blocks; a hook rewriting args silently
+        # mutates the dict (callers passed it by reference).
+        if hooks_enabled and hook_specs:
+            outcome = run_hooks(
+                hook_specs,
+                event="PreToolUse",
+                tool_name=name,
+                args=_args or {},
+                session_id=getattr(session, "session_id", ""),
+                enabled=True,
+            )
+            if outcome.block:
+                console = getattr(session, "_console", None)
+                if console is not None:
+                    console.print(
+                        f"[red]⎿  blocked by hook:[/red] {outcome.reason}",
+                        highlight=False,
+                    )
+                return False
+            if outcome.mutated_args is not None:
+                _args.clear()
+                _args.update(outcome.mutated_args)
+
+        # Step 3: declarative allow rules (matched but not denied) and
+        # the legacy LOW_RISK fast path. Both auto-approve.
+        if policy is not None and not policy.is_empty():
+            decision = policy.decide(name, _args or {})
+            if decision.verdict is Verdict.ALLOW:
+                return True
         if name in _LOW_RISK:
             return True
-        # Medium-risk: surface a console prompt when one is available,
-        # otherwise auto-approve (test path; the test would have
-        # supplied its own cache mode if it cared about gating).
+
+        # Step 4: medium-risk ASK path — surface a console prompt when
+        # one is available, otherwise default-open for headless runs.
         console = getattr(session, "_console", None)
         if console is None:
             return True
@@ -2538,33 +2848,35 @@ def _chat_with_tool_loop(
                 )
             )
         except Exception:
-            # Non-TTY console / closed stdin / etc. — default open.
-            # The user can flip the cache to ``strict`` via
-            # ``/tools mode strict`` if they want hard gating.
             return True
 
     def _render(event: ToolEvent) -> None:
+        from .tool_render import (
+            paint_call,
+            paint_denied,
+            paint_limit,
+            paint_result,
+        )
+
         console = getattr(session, "_console", None)
+
+        def _emit(paint) -> None:
+            if console is not None:
+                for line in paint.rich_lines:
+                    console.print(line, highlight=False)
+            else:
+                for line in paint.plain_lines:
+                    print(line)
+
         if event.kind == "call":
-            label = f"[dim]→[/] [bold cyan]{event.tool_name}[/]"
-            if console is not None:
-                arg_preview = _short_arg_preview(event.args)
-                console.print(f"{label} {arg_preview}", highlight=False)
-            else:
-                # Plain stdout line for piped/test runs. ANSI-free so
-                # ``lyra | grep tool=`` still works.
-                print(f"  → tool={event.tool_name} args={event.args}")
+            arg_preview = _short_arg_preview(event.args)
+            _emit(paint_call(event.tool_name, arg_preview))
         elif event.kind == "result":
-            tag = "ok" if not event.is_error else "err"
-            if console is not None:
-                snippet = _truncate(event.output, 240)
-                colour = "green" if not event.is_error else "red"
-                console.print(
-                    f"[dim]   {tag}[/] [{colour}]{snippet}[/]",
-                    highlight=False,
-                )
-            else:
-                print(f"  ← {tag}={_truncate(event.output, 240)!r}")
+            paint, full = paint_result(
+                event.output, is_error=bool(event.is_error)
+            )
+            session._last_tool_output = full
+            _emit(paint)
             _emit_lifecycle(
                 session,
                 "tool_call",
@@ -2576,21 +2888,9 @@ def _chat_with_tool_loop(
                 },
             )
         elif event.kind == "denied":
-            if console is not None:
-                console.print(
-                    f"[yellow]   denied:[/] {event.tool_name} ({event.reason})",
-                    highlight=False,
-                )
-            else:
-                print(f"  × denied={event.tool_name} reason={event.reason}")
+            _emit(paint_denied(event.tool_name, event.reason or ""))
         elif event.kind == "limit_reached":
-            if console is not None:
-                console.print(
-                    f"[yellow]   tool-loop budget reached:[/] {event.reason}",
-                    highlight=False,
-                )
-            else:
-                print(f"  ! limit={event.reason}")
+            _emit(paint_limit(event.reason or ""))
 
     def _on_usage(p: Any) -> None:
         _bill_turn(session, p)
@@ -2653,11 +2953,44 @@ def _short_arg_preview(args: dict[str, Any], *, limit: int = 80) -> str:
 
 
 def _truncate(text: str, limit: int) -> str:
-    """Length-cap ``text`` with an ellipsis suffix; collapse newlines."""
-    flat = text.replace("\n", "↵ ")
+    """Length-cap ``text`` with an ellipsis suffix; collapse newlines.
+
+    Multi-line tool output is flattened with a middle-dot separator
+    (``·``) rather than the literal ``↵`` Unicode return symbol —
+    on screen the dot reads as a clean structural separator while
+    ``↵`` looks like a debugging escape sequence leaked into the UI.
+    """
+    flat = text.replace("\n", " · ")
     if len(flat) <= limit:
         return flat
     return flat[: max(limit - 1, 1)] + "…"
+
+
+def _format_tool_output(output: str, *, max_lines: int = 3, max_line_width: int = 200) -> tuple[str, str]:
+    """Claude-Code-style collapsed view of tool output.
+
+    Returns ``(collapsed, full)``:
+
+    * ``collapsed`` — the first ``max_lines`` lines plus a
+      ``"… +N lines (ctrl+o to expand)"`` footer when truncated. Each
+      line is also length-capped at ``max_line_width`` so a long
+      single line can't blow out the panel.
+    * ``full`` — the un-truncated original text, stashed on the
+      session so ``Ctrl+O`` can dump it on demand.
+    """
+    full = output or ""
+    lines = full.rstrip("\n").split("\n")
+    shown: list[str] = []
+    for ln in lines[:max_lines]:
+        if len(ln) > max_line_width:
+            ln = ln[: max_line_width - 1] + "…"
+        shown.append(ln)
+    remainder = len(lines) - max_lines
+    if remainder > 0:
+        shown.append(f"… +{remainder} lines (ctrl+o to expand)")
+    if not shown:
+        shown = ["(empty)"]
+    return "\n".join(shown), full
 
 
 def _bill_turn(session: InteractiveSession, provider: Any) -> None:
@@ -2760,7 +3093,9 @@ def _stream_chat_to_console(
     buffer: list[str] = []
 
     def render_panel() -> Any:
-        return _out.chat_renderable("".join(buffer), mode=mode_for_panel)
+        return _out.chat_renderable(
+            "".join(buffer), mode=mode_for_panel, streaming=True
+        )
 
     try:
         with Live(
@@ -2788,6 +3123,19 @@ def _stream_chat_to_console(
                 buffer.append(f"\n\n[stream interrupted: {err_line}]")
                 live.update(render_panel())
                 return False, err_line
+            # Successful completion: swap the streaming Text panel for
+            # a Markdown-rendered one so headings, fenced code, and
+            # GFM tables actually format. During the loop we used
+            # ``streaming=True`` to keep half-formed fences from
+            # twitching; now that the buffer is final, render it
+            # properly as the last Live frame.
+            final_text = "".join(buffer)
+            if final_text.strip():
+                live.update(
+                    _out.chat_renderable(
+                        final_text, mode=mode_for_panel, streaming=False
+                    )
+                )
     except Exception as exc:  # pragma: no cover — Live setup failure
         return False, f"streaming render failed: {exc}"
 
@@ -3057,8 +3405,6 @@ def _cmd_status(session: InteractiveSession, _args: str) -> CommandResult:
         [
             f"mode:        {session.mode}",
             f"model:       {session.model}",
-            f"  fast slot: {getattr(session, 'fast_model', '(unset)')}",
-            f"  smart slot:{getattr(session, 'smart_model', '(unset)')}",
             f"repo:        {session.repo_root}",
             f"turn:        {session.turn}",
             f"cost:        ${session.cost_usd:.2f}",
@@ -3109,45 +3455,50 @@ def _cmd_mode(session: InteractiveSession, args: str) -> CommandResult:
     """``/mode`` — show or set the active interactive mode.
 
     Forms:
-      * ``/mode``            — print the current mode name.
+      * ``/mode``            — print the current mode (short display
+        label, with the canonical permission-flavoured ID in parens).
       * ``/mode list``       — show all four modes with one-line blurbs.
       * ``/mode toggle``     — advance through the Tab cycle.
-      * ``/mode <name>``     — switch to ``<name>`` (edit_automatically |
-        ask_before_edits | plan_mode | auto_mode).
-      * ``/mode <legacy>``   — accept any prior taxonomy name (v3.2:
-        agent / plan / debug / ask; pre-v3.2: build / run / explore /
-        retro) and remap to the canonical v3.6 mode with a one-line
-        "renamed in v3.6" notice so a user with old muscle memory
-        doesn't hit a dead end.
+      * ``/mode <name>``     — switch to ``<name>``. Both the short
+        labels (``agent`` / ``plan`` / ``ask`` / ``auto``) and the
+        canonical IDs (``edit_automatically`` / ``plan_mode`` /
+        ``ask_before_edits`` / ``auto_mode``) work; the dispatcher
+        treats the short labels as first-class, not as legacy aliases.
+      * ``/mode <pre-v3.2>`` — pre-v3.2 names (``build`` / ``run`` /
+        ``explore`` / ``retro``) are still accepted silently for
+        muscle-memory continuity.
     """
     from .keybinds import cycle_mode
 
     raw = args.strip().lower()
     if not raw:
-        return CommandResult(output=f"current mode: {session.mode}")
+        return CommandResult(
+            output=(
+                f"current mode: {display_mode(session.mode)} "
+                f"({session.mode})"
+            )
+        )
 
     if raw == "list":
         lines = ["available modes:"]
         for name, blurb in _MODE_BLURBS:
             marker = "●" if name == session.mode else " "
-            lines.append(f"  {marker} {name:<20}  {blurb}")
+            label = display_mode(name)
+            lines.append(f"  {marker} {label:<6} {name:<20}  {blurb}")
         return CommandResult(output="\n".join(lines))
 
     if raw == "toggle":
         previous = session.mode
         cycle_mode(session)
         return CommandResult(
-            output=f"mode: {previous} → {session.mode}",
+            output=(
+                f"mode: {display_mode(previous)} → "
+                f"{display_mode(session.mode)} ({session.mode})"
+            ),
             new_mode=session.mode,
         )
 
     target = _LEGACY_MODE_REMAP.get(raw, raw)
-    rename_notice = ""
-    if target != raw:
-        rename_notice = (
-            f" [{raw!r} was renamed to {target!r} in v3.6.0 to match "
-            "the new permission-flavoured mode taxonomy]"
-        )
 
     if target not in _VALID_MODES:
         return CommandResult(
@@ -3195,7 +3546,10 @@ def _cmd_mode(session: InteractiveSession, args: str) -> CommandResult:
             posture_note = " [permission mode → strict]"
 
     return CommandResult(
-        output=f"mode: {target}{rename_notice}{extra}{posture_note}",
+        output=(
+            f"mode: {display_mode(target)} ({target})"
+            f"{extra}{posture_note}"
+        ),
         new_mode=target,
     )
 
@@ -3224,85 +3578,120 @@ def _propagate_permission_mode(session: InteractiveSession, perm: str) -> None:
 
 
 def _cmd_model(session: InteractiveSession, args: str) -> CommandResult:
-    """``/model`` - inspect or pin the active model + small/smart slots.
+    """``/model`` — open the picker, list providers, or pin a slug directly.
 
     Forms accepted:
 
-    * ``/model`` - print the current backend pin plus the fast/smart
-      slot values (the small/smart split introduced in v2.7.1).
-    * ``/model list`` (or ``ls``) - delegate to the configured-providers
+    * ``/model`` — open the Claude-Code-style full-screen picker.
+    * ``/model list`` / ``/model ls`` — delegate to the configured-providers
       table (same as ``/models``).
-    * ``/model fast`` / ``/model smart`` - run the next chat turn
-      against the named slot. Equivalent to flipping the role pin
-      manually until the user types another ``/model …``.
-    * ``/model fast=<slug>`` / ``/model smart=<slug>`` - re-pin the
-      named slot to ``<slug>`` (any alias the registry knows about,
-      e.g. ``haiku``, ``opus``, ``deepseek-v4-pro``, ``gpt-5``).
-    * ``/model <kind>`` - legacy backward-compatible behaviour: pin
-      the backend (``anthropic``, ``deepseek``, ``mock``, …).
-
-    Slot pins persist for the lifetime of the REPL; future runs read
-    them from ``InteractiveSession`` defaults unless ``lyra connect``
-    or settings.json overrides them.
+    * ``/model <slug>`` — pin the active model directly (``haiku``,
+      ``opus-4.7``, ``gpt-5.5``, ``deepseek-reasoner``, …). Any alias
+      registered in :data:`lyra_core.providers.aliases.DEFAULT_ALIASES`
+      is accepted.
     """
     target = args.strip()
     if not target:
-        lines = [
-            f"current model: {session.model}",
-            f"  fast slot:   {getattr(session, 'fast_model', '(unset)')}",
-            f"  smart slot:  {getattr(session, 'smart_model', '(unset)')}",
-            "",
-            "Tip: /model fast=<slug> or /model smart=<slug> to repin a slot.",
-        ]
-        return CommandResult(output="\n".join(lines))
+        # Lazy import so a headless caller (no TTY, prompt_toolkit
+        # unavailable) still falls back to the text summary below.
+        try:
+            from .dialog_model import run_model_dialog
+
+            chosen = run_model_dialog(getattr(session, "model", None))
+        except Exception:
+            chosen = None
+
+        if chosen:
+            session.model = chosen
+            session._llm_provider = None
+            session._llm_provider_kind = None
+            return CommandResult(output=f"model set to: {chosen}")
+
+        return CommandResult(output=f"current model: {session.model}")
+
     if target.lower() in {"list", "ls"}:
         return CommandResult(output=session._cmd_model_list(""))
 
-    # Slot operations: ``fast``, ``smart``, ``fast=<slug>``, ``smart=<slug>``.
-    head, _, tail = target.partition("=")
-    head_norm = head.strip().lower()
-    if head_norm in {"fast", "smart"}:
-        slug = tail.strip()
-        if slug:
-            attr = "fast_model" if head_norm == "fast" else "smart_model"
-            setattr(session, attr, slug)
-            # Invalidate the cached LLMProvider so the next chat turn
-            # rebuilds with the freshly-pinned slot. Subagent factories
-            # build their own per-spawn provider so they're unaffected.
-            session._llm_provider = None
-            session._llm_provider_kind = None
-            return CommandResult(output=f"{head_norm} slot set to: {slug}")
-        # ``/model fast`` / ``/model smart`` without ``=`` swaps the
-        # ACTIVE slot for this turn — handy when the user wants to
-        # nudge a single tricky question into the smart lane without
-        # paying the cost on every subsequent turn. We implement it as
-        # a one-shot env stamp; the next plain-text turn picks it up
-        # via :func:`_apply_role_model`.
-        slot = getattr(session, "smart_model" if head_norm == "smart" else "fast_model", "")
-        if not slot:
-            return CommandResult(
-                output=f"{head_norm} slot is empty; pin it first with /model {head_norm}=<slug>"
-            )
-        applied = _stamp_model_env(slot)
-        prov = getattr(session, "_llm_provider", None)
-        if prov is not None and applied:
-            try:
-                prov.model = applied
-            except Exception:
-                pass
-        return CommandResult(
-            output=(
-                f"next turn will use {head_norm} slot: {slot}"
-                + (f" (resolved → {applied})" if applied and applied != slot else "")
-            )
-        )
+    # Resolve the alias to its canonical slug + provider so we can
+    # ask for a key when the provider has no credentials yet. Both
+    # helpers return the input unchanged for unknown aliases, so a
+    # raw provider-specific slug ("local-only-model") still works.
+    from lyra_core.providers.aliases import provider_key_for, resolve_alias
 
+    canonical = resolve_alias(target) or target
+    provider = provider_key_for(target) or provider_key_for(canonical)
+
+    extra = ""
+    if provider:
+        extra = _ensure_provider_credentials_or_prompt(provider)
+
+    # Preserve the *user-typed* alias as the active model name. The
+    # toolbar, prompt, banner and bottom bar all read ``session.model``
+    # — collapsing it to the canonical slug here meant
+    # ``/model deepseek-v4-pro`` immediately rendered as
+    # ``deepseek-reasoner`` and the user lost the friendly slot
+    # syntax they typed. ``build_llm`` resolves the alias on its own
+    # via ``_route_kind_via_alias``, so routing stays correct.
     session.model = target
     # Invalidate the cached LLMProvider so the next plain-text turn
     # rebuilds against the newly-selected model.
     session._llm_provider = None
     session._llm_provider_kind = None
-    return CommandResult(output=f"model set to: {target}")
+    suffix = f" → {canonical}" if canonical != target else ""
+    return CommandResult(output=f"model set to: {target}{suffix}{extra}")
+
+
+def _ensure_provider_credentials_or_prompt(provider: str) -> str:
+    """If *provider* has no key in env / auth.json and we're in a TTY,
+    prompt the user to paste one and persist it via the auth store.
+
+    Returns a one-line annotation to append to the ``/model`` output:
+    ``" [saved deepseek key to ~/.lyra/auth.json]"`` on success,
+    ``" [warning: …]"`` when the user skipped, ``""`` when nothing
+    needed to happen.
+    """
+    import os
+    import sys
+
+    from lyra_cli.llm_factory import (
+        provider_env_var,
+        provider_has_credentials,
+    )
+
+    if provider_has_credentials(provider):
+        return ""
+    env_name = provider_env_var(provider)
+    if env_name is None:
+        # Provider not in the saveable map (e.g. ``vertex`` uses ADC,
+        # ``bedrock`` uses the boto3 chain). Nothing to prompt for.
+        return ""
+    if not (sys.stdin.isatty() and sys.stdout.isatty()):
+        return (
+            f" [warning: {provider} has no key set; "
+            f"export {env_name} or run `lyra connect {provider}`]"
+        )
+    try:
+        from lyra_core.auth.store import save as _save_key
+
+        from .dialog_apikey import prompt_api_key
+    except Exception:
+        return ""
+    try:
+        key = prompt_api_key(provider)
+    except Exception:
+        key = ""
+    key = (key or "").strip()
+    if not key:
+        return (
+            f" [skipped — set {env_name} or run "
+            f"`lyra connect {provider}` later]"
+        )
+    try:
+        _save_key(provider, key)
+    except Exception as exc:
+        return f" [could not save key: {exc}]"
+    os.environ[env_name] = key
+    return f" [saved {provider} key to ~/.lyra/auth.json]"
 
 
 def _cmd_models(session: InteractiveSession, args: str) -> CommandResult:
@@ -3368,6 +3757,34 @@ def _cmd_exit(_session: InteractiveSession, _args: str) -> CommandResult:
 
 def _cmd_clear(_session: InteractiveSession, _args: str) -> CommandResult:
     return CommandResult(output="", clear_screen=True)
+
+
+def _cmd_keybindings(session: InteractiveSession, _args: str) -> CommandResult:
+    """``/keybindings`` — print the cheatsheet (slash form of ``Alt-?``)."""
+    from .keybindings_help import show_keybindings_help
+
+    console = getattr(session, "_console", None)
+    if console is not None:
+        show_keybindings_help(console)
+        return CommandResult(output="")
+    # Headless / non-TTY fallback: render to a string via a fresh
+    # Console captured into a buffer so callers (tests, piped output)
+    # still see the table.
+    import io
+
+    from rich.console import Console as _Console
+
+    buf = io.StringIO()
+    show_keybindings_help(_Console(file=buf, force_terminal=False, width=100))
+    return CommandResult(output=buf.getvalue())
+
+
+def _cmd_new(session: InteractiveSession, _args: str) -> CommandResult:
+    """``/new`` — start a fresh chat (slash form of ``Ctrl-N``)."""
+    from . import keybinds as _keybinds
+
+    toast = _keybinds.new_chat(session)
+    return CommandResult(output=toast, clear_screen=True)
 
 
 def _cmd_history(session: InteractiveSession, args: str) -> CommandResult:
@@ -4016,32 +4433,31 @@ def _resolve_session_reference(
 
 
 def _cmd_resume(session: InteractiveSession, args: str) -> CommandResult:
-    """Restore a previously saved session by id (Wave-C Task 1).
+    """Restore a previously saved session.
 
-    v3.2.0 (Phase L): now also copies ``_chat_history``, ``history``,
-    ``model``, ``fast_model``, and ``smart_model`` from the restored
-    snapshot. Pre-v3.2 the LLM-side conversation context was rebuilt
-    inside :meth:`InteractiveSession.resume_session` but only landed
-    on the *restored* object — the live session that the REPL was
-    holding never got it, so the model "forgot" the conversation
-    on the next turn. Symmetrically the model slots never travelled
-    across, which meant resuming a session that was running on
-    ``deepseek-v4-pro`` would silently switch to ``auto`` and the
-    pricing column would lie. Both bugs are now fixed in lock-step.
+    Three call shapes:
 
-    The argument may be:
-
-    * a full session id — ``/resume sess-20260427-1234``
-    * the literal ``latest`` (or empty) — resumes the most recently
-      modified session under the current repo
-    * a unique prefix of an id — ``/resume sess-20260427`` if there
-      is exactly one match
+    * ``/resume`` (no args, TTY) — opens the Claude-Code-style picker
+      with every session listed; Enter resumes the one under the
+      cursor. ``Esc`` cancels and leaves the live session untouched.
+    * ``/resume <id>`` — direct restore (back-compat). Accepts a full
+      session id, the literal ``latest``, or a unique prefix.
+    * ``/resume`` (no args, no TTY) — defaults to ``latest`` so
+      piped/CI runs keep working without an interactive picker.
     """
     from .sessions_store import SessionsStore
 
     sessions_root = _resolve_sessions_root(session)
+    raw = args.strip()
+
+    if not raw and _stdin_is_tty():
+        chosen = _launch_sessions_picker(sessions_root)
+        if chosen is None:
+            return CommandResult(output="resume: cancelled.")
+        raw = chosen  # fall through to the resolve+restore path below
+
     target = _resolve_session_reference(
-        args.strip() or "latest", sessions_root, fallback=session.session_id
+        raw or "latest", sessions_root, fallback=session.session_id
     )
     restored = InteractiveSession.resume_session(
         session_id=target,
@@ -4076,17 +4492,13 @@ def _cmd_resume(session: InteractiveSession, args: str) -> CommandResult:
     # And the user's REPL input history — useful for ↑/↓ navigation.
     if getattr(restored, "history", None):
         session.history = list(restored.history)
-    # And the model slots so pricing + the banner stay accurate. We
-    # only adopt the restored model when it was explicitly recorded
-    # (not when it's the default "auto") so a deliberate
+    # And the model so pricing + the banner stay accurate. We only
+    # adopt the restored model when it was explicitly recorded (not
+    # when it's the default "auto") so a deliberate
     # ``lyra --model anthropic --resume <id>`` still wins over the
     # snapshot's persisted choice.
     if restored.model and restored.model != "auto":
         session.model = restored.model
-    if getattr(restored, "fast_model", None):
-        session.fast_model = restored.fast_model
-    if getattr(restored, "smart_model", None):
-        session.smart_model = restored.smart_model
     # v3.0.0: a resumed session is, by definition, the post-turn
     # state of *another* timeline — any snapshots sitting on the
     # live session's redo stack belonged to the pre-resume timeline
@@ -4135,7 +4547,13 @@ def _cmd_fork(session: InteractiveSession, args: str) -> CommandResult:
 
 
 def _cmd_sessions(session: InteractiveSession, _args: str) -> CommandResult:
-    """Real `/sessions`: enumerate disk-backed sessions (Wave-C Task 2)."""
+    """``/sessions`` — list (or pick) saved sessions on disk.
+
+    On a TTY the bare command opens the same Claude-Code-style picker
+    ``/resume`` uses; arrow-key to a row and Enter to resume. On a
+    non-TTY (piped / CI) we keep the legacy plaintext list so scripts
+    that grep the output continue to work.
+    """
     from .sessions_store import SessionsStore
 
     sessions_root = _resolve_sessions_root(session)
@@ -4148,6 +4566,17 @@ def _cmd_sessions(session: InteractiveSession, _args: str) -> CommandResult:
             ),
             renderable=_out.sessions_renderable(sessions_root),
         )
+
+    if _stdin_is_tty():
+        chosen = _launch_sessions_picker(sessions_root)
+        if chosen is None:
+            return CommandResult(
+                output="sessions: cancelled.",
+                renderable=_out.sessions_renderable(sessions_root),
+            )
+        # Re-enter the resume path so state warps consistently.
+        return _cmd_resume(session, chosen)
+
     lines = [f"saved sessions under {sessions_root}:"]
     for m in metas:
         label = f"  • {m.session_id}  ({m.turn_count} turns)"
@@ -4689,6 +5118,1292 @@ def _cmd_export(session: InteractiveSession, args: str) -> CommandResult:
     )
 
 
+def _last_assistant_text(session: InteractiveSession) -> Optional[str]:
+    """Return the most recent assistant message body, or None if absent.
+
+    Reads the in-memory ``_chat_history`` rather than the on-disk JSONL
+    so ``/copy`` reflects what the user just saw on screen, even if the
+    sessions store hasn't flushed yet. Walks from the tail because the
+    history is append-only and the assistant turn we care about is
+    always the last one with role ``assistant``.
+    """
+    history = list(getattr(session, "_chat_history", []) or [])
+    for msg in reversed(history):
+        role = getattr(msg, "role", None) or (
+            isinstance(msg, dict) and msg.get("role")
+        )
+        if role != "assistant":
+            continue
+        content = getattr(msg, "content", None)
+        if content is None and isinstance(msg, dict):
+            content = msg.get("content")
+        if isinstance(content, str) and content.strip():
+            return content
+    return None
+
+
+def _nth_assistant_text(session: InteractiveSession, n: int) -> Optional[str]:
+    """Return the N-th most recent assistant reply (1 = latest)."""
+    if n < 1:
+        return None
+    history = list(getattr(session, "_chat_history", []) or [])
+    seen = 0
+    for msg in reversed(history):
+        role = getattr(msg, "role", None) or (
+            isinstance(msg, dict) and msg.get("role")
+        )
+        if role != "assistant":
+            continue
+        seen += 1
+        if seen == n:
+            content = getattr(msg, "content", None)
+            if content is None and isinstance(msg, dict):
+                content = msg.get("content")
+            if isinstance(content, str) and content.strip():
+                return content
+            return None
+    return None
+
+
+def _cmd_copy(session: InteractiveSession, args: str) -> CommandResult:
+    """``/copy [N] [--write PATH]`` — copy the last assistant reply.
+
+    Without arguments: copies the most recent reply to the system
+    clipboard via :mod:`.clipboard`. ``/copy 2`` reaches one step
+    further back, ``/copy 3`` two, etc. ``--write FILE`` (or its short
+    form ``-w FILE``) skips the clipboard entirely and writes to disk —
+    useful over SSH where the clipboard backend is unreachable.
+    """
+    from .clipboard import copy_to_clipboard
+
+    tokens = args.split()
+    n = 1
+    write_path: Optional[Path] = None
+    iter_tokens = iter(tokens)
+    for tok in iter_tokens:
+        if tok in ("--write", "-w"):
+            try:
+                write_path = Path(next(iter_tokens)).expanduser()
+            except StopIteration:
+                return CommandResult(
+                    output="usage: /copy [N] [--write PATH]",
+                )
+            continue
+        if tok.isdigit():
+            n = max(1, int(tok))
+            continue
+        return CommandResult(output=f"/copy: unrecognised argument {tok!r}")
+
+    text = _nth_assistant_text(session, n)
+    if not text:
+        return CommandResult(
+            output=(
+                f"/copy: no assistant reply at position {n} "
+                f"(history has {sum(1 for m in session._chat_history if getattr(m, 'role', None) == 'assistant')} replies)."
+            )
+        )
+
+    if write_path is not None:
+        try:
+            write_path.parent.mkdir(parents=True, exist_ok=True)
+            write_path.write_text(text, encoding="utf-8")
+        except OSError as exc:
+            return CommandResult(output=f"/copy: write failed: {exc}")
+        return CommandResult(
+            output=f"wrote {len(text)} chars to {write_path}"
+        )
+
+    result = copy_to_clipboard(text)
+    if result.ok:
+        return CommandResult(
+            output=(
+                f"copied {len(text)} chars via {result.backend} "
+                f"(reply #{n})."
+            )
+        )
+    return CommandResult(
+        output=(
+            f"/copy: clipboard unavailable ({result.detail}). "
+            f"Try /copy {n} --write FILE to dump to disk instead."
+        )
+    )
+
+
+def _cmd_usage(session: InteractiveSession, _args: str) -> CommandResult:
+    """``/usage`` — consolidated cost + session-stats panel.
+
+    Mirrors Claude Code's v2.1.x consolidation: instead of asking users
+    to remember which of ``/cost``, ``/stats``, ``/insights`` shows the
+    field they want, ``/usage`` renders both cost (dollars / tokens /
+    budget cap) and session-shape metrics (turns, slash count, mode,
+    deep-think) in one panel. The two underlying commands stay around
+    so existing scripts and habits don't break.
+    """
+    cost_result = _cmd_cost(session, "")
+    stats_result = _cmd_stats(session, "")
+    plain = (cost_result.output or "") + "\n\n" + (stats_result.output or "")
+    return CommandResult(
+        output=plain.strip(),
+        renderable=_out.usage_renderable(
+            cost_usd=session.cost_usd,
+            tokens=session.tokens_used,
+            turns=session.turn,
+            budget_cap_usd=session.budget_cap_usd,
+            slash=sum(1 for h in session.history if h.startswith("/")),
+            bash=sum(1 for h in session.history if h.startswith("!")),
+            files=sum(1 for h in session.history if h.startswith("@")),
+            mode=session.mode,
+            deep_think=session.deep_think,
+        ),
+    )
+
+
+def _cmd_hooks(session: InteractiveSession, _args: str) -> CommandResult:
+    """``/hooks`` — show every configured user hook + master enable flag.
+
+    Surfaces what :mod:`lyra_cli.policy_loader` would dispatch on the
+    next tool call. The output is intentionally read-only — editing
+    happens via ``$EDITOR <repo>/.lyra/settings.json`` because hook
+    bodies are shell commands and a Rich form would be a footgun for
+    arguments containing quotes / pipes.
+    """
+    try:
+        from ..policy_loader import load_hooks
+    except Exception as exc:
+        return CommandResult(output=f"/hooks: loader unavailable ({exc})")
+    specs, enabled = load_hooks(session.repo_root)
+    if not specs:
+        return CommandResult(
+            output=(
+                "no user hooks configured. Drop a hooks block into "
+                f"{session.repo_root}/.lyra/settings.json or ~/.lyra/"
+                'settings.json with the shape: {"enable_hooks": true, '
+                '"hooks": {"PreToolUse": [{"matcher": "Bash(rm *)", '
+                '"command": "..."}]}}'
+            )
+        )
+    lines = [f"hooks (master: {'on' if enabled else 'OFF'})"]
+    for spec in specs:
+        lines.append(
+            f"  [{spec.event:<14}] {spec.matcher:<30} → {spec.command}"
+        )
+    if not enabled:
+        lines.append(
+            "  (hooks parsed but enable_hooks is false — set it to true "
+            "to activate)"
+        )
+    return CommandResult(output="\n".join(lines))
+
+
+def _cmd_permissions(session: InteractiveSession, args: str) -> CommandResult:
+    """``/permissions`` — view (or edit) the declarative policy grammar.
+
+    Forms:
+      * ``/permissions``      — print loaded allow/ask/deny rules
+      * ``/permissions edit`` — open ``<repo>/.lyra/settings.json`` in
+        ``$EDITOR``; cache invalidates on next tool call
+      * ``/permissions reload`` — drop the per-session cache so the
+        next tool call re-reads from disk
+
+    Editing is via ``$EDITOR`` rather than an in-REPL form because
+    rule literals contain glob characters that interactive widgets
+    handle poorly (Rich prompts and prompt_toolkit Buffers both
+    eat unescaped braces); a plain text edit is the path of least
+    surprise.
+    """
+    sub = args.strip().lower()
+    settings_path = session.repo_root / ".lyra" / "settings.json"
+
+    if sub == "edit":
+        import subprocess as _subprocess  # local — keeps top-level imports lean
+
+        editor = os.environ.get("VISUAL") or os.environ.get("EDITOR") or "vi"
+        settings_path.parent.mkdir(parents=True, exist_ok=True)
+        if not settings_path.exists():
+            settings_path.write_text(
+                '{\n  "permissions": {\n    "allow": [],\n    "ask": [],\n'
+                '    "deny": []\n  }\n}\n',
+                encoding="utf-8",
+            )
+        try:
+            _subprocess.call([editor, str(settings_path)])
+        except (FileNotFoundError, OSError) as exc:
+            return CommandResult(
+                output=f"/permissions edit: launch failed ({exc})"
+            )
+        # Drop cache so next tool call re-reads.
+        if hasattr(session, "_policy_hooks_cache"):
+            session._policy_hooks_cache = None
+        return CommandResult(
+            output=(
+                f"opened {settings_path}; "
+                f"changes apply on the next tool call."
+            )
+        )
+
+    if sub == "reload":
+        if hasattr(session, "_policy_hooks_cache"):
+            session._policy_hooks_cache = None
+        return CommandResult(
+            output="permission cache dropped; settings re-read on next tool call."
+        )
+
+    try:
+        from ..policy_loader import load_policy
+    except Exception as exc:
+        return CommandResult(output=f"/permissions: loader unavailable ({exc})")
+
+    policy = load_policy(session.repo_root)
+    if policy.is_empty():
+        return CommandResult(
+            output=(
+                "no user rules. Default policy: read-only tools auto-allow, "
+                "writes/exec ask. Add rules with /permissions edit "
+                f"({settings_path})."
+            )
+        )
+    lines = ["declarative permission policy:"]
+    for label, bucket in (
+        ("DENY", policy.deny),
+        ("ASK",  policy.ask),
+        ("ALLOW", policy.allow),
+    ):
+        if not bucket:
+            continue
+        lines.append(f"  {label}:")
+        for rule in bucket:
+            lines.append(f"    - {rule.source}")
+    lines.append(f"  (precedence: deny → ask → allow, first match wins)")
+    return CommandResult(output="\n".join(lines))
+
+
+def _cmd_plan(session: InteractiveSession, _args: str) -> CommandResult:
+    """``/plan`` — one-shot enter plan mode.
+
+    Equivalent to ``/mode plan`` but matches Claude Code's muscle
+    memory. Idempotent: calling it from inside plan mode is a no-op
+    (no warning, just a confirmation toast).
+    """
+    if session.mode == "plan_mode":
+        return CommandResult(output="already in plan mode.", new_mode="plan_mode")
+    session.mode = "plan_mode"
+    return CommandResult(
+        output=f"mode: {display_mode('plan_mode')} (plan_mode)",
+        new_mode="plan_mode",
+    )
+
+
+def _cmd_recap(session: InteractiveSession, _args: str) -> CommandResult:
+    """``/recap`` — terse summary of recent activity for re-orientation.
+
+    Walks the last few user turns from ``_turns_log`` so a session
+    resumed after a break (or a user staring at a 200-line scrollback)
+    can re-anchor in two seconds. Doesn't make an LLM call — that
+    would be a recap with a token bill, defeating the point. For the
+    LLM-summary form, fall through to ``/compact`` instead.
+    """
+    turns = list(getattr(session, "_turns_log", []) or [])[-5:]
+    if not turns:
+        return CommandResult(
+            output="no turns logged yet — recap is empty."
+        )
+    lines = [
+        f"recap · last {len(turns)} turn{'s' if len(turns) != 1 else ''}:",
+    ]
+    for snap in turns:
+        line = (snap.line or "").strip().splitlines()[0] if snap.line else ""
+        if len(line) > 70:
+            line = line[:69] + "…"
+        lines.append(f"  #{snap.turn:>3}  [{snap.mode:<18}] {line}")
+    if session.pending_task:
+        pending = session.pending_task[:80]
+        lines.append(f"pending task: {pending}")
+    return CommandResult(output="\n".join(lines))
+
+
+def _cmd_add_dir(session: InteractiveSession, args: str) -> CommandResult:
+    """``/add-dir <path>`` — widen the session's filesystem sandbox.
+
+    By default Lyra sandboxes file tools under ``session.repo_root``.
+    For multi-repo work (frontend + backend monorepos, library +
+    consumer pairs) the agent needs to see siblings. ``/add-dir``
+    appends to ``session.aux_repo_roots``; the chat-tools layer reads
+    that list and widens its allowed-path check accordingly.
+
+    Paths are resolved at registration time so ``cd`` in the user's
+    shell after they typed the command can't change which directory
+    is allowed.
+    """
+    raw = args.strip()
+    if not raw:
+        existing = list(getattr(session, "aux_repo_roots", []) or [])
+        if not existing:
+            return CommandResult(
+                output=(
+                    "no auxiliary directories. Usage: "
+                    "/add-dir <path-to-extra-repo-or-folder>"
+                )
+            )
+        lines = [f"aux directories ({len(existing)}):"]
+        for p in existing:
+            lines.append(f"  - {p}")
+        return CommandResult(output="\n".join(lines))
+
+    target = Path(raw).expanduser().resolve()
+    if not target.is_dir():
+        return CommandResult(
+            output=f"/add-dir: not a directory: {target}"
+        )
+    aux = list(getattr(session, "aux_repo_roots", []) or [])
+    if target in aux:
+        return CommandResult(
+            output=f"/add-dir: {target} already registered."
+        )
+    aux.append(target)
+    session.aux_repo_roots = aux  # type: ignore[attr-defined]
+    return CommandResult(
+        output=f"added {target} (now {len(aux)} aux director{'ies' if len(aux) != 1 else 'y'})."
+    )
+
+
+def _cmd_security_review(session: InteractiveSession, args: str) -> CommandResult:
+    """``/security-review [target]`` — focused vulnerability review.
+
+    Distinct from ``/review`` (general code-quality pass) — this one
+    pre-frames the target diff for OWASP-style attention: secrets,
+    injection, auth, path traversal, unbounded queries, missing
+    rate-limits. Wraps the existing review pipeline by injecting a
+    security-flavoured system prompt at dispatch time, so the
+    underlying agent sees the right prior even when the user typed a
+    one-word target.
+    """
+    target = args.strip() or "HEAD"
+    framed = (
+        "/review "
+        f"{target} "
+        "--focus security "
+        "--lens 'OWASP Top 10: hardcoded secrets, SQL/XSS injection, "
+        "unsafe deserialisation, missing authn/authz, path traversal, "
+        "unbounded queries, missing rate limiting, error messages "
+        "leaking sensitive data.'"
+    )
+    return session.dispatch(framed)
+
+
+def _cmd_feedback(session: InteractiveSession, args: str) -> CommandResult:
+    """``/feedback`` (alias ``/bug``) — print the issue URL + recent context.
+
+    Doesn't open a browser (Lyra runs over SSH and headless terminals
+    routinely) — instead prints the URL the user can copy. When
+    ``--copy`` is passed, also drops the last 3 turns to the clipboard
+    so the bug report has reproducible context attached.
+    """
+    body = args.strip().lower()
+    url = "https://github.com/lyra-research/lyra/issues/new"
+    lines = [
+        f"file an issue: {url}",
+        "  include /version, /doctor output, and the last few turns "
+        "(use /copy to grab the most recent reply).",
+    ]
+    if "--copy" in body:
+        try:
+            from .clipboard import copy_to_clipboard
+        except Exception:
+            return CommandResult(
+                output="\n".join(lines + ["(clipboard module unavailable)"])
+            )
+        recent = list(getattr(session, "_turns_log", []) or [])[-3:]
+        payload = "\n".join(
+            f"#{snap.turn} [{snap.mode}] {snap.line or ''}" for snap in recent
+        )
+        result = copy_to_clipboard(payload or "(no recent turns)")
+        if result.ok:
+            lines.append(f"  copied {len(payload)} chars of recent context.")
+        else:
+            lines.append(f"  clipboard unavailable: {result.detail}")
+    return CommandResult(output="\n".join(lines))
+
+
+def _cmd_statusline(session: InteractiveSession, args: str) -> CommandResult:
+    """``/statusline`` — show or set the bottom-toolbar format string.
+
+    With no args: print the current format. With a literal string:
+    persist it on the session (and on the next ``/save`` it lands in
+    settings.json). Reset with ``/statusline default``.
+
+    The format follows prompt_toolkit's HTML-ish syntax for
+    ``bottom_toolbar``; documenting the full grammar is out of scope
+    here, so the bare command also prints the current value as a
+    starting template the user can paste-edit.
+    """
+    raw = args.strip()
+    current = getattr(session, "statusline_format", None) or "(default)"
+    if not raw:
+        return CommandResult(
+            output=(
+                f"current statusline: {current}\n"
+                "  set with: /statusline <format>\n"
+                "  reset with: /statusline default"
+            )
+        )
+    if raw == "default":
+        session.statusline_format = None  # type: ignore[attr-defined]
+        return CommandResult(output="statusline reset to default.")
+    session.statusline_format = raw  # type: ignore[attr-defined]
+    return CommandResult(output=f"statusline format set to: {raw}")
+
+
+_PROMPT_COLOURS = {
+    "red", "blue", "green", "yellow", "purple", "orange", "pink", "cyan",
+    "white", "magenta", "default",
+}
+
+
+def _cmd_color(session: InteractiveSession, args: str) -> CommandResult:
+    """``/color [name|default]`` — tint the prompt-bar accent.
+
+    Accepts a small named-colour palette (matches CC's set). Bare
+    ``/color`` rotates pseudo-randomly through the palette using the
+    session id as seed so the same session reproduces the same
+    "random" pick on resume.
+    """
+    raw = args.strip().lower()
+    if not raw:
+        # Deterministic-pseudo-random: hash the session id mod palette.
+        choices = sorted(_PROMPT_COLOURS - {"default"})
+        seed = abs(hash(getattr(session, "session_id", "lyra"))) % len(choices)
+        raw = choices[seed]
+    if raw not in _PROMPT_COLOURS:
+        return CommandResult(
+            output=(
+                f"unknown colour {raw!r}; "
+                f"valid: {', '.join(sorted(_PROMPT_COLOURS))}"
+            )
+        )
+    if raw == "default":
+        session.prompt_color = None  # type: ignore[attr-defined]
+        return CommandResult(output="prompt colour reset to default.")
+    session.prompt_color = raw  # type: ignore[attr-defined]
+    return CommandResult(output=f"prompt colour: {raw}")
+
+
+def _cmd_fast(session: InteractiveSession, args: str) -> CommandResult:
+    """``/fast [on|off]`` — toggle the "fast Opus" posture.
+
+    Lyra doesn't ship a separate model variant for "fast"; we map it
+    to ``effort=low`` against the active provider, which is the
+    closest behavioural analogue (less internal deliberation, faster
+    end-to-end latency). Persists for the rest of the session unless
+    the user switches it off.
+    """
+    raw = args.strip().lower()
+    current = getattr(session, "fast_mode", False)
+    if raw in ("", "toggle"):
+        new = not current
+    elif raw in ("on", "true", "1"):
+        new = True
+    elif raw in ("off", "false", "0"):
+        new = False
+    else:
+        return CommandResult(output=f"/fast: expected on|off|toggle, got {raw!r}")
+    session.fast_mode = new  # type: ignore[attr-defined]
+    if new:
+        session.effort = "low"  # type: ignore[attr-defined]
+    return CommandResult(
+        output=f"fast mode: {'on' if new else 'off'}"
+        + (" (effort=low)" if new else "")
+    )
+
+
+def _cmd_focus(session: InteractiveSession, args: str) -> CommandResult:
+    """``/focus [on|off]`` — hide side panels, show only the chat.
+
+    Toggles ``session.focus_mode``; the renderer reads this flag and
+    skips the bottom toolbar / task panel / status bar when it's on.
+    Useful for screenshots, demos, and screen recordings where the
+    chrome is just visual noise.
+    """
+    raw = args.strip().lower()
+    current = getattr(session, "focus_mode", False)
+    if raw in ("", "toggle"):
+        new = not current
+    elif raw in ("on", "true", "1"):
+        new = True
+    elif raw in ("off", "false", "0"):
+        new = False
+    else:
+        return CommandResult(output=f"/focus: expected on|off|toggle, got {raw!r}")
+    session.focus_mode = new  # type: ignore[attr-defined]
+    return CommandResult(output=f"focus mode: {'on' if new else 'off'}")
+
+
+def _cmd_tui(session: InteractiveSession, args: str) -> CommandResult:
+    """``/tui [classic|smooth]`` — switch the rendering mode.
+
+    ``classic`` is the historical "redraw the whole panel each frame"
+    approach; ``smooth`` (default) uses prompt_toolkit's diff-based
+    repaint. Some terminals (older Windows consoles, certain SSH
+    multiplexers) flicker under smooth mode; ``classic`` trades a
+    little visual judder for guaranteed correct output. Persists on
+    the session field so the next ``/save`` captures it.
+    """
+    raw = args.strip().lower() or "toggle"
+    valid = {"classic", "smooth", "toggle"}
+    if raw not in valid:
+        return CommandResult(output=f"/tui: expected one of {sorted(valid)}")
+    current = getattr(session, "tui_mode", "smooth")
+    if raw == "toggle":
+        new = "classic" if current == "smooth" else "smooth"
+    else:
+        new = raw
+    session.tui_mode = new  # type: ignore[attr-defined]
+    return CommandResult(output=f"tui rendering: {new}")
+
+
+def _cmd_pr_comments(session: InteractiveSession, args: str) -> CommandResult:
+    """``/pr-comments [PR-number-or-URL]`` — fetch GitHub PR comments.
+
+    Auto-detects the PR for the current branch when called bare, by
+    asking ``gh pr view --json number``. Prints the comment list as a
+    readable table rather than dumping the JSON payload — operators
+    skim ``author: body`` faster than ``[object]``.
+    """
+    import subprocess as _sp
+
+    if not _which("gh"):
+        return CommandResult(
+            output="/pr-comments: needs the gh CLI on PATH. Install via https://cli.github.com"
+        )
+    target = args.strip()
+    if not target:
+        try:
+            view = _sp.run(
+                ["gh", "pr", "view", "--json", "number"],
+                capture_output=True, text=True, timeout=10,
+                cwd=str(session.repo_root),
+            )
+            if view.returncode != 0:
+                return CommandResult(
+                    output=(
+                        "/pr-comments: no PR detected for the current branch. "
+                        "Pass a PR number or URL explicitly."
+                    )
+                )
+            payload = json.loads(view.stdout)
+            target = str(payload.get("number") or "")
+        except (_sp.TimeoutExpired, json.JSONDecodeError, OSError) as exc:
+            return CommandResult(output=f"/pr-comments: gh failed: {exc}")
+    if not target:
+        return CommandResult(output="/pr-comments: usage: /pr-comments <PR>")
+    try:
+        proc = _sp.run(
+            ["gh", "pr", "view", target, "--json", "comments,reviews"],
+            capture_output=True, text=True, timeout=15,
+            cwd=str(session.repo_root),
+        )
+    except OSError as exc:
+        return CommandResult(output=f"/pr-comments: gh launch failed: {exc}")
+    if proc.returncode != 0:
+        err = (proc.stderr or "").strip()[:200]
+        return CommandResult(output=f"/pr-comments: gh exit={proc.returncode} {err}")
+    try:
+        data = json.loads(proc.stdout)
+    except json.JSONDecodeError:
+        return CommandResult(output="/pr-comments: gh returned non-JSON output")
+    lines = [f"PR #{target} comments:"]
+    for c in (data.get("comments") or []):
+        body = (c.get("body") or "").strip().splitlines()
+        first = body[0] if body else ""
+        if len(first) > 120:
+            first = first[:117] + "…"
+        lines.append(f"  💬  {c.get('author', {}).get('login', '?')}: {first}")
+    for r in (data.get("reviews") or []):
+        body = (r.get("body") or "").strip().splitlines()
+        first = body[0] if body else "(no body)"
+        if len(first) > 120:
+            first = first[:117] + "…"
+        state = r.get("state", "?")
+        lines.append(
+            f"  🔍 [{state}] "
+            f"{r.get('author', {}).get('login', '?')}: {first}"
+        )
+    if len(lines) == 1:
+        lines.append("  (no comments or reviews)")
+    return CommandResult(output="\n".join(lines))
+
+
+def _cmd_schedule(session: InteractiveSession, args: str) -> CommandResult:
+    """``/schedule`` — Claude-Code-style alias for the cron registry.
+
+    Lyra already has ``/cron`` for scheduled-prompt management; this
+    is the CC-canonical name that delegates to the same handler so
+    muscle-memory transfers without us re-implementing scheduling. Both
+    surfaces stay in sync because they call the same code path.
+    """
+    return _cmd_cron(session, args)
+
+
+def _cmd_sandbox(session: InteractiveSession, args: str) -> CommandResult:
+    """``/sandbox [on|off|toggle]`` — toggle filesystem-sandbox mode.
+
+    Distinct from ``/perm`` (permission_mode) — sandbox mode means
+    "tools that would write outside the repo root get refused, even
+    when the rule says allow". It's a *belt-and-suspenders* layer
+    on top of the permission grammar for paranoid CI runs.
+
+    The flag is read by the file-tool sandbox check at dispatch time;
+    flipping it mid-session takes effect on the next tool call.
+    """
+    raw = args.strip().lower()
+    current = getattr(session, "sandbox_strict", False)
+    if raw in ("", "toggle"):
+        new = not current
+    elif raw in ("on", "true", "1", "strict"):
+        new = True
+    elif raw in ("off", "false", "0", "loose"):
+        new = False
+    else:
+        return CommandResult(output=f"/sandbox: expected on|off|toggle, got {raw!r}")
+    session.sandbox_strict = new  # type: ignore[attr-defined]
+    return CommandResult(
+        output=f"sandbox: {'strict' if new else 'normal'}"
+    )
+
+
+def _cmd_plugin(_session: InteractiveSession, args: str) -> CommandResult:
+    """``/plugin`` — point at the OMC plugin layer (Lyra's de-facto plugin host).
+
+    Lyra doesn't ship its own marketplace; the oh-my-claudecode
+    plugin system is what the community uses to share commands,
+    skills, and agents that ride alongside Lyra. Rather than build a
+    second marketplace surface, this command points users at the
+    canonical install / list / remove flow.
+    """
+    sub = args.strip().lower()
+    base = (
+        "Lyra uses oh-my-claudecode (OMC) for plugins. Manage them with:\n"
+        "  • omc plugin install <name>\n"
+        "  • omc plugin list\n"
+        "  • omc plugin remove <name>\n"
+        "  • omc plugin update\n"
+        "Docs: https://github.com/oh-my-claudecode/oh-my-claudecode"
+    )
+    if not sub:
+        return CommandResult(output=base)
+    if sub in ("list", "ls"):
+        # Defer to OMC's list command so we don't drift from upstream.
+        import subprocess as _sp
+        if not _which("omc"):
+            return CommandResult(output=base + "\n\n(omc not installed)")
+        try:
+            proc = _sp.run(
+                ["omc", "plugin", "list"],
+                capture_output=True, text=True, timeout=10,
+            )
+            return CommandResult(
+                output=(proc.stdout or "(no plugins)").strip()
+            )
+        except OSError as exc:
+            return CommandResult(output=f"/plugin list: omc launch failed: {exc}")
+    return CommandResult(output=base)
+
+
+def _cmd_reload_plugins(session: InteractiveSession, _args: str) -> CommandResult:
+    """``/reload-plugins`` — re-walk skill / hook / user-command discovery.
+
+    Reloads what discovery surfaces would naturally pick up on a
+    fresh REPL boot — without making the user actually restart. The
+    permission/hooks cache is dropped too because a plugin that ships
+    new hooks is otherwise invisible until the next cache miss.
+    """
+    reloaded = {"user_commands": 0, "policy_cache": False, "skills": 0}
+    try:
+        n = session.reload_user_commands()
+        reloaded["user_commands"] = n
+    except Exception:
+        pass
+    if hasattr(session, "_policy_hooks_cache"):
+        session._policy_hooks_cache = None
+        reloaded["policy_cache"] = True
+    # Skills layer: re-resolve via the existing inject path; safe to
+    # call even when no skills are installed.
+    try:
+        from . import skills_inject as _si
+        if hasattr(_si, "reload_skills"):
+            reloaded["skills"] = _si.reload_skills(session.repo_root)
+    except Exception:
+        pass
+    return CommandResult(
+        output=(
+            f"reloaded: user_commands={reloaded['user_commands']}, "
+            f"skills={reloaded['skills']}, "
+            f"policy_cache={'dropped' if reloaded['policy_cache'] else 'untouched'}"
+        )
+    )
+
+
+def _cmd_release_notes(_session: InteractiveSession, _args: str) -> CommandResult:
+    """``/release-notes`` — print the bundled CHANGELOG (or fallback).
+
+    Walks up from this module to find the lyra-cli package root, then
+    prints ``CHANGELOG.md`` if it exists. Bundled-changelog beats
+    fetching from GitHub because Lyra runs offline and a network
+    timeout on a release-notes command would feel ridiculous.
+    """
+    from importlib.resources import files
+    try:
+        package_root = Path(str(files("lyra_cli"))).parent.parent.parent
+        changelog = package_root / "CHANGELOG.md"
+        if changelog.is_file():
+            text = changelog.read_text(encoding="utf-8")
+            head = "\n".join(text.splitlines()[:80])
+            return CommandResult(output=head)
+    except Exception:
+        pass
+    from lyra_cli import __version__
+    return CommandResult(
+        output=(
+            f"lyra v{__version__}\n"
+            "no bundled CHANGELOG.md — see "
+            "https://github.com/lyra-research/lyra/releases"
+        )
+    )
+
+
+def _cmd_logout(session: InteractiveSession, _args: str) -> CommandResult:
+    """``/logout`` — revoke every stored provider credential.
+
+    Walks ``auth.store.list_providers()`` and revokes each so the next
+    LLM call re-prompts. Doesn't kill the live session — the user can
+    still type ``/connect`` to re-auth without restarting; until then
+    any new dispatch lands on the credentials-prompt path.
+    """
+    try:
+        from lyra_core.auth.store import list_providers, revoke
+    except Exception as exc:
+        return CommandResult(output=f"/logout: auth module unavailable ({exc})")
+    providers = list_providers()
+    if not providers:
+        return CommandResult(output="/logout: no stored credentials to clear.")
+    cleared: list[str] = []
+    for provider in providers:
+        try:
+            revoke(provider)
+            cleared.append(provider)
+        except Exception:
+            continue
+    return CommandResult(
+        output=(
+            f"credentials cleared for {len(cleared)} provider"
+            f"{'s' if len(cleared) != 1 else ''}: {', '.join(cleared)}. "
+            "Next LLM call will re-prompt — or run /connect <provider> --key ..."
+        )
+    )
+
+
+def _which(cmd: str) -> bool:
+    """Lightweight PATH lookup so tests and slash handlers stay tiny."""
+    import shutil as _shutil
+    return _shutil.which(cmd) is not None
+
+
+def _resolve_session_run_dir(session: InteractiveSession) -> Path:
+    """Resolve the per-session run directory under LYRA_HOME.
+
+    Used by the v3.13 autonomy slashes (/directive, /autopilot) to
+    park per-session artefacts in a stable location that the
+    long-running autopilot supervisor can also reach.
+    """
+    home = os.environ.get("LYRA_HOME") or str(Path.home() / ".lyra")
+    sid = (session.session_id or "default").replace("/", "_")
+    run_dir = Path(home) / "loops" / sid
+    run_dir.mkdir(parents=True, exist_ok=True)
+    return run_dir
+
+
+def _cmd_directive(session: InteractiveSession, args: str) -> CommandResult:
+    """``/directive [<text>]`` — write an async control directive.
+
+    Drops the text into ``$LYRA_HOME/loops/<session>/HUMAN_DIRECTIVE.md``
+    where a long-running autopilot or Ralph loop picks it up at the next
+    iteration boundary. Without text, lists the last 5 archived directives.
+    Anchor: ``lyra_core.loops.directive.HumanDirective``.
+    """
+    run_dir = _resolve_session_run_dir(session)
+    live = run_dir / "HUMAN_DIRECTIVE.md"
+    archive = run_dir / "directives"
+
+    text = args.strip()
+    if not text:
+        if not archive.exists():
+            return CommandResult(
+                output=f"no archived directives under {archive}"
+            )
+        entries = sorted(archive.glob("*.md"))[-5:]
+        if not entries:
+            return CommandResult(
+                output=f"no archived directives under {archive}"
+            )
+        lines = [f"recent directives ({len(entries)} shown):"]
+        for p in entries:
+            head = p.read_text(encoding="utf-8").splitlines()[:1]
+            preview = head[0][:80] if head else ""
+            lines.append(f"  {p.name}: {preview}")
+        return CommandResult(output="\n".join(lines))
+
+    try:
+        with live.open("a", encoding="utf-8") as fh:
+            fh.write(text)
+            if not text.endswith("\n"):
+                fh.write("\n")
+    except OSError as exc:
+        return CommandResult(output=f"/directive: write failed: {exc}")
+
+    return CommandResult(
+        output=f"directive appended to {live} ({len(text)} chars)"
+    )
+
+
+def _cmd_contract(session: InteractiveSession, args: str) -> CommandResult:
+    """``/contract [show|set <key>=<value>]`` — inspect or configure budget.
+
+    Surfaces the v3.12 AgentContract envelope for the active session.
+    Supported keys for ``set``: ``max_usd``, ``max_iterations``,
+    ``max_wall_clock_s``. The contract object is parked on the session
+    under ``_agent_contract`` and re-used by subsequent /contract calls
+    so successive sets compose. Anchor: ``lyra_core.contracts``.
+    """
+    raw = args.strip()
+    sub = raw.split(maxsplit=1)
+    verb = sub[0].lower() if sub else "show"
+    rest = sub[1] if len(sub) >= 2 else ""
+
+    try:
+        from lyra_core.contracts import (
+            AgentContract,
+            BudgetEnvelope,
+            ContractState,
+        )
+    except ImportError as exc:
+        return CommandResult(output=f"/contract: backend missing ({exc})")
+
+    contract: Any = getattr(session, "_agent_contract", None)
+    if contract is None:
+        contract = AgentContract(budget=BudgetEnvelope())
+        session._agent_contract = contract  # type: ignore[attr-defined]
+
+    if verb == "show":
+        b = contract.budget
+        lines = [
+            f"contract state:   {contract.state.value}",
+            f"cumulative USD:   ${contract.cum_usd:.4f}",
+            f"iterations:       {contract.iter_count}",
+            f"budget.max_usd:   {b.max_usd if b.max_usd is not None else '(unbounded)'}",
+            f"budget.max_iter:  {b.max_iterations if b.max_iterations is not None else '(unbounded)'}",
+            f"budget.max_wall:  {b.max_wall_clock_s if b.max_wall_clock_s is not None else '(unbounded)'}s",
+        ]
+        return CommandResult(output="\n".join(lines))
+
+    if verb == "set":
+        if "=" not in rest:
+            return CommandResult(
+                output="usage: /contract set <key>=<value>"
+            )
+        key, _, value = rest.partition("=")
+        key = key.strip().lower()
+        value = value.strip()
+        if key not in {"max_usd", "max_iterations", "max_wall_clock_s"}:
+            return CommandResult(
+                output=(
+                    "/contract set: unknown key. "
+                    "Valid: max_usd, max_iterations, max_wall_clock_s"
+                )
+            )
+        try:
+            num: Any = float(value) if key == "max_usd" else int(value) if key == "max_iterations" else float(value)
+        except ValueError:
+            return CommandResult(
+                output=f"/contract set: {value!r} is not a number"
+            )
+        b = contract.budget
+        # BudgetEnvelope is frozen — rebuild then re-wrap the contract.
+        new_budget = BudgetEnvelope(
+            max_usd=num if key == "max_usd" else b.max_usd,
+            max_iterations=num if key == "max_iterations" else b.max_iterations,
+            max_wall_clock_s=num if key == "max_wall_clock_s" else b.max_wall_clock_s,
+            per_tool_max=b.per_tool_max,
+            deny_patterns=b.deny_patterns,
+        )
+        contract.budget = new_budget
+        return CommandResult(output=f"contract.budget.{key} = {num}")
+
+    return CommandResult(
+        output="usage: /contract [show|set <key>=<value>]"
+    )
+
+
+def _cmd_autopilot(session: InteractiveSession, args: str) -> CommandResult:
+    """``/autopilot [status|list]`` — read the LoopStore SQLite checkpoint.
+
+    Reports loops the v3.12 autopilot supervisor has registered, with
+    their state, cumulative USD, and iteration counts. Anchor:
+    ``lyra_core.loops.store.LoopStore``.
+    """
+    raw = args.strip().lower() or "status"
+
+    try:
+        from lyra_core.loops.store import LoopStore
+    except ImportError as exc:
+        return CommandResult(output=f"/autopilot: backend missing ({exc})")
+
+    home = os.environ.get("LYRA_HOME") or str(Path.home() / ".lyra")
+    db_path = Path(home) / "loops" / "loops.sqlite"
+    if not db_path.exists():
+        return CommandResult(
+            output=f"no autopilot store at {db_path} (no loops registered yet)"
+        )
+
+    store = LoopStore(db_path=db_path)
+    if raw == "status":
+        running = store.list_state("running")
+        if not running:
+            return CommandResult(output="autopilot: no running loops")
+        lines = [f"autopilot: {len(running)} running loop(s)"]
+        for rec in running:
+            lines.append(
+                f"  {rec.id} [{rec.kind}] "
+                f"iter={rec.iter_count} ${rec.cum_usd:.4f}"
+            )
+        return CommandResult(output="\n".join(lines))
+
+    if raw == "list":
+        records = store.list_state(
+            "running", "pending_resume", "completed", "terminated"
+        )
+        if not records:
+            return CommandResult(output="autopilot: store empty")
+        lines = [f"autopilot: {len(records)} loop(s)"]
+        for rec in records:
+            lines.append(
+                f"  {rec.id} [{rec.kind}] {rec.state} "
+                f"iter={rec.iter_count} ${rec.cum_usd:.4f}"
+            )
+        return CommandResult(output="\n".join(lines))
+
+    return CommandResult(output="usage: /autopilot [status|list]")
+
+
+def _cmd_continue(session: InteractiveSession, args: str) -> CommandResult:
+    """``/continue [<follow-up text>]`` — explicit re-feed after a Stop.
+
+    Companion to the v3.12 Stop / SubagentStop lifecycle event. When
+    the LLM ends a turn with no tool calls, the REPL returns control
+    to the user; ``/continue`` re-enters the loop with an empty (or
+    user-supplied) follow-up prompt, mirroring Claude Code's manual
+    "press enter to continue" affordance.
+
+    Implemented as a queue: the slash deposits the prompt on
+    ``session.pending_task`` so the next REPL tick treats it as a
+    normal user turn. Surfaces a no-op if a prior /continue is
+    already queued.
+    """
+    if getattr(session, "pending_task", None):
+        return CommandResult(
+            output="/continue: a pending task is already queued"
+        )
+    text = args.strip() or "continue"
+    session.pending_task = text
+    return CommandResult(
+        output=f"queued: {text!r} (next turn will dispatch)"
+    )
+
+
+# v3.13 P0-6 — imperative→declarative task sharpener.
+# Anchor: docs/context-engineering-deep-research-v2.md §1.3 (Karpathy
+# principle 4) and §7 P0-6. The slash converts a free-text task into
+# a verifiable goal — "write failing tests for X, then make them
+# pass" — by queueing a one-shot rewrite meta-prompt onto
+# ``session.pending_task``. The agent emits the rewrite on the next
+# turn; the user reviews and approves before any code change.
+_SHARPEN_META_PROMPT = (
+    "Rewrite the following task as verifiable goals using the "
+    "Karpathy declarative-rewrite pattern.\n\n"
+    "Imperative input:\n{task}\n\n"
+    "Emit (in order, as Markdown):\n"
+    "1. **Invariants to verify** — one bullet per concrete case\n"
+    "   (malformed input, missing field, edge value, regression).\n"
+    "2. **Failing tests to write FIRST** — code stubs the implementer\n"
+    "   should add to the test suite *before* touching production code.\n"
+    "3. **Minimal implementation** — the smallest production change\n"
+    "   that makes those tests pass, without widening scope.\n\n"
+    "Do NOT start editing yet. Emit the rewrite and stop so the user "
+    "can confirm or amend before implementation."
+)
+
+
+def _cmd_sharpen(session: InteractiveSession, args: str) -> CommandResult:
+    """``/sharpen <task>`` — rewrite a task as verifiable goals.
+
+    Implements the Karpathy P4 / Claude-Code-context P0-6 primitive:
+    convert an imperative task ("Add input validation") into a
+    declarative one with tests-then-implementation as the path.
+
+    Queueing model matches :func:`_cmd_continue` — drops a one-shot
+    rewrite meta-prompt onto ``session.pending_task`` so the next
+    REPL tick dispatches it. Refuses to overwrite an existing
+    queued task.
+    """
+    text = args.strip()
+    if not text:
+        return CommandResult(
+            output=(
+                "/sharpen: pass the task to rewrite, e.g.\n"
+                "    /sharpen add input validation to login\n"
+                "→ Rewrites as: failing tests for malformed/missing/"
+                "oversized inputs, then minimal impl to pass them."
+            )
+        )
+    if getattr(session, "pending_task", None):
+        return CommandResult(
+            output=(
+                "/sharpen: a pending task is already queued; "
+                "clear it before queueing a rewrite"
+            )
+        )
+    session.pending_task = _SHARPEN_META_PROMPT.format(task=text)
+    return CommandResult(
+        output=f"queued /sharpen rewrite for: {text!r}"
+    )
+
+
+def _cmd_loop(session: InteractiveSession, args: str) -> CommandResult:
+    """``/loop [interval] <prompt>`` — schedule a recurring prompt.
+
+    Thin wrapper around ``/cron`` with the Claude-Code calling shape
+    (``/loop 5m <prompt>``). Parses the leading interval token if it
+    matches the ``Nm|Nh|Nd`` pattern; otherwise treats the entire
+    payload as the prompt and lets ``/cron`` apply its default cadence.
+    """
+    import re as _re  # local — keeps top-level imports unchanged
+
+    raw = args.strip()
+    if not raw:
+        return CommandResult(output="usage: /loop [interval] <prompt>")
+    parts = raw.split(maxsplit=1)
+    leading = parts[0]
+    if len(parts) >= 2 and _re.fullmatch(r"\d+[smhd]", leading):
+        interval, prompt = leading, parts[1]
+        return _cmd_cron(session, f"add {interval} {prompt}")
+    return _cmd_cron(session, f"add 5m {raw}")
+
+
+def _cmd_debug(session: InteractiveSession, args: str) -> CommandResult:
+    """``/debug [on|off|toggle]`` — toggle the session debug-log flag.
+
+    Lyra writes structured events through ``HIRLogger`` regardless;
+    ``/debug on`` flips the *verbose* level so background telemetry
+    surfaces in the REPL alongside chat output. ``/debug`` bare
+    toggles. Distinct from ``/trace`` (HIR file path / on-off) — this
+    is the user-facing rendering toggle.
+    """
+    raw = args.strip().lower()
+    current = getattr(session, "debug_mode", False)
+    if raw in ("", "toggle"):
+        new = not current
+    elif raw in ("on", "true", "1"):
+        new = True
+    elif raw in ("off", "false", "0"):
+        new = False
+    else:
+        return CommandResult(output=f"/debug: expected on|off|toggle, got {raw!r}")
+    session.debug_mode = new  # type: ignore[attr-defined]
+    return CommandResult(output=f"debug mode: {'on' if new else 'off'}")
+
+
+def _cmd_simplify(session: InteractiveSession, args: str) -> CommandResult:
+    """``/simplify [focus]`` — fan-out 3 review agents (quality / reuse / efficiency).
+
+    Mirrors Claude Code's bundled skill: dispatch three subagents in
+    parallel to the same target, each looking through a different
+    lens, then collect the findings. Implemented as a single
+    ``/spawn`` invocation with a ``--type=review`` hint and a prompt
+    that asks the agent to internally fan out — keeps the surface
+    small while the underlying agent does the orchestration.
+    """
+    focus = args.strip() or "general code-quality, reuse, and efficiency"
+    framed = (
+        f"/spawn --type=review "
+        f"Run a three-pass simplification review on the recent changes. "
+        f"Pass 1: {focus} — code quality, naming, function size. "
+        f"Pass 2: dead code, duplication, opportunities for reuse. "
+        f"Pass 3: hot paths, allocation, redundant work. "
+        f"Apply trivial fixes inline; surface non-trivial findings as a "
+        f"bulleted list grouped by pass."
+    )
+    return session.dispatch(framed)
+
+
+def _cmd_batch(_session: InteractiveSession, args: str) -> CommandResult:
+    """``/batch <instruction>`` — point at the OMC fan-out pipeline.
+
+    Implementing ``/batch`` natively requires worktree-aware tools
+    (``EnterWorktree``/``ExitWorktree``) that Lyra doesn't yet expose
+    to the agent, so this command points at the OMC equivalent that
+    already does the orchestration. When Lyra grows worktree tools
+    this can flip to a native handler.
+    """
+    payload = args.strip()
+    if not payload:
+        return CommandResult(
+            output=(
+                "usage: /batch <instruction>. Lyra delegates fan-out to "
+                "oh-my-claudecode for now: omc batch \"<instruction>\""
+            )
+        )
+    return CommandResult(
+        output=(
+            f"/batch is delegated to OMC until Lyra ships native worktree "
+            f"tools. Run: omc batch \"{payload}\""
+        )
+    )
+
+
+def _cmd_research(session: InteractiveSession, args: str) -> CommandResult:
+    """``/research <query> [--depth N] [--time day|week|month|year]``.
+
+    Deep-research workflow built on the v3.12 ``WebSearch`` orchestrator:
+
+    1. Search the configured provider chain (Tavily → Exa → Serper →
+       Brave → Google CSE → DuckDuckGo) with reranking.
+    2. WebFetch the top ``--depth`` (default 3) result URLs.
+    3. Return a compact markdown blob: per-source heading, snippet,
+       quoted excerpt.
+
+    The agent loop synthesises across this blob without each step
+    eating a tool-call hop. Keeps research lightweight enough that
+    the user actually uses it.
+    """
+    import shlex
+
+    if not args.strip():
+        return CommandResult(
+            output=(
+                "usage: /research <query> [--depth N] "
+                "[--time day|week|month|year] [--domain example.com]"
+            )
+        )
+
+    try:
+        tokens = shlex.split(args)
+    except ValueError as exc:
+        return CommandResult(output=f"/research: shell parse failed: {exc}")
+
+    depth = 3
+    time_range: Optional[str] = None
+    domains: list[str] = []
+    query_parts: list[str] = []
+    it = iter(tokens)
+    for tok in it:
+        if tok in ("--depth", "-d"):
+            try:
+                depth = max(1, min(10, int(next(it))))
+            except (StopIteration, ValueError):
+                return CommandResult(output="/research: --depth needs an integer")
+        elif tok in ("--time", "-t"):
+            try:
+                value = next(it)
+            except StopIteration:
+                return CommandResult(output="/research: --time needs a value")
+            if value not in {"day", "week", "month", "year"}:
+                return CommandResult(
+                    output=f"/research: --time must be day/week/month/year, got {value!r}"
+                )
+            time_range = value
+        elif tok == "--domain":
+            try:
+                domains.append(next(it))
+            except StopIteration:
+                return CommandResult(output="/research: --domain needs a value")
+        else:
+            query_parts.append(tok)
+
+    query = " ".join(query_parts).strip()
+    if not query:
+        return CommandResult(output="/research: no query provided")
+
+    try:
+        from lyra_core.tools.web_search import make_web_search_tool
+        from lyra_core.tools.web_fetch import make_web_fetch_tool
+    except Exception as exc:
+        return CommandResult(output=f"/research: tools unavailable ({exc})")
+
+    search = make_web_search_tool()
+    payload = search(
+        query=query,
+        max_results=max(depth, 5),
+        time_range=time_range,
+        domains_allow=domains or None,
+    )
+    if payload.get("count", 0) == 0:
+        err = payload.get("error") or "no results returned"
+        return CommandResult(output=f"/research: {err}")
+
+    fetch = make_web_fetch_tool()
+    lines = [f"# /research: {query}"]
+    if time_range:
+        lines.append(f"_time range: {time_range}_")
+    lines.append(f"_provider: {payload.get('provider', '?')}_")
+    lines.append("")
+    for hit in payload["results"][:depth]:
+        title = hit.get("title") or "(no title)"
+        url = hit.get("url") or ""
+        lines.append(f"## {title}")
+        lines.append(f"<{url}>")
+        snippet = (hit.get("snippet") or "").strip()
+        if snippet:
+            lines.append(f"> {snippet}")
+        try:
+            fetched = fetch(url=url, max_chars=2_000)
+        except Exception as exc:
+            lines.append(f"_fetch failed: {exc}_")
+            lines.append("")
+            continue
+        if fetched.get("error"):
+            lines.append(f"_fetch failed: {fetched['error']}_")
+        else:
+            excerpt = (fetched.get("text") or "")[:1500]
+            if excerpt:
+                lines.append("```")
+                lines.append(excerpt)
+                lines.append("```")
+        lines.append("")
+
+    return CommandResult(output="\n".join(lines).rstrip())
+
+
+def _cmd_claude_api(_session: InteractiveSession, _args: str) -> CommandResult:
+    """``/claude-api`` — print the Anthropic API quick-reference card.
+
+    Replaces the Claude Code skill (which loads SDK reference for
+    Python/TypeScript/Java/Go/Ruby/C#/PHP/cURL). Lyra ships with the
+    text inline rather than fetching it — same offline-first
+    rationale as ``/release-notes``.
+    """
+    body = (
+        "Anthropic Claude API quick reference\n"
+        "  Endpoint    POST https://api.anthropic.com/v1/messages\n"
+        "  Auth        x-api-key: $ANTHROPIC_API_KEY\n"
+        "  Header      anthropic-version: 2023-06-01\n"
+        "  Models      claude-opus-4-7, claude-sonnet-4-6, claude-haiku-4-5\n"
+        "  Streaming   stream: true (server-sent events)\n"
+        "  Tool use    tools: [{name, description, input_schema}]\n"
+        "  Caching     cache_control: {type: 'ephemeral'} on a content block\n"
+        "  SDKs        pip install anthropic  ·  npm install @anthropic-ai/sdk\n"
+        "  Docs        https://docs.anthropic.com/en/api/getting-started"
+    )
+    return CommandResult(output=body)
+
+
 def _cmd_theme(session: InteractiveSession, args: str) -> CommandResult:
     from . import themes as _t  # local import — keeps session import cheap
 
@@ -4921,11 +6636,20 @@ def _cmd_agents(session: InteractiveSession, args: str) -> CommandResult:
     valid. With a registry attached we render the live process
     table — id, state, description — and route ``kill <id>`` to
     :meth:`SubagentRegistry.cancel`.
+
+    When stdin is a TTY and no subcommand is given, the bare ``/agents``
+    form opens the Claude-Code-style picker (catalog + live views).
+    The legacy text path still runs in headless / piped sessions and
+    when the picker subcommand isn't ``pick``.
     """
     parts = args.strip().split(maxsplit=1)
     sub = parts[0].lower() if parts else ""
     rest = parts[1] if len(parts) > 1 else ""
     reg = getattr(session, "subagent_registry", None)
+
+    # Bare /agents on a TTY → interactive picker. ``pick`` forces it.
+    if (sub == "" and _stdin_is_tty()) or sub == "pick":
+        return _launch_agents_picker(session)
 
     # Sub-command: kill ------------------------------------------------
     if sub in ("kill", "cancel", "stop"):
@@ -5185,27 +6909,7 @@ def _ensure_subagent_registry(session: InteractiveSession) -> Any | None:
         # first ``/spawn``. The real path is the package-root module.
         from lyra_cli.llm_factory import build_llm
 
-        # v2.7.1: spawned subagents are reasoning-heavy by definition
-        # (multi-step task with autonomous tool use), so route them
-        # through the smart slot. ``_apply_role_model`` stamps the
-        # provider-specific env vars *before* ``build_llm`` reads them,
-        # so the resulting provider already targets ``smart_model``
-        # (default ``deepseek-v4-pro`` → ``deepseek-reasoner``).
-        _apply_role_model(session, "smart")
         provider = build_llm(getattr(session, "model", "auto"))
-        # Re-apply so the freshly-built provider's ``model`` attr is
-        # synced even on the rare path where the preset cached its
-        # env read at construction time.
-        try:
-            slug = _resolve_model_for_role(session, "smart")
-            if slug:
-                from lyra_core.providers.aliases import resolve_alias as _res
-
-                resolved = _res(slug) or slug
-                if hasattr(provider, "model"):
-                    provider.model = resolved
-        except Exception:
-            pass
         return AgentLoop(
             llm=_LyraCoreLLMAdapter(provider),
             tools={},
@@ -5893,6 +7597,12 @@ def _cmd_skills(session: InteractiveSession, args: str) -> CommandResult:
         ]
 
     if target == "":
+        # If a TTY is available, launch the interactive picker
+        # (Claude-Code-style /skills panel). Falls through to the
+        # legacy text status when running headless (tests, pipes,
+        # remote sessions).
+        if _stdin_is_tty():
+            return _launch_skills_picker(session)
         # Default rendering keeps the v0.1.0 "list installed packs"
         # contract so older tests + muscle-memory still work, and adds
         # the new injection state line at the top.
@@ -5978,10 +7688,26 @@ def _cmd_skills(session: InteractiveSession, args: str) -> CommandResult:
         ]
         return CommandResult(output="\n".join(lines))
 
+    if target == "pick":
+        return _launch_skills_picker(session)
+
+    if target == "state":
+        return _print_skills_state(session)
+
+    if target.startswith("enable ") or target.startswith("disable "):
+        verb, _, sid = target.partition(" ")
+        sid = sid.strip()
+        if not sid:
+            return CommandResult(
+                output=f"usage: /skills {verb} <skill-id>"
+            )
+        return _toggle_skill_id(session, sid, enable=(verb == "enable"))
+
     return CommandResult(
         output=(
             f"unknown /skills argument {target!r}. "
-            f"usage: /skills [on|off|status|list|reload]"
+            f"usage: /skills [pick|on|off|status|list|reload|"
+            f"enable <id>|disable <id>|state]"
         )
     )
 
@@ -6603,38 +8329,64 @@ def _cmd_replay(session: InteractiveSession, args: str) -> CommandResult:
 
 
 def _cmd_effort(session: InteractiveSession, args: str) -> CommandResult:
-    """Wave-C `/effort`: pure picker render or direct value-set.
+    """`/effort` — Claude-Code-parity reasoning-effort picker.
 
-    ``/effort`` (no arg) renders the slider; ``/effort <level>`` sets
-    the env var directly so a script can drive the same surface
-    without going through the TTY arrow-key UI.
+    With no argument and a real TTY, runs the interactive horizontal
+    slider (`run_effort_picker`); with an explicit level argument
+    (``/effort high``) it skips the slider and applies directly so
+    scripts and non-TTY callers can drive the same surface.
+
+    Levels: ``low`` · ``medium`` · ``high`` · ``xhigh`` · ``max``.
+    The legacy ``ultra`` alias from v0.x continues to resolve to
+    ``max`` for back-compat with stored configs.
     """
+    import sys
+
     from .effort import EffortPicker, apply_effort
 
     levels = {
-        "low":    "quick single-turn attempt, cheapest model",
+        "low":    "fastest single-turn attempt; cheapest model",
         "medium": "default — Plan + Build with standard verification",
         "high":   "+ extra review passes (/review, /ultrareview)",
+        "xhigh":  "deep reasoning + multi-pass verifier",
         "max":    "full refute-or-promote loop + cross-channel verifier",
         # Back-compat: accept the legacy "ultra" alias from v0.x.
         "ultra":  "alias for max",
     }
+    valid_canonical: tuple[str, ...] = ("low", "medium", "high", "xhigh", "max")
     choice = args.strip().lower()
+
     if not choice:
-        picker = EffortPicker(initial="medium")
+        # Try the interactive slider first; fall back to a static
+        # render whenever a real Application can't be launched (no
+        # TTY, prompt_toolkit unavailable, in a unit test, …).
+        picked: str | None = None
+        if sys.stdin.isatty() and sys.stdout.isatty():
+            try:
+                from .effort_app import run_effort_picker
+                picked = run_effort_picker(initial="medium")
+            except Exception:
+                picked = None
+
+        if picked is None:
+            picker = EffortPicker(initial="medium")
+            return CommandResult(
+                output=picker.render(),
+                renderable=_out.effort_renderable("medium", levels),
+            )
+        canonical = apply_effort(picked)
         return CommandResult(
-            output=picker.render(),
-            renderable=_out.effort_renderable("medium", levels),
+            output=f"effort: {canonical} — {levels[canonical]}",
+            renderable=_out.effort_renderable(canonical, levels),
         )
+
     if choice not in levels:
         return CommandResult(
             output=(
                 f"unknown effort level {choice!r}; "
-                f"valid: {', '.join(k for k in levels if k != 'ultra')}."
+                f"valid: {', '.join(valid_canonical)}."
             ),
-            renderable=_out.bad_effort_renderable(
-                choice, ("low", "medium", "high", "max")
-            ),
+            renderable=_out.bad_effort_renderable(choice, valid_canonical),
         )
     typed = choice
     if choice == "ultra":
@@ -7121,6 +8873,20 @@ COMMAND_REGISTRY: tuple[CommandSpec, ...] = (
     ),
     CommandSpec("clear", _cmd_clear, "clear the screen", "session"),
     CommandSpec(
+        "keybindings",
+        _cmd_keybindings,
+        "show the keybindings cheatsheet",
+        "session",
+        aliases=("keys",),
+    ),
+    CommandSpec(
+        "new",
+        _cmd_new,
+        "start a fresh chat (clear messages, keep mode/model)",
+        "session",
+        aliases=("reset",),
+    ),
+    CommandSpec(
         "palette",
         _cmd_palette,
         "fuzzy-searchable command palette",
@@ -7306,7 +9072,225 @@ COMMAND_REGISTRY: tuple[CommandSpec, ...] = (
         _cmd_cost,
         "cost / token usage so far",
         "observability",
-        aliases=("usage",),
+    ),
+    CommandSpec(
+        "usage",
+        _cmd_usage,
+        "consolidated cost + session metrics (Claude-Code-style)",
+        "observability",
+    ),
+    CommandSpec(
+        "copy",
+        _cmd_copy,
+        "copy the last assistant reply to the clipboard",
+        "observability",
+        args_hint="[N] [--write PATH]",
+    ),
+    CommandSpec(
+        "hooks",
+        _cmd_hooks,
+        "show configured user hooks (PreToolUse / PostToolUse / …)",
+        "observability",
+    ),
+    CommandSpec(
+        "permissions",
+        _cmd_permissions,
+        "view / edit / reload the declarative permission grammar",
+        "config-theme",
+        aliases=("allowed-tools",),
+        args_hint="[edit|reload]",
+    ),
+    CommandSpec(
+        "plan",
+        _cmd_plan,
+        "enter plan mode (one-shot)",
+        "plan-build-run",
+    ),
+    CommandSpec(
+        "recap",
+        _cmd_recap,
+        "terse summary of recent turns for re-orientation",
+        "observability",
+    ),
+    CommandSpec(
+        "add-dir",
+        _cmd_add_dir,
+        "widen the session sandbox by adding an auxiliary directory",
+        "config-theme",
+        args_hint="[path]",
+    ),
+    CommandSpec(
+        "security-review",
+        _cmd_security_review,
+        "OWASP-style security-focused code review",
+        "tools-agents",
+        args_hint="[target]",
+    ),
+    CommandSpec(
+        "feedback",
+        _cmd_feedback,
+        "print issue URL + recent context (use --copy to grab turns)",
+        "observability",
+        aliases=("bug",),
+        args_hint="[--copy]",
+    ),
+    CommandSpec(
+        "statusline",
+        _cmd_statusline,
+        "show or set the bottom-toolbar format",
+        "config-theme",
+        args_hint="[format|default]",
+    ),
+    CommandSpec(
+        "color",
+        _cmd_color,
+        "tint the prompt-bar accent (red/blue/green/...)",
+        "config-theme",
+        args_hint="[name|default]",
+    ),
+    CommandSpec(
+        "fast",
+        _cmd_fast,
+        "toggle fast posture (effort=low for snappier turns)",
+        "config-theme",
+        args_hint="[on|off|toggle]",
+    ),
+    CommandSpec(
+        "focus",
+        _cmd_focus,
+        "hide side panels — chat-only view for screenshots/demos",
+        "config-theme",
+        args_hint="[on|off|toggle]",
+    ),
+    CommandSpec(
+        "tui",
+        _cmd_tui,
+        "switch rendering mode (classic vs smooth)",
+        "config-theme",
+        args_hint="[classic|smooth|toggle]",
+    ),
+    CommandSpec(
+        "pr-comments",
+        _cmd_pr_comments,
+        "fetch GitHub PR comments via gh CLI",
+        "observability",
+        args_hint="[PR-number-or-URL]",
+    ),
+    CommandSpec(
+        "schedule",
+        _cmd_schedule,
+        "schedule a recurring/one-shot prompt (alias of /cron)",
+        "tools-agents",
+        args_hint="[add|list|rm <id>]",
+    ),
+    CommandSpec(
+        "sandbox",
+        _cmd_sandbox,
+        "toggle strict filesystem sandbox (refuses writes outside repo_root)",
+        "config-theme",
+        args_hint="[on|off|toggle]",
+    ),
+    CommandSpec(
+        "plugin",
+        _cmd_plugin,
+        "OMC plugin management hint (Lyra delegates to omc)",
+        "tools-agents",
+        aliases=("plugins",),
+        args_hint="[list]",
+    ),
+    CommandSpec(
+        "reload-plugins",
+        _cmd_reload_plugins,
+        "re-walk skill / user-command / hook discovery without restart",
+        "tools-agents",
+    ),
+    CommandSpec(
+        "release-notes",
+        _cmd_release_notes,
+        "print the bundled CHANGELOG.md head",
+        "observability",
+    ),
+    CommandSpec(
+        "logout",
+        _cmd_logout,
+        "clear stored provider credentials",
+        "config-theme",
+    ),
+    CommandSpec(
+        "loop",
+        _cmd_loop,
+        "schedule a recurring prompt (Claude-Code-style cron shortcut)",
+        "tools-agents",
+        args_hint="[interval] <prompt>",
+    ),
+    CommandSpec(
+        "directive",
+        _cmd_directive,
+        "append a directive to HUMAN_DIRECTIVE.md (autopilot async-control)",
+        "tools-agents",
+        args_hint="[<text>]",
+    ),
+    CommandSpec(
+        "contract",
+        _cmd_contract,
+        "inspect or configure the AgentContract budget envelope",
+        "tools-agents",
+        args_hint="[show|set <key>=<value>]",
+    ),
+    CommandSpec(
+        "autopilot",
+        _cmd_autopilot,
+        "show status of supervised autonomy loops (LoopStore)",
+        "tools-agents",
+        args_hint="[status|list]",
+    ),
+    CommandSpec(
+        "continue",
+        _cmd_continue,
+        "queue an explicit re-feed of the agent (manual Stop re-entry)",
+        "tools-agents",
+        args_hint="[<follow-up>]",
+    ),
+    CommandSpec(
+        "sharpen",
+        _cmd_sharpen,
+        "rewrite a task as verifiable goals (imperative → declarative)",
+        "tools-agents",
+        args_hint="<task description>",
+    ),
+    CommandSpec(
+        "debug",
+        _cmd_debug,
+        "toggle verbose debug-event surfacing in the REPL",
+        "observability",
+        args_hint="[on|off|toggle]",
+    ),
+    CommandSpec(
+        "simplify",
+        _cmd_simplify,
+        "fan-out 3-pass review (quality / reuse / efficiency)",
+        "tools-agents",
+        args_hint="[focus]",
+    ),
+    CommandSpec(
+        "batch",
+        _cmd_batch,
+        "delegate multi-unit refactors to OMC's batch fan-out",
+        "tools-agents",
+        args_hint="<instruction>",
+    ),
+    CommandSpec(
+        "claude-api",
+        _cmd_claude_api,
+        "Anthropic Claude API quick reference",
+        "observability",
+    ),
+    CommandSpec(
+        "research",
+        _cmd_research,
+        "deep-research workflow: search + fetch + snippet excerpts",
+        "tools-agents",
+        args_hint="<query> [--depth N] [--time day|week|month|year] [--domain X]",
     ),
     CommandSpec(
         "stats",
@@ -7431,13 +9415,11 @@ COMMAND_REGISTRY: tuple[CommandSpec, ...] = (
         "config-theme",
         args_hint="[on|off]",
     ),
-    CommandSpec(
-        "keybindings",
-        _cmd_keybindings,
-        "full key-binding cheat sheet",
-        "config-theme",
-        aliases=("keys",),
-    ),
+    # NOTE: `keybindings` is registered once in the `session` bucket above
+    # (with the same handler + ``keys`` alias). The duplicate entry that
+    # used to live here in the `config-theme` bucket caused
+    # ``test_registry_names_are_unique`` to fail and could shadow the
+    # ``keys`` alias depending on iteration order. Single source of truth.
     CommandSpec("policy", _cmd_policy, "print .lyra/policy.yaml", "config-theme"),
     CommandSpec(
         "doctor", _cmd_doctor, "quick health check for this repo", "config-theme"
@@ -7447,6 +9429,7 @@ COMMAND_REGISTRY: tuple[CommandSpec, ...] = (
         _cmd_auth,
         "OAuth provider tokens (list, logout, Copilot device flow hint)",
         "config-theme",
+        aliases=("login",),
         args_hint="[list|logout|copilot]",
     ),
     # --- collaboration ----------------------------------------------------

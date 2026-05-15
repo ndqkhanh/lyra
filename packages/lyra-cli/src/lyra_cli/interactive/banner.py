@@ -50,6 +50,24 @@ from pathlib import Path
 
 from rich.align import Align
 from rich.box import ROUNDED
+
+
+# Mode display labels, mirroring ``session._MODE_DISPLAY``. Embedded
+# locally rather than imported because banner.py is imported eagerly
+# from the driver and we want zero-circularity at import time. The
+# session module is the source of truth for permission posture; this
+# table is purely cosmetic and only converts canonical IDs to the short
+# label shown in the banner / prompt / toolbar.
+_MODE_LABELS: dict[str, str] = {
+    "edit_automatically": "agent",
+    "plan_mode":          "plan",
+    "ask_before_edits":   "ask",
+    "auto_mode":          "auto",
+}
+
+
+def _display_mode(mode: str) -> str:
+    return _MODE_LABELS.get(mode, mode)
 from rich.console import Console, Group
 from rich.panel import Panel
 from rich.text import Text
@@ -100,6 +118,28 @@ _LOGO = (
 _LOGO_WIDTH = 30
 _FANCY_PANEL_WIDTH = 36  # 30-col logo + 2+2 padding + 2 borders = 36 exactly
 _FANCY_MIN_TERMINAL_COLS = 40  # fits almost any terminal (80-col default)
+_FANCY_PANEL_MAX_WIDTH = 100  # cap so 4K / ultrawide doesn't get a horizon-spanning stripe
+
+
+def _fancy_panel_width(cols: int) -> int:
+    """Compute the fancy banner panel width for a terminal of *cols* cols.
+
+    Stretches the panel to fill the terminal (minus 2 cols breathing
+    room) so the banner doesn't sit as a tiny 36-col rectangle in a
+    140-col window. Capped at :data:`_FANCY_PANEL_MAX_WIDTH` (default
+    100, override with ``LYRA_BANNER_MAX_WIDTH``) so on a 240-col
+    ultrawide it remains a tasteful header rather than a stripe.
+    """
+    floor = _FANCY_PANEL_WIDTH
+    cap_raw = os.environ.get("LYRA_BANNER_MAX_WIDTH", "").strip()
+    try:
+        cap = int(cap_raw) if cap_raw else _FANCY_PANEL_MAX_WIDTH
+    except ValueError:
+        cap = _FANCY_PANEL_MAX_WIDTH
+    if cap < floor:
+        cap = floor
+    target = max(cols - 2, floor)
+    return min(target, cap)
 
 # Default gradient stops (hex, no '#') — cyan → indigo → magenta —
 # preserved as a fallback when the active skin doesn't declare its
@@ -175,6 +215,83 @@ def _wordmark_text() -> str:
     return _themes.get_active_skin().brand("agent_name", "Lyra")
 
 
+def render_sparse_banner(
+    *,
+    repo_root: Path,
+    model: str,
+    mode: str,
+    plain: bool = False,
+) -> str:
+    """Claude-Code-class startup banner — five blocks, no wrap.
+
+    Layout (matches the reference exactly):
+
+        ✻ Welcome to Lyra v3.11.0!
+
+          /help for help, /status for your setup, ⌥? for keybindings
+
+          model: deepseek-chat
+          mode:  agent
+          cwd:   /Users/.../harness-engineering
+
+    Each value sits on its own line so a long ``cwd`` never wraps a
+    separator. Plain-mode output drops ANSI but keeps the layout
+    so piped/CI logs stay readable.
+    """
+    from .palette import PALETTE
+
+    name = _wordmark_text()
+    # cwd can stretch wide; truncate the middle so the tail of the
+    # path (which is the part that disambiguates) always shows.
+    cwd = _truncate_middle(str(repo_root), max_width=70)
+    title = f"✻ Welcome to {name} v{__version__}!"
+    hint = (
+        "/help for help, /status for your setup, "
+        "⌥? for keybindings"
+    )
+    fields = (
+        ("model", model),
+        ("mode",  _display_mode(mode)),
+        ("cwd",   cwd),
+    )
+    field_label_width = max(len(label) for label, _ in fields)
+    field_lines = [
+        f"  {label:<{field_label_width}}  {value}"
+        for label, value in fields
+    ]
+
+    if plain:
+        parts = [
+            title,
+            "",
+            f"  {hint}",
+            "",
+            *field_lines,
+            "",
+        ]
+        return "\n".join(parts) + "\n"
+
+    accent = PALETTE["accent"]
+    meta = PALETTE["meta"]
+    dim = PALETTE["dim"]
+
+    console = Console(record=True, force_terminal=True, file=None)
+    with console.capture() as cap:
+        console.print(Text(title, style=f"bold {accent}"))
+        console.print()
+        console.print(Text(f"  {hint}", style=meta))
+        console.print()
+        for label, value in fields:
+            line = (
+                Text("", end="")
+                .append(f"  {label:<{field_label_width}}  ", style=dim)
+                .append(value, style=meta)
+            )
+            console.print(line)
+        console.print()
+    return cap.get()
+
+
 def render_banner(
     *,
     repo_root: Path,
@@ -222,7 +339,7 @@ def _render_plain(*, repo_root: Path, model: str, mode: str) -> str:
         "",
         f"Repo    {repo_root}",
         f"Model   {model}",
-        f"Mode    {mode}",
+        f"Mode    {_display_mode(mode)}",
         f"CLI     lyra · alias: ly",
     ]
     if skin_tag:
@@ -349,7 +466,7 @@ def _metadata_block(
     model_line.append("Model   ", style="dim")
     model_line.append(model, style=f"bold {success}")
     model_line.append("     Mode   ", style="dim")
-    model_line.append(mode, style=f"bold {danger}")
+    model_line.append(_display_mode(mode), style=f"bold {danger}")
     console.print(model_line)
 
     cli_line = Text(no_wrap=True)
@@ -428,14 +545,15 @@ def _render_fancy(
     welcome = skin.brand("welcome", "ready.")
 
     buf = io.StringIO()
-    # The *panel* is pinned to ``_FANCY_PANEL_WIDTH`` (36 cols) so the
-    # LYRA wordmark always lands in the same rectangle. But the
-    # ``Console`` itself must be as wide as the real terminal,
-    # otherwise the metadata block below (``Model  … Mode  …``) and
-    # the hint row wrap at the panel width and look broken on a 140-col
-    # shell. ``len(repo_root)+20`` is the historical floor so paths
-    # never get ellipsized in fancy mode.
-    width = max(cols, _FANCY_PANEL_WIDTH, len(str(repo_root)) + 20)
+    # v3.5.x: the panel now stretches to fill the terminal (capped at
+    # ``LYRA_BANNER_MAX_WIDTH`` / 100) so a 140-col shell no longer sees
+    # a tiny 36-col rectangle stranded at the left margin. The 30-col
+    # LYRA logo is centered inside the wider panel so the wordmark
+    # stays visually balanced. Console width must still be at least the
+    # repo path length + 20 so absolute paths in the metadata block
+    # never get ellipsized.
+    panel_width = _fancy_panel_width(cols)
+    width = max(cols, panel_width, len(str(repo_root)) + 20)
     with _forced_columns(width):
         console = Console(
             file=buf,
@@ -448,12 +566,18 @@ def _render_fancy(
         logo = _gradient_logo()
         tagline = _tagline_text(_skin_subtitle())
 
+        # Inner content width = panel width minus 2 borders + 2*2 padding.
+        inner_width = max(panel_width - 6, _LOGO_WIDTH)
         panel = Panel(
-            Group(Align.center(logo, width=_LOGO_WIDTH), Text(""), tagline),
+            Group(
+                Align.center(logo, width=inner_width),
+                Text(""),
+                Align.center(tagline, width=inner_width),
+            ),
             box=ROUNDED,
             border_style=border,
             padding=(1, 2),
-            width=_FANCY_PANEL_WIDTH,
+            width=panel_width,
             title=f"[bold {title_colour}]{wordmark_text}[/] [dim]v{__version__}[/]",
             title_align="left",
             subtitle=f"[dim italic]{welcome}[/]",

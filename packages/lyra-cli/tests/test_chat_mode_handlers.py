@@ -288,15 +288,10 @@ def test_each_turn_bumps_tokens_used(session: InteractiveSession) -> None:
 def test_cost_uses_model_pricing(session: InteractiveSession) -> None:
     """``deepseek-v4-pro`` = $0.55 in / $2.19 out per Mtok.
 
-    v2.7.1: the small/smart split pins the active slot via
-    ``session.fast_model`` / ``session.smart_model`` rather than
-    by mutating the FakeLLM's model attribute, because
-    ``_apply_role_model`` re-stamps ``provider.model`` from the
-    slot before each chat turn (so the FakeLLM-provided model is
-    whatever the slot resolves to). 1000 in + 500 out should cost
+    1000 in + 500 out should cost
     ~ 0.001*0.55 + 0.0005*2.19 = $0.001645.
     """
-    session.fast_model = "deepseek-v4-pro"
+    session.model = "deepseek-v4-pro"
     fake = FakeLLM(
         usage={"prompt_tokens": 1000, "completion_tokens": 500, "total_tokens": 1500},
         model="deepseek-v4-pro",
@@ -311,17 +306,15 @@ def test_cost_uses_model_pricing(session: InteractiveSession) -> None:
 def test_unknown_model_falls_back_to_default_pricing(
     tmp_path: Path,
 ) -> None:
-    """v2.7.1: unknown slugs propagate through the slot system unchanged.
+    """Unknown slugs propagate through unchanged.
 
-    ``_stamp_model_env`` is idempotent for unregistered slugs - it
-    stamps the value verbatim - so the active provider sees
-    ``some-fictional-llm`` and the price table falls back to the
-    universal default of $1.00 / $3.00 per Mtok.
+    The active provider sees ``some-fictional-llm`` and the price
+    table falls back to the universal default of $1.00 / $3.00 per
+    Mtok.
     """
     s = InteractiveSession(
         repo_root=tmp_path,
         model="some-fictional-llm",
-        fast_model="some-fictional-llm",
     )
     fake = FakeLLM(
         usage={"prompt_tokens": 1000, "completion_tokens": 0, "total_tokens": 1000},
@@ -385,8 +378,11 @@ def test_legacy_retro_alias_remaps_to_auto_mode_and_calls_llm(
         "legacy 'retro' alias must remap to canonical 'auto_mode'"
     )
     notice = mode_result.output
-    assert "v3.6" in notice and "'auto_mode'" in notice, (
-        "user must see a one-shot notice when typing the legacy name; "
+    # v3.7+: legacy aliases remap silently. The output still surfaces
+    # the canonical ID in parens so the user can see exactly which
+    # permission posture they landed in.
+    assert "auto" in notice and "auto_mode" in notice, (
+        "user must see the resolved mode name in the dispatcher output; "
         f"got: {notice!r}"
     )
 
@@ -776,12 +772,8 @@ def test_streaming_bills_from_final_usage_event(
 ) -> None:
     """The streaming path reads ``provider.last_usage`` after the
     iterator finishes and updates session.cost_usd / tokens_used.
-
-    v2.7.1: pin the fast slot so the slot-based router doesn't
-    overwrite ``provider.model`` to ``deepseek-chat`` (the default
-    fast slug) before billing runs.
     """
-    session.fast_model = "deepseek-v4-pro"
+    session.model = "deepseek-v4-pro"
     _enable_streaming(session)
     fake = StreamingFakeLLM(
         stream_chunks=["a", "b", "c"],

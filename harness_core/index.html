@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>harness_core — Shared Harness Primitives</title>
+<style>:root{--bg:#0b1020;--fg:#e6ecff;--muted:#8aa0c8;--accent:#e2e8ff;--accent-2:#a8d8ff;--border:#1e2a49;--card:#131a32;--badge:#22304f}*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Inter","Helvetica Neue",sans-serif;line-height:1.55}a{color:var(--accent)}a:hover{text-decoration:underline}header{padding:48px 32px 32px;border-bottom:1px solid var(--border);background:linear-gradient(160deg,#0b1020 0%,#141d33 80%)}header h1{font-size:2.2rem;margin:0 0 8px}header h2{font-size:1.05rem;font-weight:400;color:var(--muted);margin:0 0 16px}.badges span{background:var(--badge);color:var(--accent-2);padding:4px 10px;border-radius:12px;font-size:.78rem;margin-right:8px;display:inline-block;margin-bottom:6px}nav.tabs{display:flex;gap:4px;flex-wrap:wrap;padding:0 32px;border-bottom:1px solid var(--border);background:#0d1428;position:sticky;top:0;z-index:5}nav.tabs button{background:transparent;border:0;color:var(--muted);padding:14px 18px;cursor:pointer;font-size:.92rem;border-bottom:2px solid transparent}nav.tabs button.active{color:var(--fg);border-bottom-color:var(--accent)}main{max-width:1100px;margin:0 auto;padding:36px 32px 80px}section.pane{display:none}section.pane.active{display:block}h3{margin-top:36px;font-size:1.3rem}h4{margin-top:28px;font-size:1.05rem;color:var(--accent-2)}code{background:var(--card);padding:2px 6px;border-radius:4px;font-size:.88rem}pre{background:var(--card);border:1px solid var(--border);padding:12px 16px;border-radius:6px;overflow-x:auto;font-size:.85rem}ul{padding-left:20px}li{margin:6px 0}table{border-collapse:collapse;width:100%;margin:12px 0;font-size:.92rem}th,td{border-bottom:1px solid var(--border);padding:10px 12px;text-align:left;vertical-align:top}th{color:var(--muted);font-weight:500}.hero-target{background:var(--card);border-left:3px solid var(--accent);padding:14px 18px;border-radius:4px;margin:14px 0;font-size:.95rem}footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--border);padding:24px 32px;margin-top:40px}</style>
+</head><body>
+<header><div class="badges"><span>Shared library</span><span>Implemented · April 2026</span><span>50 tests passing</span></div>
+<h1>harness_core</h1>
+<h2>Shared harness primitives: agent loop, tools, hooks, permissions, memory, observability.</h2>
+<div class="hero-target">All five MVP projects (Orion-Code, Atlas-Research, Aegis-Ops, Harmony-Voice, Syndicate) build on this library.</div></header>
+<nav class="tabs">
+<button class="tab-btn active" data-tab="overview">Overview</button>
+<button class="tab-btn" data-tab="modules">Modules</button>
+<button class="tab-btn" data-tab="run">Run / Install</button>
+<button class="tab-btn" data-tab="usage">Usage</button>
+</nav>
+<main>
+<section id="overview" class="pane active">
+<h3>What harness_core is</h3>
+<p>Pure-Python shared library implementing the harness primitives documented in the <a href="../../docs/">research corpus</a>. All five MVP projects in this workspace depend on it via <code>pip install -e ../harness_core</code>.</p>
+<h4>Files</h4>
+<ul><li><a href="README.md">README.md</a></li><li><a href="src/harness_core/">src/</a></li><li><a href="tests/">tests/</a></li><li><a href="pyproject.toml">pyproject.toml</a></li></ul>
+</section>
+<section id="modules" class="pane">
+<h3>Modules</h3>
+<table>
+<tr><th>Module</th><th>Role</th><th>Research ref</th></tr>
+<tr><td><code>models</code></td><td>LLM abstraction (MockLLM, AnthropicLLM)</td><td>—</td></tr>
+<tr><td><code>messages</code></td><td>Message / ToolCall / ToolResult schemas</td><td>—</td></tr>
+<tr><td><code>tools</code></td><td>Tool ABC, ToolRegistry, arg validation</td><td><a href="../../docs/07-model-context-protocol.md">docs/07</a></td></tr>
+<tr><td><code>permissions</code></td><td>Permission modes + rule engine</td><td><a href="../../docs/06-permission-modes.md">docs/06</a></td></tr>
+<tr><td><code>hooks</code></td><td>Pre/post tool-use hook system</td><td><a href="../../docs/05-hooks.md">docs/05</a></td></tr>
+<tr><td><code>memory</code></td><td>File-backed memory with provenance</td><td><a href="../../docs/09-memory-files.md">docs/09</a></td></tr>
+<tr><td><code>observability</code></td><td>Structured span logging + metrics</td><td><a href="../../docs/24-observability-tracing.md">docs/24</a></td></tr>
+<tr><td><code>loop</code></td><td>AgentLoop — composes the above</td><td><a href="../../docs/01-agent-loop-architecture.md">docs/01</a></td></tr>
+</table>
+</section>
+<section id="run" class="pane">
+<h3>Install</h3>
+<pre>make install    # create .venv and install editable with dev deps
+make test       # 50 unit tests in &lt;1s</pre>
+<h4>From a project</h4>
+<pre>pip install -e ../harness_core   # editable path dependency
+# then: from harness_core import AgentLoop, MockLLM, ToolRegistry, ...</pre>
+</section>
+<section id="usage" class="pane">
+<h3>Usage sketch</h3>
+<pre>from harness_core import AgentLoop, MockLLM, ToolRegistry, PermissionMode
+from harness_core.tools_builtin import EchoTool
+
+tools = ToolRegistry()
+tools.register(EchoTool())
+
+loop = AgentLoop(
+    llm=MockLLM(scripted_outputs=["hello"]),
+    tools=tools,
+    permission_mode=PermissionMode.DEFAULT,
+)
+result = loop.run(task="say hello")
+print(result.final_text)</pre>
+</section>
+</main>
+<footer>Part of the <a href="..">harness-engineering projects</a> index.</footer>
+<script>document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById(btn.dataset.tab).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}));</script>
+</body></html>

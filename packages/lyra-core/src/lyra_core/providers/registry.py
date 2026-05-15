@@ -72,7 +72,7 @@ PROVIDER_REGISTRY: tuple[ProviderSpec, ...] = (
         supports_tools=True,
         supports_reasoning=False,
         supports_vision=True,
-        models=("gpt-5", "gpt-5-mini", "gpt-4o", "gpt-4o-mini"),
+        models=("gpt-4o", "gpt-4o-mini", "gpt-5", "gpt-5-mini"),
     ),
     ProviderSpec(
         key="openai-reasoning",

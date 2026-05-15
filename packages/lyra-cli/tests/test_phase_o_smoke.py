@@ -29,7 +29,7 @@ from lyra_cli.__main__ import app
 
 
 def test_phase_o_version_string() -> None:
-    assert __version__ == "3.5.0"
+    assert __version__ == "3.13.0"
 
 
 @pytest.mark.parametrize(

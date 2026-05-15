@@ -62,16 +62,39 @@ from .tool_approval import ToolApprovalCache
 # exposes by default. They're enough to power "ask Lyra about your
 # codebase" and "fix this typo" without a permission prompt.
 #
-# What's *out*: Bash / ExecuteCode / Browser / WebFetch — these need
+# What's *out*: Bash / ExecuteCode / Browser — these need
 # explicit user opt-in (planned ``/tools enable bash`` in v2.4.x).
 # Keeping the chat-mode default to read/write within the repo follows
 # claw-code's principle of least surprise: the assistant can show you
 # code and propose edits, but it can't run arbitrary commands without
 # you turning that on.
-_CHAT_TOOL_NAMES: tuple[str, ...] = ("Read", "Glob", "Grep", "Edit", "Write")
+#
+# What's *in* (v3.13+): WebFetch and WebSearch are now enabled by
+# default for research and deep-dive workflows. They're read-only
+# operations with URL safety validation (file://, javascript:, data:
+# schemes are rejected) and don't pose the same risk as shell execution.
+_CHAT_TOOL_NAMES: tuple[str, ...] = (
+    "Read",
+    "Glob",
+    "Grep",
+    "Edit",
+    "Write",
+    "WebFetch",
+    "WebSearch",
+    # v3.10: ``AskUserQuestion`` is gated on the prompter being
+    # installed (see ``build_chat_tool_registry`` below). Listing it
+    # here is safe even when the registry doesn't have it — the
+    # schema filter in :func:`chat_tool_schemas` only emits specs for
+    # tools that are *actually* registered.
+    "AskUserQuestion",
+)
 
 
-def build_chat_tool_registry(repo_root: Path) -> Any:
+def build_chat_tool_registry(
+    repo_root: Path,
+    *,
+    ask_user_prompter: Any = None,
+) -> Any:
     """Build a :class:`harness_core.tools.ToolRegistry` for chat mode.
 
     Lazy-imports :mod:`lyra_core.tools.builtin` so a stripped install
@@ -83,6 +106,12 @@ def build_chat_tool_registry(repo_root: Path) -> Any:
             five tools enforce ``Path.resolve()`` confinement to this
             directory; symlink escapes are rejected with
             ``ToolError``.
+        ask_user_prompter: Optional callable that renders an
+            ``AskUserQuestion`` dialog and returns the picked indices.
+            When provided, registers the tool so the agent can pause
+            for a structured choice; when ``None`` (the default), the
+            tool stays out of the registry so non-interactive runs
+            (CI, ``--print``) never hang on stdin.
 
     Returns:
         A populated :class:`ToolRegistry`. Each tool's
@@ -98,7 +127,9 @@ def build_chat_tool_registry(repo_root: Path) -> Any:
     from lyra_core.tools.builtin import register_builtin_tools
 
     registry = ToolRegistry()
-    register_builtin_tools(registry, repo_root=repo_root)
+    register_builtin_tools(
+        registry, repo_root=repo_root, ask_user_prompter=ask_user_prompter
+    )
     return registry
 
 

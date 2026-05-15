@@ -50,7 +50,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Any, Iterable, Optional
 
 
 # ---------------------------------------------------------------------------
@@ -113,6 +113,54 @@ _DEFAULT_MAX_SKILLS = 32
 _DEFAULT_LINE_LIMIT = 240
 
 
+def is_locked_skill(skill: Any, packaged_root: Path | None) -> bool:
+    """Return True when *skill* is shipped under the packaged-pack root.
+
+    A locked skill is one the user can't disable from the picker —
+    it's part of the wheel and is removed by ``lyra skill remove``,
+    not by toggling state. We detect it by checking the manifest's
+    on-disk path against the packaged-pack root.
+    """
+    if packaged_root is None:
+        return False
+    try:
+        skill_path = Path(getattr(skill, "path", "") or "").resolve()
+        root = Path(packaged_root).resolve()
+    except (OSError, RuntimeError):
+        return False
+    try:
+        skill_path.relative_to(root)
+    except ValueError:
+        return False
+    return True
+
+
+def _filter_skills_by_state(
+    skills: list,
+    *,
+    state: Any | None,
+    packaged_root: Path | None,
+) -> list:
+    """Drop skills the user has disabled via ``state``.
+
+    Locked skills (under *packaged_root*) survive even when listed
+    in ``state.disabled`` — defensive against hand-edits to the
+    state file. ``state=None`` is the legacy default-on behaviour.
+    """
+    if state is None:
+        return skills
+    disabled = getattr(state, "disabled", frozenset())
+    if not disabled:
+        return skills
+    out = []
+    for s in skills:
+        sid = getattr(s, "id", "")
+        if sid in disabled and not is_locked_skill(s, packaged_root):
+            continue
+        out.append(s)
+    return out
+
+
 def render_skill_block(
     repo_root: Path,
     *,
@@ -120,6 +168,7 @@ def render_skill_block(
     line_limit: int = _DEFAULT_LINE_LIMIT,
     prompt: str | None = None,
     force_ids: Iterable[str] = (),
+    state: Any | None = None,
 ) -> str:
     """Build the system-prompt suffix listing available skills.
 
@@ -151,8 +200,20 @@ def render_skill_block(
             behaviour and never injects bodies via this path.
         force_ids: skills the caller wants pinned-on regardless
             of keyword matches (e.g. a ``--skill foo`` CLI flag).
+        state: optional :class:`~lyra_skills.state.SkillsState` from
+            the ``/skills`` picker. Disabled (non-locked) skills are
+            filtered before rendering. ``None`` keeps the legacy
+            default-on behaviour.
     """
     skills = _load_skills_safely(discover_skill_roots(repo_root))
+    if not skills:
+        return ""
+
+    skills = _filter_skills_by_state(
+        skills,
+        state=state,
+        packaged_root=_packaged_pack_root(),
+    )
     if not skills:
         return ""
 
@@ -324,6 +385,7 @@ def render_skill_block_with_activations(
     line_limit: int = _DEFAULT_LINE_LIMIT,
     prompt: str | None = None,
     force_ids: Iterable[str] = (),
+    state: Any | None = None,
 ) -> SkillBlockResult:
     """Same as :func:`render_skill_block` but reports activations.
 
@@ -331,8 +393,21 @@ def render_skill_block_with_activations(
     activated skills on the ledger after the turn settles. Pure
     callers that only want the prompt block keep using the original
     function — this one is for the per-turn telemetry path.
+
+    Honours ``state`` the same way :func:`render_skill_block` does:
+    disabled non-locked skills are filtered before activation runs,
+    so a user-disabled skill never appears in the ledger as
+    activated.
     """
     skills = _load_skills_safely(discover_skill_roots(repo_root))
+    if not skills:
+        return SkillBlockResult(text="")
+
+    skills = _filter_skills_by_state(
+        skills,
+        state=state,
+        packaged_root=_packaged_pack_root(),
+    )
     if not skills:
         return SkillBlockResult(text="")
 
@@ -416,6 +491,7 @@ def _load_skills_safely(roots: Iterable[Path]) -> list:
 __all__ = [
     "SkillBlockResult",
     "discover_skill_roots",
+    "is_locked_skill",
     "render_skill_block",
     "render_skill_block_with_activations",
 ]

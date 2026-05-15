@@ -12,6 +12,7 @@ license = { text = "MIT" }
 dependencies = [
     "lyra-core",
     "PyYAML>=6",
+    "harness-skill-router>=0.2.0",
 ]
 
 [project.optional-dependencies]

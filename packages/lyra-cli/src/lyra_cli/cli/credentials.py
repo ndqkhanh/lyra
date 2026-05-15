@@ -44,6 +44,7 @@ class CredentialManager:
                     # Map Claude Code env vars to providers
                     key_mapping = {
                         "ANTHROPIC_API_KEY": "anthropic",
+                        "ANTHROPIC_AUTH_TOKEN": "anthropic",  # Alternative key name
                         "OPENAI_API_KEY": "openai",
                         "GEMINI_API_KEY": "gemini",
                         "DEEPSEEK_API_KEY": "deepseek",
@@ -60,6 +61,14 @@ class CredentialManager:
                                 "api_key": env_vars[env_key],
                                 "source": "claude_settings"
                             }
+
+                    # Also check for base URLs
+                    if "ANTHROPIC_BASE_URL" in env_vars and "anthropic" in credentials:
+                        credentials["anthropic"]["base_url"] = env_vars["ANTHROPIC_BASE_URL"]
+                    if "OPENAI_BASE_URL" in env_vars and "openai" in credentials:
+                        credentials["openai"]["base_url"] = env_vars["OPENAI_BASE_URL"]
+                    if "DEEPSEEK_BASE_URL" in env_vars and "deepseek" in credentials:
+                        credentials["deepseek"]["base_url"] = env_vars["DEEPSEEK_BASE_URL"]
             except Exception:
                 pass  # Ignore errors, fall back to other sources
 
@@ -126,6 +135,10 @@ class CredentialManager:
 # Available models by provider
 AVAILABLE_MODELS = {
     "anthropic": [
+        "claude-sonnet-4-20250514",
+        "claude-opus-4-20250514",
+        "claude-3-5-sonnet-20241022",
+        "claude-3-5-haiku-20241022",
         "claude-opus-4.7",
         "claude-opus-4",
         "claude-sonnet-4.6",
@@ -154,6 +167,20 @@ AVAILABLE_MODELS = {
     ],
 }
 
+# Model aliases - map friendly names to actual model IDs
+MODEL_ALIASES = {
+    "claude-sonnet-4.6": "claude-sonnet-4-20250514",
+    "claude-sonnet-4": "claude-sonnet-4-20250514",
+    "claude-opus-4.7": "claude-opus-4-20250514",
+    "claude-opus-4": "claude-opus-4-20250514",
+    "claude-3.5-sonnet": "claude-3-5-sonnet-20241022",
+    "claude-3.5-haiku": "claude-3-5-haiku-20241022",
+    "sonnet": "claude-sonnet-4-20250514",
+    "opus": "claude-opus-4-20250514",
+    "haiku": "claude-3-5-haiku-20241022",
+    "auto": "claude-sonnet-4-20250514",  # Default for auto mode
+}
+
 # Default base URLs
 DEFAULT_BASE_URLS = {
     "anthropic": "https://api.anthropic.com",
@@ -169,6 +196,10 @@ def parse_model_string(model_str: str) -> tuple[str, str]:
     Returns:
         (provider, model_name)
     """
+    # First check if it's an alias
+    if model_str in MODEL_ALIASES:
+        model_str = MODEL_ALIASES[model_str]
+
     model_lower = model_str.lower()
 
     # Detect provider from model name

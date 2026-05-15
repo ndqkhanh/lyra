@@ -826,9 +826,11 @@ PRESETS: tuple[_Preset, ...] = (
         base_url="https://api.openai.com/v1",
         env_keys=("OPENAI_API_KEY",),
         model_env_keys=("OPEN_HARNESS_OPENAI_MODEL", "OPENAI_MODEL"),
-        # GPT-5 is the current flagship in 2026; gpt-4o / gpt-4.1
-        # are still available and users can override via env var.
-        default_model="gpt-5",
+        # gpt-4o is universally available across OpenAI account tiers;
+        # gpt-5 is the flagship but not all keys can call it (returns
+        # HTTP 404 from the API). Users who have gpt-5 access can opt
+        # in via OPENAI_MODEL=gpt-5 or `/model openai:gpt-5`.
+        default_model="gpt-4o",
     ),
     _Preset(
         name="openai-reasoning",

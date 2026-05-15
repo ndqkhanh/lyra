@@ -17,7 +17,7 @@ from typer.testing import CliRunner
 
 
 def _runner() -> CliRunner:
-    return CliRunner(mix_stderr=False)
+    return CliRunner()
 
 
 def test_brain_list_shows_builtins() -> None:

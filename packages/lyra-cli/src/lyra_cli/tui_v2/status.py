@@ -68,10 +68,18 @@ def format_token_bar(used: int, maximum: int = DEFAULT_CONTEXT_WINDOW) -> str:
 
 
 def format_repo_segment(working_dir: str) -> str:
-    """Compact repo label — basename of the working directory."""
+    """Compact repo label — basename of the working directory.
+
+    Resolves relative paths (e.g. ``"."``) to absolute so the segment
+    always shows a meaningful name instead of ``"."``.
+    """
     if not working_dir:
         return "—"
-    name = working_dir.rstrip("/").rsplit("/", 1)[-1]
+    from pathlib import Path
+    try:
+        name = Path(working_dir).resolve().name
+    except Exception:
+        name = working_dir.rstrip("/").rsplit("/", 1)[-1]
     return name or "/"
 
 

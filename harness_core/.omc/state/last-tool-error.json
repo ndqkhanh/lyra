@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"git commit -m \\\"feat: add native ANTHROPIC_BASE_URL support\\n\\nBREAKING CHANGE: Native support for custom Anthropic endpoints\\n\\nChanges:\\n- harness_core.models.AnthropicLLM now accepts ba...",
+  "error": "Exit code 1\nOn branch main\nYour branch is up to date with 'origin/main'.\n\nChanges not staged for commit:\n  (use \"git add/rm <file>...\" to update what will be committed)\n  (use \"git restore <file>...\" to discard changes in working directory)\n\tmodified:   ../packages/lyra-cli/src/lyra_cli/__init__.py\n\tmodified:   ../packages/lyra-cli/src/lyra_cli/commands/skill.py\n\tmodified:   ../packages/lyra-cli/src/lyra_cli/commands/tui.py\n\tmodified:   ../packages/lyra-cli/src/lyra_cli/daemon_cmd.py\n\tmodified: ...",
+  "timestamp": "2026-05-15T01:51:25.921Z",
+  "retry_count": 2
+}

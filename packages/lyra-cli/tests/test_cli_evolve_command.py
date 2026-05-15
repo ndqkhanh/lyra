@@ -24,7 +24,7 @@ def _write_task(tmp: Path) -> Path:
 
 def test_evolve_runs_with_default_echo_stub(tmp_path: Path) -> None:
     task = _write_task(tmp_path)
-    runner = CliRunner(mix_stderr=False)
+    runner = CliRunner()
     result = runner.invoke(
         app,
         ["evolve", "--task", str(task), "--generations", "1", "--population", "2"],
@@ -37,7 +37,7 @@ def test_evolve_runs_with_default_echo_stub(tmp_path: Path) -> None:
 
 def test_evolve_emits_json_when_flag_set(tmp_path: Path) -> None:
     task = _write_task(tmp_path)
-    runner = CliRunner(mix_stderr=False)
+    runner = CliRunner()
     result = runner.invoke(
         app,
         [
@@ -63,7 +63,7 @@ def test_evolve_emits_json_when_flag_set(tmp_path: Path) -> None:
 def test_evolve_writes_output_file(tmp_path: Path) -> None:
     task = _write_task(tmp_path)
     out = tmp_path / "report.json"
-    runner = CliRunner(mix_stderr=False)
+    runner = CliRunner()
     result = runner.invoke(
         app,
         [
@@ -88,11 +88,11 @@ def test_evolve_rejects_non_list_examples(tmp_path: Path) -> None:
     spec = {"prompt": "x", "examples": "not a list"}
     path = tmp_path / "bad.json"
     path.write_text(json.dumps(spec))
-    runner = CliRunner(mix_stderr=False)
+    runner = CliRunner()
     result = runner.invoke(app, ["evolve", "--task", str(path)])
     assert result.exit_code != 0
     # ``typer.BadParameter`` renders to stderr, not stdout; with
-    # ``mix_stderr=False`` we have to inspect both streams (newer
+    # ```` we have to inspect both streams (newer
     # Click/Typer no longer folds the abort message into ``output``).
     combined = (result.output or "") + (result.stderr or "")
     assert "examples must be a list" in combined or "Invalid value" in combined

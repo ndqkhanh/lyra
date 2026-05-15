@@ -5,14 +5,21 @@ and rank — a unique id, a human-readable description, a set of
 trigger phrases the router searches against, and a mutable
 ``success_rate`` that updates as the skill is used.
 
-The registry is intentionally thin: no eviction policy yet
-(Task 10 will add that) and no persistence layer (it's held in
-memory; callers snapshot to JSON if they want durability).
+L38-2 (Argus telemetry persistence) added an optional
+:class:`SkillTelemetryStore` constructor argument. When provided,
+``record_success`` / ``record_miss`` append to a SQLite event
+ledger, the in-memory ints are restored from that ledger on
+construction, and ``decayed_rate(skill_id)`` exposes the half-life-
+weighted score for the cascade router. Callers that don't pass a
+store keep the legacy in-memory-only behaviour bit-for-bit.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Iterable
+from typing import Iterable, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:  # pragma: no cover — import-cycle dodge
+    from .telemetry import DecayedRate, SkillTelemetryStore
 
 
 __all__ = [
@@ -53,12 +60,23 @@ class Skill:
 @dataclass
 class SkillRegistry:
     _skills: dict[str, Skill] = field(default_factory=dict)
+    telemetry_store: Optional["SkillTelemetryStore"] = None
 
     # ---- CRUD ----------------------------------------------------
 
     def register(self, skill: Skill) -> None:
         if skill.id in self._skills:
             raise SkillAlreadyExists(f"skill {skill.id!r} already registered")
+        # L38-2 — when a telemetry store is attached, restore the lifetime
+        # success / miss counts from the ledger so a process restart
+        # never loses ranking history. The decayed rate is exposed
+        # separately via ``decayed_rate``; the in-memory ints stay
+        # correct for the legacy ``success_rate`` property.
+        if self.telemetry_store is not None:
+            s, m = self.telemetry_store.counts(skill.id)
+            if s or m:
+                skill.success_count = max(skill.success_count, s)
+                skill.miss_count = max(skill.miss_count, m)
         self._skills[skill.id] = skill
 
     def update(self, skill: Skill) -> None:
@@ -91,12 +109,34 @@ class SkillRegistry:
     def record_success(self, skill_id: str) -> Skill:
         skill = self.get(skill_id)
         skill.success_count += 1
+        if self.telemetry_store is not None:
+            self.telemetry_store.record_success(skill_id)
         return skill
 
     def record_miss(self, skill_id: str) -> Skill:
         skill = self.get(skill_id)
         skill.miss_count += 1
+        if self.telemetry_store is not None:
+            self.telemetry_store.record_miss(skill_id)
         return skill
+
+    def decayed_rate(
+        self,
+        skill_id: str,
+        *,
+        half_life_days: float = 14.0,
+    ) -> "DecayedRate | None":
+        """L38-2 — half-life-weighted success rate from the ledger.
+
+        Returns ``None`` when no telemetry store is attached so callers
+        can fall back to the in-memory ``Skill.success_rate`` cleanly.
+        """
+        if self.telemetry_store is None:
+            return None
+        self.get(skill_id)  # surfaces SkillNotFound for unknown ids
+        return self.telemetry_store.decayed_rate(
+            skill_id, half_life_days=half_life_days
+        )
 
     # ---- queries -------------------------------------------------
 

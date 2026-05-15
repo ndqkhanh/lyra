@@ -232,15 +232,22 @@ def test_legacy_remap_table_covers_every_pre_v36_mode() -> None:
         assert canonical in _VALID_MODES
 
 
-def test_slash_mode_accepts_legacy_alias_with_rename_notice(tmp_path: Path) -> None:
-    """``/mode agent`` switches to ``edit_automatically`` and tells the user about the rename."""
+def test_slash_mode_accepts_short_alias(tmp_path: Path) -> None:
+    """``/mode agent`` switches to ``edit_automatically``.
+
+    v3.7+ promoted the short labels (``agent`` / ``plan`` / ``ask`` /
+    ``auto``) to first-class names rather than legacy aliases — typing
+    them lands silently on the matching canonical mode. The output
+    surfaces both the short label the user typed and the canonical ID
+    in parens so the permission posture stays unambiguous.
+    """
     s = InteractiveSession(repo_root=tmp_path, mode="plan_mode")
     result = _cmd_mode(s, "agent")
     assert s.mode == "edit_automatically"
     assert result.new_mode == "edit_automatically"
-    # The user gets a one-line "renamed in v3.6" notice so old muscle
-    # memory doesn't silently land them in a different mode.
-    assert "renamed" in result.output.lower() or "v3.6" in result.output
+    # Output shows both the short label and the canonical ID.
+    assert "agent" in result.output
+    assert "edit_automatically" in result.output
 
 
 def test_slash_mode_rejects_unknown_string(tmp_path: Path) -> None:

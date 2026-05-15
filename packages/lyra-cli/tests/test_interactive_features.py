@@ -566,8 +566,13 @@ def test_walk_repo_returns_relative_posix_paths(tmp_path: Path) -> None:
     sub = tmp_path / "deep" / "nested"
     sub.mkdir(parents=True)
     (sub / "file.py").write_text("", encoding="utf-8")
-    paths = list(_walk_repo(tmp_path))
-    assert "deep/nested/file.py" in paths
+    # ``_walk_repo`` now yields ``(rel_posix_path, is_dir)`` tuples so
+    # the @-mention completer can render directories with a trailing
+    # slash. Both files and directories appear in the output; we check
+    # the file is present and marked as a non-directory.
+    entries = list(_walk_repo(tmp_path))
+    assert ("deep/nested/file.py", False) in entries
+    assert ("deep", True) in entries
 
 
 # ---------------------------------------------------------------------------

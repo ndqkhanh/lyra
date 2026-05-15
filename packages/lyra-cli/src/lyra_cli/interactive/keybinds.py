@@ -177,6 +177,31 @@ def cycle_mode(session: "InteractiveSession") -> str:
     return f"mode → {nxt}"
 
 
+def set_mode(session: "InteractiveSession", mode: str) -> str:
+    """Direct mode setter — Claude-Code-style ``Alt+P`` / ``Alt+E`` / ``Alt+A``.
+
+    Cycling via ``Tab`` is fine for browsing, but power users know
+    which mode they want and shouldn't have to press Tab N times.
+    This is the Hermes / Claude-Code shortcut pattern: each mode has a
+    dedicated chord that snaps to it directly. Permission posture is
+    re-aligned the same way :func:`cycle_mode` does so the two paths
+    stay symmetric.
+    """
+    if mode not in _MODE_CYCLE_TAB:
+        return f"unknown mode: {mode}"
+    session.mode = mode
+
+    current_perm = getattr(session, "permission_mode", "normal")
+    if current_perm != "yolo":
+        if mode == "edit_automatically" and current_perm != "normal":
+            session.permission_mode = "normal"
+            _propagate_perm_to_substrate(session, "normal")
+        elif mode == "ask_before_edits" and current_perm != "strict":
+            session.permission_mode = "strict"
+            _propagate_perm_to_substrate(session, "strict")
+    return f"mode → {mode}"
+
+
 def _propagate_perm_to_substrate(session: "InteractiveSession", perm: str) -> None:
     """Push ``perm`` into the permission stack + tool-approval cache.
 
@@ -235,6 +260,25 @@ def rewind_one_persisted(session: "InteractiveSession") -> str:
     if snap is None:
         return "nothing to rewind."
     return f"rewound turn {snap.turn + 1} (mode={snap.mode!r})"
+
+
+def new_chat(session: "InteractiveSession") -> str:
+    """``Ctrl-N`` — start a fresh chat in the same session shell.
+
+    Wipes in-memory message log, input history, turn counter, and
+    per-turn snapshots so the LLM sees a blank conversation. Preserves
+    mode, model, repo_root, MCP servers, permission settings, and the
+    deep-think flag — those are user preferences, not chat state. The
+    on-disk JSONL session file is left intact; use ``/fork`` if you
+    want to branch instead of starting fresh.
+    """
+    session.turn = 0
+    session.history = []
+    if hasattr(session, "_chat_history"):
+        session._chat_history = []
+    if hasattr(session, "_turns_log"):
+        session._turns_log = []
+    return "new chat (mode + model preserved)"
 
 
 def focus_foreground_subagent(session: "InteractiveSession") -> str:

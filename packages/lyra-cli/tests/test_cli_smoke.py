@@ -233,17 +233,17 @@ def test_version_flag(runner: CliRunner) -> None:
 def test_no_args_launches_interactive_session(
     tmp_path: Path, runner: CliRunner
 ) -> None:
-    """Running ``lyra`` with no args drops into the REPL.
+    """``lyra --legacy`` boots the prompt_toolkit REPL.
 
-    In the test harness stdin is a pipe (no TTY), so the driver falls
-    back to ``input()`` and ``EOFError`` terminates the loop cleanly.
-    We feed ``/exit`` explicitly to prove the dispatcher is live and to
-    keep the test deterministic across Python versions.
+    v3.14 Phase 6 flipped the bare default to the Textual shell, so
+    this test asserts the legacy off-ramp via ``--legacy``. The
+    underlying contract — REPL dispatcher live, accepts ``/exit`` —
+    is unchanged.
     """
     runner.invoke(app, ["init", "--repo-root", str(tmp_path)])
     result = runner.invoke(
         app,
-        ["--repo-root", str(tmp_path)],
+        ["--legacy", "--repo-root", str(tmp_path)],
         input="/exit\n",
     )
     assert result.exit_code == 0, result.stdout

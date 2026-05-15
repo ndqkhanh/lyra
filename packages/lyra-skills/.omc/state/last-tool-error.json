@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"ls /Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-core/src/lyra_core/ 2>/dev/null; echo \\\"---context---\\\"; ls /Users/khanhnguyen/Downloads/MyCV/...",
+  "error": "Exit code 1\n__init__.py\n__pycache__\nacp\nadapters\nagent\narena\nauth\nbrains\nbundle\nconcurrency.py\ncontext\ncontracts\ncron\ndiversity\nenv_compat.py\neval\nevolve\ngateway\nharnesses\nhir\nhooks\nide\nklong\nloop\nloops\nlsp_backend\nmcp\nmemory\nmeta\nmigrations\nmock_llm\nobservability\norg\npaths.py\npermissions\nplan\nplugins\nproviders\nralph\nretrieval\nrl\nrouting\nsafety\nsessions\nskills\nstore\nsubagent\ntdd\nteams\nterminal\ntools\ntts\nverifier\nwiki\n---context---\n__init__.py\n__pycache__\ncompactor.py\neternal_autocompact.py\ngrid....",
+  "timestamp": "2026-05-11T06:52:35.163Z",
+  "retry_count": 1
+}

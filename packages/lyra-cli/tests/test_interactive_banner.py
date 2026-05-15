@@ -62,6 +62,98 @@ def test_banner_shows_help_hint(tmp_path: Path) -> None:
     assert "/help" in _strip_ansi(banner)
 
 
+# ---------------------------------------------------------------------------
+# v3.5.x: panel stretches to fill the terminal width.
+# Before the fix, the panel was hard-coded to 36 cols regardless of
+# terminal size, leaving a tiny rectangle stranded at the left of any
+# wide shell. Now it stretches up to LYRA_BANNER_MAX_WIDTH (default 100).
+# ---------------------------------------------------------------------------
+
+
+def _max_visible_line_width(banner: str) -> int:
+    return max(
+        (len(line) for line in _strip_ansi(banner).splitlines()),
+        default=0,
+    )
+
+
+def test_fancy_panel_stretches_to_terminal_width(tmp_path: Path) -> None:
+    """At 140 cols, the panel must be wider than the legacy 36-col fixed size."""
+    banner = render_banner(
+        repo_root=tmp_path,
+        model="deepseek-chat",
+        mode="plan",
+        term_cols=140,
+    )
+    width = _max_visible_line_width(banner)
+    assert width >= 80, (
+        f"expected panel to stretch ≥ 80 cols on a 140-col terminal, "
+        f"got {width}"
+    )
+
+
+def test_fancy_panel_capped_on_ultrawide(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """200-col terminal still produces a tasteful header, not a stripe.
+
+    Cap default is 100; verify the panel obeys it.
+    """
+    monkeypatch.delenv("LYRA_BANNER_MAX_WIDTH", raising=False)
+    banner = render_banner(
+        repo_root=tmp_path,
+        model="deepseek-chat",
+        mode="plan",
+        term_cols=240,
+    )
+    width = _max_visible_line_width(banner)
+    # The panel itself ≤ 100; metadata block below the panel may render
+    # the absolute repo path, which can exceed 100 cols on long paths.
+    # We only constrain the *panel* via panel-border-character count.
+    panel_lines = [
+        line for line in _strip_ansi(banner).splitlines()
+        if line.strip().startswith(("╭", "│", "╰"))
+    ]
+    panel_width = max((len(line) for line in panel_lines), default=0)
+    assert panel_width <= 100, (
+        f"panel must be capped at 100 cols on ultrawide, got {panel_width}"
+    )
+    # And it should at least be wider than the 36-col legacy default.
+    assert panel_width >= 80
+
+
+def test_lyra_banner_max_width_env_override(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """``LYRA_BANNER_MAX_WIDTH=120`` lifts the 100-col cap."""
+    monkeypatch.setenv("LYRA_BANNER_MAX_WIDTH", "120")
+    banner = render_banner(
+        repo_root=tmp_path,
+        model="deepseek-chat",
+        mode="plan",
+        term_cols=240,
+    )
+    panel_lines = [
+        line for line in _strip_ansi(banner).splitlines()
+        if line.strip().startswith(("╭", "│", "╰"))
+    ]
+    panel_width = max((len(line) for line in panel_lines), default=0)
+    assert panel_width <= 120
+    assert panel_width >= 100
+
+
+def test_narrow_terminal_still_uses_compact_path(tmp_path: Path) -> None:
+    """Sub-40-col terminal: no logo (compact path), banner stays small."""
+    banner = render_banner(
+        repo_root=tmp_path,
+        model="mock",
+        mode="plan",
+        term_cols=30,
+    )
+    # Compact path — the ASCII logo's distinctive `██╗` glyph is absent.
+    assert "██╗" not in banner
+
+
 def test_banner_renders_without_colorcodes_on_plain_terminals(
     tmp_path: Path,
 ) -> None:

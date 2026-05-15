@@ -20,8 +20,10 @@ from lyra_cli.__main__ import app
 
 
 def test_phase_n_version_string() -> None:
-    # Bumped in Phase O.7 (Memento-style Read-Write Reflective Learning).
-    assert __version__ == "3.5.0"
+    # Bumped in v3.13 — autonomy surfaces: /directive, /contract,
+    # /autopilot, /continue wire the v3.12 substrate
+    # (lyra_core.contracts, lyra_core.loops.{directive,store}) into the REPL.
+    assert __version__ == "3.13.0"
 
 
 @pytest.mark.parametrize(

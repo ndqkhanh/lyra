@@ -235,21 +235,36 @@ def _root(
                 err=True,
             )
     elif not use_legacy:
-        # Launch streaming CLI (default)
-        from .cli.repl import launch_streaming_repl
-        import asyncio
+        # Default: Hermes-style TUI Application
+        # Set LYRA_USE_STREAMING=true to use streaming CLI instead
+        use_streaming = os.environ.get("LYRA_USE_STREAMING", "").lower() == "true"
 
-        exit_code = asyncio.run(
-            launch_streaming_repl(
+        if use_streaming:
+            # Streaming CLI (opt-in)
+            from .cli.repl import launch_streaming_repl
+            import asyncio
+
+            exit_code = asyncio.run(
+                launch_streaming_repl(
+                    repo_root=repo_root.resolve(),
+                    model=model,
+                    budget_cap_usd=budget,
+                    resume_id=resume_target,
+                    pin_session_id=pin_id,
+                    bare=bare,
+                )
+            )
+            raise typer.Exit(exit_code)
+        else:
+            # Full Hermes-style TUI Application (DEFAULT)
+            from .cli.tui import launch_tui
+            exit_code = launch_tui(
                 repo_root=repo_root.resolve(),
                 model=model,
                 budget_cap_usd=budget,
-                resume_id=resume_target,
-                pin_session_id=pin_id,
-                bare=bare,
+                session_id=session_id,
             )
-        )
-        raise typer.Exit(exit_code)
+            raise typer.Exit(exit_code)
 
     # Legacy path — surface a one-line deprecation hint via Click's
     # stderr stream so CliRunner can capture it without monkeypatching.

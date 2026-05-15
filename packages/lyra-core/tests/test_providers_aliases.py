@@ -126,3 +126,104 @@ def test_deepseek_coder_routes_to_chat_for_now() -> None:
     older lyra setups.
     """
     assert resolve_alias("deepseek-coder") == "deepseek-chat"
+
+
+# ---------------------------------------------------------------------------
+# Future-proof DeepSeek versions: any ``deepseek-vN-{pro|flash|...}`` should
+# resolve to the canonical API slug without requiring a code change every
+# time DeepSeek bumps the version. The pro/reasoner/smart family routes to
+# ``deepseek-reasoner`` (R1-class); flash/chat/fast/coder routes to
+# ``deepseek-chat`` (V3-class). Decimal versions (v3.1, v4.5) work too.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "alias",
+    [
+        "deepseek-v5-pro",
+        "deepseek-v6-pro",
+        "deepseek-v10-pro",
+        "deepseek-v5-reasoner",
+        "deepseek-v5-smart",
+        "deepseek-v3.1-pro",
+        "deepseek-v4.5-pro",
+    ],
+)
+def test_deepseek_future_pro_versions_resolve_to_reasoner(alias: str) -> None:
+    from lyra_core.providers.aliases import provider_key_for, resolve_alias
+
+    assert resolve_alias(alias) == "deepseek-reasoner"
+    assert provider_key_for(alias) == "deepseek"
+
+
+@pytest.mark.parametrize(
+    "alias",
+    [
+        "deepseek-v5-flash",
+        "deepseek-v6-flash",
+        "deepseek-v10-flash",
+        "deepseek-v5-chat",
+        "deepseek-v5-fast",
+        "deepseek-v5-coder",
+        "deepseek-v3.1-flash",
+    ],
+)
+def test_deepseek_future_flash_versions_resolve_to_chat(alias: str) -> None:
+    from lyra_core.providers.aliases import provider_key_for, resolve_alias
+
+    assert resolve_alias(alias) == "deepseek-chat"
+    assert provider_key_for(alias) == "deepseek"
+
+
+def test_deepseek_versioned_aliases_are_case_insensitive() -> None:
+    assert resolve_alias("DeepSeek-V5-PRO") == "deepseek-reasoner"
+    assert resolve_alias("DEEPSEEK-V7-FLASH") == "deepseek-chat"
+
+
+def test_deepseek_unrecognized_suffix_falls_back_to_input() -> None:
+    """``v5-banana`` is not in the pro/flash family — leave it alone.
+
+    Falling back means the eventual API call surfaces the real DeepSeek
+    error rather than silently misrouting to the wrong model.
+    """
+    assert resolve_alias("deepseek-v5-banana") == "deepseek-v5-banana"
+
+
+def test_register_pattern_extends_default_registry() -> None:
+    """Users / plugins can add their own version pattern at runtime."""
+    from lyra_core.providers.aliases import (
+        DEFAULT_ALIASES,
+        register_pattern,
+        resolve_alias,
+    )
+
+    register_pattern(r"^myco-v\d+-fast$", "myco-cheap", provider="myco")
+    try:
+        assert resolve_alias("myco-v9-fast") == "myco-cheap"
+    finally:
+        DEFAULT_ALIASES._patterns = [
+            (p, e) for p, e in DEFAULT_ALIASES._patterns if "myco" not in p.pattern
+        ]
+
+
+def test_custom_registry_does_not_inherit_default_patterns() -> None:
+    """A fresh ``AliasRegistry()`` starts empty, including patterns.
+
+    Mirrors the existing isolation contract for ``register()``.
+    """
+    reg = AliasRegistry()
+    assert reg.resolve("deepseek-v5-pro") == "deepseek-v5-pro"
+
+
+def test_explicit_alias_wins_over_pattern() -> None:
+    """An exact-match alias must take precedence over a regex pattern.
+
+    If a future DeepSeek release ships a real ``deepseek-v5-pro`` slug,
+    we want to be able to register it directly and have it stop routing
+    through the generic pattern.
+    """
+    reg = AliasRegistry()
+    reg.register_pattern(r"^foo-v\d+$", "foo-canonical", provider="foo")
+    reg.register("foo-v3", "foo-special", provider="foo")
+    assert reg.resolve("foo-v3") == "foo-special"
+    assert reg.resolve("foo-v9") == "foo-canonical"

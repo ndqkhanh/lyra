@@ -184,6 +184,39 @@ _AUTHJSON_PROVIDER_TO_ENV = {
 }
 
 
+def provider_env_var(provider: str) -> str | None:
+    """Public form of the auth.json provider → env-var map.
+
+    Used by ``/model`` to know which env var to stamp after the user
+    pastes a key, and by docs / diagnostics that want the canonical
+    name of the env var for a given provider without re-deriving it.
+    """
+    return _AUTHJSON_PROVIDER_TO_ENV.get(provider)
+
+
+def provider_has_credentials(provider: str) -> bool:
+    """True iff *provider* has either an env var or a saved auth.json key.
+
+    This is the single decision point for "should we ask the user
+    for an API key when they switch to this provider". Local
+    providers (``ollama``, ``lmstudio``) intentionally return True
+    because they don't need keys; ``mock`` always returns True.
+    """
+    if provider in {"mock", "ollama", "lmstudio"}:
+        return True
+    env_name = _AUTHJSON_PROVIDER_TO_ENV.get(provider)
+    if env_name and os.environ.get(env_name, "").strip():
+        return True
+    try:
+        from lyra_core.auth.store import get_api_key as _get_api_key
+
+        if _get_api_key(provider):
+            return True
+    except Exception:
+        pass
+    return False
+
+
 def _hydrate_env_from_authjson() -> None:
     """Source any missing provider keys from ``~/.lyra/auth.json``.
 
@@ -241,6 +274,53 @@ def _hydrate_env_from_dotenv() -> None:
         value = dotenv_value(key)
         if value:
             os.environ[key] = value
+
+
+def _route_kind_via_alias(kind: str) -> str:
+    """Resolve a model alias to its provider key + stamp env vars.
+
+    When the caller passes a model slug (``deepseek-chat``,
+    ``claude-opus-4.5``, ``gpt-5``) instead of a provider name, route
+    via the alias registry so the right preset is selected and the
+    canonical slug propagates as ``HARNESS_LLM_MODEL`` (and the
+    provider-specific override when present). Without this remap, the
+    cascade reaches the auto branch and silently lands on whichever
+    provider has a key — the exact bug behind ``/model deepseek-chat``
+    calling OpenAI.
+
+    Returns the routed kind (provider key) or the input unchanged.
+    """
+    if kind == "auto" or not kind:
+        return kind
+    from lyra_core.providers.aliases import (
+        provider_key_for as _provider_key_for,
+        resolve_alias as _resolve_alias,
+    )
+
+    resolved_provider = _provider_key_for(kind)
+    if not resolved_provider or resolved_provider == kind:
+        return kind
+    canonical_slug = _resolve_alias(kind)
+    if canonical_slug:
+        os.environ["HARNESS_LLM_MODEL"] = canonical_slug
+        provider_model_env = {
+            "deepseek": "DEEPSEEK_MODEL",
+            "anthropic": "ANTHROPIC_MODEL",
+            "openai": "OPENAI_MODEL",
+            "openai-reasoning": "OPENAI_MODEL",
+            "gemini": "GEMINI_MODEL",
+            "xai": "XAI_MODEL",
+            "groq": "GROQ_MODEL",
+            "cerebras": "CEREBRAS_MODEL",
+            "mistral": "MISTRAL_MODEL",
+            "openrouter": "OPENROUTER_MODEL",
+            "dashscope": "DASHSCOPE_MODEL",
+            "qwen": "DASHSCOPE_MODEL",
+            "ollama": "OLLAMA_MODEL",
+        }.get(resolved_provider)
+        if provider_model_env:
+            os.environ[provider_model_env] = canonical_slug
+    return resolved_provider
 
 
 def _resolve_model_alias_from_env() -> None:
@@ -474,6 +554,7 @@ def build_llm(
     kind = (kind or "auto").lower().strip()
     _hydrate_env_from_dotenv()
     _resolve_model_alias_from_env()
+    kind = _route_kind_via_alias(kind)
 
     # -- mock: always works ---------------------------------------------
     if kind == "mock":
@@ -639,6 +720,29 @@ def build_llm(
         # branch is the belt-and-braces for programmatic callers.
         kind = "auto"
 
+    # -- local-first preference (v3.5.x) --------------------------------
+    # If Ollama is running on localhost, prefer it over remote APIs:
+    # zero cost, no rate limits, no provider 404s on unsupported model
+    # names, and works offline. Set ``LYRA_PREFER_LOCAL=0`` to disable
+    # and use the cloud cascade below (e.g. for CI / determinism).
+    _prefer_local = os.environ.get("LYRA_PREFER_LOCAL", "1").strip().lower() not in (
+        "0", "false", "no", "off", ""
+    )
+    if _prefer_local and ollama_reachable():
+        try:
+            llm = OllamaLLM()
+            model = (
+                os.environ.get("OPEN_HARNESS_LOCAL_MODEL", "").strip()
+                or os.environ.get("OLLAMA_MODEL", "").strip()
+                or "llama3.1"
+            )
+            _emit_provider_selected("ollama", model, is_local=True)
+            return llm
+        except ProviderNotConfigured:
+            # Ollama daemon went down between probe and build; fall
+            # through to the cloud cascade.
+            pass
+
     # ------------------------- auto cascade ----------------------------
     #
     # Priority order in 2026:
@@ -759,6 +863,7 @@ def describe_selection(kind: str = "auto") -> str:
     kind = (kind or "auto").lower().strip()
     _hydrate_env_from_dotenv()
     _resolve_model_alias_from_env()
+    kind = _route_kind_via_alias(kind)
 
     if kind == "mock":
         return "mock · canned outputs"

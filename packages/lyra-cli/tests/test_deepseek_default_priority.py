@@ -52,6 +52,9 @@ def isolated_env(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
         "OPEN_HARNESS_DEEPSEEK_MODEL",
     ):
         monkeypatch.delenv(k, raising=False)
+    # Disable v3.5.x local-first cascade so these tests stay deterministic
+    # on dev machines that happen to have Ollama running on localhost.
+    monkeypatch.setenv("LYRA_PREFER_LOCAL", "0")
     # Belt-and-braces: the dotenv hydration walks up the tree from
     # CWD, so point CWD at /tmp where there's no .env to surprise us.
     monkeypatch.chdir(os.path.dirname(os.path.abspath(__file__)) + "/..")

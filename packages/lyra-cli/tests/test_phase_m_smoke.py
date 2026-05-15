@@ -7,8 +7,8 @@ from lyra_cli import __version__
 from lyra_cli.__main__ import app
 
 
-def test_version_is_3_5_0():
-    assert __version__ == "3.5.0"
+def test_version_string():
+    assert __version__ == "3.13.0"
 
 
 def test_root_help_mentions_burn():

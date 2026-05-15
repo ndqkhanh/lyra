@@ -68,7 +68,9 @@ def test_mode_build_alias_remaps_to_edit_automatically(tmp_path: Path) -> None:
     assert s.mode == "edit_automatically"
     # User sees the rename so old muscle memory doesn't silently land
     # them in a different conceptual mode.
-    assert "rename" in out.lower() or "v3.6" in out
+    # v3.7+: legacy aliases remap silently — the user typed a name they
+    # know, the dispatcher honours it, no explanatory paragraph required.
+    assert out.startswith("mode:")
 
 
 def test_mode_agent_alias_remaps_to_edit_automatically(tmp_path: Path) -> None:
@@ -77,7 +79,9 @@ def test_mode_agent_alias_remaps_to_edit_automatically(tmp_path: Path) -> None:
     s = InteractiveSession(repo_root=tmp_path, mode="plan_mode")
     out = s.dispatch("/mode agent").output
     assert s.mode == "edit_automatically"
-    assert "rename" in out.lower() or "v3.6" in out
+    # v3.7+: legacy aliases remap silently — the user typed a name they
+    # know, the dispatcher honours it, no explanatory paragraph required.
+    assert out.startswith("mode:")
 
 
 def test_mode_debug_alias_remaps_to_auto_mode(tmp_path: Path) -> None:
@@ -86,7 +90,9 @@ def test_mode_debug_alias_remaps_to_auto_mode(tmp_path: Path) -> None:
     s = InteractiveSession(repo_root=tmp_path, mode="plan_mode")
     out = s.dispatch("/mode debug").output
     assert s.mode == "auto_mode"
-    assert "rename" in out.lower() or "v3.6" in out
+    # v3.7+: legacy aliases remap silently — the user typed a name they
+    # know, the dispatcher honours it, no explanatory paragraph required.
+    assert out.startswith("mode:")
 
 
 def test_mode_ask_alias_remaps_to_plan_mode(tmp_path: Path) -> None:
@@ -96,4 +102,6 @@ def test_mode_ask_alias_remaps_to_plan_mode(tmp_path: Path) -> None:
     s = InteractiveSession(repo_root=tmp_path, mode="edit_automatically")
     out = s.dispatch("/mode ask").output
     assert s.mode == "plan_mode"
-    assert "rename" in out.lower() or "v3.6" in out
+    # v3.7+: legacy aliases remap silently — the user typed a name they
+    # know, the dispatcher honours it, no explanatory paragraph required.
+    assert out.startswith("mode:")

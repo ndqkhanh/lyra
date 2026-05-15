@@ -22,10 +22,62 @@ from typing import Any
 
 from typing import Any, Callable
 
-from harness_eternal import CircuitBreaker
-from harness_eternal.restate import LocalRuntime, RestateRuntime
+# ``harness_eternal`` is an optional sibling package — present in the
+# orion-code monorepo and on production deployments, absent in lean
+# checkouts where users never opt into eternal-mode. Importing it
+# eagerly broke every test file that touched ``eternal_factory`` even
+# when the test never instantiated a durable loop. We import lazily and
+# raise a clear error at call time instead, so module-level ``import
+# lyra_cli.eternal_factory`` always succeeds.
+try:
+    from harness_eternal import CircuitBreaker  # type: ignore[import-untyped]
+    from harness_eternal.restate import (  # type: ignore[import-untyped]
+        LocalRuntime,
+        RestateRuntime,
+    )
 
-from lyra_core.agent.eternal_turn import EternalAgentLoop
+    _HARNESS_ETERNAL_OK = True
+    _HARNESS_ETERNAL_ERR: str | None = None
+except ImportError as _exc:  # pragma: no cover — exercised in lean envs
+    _HARNESS_ETERNAL_OK = False
+    _HARNESS_ETERNAL_ERR = str(_exc)
+
+    class CircuitBreaker:  # type: ignore[no-redef]
+        """Stub — real impl ships in ``harness_eternal``."""
+
+        def __init__(self, *_: Any, **__: Any) -> None:
+            raise RuntimeError(
+                "harness_eternal is not installed; install it to enable "
+                f"eternal-mode (original ImportError: {_HARNESS_ETERNAL_ERR})"
+            )
+
+    class LocalRuntime:  # type: ignore[no-redef]
+        def __init__(self, *_: Any, **__: Any) -> None:
+            raise RuntimeError(
+                "harness_eternal is not installed; install it to enable "
+                f"eternal-mode (original ImportError: {_HARNESS_ETERNAL_ERR})"
+            )
+
+    class RestateRuntime:  # type: ignore[no-redef]
+        def __init__(self, *_: Any, **__: Any) -> None:
+            raise RuntimeError(
+                "harness_eternal is not installed; install it to enable "
+                f"eternal-mode (original ImportError: {_HARNESS_ETERNAL_ERR})"
+            )
+
+
+try:
+    from lyra_core.agent.eternal_turn import EternalAgentLoop
+except ImportError:  # pragma: no cover — lean env
+
+    class EternalAgentLoop:  # type: ignore[no-redef]
+        """Stub — real impl ships in ``lyra_core.agent.eternal_turn``."""
+
+        def __init__(self, *_: Any, **__: Any) -> None:
+            raise RuntimeError(
+                "lyra_core.agent.eternal_turn is unavailable; cannot "
+                "wrap a loop in eternal-mode."
+            )
 
 
 def make_eternal_loop(

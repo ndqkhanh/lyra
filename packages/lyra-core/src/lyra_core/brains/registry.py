@@ -116,7 +116,7 @@ strictness; do not relax it.
 
 Defaults:
 - Toolset: coding
-- Model preference: auto (smart_model for reasoning)
+- Model preference: auto
 - TDD plugin: on (enforced gate; do not disable mid-task)
 - Reviewer: /ultrareview after every code-touching turn
 """
@@ -147,7 +147,7 @@ hardened production code paths.
 
 Defaults:
 - Toolset: coding
-- Model preference: auto (fast_model for chat)
+- Model preference: auto
 - TDD plugin: off
 - Reviewer: /review on demand only
 """

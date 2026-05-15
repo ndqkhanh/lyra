@@ -151,4 +151,31 @@ def make_web_fetch_tool(
     return web_fetch
 
 
-__all__ = ["make_web_fetch_tool"]
+class WebFetchTool:
+    """Tool wrapper for WebFetch compatible with harness_core.tools.ToolRegistry."""
+
+    name = "WebFetch"
+    description = "Fetch a URL and return its readable text content."
+    risk = "low"
+    writes = False
+
+    def __init__(self, *, http: Any | None = None) -> None:
+        self._fetch = make_web_fetch_tool(http=http)
+
+    def run(self, args: Any) -> str:
+        """Execute the web fetch and return formatted result."""
+        result = self._fetch(**args)
+        if result.get("error"):
+            return f"WebFetch failed: {result['error']}\nURL: {result['final_url']}"
+
+        text = result.get("text", "")
+        truncated = " (truncated)" if result.get("truncated") else ""
+        status = result.get("status_code", 0)
+        return f"fetched {result['final_url']} (HTTP {status}){truncated}\n{text}"
+
+    def to_schema(self) -> dict:
+        """Return the tool schema for LLM consumption."""
+        return getattr(self._fetch, "__tool_schema__", {})
+
+
+__all__ = ["make_web_fetch_tool", "WebFetchTool"]
