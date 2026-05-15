@@ -16,7 +16,9 @@ The flat Claude-Code style remains available via
 """
 from __future__ import annotations
 
+import difflib
 import os
+import re
 import shutil
 from dataclasses import dataclass
 
@@ -28,8 +30,11 @@ __all__ = [
     "PREVIEW_LINES",
     "ToolPaint",
     "format_tool_output",
+    "is_file_tool",
     "paint_call",
     "paint_denied",
+    "paint_file_call",
+    "paint_file_result",
     "paint_limit",
     "paint_result",
     "tool_emoji",
@@ -271,3 +276,162 @@ def paint_limit(reason: str) -> ToolPaint:
     )
     plain = f"  {glyphs.OUTPUT}  tool-loop budget reached: {reason}"
     return ToolPaint(rich_lines=[rich], plain_lines=[plain])
+
+
+# ── Claude Code-style file-write rendering ──────────────────────
+
+_FILE_WRITE_TOOLS: frozenset[str] = frozenset({"Edit", "Write", "MultiEdit"})
+
+_HUNK_RE = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@")
+
+# Soft green / red for +/- lines (same palette as live_progress)
+_ADD_COL = "#7CFFB2"
+_DEL_COL = "#FF5370"
+
+
+def is_file_tool(tool_name: str) -> bool:
+    """True for tools that write file content (Edit, Write, MultiEdit)."""
+    return tool_name in _FILE_WRITE_TOOLS
+
+
+def paint_file_call(tool_name: str, path: str) -> ToolPaint:
+    """Claude Code-style call header: ``⏺ Update(path)`` or ``⏺ Write(path)``."""
+    accent = PALETTE["accent"]
+    meta = PALETTE["meta"]
+    verb = "Write" if tool_name == "Write" else "Update"
+    rich = (
+        f"[bold {accent}]{glyphs.ASSISTANT}[/] "
+        f"[bold]{verb}[/]"
+        f"[{meta}]({path})[/]"
+    )
+    plain = f"{glyphs.ASSISTANT} {verb}({path})"
+    return ToolPaint(rich_lines=[rich], plain_lines=[plain])
+
+
+def _unified_diff_rows(
+    old: str, new: str, *, context: int = 2
+) -> tuple[list[tuple[int | None, str, str]], int, int]:
+    """Compute unified diff and return ``(rows, added, removed)``.
+
+    Each row is ``(new_lineno | None, marker, content)`` where marker is
+    ``"+"`` / ``"-"`` / ``" "``.  ``new_lineno`` is ``None`` for deleted
+    lines because they have no position in the new file.
+    """
+    raw = list(
+        difflib.unified_diff(
+            old.splitlines(keepends=True),
+            new.splitlines(keepends=True),
+            n=context,
+            lineterm="",
+        )
+    )
+    diff_lines = [
+        ln.rstrip("\n")
+        for ln in raw
+        if not ln.startswith("---") and not ln.startswith("+++")
+    ]
+
+    added = removed = 0
+    rows: list[tuple[int | None, str, str]] = []
+    lineno = 1
+    for dl in diff_lines:
+        m = _HUNK_RE.match(dl)
+        if m:
+            lineno = int(m.group(1))
+            continue
+        if dl.startswith("+"):
+            rows.append((lineno, "+", dl[1:]))
+            lineno += 1
+            added += 1
+        elif dl.startswith("-"):
+            rows.append((None, "-", dl[1:]))
+            removed += 1
+        else:
+            rows.append((lineno, " ", dl[1:] if dl else ""))
+            lineno += 1
+
+    return rows, added, removed
+
+
+def paint_file_result(
+    tool_name: str,
+    args: dict,
+    output: str,
+    *,
+    is_error: bool,
+    preview_lines: int = PREVIEW_LINES,
+) -> tuple[ToolPaint, str]:
+    """Claude Code-style result block for Edit/Write tools.
+
+    Emits::
+
+        ⎿  Added 12 lines
+             1234      context line
+             1235 +    new addition
+    """
+    if is_error:
+        return paint_result(output, is_error=True)
+
+    success_col = PALETTE["success"]
+    meta = PALETTE["meta"]
+
+    if tool_name == "Write":
+        new_text = args.get("content", "") or ""
+        n_lines = len(new_text.splitlines()) if new_text else 0
+        stat = f"Wrote {n_lines} line{'s' if n_lines != 1 else ''}"
+        all_rows: list[tuple[int | None, str, str]] = [
+            (i + 1, "+", ln) for i, ln in enumerate(new_text.splitlines())
+        ]
+        full_output = new_text
+    else:
+        old_text = args.get("old", "") or ""
+        new_text = args.get("new", "") or ""
+        all_rows, added, removed = _unified_diff_rows(old_text, new_text)
+        parts: list[str] = []
+        if added:
+            parts.append(f"Added {added} line{'s' if added != 1 else ''}")
+        if removed:
+            parts.append(f"Removed {removed} line{'s' if removed != 1 else ''}")
+        stat = " · ".join(parts) if parts else "No changes"
+        full_output = output
+
+    remainder = max(0, len(all_rows) - preview_lines)
+    rows = all_rows[:preview_lines]
+
+    num_width = max(
+        (len(str(r[0])) for r in rows if r[0] is not None),
+        default=4,
+    )
+
+    rich_lines: list[str] = [
+        f"  [{success_col}]{glyphs.OUTPUT}[/]  [{meta}]{stat}[/]"
+    ]
+    plain_lines: list[str] = [f"  {glyphs.OUTPUT}  {stat}"]
+
+    for lineno_val, marker, content in rows:
+        num_str = (
+            str(lineno_val).rjust(num_width)
+            if lineno_val is not None
+            else " " * num_width
+        )
+        if len(content) > MAX_LINE_WIDTH:
+            content = content[: MAX_LINE_WIDTH - 1] + "…"
+        if marker == "+":
+            rich_lines.append(
+                f"  [{meta}]{num_str}[/] [bold {_ADD_COL}]+[/][{_ADD_COL}]{content}[/]"
+            )
+            plain_lines.append(f"  {num_str} +{content}")
+        elif marker == "-":
+            rich_lines.append(
+                f"  [{meta}]{num_str}[/] [bold {_DEL_COL}]-[/][{_DEL_COL}]{content}[/]"
+            )
+            plain_lines.append(f"  {num_str} -{content}")
+        else:
+            rich_lines.append(f"  [{meta}]{num_str}   {content}[/]")
+            plain_lines.append(f"  {num_str}   {content}")
+
+    if remainder > 0:
+        rich_lines.append(f"  [{meta}]… +{remainder} more lines[/]")
+        plain_lines.append(f"  … +{remainder} more lines")
+
+    return ToolPaint(rich_lines=rich_lines, plain_lines=plain_lines), full_output

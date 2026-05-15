@@ -182,6 +182,14 @@ def apply_to_session(cfg: Config, session: object) -> None:
         except (TypeError, ValueError):
             pass
 
+    model = cfg.get("model")
+    if model:
+        setattr(session, "model", model)
+
+    mode = cfg.get("mode")
+    if mode:
+        setattr(session, "mode", mode)
+
 
 def to_bool(value: str) -> bool:
     """Public helper used by `_cmd_config` to coerce on/off → bool."""

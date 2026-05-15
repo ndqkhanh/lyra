@@ -19,7 +19,7 @@ from rich.console import Console
 class ProgressBarManager:
     """Manages progress bars for various operations."""
 
-    def __init__(self, console: Console = None):
+    def __init__(self, console: Console | None = None):
         self.console = console or Console()
 
     def create_research_progress(self) -> Progress:

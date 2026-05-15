@@ -49,7 +49,19 @@ import os
 import sys
 import threading
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from .status_source import StatusSource
+
+
+def _humanise_tokens(n: int) -> str:
+    """Compact token count: 800 → '800', 1500 → '1.5k', 2_100_000 → '2.1M'."""
+    if n < 1_000:
+        return str(n)
+    if n < 1_000_000:
+        return f"{n / 1_000:.1f}k"
+    return f"{n / 1_000_000:.1f}M"
 
 
 # Module-level enable flag so tests can switch the spinner off entirely
@@ -111,16 +123,17 @@ class Spinner:
         message: str = "",
         *,
         frames: list[str] | None = None,
-        preset: str = "dots",
+        preset: str = "star",
         out: Any | None = None,
+        status_source: "StatusSource | None" = None,
     ) -> None:
         # Resolve frames in priority order:
         #   1. explicit ``frames=`` (caller knows best)
         #   2. active-skin spinner.faces (so /theme can re-skin spinners)
-        #   3. ``preset`` lookup (default "dots")
+        #   3. ``preset`` lookup (default "star" = ✶ ✷ ✸ — matches Claude Code)
         if frames is None:
             frames = self._frames_from_active_skin() or list(
-                SPINNER_PRESETS.get(preset, SPINNER_PRESETS["dots"])
+                SPINNER_PRESETS.get(preset, SPINNER_PRESETS["star"])
             )
         if not frames:
             # Defensive: empty frame list would divide-by-zero in ``_animate``.
@@ -138,6 +151,8 @@ class Spinner:
         self._out: Any = out if out is not None else sys.stdout
         # Cache wings once at start to avoid a per-frame skin import.
         self._wings: list[tuple[str, str]] = []
+        # Optional status source for per-turn token download display.
+        self._status_source: "StatusSource | None" = status_source
 
     @staticmethod
     def _frames_from_active_skin() -> list[str]:
@@ -225,11 +240,24 @@ class Spinner:
                 continue
             frame = self.frames[self._frame_idx % len(self.frames)]
             elapsed = time.time() - (self._start_time or time.time())
+
+            # Build token-download suffix: "· ↓ 8.3k tokens" when available.
+            tokens_suffix = ""
+            if self._status_source is not None:
+                td = self._status_source.tokens_down_turn
+                if td > 0:
+                    tokens_suffix = f" · ↓ {_humanise_tokens(td)} tokens"
+
+            # Use verb from status_source when available, else fall back to message.
+            verb = self.message
+            if self._status_source is not None:
+                verb = self._status_source.current_verb
+
             if self._wings:
                 left, right = self._wings[self._frame_idx % len(self._wings)]
-                line = f" {left} {frame} {self.message} {right} ({elapsed:.1f}s)"
+                line = f" {left} {frame} {verb}… ({elapsed:.0f}s{tokens_suffix}) {right}"
             else:
-                line = f" {frame} {self.message} ({elapsed:.1f}s)"
+                line = f" {frame} {verb}… ({elapsed:.0f}s{tokens_suffix})"
             # Pad with spaces (NOT \033[K) to clear the previous frame —
             # \033[K renders as garbage under patch_stdout proxies.
             pad = max(self._last_line_len - len(line), 0)

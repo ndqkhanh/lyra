@@ -130,6 +130,21 @@ def format_permission_badge(mode: str) -> str:
     return f"[{style}]mode={mode}[/]"
 
 
+def format_bg_tasks_segment(count: int) -> str:
+    """Render the background task count as a coloured badge.
+
+    Returns an empty string when ``count`` is zero so the caller can
+    skip the segment entirely (field collapses in narrow terminals).
+
+    Example output:
+        [bold cyan]⏵⏵ 5 background tasks[/]
+    """
+    if count <= 0:
+        return ""
+    label = "task" if count == 1 else "tasks"
+    return f"[bold cyan]⏵⏵ {count} background {label}[/]"
+
+
 def format_daemon_segment(iteration: int, last_job: str = "—") -> str:
     """Render the daemon iteration counter and last cron job.
 

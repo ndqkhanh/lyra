@@ -1200,6 +1200,31 @@ def _bottom_toolbar(session: InteractiveSession) -> HTML:
         else ""
     )
 
+    # Permission mode badge — shown only when non-default (yolo/strict).
+    perm_badge = {
+        "yolo": (
+            f"{bar}<style fg='{danger}'><b>⏵⏵</b></style>"
+            f"<style fg='{danger}'> bypass permissions on</style>"
+        ),
+        "strict": (
+            f"{bar}<style fg='{warning}'><b>🔒</b></style>"
+            f"<style fg='{warning}'> strict</style>"
+        ),
+    }.get(session.permission_mode, "")
+
+    # Background task count + "esc to interrupt" from shared StatusSource.
+    _ss = getattr(session, "status_source", None)
+    _bg = _ss.bg_task_count if _ss is not None else 0
+    bg_badge = ""
+    interrupt_badge = ""
+    if _bg > 0:
+        _label = "task" if _bg == 1 else "tasks"
+        bg_badge = (
+            f"{bar}<style fg='{accent}'><b>⏵⏵</b></style>"
+            f"<style fg='{text}'> {_bg} background {_label}</style>"
+        )
+        interrupt_badge = f"{bar}<style fg='{text}'>esc to interrupt</style>"
+
     left = (
         f"<style fg='{accent}'> ◆ </style>"
         f"<style fg='{text}'>repo </style>"
@@ -1217,6 +1242,9 @@ def _bottom_toolbar(session: InteractiveSession) -> HTML:
         + deep_badge
         + budget_badge
         + skin_badge
+        + perm_badge
+        + bg_badge
+        + interrupt_badge
     )
     # Compact keybind strip — same glyphs, single-space separator so the
     # full hint row fits beside the status segments on an 80-col panel.

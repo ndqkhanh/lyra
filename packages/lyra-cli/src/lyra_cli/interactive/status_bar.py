@@ -20,8 +20,27 @@ from typing import TYPE_CHECKING, Optional, Union
 
 from rich.text import Text
 
+from .task_list import render_checklist_text
+
 if TYPE_CHECKING:
     from .status_source import StatusSource
+
+
+def _humanise_tokens(n: int) -> str:
+    if n < 1_000:
+        return str(n)
+    if n < 1_000_000:
+        return f"{n / 1_000:.1f}k"
+    return f"{n / 1_000_000:.1f}M"
+
+
+def _fmt_elapsed(secs: float) -> str:
+    m, s = divmod(int(secs), 60)
+    return f"{m}m {s:02d}s" if m else f"{s}s"
+
+
+def _truncate(text: str, width: int) -> str:
+    return text if len(text) <= width else text[: width - 1] + "…"
 
 
 # Symbol vocabulary, kept here so the welcome screen and command
@@ -32,7 +51,60 @@ SYM_LSP = "✦"
 SYM_MCP = "⊙"
 SEP = " · "
 
-__all__ = ["render_footer", "SEP", "SYM_MODEL", "SYM_PERMS", "SYM_LSP", "SYM_MCP"]
+def render_checklist_section(source: "StatusSource") -> str:
+    """Return the checklist block as a plain-text string (multi-line).
+
+    Returns ``""`` when there are no tasks so callers can skip the newline.
+    Reads the task list via :meth:`StatusSource.snapshot_tasks` to avoid
+    holding the lock while rendering.
+    """
+    tasks = source.snapshot_tasks()
+    return render_checklist_text(tasks)
+
+
+def render_agents_text(processes: list, *, max_show: int = 3) -> str:
+    """Render a compact agent list for the REPL bottom toolbar.
+
+    Each line: ``  ◯ {type:<14} {desc:<38}  {elapsed} · ↓ {tokens} tokens``
+
+    Args:
+        processes: List of :class:`~lyra_core.transparency.models.AgentProcess`.
+        max_show: Maximum number of agent lines to display.
+
+    Returns:
+        Multi-line string (empty string when no processes).
+    """
+    if not processes:
+        return ""
+    lines: list[str] = []
+    for proc in processes[:max_show]:
+        agent_type = _infer_agent_type(proc)
+        desc = _truncate(proc.current_tool or "—", 38)
+        elapsed = _fmt_elapsed(getattr(proc, "elapsed_s", 0.0))
+        tokens = _humanise_tokens(getattr(proc, "tokens_out", 0))
+        lines.append(f"  ◯ {agent_type:<14} {desc:<38}  {elapsed} · ↓ {tokens} tokens")
+    return "\n".join(lines)
+
+
+def _infer_agent_type(proc: object) -> str:
+    """Guess a short agent type label from an AgentProcess."""
+    session_id = getattr(proc, "session_id", "") or ""
+    for keyword in ("executor", "researcher", "planner", "architect", "reviewer"):
+        if keyword in session_id.lower():
+            return keyword
+    return "general-purpose"
+
+
+__all__ = [
+    "render_footer",
+    "render_checklist_section",
+    "render_agents_text",
+    "SEP",
+    "SYM_MODEL",
+    "SYM_PERMS",
+    "SYM_LSP",
+    "SYM_MCP",
+]
 
 
 def _shorten_cwd(cwd: Path, max_width: int) -> str:
@@ -113,6 +185,7 @@ def render_footer(
         cost = source.cost_usd
         turn = source.turn
         extra = dict(source.extra)
+        bg_tasks = source.bg_task_count
 
     # Build a list of (priority, plain_segment, rich_segment) tuples.
     # Higher priority = drops first when terminal is narrow.
@@ -148,6 +221,12 @@ def render_footer(
         plain_seg = f"MCP:{mcp}"
         rich_seg = Text.assemble((f"{SYM_MCP} ", "blue"), (str(mcp), "blue"))
         segments.append((3, plain_seg, rich_seg))
+
+    if bg_tasks:
+        bg_label = "task" if bg_tasks == 1 else "tasks"
+        bg_str = f"{bg_tasks} background {bg_label}"
+        rich_seg = Text.assemble(("⏵⏵ ", "cyan"), (bg_str, "bold cyan"))
+        segments.append((1, bg_str, rich_seg))
 
     if turn:
         plain_seg = f"t{turn}"

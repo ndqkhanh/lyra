@@ -54,6 +54,45 @@ SLASH_COMMANDS = {
 }
 
 
+def _model_completions() -> list[tuple[str, str]]:
+    """Return ``[(model_name, provider), ...]`` from AVAILABLE_MODELS + aliases.
+
+    Cached at module level after first call — the list never changes at
+    runtime so there is no need to rebuild it per keystroke.
+    """
+    try:
+        from .credentials import AVAILABLE_MODELS, MODEL_ALIASES
+    except Exception:
+        return []
+    pairs: list[tuple[str, str]] = []
+    seen: set[str] = set()
+    for provider, models in AVAILABLE_MODELS.items():
+        for m in models:
+            if m not in seen:
+                pairs.append((m, provider))
+                seen.add(m)
+    for alias, canonical in MODEL_ALIASES.items():
+        if alias not in seen:
+            # Find provider of canonical model
+            provider = next(
+                (p for p, ms in AVAILABLE_MODELS.items() if canonical in ms),
+                "alias",
+            )
+            pairs.append((alias, f"{provider} alias"))
+            seen.add(alias)
+    return pairs
+
+
+_MODEL_PAIRS: list[tuple[str, str]] | None = None
+
+
+def _get_model_pairs() -> list[tuple[str, str]]:
+    global _MODEL_PAIRS
+    if _MODEL_PAIRS is None:
+        _MODEL_PAIRS = _model_completions()
+    return _MODEL_PAIRS
+
+
 class SlashCommandCompleter(Completer):
     """Autocomplete for slash commands and @ context references (Claude Code style)."""
 
@@ -134,6 +173,20 @@ class SlashCommandCompleter(Completer):
                                 )
                     return
 
+        # /model <name> — show matching model names as a dropdown
+        if text.lower().startswith("/model "):
+            typed = text[len("/model "):]
+            typed_lower = typed.lower()
+            for model_name, provider in _get_model_pairs():
+                if model_name.lower().startswith(typed_lower):
+                    yield Completion(
+                        text=model_name,
+                        start_position=-len(typed),
+                        display=model_name,
+                        display_meta=provider,
+                    )
+            return
+
         # Slash command completion
         if text.startswith("/"):
             word = text[1:].lower()
@@ -160,13 +213,22 @@ class SlashCommandAutoSuggest(AutoSuggest):
         """Get inline suggestion for current input."""
         text = document.text_before_cursor
 
+        # /model <name> — inline ghost-text completion
+        if text.lower().startswith("/model "):
+            typed = text[len("/model "):]
+            typed_lower = typed.lower()
+            for model_name, _ in _get_model_pairs():
+                if model_name.lower().startswith(typed_lower) and model_name.lower() != typed_lower:
+                    return Suggestion(model_name[len(typed):])
+            return None
+
         # Only suggest for slash commands
         if text.startswith("/"):
             word = text[1:].lower()
             for cmd in SLASH_COMMANDS:
                 cmd_name = cmd[1:]
                 if cmd_name.startswith(word) and cmd_name != word:
-                    return Suggestion(cmd_name[len(word) :])
+                    return Suggestion(cmd_name[len(word):])
 
         # Fall back to history
         return self.history_suggest.get_suggestion(buffer, document)

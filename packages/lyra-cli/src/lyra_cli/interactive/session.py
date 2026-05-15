@@ -64,6 +64,7 @@ from . import output as _out
 from .config_store import Config as _ConfigT
 from .config_store import apply_to_session as _apply_config_to_session
 from .cron import CronCommandError, handle_cron
+from .status_source import StatusSource as _StatusSource
 
 _VALID_MODES: tuple[str, ...] = (
     "edit_automatically",
@@ -311,6 +312,9 @@ class InteractiveSession:
     # explicit confirmation for every tool call; ``normal`` is the
     # default; ``yolo`` skips confirmation prompts entirely.
     permission_mode: str = "normal"
+    # Shared status bag: spinner verb, task checklist, sub-agent panel,
+    # bg-task count, and bottom-bar segments all read from this one source.
+    status_source: _StatusSource = field(default_factory=_StatusSource.from_env)
     # v3.0.0 (Phase G): TDD became opt-in. The default is now
     # ``False`` so a fresh ``lyra`` behaves like claw-code, opencode,
     # and hermes-agent: a general coding agent that doesn't refuse
@@ -1149,6 +1153,13 @@ class InteractiveSession:
             **overrides,
         )
         _apply_config_to_session(cfg, session)
+        # Hydrate env vars from ~/.lyra/credentials.json so provider
+        # keys are available immediately without a restart.
+        try:
+            from .key_store import KeyStore as _KeyStore
+            _KeyStore().hydrate_env()
+        except Exception:
+            pass
         return session
 
     # ---- v1.7.4: /model list + /models -----------------------------------
@@ -1998,12 +2009,24 @@ def _chat_with_llm(
                 )
 
     history = list(session._chat_history)[-(2 * _CHAT_HISTORY_TURNS) :]
+
+    # Collect completed pre-LLM phases for the nyan-bar progress header.
+    # We detect actual augmentation by comparing lengths; that's cheap and
+    # never wrong — an empty skill block doesn't add characters.
+    _completed_phases: list[tuple[str, str]] = []
     effective_system = _augment_system_prompt_with_skills(
         session, system_prompt, line=line
     )
+    if len(effective_system) > len(system_prompt):
+        _completed_phases.append(("Skills loaded", "done"))
+
+    _before_memory = effective_system
     effective_system = _augment_system_prompt_with_memory(
         session, effective_system, line
     )
+    if len(effective_system) > len(_before_memory):
+        _completed_phases.append(("Memory loaded", "done"))
+
     messages = [Message.system(effective_system), *history, Message.user(line)]
     _emit_lifecycle(
         session,
@@ -2130,6 +2153,7 @@ def _chat_with_llm(
             provider,
             messages,
             mode_for_panel=_mode_for_system_prompt(system_prompt),
+            completed_phases=_completed_phases,
         )
         if ok:
             text = (text_or_err or "").strip()
@@ -2850,10 +2874,15 @@ def _chat_with_tool_loop(
         except Exception:
             return True
 
+    _last_file_call: dict[str, Any] = {}
+
     def _render(event: ToolEvent) -> None:
         from .tool_render import (
+            is_file_tool,
             paint_call,
             paint_denied,
+            paint_file_call,
+            paint_file_result,
             paint_limit,
             paint_result,
         )
@@ -2869,12 +2898,27 @@ def _chat_with_tool_loop(
                     print(line)
 
         if event.kind == "call":
-            arg_preview = _short_arg_preview(event.args)
-            _emit(paint_call(event.tool_name, arg_preview))
+            _last_file_call.clear()
+            if is_file_tool(event.tool_name):
+                _last_file_call["tool"] = event.tool_name
+                _last_file_call["args"] = event.args
+                path = event.args.get("path", "")
+                _emit(paint_file_call(event.tool_name, path))
+            else:
+                arg_preview = _short_arg_preview(event.args)
+                _emit(paint_call(event.tool_name, arg_preview))
         elif event.kind == "result":
-            paint, full = paint_result(
-                event.output, is_error=bool(event.is_error)
-            )
+            if _last_file_call:
+                paint, full = paint_file_result(
+                    _last_file_call["tool"],
+                    _last_file_call["args"],
+                    event.output,
+                    is_error=bool(event.is_error),
+                )
+            else:
+                paint, full = paint_result(
+                    event.output, is_error=bool(event.is_error)
+                )
             session._last_tool_output = full
             _emit(paint)
             _emit_lifecycle(
@@ -3071,6 +3115,7 @@ def _stream_chat_to_console(
     messages: list[Any],
     *,
     mode_for_panel: str,
+    completed_phases: "list[tuple[str, str]] | None" = None,
 ) -> tuple[bool, str]:
     """Drive the streaming chat panel.
 
@@ -3084,22 +3129,71 @@ def _stream_chat_to_console(
     The whole thing is best-effort: any unexpected exception while
     setting up Rich falls through to the caller's non-streaming
     retry path, so a Rich version mismatch never bricks the REPL.
+
+    ``completed_phases`` is a list of ``(label, state)`` tuples for
+    phases that finished before the LLM call (skills injection, memory
+    loading, etc.). When present, a nyan-bar progress header is shown
+    above the streaming panel so the user sees the full turn lifecycle
+    rather than just the model's words appearing from nowhere.
     """
     try:
         from rich.live import Live
+        from rich.console import Group
     except Exception as exc:  # pragma: no cover — Rich is a hard dep
         return False, f"rich import failed: {exc}"
 
+    import time as _time_mod
+
     buffer: list[str] = []
+    _tick = 0
+    _t0 = _time_mod.monotonic()
+
+    # Try to import the progress header; degrade gracefully if missing.
+    try:
+        from .live_progress import TurnProgressHeader
+        _phases = list(completed_phases or [])
+        _use_header = True
+    except Exception:
+        _use_header = False
+        _phases = []
+
+    def _verb_for_mode(m: str) -> str:
+        return {
+            "agent": "Thinking",
+            "edit_automatically": "Thinking",
+            "plan":  "Planning",
+            "plan_mode": "Planning",
+            "ask":   "Reasoning",
+            "ask_before_edits": "Reasoning",
+            "auto":  "Thinking",
+            "auto_mode": "Thinking",
+        }.get(m, "Thinking")
+
+    _verb = _verb_for_mode(mode_for_panel)
 
     def render_panel() -> Any:
         return _out.chat_renderable(
             "".join(buffer), mode=mode_for_panel, streaming=True
         )
 
+    def render_with_header() -> Any:
+        nonlocal _tick
+        elapsed = _time_mod.monotonic() - _t0
+        header = TurnProgressHeader(
+            _phases,
+            tick=_tick,
+            elapsed=elapsed,
+            verb=_verb,
+            streaming=True,
+        )
+        _tick += 1
+        return Group(header, render_panel())
+
+    render_fn = render_with_header if _use_header else render_panel
+
     try:
         with Live(
-            render_panel(),
+            render_fn(),
             console=session._console,
             refresh_per_second=18,
             transient=False,
@@ -3110,7 +3204,7 @@ def _stream_chat_to_console(
                     if not delta:
                         continue
                     buffer.append(delta)
-                    live.update(render_panel())
+                    live.update(render_fn())
             except Exception as exc:
                 # Render whatever we've got plus a small error tail
                 # before tearing down Live, so the user sees the
@@ -3128,7 +3222,9 @@ def _stream_chat_to_console(
             # GFM tables actually format. During the loop we used
             # ``streaming=True`` to keep half-formed fences from
             # twitching; now that the buffer is final, render it
-            # properly as the last Live frame.
+            # properly as the last Live frame. The nyan-bar header is
+            # intentionally dropped on the final frame so only the clean
+            # reply panel stays on screen after the turn completes.
             final_text = "".join(buffer)
             if final_text.strip():
                 live.update(
@@ -3605,6 +3701,10 @@ def _cmd_model(session: InteractiveSession, args: str) -> CommandResult:
             session.model = chosen
             session._llm_provider = None
             session._llm_provider_kind = None
+            cfg = getattr(session, "config", None)
+            if cfg is not None:
+                cfg.set("model", chosen)
+                _persist_config(session)
             return CommandResult(output=f"model set to: {chosen}")
 
         return CommandResult(output=f"current model: {session.model}")
@@ -3637,20 +3737,22 @@ def _cmd_model(session: InteractiveSession, args: str) -> CommandResult:
     # rebuilds against the newly-selected model.
     session._llm_provider = None
     session._llm_provider_kind = None
+    cfg = getattr(session, "config", None)
+    if cfg is not None:
+        cfg.set("model", target)
+        _persist_config(session)
     suffix = f" → {canonical}" if canonical != target else ""
     return CommandResult(output=f"model set to: {target}{suffix}{extra}")
 
 
 def _ensure_provider_credentials_or_prompt(provider: str) -> str:
-    """If *provider* has no key in env / auth.json and we're in a TTY,
-    prompt the user to paste one and persist it via the auth store.
+    """If *provider* has no key in env / credentials.json and we're in a
+    TTY, prompt the user to paste one and persist it via KeyStore.
 
     Returns a one-line annotation to append to the ``/model`` output:
-    ``" [saved deepseek key to ~/.lyra/auth.json]"`` on success,
-    ``" [warning: …]"`` when the user skipped, ``""`` when nothing
-    needed to happen.
+    ``" [saved deepseek key]"`` on success, ``" [warning: …]"`` when
+    the user skipped, ``""`` when nothing needed to happen.
     """
-    import os
     import sys
 
     from lyra_cli.llm_factory import (
@@ -3671,27 +3773,22 @@ def _ensure_provider_credentials_or_prompt(provider: str) -> str:
             f"export {env_name} or run `lyra connect {provider}`]"
         )
     try:
-        from lyra_core.auth.store import save as _save_key
-
-        from .dialog_apikey import prompt_api_key
+        from .dialog_apikey import request_api_key
+        from .key_store import KeyStore
     except Exception:
         return ""
     try:
-        key = prompt_api_key(provider)
-    except Exception:
-        key = ""
-    key = (key or "").strip()
-    if not key:
-        return (
-            f" [skipped — set {env_name} or run "
-            f"`lyra connect {provider}` later]"
-        )
-    try:
-        _save_key(provider, key)
+        _key, status = request_api_key(provider, store=KeyStore())
     except Exception as exc:
-        return f" [could not save key: {exc}]"
-    os.environ[env_name] = key
-    return f" [saved {provider} key to ~/.lyra/auth.json]"
+        return f" [could not prompt for key: {exc}]"
+    if status == "saved":
+        return f" [saved {provider} key → ~/.lyra/credentials.json]"
+    if status == "kept":
+        return f" [using stored {provider} key]"
+    return (
+        f" [skipped — set {env_name} or run "
+        f"`lyra connect {provider}` later]"
+    )
 
 
 def _cmd_models(session: InteractiveSession, args: str) -> CommandResult:
@@ -4215,7 +4312,16 @@ def _cmd_compact(session: InteractiveSession, _args: str) -> CommandResult:
 
 
 def _cmd_context(session: InteractiveSession, _args: str) -> CommandResult:
-    """Show a breakdown of what's in the current context window (stub)."""
+    """``/context [checkpoint|prune|playbook|inject|breakdown]``
+
+    Without args: context window breakdown.
+    Sub-commands (Wave B): checkpoint, prune, playbook, inject.
+    """
+    _ce_verbs = {"checkpoint", "prune", "playbook", "inject"}
+    _verb = (_args or "").strip().split()[0].lower() if (_args or "").strip() else ""
+    if _verb in _ce_verbs:
+        from .context_engineering import cmd_context_extended
+        return cmd_context_extended(session, _args)
     budget = 200_000
     used = session.tokens_used
     buckets: list[tuple[str, int]] = [
@@ -5901,6 +6007,90 @@ def _cmd_logout(session: InteractiveSession, _args: str) -> CommandResult:
     )
 
 
+def _cmd_connect(session: InteractiveSession, args: str) -> CommandResult:
+    """``/connect`` — manage API keys in ``~/.lyra/credentials.json``.
+
+    Forms::
+
+        /connect                           list all configured providers
+        /connect list                      same as above
+        /connect <provider> <key>          save a key
+        /connect <provider> <key> <url>    save key + custom base URL
+        /connect remove <provider>         delete stored key
+
+    Keys are stamped into the process env immediately so the current
+    session can use them without a restart.
+    """
+    from .key_store import PROVIDER_ENV_VARS, KeyStore, _mask
+
+    store = KeyStore()
+    parts = args.split()
+
+    if not parts or parts[0] in ("list", "ls"):
+        entries = store.list_all()
+        if not entries:
+            return CommandResult(
+                output=(
+                    "No credentials stored in ~/.lyra/credentials.json.\n"
+                    "Add one with:  /connect <provider> <api_key>\n"
+                    "Providers: anthropic, openai, deepseek, gemini, groq, mistral, xai, ..."
+                )
+            )
+        lines = ["Stored credentials  (~/.lyra/credentials.json):"]
+        for provider, entry in sorted(entries.items()):
+            key = entry.get("api_key", "")
+            masked = _mask(key) if key else "(no key)"
+            env = PROVIDER_ENV_VARS.get(provider, "?")
+            suffix = f"  base_url={entry['base_url']}" if "base_url" in entry else ""
+            lines.append(f"  {provider:<14} {masked:<22} ${env}{suffix}")
+        return CommandResult(output="\n".join(lines))
+
+    if parts[0] == "remove":
+        if len(parts) < 2:
+            return CommandResult(output="usage: /connect remove <provider>")
+        provider = parts[1]
+        removed = store.remove(provider)
+        msg = f"removed credentials for {provider}" if removed else f"no credentials found for {provider}"
+        return CommandResult(output=msg)
+
+    provider = parts[0]
+
+    if len(parts) < 2:
+        import sys
+        if sys.stdin.isatty() and sys.stdout.isatty():
+            # Interactive: run the full prompt → validate → save flow.
+            try:
+                from .dialog_apikey import request_api_key
+                _key, status = request_api_key(provider, store=store)
+            except Exception as exc:
+                return CommandResult(output=f"error: {exc}")
+            if status == "saved":
+                return CommandResult(output=f"saved {provider} key → ~/.lyra/credentials.json")
+            if status == "kept":
+                return CommandResult(output=f"keeping existing {provider} key")
+            return CommandResult(output=f"skipped — no key saved for {provider}")
+        # Non-interactive: show current status or hint.
+        entry = store.get(provider)
+        if entry:
+            key = entry.get("api_key", "")
+            env = PROVIDER_ENV_VARS.get(provider, "?")
+            base = f"\n  base_url: {entry['base_url']}" if "base_url" in entry else ""
+            return CommandResult(output=f"{provider}: {_mask(key)}  ${env}{base}")
+        return CommandResult(
+            output=f"no key stored for {provider}.\nusage: /connect {provider} <api_key>"
+        )
+
+    api_key = parts[1]
+    base_url = parts[2] if len(parts) > 2 else None
+    store.set(provider, api_key, base_url)
+    env = PROVIDER_ENV_VARS.get(provider)
+    env_note = f" (${env} set in env)" if env else ""
+    base_note = f" with base_url={base_url}" if base_url else ""
+    return CommandResult(
+        output=f"saved {provider} key{base_note}{env_note} → ~/.lyra/credentials.json"
+    )
+
+
 def _which(cmd: str) -> bool:
     """Lightweight PATH lookup so tests and slash handlers stay tiny."""
     import shutil as _shutil
@@ -6289,9 +6479,104 @@ def _cmd_research(session: InteractiveSession, args: str) -> CommandResult:
         return CommandResult(
             output=(
                 "usage: /research <query> [--depth N] "
-                "[--time day|week|month|year] [--domain example.com]"
+                "[--time day|week|month|year] [--domain example.com]\n"
+                "       /research plan <topic>\n"
+                "       /research verify\n"
+                "       /research falsify <hypothesis>\n"
+                "       /research sandbox <task>"
             )
         )
+
+    # ------------------------------------------------------------------
+    # Sub-command dispatch: plan / verify / falsify / sandbox
+    # ------------------------------------------------------------------
+    verb = args.strip().split()[0] if args.strip() else ""
+
+    if verb == "plan":
+        topic = args.strip()[len("plan"):].strip()
+        if not topic:
+            return CommandResult(output="usage: /research plan <topic>")
+        sections = [
+            ("Background", f"Establish context for: {topic}"),
+            ("Key Questions", "Each question must be answered with ≥1 source span"),
+            ("Sources Needed", "Primary sources, peer-reviewed where applicable"),
+            ("Acceptance Criteria", "Every claim bound to a source before output"),
+        ]
+        lines = [f"## Research Plan: {topic}", ""]
+        for title, desc in sections:
+            lines.append(f"### {title}")
+            lines.append(desc)
+            lines.append("")
+        return CommandResult(output="\n".join(lines))
+
+    elif verb == "verify":
+        last_assistant = next(
+            (m["content"] for m in reversed(session.messages) if m.get("role") == "assistant"),
+            "",
+        )
+        if not last_assistant:
+            return CommandResult(output="/research verify: no assistant output to audit")
+        sentences = [
+            s.strip()
+            for s in last_assistant.replace("\n", " ").split(".")
+            if len(s.strip()) > 20
+        ]
+        lines = ["/research verify — claim audit:", ""]
+        for i, s in enumerate(sentences[:15], 1):
+            truncated = f"{s[:120]}…" if len(s) > 120 else s
+            lines.append(f"  [{i:02d}] {truncated}")
+            lines.append("       ↳ evidence: [UNVERIFIED — add citation]")
+        return CommandResult(output="\n".join(lines))
+
+    elif verb == "falsify":
+        hypothesis = args.strip()[len("falsify"):].strip()
+        if not hypothesis:
+            return CommandResult(output="usage: /research falsify <hypothesis>")
+        lines = [
+            f"## Falsification Plan: {hypothesis}",
+            "",
+            "### Counterexample Candidates",
+            "  1. [Generate a case where the hypothesis would be FALSE]",
+            "  2. [Edge case: boundary condition]",
+            "  3. [Alternative explanation that explains the same observations]",
+            "",
+            "### Refuting Experiments",
+            "  - Design an experiment that could disprove this hypothesis",
+            "  - Identify the smallest evidence that would invalidate it",
+            "",
+            "### Verdict",
+            "  Run the above experiments. If any succeed, revise hypothesis.",
+        ]
+        return CommandResult(output="\n".join(lines))
+
+    elif verb == "sandbox":
+        task = args.strip()[len("sandbox"):].strip()
+        if not task:
+            return CommandResult(output="usage: /research sandbox <task>")
+        import time as _time
+        from pathlib import Path as _Path
+
+        ts = int(_time.time())
+        report_dir = _Path.home() / ".lyra" / "research" / f"sandbox-{ts}"
+        report_dir.mkdir(parents=True, exist_ok=True)
+        report_file = report_dir / "report.md"
+        report_file.write_text(
+            f"# Research Sandbox Report\n\n"
+            f"Task: {task}\n\n"
+            f"Status: pending\n\n"
+            f"Generated: {_time.strftime('%Y-%m-%dT%H:%M:%S')}\n"
+        )
+        return CommandResult(
+            output=(
+                f"Research sandbox created at {report_dir}\n"
+                f"Report template: {report_file}\n"
+                "Run /research to fill in results."
+            )
+        )
+
+    # ------------------------------------------------------------------
+    # End sub-command dispatch — fall through to web-search query path
+    # ------------------------------------------------------------------
 
     try:
         tokens = shlex.split(args)
@@ -7585,6 +7870,12 @@ def _cmd_skills(session: InteractiveSession, args: str) -> CommandResult:
     """
     target = (args or "").strip().lower()
 
+    # Lifecycle sub-commands (Wave D — skills_lifecycle.py)
+    _sl_verbs = {"create", "admit", "audit", "distill", "compose", "merge", "prune"}
+    if (target.split()[0] if target else "") in _sl_verbs:
+        from .skills_lifecycle import cmd_skills_lifecycle
+        return cmd_skills_lifecycle(session, args)
+
     def _state_message() -> str:
         if session.skills_inject_enabled:
             return "skill injection is on. /skills off to disable."
@@ -7736,6 +8027,12 @@ def _cmd_memory(session: InteractiveSession, args: str) -> CommandResult:
     """
     target = (args or "").strip()
     target_lc = target.lower()
+
+    # Lifecycle sub-commands (Wave A — memory_lifecycle.py)
+    _lifecycle_verbs = {"consolidate", "distill", "audit", "evolve", "promote"}
+    if (target_lc.split()[0] if target_lc else "") in _lifecycle_verbs:
+        from .memory_lifecycle import cmd_memory_lifecycle
+        return cmd_memory_lifecycle(session, args)
 
     def _state_message() -> str:
         if session.memory_inject_enabled:
@@ -8785,6 +9082,129 @@ def _cmd_config(session: "InteractiveSession", args: str) -> CommandResult:
 
 
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Wave C: /deepsearch
+# ---------------------------------------------------------------------------
+
+
+def _cmd_deepsearch(session: InteractiveSession, args: str) -> CommandResult:
+    """``/deepsearch <query> [--hops N] [--local]`` — multi-hop IRCoT retrieval.
+
+    Iterative retrieval loop: decompose → retrieve → reason → repeat.
+    Emits a per-hop trace (subgoal, sources, support score, contradiction score).
+    """
+    from .deepsearch import cmd_deepsearch
+    return cmd_deepsearch(session, args)
+
+
+# ---------------------------------------------------------------------------
+# Wave E: /specify  /bmad  /tasks
+# ---------------------------------------------------------------------------
+
+
+def _cmd_specify(session: InteractiveSession, args: str) -> CommandResult:
+    """``/specify [topic]`` — generate a structured spec with hidden-question detection.
+
+    Outputs ``spec-<slug>.md`` with acceptance criteria, ambiguity questions,
+    and out-of-scope section. Human gate before plan generation (doc 321).
+    """
+    from .spec_driven import cmd_specify
+    return cmd_specify(session, args)
+
+
+def _cmd_bmad(session: InteractiveSession, args: str) -> CommandResult:
+    """``/bmad <role> [task]`` — invoke a BMAD agent persona.
+
+    Roles: analyst · pm · architect · dev · qa · writer.
+    Each persona produces its canonical artifact (brief / PRD / ADR /
+    implementation checklist / acceptance criteria / doc outline).
+    """
+    from .spec_driven import cmd_bmad
+    return cmd_bmad(session, args)
+
+
+def _cmd_tasks(session: InteractiveSession, args: str) -> CommandResult:
+    """``/tasks [--from-spec <file>]`` — split plan/spec into testable task chunks.
+
+    Each task gets an ID, description, acceptance criteria, size estimate (S/M/L),
+    and dependency list. Writes ``.lyra/tasks-<date>.md``.
+    """
+    from .spec_driven import cmd_tasks
+    return cmd_tasks(session, args)
+
+
+# ---------------------------------------------------------------------------
+# Wave F: /verify  /checkpoint  /rollback
+# ---------------------------------------------------------------------------
+
+
+def _cmd_verify(session: InteractiveSession, args: str) -> CommandResult:
+    """``/verify [--spec <file>] [--rubric <criteria>]`` — rubric-based evaluator.
+
+    Scores the last assistant output against acceptance criteria (0-100).
+    Distinct from ``/review`` (code quality) - this evaluates correctness
+    against explicit goals. Surfaces gap between output and threshold (doc 326).
+    """
+    from .checkpoints import cmd_verify
+    return cmd_verify(session, args)
+
+
+def _cmd_checkpoint(session: InteractiveSession, args: str) -> CommandResult:
+    """``/checkpoint [label]`` — save current agent state.
+
+    Persists turn, model, mode, cost, last message to
+    ``~/.lyra/checkpoints/<session-id>/<label>.json``.
+    """
+    from .checkpoints import cmd_checkpoint
+    return cmd_checkpoint(session, args)
+
+
+def _cmd_rollback(session: InteractiveSession, args: str) -> CommandResult:
+    """``/rollback [label]`` — restore to a prior checkpoint.
+
+    No args: list all checkpoints for this session.
+    With label: restore model/mode/pending_task from that checkpoint.
+    """
+    from .checkpoints import cmd_rollback
+    return cmd_rollback(session, args)
+
+
+# ---------------------------------------------------------------------------
+# Wave G: /route  /monitor  /aer
+# ---------------------------------------------------------------------------
+
+
+def _cmd_route(session: InteractiveSession, args: str) -> CommandResult:
+    """``/route [status|set <slot> <tier>|reset]`` — model routing policy.
+
+    Shows or configures the 8-slot routing table (intent / search / planning /
+    execution / synthesis / verification / review / final). Tiers: fast · mid ·
+    strong · advisor. Persisted to ``~/.lyra/route-policy.json`` (doc 323).
+    """
+    from .model_router import cmd_route
+    return cmd_route(session, args)
+
+
+def _cmd_monitor(session: InteractiveSession, args: str) -> CommandResult:
+    """``/monitor`` — operator fleet view.
+
+    Sessions grouped by attention priority: Needs Input · Ready for Review ·
+    Working · Completed. Space=peek, Enter=attach (doc 325 Agent View).
+    """
+    from .monitor import cmd_monitor
+    return cmd_monitor(session, args)
+
+
+def _cmd_aer(session: InteractiveSession, args: str) -> CommandResult:
+    """``/aer [session-id|timeline]`` — Agent Execution Record viewer.
+
+    Per-turn: intent, observation, inferred step type, tokens.
+    ``/aer timeline`` — flat event list in chronological order (doc 322).
+    """
+    from .monitor import cmd_aer
+    return cmd_aer(session, args)
+
+
 # Command registry — single source of truth (hermes-agent CommandDef pattern)
 # ---------------------------------------------------------------------------
 #
@@ -9211,6 +9631,13 @@ COMMAND_REGISTRY: tuple[CommandSpec, ...] = (
         "observability",
     ),
     CommandSpec(
+        "connect",
+        _cmd_connect,
+        "manage API keys (~/.lyra/credentials.json)",
+        "config-theme",
+        args_hint="[list | remove <provider> | <provider> <key> [base_url]]",
+    ),
+    CommandSpec(
         "logout",
         _cmd_logout,
         "clear stored provider credentials",
@@ -9518,6 +9945,80 @@ COMMAND_REGISTRY: tuple[CommandSpec, ...] = (
         "session catch-up briefing",
         "session",
         args_hint="",
+    ),
+    # --- deep research ----------------------------------------------------
+    CommandSpec(
+        "deepsearch",
+        _cmd_deepsearch,
+        "multi-hop IRCoT retrieval loop with per-hop trace (doc 324)",
+        "tools-agents",
+        args_hint="<query> [--hops N] [--local]",
+    ),
+    # --- spec-driven development ------------------------------------------
+    CommandSpec(
+        "specify",
+        _cmd_specify,
+        "generate a structured spec with hidden-question detection (doc 321)",
+        "plan-build-run",
+        args_hint="[topic]",
+    ),
+    CommandSpec(
+        "bmad",
+        _cmd_bmad,
+        "invoke a BMAD agent persona: analyst · pm · architect · dev · qa · writer",
+        "plan-build-run",
+        args_hint="<role> [task]",
+    ),
+    CommandSpec(
+        "tasks",
+        _cmd_tasks,
+        "split plan/spec into independently testable task chunks",
+        "plan-build-run",
+        args_hint="[--from-spec <file>]",
+    ),
+    # --- closed-loop control ----------------------------------------------
+    CommandSpec(
+        "verify",
+        _cmd_verify,
+        "rubric-based evaluator: score output against acceptance criteria 0-100 (doc 326)",
+        "plan-build-run",
+        args_hint="[--spec <file>] [--rubric <criteria>]",
+    ),
+    CommandSpec(
+        "checkpoint",
+        _cmd_checkpoint,
+        "save current agent state to ~/.lyra/checkpoints/",
+        "session",
+        args_hint="[label]",
+    ),
+    CommandSpec(
+        "rollback",
+        _cmd_rollback,
+        "restore to a prior checkpoint (list if no label given)",
+        "session",
+        args_hint="[label]",
+    ),
+    # --- routing & monitoring ---------------------------------------------
+    CommandSpec(
+        "route",
+        _cmd_route,
+        "show/configure 8-slot model routing policy (doc 323)",
+        "config-theme",
+        args_hint="[status|set <slot> <tier>|reset]",
+    ),
+    CommandSpec(
+        "monitor",
+        _cmd_monitor,
+        "operator fleet view: sessions grouped by attention priority (doc 325)",
+        "observability",
+        args_hint="",
+    ),
+    CommandSpec(
+        "aer",
+        _cmd_aer,
+        "Agent Execution Record viewer: per-turn intent/observation/step-type (doc 322)",
+        "observability",
+        args_hint="[session-id|timeline]",
     ),
     # --- meta -------------------------------------------------------------
     CommandSpec("help", _cmd_help, "show this list", "meta", aliases=("commands",)),

@@ -7,8 +7,11 @@ from lyra_cli.interactive import tool_render
 from lyra_cli.interactive.tool_render import (
     PREVIEW_LINES,
     format_tool_output,
+    is_file_tool,
     paint_call,
     paint_denied,
+    paint_file_call,
+    paint_file_result,
     paint_limit,
     paint_result,
     tool_emoji,
@@ -176,3 +179,112 @@ def test_paint_denied_includes_tool_and_reason() -> None:
 def test_paint_limit_includes_reason() -> None:
     paint = paint_limit("max-tool-calls")
     assert "max-tool-calls" in paint.plain_lines[0]
+
+
+# ── is_file_tool ───────────────────────────────────────────────
+
+
+def test_is_file_tool_edit_write_multiedit() -> None:
+    assert is_file_tool("Edit")
+    assert is_file_tool("Write")
+    assert is_file_tool("MultiEdit")
+
+
+def test_is_file_tool_false_for_read_bash() -> None:
+    assert not is_file_tool("Read")
+    assert not is_file_tool("Bash")
+    assert not is_file_tool("Grep")
+
+
+# ── paint_file_call ────────────────────────────────────────────
+
+
+def test_paint_file_call_edit_uses_update_verb() -> None:
+    paint = paint_file_call("Edit", "src/foo.py")
+    line = paint.plain_lines[0]
+    assert "Update" in line
+    assert "src/foo.py" in line
+    # Claude Code bullet
+    assert "⏺" in line
+
+
+def test_paint_file_call_write_uses_write_verb() -> None:
+    paint = paint_file_call("Write", "src/new.py")
+    assert "Write" in paint.plain_lines[0]
+    assert "src/new.py" in paint.plain_lines[0]
+
+
+def test_paint_file_call_multiedit_uses_update_verb() -> None:
+    paint = paint_file_call("MultiEdit", "src/bar.py")
+    assert "Update" in paint.plain_lines[0]
+
+
+def test_paint_file_call_rich_contains_bullet() -> None:
+    paint = paint_file_call("Edit", "src/foo.py")
+    assert "⏺" in paint.rich_lines[0]
+
+
+# ── paint_file_result ──────────────────────────────────────────
+
+
+def test_paint_file_result_edit_stat_line_added() -> None:
+    args = {"path": "src/foo.py", "old": "x = 1\n", "new": "x = 1\ny = 2\n"}
+    paint, _ = paint_file_result("Edit", args, "edited src/foo.py (1 replacement)", is_error=False)
+    stat_line = paint.plain_lines[0]
+    assert "⎿" in stat_line
+    assert "Added" in stat_line
+
+
+def test_paint_file_result_edit_stat_line_removed() -> None:
+    args = {"path": "src/foo.py", "old": "x = 1\ny = 2\n", "new": "x = 1\n"}
+    paint, _ = paint_file_result("Edit", args, "edited src/foo.py (1 replacement)", is_error=False)
+    stat_line = paint.plain_lines[0]
+    assert "Removed" in stat_line
+
+
+def test_paint_file_result_edit_shows_plus_lines() -> None:
+    args = {"path": "src/foo.py", "old": "a\n", "new": "a\nb\n"}
+    paint, _ = paint_file_result("Edit", args, "ok", is_error=False)
+    body = "\n".join(paint.plain_lines[1:])
+    assert "+" in body
+
+
+def test_paint_file_result_edit_shows_minus_lines() -> None:
+    args = {"path": "src/foo.py", "old": "a\nb\n", "new": "a\n"}
+    paint, _ = paint_file_result("Edit", args, "ok", is_error=False)
+    body = "\n".join(paint.plain_lines[1:])
+    assert "-" in body
+
+
+def test_paint_file_result_write_stat_says_wrote() -> None:
+    args = {"path": "src/new.py", "content": "line1\nline2\nline3\n"}
+    paint, _ = paint_file_result("Write", args, "wrote src/new.py (30 bytes)", is_error=False)
+    stat_line = paint.plain_lines[0]
+    assert "Wrote" in stat_line
+    assert "3 lines" in stat_line
+
+
+def test_paint_file_result_error_falls_through_to_paint_result() -> None:
+    args = {"path": "src/foo.py", "old": "x", "new": "y"}
+    paint, _ = paint_file_result("Edit", args, "edit failed: not found", is_error=True)
+    # paint_result error format: has ✗ error marker
+    assert any("✗ error" in ln for ln in paint.plain_lines)
+
+
+def test_paint_file_result_no_change_shows_no_changes() -> None:
+    args = {"path": "src/foo.py", "old": "same\n", "new": "same\n"}
+    paint, _ = paint_file_result("Edit", args, "ok", is_error=False)
+    assert "No changes" in paint.plain_lines[0]
+
+
+def test_paint_file_result_truncates_at_preview_lines() -> None:
+    big_new = "\n".join(f"line {i}" for i in range(50))
+    args = {"path": "src/foo.py", "old": "", "new": big_new}
+    paint, _ = paint_file_result("Edit", args, "ok", is_error=False, preview_lines=5)
+    assert any("more lines" in ln for ln in paint.plain_lines)
+
+
+def test_paint_file_result_returns_full_output_for_ctrl_o() -> None:
+    args = {"path": "src/foo.py", "old": "x\n", "new": "y\n"}
+    _, full = paint_file_result("Edit", args, "edited src/foo.py", is_error=False)
+    assert isinstance(full, str)

@@ -15,19 +15,14 @@ from __future__ import annotations
 
 import asyncio
 import queue
-import sys
 import threading
 from pathlib import Path
-from typing import Any
 
-from prompt_toolkit import print_formatted_text
 from prompt_toolkit.application import Application
 from prompt_toolkit.filters import Condition
-from prompt_toolkit.formatted_text import ANSI
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import (
-    ConditionalContainer,
     Dimension,
     FormattedTextControl,
     HSplit,
@@ -260,25 +255,26 @@ class LyraTUI:
         return frags
 
     def _process_loop(self):
-        """Background processing loop."""
-        # Create event loop for async operations
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+        """Background processing loop.
 
+        Must NOT call asyncio.set_event_loop — doing so poisons the loop
+        reference that patch_stdout's _StdoutProxy captures from the main
+        thread, causing it to schedule output on this thread's loop
+        (which is only running during run_until_complete) and then fall
+        back to a direct raw-mode write that mangles ESC bytes.
+        asyncio.run() creates and destroys its own loop without touching
+        the module-level current-loop pointer.
+        """
         while not self._should_exit:
             try:
                 user_input = self._pending_input.get(timeout=0.1)
             except queue.Empty:
                 continue
 
-            # Handle slash commands
             if user_input.startswith("/"):
                 self._handle_command(user_input)
             else:
-                # Run agent asynchronously
-                loop.run_until_complete(self._run_agent(user_input))
-
-        loop.close()
+                asyncio.run(self._run_agent(user_input))
 
     def _handle_command(self, command: str):
         """Handle slash command."""
@@ -298,7 +294,7 @@ class LyraTUI:
             self._print_output("\n")
 
         elif cmd == "/status":
-            self._print_output(f"\n\033[1mSession Status:\033[0m\n")
+            self._print_output("\n\033[1mSession Status:\033[0m\n")
             self._print_output(f"  Session: \033[35m{self.session_id}\033[0m\n")
             self._print_output(f"  Model: \033[36m{self.model}\033[0m\n")
             self._print_output(f"  Tokens: \033[33m{self._total_tokens:,}\033[0m\n")
@@ -330,7 +326,7 @@ class LyraTUI:
             self._handle_mcp_command(args)
 
         elif cmd == "/usage" or cmd == "/cost":
-            self._print_output(f"\n\033[1mUsage Statistics:\033[0m\n")
+            self._print_output("\n\033[1mUsage Statistics:\033[0m\n")
             self._print_output(f"  Total Tokens: \033[33m{self._total_tokens:,}\033[0m\n")
             self._print_output(f"  Total Cost: \033[32m${self._total_cost:.4f}\033[0m\n")
             if self.budget_cap_usd:
@@ -512,15 +508,19 @@ class LyraTUI:
                 self._print_output(f"\033[2mRun: /credentials {provider}\033[0m\n\n")
             else:
                 self.model = model_name
+                # Force _agent to be re-initialised with the new provider
+                # on the next turn; the old instance is bound to the
+                # previous model's credentials and must not be reused.
+                if hasattr(self, "_agent"):
+                    del self._agent
                 self._print_output(f"\n\033[32m✓ Model switched to {model_name}\033[0m\n\n")
 
     def _handle_credentials_command(self, args: list[str]):
         """Handle /credentials command."""
         from .credentials import (
+            DEFAULT_BASE_URLS,
             CredentialManager,
             format_credentials_prompt,
-            parse_credential_input,
-            DEFAULT_BASE_URLS,
         )
 
         cred_mgr = CredentialManager()
@@ -531,8 +531,7 @@ class LyraTUI:
             self._print_output("\n\033[1mConfigured Providers:\033[0m\n\n")
             if providers:
                 for provider in providers:
-                    creds = cred_mgr.get_provider(provider)
-                    has_key = "api_key" in creds
+                    creds: dict = cred_mgr.get_provider(provider) or {}
                     has_url = "base_url" in creds
                     self._print_output(f"  \033[32m✓\033[0m \033[36m{provider}\033[0m")
                     if has_url:
@@ -553,9 +552,9 @@ class LyraTUI:
             # Note: In real implementation, this would read from input
             # For now, show instructions
             self._print_output(f"\033[33mTo configure {provider}:\033[0m\n")
-            self._print_output(f"1. Get API key from provider\n")
+            self._print_output("1. Get API key from provider\n")
             self._print_output(f"2. Run: export {provider.upper()}_API_KEY='your-key'\n")
-            self._print_output(f"3. Or paste JSON config when prompted\n\n")
+            self._print_output("3. Or paste JSON config when prompted\n\n")
             self._print_output(f"\033[2mDefault base URL: {DEFAULT_BASE_URLS.get(provider, 'N/A')}\033[0m\n\n")
 
     async def _run_agent(self, user_input: str):
@@ -575,22 +574,32 @@ class LyraTUI:
 
             # Print user input
             self._print_output(f"\n\033[1mYou:\033[0m {user_input}\n\n")
-            self._print_output("\033[1mAgent:\033[0m ")
+            self._print_output("\033[1mAgent:\033[0m\n")
 
-            # Stream agent response
+            # Stream agent response — line-buffered so each run_in_terminal
+            # call emits a complete line instead of one char at a time.
+            # Character-by-character scheduling causes one suspend/redraw
+            # cycle per token, fragmenting output into garbled dots/glyphs.
+            buf = ""
             async for event in self._agent.run_agent(user_input):
-                if event["type"] == "text":
-                    self._print_output(event["content"], end="")
-                elif event["type"] == "tool":
-                    self._print_output(f"\033[2m{event['content']}\033[0m", end="")
+                if event["type"] in ("text", "tool"):
+                    content = event["content"]
+                    if event["type"] == "tool":
+                        content = f"\033[2m{content}\033[0m"
+                    buf += content
+                    while "\n" in buf:
+                        line, buf = buf.split("\n", 1)
+                        self._print_output(line)
                 elif event["type"] == "usage":
-                    # Update stats
                     stats = self._agent.get_usage_stats()
                     self._total_tokens = stats["total_tokens"]
                     self._total_cost = stats["total_cost"]
                     self._context_tokens = stats["context_tokens"]
 
-            self._print_output("\n\n")
+            # Flush any partial last line (no trailing newline from model)
+            if buf:
+                self._print_output(buf, end="")
+            self._print_output("\n")
 
         except Exception as e:
             self._print_output(f"\n\033[31mError:\033[0m {e}\n\n")
@@ -598,18 +607,63 @@ class LyraTUI:
             self._agent_running = False
 
     def _print_output(self, text: str, end: str = "\n"):
-        """Print output to terminal."""
-        import sys
-        # Use regular print instead of print_formatted_text for better compatibility
-        sys.stdout.write(text)
-        if end:
-            sys.stdout.write(end)
-        sys.stdout.flush()
+        """Thread-safe, ANSI-correct terminal output.
+
+        get_app_or_none() uses a ContextVar scoped to the main thread, so
+        it returns None from background threads even when the app is running.
+        We use self.app directly so the background thread can always reach
+        app.loop and schedule via call_soon_threadsafe → run_in_terminal.
+        """
+        from prompt_toolkit import print_formatted_text as _pt_print
+        from prompt_toolkit.application import run_in_terminal
+        from prompt_toolkit.formatted_text import ANSI as _PT_ANSI
+
+        full = text + (end if end else "")
+
+        app = self.app
+        if not getattr(app, "_is_running", False):
+            _pt_print(_PT_ANSI(full), end="")
+            return
+
+        try:
+            loop = app.loop  # type: ignore[attr-defined]
+        except Exception:
+            loop = None
+        if loop is None:
+            _pt_print(_PT_ANSI(full), end="")
+            return
+
+        try:
+            current = asyncio.get_running_loop()
+        except RuntimeError:
+            current = None
+
+        if current is loop and loop.is_running():
+            run_in_terminal(lambda: _pt_print(_PT_ANSI(full), end=""))
+            return
+
+        def _schedule() -> None:
+            try:
+                run_in_terminal(lambda: _pt_print(_PT_ANSI(full), end=""))
+            except Exception:
+                try:
+                    _pt_print(_PT_ANSI(full), end="")
+                except Exception:
+                    pass
+
+        try:
+            loop.call_soon_threadsafe(_schedule)
+        except Exception:
+            try:
+                _pt_print(_PT_ANSI(full), end="")
+            except Exception:
+                pass
 
     def run(self) -> int:
         """Run the TUI application."""
         # Print welcome banner
         from lyra_cli import __version__
+
         from .banner import get_banner
 
         print()
@@ -629,14 +683,14 @@ class LyraTUI:
         )
         print()
 
-        # Start background processing thread
         process_thread = threading.Thread(target=self._process_loop, daemon=True)
         process_thread.start()
 
-        # Run application
+        from prompt_toolkit.patch_stdout import patch_stdout
         try:
-            self.app.run()
-        except KeyboardInterrupt:
+            with patch_stdout():
+                self.app.run()
+        except (EOFError, KeyboardInterrupt, BrokenPipeError):
             pass
         finally:
             self._should_exit = True

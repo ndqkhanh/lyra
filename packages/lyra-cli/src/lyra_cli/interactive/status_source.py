@@ -14,6 +14,34 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from threading import Lock
+from typing import Literal
+
+
+@dataclass
+class SubAgentRecord:
+    """One tracked sub-agent shown in the agent panel below the spinner."""
+
+    agent_id: str
+    role: str
+    description: str
+    started_at: float
+    tokens_down: int = 0
+    state: str = "running"  # "running" | "done" | "error"
+
+
+@dataclass
+class TaskItem:
+    """One tracked sub-task shown in the checklist below the spinner."""
+
+    id: str
+    description: str
+    state: Literal["pending", "running", "done"] = "pending"
+
+
+_TURN_VERBS = [
+    "Thinking", "Researching", "Analyzing", "Galloping",
+    "Reasoning", "Exploring", "Synthesizing", "Planning",
+]
 
 
 @dataclass
@@ -38,7 +66,19 @@ class StatusSource:
     session_id: str = ""
     extra: dict[str, str] = field(default_factory=dict)
 
+    # Per-turn token download counter (resets on reset_turn)
+    tokens_down_turn: int = 0
+    # Active background agent count (synced from ProcessRegistry)
+    bg_task_count: int = 0
+    # Rotating verb shown in the spinner header
+    current_verb: str = "Thinking"
+    # Sub-task checklist (cleared each turn)
+    task_list: list[TaskItem] = field(default_factory=list)
+    # Active sub-agent records shown in the agent panel
+    sub_agents: list[SubAgentRecord] = field(default_factory=list)
+
     _lock: Lock = field(default_factory=Lock, repr=False)
+    _verb_idx: int = field(default=0, repr=False)
 
     def update(self, **kv: object) -> None:
         """Update any subset of fields atomically."""
@@ -48,6 +88,74 @@ class StatusSource:
                     self.extra.update({str(k): str(v) for k, v in value.items()})
                 elif hasattr(self, key):
                     setattr(self, key, value)
+
+    def reset_turn(self) -> None:
+        """Called on TurnStarted — clears per-turn counters and advances verb."""
+        with self._lock:
+            self.tokens_down_turn = 0
+            self.task_list.clear()
+            self._verb_idx = (self._verb_idx + 1) % len(_TURN_VERBS)
+            self.current_verb = _TURN_VERBS[self._verb_idx]
+
+    def add_task(self, task_id: str, description: str) -> None:
+        """Register a new sub-task in the checklist (deduplicates by id)."""
+        with self._lock:
+            if any(t.id == task_id for t in self.task_list):
+                return
+            self.task_list.append(TaskItem(id=task_id, description=description))
+
+    def start_task(self, task_id: str) -> None:
+        """Mark a task as running."""
+        with self._lock:
+            for t in self.task_list:
+                if t.id == task_id:
+                    t.state = "running"
+                    return
+
+    def complete_task(self, task_id: str) -> None:
+        """Mark a task as done."""
+        with self._lock:
+            for t in self.task_list:
+                if t.id == task_id:
+                    t.state = "done"
+                    return
+
+    def snapshot_tasks(self) -> list[TaskItem]:
+        """Return a thread-safe snapshot of the task list."""
+        with self._lock:
+            return [
+                TaskItem(id=t.id, description=t.description, state=t.state)
+                for t in self.task_list
+            ]
+
+    # ----- sub-agent panel API -------------------------------------------
+
+    def add_sub_agent(self, record: SubAgentRecord) -> None:
+        """Register a sub-agent record (deduplicates by agent_id)."""
+        with self._lock:
+            if any(r.agent_id == record.agent_id for r in self.sub_agents):
+                return
+            self.sub_agents = [*self.sub_agents, record]
+
+    def update_sub_agent(self, agent_id: str, **kwargs: object) -> None:
+        """Update fields on a sub-agent record by agent_id (immutable replace)."""
+        with self._lock:
+            self.sub_agents = [
+                SubAgentRecord(**{**vars(r), **kwargs})
+                if r.agent_id == agent_id
+                else r
+                for r in self.sub_agents
+            ]
+
+    def remove_sub_agent(self, agent_id: str) -> None:
+        """Remove a sub-agent record by agent_id."""
+        with self._lock:
+            self.sub_agents = [r for r in self.sub_agents if r.agent_id != agent_id]
+
+    def active_sub_agents(self) -> list[SubAgentRecord]:
+        """Return a snapshot of sub-agents currently in 'running' state."""
+        with self._lock:
+            return [r for r in self.sub_agents if r.state == "running"]
 
     def render(self, *, max_width: int | None = None) -> str:
         """Return the compact footer string.
@@ -71,6 +179,9 @@ class StatusSource:
                 parts.append(f"{self.tokens} tokens")
             if self.cost_usd:
                 parts.append(f"${self.cost_usd:.2f}")
+            if self.bg_task_count:
+                label = "task" if self.bg_task_count == 1 else "tasks"
+                parts.append(f"{self.bg_task_count} background {label}")
             for key, value in self.extra.items():
                 parts.append(f"{key}:{value}")
 
@@ -80,7 +191,7 @@ class StatusSource:
         return line
 
     @classmethod
-    def from_env(cls) -> "StatusSource":
+    def from_env(cls) -> StatusSource:
         """Factory that populates sensible defaults from the environment."""
         return cls(
             cwd=Path(os.environ.get("PWD", Path.cwd())),
@@ -89,4 +200,4 @@ class StatusSource:
         )
 
 
-__all__ = ["StatusSource"]
+__all__ = ["StatusSource", "SubAgentRecord", "TaskItem"]
