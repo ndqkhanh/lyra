@@ -311,6 +311,9 @@ class LyraTUI:
         elif cmd == "/config" or cmd == "/credentials":
             self._handle_credentials_command(args)
 
+        elif cmd == "/research" or cmd == "/deep-research":
+            self._handle_research_command(args)
+
         elif cmd == "/usage" or cmd == "/cost":
             self._print_output(f"\n\033[1mUsage Statistics:\033[0m\n")
             self._print_output(f"  Total Tokens: \033[33m{self._total_tokens:,}\033[0m\n")
@@ -334,6 +337,19 @@ class LyraTUI:
         else:
             self._print_output(f"\n\033[31mUnknown command:\033[0m {cmd}\n")
             self._print_output("\033[2mType /help for available commands.\033[0m\n\n")
+
+    def _handle_research_command(self, args: list[str]):
+        """Handle /research command."""
+        if not args:
+            self._print_output("\n\033[33mUsage:\033[0m /research <topic>\n")
+            self._print_output("\033[2mExample: /research quantum computing\033[0m\n\n")
+            return
+
+        topic = " ".join(args)
+        self._print_output(f"\n\033[1m🔬 Starting deep research on:\033[0m {topic}\n\n")
+
+        # Queue research task
+        self._pending_input.put(f"__RESEARCH__{topic}")
 
     def _handle_model_command(self, args: list[str]):
         """Handle /model command."""
