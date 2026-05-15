@@ -31,6 +31,7 @@ display-only and don't drive routing or billing.
 """
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from typing import Optional
 
@@ -124,6 +125,17 @@ _DESCRIPTION = (
 _FOOTER = "Enter to confirm · Esc to cancel · type to filter all 126 slugs"
 _PAGE = 8
 
+# Effort slider — mirrors effort.py's _LEVELS and blurbs but kept local
+# so dialog_model.py stays importable without pulling in effort.py.
+_EFFORT_LEVELS: tuple[str, ...] = ("low", "medium", "high", "xhigh", "max")
+_EFFORT_LABELS: dict[str, str] = {
+    "low":   "Low effort",
+    "medium": "Medium effort",
+    "high":  "High effort",
+    "xhigh": "Very high effort",
+    "max":   "Maximum effort",
+}
+
 
 def _flatten() -> list[_Entry]:
     out: list[_Entry] = []
@@ -153,17 +165,34 @@ def _matches(entry: _Entry, q: str) -> bool:
     return qlow in entry.slug.lower() or qlow in entry.name.lower()
 
 
-def run_model_dialog(current: Optional[str]) -> Optional[str]:
-    """Drive the model picker; return chosen slug or None on cancel.
+def run_model_dialog(
+    current: Optional[str],
+    effort: Optional[str] = None,
+) -> tuple[Optional[str], Optional[str]]:
+    """Drive the model picker; return ``(slug, effort)`` or ``(None, None)`` on cancel.
 
-    Returns ``""`` (empty string) when the user picks ``Default (auto)``;
-    callers should treat that as "use the default cascade".
+    ``slug`` is ``""`` when the user picks ``Default (auto)``; callers should
+    treat that as "use the default cascade".  ``effort`` is one of the five
+    canonical levels (``low`` / ``medium`` / ``high`` / ``xhigh`` / ``max``)
+    or ``None`` when the caller should leave the current effort unchanged.
+
+    The effort slider is shown at the bottom of the dialog and responds to
+    ``←``/``→`` **only when the filter buffer is empty** so that typing a
+    filter query never accidentally shifts the effort level.
     """
     long_tail = _all_slugs()
+
+    # Resolve initial effort: explicit arg → env var → "medium".
+    _init_effort = effort or os.environ.get("HARNESS_REASONING_EFFORT", "") or "medium"
+    if _init_effort not in _EFFORT_LEVELS:
+        _init_effort = "medium"
+
     state: dict = {
         "filter": "",
         "cursor": 0,
         "result": None,
+        "effort_idx": _EFFORT_LEVELS.index(_init_effort),
+        "effort_result": None,
     }
 
     filter_buffer = Buffer(multiline=False)
@@ -227,6 +256,24 @@ def run_model_dialog(current: Optional[str]) -> Optional[str]:
             return FormattedText([("class:dim", "  filter: (type to narrow)")])
         return FormattedText([("class:dim", "  filter: "), ("class:filter", q)])
 
+    def render_effort_row() -> FormattedText:
+        """Render the inline effort slider row.
+
+        Example:  ● High effort   ←/→ to adjust
+        When filter is non-empty, dims the row with a note that ←/→ is inactive.
+        """
+        idx = state["effort_idx"]
+        level = _EFFORT_LEVELS[idx]
+        label = _EFFORT_LABELS[level]
+        is_default = level == "medium"
+        suffix = " (default)" if is_default else ""
+        hint = "←/→ to adjust" if not state["filter"] else "←/→ adjusts effort (clear filter first)"
+        return FormattedText([
+            ("class:effort-dot", "  ● "),
+            ("class:effort-label", f"{label}{suffix}"),
+            ("class:effort-hint", f"   {hint}"),
+        ])
+
     def on_filter_change(_: Buffer) -> None:
         state["filter"] = filter_buffer.text
         state["cursor"] = 0
@@ -267,13 +314,25 @@ def run_model_dialog(current: Optional[str]) -> Optional[str]:
         n = len(visible_flat())
         state["cursor"] = max(0, n - 1)
 
+    @kb.add("left")
+    def _(_e: object) -> None:
+        # Only shift effort when the filter buffer is empty; otherwise the
+        # left-arrow is just cursor movement inside the filter text.
+        if not state["filter"]:
+            state["effort_idx"] = max(0, state["effort_idx"] - 1)
+
+    @kb.add("right")
+    def _(_e: object) -> None:
+        if not state["filter"]:
+            state["effort_idx"] = min(len(_EFFORT_LEVELS) - 1, state["effort_idx"] + 1)
+
     @kb.add("enter")
     def _(_e: object) -> None:
         flat = visible_flat()
         if flat:
             picked = flat[state["cursor"]]
-            # Empty slug == "Default (auto)". Tell caller via "auto".
             state["result"] = picked.slug or "auto"
+        state["effort_result"] = _EFFORT_LEVELS[state["effort_idx"]]
         app.exit()
 
     @kb.add("escape", eager=True)
@@ -302,6 +361,10 @@ def run_model_dialog(current: Optional[str]) -> Optional[str]:
             "footer": "#888888",
             "filter": "bold #ffaf00",
             "dim": "#555555",
+            # Effort slider row
+            "effort-dot": "bold #5fafff",
+            "effort-label": "bold #ffffff",
+            "effort-hint": "#555555",
         }
     )
 
@@ -326,6 +389,8 @@ def run_model_dialog(current: Optional[str]) -> Optional[str]:
                 Window(FormattedTextControl(render_filter), height=1),
                 Window(BufferControl(buffer=filter_buffer), height=1),
                 Window(height=1, char=" "),
+                Window(FormattedTextControl(render_effort_row), height=1),
+                Window(height=1, char=" "),
                 Window(
                     FormattedTextControl(FormattedText([("class:footer", _FOOTER)])),
                     height=1,
@@ -343,4 +408,4 @@ def run_model_dialog(current: Optional[str]) -> Optional[str]:
     )
     layout.focus(filter_buffer)
     app.run()
-    return state["result"]
+    return state["result"], state["effort_result"]

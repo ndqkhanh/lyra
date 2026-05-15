@@ -3692,10 +3692,16 @@ def _cmd_model(session: InteractiveSession, args: str) -> CommandResult:
         # unavailable) still falls back to the text summary below.
         try:
             from .dialog_model import run_model_dialog
+            from .effort import apply_effort
 
-            chosen = run_model_dialog(getattr(session, "model", None))
+            current_effort = getattr(session, "effort", None)
+            chosen, chosen_effort = run_model_dialog(
+                getattr(session, "model", None),
+                effort=current_effort,
+            )
         except Exception:
             chosen = None
+            chosen_effort = None
 
         if chosen:
             session.model = chosen
@@ -3705,7 +3711,16 @@ def _cmd_model(session: InteractiveSession, args: str) -> CommandResult:
             if cfg is not None:
                 cfg.set("model", chosen)
                 _persist_config(session)
-            return CommandResult(output=f"model set to: {chosen}")
+        if chosen_effort:
+            session.effort = chosen_effort
+            apply_effort(chosen_effort)
+        if chosen or chosen_effort:
+            parts = []
+            if chosen:
+                parts.append(f"model: {chosen}")
+            if chosen_effort:
+                parts.append(f"effort: {chosen_effort}")
+            return CommandResult(output=", ".join(parts))
 
         return CommandResult(output=f"current model: {session.model}")
 
