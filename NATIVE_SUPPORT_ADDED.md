@@ -23,7 +23,7 @@ class CustomAnthropicProvider(LyraAnthropicLLM):
 ### After (Native Support) ✅
 ```bash
 # Just set environment variables!
-export ANTHROPIC_BASE_URL="https://claude.aishopacc.com"
+export ANTHROPIC_BASE_URL="https://custom-anthropic-endpoint.com"
 export ANTHROPIC_API_KEY="your-key"
 lyra
 ```
@@ -62,7 +62,7 @@ lyra
 ### Method 1: Environment Variables (Simplest)
 
 ```bash
-export ANTHROPIC_BASE_URL="https://claude.aishopacc.com"
+export ANTHROPIC_BASE_URL="https://custom-anthropic-endpoint.com"
 export ANTHROPIC_API_KEY="your-api-key"
 lyra
 ```
@@ -74,7 +74,7 @@ lyra
 {
   "config_version": 2,
   "env": {
-    "ANTHROPIC_BASE_URL": "https://claude.aishopacc.com",
+    "ANTHROPIC_BASE_URL": "https://custom-anthropic-endpoint.com",
     "ANTHROPIC_API_KEY": "your-api-key"
   }
 }
@@ -87,7 +87,7 @@ from harness_core.models import AnthropicLLM
 
 llm = AnthropicLLM(
     api_key="your-key",
-    base_url="https://claude.aishopacc.com",
+    base_url="https://custom-anthropic-endpoint.com",
     model="claude-opus-4.5"
 )
 ```
@@ -121,7 +121,7 @@ When multiple sources provide `base_url`:
 
 ```bash
 # Set your custom endpoint
-export ANTHROPIC_BASE_URL="https://claude.aishopacc.com"
+export ANTHROPIC_BASE_URL="https://custom-anthropic-endpoint.com"
 export ANTHROPIC_API_KEY="your-key"
 
 # Start Lyra
@@ -246,7 +246,7 @@ Lyra now has **native support** for `ANTHROPIC_BASE_URL`. No workarounds, no cus
 Just set the environment variable and start coding!
 
 ```bash
-export ANTHROPIC_BASE_URL="https://claude.aishopacc.com"
+export ANTHROPIC_BASE_URL="https://custom-anthropic-endpoint.com"
 export ANTHROPIC_API_KEY="your-key"
 lyra
 ```

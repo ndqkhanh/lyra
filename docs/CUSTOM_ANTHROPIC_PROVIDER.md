@@ -79,7 +79,7 @@ Edit `~/.lyra/settings.json`:
 
 ```bash
 export ANTHROPIC_AUTH_TOKEN="your-custom-token"
-export ANTHROPIC_BASE_URL="https://claude.aishopacc.com"
+export ANTHROPIC_BASE_URL="https://custom-anthropic-endpoint.com"
 export ANTHROPIC_MODEL="claude-opus-4.5"
 ```
 
@@ -87,7 +87,7 @@ Or create `~/.lyra/.env`:
 
 ```bash
 ANTHROPIC_AUTH_TOKEN=your-custom-token
-ANTHROPIC_BASE_URL=https://claude.aishopacc.com
+ANTHROPIC_BASE_URL=https://custom-anthropic-endpoint.com
 ANTHROPIC_MODEL=claude-opus-4.5
 ```
 
@@ -113,7 +113,7 @@ You can also configure everything in `~/.lyra/settings.json`:
   "config_version": 2,
   "env": {
     "ANTHROPIC_AUTH_TOKEN": "your-token-here",
-    "ANTHROPIC_BASE_URL": "https://claude.aishopacc.com",
+    "ANTHROPIC_BASE_URL": "https://custom-anthropic-endpoint.com",
     "ANTHROPIC_MODEL": "claude-opus-4.5"
   },
   "providers": {
@@ -147,7 +147,7 @@ echo "Hello, test custom endpoint" | lyra run --llm custom-anthropic
 
 **Authentication errors:**
 - Verify `ANTHROPIC_AUTH_TOKEN` is set correctly
-- Check base URL is accessible: `curl https://claude.aishopacc.com`
+- Check base URL is accessible: `curl https://custom-anthropic-endpoint.com`
 
 **Model not available:**
 - Verify model name matches your custom endpoint's models

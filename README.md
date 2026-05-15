@@ -75,33 +75,62 @@ lyra
 
 Lyra consists of 8 integrated packages working together:
 
+```mermaid
+graph TB
+    subgraph "🖥️ User Interface"
+        CLI[lyra-cli<br/>Terminal UI<br/>Typer + Rich + prompt_toolkit]
+    end
+    
+    subgraph "🧠 Core Engine"
+        CORE[lyra-core<br/>Agent Kernel<br/>LLM Loop + BAAR Routing]
+        RESEARCH[lyra-research<br/>Deep Research<br/>10-step Pipeline]
+        SKILLS[lyra-skills<br/>Skill Intelligence<br/>SSL + SLIM + BM25]
+        EVOLUTION[lyra-evolution<br/>Self-Evolution<br/>Ctx2Skill + Voyager]
+    end
+    
+    subgraph "💾 Data & Observability"
+        MEMORY[lyra-memory<br/>Long-term Memory<br/>Code Graph + FTS5]
+        EVALS[lyra-evals<br/>Observability<br/>AER Traces + SLO]
+        MCP[lyra-mcp<br/>MCP Server<br/>Protocol Implementation]
+    end
+    
+    subgraph "🌐 LLM Providers"
+        PROVIDERS[16 Providers<br/>DeepSeek • Anthropic • OpenAI<br/>Gemini • xAI • Groq • Ollama<br/>+ 9 more]
+    end
+    
+    CLI --> CORE
+    CLI --> RESEARCH
+    CORE --> SKILLS
+    CORE --> EVOLUTION
+    CORE --> MEMORY
+    CORE --> EVALS
+    CORE --> PROVIDERS
+    EVOLUTION --> SKILLS
+    RESEARCH --> MEMORY
+    
+    style CLI fill:#0c4a6e,stroke:#38bdf8,color:#fff
+    style CORE fill:#1e3a5f,stroke:#60a5fa,color:#fff
+    style RESEARCH fill:#3b0764,stroke:#c084fc,color:#fff
+    style SKILLS fill:#164e63,stroke:#22d3ee,color:#fff
+    style EVOLUTION fill:#422006,stroke:#f97316,color:#fff
+    style MEMORY fill:#1c1917,stroke:#a8a29e,color:#fff
+    style EVALS fill:#14532d,stroke:#4ade80,color:#fff
+    style MCP fill:#064e3b,stroke:#34d399,color:#fff
+    style PROVIDERS fill:#7c2d12,stroke:#fb923c,color:#fff
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  lyra-cli: Terminal UI (Typer + Rich + prompt_toolkit)     │
-│  • 80+ slash commands • 4 interaction modes • Tab completion│
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│  lyra-core: Agent Kernel                                    │
-│  • LLM loop • 3-tier BAAR routing • IRCoT multi-hop        │
-│  • Fleet View dashboard • 16 provider integrations          │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌──────────────────┬──────────────────┬──────────────────────┐
-│  lyra-research   │  lyra-skills     │  lyra-evolution      │
-│  Deep Research   │  Skill Intel     │  Self-Evolution      │
-│  • 10-step pipe  │  • SSL repr      │  • Ctx2Skill         │
-│  • ArXiv search  │  • SLIM lifecycle│  • Voyager           │
-│  • Gap analysis  │  • BM25+DCI      │  • Reflexion         │
-└──────────────────┴──────────────────┴──────────────────────┘
-                            ↓
-┌──────────────────┬──────────────────┬──────────────────────┐
-│  lyra-memory     │  lyra-evals      │  lyra-mcp            │
-│  Long-term Mem   │  Observability   │  MCP Server          │
-│  • Code graph    │  • AER traces    │  • Tool exposure     │
-│  • FTS5 search   │  • SLO tracking  │  • Protocol impl     │
-└──────────────────┴──────────────────┴──────────────────────┘
-```
+
+### Package Overview
+
+| Package | Purpose | Key Features |
+|---------|---------|--------------|
+| **lyra-cli** | Terminal UI | 80+ slash commands, Rich output, Tab completion |
+| **lyra-core** | Agent kernel | LLM loop, 3-tier routing, 16 providers |
+| **lyra-research** | Deep research | 10-step pipeline, ArXiv/GitHub search |
+| **lyra-skills** | Skill intelligence | SSL representation, SLIM lifecycle |
+| **lyra-evolution** | Self-evolution | Ctx2Skill, Voyager, Reflexion |
+| **lyra-memory** | Long-term memory | Codebase graph, FTS5 search |
+| **lyra-evals** | Observability | SQLite traces, SLO tracking |
+| **lyra-mcp** | MCP server | Tool exposure, Protocol impl |
 
 ---
 
@@ -228,7 +257,7 @@ Lyra now natively supports custom Anthropic-compatible endpoints via `ANTHROPIC_
 
 ```bash
 # Set environment variables
-export ANTHROPIC_BASE_URL="https://claude.aishopacc.com"
+export ANTHROPIC_BASE_URL="https://custom-anthropic-endpoint.com"
 export ANTHROPIC_API_KEY="your-api-key"
 
 # Start Lyra - it will automatically use your custom endpoint
@@ -240,7 +269,7 @@ lyra
 {
   "config_version": 2,
   "env": {
-    "ANTHROPIC_BASE_URL": "https://claude.aishopacc.com",
+    "ANTHROPIC_BASE_URL": "https://custom-anthropic-endpoint.com",
     "ANTHROPIC_API_KEY": "your-api-key"
   }
 }

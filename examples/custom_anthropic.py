@@ -13,7 +13,7 @@ Usage:
        }
     3. Set environment variables:
        export ANTHROPIC_AUTH_TOKEN="your-token"
-       export ANTHROPIC_BASE_URL="https://claude.aishopacc.com"
+       export ANTHROPIC_BASE_URL="https://custom-anthropic-endpoint.com"
     4. Use: lyra run --llm custom-anthropic
 """
 
