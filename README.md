@@ -54,16 +54,21 @@ lyra
 # Interactive mode (default)
 lyra
 
-# Switch models
-/model opus              # Claude Opus 4.7
+# Switch models - use /model to see dropdown list
+/model                   # Opens interactive picker with all available models
+
+# Or switch directly by full model name
+/model claude-opus-4.7   # Claude Opus 4.7
+/model claude-sonnet-4.6 # Claude Sonnet 4.6
 /model deepseek-chat     # DeepSeek V4
 /model gpt-5             # GPT-5
+/model gemini-2.5-pro    # Gemini 2.5 Pro
+
+# List all available models
+/model list
 
 # Deep research
 /research "transformer attention mechanisms"
-
-# List all providers
-/model list
 
 # Get help
 /help
