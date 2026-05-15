@@ -323,6 +323,12 @@ class LyraTUI:
         elif cmd == "/reflect":
             self._handle_reflect_command(args)
 
+        elif cmd == "/skills":
+            self._handle_skills_command(args)
+
+        elif cmd == "/mcp":
+            self._handle_mcp_command(args)
+
         elif cmd == "/usage" or cmd == "/cost":
             self._print_output(f"\n\033[1mUsage Statistics:\033[0m\n")
             self._print_output(f"  Total Tokens: \033[33m{self._total_tokens:,}\033[0m\n")
@@ -429,6 +435,48 @@ class LyraTUI:
         self._print_output(f"\n\033[32m✓ Lesson stored\033[0m (ID: {lesson_id})\n")
         self._print_output(f"  Tags: {', '.join(tags)}\n")
         self._print_output(f"  Verdict: {verdict}\n\n")
+
+    def _handle_skills_command(self, args: list[str]):
+        """Handle /skills command."""
+        from .skill_manager import SkillManager
+
+        skill_mgr = SkillManager()
+
+        if not args:
+            # Show stats
+            stats = skill_mgr.get_stats()
+            self._print_output("\n\033[1mSkills:\033[0m\n")
+            self._print_output(f"  Total: \033[33m{stats['total_skills']}\033[0m\n")
+            self._print_output(f"  Directory: {stats['skills_dir']}\n\n")
+            return
+
+        if args[0] == "list":
+            skills = skill_mgr.list_skills()
+            self._print_output(f"\n\033[1mInstalled Skills ({len(skills)}):\033[0m\n\n")
+            for skill in skills:
+                self._print_output(f"  - {skill}\n")
+            self._print_output("\n")
+
+    def _handle_mcp_command(self, args: list[str]):
+        """Handle /mcp command."""
+        from .skill_manager import MCPManager
+
+        mcp_mgr = MCPManager()
+
+        if not args:
+            # Show stats
+            stats = mcp_mgr.get_stats()
+            self._print_output("\n\033[1mMCP Servers:\033[0m\n")
+            self._print_output(f"  Total: \033[33m{stats['total_servers']}\033[0m\n")
+            self._print_output(f"  Config: {stats['config_file']}\n\n")
+            return
+
+        if args[0] == "list":
+            servers = mcp_mgr.list_servers()
+            self._print_output(f"\n\033[1mConfigured MCP Servers ({len(servers)}):\033[0m\n\n")
+            for server in servers:
+                self._print_output(f"  - {server}\n")
+            self._print_output("\n")
 
     def _handle_model_command(self, args: list[str]):
         """Handle /model command."""
