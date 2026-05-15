@@ -178,7 +178,7 @@ MODEL_ALIASES = {
     "sonnet": "claude-sonnet-4-20250514",
     "opus": "claude-opus-4-20250514",
     "haiku": "claude-3-5-haiku-20241022",
-    "auto": "claude-sonnet-4-20250514",  # Default for auto mode
+    "auto": "claude-opus-4-20250514",  # Default to Opus for best quality
 }
 
 # Default base URLs
