@@ -261,6 +261,10 @@ class LyraTUI:
 
     def _process_loop(self):
         """Background processing loop."""
+        # Create event loop for async operations
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
         while not self._should_exit:
             try:
                 user_input = self._pending_input.get(timeout=0.1)
@@ -271,7 +275,10 @@ class LyraTUI:
             if user_input.startswith("/"):
                 self._handle_command(user_input)
             else:
-                self._run_agent(user_input)
+                # Run agent asynchronously
+                loop.run_until_complete(self._run_agent(user_input))
+
+        loop.close()
 
     def _handle_command(self, command: str):
         """Handle slash command."""
@@ -408,15 +415,42 @@ class LyraTUI:
             self._print_output(f"3. Or paste JSON config when prompted\n\n")
             self._print_output(f"\033[2mDefault base URL: {DEFAULT_BASE_URLS.get(provider, 'N/A')}\033[0m\n\n")
 
-    def _run_agent(self, user_input: str):
+    async def _run_agent(self, user_input: str):
         """Run agent with user input."""
         self._agent_running = True
         try:
-            # TODO: Integrate with actual agent loop
-            self._print_output(f"\nYou: {user_input}\n")
-            self._print_output("Agent: This is a placeholder response.\n\n")
-            self._total_tokens += 100
-            self._total_cost += 0.001
+            from .agent_integration import TUIAgentIntegration
+
+            # Initialize agent if needed
+            if not hasattr(self, "_agent"):
+                self._agent = TUIAgentIntegration(
+                    model=self.model,
+                    repo_root=self.repo_root,
+                    budget_cap_usd=self.budget_cap_usd,
+                )
+                await self._agent.initialize()
+
+            # Print user input
+            self._print_output(f"\n\033[1mYou:\033[0m {user_input}\n\n")
+            self._print_output("\033[1mAgent:\033[0m ")
+
+            # Stream agent response
+            async for event in self._agent.run_agent(user_input):
+                if event["type"] == "text":
+                    self._print_output(event["content"])
+                elif event["type"] == "tool":
+                    self._print_output(f"\033[2m{event['content']}\033[0m")
+                elif event["type"] == "usage":
+                    # Update stats
+                    stats = self._agent.get_usage_stats()
+                    self._total_tokens = stats["total_tokens"]
+                    self._total_cost = stats["total_cost"]
+                    self._context_tokens = stats["context_tokens"]
+
+            self._print_output("\n\n")
+
+        except Exception as e:
+            self._print_output(f"\n\033[31mError:\033[0m {e}\n\n")
         finally:
             self._agent_running = False
 
