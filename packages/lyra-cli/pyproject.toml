@@ -16,6 +16,9 @@ dependencies = [
     "rich>=13",
     "prompt_toolkit>=3.0",
     "harness-tui",
+    "alive-progress>=3.0",
+    "structlog>=24.0",
+    "tenacity>=8.0",
 ]
 
 [project.scripts]
@@ -41,3 +44,8 @@ where = ["src"]
 [tool.pytest.ini_options]
 addopts = "--import-mode=importlib -ra"
 testpaths = ["tests"]
+markers = [
+    "unit: pure unit tests with no I/O or network",
+    "integration: tests that require external services",
+    "e2e: end-to-end tests that exercise the full stack",
+]
