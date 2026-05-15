@@ -20,15 +20,10 @@ class TUIAgentIntegration:
 
     async def initialize(self):
         """Initialize agent loop."""
-        from lyra_cli.llm_factory import build_llm_auto
-
-        # Build LLM provider
-        llm = build_llm_auto(model_hint=self.model)
-
-        # For now, create a simple agent loop without ToolKernel
+        # For now, create a simple agent loop without external dependencies
         # TODO: Integrate with actual lyra_core agent loop when available
         self._agent_loop = {
-            "llm": llm,
+            "llm": None,  # Placeholder
             "total_tokens": 0,
             "total_cost": 0.0,
             "context_tokens": 0,
