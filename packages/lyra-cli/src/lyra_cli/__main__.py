@@ -184,21 +184,72 @@ def _root(
     if ctx.invoked_subcommand is not None:
         return
 
-    # v3.14 / Phase 6 — default-entry flip. Bare ``lyra`` now opens the
-    # Textual shell. Two escape hatches for users who depend on the
-    # legacy prompt_toolkit REPL during the transition:
-    #   * ``lyra --legacy``  — per-invocation
-    #   * ``LYRA_TUI=legacy`` — per-shell
-    # ``LYRA_TUI=v2`` remains a no-op opt-in (kept so users who set it
-    # during Phases 1–5 don't need to unset it now).
-    tui_pref = os.environ.get("LYRA_TUI", "").strip().lower()
-    use_legacy = legacy or tui_pref == "legacy"
-    if not use_legacy:
-        from .tui_v2 import launch_tui_v2
+    # v3.2.0 (Phase L): unify --resume / --continue / --session into
+    # a single ``resume_id`` plumbed through the driver, plus an
+    # optional ``pin_session_id`` that takes effect when the id
+    # doesn't resolve to an existing session. Precedence mirrors
+    # Claude Code:
+    #   1. ``--resume <id>`` wins (must already exist; falls back to
+    #       a fresh auto-id session with a stderr warning when missing)
+    #   2. ``--continue`` is a shortcut for "latest"
+    #   3. ``--session <id>`` resumes when the id exists, otherwise
+    #      starts a brand-new session with that exact id so subsequent
+    #      ``--resume <id>`` attaches back to it
+    resume_target: Optional[str] = None
+    pin_id: Optional[str] = None
+    if resume is not None:
+        resume_target = resume or "latest"
+    elif cont:
+        resume_target = "latest"
+    elif session_id:
+        resume_target = session_id
+        pin_id = session_id
 
-        raise typer.Exit(
-            launch_tui_v2(repo_root=repo_root.resolve(), model=model)
+    # v3.15 / Phase 15 — CLI-first architecture. Bare ``lyra`` now opens
+    # the streaming CLI (Claude Code style). Three modes available:
+    #   * Default: Streaming CLI (new)
+    #   * ``lyra --tui``: Textual TUI (optional)
+    #   * ``lyra --legacy``: prompt_toolkit REPL (deprecated)
+    # Environment variable LYRA_TUI can override:
+    #   * ``LYRA_TUI=cli`` — streaming CLI (default)
+    #   * ``LYRA_TUI=tui`` — Textual TUI
+    #   * ``LYRA_TUI=legacy`` — prompt_toolkit REPL
+    tui_pref = os.environ.get("LYRA_TUI", "cli").strip().lower()
+
+    # Check for --tui flag (not in typer params, check sys.argv)
+    import sys
+
+    use_tui = "--tui" in sys.argv or tui_pref == "tui"
+    use_legacy = legacy or tui_pref == "legacy"
+
+    if use_tui:
+        # Launch Textual TUI
+        try:
+            from .tui_v2 import launch_tui_v2
+
+            raise typer.Exit(launch_tui_v2(repo_root=repo_root.resolve(), model=model))
+        except ImportError:
+            typer.echo(
+                "lyra: TUI not available (harness-tui not installed). "
+                "Falling back to streaming CLI.",
+                err=True,
+            )
+    elif not use_legacy:
+        # Launch streaming CLI (default)
+        from .cli.repl import launch_streaming_repl
+        import asyncio
+
+        exit_code = asyncio.run(
+            launch_streaming_repl(
+                repo_root=repo_root.resolve(),
+                model=model,
+                budget_cap_usd=budget,
+                resume_id=resume_target,
+                pin_session_id=pin_id,
+                bare=bare,
+            )
         )
+        raise typer.Exit(exit_code)
 
     # Legacy path — surface a one-line deprecation hint via Click's
     # stderr stream so CliRunner can capture it without monkeypatching.
