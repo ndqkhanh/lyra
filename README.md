@@ -18,10 +18,13 @@ Lyra isn't just another AI coding assistant — it's a **self-evolving agent** t
 - 🧠 **Learns from every session** - Extracts reusable skills and strategies automatically
 - 🔬 **Deep research capabilities** - 10-step pipeline with academic paper discovery
 - 🎯 **Smart model routing** - 3-tier system (fast/reasoning/advisor) with 16 providers
+- 🔌 **Production-ready MCP support** - Bidirectional integration with 200+ MCP servers
 - 📊 **Full observability** - SQLite-backed execution traces and SLO tracking
 - 🔄 **Self-improvement** - Co-evolutionary verification (+17.6pp over human curation)
 - 💾 **Long-term memory** - Codebase graph with impact analysis
 - 🎨 **Beautiful TUI** - Animated progress bars, streaming output, Rich formatting
+
+**🔌 MCP Integration:** Lyra has **native, production-ready MCP support** (v2.7.1) with 57 passing tests, security-first design, and compatibility with 200+ community servers. See [MCP Integration Plan](docs/MCP_INTEGRATION_PLAN.md) for details.
 
 ---
 
