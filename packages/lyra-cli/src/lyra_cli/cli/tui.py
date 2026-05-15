@@ -580,9 +580,9 @@ class LyraTUI:
             # Stream agent response
             async for event in self._agent.run_agent(user_input):
                 if event["type"] == "text":
-                    self._print_output(event["content"])
+                    self._print_output(event["content"], end="")
                 elif event["type"] == "tool":
-                    self._print_output(f"\033[2m{event['content']}\033[0m")
+                    self._print_output(f"\033[2m{event['content']}\033[0m", end="")
                 elif event["type"] == "usage":
                     # Update stats
                     stats = self._agent.get_usage_stats()
@@ -597,9 +597,11 @@ class LyraTUI:
         finally:
             self._agent_running = False
 
-    def _print_output(self, text: str):
+    def _print_output(self, text: str, end: str = "\n"):
         """Print output to terminal."""
-        print_formatted_text(ANSI(text))
+        import sys
+        print_formatted_text(ANSI(text), end=end)
+        sys.stdout.flush()
 
     def run(self) -> int:
         """Run the TUI application."""
