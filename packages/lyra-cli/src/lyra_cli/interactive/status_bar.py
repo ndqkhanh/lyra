@@ -186,6 +186,8 @@ def render_footer(
         turn = source.turn
         extra = dict(source.extra)
         bg_tasks = source.bg_task_count
+        shell_count = getattr(source, "shell_count", 0)
+        is_inferring = getattr(source, "is_inferring", False)
 
     # Build a list of (priority, plain_segment, rich_segment) tuples.
     # Higher priority = drops first when terminal is narrow.
@@ -208,8 +210,13 @@ def render_footer(
         segments.append((1, plain_seg, rich_seg))
 
     if permissions:
-        plain_seg = f"permissions={permissions}"
-        rich_seg = Text.assemble((f"{SYM_PERMS} ", "yellow"), (permissions, "yellow"))
+        if permissions == "yolo":
+            # Claude Code-style bypass badge: ⏵⏵ bypass permissions on
+            plain_seg = "bypass permissions on"
+            rich_seg = Text.assemble(("⏵⏵ ", "bold red"), ("bypass permissions on", "bold red"))
+        else:
+            plain_seg = f"permissions={permissions}"
+            rich_seg = Text.assemble((f"{SYM_PERMS} ", "yellow"), (permissions, "yellow"))
         segments.append((2, plain_seg, rich_seg))
 
     if lsp:
@@ -222,11 +229,27 @@ def render_footer(
         rich_seg = Text.assemble((f"{SYM_MCP} ", "blue"), (str(mcp), "blue"))
         segments.append((3, plain_seg, rich_seg))
 
+    if shell_count:
+        shell_label = "shell" if shell_count == 1 else "shells"
+        plain_seg = f"{shell_count} {shell_label}"
+        rich_seg = Text(plain_seg, style="bold #00E5FF")
+        segments.append((2, plain_seg, rich_seg))
+
     if bg_tasks:
         bg_label = "task" if bg_tasks == 1 else "tasks"
         bg_str = f"{bg_tasks} background {bg_label}"
-        rich_seg = Text.assemble(("⏵⏵ ", "cyan"), (bg_str, "bold cyan"))
-        segments.append((1, bg_str, rich_seg))
+        plain_seg = f"{bg_str} · ↓ to manage"
+        rich_seg = Text.assemble(
+            ("⏵⏵ ", "cyan"),
+            (bg_str, "bold cyan"),
+            (" · ↓ to manage", "dim cyan"),
+        )
+        segments.append((1, plain_seg, rich_seg))
+
+    if is_inferring:
+        plain_seg = "esc to interrupt"
+        rich_seg = Text(plain_seg, style="dim italic")
+        segments.append((1, plain_seg, rich_seg))
 
     if turn:
         plain_seg = f"t{turn}"

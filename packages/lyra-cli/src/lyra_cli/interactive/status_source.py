@@ -70,6 +70,10 @@ class StatusSource:
     tokens_down_turn: int = 0
     # Active background agent count (synced from ProcessRegistry)
     bg_task_count: int = 0
+    # Active shell/process count shown in the toolbar as "N shell"
+    shell_count: int = 0
+    # True while the LLM is actively streaming (drives "esc to interrupt" hint)
+    is_inferring: bool = False
     # Rotating verb shown in the spinner header
     current_verb: str = "Thinking"
     # Sub-task checklist (cleared each turn)

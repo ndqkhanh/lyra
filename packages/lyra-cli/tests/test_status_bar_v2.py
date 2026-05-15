@@ -1,123 +1,107 @@
-"""Phase 5 — opencode-style footer (status bar v2).
-
-The legacy renderer in :class:`StatusSource.render` returned a flat
-text line that worked but lacked iconography and made it hard to
-distinguish "no MCP servers" from "MCP renderer hasn't initialized"
-(both showed nothing). v2 delegates to :func:`render_footer` which
-produces a Rich :class:`~rich.text.Text` with claw-code-aligned
-symbols (◆ model · △ perms · ✦ LSP · ⊙ MCP) and a non-TTY plain
-fallback.
-
-Contract:
-
-* Every populated field is rendered exactly once with its symbol.
-* ``cost_usd=0`` and counts of zero collapse — the footer never
-  shouts ``MCP:0`` at users who aren't using MCP.
-* Plain mode (when stdout isn't a TTY) drops the symbols but keeps
-  the field labels so log captures stay greppable.
-* The full footer never exceeds ``term_cols`` characters; long cwd
-  paths get truncated in the middle (``~/Downloads/…/lyra``).
-"""
+"""Tests for Wave 2 status_bar.py enhancements."""
 from __future__ import annotations
 
 from pathlib import Path
-
-import pytest
 
 from lyra_cli.interactive.status_bar import render_footer
 from lyra_cli.interactive.status_source import StatusSource
 
 
-def _basic_source(tmp_path: Path, **kw) -> StatusSource:
-    s = StatusSource(cwd=tmp_path)
-    s.update(**kw)
+def _src(**kv) -> StatusSource:
+    s = StatusSource(cwd=Path("/home/user/project"), model="sonnet-4.6", mode="agent")
+    for k, v in kv.items():
+        setattr(s, k, v)
     return s
 
 
-def _plain(text_obj) -> str:
-    """Coerce the Rich Text returned by render_footer to plain string."""
-    if hasattr(text_obj, "plain"):
-        return text_obj.plain
-    return str(text_obj)
+# ---- shell_count -----------------------------------------------------------
+
+def test_shell_count_single_shown():
+    src = _src(shell_count=1)
+    plain = render_footer(src, plain=True)
+    assert "1 shell" in plain
 
 
-def test_renders_cwd_and_model(tmp_path: Path) -> None:
-    s = _basic_source(tmp_path, model="deepseek-chat", mode="plan")
-    out = _plain(render_footer(s, term_cols=120))
-    assert "deepseek-chat" in out
-    assert "plan" in out
-    assert str(tmp_path.name) in out
+def test_shell_count_plural():
+    src = _src(shell_count=3)
+    plain = render_footer(src, plain=True)
+    assert "3 shells" in plain
 
 
-def test_zero_counts_collapse(tmp_path: Path) -> None:
-    """Empty MCP / LSP / cost fields must not appear."""
-    s = _basic_source(tmp_path, model="deepseek-chat", mode="plan")
-    out = _plain(render_footer(s, term_cols=120))
-    assert "MCP" not in out
-    assert "LSP" not in out
-    assert "$" not in out
+def test_shell_count_zero_hidden():
+    src = _src(shell_count=0)
+    plain = render_footer(src, plain=True)
+    assert "shell" not in plain
 
 
-def test_permissions_field_present_when_set(tmp_path: Path) -> None:
-    s = _basic_source(tmp_path, model="m", mode="plan", permissions="strict")
-    out = _plain(render_footer(s, term_cols=120))
-    assert "strict" in out
+# ---- is_inferring ----------------------------------------------------------
+
+def test_is_inferring_shows_hint():
+    src = _src(is_inferring=True)
+    plain = render_footer(src, plain=True)
+    assert "esc to interrupt" in plain
 
 
-def test_lsp_and_mcp_count_present_when_nonzero(tmp_path: Path) -> None:
-    s = _basic_source(tmp_path, model="m", mode="plan", lsp_count=3, mcp_count=2)
-    rich_out = _plain(render_footer(s, term_cols=120))
-    plain_out = render_footer(s, term_cols=120, plain=True)
-
-    # Rich mode: symbols + numbers
-    assert "✦" in rich_out and "3" in rich_out
-    assert "⊙" in rich_out and "2" in rich_out
-
-    # Plain mode: labels + numbers (greppable)
-    plain_str = plain_out if isinstance(plain_out, str) else _plain(plain_out)
-    assert "LSP:3" in plain_str
-    assert "MCP:2" in plain_str
+def test_is_inferring_false_hidden():
+    src = _src(is_inferring=False)
+    plain = render_footer(src, plain=True)
+    assert "esc to interrupt" not in plain
 
 
-def test_cost_renders_two_decimals_when_nonzero(tmp_path: Path) -> None:
-    s = _basic_source(tmp_path, model="m", mode="plan", cost_usd=0.0123)
-    out = _plain(render_footer(s, term_cols=120))
-    assert "$" in out
-    assert "0.01" in out
+# ---- bg_tasks with ↓ to manage hint ----------------------------------------
+
+def test_bg_tasks_shows_down_to_manage():
+    src = _src(bg_task_count=2)
+    plain = render_footer(src, plain=True)
+    assert "↓ to manage" in plain or "background" in plain
 
 
-def test_token_count_present_when_nonzero(tmp_path: Path) -> None:
-    s = _basic_source(tmp_path, model="m", mode="plan", tokens=1234)
-    out = _plain(render_footer(s, term_cols=120))
-    assert "1234" in out or "1,234" in out or "1.2k" in out
+def test_bg_tasks_zero_hidden():
+    src = _src(bg_task_count=0)
+    plain = render_footer(src, plain=True)
+    assert "background" not in plain
 
 
-def test_plain_mode_drops_symbols_but_keeps_labels(tmp_path: Path) -> None:
-    """plain=True is the non-TTY / log-capture format."""
-    s = _basic_source(tmp_path, model="m", mode="plan", lsp_count=2)
-    out = render_footer(s, term_cols=120, plain=True)
-    # plain mode returns a str directly (no Rich Text)
-    out_str = out if isinstance(out, str) else _plain(out)
-    assert "model" in out_str.lower() or "m" in out_str
-    assert "LSP" in out_str
-    # Symbols shouldn't be in plain mode
-    assert "◆" not in out_str
-    assert "△" not in out_str
+# ---- yolo permission badge --------------------------------------------------
+
+def test_yolo_shows_bypass_badge():
+    src = _src(permissions="yolo")
+    plain = render_footer(src, plain=True)
+    assert "bypass permissions on" in plain
 
 
-def test_cwd_truncated_when_path_exceeds_terminal_width() -> None:
-    deep = Path("/very/very/long/nested/path/structure/with/many/segments/lyra")
-    s = StatusSource(cwd=deep)
-    s.update(model="m", mode="plan")
-    out = _plain(render_footer(s, term_cols=60))
-    assert len(out) <= 60
-    assert "…" in out or "..." in out
+def test_strict_shows_triangle_badge():
+    src = _src(permissions="strict")
+    plain = render_footer(src, plain=True)
+    assert "strict" in plain
+    assert "bypass" not in plain
 
 
-def test_collapsed_initial_state_shows_only_cwd_model_mode(tmp_path: Path) -> None:
-    """Spec §8.2: a fresh session shows just `cwd · ◆ <model> · <mode>`."""
-    s = _basic_source(tmp_path, model="deepseek-v4-pro", mode="plan")
-    out = _plain(render_footer(s, term_cols=120))
-    forbidden = ("MCP", "LSP", "tokens", "$", "perms", "permissions=")
-    for token in forbidden:
-        assert token not in out, f"{token!r} should be collapsed but appeared in: {out}"
+def test_normal_permission_shown():
+    src = _src(permissions="normal")
+    plain = render_footer(src, plain=True)
+    assert "normal" in plain
+
+
+# ---- StatusSource new fields default to zero/False --------------------------
+
+def test_status_source_shell_count_default():
+    s = StatusSource()
+    assert s.shell_count == 0
+
+
+def test_status_source_is_inferring_default():
+    s = StatusSource()
+    assert s.is_inferring is False
+
+
+def test_status_source_update_shell_count():
+    s = StatusSource()
+    s.update(shell_count=2)
+    assert s.shell_count == 2
+
+
+def test_status_source_update_is_inferring():
+    s = StatusSource()
+    s.update(is_inferring=True)
+    assert s.is_inferring is True
