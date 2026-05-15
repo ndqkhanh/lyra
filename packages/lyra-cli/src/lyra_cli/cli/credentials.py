@@ -21,16 +21,76 @@ class CredentialManager:
     def __init__(self):
         self.config_dir = Path.home() / ".lyra"
         self.config_file = self.config_dir / "credentials.json"
+        self.claude_settings = Path.home() / ".claude" / "settings.json"
         self.config_dir.mkdir(exist_ok=True)
 
     def load_credentials(self) -> dict[str, Any]:
-        """Load saved credentials."""
+        """Load saved credentials.
+
+        Priority:
+        1. ~/.lyra/credentials.json (Lyra-specific)
+        2. ~/.claude/settings.json (Claude Code format)
+        3. Environment variables
+        """
+        credentials = {}
+
+        # Try Claude Code settings first
+        if self.claude_settings.exists():
+            try:
+                claude_config = json.loads(self.claude_settings.read_text())
+                if "env" in claude_config:
+                    env_vars = claude_config["env"]
+
+                    # Map Claude Code env vars to providers
+                    key_mapping = {
+                        "ANTHROPIC_API_KEY": "anthropic",
+                        "OPENAI_API_KEY": "openai",
+                        "GEMINI_API_KEY": "gemini",
+                        "DEEPSEEK_API_KEY": "deepseek",
+                        "GROQ_API_KEY": "groq",
+                        "XAI_API_KEY": "xai",
+                        "MISTRAL_API_KEY": "mistral",
+                        "CEREBRAS_API_KEY": "cerebras",
+                        "QWEN_API_KEY": "qwen",
+                    }
+
+                    for env_key, provider in key_mapping.items():
+                        if env_key in env_vars:
+                            credentials[provider] = {
+                                "api_key": env_vars[env_key],
+                                "source": "claude_settings"
+                            }
+            except Exception:
+                pass  # Ignore errors, fall back to other sources
+
+        # Override with Lyra-specific credentials
         if self.config_file.exists():
             try:
-                return json.loads(self.config_file.read_text())
+                lyra_creds = json.loads(self.config_file.read_text())
+                for provider, cred in lyra_creds.items():
+                    if isinstance(cred, dict):
+                        credentials[provider] = cred
+                    else:
+                        credentials[provider] = {"api_key": cred}
             except Exception:
-                return {}
-        return {}
+                pass
+
+        # Check environment variables as final fallback
+        env_keys = {
+            "ANTHROPIC_API_KEY": "anthropic",
+            "OPENAI_API_KEY": "openai",
+            "GEMINI_API_KEY": "gemini",
+            "DEEPSEEK_API_KEY": "deepseek",
+        }
+
+        for env_var, provider in env_keys.items():
+            if env_var in os.environ and provider not in credentials:
+                credentials[provider] = {
+                    "api_key": os.environ[env_var],
+                    "source": "environment"
+                }
+
+        return credentials
 
     def save_credentials(self, credentials: dict[str, Any]) -> None:
         """Save credentials to file."""
@@ -50,7 +110,12 @@ class CredentialManager:
     def get_provider(self, provider: str) -> dict[str, Any] | None:
         """Get credentials for a provider."""
         creds = self.load_credentials()
-        return creds.get(provider)
+        cred = creds.get(provider)
+        if isinstance(cred, dict):
+            return cred
+        elif cred:
+            return {"api_key": cred}
+        return None
 
     def list_providers(self) -> list[str]:
         """List configured providers."""
