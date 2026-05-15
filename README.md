@@ -137,6 +137,16 @@ graph TB
 | **lyra-evals** | Observability | SQLite traces, SLO tracking |
 | **lyra-mcp** | MCP server | Tool exposure, Protocol impl |
 
+**📊 Want to dive deeper?** See [Architecture Diagrams](docs/ARCHITECTURE_DIAGRAMS.md) for detailed visualizations of:
+- Self-Evolution System (12 phases)
+- Skill Intelligence (SSL + SLIM + Retrieval)
+- Tool System (Built-in + MCP)
+- Memory System (Short-term + Long-term)
+- Deep Research Pipeline
+- Provider Routing (3-tier BAAR)
+- Observability (AER + 7 SLO)
+- Context Management (P0-P4)
+
 ---
 
 ## 🎯 Key Features
