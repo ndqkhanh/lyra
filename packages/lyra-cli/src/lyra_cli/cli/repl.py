@@ -76,7 +76,11 @@ async def launch_streaming_repl(
             ):
                 await handle_stream_event(event, formatter)
 
-            formatter.print()  # Newline after turn
+            # Print newline after turn (no error)
+            if hasattr(formatter, 'console') and formatter.use_rich:
+                formatter.console.print()
+            else:
+                formatter.print()
 
         except KeyboardInterrupt:
             formatter.print("\n^C")
@@ -92,14 +96,40 @@ async def launch_streaming_repl(
 
 
 async def read_prompt(formatter: CLIFormatter) -> str:
-    """Read user input with multi-line support.
+    """Read user input with rich prompt_toolkit features.
 
     Returns:
         User input string
     """
-    # TODO: Implement proper multi-line input with prompt_toolkit
-    # For now, use simple input
     try:
+        from .input import create_prompt_session
+        from pathlib import Path
+        import os
+
+        # Get history file path
+        history_dir = Path.home() / ".lyra"
+        history_dir.mkdir(exist_ok=True)
+        history_file = history_dir / "history.txt"
+
+        # Create session (cached globally in production)
+        if not hasattr(read_prompt, "_session"):
+            read_prompt._session = create_prompt_session(history_file)
+
+        # Show prompt with Rich styling
+        if hasattr(formatter, "console") and formatter.use_rich:
+            prompt_text = "\n> "
+        else:
+            prompt_text = "\n> "
+
+        # Get input with all features
+        loop = asyncio.get_event_loop()
+        text = await loop.run_in_executor(
+            None, read_prompt._session.prompt, prompt_text
+        )
+        return text.strip()
+
+    except ImportError:
+        # Fallback to simple input if prompt_toolkit not available
         formatter.print("\n> ", end="", flush=True)
         loop = asyncio.get_event_loop()
         prompt = await loop.run_in_executor(None, sys.stdin.readline)

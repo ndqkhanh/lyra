@@ -32,7 +32,7 @@ class CLIFormatter:
         if self.use_rich:
             self.console = Console(force_terminal=True)
 
-    def print(self, text: str, end: str = "\n", flush: bool = False) -> None:
+    def print(self, text: str = "", end: str = "\n", flush: bool = False) -> None:
         """Print plain text."""
         print(text, end=end, flush=flush, file=self.file)
 
@@ -127,17 +127,40 @@ class CLIFormatter:
         self, version: str, model: str, repo: str, session_id: str
     ) -> None:
         """Print welcome banner."""
-        welcome = f"""
-# Lyra v{version}
+        from .banner import get_banner
 
-**Model:** {model}
-**Repo:** {repo}
-**Session:** {session_id}
+        # Print ASCII banner
+        if self.use_rich and RICH_AVAILABLE:
+            self.console.print(get_banner("claude"), style="cyan")
+        else:
+            self.print(get_banner("default"))
 
-Type `/help` for commands, `/status` for session info, or start chatting.
-"""
-        self.print_markdown(welcome.strip())
-        self.print("")  # Empty line after welcome
+        # Print session info
+        self.print()
+        if self.use_rich and RICH_AVAILABLE:
+            self.console.print(f"[bold]Lyra[/bold] [dim]v{version}[/dim]")
+            self.console.print(
+                f"[dim]Model:[/dim] [cyan]{model}[/cyan]  "
+                f"[dim]Repo:[/dim] [yellow]{repo}[/yellow]  "
+                f"[dim]Session:[/dim] [magenta]{session_id}[/magenta]"
+            )
+        else:
+            self.print(f"Lyra v{version}")
+            self.print(f"Model: {model}  Repo: {repo}  Session: {session_id}")
+
+        self.print()
+
+        # Print help hint
+        if self.use_rich and RICH_AVAILABLE:
+            self.console.print(
+                "[dim]Type [/dim][cyan]/help[/cyan][dim] for commands · "
+                "[/dim][cyan]/status[/cyan][dim] for session info · "
+                "[/dim][cyan]⌥?[/cyan][dim] for shortcuts[/dim]"
+            )
+        else:
+            self.print("Type /help for commands · /status for session info · ⌥? for shortcuts")
+
+        self.print()
 
     def print_result(
         self, cost_usd: float, tokens_in: int, tokens_out: int, duration_ms: int
