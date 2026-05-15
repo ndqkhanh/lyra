@@ -600,7 +600,10 @@ class LyraTUI:
     def _print_output(self, text: str, end: str = "\n"):
         """Print output to terminal."""
         import sys
-        print_formatted_text(ANSI(text), end=end)
+        # Use regular print instead of print_formatted_text for better compatibility
+        sys.stdout.write(text)
+        if end:
+            sys.stdout.write(end)
         sys.stdout.flush()
 
     def run(self) -> int:
