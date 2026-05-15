@@ -317,6 +317,12 @@ class LyraTUI:
         elif cmd == "/team":
             self._handle_team_command(args)
 
+        elif cmd == "/memory":
+            self._handle_memory_command(args)
+
+        elif cmd == "/reflect":
+            self._handle_reflect_command(args)
+
         elif cmd == "/usage" or cmd == "/cost":
             self._print_output(f"\n\033[1mUsage Statistics:\033[0m\n")
             self._print_output(f"  Total Tokens: \033[33m{self._total_tokens:,}\033[0m\n")
@@ -366,6 +372,63 @@ class LyraTUI:
 
         # Queue team task
         self._pending_input.put(f"__TEAM__{task}")
+
+    def _handle_memory_command(self, args: list[str]):
+        """Handle /memory command."""
+        from .memory_manager import MemoryManager
+
+        memory = MemoryManager()
+
+        if not args:
+            # Show memory stats
+            stats = memory.get_stats()
+            self._print_output("\n\033[1mMemory Statistics:\033[0m\n")
+            self._print_output(f"  Total Lessons: \033[33m{stats['total_lessons']}\033[0m\n")
+            self._print_output(f"  Skills Tracked: \033[33m{stats['skills_tracked']}\033[0m\n")
+            self._print_output(f"  Playbook Entries: \033[33m{stats['playbook_entries']}\033[0m\n\n")
+            return
+
+        if args[0] == "search":
+            query = " ".join(args[1:])
+            lessons = memory.recall(query=query)
+            self._print_output(f"\n\033[1mFound {len(lessons)} lessons:\033[0m\n\n")
+            for lesson in lessons[:5]:  # Show top 5
+                self._print_output(f"  \033[36m{lesson.verdict}\033[0m: {lesson.lesson}\n")
+            self._print_output("\n")
+
+    def _handle_reflect_command(self, args: list[str]):
+        """Handle /reflect command."""
+        if len(args) < 3:
+            self._print_output("\n\033[33mUsage:\033[0m /reflect tag:<tags> verdict:<verdict> :: <lesson>\n")
+            self._print_output("\033[2mExample: /reflect tag:testing verdict:success :: Always write tests first\033[0m\n\n")
+            return
+
+        # Parse command
+        tags = []
+        verdict = "insight"
+        lesson = ""
+
+        for i, arg in enumerate(args):
+            if arg.startswith("tag:"):
+                tags = arg[4:].split(",")
+            elif arg.startswith("verdict:"):
+                verdict = arg[8:]
+            elif arg == "::":
+                lesson = " ".join(args[i+1:])
+                break
+
+        if not lesson:
+            self._print_output("\n\033[31mError:\033[0m Lesson text required after ::\n\n")
+            return
+
+        # Store lesson
+        from .memory_manager import MemoryManager
+        memory = MemoryManager()
+        lesson_id = memory.reflect(tags, verdict, lesson)
+
+        self._print_output(f"\n\033[32m✓ Lesson stored\033[0m (ID: {lesson_id})\n")
+        self._print_output(f"  Tags: {', '.join(tags)}\n")
+        self._print_output(f"  Verdict: {verdict}\n\n")
 
     def _handle_model_command(self, args: list[str]):
         """Handle /model command."""
