@@ -50,8 +50,16 @@ class LyraAnthropicLLM(_UpstreamAnthropicLLM):
         self,
         model: Optional[str] = None,
         api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
     ) -> None:
-        super().__init__(model=model, api_key=api_key)
+        """Initialize Anthropic provider with optional custom base_url.
+
+        Args:
+            model: Model name (defaults to HARNESS_LLM_MODEL or claude-3-5-sonnet-latest)
+            api_key: API key (defaults to ANTHROPIC_API_KEY env var)
+            base_url: Custom base URL (defaults to ANTHROPIC_BASE_URL env var)
+        """
+        super().__init__(model=model, api_key=api_key, base_url=base_url)
         self.last_usage: dict[str, int] = {}
         self.provider_name = "anthropic"
 

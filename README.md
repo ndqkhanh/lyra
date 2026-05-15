@@ -222,41 +222,38 @@ Location: `~/.lyra/settings.json`
 
 ### Custom Providers
 
-**Example: Custom Anthropic Endpoint**
+**Native Support for Custom Anthropic Endpoints** ✅
 
-1. Create `~/.lyra/custom_anthropic.py`:
-```python
-from lyra_cli.providers.anthropic import LyraAnthropicLLM
-from anthropic import Anthropic
-import os
+Lyra now natively supports custom Anthropic-compatible endpoints via `ANTHROPIC_BASE_URL`:
 
-class CustomAnthropicProvider(LyraAnthropicLLM):
-    def __init__(self, model=None, api_key=None):
-        self._api_key = api_key or os.environ.get("ANTHROPIC_AUTH_TOKEN")
-        self._base_url = os.environ.get("ANTHROPIC_BASE_URL", "https://api.anthropic.com")
-        self.model = model or os.environ.get("ANTHROPIC_MODEL", "claude-opus-4.5")
-        self._client = Anthropic(api_key=self._api_key, base_url=self._base_url)
-        self.last_usage = {}
-        self.provider_name = "custom-anthropic"
+```bash
+# Set environment variables
+export ANTHROPIC_BASE_URL="https://claude.aishopacc.com"
+export ANTHROPIC_API_KEY="your-api-key"
+
+# Start Lyra - it will automatically use your custom endpoint
+lyra
 ```
 
-2. Register in `~/.lyra/settings.json`:
+**Configuration in settings.json:**
 ```json
 {
-  "providers": {
-    "custom-anthropic": "custom_anthropic:CustomAnthropicProvider"
+  "config_version": 2,
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://claude.aishopacc.com",
+    "ANTHROPIC_API_KEY": "your-api-key"
   }
 }
 ```
 
-3. Use:
-```bash
-export ANTHROPIC_AUTH_TOKEN="your-token"
-export ANTHROPIC_BASE_URL="https://claude.aishopacc.com"
-lyra run --llm custom-anthropic
-```
+**Priority Order:**
+1. Constructor parameter: `AnthropicLLM(base_url="...")`
+2. Environment variable: `ANTHROPIC_BASE_URL`
+3. Default: `https://api.anthropic.com`
 
-See [examples/custom_anthropic.py](examples/custom_anthropic.py) for complete implementation.
+**Other Custom Providers:**
+
+For non-Anthropic custom providers, use the provider registry:
 
 ---
 
