@@ -241,23 +241,32 @@ class Spinner:
             frame = self.frames[self._frame_idx % len(self.frames)]
             elapsed = time.time() - (self._start_time or time.time())
 
-            # Build token-download suffix: "· ↓ 8.3k tokens" when available.
-            tokens_suffix = ""
+            # Tokens part: "  ↓ 8.3k" (no "tokens" word — matches Claude Code).
+            tokens_part = ""
             if self._status_source is not None:
                 td = self._status_source.tokens_down_turn
                 if td > 0:
-                    tokens_suffix = f" · ↓ {_humanise_tokens(td)} tokens"
+                    tokens_part = f"  ↓ {_humanise_tokens(td)}"
 
             # Use verb from status_source when available, else fall back to message.
             verb = self.message
             if self._status_source is not None:
                 verb = self._status_source.current_verb
 
+            # Elapsed: compact, always shown, no parens.
+            elapsed_part = f"  {elapsed:.0f}s"
+
+            # Ctrl+B hint: shown for first 3 seconds when background mode is off.
+            bg_active = self._status_source is not None and getattr(
+                self._status_source, "run_in_bg", False
+            )
+            bg_hint = "  [ctrl+b: bg]" if elapsed < 3.0 and not bg_active else ""
+
             if self._wings:
                 left, right = self._wings[self._frame_idx % len(self._wings)]
-                line = f" {left} {frame} {verb}… ({elapsed:.0f}s{tokens_suffix}) {right}"
+                line = f" {left} {frame} {verb}{tokens_part}{elapsed_part}{bg_hint} {right}"
             else:
-                line = f" {frame} {verb}… ({elapsed:.0f}s{tokens_suffix})"
+                line = f" {frame} {verb}{tokens_part}{elapsed_part}{bg_hint}"
             # Pad with spaces (NOT \033[K) to clear the previous frame —
             # \033[K renders as garbage under patch_stdout proxies.
             pad = max(self._last_line_len - len(line), 0)

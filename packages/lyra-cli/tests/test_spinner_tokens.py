@@ -56,8 +56,8 @@ def test_spinner_falls_back_to_message_without_source():
 
 def test_spinner_shows_elapsed_seconds():
     output = _capture_spinner_frames(run_secs=0.4)
-    # Elapsed should appear as "(Ns" pattern
-    assert "s)" in output or "0s)" in output
+    # Elapsed appears as "Ns" (no parens) in the new spinner format
+    assert "0s" in output or "s" in output
 
 
 def test_humanise_tokens():

@@ -215,12 +215,83 @@ def _wordmark_text() -> str:
     return _themes.get_active_skin().brand("agent_name", "Lyra")
 
 
+_TIPS: tuple[tuple[str, str], ...] = (
+    ("ctrl+b",       "run inference in background — keep typing"),
+    ("tab",          "cycle modes: agent → plan → ask → auto"),
+    ("/model",       "switch model + effort slider together"),
+    ("/checkpoint",  "save session state before risky changes"),
+    ("/deepsearch",  "multi-hop iterative research with per-hop trace"),
+)
+
+
+def render_tips_panel(*, plain: bool = False, force: bool = False) -> str:
+    """Return a compact tips block to append after the banner.
+
+    Controlled by the ``LYRA_TIPS`` env var:
+    - unset / ``0`` → hidden (default; driver decides when to show it)
+    - ``1`` / ``show`` → always show
+    - ``once`` → show until ``~/.lyra/.tips_shown`` marker exists
+
+    Pass ``force=True`` to bypass the env-var gate (e.g. when the caller
+    already decided the panel should appear, such as ``show_tips=True``
+    on :func:`render_sparse_banner`).
+
+    Returns ``""`` when the tips should be suppressed so the caller can
+    skip the trailing newline without extra branching.
+    """
+    if not force:
+        lyra_tips = os.environ.get("LYRA_TIPS", "").strip().lower()
+        if lyra_tips in ("0", "false", "no", ""):
+            return ""
+        if lyra_tips == "once":
+            marker = Path.home() / ".lyra" / ".tips_shown"
+            if marker.exists():
+                return ""
+            try:
+                marker.parent.mkdir(parents=True, exist_ok=True)
+                marker.touch()
+            except OSError:
+                pass
+
+    key_w = max(len(k) for k, _ in _TIPS)
+    if plain:
+        lines = ["  tips:"]
+        for key, desc in _TIPS:
+            lines.append(f"    {key:<{key_w}}  {desc}")
+        lines.append("")
+        return "\n".join(lines) + "\n"
+
+    buf = io.StringIO()
+    console = Console(file=buf, force_terminal=True, color_system="truecolor")
+    skin = _themes.get_active_skin()
+    accent = skin.color("accent", "#00E5FF")
+    secondary = skin.color("secondary", "#7C4DFF")
+    from rich.box import SIMPLE
+    from rich.table import Table
+    t = Table(box=SIMPLE, show_header=False, show_edge=False, pad_edge=False)
+    t.add_column(style=f"bold {accent}", no_wrap=True, width=key_w + 2)
+    t.add_column(style="dim")
+    for key, desc in _TIPS:
+        t.add_row(key, desc)
+    from rich.panel import Panel
+    panel = Panel(
+        t,
+        border_style=f"dim {secondary}",
+        title=f"[dim {accent}]tips[/]",
+        title_align="left",
+        padding=(0, 1),
+    )
+    console.print(panel)
+    return buf.getvalue()
+
+
 def render_sparse_banner(
     *,
     repo_root: Path,
     model: str,
     mode: str,
     plain: bool = False,
+    show_tips: bool = False,
 ) -> str:
     """Claude-Code-class startup banner — five blocks, no wrap.
 
@@ -269,7 +340,10 @@ def render_sparse_banner(
             *field_lines,
             "",
         ]
-        return "\n".join(parts) + "\n"
+        result = "\n".join(parts) + "\n"
+        if show_tips:
+            result += render_tips_panel(plain=True, force=True)
+        return result
 
     accent = PALETTE["accent"]
     meta = PALETTE["meta"]
@@ -289,7 +363,10 @@ def render_sparse_banner(
             )
             console.print(line)
         console.print()
-    return cap.get()
+    result = cap.get()
+    if show_tips:
+        result += render_tips_panel(plain=plain, force=True)
+    return result
 
 
 def render_banner(

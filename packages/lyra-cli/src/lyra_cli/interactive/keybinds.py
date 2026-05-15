@@ -281,6 +281,19 @@ def new_chat(session: "InteractiveSession") -> str:
     return "new chat (mode + model preserved)"
 
 
+def run_in_background(session: "InteractiveSession") -> str:
+    """``Ctrl+B`` — toggle background-turn mode for the current inference.
+
+    When enabled, the next LLM call is dispatched as a background task so
+    the prompt returns immediately and the user can keep typing. The flag
+    is automatically cleared after each turn so it doesn't persist beyond
+    the one turn the user asked for.
+    """
+    session.run_in_bg = not getattr(session, "run_in_bg", False)
+    state = "on" if session.run_in_bg else "off"
+    return f"background mode {state}"
+
+
 def focus_foreground_subagent(session: "InteractiveSession") -> str:
     """``Ctrl+F`` — re-focus the most recently spawned subagent.
 
@@ -421,6 +434,7 @@ __all__ = [
     "cycle_mode",
     "toggle_permission_mode",
     "rewind_one_persisted",
+    "run_in_background",
     "focus_foreground_subagent",
     "vi_bindings",
 ]
