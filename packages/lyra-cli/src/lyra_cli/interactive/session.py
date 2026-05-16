@@ -347,6 +347,9 @@ class InteractiveSession:
     # Side-channel for ``/btw <topic>`` — questions that should NOT
     # enter the main agent context. Kept as plain strings so a future
     # exporter can drop them into a "side notes" section without
+
+    # v3.7.0 (Phase 1): Skill system support
+    _skill_manager: Any = None  # SkillManager instance, lazy-loaded
     # touching the LLM transcript.
     _btw_log: list[str] = field(default_factory=list, repr=False)
 
@@ -569,6 +572,8 @@ class InteractiveSession:
         The user can still override the permission posture mid-session
         with Alt+M (or ``/perm``); we only set it on boot so a fresh
         session reflects the mode they asked for.
+
+        v3.7.0 (Phase 1): Auto-register discovered skills as slash commands.
         """
         canonical = _LEGACY_MODE_REMAP.get(self.mode, self.mode)
         if canonical != self.mode:
@@ -580,6 +585,32 @@ class InteractiveSession:
             self.permission_mode = "normal"
         elif self.mode == "ask_before_edits":
             self.permission_mode = "strict"
+
+        # Auto-register skills as slash commands
+        self._register_skills()
+
+    def _register_skills(self) -> None:
+        """Auto-register discovered skills as slash commands."""
+        try:
+            from lyra_cli.cli.skill_manager import SkillManager
+            from lyra_cli.commands.registry import register_command
+
+            if self._skill_manager is None:
+                self._skill_manager = SkillManager()
+
+            # Get command specs for all discovered skills
+            specs = self._skill_manager.get_command_specs()
+
+            # Register each skill as a slash command
+            for spec in specs:
+                try:
+                    register_command(spec)
+                except ValueError:
+                    # Already registered (e.g., from a previous session), skip
+                    pass
+        except Exception:
+            # Skill system is optional; if it fails to load, continue without it
+            pass
 
     def dispatch(self, line: str) -> CommandResult:
         stripped = line.strip()
@@ -684,6 +715,79 @@ class InteractiveSession:
         self.turn += 1
         handler = _MODE_HANDLERS.get(self.mode, _handle_plan_mode_text)
         return handler(self, line)
+
+    def _execute_skill(self, skill_name: str, args: str) -> CommandResult:
+        """Execute a skill by name with given arguments.
+
+        This method is called by dynamically-registered skill command handlers.
+        It loads the skill definition and executes it according to its execution type.
+        """
+        if self._skill_manager is None:
+            from lyra_cli.cli.skill_manager import SkillManager
+            self._skill_manager = SkillManager()
+
+        skill = self._skill_manager.get_skill(skill_name)
+        if not skill:
+            return CommandResult(output=f"Skill '{skill_name}' not found")
+
+        execution = skill.get("execution", {})
+        exec_type = execution.get("type", "prompt")
+
+        if exec_type == "prompt":
+            # Load prompt from file and dispatch as plain text
+            prompt_file = execution.get("prompt_file")
+            if not prompt_file:
+                return CommandResult(output=f"Skill '{skill_name}' has no prompt_file defined")
+
+            # Resolve prompt file path (relative to skill JSON location)
+            from pathlib import Path
+            skill_dir = self._skill_manager.global_skills_dir
+            if (self._skill_manager.local_skills_dir / f"{skill_name}.json").exists():
+                skill_dir = self._skill_manager.local_skills_dir
+
+            prompt_path = skill_dir / prompt_file
+            if not prompt_path.exists():
+                return CommandResult(
+                    output=f"Skill prompt file not found: {prompt_path}"
+                )
+
+            try:
+                prompt_template = prompt_path.read_text(encoding="utf-8")
+                # Simple variable substitution: {args} -> actual args
+                prompt = prompt_template.replace("{args}", args)
+
+                # Dispatch as plain text to the LLM
+                return self._dispatch_plain(prompt)
+            except Exception as e:
+                return CommandResult(output=f"Error executing skill '{skill_name}': {e}")
+
+        elif exec_type == "command":
+            # Execute shell command
+            command_template = execution.get("command", "")
+            if not command_template:
+                return CommandResult(output=f"Skill '{skill_name}' has no command defined")
+
+            # Simple variable substitution
+            command = command_template.replace("{args}", args)
+
+            try:
+                import subprocess
+                result = subprocess.run(
+                    command,
+                    shell=True,
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                )
+                output = result.stdout if result.returncode == 0 else result.stderr
+                return CommandResult(output=output or f"Command completed with exit code {result.returncode}")
+            except Exception as e:
+                return CommandResult(output=f"Error executing skill command: {e}")
+
+        else:
+            return CommandResult(
+                output=f"Unknown execution type '{exec_type}' for skill '{skill_name}'"
+            )
 
     # ---- helpers used by slash handlers ------------------------------------
 
@@ -9280,6 +9384,148 @@ from .v311_commands import (  # noqa: E402
     cmd_team as _cmd_team_v311,
 )
 
+
+# --- Skill System Handlers (Phase 1) -----------------------------------------
+
+
+def _cmd_skill(session: InteractiveSession, args: str) -> CommandResult:
+    """``/skill [list|search|reload|info]`` — manage skills."""
+    from lyra_cli.cli.skill_manager import SkillManager
+
+    parts = args.strip().split(maxsplit=1)
+    sub = parts[0].lower() if parts else "list"
+    rest = parts[1] if len(parts) > 1 else ""
+
+    if sub == "list":
+        return _cmd_skill_list(session, rest)
+    elif sub == "search":
+        return _cmd_skill_search(session, rest)
+    elif sub == "reload":
+        return _cmd_skill_reload(session, rest)
+    elif sub == "info":
+        return _cmd_skill_info(session, rest)
+    else:
+        return CommandResult(
+            output=f"Unknown subcommand '{sub}'. Use: /skill [list|search|reload|info]"
+        )
+
+
+def _cmd_skill_list(session: InteractiveSession, _args: str) -> CommandResult:
+    """``/skill list`` — show all installed skills."""
+    from lyra_cli.cli.skill_manager import SkillManager
+
+    skill_mgr = SkillManager()
+    skills = skill_mgr.skills
+
+    if not skills:
+        return CommandResult(
+            output="No skills installed. Add skills to ~/.lyra/skills/ or .lyra/skills/"
+        )
+
+    # Build output
+    lines = [f"Installed skills ({len(skills)}):"]
+    lines.append("")
+
+    for name, skill in sorted(skills.items()):
+        category = skill.get("category", "unknown")
+        description = skill.get("description", "No description")
+        version = skill.get("version", "unknown")
+        lines.append(f"  /{name:<20} [{category}] v{version}")
+        lines.append(f"    {description}")
+        lines.append("")
+
+    return CommandResult(output="\n".join(lines))
+
+
+def _cmd_skill_search(session: InteractiveSession, args: str) -> CommandResult:
+    """``/skill search <query>`` — search skills by name or description."""
+    from lyra_cli.cli.skill_manager import SkillManager
+
+    if not args.strip():
+        return CommandResult(output="Usage: /skill search <query>")
+
+    skill_mgr = SkillManager()
+    results = skill_mgr.search_skills(args.strip())
+
+    if not results:
+        return CommandResult(output=f"No skills found matching '{args.strip()}'")
+
+    lines = [f"Found {len(results)} skill(s):"]
+    lines.append("")
+
+    for name in results:
+        skill = skill_mgr.get_skill(name)
+        if skill:
+            description = skill.get("description", "No description")
+            lines.append(f"  /{name}")
+            lines.append(f"    {description}")
+            lines.append("")
+
+    return CommandResult(output="\n".join(lines))
+
+
+def _cmd_skill_reload(session: InteractiveSession, _args: str) -> CommandResult:
+    """``/skill reload`` — reload skills from disk and re-register commands."""
+    from lyra_cli.cli.skill_manager import SkillManager
+    from lyra_cli.commands.registry import register_command
+
+    skill_mgr = SkillManager()
+    skill_mgr.reload()
+
+    # Re-register skill commands
+    new_specs = skill_mgr.get_command_specs()
+    count = 0
+    for spec in new_specs:
+        try:
+            register_command(spec)
+            count += 1
+        except ValueError:
+            # Already registered, skip
+            pass
+
+    return CommandResult(
+        output=f"Reloaded {len(skill_mgr.skills)} skills ({count} new commands registered)"
+    )
+
+
+def _cmd_skill_info(session: InteractiveSession, args: str) -> CommandResult:
+    """``/skill info <name>`` — show detailed information about a skill."""
+    from lyra_cli.cli.skill_manager import SkillManager
+
+    if not args.strip():
+        return CommandResult(output="Usage: /skill info <skill-name>")
+
+    skill_mgr = SkillManager()
+    skill = skill_mgr.get_skill(args.strip())
+
+    if not skill:
+        return CommandResult(output=f"Skill '{args.strip()}' not found")
+
+    lines = [f"Skill: {skill['name']}"]
+    lines.append(f"Version: {skill.get('version', 'unknown')}")
+    lines.append(f"Category: {skill.get('category', 'unknown')}")
+    lines.append(f"Description: {skill.get('description', 'No description')}")
+    lines.append("")
+
+    if skill.get("aliases"):
+        lines.append(f"Aliases: {', '.join(skill['aliases'])}")
+        lines.append("")
+
+    if skill.get("args"):
+        args_data = skill["args"]
+        if isinstance(args_data, dict) and args_data.get("hint"):
+            lines.append(f"Usage: /{skill['name']} {args_data['hint']}")
+            lines.append("")
+
+    execution = skill.get("execution", {})
+    lines.append(f"Execution type: {execution.get('type', 'unknown')}")
+
+    if execution.get("prompt_file"):
+        lines.append(f"Prompt file: {execution['prompt_file']}")
+
+    return CommandResult(output="\n".join(lines))
+
+
 COMMAND_REGISTRY: tuple[CommandSpec, ...] = (
     # --- session ----------------------------------------------------------
     CommandSpec(
@@ -10041,6 +10287,15 @@ COMMAND_REGISTRY: tuple[CommandSpec, ...] = (
         "Agent Execution Record viewer: per-turn intent/observation/step-type (doc 322)",
         "observability",
         args_hint="[session-id|timeline]",
+    ),
+    # --- skills -----------------------------------------------------------
+    CommandSpec(
+        "skill",
+        _cmd_skill,
+        "manage skills (list, search, reload, info)",
+        "skills",
+        subcommands=("list", "search", "reload", "info"),
+        args_hint="[list|search|reload|info] [query]",
     ),
     # --- meta -------------------------------------------------------------
     CommandSpec("help", _cmd_help, "show this list", "meta", aliases=("commands",)),
