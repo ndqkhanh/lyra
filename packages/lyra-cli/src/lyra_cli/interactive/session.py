@@ -9389,9 +9389,52 @@ from .v311_commands import (  # noqa: E402
 
 
 def _cmd_skill(session: InteractiveSession, args: str) -> CommandResult:
-    """``/skill [list|search|reload|info]`` — manage skills."""
+    """``/skill [list|search|reload|info]`` — manage skills or launch interactive picker."""
+    import sys
     from lyra_cli.cli.skill_manager import SkillManager
 
+    # If no args and stdin is a TTY, launch interactive picker
+    if not args.strip() and sys.stdin.isatty():
+        from lyra_cli.interactive.dialog_skill_picker import run_skill_picker
+
+        skill_mgr = SkillManager()
+        skills = skill_mgr.skills
+
+        if not skills:
+            return CommandResult(
+                output="No skills installed. Add skills to ~/.lyra/skills/ or .lyra/skills/"
+            )
+
+        selected = run_skill_picker(skills)
+        if selected is None:
+            return CommandResult(output="Cancelled")
+
+        # Prompt for args if skill requires them
+        skill = skills[selected]
+        args_config = skill.get("args", {})
+        if args_config:
+            hint = args_config.get("hint", "")
+            required = args_config.get("required", False)
+            prompt_msg = f"Arguments for {selected}"
+            if hint:
+                prompt_msg += f" ({hint})"
+            if required:
+                prompt_msg += " [required]"
+            prompt_msg += ": "
+
+            try:
+                skill_args = input(prompt_msg).strip()
+                if required and not skill_args:
+                    return CommandResult(output=f"Error: {selected} requires arguments")
+            except (EOFError, KeyboardInterrupt):
+                return CommandResult(output="Cancelled")
+        else:
+            skill_args = ""
+
+        # Execute the selected skill
+        return session._execute_skill(selected, skill_args)
+
+    # Parse subcommand
     parts = args.strip().split(maxsplit=1)
     sub = parts[0].lower() if parts else "list"
     rest = parts[1] if len(parts) > 1 else ""

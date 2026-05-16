@@ -327,6 +327,56 @@ def focus_foreground_subagent(session: "InteractiveSession") -> str:
     return f"focused → {chosen.id} ({chosen.state})"
 
 
+def launch_skill_picker(session: "InteractiveSession") -> tuple[str | None, str]:
+    """``Alt+K`` — launch interactive skill picker and return selected skill + args.
+
+    Returns a tuple of (skill_name, args_string) if a skill was selected,
+    or (None, "") if cancelled. The caller is responsible for executing
+    the skill via session._execute_skill() or queueing it as a command.
+    """
+    from lyra_cli.cli.skill_manager import SkillManager
+
+    skill_mgr = SkillManager()
+    skills = skill_mgr.skills
+
+    if not skills:
+        return (None, "no skills installed")
+
+    # Import dialog only when needed (prompt_toolkit dependency)
+    try:
+        from lyra_cli.interactive.dialog_skill_picker import run_skill_picker
+    except ImportError:
+        return (None, "dialog not available (prompt_toolkit missing)")
+
+    selected = run_skill_picker(skills)
+    if selected is None:
+        return (None, "cancelled")
+
+    # Prompt for args if skill requires them
+    skill = skills[selected]
+    args_config = skill.get("args", {})
+    if args_config:
+        hint = args_config.get("hint", "")
+        required = args_config.get("required", False)
+        prompt_msg = f"Arguments for {selected}"
+        if hint:
+            prompt_msg += f" ({hint})"
+        if required:
+            prompt_msg += " [required]"
+        prompt_msg += ": "
+
+        try:
+            skill_args = input(prompt_msg).strip()
+            if required and not skill_args:
+                return (None, f"error: {selected} requires arguments")
+        except (EOFError, KeyboardInterrupt):
+            return (None, "cancelled")
+    else:
+        skill_args = ""
+
+    return (selected, skill_args)
+
+
 # ---------------------------------------------------------------------------
 # Wave-C Task 12: vi-mode keybinding factory.
 #
@@ -436,5 +486,6 @@ __all__ = [
     "rewind_one_persisted",
     "run_in_background",
     "focus_foreground_subagent",
+    "launch_skill_picker",
     "vi_bindings",
 ]

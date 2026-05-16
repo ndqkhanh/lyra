@@ -1565,6 +1565,22 @@ def _build_key_bindings(
         """Alt-U → jump straight to auto_mode (per-turn router)."""
         _jump_mode("auto_mode")
 
+    @kb.add("escape", "k")
+    def _(event: Any) -> None:
+        """Alt-K launches the interactive skill picker."""
+        selected, skill_args = _keybinds.launch_skill_picker(session)
+
+        if selected is None:
+            console.print(Text(f" → {skill_args}", style="#6B7280"))
+            get_app().invalidate()
+            return
+
+        # Queue the skill execution as a command
+        console.print(Text(f" → Executing {selected}...", style="#7C4DFF"))
+        get_app().invalidate()
+        event.app.current_buffer.text = f"/{selected} {skill_args}".strip()
+        event.app.current_buffer.validate_and_handle()
+
     @kb.add("escape", "l")
     def _(event: Any) -> None:
         """Alt-L → list configured model providers (former Alt-P)."""
