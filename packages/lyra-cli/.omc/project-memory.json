@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "python -m pytest tests/evaluation/test_evaluation.py -v",
+    "testCommand": "python -m pytest tests/multimodal_enhanced/test_phase_a.py -v",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
