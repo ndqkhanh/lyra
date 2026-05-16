@@ -20,26 +20,24 @@ Key Features:
 
 from .l0_conversation import ConversationStore, ConversationLog
 from .l1_atom import AtomStore, StructuredFact
+from .l2_scenario import ScenarioStore, ScenarioBlock
+from .l3_persona import PersonaStore, UserPersona
 from .search import rrf_merge, hybrid_search, SearchResult
 from .utils import WarmupScheduler
-
-# L2, L3 layers will be imported as they are implemented
-# from .l2_scenario import ScenarioStore, ScenarioBlock
-# from .l3_persona import PersonaStore, UserPersona
 
 __all__ = [
     "ConversationStore",
     "ConversationLog",
     "AtomStore",
     "StructuredFact",
+    "ScenarioStore",
+    "ScenarioBlock",
+    "PersonaStore",
+    "UserPersona",
     "rrf_merge",
     "hybrid_search",
     "SearchResult",
     "WarmupScheduler",
-    # "ScenarioStore",
-    # "ScenarioBlock",
-    # "PersonaStore",
-    # "UserPersona",
 ]
 
 __version__ = "0.1.0"
