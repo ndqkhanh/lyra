@@ -1,0 +1,70 @@
+{
+  "format": 1,
+  "id": "2026-05-10T06-15-30-723641",
+  "name": "session-3",
+  "saved_at": "2026-05-10T06:15:30.723641+00:00",
+  "repo_root": "/Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra",
+  "state": {
+    "model": "auto",
+    "mode": "edit_automatically",
+    "turn": 3,
+    "cost_usd": 0.005261180000000001,
+    "tokens_used": 16172,
+    "history": [
+      "what files in this folder @packages/",
+      "What skills do you have",
+      "What argus do"
+    ],
+    "pending_task": null,
+    "deep_think": false,
+    "verbose": false,
+    "vim_mode": false,
+    "theme": "aurora",
+    "budget_cap_usd": null,
+    "task_panel": false,
+    "turns_log": [
+      {
+        "line": "what files in this folder @packages/",
+        "mode": "edit_automatically",
+        "turn": 0,
+        "pending_task": null,
+        "cost_usd": 0.0,
+        "tokens_used": 0,
+        "model": "auto",
+        "ts": 1778393667.600325,
+        "tokens_in": 6738,
+        "tokens_out": 418,
+        "cost_delta_usd": 0.0028310500000000003,
+        "latency_ms": 8744.98712500008
+      },
+      {
+        "line": "What skills do you have",
+        "mode": "edit_automatically",
+        "turn": 1,
+        "pending_task": null,
+        "cost_usd": 0.0028310500000000003,
+        "tokens_used": 9059,
+        "model": "auto",
+        "ts": 1778393701.081014,
+        "tokens_in": 2284,
+        "tokens_out": 324,
+        "cost_delta_usd": 0.0009730799999999999,
+        "latency_ms": 5330.94908299995
+      },
+      {
+        "line": "What argus do",
+        "mode": "edit_automatically",
+        "turn": 2,
+        "pending_task": null,
+        "cost_usd": 0.00380413,
+        "tokens_used": 11667,
+        "model": "auto",
+        "ts": 1778393721.9366221,
+        "tokens_in": 1599,
+        "tokens_out": 142,
+        "cost_delta_usd": 0.0014570500000000005,
+        "latency_ms": 6132.235249999894
+      }
+    ]
+  }
+}

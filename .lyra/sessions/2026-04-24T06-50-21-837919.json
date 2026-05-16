@@ -1,0 +1,44 @@
+{
+  "format": 1,
+  "id": "2026-04-24T06-50-21-837919",
+  "name": "session-2",
+  "saved_at": "2026-04-24T06:50:21.837919+00:00",
+  "repo_root": "/Users/kane.nguyendinhquangkhanh/Downloads/Explore/research/harness-engineering/projects/lyra",
+  "state": {
+    "model": "mock",
+    "mode": "plan",
+    "turn": 2,
+    "cost_usd": 0.0,
+    "tokens_used": 0,
+    "history": [
+      "/agents",
+      "hello",
+      "python3 -m lyra_cli plan \"add a CSV exporter\" --auto-approve --llm mock\npython3 -m lyra_cli run  \"implement the CSV exporter\" --llm mock"
+    ],
+    "pending_task": "python3 -m lyra_cli plan \"add a CSV exporter\" --auto-approve --llm mock\npython3 -m lyra_cli run  \"implement the CSV exporter\" --llm mock",
+    "deep_think": false,
+    "verbose": false,
+    "vim_mode": false,
+    "theme": "aurora",
+    "budget_cap_usd": null,
+    "task_panel": false,
+    "turns_log": [
+      {
+        "line": "hello",
+        "mode": "plan",
+        "turn": 0,
+        "pending_task": null,
+        "cost_usd": 0.0,
+        "tokens_used": 0
+      },
+      {
+        "line": "python3 -m lyra_cli plan \"add a CSV exporter\" --auto-approve --llm mock\npython3 -m lyra_cli run  \"implement the CSV exporter\" --llm mock",
+        "mode": "plan",
+        "turn": 1,
+        "pending_task": "hello",
+        "cost_usd": 0.0,
+        "tokens_used": 0
+      }
+    ]
+  }
+}

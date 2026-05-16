@@ -1,6 +1,6 @@
-"""Skill Manager for Lyra — Phase 1: Auto-discovery & Slash Command Registration.
+"""Skill Manager for Lyra — Phases 1-4: Complete Skill System.
 
-Manages skill installation, loading, and execution.
+Manages skill installation, loading, execution, configuration, templates, analytics, and composition.
 Integrates 179+ skills from research.
 
 Phase 1 Features:
@@ -9,14 +9,26 @@ Phase 1 Features:
 - Auto-registration as slash commands
 - Autocomplete integration
 - /skill list command
+
+Phase 4 Features:
+- Skill composition and chaining
+- Skill templates and scaffolding
+- Usage analytics and tracking
+- Advanced configuration system
 """
 
 from __future__ import annotations
 
 import json
 import subprocess
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
+
+from lyra_cli.cli.composition_engine import CompositionEngine
+from lyra_cli.cli.skill_analytics import SkillAnalytics, SkillInvocation
+from lyra_cli.cli.skill_config import SkillConfigManager
+from lyra_cli.cli.skill_templates import SkillTemplateEngine
 
 
 class SkillManager:
@@ -29,6 +41,16 @@ class SkillManager:
 
         # Project-local skills directory (relative to cwd)
         self.local_skills_dir = Path.cwd() / ".lyra" / "skills"
+
+        # Phase 4: Initialize advanced features
+        self.config_manager = SkillConfigManager(
+            Path.home() / ".lyra" / "skill_config.json"
+        )
+        self.template_engine = SkillTemplateEngine(
+            Path.home() / ".lyra" / "templates"
+        )
+        self.analytics = SkillAnalytics(Path.home() / ".lyra" / "analytics")
+        self.composition_engine = CompositionEngine(self)
 
         # Load skills from both locations
         self.skills = self._load_skills()
@@ -194,6 +216,173 @@ class SkillManager:
     def reload(self):
         """Reload skills from disk."""
         self.skills = self._load_skills()
+
+    # Phase 4: Composition Methods
+    def execute_composition(self, skill_name: str, user_input: str) -> dict:
+        """Execute a composition skill.
+
+        Args:
+            skill_name: Name of composition skill
+            user_input: User-provided arguments
+
+        Returns:
+            Execution result with output and success status
+        """
+        skill = self.skills.get(skill_name)
+        if not skill:
+            return {"success": False, "error": f"Skill '{skill_name}' not found"}
+
+        execution = skill.get("execution", {})
+        if execution.get("type") != "composition":
+            return {
+                "success": False,
+                "error": f"Skill '{skill_name}' is not a composition",
+            }
+
+        start_time = datetime.now()
+        try:
+            result = self.composition_engine.execute(execution, user_input)
+            duration_ms = int((datetime.now() - start_time).total_seconds() * 1000)
+
+            # Track analytics
+            self.analytics.record_invocation(
+                SkillInvocation(
+                    skill_name=skill_name,
+                    timestamp=start_time,
+                    duration_ms=duration_ms,
+                    success=result.success,
+                    error=result.error,
+                    args_length=len(user_input),
+                    output_length=len(str(result.output)) if result.output else 0,
+                )
+            )
+
+            return {
+                "success": result.success,
+                "output": result.output,
+                "error": result.error,
+            }
+        except Exception as e:
+            duration_ms = int((datetime.now() - start_time).total_seconds() * 1000)
+            self.analytics.record_invocation(
+                SkillInvocation(
+                    skill_name=skill_name,
+                    timestamp=start_time,
+                    duration_ms=duration_ms,
+                    success=False,
+                    error=str(e),
+                    args_length=len(user_input),
+                )
+            )
+            return {"success": False, "error": str(e)}
+
+    # Phase 4: Template Methods
+    def create_from_template(
+        self, template_name: str, variables: dict[str, str], save_path: Optional[Path] = None
+    ) -> dict:
+        """Create a new skill from a template.
+
+        Args:
+            template_name: Name of template to use
+            variables: Template variables
+            save_path: Optional path to save skill (defaults to global skills dir)
+
+        Returns:
+            Result with skill data and save path
+        """
+        try:
+            skill_data = self.template_engine.render(template_name, variables)
+
+            # Save to file
+            if save_path is None:
+                skill_name = skill_data["name"]
+                save_path = self.global_skills_dir / f"{skill_name}.json"
+
+            save_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(save_path, "w") as f:
+                json.dump(skill_data, f, indent=2)
+
+            # Reload skills
+            self.reload()
+
+            return {
+                "success": True,
+                "skill_name": skill_data["name"],
+                "path": str(save_path),
+            }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def list_templates(self) -> list[dict]:
+        """List available skill templates."""
+        return self.template_engine.list_templates()
+
+    # Phase 4: Configuration Methods
+    def get_skill_config(self, skill_name: str) -> dict:
+        """Get configuration for a skill."""
+        return self.config_manager.get_skill_config(skill_name)
+
+    def set_skill_config(self, skill_name: str, config: dict):
+        """Set configuration for a skill."""
+        self.config_manager.set_skill_config(skill_name, config)
+
+    def get_global_config(self) -> dict:
+        """Get global skill configuration."""
+        return self.config_manager.config.get("global", {})
+
+    # Phase 4: Analytics Methods
+    def get_skill_stats(self, skill_name: Optional[str] = None) -> dict:
+        """Get usage statistics for skills."""
+        stats = self.analytics.get_stats(skill_name)
+        return {
+            name: {
+                "total_invocations": s.total_invocations,
+                "successful_invocations": s.successful_invocations,
+                "failed_invocations": s.failed_invocations,
+                "avg_duration_ms": s.avg_duration_ms,
+                "success_rate": s.success_rate,
+                "first_used": s.first_used.isoformat(),
+                "last_used": s.last_used.isoformat(),
+            }
+            for name, s in stats.items()
+        }
+
+    def get_top_skills(
+        self, limit: int = 10, sort_by: str = "invocations"
+    ) -> list[dict]:
+        """Get top skills by usage or performance."""
+        top_stats = self.analytics.get_top_skills(limit, sort_by)
+        return [
+            {
+                "skill_name": s.skill_name,
+                "total_invocations": s.total_invocations,
+                "success_rate": s.success_rate,
+                "avg_duration_ms": s.avg_duration_ms,
+            }
+            for s in top_stats
+        ]
+
+    def record_skill_execution(
+        self,
+        skill_name: str,
+        duration_ms: int,
+        success: bool,
+        error: Optional[str] = None,
+        args_length: int = 0,
+        output_length: int = 0,
+    ):
+        """Record a skill execution for analytics."""
+        self.analytics.record_invocation(
+            SkillInvocation(
+                skill_name=skill_name,
+                timestamp=datetime.now(),
+                duration_ms=duration_ms,
+                success=success,
+                error=error,
+                args_length=args_length,
+                output_length=output_length,
+            )
+        )
 
 
 class MCPManager:

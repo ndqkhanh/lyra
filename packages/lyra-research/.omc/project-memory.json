@@ -1,0 +1,83 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1778864385784,
+  "projectRoot": "/Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-research",
+  "techStack": {
+    "languages": [
+      {
+        "name": "Python",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "pyproject.toml"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "pytest",
+        "version": null,
+        "category": "testing"
+      }
+    ],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": "pytest",
+    "lintCommand": "ruff check",
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "src",
+      "tests"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "lyra_research": {
+      "path": "lyra_research",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1778864385774,
+      "keyFiles": [
+        "falsification.py",
+        "feynman.py"
+      ]
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 0,
+      "lastAccessed": 1778864385775,
+      "keyFiles": []
+    },
+    "tests": {
+      "path": "tests",
+      "purpose": "Test files",
+      "fileCount": 13,
+      "lastAccessed": 1778864385775,
+      "keyFiles": [
+        "test_analysis.py",
+        "test_discovery.py",
+        "test_evaluation.py",
+        "test_hop_trace.py",
+        "test_intelligence.py"
+      ]
+    }
+  },
+  "hotPaths": [],
+  "userDirectives": []
+}

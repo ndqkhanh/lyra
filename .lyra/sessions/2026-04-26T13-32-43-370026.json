@@ -1,0 +1,34 @@
+{
+  "format": 1,
+  "id": "2026-04-26T13-32-43-370026",
+  "name": "session-1",
+  "saved_at": "2026-04-26T13:32:43.370026+00:00",
+  "repo_root": "/Users/kane.nguyendinhquangkhanh/Downloads/Explore/research/harness-engineering/projects/lyra",
+  "state": {
+    "model": "mock",
+    "mode": "plan",
+    "turn": 1,
+    "cost_usd": 0.0,
+    "tokens_used": 0,
+    "history": [
+      "hello"
+    ],
+    "pending_task": "hello",
+    "deep_think": false,
+    "verbose": false,
+    "vim_mode": false,
+    "theme": "aurora",
+    "budget_cap_usd": null,
+    "task_panel": false,
+    "turns_log": [
+      {
+        "line": "hello",
+        "mode": "plan",
+        "turn": 0,
+        "pending_task": null,
+        "cost_usd": 0.0,
+        "tokens_used": 0
+      }
+    ]
+  }
+}

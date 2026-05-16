@@ -1,0 +1,53 @@
+#!/bin/bash
+# Interactive UX test - verifies real-time feedback and user experience
+# This script tests the actual interactive experience with visual feedback
+
+echo "════════════════════════════════════════════════════════════════"
+echo "  Lyra Interactive UX Test"
+echo "════════════════════════════════════════════════════════════════"
+echo ""
+echo "This test will launch Lyra interactively to verify:"
+echo "  ✓ Real-time spinner and progress indicators"
+echo "  ✓ Status bar with live updates"
+echo "  ✓ Background task management UI"
+echo "  ✓ Autosuggestions and tips"
+echo "  ✓ Subagent execution visibility"
+echo ""
+echo "Press Ctrl+C to stop at any time"
+echo ""
+read -p "Press Enter to start interactive test..."
+
+# Test scenario 1: Simple query with visible progress
+echo ""
+echo "→ Test 1: Simple query (watch for spinner and progress)"
+echo "  Type: 'Explain what async/await does in Python'"
+echo "  Then type: /exit"
+echo ""
+read -p "Press Enter to launch..."
+
+ly --model deepseek-chat
+
+echo ""
+echo "════════════════════════════════════════════════════════════════"
+echo "  Manual Verification Checklist"
+echo "════════════════════════════════════════════════════════════════"
+echo ""
+echo "Did you observe the following?"
+echo ""
+echo "[ ] Spinner with animation (⏺, ✳, ✻, ✶, ✽)"
+echo "[ ] Token count displayed (e.g., '↓ 2.6k tokens')"
+echo "[ ] Time elapsed shown (e.g., '2m 53s')"
+echo "[ ] Status bar at bottom with model/mode info"
+echo "[ ] Tips displayed (e.g., 'Tip: Use /btw to ask...')"
+echo "[ ] Ctrl+O hint for expanding tool output"
+echo "[ ] Ctrl+B hint for background mode"
+echo "[ ] Clean, readable output formatting"
+echo ""
+echo "If you want to test deep research with parallel agents:"
+echo "  Run: ly --model deepseek-reasoner"
+echo "  Type: /research \"transformer architecture\""
+echo "  Watch for: Multiple agents running in parallel"
+echo "              Progress bars for each agent"
+echo "              Token usage per agent"
+echo "              Background task indicators"
+echo ""

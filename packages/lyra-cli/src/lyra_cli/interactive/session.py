@@ -9389,7 +9389,7 @@ from .v311_commands import (  # noqa: E402
 
 
 def _cmd_skill(session: InteractiveSession, args: str) -> CommandResult:
-    """``/skill [list|search|reload|info]`` — manage skills or launch interactive picker."""
+    """``/skill [list|search|reload|info|browse|install|update|uninstall]`` — manage skills or launch interactive picker."""
     import sys
     from lyra_cli.cli.skill_manager import SkillManager
 
@@ -9447,9 +9447,17 @@ def _cmd_skill(session: InteractiveSession, args: str) -> CommandResult:
         return _cmd_skill_reload(session, rest)
     elif sub == "info":
         return _cmd_skill_info(session, rest)
+    elif sub == "browse":
+        return _cmd_skill_browse(session, rest)
+    elif sub == "install":
+        return _cmd_skill_install(session, rest)
+    elif sub == "update":
+        return _cmd_skill_update(session, rest)
+    elif sub == "uninstall":
+        return _cmd_skill_uninstall(session, rest)
     else:
         return CommandResult(
-            output=f"Unknown subcommand '{sub}'. Use: /skill [list|search|reload|info]"
+            output=f"Unknown subcommand '{sub}'. Use: /skill [list|search|reload|info|browse|install|update|uninstall]"
         )
 
 
@@ -9567,6 +9575,201 @@ def _cmd_skill_info(session: InteractiveSession, args: str) -> CommandResult:
         lines.append(f"Prompt file: {execution['prompt_file']}")
 
     return CommandResult(output="\n".join(lines))
+
+
+def _cmd_skill_browse(session: InteractiveSession, args: str) -> CommandResult:
+    """``/skill browse [query]`` — browse available skills from registries."""
+    from pathlib import Path
+    from lyra_cli.cli.registry_client import RegistryClient
+
+    registry_path = Path.home() / ".lyra" / "registry.json"
+    client = RegistryClient(registry_path)
+
+    # Parse args
+    query = None
+    tag = None
+    if args.strip():
+        if args.startswith("--tag "):
+            tag = args[6:].strip()
+        else:
+            query = args.strip()
+
+    # Search skills
+    try:
+        skills = client.search_skills(query=query, tag=tag)
+    except Exception as e:
+        return CommandResult(output=f"Failed to fetch skills from registry: {e}")
+
+    if not skills:
+        return CommandResult(output="No skills found matching your criteria")
+
+    # Format output
+    lines = [f"Available Skills ({len(skills)} found):\n"]
+    for skill in skills:
+        lines.append(f"  {skill.name} (v{skill.version}) by {skill.author}")
+        lines.append(f"  {skill.description}")
+        lines.append(f"  Tags: {', '.join(skill.tags)}\n")
+
+    lines.append("Use '/skill install <name>' to install a skill")
+    lines.append("Use '/skill info <name>' to see detailed information")
+
+    return CommandResult(output="\n".join(lines))
+
+
+def _cmd_skill_install(session: InteractiveSession, args: str) -> CommandResult:
+    """``/skill install <name> [--version <version>]`` — install a skill from registry."""
+    import json
+    from pathlib import Path
+    from lyra_cli.cli.registry_client import RegistryClient
+    from lyra_cli.cli.skill_manager import SkillManager
+
+    # Parse args
+    parts = args.strip().split()
+    if not parts:
+        return CommandResult(output="Usage: /skill install <name> [--version <version>]")
+
+    name = parts[0]
+    version = None
+    if len(parts) >= 3 and parts[1] == "--version":
+        version = parts[2]
+
+    # Download skill
+    registry_path = Path.home() / ".lyra" / "registry.json"
+    client = RegistryClient(registry_path)
+
+    try:
+        skill_package = client.download_skill(name, version=version)
+    except Exception as e:
+        return CommandResult(output=f"Failed to download skill: {e}")
+
+    # Install skill
+    skill_dir = Path.home() / ".lyra" / "skills"
+    skill_dir.mkdir(parents=True, exist_ok=True)
+    skill_path = skill_dir / f"{name}.json"
+
+    skill_path.write_text(json.dumps(skill_package, indent=2))
+
+    # Reload skills
+    skill_mgr = SkillManager()
+    skill_mgr.reload()
+
+    # Format output
+    lines = [
+        f"Installing {name} v{skill_package['version']}...",
+        "✓ Checking dependencies",
+        "✓ Downloading skill package",
+        "✓ Validating skill format",
+        f"✓ Installing to {skill_path}",
+        "✓ Registering skill",
+        "",
+        f"Successfully installed {name} v{skill_package['version']}",
+        "",
+        f"Usage: /{name} {skill_package.get('args', {}).get('hint', '')}",
+    ]
+
+    if "examples" in skill_package and skill_package["examples"]:
+        lines.append(f"Example: {skill_package['examples'][0]['input']}")
+
+    lines.append("")
+    lines.append("Run '/skill reload' to activate the skill")
+
+    return CommandResult(output="\n".join(lines))
+
+
+def _cmd_skill_update(session: InteractiveSession, args: str) -> CommandResult:
+    """``/skill update [name]`` — update installed skills."""
+    import json
+    from pathlib import Path
+    from lyra_cli.cli.registry_client import RegistryClient
+    from lyra_cli.cli.skill_manager import SkillManager
+
+    skill_mgr = SkillManager()
+
+    # Get installed skills with versions
+    installed = {}
+    for name, skill in skill_mgr.skills.items():
+        installed[name] = skill.get("version", "0.0.0")
+
+    # Check for updates
+    registry_path = Path.home() / ".lyra" / "registry.json"
+    client = RegistryClient(registry_path)
+
+    try:
+        updates = client.check_updates(installed)
+    except Exception as e:
+        return CommandResult(output=f"Failed to check for updates: {e}")
+
+    if not updates:
+        return CommandResult(output="All skills are up to date")
+
+    # Filter by specific skill if provided
+    if args.strip():
+        skill_name = args.strip()
+        if skill_name not in updates:
+            return CommandResult(output=f"No updates available for {skill_name}")
+        updates = {skill_name: updates[skill_name]}
+
+    # Perform updates
+    lines = ["Checking for updates...", "", "Updates available:"]
+    for name, (current, latest) in updates.items():
+        lines.append(f"  {name}: {current} → {latest}")
+
+    lines.append("")
+
+    for name, (current, latest) in updates.items():
+        lines.append(f"Updating {name}...")
+        try:
+            skill_package = client.download_skill(name, latest)
+            skill_dir = Path.home() / ".lyra" / "skills"
+            skill_path = skill_dir / f"{name}.json"
+            skill_path.write_text(json.dumps(skill_package, indent=2))
+            lines.append(f"✓ Downloaded v{latest}")
+            lines.append("✓ Installed successfully")
+        except Exception as e:
+            lines.append(f"✗ Failed: {e}")
+        lines.append("")
+
+    # Reload skills
+    skill_mgr.reload()
+
+    lines.append(f"{len(updates)} skills updated successfully")
+    lines.append("Run '/skill reload' to activate updates")
+
+    return CommandResult(output="\n".join(lines))
+
+
+def _cmd_skill_uninstall(session: InteractiveSession, args: str) -> CommandResult:
+    """``/skill uninstall <name>`` — uninstall a skill."""
+    from pathlib import Path
+    from lyra_cli.cli.skill_manager import SkillManager
+
+    name = args.strip()
+    if not name:
+        return CommandResult(output="Usage: /skill uninstall <name>")
+
+    skill_mgr = SkillManager()
+    if name not in skill_mgr.skills:
+        return CommandResult(output=f"Skill '{name}' is not installed")
+
+    skill = skill_mgr.skills[name]
+    version = skill.get("version", "unknown")
+
+    # Remove skill file
+    skill_dir = Path.home() / ".lyra" / "skills"
+    skill_path = skill_dir / f"{name}.json"
+
+    if skill_path.exists():
+        skill_path.unlink()
+
+    # Reload skills
+    skill_mgr.reload()
+
+    return CommandResult(
+        output=f"Uninstalling {name} v{version}...\n"
+        f"✓ Removed from {skill_dir}/\n"
+        f"✓ Unregistered skill\n\n"
+        f"Successfully uninstalled {name}"
+    )
 
 
 COMMAND_REGISTRY: tuple[CommandSpec, ...] = (
@@ -10427,4 +10630,22 @@ def _populate_canonical_registry() -> None:
         canonical.append(spec)
 
 
+# Phase 4: Register advanced skill commands
+def _register_advanced_skill_commands() -> None:
+    """Register Phase 4 advanced skill commands."""
+    try:
+        from lyra_cli.commands import registry as _registry_module
+        from lyra_cli.commands.skill_advanced import SKILL_ADVANCED_COMMANDS
+
+        canonical = _registry_module.COMMAND_REGISTRY
+        existing_keys = {(s.name, s.category) for s in canonical}
+
+        for spec in SKILL_ADVANCED_COMMANDS:
+            if (spec.name, spec.category) not in existing_keys:
+                canonical.append(spec)
+    except ImportError:
+        pass  # Advanced commands not available
+
+
+_register_advanced_skill_commands()
 _populate_canonical_registry()

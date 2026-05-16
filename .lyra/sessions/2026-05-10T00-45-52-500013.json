@@ -1,0 +1,41 @@
+{
+  "format": 1,
+  "id": "2026-05-10T00-45-52-500013",
+  "name": "session-1",
+  "saved_at": "2026-05-10T00:45:52.500013+00:00",
+  "repo_root": "/Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra",
+  "state": {
+    "model": "deepseek-reasoner",
+    "mode": "edit_automatically",
+    "turn": 1,
+    "cost_usd": 0.0021594,
+    "tokens_used": 2316,
+    "history": [
+      "/model deepseek-v4-pro",
+      "hello what skills do you have"
+    ],
+    "pending_task": null,
+    "deep_think": false,
+    "verbose": false,
+    "vim_mode": false,
+    "theme": "aurora",
+    "budget_cap_usd": null,
+    "task_panel": false,
+    "turns_log": [
+      {
+        "line": "hello what skills do you have",
+        "mode": "edit_automatically",
+        "turn": 0,
+        "pending_task": null,
+        "cost_usd": 0.0,
+        "tokens_used": 0,
+        "model": "deepseek-reasoner",
+        "ts": 1778373861.394717,
+        "tokens_in": 1776,
+        "tokens_out": 540,
+        "cost_delta_usd": 0.0021594,
+        "latency_ms": 7508.546999975806
+      }
+    ]
+  }
+}

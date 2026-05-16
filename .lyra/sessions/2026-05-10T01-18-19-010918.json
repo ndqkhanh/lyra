@@ -1,0 +1,70 @@
+{
+  "format": 1,
+  "id": "2026-05-10T01-18-19-010918",
+  "name": "session-3",
+  "saved_at": "2026-05-10T01:18:19.010918+00:00",
+  "repo_root": "/Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra",
+  "state": {
+    "model": "auto",
+    "mode": "edit_automatically",
+    "turn": 3,
+    "cost_usd": 0.00365314,
+    "tokens_used": 12196,
+    "history": [
+      "hello",
+      "@packages/",
+      "what files in this folder @packages/"
+    ],
+    "pending_task": null,
+    "deep_think": false,
+    "verbose": false,
+    "vim_mode": false,
+    "theme": "aurora",
+    "budget_cap_usd": null,
+    "task_panel": false,
+    "turns_log": [
+      {
+        "line": "hello",
+        "mode": "edit_automatically",
+        "turn": 0,
+        "pending_task": null,
+        "cost_usd": 0.0,
+        "tokens_used": 0,
+        "model": "auto",
+        "ts": 1778375663.882424,
+        "tokens_in": 1771,
+        "tokens_out": 64,
+        "cost_delta_usd": 0.0005485700000000001,
+        "latency_ms": 1723.1042089988478
+      },
+      {
+        "line": "@packages/",
+        "mode": "edit_automatically",
+        "turn": 1,
+        "pending_task": null,
+        "cost_usd": 0.0005485700000000001,
+        "tokens_used": 1835,
+        "model": "auto",
+        "ts": 1778375677.7053142,
+        "tokens_in": 2212,
+        "tokens_out": 92,
+        "cost_delta_usd": 0.0018636200000000003,
+        "latency_ms": 5223.45270900405
+      },
+      {
+        "line": "what files in this folder @packages/",
+        "mode": "edit_automatically",
+        "turn": 2,
+        "pending_task": null,
+        "cost_usd": 0.0024121900000000003,
+        "tokens_used": 8061,
+        "model": "auto",
+        "ts": 1778375757.129138,
+        "tokens_in": 2037,
+        "tokens_out": 105,
+        "cost_delta_usd": 0.0012409499999999998,
+        "latency_ms": 3411.616083001718
+      }
+    ]
+  }
+}

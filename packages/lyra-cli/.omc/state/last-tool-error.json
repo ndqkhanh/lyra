@@ -1,7 +1,7 @@
 {
   "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"git add ../../LYRA_CLI_MIGRATION_GUIDE.md ../../LYRA_CLI_COMPLETE_SUMMARY.md && git commit -m \\\"docs: Phase 5 - Complete documentation and migration guide\\n\\nAdd comprehensive documentatio...",
-  "error": "Exit code 128\nfatal: pathspec '../../LYRA_CLI_MIGRATION_GUIDE.md' did not match any files",
-  "timestamp": "2026-05-15T04:08:48.644Z",
-  "retry_count": 2
+  "tool_input_preview": "{\"command\":\"python -m pytest tests/memory/test_graph_memory.py -v\",\"description\":\"Run graph memory tests\"}",
+  "error": "Exit code 1\n============================= test session starts ==============================\nplatform darwin -- Python 3.11.8, pytest-9.0.2, pluggy-1.6.0 -- /Users/khanhnguyen/miniconda3/bin/python\ncachedir: .pytest_cache\nrootdir: /Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-cli\nconfigfile: pyproject.toml\nplugins: anyio-4.12.1, cov-7.1.0\ncollecting ... collected 10 items\n\ntests/memory/test_graph_memory.py::test_add_entity PASSED                [ 10%]...",
+  "timestamp": "2026-05-16T12:10:57.696Z",
+  "retry_count": 1
 }

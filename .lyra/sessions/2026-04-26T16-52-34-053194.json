@@ -1,0 +1,52 @@
+{
+  "format": 1,
+  "id": "2026-04-26T16-52-34-053194",
+  "name": "session-3",
+  "saved_at": "2026-04-26T16:52:34.053194+00:00",
+  "repo_root": "/Users/kane.nguyendinhquangkhanh/Downloads/Explore/research/harness-engineering/projects/lyra",
+  "state": {
+    "model": "auto",
+    "mode": "build",
+    "turn": 3,
+    "cost_usd": 0.0,
+    "tokens_used": 0,
+    "history": [
+      "hello",
+      "what is the weather today at Ho Chi Minh City",
+      "What model are you"
+    ],
+    "pending_task": null,
+    "deep_think": false,
+    "verbose": false,
+    "vim_mode": false,
+    "theme": "aurora",
+    "budget_cap_usd": null,
+    "task_panel": false,
+    "turns_log": [
+      {
+        "line": "hello",
+        "mode": "build",
+        "turn": 0,
+        "pending_task": null,
+        "cost_usd": 0.0,
+        "tokens_used": 0
+      },
+      {
+        "line": "what is the weather today at Ho Chi Minh City",
+        "mode": "build",
+        "turn": 1,
+        "pending_task": null,
+        "cost_usd": 0.0,
+        "tokens_used": 0
+      },
+      {
+        "line": "What model are you",
+        "mode": "build",
+        "turn": 2,
+        "pending_task": null,
+        "cost_usd": 0.0,
+        "tokens_used": 0
+      }
+    ]
+  }
+}

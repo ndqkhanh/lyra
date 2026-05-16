@@ -1,0 +1,23 @@
+{
+  "format": 1,
+  "id": "2026-05-10T00-40-38-675248",
+  "name": "session-0",
+  "saved_at": "2026-05-10T00:40:38.675248+00:00",
+  "repo_root": "/Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra",
+  "state": {
+    "model": "auto",
+    "mode": "edit_automatically",
+    "turn": 0,
+    "cost_usd": 0.0,
+    "tokens_used": 0,
+    "history": [],
+    "pending_task": null,
+    "deep_think": false,
+    "verbose": false,
+    "vim_mode": false,
+    "theme": "aurora",
+    "budget_cap_usd": null,
+    "task_panel": false,
+    "turns_log": []
+  }
+}

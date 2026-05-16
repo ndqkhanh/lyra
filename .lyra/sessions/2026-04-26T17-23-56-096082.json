@@ -1,0 +1,43 @@
+{
+  "format": 1,
+  "id": "2026-04-26T17-23-56-096082",
+  "name": "session-2",
+  "saved_at": "2026-04-26T17:23:56.096082+00:00",
+  "repo_root": "/Users/kane.nguyendinhquangkhanh/Downloads/Explore/research/harness-engineering/projects/lyra",
+  "state": {
+    "model": "auto",
+    "mode": "build",
+    "turn": 2,
+    "cost_usd": 0.0010501,
+    "tokens_used": 642,
+    "history": [
+      "hello",
+      "can you explain what is harness engineering"
+    ],
+    "pending_task": null,
+    "deep_think": false,
+    "verbose": false,
+    "vim_mode": false,
+    "theme": "aurora",
+    "budget_cap_usd": null,
+    "task_panel": false,
+    "turns_log": [
+      {
+        "line": "hello",
+        "mode": "build",
+        "turn": 0,
+        "pending_task": null,
+        "cost_usd": 0.0,
+        "tokens_used": 0
+      },
+      {
+        "line": "can you explain what is harness engineering",
+        "mode": "build",
+        "turn": 1,
+        "pending_task": null,
+        "cost_usd": 0.00027013,
+        "tokens_used": 187
+      }
+    ]
+  }
+}

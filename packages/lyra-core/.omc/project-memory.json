@@ -1,0 +1,98 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1778865617550,
+  "projectRoot": "/Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-core",
+  "techStack": {
+    "languages": [
+      {
+        "name": "Python",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "pyproject.toml"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "pytest",
+        "version": null,
+        "category": "testing"
+      }
+    ],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": "pytest tests/test_memory_reasoning_bank_sqlite.py tests/test_memory_reasoning_bank_phase0.py tests/test_memory_distillers.py -v",
+    "lintCommand": "ruff check",
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "examples",
+      "src",
+      "tests"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "examples": {
+      "path": "examples",
+      "purpose": "Example code",
+      "fileCount": 2,
+      "lastAccessed": 1778865617535,
+      "keyFiles": [
+        "repobench_memory_usage.py",
+        "t3_git_sync_usage.py"
+      ]
+    },
+    "lyra_core": {
+      "path": "lyra_core",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1778865617535,
+      "keyFiles": []
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 0,
+      "lastAccessed": 1778865617536,
+      "keyFiles": []
+    },
+    "tests": {
+      "path": "tests",
+      "purpose": "Test files",
+      "fileCount": 223,
+      "lastAccessed": 1778865617536,
+      "keyFiles": [
+        "__init__.py",
+        "conftest.py",
+        "test_acp_http_bridge.py",
+        "test_acp_remote_control.py",
+        "test_acp_server_contract.py"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "tests/test_providers_prompt_cache.py",
+      "accessCount": 1,
+      "lastAccessed": 1778865720160,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
