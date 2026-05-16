@@ -29,9 +29,20 @@ SLASH_COMMANDS = {
     # Session & Context
     "/help": "Show available commands",
     "/status": "Show session status",
-    "/clear": "Clear conversation history",
+    "/clear": "Clear screen",
     "/exit": "Exit the REPL",
     "/quit": "Exit the REPL",
+
+    # Conversation Memory (Phase A/D)
+    "/history": "Conversation memory — /history [clear|show|stats|search <q>]",
+    "/context": "Show context window stats and compression metrics",
+
+    # Output Control (Phase B)
+    "/verbosity": "Set output verbosity — /verbosity [lite|full|ultra|off]",
+
+    # Memory (Phase E)
+    "/memory": "Memory management — /memory [add <fact>|show|search <q>|archive]",
+    "/reflect": "Store a lesson — /reflect tag:<tags> verdict:<v> :: <lesson>",
 
     # Model & Configuration
     "/model": "Switch model or show current model",
@@ -42,7 +53,14 @@ SLASH_COMMANDS = {
     # Information
     "/usage": "Show token usage and cost",
     "/cost": "View spending statistics",
-    "/history": "Show command history",
+
+    # Research & Team
+    "/research": "Deep research — /research <topic>",
+    "/team": "Team task — /team run <task>",
+
+    # Skills & MCP
+    "/skills": "List installed skills",
+    "/mcp": "List MCP servers",
 
     # Budget
     "/budget": "Set or show budget cap",

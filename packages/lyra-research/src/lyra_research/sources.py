@@ -41,7 +41,7 @@ class OpenReviewDiscovery:
         venue: Optional[str] = None,
     ) -> List[ResearchSource]:
         """
-        Search OpenReview for papers.
+        Search OpenReview for papers with exponential backoff retry.
 
         Args:
             query: Search query.
@@ -51,26 +51,50 @@ class OpenReviewDiscovery:
         Returns:
             List of discovered papers.
         """
-        try:
-            params: Dict[str, Any] = {"term": query, "limit": min(max_results, 100)}
-            if venue:
-                params["content.venueid"] = venue
+        import time
 
-            response = requests.get(
-                f"{self.BASE_URL}/notes",
-                params=params,
-                timeout=30,
-            )
-            if response.status_code != 200:
-                print(f"OpenReview API error: {response.status_code}")
-                return []
+        max_retries = 3
+        base_delay = 2  # seconds
 
-            data = response.json()
-            return [self._to_source(note) for note in data.get("notes", [])]
+        for attempt in range(max_retries):
+            try:
+                params: Dict[str, Any] = {"term": query, "limit": min(max_results, 100)}
+                if venue:
+                    params["content.venueid"] = venue
 
-        except Exception as e:
-            print(f"OpenReview search error: {e}")
-            return []
+                response = requests.get(
+                    f"{self.BASE_URL}/notes",
+                    params=params,
+                    timeout=30,
+                )
+
+                if response.status_code == 429:  # Rate limited
+                    if attempt < max_retries - 1:
+                        delay = base_delay * (2 ** attempt)
+                        print(f"OpenReview rate limited. Retrying in {delay}s... (attempt {attempt + 1}/{max_retries})")
+                        time.sleep(delay)
+                        continue
+                    else:
+                        print(f"OpenReview API error: Rate limit exceeded after {max_retries} attempts")
+                        return []
+
+                if response.status_code != 200:
+                    print(f"OpenReview API error: {response.status_code}")
+                    return []
+
+                data = response.json()
+                return [self._to_source(note) for note in data.get("notes", [])]
+
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    delay = base_delay * (2 ** attempt)
+                    print(f"OpenReview error: {e}. Retrying in {delay}s...")
+                    time.sleep(delay)
+                else:
+                    print(f"OpenReview search error after {max_retries} attempts: {e}")
+                    return []
+
+        return []
 
     def _to_source(self, note: Dict[str, Any]) -> ResearchSource:
         """Convert an OpenReview note dict to a ResearchSource."""
@@ -238,7 +262,7 @@ class PapersWithCodeDiscovery:
 
     def search(self, query: str, max_results: int = 50) -> List[ResearchSource]:
         """
-        Search Papers with Code for papers.
+        Search Papers with Code for papers with exponential backoff retry.
 
         Args:
             query: Search query.
@@ -247,29 +271,54 @@ class PapersWithCodeDiscovery:
         Returns:
             List of discovered papers.
         """
-        try:
-            headers: Dict[str, str] = {}
-            if self.api_key:
-                headers["Authorization"] = f"Token {self.api_key}"
+        import time
 
-            params = {"q": query, "items_per_page": min(max_results, 50)}
-            response = requests.get(
-                f"{self.BASE_URL}/papers/",
-                params=params,
-                headers=headers,
-                timeout=30,
-            )
-            if response.status_code != 200:
-                print(f"Papers with Code API error: {response.status_code}")
-                return []
+        max_retries = 3
+        base_delay = 2  # seconds
 
-            data = response.json()
-            papers = data.get("results", [])
-            return [self._to_source(p) for p in papers[:max_results]]
+        for attempt in range(max_retries):
+            try:
+                headers: Dict[str, str] = {}
+                if self.api_key:
+                    headers["Authorization"] = f"Token {self.api_key}"
 
-        except Exception as e:
-            print(f"Papers with Code search error: {e}")
-            return []
+                params = {"q": query, "items_per_page": min(max_results, 50)}
+                response = requests.get(
+                    f"{self.BASE_URL}/papers/",
+                    params=params,
+                    headers=headers,
+                    timeout=30,
+                    allow_redirects=True,
+                )
+
+                if response.status_code == 429:  # Rate limited
+                    if attempt < max_retries - 1:
+                        delay = base_delay * (2 ** attempt)
+                        print(f"Papers with Code rate limited. Retrying in {delay}s... (attempt {attempt + 1}/{max_retries})")
+                        time.sleep(delay)
+                        continue
+                    else:
+                        print(f"Papers with Code API error: Rate limit exceeded after {max_retries} attempts")
+                        return []
+
+                if response.status_code != 200:
+                    print(f"Papers with Code API error: {response.status_code}")
+                    return []
+
+                data = response.json()
+                papers = data.get("results", [])
+                return [self._to_source(p) for p in papers[:max_results]]
+
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    delay = base_delay * (2 ** attempt)
+                    print(f"Papers with Code error: {e}. Retrying in {delay}s...")
+                    time.sleep(delay)
+                else:
+                    print(f"Papers with Code search error after {max_retries} attempts: {e}")
+                    return []
+
+        return []
 
     def _to_source(self, paper: Dict[str, Any]) -> ResearchSource:
         """Convert a PwC paper dict to a ResearchSource."""

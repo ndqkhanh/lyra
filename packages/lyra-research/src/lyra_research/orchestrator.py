@@ -97,8 +97,15 @@ class ResearchOrchestrator:
         self.strategy_memory = strategy_memory or ResearchStrategyMemory()
         self.case_bank = case_bank or SessionCaseBank()
 
-        # Pipeline components
-        self.discovery = MultiSourceDiscovery()
+        # Pipeline components - read API keys from environment
+        import os
+        semantic_scholar_key = os.environ.get("SEMANTIC_SCHOLAR_API_KEY")
+        github_token = os.environ.get("GITHUB_TOKEN")
+
+        self.discovery = MultiSourceDiscovery(
+            semantic_scholar_key=semantic_scholar_key,
+            github_token=github_token,
+        )
         self.quality_scorer = SourceQualityScorer()
         self.checklist_gen = VerifiableChecklistGenerator()
         self.gap_analyzer = GapAnalyzer()
@@ -152,7 +159,11 @@ class ResearchOrchestrator:
             _step(3, "Searching sources")
             skill = self.skill_store.get_for_domain("general") or self.skill_store.get_by_name("general_research")
             active_sources = sources or (
-                skill.preferred_sources if skill else ["arxiv", "semantic_scholar", "github"]
+                skill.preferred_sources if skill else [
+                    "arxiv",
+                    "github",
+                    "huggingface",
+                ]
             )
             max_per_source = (
                 50 if resolved_depth == "deep"
@@ -284,7 +295,7 @@ class ResearchOrchestrator:
                 source_id=s.id,
                 title=s.title,
                 url=s.url,
-                abstract=s.abstract,
+                abstract=s.abstract or "",  # Ensure non-None for NOT NULL constraint
                 full_text="",
                 source_type=s.source_type.value,
                 metadata=s.metadata,

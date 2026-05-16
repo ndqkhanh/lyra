@@ -3145,8 +3145,12 @@ def _stream_chat_to_console(
     import time as _time_mod
 
     buffer: list[str] = []
+    display_buffer: list[str] = []   # fence-safe content, drives the live panel
     _tick = 0
     _t0 = _time_mod.monotonic()
+
+    from .stream import MarkdownStreamState
+    _mss = MarkdownStreamState()
 
     # Try to import the progress header; degrade gracefully if missing.
     try:
@@ -3173,7 +3177,7 @@ def _stream_chat_to_console(
 
     def render_panel() -> Any:
         return _out.chat_renderable(
-            "".join(buffer), mode=mode_for_panel, streaming=True
+            "".join(display_buffer), mode=mode_for_panel, streaming=False
         )
 
     def render_with_header() -> Any:
@@ -3204,6 +3208,9 @@ def _stream_chat_to_console(
                     if not delta:
                         continue
                     buffer.append(delta)
+                    safe = _mss.push(delta)
+                    if safe:
+                        display_buffer.append(safe)
                     live.update(render_fn())
             except Exception as exc:
                 # Render whatever we've got plus a small error tail

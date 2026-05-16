@@ -712,13 +712,27 @@ def _enable_streaming(session: InteractiveSession) -> list[str]:
 
     def update_spy(self, renderable, **kwargs):  # noqa: ANN001
         try:
+            from rich.console import Group
             from rich.panel import Panel
 
-            if isinstance(renderable, Panel):
+            # render_with_header wraps the reply Panel in a Group;
+            # unwrap to find the inner Panel so the spy works
+            # regardless of whether the progress header is active.
+            target = renderable
+            if isinstance(target, Group):
+                for child in target._renderables:
+                    if isinstance(child, Panel):
+                        target = child
+                        break
+
+            if isinstance(target, Panel):
                 plain = ""
-                inner = renderable.renderable
+                inner = target.renderable
                 if hasattr(inner, "plain"):
-                    plain = inner.plain
+                    plain = inner.plain  # type: ignore[union-attr]
+                elif hasattr(inner, "markup"):
+                    # Markdown objects expose the source string via .markup
+                    plain = inner.markup  # type: ignore[union-attr]
                 seen.append(plain)
         except Exception:
             seen.append(repr(renderable))

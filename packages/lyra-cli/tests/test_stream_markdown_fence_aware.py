@@ -8,8 +8,9 @@ Contract (plan Phase 6, cc-stream-buffer):
 - ``MarkdownStreamState`` lives at ``lyra_cli.interactive.stream``.
 - ``state.push(delta: str) -> Optional[str]`` appends incoming text and
   returns the portion that is safe to flush (outside any unclosed
-  fenced code block, aligned on a newline). Returns ``None`` when
-  nothing is safe to flush yet.
+  fenced code block). Plain text with no open fence is returned
+  immediately. Returns ``None`` when nothing is safe to flush yet
+  (i.e. inside an open fence with no prior safe content).
 - ``state.flush() -> str`` always returns whatever is buffered,
   regardless of boundaries (used when the stream ends).
 - Splitting inside an open ``` fence must NEVER happen.
@@ -27,14 +28,14 @@ def _import_stream():
     return MarkdownStreamState
 
 
-def test_push_plain_text_flushes_at_newline():
+def test_push_plain_text_flushes_immediately():
     MarkdownStreamState = _import_stream()
     s = MarkdownStreamState()
-    assert s.push("hello") in (None, "")  # no newline yet -> hold back
-    ready = s.push(" world\nnext")
-    assert ready is not None
-    assert "hello world" in ready
-    # "next" (no newline) is still pending.
+    # Plain text with no open fence is safe immediately — no need to
+    # wait for a newline boundary.
+    assert s.push("hello") == "hello"
+    assert s.push(" world") == " world"
+    assert s.push("\nnext") == "\nnext"
 
 
 def test_push_never_splits_inside_an_open_fence():
@@ -59,12 +60,16 @@ def test_push_flushes_once_fence_closes():
     assert "x = 1" in out
 
 
-def test_flush_returns_pending_text():
+def test_flush_returns_pending_fence_content():
     MarkdownStreamState = _import_stream()
     s = MarkdownStreamState()
-    s.push("no-newline tail")
+    # Content inside an unclosed fence is deferred by push(); flush()
+    # must drain it all when the stream ends (e.g. model stopped mid-block).
+    s.push("```python\n")
+    s.push("incomplete body")
     rest = s.flush()
-    assert "no-newline tail" in rest
+    assert "```python" in rest
+    assert "incomplete body" in rest
 
 
 def test_flush_is_empty_after_clean_stream():

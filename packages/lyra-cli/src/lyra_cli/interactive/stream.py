@@ -64,18 +64,29 @@ class MarkdownStreamState:
     # --- internal --------------------------------------------------- #
 
     def _safe_boundary(self) -> int:
-        """Return the index *after* the last safe newline, or 0."""
+        """Return the index up to which content is safe to flush now.
+
+        When the buffer has no unclosed fence (even fence count), the
+        entire buffer is safe to render as Markdown.  When we are inside
+        an open fence, return the boundary just before the fence opened
+        (last newline preceding the opening triple-backtick) so the caller can
+        display the prose that came before the fence without waiting for
+        the model to close it.
+        """
         if not self._buf:
             return 0
-        idx = self._buf.rfind("\n")
-        while idx >= 0:
-            prefix = self._buf[: idx + 1]
-            if self._fence_count(prefix) % 2 == 0:
-                return idx + 1
-            # Inside an open fence at this newline — step back to the
-            # previous candidate boundary.
-            idx = self._buf.rfind("\n", 0, idx)
-        return 0
+        # Fast path: no open fence — entire buffer is safe to render.
+        if self._fence_count(self._buf) % 2 == 0:
+            return len(self._buf)
+        # We are inside an open fence.  Find the rightmost "```" — that
+        # is the unclosed opener.  Everything before it (with an even
+        # fence count by definition, since removing one odd occurrence
+        # leaves an even count) is safe prose.
+        idx = self._buf.rfind(self._FENCE)
+        if idx <= 0:
+            return 0
+        nl = self._buf.rfind("\n", 0, idx)
+        return nl + 1 if nl >= 0 else 0
 
     @classmethod
     def _fence_count(cls, text: str) -> int:

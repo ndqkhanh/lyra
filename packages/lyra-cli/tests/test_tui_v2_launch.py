@@ -40,36 +40,36 @@ def test_is_v2_enabled_reads_env(monkeypatch: pytest.MonkeyPatch) -> None:
     assert tui_v2.is_v2_enabled() is False
 
 
-def test_bare_lyra_defaults_to_v2(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Phase 6: bare ``lyra`` (no flag, no env) now opens the v2 shell."""
+def test_bare_lyra_defaults_to_hermes_tui(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Phase 15: bare ``lyra`` (no flag, no env) opens the Hermes TUI."""
     monkeypatch.delenv("LYRA_TUI", raising=False)
 
     runner = CliRunner()
-    with patch.object(tui_v2, "launch_tui_v2", return_value=0) as launch, patch(
+    with patch("lyra_cli.cli.tui.launch_tui", return_value=0) as launch, patch(
         "lyra_cli.interactive.driver.run"
-    ) as repl_run:
+    ) as repl_run, patch.object(tui_v2, "launch_tui_v2") as v2_launch:
         result = runner.invoke(app, [])
 
     assert result.exit_code == 0, result.output
     launch.assert_called_once()
     repl_run.assert_not_called()
-    kwargs = launch.call_args.kwargs
-    assert "repo_root" in kwargs and "model" in kwargs
+    v2_launch.assert_not_called()
 
 
-def test_lyra_v2_env_keeps_v2_default(monkeypatch: pytest.MonkeyPatch) -> None:
-    """``LYRA_TUI=v2`` is a backwards-compat affirmation, not an override."""
+def test_lyra_v2_env_still_defaults_to_hermes_tui(monkeypatch: pytest.MonkeyPatch) -> None:
+    """``LYRA_TUI=v2`` is unrecognised in Phase 15 and falls through to Hermes TUI."""
     monkeypatch.setenv("LYRA_TUI", "v2")
 
     runner = CliRunner()
-    with patch.object(tui_v2, "launch_tui_v2", return_value=0) as launch, patch(
+    with patch("lyra_cli.cli.tui.launch_tui", return_value=0) as launch, patch(
         "lyra_cli.interactive.driver.run"
-    ) as repl_run:
+    ) as repl_run, patch.object(tui_v2, "launch_tui_v2") as v2_launch:
         result = runner.invoke(app, [])
 
     assert result.exit_code == 0, result.output
     launch.assert_called_once()
     repl_run.assert_not_called()
+    v2_launch.assert_not_called()
 
 
 def test_legacy_flag_dispatches_to_prompt_toolkit_repl(

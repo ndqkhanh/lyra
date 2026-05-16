@@ -22,7 +22,9 @@ mirrors the v3.11 test contract.
 from __future__ import annotations
 
 import re
-from typing import Any, Callable, Optional
+from typing import Any, Callable, List, Optional
+
+from pydantic import BaseModel, Field
 
 from . import web_search_cache as _cache
 from . import web_search_providers as _providers
@@ -374,6 +376,30 @@ def make_web_search_tool(
     return web_search
 
 
+class _WebSearchArgs(BaseModel):
+    """Pydantic model for WebSearch arguments."""
+    query: str = Field(..., description="Search query")
+    max_results: int = Field(default=5, description="Maximum number of results to return")
+    provider_name: Optional[str] = Field(
+        default=None,
+        description="Pin a specific provider. Omit to let the fallback chain pick."
+    )
+    time_range: Optional[str] = Field(
+        default=None,
+        description="Time range filter: day, week, month, or year"
+    )
+    domains_allow: Optional[List[str]] = Field(
+        default=None,
+        description="Only include results from these domains"
+    )
+    domains_block: Optional[List[str]] = Field(
+        default=None,
+        description="Exclude results from these domains"
+    )
+    rerank: bool = Field(default=True, description="Re-order results with BM25 scoring")
+    cache: bool = Field(default=True, description="Use SQLite cache for results")
+
+
 class WebSearchTool:
     """Tool wrapper for WebSearch compatible with harness_core.tools.ToolRegistry."""
 
@@ -381,18 +407,29 @@ class WebSearchTool:
     description = "Search the web and return ranked snippets with URLs."
     risk = "low"
     writes = False
+    ArgsModel = _WebSearchArgs  # pyright: ignore[reportAssignmentType]
 
     def __init__(self, *, provider: Any = None) -> None:
         self._search = make_web_search_tool(provider=provider)
 
     def run(self, args: Any) -> str:
         """Execute the web search and return formatted results."""
-        result = self._search(**args)
+        a: _WebSearchArgs = args  # type: ignore[assignment]
+        result = self._search(
+            query=a.query,
+            max_results=a.max_results,
+            provider_name=a.provider_name,
+            time_range=a.time_range,
+            domains_allow=a.domains_allow,
+            domains_block=a.domains_block,
+            rerank=a.rerank,
+            cache=a.cache,
+        )
         results = result.get("results", [])
         count = result.get("count", 0)
 
         if count == 0:
-            return f"WebSearch found no results for: {args.get('query', '')}"
+            return f"WebSearch found no results for: {a.query}"
 
         lines = [f"WebSearch found {count} result{'s' if count != 1 else ''}:\n"]
         for i, hit in enumerate(results, 1):

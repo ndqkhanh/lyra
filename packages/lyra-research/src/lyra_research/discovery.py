@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
+import time
 import requests
 
 
@@ -97,7 +98,7 @@ class SemanticScholarDiscovery:
 
     def search(self, query: str, max_results: int = 50) -> List[ResearchSource]:
         """
-        Search Semantic Scholar for papers.
+        Search Semantic Scholar for papers with exponential backoff retry.
 
         Args:
             query: Search query
@@ -106,57 +107,78 @@ class SemanticScholarDiscovery:
         Returns:
             List of discovered papers
         """
-        try:
-            headers = {}
-            if self.api_key:
-                headers["x-api-key"] = self.api_key
+        max_retries = 3
+        base_delay = 2  # seconds
 
-            params = {
-                "query": query,
-                "limit": min(max_results, 100),
-                "fields": "paperId,title,abstract,authors,year,citationCount,url,venue",
-            }
+        for attempt in range(max_retries):
+            try:
+                headers = {}
+                if self.api_key:
+                    headers["x-api-key"] = self.api_key
 
-            response = requests.get(
-                f"{self.base_url}/paper/search",
-                params=params,
-                headers=headers,
-                timeout=30,
-            )
+                params = {
+                    "query": query,
+                    "limit": min(max_results, 100),
+                    "fields": "paperId,title,abstract,authors,year,citationCount,url,venue",
+                }
 
-            if response.status_code != 200:
-                print(f"Semantic Scholar API error: {response.status_code}")
-                return []
-
-            data = response.json()
-            sources = []
-
-            for paper in data.get("data", []):
-                # Parse year to datetime
-                year = paper.get("year")
-                published_date = datetime(year, 1, 1) if year else None
-
-                source = ResearchSource(
-                    id=paper["paperId"],
-                    title=paper.get("title", ""),
-                    source_type=SourceType.PAPER,
-                    url=paper.get("url", ""),
-                    authors=[a.get("name", "") for a in paper.get("authors", [])],
-                    published_date=published_date,
-                    abstract=paper.get("abstract", ""),
-                    citations=paper.get("citationCount", 0),
-                    metadata={
-                        "venue": paper.get("venue", ""),
-                        "year": year,
-                    },
+                response = requests.get(
+                    f"{self.base_url}/paper/search",
+                    params=params,
+                    headers=headers,
+                    timeout=30,
                 )
-                sources.append(source)
 
-            return sources
+                if response.status_code == 429:  # Rate limited
+                    if attempt < max_retries - 1:
+                        delay = base_delay * (2 ** attempt)  # Exponential backoff
+                        print(f"Semantic Scholar rate limited. Retrying in {delay}s... (attempt {attempt + 1}/{max_retries})")
+                        time.sleep(delay)
+                        continue
+                    else:
+                        print(f"Semantic Scholar API error: Rate limit exceeded after {max_retries} attempts")
+                        return []
 
-        except Exception as e:
-            print(f"Semantic Scholar search error: {e}")
-            return []
+                if response.status_code != 200:
+                    print(f"Semantic Scholar API error: {response.status_code}")
+                    return []
+
+                data = response.json()
+                sources = []
+
+                for paper in data.get("data", []):
+                    # Parse year to datetime
+                    year = paper.get("year")
+                    published_date = datetime(year, 1, 1) if year else None
+
+                    source = ResearchSource(
+                        id=paper["paperId"],
+                        title=paper.get("title", ""),
+                        source_type=SourceType.PAPER,
+                        url=paper.get("url", ""),
+                        authors=[a.get("name", "") for a in paper.get("authors", [])],
+                        published_date=published_date,
+                        abstract=paper.get("abstract", ""),
+                        citations=paper.get("citationCount", 0),
+                        metadata={
+                            "venue": paper.get("venue", ""),
+                            "year": year,
+                        },
+                    )
+                    sources.append(source)
+
+                return sources
+
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    delay = base_delay * (2 ** attempt)
+                    print(f"Semantic Scholar error: {e}. Retrying in {delay}s...")
+                    time.sleep(delay)
+                else:
+                    print(f"Semantic Scholar search error after {max_retries} attempts: {e}")
+                    return []
+
+        return []
 
 
 class GitHubDiscovery:
@@ -277,7 +299,11 @@ class MultiSourceDiscovery:
     def discover(
         self,
         query: str,
-        sources: List[str] = ["arxiv", "semantic_scholar", "github"],
+        sources: List[str] = [
+            "arxiv",
+            "github",
+            "huggingface",
+        ],
         max_per_source: int = 50,
     ) -> Dict[str, List[ResearchSource]]:
         """
