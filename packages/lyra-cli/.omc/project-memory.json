@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "python -m pytest tests/learning/test_learning.py -v",
+    "testCommand": "python -m pytest tests/orchestration/test_orchestration.py -v",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
