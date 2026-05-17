@@ -4,7 +4,7 @@ import time
 from typing import Callable, Any, Optional
 from dataclasses import dataclass
 
-from lyra_cli.eager_tools.seal_detector import ToolBlock
+from lyra_cli.eager_tools.types import ToolSeal
 from lyra_cli.eager_tools.logging import log_tool_dispatched, log_tool_cancelled, log_exception_boundary
 from lyra_cli.eager_tools.metrics import MetricsCollector
 
@@ -26,14 +26,14 @@ class EagerExecutorPool:
         self.results: list[ToolResult] = []
         self.metrics = metrics
 
-    async def dispatch(self, tool: ToolBlock, idempotent: bool = False) -> None:
+    async def dispatch(self, tool: ToolSeal, idempotent: bool = False) -> None:
         """Fire tool immediately (non-blocking)."""
         if not idempotent:
             # Non-idempotent tools wait for message_stop
             return
 
         # Log dispatch decision
-        log_tool_dispatched(tool.tool_call_id, tool.name, idempotent)
+        log_tool_dispatched(tool.tool_call_id, tool.tool_name, idempotent)
         if self.metrics:
             self.metrics.on_tool_dispatched(tool.tool_call_id)
 
@@ -41,16 +41,16 @@ class EagerExecutorPool:
         task = asyncio.create_task(self._execute_tool(tool))
         self.pending_tasks.append(task)
 
-    async def _execute_tool(self, tool: ToolBlock) -> None:
+    async def _execute_tool(self, tool: ToolSeal) -> None:
         """Execute tool and store result."""
         start_time = time.perf_counter()
         try:
-            tool_fn = self.tool_registry.get(tool.name)
+            tool_fn = self.tool_registry.get(tool.tool_name)
             if not tool_fn:
                 self.results.append(ToolResult(
                     tool_call_id=tool.tool_call_id,
                     result=None,
-                    error=f"Tool {tool.name} not found",
+                    error=f"Tool {tool.tool_name} not found",
                 ))
                 return
 
