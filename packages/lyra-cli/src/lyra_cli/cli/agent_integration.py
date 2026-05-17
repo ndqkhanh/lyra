@@ -31,6 +31,8 @@ from .context_manager import ContextBudget, ContextManager
 from .prompt_compressor import HeuristicCompressor
 from .semantic_retriever import SemanticRetriever
 from .tool_output_filter import ToolOutputFilter
+from .tool_registry import ToolRegistry
+from .default_tools import register_default_tools
 
 
 # ── Phase H: Provider context limits (tokens) ──────────────────────────────
@@ -113,6 +115,9 @@ class TUIAgentIntegration:
         # Phase G: Semantic retriever (set in initialize)
         self._retriever: SemanticRetriever | None = None
 
+        # Tool registry
+        self._tool_registry: ToolRegistry | None = None
+
         # Phase H: Cache tracking
         self._cache_saved_tokens: int = 0
 
@@ -177,6 +182,10 @@ class TUIAgentIntegration:
             self._memory_manager = MemoryManager()
         except Exception:
             self._memory_manager = None
+
+        # Initialize tool registry
+        self._tool_registry = ToolRegistry()
+        register_default_tools(self._tool_registry)
 
     def _ensure_context_manager(self) -> ContextManager:
         """Phase D: Lazy-init ContextManager (needs self._summarize_turns bound after initialize)."""
@@ -346,6 +355,11 @@ class TUIAgentIntegration:
                 "max_tokens": 4096,
                 "messages": chat_msgs,
             }
+            # Add tools if registry available
+            if self._tool_registry:
+                tools = self._tool_registry.get_tool_definitions()
+                if tools:
+                    stream_kwargs["tools"] = tools
             # Phase H: cache_control on stable system prefix (90% cost on re-use)
             if system_texts:
                 stream_kwargs["system"] = [
@@ -357,10 +371,24 @@ class TUIAgentIntegration:
                 ]
 
             async with self._client.messages.stream(**stream_kwargs) as stream:
-                async for text in stream.text_stream:
-                    yield {"type": "text", "content": text}
+                # Process stream events for text and tool_use blocks
+                async for event in stream:
+                    if event.type == "content_block_delta":
+                        delta = event.delta
+                        if hasattr(delta, "text"):
+                            yield {"type": "text", "content": delta.text}
+                        elif hasattr(delta, "partial_json"):
+                            # Tool arguments streaming (for eager dispatch)
+                            pass
 
                 message = await stream.get_final_message()
+
+                # Execute tools if present
+                if hasattr(message, "content"):
+                    for block in message.content:
+                        if block.type == "tool_use":
+                            tool_result = await self._execute_tool(block)
+                            yield {"type": "tool", "content": tool_result}
                 if hasattr(message, "usage"):
                     input_tokens: int = message.usage.input_tokens
                     output_tokens: int = message.usage.output_tokens
@@ -438,6 +466,20 @@ class TUIAgentIntegration:
             yield {"type": "text", "content": f"\n\nOpenAIError: {str(e)}\n"}
 
     # ── Phase D: Summarizer (called by ContextManager._compress) ──────────
+
+    async def _execute_tool(self, tool_block: Any) -> str:
+        """Execute a tool and return formatted result."""
+        if not self._tool_registry:
+            return f"Error: Tool registry not initialized"
+
+        try:
+            result = await self._tool_registry.execute(
+                tool_block.name,
+                tool_block.input,
+            )
+            return f"Tool {tool_block.name}: {result}"
+        except Exception as e:
+            return f"Tool {tool_block.name} error: {str(e)}"
 
     async def _summarize_turns(self, turns: list[dict], existing_summary: str) -> str:
         """One-shot LLM call to compress old conversation turns into a summary."""
