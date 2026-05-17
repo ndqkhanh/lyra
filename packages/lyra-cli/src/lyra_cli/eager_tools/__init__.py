@@ -3,6 +3,7 @@
 from .types import StreamChunk, ToolSeal, ToolResult
 from .seal_detector import SealDetector
 from .executor import ExecutorPool
+from .registry import ToolRegistry, ToolMetadata, tool
 
 __all__ = [
     "StreamChunk",
@@ -10,4 +11,7 @@ __all__ = [
     "ToolResult",
     "SealDetector",
     "ExecutorPool",
+    "ToolRegistry",
+    "ToolMetadata",
+    "tool",
 ]
