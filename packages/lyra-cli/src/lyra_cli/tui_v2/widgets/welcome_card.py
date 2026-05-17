@@ -2,7 +2,8 @@
 
 from textual.app import ComposeResult
 from textual.reactive import reactive
-from textual.widgets import Static, Widget
+from textual.widget import Widget
+from textual.widgets import Static
 from textual.containers import Grid
 
 
