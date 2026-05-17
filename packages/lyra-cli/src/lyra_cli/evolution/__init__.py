@@ -6,6 +6,9 @@ from lyra_cli.evolution.actions import EditAction, EditType
 from lyra_cli.evolution.meta_agent import MetaAgent
 from lyra_cli.evolution.procedure_mode import ProcedureMode
 from lyra_cli.evolution.agent_mode import AgentMode
+from lyra_cli.evolution.segment import EvolutionSegment
+from lyra_cli.evolution.meta_phase import meta_editing_phase
+from lyra_cli.evolution.aevo_loop import aevo_loop
 
 __all__ = [
     "EvolutionHarness",
@@ -18,4 +21,7 @@ __all__ = [
     "MetaAgent",
     "ProcedureMode",
     "AgentMode",
+    "EvolutionSegment",
+    "meta_editing_phase",
+    "aevo_loop",
 ]
