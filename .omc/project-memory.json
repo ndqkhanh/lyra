@@ -27,7 +27,7 @@
   },
   "build": {
     "buildCommand": "make build 2>&1 | head -20",
-    "testCommand": "python -m pytest tests/ -q --ignore=tests/test_cli_basic.py --deselect=tests/test_command_registry_unified.py::test_aliases_do_not_collide_with_names_or_other_aliases -x",
+    "testCommand": "python -m pytest tests/eager_tools/ -v --tb=line | tail -5",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -254,8 +254,8 @@
     },
     {
       "path": "packages/lyra-cli/src/lyra_cli/commands/registry.py",
-      "accessCount": 2,
-      "lastAccessed": 1778914093328,
+      "accessCount": 3,
+      "lastAccessed": 1778995487304,
       "type": "file"
     },
     {

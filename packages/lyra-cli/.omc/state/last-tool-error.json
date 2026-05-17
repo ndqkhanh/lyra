@@ -1,7 +1,7 @@
 {
   "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"ls -d src/lyra_cli/skills/{typescript-patterns,react-patterns,go-patterns,rust-patterns,docker-patterns,kubernetes-patterns,aws-patterns,microservices-patterns} 2>/dev/null\",\"description\":...",
-  "error": "Exit code 1\nsrc/lyra_cli/skills/aws-patterns\nsrc/lyra_cli/skills/microservices-patterns",
-  "timestamp": "2026-05-17T05:21:24.881Z",
+  "tool_input_preview": "{\"command\":\"grep -r \\\"class.*Executor\\\" packages/lyra-cli/src/lyra_cli/eager_tools/ --include=\\\"*.py\\\" && echo \\\"---\\\" && grep -r \\\"class.*SealDetector\\\" packages/lyra-cli/src/lyra_cli/eager_tools/ --...",
+  "error": "Exit code 2\nugrep: warning: packages/lyra-cli/src/lyra_cli/eager_tools/: No such file or directory",
+  "timestamp": "2026-05-17T05:25:33.481Z",
   "retry_count": 1
 }
