@@ -1,76 +1,55 @@
-"""Seal detection for eager tool dispatch during streaming."""
-from dataclasses import dataclass
-from typing import Optional
+"""Seal detector for identifying completed tool calls in streams."""
 
-from lyra_cli.eager_tools.logging import log_seal_detected
-from lyra_cli.eager_tools.metrics import MetricsCollector
+import time
+from typing import Any
 
-
-@dataclass
-class ToolBlock:
-    """Completed tool block ready for dispatch."""
-    tool_call_id: str
-    name: str
-    arguments: str
+from .types import StreamChunk, ToolSeal
 
 
 class SealDetector:
-    """Detect tool block completion during LLM streaming."""
+    """Detects when tool calls are sealed (complete) in streaming responses."""
 
-    def __init__(self, metrics: Optional[MetricsCollector] = None):
-        self.current_id: Optional[str] = None
-        self.buffer: dict[str, dict] = {}
-        self.metrics = metrics
+    def __init__(self) -> None:
+        self.current_id: str | None = None
+        self.current_buffer: dict[str, Any] = {}
 
-    def process_chunk(self, chunk: dict) -> list[ToolBlock]:
-        """Process stream chunk and return sealed (complete) tool blocks."""
-        sealed_blocks = []
+    def process_chunk(self, chunk: StreamChunk) -> list[ToolSeal]:
+        """Process chunk and return any sealed tools.
 
-        # Extract tool_call_id from chunk (Anthropic format)
-        tool_call_id = chunk.get("tool_call_id")
-        if not tool_call_id:
-            return sealed_blocks
+        A tool is sealed when a new tool_call_id appears, meaning the
+        previous tool's JSON is complete.
 
-        # Detect seal: new ID means previous block is complete
-        if self.current_id and tool_call_id != self.current_id:
-            if self.current_id in self.buffer:
-                sealed_blocks.append(self._seal_block(self.current_id))
+        Performance target: <5ms per chunk
+        """
+        if chunk.tool_call_id is None:
+            return []
 
-        # Update current ID and buffer
-        self.current_id = tool_call_id
-        if tool_call_id not in self.buffer:
-            self.buffer[tool_call_id] = {
-                "name": chunk.get("name", ""),
-                "arguments": "",
-            }
+        # Seal detection: ID transition means previous tool is complete
+        sealed = []
+        if self.current_id is not None and chunk.tool_call_id != self.current_id:
+            args = self.current_buffer.get("arguments", {})
+            sealed.append(
+                ToolSeal(
+                    tool_call_id=self.current_id,
+                    tool_name=str(self.current_buffer.get("name", "")),
+                    arguments=args if isinstance(args, dict) else {},
+                    sealed_at=time.time(),
+                )
+            )
+            self.current_buffer = {}
 
-        # Accumulate arguments
-        if "arguments" in chunk:
-            self.buffer[tool_call_id]["arguments"] += chunk["arguments"]
+        # Accumulate current tool
+        self.current_id = chunk.tool_call_id
+        if chunk.name:
+            self.current_buffer["name"] = chunk.name
+        if chunk.arguments:
+            args = self.current_buffer.setdefault("arguments", {})
+            if isinstance(args, dict):
+                args.update(chunk.arguments)
 
-        return sealed_blocks
+        return sealed
 
-    def flush(self) -> list[ToolBlock]:
-        """Flush remaining buffered blocks (called at message_stop)."""
-        sealed_blocks = []
-        if self.current_id and self.current_id in self.buffer:
-            sealed_blocks.append(self._seal_block(self.current_id))
-        self.buffer.clear()
+    def reset(self) -> None:
+        """Reset detector state for new stream."""
         self.current_id = None
-        return sealed_blocks
-
-    def _seal_block(self, tool_call_id: str) -> ToolBlock:
-        """Convert buffered data to sealed ToolBlock."""
-        data = self.buffer.pop(tool_call_id)
-        block = ToolBlock(
-            tool_call_id=tool_call_id,
-            name=data["name"],
-            arguments=data["arguments"],
-        )
-
-        # Log and record metrics
-        if self.metrics:
-            self.metrics.on_seal_detected(tool_call_id)
-        log_seal_detected(tool_call_id, block.name, 0.0)
-
-        return block
+        self.current_buffer = {}

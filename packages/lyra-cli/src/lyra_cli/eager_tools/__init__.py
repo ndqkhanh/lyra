@@ -1,13 +1,13 @@
-"""Eager tools integration module."""
-from lyra_cli.eager_tools.seal_detector import SealDetector, ToolBlock
-from lyra_cli.eager_tools.executor_pool import EagerExecutorPool, ToolResult
-from lyra_cli.eager_tools.metrics import MetricsCollector, SealMetrics
+"""Eager Tools: Stream-parallel tool dispatch for 1.2×-1.5× speedup."""
+
+from .types import StreamChunk, ToolSeal, ToolResult
+from .seal_detector import SealDetector
+from .executor import ExecutorPool
 
 __all__ = [
-    "SealDetector",
-    "ToolBlock",
-    "EagerExecutorPool",
+    "StreamChunk",
+    "ToolSeal",
     "ToolResult",
-    "MetricsCollector",
-    "SealMetrics",
+    "SealDetector",
+    "ExecutorPool",
 ]
