@@ -35,7 +35,7 @@ from .tool_registry import ToolRegistry
 from .default_tools import register_default_tools
 
 # Eager tools integration
-from lyra_cli.eager_tools import SealDetector, EagerExecutorPool, MetricsCollector
+from lyra_cli.eager_tools import SealDetector, ExecutorPool
 
 
 # ── Phase H: Provider context limits (tokens) ──────────────────────────────
@@ -123,8 +123,7 @@ class TUIAgentIntegration:
 
         # Eager tools
         self._seal_detector: SealDetector | None = None
-        self._executor_pool: EagerExecutorPool | None = None
-        self._metrics_collector: MetricsCollector | None = None
+        self._executor_pool: ExecutorPool | None = None
 
         # Phase H: Cache tracking
         self._cache_saved_tokens: int = 0
@@ -196,12 +195,8 @@ class TUIAgentIntegration:
         register_default_tools(self._tool_registry)
 
         # Initialize eager tools
-        self._metrics_collector = MetricsCollector()
-        self._seal_detector = SealDetector(metrics=self._metrics_collector)
-        self._executor_pool = EagerExecutorPool(
-            tool_registry={name: self._tool_registry.execute for name in ["read_file", "search_code", "list_files"]},
-            metrics=self._metrics_collector,
-        )
+        self._seal_detector = SealDetector()
+        self._executor_pool = ExecutorPool(max_workers=10)
 
     def _ensure_context_manager(self) -> ContextManager:
         """Phase D: Lazy-init ContextManager (needs self._summarize_turns bound after initialize)."""
@@ -387,10 +382,6 @@ class TUIAgentIntegration:
                 ]
 
             async with self._client.messages.stream(**stream_kwargs) as stream:
-                # Start metrics collection
-                if self._metrics_collector:
-                    self._metrics_collector.start_stream()
-
                 # Process stream events for text and tool_use blocks
                 async for event in stream:
                     if event.type == "content_block_delta":
@@ -399,39 +390,36 @@ class TUIAgentIntegration:
                             yield {"type": "text", "content": delta.text}
                         elif hasattr(delta, "partial_json") and self._seal_detector:
                             # Process chunk for seal detection
-                            chunk = {"tool_call_id": getattr(event, "index", ""), "arguments": delta.partial_json}
+                            from lyra_cli.eager_tools import StreamChunk
+                            chunk = StreamChunk(
+                                tool_call_id=getattr(event, "index", None),
+                                arguments=delta.partial_json if hasattr(delta, "partial_json") else None,
+                            )
                             sealed_blocks = self._seal_detector.process_chunk(chunk)
 
                             # Dispatch sealed tools eagerly
-                            for block in sealed_blocks:
+                            for seal in sealed_blocks:
                                 if self._executor_pool and self._tool_registry:
-                                    idempotent = self._tool_registry.is_idempotent(block.name)
-                                    await self._executor_pool.dispatch(block, idempotent=idempotent)
+                                    # Get tool function
+                                    tool_fn = lambda **kwargs: self._tool_registry.execute(seal.tool_name, str(kwargs))
+                                    await self._executor_pool.dispatch(seal, tool_fn)
 
                 message = await stream.get_final_message()
 
-                # Flush any remaining sealed blocks
-                if self._seal_detector:
-                    sealed_blocks = self._seal_detector.flush()
-                    for block in sealed_blocks:
-                        if self._executor_pool and self._tool_registry:
-                            idempotent = self._tool_registry.is_idempotent(block.name)
-                            await self._executor_pool.dispatch(block, idempotent=idempotent)
-
-                # Collect eager tool results
+                # Wait for all eager tool results
                 if self._executor_pool:
-                    results = await self._executor_pool.collect_results()
-                    for result in results:
-                        if result.error:
-                            yield {"type": "tool", "content": f"Tool error: {result.error}"}
+                    results = await self._executor_pool.wait_all()
+                    for tool_id, result in results.items():
+                        if result.success:
+                            yield {"type": "tool", "content": f"Tool result: {result.output}"}
                         else:
-                            yield {"type": "tool", "content": f"Tool result: {result.result}"}
+                            yield {"type": "tool", "content": f"Tool error: {result.error}"}
 
                 # Execute non-idempotent tools (deferred until message_stop)
                 if hasattr(message, "content"):
                     for block in message.content:
                         if block.type == "tool_use":
-                            if self._tool_registry and not self._tool_registry.is_idempotent(block.name):
+                            if self._tool_registry:
                                 tool_result = await self._execute_tool(block)
                                 yield {"type": "tool", "content": tool_result}
                 if hasattr(message, "usage"):
