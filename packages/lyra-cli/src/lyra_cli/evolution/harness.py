@@ -35,9 +35,12 @@ class EvolutionHarness:
 
     def workspace_read(self, path: str) -> Optional[str]:
         """Read from workspace (confined to workspace/)."""
-        full_path = self.workspace_dir / path
-        if not full_path.is_relative_to(self.workspace_dir):
-            raise PermissionError("Access denied: outside workspace")
+        # Resolve paths to prevent traversal attacks
+        full_path = (self.workspace_dir / path).resolve()
+        workspace_resolved = self.workspace_dir.resolve()
+
+        if not full_path.is_relative_to(workspace_resolved):
+            raise PermissionError(f"Access denied: path '{path}' is outside workspace")
 
         if full_path.exists():
             return full_path.read_text()
@@ -45,9 +48,12 @@ class EvolutionHarness:
 
     def workspace_write(self, path: str, content: str) -> bool:
         """Write to workspace (confined to workspace/)."""
-        full_path = self.workspace_dir / path
-        if not full_path.is_relative_to(self.workspace_dir):
-            raise PermissionError("Access denied: outside workspace")
+        # Resolve paths to prevent traversal attacks
+        full_path = (self.workspace_dir / path).resolve()
+        workspace_resolved = self.workspace_dir.resolve()
+
+        if not full_path.is_relative_to(workspace_resolved):
+            raise PermissionError(f"Access denied: path '{path}' is outside workspace")
 
         full_path.parent.mkdir(parents=True, exist_ok=True)
         full_path.write_text(content)
