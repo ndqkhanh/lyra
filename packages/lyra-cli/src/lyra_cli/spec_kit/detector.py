@@ -5,6 +5,7 @@ import re
 import time
 import os
 from typing import Any
+from functools import lru_cache
 
 from .models import Verdict
 
@@ -18,6 +19,7 @@ EXEMPT_VERBS = r'\b(fix|patch|update|bump|rename|small|quick|typo|one-liner|run|
 FILE_REFERENCE = r'\b(line\s+\d+|\.py|\.ts|\.js|\.md)\b'
 
 THRESHOLD = 0.7
+MAX_PROMPT_LENGTH = 10000  # Truncate very long prompts
 
 
 class Detector:
@@ -35,6 +37,10 @@ class Detector:
         """Classify prompt as spec-worthy or not."""
         start = time.perf_counter()
 
+        # Truncate very long prompts
+        if len(prompt) > MAX_PROMPT_LENGTH:
+            prompt = prompt[:MAX_PROMPT_LENGTH]
+
         # Always-bypass conditions
         if prompt.startswith('/'):
             return Verdict(False, 1.0, "slash command", "slash command", 0)
@@ -45,8 +51,8 @@ class Detector:
         if active_phase != "idle":
             return Verdict(False, 1.0, "already active", "spec-kit already running", 0)
 
-        # Stage 1: Rule-based
-        confidence = self._rule_based_score(prompt)
+        # Stage 1: Rule-based (cached)
+        confidence = self._rule_based_score_cached(prompt)
         latency = (time.perf_counter() - start) * 1000
 
         # Clear verdict from rules
@@ -71,6 +77,11 @@ class Detector:
 
         # Default: not spec-worthy
         return Verdict(False, confidence, "below threshold", "insufficient signals", latency)
+
+    @lru_cache(maxsize=128)
+    def _rule_based_score_cached(self, prompt: str) -> float:
+        """Cached version of rule-based scoring."""
+        return self._rule_based_score(prompt)
 
     def _rule_based_score(self, prompt: str) -> float:
         """Calculate confidence score using heuristics."""
