@@ -183,6 +183,33 @@ Legacy mode names (`build`, `run`, `explore`, `retro` from v3.1) still work and 
 - `⠋ Thinking  ↓ 1.2k  3s  [ctrl+b: bg]`
 - Tips panel in welcome banner with quick reference
 
+## Auto-Spec-Kit
+
+Lyra automatically detects complex feature requests and guides you through structured design before writing code.
+
+**When it triggers:**
+- "Build me a..." / "Create a..." / "Implement a..."
+- Multi-step features requiring architecture
+- Prompts describing systems or frameworks
+
+**When it doesn't trigger:**
+- Simple fixes: "fix typo", "update line 42"
+- Queries: "show me", "explain", "what does X do"
+- Slash commands: all `/` prefixed commands
+
+**The flow:**
+1. **Constitution Check** — Verify alignment with Lyra principles
+2. **Spec Draft** — Problem, solution, design, risks
+3. **Plan Draft** — Phases, files, dependencies, tests
+4. **Tasks Draft** — Implementation checklist
+5. **Approval** — Review and approve each artifact
+6. **Execution** — Normal agent loop, scoped to tasks
+
+**Opt out:**
+- Globally: `export LYRA_AUTOSPEC=off`
+- Per prompt: Type `/skip-spec` before submitting
+- During flow: Press `Esc` at any phase
+
 ## Key Keybindings
 
 | Key | Action |
