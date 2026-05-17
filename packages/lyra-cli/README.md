@@ -24,10 +24,13 @@ lyra                                     # Start the interactive REPL
 ## Quick Start
 
 ```bash
-lyra                                     # Open REPL in current directory
+lyra                                     # Open TUI (tui_v2, Textual-based)
 lyra --model claude-opus-4-5             # Pin a specific model
 lyra --budget 5.00                       # Cap session spend at $5.00
+lyra --legacy-tui                        # Use legacy TUI (deprecated, removed in v1.0.0)
 ```
+
+**Note:** As of Phase 2, `lyra` launches the new Textual-based TUI (tui_v2) by default. The legacy prompt_toolkit TUI is deprecated and accessible via `--legacy-tui` flag only.
 
 In the REPL:
 

@@ -179,6 +179,16 @@ def _root(
             "REPL is scheduled for removal in v3.15."
         ),
     ),
+    legacy_tui: bool = typer.Option(
+        False,
+        "--legacy-tui",
+        help=(
+            "Boot the legacy prompt_toolkit TUI (cli/tui.py) instead of "
+            "the new Textual-based tui_v2. The legacy TUI is deprecated "
+            "and will be removed in v1.0.0. Use this flag only if you "
+            "encounter critical bugs in tui_v2."
+        ),
+    ),
 ) -> None:
     """Lyra."""
     if ctx.invoked_subcommand is not None:
@@ -207,64 +217,59 @@ def _root(
 
     # v3.15 / Phase 15 — CLI-first architecture. Bare ``lyra`` now opens
     # the streaming CLI (Claude Code style). Three modes available:
-    #   * Default: Streaming CLI (new)
-    #   * ``lyra --tui``: Textual TUI (optional)
+    #   * Default: tui_v2 (Textual-based TUI)
+    #   * ``lyra --legacy-tui``: Old prompt_toolkit TUI (deprecated)
     #   * ``lyra --legacy``: prompt_toolkit REPL (deprecated)
     # Environment variable LYRA_TUI can override:
-    #   * ``LYRA_TUI=cli`` — streaming CLI (default)
-    #   * ``LYRA_TUI=tui`` — Textual TUI
+    #   * ``LYRA_TUI=tui`` — tui_v2 (default)
     #   * ``LYRA_TUI=legacy`` — prompt_toolkit REPL
-    tui_pref = os.environ.get("LYRA_TUI", "cli").strip().lower()
+    tui_pref = os.environ.get("LYRA_TUI", "tui").strip().lower()
 
     # Check for --tui flag (not in typer params, check sys.argv)
     import sys
 
-    use_tui = "--tui" in sys.argv or tui_pref == "tui"
     use_legacy = legacy or tui_pref == "legacy"
+    use_legacy_tui = legacy_tui
 
-    if use_tui:
-        # Launch Textual TUI
+    if not use_legacy and not use_legacy_tui:
+        # Default: Launch tui_v2 (Textual-based TUI)
         try:
             from .tui_v2 import launch_tui_v2
 
             raise typer.Exit(launch_tui_v2(repo_root=repo_root.resolve(), model=model))
         except ImportError:
             typer.echo(
-                "lyra: TUI not available (harness-tui not installed). "
-                "Falling back to streaming CLI.",
+                "lyra: tui_v2 not available (harness-tui not installed). "
+                "Falling back to legacy TUI.",
                 err=True,
             )
-    elif not use_legacy:
-        # Default: Hermes-style TUI Application
-        # Set LYRA_USE_STREAMING=true to use streaming CLI instead
-        use_streaming = os.environ.get("LYRA_USE_STREAMING", "").lower() == "true"
+            use_legacy_tui = True
 
-        if use_streaming:
-            # Streaming CLI (opt-in)
-            from .cli.repl import launch_streaming_repl
-            import asyncio
+    if use_legacy_tui:
+        # Legacy TUI path (deprecated, will be removed in v1.0.0)
+        typer.echo(
+            "lyra: launching legacy TUI (cli/tui.py). This TUI is deprecated "
+            "and will be removed in v1.0.0. Drop --legacy-tui to use the new "
+            "Textual-based tui_v2.",
+            err=True,
+        )
+        from .cli.tui import launch_tui
+        exit_code = launch_tui(
+            repo_root=repo_root.resolve(),
+            model=model,
+            budget_cap_usd=budget,
+            session_id=session_id,
+        )
+        raise typer.Exit(exit_code)
 
-            exit_code = asyncio.run(
-                launch_streaming_repl(
-                    repo_root=repo_root.resolve(),
-                    model=model,
-                    budget_cap_usd=budget,
-                    resume_id=resume_target,
-                    pin_session_id=pin_id,
-                    bare=bare,
-                )
-            )
-            raise typer.Exit(exit_code)
-        else:
-            # Full Hermes-style TUI Application (DEFAULT)
-            from .cli.tui import launch_tui
-            exit_code = launch_tui(
-                repo_root=repo_root.resolve(),
-                model=model,
-                budget_cap_usd=budget,
-                session_id=session_id,
-            )
-            raise typer.Exit(exit_code)
+    if not use_legacy:
+        # This path should not be reached (tui_v2 is default)
+        typer.echo(
+            "lyra: unexpected path. Falling back to tui_v2.",
+            err=True,
+        )
+        from .tui_v2 import launch_tui_v2
+        raise typer.Exit(launch_tui_v2(repo_root=repo_root.resolve(), model=model))
 
     # Legacy path — surface a one-line deprecation hint via Click's
     # stderr stream so CliRunner can capture it without monkeypatching.
