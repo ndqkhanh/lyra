@@ -1,0 +1,35 @@
+/* SpecDrawer widget styles */
+
+SpecDrawer {
+    display: none;
+    width: 50%;
+    height: 100%;
+    dock: right;
+    background: $surface;
+    border-left: solid $primary;
+}
+
+SpecDrawer.visible {
+    display: block;
+}
+
+#spec-phase-title {
+    height: 3;
+    background: $primary;
+    color: $text;
+    content-align: center middle;
+    text-style: bold;
+}
+
+#spec-draft-content {
+    height: 1fr;
+    overflow-y: auto;
+    padding: 1 2;
+}
+
+#spec-approval-bar {
+    height: 3;
+    background: $panel;
+    content-align: center middle;
+    text-style: italic;
+}
