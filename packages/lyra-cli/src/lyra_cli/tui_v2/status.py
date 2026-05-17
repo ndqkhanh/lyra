@@ -192,3 +192,62 @@ def _humanise(n: int) -> str:
     if n < 1_000_000_000:
         return f"{n / 1_000_000:.1f}M"
     return f"{n / 1_000_000_000:.1f}B"
+
+
+def format_compaction_message(
+    util_before: float,
+    util_after: float,
+    tokens_before: int,
+    tokens_after: int,
+    preserved: int,
+    summarized: int,
+) -> str:
+    """Format context compaction notification message.
+
+    Returns multi-line Rich markup matching Claude Code style:
+        ✻ Conversation compacted (60% → 40%)
+          ⎿  Preserved last 4 turns (12.5K tokens)
+          ⎿  Summarized 8 older turns (45.2K → 8.1K tokens)
+
+    Args:
+        util_before: Context utilization before compaction (0.0-1.0)
+        util_after: Context utilization after compaction (0.0-1.0)
+        tokens_before: Token count before compaction
+        tokens_after: Token count after compaction
+        preserved: Number of turns preserved
+        summarized: Number of turns summarized
+
+    Returns:
+        Multi-line Rich markup string
+    """
+    before_pct = f"{util_before:.0%}"
+    after_pct = f"{util_after:.0%}"
+    tokens_saved = tokens_before - tokens_after
+
+    lines = [
+        f"[bold cyan]✻[/] Conversation compacted ({before_pct} → {after_pct})",
+        f"  [dim]⎿[/]  Preserved last {preserved} turns ({_humanise(tokens_after)} tokens)",
+        f"  [dim]⎿[/]  Summarized {summarized} older turns ({_humanise(tokens_before)} → {_humanise(tokens_after)} tokens)",
+    ]
+    return "\n".join(lines)
+
+
+def format_agents_segment(running: int, total: int, tokens: int) -> str:
+    """Format live agent count badge for status bar.
+
+    Example output:
+        [bold cyan]⏺ Running 2/4 agents · 45.2K tokens[/]
+
+    Args:
+        running: Number of currently running agents
+        total: Total number of agents
+        tokens: Total token count across all agents
+
+    Returns:
+        Rich markup string for status bar, or empty string if no agents
+    """
+    if running <= 0:
+        return ""
+
+    tokens_label = _humanise(tokens)
+    return f"[bold cyan]⏺ Running {running}/{total} agents · {tokens_label} tokens[/]"

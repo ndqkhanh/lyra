@@ -1,0 +1,31 @@
+{
+  "name": "ink-stress-test",
+  "version": "1.0.0",
+  "description": "Ink + React stress test for Lyra UI performance validation",
+  "scripts": {
+    "start": "tsx src/index.tsx",
+    "test": "tsx src/index.tsx"
+  },
+  "keywords": [
+    "ink",
+    "react",
+    "tui",
+    "stress-test"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ink": "^4.4.1",
+    "pidusage": "^3.0.2",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@swc/core": "^1.15.33",
+    "@swc/helpers": "^0.5.21",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.48",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}

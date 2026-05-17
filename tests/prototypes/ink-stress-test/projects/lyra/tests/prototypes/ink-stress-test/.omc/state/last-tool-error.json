@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"ls -la projects/lyra/tests/prototypes/\",\"description\":\"Check prototypes directory\"}",
+  "error": "Exit code 1\nls: projects/lyra/tests/prototypes/: No such file or directory",
+  "timestamp": "2026-05-17T00:46:05.802Z",
+  "retry_count": 1
+}

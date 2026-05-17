@@ -1,5 +1,16 @@
 """Lyra TUI - Full Hermes-style prompt_toolkit Application.
 
+⚠️  DEPRECATED: This prompt_toolkit-based TUI is deprecated as of v0.x.0
+    and will be removed in v1.0.0.
+
+    Use the new Textual-based TUI instead:
+      • Default: lyra (launches tui_v2)
+      • Explicit: lyra tui
+      • Legacy: lyra --legacy-tui (this implementation)
+
+    Migration Guide: /projects/lyra/ui-specs/
+    Reason: Not aligned with Claude Code parity spec, difficult to extend.
+
 Complete TUI implementation with:
 - Status bar with model, tokens, cost
 - Input area with dynamic height

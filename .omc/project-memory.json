@@ -188,14 +188,26 @@
   "hotPaths": [
     {
       "path": "packages/lyra-cli/src/lyra_cli/interactive/session.py",
-      "accessCount": 17,
-      "lastAccessed": 1778917266923,
+      "accessCount": 18,
+      "lastAccessed": 1778948427647,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/src/lyra_cli/tui_v2/app.py",
+      "accessCount": 13,
+      "lastAccessed": 1778951427526,
       "type": "file"
     },
     {
       "path": "packages/lyra-cli/src/lyra_cli/cli/skill_manager.py",
       "accessCount": 10,
       "lastAccessed": 1778914289164,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/src/lyra_cli/tui_v2/status.py",
+      "accessCount": 7,
+      "lastAccessed": 1778948967038,
       "type": "file"
     },
     {
@@ -206,8 +218,14 @@
     },
     {
       "path": "packages/lyra-cli/src/lyra_cli/interactive/keybinds.py",
+      "accessCount": 5,
+      "lastAccessed": 1778948427702,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/src/lyra_cli/interactive/driver.py",
       "accessCount": 4,
-      "lastAccessed": 1778916375950,
+      "lastAccessed": 1778948482462,
       "type": "file"
     },
     {
@@ -217,21 +235,39 @@
       "type": "file"
     },
     {
-      "path": "packages/lyra-cli/src/lyra_cli/interactive/driver.py",
-      "accessCount": 3,
-      "lastAccessed": 1778916342251,
-      "type": "file"
-    },
-    {
       "path": "test_phase2_dialog.py",
       "accessCount": 3,
       "lastAccessed": 1778916470420,
       "type": "file"
     },
     {
+      "path": "packages/lyra-cli/src/lyra_cli/tui_v2/transport.py",
+      "accessCount": 3,
+      "lastAccessed": 1778948430998,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/src/lyra_cli/tui_v2/progress.py",
+      "accessCount": 3,
+      "lastAccessed": 1778951254724,
+      "type": "file"
+    },
+    {
       "path": "packages/lyra-cli/src/lyra_cli/commands/registry.py",
       "accessCount": 2,
       "lastAccessed": 1778914093328,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-core/src/lyra_core/terminal/events.py",
+      "accessCount": 2,
+      "lastAccessed": 1778948419855,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/src/lyra_cli/tui_v2/sidebar/agents_tab.py",
+      "accessCount": 2,
+      "lastAccessed": 1778951523612,
       "type": "file"
     },
     {
@@ -268,6 +304,186 @@
       "path": "packages/lyra-cli/tests/test_registry_client.py",
       "accessCount": 1,
       "lastAccessed": 1778917324856,
+      "type": "file"
+    },
+    {
+      "path": "MANUAL_TEST_GUIDE.md",
+      "accessCount": 1,
+      "lastAccessed": 1778947831879,
+      "type": "file"
+    },
+    {
+      "path": "test_lyra_e2e_deepseek.sh",
+      "accessCount": 1,
+      "lastAccessed": 1778947831935,
+      "type": "file"
+    },
+    {
+      "path": "LYRA_UX_VERIFICATION_REPORT.md",
+      "accessCount": 1,
+      "lastAccessed": 1778948098615,
+      "type": "file"
+    },
+    {
+      "path": "QUICK_START_MANUAL_TEST.md",
+      "accessCount": 1,
+      "lastAccessed": 1778948151787,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-core/src/lyra_core/context/eternal_autocompact.py",
+      "accessCount": 1,
+      "lastAccessed": 1778948352378,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-core/src/lyra_core/context/compaction_controller.py",
+      "accessCount": 1,
+      "lastAccessed": 1778948352430,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-core/src/lyra_core/hir/events.py",
+      "accessCount": 1,
+      "lastAccessed": 1778948375174,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-core/src/lyra_core/transparency/agent_view.py",
+      "accessCount": 1,
+      "lastAccessed": 1778948375247,
+      "type": "file"
+    },
+    {
+      "path": "harness_core/src/harness_core/messages.py",
+      "accessCount": 1,
+      "lastAccessed": 1778948398803,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-core/src/lyra_core/tools/task.py",
+      "accessCount": 1,
+      "lastAccessed": 1778948425826,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/tests/test_keybinds_session_toggles.py",
+      "accessCount": 1,
+      "lastAccessed": 1778948427669,
+      "type": "file"
+    },
+    {
+      "path": "harness_core/src/harness_core/loop.py",
+      "accessCount": 1,
+      "lastAccessed": 1778948446275,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-core/src/lyra_core/transparency/event_store.py",
+      "accessCount": 1,
+      "lastAccessed": 1778948465868,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-core/src/lyra_core/transparency/process_registry.py",
+      "accessCount": 1,
+      "lastAccessed": 1778948465917,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-core/src/lyra_core/transparency/process_scanner.py",
+      "accessCount": 1,
+      "lastAccessed": 1778948465982,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/src/lyra_cli/tui_v2/sidebar/data.py",
+      "accessCount": 1,
+      "lastAccessed": 1778948479331,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-core/src/lyra_core/transparency/models.py",
+      "accessCount": 1,
+      "lastAccessed": 1778948479412,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/src/lyra_cli/interactive/status_source.py",
+      "accessCount": 1,
+      "lastAccessed": 1778948482529,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/src/lyra_cli/tui_v2/commands/claude_compat.py",
+      "accessCount": 1,
+      "lastAccessed": 1778948521201,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/src/lyra_cli/interactive/agent_panel.py",
+      "accessCount": 1,
+      "lastAccessed": 1778948528817,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-core/src/lyra_core/context/compactor.py",
+      "accessCount": 1,
+      "lastAccessed": 1778948538673,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/tests/test_wave3_wave5.py",
+      "accessCount": 1,
+      "lastAccessed": 1778948575594,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/tests/test_tui_v2_observability_segments.py",
+      "accessCount": 1,
+      "lastAccessed": 1778948575650,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/src/lyra_cli/interactive/spinner.py",
+      "accessCount": 1,
+      "lastAccessed": 1778948610402,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/src/lyra_cli/tui_v2/events.py",
+      "accessCount": 1,
+      "lastAccessed": 1778948934404,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/src/lyra_cli/tui_v2/tips.py",
+      "accessCount": 1,
+      "lastAccessed": 1778948990920,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/src/lyra_cli/tui_v2/modals/command_palette.py",
+      "accessCount": 1,
+      "lastAccessed": 1778949118306,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/src/lyra_cli/tui_v2/modals/task_panel.py",
+      "accessCount": 1,
+      "lastAccessed": 1778949118563,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/src/lyra_cli/__init__.py",
+      "accessCount": 1,
+      "lastAccessed": 1778949888156,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/src/lyra_cli/__main__.py",
+      "accessCount": 1,
+      "lastAccessed": 1778949947329,
       "type": "file"
     }
   ],

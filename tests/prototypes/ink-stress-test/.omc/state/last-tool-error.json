@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd projects/lyra/tests/prototypes/ink-stress-test && cat package.json\",\"description\":\"Check if package.json exists\"}",
+  "error": "Exit code 1\ncat: package.json: No such file or directory",
+  "timestamp": "2026-05-17T00:39:26.359Z",
+  "retry_count": 1
+}

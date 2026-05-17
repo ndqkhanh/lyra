@@ -47,7 +47,7 @@ def _truncate(text: str, width: int) -> str:
 
 
 def _render_agents(agents: list, selected_idx: int) -> str:
-    """Render agent list as a Rich-markup string for a Textual Static widget."""
+    """Render agent list with tree-style hierarchy and current operations."""
     if not agents:
         return "[dim](no background agents)[/]"
 
@@ -55,14 +55,30 @@ def _render_agents(agents: list, selected_idx: int) -> str:
     lines = [f"  [green]⏺[/] [bold]main[/]   {nav_hint}"]
 
     for i, proc in enumerate(agents[:_MAX_AGENTS]):
-        dot = "[green]⏺[/]" if i == selected_idx else "[dim]◯[/]"
+        is_selected = i == selected_idx
+        dot = "[green]⏺[/]" if is_selected else "[dim]◯[/]"
+
+        # Agent info
         agent_type = _infer_agent_type(getattr(proc, "session_id", ""))
-        desc = _truncate(getattr(proc, "current_tool", "") or "—", _DESC_COL_WIDTH)
+        current_tool = getattr(proc, "current_tool", "") or "—"
         elapsed = _fmt_elapsed(getattr(proc, "elapsed_s", 0.0))
         tokens = _humanise_tokens(getattr(proc, "tokens_out", 0))
-        type_col = f"{agent_type:<{_TYPE_COL_WIDTH}}"
-        desc_col = f"{desc:<{_DESC_COL_WIDTH}}"
-        lines.append(f"  {dot} {type_col} {desc_col}  {elapsed} · ↓ {tokens} tokens")
+
+        # Format with tree structure if has parent
+        has_parent = getattr(proc, "parent_session_id", "")
+        is_last = i == len(agents) - 1
+
+        if has_parent:
+            glyph = "└" if is_last else "├"
+            desc = _truncate(current_tool, _DESC_COL_WIDTH - 2)
+            line = f"  {glyph} {dot} {agent_type}  {desc}  {elapsed} · ↓ {tokens} tokens"
+        else:
+            desc = _truncate(current_tool, _DESC_COL_WIDTH)
+            type_col = f"{agent_type:<{_TYPE_COL_WIDTH}}"
+            desc_col = f"{desc:<{_DESC_COL_WIDTH}}"
+            line = f"  {dot} {type_col} {desc_col}  {elapsed} · ↓ {tokens} tokens"
+
+        lines.append(line)
 
     return "\n".join(lines)
 

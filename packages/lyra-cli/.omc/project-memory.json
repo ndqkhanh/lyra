@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "python -m pytest tests/skills_enhanced/test_phase_b.py -v",
+    "testCommand": "cd /Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-cli && python -m pytest tests/test_spec_kit_phase1.py -v 2>&1 | head -50",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
