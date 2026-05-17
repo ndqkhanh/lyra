@@ -132,6 +132,7 @@ LYRA_COMMANDS = {
     "/scaling": "Four-axis scaling laws",
     "/coverage": "Verifier coverage index",
     "/bundle": "Software 3.0 bundle pipeline",
+    "/meta-evolve": "AEVO meta-evolution framework",
     "/commands": "User-defined commands",
     "/keybindings": "Show keyboard shortcuts",
     "/palette": "Command palette",
@@ -172,7 +173,7 @@ def get_command_category(command: str) -> str:
         "theme": ["/theme", "/color", "/statusline", "/fast", "/focus", "/tui", "/vim", "/sandbox"],
         "debug": ["/trace", "/self", "/context", "/stats", "/cost", "/badges", "/debug", "/doctor", "/hooks", "/permissions", "/usage"],
         "advanced": ["/autopilot", "/ultrawork", "/ralph", "/ralplan", "/continue", "/sharpen", "/directive", "/contract", "/batch", "/add-dir", "/pr-comments", "/feedback", "/release-notes", "/logout", "/plugin", "/reload-plugins", "/claude-api"],
-        "unique": ["/scaling", "/coverage", "/bundle", "/commands", "/keybindings", "/palette", "/soul", "/policy", "/evals", "/auth", "/init", "/rewind", "/redo", "/toolsets", "/wiki", "/voice", "/split", "/pair", "/recap"],
+        "unique": ["/scaling", "/coverage", "/bundle", "/meta-evolve", "/commands", "/keybindings", "/palette", "/soul", "/policy", "/evals", "/auth", "/init", "/rewind", "/redo", "/toolsets", "/wiki", "/voice", "/split", "/pair", "/recap"],
         "git": ["/commit", "/pr", "/push"],
     }
 
