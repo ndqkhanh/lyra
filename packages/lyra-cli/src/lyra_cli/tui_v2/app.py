@@ -30,13 +30,10 @@ from .status import format_repo_segment, format_token_bar, format_turn_segment
 from .widgets.welcome_card import WelcomeCard
 from .widgets.compaction_banner import CompactionBanner
 from .widgets.todo_panel import TodoPanel
-
-# UX improvement widgets
 from .widgets import (
     ProgressSpinner,
     AgentExecutionPanel,
     MetricsTracker,
-    ExpandableBlockManager,
     BackgroundTaskPanel,
     ThinkingIndicator,
     PhaseProgress,
@@ -76,7 +73,7 @@ class LyraHarnessApp(HarnessApp):
         from .expandable import ExpandableBlockManager
         self._expandable_manager = ExpandableBlockManager()
 
-        # Initialize original widgets
+        # Initialize widgets
         self.welcome_card = WelcomeCard()
         self.compaction_banner = CompactionBanner()
         self.todo_panel = TodoPanel()
@@ -85,10 +82,10 @@ class LyraHarnessApp(HarnessApp):
         self.progress_spinner = ProgressSpinner()
         self.agent_panel = AgentExecutionPanel()
         self.metrics_tracker = MetricsTracker()
-        self.expandable_manager = ExpandableBlockManager()
-        self.background_panel = BackgroundTaskPanel()
+        self.bg_panel = BackgroundTaskPanel()
         self.thinking_indicator = ThinkingIndicator()
         self.phase_progress = PhaseProgress()
+        self._agent_panel_expanded = False
 
     def _post_mount(self) -> None:
         """Replace the parent's generic welcome with the Lyra welcome pane.
@@ -156,7 +153,6 @@ class LyraHarnessApp(HarnessApp):
 
         # Import Lyra-specific events
         from .events import ContextCompacted
-        from .spinner_states import format_spinner_status
         import time
 
         if isinstance(event, ev.TurnStarted):
@@ -164,6 +160,10 @@ class LyraHarnessApp(HarnessApp):
             self.shell.status_line.set_segment(
                 "turn", format_turn_segment(self._turn_index)
             )
+
+            # Start progress spinner
+            self.progress_spinner.start()
+
             # Track agent for progress display with spinner
             self._active_agents[event.turn_id] = {
                 'started_at': time.time(),
@@ -171,29 +171,23 @@ class LyraHarnessApp(HarnessApp):
                 'tokens_out': 0,
                 'thinking_s': 0,
             }
-            self._update_agents_display()
 
-            # Start progress spinner
-            self.progress_spinner.start()
-
-            # Start metrics tracking
-            self.metrics_tracker.start_operation(
-                op_id=event.turn_id,
-                op_type="agent_turn"
-            )
-
-            # Add agent to panel
+            # Add to agent panel
             self.agent_panel.add_agent(
                 agent_id=event.turn_id,
                 description=f"Turn {self._turn_index}"
             )
 
-            # Show spinner status
-            spinner_msg = format_spinner_status(
-                elapsed_s=0,
-                tokens_in=0,
-                tokens_out=0,
+            # Start metrics tracking
+            self.metrics_tracker.start_operation(
+                op_id=event.turn_id,
+                op_type="turn"
             )
+
+            self._update_agents_display()
+
+            # Show spinner status
+            spinner_msg = self.progress_spinner.next_frame(tokens=0)
             self.shell.chat_log.write_system(spinner_msg)
 
         elif isinstance(event, ev.TurnFinished):
@@ -202,46 +196,36 @@ class LyraHarnessApp(HarnessApp):
                 "tokens", format_token_bar(total)
             )
 
+            # Stop progress spinner
+            self.progress_spinner.stop()
+
             # Update agent tracking with final tokens
             elapsed = 0.0
             if event.turn_id in self._active_agents:
                 agent = self._active_agents[event.turn_id]
                 elapsed = time.time() - agent['started_at']
 
-                # Stop progress spinner
-                self.progress_spinner.stop()
-
-                # End metrics tracking
-                self.metrics_tracker.end_operation(
-                    op_id=event.turn_id,
-                    tokens_in=event.tokens_in,
-                    tokens_out=event.tokens_out,
-                    model=getattr(event, 'model', self.cfg.model or 'unknown')
-                )
-
-                # Update agent panel with final stats
+                # Update agent panel
                 self.agent_panel.update_agent(
                     agent_id=event.turn_id,
                     tokens=total,
                     status="done"
                 )
 
-                # Show final spinner status with complete info
-                from .spinner_states import format_spinner_status
-                final_spinner = format_spinner_status(
-                    elapsed_s=elapsed,
+                # End metrics tracking
+                self.metrics_tracker.end_operation(
+                    op_id=event.turn_id,
                     tokens_in=event.tokens_in,
                     tokens_out=event.tokens_out,
-                    thinking_s=agent.get('thinking_s', 0),
+                    model=getattr(event, 'model', '')
                 )
-                self.shell.chat_log.write_system(final_spinner)
 
-                # Show metrics summary
+                # Show final metrics
                 metrics_summary = self.metrics_tracker.format_summary(event.turn_id)
                 if metrics_summary:
-                    self.shell.chat_log.write_system(f"📊 {metrics_summary}")
+                    self.shell.chat_log.write_system(f"✓ {metrics_summary}")
 
-                # Remove from active agents
+                # Remove from active agents after delay
                 del self._active_agents[event.turn_id]
 
             self._update_agents_display()
@@ -257,6 +241,13 @@ class LyraHarnessApp(HarnessApp):
             self.shell.status_line.set_segment(
                 "tokens", format_token_bar(event.used, event.max)
             )
+
+            # Update progress spinner with current token count
+            if self._active_agents:
+                spinner_msg = self.progress_spinner.next_frame(tokens=event.used)
+                # Update the last system message instead of appending
+                # (This prevents spam - in production you'd update in place)
+                self.shell.chat_log.write_system(spinner_msg)
 
         elif isinstance(event, ContextCompacted):
             # Handle context compaction notification
@@ -337,14 +328,32 @@ class LyraHarnessApp(HarnessApp):
         """Open background task switcher modal (Ctrl+B)."""
         from .modals.background_switcher import BackgroundSwitcherModal
 
-        # Show modal with current background tasks
-        result = await self.push_screen(BackgroundSwitcherModal(self._bg_tasks))
-        if result:
-            # Switch to selected background task
-            self.notify(f"Switched to task: {result}", severity="information")
+        # Toggle background panel visibility
+        self.bg_panel.toggle_visibility()
+
+        # Render background panel
+        panel_output = self.bg_panel.render()
+        if panel_output:
+            self.shell.chat_log.write_system(panel_output)
+        else:
+            # If panel is now hidden or empty, show modal fallback
+            result = await self.push_screen(BackgroundSwitcherModal(self._bg_tasks))
+            if result:
+                # Switch to selected background task
+                self.notify(f"Switched to task: {result}", severity="information")
 
     async def action_toggle_expand(self) -> None:
         """Toggle expand/collapse for the most recent expandable block (Ctrl+O)."""
+        # Toggle agent panel expansion
+        self._agent_panel_expanded = not self._agent_panel_expanded
+
+        # Render agent panel
+        if self.agent_panel.agents:
+            panel_output = self.agent_panel.render(expanded=self._agent_panel_expanded)
+            if panel_output:
+                self.shell.chat_log.write_system(panel_output)
+
+        # Also toggle expandable blocks (original behavior)
         block = self._expandable_manager.toggle_current()
         if block:
             # Re-render the chat log with updated block state
@@ -453,6 +462,16 @@ class LyraHarnessApp(HarnessApp):
         state = "on" if self._thinking_enabled else "off"
         self.shell.status_line.set_segment("thinking", f"think:{state}")
         self.notify(f"extended thinking: {state}", severity="information")
+
+        # Start/stop thinking indicator
+        if self._thinking_enabled:
+            self.thinking_indicator.start_thinking()
+        else:
+            elapsed = self.thinking_indicator.end_thinking()
+            if elapsed > 0:
+                self.shell.chat_log.write_system(
+                    f"Extended thinking: {elapsed:.1f}s"
+                )
 
     def action_toggle_fast(self) -> None:
         self._fast_mode = not self._fast_mode
