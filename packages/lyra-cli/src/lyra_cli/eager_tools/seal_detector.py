@@ -2,6 +2,9 @@
 from dataclasses import dataclass
 from typing import Optional
 
+from lyra_cli.eager_tools.logging import log_seal_detected
+from lyra_cli.eager_tools.metrics import MetricsCollector
+
 
 @dataclass
 class ToolBlock:
@@ -14,9 +17,10 @@ class ToolBlock:
 class SealDetector:
     """Detect tool block completion during LLM streaming."""
 
-    def __init__(self):
+    def __init__(self, metrics: Optional[MetricsCollector] = None):
         self.current_id: Optional[str] = None
         self.buffer: dict[str, dict] = {}
+        self.metrics = metrics
 
     def process_chunk(self, chunk: dict) -> list[ToolBlock]:
         """Process stream chunk and return sealed (complete) tool blocks."""
@@ -58,8 +62,15 @@ class SealDetector:
     def _seal_block(self, tool_call_id: str) -> ToolBlock:
         """Convert buffered data to sealed ToolBlock."""
         data = self.buffer.pop(tool_call_id)
-        return ToolBlock(
+        block = ToolBlock(
             tool_call_id=tool_call_id,
             name=data["name"],
             arguments=data["arguments"],
         )
+
+        # Log and record metrics
+        if self.metrics:
+            self.metrics.on_seal_detected(tool_call_id)
+        log_seal_detected(tool_call_id, block.name, 0.0)
+
+        return block
