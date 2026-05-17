@@ -31,6 +31,17 @@ from .widgets.welcome_card import WelcomeCard
 from .widgets.compaction_banner import CompactionBanner
 from .widgets.todo_panel import TodoPanel
 
+# UX improvement widgets
+from .widgets import (
+    ProgressSpinner,
+    AgentExecutionPanel,
+    MetricsTracker,
+    ExpandableBlockManager,
+    BackgroundTaskPanel,
+    ThinkingIndicator,
+    PhaseProgress,
+)
+
 
 class LyraHarnessApp(HarnessApp):
     # Textual resolves a relative CSS_PATH relative to the leaf class's file,
@@ -65,10 +76,19 @@ class LyraHarnessApp(HarnessApp):
         from .expandable import ExpandableBlockManager
         self._expandable_manager = ExpandableBlockManager()
 
-        # Initialize widgets
+        # Initialize original widgets
         self.welcome_card = WelcomeCard()
         self.compaction_banner = CompactionBanner()
         self.todo_panel = TodoPanel()
+
+        # Initialize UX improvement widgets
+        self.progress_spinner = ProgressSpinner()
+        self.agent_panel = AgentExecutionPanel()
+        self.metrics_tracker = MetricsTracker()
+        self.expandable_manager = ExpandableBlockManager()
+        self.background_panel = BackgroundTaskPanel()
+        self.thinking_indicator = ThinkingIndicator()
+        self.phase_progress = PhaseProgress()
 
     def _post_mount(self) -> None:
         """Replace the parent's generic welcome with the Lyra welcome pane.
@@ -153,6 +173,21 @@ class LyraHarnessApp(HarnessApp):
             }
             self._update_agents_display()
 
+            # Start progress spinner
+            self.progress_spinner.start()
+
+            # Start metrics tracking
+            self.metrics_tracker.start_operation(
+                op_id=event.turn_id,
+                op_type="agent_turn"
+            )
+
+            # Add agent to panel
+            self.agent_panel.add_agent(
+                agent_id=event.turn_id,
+                description=f"Turn {self._turn_index}"
+            )
+
             # Show spinner status
             spinner_msg = format_spinner_status(
                 elapsed_s=0,
@@ -173,6 +208,24 @@ class LyraHarnessApp(HarnessApp):
                 agent = self._active_agents[event.turn_id]
                 elapsed = time.time() - agent['started_at']
 
+                # Stop progress spinner
+                self.progress_spinner.stop()
+
+                # End metrics tracking
+                self.metrics_tracker.end_operation(
+                    op_id=event.turn_id,
+                    tokens_in=event.tokens_in,
+                    tokens_out=event.tokens_out,
+                    model=getattr(event, 'model', self.cfg.model or 'unknown')
+                )
+
+                # Update agent panel with final stats
+                self.agent_panel.update_agent(
+                    agent_id=event.turn_id,
+                    tokens=total,
+                    status="done"
+                )
+
                 # Show final spinner status with complete info
                 from .spinner_states import format_spinner_status
                 final_spinner = format_spinner_status(
@@ -182,6 +235,11 @@ class LyraHarnessApp(HarnessApp):
                     thinking_s=agent.get('thinking_s', 0),
                 )
                 self.shell.chat_log.write_system(final_spinner)
+
+                # Show metrics summary
+                metrics_summary = self.metrics_tracker.format_summary(event.turn_id)
+                if metrics_summary:
+                    self.shell.chat_log.write_system(f"📊 {metrics_summary}")
 
                 # Remove from active agents
                 del self._active_agents[event.turn_id]
