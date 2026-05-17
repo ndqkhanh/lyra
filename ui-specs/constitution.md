@@ -1,19 +1,16 @@
 <!--
 Sync Impact Report
 ==================
-Version change: — → 1.0.0
-Modified principles: (initial constitution — all principles new)
+Version change: 1.0.0 → 1.1.0
+Modified principles: Added Principle VIII (Spec Before Build)
 Added sections:
-  - Core Principles (I–VII)
-  - Operational Constraints
-  - Quality Gates
-  - Governance
+  - Principle VIII: Spec Before Build
 Removed sections: none
 Templates requiring update:
-  - .specify/templates/plan-template.md → ✅ aligned (constitution-check section maps to Principles I–VII)
-  - .specify/templates/spec-template.md → ✅ aligned (no mandatory section added/removed beyond defaults)
-  - .specify/templates/tasks-template.md → ✅ aligned (category headings cover Observability, Testing, UX)
-Follow-up TODOs: none
+  - .specify/templates/plan-template.md → ✅ aligned (constitution-check section now includes Principle VIII)
+  - .specify/templates/spec-template.md → ✅ aligned
+  - .specify/templates/tasks-template.md → ✅ aligned
+Follow-up TODOs: Update plan template to include Principle VIII checkbox
 -->
 
 # Lyra TUI Constitution
@@ -78,6 +75,18 @@ Textual dev console (`textual console`) and to a rotating file log under
 `~/.lyra/logs/`. Log entries include `session_id`, `agent_id`, `worker_id`,
 `event_type`, and timing. Bug reports must be reproducible from logs alone.
 
+### VIII. Spec Before Build
+Complex features require structured design before implementation. Auto-Spec-Kit
+automatically intercepts "build-a-thing" prompts and guides the user through
+constitution → spec → plan → tasks before any code is written.
+
+**Exemptions** (bypass Auto-Spec-Kit):
+- Simple fixes: typos, one-liners, small updates
+- Direct file operations: "fix line 42 in foo.py"
+- Queries: "show me", "explain", "what does X do"
+- Slash commands: all `/` prefixed commands
+- Explicit bypass: `/skip-spec` or `LYRA_AUTOSPEC=off`
+
 ## Operational Constraints
 
 - **Python ≥ 3.11.** Required for `asyncio.TaskGroup` and `Self` typing.
@@ -130,4 +139,4 @@ Amendments require:
 All PRs that touch `src/lyra_cli/tui/` must include a "Constitution
 compliance" checklist with one box per principle.
 
-**Version**: 1.0.0 | **Ratified**: 2026-05-17 | **Last Amended**: 2026-05-17
+**Version**: 1.1.0 | **Ratified**: 2026-05-17 | **Last Amended**: 2026-05-17

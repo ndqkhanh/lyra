@@ -9,6 +9,7 @@
 - [ ] Principle V: Keyboard-First
 - [ ] Principle VI: Single Source of Truth
 - [ ] Principle VII: Observability
+- [ ] Principle VIII: Spec Before Build
 
 ## Phase Breakdown
 
