@@ -299,6 +299,42 @@
       "accessCount": 1,
       "lastAccessed": 1779088739047,
       "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1779088965020,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-evolution/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1779089039221,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1779089039469,
+      "type": "file"
+    },
+    {
+      "path": "docs/getting-started/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1779089087647,
+      "type": "file"
+    },
+    {
+      "path": "ARCHITECTURE.md",
+      "accessCount": 1,
+      "lastAccessed": 1779089148103,
+      "type": "file"
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "accessCount": 1,
+      "lastAccessed": 1779089191256,
+      "type": "file"
     }
   ],
   "userDirectives": []
