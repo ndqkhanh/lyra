@@ -1,7 +1,7 @@
 {
   "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"grep -r \\\"class.*Executor\\\" packages/lyra-cli/src/lyra_cli/eager_tools/ --include=\\\"*.py\\\" && echo \\\"---\\\" && grep -r \\\"class.*SealDetector\\\" packages/lyra-cli/src/lyra_cli/eager_tools/ --...",
-  "error": "Exit code 2\nugrep: warning: packages/lyra-cli/src/lyra_cli/eager_tools/: No such file or directory",
-  "timestamp": "2026-05-17T05:25:33.481Z",
+  "tool_input_preview": "{\"command\":\"cd packages/lyra-cli && python -m pytest ../../tests/memory/test_memory_core.py -v\",\"description\":\"Run updated memory tests\"}",
+  "error": "Exit code 4\n============================= test session starts ==============================\nplatform darwin -- Python 3.11.8, pytest-9.0.2, pluggy-1.6.0 -- /Users/khanhnguyen/miniconda3/bin/python\ncachedir: .pytest_cache\nrootdir: /Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-cli\nconfigfile: pyproject.toml\nplugins: anyio-4.12.1, cov-7.1.0\ncollecting ... ERROR: file or directory not found: ../../tests/memory/test_memory_core.py\n\ncollected 0 items\n\n====...",
+  "timestamp": "2026-05-17T06:28:16.752Z",
   "retry_count": 1
 }

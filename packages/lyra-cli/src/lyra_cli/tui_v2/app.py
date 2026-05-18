@@ -25,6 +25,7 @@ import harness_tui as _harness_tui_pkg
 from harness_tui import events as ev
 from harness_tui.app import HarnessApp, ProjectConfig
 from textual.binding import Binding
+from textual.reactive import reactive
 
 from .status import format_repo_segment, format_token_bar, format_turn_segment
 from .widgets.welcome_card import WelcomeCard
@@ -60,11 +61,13 @@ class LyraHarnessApp(HarnessApp):
         Binding("ctrl+o", "toggle_expand", "Expand", show=False),
     ]
 
+    # Reactive state properties (Constitution I: Single Source of Truth)
+    turn_index: reactive[int] = reactive(0)
+    thinking_enabled: reactive[bool] = reactive(False)
+    fast_mode: reactive[bool] = reactive(False)
+
     def __init__(self, cfg: ProjectConfig) -> None:
         super().__init__(cfg)
-        self._turn_index = 0
-        self._thinking_enabled = False
-        self._fast_mode = False
         self._active_agents = {}  # Track active agents for progress display
         self._bg_tasks = {}  # Track background tasks
         self._active_tools = {}  # Track active tool executions
@@ -119,7 +122,7 @@ class LyraHarnessApp(HarnessApp):
             "repo", format_repo_segment(self.cfg.working_dir)
         )
         self.shell.status_line.set_segment(
-            "turn", format_turn_segment(self._turn_index)
+            "turn", format_turn_segment(self.turn_index)
         )
         self.shell.status_line.set_segment("effort", "auto")
         self._detect_pr()
@@ -156,9 +159,9 @@ class LyraHarnessApp(HarnessApp):
         import time
 
         if isinstance(event, ev.TurnStarted):
-            self._turn_index += 1
+            self.turn_index += 1
             self.shell.status_line.set_segment(
-                "turn", format_turn_segment(self._turn_index)
+                "turn", format_turn_segment(self.turn_index)
             )
 
             # Start progress spinner
@@ -175,7 +178,7 @@ class LyraHarnessApp(HarnessApp):
             # Add to agent panel
             self.agent_panel.add_agent(
                 agent_id=event.turn_id,
-                description=f"Turn {self._turn_index}"
+                description=f"Turn {self.turn_index}"
             )
 
             # Start metrics tracking
@@ -458,13 +461,13 @@ class LyraHarnessApp(HarnessApp):
         asyncio.create_task(self._dispatch_slash("/model"))
 
     def action_toggle_thinking(self) -> None:
-        self._thinking_enabled = not self._thinking_enabled
-        state = "on" if self._thinking_enabled else "off"
+        self.thinking_enabled = not self.thinking_enabled
+        state = "on" if self.thinking_enabled else "off"
         self.shell.status_line.set_segment("thinking", f"think:{state}")
         self.notify(f"extended thinking: {state}", severity="information")
 
         # Start/stop thinking indicator
-        if self._thinking_enabled:
+        if self.thinking_enabled:
             self.thinking_indicator.start_thinking()
         else:
             elapsed = self.thinking_indicator.end_thinking()
@@ -474,9 +477,9 @@ class LyraHarnessApp(HarnessApp):
                 )
 
     def action_toggle_fast(self) -> None:
-        self._fast_mode = not self._fast_mode
-        state = "on" if self._fast_mode else "off"
+        self.fast_mode = not self.fast_mode
+        state = "on" if self.fast_mode else "off"
         self.shell.status_line.set_segment(
-            "fast", f"fast:{state}" if self._fast_mode else ""
+            "fast", f"fast:{state}" if self.fast_mode else ""
         )
         self.notify(f"fast mode: {state}", severity="information")

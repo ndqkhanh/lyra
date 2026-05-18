@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "pytest tests/test_memory_reasoning_bank_sqlite.py tests/test_memory_reasoning_bank_phase0.py tests/test_memory_distillers.py -v",
+    "testCommand": "python -m pytest tests/e2e/test_process_transparency_e2e.py -v --tb=short 2>&1 | tail -10",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -88,9 +88,45 @@
   },
   "hotPaths": [
     {
+      "path": "tests/e2e/test_process_transparency_e2e.py",
+      "accessCount": 14,
+      "lastAccessed": 1779074213816,
+      "type": "file"
+    },
+    {
       "path": "tests/test_providers_prompt_cache.py",
       "accessCount": 1,
       "lastAccessed": 1778865720160,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/transparency/event_store.py",
+      "accessCount": 1,
+      "lastAccessed": 1779072486361,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/observability/process_tree.py",
+      "accessCount": 1,
+      "lastAccessed": 1779072486423,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/observability/event_bus.py",
+      "accessCount": 1,
+      "lastAccessed": 1779072486479,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/transparency/process_registry.py",
+      "accessCount": 1,
+      "lastAccessed": 1779072486530,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/retrieval/skill_rag.py",
+      "accessCount": 1,
+      "lastAccessed": 1779076348824,
       "type": "file"
     }
   ],

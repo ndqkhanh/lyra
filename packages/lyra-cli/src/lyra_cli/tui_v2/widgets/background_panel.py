@@ -2,6 +2,9 @@
 import time
 from typing import Dict, Optional
 from dataclasses import dataclass, field
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -32,6 +35,7 @@ class BackgroundTaskPanel:
 
     def add_task(self, task_id: str, description: str, agent_type: str) -> None:
         """Add background task."""
+        logger.info(f"Adding background task {task_id}: {description} ({agent_type})")
         self.tasks[task_id] = BackgroundTask(
             description=description,
             agent_type=agent_type,
@@ -45,6 +49,7 @@ class BackgroundTaskPanel:
     ) -> None:
         """Update task status."""
         if task_id not in self.tasks:
+            logger.warning(f"Attempted to update unknown task: {task_id}")
             return
 
         task = self.tasks[task_id]
@@ -52,6 +57,7 @@ class BackgroundTaskPanel:
             task.tokens = tokens
         if status is not None:
             task.status = status
+            logger.info(f"Background task {task_id} status changed to {status}")
 
     def remove_task(self, task_id: str) -> None:
         """Remove completed task."""

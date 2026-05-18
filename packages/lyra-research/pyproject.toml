@@ -2,7 +2,7 @@
 name = "lyra-research"
 version = "0.1.0"
 description = "Deep Research Agent for Lyra - Multi-source research discovery and analysis"
-authors = ["Lyra Team"]
+authors = [{name = "Lyra Team"}]
 requires-python = ">=3.11"
 dependencies = [
     "requests>=2.31.0",
@@ -24,8 +24,11 @@ dev = [
 ]
 
 [build-system]
-requires = ["setuptools>=68.0"]
+requires = ["setuptools>=68.0", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

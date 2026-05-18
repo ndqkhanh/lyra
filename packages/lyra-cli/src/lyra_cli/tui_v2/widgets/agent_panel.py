@@ -2,6 +2,9 @@
 from typing import Dict, Optional
 from dataclasses import dataclass, field
 import time
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -35,6 +38,7 @@ class AgentExecutionPanel:
 
     def add_agent(self, agent_id: str, description: str) -> None:
         """Register new agent."""
+        logger.info(f"Adding agent {agent_id}: {description}")
         self.agents[agent_id] = AgentStatus(description=description)
 
     def update_agent(
@@ -47,6 +51,7 @@ class AgentExecutionPanel:
     ) -> None:
         """Update agent status."""
         if agent_id not in self.agents:
+            logger.warning(f"Attempted to update unknown agent: {agent_id}")
             return
 
         agent = self.agents[agent_id]
@@ -56,6 +61,7 @@ class AgentExecutionPanel:
             agent.tokens = tokens
         if status is not None:
             agent.status = status
+            logger.info(f"Agent {agent_id} status changed to {status}")
         if last_action is not None:
             agent.last_action = last_action
 

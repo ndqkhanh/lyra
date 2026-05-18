@@ -1,0 +1,27 @@
+{
+  "name": "parallel_exploration",
+  "applicability": "When exploring multiple agent variants simultaneously",
+  "policy": "\ndef explore_parallel(variants, n_workers=10):\n    with ThreadPoolExecutor(max_workers=n_workers) as executor:\n        futures = [executor.submit(evaluate, v) for v in variants]\n        return [f.result() for f in futures]\n        ",
+  "termination": "All variants evaluated",
+  "interface": {
+    "inputs": [
+      "variants: List[AgentConfig]",
+      "n_workers: int"
+    ],
+    "outputs": [
+      "results: List[EvaluationResult]"
+    ]
+  },
+  "verifier": "assert len(variants) > 0",
+  "lineage": {
+    "created_from": null,
+    "created_at": "2026-05-17T14:31:44.969200",
+    "modified_at": "2026-05-17T14:31:44.969213",
+    "version": 1,
+    "modifications": []
+  },
+  "metadata": {},
+  "skill_type": "code",
+  "risk_level": "low",
+  "verified": true
+}

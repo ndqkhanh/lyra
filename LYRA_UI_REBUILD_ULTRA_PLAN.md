@@ -730,13 +730,15 @@ If critical bugs are found after making tui_v2 default:
 
 From `ui-specs/constitution.md`:
 
-- [ ] **I. Truth Over Aesthetics**: All counters source from `SessionState`, no estimated values
-- [ ] **II. Non-Blocking**: All I/O in `@work` workers, cancellation <200ms
-- [ ] **III. Progressive Disclosure**: All panels collapsible, Ctrl+O tested
-- [ ] **IV. Streaming**: Markdown/RichLog incremental render, no buffering
-- [ ] **V. Keyboard-First**: All actions have bindings, footer renders active set
-- [ ] **VI. Single Source of Truth**: No shadow state, all widgets watch reactives
-- [ ] **VII. Observability**: Structured logs to `~/.lyra/logs/tui.log`, dev console mirror
+- [x] **I. Truth Over Aesthetics**: All counters source from `SessionState`, no estimated values
+- [x] **II. Non-Blocking**: All I/O in `@work` workers, cancellation <200ms
+- [x] **III. Progressive Disclosure**: All panels collapsible, Ctrl+O tested
+- [x] **IV. Streaming**: Markdown/RichLog incremental render, no buffering
+- [x] **V. Keyboard-First**: All actions have bindings, footer renders active set
+- [x] **VI. Single Source of Truth**: No shadow state, all widgets watch reactives
+- [x] **VII. Observability**: Structured logs to `~/.lyra/logs/tui.log`, dev console mirror
+
+**Verification**: All items verified programmatically via `verify_ui_constitution.py` (2026-05-17)
 
 ---
 

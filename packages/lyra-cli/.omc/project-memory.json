@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "cd /Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-cli && python -m pytest tests/test_spec_kit_phase1.py -v 2>&1 | head -50",
+    "testCommand": "cd /Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-cli && python -m pytest tests/ -k \"repl or streaming\" -v --tb=short 2>&1 | tail -30",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -83,8 +83,8 @@
     },
     {
       "path": "src/lyra_cli/cli/agent_integration.py",
-      "accessCount": 18,
-      "lastAccessed": 1778860156987,
+      "accessCount": 22,
+      "lastAccessed": 1778995656118,
       "type": "file"
     },
     {

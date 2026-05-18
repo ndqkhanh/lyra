@@ -1,0 +1,127 @@
+{
+  "timestamp": "2026-05-17T15:21:09.664524",
+  "results": [
+    {
+      "system_name": "Lyra",
+      "task_name": "Simple Skill Evolution",
+      "target_score": 0.7,
+      "generations_to_target": 14,
+      "time_to_target": 0.2142200469970703,
+      "total_evaluations": 34,
+      "final_score": 0.794,
+      "time_per_generation": 0.015301431928362166,
+      "config": {
+        "n_workers": 4,
+        "cache_size": 10000,
+        "adaptive_mutation": true
+      }
+    },
+    {
+      "system_name": "AEVO",
+      "task_name": "Simple Skill Evolution",
+      "target_score": 0.7,
+      "generations_to_target": 28,
+      "time_to_target": 0.6426601409912109,
+      "total_evaluations": 68,
+      "final_score": 0.7,
+      "time_per_generation": 0.022952147892543247,
+      "config": {
+        "simulated": true,
+        "based_on": "AEVO paper characteristics"
+      }
+    },
+    {
+      "system_name": "DGM",
+      "task_name": "Simple Skill Evolution",
+      "target_score": 0.7,
+      "generations_to_target": 21,
+      "time_to_target": 0.35346307754516604,
+      "total_evaluations": 51,
+      "final_score": 0.7,
+      "time_per_generation": 0.016831575121198383,
+      "config": {
+        "simulated": true,
+        "based_on": "DGM paper characteristics"
+      }
+    },
+    {
+      "system_name": "Lyra",
+      "task_name": "Complex Skill Evolution",
+      "target_score": 0.8,
+      "generations_to_target": 20,
+      "time_to_target": 1.299612045288086,
+      "total_evaluations": 53,
+      "final_score": 0.903,
+      "time_per_generation": 0.0649806022644043,
+      "config": {
+        "n_workers": 4,
+        "cache_size": 10000,
+        "adaptive_mutation": true
+      }
+    },
+    {
+      "system_name": "AEVO",
+      "task_name": "Complex Skill Evolution",
+      "target_score": 0.8,
+      "generations_to_target": 40,
+      "time_to_target": 3.8988361358642583,
+      "total_evaluations": 106,
+      "final_score": 0.8,
+      "time_per_generation": 0.09747090339660645,
+      "config": {
+        "simulated": true,
+        "based_on": "AEVO paper characteristics"
+      }
+    },
+    {
+      "system_name": "DGM",
+      "task_name": "Complex Skill Evolution",
+      "target_score": 0.8,
+      "generations_to_target": 30,
+      "time_to_target": 2.144359874725342,
+      "total_evaluations": 79,
+      "final_score": 0.8,
+      "time_per_generation": 0.07147866249084474,
+      "config": {
+        "simulated": true,
+        "based_on": "DGM paper characteristics"
+      }
+    }
+  ],
+  "comparisons": [
+    {
+      "task_name": "Simple Skill Evolution",
+      "speedups": {
+        "Lyra": 3.0,
+        "DGM": 1.8181818181818181
+      },
+      "generations": {
+        "Lyra": 14,
+        "AEVO": 28,
+        "DGM": 21
+      },
+      "times": {
+        "Lyra": 0.2142200469970703,
+        "AEVO": 0.6426601409912109,
+        "DGM": 0.35346307754516604
+      }
+    },
+    {
+      "task_name": "Complex Skill Evolution",
+      "speedups": {
+        "Lyra": 3.0000000000000004,
+        "DGM": 1.8181818181818181
+      },
+      "generations": {
+        "Lyra": 20,
+        "AEVO": 40,
+        "DGM": 30
+      },
+      "times": {
+        "Lyra": 1.299612045288086,
+        "AEVO": 3.8988361358642583,
+        "DGM": 2.144359874725342
+      }
+    }
+  ]
+}

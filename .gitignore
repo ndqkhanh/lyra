@@ -36,3 +36,4 @@ Thumbs.db
 # OMC state (session state, not source)
 .omc/state/
 .omc/sessions/
+.frg/

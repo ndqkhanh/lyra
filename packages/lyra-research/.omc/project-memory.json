@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "pytest",
+    "testCommand": "python -m pytest tests/ -v --tb=short 2>&1 | tail -50",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -78,6 +78,37 @@
       ]
     }
   },
-  "hotPaths": [],
+  "hotPaths": [
+    {
+      "path": "pyproject.toml",
+      "accessCount": 2,
+      "lastAccessed": 1779080083701,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/__init__.py",
+      "accessCount": 1,
+      "lastAccessed": 1779076418081,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/memory.py",
+      "accessCount": 1,
+      "lastAccessed": 1779078676078,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/orchestrator.py",
+      "accessCount": 1,
+      "lastAccessed": 1779078676101,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/sources.py",
+      "accessCount": 1,
+      "lastAccessed": 1779078676698,
+      "type": "file"
+    }
+  ],
   "userDirectives": []
 }
