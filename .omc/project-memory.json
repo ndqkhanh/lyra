@@ -335,6 +335,24 @@
       "accessCount": 1,
       "lastAccessed": 1779089191256,
       "type": "file"
+    },
+    {
+      "path": "CLEANUP_COMPLETE.md",
+      "accessCount": 1,
+      "lastAccessed": 1779089270338,
+      "type": "file"
+    },
+    {
+      "path": "docs/guides/configuration.md",
+      "accessCount": 1,
+      "lastAccessed": 1779089573691,
+      "type": "file"
+    },
+    {
+      "path": "docs/guides/mcp-integration.md",
+      "accessCount": 1,
+      "lastAccessed": 1779089573976,
+      "type": "file"
     }
   ],
   "userDirectives": []
