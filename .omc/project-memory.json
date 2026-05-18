@@ -223,6 +223,18 @@
       "type": "file"
     },
     {
+      "path": "README.md",
+      "accessCount": 3,
+      "lastAccessed": 1779088885247,
+      "type": "file"
+    },
+    {
+      "path": "docs/ARCHITECTURE_DIAGRAMS.md",
+      "accessCount": 2,
+      "lastAccessed": 1779087949588,
+      "type": "file"
+    },
+    {
       "path": "LYRA_EVOLUTION_IMPROVEMENT_ULTRA_PLAN.md",
       "accessCount": 1,
       "lastAccessed": 1779001509251,
@@ -280,6 +292,12 @@
       "path": "EXECUTION_TRACKER.md",
       "accessCount": 1,
       "lastAccessed": 1779002487547,
+      "type": "file"
+    },
+    {
+      "path": "CLEANUP_PLAN.md",
+      "accessCount": 1,
+      "lastAccessed": 1779088739047,
       "type": "file"
     }
   ],
