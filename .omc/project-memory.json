@@ -181,8 +181,8 @@
     },
     {
       "path": "packages/lyra-audio/src/lyra_audio/__init__.py",
-      "accessCount": 3,
-      "lastAccessed": 1779216641064,
+      "accessCount": 4,
+      "lastAccessed": 1779216780131,
       "type": "file"
     },
     {
@@ -207,6 +207,12 @@
       "path": "packages/lyra-permissions/pyproject.toml",
       "accessCount": 2,
       "lastAccessed": 1779207739753,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/pyproject.toml",
+      "accessCount": 2,
+      "lastAccessed": 1779216779639,
       "type": "file"
     },
     {
@@ -291,12 +297,6 @@
       "path": "packages/lyra-permissions/tests/test_cli.py",
       "accessCount": 1,
       "lastAccessed": 1779207761101,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-audio/pyproject.toml",
-      "accessCount": 1,
-      "lastAccessed": 1779208007340,
       "type": "file"
     },
     {
@@ -405,6 +405,30 @@
       "path": "packages/lyra-audio/tests/test_advanced_features.py",
       "accessCount": 1,
       "lastAccessed": 1779216640810,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/src/lyra_audio/sound_cli.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216750848,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/tests/test_sound_cli.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216779890,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/src/lyra_audio/config_manager.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216927442,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/tests/test_config_manager.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216927689,
       "type": "file"
     }
   ],

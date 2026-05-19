@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "python -m pytest tests/test_permission_gate.py tests/test_bypass_manager.py tests/test_audit_logger.py tests/test_indicators.py tests/test_status_line.py tests/test_permission_hooks.py tests/test_bypass_commands.py tests/test_bypass_integration.py -v --tb=short",
+    "testCommand": "python -m pytest tests/test_event_mapper.py -v",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -105,6 +105,12 @@
       "path": "tests/test_bypass_integration.py",
       "accessCount": 3,
       "lastAccessed": 1779216674825,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/sounds/__init__.py",
+      "accessCount": 2,
+      "lastAccessed": 1779216921531,
       "type": "file"
     },
     {
@@ -201,6 +207,66 @@
       "path": "src/lyra_research/cli/__init__.py",
       "accessCount": 1,
       "lastAccessed": 1779216551352,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/sounds/audio_player.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216752809,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/sounds/theme_manager.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216808228,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/sounds/config.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216808473,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/sounds/sound_manager.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216808714,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_audio_player.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216826070,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_theme_manager.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216854673,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_sound_manager.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216854923,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_sound_config.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216855169,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/sounds/event_mapper.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216878512,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_event_mapper.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216903767,
       "type": "file"
     }
   ],
