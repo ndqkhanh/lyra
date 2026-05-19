@@ -7,9 +7,16 @@ This package provides:
 - Permission store
 - Bypass mode
 - Audit logging
+- Granular control
 """
 
 from lyra_permissions.bypass_mode import AuditLogger, BypassMode, SafetyGuardrails
+from lyra_permissions.granular_control import (
+    GranularController,
+    PermissionProfile,
+    TimeBasedController,
+    ToolPermission,
+)
 from lyra_permissions.permission_manager import PermissionManager, PermissionResult
 from lyra_permissions.permission_policy import PolicyEngine
 from lyra_permissions.permission_store import PermissionStore
@@ -37,4 +44,9 @@ __all__ = [
     "BypassMode",
     "AuditLogger",
     "SafetyGuardrails",
+    # Granular Control
+    "GranularController",
+    "PermissionProfile",
+    "TimeBasedController",
+    "ToolPermission",
 ]

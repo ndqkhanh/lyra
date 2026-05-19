@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
 from lyra_permissions.bypass_mode import AuditLogger, BypassMode, SafetyGuardrails
+from lyra_permissions.granular_control import GranularController, TimeBasedController
 from lyra_permissions.permission_policy import PolicyEngine
 from lyra_permissions.permission_store import PermissionStore
 from lyra_permissions.types import (
@@ -48,6 +49,8 @@ class PermissionManager:
         self.store = PermissionStore()
         self.bypass_mode = BypassMode()
         self.audit_logger = AuditLogger()
+        self.granular_controller = GranularController()
+        self.time_controller = TimeBasedController()
 
     def check_permission(
         self, tool: str, operation: str, context: Optional[Dict[str, Any]] = None
@@ -77,6 +80,42 @@ class PermissionManager:
                 level=risk_level,
                 reason="Critical operation requires confirmation",
                 allow=False,
+            )
+            self.audit_logger.log(tool, operation, result.decision, risk_level, context)
+            return result
+
+        # Check time-based rules
+        time_decision = self.time_controller.check_time_rules()
+        if time_decision:
+            result = PermissionResult(
+                decision=time_decision,
+                level=risk_level,
+                reason=f"Time-based rule: {time_decision.value}",
+                allow=time_decision == PermissionDecision.ALLOW,
+            )
+            self.audit_logger.log(tool, operation, result.decision, risk_level, context)
+            return result
+
+        # Check context rules
+        context_decision = self.granular_controller.check_context_rules(context)
+        if context_decision:
+            result = PermissionResult(
+                decision=context_decision,
+                level=risk_level,
+                reason=f"Context rule: {context_decision.value}",
+                allow=context_decision == PermissionDecision.ALLOW,
+            )
+            self.audit_logger.log(tool, operation, result.decision, risk_level, context)
+            return result
+
+        # Check tool-specific permissions
+        tool_decision = self.granular_controller.check_tool_permission(tool, operation, risk_level)
+        if tool_decision:
+            result = PermissionResult(
+                decision=tool_decision,
+                level=risk_level,
+                reason=f"Tool permission: {tool_decision.value}",
+                allow=tool_decision == PermissionDecision.ALLOW,
             )
             self.audit_logger.log(tool, operation, result.decision, risk_level, context)
             return result
