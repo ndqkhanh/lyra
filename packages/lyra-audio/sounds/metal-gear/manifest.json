@@ -1,0 +1,18 @@
+{
+  "name": "Metal Gear Solid - Alert Pack",
+  "version": "1.0.0",
+  "author": "Lyra Community",
+  "description": "Metal Gear Solid sound effects",
+  "sounds": {
+    "session_start": "codec_call.mp3",
+    "error_general": "alert.mp3",
+    "task_complete": "mission_complete.mp3",
+    "milestone_10": "kept_you_waiting.mp3"
+  },
+  "metadata": {
+    "game": "Metal Gear Solid",
+    "character": "Snake",
+    "language": "en",
+    "tags": ["stealth", "tactical", "gaming", "mgs"]
+  }
+}

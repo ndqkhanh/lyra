@@ -1,0 +1,20 @@
+{
+  "name": "Age of Empires - Monk Pack",
+  "version": "1.0.0",
+  "author": "Lyra Community",
+  "description": "Age of Empires sound effects",
+  "sounds": {
+    "session_start": "horn.mp3",
+    "prompt_submit": "yes.mp3",
+    "task_complete": "all_hail.mp3",
+    "context_compact": "wololo.mp3",
+    "error_general": "no.mp3",
+    "milestone_10": "victory.mp3"
+  },
+  "metadata": {
+    "game": "Age of Empires",
+    "character": "Monk",
+    "language": "en",
+    "tags": ["classic", "strategy", "gaming"]
+  }
+}

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1778864385784,
+  "lastScanned": 1779208006123,
   "projectRoot": "/Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-research",
   "techStack": {
     "languages": [
@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "python -m pytest tests/ -v --tb=short 2>&1 | tail -50",
+    "testCommand": "pytest",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -40,6 +40,7 @@
     "isMonorepo": false,
     "workspaces": [],
     "mainDirectories": [
+      "docs",
       "src",
       "tests"
     ],
@@ -47,11 +48,20 @@
   },
   "customNotes": [],
   "directoryMap": {
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 1,
+      "lastAccessed": 1779208006114,
+      "keyFiles": [
+        "PHASE2_COMPLETE.md"
+      ]
+    },
     "lyra_research": {
       "path": "lyra_research",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1778864385774,
+      "lastAccessed": 1779208006116,
       "keyFiles": [
         "falsification.py",
         "feynman.py"
@@ -61,54 +71,23 @@
       "path": "src",
       "purpose": "Source code",
       "fileCount": 0,
-      "lastAccessed": 1778864385775,
+      "lastAccessed": 1779208006117,
       "keyFiles": []
     },
     "tests": {
       "path": "tests",
       "purpose": "Test files",
-      "fileCount": 13,
-      "lastAccessed": 1778864385775,
+      "fileCount": 38,
+      "lastAccessed": 1779208006122,
       "keyFiles": [
+        "test_adaptive_decomposition.py",
+        "test_adversarial_reviewer.py",
         "test_analysis.py",
-        "test_discovery.py",
-        "test_evaluation.py",
-        "test_hop_trace.py",
-        "test_intelligence.py"
+        "test_analysis_agents.py",
+        "test_benchmarks.py"
       ]
     }
   },
-  "hotPaths": [
-    {
-      "path": "pyproject.toml",
-      "accessCount": 2,
-      "lastAccessed": 1779080083701,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/__init__.py",
-      "accessCount": 1,
-      "lastAccessed": 1779076418081,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/memory.py",
-      "accessCount": 1,
-      "lastAccessed": 1779078676078,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/orchestrator.py",
-      "accessCount": 1,
-      "lastAccessed": 1779078676101,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/sources.py",
-      "accessCount": 1,
-      "lastAccessed": 1779078676698,
-      "type": "file"
-    }
-  ],
+  "hotPaths": [],
   "userDirectives": []
 }

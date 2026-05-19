@@ -1,0 +1,18 @@
+{
+  "name": "Minecraft - Villager Pack",
+  "version": "1.0.0",
+  "author": "Lyra Community",
+  "description": "Minecraft villager sounds",
+  "sounds": {
+    "session_start": "hmm.mp3",
+    "task_complete": "hmm_hmm.mp3",
+    "error_general": "huh.mp3",
+    "milestone_10": "hrr.mp3"
+  },
+  "metadata": {
+    "game": "Minecraft",
+    "character": "Villager",
+    "language": "en",
+    "tags": ["minecraft", "casual", "gaming"]
+  }
+}

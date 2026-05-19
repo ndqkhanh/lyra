@@ -1,0 +1,19 @@
+{
+  "name": "StarCraft - Terran Pack",
+  "version": "1.0.0",
+  "author": "Lyra Community",
+  "description": "StarCraft Terran unit voice lines",
+  "sounds": {
+    "session_start": "in_the_rear_with_the_gear.mp3",
+    "task_start": "you_want_a_piece_of_me_boy.mp3",
+    "task_complete": "hell_its_about_time.mp3",
+    "error_general": "were_in_trouble.mp3",
+    "milestone_10": "battlecruiser_operational.mp3"
+  },
+  "metadata": {
+    "game": "StarCraft",
+    "character": "Terran Units",
+    "language": "en",
+    "tags": ["scifi", "strategy", "gaming", "starcraft"]
+  }
+}

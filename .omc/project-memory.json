@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1779089755291,
+  "lastScanned": 1779206503755,
   "projectRoot": "/Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra",
   "techStack": {
     "languages": [
@@ -27,7 +27,7 @@
   },
   "build": {
     "buildCommand": "make build",
-    "testCommand": "ps aux | grep -E \"be9uqt8v7|pytest\" | grep -v grep | head -5",
+    "testCommand": "pip install -e . 2>&1 | tail -5 && pytest tests/ -v --tb=line 2>&1 | tail -50",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -55,14 +55,14 @@
       "path": "archive",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1779089755285,
+      "lastAccessed": 1779206503744,
       "keyFiles": []
     },
     "docs": {
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 23,
-      "lastAccessed": 1779089755285,
+      "lastAccessed": 1779206503748,
       "keyFiles": [
         "ARCHITECTURE_DIAGRAMS.md",
         "CUSTOM_ANTHROPIC_PROVIDER.md",
@@ -75,7 +75,7 @@
       "path": "examples",
       "purpose": "Example code",
       "fileCount": 1,
-      "lastAccessed": 1779089755286,
+      "lastAccessed": 1779206503748,
       "keyFiles": [
         "custom_anthropic.py"
       ]
@@ -84,7 +84,7 @@
       "path": "harness_core",
       "purpose": null,
       "fileCount": 6,
-      "lastAccessed": 1779089755286,
+      "lastAccessed": 1779206503749,
       "keyFiles": [
         "Makefile",
         "README.md",
@@ -96,14 +96,14 @@
       "path": "packages",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1779089755286,
+      "lastAccessed": 1779206503749,
       "keyFiles": []
     },
     "papers": {
       "path": "papers",
       "purpose": null,
       "fileCount": 23,
-      "lastAccessed": 1779089755286,
+      "lastAccessed": 1779206503750,
       "keyFiles": [
         "README.md",
         "alphaevolve.pdf",
@@ -116,7 +116,7 @@
       "path": "scripts",
       "purpose": "Build/utility scripts",
       "fileCount": 1,
-      "lastAccessed": 1779089755286,
+      "lastAccessed": 1779206503750,
       "keyFiles": [
         "install-lyra.sh"
       ]
@@ -125,28 +125,28 @@
       "path": "skills",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1779089755286,
+      "lastAccessed": 1779206503751,
       "keyFiles": []
     },
     "tests": {
       "path": "tests",
       "purpose": "Test files",
       "fileCount": 0,
-      "lastAccessed": 1779089755287,
+      "lastAccessed": 1779206503751,
       "keyFiles": []
     },
     "harness_core/src": {
       "path": "harness_core/src",
       "purpose": "Source code",
       "fileCount": 0,
-      "lastAccessed": 1779089755287,
+      "lastAccessed": 1779206503753,
       "keyFiles": []
     },
     "harness_core/tests": {
       "path": "harness_core/tests",
       "purpose": "Test files",
       "fileCount": 40,
-      "lastAccessed": 1779089755288,
+      "lastAccessed": 1779206503753,
       "keyFiles": [
         "test_anthropic_base_url.py",
         "test_beam_and_dualuse.py",
@@ -156,303 +156,225 @@
   },
   "hotPaths": [
     {
-      "path": "packages/lyra-research/tests/test_capacity_manager.py",
-      "accessCount": 21,
-      "lastAccessed": 1779092464235,
+      "path": "packages/lyra-permissions/src/lyra_permissions/permission_manager.py",
+      "accessCount": 8,
+      "lastAccessed": 1779207414158,
       "type": "file"
     },
     {
-      "path": "packages/lyra-research/src/lyra_research/coordination.py",
-      "accessCount": 14,
-      "lastAccessed": 1779121118470,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/src/lyra_research/orchestrator.py",
-      "accessCount": 13,
-      "lastAccessed": 1779122069217,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/src/lyra_research/__init__.py",
-      "accessCount": 9,
-      "lastAccessed": 1779093124595,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/src/lyra_research/adversarial_reviewer.py",
-      "accessCount": 7,
-      "lastAccessed": 1779095885568,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/tests/test_adversarial_reviewer.py",
-      "accessCount": 6,
-      "lastAccessed": 1779092967340,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/src/lyra_research/agents/analysis/analysis_base.py",
+      "path": "packages/lyra-permissions/src/lyra_permissions/permission_store.py",
       "accessCount": 5,
-      "lastAccessed": 1779122287003,
+      "lastAccessed": 1779206932314,
       "type": "file"
     },
     {
-      "path": "packages/lyra-research/src/lyra_research/reporter.py",
+      "path": "packages/lyra-permissions/src/lyra_permissions/__init__.py",
       "accessCount": 5,
-      "lastAccessed": 1779122499432,
+      "lastAccessed": 1779207776777,
       "type": "file"
     },
     {
-      "path": "packages/lyra-research/tests/test_coordination.py",
-      "accessCount": 4,
-      "lastAccessed": 1779091734918,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/src/lyra_research/capacity_manager.py",
-      "accessCount": 4,
-      "lastAccessed": 1779093096372,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/tests/test_orchestrator_integration.py",
-      "accessCount": 3,
-      "lastAccessed": 1779093365857,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/tests/test_discovery_agents.py",
-      "accessCount": 3,
-      "lastAccessed": 1779094901270,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/src/lyra_research/agents/synthesis/evidence_auditor.py",
-      "accessCount": 3,
-      "lastAccessed": 1779095375221,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/src/lyra_research/agents/synthesis/falsification_checker.py",
-      "accessCount": 3,
-      "lastAccessed": 1779095375467,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/src/lyra_research/checkpoint.py",
-      "accessCount": 3,
-      "lastAccessed": 1779095856170,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/src/lyra_research/agents/synthesis/contradiction_detector.py",
-      "accessCount": 3,
-      "lastAccessed": 1779096171484,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/src/lyra_research/agents/synthesis/cross_source_synthesizer.py",
-      "accessCount": 3,
-      "lastAccessed": 1779096171550,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/src/lyra_research/sources.py",
-      "accessCount": 3,
-      "lastAccessed": 1779122083908,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/src/lyra_research/agents/analysis/__init__.py",
-      "accessCount": 3,
-      "lastAccessed": 1779122083958,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/src/lyra_research/agents/synthesis/__init__.py",
-      "accessCount": 3,
-      "lastAccessed": 1779122286762,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/src/lyra_research/agents/analysis/quality_score_agent.py",
-      "accessCount": 3,
-      "lastAccessed": 1779122315697,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/src/lyra_research/agents/discovery/__init__.py",
-      "accessCount": 3,
-      "lastAccessed": 1779122420469,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/src/lyra_research/discovery.py",
-      "accessCount": 3,
-      "lastAccessed": 1779122499373,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/src/lyra_research/intelligence.py",
+      "path": "packages/lyra-research/src/lyra_research/integrity/validators.py",
       "accessCount": 2,
-      "lastAccessed": 1779092631085,
+      "lastAccessed": 1779206589940,
       "type": "file"
     },
     {
-      "path": "packages/lyra-research/tests/test_orchestrator.py",
+      "path": "packages/lyra-research/tests/test_integrity_phase0.py",
       "accessCount": 2,
-      "lastAccessed": 1779093114418,
+      "lastAccessed": 1779206676467,
       "type": "file"
     },
     {
-      "path": "packages/lyra-research/tests/test_benchmarks.py",
+      "path": "packages/lyra-permissions/src/lyra_permissions/permission_policy.py",
       "accessCount": 2,
-      "lastAccessed": 1779093389781,
+      "lastAccessed": 1779206900103,
       "type": "file"
     },
     {
-      "path": "packages/lyra-research/tests/test_analysis_agents.py",
+      "path": "packages/lyra-permissions/pyproject.toml",
       "accessCount": 2,
-      "lastAccessed": 1779094823386,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/tests/test_checkpoint.py",
-      "accessCount": 2,
-      "lastAccessed": 1779095399878,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/src/lyra_research/agents/synthesis/synthesis_base.py",
-      "accessCount": 2,
-      "lastAccessed": 1779095856065,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/src/lyra_research/adaptive_coordination.py",
-      "accessCount": 2,
-      "lastAccessed": 1779095856127,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/src/lyra_research/agents/__init__.py",
-      "accessCount": 2,
-      "lastAccessed": 1779095856252,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/src/lyra_research/agents/discovery/discovery_base.py",
-      "accessCount": 2,
-      "lastAccessed": 1779122083871,
-      "type": "file"
-    },
-    {
-      "path": "README.md",
-      "accessCount": 1,
-      "lastAccessed": 1779089863907,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-research/README.md",
-      "accessCount": 1,
-      "lastAccessed": 1779089871239,
+      "lastAccessed": 1779207739753,
       "type": "file"
     },
     {
       "path": "packages/lyra-research/pyproject.toml",
       "accessCount": 1,
-      "lastAccessed": 1779091552071,
+      "lastAccessed": 1779206514046,
       "type": "file"
     },
     {
-      "path": "packages/lyra-memory/src/lyra_memory/schema.py",
+      "path": "packages/lyra-research/src/lyra_research/integrity/__init__.py",
       "accessCount": 1,
-      "lastAccessed": 1779091895055,
+      "lastAccessed": 1779206534507,
       "type": "file"
     },
     {
-      "path": "packages/lyra-memory/src/lyra_memory/database.py",
+      "path": "packages/lyra-research/src/lyra_research/integrity/integrity_gate.py",
       "accessCount": 1,
-      "lastAccessed": 1779091895107,
+      "lastAccessed": 1779206534759,
       "type": "file"
     },
     {
-      "path": "packages/lyra-memory/src/lyra_memory/store.py",
+      "path": "packages/lyra-research/src/lyra_research/integrity/citation_verifier.py",
       "accessCount": 1,
-      "lastAccessed": 1779091902684,
+      "lastAccessed": 1779206590189,
       "type": "file"
     },
     {
-      "path": "packages/lyra-research/WEEK4_SUMMARY.md",
+      "path": "packages/lyra-research/src/lyra_research/integrity/temporal_verifier.py",
       "accessCount": 1,
-      "lastAccessed": 1779093523645,
+      "lastAccessed": 1779206649421,
       "type": "file"
     },
     {
-      "path": "packages/lyra-research/src/lyra_research/agents/discovery/arxiv_agent.py",
+      "path": "packages/lyra-permissions/README.md",
       "accessCount": 1,
-      "lastAccessed": 1779094633018,
+      "lastAccessed": 1779206841140,
       "type": "file"
     },
     {
-      "path": "packages/lyra-research/src/lyra_research/agents/discovery/semantic_scholar_agent.py",
+      "path": "packages/lyra-permissions/src/lyra_permissions/types.py",
       "accessCount": 1,
-      "lastAccessed": 1779094633255,
+      "lastAccessed": 1779206888037,
       "type": "file"
     },
     {
-      "path": "packages/lyra-research/src/lyra_research/agents/discovery/github_agent.py",
+      "path": "packages/lyra-permissions/tests/test_permissions.py",
       "accessCount": 1,
-      "lastAccessed": 1779094633489,
+      "lastAccessed": 1779206973564,
       "type": "file"
     },
     {
-      "path": "packages/lyra-research/src/lyra_research/agents/discovery/web_agent.py",
+      "path": "packages/lyra-permissions/src/lyra_permissions/bypass_mode.py",
       "accessCount": 1,
-      "lastAccessed": 1779094633733,
+      "lastAccessed": 1779207083228,
       "type": "file"
     },
     {
-      "path": "packages/lyra-research/src/lyra_research/agents/discovery/openreview_agent.py",
+      "path": "packages/lyra-permissions/tests/test_bypass_mode.py",
       "accessCount": 1,
-      "lastAccessed": 1779094633968,
+      "lastAccessed": 1779207143755,
       "type": "file"
     },
     {
-      "path": "packages/lyra-research/src/lyra_research/agents/discovery/huggingface_agent.py",
+      "path": "packages/lyra-permissions/src/lyra_permissions/granular_control.py",
       "accessCount": 1,
-      "lastAccessed": 1779094634210,
+      "lastAccessed": 1779207393627,
       "type": "file"
     },
     {
-      "path": "packages/lyra-research/src/lyra_research/agents/analysis/paper_analysis_agent.py",
+      "path": "packages/lyra-permissions/tests/test_granular_control.py",
       "accessCount": 1,
-      "lastAccessed": 1779094680066,
+      "lastAccessed": 1779207464784,
       "type": "file"
     },
     {
-      "path": "packages/lyra-research/src/lyra_research/agents/analysis/repo_analysis_agent.py",
+      "path": "packages/lyra-permissions/src/lyra_permissions/cli.py",
       "accessCount": 1,
-      "lastAccessed": 1779094680320,
+      "lastAccessed": 1779207729847,
       "type": "file"
     },
     {
-      "path": "packages/lyra-research/src/lyra_research/agents/analysis/citation_analysis_agent.py",
+      "path": "packages/lyra-permissions/tests/test_cli.py",
       "accessCount": 1,
-      "lastAccessed": 1779094680575,
+      "lastAccessed": 1779207761101,
       "type": "file"
     },
     {
-      "path": "packages/lyra-research/tests/test_synthesis_agents.py",
+      "path": "packages/lyra-audio/pyproject.toml",
       "accessCount": 1,
-      "lastAccessed": 1779095271252,
+      "lastAccessed": 1779208007340,
       "type": "file"
     },
     {
-      "path": "packages/lyra-research/tests/test_adaptive_decomposition.py",
+      "path": "packages/lyra-audio/README.md",
       "accessCount": 1,
-      "lastAccessed": 1779095322516,
+      "lastAccessed": 1779208007592,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/src/lyra_audio/__init__.py",
+      "accessCount": 1,
+      "lastAccessed": 1779208082122,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/src/lyra_audio/audio_player.py",
+      "accessCount": 1,
+      "lastAccessed": 1779208100482,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/src/lyra_audio/event_hooks.py",
+      "accessCount": 1,
+      "lastAccessed": 1779208129189,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/src/lyra_audio/sound_manager.py",
+      "accessCount": 1,
+      "lastAccessed": 1779208129434,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/tests/test_audio.py",
+      "accessCount": 1,
+      "lastAccessed": 1779208156037,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/src/lyra_audio/sound_pack.py",
+      "accessCount": 1,
+      "lastAccessed": 1779208561196,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/sounds/warcraft/manifest.json",
+      "accessCount": 1,
+      "lastAccessed": 1779208594676,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/sounds/age-of-empires/manifest.json",
+      "accessCount": 1,
+      "lastAccessed": 1779208594953,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/sounds/glados/manifest.json",
+      "accessCount": 1,
+      "lastAccessed": 1779208595202,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/sounds/starcraft/manifest.json",
+      "accessCount": 1,
+      "lastAccessed": 1779208595446,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/sounds/minecraft/manifest.json",
+      "accessCount": 1,
+      "lastAccessed": 1779208595695,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/sounds/mario/manifest.json",
+      "accessCount": 1,
+      "lastAccessed": 1779208595938,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/sounds/metal-gear/manifest.json",
+      "accessCount": 1,
+      "lastAccessed": 1779208596181,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/sounds/meme-pack/manifest.json",
+      "accessCount": 1,
+      "lastAccessed": 1779208596428,
       "type": "file"
     }
   ],

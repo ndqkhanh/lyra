@@ -1,0 +1,24 @@
+{
+  "name": "Warcraft III - Peon Pack",
+  "version": "1.0.0",
+  "author": "Lyra Community",
+  "description": "Classic Warcraft III peon voice lines",
+  "sounds": {
+    "session_start": "zug_zug.mp3",
+    "task_start": "work_work.mp3",
+    "task_complete": "jobs_done.mp3",
+    "prompt_submit": "ready_to_work.mp3",
+    "error_general": "something_need_doing.mp3",
+    "error_syntax": "me_not_that_kind_of_orc.mp3",
+    "error_logic": "that_not_possible.mp3",
+    "error_rate_limit": "me_tired_need_rest.mp3",
+    "context_compact": "hmm.mp3",
+    "milestone_10": "for_the_horde.mp3"
+  },
+  "metadata": {
+    "game": "Warcraft III",
+    "character": "Peon",
+    "language": "en",
+    "tags": ["funny", "nostalgic", "gaming", "warcraft"]
+  }
+}
