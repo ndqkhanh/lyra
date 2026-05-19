@@ -180,6 +180,12 @@
       "type": "file"
     },
     {
+      "path": "packages/lyra-audio/src/lyra_audio/__init__.py",
+      "accessCount": 3,
+      "lastAccessed": 1779216641064,
+      "type": "file"
+    },
+    {
       "path": "packages/lyra-research/src/lyra_research/integrity/validators.py",
       "accessCount": 2,
       "lastAccessed": 1779206589940,
@@ -201,12 +207,6 @@
       "path": "packages/lyra-permissions/pyproject.toml",
       "accessCount": 2,
       "lastAccessed": 1779207739753,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-audio/src/lyra_audio/__init__.py",
-      "accessCount": 2,
-      "lastAccessed": 1779216410128,
       "type": "file"
     },
     {
@@ -381,6 +381,30 @@
       "path": "packages/lyra-audio/tests/test_sound_pack.py",
       "accessCount": 1,
       "lastAccessed": 1779216378991,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/src/lyra_audio/adaptive_volume.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216611894,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/src/lyra_audio/time_behavior.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216612140,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/src/lyra_audio/productivity_mode.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216612387,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/tests/test_advanced_features.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216640810,
       "type": "file"
     }
   ],

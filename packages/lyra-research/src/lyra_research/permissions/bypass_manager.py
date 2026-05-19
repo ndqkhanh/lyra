@@ -34,10 +34,11 @@ class BypassManager:
     - Audit logging
     """
 
-    def __init__(self, config_path: Optional[Path] = None):
+    def __init__(self, config_path: Optional[Path] = None, audit_logger=None):
         self.config_path = config_path or Path.home() / ".lyra" / "bypass_config.json"
         self.config = self._load_config()
         self.enabled_at: Optional[datetime] = None
+        self.audit_logger = audit_logger  # Allow injecting audit logger for testing
 
     def _load_config(self) -> BypassConfig:
         """Load bypass configuration from file"""
@@ -104,7 +105,10 @@ class BypassManager:
 
     def log_bypass(self, request):
         """Log bypassed operation for audit trail"""
-        # Delegate to audit logger
-        from .audit_logger import AuditLogger
-        logger = AuditLogger()
+        # Use injected logger or create default one
+        if self.audit_logger:
+            logger = self.audit_logger
+        else:
+            from .audit_logger import AuditLogger
+            logger = AuditLogger()
         logger.log_bypass(request)

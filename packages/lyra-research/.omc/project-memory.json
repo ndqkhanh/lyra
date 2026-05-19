@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "python -m pytest tests/test_permission_hooks.py -v",
+    "testCommand": "python -m pytest tests/test_permission_gate.py tests/test_bypass_manager.py tests/test_audit_logger.py tests/test_indicators.py tests/test_status_line.py tests/test_permission_hooks.py tests/test_bypass_commands.py tests/test_bypass_integration.py -v --tb=short",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -91,8 +91,20 @@
   "hotPaths": [
     {
       "path": "src/lyra_research/permissions/bypass_manager.py",
-      "accessCount": 2,
-      "lastAccessed": 1779216172808,
+      "accessCount": 4,
+      "lastAccessed": 1779216660007,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_bypass_commands.py",
+      "accessCount": 3,
+      "lastAccessed": 1779216622776,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_bypass_integration.py",
+      "accessCount": 3,
+      "lastAccessed": 1779216674825,
       "type": "file"
     },
     {
@@ -177,6 +189,18 @@
       "path": "tests/test_permission_hooks.py",
       "accessCount": 1,
       "lastAccessed": 1779216498291,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/cli/bypass_commands.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216551100,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/cli/__init__.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216551352,
       "type": "file"
     }
   ],
