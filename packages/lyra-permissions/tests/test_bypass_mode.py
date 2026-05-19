@@ -213,8 +213,9 @@ def test_permission_manager_bypass_mode():
     """Test permission manager with bypass mode."""
     manager = PermissionManager()
 
-    # Enable bypass mode
+    # Enable bypass mode and use default profile (no context rules)
     manager.bypass_mode.enable()
+    manager.granular_controller.set_profile("default")
 
     # Check medium risk operation (should be auto-accepted)
     result = manager.check_permission("file_write", "write", {"path": "/tmp/test.txt"})

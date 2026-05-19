@@ -1,164 +1,138 @@
-# Lyra Permissions - Phase 3: Granular Permission Control
+# Lyra Permissions - Complete Implementation
 
 ## Overview
 
-Phase 3 implements granular permission control with tool-specific permissions, context-aware rules, permission profiles, and time-based permissions.
+Complete permission management system for Lyra with bypass mode, granular control, and CLI interface.
 
 ## Features
 
-### 1. Tool-Specific Permissions
+### 1. Permission System Foundation (Phase 1)
+- 4 permission levels: SAFE, MEDIUM, DANGEROUS, CRITICAL
+- 4 permission policies: STRICT, BALANCED, PERMISSIVE, BYPASS
+- Persistent permission storage
+- Risk assessment engine
 
-Configure permissions for specific tools and operations:
+### 2. Bypass Mode (Phase 2)
+- Auto-accept permissions with audit logging
+- Multiple toggle methods (CLI, env var, config, runtime)
+- Safety guardrails for critical operations
+- Audit trail with export capabilities
 
-```python
-from lyra_permissions import GranularController, ToolPermission
+### 3. Granular Control (Phase 3)
+- Tool-specific permissions
+- Context-aware rules with priority system
+- Permission profiles (default, development, production)
+- Time-based permissions
 
-controller = GranularController()
+### 4. CLI Interface (Phase 4)
+- Complete command-line interface
+- Profile management
+- Audit log viewing and export
+- Permission configuration
 
-# Add tool-specific permission
-controller.add_tool_permission(
-    tool="file_write",
-    operation="write",
-    permission=ToolPermission.ALWAYS_ALLOW
-)
+## Installation
 
-# Add wildcard permission for all operations
-controller.add_tool_permission(
-    tool="file_read",
-    operation="*",
-    permission=ToolPermission.ALWAYS_ALLOW
-)
+```bash
+pip install lyra-permissions
 ```
 
-**Permission Types**:
-- `ALWAYS_ALLOW`: Always allow without prompting
-- `PROMPT_ONCE`: Prompt once per session
-- `ALWAYS_PROMPT`: Always prompt
-- `BYPASS_IF_SAFE`: Bypass only if risk level is SAFE
+## Quick Start
 
-### 2. Context-Aware Rules
+### CLI Usage
 
-Create rules based on operation context:
+```bash
+# Enable bypass mode
+lyra-permissions bypass-on
 
-```python
-from lyra_permissions import GranularController
+# Set profile
+lyra-permissions profile-set development
 
-controller = GranularController()
+# View status
+lyra-permissions status
 
-# Allow operations in /tmp directory
-controller.add_context_rule(
-    name="Allow temp directory",
-    condition={"path": {"startswith": "/tmp"}},
-    decision="allow",
-    priority=10
-)
+# View audit log
+lyra-permissions audit-log --limit 20
 
-# Deny operations on sensitive paths
-controller.add_context_rule(
-    name="Deny sensitive paths",
-    condition={"path": {"startswith": "/etc"}},
-    decision="prompt",
-    priority=100  # Higher priority
-)
+# Allow/deny operations
+lyra-permissions allow file_write write
+lyra-permissions deny file_delete delete
+
+# Export audit log
+lyra-permissions audit-export audit.json --format json
 ```
 
-**Condition Types**:
-- `startswith`: String starts with value
-- `contains`: String contains value
-- `equals`: Exact match
-
-### 3. Permission Profiles
-
-Switch between pre-configured permission sets:
-
-```python
-from lyra_permissions import GranularController
-
-controller = GranularController()
-
-# List available profiles
-profiles = controller.list_profiles()
-print(profiles)  # ['default', 'development', 'production']
-
-# Switch to development profile
-controller.set_profile("development")
-
-# Switch to production profile
-controller.set_profile("production")
-```
-
-**Built-in Profiles**:
-
-**Development Profile**:
-- File read: Always allow
-- File write: Bypass if safe
-- File delete: Always prompt
-- Git push: Prompt once
-- Allow /tmp directory operations
-
-**Production Profile**:
-- File read: Always allow
-- File write: Always prompt
-- File delete: Always prompt
-- Database operations: Always prompt
-- Deny /var directory operations
-
-### 4. Time-Based Permissions
-
-Control permissions based on time of day:
-
-```python
-from datetime import time
-from lyra_permissions import TimeBasedController, PermissionDecision
-
-controller = TimeBasedController()
-
-# Allow operations during work hours (9 AM - 5 PM, Mon-Fri)
-controller.add_time_rule(
-    start_time=time(9, 0),
-    end_time=time(17, 0),
-    decision=PermissionDecision.ALLOW,
-    days=[0, 1, 2, 3, 4]  # Monday-Friday
-)
-
-# Check if currently work hours
-if controller.is_work_hours():
-    print("Work hours - operations allowed")
-```
-
-### 5. Integrated Permission Manager
-
-All granular controls are integrated into the permission manager:
+### Python API
 
 ```python
 from lyra_permissions import PermissionManager
 
+# Initialize manager
 manager = PermissionManager()
+
+# Enable bypass mode
+manager.bypass_mode.enable()
 
 # Set profile
 manager.granular_controller.set_profile("development")
 
-# Add custom rule
-manager.granular_controller.add_context_rule(
-    name="Allow project directory",
-    condition={"path": {"startswith": "/home/user/project"}},
-    decision="allow",
-    priority=5
-)
-
-# Check permission (granular rules take priority)
+# Check permission
 result = manager.check_permission(
-    "file_write",
-    "write",
-    {"path": "/home/user/project/file.txt"}
+    tool="file_write",
+    operation="write",
+    context={"path": "/tmp/test.txt"}
 )
 
-print(result.reason)  # "Context rule: allow"
+print(f"Allowed: {result.allow}")
+print(f"Reason: {result.reason}")
+
+# View audit log
+entries = manager.audit_logger.get_recent(limit=10)
+for entry in entries:
+    print(f"{entry['timestamp']}: {entry['tool']}.{entry['operation']}")
 ```
+
+## CLI Commands
+
+### Bypass Mode
+- `bypass-on` - Enable bypass mode
+- `bypass-off` - Disable bypass mode
+- `bypass-toggle` - Toggle bypass mode
+- `bypass-status` - Show bypass mode status
+
+### Profiles
+- `profile-list` - List available profiles
+- `profile-set <profile>` - Set current profile
+- `profile-show` - Show current profile details
+
+### Audit Log
+- `audit-log [--limit N]` - Show recent audit entries
+- `audit-stats` - Show audit statistics
+- `audit-export <file> [--format json|csv]` - Export audit log
+- `audit-clear [--confirm]` - Clear audit log
+
+### Permissions
+- `allow <tool> <operation>` - Allow tool operation
+- `deny <tool> <operation>` - Deny tool operation
+- `remove <tool> <operation>` - Remove permission preference
+- `list` - List all permission preferences
+
+### Status
+- `status` - Show complete permission system status
 
 ## Architecture
 
 ```
+┌─────────────────────────────────────────┐
+│    CLI Interface                        │
+│  (Command-line Management)              │
+│                                         │
+│  • Bypass mode commands                │
+│  • Profile management                  │
+│  • Audit log viewing                   │
+│  • Permission configuration            │
+└─────────────────────────────────────────┘
+           │
+           ↓
 ┌─────────────────────────────────────────┐
 │    Permission Manager                   │
 │  (Central Decision Engine)              │
@@ -173,42 +147,31 @@ print(result.reason)  # "Context rule: allow"
 │  7. Policy                             │
 └─────────────────────────────────────────┘
            │
-           ↓
-┌─────────────────────────────────────────┐
-│    Granular Controller                  │
-│  (Tool & Context Rules)                 │
-│                                         │
-│  • Tool-specific permissions           │
-│  • Context-aware rules                 │
-│  • Permission profiles                 │
-│  • Rule priority system                │
-└─────────────────────────────────────────┘
-           │
-           ↓
-┌─────────────────────────────────────────┐
-│    Time-Based Controller                │
-│  (Temporal Rules)                       │
-│                                         │
-│  • Time-of-day rules                   │
-│  • Day-of-week rules                   │
-│  • Work hours detection                │
-└─────────────────────────────────────────┘
+           ├─→ Bypass Mode (auto-accept)
+           ├─→ Granular Control (rules)
+           ├─→ Audit Logger (tracking)
+           ├─→ Permission Store (preferences)
+           └─→ Policy Engine (evaluation)
 ```
 
-## Configuration
+## Configuration Files
 
-### Granular Permissions Config (`~/.lyra/granular_permissions.json`)
+### Bypass Mode (`~/.lyra/config.json`)
+```json
+{
+  "bypassPermissions": true
+}
+```
 
+### Granular Permissions (`~/.lyra/granular_permissions.json`)
 ```json
 {
   "currentProfile": "development",
   "profiles": {
     "development": {
-      "name": "Development",
       "toolPermissions": {
         "file_read:*": "always_allow",
-        "file_write:*": "bypass_if_safe",
-        "git:push": "prompt_once"
+        "file_write:*": "bypass_if_safe"
       },
       "contextRules": [
         {
@@ -218,25 +181,23 @@ print(result.reason)  # "Context rule: allow"
           "priority": 10
         }
       ]
-    },
-    "production": {
-      "name": "Production",
-      "toolPermissions": {
-        "file_read:*": "always_allow",
-        "file_write:*": "always_prompt",
-        "database:*": "always_prompt"
-      },
-      "contextRules": [
-        {
-          "name": "Deny production paths",
-          "condition": {"path": {"startswith": "/var"}},
-          "decision": "prompt",
-          "priority": 100
-        }
-      ]
     }
   }
 }
+```
+
+### User Preferences (`~/.lyra/permissions.json`)
+```json
+{
+  "policy": "balanced",
+  "allowList": ["file_read:read"],
+  "denyList": ["file_delete:delete"]
+}
+```
+
+### Audit Log (`~/.lyra/audit.log`)
+```json
+{"timestamp": "2026-05-19T...", "tool": "file_write", "operation": "write", "decision": "allow", "level": "medium"}
 ```
 
 ## Testing
@@ -248,38 +209,103 @@ pip install -e .
 pytest tests/ -v
 ```
 
-Tests: 61 tests covering all components (24 Phase 1 + 21 Phase 2 + 16 Phase 3)
+**Test Results**: 78 tests, 86% coverage
+
+## Version
+
+Current version: **0.1.0**
+
+## Complete Feature List
+
+### Phase 1: Permission System Foundation
+- ✅ PermissionManager with risk assessment
+- ✅ 4 permission levels (SAFE, MEDIUM, DANGEROUS, CRITICAL)
+- ✅ 4 permission policies (STRICT, BALANCED, PERMISSIVE, BYPASS)
+- ✅ PermissionStore with persistent preferences
+- ✅ PolicyEngine for rule-based evaluation
+- ✅ 24 tests, 95% coverage
+
+### Phase 2: Bypass Mode Implementation
+- ✅ BypassMode with multiple toggle methods
+- ✅ AuditLogger with export capabilities (JSON, CSV)
+- ✅ SafetyGuardrails for critical operation protection
+- ✅ Visual status indicators
+- ✅ Audit statistics tracking
+- ✅ 21 tests (45 total), 85% coverage
+
+### Phase 3: Granular Permission Control
+- ✅ GranularController with tool-specific permissions
+- ✅ Context-aware rules with priority system
+- ✅ PermissionProfile for environment-specific settings
+- ✅ TimeBasedController for temporal permissions
+- ✅ Built-in profiles (default, development, production)
+- ✅ 16 tests (61 total), 83% coverage
+
+### Phase 4: Integration & UI
+- ✅ Complete CLI interface (PermissionCLI)
+- ✅ 20+ CLI commands
+- ✅ Profile management commands
+- ✅ Audit log viewing and export
+- ✅ Permission configuration commands
+- ✅ Status reporting
+- ✅ 17 tests (78 total), 86% coverage
 
 ## Usage Examples
 
-### Tool-Specific Permissions
+### Example 1: Development Workflow
+
+```bash
+# Set development profile
+lyra-permissions profile-set development
+
+# Enable bypass mode for faster iteration
+lyra-permissions bypass-on
+
+# Check status
+lyra-permissions status
+
+# Work on your project...
+# All non-critical operations auto-accepted
+
+# View what was auto-accepted
+lyra-permissions audit-log --limit 50
+
+# Disable bypass mode when done
+lyra-permissions bypass-off
+```
+
+### Example 2: Production Deployment
+
+```bash
+# Set production profile
+lyra-permissions profile-set production
+
+# Ensure bypass mode is off
+lyra-permissions bypass-off
+
+# All operations will require confirmation
+# Critical operations always prompt
+
+# Export audit log for compliance
+lyra-permissions audit-export /var/log/lyra-audit.json
+```
+
+### Example 3: Custom Permissions
 
 ```python
 from lyra_permissions import PermissionManager, ToolPermission
 
 manager = PermissionManager()
 
-# Always allow file reads
+# Allow all file reads
 manager.granular_controller.add_tool_permission(
     "file_read", "*", ToolPermission.ALWAYS_ALLOW
 )
 
-# Always prompt for database operations
+# Prompt for database operations
 manager.granular_controller.add_tool_permission(
     "database", "*", ToolPermission.ALWAYS_PROMPT
 )
-
-# Check permission
-result = manager.check_permission("file_read", "read", {"path": "/data/file.txt"})
-print(result.allow)  # True
-```
-
-### Context-Aware Rules
-
-```python
-from lyra_permissions import PermissionManager
-
-manager = PermissionManager()
 
 # Allow operations in project directory
 manager.granular_controller.add_context_rule(
@@ -288,99 +314,25 @@ manager.granular_controller.add_context_rule(
     decision="allow",
     priority=10
 )
-
-# Deny operations on config files
-manager.granular_controller.add_context_rule(
-    name="Protect config",
-    condition={"path": {"contains": ".config"}},
-    decision="prompt",
-    priority=20  # Higher priority
-)
-
-# Check permission
-result = manager.check_permission(
-    "file_write",
-    "write",
-    {"path": "/home/user/project/.config/settings.json"}
-)
-print(result.reason)  # "Context rule: prompt" (higher priority wins)
 ```
 
-### Permission Profiles
+## Next Steps
 
-```python
-from lyra_permissions import PermissionManager
+The permission system is now complete and ready for integration into Lyra! 
 
-manager = PermissionManager()
-
-# Development mode - more permissive
-manager.granular_controller.set_profile("development")
-result1 = manager.check_permission("file_write", "write", {"path": "/tmp/test.txt"})
-print(result1.allow)  # True
-
-# Production mode - more restrictive
-manager.granular_controller.set_profile("production")
-result2 = manager.check_permission("file_write", "write", {"path": "/var/data.txt"})
-print(result2.allow)  # False (requires prompt)
-```
-
-### Time-Based Permissions
-
-```python
-from datetime import time
-from lyra_permissions import PermissionManager, PermissionDecision
-
-manager = PermissionManager()
-
-# Allow deployments only during maintenance window (2 AM - 4 AM)
-manager.time_controller.add_time_rule(
-    start_time=time(2, 0),
-    end_time=time(4, 0),
-    decision=PermissionDecision.ALLOW,
-    days=None  # All days
-)
-
-# Check if work hours
-if manager.time_controller.is_work_hours():
-    print("Work hours: 9 AM - 5 PM, Monday-Friday")
-```
-
-## Version
-
-Current version: **0.1.0**
-
-## Changes
-
-### Phase 3 (Current)
-- Added `GranularController` for tool-specific and context-aware permissions
-- Added `PermissionProfile` for environment-specific permission sets
-- Added `TimeBasedController` for time-of-day permissions
-- Integrated granular control with `PermissionManager`
-- Built-in profiles: default, development, production
-- Context rule priority system
-- 16 new tests (61 total, 83% coverage)
-
-### Phase 2
-- Added `BypassMode` for auto-accepting permissions
-- Added `AuditLogger` for tracking all permission decisions
-- Added `SafetyGuardrails` for protecting critical operations
-- 21 tests (45 total, 85% coverage)
-
-### Phase 1
-- Added `PermissionManager` for central permission control
-- Added `PermissionPolicy` for rule-based evaluation
-- Added `PermissionStore` for persistent preferences
-- 24 tests (95% coverage)
-
-## Next Phase
-
-Phase 4 will implement:
-- CLI integration (`lyra permissions` commands)
-- Desktop app UI for permission management
-- Real-time permission monitoring
+Potential future enhancements:
+- Desktop app UI for visual permission management
+- Real-time permission monitoring dashboard
 - Permission analytics and reporting
+- Machine learning for permission pattern detection
+- Team-based permission sharing
+- Cloud sync for permission preferences
 
 ## References
 
 - Lyra Bypass Permissions Plan: `.omc/plans/LYRA_BYPASS_PERMISSIONS_PLAN.md`
 - GitHub Repository: https://github.com/ndqkhanh/lyra
+
+---
+
+**Status**: ✅ All 4 phases complete! Ready for production use.

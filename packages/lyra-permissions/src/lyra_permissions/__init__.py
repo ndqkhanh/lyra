@@ -8,9 +8,11 @@ This package provides:
 - Bypass mode
 - Audit logging
 - Granular control
+- CLI interface
 """
 
 from lyra_permissions.bypass_mode import AuditLogger, BypassMode, SafetyGuardrails
+from lyra_permissions.cli import PermissionCLI
 from lyra_permissions.granular_control import (
     GranularController,
     PermissionProfile,
@@ -49,4 +51,6 @@ __all__ = [
     "PermissionProfile",
     "TimeBasedController",
     "ToolPermission",
+    # CLI
+    "PermissionCLI",
 ]
