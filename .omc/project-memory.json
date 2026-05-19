@@ -216,6 +216,12 @@
       "type": "file"
     },
     {
+      "path": "packages/lyra-audio/README.md",
+      "accessCount": 2,
+      "lastAccessed": 1779217082578,
+      "type": "file"
+    },
+    {
       "path": "packages/lyra-research/pyproject.toml",
       "accessCount": 1,
       "lastAccessed": 1779206514046,
@@ -297,12 +303,6 @@
       "path": "packages/lyra-permissions/tests/test_cli.py",
       "accessCount": 1,
       "lastAccessed": 1779207761101,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-audio/README.md",
-      "accessCount": 1,
-      "lastAccessed": 1779208007592,
       "type": "file"
     },
     {

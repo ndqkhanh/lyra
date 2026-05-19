@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "python -m pytest tests/test_event_mapper.py -v",
+    "testCommand": "python -m pytest tests/test_sound_commands.py -v",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -114,6 +114,30 @@
       "type": "file"
     },
     {
+      "path": "src/lyra_research/hooks/__init__.py",
+      "accessCount": 2,
+      "lastAccessed": 1779217070843,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/cli/__init__.py",
+      "accessCount": 2,
+      "lastAccessed": 1779217179655,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/sounds/context_aware.py",
+      "accessCount": 2,
+      "lastAccessed": 1779217198818,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_sound_commands.py",
+      "accessCount": 2,
+      "lastAccessed": 1779217259841,
+      "type": "file"
+    },
+    {
       "path": "src/lyra_research/permissions/__init__.py",
       "accessCount": 1,
       "lastAccessed": 1779216071091,
@@ -180,12 +204,6 @@
       "type": "file"
     },
     {
-      "path": "src/lyra_research/hooks/__init__.py",
-      "accessCount": 1,
-      "lastAccessed": 1779216475433,
-      "type": "file"
-    },
-    {
       "path": "src/lyra_research/hooks/permission_hooks.py",
       "accessCount": 1,
       "lastAccessed": 1779216475694,
@@ -201,12 +219,6 @@
       "path": "src/lyra_research/cli/bypass_commands.py",
       "accessCount": 1,
       "lastAccessed": 1779216551100,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/cli/__init__.py",
-      "accessCount": 1,
-      "lastAccessed": 1779216551352,
       "type": "file"
     },
     {
@@ -267,6 +279,42 @@
       "path": "tests/test_event_mapper.py",
       "accessCount": 1,
       "lastAccessed": 1779216903767,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/hooks/sound_hooks.py",
+      "accessCount": 1,
+      "lastAccessed": 1779217070599,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_sound_hooks.py",
+      "accessCount": 1,
+      "lastAccessed": 1779217088695,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/sounds/adaptive_volume.py",
+      "accessCount": 1,
+      "lastAccessed": 1779217118300,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/sounds/productivity_mode.py",
+      "accessCount": 1,
+      "lastAccessed": 1779217118782,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_advanced_sounds.py",
+      "accessCount": 1,
+      "lastAccessed": 1779217151392,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/cli/sound_commands.py",
+      "accessCount": 1,
+      "lastAccessed": 1779217179410,
       "type": "file"
     }
   ],
