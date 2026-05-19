@@ -7,12 +7,16 @@ This package provides:
 - Event-driven audio
 - Theme support
 - Sound pack library
+- Advanced features (adaptive volume, time behavior, productivity mode)
 """
 
+from lyra_audio.adaptive_volume import AdaptiveVolumeController
 from lyra_audio.audio_player import AudioPlayer
 from lyra_audio.event_hooks import EventHookSystem, LyraEvent
+from lyra_audio.productivity_mode import ProductivityModeController
 from lyra_audio.sound_manager import SoundManager
 from lyra_audio.sound_pack import SoundPack, SoundPackLoader, SoundPackMetadata
+from lyra_audio.time_behavior import TimeBehaviorController
 
 __version__ = "0.1.0"
 
@@ -28,4 +32,8 @@ __all__ = [
     "SoundPack",
     "SoundPackLoader",
     "SoundPackMetadata",
+    # Advanced Features
+    "AdaptiveVolumeController",
+    "TimeBehaviorController",
+    "ProductivityModeController",
 ]
