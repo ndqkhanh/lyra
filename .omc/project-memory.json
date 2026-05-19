@@ -162,6 +162,12 @@
       "type": "file"
     },
     {
+      "path": "packages/lyra-audio/src/lyra_audio/sound_manager.py",
+      "accessCount": 7,
+      "lastAccessed": 1779216411670,
+      "type": "file"
+    },
+    {
       "path": "packages/lyra-permissions/src/lyra_permissions/permission_store.py",
       "accessCount": 5,
       "lastAccessed": 1779206932314,
@@ -195,6 +201,12 @@
       "path": "packages/lyra-permissions/pyproject.toml",
       "accessCount": 2,
       "lastAccessed": 1779207739753,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/src/lyra_audio/__init__.py",
+      "accessCount": 2,
+      "lastAccessed": 1779216410128,
       "type": "file"
     },
     {
@@ -294,12 +306,6 @@
       "type": "file"
     },
     {
-      "path": "packages/lyra-audio/src/lyra_audio/__init__.py",
-      "accessCount": 1,
-      "lastAccessed": 1779208082122,
-      "type": "file"
-    },
-    {
       "path": "packages/lyra-audio/src/lyra_audio/audio_player.py",
       "accessCount": 1,
       "lastAccessed": 1779208100482,
@@ -309,12 +315,6 @@
       "path": "packages/lyra-audio/src/lyra_audio/event_hooks.py",
       "accessCount": 1,
       "lastAccessed": 1779208129189,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-audio/src/lyra_audio/sound_manager.py",
-      "accessCount": 1,
-      "lastAccessed": 1779208129434,
       "type": "file"
     },
     {
@@ -375,6 +375,12 @@
       "path": "packages/lyra-audio/sounds/meme-pack/manifest.json",
       "accessCount": 1,
       "lastAccessed": 1779208596428,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-audio/tests/test_sound_pack.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216378991,
       "type": "file"
     }
   ],

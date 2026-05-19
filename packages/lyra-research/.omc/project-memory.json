@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "python -m pytest tests/test_permission_gate.py tests/test_bypass_manager.py tests/test_audit_logger.py -v",
+    "testCommand": "python -m pytest tests/test_indicators.py tests/test_status_line.py -v",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -129,6 +129,36 @@
       "path": "tests/test_audit_logger.py",
       "accessCount": 1,
       "lastAccessed": 1779216158487,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/ui/__init__.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216411478,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/ui/status_line.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216411764,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/ui/indicators.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216412010,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_status_line.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216430253,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_indicators.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216430517,
       "type": "file"
     }
   ],

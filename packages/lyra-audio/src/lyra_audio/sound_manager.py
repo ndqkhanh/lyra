@@ -5,6 +5,7 @@ Features:
 - Event-to-sound mapping
 - Theme management
 - Sound file loading
+- Sound pack support
 """
 
 import json
@@ -12,6 +13,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from lyra_audio.audio_player import AudioPlayer
+from lyra_audio.sound_pack import SoundPackLoader
 
 
 class SoundManager:
@@ -34,10 +36,15 @@ class SoundManager:
         self.sounds_dir.mkdir(parents=True, exist_ok=True)
 
         self.player = AudioPlayer()
+        self.pack_loader = SoundPackLoader(str(self.sounds_dir))
         self.config = self._load_config()
-        self.current_theme = self.config.get("theme", "default")
+        self.current_theme = self.config.get("theme", "warcraft")
         self.enabled = self.config.get("enabled", True)
         self.volume = self.config.get("volume", 0.7)
+        self.current_pack = None
+
+        # Load current theme pack
+        self._load_current_pack()
 
     def _load_config(self) -> Dict[str, Any]:
         """Load audio configuration."""
@@ -55,10 +62,14 @@ class SoundManager:
         """Get default configuration."""
         return {
             "enabled": True,
-            "theme": "default",
+            "theme": "warcraft",
             "volume": 0.7,
             "soundsDir": str(self.sounds_dir),
         }
+
+    def _load_current_pack(self):
+        """Load current theme pack."""
+        self.current_pack = self.pack_loader.load_pack(self.current_theme)
 
     def _save_config(self):
         """Save configuration."""
@@ -98,6 +109,13 @@ class SoundManager:
         Returns:
             Path to sound file or None
         """
+        # Try to get from loaded pack first
+        if self.current_pack:
+            sound_path = self.current_pack.get_sound_path(event)
+            if sound_path:
+                return sound_path
+
+        # Fallback to directory-based lookup
         theme_dir = self.sounds_dir / self.current_theme
 
         if not theme_dir.exists():
@@ -123,6 +141,7 @@ class SoundManager:
             self.current_theme = theme
             self.config["theme"] = theme
             self._save_config()
+            self._load_current_pack()
 
     def get_theme(self) -> str:
         """Get current theme."""
@@ -130,15 +149,7 @@ class SoundManager:
 
     def list_themes(self) -> List[str]:
         """List available themes."""
-        if not self.sounds_dir.exists():
-            return []
-
-        themes = []
-        for item in self.sounds_dir.iterdir():
-            if item.is_dir():
-                themes.append(item.name)
-
-        return sorted(themes)
+        return self.pack_loader.list_packs()
 
     def enable(self):
         """Enable sound effects."""

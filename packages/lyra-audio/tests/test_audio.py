@@ -111,9 +111,20 @@ def test_sound_manager_list_themes():
     with tempfile.TemporaryDirectory() as tmpdir:
         manager = SoundManager(sounds_dir=tmpdir)
 
-        # Create test themes
-        (Path(tmpdir) / "theme1").mkdir()
-        (Path(tmpdir) / "theme2").mkdir()
+        # Create test themes with manifests
+        import json
+        for theme_name in ["theme1", "theme2"]:
+            theme_dir = Path(tmpdir) / theme_name
+            theme_dir.mkdir()
+            manifest = {
+                "name": theme_name,
+                "version": "1.0.0",
+                "author": "Test",
+                "description": "Test theme",
+                "sounds": {}
+            }
+            with open(theme_dir / "manifest.json", "w") as f:
+                json.dump(manifest, f)
 
         themes = manager.list_themes()
         assert "theme1" in themes
