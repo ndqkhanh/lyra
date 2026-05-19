@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "pytest",
+    "testCommand": "python -m pytest tests/test_permission_gate.py tests/test_bypass_manager.py tests/test_audit_logger.py -v",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -88,6 +88,49 @@
       ]
     }
   },
-  "hotPaths": [],
+  "hotPaths": [
+    {
+      "path": "src/lyra_research/permissions/bypass_manager.py",
+      "accessCount": 2,
+      "lastAccessed": 1779216172808,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/permissions/__init__.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216071091,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/permissions/permission_gate.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216083566,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/permissions/audit_logger.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216106948,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_permission_gate.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216123607,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_bypass_manager.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216141564,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_audit_logger.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216158487,
+      "type": "file"
+    }
+  ],
   "userDirectives": []
 }
