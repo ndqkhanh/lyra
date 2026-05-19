@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "python -m pytest tests/test_indicators.py tests/test_status_line.py -v",
+    "testCommand": "python -m pytest tests/test_permission_hooks.py -v",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -159,6 +159,24 @@
       "path": "tests/test_indicators.py",
       "accessCount": 1,
       "lastAccessed": 1779216430517,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/hooks/__init__.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216475433,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/hooks/permission_hooks.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216475694,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_permission_hooks.py",
+      "accessCount": 1,
+      "lastAccessed": 1779216498291,
       "type": "file"
     }
   ],
