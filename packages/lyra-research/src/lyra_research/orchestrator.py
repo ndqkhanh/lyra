@@ -1,10 +1,16 @@
 """
-ResearchOrchestrator — ties all research phases into a 10-step pipeline.
+ResearchOrchestrator — 3-Agent Hybrid Architecture with Coordination.
+
+Integrates:
+- Week 1: Coordination primitives (retry, timeout, circuit breaker)
+- Week 2: Memory capacity management
+- Week 3: Adversarial review system
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 from uuid import uuid4
@@ -32,24 +38,102 @@ from lyra_research.reporter import (
     ResearchReport,
 )
 from lyra_research.skills import ResearchSkillStore, StrategyAdaptationSkill
+from lyra_research.coordination import (
+    CoordinationManager,
+    Task,
+    TaskState,
+    FailureType,
+)
+from lyra_research.capacity_manager import CapacityManager, CapacityLimits
+from lyra_research.adversarial_reviewer import AdversarialReviewer, ReviewResult
+from lyra_core.context.layered_context import (
+    LayeredContextManager,
+    ContextLayer,
+)
+from lyra_core.context.provenance import ContextAuditTrail
+from lyra_core.context.isolation import (
+    ContextBoundary,
+    IsolationPolicy,
+)
+
+
+# ---------------------------------------------------------------------------
+# Agent Types
+# ---------------------------------------------------------------------------
+
+
+class AgentType(Enum):
+    """Agent types in the 3-agent hybrid architecture."""
+    DISCOVERY = "discovery"  # Haiku - parallel source discovery
+    ANALYSIS = "analysis"    # Sonnet - paper/repo analysis
+    SYNTHESIS = "synthesis"  # Opus - report generation
+
+
+# ---------------------------------------------------------------------------
+# Agent Configuration
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class AgentConfig:
+    """Configuration for an agent in the hybrid system."""
+    type: AgentType
+    model: str  # Model identifier
+    timeout_seconds: int
+    max_retries: int
+
+
+# Default agent configurations
+DEFAULT_AGENT_CONFIGS = {
+    AgentType.DISCOVERY: AgentConfig(
+        type=AgentType.DISCOVERY,
+        model="claude-haiku-4-5",
+        timeout_seconds=300,  # 5 minutes
+        max_retries=2,
+    ),
+    AgentType.ANALYSIS: AgentConfig(
+        type=AgentType.ANALYSIS,
+        model="claude-sonnet-4-6",
+        timeout_seconds=600,  # 10 minutes
+        max_retries=2,
+    ),
+    AgentType.SYNTHESIS: AgentConfig(
+        type=AgentType.SYNTHESIS,
+        model="claude-opus-4-7",
+        timeout_seconds=900,  # 15 minutes
+        max_retries=1,  # Expensive model, fewer retries
+    ),
+}
+
+
+# ---------------------------------------------------------------------------
+# Research Progress
+# ---------------------------------------------------------------------------
 
 
 @dataclass
 class ResearchProgress:
-    """Tracks progress through the 10-step pipeline."""
+    """Tracks progress through the research pipeline with telemetry."""
 
     session_id: str
     topic: str
-    current_step: int = 0        # 1-10
+    current_step: int = 0
     current_step_name: str = ""
-    sources_found: Dict[str, int] = field(default_factory=dict)  # {source_name: count}
+    sources_found: Dict[str, int] = field(default_factory=dict)
     papers_analyzed: int = 0
     repos_analyzed: int = 0
     gaps_found: int = 0
-    report: Optional[Any] = None  # ResearchReport when done
+    report: Optional[Any] = None
     error: Optional[str] = None
     started_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     completed_at: Optional[datetime] = None
+
+    # Telemetry
+    context_size_kb: float = 0.0
+    verification_rate: float = 0.0
+    tasks_completed: int = 0
+    tasks_failed: int = 0
+    tasks_retried: int = 0
 
     @property
     def is_complete(self) -> bool:
@@ -64,20 +148,35 @@ class ResearchProgress:
 ProgressCallback = Callable[[ResearchProgress], None]
 
 
+# ---------------------------------------------------------------------------
+# Research Orchestrator
+# ---------------------------------------------------------------------------
+
+
 class ResearchOrchestrator:
-    """Ties all research phases together into the 10-step pipeline.
+    """3-Agent Hybrid Research Orchestrator.
+
+    Architecture:
+    - Discovery Agent (Haiku): Parallel source discovery
+    - Analysis Agent (Sonnet): Paper/repo analysis
+    - Synthesis Agent (Opus): Report generation
+
+    Integration:
+    - CoordinationManager: Task execution with retry/timeout/circuit breaker
+    - CapacityManager: Memory capacity enforcement
+    - AdversarialReviewer: Quality assurance for deep research
 
     Steps:
     1. CLARIFY   - validate topic and depth
     2. PLAN      - generate verifiable checklist
-    3. SEARCH    - discover sources across all configured sources
-    4. FILTER    - rank and deduplicate by quality score
-    5. FETCH     - load source metadata into LocalCorpus
-    6. ANALYZE   - extract paper/repo summaries
+    3. SEARCH    - discover sources (Discovery Agent)
+    4. FILTER    - rank and deduplicate by quality
+    5. FETCH     - load source metadata into corpus
+    6. ANALYZE   - extract summaries (Analysis Agent)
     7. EVIDENCE_AUDIT - verify claims vs sources
-    8. SYNTHESIZE - build taxonomy and relationships
-    9. REPORT    - generate full Markdown report
-    10. MEMORIZE - persist notes, strategies, case to memory stores
+    8. SYNTHESIZE - build taxonomy (Synthesis Agent)
+    9. REPORT    - generate report (Synthesis Agent)
+    10. MEMORIZE - persist to memory stores
     """
 
     def __init__(
@@ -87,17 +186,52 @@ class ResearchOrchestrator:
         corpus: Optional[LocalCorpus] = None,
         strategy_memory: Optional[ResearchStrategyMemory] = None,
         case_bank: Optional[SessionCaseBank] = None,
+        coordination_manager: Optional[CoordinationManager] = None,
+        capacity_manager: Optional[CapacityManager] = None,
+        adversarial_reviewer: Optional[AdversarialReviewer] = None,
+        agent_configs: Optional[Dict[AgentType, AgentConfig]] = None,
     ) -> None:
         self.output_dir = output_dir or Path.home() / ".lyra" / "research_reports"
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-        # Memory stores (injectable for testing)
+        # Memory stores
         self.note_store = note_store or ResearchNoteStore()
         self.corpus = corpus or LocalCorpus()
         self.strategy_memory = strategy_memory or ResearchStrategyMemory()
         self.case_bank = case_bank or SessionCaseBank()
 
-        # Pipeline components - read API keys from environment
+        # Week 1-3 integrations
+        self.coordination = coordination_manager or CoordinationManager()
+
+        # Capacity manager with default DB path
+        db_path = Path.home() / ".lyra" / "research.db"
+        self.capacity = capacity_manager or CapacityManager(db_path=db_path)
+
+        self.reviewer = adversarial_reviewer or AdversarialReviewer()
+
+        # Agent configurations
+        self.agent_configs = agent_configs or DEFAULT_AGENT_CONFIGS
+
+        # Phase 1 Week 4: Layered context system
+        self.context_manager = LayeredContextManager(max_tokens=100_000)
+        self.audit_trail = ContextAuditTrail()
+        self.context_manager.audit_trail = self.audit_trail
+
+        # Context boundaries for each agent type
+        self.discovery_boundary = ContextBoundary(
+            self.context_manager,
+            IsolationPolicy.for_discovery_agent(),
+        )
+        self.analysis_boundary = ContextBoundary(
+            self.context_manager,
+            IsolationPolicy.for_analysis_agent(),
+        )
+        self.synthesis_boundary = ContextBoundary(
+            self.context_manager,
+            IsolationPolicy.for_synthesis_agent(),
+        )
+
+        # Pipeline components
         import os
         semantic_scholar_key = os.environ.get("SEMANTIC_SCHOLAR_API_KEY")
         github_token = os.environ.get("GITHUB_TOKEN")
@@ -119,21 +253,20 @@ class ResearchOrchestrator:
     def research(
         self,
         topic: str,
-        depth: str = "standard",   # "quick", "standard", "deep"
+        depth: str = "standard",
         sources: Optional[List[str]] = None,
         progress_callback: Optional[ProgressCallback] = None,
     ) -> ResearchProgress:
-        """Execute the full 10-step research pipeline.
+        """Execute the full research pipeline with 3-agent hybrid architecture.
 
         Args:
-            topic: The research topic.
-            depth: Research depth — "quick" (5 questions), "standard" (10),
-                   "deep" (15).
-            sources: Source names to search (default: all available).
-            progress_callback: Called after each step with current progress.
+            topic: Research topic
+            depth: "quick", "standard", or "deep"
+            sources: Source names to search (default: all)
+            progress_callback: Called after each step
 
         Returns:
-            ResearchProgress with completed report or error set.
+            ResearchProgress with report or error
         """
         progress = ResearchProgress(
             session_id=str(uuid4()),
@@ -147,6 +280,23 @@ class ResearchOrchestrator:
                 progress_callback(progress)
 
         try:
+            # Check capacity before starting
+            self.capacity.enforce_limits()
+
+            # Initialize context with system and task layers
+            self.context_manager.add(
+                ContextLayer.SYSTEM,
+                "You are a deep research AI assistant",
+                source="system_prompt",
+                priority=10,
+            )
+            self.context_manager.add(
+                ContextLayer.TASK,
+                f"Research topic: {topic}",
+                source="user_query",
+                priority=9,
+            )
+
             # Step 1: Clarify
             _step(1, "Clarifying research scope")
             validated_topic, resolved_depth = self._clarify(topic, depth)
@@ -155,26 +305,16 @@ class ResearchOrchestrator:
             _step(2, "Generating research checklist")
             checklist = self.checklist_gen.generate(validated_topic, resolved_depth)
 
-            # Step 3: Search
+            # Step 3: Search (Discovery Agent - parallel)
             _step(3, "Searching sources")
-            skill = self.skill_store.get_for_domain("general") or self.skill_store.get_by_name("general_research")
-            active_sources = sources or (
-                skill.preferred_sources if skill else [
-                    "arxiv",
-                    "github",
-                    "huggingface",
-                ]
-            )
-            max_per_source = (
-                50 if resolved_depth == "deep"
-                else 30 if resolved_depth == "standard"
-                else 15
-            )
-            raw_results = self.discovery.discover(
+            discovery_task = self._create_task(AgentType.DISCOVERY)
+            raw_results = self._execute_discovery(
+                discovery_task,
                 validated_topic,
-                sources=active_sources,
-                max_per_source=max_per_source,
+                resolved_depth,
+                sources,
             )
+
             for src_name, src_list in raw_results.items():
                 progress.sources_found[src_name] = len(src_list)
             all_sources_flat = [s for lst in raw_results.values() for s in lst]
@@ -185,8 +325,9 @@ class ResearchOrchestrator:
             top_n = 50 if resolved_depth == "deep" else 30 if resolved_depth == "standard" else 10
             ranked = ranked[:top_n]
 
-            # Step 5: Fetch
+            # Step 5: Fetch (check capacity before storing)
             _step(5, "Fetching source metadata")
+            self.capacity.enforce_limits()
             self._store_to_corpus(ranked)
             progress.papers_analyzed = sum(
                 1 for s in ranked if s.source_type.value == "paper"
@@ -195,9 +336,13 @@ class ResearchOrchestrator:
                 1 for s in ranked if s.source_type.value == "repository"
             )
 
-            # Step 6: Analyze
+            # Step 6: Analyze (Analysis Agent - parallel)
             _step(6, "Analyzing sources")
-            paper_analyses, repo_analyses = self._analyze_sources(ranked)
+            analysis_task = self._create_task(AgentType.ANALYSIS)
+            paper_analyses, repo_analyses = self._execute_analysis(
+                analysis_task,
+                ranked,
+            )
 
             # Step 7: Evidence Audit
             _step(7, "Auditing evidence")
@@ -216,27 +361,41 @@ class ResearchOrchestrator:
             gap_strings = [g.area for g in gaps]
             progress.gaps_found = len(gaps)
 
-            # Step 8: Synthesize
+            # Step 8: Synthesize (Synthesis Agent)
             _step(8, "Synthesizing findings")
-            synthesis = self.synthesizer.synthesize(
-                topic=validated_topic,
-                paper_analyses=paper_analyses,
-                repo_analyses=repo_analyses,
-                gaps=gap_strings,
-                contradictions=[],
+            synthesis_task = self._create_task(AgentType.SYNTHESIS)
+            synthesis = self._execute_synthesis(
+                synthesis_task,
+                validated_topic,
+                paper_analyses,
+                repo_analyses,
+                gap_strings,
             )
 
-            # Step 9: Report
+            # Step 9: Report (Synthesis Agent)
             _step(9, "Generating report")
+            report_task = self._create_task(AgentType.SYNTHESIS)
             source_dicts = [self._source_to_dict(s) for s in ranked]
-            report = self.report_gen.generate(
-                topic=validated_topic,
-                synthesis=synthesis,
-                sources=source_dicts,
-                gaps=gap_strings,
-                contradictions=[],
-                checklist_completion=checklist.completion_rate(),
+            report = self._execute_report_generation(
+                report_task,
+                validated_topic,
+                synthesis,
+                source_dicts,
+                gap_strings,
+                checklist,
             )
+
+            # Adversarial review for deep research
+            if resolved_depth == "deep":
+                review_result = self.reviewer.review(report, ranked, depth=resolved_depth)
+                if review_result.revised_report:
+                    # Update report with reviewed content
+                    report.content = review_result.revised_report
+                progress.verification_rate = (
+                    review_result.claims_reviewed - review_result.claims_modified
+                ) / review_result.claims_reviewed if review_result.claims_reviewed > 0 else 1.0
+                progress.context_size_kb = review_result.context_size_kb
+
             report.sources_used = len(ranked)
             saved_path = report.save(self.output_dir)
             quality = self.quality_checker.check(
@@ -249,9 +408,23 @@ class ResearchOrchestrator:
             report.quality_score = quality.overall_score
             progress.report = report
 
-            # Step 10: Memorize
+            # Step 10: Memorize (check capacity before storing)
             _step(10, "Saving to memory")
+            self.capacity.enforce_limits()
             self._memorize(validated_topic, report, ranked, quality.overall_score, str(saved_path))
+
+            # Collect telemetry
+            progress.tasks_completed = sum(
+                1 for t in self.coordination.get_all_tasks()
+                if t.state == TaskState.COMPLETED
+            )
+            progress.tasks_failed = sum(
+                1 for t in self.coordination.get_all_tasks()
+                if t.state == TaskState.FAILED
+            )
+            progress.tasks_retried = sum(
+                t.retry_count for t in self.coordination.get_all_tasks()
+            )
 
             progress.completed_at = datetime.now(timezone.utc)
             return progress
@@ -260,6 +433,167 @@ class ResearchOrchestrator:
             progress.error = str(e)
             progress.completed_at = datetime.now(timezone.utc)
             return progress
+
+    # --- Agent Task Execution ---
+
+    def _create_task(self, agent_type: AgentType) -> Task:
+        """Create a task for the given agent type."""
+        config = self.agent_configs[agent_type]
+        return self.coordination.create_task(
+            agent_type=agent_type.value,
+            timeout_seconds=config.timeout_seconds,
+            max_retries=config.max_retries,
+        )
+
+    def _execute_discovery(
+        self,
+        task: Task,
+        topic: str,
+        depth: str,
+        sources: Optional[List[str]],
+    ) -> Dict[str, List[ResearchSource]]:
+        """Execute discovery phase with coordination."""
+        self.coordination.start_task(task)
+
+        try:
+            # Check circuit breaker
+            should_proceed, error = self.coordination.circuit_breaker.should_proceed(task.agent_type)
+            if not should_proceed:
+                raise RuntimeError(error)
+
+            # Execute discovery
+            skill = self.skill_store.get_for_domain("general") or self.skill_store.get_by_name("general_research")
+            active_sources = sources or (
+                skill.preferred_sources if skill else ["arxiv", "github", "huggingface"]
+            )
+            max_per_source = (
+                50 if depth == "deep"
+                else 30 if depth == "standard"
+                else 15
+            )
+
+            raw_results = self.discovery.discover(
+                topic,
+                sources=active_sources,
+                max_per_source=max_per_source,
+            )
+
+            # Check for timeout
+            if not self.coordination.check_and_enforce(task):
+                raise RuntimeError(f"Task {task.id} killed by health check")
+
+            self.coordination.complete_task(task)
+            return raw_results
+
+        except Exception as e:
+            self.coordination.fail_task(task, str(e), FailureType.TRANSIENT)
+
+            # Retry if needed
+            if task.should_retry():
+                self.coordination.retry_policy.wait_before_retry(task)
+                return self._execute_discovery(task, topic, depth, sources)
+
+            raise
+
+    def _execute_analysis(
+        self,
+        task: Task,
+        sources: List[ResearchSource],
+    ) -> tuple[List[Dict], List[Dict]]:
+        """Execute analysis phase with coordination."""
+        self.coordination.start_task(task)
+
+        try:
+            should_proceed, error = self.coordination.circuit_breaker.should_proceed(task.agent_type)
+            if not should_proceed:
+                raise RuntimeError(error)
+
+            papers, repos = self._analyze_sources(sources)
+
+            if not self.coordination.check_and_enforce(task):
+                raise RuntimeError(f"Task {task.id} killed by health check")
+
+            self.coordination.complete_task(task)
+            return papers, repos
+
+        except Exception as e:
+            self.coordination.fail_task(task, str(e), FailureType.TRANSIENT)
+
+            if task.should_retry():
+                self.coordination.retry_policy.wait_before_retry(task)
+                return self._execute_analysis(task, sources)
+
+            raise
+
+    def _execute_synthesis(
+        self,
+        task: Task,
+        topic: str,
+        paper_analyses: List[Dict],
+        repo_analyses: List[Dict],
+        gaps: List[str],
+    ) -> Any:
+        """Execute synthesis phase with coordination."""
+        self.coordination.start_task(task)
+
+        try:
+            should_proceed, error = self.coordination.circuit_breaker.should_proceed(task.agent_type)
+            if not should_proceed:
+                raise RuntimeError(error)
+
+            synthesis = self.synthesizer.synthesize(
+                topic=topic,
+                paper_analyses=paper_analyses,
+                repo_analyses=repo_analyses,
+                gaps=gaps,
+                contradictions=[],
+            )
+
+            if not self.coordination.check_and_enforce(task):
+                raise RuntimeError(f"Task {task.id} killed by health check")
+
+            self.coordination.complete_task(task)
+            return synthesis
+
+        except Exception as e:
+            self.coordination.fail_task(task, str(e), FailureType.LOGIC)
+            raise
+
+    def _execute_report_generation(
+        self,
+        task: Task,
+        topic: str,
+        synthesis: Any,
+        sources: List[Dict],
+        gaps: List[str],
+        checklist: Any,
+    ) -> ResearchReport:
+        """Execute report generation with coordination."""
+        self.coordination.start_task(task)
+
+        try:
+            should_proceed, error = self.coordination.circuit_breaker.should_proceed(task.agent_type)
+            if not should_proceed:
+                raise RuntimeError(error)
+
+            report = self.report_gen.generate(
+                topic=topic,
+                synthesis=synthesis,
+                sources=sources,
+                gaps=gaps,
+                contradictions=[],
+                checklist_completion=checklist.completion_rate(),
+            )
+
+            if not self.coordination.check_and_enforce(task):
+                raise RuntimeError(f"Task {task.id} killed by health check")
+
+            self.coordination.complete_task(task)
+            return report
+
+        except Exception as e:
+            self.coordination.fail_task(task, str(e), FailureType.LOGIC)
+            raise
 
     # --- Private helpers ---
 
@@ -287,7 +621,7 @@ class ResearchOrchestrator:
         return [s for s, _ in ranked]
 
     def _store_to_corpus(self, sources: List[ResearchSource]) -> List[CorpusEntry]:
-        """Store sources to LocalCorpus. Skips duplicates."""
+        """Store sources to LocalCorpus."""
         entries: List[CorpusEntry] = []
         for s in sources:
             entry = CorpusEntry(
@@ -295,7 +629,7 @@ class ResearchOrchestrator:
                 source_id=s.id,
                 title=s.title,
                 url=s.url,
-                abstract=s.abstract or "",  # Ensure non-None for NOT NULL constraint
+                abstract=s.abstract or "",
                 full_text="",
                 source_type=s.source_type.value,
                 metadata=s.metadata,
@@ -352,7 +686,7 @@ class ResearchOrchestrator:
         quality: float,
         report_path: str,
     ) -> None:
-        """Persist report findings to all memory stores."""
+        """Persist report findings to memory stores."""
         note = ResearchNote(
             topic=topic,
             title=f"Research: {topic}",

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1779001421094,
+  "lastScanned": 1779089755291,
   "projectRoot": "/Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra",
   "techStack": {
     "languages": [
@@ -27,7 +27,7 @@
   },
   "build": {
     "buildCommand": "make build",
-    "testCommand": "make test",
+    "testCommand": "ps aux | grep -E \"be9uqt8v7|pytest\" | grep -v grep | head -5",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -51,21 +51,18 @@
   },
   "customNotes": [],
   "directoryMap": {
-    "builder-specs": {
-      "path": "builder-specs",
+    "archive": {
+      "path": "archive",
       "purpose": null,
-      "fileCount": 2,
-      "lastAccessed": 1779001421088,
-      "keyFiles": [
-        "AUTOSPEC.md",
-        "PROMPT.md"
-      ]
+      "fileCount": 0,
+      "lastAccessed": 1779089755285,
+      "keyFiles": []
     },
     "docs": {
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 23,
-      "lastAccessed": 1779001421089,
+      "lastAccessed": 1779089755285,
       "keyFiles": [
         "ARCHITECTURE_DIAGRAMS.md",
         "CUSTOM_ANTHROPIC_PROVIDER.md",
@@ -78,7 +75,7 @@
       "path": "examples",
       "purpose": "Example code",
       "fileCount": 1,
-      "lastAccessed": 1779001421089,
+      "lastAccessed": 1779089755286,
       "keyFiles": [
         "custom_anthropic.py"
       ]
@@ -87,7 +84,7 @@
       "path": "harness_core",
       "purpose": null,
       "fileCount": 6,
-      "lastAccessed": 1779001421089,
+      "lastAccessed": 1779089755286,
       "keyFiles": [
         "Makefile",
         "README.md",
@@ -99,14 +96,14 @@
       "path": "packages",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1779001421089,
+      "lastAccessed": 1779089755286,
       "keyFiles": []
     },
     "papers": {
       "path": "papers",
       "purpose": null,
       "fileCount": 23,
-      "lastAccessed": 1779001421090,
+      "lastAccessed": 1779089755286,
       "keyFiles": [
         "README.md",
         "alphaevolve.pdf",
@@ -119,239 +116,343 @@
       "path": "scripts",
       "purpose": "Build/utility scripts",
       "fileCount": 1,
-      "lastAccessed": 1779001421090,
+      "lastAccessed": 1779089755286,
       "keyFiles": [
         "install-lyra.sh"
-      ]
-    },
-    "site": {
-      "path": "site",
-      "purpose": null,
-      "fileCount": 4,
-      "lastAccessed": 1779001421090,
-      "keyFiles": [
-        "404.html",
-        "index.html",
-        "sitemap.xml",
-        "sitemap.xml.gz"
       ]
     },
     "skills": {
       "path": "skills",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1779001421090,
+      "lastAccessed": 1779089755286,
       "keyFiles": []
-    },
-    "test_output": {
-      "path": "test_output",
-      "purpose": null,
-      "fileCount": 3,
-      "lastAccessed": 1779001421091,
-      "keyFiles": [
-        "report_Python_async_patterns_283d4934.md",
-        "report_Python_async_patterns_2c535aab.md",
-        "report_Python_async_patterns_c2a1fd49.md"
-      ]
-    },
-    "test_output_deepseek": {
-      "path": "test_output_deepseek",
-      "purpose": null,
-      "fileCount": 6,
-      "lastAccessed": 1779001421091,
-      "keyFiles": [
-        "report_874db147-422c-45cd-80dc-52a47d2e09df.txt",
-        "report_886b2232-f267-4d43-bdb3-a5aef2c92fda.txt",
-        "report_92eddb26-90a9-44a5-89bb-ab7e4923d99e.txt",
-        "report_Large_Language_Model_reasoning_capabilities_6ee9b50a.md",
-        "report_Large_Language_Model_reasoning_capabilities_a36ae574.md"
-      ]
     },
     "tests": {
       "path": "tests",
       "purpose": "Test files",
       "fileCount": 0,
-      "lastAccessed": 1779001421091,
+      "lastAccessed": 1779089755287,
       "keyFiles": []
-    },
-    "ui-specs": {
-      "path": "ui-specs",
-      "purpose": null,
-      "fileCount": 4,
-      "lastAccessed": 1779001421091,
-      "keyFiles": [
-        "constitution.md",
-        "plan.md",
-        "spec.md",
-        "tasks.md"
-      ]
     },
     "harness_core/src": {
       "path": "harness_core/src",
       "purpose": "Source code",
       "fileCount": 0,
-      "lastAccessed": 1779001421092,
+      "lastAccessed": 1779089755287,
       "keyFiles": []
     },
     "harness_core/tests": {
       "path": "harness_core/tests",
       "purpose": "Test files",
       "fileCount": 40,
-      "lastAccessed": 1779001421092,
+      "lastAccessed": 1779089755288,
       "keyFiles": [
         "test_anthropic_base_url.py",
         "test_beam_and_dualuse.py",
         "test_continuous_learning.py"
       ]
-    },
-    "site/assets": {
-      "path": "site/assets",
-      "purpose": "Static assets",
-      "fileCount": 2,
-      "lastAccessed": 1779001421092,
-      "keyFiles": [
-        "extra.css",
-        "extra.js"
-      ]
     }
   },
   "hotPaths": [
     {
-      "path": "packages/lyra-evolution/lyra_evolution/harness.py",
+      "path": "packages/lyra-research/tests/test_capacity_manager.py",
+      "accessCount": 21,
+      "lastAccessed": 1779092464235,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/coordination.py",
+      "accessCount": 14,
+      "lastAccessed": 1779121118470,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/orchestrator.py",
+      "accessCount": 13,
+      "lastAccessed": 1779122069217,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/__init__.py",
+      "accessCount": 9,
+      "lastAccessed": 1779093124595,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/adversarial_reviewer.py",
+      "accessCount": 7,
+      "lastAccessed": 1779095885568,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/tests/test_adversarial_reviewer.py",
+      "accessCount": 6,
+      "lastAccessed": 1779092967340,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/agents/analysis/analysis_base.py",
+      "accessCount": 5,
+      "lastAccessed": 1779122287003,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/reporter.py",
+      "accessCount": 5,
+      "lastAccessed": 1779122499432,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/tests/test_coordination.py",
+      "accessCount": 4,
+      "lastAccessed": 1779091734918,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/capacity_manager.py",
+      "accessCount": 4,
+      "lastAccessed": 1779093096372,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/tests/test_orchestrator_integration.py",
       "accessCount": 3,
-      "lastAccessed": 1779002537874,
+      "lastAccessed": 1779093365857,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/tests/test_discovery_agents.py",
+      "accessCount": 3,
+      "lastAccessed": 1779094901270,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/agents/synthesis/evidence_auditor.py",
+      "accessCount": 3,
+      "lastAccessed": 1779095375221,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/agents/synthesis/falsification_checker.py",
+      "accessCount": 3,
+      "lastAccessed": 1779095375467,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/checkpoint.py",
+      "accessCount": 3,
+      "lastAccessed": 1779095856170,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/agents/synthesis/contradiction_detector.py",
+      "accessCount": 3,
+      "lastAccessed": 1779096171484,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/agents/synthesis/cross_source_synthesizer.py",
+      "accessCount": 3,
+      "lastAccessed": 1779096171550,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/sources.py",
+      "accessCount": 3,
+      "lastAccessed": 1779122083908,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/agents/analysis/__init__.py",
+      "accessCount": 3,
+      "lastAccessed": 1779122083958,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/agents/synthesis/__init__.py",
+      "accessCount": 3,
+      "lastAccessed": 1779122286762,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/agents/analysis/quality_score_agent.py",
+      "accessCount": 3,
+      "lastAccessed": 1779122315697,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/agents/discovery/__init__.py",
+      "accessCount": 3,
+      "lastAccessed": 1779122420469,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/discovery.py",
+      "accessCount": 3,
+      "lastAccessed": 1779122499373,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/intelligence.py",
+      "accessCount": 2,
+      "lastAccessed": 1779092631085,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/tests/test_orchestrator.py",
+      "accessCount": 2,
+      "lastAccessed": 1779093114418,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/tests/test_benchmarks.py",
+      "accessCount": 2,
+      "lastAccessed": 1779093389781,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/tests/test_analysis_agents.py",
+      "accessCount": 2,
+      "lastAccessed": 1779094823386,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/tests/test_checkpoint.py",
+      "accessCount": 2,
+      "lastAccessed": 1779095399878,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/agents/synthesis/synthesis_base.py",
+      "accessCount": 2,
+      "lastAccessed": 1779095856065,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/adaptive_coordination.py",
+      "accessCount": 2,
+      "lastAccessed": 1779095856127,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/agents/__init__.py",
+      "accessCount": 2,
+      "lastAccessed": 1779095856252,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/agents/discovery/discovery_base.py",
+      "accessCount": 2,
+      "lastAccessed": 1779122083871,
       "type": "file"
     },
     {
       "path": "README.md",
-      "accessCount": 3,
-      "lastAccessed": 1779088885247,
-      "type": "file"
-    },
-    {
-      "path": "docs/ARCHITECTURE_DIAGRAMS.md",
-      "accessCount": 2,
-      "lastAccessed": 1779087949588,
-      "type": "file"
-    },
-    {
-      "path": "LYRA_EVOLUTION_IMPROVEMENT_ULTRA_PLAN.md",
       "accessCount": 1,
-      "lastAccessed": 1779001509251,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-evolution/lyra_evolution/self_evolution.py",
-      "accessCount": 1,
-      "lastAccessed": 1779001509281,
-      "type": "file"
-    },
-    {
-      "path": "docs/evolution/LYRA_EVOLUTION_SUMMARY.md",
-      "accessCount": 1,
-      "lastAccessed": 1779001509307,
-      "type": "file"
-    },
-    {
-      "path": "docs/evolution/LYRA_EVOLUTION_MASTER_PLAN.md",
-      "accessCount": 1,
-      "lastAccessed": 1779001509655,
-      "type": "file"
-    },
-    {
-      "path": "LYRA_RANK_1_MASTER_STRATEGY.md",
-      "accessCount": 1,
-      "lastAccessed": 1779001913515,
-      "type": "file"
-    },
-    {
-      "path": "LYRA_COMPARATIVE_ANALYSIS_2026.md",
-      "accessCount": 1,
-      "lastAccessed": 1779002143177,
-      "type": "file"
-    },
-    {
-      "path": "LYRA_IMPLEMENTATION_ROADMAP.md",
-      "accessCount": 1,
-      "lastAccessed": 1779002261254,
-      "type": "file"
-    },
-    {
-      "path": "LYRA_RANK_1_COMPLETE_PACKAGE.md",
-      "accessCount": 1,
-      "lastAccessed": 1779002332226,
-      "type": "file"
-    },
-    {
-      "path": "INDEX.md",
-      "accessCount": 1,
-      "lastAccessed": 1779002383163,
-      "type": "file"
-    },
-    {
-      "path": "EXECUTION_TRACKER.md",
-      "accessCount": 1,
-      "lastAccessed": 1779002487547,
-      "type": "file"
-    },
-    {
-      "path": "CLEANUP_PLAN.md",
-      "accessCount": 1,
-      "lastAccessed": 1779088739047,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-cli/README.md",
-      "accessCount": 1,
-      "lastAccessed": 1779088965020,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-evolution/README.md",
-      "accessCount": 1,
-      "lastAccessed": 1779089039221,
+      "lastAccessed": 1779089863907,
       "type": "file"
     },
     {
       "path": "packages/lyra-research/README.md",
       "accessCount": 1,
-      "lastAccessed": 1779089039469,
+      "lastAccessed": 1779089871239,
       "type": "file"
     },
     {
-      "path": "docs/getting-started/README.md",
+      "path": "packages/lyra-research/pyproject.toml",
       "accessCount": 1,
-      "lastAccessed": 1779089087647,
+      "lastAccessed": 1779091552071,
       "type": "file"
     },
     {
-      "path": "ARCHITECTURE.md",
+      "path": "packages/lyra-memory/src/lyra_memory/schema.py",
       "accessCount": 1,
-      "lastAccessed": 1779089148103,
+      "lastAccessed": 1779091895055,
       "type": "file"
     },
     {
-      "path": "CONTRIBUTING.md",
+      "path": "packages/lyra-memory/src/lyra_memory/database.py",
       "accessCount": 1,
-      "lastAccessed": 1779089191256,
+      "lastAccessed": 1779091895107,
       "type": "file"
     },
     {
-      "path": "CLEANUP_COMPLETE.md",
+      "path": "packages/lyra-memory/src/lyra_memory/store.py",
       "accessCount": 1,
-      "lastAccessed": 1779089270338,
+      "lastAccessed": 1779091902684,
       "type": "file"
     },
     {
-      "path": "docs/guides/configuration.md",
+      "path": "packages/lyra-research/WEEK4_SUMMARY.md",
       "accessCount": 1,
-      "lastAccessed": 1779089573691,
+      "lastAccessed": 1779093523645,
       "type": "file"
     },
     {
-      "path": "docs/guides/mcp-integration.md",
+      "path": "packages/lyra-research/src/lyra_research/agents/discovery/arxiv_agent.py",
       "accessCount": 1,
-      "lastAccessed": 1779089573976,
+      "lastAccessed": 1779094633018,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/agents/discovery/semantic_scholar_agent.py",
+      "accessCount": 1,
+      "lastAccessed": 1779094633255,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/agents/discovery/github_agent.py",
+      "accessCount": 1,
+      "lastAccessed": 1779094633489,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/agents/discovery/web_agent.py",
+      "accessCount": 1,
+      "lastAccessed": 1779094633733,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/agents/discovery/openreview_agent.py",
+      "accessCount": 1,
+      "lastAccessed": 1779094633968,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/agents/discovery/huggingface_agent.py",
+      "accessCount": 1,
+      "lastAccessed": 1779094634210,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/agents/analysis/paper_analysis_agent.py",
+      "accessCount": 1,
+      "lastAccessed": 1779094680066,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/agents/analysis/repo_analysis_agent.py",
+      "accessCount": 1,
+      "lastAccessed": 1779094680320,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/src/lyra_research/agents/analysis/citation_analysis_agent.py",
+      "accessCount": 1,
+      "lastAccessed": 1779094680575,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/tests/test_synthesis_agents.py",
+      "accessCount": 1,
+      "lastAccessed": 1779095271252,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-research/tests/test_adaptive_decomposition.py",
+      "accessCount": 1,
+      "lastAccessed": 1779095322516,
       "type": "file"
     }
   ],

@@ -85,6 +85,14 @@ from lyra_research.intelligence import (
     ResearchGap,
     VerifiableChecklistGenerator,
 )
+from lyra_research.adversarial_reviewer import (
+    AdversarialReviewer,
+    Claim,
+    DisagreementResolution,
+    ReviewerContextBudget,
+    ReviewIssue,
+    ReviewResult,
+)
 from lyra_research.skills import (
     QueryRefinementSkill,
     RefinementSuggestion,
@@ -113,6 +121,18 @@ from lyra_research.learning import (
     ResearchWorkflowOptimizer,
     GateDecision,
     SelfImprovementGate,
+)
+from lyra_research.coordination import (
+    CircuitBreaker,
+    CircuitBreakerStats,
+    CoordinationManager,
+    FailureType,
+    HealthChecker,
+    HealthMetrics,
+    RetryPolicy,
+    Task,
+    TaskState,
+    TimeoutEnforcer,
 )
 
 __version__ = "0.1.0"
@@ -181,6 +201,12 @@ __all__ = [
     "ResearchGap",
     "FalsificationChecker",
     "FalsificationNote",
+    "AdversarialReviewer",
+    "Claim",
+    "DisagreementResolution",
+    "ReviewerContextBudget",
+    "ReviewIssue",
+    "ReviewResult",
     "ResearchNote",
     "ResearchNoteStore",
     "CorpusEntry",
@@ -210,4 +236,14 @@ __all__ = [
     "ResearchWorkflowOptimizer",
     "GateDecision",
     "SelfImprovementGate",
+    "CircuitBreaker",
+    "CircuitBreakerStats",
+    "CoordinationManager",
+    "FailureType",
+    "HealthChecker",
+    "HealthMetrics",
+    "RetryPolicy",
+    "Task",
+    "TaskState",
+    "TimeoutEnforcer",
 ]

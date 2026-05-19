@@ -10,6 +10,16 @@ v1.7.3 surfaces:
   LLM-driven compaction used by the ``/compact`` slash command and
   by :class:`lyra_core.agent.loop.AgentLoop` when a turn approaches a
   context-window cap.
+
+v2.0 surfaces (Phase 1 Week 1):
+- :class:`LayeredContextManager` / :class:`ContextEntry` / :class:`LayerBudget`
+  — 8-layer context system inspired by autocontext for O(1) context growth.
+
+v2.0 surfaces (Phase 1 Week 3):
+- :class:`ContextBoundary` / :class:`ContextScope` / :class:`IsolationPolicy`
+  — Child-task context isolation for multi-agent coordination.
+- :class:`MergeStrategy` / :class:`ContextMerger` / :class:`IsolationStats`
+  — Merge strategies and statistics for context isolation.
 """
 from __future__ import annotations
 
@@ -31,6 +41,20 @@ from .compact_validate import (
 )
 from .compactor import CompactResult, compact, compact_messages
 from .grid import render_context_grid
+from .isolation import (
+    ContextBoundary,
+    ContextMerger,
+    ContextScope,
+    IsolationPolicy,
+    IsolationStats,
+    MergeResult,
+    MergeStrategy,
+)
+from .layered_context import (
+    ContextEntry,
+    LayerBudget,
+    LayeredContextManager,
+)
 from .ngc import (
     NGCCompactor,
     NGCDecision,
@@ -51,13 +75,23 @@ from .profile import (
 __all__ = [
     "CompactResult",
     "ContextAssembler",
+    "ContextBoundary",
+    "ContextEntry",
     "ContextItem",
     "ContextLayer",
+    "ContextMerger",
     "ContextProfile",
+    "ContextScope",
     "FORGET_TOOL_DESCRIPTION",
     "FORGET_TOOL_NAME",
     "Invariant",
+    "IsolationPolicy",
+    "IsolationStats",
+    "LayerBudget",
+    "LayeredContextManager",
     "MINIMAL",
+    "MergeResult",
+    "MergeStrategy",
     "NGCCompactor",
     "NGCDecision",
     "NGCItem",
