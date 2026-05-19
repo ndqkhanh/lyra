@@ -85,6 +85,7 @@ def test_permission_manager_assess_risk_safe():
 def test_permission_manager_user_preference_allow():
     """Test user preference allows operation."""
     manager = PermissionManager()
+    manager.bypass_mode.disable()  # Ensure bypass mode is off
     manager.store.allow("file_write", "write")
 
     result = manager.check_permission("file_write", "write", {"path": "/tmp/test.txt"})
@@ -96,6 +97,7 @@ def test_permission_manager_user_preference_allow():
 def test_permission_manager_user_preference_deny():
     """Test user preference denies operation."""
     manager = PermissionManager()
+    manager.bypass_mode.disable()  # Ensure bypass mode is off
     manager.store.deny("file_write", "write")
 
     result = manager.check_permission("file_write", "write", {"path": "/tmp/test.txt"})

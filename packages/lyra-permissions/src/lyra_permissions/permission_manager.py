@@ -6,11 +6,13 @@ Features:
 - Permission checking
 - Policy application
 - Context-aware decisions
+- Bypass mode integration
 """
 
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
+from lyra_permissions.bypass_mode import AuditLogger, BypassMode, SafetyGuardrails
 from lyra_permissions.permission_policy import PolicyEngine
 from lyra_permissions.permission_store import PermissionStore
 from lyra_permissions.types import (
@@ -44,6 +46,8 @@ class PermissionManager:
         """Initialize permission manager."""
         self.policy_engine = PolicyEngine(policy)
         self.store = PermissionStore()
+        self.bypass_mode = BypassMode()
+        self.audit_logger = AuditLogger()
 
     def check_permission(
         self, tool: str, operation: str, context: Optional[Dict[str, Any]] = None
@@ -64,41 +68,62 @@ class PermissionManager:
         # Assess risk level
         risk_level = self.assess_risk(tool, operation, context)
 
-        # CRITICAL operations always require confirmation
-        if risk_level == PermissionLevel.CRITICAL:
-            return PermissionResult(
+        # CRITICAL operations always require confirmation (even in bypass mode)
+        if risk_level == PermissionLevel.CRITICAL or SafetyGuardrails.requires_confirmation(
+            tool, operation, context
+        ):
+            result = PermissionResult(
                 decision=PermissionDecision.PROMPT,
                 level=risk_level,
                 reason="Critical operation requires confirmation",
                 allow=False,
             )
+            self.audit_logger.log(tool, operation, result.decision, risk_level, context)
+            return result
+
+        # Check bypass mode
+        if self.bypass_mode.is_enabled():
+            result = PermissionResult(
+                decision=PermissionDecision.ALLOW,
+                level=risk_level,
+                reason="Bypass mode: auto-accepted",
+                allow=True,
+            )
+            self.audit_logger.log(tool, operation, result.decision, risk_level, context)
+            return result
 
         # Check user preferences
         if self.store.is_allowed(tool, operation):
-            return PermissionResult(
+            result = PermissionResult(
                 decision=PermissionDecision.ALLOW,
                 level=risk_level,
                 reason="User preference: allowed",
                 allow=True,
             )
+            self.audit_logger.log(tool, operation, result.decision, risk_level, context)
+            return result
 
         if self.store.is_denied(tool, operation):
-            return PermissionResult(
+            result = PermissionResult(
                 decision=PermissionDecision.DENY,
                 level=risk_level,
                 reason="User preference: denied",
                 allow=False,
             )
+            self.audit_logger.log(tool, operation, result.decision, risk_level, context)
+            return result
 
         # Apply policy
         decision = self.policy_engine.apply_policy(risk_level)
 
-        return PermissionResult(
+        result = PermissionResult(
             decision=decision,
             level=risk_level,
             reason=f"Policy decision: {decision.value}",
             allow=decision == PermissionDecision.ALLOW,
         )
+        self.audit_logger.log(tool, operation, result.decision, risk_level, context)
+        return result
 
     def assess_risk(
         self, tool: str, operation: str, context: Optional[Dict[str, Any]] = None

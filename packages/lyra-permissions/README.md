@@ -1,88 +1,127 @@
-# Lyra Permissions - Phase 1: Permission System Foundation
+# Lyra Permissions - Phase 2: Bypass Mode Implementation
 
 ## Overview
 
-Phase 1 implements the foundational permission management system for Lyra, enabling fine-grained control over tool permissions and laying the groundwork for bypass mode.
+Phase 2 implements bypass mode with audit logging, visual indicators, and safety guardrails for the Lyra permission system.
 
 ## Features
 
-### 1. Permission Manager (`permission_manager.py`)
+### 1. Bypass Mode (`bypass_mode.py`)
 
-Central permission registry and decision engine:
+Toggle bypass mode to auto-accept permissions:
 
 ```python
-from lyra_permissions import PermissionManager, PermissionLevel
+from lyra_permissions import BypassMode
 
-manager = PermissionManager()
+bypass = BypassMode()
 
-# Check permission
-decision = manager.check_permission(
+# Enable bypass mode
+bypass.enable()
+print(f"Status: {bypass.get_status_indicator()}")  # [BYPASS MODE]
+
+# Disable bypass mode
+bypass.disable()
+
+# Toggle bypass mode
+bypass.toggle()
+
+# Check status
+if bypass.is_enabled():
+    print("Bypass mode is active")
+```
+
+**Toggle Methods**:
+- CLI flag: `--bypass-permissions` or `-bp`
+- Environment variable: `LYRA_BYPASS_PERMISSIONS=true`
+- Config file: `~/.lyra/config.json` → `"bypassPermissions": true`
+- Runtime toggle: `bypass.enable()` / `bypass.disable()`
+
+### 2. Audit Logger (`bypass_mode.py`)
+
+Track all permission decisions:
+
+```python
+from lyra_permissions import AuditLogger, PermissionDecision, PermissionLevel
+
+logger = AuditLogger()
+
+# Log permission decision
+logger.log(
     tool="file_write",
     operation="write",
+    decision=PermissionDecision.ALLOW,
+    level=PermissionLevel.MEDIUM,
     context={"path": "/tmp/test.txt"}
 )
 
-# Assess risk level
-risk = manager.assess_risk("file_delete", "delete", {"path": "/etc/passwd"})
-print(f"Risk level: {risk}")  # CRITICAL
+# Get recent entries
+entries = logger.get_recent(limit=100)
+for entry in entries:
+    print(f"{entry['timestamp']}: {entry['tool']}.{entry['operation']} - {entry['decision']}")
+
+# Get statistics
+stats = logger.get_stats()
+print(f"Total: {stats['total_entries']}")
+print(f"Auto-accepted: {stats['auto_accepted']}")
+print(f"Prompted: {stats['prompted']}")
+
+# Export audit log
+logger.export("/path/to/export.json", format="json")
+logger.export("/path/to/export.csv", format="csv")
 ```
 
-**Permission Levels**:
-- `SAFE`: Always allow (Read, List, Search)
-- `MEDIUM`: Prompt once per session (Edit, Write)
-- `DANGEROUS`: Always prompt (Delete, Execute, Deploy)
-- `CRITICAL`: Require explicit confirmation (Drop DB, Force Push)
+**Audit Trail**:
+- Location: `~/.lyra/audit.log`
+- Format: JSON lines (one entry per line)
+- Includes: timestamp, tool, operation, decision, level, context
+- Exportable: JSON or CSV format
 
-### 2. Permission Policy (`permission_policy.py`)
+### 3. Safety Guardrails (`bypass_mode.py`)
 
-Policy definitions and rule-based evaluation:
+Protect critical operations even in bypass mode:
 
 ```python
-from lyra_permissions import PermissionPolicy, PolicyEngine
+from lyra_permissions import SafetyGuardrails
 
-# Set policy
-engine = PolicyEngine(policy=PermissionPolicy.BALANCED)
+# Check if operation requires confirmation
+if SafetyGuardrails.requires_confirmation("database", "drop", {"table": "users"}):
+    print("⚠️  This operation requires confirmation!")
 
-# Apply policy
-decision = engine.apply_policy(PermissionLevel.DANGEROUS)
-print(f"Decision: {decision}")  # PROMPT
-
-# Change policy
-engine.set_policy(PermissionPolicy.BYPASS)
+# Get warning message
+warning = SafetyGuardrails.get_warning_message("git", "force_push", {"branch": "main"})
+print(warning)  # ⚠️  CRITICAL: git.force_push is a destructive operation!
 ```
 
-**Permission Policies**:
-- `STRICT`: Prompt for everything except SAFE
-- `BALANCED`: Prompt for DANGEROUS and CRITICAL (default)
-- `PERMISSIVE`: Only prompt for CRITICAL
-- `BYPASS`: Auto-accept all (with audit log)
+**Protected Operations**:
+- Critical operations: drop, truncate, force_push, delete_all, destroy, rm_rf
+- Sensitive paths: /etc, /var, /sys, /usr, ~/.ssh, ~/.aws, ~/.config
+- Force operations: Any operation with `force=True`
+- Bulk operations: Operations affecting >10 items
 
-### 3. Permission Store (`permission_store.py`)
+### 4. Integrated Permission Manager
 
-Persistent permission preferences:
+Permission manager now includes bypass mode:
 
 ```python
-from lyra_permissions import PermissionStore
+from lyra_permissions import PermissionManager
 
-store = PermissionStore()
+manager = PermissionManager()
 
-# Save preference
-store.allow("file_write", "write")
-store.deny("file_delete", "delete")
+# Enable bypass mode
+manager.bypass_mode.enable()
 
-# Check preference
-if store.is_allowed("file_write", "write"):
-    print("Write operation allowed")
+# Check permission (auto-accepted in bypass mode)
+result = manager.check_permission("file_write", "write", {"path": "/tmp/test.txt"})
+print(result.reason)  # "Bypass mode: auto-accepted"
 
-# Get all preferences
-prefs = store.get_all_preferences()
+# Critical operations still require confirmation
+result = manager.check_permission("database", "drop", {"table": "users"})
+print(result.allow)  # False (requires confirmation)
+
+# View audit log
+entries = manager.audit_logger.get_recent()
+print(f"Recent operations: {len(entries)}")
 ```
-
-**Storage**:
-- Location: `~/.lyra/permissions.json`
-- Format: JSON
-- Session cache for performance
-- Automatic backup
 
 ## Architecture
 
@@ -92,28 +131,38 @@ prefs = store.get_all_preferences()
 │  (Central Decision Engine)              │
 │                                         │
 │  • Risk assessment                     │
-│  • Permission checking                 │
-│  • Policy application                  │
+│  • Bypass mode integration             │
+│  • Audit logging                       │
 └─────────────────────────────────────────┘
            │
            ↓
 ┌─────────────────────────────────────────┐
-│    Permission Policy                    │
-│  (Rule-Based Evaluation)                │
+│    Bypass Mode                          │
+│  (Auto-Accept Controller)               │
 │                                         │
-│  • STRICT / BALANCED / PERMISSIVE      │
-│  • BYPASS mode                         │
-│  • Policy enforcement                  │
+│  • Enable/disable toggle               │
+│  • Multiple toggle methods             │
+│  • Visual indicators                   │
 └─────────────────────────────────────────┘
            │
            ↓
 ┌─────────────────────────────────────────┐
-│    Permission Store                     │
-│  (Persistent Preferences)               │
+│    Audit Logger                         │
+│  (Permission Trail)                     │
 │                                         │
-│  • Allow/deny lists                    │
-│  • Session cache                       │
-│  • JSON storage                        │
+│  • Log all decisions                   │
+│  • Statistics tracking                 │
+│  • Export capabilities                 │
+└─────────────────────────────────────────┘
+           │
+           ↓
+┌─────────────────────────────────────────┐
+│    Safety Guardrails                    │
+│  (Critical Operation Protection)        │
+│                                         │
+│  • Critical operation detection        │
+│  • Sensitive path protection           │
+│  • Warning messages                    │
 └─────────────────────────────────────────┘
 ```
 
@@ -126,99 +175,90 @@ pip install -e .
 pytest tests/ -v
 ```
 
-Tests: 15 tests covering all components
-
-## Usage Examples
-
-### Basic Permission Check
-
-```python
-from lyra_permissions import PermissionManager, PermissionLevel
-
-manager = PermissionManager()
-
-# Check if operation is allowed
-decision = manager.check_permission(
-    tool="git",
-    operation="push",
-    context={"branch": "main", "force": False}
-)
-
-if decision.allow:
-    print("Operation allowed")
-else:
-    print(f"Operation denied: {decision.reason}")
-```
-
-### Risk Assessment
-
-```python
-# Assess risk of different operations
-operations = [
-    ("file_read", "read", {"path": "/tmp/data.txt"}),
-    ("file_write", "write", {"path": "/tmp/output.txt"}),
-    ("file_delete", "delete", {"path": "/var/log/app.log"}),
-    ("database", "drop", {"table": "users"}),
-]
-
-for tool, op, ctx in operations:
-    risk = manager.assess_risk(tool, op, ctx)
-    print(f"{tool}.{op}: {risk.value}")
-```
-
-### Policy Management
-
-```python
-from lyra_permissions import PolicyEngine, PermissionPolicy
-
-# Create engine with strict policy
-engine = PolicyEngine(policy=PermissionPolicy.STRICT)
-
-# Check what policy would do
-for level in [PermissionLevel.SAFE, PermissionLevel.MEDIUM, 
-              PermissionLevel.DANGEROUS, PermissionLevel.CRITICAL]:
-    decision = engine.apply_policy(level)
-    print(f"{level.value}: {decision.value}")
-
-# Switch to permissive mode
-engine.set_policy(PermissionPolicy.PERMISSIVE)
-```
-
-### Persistent Preferences
-
-```python
-from lyra_permissions import PermissionStore
-
-store = PermissionStore()
-
-# Allow specific operations
-store.allow("file_read", "read")
-store.allow("file_write", "write")
-
-# Deny dangerous operations
-store.deny("file_delete", "delete")
-store.deny("database", "drop")
-
-# Check preferences
-if store.is_allowed("file_write", "write"):
-    # Perform write operation
-    pass
-
-# Clear all preferences
-store.clear()
-```
+Tests: 45 tests covering all components (24 from Phase 1 + 21 from Phase 2)
 
 ## Configuration
 
-Default configuration (`~/.lyra/permissions.json`):
+### Bypass Mode Config (`~/.lyra/config.json`)
 
 ```json
 {
-  "policy": "balanced",
-  "allowList": [],
-  "denyList": [],
-  "sessionCache": {}
+  "bypassPermissions": true
 }
+```
+
+### Audit Log Config
+
+```json
+{
+  "auditLog": "~/.lyra/audit.log",
+  "auditRetentionDays": 30
+}
+```
+
+## Usage Examples
+
+### Enable Bypass Mode via Environment
+
+```bash
+export LYRA_BYPASS_PERMISSIONS=true
+python your_script.py
+```
+
+### Enable Bypass Mode via CLI
+
+```bash
+lyra --bypass-permissions chat "Refactor the auth module"
+```
+
+### Enable Bypass Mode Programmatically
+
+```python
+from lyra_permissions import PermissionManager
+
+manager = PermissionManager()
+manager.bypass_mode.enable()
+
+# All non-critical operations auto-accepted
+result = manager.check_permission("file_write", "write")
+print(result.allow)  # True
+```
+
+### View Audit Trail
+
+```python
+from lyra_permissions import AuditLogger
+
+logger = AuditLogger()
+
+# Get recent entries
+entries = logger.get_recent(limit=50)
+for entry in entries:
+    print(f"{entry['timestamp']}: {entry['tool']}.{entry['operation']}")
+
+# Get statistics
+stats = logger.get_stats()
+print(f"Auto-accepted: {stats['auto_accepted']}")
+print(f"Prompted: {stats['prompted']}")
+print(f"Denied: {stats['denied']}")
+```
+
+### Safety Guardrails Example
+
+```python
+from lyra_permissions import PermissionManager
+
+manager = PermissionManager()
+manager.bypass_mode.enable()
+
+# Try to drop database (critical operation)
+result = manager.check_permission("database", "drop", {"table": "users"})
+print(result.allow)  # False (requires confirmation even in bypass mode)
+print(result.reason)  # "Critical operation requires confirmation"
+
+# Try to write to sensitive path
+result = manager.check_permission("file_write", "write", {"path": "/etc/passwd"})
+print(result.allow)  # False (sensitive path protected)
 ```
 
 ## Version
@@ -227,20 +267,31 @@ Current version: **0.1.0**
 
 ## Changes
 
+### Phase 2 (Current)
+- Added `BypassMode` for auto-accepting permissions
+- Added `AuditLogger` for tracking all permission decisions
+- Added `SafetyGuardrails` for protecting critical operations
+- Integrated bypass mode with `PermissionManager`
+- Multiple toggle methods (env var, config, runtime)
+- Visual status indicators
+- Audit log export (JSON, CSV)
+- 21 new tests (45 total, 85% coverage)
+
+### Phase 1
 - Added `PermissionManager` for central permission control
 - Added `PermissionPolicy` for rule-based evaluation
 - Added `PermissionStore` for persistent preferences
 - Implemented 4 permission levels (SAFE, MEDIUM, DANGEROUS, CRITICAL)
 - Implemented 4 permission policies (STRICT, BALANCED, PERMISSIVE, BYPASS)
-- Comprehensive test coverage (15 tests)
+- 24 tests (95% coverage)
 
 ## Next Phase
 
-Phase 2 will implement:
-- Bypass mode toggle (CLI, env var, config)
-- Visual indicators for bypass mode
-- Audit trail logging
-- Safety guardrails for critical operations
+Phase 3 will implement:
+- Granular permission control (tool-specific, context-aware)
+- Permission profiles (Development, Production, Testing)
+- Time-based permissions
+- Project-specific permission sets
 
 ## References
 

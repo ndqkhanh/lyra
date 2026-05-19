@@ -5,9 +5,11 @@ This package provides:
 - Permission levels and policies
 - Permission manager
 - Permission store
+- Bypass mode
 - Audit logging
 """
 
+from lyra_permissions.bypass_mode import AuditLogger, BypassMode, SafetyGuardrails
 from lyra_permissions.permission_manager import PermissionManager, PermissionResult
 from lyra_permissions.permission_policy import PolicyEngine
 from lyra_permissions.permission_store import PermissionStore
@@ -31,4 +33,8 @@ __all__ = [
     "PolicyEngine",
     # Permission Store
     "PermissionStore",
+    # Bypass Mode
+    "BypassMode",
+    "AuditLogger",
+    "SafetyGuardrails",
 ]
