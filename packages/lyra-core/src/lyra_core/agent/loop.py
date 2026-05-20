@@ -36,6 +36,14 @@ from concurrent.futures import Executor
 from dataclasses import dataclass, field
 from typing import Any, Callable, Mapping, MutableMapping, Optional
 
+from lyra_core.observability import (
+    LLMCallFinished,
+    LLMCallStarted,
+    ToolCallFinished,
+    ToolCallStarted,
+    get_event_bus,
+)
+
 _SKILL_MANAGE_TOOL = "skill_manage"
 _DEFAULT_SKILL_NUDGE_INTERVAL = 8
 
@@ -209,6 +217,7 @@ class AgentLoop:
 
     def run_conversation(self, user_text: str, *, session_id: str) -> TurnResult:
         """Run a single turn. Always returns a :class:`TurnResult`."""
+        self._current_session_id = session_id  # Track for EventBus emissions
         self._start_session(session_id=session_id, user_text=user_text)
 
         messages: list[dict] = [{"role": "user", "content": user_text}]
@@ -413,9 +422,40 @@ class AgentLoop:
             call = self.llm
         if call is None:
             raise RuntimeError("AgentLoop.llm must expose .generate(...) or be callable")
+
+        # Emit LLMCallStarted event
+        bus = get_event_bus()
+        session_id = getattr(self, "_current_session_id", "unknown")
+        turn = getattr(self, "_current_turn", 0)
+        prompt_tokens = sum(len(str(m.get("content", ""))) // 4 for m in messages)
+        bus.emit(LLMCallStarted(
+            session_id=session_id,
+            prompt_tokens=prompt_tokens,
+            model="unknown",
+            turn=turn,
+        ))
+
+        import time
+        start_time = time.time()
         response = call(messages=messages, tools=tool_defs)
+        duration_ms = (time.time() - start_time) * 1000
+
         if not isinstance(response, Mapping):
             raise TypeError(f"LLM returned {type(response).__name__}, expected mapping")
+
+        # Emit LLMCallFinished event
+        content = str(response.get("content", "") or "")
+        output_tokens = len(content) // 4
+        bus.emit(LLMCallFinished(
+            session_id=session_id,
+            input_tokens=prompt_tokens,
+            output_tokens=output_tokens,
+            cache_read_tokens=0,
+            duration_ms=duration_ms,
+            model="unknown",
+            turn=turn,
+        ))
+
         return dict(response)
 
     def _tool_defs(self) -> list[dict]:
@@ -433,17 +473,55 @@ class AgentLoop:
         fn = (self.tools or {}).get(name)
         if fn is None:
             return {"error": f"unknown tool {name!r}"}
+
+        # Emit ToolCallStarted event
+        bus = get_event_bus()
+        session_id = getattr(self, "_current_session_id", "unknown")
+        import json
+        args_str = json.dumps(arguments if isinstance(arguments, dict) else {}, default=str)
+        args_preview = args_str[:80]
+        bus.emit(ToolCallStarted(
+            session_id=session_id,
+            tool_name=name,
+            args_preview=args_preview,
+        ))
+
+        import time
+        start_time = time.time()
         try:
             if isinstance(arguments, Mapping):
-                return fn(**arguments)
-            if arguments in (None, {}, []):
-                return fn()
-            return fn(arguments)
+                result = fn(**arguments)
+            elif arguments in (None, {}, []):
+                result = fn()
+            else:
+                result = fn(arguments)
+
+            duration_ms = (time.time() - start_time) * 1000
+
+            # Emit ToolCallFinished event (success)
+            bus.emit(ToolCallFinished(
+                session_id=session_id,
+                tool_name=name,
+                duration_ms=duration_ms,
+                is_error=False,
+            ))
+            return result
+
         except KeyboardInterrupt:
             # Propagate to outer handler — treated as user interrupt.
             raise
         except Exception as exc:  # pragma: no cover - defensive
-            return {"error": str(exc), "type": type(exc).__name__}
+            duration_ms = (time.time() - start_time) * 1000
+            error_result = {"error": str(exc), "type": type(exc).__name__}
+
+            # Emit ToolCallFinished event (error)
+            bus.emit(ToolCallFinished(
+                session_id=session_id,
+                tool_name=name,
+                duration_ms=duration_ms,
+                is_error=True,
+            ))
+            return error_result
 
 
 def _stringify(value: Any) -> str:
