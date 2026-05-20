@@ -1,8 +1,14 @@
-# Lyra UI - Phases 1-8: Complete UI Foundation + Multi-Agent Dashboard + Visual Feedback + Collaboration
+# Lyra UI - Complete UI Foundation + Multi-Agent Dashboard + Performance + Accessibility
 
 ## Overview
 
-Phases 1-8 implement a complete UI foundation with Rich/Textual frameworks, dual-pane interface, streaming capabilities, context visualization, advanced keyboard navigation, multi-agent orchestration dashboard, enhanced visual feedback system, and collaboration & sharing features.
+Phases 1-10 implement a complete UI foundation with Rich/Textual frameworks, dual-pane
+interface, streaming capabilities, context visualization, advanced keyboard navigation,
+multi-agent orchestration dashboard, enhanced visual feedback, collaboration & sharing,
+performance optimization with async architecture and resource management, and full
+WCAG 2.1 AA accessibility support.
+
+**Status**: 443 tests passing | 93% coverage | Phases 1-10 complete
 
 ## Features
 
@@ -635,7 +641,7 @@ Run tests:
 pytest tests/ -v
 ```
 
-**Results**: 257 tests, 56% coverage
+**Results**: 443 tests passing, 93% coverage
 
 ## Architecture
 
@@ -980,17 +986,259 @@ manager.save_config()
 - `WebhookIntegration`: Webhook management
 - `PluginSystem`: Plugin and hook system
 
-## Next Phase
+## Phase 9: Performance & Async Architecture
 
-Phase 9 will implement:
-- Performance optimization
-- Caching strategies
-- Lazy loading
-- Memory management
-- Response time optimization
+### 16. Performance Optimization (`performance.py`)
+
+LRU caching, lazy loading, virtual scrolling, and profiling:
+
+```python
+from lyra_ui import (
+    LRUCache,
+    LazyLoader,
+    VirtualScroller,
+    Debouncer,
+    MemoryMonitor,
+    PerformanceProfiler,
+)
+
+# LRU cache with TTL
+cache = LRUCache(max_size=100, ttl=60.0)
+cache.put("key1", "value1")
+value = cache.get("key1")
+
+# Lazy loader with pagination
+loader = LazyLoader(page_size=20, prefetch=True)
+loader.set_data_source(lambda offset, limit: fetch_items(offset, limit))
+items = loader.load_page(0)
+
+# Virtual scrolling for huge lists
+scroller = VirtualScroller(item_height=20, viewport_height=400)
+scroller.set_total_items(10000)
+visible = scroller.get_visible_range(scroll_top=200)
+
+# Debouncer for rapid events
+debouncer = Debouncer(delay=0.3)
+debouncer.debounce(lambda: search(query))
+
+# Memory monitoring
+monitor = MemoryMonitor(threshold_mb=500)
+monitor.start()
+if monitor.is_above_threshold():
+    print("Memory alert")
+monitor.stop()
+
+# Performance profiler
+profiler = PerformanceProfiler()
+with profiler.measure("operation"):
+    expensive_work()
+stats = profiler.get_stats("operation")
+```
+
+### 17. Async Architecture (`async_arch.py`)
+
+Background task queues, worker pools, batching, and connection pools:
+
+```python
+import asyncio
+from lyra_ui import (
+    BackgroundTaskQueue,
+    BackgroundTask,
+    TaskPriority,
+    WorkerPool,
+    AsyncFileIO,
+    RequestBatcher,
+    ConnectionPool,
+)
+
+async def main():
+    # Background task queue with priorities
+    queue = BackgroundTaskQueue(max_workers=4)
+    await queue.start()
+    await queue.submit(BackgroundTask(
+        id="task1",
+        coro=some_async_work(),
+        priority=TaskPriority.HIGH,
+    ))
+    await queue.stop()
+
+    # Worker pool
+    pool = WorkerPool(num_workers=8)
+    results = await pool.map(process_item, items)
+
+    # Async file I/O
+    await AsyncFileIO.write("data.txt", "content")
+    content = await AsyncFileIO.read("data.txt")
+
+    # Request batcher
+    batcher = RequestBatcher(batch_size=10, flush_interval=1.0)
+    await batcher.add(request)
+
+    # Connection pool
+    pool = ConnectionPool(max_connections=20)
+    async with pool.acquire() as conn:
+        await conn.execute(query)
+```
+
+### 18. Resource Management (`resource_mgmt.py`)
+
+System resource monitoring, leak detection, and cleanup:
+
+```python
+from lyra_ui import (
+    ResourceMonitor,
+    MemoryLeakDetector,
+    ResourceCleaner,
+    DiskSpaceManager,
+    BandwidthOptimizer,
+)
+
+# Monitor CPU, memory, disk
+monitor = ResourceMonitor()
+snapshot = monitor.snapshot()
+print(f"CPU: {snapshot.cpu_percent}%, RAM: {snapshot.memory_mb}MB")
+
+# Detect memory leaks
+detector = MemoryLeakDetector()
+detector.start()
+# ... run workload ...
+leaks = detector.check_leaks()
+
+# Clean temp files and caches
+cleaner = ResourceCleaner()
+freed = cleaner.cleanup_temp_files(older_than_hours=24)
+
+# Disk space management
+disk = DiskSpaceManager(threshold_gb=10.0)
+if disk.is_low():
+    disk.cleanup_oldest()
+
+# Bandwidth-aware fetching
+optimizer = BandwidthOptimizer(max_bytes_per_sec=1_000_000)
+await optimizer.fetch(url)
+```
+
+## Phase 10: Accessibility (WCAG 2.1 AA)
+
+### 19. Accessibility (`accessibility.py`)
+
+ARIA attributes, screen reader support, keyboard shortcuts, and auditing:
+
+```python
+from lyra_ui import (
+    AriaAttributes,
+    AriaRole,
+    AriaLive,
+    ScreenReader,
+    KeyboardShortcut,
+    KeyboardShortcutManager,
+    FocusManager,
+    AccessibilityAuditor,
+)
+
+# ARIA attributes
+attrs = AriaAttributes(
+    role=AriaRole.BUTTON,
+    label="Save document",
+    pressed=False,
+    live=AriaLive.POLITE,
+)
+html_attrs = attrs.to_dict()  # {"role": "button", "aria-label": "Save document", ...}
+
+# Screen reader announcements
+reader = ScreenReader()
+reader.announce("File saved successfully")
+reader.announce("Error: file not found", assertive=True)
+
+# Keyboard shortcuts
+manager = KeyboardShortcutManager()
+manager.register("save", KeyboardShortcut(key="s", ctrl=True, description="Save"))
+manager.register("copy", KeyboardShortcut(key="c", ctrl=True, description="Copy"))
+
+action = manager.get_action("s", ctrl=True, alt=False, shift=False, meta=False)
+help_text = manager.get_help()  # [("Ctrl+S", "Save"), ("Ctrl+C", "Copy")]
+
+# Focus management
+focus = FocusManager()
+focus.push("dialog-button-1")
+focus.trap(True)  # Trap focus in modal
+current = focus.get_current()
+focus.pop()
+
+# Accessibility audit
+auditor = AccessibilityAuditor()
+auditor.check_aria_labels(elements)
+auditor.check_keyboard_navigation(focusable_ids)
+auditor.check_color_contrast("#000000", "#FFFFFF")
+report = auditor.get_report()
+print(f"Score: {report.get_score():.0%} ({report.passed}/{report.passed + report.failed})")
+```
+
+**Features**:
+- 16 ARIA roles (alert, button, checkbox, dialog, listbox, menu, etc.)
+- 3 ARIA live politeness levels (off, polite, assertive)
+- Screen reader announcement queue with rate limiting
+- Keyboard shortcuts with modifier keys (Ctrl/Alt/Shift/Cmd)
+- Focus stack with trap support for modal dialogs
+- WCAG 2.1 AA audit checks (labels, navigation, contrast)
+
+## Keyboard Shortcuts Cheat Sheet
+
+### Application
+| Key | Action |
+|-----|--------|
+| `q` | Quit |
+| `Ctrl+W` | Switch active pane |
+| `Ctrl+N` | New chat |
+| `Ctrl+C` | Cancel current stream |
+
+### Vim Navigation (`VimNavigator`)
+| Key | Action |
+|-----|--------|
+| `h` `j` `k` `l` | Move left / down / up / right |
+| `w` `b` | Forward / back by word |
+| `gg` | Go to top |
+| `G` | Go to bottom |
+| `Ctrl+D` | Page down |
+| `Ctrl+U` | Page up |
+
+### Quick Actions
+| Key | Action |
+|-----|--------|
+| `@` | File picker |
+| `#` | Skill picker |
+| `/` | Command palette |
+
+### Modes (`NavigationMode`)
+| Mode | Enter via |
+|------|-----------|
+| Normal | `Esc` |
+| Insert | `i` |
+| Visual | `v` |
+| Command | `:` |
+
+## Installation
+
+```bash
+cd packages/lyra-ui
+pip install -e .
+```
+
+## Testing
+
+```bash
+# All tests
+pytest tests/ -v
+
+# Phase-specific
+pytest tests/test_agent_dashboard.py tests/test_dashboard_viz.py -v
+pytest tests/test_accessibility.py -v
+pytest tests/test_async_arch.py -v
+```
 
 ## References
 
 - [Rich Documentation](https://rich.readthedocs.io/)
 - [Textual Documentation](https://textual.textualize.io/)
+- [WCAG 2.1 Quick Reference](https://www.w3.org/WAI/WCAG21/quickref/)
 - Lyra UI/UX Plan: `.omc/plans/LYRA_UI_UX_ULTIMATE_UPGRADE_PLAN.md`
