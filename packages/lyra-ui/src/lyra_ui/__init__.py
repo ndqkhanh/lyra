@@ -19,6 +19,9 @@ This package provides:
 - Session management and replay
 - Team collaboration
 - Integration system
+- Performance optimization
+- Async architecture
+- Resource management
 """
 
 from lyra_ui.agent_dashboard import (
@@ -30,12 +33,22 @@ from lyra_ui.agent_dashboard import (
     MonitoringPanel,
     Task,
     TaskBoard,
-    TaskPriority,
-    TaskStatus,
+    TaskPriority as AgentTaskPriority,
+    TaskStatus as AgentTaskStatus,
     WorkflowManager,
     WorkflowTemplate,
 )
 from lyra_ui.app import ConversationPane, DualPaneLayout, LyraApp, StatusPanel
+from lyra_ui.async_arch import (
+    AsyncFileIO,
+    BackgroundTask,
+    BackgroundTaskQueue,
+    ConnectionPool,
+    RequestBatcher,
+    TaskPriority,
+    TaskStatus,
+    WorkerPool,
+)
 from lyra_ui.banner import (
     BannerStats,
     BannerStyle,
@@ -82,12 +95,27 @@ from lyra_ui.notifications import (
     NotificationSystem,
     ToastNotification,
 )
+from lyra_ui.performance import (
+    Debouncer,
+    LazyLoader,
+    LRUCache,
+    MemoryMonitor,
+    PerformanceProfiler,
+    VirtualScroller,
+)
 from lyra_ui.progress import ProgressManager, Spinner
 from lyra_ui.progress_viz import (
     MultiTaskProgress,
     ProgressState,
     ProgressStep,
     ProgressVisualizer,
+)
+from lyra_ui.resource_mgmt import (
+    BandwidthOptimizer,
+    DiskSpaceManager,
+    MemoryLeakDetector,
+    ResourceCleaner,
+    ResourceMonitor,
 )
 from lyra_ui.session import (
     SessionAnnotation,
@@ -170,8 +198,8 @@ __all__ = [
     "AgentStatus",
     "TaskBoard",
     "Task",
-    "TaskStatus",
-    "TaskPriority",
+    "AgentTaskStatus",
+    "AgentTaskPriority",
     "MonitoringPanel",
     "MonitoringEvent",
     "WorkflowManager",
@@ -222,4 +250,26 @@ __all__ = [
     "WebhookIntegration",
     "PluginSystem",
     "Plugin",
+    # Performance Optimization
+    "LRUCache",
+    "LazyLoader",
+    "VirtualScroller",
+    "Debouncer",
+    "MemoryMonitor",
+    "PerformanceProfiler",
+    # Async Architecture
+    "BackgroundTaskQueue",
+    "BackgroundTask",
+    "TaskPriority",
+    "TaskStatus",
+    "WorkerPool",
+    "AsyncFileIO",
+    "RequestBatcher",
+    "ConnectionPool",
+    # Resource Management
+    "ResourceMonitor",
+    "MemoryLeakDetector",
+    "ResourceCleaner",
+    "DiskSpaceManager",
+    "BandwidthOptimizer",
 ]

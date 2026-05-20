@@ -156,6 +156,12 @@
   },
   "hotPaths": [
     {
+      "path": "packages/lyra-ui/src/lyra_ui/__init__.py",
+      "accessCount": 15,
+      "lastAccessed": 1779282539035,
+      "type": "file"
+    },
+    {
       "path": "packages/lyra-permissions/src/lyra_permissions/permission_manager.py",
       "accessCount": 8,
       "lastAccessed": 1779207414158,
@@ -165,12 +171,6 @@
       "path": "packages/lyra-audio/src/lyra_audio/sound_manager.py",
       "accessCount": 7,
       "lastAccessed": 1779216411670,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-ui/src/lyra_ui/__init__.py",
-      "accessCount": 6,
-      "lastAccessed": 1779281053709,
       "type": "file"
     },
     {
