@@ -4,12 +4,16 @@ from lyra_ui import (
     AgentFleetManager,
     AgentInfo,
     AgentStatus,
+    AgentTaskPriority,
+    AgentTaskStatus,
     DashboardVisualizer,
     MonitoringPanel,
     TaskBoard,
-    TaskPriority,
-    TaskStatus,
 )
+
+# Alias for convenience in tests
+TaskPriority = AgentTaskPriority
+TaskStatus = AgentTaskStatus
 
 
 # Dashboard Visualizer Tests
