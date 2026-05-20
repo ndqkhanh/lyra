@@ -1,8 +1,8 @@
-# Lyra UI - Phase 1 & 2: Rich/Textual Foundation + Dual-Pane Interface
+# Lyra UI - Phases 1-3: Complete UI Foundation
 
 ## Overview
 
-Phases 1 & 2 implement the foundational UI system using Rich and Textual frameworks with a dual-pane interface for beautiful terminal output.
+Phases 1-3 implement a complete UI foundation with Rich/Textual frameworks, dual-pane interface, and streaming capabilities.
 
 ## Features
 
@@ -113,6 +113,105 @@ context_ring.update_percentage(60.0)
 - `AgentStatusIndicator`: Agent status (idle/working/success/error)
 - `ContextUsageRing`: Context window usage percentage
 
+### Phase 3: Streaming & Progress Visualization
+
+#### 5. Streaming System (`streaming.py`)
+
+Async streaming with progressive rendering:
+
+```python
+from lyra_ui import StreamHandler, LiveStreamDisplay, StreamingProgress
+
+# Stream handler
+handler = StreamHandler()
+
+async def my_stream():
+    for token in ["Hello", " ", "world"]:
+        yield token
+
+result = await handler.stream_response(my_stream())
+
+# With callback
+def on_token(token):
+    print(token, end="", flush=True)
+
+await handler.stream_response(my_stream(), on_token=on_token)
+
+# Cancellation
+handler.cancel()
+
+# Pause/resume
+handler.pause()
+handler.resume()
+
+# Live display
+display = LiveStreamDisplay()
+display.start()
+display.append_token("Hello")
+display.stop()
+
+# Progress tracking
+progress = StreamingProgress()
+progress.start()
+progress.increment(10)
+rate = progress.get_rate()  # tokens/second
+elapsed = progress.get_elapsed()
+progress.stop()
+```
+
+**Features**:
+- Token-by-token streaming
+- Cancellation support (Ctrl+C)
+- Pause/resume functionality
+- Backpressure handling
+- Live display with Rich
+- Streaming rate tracking
+
+#### 6. Progress Visualization (`progress_viz.py`)
+
+Multi-task progress tracking:
+
+```python
+from lyra_ui import MultiTaskProgress, ProgressVisualizer, ProgressState
+
+# Multi-task tracker
+tracker = MultiTaskProgress()
+
+# Add tasks
+tracker.add_task("download", "Download", "Downloading files", total=100)
+tracker.add_task("process", "Process", "Processing data", total=50)
+
+# Start and update
+tracker.start_task("download")
+tracker.update_task("download", 50)
+tracker.complete_task("download", success=True)
+
+# Cancel task
+tracker.cancel_task("process")
+
+# Get summary
+summary = tracker.get_summary()
+print(f"Completed: {summary['completed']}/{summary['total']}")
+
+# Visualize
+viz = ProgressVisualizer()
+viz.display_summary(tracker)
+```
+
+**Features**:
+- Multi-task progress tracking
+- Step-by-step progress
+- Status indicators (pending/running/completed/failed/cancelled)
+- Time estimates
+- Visual progress bars
+- Summary statistics
+
+**Widgets**:
+- `MessageBubble`: User/assistant messages with timestamps
+- `TokenUsageIndicator`: Visual token usage bar with color coding
+- `AgentStatusIndicator`: Agent status (idle/working/success/error)
+- `ContextUsageRing`: Context window usage percentage
+
 ## Installation
 
 ```bash
@@ -127,7 +226,7 @@ Run tests:
 pytest tests/ -v
 ```
 
-**Results**: 40 tests, 90% coverage
+**Results**: 69 tests, 91% coverage
 
 ## Architecture
 
@@ -219,12 +318,12 @@ Current version: **0.1.0**
 
 ## Next Phase
 
-Phase 3 will implement:
-- Streaming output with progressive rendering
-- Rich progress visualization
-- Cancellation support (Ctrl+C)
-- Multi-task progress tracking
-- Real-time status updates
+Phase 4 will implement:
+- Context window visualization (ring chart)
+- Token usage breakdown by component
+- Context management tools
+- Context export/import
+- Context diff viewer
 
 ## References
 

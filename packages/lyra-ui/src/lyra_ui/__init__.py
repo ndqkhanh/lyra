@@ -7,11 +7,24 @@ This package provides:
 - Textual TUI framework
 - Dual-pane interface
 - Custom widgets
+- Streaming output
+- Progress visualization
 """
 
 from lyra_ui.app import ConversationPane, DualPaneLayout, LyraApp, StatusPanel
 from lyra_ui.console import RichConsole, console
 from lyra_ui.progress import ProgressManager, Spinner
+from lyra_ui.progress_viz import (
+    MultiTaskProgress,
+    ProgressState,
+    ProgressStep,
+    ProgressVisualizer,
+)
+from lyra_ui.streaming import (
+    LiveStreamDisplay,
+    StreamHandler,
+    StreamingProgress,
+)
 from lyra_ui.widgets import (
     AgentStatusIndicator,
     ContextUsageRing,
@@ -38,4 +51,13 @@ __all__ = [
     "TokenUsageIndicator",
     "AgentStatusIndicator",
     "ContextUsageRing",
+    # Streaming
+    "StreamHandler",
+    "LiveStreamDisplay",
+    "StreamingProgress",
+    # Progress Visualization
+    "MultiTaskProgress",
+    "ProgressStep",
+    "ProgressState",
+    "ProgressVisualizer",
 ]
