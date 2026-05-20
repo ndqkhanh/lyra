@@ -1,8 +1,8 @@
-# Lyra UI - Phases 1-3: Complete UI Foundation
+# Lyra UI - Phases 1-4: Complete UI Foundation
 
 ## Overview
 
-Phases 1-3 implement a complete UI foundation with Rich/Textual frameworks, dual-pane interface, and streaming capabilities.
+Phases 1-4 implement a complete UI foundation with Rich/Textual frameworks, dual-pane interface, streaming capabilities, and context visualization.
 
 ## Features
 
@@ -206,6 +206,50 @@ viz.display_summary(tracker)
 - Visual progress bars
 - Summary statistics
 
+### Phase 4: Context Window Visualization
+
+#### 7. Context Visualization (`context_viz.py`)
+
+Context window tracking and visualization:
+
+```python
+from lyra_ui import (
+    ContextTracker,
+    ContextComponent,
+    ContextRingVisualizer,
+    ContextManager
+)
+
+# Track context usage
+tracker = ContextTracker(total_tokens=200000)
+
+# Add tokens by component
+tracker.add_tokens(ContextComponent.SYSTEM_PROMPT, 5000)
+tracker.add_tokens(ContextComponent.CONVERSATION, 50000)
+tracker.add_tokens(ContextComponent.TOOL_RESULTS, 20000)
+tracker.add_tokens(ContextComponent.CODE_CONTEXT, 15000)
+
+# Get usage stats
+total_used = tracker.get_total_used()  # 90000
+total_percentage = tracker.get_total_percentage()  # 45.0%
+
+# Visualize
+viz = ContextRingVisualizer()
+viz.display(tracker)  # Shows ring chart + breakdown table
+
+# Context management
+manager = ContextManager(tracker)
+recommendations = manager.get_recommendations()
+```
+
+**Features**:
+- Component-level token tracking
+- Context ring visualization with color coding
+- Breakdown table with percentages
+- Context export/import
+- Component pruning
+- Optimization recommendations
+
 **Widgets**:
 - `MessageBubble`: User/assistant messages with timestamps
 - `TokenUsageIndicator`: Visual token usage bar with color coding
@@ -226,7 +270,7 @@ Run tests:
 pytest tests/ -v
 ```
 
-**Results**: 69 tests, 91% coverage
+**Results**: 93 tests, 93% coverage
 
 ## Architecture
 
@@ -318,12 +362,12 @@ Current version: **0.1.0**
 
 ## Next Phase
 
-Phase 4 will implement:
-- Context window visualization (ring chart)
-- Token usage breakdown by component
-- Context management tools
-- Context export/import
-- Context diff viewer
+Phase 5 will implement:
+- Vim-style keyboard navigation (hjkl, gg/G, Ctrl+D/U)
+- Command palette with fuzzy search (Ctrl+P)
+- Quick actions (@ file picker, # skill picker, / command picker)
+- Custom keybindings
+- Keybinding profiles (Vim, Emacs, VS Code)
 
 ## References
 
