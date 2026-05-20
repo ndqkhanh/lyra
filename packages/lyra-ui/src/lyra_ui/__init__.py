@@ -11,8 +11,23 @@ This package provides:
 - Progress visualization
 - Context window visualization
 - Keyboard navigation
+- Multi-agent orchestration dashboard
 """
 
+from lyra_ui.agent_dashboard import (
+    AgentFleetManager,
+    AgentInfo,
+    AgentMetrics,
+    AgentStatus,
+    MonitoringEvent,
+    MonitoringPanel,
+    Task,
+    TaskBoard,
+    TaskPriority,
+    TaskStatus,
+    WorkflowManager,
+    WorkflowTemplate,
+)
 from lyra_ui.app import ConversationPane, DualPaneLayout, LyraApp, StatusPanel
 from lyra_ui.console import RichConsole, console
 from lyra_ui.context_viz import (
@@ -21,6 +36,11 @@ from lyra_ui.context_viz import (
     ContextRingVisualizer,
     ContextTracker,
     ContextUsage,
+)
+from lyra_ui.dashboard_viz import (
+    AgentStatusWidget,
+    DashboardVisualizer,
+    TaskSummaryWidget,
 )
 from lyra_ui.keyboard import (
     CommandPalette,
@@ -88,4 +108,21 @@ __all__ = [
     "KeyBinding",
     "CommandPalette",
     "QuickActions",
+    # Agent Dashboard
+    "AgentFleetManager",
+    "AgentInfo",
+    "AgentMetrics",
+    "AgentStatus",
+    "TaskBoard",
+    "Task",
+    "TaskStatus",
+    "TaskPriority",
+    "MonitoringPanel",
+    "MonitoringEvent",
+    "WorkflowManager",
+    "WorkflowTemplate",
+    # Dashboard Visualization
+    "DashboardVisualizer",
+    "AgentStatusWidget",
+    "TaskSummaryWidget",
 ]

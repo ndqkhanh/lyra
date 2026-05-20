@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "python -m pytest tests/test_sound_commands.py -v",
+    "testCommand": "python -m pytest tests/test_permission_gate.py tests/test_bypass_manager.py tests/test_audit_logger.py tests/test_indicators.py tests/test_status_line.py tests/test_permission_hooks.py tests/test_bypass_commands.py tests/test_bypass_integration.py tests/test_audio_player.py tests/test_sound_config.py tests/test_theme_manager.py tests/test_sound_manager.py tests/test_event_mapper.py tests/test_sound_hooks.py tests/test_advanced_sounds.py tests/test_sound_commands.py --tb=no -q",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}

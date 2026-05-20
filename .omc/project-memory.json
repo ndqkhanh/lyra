@@ -180,6 +180,12 @@
       "type": "file"
     },
     {
+      "path": "packages/lyra-ui/src/lyra_ui/__init__.py",
+      "accessCount": 5,
+      "lastAccessed": 1779280681614,
+      "type": "file"
+    },
+    {
       "path": "packages/lyra-audio/src/lyra_audio/__init__.py",
       "accessCount": 4,
       "lastAccessed": 1779216780131,
@@ -429,6 +435,24 @@
       "path": "packages/lyra-audio/tests/test_config_manager.py",
       "accessCount": 1,
       "lastAccessed": 1779216927689,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-ui/src/lyra_ui/app.py",
+      "accessCount": 1,
+      "lastAccessed": 1779278633523,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-ui/src/lyra_ui/widgets.py",
+      "accessCount": 1,
+      "lastAccessed": 1779278653443,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-ui/tests/test_app.py",
+      "accessCount": 1,
+      "lastAccessed": 1779278686634,
       "type": "file"
     }
   ],
