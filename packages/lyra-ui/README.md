@@ -1,12 +1,14 @@
-# Lyra UI - Phase 1: Rich/Textual Foundation
+# Lyra UI - Phase 1 & 2: Rich/Textual Foundation + Dual-Pane Interface
 
 ## Overview
 
-Phase 1 implements the foundational UI system using Rich and Textual frameworks for beautiful terminal output.
+Phases 1 & 2 implement the foundational UI system using Rich and Textual frameworks with a dual-pane interface for beautiful terminal output.
 
 ## Features
 
-### 1. Rich Console (`console.py`)
+### Phase 1: Rich Console & Progress
+
+#### 1. Rich Console (`console.py`)
 
 Singleton console with theme support:
 
@@ -30,7 +32,7 @@ console.print("[bold blue]Custom styled text[/bold blue]")
 - Context indicator colors
 - Custom theme support
 
-### 2. Progress Indicators (`progress.py`)
+#### 2. Progress Indicators (`progress.py`)
 
 Progress bars and spinners:
 
@@ -56,6 +58,61 @@ with Spinner("Processing...") as spinner:
 - Time tracking (elapsed, remaining)
 - Task management (add, update, complete, remove)
 
+### Phase 2: Dual-Pane Interface
+
+#### 3. Textual App (`app.py`)
+
+Full TUI application with dual-pane layout:
+
+```python
+from lyra_ui import LyraApp
+
+# Run the app
+app = LyraApp()
+app.run()
+```
+
+**Features**:
+- Split-screen layout (70% conversation, 30% status)
+- Conversation pane with message history
+- Status panel with real-time indicators
+- Keyboard shortcuts (q=quit, Ctrl+W=switch pane, Ctrl+N=new chat)
+- CSS-like styling
+
+#### 4. Custom Widgets (`widgets.py`)
+
+Rich widgets for UI components:
+
+```python
+from lyra_ui import (
+    MessageBubble,
+    TokenUsageIndicator,
+    AgentStatusIndicator,
+    ContextUsageRing
+)
+
+# Message bubble
+bubble = MessageBubble("user", "Hello world")
+
+# Token usage
+token_indicator = TokenUsageIndicator(used=50000, total=200000)
+token_indicator.update_usage(75000)
+
+# Agent status
+agent_status = AgentStatusIndicator("working")
+agent_status.update_status("success")
+
+# Context usage
+context_ring = ContextUsageRing(45.0)
+context_ring.update_percentage(60.0)
+```
+
+**Widgets**:
+- `MessageBubble`: User/assistant messages with timestamps
+- `TokenUsageIndicator`: Visual token usage bar with color coding
+- `AgentStatusIndicator`: Agent status (idle/working/success/error)
+- `ContextUsageRing`: Context window usage percentage
+
 ## Installation
 
 ```bash
@@ -70,9 +127,29 @@ Run tests:
 pytest tests/ -v
 ```
 
+**Results**: 40 tests, 90% coverage
+
 ## Architecture
 
 ```
+┌─────────────────────────────────────────┐
+│    Lyra Textual App                     │
+│  (Main Application)                     │
+│                                         │
+│  ┌─────────────┬─────────────────────┐ │
+│  │ Conversation│  Status Panel       │ │
+│  │ Pane (70%)  │  (30%)              │ │
+│  │             │                     │ │
+│  │ Messages    │  Agent Status       │ │
+│  │ History     │  Token Usage        │ │
+│  │ Code blocks │  Context Usage      │ │
+│  │             │  Progress           │ │
+│  └─────────────┴─────────────────────┘ │
+│                                         │
+│  Keyboard: q, Ctrl+W, Ctrl+N           │
+└─────────────────────────────────────────┘
+           │
+           ↓
 ┌─────────────────────────────────────────┐
 │    Rich Console                         │
 │  (Styled Output)                        │
@@ -95,48 +172,45 @@ pytest tests/ -v
 
 ## Usage Examples
 
-### Basic Console Output
+### Running the TUI App
 
 ```python
-from lyra_ui import console
+from lyra_ui import LyraApp
 
-console.print_info("Starting Lyra...")
-console.print_success("✓ Initialization complete")
-console.print_warning("⚠ High token usage")
-console.print_error("✗ Connection failed")
+app = LyraApp()
+app.run()
 ```
 
-### Progress Tracking
+### Adding Messages to Conversation
 
 ```python
-from lyra_ui import ProgressManager
+from lyra_ui import ConversationPane
 
-manager = ProgressManager()
-
-# Add multiple tasks
-manager.add_task("compile", "Compiling...", total=100)
-manager.add_task("test", "Running tests...", total=50)
-
-# Update progress
-for i in range(100):
-    manager.update_task("compile", advance=1)
-
-for i in range(50):
-    manager.update_task("test", advance=1)
-
-manager.stop()
+pane = ConversationPane()
+pane.add_message("user", "What is Python?")
+pane.add_message("assistant", "Python is a programming language...")
 ```
 
-### Spinner for Async Operations
+### Status Indicators
 
 ```python
-from lyra_ui import Spinner
+from lyra_ui import (
+    TokenUsageIndicator,
+    AgentStatusIndicator,
+    ContextUsageRing
+)
 
-with Spinner("Connecting to API...") as spinner:
-    # Async operation
-    spinner.update("Authenticating...")
-    # More work
-    spinner.update("Fetching data...")
+# Token usage with color coding
+tokens = TokenUsageIndicator(used=100000, total=200000)
+print(tokens.render())  # Shows bar with 50% (yellow)
+
+# Agent status
+status = AgentStatusIndicator("working")
+print(status.render())  # Shows 🟡 Working
+
+# Context usage
+context = ContextUsageRing(75.0)
+print(context.render())  # Shows Context: 75.0% (yellow)
 ```
 
 ## Version
@@ -145,11 +219,12 @@ Current version: **0.1.0**
 
 ## Next Phase
 
-Phase 2 will implement:
-- Dual-pane layout with Textual
-- Conversation pane
-- Status panel
-- Resizable panes
+Phase 3 will implement:
+- Streaming output with progressive rendering
+- Rich progress visualization
+- Cancellation support (Ctrl+C)
+- Multi-task progress tracking
+- Real-time status updates
 
 ## References
 
