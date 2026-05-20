@@ -3,7 +3,8 @@ from __future__ import annotations
 
 # Phase E — closed-loop controller
 from .control_record import ControlRecord, new_control_record
-from .controller import ClosedLoopController, ControllerConfig, HaltSignal
+from .controller import ClosedLoopController, ControllerConfig, HaltSignal, HITLCallback
+from .integration import create_hitl_callback
 from .reflexion import ReflexionEngine, ReflexionLesson
 from .sandbox_verifier import SafetyRule, SandboxVerifier
 from .stability import BudgetViolation, StabilityBudget, StabilityState
@@ -44,6 +45,7 @@ __all__ = [
     "ControlRecord",
     "ControllerConfig",
     "HaltSignal",
+    "HITLCallback",
     "ReflexionEngine",
     "ReflexionLesson",
     "SafetyRule",
@@ -53,6 +55,7 @@ __all__ = [
     "StabilityBudget",
     "StabilityState",
     "VoyagerAccumulator",
+    "create_hitl_callback",
     "new_control_record",
     # Phase H
     "Ctx2SkillExtractor",

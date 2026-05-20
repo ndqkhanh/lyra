@@ -11,7 +11,7 @@ Grounded in:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Callable, Optional
 
 from .control_record import ControlRecord, new_control_record
 from .reflexion import ReflexionEngine, ReflexionLesson
@@ -22,7 +22,12 @@ __all__ = [
     "ControllerConfig",
     "ClosedLoopController",
     "HaltSignal",
+    "HITLCallback",
 ]
+
+
+# Type alias for HITL interrupt callback
+HITLCallback = Callable[[str, int, str], None]  # (session_id, turn_index, reason)
 
 
 @dataclass(frozen=True)
@@ -65,12 +70,14 @@ class ClosedLoopController:
         budget: Optional[StabilityBudget] = None,
         config: Optional[ControllerConfig] = None,
         reflexion: Optional[ReflexionEngine] = None,
+        hitl_callback: Optional[HITLCallback] = None,
     ) -> None:
         self.session_id = session_id
         self.run_id = run_id
         self._budget = budget or StabilityBudget()
         self._config = config or ControllerConfig()
         self._reflexion = reflexion or ReflexionEngine()
+        self._hitl_callback = hitl_callback
         self._state = StabilityState()
         self._records: list[ControlRecord] = []
 
@@ -106,6 +113,11 @@ class ClosedLoopController:
         rec.step_tool_retries = tool_retries
         rec.hitl_pending = hitl_pending
         rec.fleet_sre_alert = fleet_alert
+
+        # Trigger HITL callback if pending and callback is registered
+        if hitl_pending and self._hitl_callback is not None:
+            reason = fleet_alert or "HITL approval required"
+            self._hitl_callback(self.session_id, turn_index, reason)
 
         self._records.append(rec)
 
