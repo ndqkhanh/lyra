@@ -168,6 +168,12 @@
       "type": "file"
     },
     {
+      "path": "packages/lyra-ui/src/lyra_ui/__init__.py",
+      "accessCount": 6,
+      "lastAccessed": 1779281053709,
+      "type": "file"
+    },
+    {
       "path": "packages/lyra-permissions/src/lyra_permissions/permission_store.py",
       "accessCount": 5,
       "lastAccessed": 1779206932314,
@@ -177,12 +183,6 @@
       "path": "packages/lyra-permissions/src/lyra_permissions/__init__.py",
       "accessCount": 5,
       "lastAccessed": 1779207776777,
-      "type": "file"
-    },
-    {
-      "path": "packages/lyra-ui/src/lyra_ui/__init__.py",
-      "accessCount": 5,
-      "lastAccessed": 1779280681614,
       "type": "file"
     },
     {

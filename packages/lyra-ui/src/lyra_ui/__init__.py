@@ -12,6 +12,10 @@ This package provides:
 - Context window visualization
 - Keyboard navigation
 - Multi-agent orchestration dashboard
+- Banner system
+- Notification system
+- Theme management
+- Animation effects
 """
 
 from lyra_ui.agent_dashboard import (
@@ -29,6 +33,14 @@ from lyra_ui.agent_dashboard import (
     WorkflowTemplate,
 )
 from lyra_ui.app import ConversationPane, DualPaneLayout, LyraApp, StatusPanel
+from lyra_ui.banner import (
+    BannerStats,
+    BannerStyle,
+    BannerSystem,
+    BannerTheme,
+    ShutdownBanner,
+    StartupBanner,
+)
 from lyra_ui.console import RichConsole, console
 from lyra_ui.context_viz import (
     ContextComponent,
@@ -49,6 +61,13 @@ from lyra_ui.keyboard import (
     QuickActions,
     VimNavigator,
 )
+from lyra_ui.notifications import (
+    Notification,
+    NotificationHistory,
+    NotificationLevel,
+    NotificationSystem,
+    ToastNotification,
+)
 from lyra_ui.progress import ProgressManager, Spinner
 from lyra_ui.progress_viz import (
     MultiTaskProgress,
@@ -60,6 +79,12 @@ from lyra_ui.streaming import (
     LiveStreamDisplay,
     StreamHandler,
     StreamingProgress,
+)
+from lyra_ui.themes import (
+    AnimationEffects,
+    ThemeColors,
+    ThemeManager,
+    ThemeName,
 )
 from lyra_ui.widgets import (
     AgentStatusIndicator,
@@ -125,4 +150,22 @@ __all__ = [
     "DashboardVisualizer",
     "AgentStatusWidget",
     "TaskSummaryWidget",
+    # Banner System
+    "BannerSystem",
+    "BannerStyle",
+    "BannerTheme",
+    "BannerStats",
+    "StartupBanner",
+    "ShutdownBanner",
+    # Notification System
+    "NotificationSystem",
+    "NotificationLevel",
+    "Notification",
+    "ToastNotification",
+    "NotificationHistory",
+    # Theme System
+    "ThemeManager",
+    "ThemeName",
+    "ThemeColors",
+    "AnimationEffects",
 ]
