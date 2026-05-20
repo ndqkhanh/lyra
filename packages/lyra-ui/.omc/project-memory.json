@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "python -m pytest tests/test_performance.py tests/test_async_arch.py tests/test_resource_mgmt.py -v --tb=short",
+    "testCommand": "python -m pytest tests/ -v --tb=short | tail -100",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -76,6 +76,12 @@
       "type": "file"
     },
     {
+      "path": "src/lyra_ui/__init__.py",
+      "accessCount": 7,
+      "lastAccessed": 1779283427989,
+      "type": "file"
+    },
+    {
       "path": "src/lyra_ui/async_arch.py",
       "accessCount": 4,
       "lastAccessed": 1779283061722,
@@ -88,15 +94,21 @@
       "type": "file"
     },
     {
-      "path": "src/lyra_ui/__init__.py",
-      "accessCount": 4,
-      "lastAccessed": 1779283202086,
-      "type": "file"
-    },
-    {
       "path": "src/lyra_ui/performance.py",
       "accessCount": 2,
       "lastAccessed": 1779283101073,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_ui/accessibility.py",
+      "accessCount": 1,
+      "lastAccessed": 1779283350492,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_accessibility.py",
+      "accessCount": 1,
+      "lastAccessed": 1779283387325,
       "type": "file"
     }
   ],

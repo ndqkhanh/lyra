@@ -22,8 +22,20 @@ This package provides:
 - Performance optimization
 - Async architecture
 - Resource management
+- Accessibility features
 """
 
+from lyra_ui.accessibility import (
+    AccessibilityAuditor,
+    AccessibilityReport,
+    AriaAttributes,
+    AriaLive,
+    AriaRole,
+    FocusManager,
+    KeyboardShortcut,
+    KeyboardShortcutManager,
+    ScreenReader,
+)
 from lyra_ui.agent_dashboard import (
     AgentFleetManager,
     AgentInfo,
@@ -272,4 +284,14 @@ __all__ = [
     "ResourceCleaner",
     "DiskSpaceManager",
     "BandwidthOptimizer",
+    # Accessibility
+    "AccessibilityAuditor",
+    "AccessibilityReport",
+    "AriaAttributes",
+    "AriaRole",
+    "AriaLive",
+    "ScreenReader",
+    "KeyboardShortcut",
+    "KeyboardShortcutManager",
+    "FocusManager",
 ]
