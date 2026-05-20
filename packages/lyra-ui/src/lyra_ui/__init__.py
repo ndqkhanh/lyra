@@ -16,6 +16,9 @@ This package provides:
 - Notification system
 - Theme management
 - Animation effects
+- Session management and replay
+- Team collaboration
+- Integration system
 """
 
 from lyra_ui.agent_dashboard import (
@@ -54,6 +57,17 @@ from lyra_ui.dashboard_viz import (
     DashboardVisualizer,
     TaskSummaryWidget,
 )
+from lyra_ui.integration import (
+    GitHubIntegration,
+    GitIntegration,
+    IntegrationConfig,
+    IntegrationManager,
+    IntegrationType,
+    Plugin,
+    PluginSystem,
+    SlackIntegration,
+    WebhookIntegration,
+)
 from lyra_ui.keyboard import (
     CommandPalette,
     KeyBinding,
@@ -75,10 +89,26 @@ from lyra_ui.progress_viz import (
     ProgressStep,
     ProgressVisualizer,
 )
+from lyra_ui.session import (
+    SessionAnnotation,
+    SessionEvent,
+    SessionEventType,
+    SessionManager,
+    SessionMetadata,
+    SessionReplay,
+)
 from lyra_ui.streaming import (
     LiveStreamDisplay,
     StreamHandler,
     StreamingProgress,
+)
+from lyra_ui.team import (
+    PromptTemplate,
+    TeamConfig,
+    TeamManager,
+    TeamMember,
+    UsageQuota,
+    UserRole,
 )
 from lyra_ui.themes import (
     AnimationEffects,
@@ -168,4 +198,28 @@ __all__ = [
     "ThemeName",
     "ThemeColors",
     "AnimationEffects",
+    # Session Management
+    "SessionManager",
+    "SessionMetadata",
+    "SessionEvent",
+    "SessionEventType",
+    "SessionAnnotation",
+    "SessionReplay",
+    # Team Collaboration
+    "TeamManager",
+    "TeamConfig",
+    "TeamMember",
+    "UserRole",
+    "UsageQuota",
+    "PromptTemplate",
+    # Integration System
+    "IntegrationManager",
+    "IntegrationType",
+    "IntegrationConfig",
+    "GitIntegration",
+    "GitHubIntegration",
+    "SlackIntegration",
+    "WebhookIntegration",
+    "PluginSystem",
+    "Plugin",
 ]

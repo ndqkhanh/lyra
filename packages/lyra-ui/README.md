@@ -1,8 +1,8 @@
-# Lyra UI - Phases 1-7: Complete UI Foundation + Multi-Agent Dashboard + Visual Feedback
+# Lyra UI - Phases 1-8: Complete UI Foundation + Multi-Agent Dashboard + Visual Feedback + Collaboration
 
 ## Overview
 
-Phases 1-7 implement a complete UI foundation with Rich/Textual frameworks, dual-pane interface, streaming capabilities, context visualization, advanced keyboard navigation, multi-agent orchestration dashboard, and enhanced visual feedback system.
+Phases 1-8 implement a complete UI foundation with Rich/Textual frameworks, dual-pane interface, streaming capabilities, context visualization, advanced keyboard navigation, multi-agent orchestration dashboard, enhanced visual feedback system, and collaboration & sharing features.
 
 ## Features
 
@@ -725,15 +725,269 @@ print(context.render())  # Shows Context: 75.0% (yellow)
 
 Current version: **0.1.0**
 
-## Next Phase
+## Phase 8: Collaboration & Sharing
 
-Phase 8 will implement:
-- Session sharing and replay
-- Team collaboration features
-- Git/GitHub integration
+### 13. Session Management (`session.py`)
+
+Session export/import and replay functionality:
+
+```python
+from lyra_ui import SessionManager, SessionEventType, SessionReplay
+
+# Session manager
+manager = SessionManager()
+
+# Create session
+session = manager.create_session(
+    session_id="research-session",
+    author="user@example.com",
+    title="AI Research Session",
+    description="Researching AI agent frameworks",
+    tags=["ai", "research"],
+)
+
+# Add events
+manager.add_event(
+    event_id="e1",
+    event_type=SessionEventType.MESSAGE,
+    data={"role": "user", "content": "What are the best AI frameworks?"},
+)
+manager.add_event(
+    event_id="e2",
+    event_type=SessionEventType.TOOL_CALL,
+    data={"tool": "search", "query": "AI frameworks"},
+)
+
+# Add annotations
+manager.add_annotation(
+    annotation_id="a1",
+    event_id="e1",
+    author="reviewer",
+    text="Good question",
+)
+
+# Save session
+manager.save_session()
+
+# Export session
+exported = manager.export_session()
+
+# Import session
+manager.import_session(exported)
+
+# Search sessions
+results = manager.search_sessions(query="AI", tags=["research"])
+
+# Get analytics
+analytics = manager.get_analytics()
+print(f"Total events: {analytics['total_events']}")
+print(f"Total tokens: {analytics['total_tokens']}")
+
+# Session replay
+replay = SessionReplay(manager)
+replay.start()
+while True:
+    event = replay.next_event()
+    if event is None:
+        break
+    print(f"Event: {event.type.value}")
+```
+
+**Features**:
+- Session export/import to JSON
+- Event types: MESSAGE, TOOL_CALL, TOOL_RESULT, ERROR, ANNOTATION
+- Session annotations for collaboration
+- Session search by query, author, tags
+- Session analytics (events, tokens, cost)
+- Session replay with next/previous/goto controls
+- Progress tracking during replay
+
+### 14. Team Collaboration (`team.py`)
+
+Team management with role-based access control:
+
+```python
+from lyra_ui import TeamManager, UserRole
+
+# Team manager
+manager = TeamManager()
+
+# Create team
+team = manager.create_team(
+    team_id="engineering",
+    team_name="Engineering Team",
+    settings={"theme": "dark", "notifications": True},
+)
+
+# Add members
+manager.add_member(
+    user_id="alice",
+    username="Alice",
+    email="alice@example.com",
+    role=UserRole.ADMIN,
+)
+manager.add_member(
+    user_id="bob",
+    username="Bob",
+    email="bob@example.com",
+    role=UserRole.MEMBER,
+)
+
+# Update member role
+manager.update_member_role("bob", UserRole.ADMIN)
+
+# Set usage quotas
+manager.set_quota("alice", tokens_limit=200000, cost_limit=20.0)
+manager.set_quota("bob", tokens_limit=100000, cost_limit=10.0)
+
+# Update usage
+manager.update_usage("alice", tokens=50000, cost=5.0)
+
+# Check quota
+if manager.check_quota("alice"):
+    print("Within quota")
+
+# Add shared templates
+manager.add_template(
+    template_id="code-review",
+    name="Code Review",
+    description="Template for code reviews",
+    template="Review the following code:\n{code}",
+    variables=["code"],
+    created_by="alice",
+)
+
+# Get template
+template = manager.get_template("code-review")
+
+# Save team
+manager.save_team()
+
+# Get analytics
+analytics = manager.get_team_analytics()
+print(f"Total members: {analytics['total_members']}")
+print(f"Total tokens used: {analytics['total_tokens_used']}")
+print(f"Total cost: {analytics['total_cost']}")
+```
+
+**Features**:
+- Team configuration and settings
+- Role-based access control (ADMIN, MEMBER, VIEWER)
+- Usage quotas (tokens and cost limits)
+- Shared prompt templates with variables
+- Team analytics (members, usage, cost)
+- Member management (add, remove, update role)
+- Storage in ~/.lyra/teams/
+
+### 15. Integration System (`integration.py`)
+
+External tool integrations:
+
+```python
+from lyra_ui import (
+    IntegrationManager,
+    IntegrationType,
+    GitIntegration,
+    GitHubIntegration,
+    SlackIntegration,
+    WebhookIntegration,
+    PluginSystem,
+    Plugin,
+)
+
+# Integration manager
+manager = IntegrationManager()
+
+# Configure integrations
+manager.configure_integration(
+    IntegrationType.GIT,
+    enabled=True,
+    settings={"repo_path": "/path/to/repo"},
+)
+manager.configure_integration(
+    IntegrationType.GITHUB,
+    enabled=True,
+    settings={"token": "ghp_xxx"},
+)
+
+# Git integration
+git = manager.git
+git.commit("feat: add new feature", files=["src/main.py"])
+git.push(branch="main")
+git.create_branch("feature/new-feature")
+
+# GitHub integration
+github = manager.github
+pr_url = github.create_pull_request(
+    repo="owner/repo",
+    title="Add new feature",
+    body="This PR adds...",
+    head="feature/new-feature",
+    base="main",
+)
+
+# Slack integration
+slack = manager.slack
+slack.send_notification(
+    title="Build Complete",
+    message="Build #123 completed successfully",
+    level="success",
+)
+
+# Webhook integration
+webhook = manager.webhook
+webhook.register_webhook("task.completed", "https://example.com/webhook")
+webhook.trigger_webhook("task.completed", {"task_id": "123", "status": "done"})
+
+# Plugin system
+plugins = manager.plugins
+plugin = Plugin(
+    id="custom-plugin",
+    name="Custom Plugin",
+    version="1.0.0",
+    description="A custom plugin",
+)
+plugins.register_plugin(plugin)
+
+# Register hooks
+def on_task_complete(task_id):
+    print(f"Task {task_id} completed")
+
+plugins.register_hook("task.complete", on_task_complete)
+plugins.trigger_hook("task.complete", "task-123")
+
+# Save config
+manager.save_config()
+```
+
+**Features**:
+- Git integration (commit, push, branch)
+- GitHub/GitLab integration (PR, issues)
 - Slack notifications
 - Webhook support
-- Plugin system for extensions
+- Plugin system with hooks
+- Integration configuration management
+- Enable/disable integrations
+
+**Components**:
+- `SessionManager`: Session export/import and replay
+- `SessionReplay`: Step-by-step session playback
+- `TeamManager`: Team collaboration with RBAC
+- `IntegrationManager`: External tool integrations
+- `GitIntegration`: Git operations
+- `GitHubIntegration`: GitHub API
+- `SlackIntegration`: Slack notifications
+- `WebhookIntegration`: Webhook management
+- `PluginSystem`: Plugin and hook system
+
+## Next Phase
+
+Phase 9 will implement:
+- Performance optimization
+- Caching strategies
+- Lazy loading
+- Memory management
+- Response time optimization
 
 ## References
 
