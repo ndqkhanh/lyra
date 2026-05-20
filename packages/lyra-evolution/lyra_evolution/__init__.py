@@ -5,6 +5,7 @@ from __future__ import annotations
 from .control_record import ControlRecord, new_control_record
 from .controller import ClosedLoopController, ControllerConfig, HaltSignal
 from .reflexion import ReflexionEngine, ReflexionLesson
+from .sandbox_verifier import SafetyRule, SandboxVerifier
 from .stability import BudgetViolation, StabilityBudget, StabilityState
 from .voyager import SkillCandidate, SkillLibrary, VoyagerAccumulator
 
@@ -45,6 +46,8 @@ __all__ = [
     "HaltSignal",
     "ReflexionEngine",
     "ReflexionLesson",
+    "SafetyRule",
+    "SandboxVerifier",
     "SkillCandidate",
     "SkillLibrary",
     "StabilityBudget",
