@@ -10,6 +10,7 @@ This package provides:
 - Streaming output
 - Progress visualization
 - Context window visualization
+- Keyboard navigation
 """
 
 from lyra_ui.app import ConversationPane, DualPaneLayout, LyraApp, StatusPanel
@@ -20,6 +21,13 @@ from lyra_ui.context_viz import (
     ContextRingVisualizer,
     ContextTracker,
     ContextUsage,
+)
+from lyra_ui.keyboard import (
+    CommandPalette,
+    KeyBinding,
+    NavigationMode,
+    QuickActions,
+    VimNavigator,
 )
 from lyra_ui.progress import ProgressManager, Spinner
 from lyra_ui.progress_viz import (
@@ -74,4 +82,10 @@ __all__ = [
     "ContextUsage",
     "ContextRingVisualizer",
     "ContextManager",
+    # Keyboard Navigation
+    "VimNavigator",
+    "NavigationMode",
+    "KeyBinding",
+    "CommandPalette",
+    "QuickActions",
 ]

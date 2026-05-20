@@ -1,8 +1,8 @@
-# Lyra UI - Phases 1-4: Complete UI Foundation
+# Lyra UI - Phases 1-5: Complete UI Foundation
 
 ## Overview
 
-Phases 1-4 implement a complete UI foundation with Rich/Textual frameworks, dual-pane interface, streaming capabilities, and context visualization.
+Phases 1-5 implement a complete UI foundation with Rich/Textual frameworks, dual-pane interface, streaming capabilities, context visualization, and advanced keyboard navigation.
 
 ## Features
 
@@ -250,6 +250,73 @@ recommendations = manager.get_recommendations()
 - Component pruning
 - Optimization recommendations
 
+### Phase 5: Advanced Keyboard Navigation
+
+#### 8. Keyboard Navigation (`keyboard.py`)
+
+Vim-style keyboard navigation and command palette:
+
+```python
+from lyra_ui import (
+    VimNavigator,
+    NavigationMode,
+    KeyBinding,
+    CommandPalette,
+    QuickActions
+)
+
+# Vim-style navigation
+nav = VimNavigator()
+
+# Check bindings
+binding = nav.get_binding("h")  # Move left
+print(f"{binding.key}: {binding.description}")
+
+# Add custom binding
+custom = KeyBinding("ctrl+s", "save", "Save file")
+nav.add_binding(custom)
+
+# Switch modes
+nav.set_mode(NavigationMode.INSERT)
+
+# Command palette
+palette = CommandPalette()
+
+# Register commands
+def save_file():
+    return "File saved"
+
+palette.register_command("save", save_file, category="file")
+
+# Search commands
+results = palette.search_commands("save")
+
+# Execute command
+result = palette.execute_command("save")
+
+# Quick actions
+actions = QuickActions()
+action = actions.get_action("@")  # file_picker
+action = actions.get_action("#")  # skill_picker
+action = actions.get_action("/")  # command_picker
+```
+
+**Features**:
+- Vim-style navigation (hjkl, gg/G, Ctrl+D/U, w/b)
+- Navigation modes (normal, insert, visual, command)
+- Custom keybindings
+- Command palette with fuzzy search
+- Command history
+- Command categories
+- Quick actions (@, #, /)
+
+**Components**:
+- `VimNavigator`: Vim-style keyboard navigation
+- `NavigationMode`: Navigation mode enum
+- `KeyBinding`: Key binding definition
+- `CommandPalette`: Command palette with fuzzy search
+- `QuickActions`: Quick action shortcuts
+
 **Widgets**:
 - `MessageBubble`: User/assistant messages with timestamps
 - `TokenUsageIndicator`: Visual token usage bar with color coding
@@ -270,7 +337,7 @@ Run tests:
 pytest tests/ -v
 ```
 
-**Results**: 93 tests, 93% coverage
+**Results**: 118 tests, 94% coverage
 
 ## Architecture
 
@@ -362,12 +429,12 @@ Current version: **0.1.0**
 
 ## Next Phase
 
-Phase 5 will implement:
-- Vim-style keyboard navigation (hjkl, gg/G, Ctrl+D/U)
-- Command palette with fuzzy search (Ctrl+P)
-- Quick actions (@ file picker, # skill picker, / command picker)
-- Custom keybindings
-- Keybinding profiles (Vim, Emacs, VS Code)
+Phase 6 will implement:
+- Multi-agent orchestration dashboard
+- Agent status visualization
+- Task queue management
+- Agent communication logs
+- Performance metrics per agent
 
 ## References
 
