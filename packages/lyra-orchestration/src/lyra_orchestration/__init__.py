@@ -5,8 +5,17 @@ This package provides:
 - Event bus for cross-module communication
 - Agent coordinator for parallel execution
 - Domain events for agent coordination
+- Consensus protocol for agent decision-making
+- Task queue for distributed work distribution
 """
 
+from lyra_orchestration.consensus import (
+    ConsensusProtocol,
+    Proposal,
+    Vote,
+    VoteChoice,
+    VotingStrategy,
+)
 from lyra_orchestration.coordinator import AgentCoordinator, AgentStatus, AgentTask
 from lyra_orchestration.event_bus import (
     AgentCompleted,
@@ -22,6 +31,7 @@ from lyra_orchestration.event_bus import (
     Subscription,
     VulnerabilityDiscovered,
 )
+from lyra_orchestration.task_queue import Task, TaskPriority, TaskQueue, TaskStatus
 
 __version__ = "0.1.0"
 
@@ -44,4 +54,15 @@ __all__ = [
     "AgentCoordinator",
     "AgentTask",
     "AgentStatus",
+    # Consensus Protocol
+    "ConsensusProtocol",
+    "Proposal",
+    "Vote",
+    "VoteChoice",
+    "VotingStrategy",
+    # Task Queue
+    "TaskQueue",
+    "Task",
+    "TaskPriority",
+    "TaskStatus",
 ]
