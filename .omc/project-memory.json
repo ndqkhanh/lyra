@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1779206503755,
+  "lastScanned": 1779379405971,
   "projectRoot": "/Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra",
   "techStack": {
     "languages": [
@@ -26,8 +26,8 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "cat > /tmp/commit_message.txt << 'EOF'\nfeat: Lyra v4.0.0 - ECC Integration Foundation (Phase 0-1)\n\n🚀 Major Release: ECC Integration Package\n\nThis commit implements the foundation for Lyra × ECC integration,\ncreating the ultimate AI agent framework by combining Lyra's\nintelligence (RSI, memory, research) with ECC's production polish\n(skills, agents, hooks, rules).\n\n## New Package: lyra-ecc\n\nComplete ECC compatibility layer with 4 core modules:\n\n### 1. Compatibility Layer (compatibility.py)\n- ECCCompatibilityLayer for seamless integration\n- Compatibility matrix builder\n- ECC path detection and validation\n- Component counting (skills, agents, rules)\n\n### 2. Importer (importer.py)\n- ECCImporter for importing ECC components\n- Skill file parser (232+ skills support)\n- Agent file parser (60+ agents support)\n- Import result tracking with error handling\n\n### 3. Hooks Engine (hooks.py)\n- Event-driven automation system\n- 5 hook types: PreToolUse, PostToolUse, SessionStart, SessionEnd, Stop\n- Auto-format hooks (black, prettier, gofmt)\n- Type-check hooks (mypy, tsc)\n- Async support with proper error handling\n\n### 4. Rules Engine (rules.py)\n- 34 language-specific rules support\n- Common rules + language-specific rules\n- Language detection from file extensions\n- Rule violation tracking with severity levels\n- Project-aware rule activation\n\n## Documentation\n\n- LYRA_ECC_INTEGRATION_ULTRA_PLAN.md: Complete 12-phase roadmap\n- RELEASE_NOTES_v4.0.0.md: Release notes and features\n- packages/lyra-ecc/README.md: Package documentation\n- packages/lyra-ecc/pyproject.toml: Package configuration\n\n## Testing\n\n- Comprehensive test suite (test_ecc_integration.py)\n- Unit tests for all components\n- Integration tests for full workflow\n- 95%+ test coverage target\n\n## Code Quality\n\n- ✅ Full type annotations (mypy compliant)\n- ✅ Immutable data structures (frozen dataclasses)\n- ✅ PEP 8 compliant (black formatted)\n- ✅ Linted (ruff)\n- ✅ Async/await support\n- ✅ Comprehensive error handling\n- ✅ Logging throughout\n\n## Architecture Highlights\n\n- Immutable dataclasses for all data structures\n- Type-safe with complete annotations\n- Async-first design for hooks\n- Modular and extensible\n- Zero breaking changes to existing Lyra code\n\n## Integration Points\n\n- Compatible with lyra-core >= 3.14.0\n- Hooks integrate with Lyra's tool system\n- Rules integrate with code review flow\n- Skills/agents ready for unified registry\n\n## Next Steps (Phase 2-12)\n\n- [ ] Agent fleet integration (60 ECC agents)\n- [ ] UI/UX enhancements (streaming REPL)\n- [ ] Security integration (AgentShield)\n- [ ] Cross-platform adapters\n- [ ] Token optimization\n- [ ] Monitoring & observability\n\n## Statistics\n\n- New files: 11\n- Lines of code: 1000+\n- Test coverage: 95%+\n- Documentation: Complete\n\n## Breaking Changes\n\nNone - this is a new package with no impact on existing code.\n\n## Migration Guide\n\nNo migration needed. This is an additive feature.\n\nTo use ECC integration:\n```python\nfrom lyra_ecc import ECCCompatibilityLayer\ncompat = ECCCompatibilityLayer()\ncompat.initialize()\n```\n\nCo-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>\nEOF\ncat /tmp/commit_message.txt",
-    "testCommand": "pip install -e . 2>&1 | tail -5 && pytest tests/ -v --tb=line 2>&1 | tail -50",
+    "buildCommand": "make build",
+    "testCommand": "python -m pytest tests/ -v --tb=short 2>&1 | tail -30",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -55,27 +55,27 @@
       "path": "archive",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1779206503744,
+      "lastAccessed": 1779379405958,
       "keyFiles": []
     },
     "docs": {
       "path": "docs",
       "purpose": "Documentation",
-      "fileCount": 23,
-      "lastAccessed": 1779206503748,
+      "fileCount": 49,
+      "lastAccessed": 1779379405959,
       "keyFiles": [
         "ARCHITECTURE_DIAGRAMS.md",
         "CUSTOM_ANTHROPIC_PROVIDER.md",
-        "MCP_INTEGRATION_PLAN.md",
-        "MODEL_SELECTION_GUIDE.md",
-        "TUI_AUTOCOMPLETE_IMPLEMENTATION_GUIDE.md"
+        "DAY1_FINAL_SUMMARY.md",
+        "DAY1_SUMMARY.md",
+        "DOCUMENTATION_INDEX.md"
       ]
     },
     "examples": {
       "path": "examples",
       "purpose": "Example code",
       "fileCount": 1,
-      "lastAccessed": 1779206503748,
+      "lastAccessed": 1779379405959,
       "keyFiles": [
         "custom_anthropic.py"
       ]
@@ -84,7 +84,7 @@
       "path": "harness_core",
       "purpose": null,
       "fileCount": 6,
-      "lastAccessed": 1779206503749,
+      "lastAccessed": 1779379405959,
       "keyFiles": [
         "Makefile",
         "README.md",
@@ -96,14 +96,14 @@
       "path": "packages",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1779206503749,
+      "lastAccessed": 1779379405959,
       "keyFiles": []
     },
     "papers": {
       "path": "papers",
       "purpose": null,
       "fileCount": 23,
-      "lastAccessed": 1779206503750,
+      "lastAccessed": 1779379405959,
       "keyFiles": [
         "README.md",
         "alphaevolve.pdf",
@@ -112,11 +112,20 @@
         "diversity-collapse-mas.pdf"
       ]
     },
+    "research": {
+      "path": "research",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1779379405959,
+      "keyFiles": [
+        "AutoResearchClaw_Analysis.md"
+      ]
+    },
     "scripts": {
       "path": "scripts",
       "purpose": "Build/utility scripts",
       "fileCount": 1,
-      "lastAccessed": 1779206503750,
+      "lastAccessed": 1779379405959,
       "keyFiles": [
         "install-lyra.sh"
       ]
@@ -125,28 +134,28 @@
       "path": "skills",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1779206503751,
+      "lastAccessed": 1779379405960,
       "keyFiles": []
     },
     "tests": {
       "path": "tests",
       "purpose": "Test files",
       "fileCount": 0,
-      "lastAccessed": 1779206503751,
+      "lastAccessed": 1779379405960,
       "keyFiles": []
     },
     "harness_core/src": {
       "path": "harness_core/src",
       "purpose": "Source code",
       "fileCount": 0,
-      "lastAccessed": 1779206503753,
+      "lastAccessed": 1779379405961,
       "keyFiles": []
     },
     "harness_core/tests": {
       "path": "harness_core/tests",
       "purpose": "Test files",
       "fileCount": 40,
-      "lastAccessed": 1779206503753,
+      "lastAccessed": 1779379405961,
       "keyFiles": [
         "test_anthropic_base_url.py",
         "test_beam_and_dualuse.py",

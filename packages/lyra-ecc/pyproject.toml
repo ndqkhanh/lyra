@@ -25,7 +25,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "lyra-core>=3.14.0",
+    "lyra-core>=0.1.0",
 ]
 
 [project.optional-dependencies]

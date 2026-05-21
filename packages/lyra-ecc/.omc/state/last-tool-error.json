@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd packages/lyra-ecc && python -m pytest tests/ -v --cov=lyra_ecc --cov-report=term-missing 2>&1 | tail -20\",\"description\":\"Run all tests after fix\"}",
+  "error": "Exit code 1\n(eval):cd:1: no such file or directory: packages/lyra-ecc",
+  "timestamp": "2026-05-21T16:07:52.776Z",
+  "retry_count": 1
+}
