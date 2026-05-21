@@ -32,15 +32,19 @@ from lyra_autoresearch.execution import (
     execute_with_healing,
 )
 from lyra_autoresearch.evolution import (
+    EvolutionEngine,
     EvolutionStore,
     LessonEntry,
     LessonCategory,
+    LessonSeverity,
     SkillSynthesizer,
 )
 from lyra_autoresearch.hitl import (
+    HITLMode,
     HITLPolicy,
     GatePoint,
     GateOrchestrator,
+    create_gate_config,
 )
 
 __all__ = [
@@ -60,12 +64,16 @@ __all__ = [
     "ExecutionStrategy",
     "execute_with_healing",
     # Evolution
+    "EvolutionEngine",
     "EvolutionStore",
     "LessonEntry",
     "LessonCategory",
+    "LessonSeverity",
     "SkillSynthesizer",
     # HITL
+    "HITLMode",
     "HITLPolicy",
     "GatePoint",
     "GateOrchestrator",
+    "create_gate_config",
 ]
