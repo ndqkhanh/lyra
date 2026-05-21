@@ -49,6 +49,16 @@
       "successRate": 1,
       "executionCount": 1,
       "lastUsed": 1779377526798
+    },
+    {
+      "id": "190cf1ba-964a-4947-85e1-1a11d8ec7a79",
+      "title": "Test Skill",
+      "principle": "Test principle",
+      "whenToApply": "Always",
+      "examples": [],
+      "successRate": 1,
+      "executionCount": 1,
+      "lastUsed": 1779378213788
     }
   ],
   "commonMistakes": []
