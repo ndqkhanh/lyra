@@ -1,0 +1,55 @@
+{
+  "generalSkills": [
+    {
+      "id": "45649fe8-1f22-470c-8be5-0937179a0aa7",
+      "title": "Test Skill",
+      "principle": "Test principle",
+      "whenToApply": "Always",
+      "examples": [],
+      "successRate": 1,
+      "executionCount": 1,
+      "lastUsed": 1779377026172
+    },
+    {
+      "id": "01dbb3a8-8487-4f4b-88ed-87792e40373d",
+      "title": "Test Skill",
+      "principle": "Test principle",
+      "whenToApply": "Always",
+      "examples": [],
+      "successRate": 1,
+      "executionCount": 1,
+      "lastUsed": 1779377265268
+    },
+    {
+      "id": "66d589ef-0a1f-4039-aacf-a1342092a185",
+      "title": "Test Skill",
+      "principle": "Test principle",
+      "whenToApply": "Always",
+      "examples": [],
+      "successRate": 1,
+      "executionCount": 1,
+      "lastUsed": 1779377363521
+    },
+    {
+      "id": "56b9bace-f810-4b51-a5d8-75a83233a6c3",
+      "title": "Test Skill",
+      "principle": "Test principle",
+      "whenToApply": "Always",
+      "examples": [],
+      "successRate": 1,
+      "executionCount": 1,
+      "lastUsed": 1779377484310
+    },
+    {
+      "id": "0dd6d987-ac4e-4f37-aa53-482acbb91722",
+      "title": "Test Skill",
+      "principle": "Test principle",
+      "whenToApply": "Always",
+      "examples": [],
+      "successRate": 1,
+      "executionCount": 1,
+      "lastUsed": 1779377526798
+    }
+  ],
+  "commonMistakes": []
+}
