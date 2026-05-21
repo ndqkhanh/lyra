@@ -82,6 +82,7 @@ from lyra_ui.dashboard_viz import (
     DashboardVisualizer,
     TaskSummaryWidget,
 )
+from lyra_ui.formatter import RichFormatter
 from lyra_ui.integration import (
     GitHubIntegration,
     GitIntegration,
@@ -169,6 +170,8 @@ __all__ = [
     # Console
     "RichConsole",
     "console",
+    # Formatter
+    "RichFormatter",
     # Progress
     "ProgressManager",
     "Spinner",
