@@ -5,6 +5,7 @@ Implements:
 - Multimodal evidence chain for images/video/screenshots
 - Computer-use context engineering
 - Screenshot analysis with OCR and UI detection
+- Memory integration with compression (10MB → 2KB)
 """
 
 from lyra_cli.multimodal.evidence_chain import (
@@ -30,6 +31,12 @@ from lyra_cli.multimodal.screenshot_analysis import (
     ScreenshotAnalyzer,
 )
 
+from lyra_cli.multimodal.memory_integration import (
+    CompressionLevel,
+    MultimodalReference,
+    MultimodalMemoryIntegrator,
+)
+
 __all__ = [
     # Evidence Chain
     "MediaType",
@@ -48,4 +55,8 @@ __all__ = [
     "DetectedObject",
     "ScreenshotAnalysis",
     "ScreenshotAnalyzer",
+    # Memory Integration
+    "CompressionLevel",
+    "MultimodalReference",
+    "MultimodalMemoryIntegrator",
 ]

@@ -19,7 +19,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "cd /Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-evolution && python -m pytest tests/ -v --tb=short 2>&1 | tail -30",
+    "testCommand": "cd packages/lyra-evolution && python -m pytest tests/test_hitl_integration.py -v",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -78,6 +78,12 @@
       "path": "lyra_evolution/parallel_exploration.py",
       "accessCount": 6,
       "lastAccessed": 1779003954844,
+      "type": "file"
+    },
+    {
+      "path": "lyra_evolution/__init__.py",
+      "accessCount": 5,
+      "lastAccessed": 1779293521216,
       "type": "file"
     },
     {

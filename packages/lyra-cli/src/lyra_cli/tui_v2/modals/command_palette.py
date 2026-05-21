@@ -1,108 +1,121 @@
-"""CommandPaletteModal — Ctrl-K fuzzy command search for TUI v2.
+"""Command palette modal for TUI v2.
 
-Ports the REPL's command palette experience to Textual. Uses the same
-fuzzy_filter logic from interactive.command_palette but adapts it to
-the LyraPickerModal pattern.
+Ctrl+K fuzzy-searchable command palette that mirrors the REPL's /palette
+functionality. Provides quick access to all slash commands with keyboard
+navigation and real-time filtering.
+
+Architecture:
+- Extends LyraPickerModal for consistent modal behavior
+- Uses COMMAND_REGISTRY as the single source of truth
+- Fuzzy matching handled by base class
+- Keyboard navigation: Up/Down/Enter/Escape
 
 Usage:
-    result = await self.app.push_screen(CommandPaletteModal())
+    result = await app.push_screen(CommandPaletteModal())
     if result:
-        # result is the command name (e.g., "model", "mode")
-        await self.run_command(f"/{result}")
+        # result is the command name (e.g., "model", "fork")
+        composer.text = f"/{result} "
 """
+
 from __future__ import annotations
 
-from lyra_cli.interactive.command_palette import fuzzy_filter
+from typing import TYPE_CHECKING
 
 from .base import Entry, LyraPickerModal
 
+if TYPE_CHECKING:
+    from lyra_cli.commands.registry import CommandSpec
+
 
 class CommandPaletteModal(LyraPickerModal):
-    """Fuzzy-searchable command palette (Ctrl-K)."""
+    """Fuzzy-searchable command palette modal.
+    
+    Displays all available slash commands with descriptions, grouped by
+    category. Supports fuzzy search and keyboard navigation.
+    """
 
     picker_title = "Command Palette"
 
-    # Larger modal for command descriptions
-    DEFAULT_CSS = """
-    CommandPaletteModal {
-        align: center middle;
-    }
-    CommandPaletteModal > Vertical {
-        width: 88;
-        height: 28;
-        background: $surface;
-        border: tall $primary;
-        padding: 1 2;
-    }
-    CommandPaletteModal #title {
-        height: 1;
-        color: $primary;
-        text-style: bold;
-    }
-    CommandPaletteModal #filter {
-        height: 3;
-        margin-bottom: 1;
-    }
-    CommandPaletteModal #cols {
-        height: 1fr;
-    }
-    CommandPaletteModal ListView {
-        width: 35;
-        background: $bg;
-    }
-    CommandPaletteModal #preview {
-        width: 1fr;
-        background: $bg;
-        padding: 0 1;
-    }
-    CommandPaletteModal #hint {
-        height: 1;
-        color: $fg_muted;
-    }
-    """
-
     def entries(self) -> list[Entry]:
-        """Load all commands from COMMAND_REGISTRY."""
-        # Use fuzzy_filter with empty query to get all commands
-        specs = fuzzy_filter("")
+        """Load all commands from the registry.
+        
+        Returns:
+            List of Entry objects, one per command
+        """
+        # Import here to avoid circular dependency
+        from lyra_cli.commands.registry import COMMAND_REGISTRY
 
         entries = []
-        for spec in specs:
-            # Build label with category prefix
-            label = f"/{spec.name}"
-            if spec.args_hint:
-                label = f"{label} {spec.args_hint}"
-
+        for cmd in COMMAND_REGISTRY:
+            # Build label with aliases
+            label = f"/{cmd.name}"
+            if cmd.aliases:
+                label += f" ({', '.join('/' + a for a in cmd.aliases)})"
+            
             # Build description with category
-            description = f"[dim]{spec.category}[/]\n{spec.description}"
-
-            # Add aliases to meta
-            meta = {}
-            if spec.aliases:
-                meta["aliases"] = ", ".join(f"/{a}" for a in spec.aliases)
-
+            description = f"[{cmd.display_category}] {cmd.description}"
+            
+            # Add metadata for preview
+            meta = {
+                "Category": cmd.display_category,
+                "Description": cmd.description,
+            }
+            if cmd.aliases:
+                meta["Aliases"] = ", ".join(f"/{a}" for a in cmd.aliases)
+            
             entries.append(
                 Entry(
-                    key=spec.name,
+                    key=cmd.name,
                     label=label,
                     description=description,
                     meta=meta,
                 )
             )
-
+        
+        # Sort by category, then name
+        entries.sort(key=lambda e: (e.meta["Category"], e.label.lower()))
         return entries
 
     def _preview(self, key: str) -> str:
-        """Enhanced preview with category and aliases."""
-        for e in self._all:
-            if e.key == key:
-                lines = [f"[bold cyan]{e.label}[/]"]
-                if e.description:
-                    lines.append("")
-                    lines.append(e.description)
-                if e.meta:
-                    lines.append("")
-                    for k, v in e.meta.items():
-                        lines.append(f"[dim]{k}:[/] {v}")
-                return "\n".join(lines)
-        return "[dim](no command selected)[/]"
+        """Render detailed preview for the selected command.
+        
+        Args:
+            key: Command name
+            
+        Returns:
+            Rich-formatted preview text
+        """
+        # Import here to avoid circular dependency
+        from lyra_cli.commands.registry import COMMAND_REGISTRY
+
+        # Find the command
+        cmd = next((c for c in COMMAND_REGISTRY if c.name == key), None)
+        if not cmd:
+            return "[dim](command not found)[/]"
+        
+        lines = []
+        
+        # Command name
+        lines.append(f"[bold cyan]/{cmd.name}[/]")
+        
+        # Aliases
+        if cmd.aliases:
+            aliases_str = ", ".join(f"/{a}" for a in cmd.aliases)
+            lines.append(f"[dim]Aliases:[/] {aliases_str}")
+        
+        lines.append("")
+        
+        # Category
+        lines.append(f"[dim]Category:[/] {cmd.display_category}")
+        
+        lines.append("")
+        
+        # Description
+        lines.append(f"[bold]Description:[/]")
+        lines.append(cmd.description)
+        
+        # Usage hint
+        lines.append("")
+        lines.append("[dim]Press Enter to insert this command[/]")
+        
+        return "\n".join(lines)

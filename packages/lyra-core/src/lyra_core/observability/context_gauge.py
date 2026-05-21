@@ -151,28 +151,70 @@ class SkillEntry:
     name: str
     activated_at: float = field(default_factory=time.time)
     use_count: int = 1
+    tier: str = ""
+    trust_tier: str = ""
+    success_rate: float = 0.0
 
     def activated_str(self) -> str:
         return datetime.fromtimestamp(self.activated_at, tz=timezone.utc).strftime("%H:%M:%S")
 
 
 class SkillPanel:
-    """Tracks which skills were activated this session."""
+    """Tracks which skills were activated this session.
+
+    Reacts to ``SkillActivated`` events on the EventBus and can persist a
+    snapshot to ``.lyra/skills/active.json`` for the ``lyra skills --active``
+    command to read postmortem.
+    """
 
     def __init__(self) -> None:
         self._skills: dict[str, SkillEntry] = {}
 
-    def activate(self, name: str) -> None:
+    def activate(
+        self,
+        name: str,
+        tier: str = "",
+        trust_tier: str = "",
+        success_rate: float = 0.0,
+    ) -> None:
         if name in self._skills:
-            self._skills[name].use_count += 1
+            entry = self._skills[name]
+            entry.use_count += 1
+            if tier:
+                entry.tier = tier
+            if trust_tier:
+                entry.trust_tier = trust_tier
+            if success_rate:
+                entry.success_rate = success_rate
         else:
-            self._skills[name] = SkillEntry(name=name)
+            self._skills[name] = SkillEntry(
+                name=name,
+                tier=tier,
+                trust_tier=trust_tier,
+                success_rate=success_rate,
+            )
 
     def active_skills(self) -> list[SkillEntry]:
         return sorted(self._skills.values(), key=lambda e: e.activated_at)
 
     def total_activations(self) -> int:
         return sum(e.use_count for e in self._skills.values())
+
+    def to_snapshot(self) -> dict[str, Any]:
+        """Serialise for `.lyra/skills/active.json`."""
+        return {
+            "skills": [
+                {
+                    "name": s.name,
+                    "tier": s.tier,
+                    "trust_tier": s.trust_tier,
+                    "success_rate": s.success_rate,
+                    "use_count": s.use_count,
+                    "last_used": s.activated_str(),
+                }
+                for s in self.active_skills()
+            ],
+        }
 
     def render(self) -> "rich.panel.Panel":  # type: ignore[name-defined]
         from rich import box
@@ -192,10 +234,18 @@ class SkillPanel:
 
         return Panel(table, title="Skills", box=box.ROUNDED)
 
-    def on_event(self, _event: Any) -> None:
-        # SkillActivated events are not yet in the core EventBus;
-        # callers drive activate() directly or from custom events.
-        pass
+    def on_event(self, event: Any) -> None:
+        try:
+            from lyra_core.observability.event_bus import SkillActivated
+        except ImportError:
+            return
+        if isinstance(event, SkillActivated):
+            self.activate(
+                event.skill_name,
+                tier=event.tier,
+                trust_tier=event.trust_tier,
+                success_rate=event.success_rate,
+            )
 
 
 # ---------------------------------------------------------------------------

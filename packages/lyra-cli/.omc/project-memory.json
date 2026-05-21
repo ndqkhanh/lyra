@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "cd /Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-cli && python -m pytest tests/ -k \"repl or streaming\" -v --tb=short 2>&1 | tail -30",
+    "testCommand": "python -m pytest tests/test_phase_observability_commands.py -v 2>&1 | tail -40",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -139,6 +139,12 @@
       "path": "src/lyra_cli/cli/input.py",
       "accessCount": 6,
       "lastAccessed": 1778858257561,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/__main__.py",
+      "accessCount": 6,
+      "lastAccessed": 1779285649095,
       "type": "file"
     },
     {
@@ -265,12 +271,6 @@
       "path": "src/lyra_cli/cli/repl.py",
       "accessCount": 2,
       "lastAccessed": 1778859753642,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/__main__.py",
-      "accessCount": 2,
-      "lastAccessed": 1778860850801,
       "type": "file"
     },
     {

@@ -164,6 +164,18 @@ class DaemonIteration:
     ts: str = field(default_factory=_now)
 
 
+@dataclass(frozen=True)
+class SkillActivated:
+    """A skill was activated this turn (BM25 / cross-encoder / embedding tier)."""
+
+    session_id: str
+    skill_name: str
+    tier: str = ""              # "BM25" | "cross-encoder" | "embedding"
+    trust_tier: str = ""        # "core" | "verified" | "experimental"
+    success_rate: float = 0.0
+    ts: str = field(default_factory=_now)
+
+
 # Union of all event types (used for type hints)
 AnyEvent = (
     LLMCallStarted
@@ -179,6 +191,7 @@ AnyEvent = (
     | CostThreshold
     | CronJobFired
     | DaemonIteration
+    | SkillActivated
 )
 
 # ---------------------------------------------------------------------------
@@ -417,6 +430,7 @@ __all__ = [
     "CostThreshold",
     "CronJobFired",
     "DaemonIteration",
+    "SkillActivated",
     # bus
     "EventBus",
     "get_event_bus",

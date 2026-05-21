@@ -27,8 +27,12 @@ import typer
 
 from . import __version__
 from .commands.acp import acp_app
+from .commands.agents import agents_app
 from .commands.context_opt import context_opt_app
+from .commands.hops import hops_app
+from .commands.model import model_app
 from .commands.ps import ps_app
+from .commands.skills_view import dag_app, skills_app
 from .commands.brain import brain_app
 from .commands.burn import burn_app
 from .commands.connect import connect_command
@@ -340,6 +344,11 @@ app.add_typer(ps_app, name="ps")
 app.add_typer(status_app, name="status")
 app.add_typer(trace_app, name="trace")
 app.add_typer(tree_app, name="tree")
+app.add_typer(model_app, name="model")
+app.add_typer(agents_app, name="agents")
+app.add_typer(hops_app, name="hops")
+app.add_typer(skills_app, name="skills")
+app.add_typer(dag_app, name="dag")
 
 # Optional: harness-tui shell (decoupled from Lyra's primary REPL).
 try:  # pragma: no cover — optional import

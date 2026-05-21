@@ -9,20 +9,22 @@ Phase 5 of the v3.14 rewrite. harness-tui already ships:
   * ``PermissionGate`` (auto on ``PermissionRequested``)
   * ``PlanEditor`` (auto on ``PlanProposed``)
 
-Lyra adds three project-specific pickers:
+Lyra adds four project-specific pickers:
 
+  * ``CommandPaletteModal`` — fuzzy-searchable command palette (Ctrl+K)
   * ``ModelPicker``  — switch LLM provider/model
   * ``SkillPicker``  — browse installed skills
   * ``McpPicker``    — browse configured MCP servers
 
-All three share the :class:`base.LyraPickerModal` filter+list contract
+All four share the :class:`base.LyraPickerModal` filter+list contract
 so they look and feel consistent. OpenCode-style size tiers map onto
 the modals' DEFAULT_CSS widths (60 / 88 / 116 cols).
 """
 from __future__ import annotations
 
+from .command_palette import CommandPaletteModal
 from .mcp import McpPicker
 from .model import ModelPicker
 from .skill import SkillPicker
 
-__all__ = ["McpPicker", "ModelPicker", "SkillPicker"]
+__all__ = ["CommandPaletteModal", "McpPicker", "ModelPicker", "SkillPicker"]
