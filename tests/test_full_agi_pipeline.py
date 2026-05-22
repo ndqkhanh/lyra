@@ -1,18 +1,20 @@
 """End-to-end integration test: Full AGI pipeline across all 5 plans.
 
 Tests that all 5 AGI plans can be instantiated and coordinated together.
-This is the closest we get to an "Are we there yet?" AGI readiness check.
 """
 
 import os, sys
 
-# Build PYTHONPATH
-src_dirs = []
-for d in os.listdir('packages'):
-    src = os.path.join(os.path.abspath('packages'), d, 'src')
-    if os.path.isdir(src):
-        src_dirs.append(src)
-sys.path = src_dirs + sys.path
+# Auto-build PYTHONPATH from all package src dirs AND non-standard packages
+_packages_dir = os.path.join(os.path.dirname(__file__), "..", "packages")
+if os.path.isdir(_packages_dir):
+    for _d in sorted(os.listdir(_packages_dir)):
+        _src = os.path.join(_packages_dir, _d, "src")
+        if os.path.isdir(_src):
+            sys.path.insert(0, _src)
+        _alt = os.path.join(_packages_dir, _d, _d.replace("-", "_"))
+        if os.path.isdir(_alt) and os.path.isfile(os.path.join(_alt, "__init__.py")):
+            sys.path.insert(0, os.path.join(_packages_dir, _d))
 
 
 class TestFullAGIPipeline:
