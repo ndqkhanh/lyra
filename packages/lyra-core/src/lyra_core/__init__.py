@@ -22,8 +22,13 @@ from lyra_core.agent.event_sourced_loop import (
     SpeculativePlanner,
     RuntimeHarnessAdaptor,
 )
+from lyra_core.agi_orchestrator import (
+    AGIOrchestrator,
+    AGIPhase,
+    PlanStatus,
+)
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "__version__",
@@ -34,4 +39,7 @@ __all__ = [
     "MultiStreamExecutor",
     "SpeculativePlanner",
     "RuntimeHarnessAdaptor",
+    "AGIOrchestrator",
+    "AGIPhase",
+    "PlanStatus",
 ]
