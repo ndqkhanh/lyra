@@ -10,5 +10,5 @@ pip install -e packages/lyra-emergent-coord
 
 ## Testing
 ```bash
-pytest packages/lyra-emergent-coord/tests/
+pytest packages/lyra-emergent-coord/pkg_tests/
 ```

@@ -10,5 +10,5 @@ pip install -e packages/lyra-agent-lifecycle
 
 ## Testing
 ```bash
-pytest packages/lyra-agent-lifecycle/tests/
+pytest packages/lyra-agent-lifecycle/pkg_tests/
 ```

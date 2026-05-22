@@ -10,5 +10,5 @@ pip install -e packages/lyra-colony
 
 ## Testing
 ```bash
-pytest packages/lyra-colony/tests/
+pytest packages/lyra-colony/pkg_tests/
 ```

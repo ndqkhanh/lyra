@@ -10,5 +10,5 @@ pip install -e packages/lyra-gossip-memory
 
 ## Testing
 ```bash
-pytest packages/lyra-gossip-memory/tests/
+pytest packages/lyra-gossip-memory/pkg_tests/
 ```
