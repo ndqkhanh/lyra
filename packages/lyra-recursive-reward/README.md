@@ -10,5 +10,5 @@ pip install -e packages/lyra-recursive-reward
 
 ## Testing
 ```bash
-pytest packages/lyra-recursive-reward/tests/
+pytest packages/lyra-recursive-reward/pkg_tests/
 ```

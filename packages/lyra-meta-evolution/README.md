@@ -10,5 +10,5 @@ pip install -e packages/lyra-meta-evolution
 
 ## Testing
 ```bash
-pytest packages/lyra-meta-evolution/tests/
+pytest packages/lyra-meta-evolution/pkg_tests/
 ```

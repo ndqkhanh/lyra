@@ -7,7 +7,10 @@ from collections import deque
 from dataclasses import dataclass, field
 from typing import Any, Optional
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:
+    np = None
 
 logger = logging.getLogger(__name__)
 
@@ -66,14 +69,24 @@ class MiddleRewardLoop:
     def current_rate(self) -> float:
         if not self.daily_acquisition:
             return 0.0
-        return np.mean(self.daily_acquisition)
+        if np is not None:
+            return np.mean(self.daily_acquisition)
+        import statistics
+        return statistics.mean(self.daily_acquisition)
 
     def is_accelerating(self) -> bool:
         if len(self.daily_acquisition) < 10:
             return False
-        recent = np.mean(list(self.daily_acquisition)[-7:])
-        older = np.mean(list(self.daily_acquisition)[:7])
-        return recent > older * 1.1
+        recent = list(self.daily_acquisition)[-7:]
+        older = list(self.daily_acquisition)[:7]
+        if np is not None:
+            recent_mean = np.mean(recent)
+            older_mean = np.mean(older)
+        else:
+            import statistics
+            recent_mean = statistics.mean(recent)
+            older_mean = statistics.mean(older)
+        return recent_mean > older_mean * 1.1
 
 
 class OuterRewardLoop:

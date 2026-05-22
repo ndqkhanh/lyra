@@ -10,5 +10,5 @@ pip install -e packages/lyra-fork-worker
 
 ## Testing
 ```bash
-pytest packages/lyra-fork-worker/tests/
+pytest packages/lyra-fork-worker/pkg_tests/
 ```
