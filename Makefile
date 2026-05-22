@@ -7,6 +7,19 @@ PACKAGES := packages/lyra-core \
             packages/lyra-evals \
             packages/lyra-cli
 
+BREAKTHROUGH_PACKAGES := packages/lyra-instincts \
+                         packages/lyra-beliefs \
+                         packages/lyra-memory-token \
+                         packages/lyra-memory-vericache \
+                         packages/lyra-router \
+                         packages/lyra-identity \
+                         packages/lyra-resilience \
+                         packages/lyra-sla \
+                         packages/lyra-experiment \
+                         packages/lyra-etl-pipeline \
+                         packages/lyra-command-registry \
+                         packages/lyra-ecology
+
 AGI_PACKAGES := packages/lyra-verification-mesh \
                 packages/lyra-hbhc \
                 packages/lyra-viper-mcp \
@@ -27,7 +40,7 @@ AGI_PACKAGES := packages/lyra-verification-mesh \
                 packages/lyra-gossip-memory \
                 packages/lyra-agent-lifecycle
 
-ALL_PACKAGES := $(PACKAGES) $(AGI_PACKAGES)
+ALL_PACKAGES := $(PACKAGES) $(AGI_PACKAGES) $(BREAKTHROUGH_PACKAGES)
 
 PYTHON ?= python3
 
@@ -107,6 +120,9 @@ test:
 
 test-agi:
 	$(PYTHON) -m pytest $(AGI_PACKAGES:%=%/tests) tests/test_agi_integration.py -v -c /dev/null --no-header
+
+test-breakthrough:
+	$(PYTHON) -m pytest $(BREAKTHROUGH_PACKAGES:%=%/tests) -v --no-header -p no:cov -o addopts=
 
 test-fast:
 	$(PYTHON) -m pytest packages -q -x
