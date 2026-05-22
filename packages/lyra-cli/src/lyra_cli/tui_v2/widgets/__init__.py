@@ -35,6 +35,26 @@ from .async_bridge import BackgroundTaskQueue, QueueStatusWidget
 from .rich_repl import RichReplWidget, MarkdownStreamBuffer
 from .progress_viz import ProgressVizWidget, ProgressStep, StepState
 
+# UX improvement widgets (Round 10-15 — wired from disk)
+from .chat_tools_panel import ChatToolsWidget, ToolBlock
+from .claude_banner import ClaudeStyleBannerWidget
+from .connect_status import ConnectStatusWidget
+from .context_engineering import ContextEngineeringWidget
+from .deepsearch_panel import DeepSearchWidget
+from .memory_dashboard import MemoryDashboardWidget
+from .model_router_panel import ModelRouterWidget
+from .skills_lifecycle_panel import SkillsLifecycleWidget
+from .status_bar_enhanced import StatusBarEnhancedWidget
+from .task_checklist import TaskChecklistWidget
+from .trace_panel import TraceWidget
+from .ultrareview_panel import UltraReviewWidget
+
+# Orphaned compatible widgets (existing files, no new code)
+from .enhanced_features import EnhancedFeatures
+from .file_completion import FileCompletion
+from .ghost_text import GhostText
+from .spec_drawer import SpecDrawer
+
 __all__ = [
     # Original widgets
     "SlashDropdown",
@@ -81,4 +101,23 @@ __all__ = [
     "ProgressVizWidget",
     "ProgressStep",
     "StepState",
+
+    # UX improvement widgets (Round 10-15 — wired from disk)
+    "ClaudeStyleBannerWidget",
+    "ConnectStatusWidget",
+    "ContextEngineeringWidget",
+    "DeepSearchWidget",
+    "MemoryDashboardWidget",
+    "ModelRouterWidget",
+    "SkillsLifecycleWidget",
+    "StatusBarEnhancedWidget",
+    "TaskChecklistWidget",
+    "TraceWidget",
+    "UltraReviewWidget",
+
+    # Orphaned compatible widgets
+    "EnhancedFeatures",
+    "FileCompletion",
+    "GhostText",
+    "SpecDrawer",
 ]
