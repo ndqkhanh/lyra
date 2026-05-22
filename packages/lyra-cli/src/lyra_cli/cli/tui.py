@@ -926,6 +926,23 @@ class LyraTUI:
                     line, buf = buf.split("\n", 1)
                     self._print_output(line)
 
+            elif etype == "thinking":
+                # Claude-Code-style collapsed "thought" indicator. Stash the
+                # full reasoning so ctrl+o can expand it (uses the same slot
+                # as last tool output for a single expand affordance).
+                if buf:
+                    self._print_output(buf, end="")
+                    buf = ""
+                full_reasoning = event.get("content", "") or ""
+                self._last_tool_output = full_reasoning
+                self._tool_output_expanded = False
+                meta = event.get("metadata", {})
+                chars = meta.get("chars", len(full_reasoning))
+                self._print_output(
+                    f"\033[2m✻ Thought · {chars} chars  \033[0m"
+                    f"\033[2m(ctrl+o to expand)\033[0m"
+                )
+
             elif etype == "tool_display":
                 # Wave 2: ⎿ tool use line
                 if buf:

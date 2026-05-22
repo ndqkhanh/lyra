@@ -470,21 +470,24 @@ class TUIAgentIntegration:
 
             # DeepSeek reasoning models stream chain-of-thought as
             # ``delta.reasoning_content`` and the final answer as
-            # ``delta.content``. Buffer reasoning into a single event so we
-            # don't pile up per-chunk ANSI escape sequences that confuse the
-            # TUI's prompt_toolkit ANSI parser. Flush when real content
-            # arrives, or at stream end if no content ever comes.
+            # ``delta.content``. For short prompts the model often emits
+            # everything inside ``reasoning_content`` with no ``content``
+            # ever arriving — in that case the reasoning IS the reply, so
+            # render it bright. When content does arrive, render the
+            # reasoning dim as a "thinking" prefix to the bright answer.
+            #
+            # Buffer reasoning into a single event so we don't pile up
+            # per-chunk ANSI escape sequences (prompt_toolkit's ANSI
+            # parser truncates on long alternating sequences).
+            # Buffer reasoning AND content separately, yield each as ONE
+            # text event with a trailing newline at stream end. This avoids
+            # the legacy TUI's post-loop-flush path (where a sub-newline
+            # ``_print_output(buf, end="")`` of partial content sometimes
+            # doesn't reach the screen) by guaranteeing every text we emit
+            # already terminates on a newline the inner loop will flush
+            # mid-stream.
             reasoning_buf = ""
-            reasoning_flushed = False
-
-            def _flush_reasoning() -> dict | None:
-                nonlocal reasoning_buf, reasoning_flushed
-                if not reasoning_buf or reasoning_flushed:
-                    return None
-                payload = f"\033[2m{reasoning_buf}\033[0m\n"
-                reasoning_buf = ""
-                reasoning_flushed = True
-                return {"type": "text", "content": payload}
+            content_buf = ""
 
             async for chunk in stream:
                 if chunk.usage is not None:
@@ -495,19 +498,29 @@ class TUIAgentIntegration:
                 delta = chunk.choices[0].delta
                 content = getattr(delta, "content", None)
                 if content:
-                    flushed = _flush_reasoning()
-                    if flushed is not None:
-                        yield flushed
-                    yield {"type": "text", "content": content}
+                    content_buf += content
                     continue
                 reasoning = getattr(delta, "reasoning_content", None)
-                if reasoning and not reasoning_flushed:
+                if reasoning:
                     reasoning_buf += reasoning
 
-            # Stream ended — surface any reasoning that never had a content follow-up.
-            flushed = _flush_reasoning()
-            if flushed is not None:
-                yield flushed
+            # Emit reasoning (dim) only when we also have content to follow.
+            # Emit reasoning as a ``thinking`` event so the TUI can collapse
+            # it to a one-line "✻ Thought" indicator (Claude-Code style)
+            # instead of dumping the chain-of-thought inline. When the model
+            # never produced separate content, reasoning IS the response —
+            # surface it as bright text.
+            if reasoning_buf and content_buf:
+                yield {
+                    "type": "thinking",
+                    "content": reasoning_buf,
+                    "metadata": {"chars": len(reasoning_buf)},
+                }
+            elif reasoning_buf:
+                yield {"type": "text", "content": reasoning_buf + "\n"}
+
+            if content_buf:
+                yield {"type": "text", "content": content_buf + "\n"}
 
             self._total_tokens += input_tokens + output_tokens
             self._context_tokens = input_tokens
