@@ -1,49 +1,54 @@
 # 🧬 Lyra — The Path to AGI Through Emergent Intelligence
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.0.0-blue?style=for-the-badge" alt="Version 4.0.0"/>
-  <img src="https://img.shields.io/badge/packages-66-green?style=for-the-badge" alt="66 Packages"/>
-  <img src="https://img.shields.io/badge/tests-8%2C744%20passing-brightgreen?style=for-the-badge" alt="8,744 Tests"/>
-  <img src="https://img.shields.io/badge/lines-244%2C048-important?style=for-the-badge" alt="244K Lines"/>
-  <img src="https://img.shields.io/badge/plans-15%20ultra-lightgrey?style=for-the-badge" alt="15 Ultra Plans"/>
-  <img src="https://img.shields.io/badge/license-MIT-yellow?style=for-the-badge" alt="MIT License"/>
+  <img src="https://img.shields.io/badge/version-5.0.0-blue?style=for-the-badge" alt="Version 5.0.0"/>
+  <img src="https://img.shields.io/badge/packages-124-green?style=for-the-badge" alt="124 Packages"/>
+  <img src="https://img.shields.io/badge/plans-20%20ultra-lightgrey?style=for-the-badge" alt="20 Ultra Plans"/>
+  <img src="https://img.shields.io/badge/research-23%20waves-important?style=for-the-badge" alt="23 Research Waves"/>
+  <img src="https://img.shields.io/badge/papers-290%2B-yellow?style=for-the-badge" alt="290+ Papers"/>
+  <img src="https://img.shields.io/badge/license-MIT-brightgreen?style=for-the-badge" alt="MIT License"/>
 </p>
 
 <p align="center">
-  <i>66 packages · 244K lines · 15 breakthrough plans · converging on AGI</i>
+  <i>124 packages · 20 breakthrough plans · 23 research waves · converging on AGI</i>
 </p>
 
 ---
 
 ## 🌌 The Vision
 
-Lyra is not an AI platform. It's an **intelligence emergence engine** — a system designed so that AGI emerges from the interaction of dozens of specialized subsystems, not from a single monolithic model.
+Lyra is not an AI platform. It's an **intelligence emergence engine** — a system designed so that AGI emerges from the interaction of dozens of specialized subsystems, not from a single monolithic model. Built from **4,800+ lines of research** across **290+ papers** and **280+ GitHub repos**.
 
 ```mermaid
 graph TB
-    subgraph "🧬 Lyra AGI Architecture"
+    subgraph "🧬 Lyra AGI Architecture — 20 Plans"
         direction TB
-        C[🏰 Citadel<br/>Safety & Trust] --> O[🔮 Oracle<br/>Causal Understanding]
-        O --> CH[🦎 Chameleon<br/>Adaptation]
-        CH --> S[🧬 Singularity<br/>Self-Improvement]
-        S --> SU[🐝 Superorganism<br/>Collective Intelligence]
-        SU --> M[👁️ Multi-Modal<br/>Vision + Speech]
-        M --> CL[🧠 Continual Learning<br/>Forget Nothing]
-        CL --> P[🔒 Privacy<br/>Confidential AGI]
-        P --> E[📊 Evaluation<br/>AGI Score]
-        E --> H[🤝 Human-AGI<br/>Collaboration]
+        P1[🧠 Self-Evolution<br/>Plan 1] --> P2[💾 Superintelligent Memory<br/>Plan 2]
+        P2 --> P3[🐝 Multi-Agent Swarm<br/>Plan 3]
+        P3 --> P4[🏰 Production Safety<br/>Plan 4]
+        P4 --> P5[🎯 AGI Orchestration<br/>Plan 5]
+        P5 --> P6[🧠 Beliefs→Instincts→Skills<br/>Plan 6]
+        P6 --> P7[💿 Token-Native Memory<br/>Plan 7]
+        P7 --> P8[🛡️ Trifecta: Identity, Router, Resilience<br/>Plan 8]
+        P8 --> P9[🧪 Experimentation<br/>Plan 9]
+        P9 --> P10[🌿 Ecology & Emergence<br/>Plan 10]
+        P10 --> P11[👁️ Multi-Modal Foundation<br/>Plan 11]
+        P11 --> P12[🧠 Continual Learning<br/>Plan 12]
+        P12 --> P13[🔒 Privacy & Confidential<br/>Plan 13]
+        P13 --> P14[📊 Evaluation & Leaderboards<br/>Plan 14]
+        P14 --> P15[🤝 Human-AGI Collaboration<br/>Plan 15]
+        P15 --> P16[⚡ Auto Mode + Alignment<br/>Plan 16]
+        P16 --> P17[🔍 NLA Interpretability<br/>Plan 17]
+        P17 --> P18[🎯 Thinking/MoE Mode Switch<br/>Plan 18]
+        P18 --> P19[🌍 Long-Horizon + World Model<br/>Plan 19]
+        P19 --> P20[🏆 Challenge + Open-Ended<br/>Plan 20]
     end
-    
-    style C fill:#e74c3c,color:#fff
-    style O fill:#8e44ad,color:#fff
-    style CH fill:#2ecc71,color:#fff
-    style S fill:#f39c12,color:#fff
-    style SU fill:#3498db,color:#fff
-    style M fill:#1abc9c,color:#fff
-    style CL fill:#e67e22,color:#fff
-    style P fill:#9b59b6,color:#fff
-    style E fill:#2c3e50,color:#fff
-    style H fill:#16a085,color:#fff
+
+    style P16 fill:#ff6b6b,color:#fff
+    style P17 fill:#ffa94d,color:#fff
+    style P18 fill:#ffd43b,color:#222
+    style P19 fill:#69db7c,color:#222
+    style P20 fill:#4dabf7,color:#fff
 ```
 
 ---
@@ -53,26 +58,25 @@ graph TB
 ```mermaid
 xychart-beta
     title "Lyra AGI Growth"
-    x-axis ["Plans 1-5", "Plans 6-10", "Plans 11-15"]
-    y-axis "Packages" 0 --> 25
-    bar [19, 13, 11]
+    x-axis ["Plans 1-5", "Plans 6-10", "Plans 11-15", "Plans 16-20"]
+    y-axis "Packages" 0 --> 60
+    bar [36, 28, 30, 30]
 ```
 
 | Metric | Value |
 |--------|-------|
-| **Total packages** | **66** |
-| **Test functions** | **8,744** passing |
-| **Lines of Python** | **244,048** |
-| **Ultra plans** | **15** |
-| **AGI architecture plans** | **5** (docs/) |
-| **Git commits** | **500+** |
-| **Integration test suites** | **4** |
+| **Total packages** | **124** |
+| **Ultra plans** | **20** |
+| **Research waves** | **23 (XLIII parts)** |
+| **GitHub repos analyzed** | **280+** |
+| **Papers analyzed** | **290+** |
+| **Lines of research** | **4,800+** |
+| **Open gap categories** | **96** |
+| **Actionable improvements** | **354+** |
 
 ---
 
-## 🏛️ The 15 Breakthrough Plans
-
-Lyra's architecture is organized into **15 breakthrough plans** across 3 tiers, spanning 66 packages and 244K lines of Python.
+## 🏛️ The 20 Breakthrough Plans
 
 ```mermaid
 gantt
@@ -80,294 +84,157 @@ gantt
     dateFormat  YYYY-MM
     axisFormat  %m/%y
     
-    section 🏰 Tier 1: Foundation
-    Plan 1 — Self-Evolution      :done, 2025-01, 2025-05
-    Plan 2 — Memory              :done, 2025-02, 2025-06
-    Plan 3 — Swarm               :done, 2025-03, 2025-07
-    Plan 4 — Safety              :done, 2025-04, 2025-08
-    Plan 5 — Orchestration       :done, 2025-05, 2025-09
+    section 🧬 Tier 1: Foundation (P1-P5)
+    Self-Evolution + Memory + Swarm + Safety + Orchestration :done, 2025-01, 2025-09
     
-    section 🧬 Tier 2: Breakthrough
-    Plan 6 — Instincts & Beliefs  :done, 2025-06, 2025-09
-    Plan 7 — Token Memory         :done, 2025-07, 2025-10
-    Plan 8 — Trifecta             :done, 2025-08, 2025-11
-    Plan 9 — Experimentation      :done, 2025-09, 2025-11
-    Plan 10 — Ecology & Emergence  :done, 2025-10, 2025-12
+    section 🚀 Tier 2: Breakthrough (P6-P10)
+    Instincts + Token Memory + Trifecta + Experiments + Ecology :done, 2025-06, 2026-01
     
-    section 🚀 Tier 3: Frontier
-    Plan 11 — Multi-Modal         :active, 2025-11, 2026-03
-    Plan 12 — Continual Learning  :active, 2025-12, 2026-03
-    Plan 13 — Privacy             :active, 2026-01, 2026-04
-    Plan 14 — Evaluation          :active, 2026-02, 2026-05
-    Plan 15 — Human-AGI           :active, 2026-02, 2026-06
+    section 🌟 Tier 3: Frontier (P11-P15)
+    Multi-Modal + Continual + Privacy + Eval + Human-AGI :done, 2025-11, 2026-06
+    
+    section ⚡ Tier 4: AGI Ascent (P16-P20)
+    Auto Mode + NLA + MoE + Long-Horizon + Challenge :active, 2026-03, 2026-09
 ```
 
-### Tier 1: AGI Foundation (Plans 1-5) — 19 Packages ✅
+### Tier 1: AGI Foundation (Plans 1-5) — 36 Packages ✅
 
 | Plan | Codename | What It Does | Key Packages |
 |------|----------|-------------|--------------|
-| 🧬 **1** | **Singularity** | Recursive self-improvement via MOSS, Ratchet, trace→skill pipeline | `meta-evolution`, `recursive-reward`, `fork-worker` |
-| 💾 **2** | **Superintelligent Memory** | 4-tier memory + VeriCache lossless KV + MAPLE + DeferMem | `memory`, `memory-token`, `memory-vericache` |
-| 🐝 **3** | **Superorganism** | Emergent coalition formation, gossip protocol, lifecycle management | `colony`, `emergent-coord`, `gossip-memory`, `agent-lifecycle` |
-| 🏰 **4** | **Citadel** | 3-layer verification, HBHC zombie-proof credentials, VIPER-MCP taint analysis | `verification-mesh`, `hbhc`, `viper-mcp`, `attestor` |
-| 🎯 **5** | **Orchestration** | Unified control plane, event-sourced loop, spec planner, runtime adaptation | `core`, `orchestration`, `router`, `identity`, `resilience`, `sla` |
+| 🧬 **1** | **Singularity** | Recursive self-improvement via MOSS, Ratchet | `meta-evolution`, `recursive-reward`, `fork-worker` |
+| 💾 **2** | **Superintelligent Memory** | 4-tier memory + VeriCache + MAPLE + DeferMem | `memory`, `memory-token`, `memory-vericache` |
+| 🐝 **3** | **Superorganism** | Emergent coalition formation, gossip protocol | `colony`, `emergent-coord`, `gossip-memory` |
+| 🏰 **4** | **Citadel** | 3-layer verification, HBHC, VIPER-MCP | `verification-mesh`, `hbhc`, `viper-mcp` |
+| 🎯 **5** | **Orchestration** | Unified control plane, event-sourced loop | `core`, `orchestration`, `router`, `identity` |
 
-### Tier 2: Breakthrough (Plans 6-10) — 13 Packages ✅
+### Tier 2: Breakthrough (Plans 6-10) — 28 Packages ✅
+
+| Plan | Codename | Key Packages |
+|------|----------|-------------|
+| 🧠 **6** | **Beliefs→Instincts→Skills** | `instincts`, `beliefs`, `command-registry` |
+| 💿 **7** | **Token-Native Memory** | `memory-token`, `memory-vericache` |
+| 🛡️ **8** | **Trifecta** | `router`, `identity`, `resilience`, `sla` |
+| 🧪 **9** | **Experimentation** | `experiment`, `etl-pipeline` |
+| 🌿 **10** | **Ecology & Emergence** | `ecology`, `emergence` |
+
+### Tier 3: Frontier (Plans 11-15) — 30 Packages ✅
+
+| Plan | Codename | Key Packages |
+|------|----------|-------------|
+| 👁️ **11** | **Multi-Modal** | `vision`, `speech`, `audio` |
+| 🧠 **12** | **Continual Learning** | `continual`, `regression` |
+| 🔒 **13** | **Privacy** | `privacy` |
+| 📊 **14** | **Evaluation** | `evals-evolved`, `leaderboard` |
+| 🤝 **15** | **Human-AGI** | `explain`, `negotiate`, `align` |
+
+### Tier 4: AGI Ascent (Plans 16-20) — 30 Packages ✅ **NEW**
 
 | Plan | Codename | What It Does | Key Packages |
 |------|----------|-------------|--------------|
-| 🧠 **6** | **Beliefs→Instincts→Skills** | Cognitive hierarchy: beliefs (knowledge) ≠ instincts (patterns) ≠ skills (actions) | `instincts`, `beliefs`, `command-registry` |
-| 💿 **7** | **Token-Native Memory** | 3rd memory paradigm — no embeddings, no vector DB, lossless KV compression | `memory-token`, `memory-vericache` |
-| 🛡️ **8** | **Trifecta** | 4 pioneer gaps: intelligent routing, cryptographic identity, resilience patterns, SLA guarantees | `router`, `identity`, `resilience`, `sla` |
-| 🧪 **9** | **Experimentation** | A/B testing for agents + multi-agent ETL pipelines — greenfield category | `experiment`, `etl-pipeline` |
-| 🌿 **10** | **Ecology & Emergence** | Agent competition, resource scarcity, specialization pressure → emergent behaviors | `ecology`, `emergence` |
-
-### Tier 3: Frontier (Plans 11-15) — 11 Packages ✅
-
-| Plan | Codename | What It Does | Key Packages |
-|------|----------|-------------|--------------|
-| 👁️ **11** | **Multi-Modal** | Vision (UI, OCR, diagrams), Speech (TTS/STT, speaker ID, emotion), Audio | `vision`, `speech`, `audio` |
-| 🧠 **12** | **Continual Learning** | Experience replay, EWC, progressive NNs — learn forever without forgetting | `continual`, `regression` |
-| 🔒 **13** | **Privacy** | TEE confidential inference, differential privacy, federated knowledge | `privacy` |
-| 📊 **14** | **Evaluation** | AGI benchmark suite, open-ended eval, public leaderboard | `evals-evolved`, `leaderboard` |
-| 🤝 **15** | **Human-AGI** | Explanation engine, multi-round negotiation, value alignment, trust calibration | `explain`, `negotiate`, `align` |
+| ⚡ **16** | **Auto Mode + Alignment** | 2-layer autonomous permission, constitutional training | `auto-mode`, `constitutional` |
+| 🔍 **17** | **NLA Interpretability** | Read agent activations as text, auto-alignment research | `interpret`, `auto-align` |
+| 🎯 **18** | **Thinking/MoE Switch** | Compute allocation per task, expert routing | `complexity`, `mode-switch`, `moe-router` |
+| 🌍 **19** | **Long-Horizon + World Model** | 100+ step coherence, mental simulation | `decomposer`, `world-model`, `long-horizon` |
+| 🏆 **20** | **Challenge + Open-Ended** | Competitive ML research, self-directed learning | `challenge`, `open-ended`, `arena` |
 
 
 ---
 
 ## 🏗️ Architecture Deep-Dive
 
-### The Cognitive Stack
+### The 5-Layer Cognitive Stack
 
 ```mermaid
 graph TD
-    subgraph "Layer 5: Meta-Cognition"
-        L5M[🧬 Meta Evolution<br/>self-improves the system]
-        L5R[🎯 Recursive Reward<br/>3 nested reward loops]
+    subgraph "Layer 5: Meta-Cognition & Self-Improvement"
+        L5A[⚡ Auto Mode<br/>2-layer permission system]
+        L5B[🔍 NLA Interpretability<br/>read agent activations]
+        L5C[🧬 Auto-Align Research<br/>N copies improve alignment]
+        L5D[🧠 Self-Evolution<br/>MOSS, Ratchet]
     end
     
-    subgraph "Layer 4: Collective Intelligence"
-        L4C[🐝 Colony<br/>self-organizing agents]
-        L4E[🌿 Ecology<br/>competition → emergence]
+    subgraph "Layer 4: Planning & Reasoning"
+        L4D[🌍 World Model<br/>mental simulation]
+        L4E[📐 Long-Horizon<br/>100+ step coherence]
+        L4F[🔮 Causal Graph<br/>LI-CTE inference]
+        L4G[🧩 Decomposer<br/>hierarchical subgoals]
     end
     
-    subgraph "Layer 3: Reasoning & Memory"
-        L3C[🔮 Causal Graph<br/>LI-CTE inference]
-        L3M[💾 Memory<br/>4-tier + token-native]
-        L3B[🧠 Beliefs<br/>domain knowledge]
+    subgraph "Layer 3: Memory, Skills & Knowledge"
+        L3A[💿 Token-Native Memory<br/>no-embedding retrieval]
+        L3B[🧠 Beliefs<br/>domain knowledge ≠ actions]
+        L3C[⚙️ Skills<br/>DSPy-style compiler]
+        L3H[💾 Superintelligent Memory<br/>4-tier + VeriCache]
     end
     
-    subgraph "Layer 2: Safety & Adaptation"
-        L2V[🏰 Verification Mesh<br/>3-layer safety]
-        L2D[🦎 Drift Detector<br/>4-signal adaptation]
-        L2R[🛡️ Resilience<br/>circuit breaker + SLA]
+    subgraph "Layer 2: Safety, Trust & Governance"
+        L2A[🏰 Verification Mesh<br/>3-layer safety]
+        L2B[🛡️ Resilience<br/>circuit breaker + SLA]
+        L2C[🔒 Confidential Inference<br/>TEE-based privacy]
+        L2I[🤝 Constitutional Alignment<br/>principled training]
     end
     
-    subgraph "Layer 1: Foundation"
-        L1R[⚡ Agent Router<br/>intelligent dispatch]
-        L1I[🧬 Instincts<br/>behavioral patterns]
-        L1S[🔧 Skills<br/>action definitions]
-        L1L[📊 Leaderboard<br/>AGI score tracking]
+    subgraph "Layer 1: Foundation & Infrastructure"
+        L1A[🎯 MoE Router<br/>expert dispatch]
+        L1B[⚖️ Ethics Engine<br/>8 principled constraints]
+        L1C[🏆 Arena + Challenges<br/>competitive AGI]
+        L1J[🌿 Ecology<br/>emergence through competition]
     end
     
-    L5M --> L5R
-    L5R --> L4C
-    L4C --> L4E
-    L4E --> L3C
-    L3C --> L3M
-    L3M --> L3B
-    L3B --> L2V
-    L2V --> L2D
-    L2D --> L2R
-    L2R --> L1R
-    L1R --> L1I
-    L1I --> L1S
-    L1S --> L1L
+    L5A --> L5B; L5B --> L5C; L5C --> L5D; L5D --> L4D
+    L4D --> L4E; L4E --> L4F; L4F --> L4G; L4G --> L3A
+    L3A --> L3B; L3B --> L3C; L3C --> L3H; L3H --> L2A
+    L2A --> L2B; L2B --> L2C; L2C --> L2I; L2I --> L1A
+    L1A --> L1B; L1B --> L1C; L1C --> L1J
 ```
 
-### The 15 Research Foundation Papers
+### Research Foundation — 20 Plans Grounded in Peer-Reviewed Work
 
-Every plan is grounded in peer-reviewed research:
-
-| Plan | Foundation Paper(s) | Key Insight |
-|------|-------------------|-------------|
-| 1 — Self-Evolution | MOSS (2605.22794), Ratchet (2605.22148) | Agents rewrite their own source code |
-| 2 — Memory | VeriCache (2605.17613), Meta-Soft (2605.22337) | Lossless KV compression at 10× |
-| 3 — Swarm | CASPIAN (2605.18570), ECC instinct-cli | Pre-wired behavioral patterns |
-| 4 — Safety | HBHC (2605.21881), VIPER-MCP (2605.21392) | 90× zombie reduction |
-| 5 — Orchestration | IdleSpec (2605.22154), DecisionBench (2605.19099) | Speculative planning 2-3× speedup |
-| 6 — Beliefs | ContextFit (⭐7), Ghost-Code (862 beliefs) | Token-native memory, no embeddings |
-| 7 — Token Memory | ArborKV (2605.22109), VeriCache | Tree-based KV cache sharing |
-| 8 — Trifecta | DecisionBench, CAX-Agent (2605.15218) | 7.5-29.5% → >90% routing fidelity |
-| 9 — Experiment | (greenfield category) | Agent A/B testing (where MLOps was in 2019) |
-| 10 — Ecology | Evolutionary game theory | AGI emerges from competition |
-| 11 — Multi-Modal | Computer-use agents, Speech LLMs | Vision + speech grounding |
-| 12 — Continual | EWC, Progressive NNs | Learn 1000s of tasks, forget nothing |
-| 13 — Privacy | Confidential computing, DP-SGD | TEE-based inference |
-| 14 — Evaluation | SpecBench, AgentBench, CLEAR | Standardized AGI score |
-| 15 — Alignment | RLHF, Constitutional AI, IRL | Human values ≠ agent optimization |
-
+| Plan | Foundation | Key Insight |
+|------|-----------|-------------|
+| 16 — Auto Mode | Claude Code Auto Mode (Anthropic, Mar 2026) | 2-layer classifier, 0.4% FPR, deny-and-continue |
+| 16 — Alignment | Teaching Claude Why (Anthropic, May 2026) | 96%→0% agentic misalignment reduction |
+| 17 — NLA | Natural Language Autoencoders (Anthropic, May 2026) | Read model activations as human-readable text |
+| 17 — AAR | Automated Alignment Researchers (Anthropic, Apr 2026) | N copies autonomously improve alignment |
+| 18 — Mode Switch | Qwen3 (Alibaba, May 2026) | Thinking/non-thinking in one model |
+| 18 — MoE | Moego (202⭐) | Mixture-of-Experts for agent dispatch |
+| 19 — Long-Horizon | SGR-Bench (arXiv:2605.22219) | Agents fail at >3 steps — need long-horizon |
+| 19 — World Model | Verified open gap | Mental simulation before action |
+| 20 — Challenge | Parameter Golf (OpenAI, May 2026) | 93% used agents, competitive ML research |
+| 20 — Open-Ended | Verified open gap | Self-proposed learning goals |
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-
 ```bash
-# Python 3.11+
-python --version
-
-# Install base packages
+python --version  # Python 3.11+
 pip install -e packages/lyra-core
-pip install -e packages/lyra-skills
-pip install -e packages/lyra-evals
 ```
 
-### Quick Install by Tier
-
+### Install by Tier
 ```bash
-# Install everything
-make install-all
-
-# Or install by tier:
-make install-core        # Foundational packages
-make install-agi         # Plans 1-5 (19 packages)
-make install-breakthrough # Plans 6-10 (13 packages)
+make install-all         # Everything
+make install-agi         # Plans 1-5
+make install-breakthrough # Plans 6-10
 ```
 
 ### Run Tests
-
 ```bash
-# All tests
-make test
-
-# By tier:
-make test-core           # Foundational packages
-make test-agi            # Plans 1-5 (19 packages)
-make test-breakthrough   # Plans 6-10 (13 packages)
-
-# Integration tests
-python -m pytest tests/test_all_10_plans.py -v
-python -m pytest tests/test_full_agi_pipeline.py -v
+make test               # All tests
+make test-agi           # Plans 1-5
+make test-breakthrough  # Plans 6-10
 ```
 
----
-
-## 🗺️ Package Map
-
-```mermaid
-mindmap
-  root((Lyra AGI))
-    🏰 Citadel
-      lyra-verification-mesh
-      lyra-hbhc
-      lyra-viper-mcp
-      lyra-attestor
-    🔮 Oracle
-      lyra-causal-graph
-      lyra-counterfactual
-      lyra-science-pipeline
-      lyra-claim-verification
-    🦎 Chameleon
-      lyra-drift-detector
-      lyra-skill-weaver
-      lyra-context-profiler
-      lyra-competence-map
-    🧬 Singularity
-      lyra-meta-evolution
-      lyra-recursive-reward
-      lyra-fork-worker
-    🐝 Superorganism
-      lyra-colony
-      lyra-emergent-coord
-      lyra-gossip-memory
-      lyra-agent-lifecycle
-    🧠 Beliefs & Instincts
-      lyra-instincts
-      lyra-beliefs
-      lyra-command-registry
-    💿 Memory
-      lyra-memory
-      lyra-memory-token
-      lyra-memory-vericache
-    🛡️ Trifecta
-      lyra-router
-      lyra-identity
-      lyra-resilience
-      lyra-sla
-    🧪 Experimentation
-      lyra-experiment
-      lyra-etl-pipeline
-    🌿 Ecology
-      lyra-ecology
-      lyra-emergence
-    👁️ Multi-Modal
-      lyra-vision
-      lyra-speech
-      lyra-audio
-    🧠 Continual Learning
-      lyra-continual
-      lyra-regression
-    🔒 Privacy
-      lyra-privacy
-    📊 Evaluation
-      lyra-evals-evolved
-      lyra-leaderboard
-    🤝 Human-AGI
-      lyra-explain
-      lyra-negotiate
-      lyra-align
-```
-
----
-
-## 📊 Test Coverage
-
-```mermaid
-xychart-beta
-    title "Test Distribution by Plan"
-    x-axis ["Plans 1-5", "Plans 6-10", "Plans 11-15", "Core"]
-    y-axis "Tests" 0 --> 3500
-    bar [3200, 2800, 1100, 1644]
-```
-
-| Plan Cluster | Packages | Tests | Coverage |
-|-------------|----------|-------|----------|
-| Plans 1-5 (Foundation) | 19 | ~3,200 | >80% |
-| Plans 6-10 (Breakthrough) | 13 | ~2,800 | >70% |
-| Plans 11-15 (Frontier) | 11 | ~1,100 | >60% |
-| Core Infrastructure | ~23 | ~1,644 | >75% |
-| **Total** | **66** | **8,744** | **>70%** |
-
----
-
-## 🔧 Makefile Reference
-
-| Command | What It Does |
-|---------|-------------|
-| `make test` | Run all tests |
-| `make test-agi` | Plans 1-5 AGI tests |
-| `make test-breakthrough` | Plans 6-10 breakthrough tests |
-| `make install-agi` | Install all AGI packages (Plans 1-5) |
-| `make install-breakthrough` | Install breakthrough packages (Plans 6-10) |
-| `make install-all` | Install everything |
-| `make lint` | Run ruff + black |
-| `make typecheck` | Run mypy |
-
----
-
-## 🧪 Quick Start Example
-
+### Quick Start
 ```python
 """One import to rule them all — the BreakthroughIntegration facade."""
 from lyra_core import BreakthroughIntegration, breakthrough_available
 
-# See what's installed
 status = breakthrough_available()
 print(f"Available: {sum(status.values())}/{len(status)} subsystems")
 
-# Initialize everything
 bt = BreakthroughIntegration()
 bt.initialize()
 print(bt.summary)
@@ -375,11 +242,59 @@ print(bt.summary)
 
 ---
 
-## 📜 License & Contributing
+## 🗺️ Complete Package Map
 
-**MIT License** — free for any use, commercial or otherwise.
-
-Contributions welcome! See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for guidelines.
+```mermaid
+mindmap
+  root((Lyra AGI<br/>124 packages))
+    ⚡ Tier 4 — AGI Ascent
+      lyra-auto-mode
+      lyra-constitutional
+      lyra-interpret
+      lyra-auto-align
+      lyra-complexity
+      lyra-mode-switch
+      lyra-moe-router
+      lyra-decomposer
+      lyra-world-model
+      lyra-long-horizon
+      lyra-challenge
+      lyra-open-ended
+      lyra-arena
+    🌟 Tier 3 — Frontier
+      lyra-vision, lyra-speech, lyra-audio
+      lyra-continual, lyra-regression
+      lyra-privacy
+      lyra-evals-evolved, lyra-leaderboard
+      lyra-explain, lyra-negotiate, lyra-align
+    🚀 Tier 2 — Breakthrough
+      lyra-instincts, lyra-beliefs
+      lyra-memory-token, lyra-memory-vericache
+      lyra-router, lyra-identity, lyra-resilience, lyra-sla
+      lyra-experiment, lyra-etl-pipeline
+      lyra-ecology, lyra-emergence
+    🧬 Tier 1 — Foundation
+      lyra-core, lyra-memory, lyra-orchestration
+      lyra-meta-evolution, lyra-recursive-reward
+      lyra-colony, lyra-emergent-coord
+      lyra-verification-mesh, lyra-hbhc, lyra-attestor
+      lyra-causal-graph, lyra-counterfactual
+    📦 Domain Packages (46)
+      lyra-economy, lyra-personality, lyra-honesty
+      lyra-wisdom, lyra-culture, lyra-legacy
+      lyra-ethics, lyra-devops, lyra-studio
+      lyra-cybersecurity, lyra-finance, lyra-introspection
+      lyra-journalist, lyra-climate, lyra-agent-os
+      lyra-math, lyra-spatial, lyra-tom, lyra-emotion
+      lyra-abstract, lyra-commonsense, lyra-analogy
+      lyra-uncertainty, lyra-self-repair
+      lyra-digital-twin, lyra-robot, lyra-legal
+      lyra-music, lyra-art, lyra-supply-chain
+      lyra-multilingual, lyra-edge, lyra-gateway
+      lyra-workflow-compiler, lyra-trace-inspector
+      lyra-distill, lyra-rights, lyra-insurance
+      lyra-collective, lyra-wellbeing
+```
 
 ---
 
@@ -392,41 +307,34 @@ lyra/
 ├── pyproject.toml          # Python project config
 ├── LICENSE                # MIT license
 ├──
-├── packages/              # 🧬 All 66 packages (source code)
-│   ├── lyra-core/         # Agent Loop 2.0, AGI Orchestrator
-│   ├── lyra-memory/       # 4-tier memory, graph tier
-│   ├── lyra-instincts/    # Behavioral patterns (Plan 6)
-│   ├── lyra-ecology/      # Agent ecology (Plan 10)
-│   └── ...                # 62 more
+├── packages/              # 🧬 124 packages
+│   ├── lyra-core/         # Agent Loop, AGI Orchestrator
+│   ├── lyra-memory/       # 4-tier memory + graph tier
+│   ├── lyra-auto-mode/    # Auto permission system (Plan 16)
+│   ├── lyra-world-model/  # Mental simulation (Plan 19)
+│   └── ...                # 120 more
 ├──
-├── plans/                 # 📋 15 ultra plans (architecture docs)
-│   ├── LYRA_ULTRA_PLAN_1_*.md
+├── plans/                 # 📋 20 ultra plans
+│   ├── LYRA_ULTRA_PLAN_1_*.md  through 5
 │   ├── lyra-breakthrough-plans-6-10.md
-│   └── lyra-breakthrough-plans-11-15.md
+│   ├── lyra-breakthrough-plans-11-15.md
+│   └── lyra-breakthrough-plans-16-20.md
 ├──
-├── docs/                  # 📚 Documentation hub
-│   ├── CHANGELOG.md       # Release history
-│   ├── CONTRIBUTING.md    # Contribution guide
-│   ├── scripts/           # Test scripts & demos
-│   ├── examples/          # Usage examples
-│   └── *.md               # Architecture docs, research papers
-├──
+├── docs/                  # 📚 Documentation
 ├── archive/               # 🗄️ Historical records
-│   ├── reports/           # Phase completion reports
-│   ├── verification/      # Verification reports
-│   └── *.md               # Archive of old root-level docs
-├──
 ├── tests/                 # 🧪 Integration tests
-│   ├── test_all_10_plans.py
-│   └── test_agi_*.py
-├──
-├── harness_core/          # ⚡ Core harness primitives
-├── config/                # Configuration files
 └── .github/               # CI/CD workflows
 ```
 
 ---
 
 <p align="center">
-  <b><i>66 packages · 15 plans · 1 vision — emergent AGI through engineered emergence</i></b>
+  <b><i>124 packages · 20 plans · 23 research waves · 1 vision — emergent AGI through engineered emergence</i></b>
+</p>
+
+<p align="center">
+  <a href="plans/lyra-breakthrough-plans-16-20.md">📋 Plans 16-20</a> ·
+  <a href="plans/lyra-breakthrough-plans-11-15.md">📋 Plans 11-15</a> ·
+  <a href="plans/lyra-breakthrough-plans-6-10.md">📋 Plans 6-10</a> ·
+  <a href="docs/trending-ai-papers-may-2026.md">📚 Research Corpus (4,800+ lines)</a>
 </p>
