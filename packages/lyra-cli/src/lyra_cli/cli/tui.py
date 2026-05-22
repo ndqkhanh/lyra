@@ -193,6 +193,9 @@ class LyraTUI:
                     "status-bar-mode-plan": "bg:#1a1a2e #FFD700 bold",
                     "input-rule": rule_color,
                     "hint-bar": "#444444",
+                    # Claude-Code-style footer accents
+                    "hint-bar-prompt": "#FFD700 bold",   # ⏵⏵ glyph
+                    "hint-bar-state": "#888888",          # mode / turn state
                     "completion-menu": "bg:#1a1a2e #FFF8DC",
                     "completion-menu.completion.current": "bg:#333355 #FFD700",
                 }
@@ -373,29 +376,45 @@ class LyraTUI:
         return frags
 
     def _get_hint_bar_fragments(self) -> list[tuple[str, str]]:
-        """Wave 8: context-sensitive keyboard hint line."""
+        """Wave 8: context-sensitive footer.
+
+        Claude-Code-style: leading ``⏵⏵`` glyph + current state (mode,
+        turn) on the left, key hints on the right. Format mirrors
+        ``⏵⏵ bypass permissions on · 5 background tasks · esc to interrupt``.
+        """
         sep = ("class:hint-bar", "  ·  ")
+        glyph = ("class:hint-bar-prompt", " ⏵⏵ ")
+        mode = getattr(self, "_mode", "chat")
+        turn = getattr(self, "_turn_count", 0)
+
         if self._agent_running:
-            hints = [
-                ("class:hint-bar", " ctrl+c interrupt agent"),
+            return [
+                glyph,
+                ("class:hint-bar-state", "agent running"),
                 sep,
-                ("class:hint-bar", "ctrl+o expand tool"),
+                ("class:hint-bar", f"turn {turn}"),
+                sep,
+                ("class:hint-bar", "ctrl+c interrupt"),
+                sep,
+                ("class:hint-bar", "ctrl+o expand"),
             ]
-        else:
-            hints = [
-                ("class:hint-bar", " ctrl+c cancel"),
-                sep,
-                ("class:hint-bar", "ctrl+o expand tool"),
-                sep,
-                ("class:hint-bar", "ctrl+h history"),
-                sep,
-                ("class:hint-bar", "ctrl+r search"),
-                sep,
-                ("class:hint-bar", "shift+tab mode"),
-                sep,
-                ("class:hint-bar", "/help"),
-            ]
-        return hints
+
+        return [
+            glyph,
+            ("class:hint-bar-state", f"{mode} mode"),
+            sep,
+            ("class:hint-bar", f"turn {turn}"),
+            sep,
+            ("class:hint-bar", "ctrl+c cancel"),
+            sep,
+            ("class:hint-bar", "ctrl+o expand"),
+            sep,
+            ("class:hint-bar", "ctrl+h history"),
+            sep,
+            ("class:hint-bar", "shift+tab mode"),
+            sep,
+            ("class:hint-bar", "/help"),
+        ]
 
     def _process_loop(self):
         """Background processing loop.
