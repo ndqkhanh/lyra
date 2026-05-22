@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lyra-beliefs"
+version = "0.1.0"
+description = "Domain knowledge system — beliefs are what the agent knows (distinct from skills, which are what it does)"
+requires-python = ">=3.11"
+dependencies = ["lyra-core"]
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+[tool.setuptools.packages.find]
+where = ["src"]
