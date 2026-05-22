@@ -49,14 +49,12 @@ def interactive_chat(model: str = "opus"):
             callback=agent_handler,
             model=api_model
         )
-        formatter.success_message("Agent loop initialized")
-    except ValueError as e:
-        formatter.error_message(str(e))
-        formatter.info_message("Set ANTHROPIC_API_KEY environment variable to use agent features")
-        formatter.info_message("Continuing in demo mode...")
+        # Agent ready - no message needed
+    except ValueError:
+        # Only show error once, cleanly
+        formatter.error_message("ANTHROPIC_API_KEY not set")
+        console.print("[dim]Set API key to enable agent[/dim]\n")
         agent_loop = None
-
-    formatter.info_message("Interactive chat mode - Type your message or /help for commands")
 
     current_model = model
     while True:
@@ -88,10 +86,9 @@ def interactive_chat(model: str = "opus"):
             if agent_loop:
                 agent_loop.process_message(user_input)
             else:
-                # Demo mode - just echo
-                formatter.status_message("Processing (demo mode)...")
-                console.print(f"\n[dim]Echo: {user_input}[/dim]")
-                formatter.warning_message("Set ANTHROPIC_API_KEY to enable real agent responses")
+                # Demo mode - minimal feedback
+                console.print(f"[dim]Echo: {user_input}[/dim]")
+                console.print("[dim]Set ANTHROPIC_API_KEY to enable agent[/dim]\n")
 
         except (KeyboardInterrupt, EOFError):
             console.print("\n\nGoodbye!", style="cyan")
