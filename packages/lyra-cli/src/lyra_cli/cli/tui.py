@@ -826,6 +826,7 @@ class LyraTUI:
                 self._print_output(f"\033[2mRun: /credentials {provider}\033[0m\n\n")
             else:
                 self.model = model_name
+                _persist_last_model(model_name)
                 # Force _agent to be re-initialised with the new provider
                 # on the next turn; the old instance is bound to the
                 # previous model's credentials and must not be reused.
@@ -1215,6 +1216,45 @@ class LyraTUI:
         return 0
 
 
+def _persist_last_model(model_name: str) -> None:
+    """Save the model the user just switched to as the next-session default.
+
+    Writes ``last_model`` into ``~/.lyra/auth.json``. Mirrors how
+    ``/budget save`` persists the budget cap. Best-effort — silent failure
+    if the home directory is read-only.
+    """
+    try:
+        import json as _json
+
+        path = Path.home() / ".lyra" / "auth.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        data: dict = {}
+        if path.exists():
+            try:
+                data = _json.loads(path.read_text())
+            except _json.JSONDecodeError:
+                data = {}
+        data["last_model"] = model_name
+        path.write_text(_json.dumps(data, indent=2))
+    except OSError:
+        return
+
+
+def _load_last_model() -> str | None:
+    """Return the persisted ``last_model`` from ``~/.lyra/auth.json`` or None."""
+    try:
+        import json as _json
+
+        path = Path.home() / ".lyra" / "auth.json"
+        if not path.exists():
+            return None
+        data = _json.loads(path.read_text())
+    except (OSError, ValueError):
+        return None
+    val = data.get("last_model")
+    return val if isinstance(val, str) and val else None
+
+
 def launch_tui(
     repo_root: Path,
     model: str,
@@ -1222,6 +1262,12 @@ def launch_tui(
     session_id: str | None = None,
 ) -> int:
     """Launch Lyra TUI."""
+    # If the caller passed the default "auto" (no explicit --model flag),
+    # honour any model the user picked in a prior session via ``/model``.
+    if model == "auto":
+        saved = _load_last_model()
+        if saved:
+            model = saved
     tui = LyraTUI(
         repo_root=repo_root,
         model=model,
