@@ -8,6 +8,7 @@ version = "0.1.0"
 description = "Decentralized memory gossip protocol for multi-agent memory federation"
 requires-python = ">=3.11"
 dependencies = ["lyra-core", "lyra-memory"]
+[project.optional-dependencies]
 dev = ["pytest>=7.0"]
 [tool.setuptools.packages.find]
 where = ["src"]

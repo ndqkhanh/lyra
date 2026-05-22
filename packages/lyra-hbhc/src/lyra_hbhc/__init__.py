@@ -16,6 +16,14 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+__all__ = [
+    "CredentialStatus",
+    "HeartbeatCredential",
+    "HBHCManager",
+    "Verifier",
+    "ZombieDetector",
+]
+
 
 class CredentialStatus(Enum):
     ACTIVE = auto()

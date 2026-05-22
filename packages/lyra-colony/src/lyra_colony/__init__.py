@@ -13,6 +13,13 @@ from lyra_agent_lifecycle import LifecycleManager
 
 logger = logging.getLogger(__name__)
 
+__all__ = [
+    "ColonyConfig",
+    "AgentColony",
+]
+
+
+
 
 @dataclass
 class ColonyConfig:

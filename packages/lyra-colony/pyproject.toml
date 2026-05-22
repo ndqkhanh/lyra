@@ -8,6 +8,7 @@ version = "0.1.0"
 description = "Self-organizing agent colony runtime with emergent coordination"
 requires-python = ">=3.11"
 dependencies = ["lyra-core", "lyra-orchestration", "lyra-emergent-coord", "lyra-gossip-memory", "lyra-agent-lifecycle"]
+[project.optional-dependencies]
 dev = ["pytest>=7.0"]
 [tool.setuptools.packages.find]
 where = ["src"]

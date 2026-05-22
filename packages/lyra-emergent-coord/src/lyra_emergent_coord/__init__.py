@@ -9,6 +9,15 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+__all__ = [
+    "TaskAdvertisement",
+    "Bid",
+    "Coalition",
+    "EmergentCoordinator",
+]
+
+
+
 
 @dataclass
 class TaskAdvertisement:

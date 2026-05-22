@@ -9,6 +9,14 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+__all__ = [
+    "CompetenceEntry",
+    "RegressionDetector",
+    "CompetenceMap",
+]
+
+
+
 
 @dataclass
 class CompetenceEntry:

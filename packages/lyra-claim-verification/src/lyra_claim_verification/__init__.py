@@ -11,6 +11,18 @@ from lyra_attestor import ClaimAttestation, ClaimType, VerificationStatus, Attes
 
 logger = logging.getLogger(__name__)
 
+__all__ = [
+    "Claim",
+    "MeasurementClaim",
+    "InferenceClaim",
+    "AnalogyClaim",
+    "CitationClaim",
+    "ClaimDAG",
+    "ClaimVerifier",
+]
+
+
+
 
 @dataclass
 class Claim:

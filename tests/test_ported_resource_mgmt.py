@@ -6,15 +6,11 @@ import time
 
 import pytest
 
-pytest.importorskip("textual", reason="requires textual")
-
-
 def test_resource_snapshot():
     from lyra_cli.tui_v2.widgets.resource_monitor import ResourceSnapshot
     snap = ResourceSnapshot(memory_mb=150.0, gc_objects=5000)
     assert snap.memory_mb == 150.0
     assert snap.gc_objects == 5000
-
 
 def test_resource_monitor_snapshot():
     from lyra_cli.tui_v2.widgets.resource_monitor import ResourceMonitorWidget
@@ -23,13 +19,11 @@ def test_resource_monitor_snapshot():
     assert snap is not None
     assert snap.memory_mb >= 0
 
-
 def test_resource_monitor_current_memory():
     from lyra_cli.tui_v2.widgets.resource_monitor import ResourceMonitorWidget
     mon = ResourceMonitorWidget()
     mon.snapshot()
     assert mon.current_memory_mb >= 0
-
 
 def test_resource_monitor_force_gc():
     from lyra_cli.tui_v2.widgets.resource_monitor import ResourceMonitorWidget
@@ -37,14 +31,12 @@ def test_resource_monitor_force_gc():
     collected = mon.force_gc()
     assert isinstance(collected, int)
 
-
 def test_resource_alerts_empty():
     from lyra_cli.tui_v2.widgets.resource_monitor import ResourceMonitorWidget
     mon = ResourceMonitorWidget()
     mon.snapshot()
     alerts = mon.alerts
     assert isinstance(alerts, list)
-
 
 def test_resource_monitor_set_token_budget():
     from lyra_cli.tui_v2.widgets.resource_monitor import ResourceMonitorWidget

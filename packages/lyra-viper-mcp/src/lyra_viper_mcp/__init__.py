@@ -12,6 +12,14 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+__all__ = [
+    "TaintSource",
+    "Vulnerability",
+    "TaintAnalyzer",
+    "PromptEvolver",
+    "VulnerabilityScanner",
+]
+
 
 @dataclass
 class TaintSource:
