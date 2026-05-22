@@ -134,8 +134,16 @@ from lyra_research.coordination import (
     TaskState,
     TimeoutEnforcer,
 )
+from lyra_research.sibyl_harness import (
+    TrialHarness,
+    TrialConfig,
+    ExperimentTrial,
+    TrialFailure,
+    ExperimentStatus,
+    SibylPipeline,
+)
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "ResearchOrchestrator",
@@ -246,4 +254,11 @@ __all__ = [
     "Task",
     "TaskState",
     "TimeoutEnforcer",
+    # Sibyl-style trial harnesses
+    "TrialHarness",
+    "TrialConfig",
+    "ExperimentTrial",
+    "TrialFailure",
+    "ExperimentStatus",
+    "SibylPipeline",
 ]
