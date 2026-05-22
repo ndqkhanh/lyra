@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lyra-fork-worker"
+version = "0.1.0"
+description = "Ephemeral trial worker orchestration for safe code modification testing"
+requires-python = ">=3.11"
+dependencies = ["lyra-core", "docker>=6.0"]
+dev = ["pytest>=7.0"]
+[tool.setuptools.packages.find]
+where = ["src"]

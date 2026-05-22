@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lyra-gossip-memory"
+version = "0.1.0"
+description = "Decentralized memory gossip protocol for multi-agent memory federation"
+requires-python = ">=3.11"
+dependencies = ["lyra-core", "lyra-memory"]
+dev = ["pytest>=7.0"]
+[tool.setuptools.packages.find]
+where = ["src"]

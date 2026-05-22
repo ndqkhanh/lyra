@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lyra-agent-lifecycle"
+version = "0.1.0"
+description = "Dynamic agent spawn/retire/evolve lifecycle management"
+requires-python = ">=3.11"
+dependencies = ["lyra-core", "lyra-orchestration", "lyra-evolution"]
+dev = ["pytest>=7.0"]
+[tool.setuptools.packages.find]
+where = ["src"]

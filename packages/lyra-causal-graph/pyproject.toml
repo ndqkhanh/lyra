@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lyra-causal-graph"
+version = "0.1.0"
+description = "Streaming causal graph construction using LI-CTE for agent trace analysis"
+requires-python = ">=3.11"
+dependencies = ["lyra-core", "numpy>=1.24"]
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+[tool.setuptools.packages.find]
+where = ["src"]

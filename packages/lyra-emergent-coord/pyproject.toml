@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lyra-emergent-coord"
+version = "0.1.0"
+description = "Task-driven coalition formation with bidding and lead election"
+requires-python = ">=3.11"
+dependencies = ["lyra-core", "lyra-orchestration"]
+dev = ["pytest>=7.0"]
+[tool.setuptools.packages.find]
+where = ["src"]

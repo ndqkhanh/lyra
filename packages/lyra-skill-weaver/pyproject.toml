@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lyra-skill-weaver"
+version = "0.1.0"
+description = "Dynamic skill composition engine — composable skill modules for any context"
+requires-python = ">=3.11"
+dependencies = ["lyra-core", "lyra-skills", "lyra-context-profiler"]
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+[tool.setuptools.packages.find]
+where = ["src"]

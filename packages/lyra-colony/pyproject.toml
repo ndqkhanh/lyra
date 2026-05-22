@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lyra-colony"
+version = "0.1.0"
+description = "Self-organizing agent colony runtime with emergent coordination"
+requires-python = ">=3.11"
+dependencies = ["lyra-core", "lyra-orchestration", "lyra-emergent-coord", "lyra-gossip-memory", "lyra-agent-lifecycle"]
+dev = ["pytest>=7.0"]
+[tool.setuptools.packages.find]
+where = ["src"]

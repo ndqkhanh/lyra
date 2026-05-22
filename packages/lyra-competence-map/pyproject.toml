@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lyra-competence-map"
+version = "0.1.0"
+description = "Context→Skill mapping with regression protection and competence tracking"
+requires-python = ">=3.11"
+dependencies = ["lyra-core", "lyra-skills", "lyra-context-profiler"]
+dev = ["pytest>=7.0"]
+[tool.setuptools.packages.find]
+where = ["src"]
