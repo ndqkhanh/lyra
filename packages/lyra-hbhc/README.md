@@ -10,5 +10,5 @@ pip install -e packages/lyra-hbhc
 
 ## Testing
 ```bash
-pytest packages/lyra-hbhc/tests/
+pytest packages/lyra-hbhc/pkg_tests/
 ```

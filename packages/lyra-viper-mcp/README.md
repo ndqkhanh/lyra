@@ -10,5 +10,5 @@ pip install -e packages/lyra-viper-mcp
 
 ## Testing
 ```bash
-pytest packages/lyra-viper-mcp/tests/
+pytest packages/lyra-viper-mcp/pkg_tests/
 ```

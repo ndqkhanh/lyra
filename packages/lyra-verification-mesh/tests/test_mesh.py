@@ -16,12 +16,10 @@ class TestCausalPastLogicVerifier:
     def test_record_event_pass(self):
         v = CausalPastLogicVerifier()
         v.add_property(TemporalProperty("no_errors", "not error", "No errors allowed"))
-        result = pytest.any()  # Placeholder
-        assert v.pass_rate >= 0
+        assert v.pass_rate == 1.0
 
     def test_verify_trace_empty(self):
         v = CausalPastLogicVerifier()
-        results = pytest.any()
         assert v.pass_rate == 1.0
 
 
@@ -46,7 +44,6 @@ class TestRuntimeMonitor:
     def test_ood_detection(self):
         m = RuntimeMonitor(threshold=0.1)
         m.set_baseline({"success_rate": 0.9})
-        result = pytest.any()  # Placeholder
         assert m.threshold == 0.1
 
     def test_no_alerts_initially(self):

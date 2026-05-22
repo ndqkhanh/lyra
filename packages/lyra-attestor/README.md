@@ -10,5 +10,5 @@ pip install -e packages/lyra-attestor
 
 ## Testing
 ```bash
-pytest packages/lyra-attestor/tests/
+pytest packages/lyra-attestor/pkg_tests/
 ```

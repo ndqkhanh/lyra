@@ -10,5 +10,5 @@ pip install -e packages/lyra-verification-mesh
 
 ## Testing
 ```bash
-pytest packages/lyra-verification-mesh/tests/
+pytest packages/lyra-verification-mesh/pkg_tests/
 ```
