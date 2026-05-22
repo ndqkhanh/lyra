@@ -20,9 +20,16 @@ class LyraPrompt:
 
         # Slash commands for completion
         slash_commands = [
-            "/help", "/exit", "/quit", "/clear",
-            "/model", "/config", "/session", "/sessions",
-            "/skills", "/debug", "/status", "/history"
+            "/help", "/h", "/?",
+            "/exit", "/quit", "/q",
+            "/clear",
+            "/model", "/m",
+            "/config", "/settings",
+            "/session", "/sessions",
+            "/skills", "/skill",
+            "/debug", "/status",
+            "/history", "/hist",
+            "/version", "/v",
         ]
 
         completer = WordCompleter(
