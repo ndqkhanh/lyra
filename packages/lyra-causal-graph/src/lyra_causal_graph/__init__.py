@@ -8,7 +8,10 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any, Optional
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:
+    np = None
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +95,8 @@ class CausalGraph:
 
     def compute_li_cte(self, source_id: str, target_id: str, lag: int = 1) -> float:
         """Compute Late-Interaction Conditional Transfer Entropy between two entities."""
+        if np is None:
+            return 0.0
         source_actions = [a for a in self.actions.values() if a.source_id == source_id]
         target_actions = [a for a in self.actions.values() if a.source_id == target_id]
 

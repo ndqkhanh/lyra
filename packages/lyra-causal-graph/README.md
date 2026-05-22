@@ -10,5 +10,5 @@ pip install -e packages/lyra-causal-graph
 
 ## Testing
 ```bash
-pytest packages/lyra-causal-graph/tests/
+pytest packages/lyra-causal-graph/pkg_tests/
 ```

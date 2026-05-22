@@ -10,5 +10,5 @@ pip install -e packages/lyra-counterfactual
 
 ## Testing
 ```bash
-pytest packages/lyra-counterfactual/tests/
+pytest packages/lyra-counterfactual/pkg_tests/
 ```

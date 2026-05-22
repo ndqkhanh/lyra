@@ -10,5 +10,5 @@ pip install -e packages/lyra-science-pipeline
 
 ## Testing
 ```bash
-pytest packages/lyra-science-pipeline/tests/
+pytest packages/lyra-science-pipeline/pkg_tests/
 ```

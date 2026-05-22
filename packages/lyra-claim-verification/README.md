@@ -10,5 +10,5 @@ pip install -e packages/lyra-claim-verification
 
 ## Testing
 ```bash
-pytest packages/lyra-claim-verification/tests/
+pytest packages/lyra-claim-verification/pkg_tests/
 ```
