@@ -479,8 +479,15 @@ class TUIAgentIntegration:
             # Buffer reasoning into a single event so we don't pile up
             # per-chunk ANSI escape sequences (prompt_toolkit's ANSI
             # parser truncates on long alternating sequences).
+            # Buffer reasoning AND content separately, yield each as ONE
+            # text event with a trailing newline at stream end. This avoids
+            # the legacy TUI's post-loop-flush path (where a sub-newline
+            # ``_print_output(buf, end="")`` of partial content sometimes
+            # doesn't reach the screen) by guaranteeing every text we emit
+            # already terminates on a newline the inner loop will flush
+            # mid-stream.
             reasoning_buf = ""
-            reasoning_flushed = False
+            content_buf = ""
 
             async for chunk in stream:
                 if chunk.usage is not None:
@@ -491,23 +498,25 @@ class TUIAgentIntegration:
                 delta = chunk.choices[0].delta
                 content = getattr(delta, "content", None)
                 if content:
-                    if reasoning_buf and not reasoning_flushed:
-                        yield {
-                            "type": "text",
-                            "content": f"\033[2m{reasoning_buf}\033[0m\n\n",
-                        }
-                        reasoning_buf = ""
-                        reasoning_flushed = True
-                    yield {"type": "text", "content": content}
+                    content_buf += content
                     continue
                 reasoning = getattr(delta, "reasoning_content", None)
-                if reasoning and not reasoning_flushed:
+                if reasoning:
                     reasoning_buf += reasoning
 
-            # Stream ended. If we accumulated reasoning but never got
-            # content, the reasoning IS the response — render it bright.
-            if reasoning_buf and not reasoning_flushed:
-                yield {"type": "text", "content": reasoning_buf}
+            # Emit reasoning (dim) only when we also have content to follow.
+            # If reasoning was the entire response, render it bright as the
+            # answer.
+            if reasoning_buf and content_buf:
+                yield {
+                    "type": "text",
+                    "content": f"\033[2m{reasoning_buf}\033[0m\n\n",
+                }
+            elif reasoning_buf:
+                yield {"type": "text", "content": reasoning_buf + "\n"}
+
+            if content_buf:
+                yield {"type": "text", "content": content_buf + "\n"}
 
             self._total_tokens += input_tokens + output_tokens
             self._context_tokens = input_tokens
