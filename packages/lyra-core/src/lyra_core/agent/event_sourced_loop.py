@@ -140,6 +140,20 @@ class RuntimeHarnessAdaptor:
     def set_permission_mode(self, mode: str) -> None:
         self.permission_mode = mode
 
+    def adapt_from_drift(self, drift_signals: list[Any]) -> dict[str, Any]:
+        """Adapt tool selection based on drift detector signals."""
+        changes = {"tools_adapted": False, "permissions_changed": False}
+        for signal in drift_signals:
+            if signal.is_drift:
+                if signal.drift_type.name == "PERFORMANCE":
+                    changed = len(self.tool_registry) * 0.2
+                    changes["tools_adapted"] = True
+                    changes["note"] = f"Performance drift — reduced toolset by {changed:.0f}%"
+                elif signal.drift_type.name == "CONTEXT":
+                    self.set_permission_mode("elevated")
+                    changes["permissions_changed"] = True
+        return changes
+
 
 class EventSourcedAgentLoop:
     """Agent Loop 2.0: Event-sourced, multi-stream, speculative, adaptable."""
