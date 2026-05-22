@@ -470,21 +470,17 @@ class TUIAgentIntegration:
 
             # DeepSeek reasoning models stream chain-of-thought as
             # ``delta.reasoning_content`` and the final answer as
-            # ``delta.content``. Buffer reasoning into a single event so we
-            # don't pile up per-chunk ANSI escape sequences that confuse the
-            # TUI's prompt_toolkit ANSI parser. Flush when real content
-            # arrives, or at stream end if no content ever comes.
+            # ``delta.content``. For short prompts the model often emits
+            # everything inside ``reasoning_content`` with no ``content``
+            # ever arriving — in that case the reasoning IS the reply, so
+            # render it bright. When content does arrive, render the
+            # reasoning dim as a "thinking" prefix to the bright answer.
+            #
+            # Buffer reasoning into a single event so we don't pile up
+            # per-chunk ANSI escape sequences (prompt_toolkit's ANSI
+            # parser truncates on long alternating sequences).
             reasoning_buf = ""
             reasoning_flushed = False
-
-            def _flush_reasoning() -> dict | None:
-                nonlocal reasoning_buf, reasoning_flushed
-                if not reasoning_buf or reasoning_flushed:
-                    return None
-                payload = f"\033[2m{reasoning_buf}\033[0m\n"
-                reasoning_buf = ""
-                reasoning_flushed = True
-                return {"type": "text", "content": payload}
 
             async for chunk in stream:
                 if chunk.usage is not None:
@@ -495,19 +491,23 @@ class TUIAgentIntegration:
                 delta = chunk.choices[0].delta
                 content = getattr(delta, "content", None)
                 if content:
-                    flushed = _flush_reasoning()
-                    if flushed is not None:
-                        yield flushed
+                    if reasoning_buf and not reasoning_flushed:
+                        yield {
+                            "type": "text",
+                            "content": f"\033[2m{reasoning_buf}\033[0m\n\n",
+                        }
+                        reasoning_buf = ""
+                        reasoning_flushed = True
                     yield {"type": "text", "content": content}
                     continue
                 reasoning = getattr(delta, "reasoning_content", None)
                 if reasoning and not reasoning_flushed:
                     reasoning_buf += reasoning
 
-            # Stream ended — surface any reasoning that never had a content follow-up.
-            flushed = _flush_reasoning()
-            if flushed is not None:
-                yield flushed
+            # Stream ended. If we accumulated reasoning but never got
+            # content, the reasoning IS the response — render it bright.
+            if reasoning_buf and not reasoning_flushed:
+                yield {"type": "text", "content": reasoning_buf}
 
             self._total_tokens += input_tokens + output_tokens
             self._context_tokens = input_tokens
