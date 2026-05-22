@@ -66,6 +66,24 @@ help:
 install:
 	$(PYTHON) -m pip install $(addprefix -e ,$(PACKAGES))
 
+install-quick:
+	@echo "🧬 Installing Lyra (124 packages)..."
+	@bash install.sh
+
+binary-shiv:
+	$(PYTHON) -m pip install shiv -q
+	shiv -o dist/lyra -p '/usr/bin/env python3' -e lyra_cli:main --reproducible .
+	@echo "Built: dist/lyra"
+
+binary-pyinstaller:
+	$(PYTHON) -m pip install pyinstaller -q
+	pyinstaller --onefile --name lyra \
+		--hidden-import lyra_core --hidden-import lyra_skills \
+		--distpath dist \
+		packages/lyra-cli/src/lyra_cli/__init__.py 2>&1 | tail -3
+
+binary-all: binary-shiv binary-pyinstaller
+
 install-dev:
 	$(PYTHON) -m pip install ruff pyright pytest pytest-cov PyYAML
 	$(PYTHON) -m pip install $(addprefix -e ,$(PACKAGES))

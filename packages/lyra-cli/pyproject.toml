@@ -26,6 +26,7 @@ dependencies = [
 [project.scripts]
 lyra = "lyra_cli.__main__:app"
 ly = "lyra_cli.__main__:app"
+lyra-status = "lyra_cli:main"
 
 [project.optional-dependencies]
 dev = ["pytest>=7.0"]

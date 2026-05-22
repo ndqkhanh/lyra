@@ -207,17 +207,34 @@ graph TD
 
 ## 🚀 Getting Started
 
+### One-Command Install (Recommended)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ndqkhanh/lyra/main/install.sh | bash
+```
+
+**What it does:**
+1. Checks Python 3.10+ availability
+2. Downloads all 124 packages
+3. Builds a standalone binary (shiv → PyInstaller → launcher)
+4. Installs to `~/.local/bin/lyra`
+
+### Verify
+```bash
+lyra --status
+lyra --info
+```
+
 ### Prerequisites
 ```bash
 python --version  # Python 3.11+
-pip install -e packages/lyra-core
 ```
 
-### Install by Tier
+### Install by Tier (development)
 ```bash
 make install-all         # Everything
-make install-agi         # Plans 1-5
-make install-breakthrough # Plans 6-10
+make install-quick      # One-command via install.sh
+make binary-all          # Build all binary formats
 ```
 
 ### Run Tests
@@ -237,7 +254,7 @@ print(f"Available: {sum(status.values())}/{len(status)} subsystems")
 
 bt = BreakthroughIntegration()
 bt.initialize()
-print(bt.summary)
+print(f"Active: {len([k for k,v in bt.available.items() if v])} subsystems")
 ```
 
 ---
