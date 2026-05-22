@@ -19,22 +19,39 @@ from typing import Any, Optional
 
 import typer
 
-from lyra_evals import (
-    EvalRunner,
-    TaskResult,
-    golden_tasks,
-    long_horizon_tasks,
-    red_team_tasks,
-)
-from lyra_evals.adapters import (
-    ConversationDriver,
-    LoCoEvalTask,
-    PublicBenchmarkTask,
-    SWEBenchProAdapter,
-    load_swe_bench_pro,
-    score_requirement_coverage,
-    write_submission,
-)
+try:
+    from lyra_evals import (
+        EvalRunner,
+        TaskResult,
+        golden_tasks,
+        long_horizon_tasks,
+        red_team_tasks,
+    )
+    from lyra_evals.adapters import (
+        ConversationDriver,
+        LoCoEvalTask,
+        PublicBenchmarkTask,
+        SWEBenchProAdapter,
+        load_swe_bench_pro,
+        score_requirement_coverage,
+        write_submission,
+    )
+    _EVALS_AVAILABLE = True
+except ImportError:
+    _EVALS_AVAILABLE = False
+    # Stub types for when lyra_evals is not installed
+    EvalRunner = None  # type: ignore
+    TaskResult = None  # type: ignore
+    golden_tasks = None  # type: ignore
+    long_horizon_tasks = None  # type: ignore
+    red_team_tasks = None  # type: ignore
+    ConversationDriver = None  # type: ignore
+    LoCoEvalTask = None  # type: ignore
+    PublicBenchmarkTask = None  # type: ignore
+    SWEBenchProAdapter = None  # type: ignore
+    load_swe_bench_pro = None  # type: ignore
+    score_requirement_coverage = None  # type: ignore
+    write_submission = None  # type: ignore
 
 _PUBLIC_CORPORA = {"swe-bench-pro", "loco-eval"}
 
@@ -174,6 +191,12 @@ def evals_command(
     as_json: bool = typer.Option(False, "--json", help="emit JSON"),
 ) -> None:
     """Run a smoke pass over one of the bundled or public corpora."""
+    if not _EVALS_AVAILABLE:
+        typer.echo(
+            "lyra_evals is not installed. Install it with: "
+            "pip install -e packages/lyra-evals"
+        )
+        raise typer.Exit(code=1)
     if passk > 0:
         payload = _run_passk(passk, as_json=as_json)
         if as_json:

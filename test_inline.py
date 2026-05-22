@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+"""Test with inline mode."""
+import sys
+from pathlib import Path
+
+def log(msg):
+    print(f"[DEBUG] {msg}", file=sys.stderr, flush=True)
+
+log("Starting inline test...")
+
+from lyra_cli.tui_v2.transport import LyraTransport
+from harness_tui import ProjectConfig
+from lyra_cli.tui_v2 import lyra_theme
+from lyra_cli.tui_v2.sidebar import build_lyra_sidebar_tabs
+from lyra_cli.tui_v2.commands import register_lyra_commands
+from lyra_cli.tui_v2.app import LyraHarnessApp
+
+transport = LyraTransport(repo_root=Path.cwd(), model='claude-sonnet-4.6', max_steps=20)
+cfg = ProjectConfig(
+    name='lyra',
+    description='Test',
+    theme=lyra_theme(),
+    transport=transport,
+    model='claude-sonnet-4.6',
+    working_dir=str(Path.cwd()),
+    sidebar_tabs=build_lyra_sidebar_tabs(Path.cwd()),
+    extra_commands=[register_lyra_commands],
+)
+
+app = LyraHarnessApp(cfg)
+
+log("Calling app.run(inline=True)...")
+try:
+    app.run(inline=True)
+    log("app.run() returned")
+except Exception as e:
+    log(f"Exception: {e}")
+    import traceback
+    traceback.print_exc()

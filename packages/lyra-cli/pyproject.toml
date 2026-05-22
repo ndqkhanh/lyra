@@ -15,7 +15,6 @@ dependencies = [
     "typer>=0.12",
     "rich>=13.7",
     "prompt_toolkit>=3.0",
-    # "harness-tui",  # Removed in Phase 4
     "alive-progress>=3.0",
     "structlog>=24.0",
     "tenacity>=8.0",
