@@ -22,8 +22,9 @@ from .corpora import (
 )
 from .runner import EvalRunner, Report, TaskResult
 from .snapshot import HarnessSnapshot, snapshot_hash
+from .spec_bench import SpecBenchEvaluator, ProbabilisticEvaluator, SystemEval, TraceEval, NodeEval
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     # Phase A — AER + SLO
@@ -53,4 +54,10 @@ __all__ = [
     "score_requirement_coverage",
     "snapshot_hash",
     "write_submission",
+    # Phase 12 — SpecBench multi-level evaluation
+    "SpecBenchEvaluator",
+    "ProbabilisticEvaluator",
+    "SystemEval",
+    "TraceEval",
+    "NodeEval",
 ]
