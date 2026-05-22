@@ -169,6 +169,52 @@ for result in results:
 
 ---
 
+
+## 🧬 AGI Architecture (5 Plans, 19 Packages)
+
+Lyra's AGI implementation is organized into 5 breakthrough plans spanning 19 new packages + 9 upgrade modules.
+
+### The 5 Plans
+
+| Plan | Code Name | What It Does | Packages |
+|------|-----------|-------------|----------|
+| 🏰 | **Citadel** | Maximum safety enables maximum autonomy | verification-mesh, hbhc, viper-mcp, attestor |
+| 🔮 | **Oracle** | Deep causal understanding of everything | causal-graph, counterfactual, science-pipeline, claim-verification |
+| 🦎 | **Chameleon** | Perfect adaptation to any environment | drift-detector, skill-weaver, context-profiler, competence-map |
+| 🧬 | **Singularity** | Recursive self-improvement → superintelligence | meta-evolution, recursive-reward, fork-worker |
+| 🐝 | **Superorganism** | Collective intelligence > individual brilliance | colony, emergent-coord, gossip-memory, agent-lifecycle |
+
+### Core Upgrades
+
+| Upgrade | What It Does |
+|---------|-------------|
+| **Agent Loop 2.0** | Event-sourced, multi-stream, speculative, adaptable |
+| **Memory Graph Tier** | KnowledgeGraph + MMR reranking + ACT-R decay + AutoDreamer + Federation |
+| **MOSS Evolution** | Source-level self-modification with user-consent gates |
+| **Competence Retrieval** | Context-aware skill ranking with regression protection |
+| **Sibyl Harnesses** | Scientific trial-and-error for research agents |
+| **Coalition Coordinator** | Task-driven agent coalition formation |
+| **SpecBench Eval** | Multi-level evaluation with reward hacking detection |
+| **VIPER-MCP Scan** | Taint-style vulnerability detection for MCP servers |
+| **AGI Orchestrator** | Compound layer connecting all 5 plans |
+
+### Run AGI Tests
+
+```bash
+# Install all AGI packages
+make install-agi
+
+# Run all AGI tests
+make test-agi
+
+# Run full pipeline integration test
+python3 -m pytest tests/test_full_agi_pipeline.py -v
+```
+
+---
+
+## 🧪 Testing
+
 ## 🧪 Testing
 
 ```bash
