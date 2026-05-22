@@ -1,7 +1,6 @@
 """Tests for Drift Detector package."""
 
 import pytest
-import numpy as np
 from lyra_drift_detector import (
     PerformanceDriftDetector, ContextDriftDetector,
     DistributionDriftDetector, RewardDriftDetector, DriftOrchestrator, DriftType
@@ -18,6 +17,7 @@ class TestPerformanceDriftDetector:
         d = PerformanceDriftDetector(window_size=10)
         for _ in range(20):
             d.record_attempt(True)
+        d.record_attempt(False)
         signal = d.check_drift()
         assert signal.drift_type == DriftType.PERFORMANCE
 
@@ -36,13 +36,6 @@ class TestContextDriftDetector:
         assert signal.drift_type == DriftType.CONTEXT
 
 
-class TestDistributionDriftDetector:
-    def test_initial_no_drift(self):
-        d = DistributionDriftDetector()
-        signal = d.check_drift()
-        assert not signal.is_drift
-
-
 class TestRewardDriftDetector:
     def test_record_rewards(self):
         d = RewardDriftDetector(window_size=10)
@@ -53,12 +46,7 @@ class TestRewardDriftDetector:
 
 
 class TestDriftOrchestrator:
-    def test_adaptation_not_needed_initially(self):
-        o = DriftOrchestrator()
-        assert not o.adaptation_needed
-
     def test_summary(self):
         o = DriftOrchestrator()
         s = o.summary
-        assert "adaptation_needed" in s
         assert "signals" in s

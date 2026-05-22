@@ -10,5 +10,5 @@ pip install -e packages/lyra-context-profiler
 
 ## Testing
 ```bash
-pytest packages/lyra-context-profiler/tests/
+pytest packages/lyra-context-profiler/pkg_tests/
 ```

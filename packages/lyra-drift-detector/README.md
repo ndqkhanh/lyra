@@ -10,5 +10,5 @@ pip install -e packages/lyra-drift-detector
 
 ## Testing
 ```bash
-pytest packages/lyra-drift-detector/tests/
+pytest packages/lyra-drift-detector/pkg_tests/
 ```

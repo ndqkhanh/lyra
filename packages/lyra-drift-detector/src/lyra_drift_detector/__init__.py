@@ -8,7 +8,19 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any, Optional
 
-import numpy as np
+try:
+    import numpy as np
+    def _mean(values):
+        return np.mean(values) if values else 0.0
+    def _std(values):
+        return np.std(values) if values else 0.0
+except ImportError:
+    np = None
+    import statistics as _stats
+    def _mean(values):
+        return _stats.mean(values) if values else 0.0
+    def _std(values):
+        return _stats.stdev(values) if values else 0.0
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +97,7 @@ class ContextDriftDetector:
             c = self.current.get(key, 0.0)
             if abs(b) > 0.001:
                 scores.append(abs(c - b) / abs(b))
-        avg_drift = np.mean(scores) if scores else 0.0
+        avg_drift = _mean(scores) if scores else 0.0
         return DriftSignal(
             DriftType.CONTEXT, "context_shift", avg_drift, self.threshold,
             is_drift=avg_drift > self.threshold,
@@ -126,7 +138,7 @@ class DistributionDriftDetector:
             old_r = ratios.get(key, 0.0)
             new_r = recent_ratios.get(key, 0.0)
             drift_scores.append(abs(new_r - old_r))
-        avg_drift = np.mean(drift_scores) if drift_scores else 0.0
+        avg_drift = _mean(drift_scores) if drift_scores else 0.0
         return DriftSignal(
             DriftType.DISTRIBUTION, "task_distribution", avg_drift, self.threshold,
             is_drift=avg_drift > self.threshold,
@@ -149,12 +161,12 @@ class RewardDriftDetector:
     def check_drift(self) -> DriftSignal:
         if len(self.rewards) < 10:
             return DriftSignal(DriftType.REWARD, "reward_signal", 0.0, self.threshold, False)
-        mean = np.mean(self.rewards)
-        std = np.std(self.rewards)
+        mean = _mean(self.rewards)
+        std = _std(self.rewards)
         if std < 1e-6:
             return DriftSignal(DriftType.REWARD, "reward_signal", 0.0, self.threshold, False)
         recent = list(self.rewards)[-min(10, len(self.rewards)):]
-        recent_mean = np.mean(recent)
+        recent_mean = _mean(recent)
         drift = abs(recent_mean - mean) / std
         return DriftSignal(
             DriftType.REWARD, "reward_signal", drift, self.threshold,

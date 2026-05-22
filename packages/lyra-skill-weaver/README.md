@@ -10,5 +10,5 @@ pip install -e packages/lyra-skill-weaver
 
 ## Testing
 ```bash
-pytest packages/lyra-skill-weaver/tests/
+pytest packages/lyra-skill-weaver/pkg_tests/
 ```

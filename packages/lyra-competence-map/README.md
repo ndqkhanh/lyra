@@ -10,5 +10,5 @@ pip install -e packages/lyra-competence-map
 
 ## Testing
 ```bash
-pytest packages/lyra-competence-map/tests/
+pytest packages/lyra-competence-map/pkg_tests/
 ```
