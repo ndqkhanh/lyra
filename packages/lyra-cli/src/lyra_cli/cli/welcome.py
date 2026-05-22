@@ -85,18 +85,15 @@ def show_welcome_detailed(console: Console, model: str = "Auto", organization: s
 
 
 def show_welcome_claude_code_style(console: Console, model: str = "Auto"):
-    """Show welcome screen matching Claude Code's exact style"""
+    """Show welcome screen matching Claude Code's exact style - BEAUTIFUL VERSION"""
 
-    user = os.getenv("USER") or os.getenv("USERNAME") or "user"
     cwd = os.getcwd()
     home = os.path.expanduser("~")
     if cwd.startswith(home):
         cwd = "~" + cwd[len(home):]
 
-    # Claude Code style: Very minimal, no box
+    # Beautiful minimal design with colors and spacing
     console.print()
-    console.print(f"[bold]Lyra[/bold] [dim]·[/dim] {model}")
-    console.print(f"[dim]{cwd}[/dim]")
-    console.print()
-    console.print("[dim]Type a message, /help for commands, Ctrl+D to exit[/dim]")
+    console.print(f"[bold cyan]Lyra[/bold cyan] [dim]·[/dim] [bold magenta]{model}[/bold magenta]")
+    console.print(f"[dim blue]{cwd}[/dim blue]")
     console.print()

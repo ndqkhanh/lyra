@@ -49,11 +49,12 @@ def interactive_chat(model: str = "opus"):
             callback=agent_handler,
             model=api_model
         )
-        # Agent ready - no message needed
+        # Agent ready - show nothing, just ready to chat
     except ValueError:
-        # Only show error once, cleanly
-        formatter.error_message("ANTHROPIC_API_KEY not set")
-        console.print("[dim]Set API key to enable agent[/dim]\n")
+        # Show beautiful error message
+        console.print("[yellow]⚠[/yellow] [bold]API key not configured[/bold]")
+        console.print("[dim]Run [cyan]lyra onboard[/cyan] to set up, or set ANTHROPIC_API_KEY[/dim]")
+        console.print()
         agent_loop = None
 
     current_model = model
@@ -86,9 +87,11 @@ def interactive_chat(model: str = "opus"):
             if agent_loop:
                 agent_loop.process_message(user_input)
             else:
-                # Demo mode - minimal feedback
-                console.print(f"[dim]Echo: {user_input}[/dim]")
-                console.print("[dim]Set ANTHROPIC_API_KEY to enable agent[/dim]\n")
+                # Demo mode - beautiful feedback
+                console.print()
+                console.print(f"[dim]→ {user_input}[/dim]")
+                console.print("[yellow]⚠[/yellow] [dim]Demo mode - run [cyan]lyra onboard[/cyan] to enable agent[/dim]")
+                console.print()
 
         except (KeyboardInterrupt, EOFError):
             console.print("\n\nGoodbye!", style="cyan")
