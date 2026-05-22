@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lyra-align"
+version = "0.1.0"
+description = "Alignment engine — value learning, constraint satisfaction, inverse reinforcement learning, trust calibration"
+requires-python = ">=3.11"
+dependencies = ["lyra-core"]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
