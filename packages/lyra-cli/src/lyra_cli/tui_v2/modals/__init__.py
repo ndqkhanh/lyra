@@ -33,10 +33,12 @@ from .notification_drawer import NotificationDrawer
 from .theme_switcher import ThemeSwitcherModal
 from .status_dashboard import StatusDashboardModal
 from .model_picker import ModelPickerModal
+from .skill_picker import SkillPickerModal
 
 __all__ = [
     "CommandPaletteModal", "McpPicker", "ModelPicker", "SkillPicker",
     "SessionManagerModal", "NotificationDrawer", "ThemeSwitcherModal",
     "StatusDashboardModal",
     "ModelPickerModal",
+    "SkillPickerModal",
 ]
