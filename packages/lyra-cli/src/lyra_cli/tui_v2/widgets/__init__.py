@@ -41,6 +41,7 @@ from .claude_banner import ClaudeStyleBannerWidget
 from .onboarding_panel import OnboardingWidget
 from .effort_app_panel import EffortAppWidget
 from .cron_dashboard import CronDashboardWidget
+from .ci_suggestions import CISuggestionsWidget
 from .connect_status import ConnectStatusWidget
 from .context_engineering import ContextEngineeringWidget
 from .deepsearch_panel import DeepSearchWidget
@@ -120,6 +121,7 @@ __all__ = [
     "OnboardingWidget",
     "EffortAppWidget",
     "CronDashboardWidget",
+    "CISuggestionsWidget",
 
     # Orphaned compatible widgets
     "EnhancedFeatures",

@@ -58,6 +58,7 @@ from .widgets import MonitorWidget
 # Round 10-20 — widgets that exist but were never wired
 from .widgets import (
     ChatToolsWidget,
+    CISuggestionsWidget,
     ConnectStatusWidget,
     ContextEngineeringWidget,
     CronDashboardWidget,
@@ -119,6 +120,7 @@ class LyraHarnessApp(HarnessApp):
         Binding("ctrl+shift+c", "toggle_cron", "Cron", show=True),
         Binding("ctrl+shift+e", "toggle_connect", "Connect", show=True),
         Binding("ctrl+shift+g", "toggle_chatools", "ChatTools", show=True),
+        Binding("ctrl+shift+f", "toggle_suggestions", "Suggestions", show=True),
         Binding("ctrl+shift+j", "toggle_replay", "Replay", show=True),
         Binding("ctrl+shift+k", "toggle_skills", "Skills", show=True),
         Binding("ctrl+shift+m", "toggle_memory", "Memory", show=True),
@@ -179,6 +181,7 @@ class LyraHarnessApp(HarnessApp):
 
         # Round 10-20 — instantiate all remaining widgets
         self.chat_tools = ChatToolsWidget()
+        self.ci_suggestions = CISuggestionsWidget()
         self.connect_status = ConnectStatusWidget()
         self.context_engineering = ContextEngineeringWidget()
         self.cron_dashboard = CronDashboardWidget()
@@ -219,7 +222,7 @@ class LyraHarnessApp(HarnessApp):
 
         # Mount all round-10-20 widgets so their keybindings activate
         for wgt_name in (
-            'chat_tools', 'connect_status', 'context_engineering',
+            'chat_tools', 'ci_suggestions', 'connect_status', 'context_engineering',
             'cron_dashboard', 'deepsearch', 'ecc_panel', 'effort_app',
             'memory_dashboard', 'model_router', 'onboarding',
             'progress_viz', 'queue_status', 'rich_repl',
@@ -500,6 +503,9 @@ class LyraHarnessApp(HarnessApp):
 
     async def action_toggle_ecc(self) -> None:
         if hasattr(self, 'ecc_panel'): self.ecc_panel.action_toggle_ecc()
+
+    async def action_toggle_suggestions(self) -> None:
+        if hasattr(self, 'ci_suggestions'): self.ci_suggestions.action_toggle_suggestions()
 
     async def action_toggle_auth(self) -> None:
         if hasattr(self, 'connect_status'): self.connect_status.action_toggle_connect()
