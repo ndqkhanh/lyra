@@ -62,6 +62,16 @@ from lyra_memory.schema import MemoryRecord, MemoryScope, MemoryType, VerifierSt
 from lyra_memory.store import MemoryStore
 from lyra_memory.tree import MemoryTree, TreeNode
 from lyra_memory.ultra_system import MemoryStats, UltraMemoryConfig, UltraMemorySystem
+from lyra_memory.graph_tier import (
+    KnowledgeGraph,
+    KnowledgeGraphNode,
+    KnowledgeGraphEdge,
+    MMRReranker,
+    ACTRMemoryModel,
+    AutoDreamer,
+    FederatedRetriever,
+    GraphMemoryStore,
+)
 
 __version__ = "0.3.0"
 
@@ -117,4 +127,13 @@ __all__ = [
     "BudgetStatus",
     "BudgetTier",
     "PruneCandidate",
+    # Graph Tier (Agent Loop 2.0)
+    "KnowledgeGraph",
+    "KnowledgeGraphNode",
+    "KnowledgeGraphEdge",
+    "MMRReranker",
+    "ACTRMemoryModel",
+    "AutoDreamer",
+    "FederatedRetriever",
+    "GraphMemoryStore",
 ]
