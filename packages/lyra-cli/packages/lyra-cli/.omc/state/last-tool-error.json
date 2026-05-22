@@ -1,7 +1,7 @@
 {
   "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"ls -la packages/lyra-cli/\",\"description\":\"Check full lyra-cli structure\"}",
-  "error": "Exit code 1\nls: packages/lyra-cli/: No such file or directory",
-  "timestamp": "2026-05-17T05:58:14.893Z",
+  "tool_input_preview": "{\"command\":\"cd packages/lyra-cli && python -m lyra_cli.cli.app config --help 2>&1\",\"description\":\"Test config subcommand\"}",
+  "error": "Exit code 1\n(eval):cd:1: no such file or directory: packages/lyra-cli",
+  "timestamp": "2026-05-22T19:31:13.575Z",
   "retry_count": 1
 }

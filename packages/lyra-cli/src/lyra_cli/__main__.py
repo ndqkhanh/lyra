@@ -183,16 +183,6 @@ def _root(
             "REPL is scheduled for removal in v3.15."
         ),
     ),
-    legacy_tui: bool = typer.Option(
-        False,
-        "--legacy-tui",
-        help=(
-            "Boot the legacy prompt_toolkit TUI (cli/tui.py) instead of "
-            "the new Textual-based tui_v2. The legacy TUI is deprecated "
-            "and will be removed in v1.0.0. Use this flag only if you "
-            "encounter critical bugs in tui_v2."
-        ),
-    ),
 ) -> None:
     """Lyra."""
     if ctx.invoked_subcommand is not None:
@@ -219,61 +209,26 @@ def _root(
         resume_target = session_id
         pin_id = session_id
 
-    # v3.15 / Phase 15 — CLI-first architecture. Bare ``lyra`` now opens
-    # the streaming CLI (Claude Code style). Three modes available:
-    #   * Default: tui_v2 (Textual-based TUI)
-    #   * ``lyra --legacy-tui``: Old prompt_toolkit TUI (deprecated)
-    #   * ``lyra --legacy``: prompt_toolkit REPL (deprecated)
-    # Environment variable LYRA_TUI can override:
-    #   * ``LYRA_TUI=tui`` — tui_v2 (default)
-    #   * ``LYRA_TUI=legacy`` — prompt_toolkit REPL
-    tui_pref = os.environ.get("LYRA_TUI", "tui").strip().lower()
+    # Phase 4 — TUI v2 removed, new CLI (Rich + Typer) is now default.
+    # Bare ``lyra`` now opens the new CLI. Legacy prompt_toolkit REPL
+    # is still available via ``--legacy``.
 
-    # Check for --tui flag (not in typer params, check sys.argv)
-    import sys
-
-    use_legacy = legacy or tui_pref == "legacy"
-    use_legacy_tui = legacy_tui
-
-    if not use_legacy and not use_legacy_tui:
-        # Default: Launch tui_v2 (Textual-based TUI)
-        try:
-            from .tui_v2 import launch_tui_v2
-
-            raise typer.Exit(launch_tui_v2(repo_root=repo_root.resolve(), model=model))
-        except ImportError:
-            typer.echo(
-                "lyra: tui_v2 not available (harness-tui not installed). "
-                "Falling back to legacy TUI.",
-                err=True,
-            )
-            use_legacy_tui = True
-
-    if use_legacy_tui:
-        # Legacy TUI path (deprecated, will be removed in v1.0.0)
-        typer.echo(
-            "lyra: launching legacy TUI (cli/tui.py). This TUI is deprecated "
-            "and will be removed in v1.0.0. Drop --legacy-tui to use the new "
-            "Textual-based tui_v2.",
-            err=True,
-        )
-        from .cli.tui import launch_tui
-        exit_code = launch_tui(
-            repo_root=repo_root.resolve(),
-            model=model,
-            budget_cap_usd=budget,
-            session_id=session_id,
-        )
-        raise typer.Exit(exit_code)
+    use_legacy = legacy
 
     if not use_legacy:
-        # This path should not be reached (tui_v2 is default)
-        typer.echo(
-            "lyra: unexpected path. Falling back to tui_v2.",
-            err=True,
-        )
-        from .tui_v2 import launch_tui_v2
-        raise typer.Exit(launch_tui_v2(repo_root=repo_root.resolve(), model=model))
+        # Default: Launch new CLI (Rich + Typer based)
+        try:
+            from .cli.commands.chat import interactive_chat
+
+            interactive_chat(model=model)
+            raise typer.Exit(0)
+        except ImportError as e:
+            typer.echo(
+                f"lyra: new CLI not available ({e}). "
+                "Falling back to legacy REPL.",
+                err=True,
+            )
+            use_legacy = True
 
     # Legacy path — surface a one-line deprecation hint via Click's
     # stderr stream so CliRunner can capture it without monkeypatching.
@@ -350,14 +305,7 @@ app.add_typer(hops_app, name="hops")
 app.add_typer(skills_app, name="skills")
 app.add_typer(dag_app, name="dag")
 
-# Optional: harness-tui shell (decoupled from Lyra's primary REPL).
-try:  # pragma: no cover — optional import
-    from .commands.tui import tui_app
-
-    app.add_typer(tui_app, name="tui", help="Open the Lyra TUI (harness-tui shell).")
-except ImportError:
-    # harness-tui is an optional dependency; skip if unavailable.
-    pass
+# TUI v2 removed in Phase 4 - new CLI (Rich + Typer) is now default
 
 
 if __name__ == "__main__":  # pragma: no cover
