@@ -43,3 +43,7 @@ Thumbs.db
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# Tool caches
+.frg/
+.omc/
