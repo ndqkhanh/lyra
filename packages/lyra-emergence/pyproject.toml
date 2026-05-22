@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lyra-emergence"
+version = "0.1.0"
+description = "Emergence detector — scans agent ecologies for emergent behaviors and phase transitions"
+requires-python = ">=3.11"
+dependencies = ["lyra-core", "lyra-ecology"]
+dev = ["pytest>=7.0"]
+[tool.setuptools.packages.find]
+where = ["src"]
