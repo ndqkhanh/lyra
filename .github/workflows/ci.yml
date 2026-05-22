@@ -35,11 +35,17 @@ jobs:
         pip install -e packages/lyra-orchestration
         pip install -e packages/lyra-research
         for p in verification-mesh hbhc viper-mcp attestor causal-graph counterfactual science-pipeline claim-verification drift-detector skill-weaver context-profiler competence-map meta-evolution recursive-reward fork-worker colony emergent-coord gossip-memory agent-lifecycle; do pip install -e packages/lyra-$p; done
+        # Breakthrough packages (Plans 6-10)
+        for p in instincts beliefs memory-token memory-vericache router identity resilience sla experiment etl-pipeline command-registry ecology emergence; do pip install -e packages/lyra-$p --no-deps; done
         pip install pytest-cov numpy
 
     - name: Run tests (AGI packages)
       run: |
         for p in verification-mesh hbhc viper-mcp attestor causal-graph counterfactual science-pipeline claim-verification drift-detector skill-weaver context-profiler competence-map meta-evolution recursive-reward fork-worker colony emergent-coord gossip-memory agent-lifecycle; do
+          pytest packages/lyra-$p/tests/ -v --no-header -p no:cacheprovider || true
+        done
+        # Breakthrough packages
+        for p in instincts beliefs memory-token memory-vericache router identity resilience sla experiment etl-pipeline command-registry ecology emergence; do
           pytest packages/lyra-$p/tests/ -v --no-header -p no:cacheprovider || true
         done
 
