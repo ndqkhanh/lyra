@@ -29,6 +29,7 @@ from lyra_core.agi_orchestrator import (
 )
 from lyra_core.agent.agi_plugin import AGILoopPlugin
 from lyra_core.agent.safety_hooks import SafetyHookPlugin
+from lyra_core.breakthrough import BreakthroughIntegration, breakthrough_available
 
 __version__ = "0.2.0"
 
@@ -46,4 +47,6 @@ __all__ = [
     "PlanStatus",
     "AGILoopPlugin",
     "SafetyHookPlugin",
+    "BreakthroughIntegration",
+    "breakthrough_available",
 ]
