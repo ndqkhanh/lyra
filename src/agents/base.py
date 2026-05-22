@@ -10,6 +10,15 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from src.core.task import Task, TaskType, Result
+from src.memory import (
+    ShortTermMemory,
+    LongTermMemory,
+    MemoryRetriever,
+    MemoryConsolidator,
+    MemoryType,
+    ConsolidationPolicy,
+    RetrievalStrategy,
+)
 
 
 class AgentStatus(str, Enum):
@@ -84,6 +93,22 @@ class Agent(ABC):
         self.message_queue: asyncio.Queue[Message] = asyncio.Queue()
         self.execution_history: List[Result] = []
         self.metadata: Dict[str, Any] = {}
+        
+        # Memory system
+        self.short_term_memory = ShortTermMemory(
+            capacity=10,
+            consolidation_threshold=5,
+        )
+        self.long_term_memory = LongTermMemory(
+            storage_path=f"data/memory/{agent_id}_ltm.json"
+        )
+        self.memory_retriever = MemoryRetriever(self.long_term_memory)
+        self.memory_consolidator = MemoryConsolidator(
+            self.short_term_memory,
+            self.long_term_memory,
+            policy=ConsolidationPolicy.THRESHOLD,
+            importance_threshold=0.5,
+        )
 
     @abstractmethod
     async def execute(self, task: Task) -> Result:
@@ -232,3 +257,130 @@ class Agent(ABC):
     def __repr__(self) -> str:
         """String representation of the agent."""
         return f"<{self.__class__.__name__} id={self.agent_id} status={self.status.value}>"
+
+    # Memory-related methods
+
+    def remember(self, content: str, memory_type: MemoryType = MemoryType.EPISODIC, 
+                 importance: float = 0.5, tags: Optional[List[str]] = None) -> None:
+        """
+        Store information in long-term memory.
+        
+        Args:
+            content: Content to remember
+            memory_type: Type of memory (episodic, semantic, procedural)
+            importance: Importance score (0-1)
+            tags: Optional tags for categorization
+        """
+        self.long_term_memory.add(
+            content=content,
+            memory_type=memory_type,
+            importance=importance,
+            tags=tags or [],
+        )
+
+    def recall(self, query: str, limit: int = 5, min_score: float = 0.5,
+               strategy: RetrievalStrategy = RetrievalStrategy.HYBRID,
+               filters: Optional[Dict] = None) -> List[Any]:
+        """
+        Retrieve relevant memories.
+        
+        Args:
+            query: Search query
+            limit: Maximum number of results
+            min_score: Minimum relevance score
+            strategy: Retrieval strategy to use
+            filters: Optional filters (type, tags, time_range)
+            
+        Returns:
+            List of retrieval results
+        """
+        return self.memory_retriever.retrieve(
+            query=query,
+            limit=limit,
+            min_score=min_score,
+            strategy=strategy,
+            filters=filters,
+        )
+
+    def add_conversation_turn(self, role: str, content: str, 
+                             metadata: Optional[Dict[str, Any]] = None) -> None:
+        """
+        Add a conversation turn to short-term memory.
+        
+        Args:
+            role: Role (user, agent, system)
+            content: Content of the turn
+            metadata: Optional metadata
+        """
+        self.short_term_memory.add_turn(role, content, metadata)
+        
+        # Auto-consolidate if needed
+        if self.memory_consolidator.should_consolidate():
+            self.memory_consolidator.auto_consolidate()
+
+    def get_conversation_context(self, max_turns: int = 5) -> str:
+        """
+        Get recent conversation context.
+        
+        Args:
+            max_turns: Maximum number of turns to include
+            
+        Returns:
+            Formatted conversation context
+        """
+        return self.short_term_memory.get_context(max_turns=max_turns)
+
+    def consolidate_memories(self) -> Optional[Any]:
+        """
+        Manually trigger memory consolidation.
+        
+        Returns:
+            Consolidation result if performed, None otherwise
+        """
+        if self.memory_consolidator.should_consolidate():
+            return self.memory_consolidator.consolidate()
+        return None
+
+    def set_working_memory(self, key: str, value: Any) -> None:
+        """
+        Store temporary data in working memory.
+        
+        Args:
+            key: Key to store under
+            value: Value to store
+        """
+        self.short_term_memory.set_working_memory(key, value)
+
+    def get_working_memory(self, key: str, default: Any = None) -> Any:
+        """
+        Retrieve temporary data from working memory.
+        
+        Args:
+            key: Key to retrieve
+            default: Default value if key not found
+            
+        Returns:
+            Stored value or default
+        """
+        return self.short_term_memory.get_working_memory(key, default)
+
+    def save_memories(self) -> None:
+        """Save long-term memories to disk."""
+        self.long_term_memory.save()
+
+    def load_memories(self) -> None:
+        """Load long-term memories from disk."""
+        self.long_term_memory.load()
+
+    def get_memory_statistics(self) -> Dict[str, Any]:
+        """
+        Get memory system statistics.
+        
+        Returns:
+            Dictionary with memory statistics
+        """
+        return {
+            "short_term": self.short_term_memory.get_statistics(),
+            "long_term": self.long_term_memory.get_statistics(),
+            "consolidation": self.memory_consolidator.get_statistics(),
+        }
