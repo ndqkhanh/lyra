@@ -1,7 +1,7 @@
 {
   "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"cd packages/lyra-cli && python -m pytest ../../tests/memory/test_memory_core.py -v\",\"description\":\"Run updated memory tests\"}",
-  "error": "Exit code 4\n============================= test session starts ==============================\nplatform darwin -- Python 3.11.8, pytest-9.0.2, pluggy-1.6.0 -- /Users/khanhnguyen/miniconda3/bin/python\ncachedir: .pytest_cache\nrootdir: /Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-cli\nconfigfile: pyproject.toml\nplugins: anyio-4.12.1, cov-7.1.0\ncollecting ... ERROR: file or directory not found: ../../tests/memory/test_memory_core.py\n\ncollected 0 items\n\n====...",
-  "timestamp": "2026-05-17T06:28:16.752Z",
+  "tool_input_preview": "{\"command\":\"cd packages/lyra-cli && git add -A && git commit -m \\\"fix: Remove all verbose UI messages\\n\\nNow shows clean Claude Code-style UI:\\n\\nLyra · Auto\\n~/path\\n\\n✗ ANTHROPIC_API_KEY not set\\nSe...",
+  "error": "Exit code 1\nOn branch main\nYour branch is up to date with 'origin/main'.\n\nChanges not staged for commit:\n  (use \"git add <file>...\" to update what will be committed)\n  (use \"git restore <file>...\" to discard changes in working directory)\n  (commit or discard the untracked or modified content in submodules)\n\tmodified:   ../../../lyra-pentest (modified content, untracked content)\n\nno changes added to commit (use \"git add\" and/or \"git commit -a\")",
+  "timestamp": "2026-05-22T19:53:26.672Z",
   "retry_count": 1
 }
