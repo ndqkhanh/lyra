@@ -468,12 +468,46 @@ class TUIAgentIntegration:
             input_tokens = 0
             output_tokens = 0
 
+            # DeepSeek reasoning models stream chain-of-thought as
+            # ``delta.reasoning_content`` and the final answer as
+            # ``delta.content``. Buffer reasoning into a single event so we
+            # don't pile up per-chunk ANSI escape sequences that confuse the
+            # TUI's prompt_toolkit ANSI parser. Flush when real content
+            # arrives, or at stream end if no content ever comes.
+            reasoning_buf = ""
+            reasoning_flushed = False
+
+            def _flush_reasoning() -> dict | None:
+                nonlocal reasoning_buf, reasoning_flushed
+                if not reasoning_buf or reasoning_flushed:
+                    return None
+                payload = f"\033[2m{reasoning_buf}\033[0m\n"
+                reasoning_buf = ""
+                reasoning_flushed = True
+                return {"type": "text", "content": payload}
+
             async for chunk in stream:
                 if chunk.usage is not None:
                     input_tokens = chunk.usage.prompt_tokens or 0
                     output_tokens = chunk.usage.completion_tokens or 0
-                if chunk.choices and chunk.choices[0].delta.content:
-                    yield {"type": "text", "content": chunk.choices[0].delta.content}
+                if not chunk.choices:
+                    continue
+                delta = chunk.choices[0].delta
+                content = getattr(delta, "content", None)
+                if content:
+                    flushed = _flush_reasoning()
+                    if flushed is not None:
+                        yield flushed
+                    yield {"type": "text", "content": content}
+                    continue
+                reasoning = getattr(delta, "reasoning_content", None)
+                if reasoning and not reasoning_flushed:
+                    reasoning_buf += reasoning
+
+            # Stream ended — surface any reasoning that never had a content follow-up.
+            flushed = _flush_reasoning()
+            if flushed is not None:
+                yield flushed
 
             self._total_tokens += input_tokens + output_tokens
             self._context_tokens = input_tokens

@@ -135,7 +135,7 @@ _DEFAULT_PRICES_PER_MTOK: dict[str, tuple[float, float]] = {
     "deepseek-chat": (0.27, 1.10),
     "deepseek-coder": (0.27, 1.10),
     "deepseek-v3": (0.27, 1.10),
-    "deepseek-v4": (0.40, 1.60),
+    "deepseek-v4-flash": (0.40, 1.60),
     "deepseek-v4-pro": (0.55, 2.19),
     "deepseek-reasoner": (0.55, 2.19),
     # ---- Qwen / Alibaba DashScope ------------------------------------
