@@ -90,15 +90,14 @@ class WelcomeCard(Widget):
         display: none;
     }
 
-    @media (max-width: 80) {
-        WelcomeCard Grid#command-grid {
-            grid-size: 2;
-            grid-columns: 1fr 1fr;
-        }
-        WelcomeCard Grid#session-grid {
-            grid-size: 1;
-            grid-columns: 1fr;
-        }
+    /* Narrow-width responsive layout (toggled by on_resize when width < 80) */
+    WelcomeCard.narrow Grid#command-grid {
+        grid-size: 2;
+        grid-columns: 1fr 1fr;
+    }
+    WelcomeCard.narrow Grid#session-grid {
+        grid-size: 1;
+        grid-columns: 1fr;
     }
     """
 
@@ -137,7 +136,20 @@ class WelcomeCard(Widget):
             yield Static("", id="welcome-collapsed")
 
     def on_mount(self) -> None:
+        self._apply_narrow_class()
         self._refresh()
+
+    def on_resize(self) -> None:
+        self._apply_narrow_class()
+
+    _NARROW_BREAKPOINT = 80
+
+    def _apply_narrow_class(self) -> None:
+        try:
+            width = self.app.size.width
+        except Exception:
+            return
+        self.set_class(width < self._NARROW_BREAKPOINT, "narrow")
 
     def watch_model(self, _: str) -> None:
         self._refresh()
