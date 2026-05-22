@@ -25,6 +25,7 @@ __all__ = [
     "BM25Retriever",
     "DCIRetriever",
     "HybridRetriever",
+    "CompetenceAwareRetriever",
 ]
 
 
@@ -226,3 +227,29 @@ class HybridRetriever:
             ))
         fused.sort(key=lambda r: r.score, reverse=True)
         return fused[:top_k]
+
+
+class CompetenceAwareRetriever:
+    """Competence-aware retrieval that biases toward skills with proven success in similar contexts."""
+
+    def __init__(self, hybrid: Optional[HybridRetriever] = None, 
+                 competence_map_path: str = ""):
+        self._hybrid = hybrid or HybridRetriever()
+        self._context_scores: dict[str, dict[str, float]] = {}
+
+    def record_outcome(self, skill_id: str, context: str, success: bool) -> None:
+        if context not in self._context_scores:
+            self._context_scores[context] = {}
+        prev = self._context_scores[context].get(skill_id, 0.5)
+        updated = prev + (0.1 if success else -0.1)
+        self._context_scores[context][skill_id] = max(0.0, min(1.0, updated))
+
+    def search(self, query: str, context: str = "", top_k: int = 5) -> list[RetrievalResult]:
+        base = self._hybrid.search(query, top_k=top_k * 2)
+        if not context:
+            return base[:top_k]
+        for r in base:
+            ctx_score = self._context_scores.get(context, {}).get(r.skill_id, 0.5)
+            r.score = r.score * 0.7 + ctx_score * 0.3
+        base.sort(key=lambda r: r.score, reverse=True)
+        return base[:top_k]
