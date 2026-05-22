@@ -28,6 +28,7 @@ from .message_bubble import MessageBubbleWidget
 
 # UX improvement widgets (Round 7 — ECC bridge + final)
 from .ecc_panel import ECCWidget
+from .monitor_panel import MonitorWidget
 
 __all__ = [
     # Original widgets
@@ -65,4 +66,5 @@ __all__ = [
 
     # UX improvement widgets (Round 7 — ECC bridge + final)
     "ECCWidget",
+    "MonitorWidget",
 ]

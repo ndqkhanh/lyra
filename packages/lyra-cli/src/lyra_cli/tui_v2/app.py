@@ -53,6 +53,7 @@ from .widgets import (
     ResourceMonitorWidget,
     MessageBubbleWidget,
 )
+from .widgets import MonitorWidget
 
 
 class LyraHarnessApp(HarnessApp):
@@ -86,6 +87,8 @@ class LyraHarnessApp(HarnessApp):
         Binding("ctrl+shift+d", "toggle_perf", "Performance", show=True),
         Binding("ctrl+shift+r", "toggle_resource_mon", "Resources", show=True),
         Binding("ctrl+shift+s", "open_status_dashboard", "Status", show=True),
+        # Round 8 binding
+        Binding("ctrl+m", "toggle_monitor", "Monitor", show=True),
     ]
 
     # Reactive state properties (Constitution I: Single Source of Truth)
@@ -128,6 +131,9 @@ class LyraHarnessApp(HarnessApp):
         self.perf_dashboard = PerformanceDashboardWidget()
         self.resource_mon = ResourceMonitorWidget()
         self.message_bubble = MessageBubbleWidget()
+
+        # Round 8 — new widgets
+        self.monitor = MonitorWidget()
 
     def _post_mount(self) -> None:
         """Replace the parent's generic welcome with the Lyra welcome pane.
@@ -408,6 +414,11 @@ class LyraHarnessApp(HarnessApp):
         """Toggle resource monitor (Ctrl+Shift+R)."""
         if hasattr(self, 'resource_mon'):
             self.resource_mon.action_toggle_resource_mon()
+
+    async def action_toggle_monitor(self) -> None:
+        """Toggle monitor / fleet panel (Ctrl+M)."""
+        if hasattr(self, 'monitor'):
+            self.monitor.action_toggle_monitor()
 
     async def action_open_status_dashboard(self) -> None:
         """Open consolidated status dashboard modal (Ctrl+Shift+S)."""
