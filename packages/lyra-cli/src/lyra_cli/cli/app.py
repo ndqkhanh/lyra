@@ -64,3 +64,18 @@ app.add_typer(config.app, name="config", help="Configuration management")
 app.add_typer(session.app, name="session", help="Session management")
 app.add_typer(skills.app, name="skills", help="Skills and MCP management")
 app.add_typer(debug_cmd.app, name="debug", help="Debug and diagnostics")
+
+
+# OpenClaw-inspired commands
+@app.command()
+def onboard():
+    """Setup wizard for first-time users (OpenClaw pattern)"""
+    from lyra_cli.cli.onboarding import run_onboarding
+    run_onboarding()
+
+
+@app.command()
+def doctor():
+    """Check your Lyra setup (OpenClaw pattern)"""
+    from lyra_cli.cli.doctor import run_doctor
+    run_doctor()
