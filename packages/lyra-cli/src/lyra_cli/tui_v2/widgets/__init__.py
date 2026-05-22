@@ -38,6 +38,8 @@ from .progress_viz import ProgressVizWidget, ProgressStep, StepState
 # UX improvement widgets (Round 10-15 — wired from disk)
 from .chat_tools_panel import ChatToolsWidget, ToolBlock
 from .claude_banner import ClaudeStyleBannerWidget
+from .onboarding_panel import OnboardingWidget
+from .effort_app_panel import EffortAppWidget
 from .connect_status import ConnectStatusWidget
 from .context_engineering import ContextEngineeringWidget
 from .deepsearch_panel import DeepSearchWidget
@@ -114,6 +116,8 @@ __all__ = [
     "TaskChecklistWidget",
     "TraceWidget",
     "UltraReviewWidget",
+    "OnboardingWidget",
+    "EffortAppWidget",
 
     # Orphaned compatible widgets
     "EnhancedFeatures",
