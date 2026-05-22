@@ -139,6 +139,15 @@ install-breakthrough:
 	done
 	@echo "All breakthrough packages installed"
 
+install-all: install-agi install-breakthrough
+	@echo "All packages installed"
+
+install-core:
+	$(PYTHON) -m pip install -e packages/lyra-core --quiet
+	$(PYTHON) -m pip install -e packages/lyra-skills --quiet
+	$(PYTHON) -m pip install -e packages/lyra-evals --quiet
+	@echo "Core packages installed"
+
 evals:
 	lyra evals --corpus golden --drift-gate 0.0
 
