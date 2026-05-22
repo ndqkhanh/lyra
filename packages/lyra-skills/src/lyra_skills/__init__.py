@@ -13,6 +13,11 @@ from .curator import (
     curate,
     render_report_markdown,
 )
+from .compiler import (
+    SkillProgram,
+    SkillModule,
+    SkillCompiler,
+)
 from .extractor import ExtractorInput, ExtractorOutput, extract_candidate
 from .ledger import (
     OUTCOME_FAILURE,
