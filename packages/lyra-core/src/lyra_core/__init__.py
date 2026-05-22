@@ -28,6 +28,7 @@ from lyra_core.agi_orchestrator import (
     PlanStatus,
 )
 from lyra_core.agent.agi_plugin import AGILoopPlugin
+from lyra_core.agent.safety_hooks import SafetyHookPlugin
 
 __version__ = "0.2.0"
 
@@ -44,4 +45,5 @@ __all__ = [
     "AGIPhase",
     "PlanStatus",
     "AGILoopPlugin",
+    "SafetyHookPlugin",
 ]
