@@ -249,6 +249,7 @@ from .tool_runtime import (
     ToolExecution,
 )
 from .tools import Tool, ToolError, ToolRegistry
+from .agi_integration import AGIAwareLoop, AGIState
 
 __all__ = [
     "ActiveParamAccount",
@@ -433,4 +434,7 @@ __all__ = [
     "verify_graph_protocol",
     "witness_lattice_to_json",
     "witness_lattice_to_markdown",
+    # AGI integration
+    "AGIAwareLoop",
+    "AGIState",
 ]
