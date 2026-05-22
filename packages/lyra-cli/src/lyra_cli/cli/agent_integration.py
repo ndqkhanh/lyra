@@ -505,12 +505,16 @@ class TUIAgentIntegration:
                     reasoning_buf += reasoning
 
             # Emit reasoning (dim) only when we also have content to follow.
-            # If reasoning was the entire response, render it bright as the
-            # answer.
+            # Emit reasoning as a ``thinking`` event so the TUI can collapse
+            # it to a one-line "✻ Thought" indicator (Claude-Code style)
+            # instead of dumping the chain-of-thought inline. When the model
+            # never produced separate content, reasoning IS the response —
+            # surface it as bright text.
             if reasoning_buf and content_buf:
                 yield {
-                    "type": "text",
-                    "content": f"\033[2m{reasoning_buf}\033[0m\n\n",
+                    "type": "thinking",
+                    "content": reasoning_buf,
+                    "metadata": {"chars": len(reasoning_buf)},
                 }
             elif reasoning_buf:
                 yield {"type": "text", "content": reasoning_buf + "\n"}
