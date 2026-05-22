@@ -7,6 +7,28 @@ PACKAGES := packages/lyra-core \
             packages/lyra-evals \
             packages/lyra-cli
 
+AGI_PACKAGES := packages/lyra-verification-mesh \
+                packages/lyra-hbhc \
+                packages/lyra-viper-mcp \
+                packages/lyra-attestor \
+                packages/lyra-causal-graph \
+                packages/lyra-counterfactual \
+                packages/lyra-science-pipeline \
+                packages/lyra-claim-verification \
+                packages/lyra-drift-detector \
+                packages/lyra-skill-weaver \
+                packages/lyra-context-profiler \
+                packages/lyra-competence-map \
+                packages/lyra-meta-evolution \
+                packages/lyra-recursive-reward \
+                packages/lyra-fork-worker \
+                packages/lyra-colony \
+                packages/lyra-emergent-coord \
+                packages/lyra-gossip-memory \
+                packages/lyra-agent-lifecycle
+
+ALL_PACKAGES := $(PACKAGES) $(AGI_PACKAGES)
+
 PYTHON ?= python3
 
 .PHONY: help install install-dev install-bin uninstall-bin binary \
@@ -83,8 +105,17 @@ typecheck:
 test:
 	$(PYTHON) -m pytest packages -q
 
+test-agi:
+	$(PYTHON) -m pytest $(AGI_PACKAGES:%=%/tests) tests/test_agi_integration.py -v -c /dev/null --no-header
+
 test-fast:
 	$(PYTHON) -m pytest packages -q -x
+
+install-agi:
+	for pkg in $(AGI_PACKAGES); do \
+		$(PYTHON) -m pip install -e "$$pkg" --quiet; \
+	done
+	@echo "All AGI packages installed"
 
 evals:
 	lyra evals --corpus golden --drift-gate 0.0
