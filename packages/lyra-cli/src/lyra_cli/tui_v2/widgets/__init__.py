@@ -54,9 +54,6 @@ from .trace_panel import TraceWidget
 from .ultrareview_panel import UltraReviewWidget
 
 # Orphaned compatible widgets (existing files, no new code)
-from .enhanced_features import EnhancedFeatures
-from .file_completion import FileCompletion
-from .ghost_text import GhostText
 from .spec_drawer import SpecDrawer
 
 __all__ = [
@@ -124,8 +121,5 @@ __all__ = [
     "CISuggestionsWidget",
 
     # Orphaned compatible widgets
-    "EnhancedFeatures",
-    "FileCompletion",
-    "GhostText",
     "SpecDrawer",
 ]

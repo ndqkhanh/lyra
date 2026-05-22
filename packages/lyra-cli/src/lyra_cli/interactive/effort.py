@@ -28,6 +28,7 @@ from typing import List, Tuple
 
 
 _LEVELS: Tuple[str, ...] = ("low", "medium", "high", "xhigh", "max")
+EFFORT_LEVELS: Tuple[str, ...] = _LEVELS
 
 
 _BLURBS = {
