@@ -16,9 +16,11 @@ Lyra adds four project-specific pickers:
   * ``SkillPicker``  — browse installed skills
   * ``McpPicker``    — browse configured MCP servers
 
-All four share the :class:`base.LyraPickerModal` filter+list contract
-so they look and feel consistent. OpenCode-style size tiers map onto
-the modals' DEFAULT_CSS widths (60 / 88 / 116 cols).
+Plus new UX modals:
+
+  * ``SessionManagerModal`` — browse & search session history
+  * ``NotificationDrawer``  — notification history drawer
+  * ``StatusDashboardModal`` — ECC-inspired consolidated /status view
 """
 from __future__ import annotations
 
@@ -26,5 +28,13 @@ from .command_palette import CommandPaletteModal
 from .mcp import McpPicker
 from .model import ModelPicker
 from .skill import SkillPicker
+from .session_manager import SessionManagerModal
+from .notification_drawer import NotificationDrawer
+from .theme_switcher import ThemeSwitcherModal
+from .status_dashboard import StatusDashboardModal
 
-__all__ = ["CommandPaletteModal", "McpPicker", "ModelPicker", "SkillPicker"]
+__all__ = [
+    "CommandPaletteModal", "McpPicker", "ModelPicker", "SkillPicker",
+    "SessionManagerModal", "NotificationDrawer", "ThemeSwitcherModal",
+    "StatusDashboardModal",
+]

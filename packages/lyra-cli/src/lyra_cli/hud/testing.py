@@ -1,43 +1,35 @@
-"""Test helpers for the HUD — strip_ansi, sample_state."""
+"""Sample HUD state factory for ``lyra hud preview``.
 
+Generates a realistic HudState so users and tests can preview
+HUD layouts without a live session.
+"""
 from __future__ import annotations
 
-import re
-
-from .pipeline import HudState
-
-_ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
+from . import HudState
 
 
-def strip_ansi(text: str) -> str:
-    """Remove ANSI escape codes for plain-text comparison in tests."""
-    return _ANSI_RE.sub("", text)
-
-
-def sample_state(**overrides) -> HudState:
-    """Build a representative HudState for examples / preview / tests."""
-    defaults = dict(
-        session_id="sess-20260501-abcd",
+def sample_state() -> HudState:
+    """Return a realistic HudState for preview/testing."""
+    return HudState(
+        model="deepseek-chat",
+        provider="deepseek",
         mode="edit_automatically",
-        model="anthropic:claude-3-5-sonnet",
-        context_used=24512,
-        context_max=200000,
-        cost_usd=0.123,
-        burn_usd_per_hour=0.05,
-        tools_active=["bash", "edit"],
-        agents_active=["planner"],
-        todos=[
-            ("split session.py", "in_progress"),
-            ("wire HUD", "pending"),
-            ("fix DAG tests", "completed"),
+        tokens_used=45_678,
+        tokens_max=200_000,
+        turn=12,
+        agent_count=4,
+        agent_running=2,
+        duration_s=842.0,
+        cost_usd=0.0421,
+        tasks=[
+            {"label": "Research: transformer architecture", "status": "done"},
+            {"label": "Design: agent pipeline", "status": "running"},
+            {"label": "Implement: data layer", "status": "pending"},
+            {"label": "Test: integration suite", "status": "pending"},
+            {"label": "Review: code quality", "status": "pending"},
+            {"label": "Docs: update README", "status": "pending"},
         ],
-        git_branch="main",
-        git_dirty_count=3,
-        cache_ttl_seconds=252,
-        tracer_active=True,
+        memory_mb=142.3,
+        compaction_count=3,
+        bg_tasks=1,
     )
-    defaults.update(overrides)
-    return HudState(**defaults)
-
-
-__all__ = ["sample_state", "strip_ansi"]

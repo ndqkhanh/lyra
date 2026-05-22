@@ -15,6 +15,10 @@ class BackgroundTask:
     start_time: float = field(default_factory=time.time)
     tokens: int = 0
     status: str = "running"  # running, completed, error
+    progress: float = 0.0  # 0.0-1.0 progress indicator
+    total_phases: int = 0
+    current_phase: int = 0
+    model: str = ""
 
 
 class BackgroundTaskPanel:
@@ -46,6 +50,10 @@ class BackgroundTaskPanel:
         task_id: str,
         tokens: Optional[int] = None,
         status: Optional[str] = None,
+        progress: Optional[float] = None,
+        current_phase: Optional[int] = None,
+        total_phases: Optional[int] = None,
+        model: Optional[str] = None,
     ) -> None:
         """Update task status."""
         if task_id not in self.tasks:
@@ -58,6 +66,14 @@ class BackgroundTaskPanel:
         if status is not None:
             task.status = status
             logger.info(f"Background task {task_id} status changed to {status}")
+        if progress is not None:
+            task.progress = max(0.0, min(1.0, progress))
+        if current_phase is not None:
+            task.current_phase = current_phase
+        if total_phases is not None:
+            task.total_phases = total_phases
+        if model is not None:
+            task.model = model
 
     def remove_task(self, task_id: str) -> None:
         """Remove completed task."""
@@ -111,13 +127,30 @@ class BackgroundTaskPanel:
             # Tokens
             tokens_str = f"↓ {task.tokens/1000:.1f}k tokens"
 
+            # Progress bar (when in progress)
+            progress_str = ""
+            if task.progress > 0 and task.status == "running":
+                bar_width = 10
+                filled = int(task.progress * bar_width)
+                bar = "█" * filled + "░" * (bar_width - filled)
+                pct = int(task.progress * 100)
+                progress_str = f" {bar} {pct}%"
+
+            # Phase indicator
+            phase_str = ""
+            if task.total_phases > 0:
+                phase_str = f" phase {task.current_phase}/{task.total_phases}"
+
+            # Model badge
+            model_str = f" [dim]{task.model}[/]" if task.model else ""
+
             # Truncate description
             desc = task.description
             if len(desc) > 40:
                 desc = desc[:37] + "…"
 
-            line = f"  {selected} {task.agent_type}  {desc}  "
-            line += f"{duration_str} · {tokens_str}"
+            line = f"  {selected} {task.agent_type}  {desc}{model_str}  "
+            line += f"{duration_str} · {tokens_str}{progress_str}{phase_str}"
             lines.append(line)
 
         return "\n".join(lines)

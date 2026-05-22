@@ -39,6 +39,20 @@ from .widgets import (
     ThinkingIndicator,
     PhaseProgress,
 )
+# Round 2 — lyra-ui bridge widgets
+from .widgets import (
+    ContextVizWidget,
+    AgentDashboardWidget,
+    AccessibilityBridge,
+    StreamHandlerWidget,
+    ResearchFlowWidget,
+)
+# Round 3 — remaining lyra-ui ports
+from .widgets import (
+    PerformanceDashboardWidget,
+    ResourceMonitorWidget,
+    MessageBubbleWidget,
+)
 
 
 class LyraHarnessApp(HarnessApp):
@@ -59,6 +73,19 @@ class LyraHarnessApp(HarnessApp):
         Binding("ctrl+t", "open_task_panel", "Tasks", show=False),
         Binding("ctrl+b", "open_background_switcher", "Background", show=False),
         Binding("ctrl+o", "toggle_expand", "Expand", show=False),
+        # New UX bindings
+        Binding("ctrl+r", "open_session_manager", "Sessions", show=True),
+        Binding("ctrl+n", "open_notifications", "Notifications", show=True),
+        Binding("ctrl+w", "toggle_welcome", "Welcome", show=False),
+        # Round 2 bindings
+        Binding("ctrl+v", "toggle_context_viz", "Context Viz", show=True),
+        Binding("ctrl+d", "toggle_dashboard", "Dashboard", show=True),
+        Binding("ctrl+f6", "toggle_research", "Research", show=True),
+        Binding("ctrl+shift+h", "toggle_high_contrast", "High Contrast", show=True),
+        # Round 3 bindings
+        Binding("ctrl+shift+d", "toggle_perf", "Performance", show=True),
+        Binding("ctrl+shift+r", "toggle_resource_mon", "Resources", show=True),
+        Binding("ctrl+shift+s", "open_status_dashboard", "Status", show=True),
     ]
 
     # Reactive state properties (Constitution I: Single Source of Truth)
@@ -89,6 +116,18 @@ class LyraHarnessApp(HarnessApp):
         self.thinking_indicator = ThinkingIndicator()
         self.phase_progress = PhaseProgress()
         self._agent_panel_expanded = False
+
+        # Round 2 — new UX widgets
+        self.context_viz = ContextVizWidget()
+        self.agent_dashboard = AgentDashboardWidget()
+        self.accessibility_bridge = AccessibilityBridge()
+        self.stream_handler = StreamHandlerWidget()
+        self.research_flow = ResearchFlowWidget()
+
+        # Round 3 — remaining lyra-ui ports
+        self.perf_dashboard = PerformanceDashboardWidget()
+        self.resource_mon = ResourceMonitorWidget()
+        self.message_bubble = MessageBubbleWidget()
 
     def _post_mount(self) -> None:
         """Replace the parent's generic welcome with the Lyra welcome pane.
@@ -193,11 +232,20 @@ class LyraHarnessApp(HarnessApp):
             spinner_msg = self.progress_spinner.next_frame(tokens=0)
             self.shell.chat_log.write_system(spinner_msg)
 
+            # Wire context_viz with initial component data
+            if hasattr(self, 'context_viz'):
+                self.context_viz.set_component("conversation", total, 200_000)
+                self.context_viz.set_component("system", 1000, 200_000)
+
         elif isinstance(event, ev.TurnFinished):
             total = max(0, event.tokens_in) + max(0, event.tokens_out)
             self.shell.status_line.set_segment(
                 "tokens", format_token_bar(total)
             )
+
+            # Update context_viz
+            if hasattr(self, 'context_viz'):
+                self.context_viz.set_component("conversation", total, 200_000)
 
             # Stop progress spinner
             self.progress_spinner.stop()
@@ -286,6 +334,107 @@ class LyraHarnessApp(HarnessApp):
                 tool['duration_ms'] = getattr(event, 'duration_ms', None)
                 self._show_tool_card(event.call_id)
                 del self._active_tools[event.call_id]
+
+    # ── New UX action handlers ──────────────────────────────────────
+
+    async def action_open_session_manager(self) -> None:
+        """Open session manager modal (Ctrl+R)."""
+        from .modals.session_manager import SessionManagerModal, SessionEntry
+
+        # Try to load real sessions from session history
+        try:
+            result = await self.push_screen(SessionManagerModal())
+        except Exception:
+            return
+
+        if result:
+            self.notify(f"Resumed: {result.title}", severity="information")
+            self.shell.chat_log.write_system(
+                f"[bold cyan]⌂[/] Resumed session: {result.title}"
+            )
+
+    async def action_open_notifications(self) -> None:
+        """Open notification drawer (Ctrl+N)."""
+        from .modals.notification_drawer import NotificationDrawer, NotificationEntry
+
+        notifications: list[NotificationEntry] = []
+        if hasattr(self, 'compaction_banner') and self.compaction_banner.compaction_event:
+            ev = self.compaction_banner.compaction_event
+            notifications.append(NotificationEntry(
+                level="info",
+                title=f"Context compacted: {ev.get('tokens_before', 0):,} → {ev.get('tokens_after', 0):,} tokens",
+            ))
+
+        await self.push_screen(NotificationDrawer(notifications))
+
+    async def action_toggle_welcome(self) -> None:
+        """Toggle welcome card (Ctrl+W)."""
+        if hasattr(self, 'welcome_card'):
+            self.welcome_card.action_toggle_expand()
+
+    # ── Round 2 toggle action handlers ──────────────────────────────
+
+    async def action_toggle_context_viz(self) -> None:
+        """Toggle context visualization panel (Ctrl+V)."""
+        if hasattr(self, 'context_viz'):
+            self.context_viz.action_toggle_visibility()
+
+    async def action_toggle_dashboard(self) -> None:
+        """Toggle agent dashboard panel (Ctrl+D)."""
+        if hasattr(self, 'agent_dashboard'):
+            self.agent_dashboard.action_toggle_dashboard()
+
+    async def action_toggle_research(self) -> None:
+        """Toggle research flow panel (Ctrl+F6)."""
+        if hasattr(self, 'research_flow'):
+            self.research_flow.action_toggle_research()
+
+    async def action_toggle_high_contrast(self) -> None:
+        """Toggle high-contrast accessibility mode (Ctrl+Shift+H)."""
+        if hasattr(self, 'accessibility_bridge'):
+            self.accessibility_bridge.action_toggle_high_contrast()
+            state = "on" if self.accessibility_bridge.high_contrast else "off"
+            self.shell.status_line.set_segment("a11y", f"hc:{state}")
+            self.notify(f"High contrast: {state}", severity="information")
+
+    # ── Round 3 toggle action handlers ──────────────────────────────
+
+    async def action_toggle_perf(self) -> None:
+        """Toggle performance dashboard (Ctrl+Shift+D)."""
+        if hasattr(self, 'perf_dashboard'):
+            self.perf_dashboard.action_toggle_perf()
+
+    async def action_toggle_resource_mon(self) -> None:
+        """Toggle resource monitor (Ctrl+Shift+R)."""
+        if hasattr(self, 'resource_mon'):
+            self.resource_mon.action_toggle_resource_mon()
+
+    async def action_open_status_dashboard(self) -> None:
+        """Open consolidated status dashboard modal (Ctrl+Shift+S)."""
+        from .modals.status_dashboard import StatusDashboardModal
+
+        # Gather snapshot from current state
+        snapshot = {
+            "model_name": getattr(self.cfg, 'model', '') or '',
+            "mode_name": getattr(self.cfg, 'mode', '') or 'default',
+            "provider_name": getattr(self.cfg, 'provider', '') or '',
+            "token_used": self._active_agents and sum(
+                a.get('tokens', 0) for a in self._active_agents.values()
+            ) or 0,
+            "token_max": 200_000,
+            "turn_count": self.turn_index,
+            "session_duration": 0.0,
+            "agent_count": len(self._active_agents) + len(self._bg_tasks),
+            "agent_running": len(self._active_agents),
+            "bg_task_count": len(self._bg_tasks),
+            "memory_mb": getattr(self.resource_mon, 'current_memory_mb', 0.0) if hasattr(self, 'resource_mon') else 0.0,
+            "compaction_count": len(getattr(self.context_viz, '_compaction_records', [])),
+            "a11y_mode": "high-contrast" if hasattr(self, 'accessibility_bridge') and self.accessibility_bridge.high_contrast else "normal",
+        }
+
+        await self.push_screen(StatusDashboardModal(snapshot))
+
+    # ── Legacy action handlers ───────────────────────────────────────
 
     async def action_open_command_palette(self) -> None:
         """Open command palette (Ctrl-K) and insert selected command."""
@@ -401,6 +550,23 @@ class LyraHarnessApp(HarnessApp):
 
         # Update status bar
         self.shell.status_line.set_segment("compaction", "[green]✓ compacted[/]")
+
+        # Log compaction in context_viz
+        if hasattr(self, 'context_viz'):
+            self.context_viz.add_compaction(
+                before=event.tokens_before,
+                after=event.tokens_after,
+                reason=getattr(event, 'reason', 'auto'),
+            )
+            self.context_viz.set_component("tools", event.tokens_after, 200_000)
+
+        # Log event in agent dashboard
+        if hasattr(self, 'agent_dashboard'):
+            saved = event.tokens_before - event.tokens_after
+            self.agent_dashboard.log_event(
+                "info",
+                f"Context compacted: {event.tokens_before:,} → {event.tokens_after:,} ({saved:,} saved)"
+            )
 
         # Show contextual tip
         self._show_tip("idle")

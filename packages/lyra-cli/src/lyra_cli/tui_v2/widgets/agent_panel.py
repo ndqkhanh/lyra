@@ -16,6 +16,9 @@ class AgentStatus:
     status: str = "running"  # running, done, error
     last_action: str = ""
     start_time: float = field(default_factory=time.time)
+    phase: str = ""  # E.g., "research", "design", "implement", "review", "test"
+    model: str = ""
+    emoji: str = ""  # ECC-style emoji: 🔍🎨⚡🔬🧪
 
 
 class AgentExecutionPanel:
@@ -48,6 +51,9 @@ class AgentExecutionPanel:
         tokens: Optional[int] = None,
         status: Optional[str] = None,
         last_action: Optional[str] = None,
+        phase: Optional[str] = None,
+        model: Optional[str] = None,
+        emoji: Optional[str] = None,
     ) -> None:
         """Update agent status."""
         if agent_id not in self.agents:
@@ -64,10 +70,30 @@ class AgentExecutionPanel:
             logger.info(f"Agent {agent_id} status changed to {status}")
         if last_action is not None:
             agent.last_action = last_action
+        if phase is not None:
+            agent.phase = phase
+        if model is not None:
+            agent.model = model
+        if emoji is not None:
+            agent.emoji = emoji
 
     def remove_agent(self, agent_id: str) -> None:
         """Remove completed agent."""
         self.agents.pop(agent_id, None)
+
+    # Phase-to-emoji mapping (ECC-inspired)
+    _PHASE_EMOJI = {
+        "research": "🔍",
+        "design": "🎨",
+        "implement": "⚡",
+        "review": "🔬",
+        "test": "🧪",
+        "plan": "📋",
+        "debug": "🐛",
+        "optimize": "🚀",
+        "discovery": "🌐",
+        "synthesis": "🧠",
+    }
 
     def render(self, expanded: bool = False) -> str:
         """Render agent panel.
@@ -99,18 +125,25 @@ class AgentExecutionPanel:
             is_last = i == len(agent_items) - 1
             prefix = "└" if is_last else "├"
 
-            # Status icon
+            # Status icon with ECC-style emoji
+            emoji = status.emoji or self._PHASE_EMOJI.get(status.phase, "")
             if status.status == "done":
                 status_icon = "✓"
             elif status.status == "error":
                 status_icon = "✗"
             else:
-                status_icon = "⏺"
+                status_icon = emoji or "⏺"
 
-            # Main line
-            line = f"   {prefix} {status_icon} {status.description} · "
+            # Main line with phase badge
+            desc = status.description
+            phase_badge = f"[dim][{status.phase}][/] " if status.phase else ""
+            line = f"   {prefix} {status_icon} {phase_badge}{desc} · "
             line += f"{status.tool_uses} tool uses · "
             line += f"{status.tokens/1000:.1f}k tokens"
+
+            # Model badge
+            if status.model:
+                line += f" · [dim]{status.model}[/]"
 
             # Duration
             elapsed = time.time() - status.start_time
