@@ -143,6 +143,14 @@ from lyra_ui.streaming import (
     StreamHandler,
     StreamingProgress,
 )
+from lyra_ui.streaming_repl import (
+    LyraCompleter,
+    REPLConfig,
+    REPLMode,
+    StatusBar,
+    StreamingREPL,
+    ToolProgressDisplay,
+)
 from lyra_ui.team import (
     PromptTemplate,
     TeamConfig,
@@ -189,6 +197,13 @@ __all__ = [
     "StreamHandler",
     "LiveStreamDisplay",
     "StreamingProgress",
+    # Streaming REPL
+    "StreamingREPL",
+    "REPLConfig",
+    "REPLMode",
+    "LyraCompleter",
+    "StatusBar",
+    "ToolProgressDisplay",
     # Progress Visualization
     "MultiTaskProgress",
     "ProgressStep",
