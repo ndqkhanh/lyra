@@ -5,14 +5,14 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "lyra"
 version = "4.0.0"
-description = "Autonomous Team Orchestration AI System"
+description = "Autonomous Team Orchestration AI System with ECC Integration"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
     {name = "Lyra Team", email = "team@lyra.ai"}
 ]
-keywords = ["ai", "agents", "orchestration", "multi-agent", "automation"]
+keywords = ["ai", "agents", "orchestration", "multi-agent", "automation", "ecc", "security", "optimization", "monitoring"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -21,6 +21,8 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 
 dependencies = [
@@ -30,13 +32,37 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "structlog>=24.0.0",
     "tenacity>=8.2.0",
+    "anthropic>=0.18.0",
+    "rich>=13.0.0",
+    "prompt-toolkit>=3.0.0",
+    "pyyaml>=6.0",
 ]
 
 [project.optional-dependencies]
+full = [
+    "anthropic>=0.18.0",
+    "rich>=13.0.0",
+    "prompt-toolkit>=3.0.0",
+    "pyyaml>=6.0",
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+]
+
+minimal = [
+    "pydantic>=2.0.0",
+    "anthropic>=0.18.0",
+]
+
+ecc = [
+    "pyyaml>=6.0",
+    "rich>=13.0.0",
+]
+
 dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
     "pytest-cov>=4.1.0",
+    "pytest-benchmark>=5.2.3",
     "black>=24.0.0",
     "ruff>=0.3.0",
     "mypy>=1.8.0",
