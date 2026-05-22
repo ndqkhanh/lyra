@@ -33,11 +33,11 @@ class VerificationStatus(Enum):
 @dataclass
 class ClaimAttestation:
     claim_id: str
-    claim_type: ClaimType
     statement: str
     evidence: list[str]
     verifier: str
     timestamp: str
+    claim_type: ClaimType = ClaimType.MEASUREMENT
     status: VerificationStatus = VerificationStatus.UNVERIFIED
     parent_claims: list[str] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)

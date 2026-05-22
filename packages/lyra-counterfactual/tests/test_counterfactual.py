@@ -1,12 +1,11 @@
 """Tests for Counterfactual package."""
 
-import pytest
+import asyncio
 from lyra_counterfactual import CounterfactualEngine, Intervention
 from lyra_causal_graph import CausalGraph, EntityNode, ActionEdge, OutcomeNode
 
 
-@pytest.fixture
-def engine():
+def _make_engine():
     g = CausalGraph()
     g.add_entity(EntityNode(id="tool", name="git", entity_type="tool"))
     g.add_entity(EntityNode(id="file", name="main.py", entity_type="file"))
@@ -18,16 +17,16 @@ def engine():
 
 
 class TestCounterfactualEngine:
-    @pytest.mark.asyncio
-    async def test_simulate(self, engine):
+    def test_simulate(self):
+        engine = _make_engine()
         intervention = Intervention(action_type="execute", source_id="tool", target_id="file")
-        result = await engine.simulate(intervention)
+        result = asyncio.run(engine.simulate(intervention))
         assert result.predicted_outcome is not None
         assert 0.0 <= result.confidence <= 1.0
         assert isinstance(result.causal_path, list)
 
-    @pytest.mark.asyncio
-    async def test_simulate_unknown(self, engine):
+    def test_simulate_unknown(self):
+        engine = _make_engine()
         intervention = Intervention(action_type="read", source_id="unknown", target_id="unknown")
-        result = await engine.simulate(intervention)
+        result = asyncio.run(engine.simulate(intervention))
         assert result.causal_path is not None
