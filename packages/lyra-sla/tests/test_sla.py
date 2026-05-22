@@ -6,7 +6,8 @@ class TestSLAManager:
     def test_set_and_check_compliance(self):
         sla = SLAManager()
         sla.set_sla("agent_1", AgentSLA(response_time_p99_ms=5000))
-        sla.record_metric("agent_1", "latency_ms", 100)
+        for _ in range(12):
+            sla.record_metric("agent_1", "latency_ms", 100)
         result = sla.check_compliance("agent_1")
         assert "compliant" in result
 

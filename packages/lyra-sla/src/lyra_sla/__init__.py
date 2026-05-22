@@ -61,7 +61,7 @@ class SLAManager:
             return {"compliant": True, "message": "No SLA defined"}
 
         violations = []
-        agent_metrics = list(self.metrics.get(agent_id, [])[-10:])
+        agent_metrics = list(self.metrics.get(agent_id, deque(maxlen=100)))[-10:]
         if not agent_metrics:
             return {"compliant": True, "message": "Insufficient data"}
 

@@ -1,19 +1,18 @@
 """Tests for lyra-resilience."""
-import pytest
+import asyncio
 from lyra_resilience import CircuitBreaker, RecoveryLadder
 
 
-@pytest.mark.asyncio
-async def test_circuit_breaker_closed():
+def test_circuit_breaker_closed():
     cb = CircuitBreaker("test", threshold=3)
-    result = await cb.call(lambda: "ok")
+    async def ok_fn(): return "ok"
+    result = asyncio.run(cb.call(ok_fn))
     assert result == "ok"
 
 
 class TestRecoveryLadder:
-    @pytest.mark.asyncio
-    async def test_recovery_steps(self):
+    def test_recovery_steps(self):
         ladder = RecoveryLadder()
-        result = await ladder.recover(Exception("test"), {})
+        result = asyncio.run(ladder.recover(Exception("test"), {}))
         assert result.step == "rule_patch"
         assert result.success
