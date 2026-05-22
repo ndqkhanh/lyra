@@ -42,13 +42,26 @@ class BrailleSpinner:
     optional `invalidate_fn` each frame so prompt_toolkit redraws.
     """
 
-    def __init__(self, invalidate_fn: Callable[[], None] | None = None) -> None:
+    def __init__(
+        self,
+        invalidate_fn: Callable[[], None] | None = None,
+        token_getter: Callable[[], int] | None = None,
+    ) -> None:
         self._invalidate = invalidate_fn
+        self._token_getter = token_getter
         self._stop_event = threading.Event()
         self._thread: threading.Thread | None = None
         self._verb = "Thinking"
         self._start_time: float = 0.0
         self.current_line: str = ""
+
+    @staticmethod
+    def _humanise_tokens(n: int) -> str:
+        if n >= 1_000_000:
+            return f"{n / 1_000_000:.1f}M"
+        if n >= 1_000:
+            return f"{n / 1_000:.1f}k"
+        return str(n)
 
     def start(self, verb: str | None = None) -> None:
         """Start spinning with given (or random) verb."""
@@ -86,7 +99,17 @@ class BrailleSpinner:
         idx = 0
         while not self._stop_event.wait(0.08):
             frame = FRAMES[idx % len(FRAMES)]
-            self.current_line = f"{frame} {self._verb}… {self.elapsed_str}"
+            tokens_part = ""
+            if self._token_getter is not None:
+                try:
+                    t = int(self._token_getter() or 0)
+                    if t > 0:
+                        tokens_part = f"  ↓ {self._humanise_tokens(t)}"
+                except Exception:
+                    pass
+            self.current_line = (
+                f"{frame} {self._verb}… {self.elapsed_str}{tokens_part}"
+            )
             idx += 1
             if self._invalidate:
                 try:

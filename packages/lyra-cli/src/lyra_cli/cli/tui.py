@@ -95,7 +95,15 @@ class LyraTUI:
         self._verbosity_pending = "full"  # Phase B — applied on agent init
 
         # Wave 1: spinner — shared instance, start/stop per turn
-        self._spinner = BrailleSpinner(invalidate_fn=self._invalidate_status)
+        # ``_turn_streamed_chars`` is bumped in ``_stream_to_output`` as
+        # text content arrives so the spinner can show a live token estimate
+        # (Claude-Code style ``↓ 1.2k``). Reset to 0 at the start of each
+        # turn. Chars→tokens uses the standard ≈4 chars/token heuristic.
+        self._turn_streamed_chars: int = 0
+        self._spinner = BrailleSpinner(
+            invalidate_fn=self._invalidate_status,
+            token_getter=lambda: self._turn_streamed_chars // 4,
+        )
 
         # Wave 2: last tool output (ctrl+o expand)
         self._last_tool_output: str = ""
@@ -905,6 +913,10 @@ class LyraTUI:
         self._cache_saved_tokens = stats.get("cache_saved_tokens", 0)  # Phase H
         self._invalidate_status()
 
+    def _begin_turn(self) -> None:
+        """Reset per-turn counters before a new agent invocation."""
+        self._turn_streamed_chars = 0
+
     async def _stream_to_output(self, prompt: str) -> None:
         """Send *prompt* to the LLM and print the streaming response.
 
@@ -920,6 +932,8 @@ class LyraTUI:
                 content = event["content"]
                 if etype == "tool":
                     content = f"\033[2m[tool] {content}\033[0m"
+                # Live spinner token counter (chars / 4 ≈ tokens)
+                self._turn_streamed_chars += len(content)
                 buf += content
                 while "\n" in buf:
                     line, buf = buf.split("\n", 1)
@@ -1005,6 +1019,7 @@ class LyraTUI:
             self._print_output(f"\n\033[31mAgent init failed:\033[0m {e}\n\n")
             return
 
+        self._begin_turn()
         self._spinner.start_for(f"research {topic}")
 
         report = ""
@@ -1106,6 +1121,7 @@ class LyraTUI:
             # ── Route special prefixes ─────────────────────────────────
             if user_input.startswith("__RESEARCH__"):
                 topic = user_input[len("__RESEARCH__"):]
+                self._begin_turn()
                 self._spinner.start_for(topic)
                 await self._run_research_pipeline(topic)
                 return
@@ -1127,6 +1143,7 @@ class LyraTUI:
                     + display
                 )
 
+            self._begin_turn()
             self._spinner.start_for(display)
             self._print_output("\033[1mAgent:\033[0m")
 
