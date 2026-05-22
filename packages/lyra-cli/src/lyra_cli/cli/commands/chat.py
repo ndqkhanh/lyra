@@ -29,6 +29,31 @@ def interactive_chat(model: str = "opus"):
     prompt = LyraPrompt()
     formatter = OutputFormatter(console)
 
+    # Initialize agent loop
+    from lyra_cli.cli.agent_handler import CLIAgentHandler
+    from lyra_cli.agent import AgentLoopFactory
+
+    # Map model names to API model IDs
+    model_map = {
+        "opus": "claude-opus-4-20250514",
+        "sonnet": "claude-sonnet-4-20250514",
+        "haiku": "claude-haiku-4-20250514"
+    }
+    api_model = model_map.get(model.lower(), "claude-opus-4-20250514")
+
+    try:
+        agent_handler = CLIAgentHandler(console)
+        agent_loop = AgentLoopFactory.create_simple_loop(
+            callback=agent_handler,
+            model=api_model
+        )
+        formatter.success_message("Agent loop initialized")
+    except ValueError as e:
+        formatter.error_message(str(e))
+        formatter.info_message("Set ANTHROPIC_API_KEY environment variable to use agent features")
+        formatter.info_message("Continuing in demo mode...")
+        agent_loop = None
+
     formatter.info_message("Interactive chat mode - Type your message or /help for commands")
 
     while True:
@@ -43,26 +68,58 @@ def interactive_chat(model: str = "opus"):
                 handle_slash_command(user_input, formatter)
                 continue
 
-            # TODO: Send to agent loop (Phase 3)
-            formatter.status_message("Processing your message...")
-            console.print(f"\n[dim]You said: {user_input}[/dim]")
-            formatter.warning_message("Agent integration coming in Phase 3")
+            # Send to agent loop
+            if agent_loop:
+                agent_loop.process_message(user_input)
+            else:
+                # Demo mode - just echo
+                formatter.status_message("Processing (demo mode)...")
+                console.print(f"\n[dim]Echo: {user_input}[/dim]")
+                formatter.warning_message("Set ANTHROPIC_API_KEY to enable real agent responses")
 
         except (KeyboardInterrupt, EOFError):
             console.print("\n\nGoodbye!", style="cyan")
             break
         except Exception as e:
             formatter.error_message(f"Error: {e}")
+            import os
+            if os.getenv("DEBUG"):
+                import traceback
+                traceback.print_exc()
 
 
 def send_message(message: str, model: str):
     """Send single message"""
     formatter = OutputFormatter(console)
-    formatter.status_message(f"Sending message with {model}...")
 
-    # TODO: Send to agent loop (Phase 3)
-    console.print(f"\n[dim]Message: {message}[/dim]")
-    formatter.warning_message("Agent integration coming in Phase 3")
+    # Initialize agent loop
+    from lyra_cli.cli.agent_handler import CLIAgentHandler
+    from lyra_cli.agent import AgentLoopFactory
+
+    # Map model names
+    model_map = {
+        "opus": "claude-opus-4-20250514",
+        "sonnet": "claude-sonnet-4-20250514",
+        "haiku": "claude-haiku-4-20250514"
+    }
+    api_model = model_map.get(model.lower(), "claude-opus-4-20250514")
+
+    try:
+        agent_handler = CLIAgentHandler(console)
+        agent_loop = AgentLoopFactory.create_simple_loop(
+            callback=agent_handler,
+            model=api_model
+        )
+        agent_loop.process_message(message)
+    except ValueError as e:
+        formatter.error_message(str(e))
+        formatter.info_message("Set ANTHROPIC_API_KEY environment variable")
+    except Exception as e:
+        formatter.error_message(f"Error: {e}")
+        import os
+        if os.getenv("DEBUG"):
+            import traceback
+            traceback.print_exc()
 
 
 def handle_slash_command(command: str, formatter: OutputFormatter):
