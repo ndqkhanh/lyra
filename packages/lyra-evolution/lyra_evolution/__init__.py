@@ -36,7 +36,18 @@ from .compression import (
     CompressionPromoter,
 )
 
-__version__ = "0.1.0"
+# MOSS-style source-level evolution
+from .moss_evolution import (
+    SourceEvolutionEngine,
+    SourcePatch,
+    PatchResult,
+    PatchTarget,
+    ModificationSeverity,
+    UserConsentGate,
+    GovernanceJIT,
+)
+
+__version__ = "0.2.0"
 
 __all__ = [
     # Phase E
@@ -74,4 +85,12 @@ __all__ = [
     "CompressionConfig",
     "CompressionLevel",
     "CompressionPromoter",
+    # MOSS-style source-level evolution
+    "SourceEvolutionEngine",
+    "SourcePatch",
+    "PatchResult",
+    "PatchTarget",
+    "ModificationSeverity",
+    "UserConsentGate",
+    "GovernanceJIT",
 ]
