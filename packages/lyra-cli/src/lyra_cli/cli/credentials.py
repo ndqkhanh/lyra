@@ -156,8 +156,7 @@ AVAILABLE_MODELS = {
     ],
     "deepseek": [
         "deepseek-v4-pro",
-        "deepseek-v4",
-        "deepseek-coder",
+        "deepseek-v4-flash",
     ],
     "ollama": [
         "llama3",
