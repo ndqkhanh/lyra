@@ -40,15 +40,32 @@ Lyra is a sophisticated multi-agent AI system that coordinates specialized agent
    │  Code  │  │Research│  │  Test  │  │ Review │
    │ Agent  │  │ Agent  │  │ Agent  │  │ Agent  │
    └────────┘  └────────┘  └────────┘  └────────┘
+        │            │            │            │
+        └────────────┴────────────┴────────────┘
+                     │
+        ┌────────────▼────────────────────────┐
+        │      Coordination Layer             │
+        │  • Task Allocator                   │
+        │  • Load Balancer                    │
+        │  • Dependency Manager               │
+        │  • Conflict Resolver                │
+        └─────────────────────────────────────┘
 ```
 
 ### Key Components
 
+**Phase 1: Agent System**
 - **Agent Base Classes**: Abstract interfaces for all agents
 - **Task System**: Structured task definitions and results
 - **Capability Matching**: Confidence-based agent selection
 - **Message Queue**: Asynchronous inter-agent communication
 - **Execution History**: Performance tracking and learning
+
+**Phase 2: Coordination Layer**
+- **Task Allocator**: Intelligent task routing with multiple strategies
+- **Load Balancer**: Workload distribution and monitoring
+- **Dependency Manager**: Task ordering and graph analysis
+- **Conflict Resolver**: Resource management and deadlock prevention
 
 ---
 
@@ -203,19 +220,23 @@ lyra/
 
 ## 🎯 Roadmap
 
-### Phase 1: Foundation ✅ (Current)
+### Phase 1: Foundation ✅ (Complete)
 - [x] Agent base classes
 - [x] Task/Result types
 - [x] Primary agent orchestrator
 - [x] 4 specialist agents
 - [x] Basic tests
 - [x] Demo script
+- [x] 71% test coverage
 
-### Phase 2: Coordination (Next)
-- [ ] Task allocator
-- [ ] Load balancer
-- [ ] Dependency manager
-- [ ] Conflict resolver
+### Phase 2: Coordination ✅ (Complete)
+- [x] Task allocator with multiple strategies
+- [x] Load balancer with monitoring
+- [x] Dependency manager with graph analysis
+- [x] Conflict resolver with deadlock detection
+- [x] 66 comprehensive tests
+- [x] 95% coordination layer coverage
+- [x] 83% overall coverage
 
 ### Phase 3: Intelligence
 - [ ] Performance tracker
