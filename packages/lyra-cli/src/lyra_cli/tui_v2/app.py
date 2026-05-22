@@ -55,6 +55,29 @@ from .widgets import (
 )
 from .widgets import MonitorWidget
 
+# Round 10-20 — widgets that exist but were never wired
+from .widgets import (
+    ChatToolsWidget,
+    ConnectStatusWidget,
+    ContextEngineeringWidget,
+    CronDashboardWidget,
+    DeepSearchWidget,
+    ECCWidget,
+    EffortAppWidget,
+    MemoryDashboardWidget,
+    ModelRouterWidget,
+    OnboardingWidget,
+    ProgressVizWidget,
+    QueueStatusWidget,
+    RichReplWidget,
+    SkillsLifecycleWidget,
+    StatusBarEnhancedWidget,
+    TaskChecklistWidget,
+    TraceWidget,
+    UltraReviewWidget,
+    ClaudeStyleBannerWidget,
+)
+
 
 class LyraHarnessApp(HarnessApp):
     # Textual resolves a relative CSS_PATH relative to the leaf class's file,
@@ -89,6 +112,25 @@ class LyraHarnessApp(HarnessApp):
         Binding("ctrl+shift+s", "open_status_dashboard", "Status", show=True),
         # Round 8 binding
         Binding("ctrl+m", "toggle_monitor", "Monitor", show=True),
+        # Round 10-20 bindings — wire all discovered widgets
+        Binding("ctrl+e", "toggle_ecc", "ECC Analysis", show=True),
+        Binding("ctrl+shift+a", "toggle_auth", "Auth", show=True),
+        Binding("ctrl+shift+b", "toggle_budget", "Budget", show=True),
+        Binding("ctrl+shift+c", "toggle_cron", "Cron", show=True),
+        Binding("ctrl+shift+e", "toggle_connect", "Connect", show=True),
+        Binding("ctrl+shift+g", "toggle_chatools", "ChatTools", show=True),
+        Binding("ctrl+shift+j", "toggle_replay", "Replay", show=True),
+        Binding("ctrl+shift+k", "toggle_skills", "Skills", show=True),
+        Binding("ctrl+shift+m", "toggle_memory", "Memory", show=True),
+        Binding("ctrl+shift+p", "toggle_progress_viz", "Progress Viz", show=True),
+        Binding("ctrl+shift+q", "toggle_queue", "Task Queue", show=True),
+        Binding("ctrl+shift+t", "toggle_tasklist", "Tasks", show=True),
+        Binding("ctrl+shift+x", "toggle_context", "Context Eng", show=True),
+        Binding("ctrl+shift+y", "toggle_trace", "Trace", show=True),
+        Binding("alt+e", "toggle_effort_app", "Effort Picker", show=True),
+        Binding("alt+r", "toggle_router", "Router", show=True),
+        Binding("alt+s", "toggle_deepsearch", "DeepSearch", show=True),
+        Binding("alt+u", "toggle_ultrareview", "UltraReview", show=True),
     ]
 
     # Reactive state properties (Constitution I: Single Source of Truth)
@@ -135,6 +177,27 @@ class LyraHarnessApp(HarnessApp):
         # Round 8 — new widgets
         self.monitor = MonitorWidget()
 
+        # Round 10-20 — instantiate all remaining widgets
+        self.chat_tools = ChatToolsWidget()
+        self.connect_status = ConnectStatusWidget()
+        self.context_engineering = ContextEngineeringWidget()
+        self.cron_dashboard = CronDashboardWidget()
+        self.deepsearch = DeepSearchWidget()
+        self.ecc_panel = ECCWidget()
+        self.effort_app = EffortAppWidget()
+        self.memory_dashboard = MemoryDashboardWidget()
+        self.model_router = ModelRouterWidget()
+        self.onboarding = OnboardingWidget()
+        self.progress_viz = ProgressVizWidget()
+        self.queue_status = QueueStatusWidget()
+        self.rich_repl = RichReplWidget()
+        self.skills_lifecycle = SkillsLifecycleWidget()
+        self.status_bar_enh = StatusBarEnhancedWidget()
+        self.task_checklist = TaskChecklistWidget()
+        self.trace_panel = TraceWidget()
+        self.ultrareview = UltraReviewWidget()
+        self.claude_banner = ClaudeStyleBannerWidget()
+
     def _post_mount(self) -> None:
         """Replace the parent's generic welcome with the Lyra welcome pane.
 
@@ -153,6 +216,19 @@ class LyraHarnessApp(HarnessApp):
         self.welcome_card.cwd = str(self.cfg.working_dir or "")
         self.welcome_card.account = getattr(self.cfg, 'account', '') or 'User'
         self.mount(self.welcome_card)
+
+        # Mount all round-10-20 widgets so their keybindings activate
+        for wgt_name in (
+            'chat_tools', 'connect_status', 'context_engineering',
+            'cron_dashboard', 'deepsearch', 'ecc_panel', 'effort_app',
+            'memory_dashboard', 'model_router', 'onboarding',
+            'progress_viz', 'queue_status', 'rich_repl',
+            'skills_lifecycle', 'status_bar_enh', 'task_checklist',
+            'trace_panel', 'ultrareview', 'claude_banner',
+        ):
+            wgt = getattr(self, wgt_name, None)
+            if wgt is not None and not wgt.is_mounted:
+                self.mount(wgt)
 
         # Resume the parent's post-mount work — transport stream task.
         if self.cfg.transport:
@@ -419,6 +495,62 @@ class LyraHarnessApp(HarnessApp):
         """Toggle monitor / fleet panel (Ctrl+M)."""
         if hasattr(self, 'monitor'):
             self.monitor.action_toggle_monitor()
+
+    # ── Round 10-20 action handlers ───────────────────────────────────
+
+    async def action_toggle_ecc(self) -> None:
+        if hasattr(self, 'ecc_panel'): self.ecc_panel.action_toggle_ecc()
+
+    async def action_toggle_auth(self) -> None:
+        if hasattr(self, 'connect_status'): self.connect_status.action_toggle_connect()
+
+    async def action_toggle_budget(self) -> None:
+        if hasattr(self, 'budget_status'): pass  # handled by budget_cmd
+
+    async def action_toggle_cron(self) -> None:
+        if hasattr(self, 'cron_dashboard'): self.cron_dashboard.action_toggle_cron()
+
+    async def action_toggle_connect(self) -> None:
+        if hasattr(self, 'connect_status'): self.connect_status.action_toggle_connect()
+
+    async def action_toggle_chatools(self) -> None:
+        if hasattr(self, 'chat_tools'): self.chat_tools.action_toggle_chatools()
+
+    async def action_toggle_replay(self) -> None:
+        if hasattr(self, 'trace_panel'): pass  # replay widget has its own
+
+    async def action_toggle_skills(self) -> None:
+        if hasattr(self, 'skills_lifecycle'): self.skills_lifecycle.action_toggle_skills()
+
+    async def action_toggle_memory(self) -> None:
+        if hasattr(self, 'memory_dashboard'): self.memory_dashboard.action_toggle_memory()
+
+    async def action_toggle_progress_viz(self) -> None:
+        if hasattr(self, 'progress_viz'): self.progress_viz.action_toggle_progress_viz()
+
+    async def action_toggle_queue(self) -> None:
+        if hasattr(self, 'queue_status'): self.queue_status.action_toggle_queue()
+
+    async def action_toggle_tasklist(self) -> None:
+        if hasattr(self, 'task_checklist'): self.task_checklist.action_toggle_tasklist()
+
+    async def action_toggle_context(self) -> None:
+        if hasattr(self, 'context_engineering'): self.context_engineering.action_toggle_context()
+
+    async def action_toggle_trace(self) -> None:
+        if hasattr(self, 'trace_panel'): self.trace_panel.action_toggle_trace()
+
+    async def action_toggle_effort_app(self) -> None:
+        if hasattr(self, 'effort_app'): self.effort_app.action_toggle_effort_app()
+
+    async def action_toggle_router(self) -> None:
+        if hasattr(self, 'model_router'): self.model_router.action_toggle_router()
+
+    async def action_toggle_deepsearch(self) -> None:
+        if hasattr(self, 'deepsearch'): self.deepsearch.action_toggle_deepsearch()
+
+    async def action_toggle_ultrareview(self) -> None:
+        if hasattr(self, 'ultrareview'): self.ultrareview.action_toggle_ultrareview()
 
     async def action_open_status_dashboard(self) -> None:
         """Open consolidated status dashboard modal (Ctrl+Shift+S)."""
