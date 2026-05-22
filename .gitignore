@@ -1,39 +1,49 @@
-# Python virtual environments
-.venv/
+*.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
 venv/
 env/
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
+ENV/
+.venv
 
-# Egg / build / dist
-*.egg-info/
-dist/
-build/
-*.egg
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
-# pytest / coverage
+# Testing
 .pytest_cache/
 .coverage
 htmlcov/
+.tox/
 
-# Ruff / mypy caches
-.ruff_cache/
-.mypy_cache/
+# Distribution
+dist/
+build/
+*.egg-info/
 
-# IDE
-.idea/
-.vscode/
-*.swp
-*~
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+logs/
 
 # OS
 .DS_Store
 Thumbs.db
 
-# OMC state (session state, not source)
-.omc/state/
-.omc/sessions/
+# Mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Tool caches
 .frg/
+.omc/

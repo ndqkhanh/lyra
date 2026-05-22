@@ -1,7 +1,7 @@
 {
-  "tool_name": "Read",
-  "tool_input_preview": "{\"file_path\":\"/Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-core/src/lyra_core/routing\"}",
-  "error": "EISDIR: illegal operation on a directory, read '/Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-core/src/lyra_core/routing'",
-  "timestamp": "2026-05-20T13:55:51.444Z",
-  "retry_count": 5
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd packages/lyra-ui && python examples/streaming_repl_demo.py 2>&1 | head -150\",\"description\":\"Run streaming REPL demo\"}",
+  "error": "Exit code 1\n(eval):cd:1: no such file or directory: packages/lyra-ui",
+  "timestamp": "2026-05-22T04:09:58.830Z",
+  "retry_count": 1
 }

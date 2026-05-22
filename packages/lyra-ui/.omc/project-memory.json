@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "cd /Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-ui && python -m pytest tests/ -v --tb=short 2>&1 | tail -80",
+    "testCommand": "cd packages/lyra-ui && python -m pytest tests/test_streaming_repl.py -v --tb=short 2>&1 | head -100",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -77,8 +77,14 @@
     },
     {
       "path": "src/lyra_ui/__init__.py",
-      "accessCount": 7,
-      "lastAccessed": 1779283427989,
+      "accessCount": 12,
+      "lastAccessed": 1779422992170,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_ui/formatter.py",
+      "accessCount": 10,
+      "lastAccessed": 1779381021596,
       "type": "file"
     },
     {
@@ -97,6 +103,12 @@
       "path": "tests/test_performance.py",
       "accessCount": 4,
       "lastAccessed": 1779283107994,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_formatter.py",
+      "accessCount": 4,
+      "lastAccessed": 1779381094984,
       "type": "file"
     },
     {
@@ -193,6 +205,24 @@
       "path": "docs/phase-10-accessibility.md",
       "accessCount": 1,
       "lastAccessed": 1779284384365,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_ui/theme.py",
+      "accessCount": 1,
+      "lastAccessed": 1779380919508,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_ui/cli.py",
+      "accessCount": 1,
+      "lastAccessed": 1779422947694,
+      "type": "file"
+    },
+    {
+      "path": "examples/streaming_repl_demo.py",
+      "accessCount": 1,
+      "lastAccessed": 1779422971537,
       "type": "file"
     }
   ],

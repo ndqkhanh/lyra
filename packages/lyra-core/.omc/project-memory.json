@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "cd packages/lyra-core && python -m pytest tests/test_agent_loop_eventbus.py -v",
+    "testCommand": "cd packages/lyra-core && python -m pytest tests/orchestration/ -v --tb=short 2>&1 | tail -100",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -94,6 +94,150 @@
       "type": "file"
     },
     {
+      "path": "src/lyra_core/orchestration/workflow/phase_executors/discovery_executor.py",
+      "accessCount": 4,
+      "lastAccessed": 1779385298917,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/workflow/phase_executors/implementation_executor.py",
+      "accessCount": 4,
+      "lastAccessed": 1779385299387,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/workflow/phase_executors/testing_executor.py",
+      "accessCount": 4,
+      "lastAccessed": 1779385347391,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/workflow/phase_executors/design_executor.py",
+      "accessCount": 4,
+      "lastAccessed": 1779385347860,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/workflow/phase_executors/review_executor.py",
+      "accessCount": 4,
+      "lastAccessed": 1779385524594,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/protocol.py",
+      "accessCount": 3,
+      "lastAccessed": 1779384968989,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/agent_base.py",
+      "accessCount": 3,
+      "lastAccessed": 1779384969008,
+      "type": "file"
+    },
+    {
+      "path": "tests/orchestration/agents/test_pm_agent.py",
+      "accessCount": 2,
+      "lastAccessed": 1779384407448,
+      "type": "file"
+    },
+    {
+      "path": "tests/orchestration/agents/test_lead_agent.py",
+      "accessCount": 2,
+      "lastAccessed": 1779384430575,
+      "type": "file"
+    },
+    {
+      "path": "tests/orchestration/agents/test_principal_agent.py",
+      "accessCount": 2,
+      "lastAccessed": 1779384430813,
+      "type": "file"
+    },
+    {
+      "path": "tests/orchestration/agents/test_qa_agent.py",
+      "accessCount": 2,
+      "lastAccessed": 1779384431051,
+      "type": "file"
+    },
+    {
+      "path": "tests/orchestration/agents/test_spec_agent.py",
+      "accessCount": 2,
+      "lastAccessed": 1779384448238,
+      "type": "file"
+    },
+    {
+      "path": "tests/orchestration/agents/test_research_agent.py",
+      "accessCount": 2,
+      "lastAccessed": 1779384448469,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/models/__init__.py",
+      "accessCount": 2,
+      "lastAccessed": 1779384620602,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/models/architecture.py",
+      "accessCount": 2,
+      "lastAccessed": 1779384620620,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/models/requirements.py",
+      "accessCount": 2,
+      "lastAccessed": 1779384620683,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/message_bus.py",
+      "accessCount": 2,
+      "lastAccessed": 1779384936739,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/workflow/state_machine.py",
+      "accessCount": 2,
+      "lastAccessed": 1779384945591,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/workflow/user_review.py",
+      "accessCount": 2,
+      "lastAccessed": 1779384945652,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/workflow/models.py",
+      "accessCount": 2,
+      "lastAccessed": 1779384945708,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/workflow/phase_executors/base_executor.py",
+      "accessCount": 2,
+      "lastAccessed": 1779384945759,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/orchestrator.py",
+      "accessCount": 2,
+      "lastAccessed": 1779384954873,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/agents/__init__.py",
+      "accessCount": 2,
+      "lastAccessed": 1779385281977,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/workflow/orchestrator.py",
+      "accessCount": 2,
+      "lastAccessed": 1779385383917,
+      "type": "file"
+    },
+    {
       "path": "tests/test_providers_prompt_cache.py",
       "accessCount": 1,
       "lastAccessed": 1778865720160,
@@ -133,6 +277,114 @@
       "path": "src/lyra_core/observability/__init__.py",
       "accessCount": 1,
       "lastAccessed": 1779285492928,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/models/code_review.py",
+      "accessCount": 1,
+      "lastAccessed": 1779383981711,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/models/testing.py",
+      "accessCount": 1,
+      "lastAccessed": 1779384003537,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/models/documentation.py",
+      "accessCount": 1,
+      "lastAccessed": 1779384020242,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/models/research.py",
+      "accessCount": 1,
+      "lastAccessed": 1779384045226,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/agents/pm_agent.py",
+      "accessCount": 1,
+      "lastAccessed": 1779384086541,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/agents/principal_agent.py",
+      "accessCount": 1,
+      "lastAccessed": 1779384118507,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/agents/lead_agent.py",
+      "accessCount": 1,
+      "lastAccessed": 1779384155571,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/agents/qa_agent.py",
+      "accessCount": 1,
+      "lastAccessed": 1779384189432,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/agents/spec_agent.py",
+      "accessCount": 1,
+      "lastAccessed": 1779384218307,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/agents/research_agent.py",
+      "accessCount": 1,
+      "lastAccessed": 1779384253960,
+      "type": "file"
+    },
+    {
+      "path": "tests/orchestration/agents/__init__.py",
+      "accessCount": 1,
+      "lastAccessed": 1779384371789,
+      "type": "file"
+    },
+    {
+      "path": "tests/orchestration/conftest.py",
+      "accessCount": 1,
+      "lastAccessed": 1779384634607,
+      "type": "file"
+    },
+    {
+      "path": "tests/orchestration/test_orchestrator.py",
+      "accessCount": 1,
+      "lastAccessed": 1779384634671,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/state_store.py",
+      "accessCount": 1,
+      "lastAccessed": 1779384936763,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/workflow/phase_executors/__init__.py",
+      "accessCount": 1,
+      "lastAccessed": 1779385081749,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_core/orchestration/workflow/__init__.py",
+      "accessCount": 1,
+      "lastAccessed": 1779385081986,
+      "type": "file"
+    },
+    {
+      "path": "tests/orchestration/workflow/test_state_machine.py",
+      "accessCount": 1,
+      "lastAccessed": 1779385112189,
+      "type": "file"
+    },
+    {
+      "path": "tests/orchestration/workflow/test_user_review.py",
+      "accessCount": 1,
+      "lastAccessed": 1779385139717,
       "type": "file"
     }
   ],
