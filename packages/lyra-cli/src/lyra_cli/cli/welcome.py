@@ -85,15 +85,6 @@ def show_welcome_detailed(console: Console, model: str = "Auto", organization: s
 
 
 def show_welcome_claude_code_style(console: Console, model: str = "Auto"):
-    """Show welcome screen matching Claude Code's exact style - BEAUTIFUL VERSION"""
-
-    cwd = os.getcwd()
-    home = os.path.expanduser("~")
-    if cwd.startswith(home):
-        cwd = "~" + cwd[len(home):]
-
-    # Beautiful minimal design with colors and spacing
-    console.print()
-    console.print(f"[bold cyan]Lyra[/bold cyan] [dim]·[/dim] [bold magenta]{model}[/bold magenta]")
-    console.print(f"[dim blue]{cwd}[/dim blue]")
-    console.print()
+    """Show welcome screen with beautiful banner"""
+    from lyra_cli.cli.banner import show_banner_gradient
+    show_banner_gradient(console, model)
