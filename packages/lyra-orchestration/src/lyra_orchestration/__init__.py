@@ -32,6 +32,7 @@ from lyra_orchestration.event_bus import (
     VulnerabilityDiscovered,
 )
 from lyra_orchestration.task_queue import Task, TaskPriority, TaskQueue, TaskStatus
+from lyra_orchestration.coalition_coordinator import CoalitionAwareCoordinator, BidBasedScheduler
 
 __version__ = "0.1.0"
 
@@ -65,4 +66,7 @@ __all__ = [
     "Task",
     "TaskPriority",
     "TaskStatus",
+    # Coalition-aware coordination (Superorganism Plan)
+    "CoalitionAwareCoordinator",
+    "BidBasedScheduler",
 ]
