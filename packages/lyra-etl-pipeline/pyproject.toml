@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lyra-etl-pipeline"
+version = "0.1.0"
+description = "Multi-agent ETL pipeline — Planner→Builder→Validator→Runner"
+requires-python = ">=3.11"
+dependencies = ["lyra-core", "lyra-skills"]
+dev = ["pytest>=7.0"]
+[tool.setuptools.packages.find]
+where = ["src"]
