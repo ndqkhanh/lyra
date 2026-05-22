@@ -48,6 +48,8 @@ jobs:
         for p in instincts beliefs memory-token memory-vericache router identity resilience sla experiment etl-pipeline command-registry ecology emergence; do
           pytest packages/lyra-$p/tests/ -v --no-header -p no:cacheprovider || true
         done
+        # All-10-plans integration
+        pytest tests/test_all_10_plans.py -v --no-header -p no:cacheprovider || true
 
   lint:
     name: Code Quality
