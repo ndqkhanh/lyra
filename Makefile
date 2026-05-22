@@ -133,6 +133,12 @@ install-agi:
 	done
 	@echo "All AGI packages installed"
 
+install-breakthrough:
+	for pkg in $(BREAKTHROUGH_PACKAGES); do \
+		$(PYTHON) -m pip install -e "$$pkg" --no-deps --quiet; \
+	done
+	@echo "All breakthrough packages installed"
+
 evals:
 	lyra evals --corpus golden --drift-gate 0.0
 

@@ -211,9 +211,20 @@ make test-agi
 python3 -m pytest tests/test_full_agi_pipeline.py -v
 ```
 
----
+### Run Breakthrough Tests (Plans 6-10)
 
-## 🧪 Testing
+```bash
+# Install all breakthrough packages
+make install-breakthrough
+
+# Run all breakthrough tests
+make test-breakthrough
+
+# Run ALL 10 plans integration test
+python3 -m pytest tests/test_all_10_plans.py -v
+```
+
+---
 
 ## 🧪 Testing
 
