@@ -92,6 +92,31 @@ class ToolCallFinished:
     ts: str = field(default_factory=_now)
 
 
+# ── AGI Orchestration Events ──────────────────────────────────────────
+
+@dataclass(frozen=True)
+class AGIHealthEvent:
+    plan_name: str
+    health_score: float
+    is_ready: bool
+    ts: str = field(default_factory=_now)
+
+
+@dataclass(frozen=True)
+class AGIEmergencyEvent:
+    status: str
+    active_shield: bool
+    ts: str = field(default_factory=_now)
+
+
+@dataclass(frozen=True)
+class AGIDriftEvent:
+    drift_type: str
+    score: float
+    adaptation_needed: bool
+    ts: str = field(default_factory=_now)
+
+
 @dataclass(frozen=True)
 class ToolCallBlocked:
     session_id: str
@@ -192,6 +217,9 @@ AnyEvent = (
     | CronJobFired
     | DaemonIteration
     | SkillActivated
+    | AGIHealthEvent
+    | AGIEmergencyEvent
+    | AGIDriftEvent
 )
 
 # ---------------------------------------------------------------------------
@@ -431,6 +459,9 @@ __all__ = [
     "CronJobFired",
     "DaemonIteration",
     "SkillActivated",
+    "AGIHealthEvent",
+    "AGIEmergencyEvent",
+    "AGIDriftEvent",
     # bus
     "EventBus",
     "get_event_bus",
