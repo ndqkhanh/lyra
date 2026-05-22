@@ -67,13 +67,13 @@ class PrimaryAgent(Agent):
             Response string
         """
         print(f"\n[{self.agent_id}] Handling request: {request}")
-        
+
         # 1. Analyze request and create task
         task = await self.analyze_request(request)
-        
+
         # 2. Execute task
         result = await self.execute(task)
-        
+
         # 3. Format response
         if result.success:
             return f"✅ Task completed successfully: {result.data}"
@@ -92,7 +92,7 @@ class PrimaryAgent(Agent):
         """
         # Simple analysis - in production this would use LLM
         task_type = TaskType.GENERIC
-        
+
         # Detect task type from keywords
         request_lower = request.lower()
         if any(word in request_lower for word in ["code", "implement", "refactor"]):
@@ -103,7 +103,7 @@ class PrimaryAgent(Agent):
             task_type = TaskType.RESEARCH
         elif any(word in request_lower for word in ["review", "check"]):
             task_type = TaskType.CODE_REVIEW
-        
+
         return Task(
             type=task_type,
             description=request,
@@ -123,11 +123,11 @@ class PrimaryAgent(Agent):
         self.status = AgentStatus.BUSY
         self.current_task = task
         task.start()
-        
+
         try:
             # Find best agent for task
             agent = await self.select_agent(task)
-            
+
             if not agent:
                 # No specialist available, handle it ourselves
                 result = await self.execute_directly(task)
@@ -135,11 +135,11 @@ class PrimaryAgent(Agent):
                 # Delegate to specialist
                 print(f"[{self.agent_id}] Delegating to: {agent.agent_id}")
                 result = await agent.execute(task)
-            
+
             task.complete()
             self.record_execution(result)
             return result
-            
+
         except Exception as e:
             task.fail()
             result = Result(
@@ -150,7 +150,7 @@ class PrimaryAgent(Agent):
             )
             self.record_execution(result)
             return result
-            
+
         finally:
             self.status = AgentStatus.IDLE
             self.current_task = None
@@ -167,7 +167,7 @@ class PrimaryAgent(Agent):
         """
         if not self.specialists:
             return None
-        
+
         # Score each agent
         scores = []
         for agent in self.specialists.values():
@@ -175,10 +175,10 @@ class PrimaryAgent(Agent):
                 confidence = agent.can_handle(task)
                 if confidence > 0:
                     scores.append((agent, confidence))
-        
+
         if not scores:
             return None
-        
+
         # Return agent with highest confidence
         scores.sort(key=lambda x: x[1], reverse=True)
         return scores[0][0]
@@ -194,10 +194,10 @@ class PrimaryAgent(Agent):
             Execution result
         """
         print(f"[{self.agent_id}] Executing directly: {task.description}")
-        
+
         # Simple execution - just acknowledge the task
         await asyncio.sleep(0.1)  # Simulate work
-        
+
         return Result(
             task_id=task.task_id,
             success=True,
@@ -228,13 +228,13 @@ class PrimaryAgent(Agent):
             List of results
         """
         print(f"[{self.agent_id}] Executing {len(tasks)} tasks in parallel")
-        
+
         # Execute all tasks concurrently
         results = await asyncio.gather(
             *[self.execute(task) for task in tasks],
             return_exceptions=True
         )
-        
+
         # Convert exceptions to failed results
         final_results = []
         for i, result in enumerate(results):
@@ -249,7 +249,7 @@ class PrimaryAgent(Agent):
                 )
             else:
                 final_results.append(result)
-        
+
         return final_results
 
     def get_statistics(self) -> Dict[str, any]:

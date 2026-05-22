@@ -55,10 +55,10 @@ class ResearchAgent(Agent):
         """
         self.status = AgentStatus.BUSY
         self.current_task = task
-        
+
         try:
             print(f"[{self.agent_id}] Executing {task.type.value}: {task.description}")
-            
+
             # Route to appropriate handler
             if task.type in [TaskType.WEB_SEARCH, TaskType.RESEARCH]:
                 result_data = await self.research(task)
@@ -66,14 +66,14 @@ class ResearchAgent(Agent):
                 result_data = await self.analyze_document(task)
             else:
                 raise ValueError(f"Unsupported task type: {task.type}")
-            
+
             result = Result(
                 task_id=task.task_id,
                 success=True,
                 data=result_data,
                 agent_id=self.agent_id,
             )
-            
+
         except Exception as e:
             result = Result(
                 task_id=task.task_id,
@@ -81,11 +81,11 @@ class ResearchAgent(Agent):
                 error=str(e),
                 agent_id=self.agent_id,
             )
-        
+
         finally:
             self.status = AgentStatus.IDLE
             self.current_task = None
-        
+
         self.record_execution(result)
         return result
 
@@ -100,25 +100,25 @@ class ResearchAgent(Agent):
             Research findings
         """
         query = task.params.get("query", task.description)
-        
+
         await self.report_progress(0.2, "Searching for information...")
         await asyncio.sleep(0.5)
-        
+
         # Simulate web search
         search_results = await self.web_search(query)
-        
+
         await self.report_progress(0.5, "Analyzing sources...")
         await asyncio.sleep(0.7)
-        
+
         # Simulate analysis
         analyses = await self.analyze_sources(search_results)
-        
+
         await self.report_progress(0.8, "Synthesizing findings...")
         await asyncio.sleep(0.5)
-        
+
         # Simulate synthesis
         synthesis = await self.synthesize_findings(analyses)
-        
+
         return {
             "query": query,
             "sources_found": len(search_results),
@@ -138,7 +138,7 @@ class ResearchAgent(Agent):
             List of search results
         """
         await asyncio.sleep(0.3)
-        
+
         # Simulated search results
         return [
             {
@@ -194,7 +194,7 @@ class ResearchAgent(Agent):
             Synthesized findings
         """
         await asyncio.sleep(0.3)
-        
+
         return {
             "summary": "Based on the research, the key findings are...",
             "key_insights": [
@@ -221,16 +221,16 @@ class ResearchAgent(Agent):
             Analysis results
         """
         document_path = task.params.get("document_path", "unknown")
-        
+
         await self.report_progress(0.3, "Reading document...")
         await asyncio.sleep(0.5)
-        
+
         await self.report_progress(0.6, "Extracting key information...")
         await asyncio.sleep(0.7)
-        
+
         await self.report_progress(0.9, "Generating summary...")
         await asyncio.sleep(0.4)
-        
+
         return {
             "document": document_path,
             "summary": "This document discusses important topics...",

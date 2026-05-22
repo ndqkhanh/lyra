@@ -3,7 +3,7 @@ Test Agent - specialist for testing tasks.
 """
 
 import asyncio
-from typing import Dict, Any, List
+from typing import Dict, Any
 
 from src.agents.base import Agent, AgentCapability, AgentStatus
 from src.core.task import Task, TaskType, Result
@@ -55,10 +55,10 @@ class TestAgent(Agent):
         """
         self.status = AgentStatus.BUSY
         self.current_task = task
-        
+
         try:
             print(f"[{self.agent_id}] Executing {task.type.value}: {task.description}")
-            
+
             # Route to appropriate handler
             if task.type == TaskType.TEST_GENERATION:
                 result_data = await self.generate_tests(task)
@@ -66,14 +66,14 @@ class TestAgent(Agent):
                 result_data = await self.execute_tests(task)
             else:
                 raise ValueError(f"Unsupported task type: {task.type}")
-            
+
             result = Result(
                 task_id=task.task_id,
                 success=True,
                 data=result_data,
                 agent_id=self.agent_id,
             )
-            
+
         except Exception as e:
             result = Result(
                 task_id=task.task_id,
@@ -81,11 +81,11 @@ class TestAgent(Agent):
                 error=str(e),
                 agent_id=self.agent_id,
             )
-        
+
         finally:
             self.status = AgentStatus.IDLE
             self.current_task = None
-        
+
         self.record_execution(result)
         return result
 
@@ -100,16 +100,16 @@ class TestAgent(Agent):
             Generated tests and metadata
         """
         file_path = task.params.get("file_path", "unknown")
-        
+
         await self.report_progress(0.2, "Analyzing code...")
         await asyncio.sleep(0.5)
-        
+
         await self.report_progress(0.5, "Identifying test scenarios...")
         await asyncio.sleep(0.6)
-        
+
         await self.report_progress(0.8, "Generating test code...")
         await asyncio.sleep(0.7)
-        
+
         # Simulated test generation
         test_cases = [
             {
@@ -128,7 +128,7 @@ class TestAgent(Agent):
                 "code": "def test_error_handling():\n    with pytest.raises(Exception):\n        example(invalid_input)",
             },
         ]
-        
+
         return {
             "file": file_path,
             "test_file": f"test_{file_path}",
@@ -148,16 +148,16 @@ class TestAgent(Agent):
             Test execution results
         """
         test_path = task.params.get("test_path", "tests/")
-        
+
         await self.report_progress(0.3, "Running tests...")
         await asyncio.sleep(0.8)
-        
+
         await self.report_progress(0.7, "Collecting results...")
         await asyncio.sleep(0.4)
-        
+
         await self.report_progress(0.9, "Generating report...")
         await asyncio.sleep(0.3)
-        
+
         # Simulated test execution
         results = {
             "total_tests": 15,
@@ -181,7 +181,7 @@ class TestAgent(Agent):
                 },
             ],
         }
-        
+
         return results
 
     async def analyze_coverage(self, task: Task) -> Dict[str, Any]:
@@ -196,7 +196,7 @@ class TestAgent(Agent):
         """
         await self.report_progress(0.5, "Analyzing coverage...")
         await asyncio.sleep(0.6)
-        
+
         return {
             "overall_coverage": 82.5,
             "line_coverage": 85.0,

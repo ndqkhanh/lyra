@@ -3,12 +3,11 @@ Conflict Resolver - Resolve resource conflicts and deadlocks.
 """
 
 import time
-from typing import List, Dict, Set, Optional, Tuple
+from typing import List, Dict, Optional
 from dataclasses import dataclass
 from enum import Enum
 
-from src.core.task import Task, TaskStatus, TaskPriority
-from src.agents.base import Agent
+from src.core.task import Task
 
 
 class ConflictType(Enum):
@@ -46,7 +45,7 @@ class Resource:
     resource_id: str
     owner: Optional[str] = None
     waiters: List[str] = None
-    
+
     def __post_init__(self):
         if self.waiters is None:
             self.waiters = []
@@ -105,29 +104,29 @@ class ConflictResolver:
         # Ensure resource exists
         if resource_id not in self.resources:
             self.register_resource(resource_id)
-        
+
         resource = self.resources[resource_id]
-        
+
         # Check if available
         if resource.owner is None:
             resource.owner = task.task_id
             return True
-        
+
         # Resource is busy - check for conflict
         conflict = self._detect_resource_conflict(task, resource_id)
-        
+
         if conflict:
             # Try to resolve
             resolved = self._resolve_conflict(conflict)
-            
+
             if resolved:
                 resource.owner = task.task_id
                 return True
-        
+
         # Add to waiters
         if task.task_id not in resource.waiters:
             resource.waiters.append(task.task_id)
-        
+
         return False
 
     def release_resource(self, task: Task, resource_id: str):
@@ -140,12 +139,12 @@ class ConflictResolver:
         """
         if resource_id not in self.resources:
             return
-        
+
         resource = self.resources[resource_id]
-        
+
         if resource.owner == task.task_id:
             resource.owner = None
-            
+
             # Grant to next waiter
             if resource.waiters:
                 next_task_id = resource.waiters.pop(0)
@@ -163,23 +162,23 @@ class ConflictResolver:
         """
         # Build wait-for graph
         wait_for = {}
-        
+
         for resource in self.resources.values():
             if resource.owner and resource.waiters:
                 for waiter in resource.waiters:
                     if waiter not in wait_for:
                         wait_for[waiter] = []
                     wait_for[waiter].append(resource.owner)
-        
+
         # Detect cycle using DFS
         visited = set()
         rec_stack = set()
-        
+
         def has_cycle(task_id: str, path: List[str]) -> Optional[List[str]]:
             visited.add(task_id)
             rec_stack.add(task_id)
             path.append(task_id)
-            
+
             if task_id in wait_for:
                 for waiting_on in wait_for[task_id]:
                     if waiting_on not in visited:
@@ -190,17 +189,17 @@ class ConflictResolver:
                         # Found cycle
                         cycle_start = path.index(waiting_on)
                         return path[cycle_start:] + [waiting_on]
-            
+
             rec_stack.remove(task_id)
             return None
-        
+
         # Check each task
         for task in tasks:
             if task.task_id not in visited:
                 cycle = has_cycle(task.task_id, [])
                 if cycle:
                     return cycle
-        
+
         return None
 
     def _detect_resource_conflict(self, task: Task, resource_id: str) -> Optional[Conflict]:
@@ -215,10 +214,10 @@ class ConflictResolver:
             Conflict if detected
         """
         resource = self.resources[resource_id]
-        
+
         if resource.owner is None:
             return None
-        
+
         # Create conflict
         self.conflict_count += 1
         conflict = Conflict(
@@ -228,7 +227,7 @@ class ConflictResolver:
             resource=resource_id,
             detected_at=time.time(),
         )
-        
+
         self.conflicts[conflict.conflict_id] = conflict
         return conflict
 
@@ -252,7 +251,7 @@ class ConflictResolver:
             return self._resolve_by_queue(conflict)
         elif self.strategy == ResolutionStrategy.ABORT:
             return self._resolve_by_abort(conflict)
-        
+
         return False
 
     def _resolve_by_priority(self, conflict: Conflict) -> bool:
@@ -276,7 +275,7 @@ class ConflictResolver:
             # Preempt current owner
             old_owner = resource.owner
             resource.owner = None
-            
+
             conflict.resolved = True
             conflict.resolution = f"preempted_{old_owner}"
             return True
@@ -306,14 +305,14 @@ class ConflictResolver:
         # Abort task with lowest priority (simplified)
         # In real implementation, would check actual priorities
         victim = cycle[0]
-        
+
         # Release all resources held by victim
         for resource in self.resources.values():
             if resource.owner == victim:
                 resource.owner = None
                 if resource.waiters:
                     resource.owner = resource.waiters.pop(0)
-        
+
         return victim
 
     def get_conflict_statistics(self) -> Dict:
@@ -325,19 +324,19 @@ class ConflictResolver:
         """
         total_conflicts = len(self.conflicts)
         resolved = sum(1 for c in self.conflicts.values() if c.resolved)
-        
+
         # Count by type
         by_type = {}
         for conflict in self.conflicts.values():
             ctype = conflict.conflict_type.value
             by_type[ctype] = by_type.get(ctype, 0) + 1
-        
+
         # Count by resolution
         by_resolution = {}
         for conflict in self.conflicts.values():
             if conflict.resolution:
                 by_resolution[conflict.resolution] = by_resolution.get(conflict.resolution, 0) + 1
-        
+
         return {
             "total_conflicts": total_conflicts,
             "resolved": resolved,

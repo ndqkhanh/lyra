@@ -43,7 +43,7 @@ class Memory:
     context: Dict[str, Any] = None
     access_count: int = 0
     last_accessed: float = 0.0
-    
+
     def __post_init__(self):
         if self.tags is None:
             self.tags = []
@@ -51,25 +51,25 @@ class Memory:
             self.context = {}
         if self.last_accessed == 0.0:
             self.last_accessed = self.timestamp
-    
+
     def to_dict(self) -> Dict:
         """Convert memory to dictionary."""
         data = asdict(self)
         data["memory_type"] = self.memory_type.value
         return data
-    
+
     @classmethod
     def from_dict(cls, data: Dict) -> "Memory":
         """Create memory from dictionary."""
         data = data.copy()
         data["memory_type"] = MemoryType(data["memory_type"])
         return cls(**data)
-    
+
     def access(self):
         """Record memory access."""
         self.access_count += 1
         self.last_accessed = time.time()
-    
+
     def decay_importance(self, decay_rate: float = 0.01):
         """
         Decay importance over time.
@@ -102,7 +102,7 @@ class MemoryStore:
         """
         self.memories: Dict[str, Memory] = {}
         self.storage_path = storage_path
-        
+
         if storage_path:
             self.load()
 
@@ -136,7 +136,7 @@ class MemoryStore:
             tags=tags or [],
             context=context or {},
         )
-        
+
         self.memories[memory.memory_id] = memory
         return memory
 
@@ -169,11 +169,11 @@ class MemoryStore:
         memory = self.memories.get(memory_id)
         if not memory:
             return False
-        
+
         for key, value in kwargs.items():
             if hasattr(memory, key):
                 setattr(memory, key, value)
-        
+
         return True
 
     def delete(self, memory_id: str) -> bool:
@@ -300,24 +300,24 @@ class MemoryStore:
             mid for mid, m in self.memories.items()
             if m.importance < min_importance
         ]
-        
+
         for mid in to_remove:
             del self.memories[mid]
-        
+
         return len(to_remove)
 
     def save(self):
         """Save memories to disk."""
         if not self.storage_path:
             return
-        
+
         path = Path(self.storage_path)
         path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         data = {
             "memories": [m.to_dict() for m in self.memories.values()]
         }
-        
+
         with open(path, 'w') as f:
             json.dump(data, f, indent=2)
 
@@ -325,14 +325,14 @@ class MemoryStore:
         """Load memories from disk."""
         if not self.storage_path:
             return
-        
+
         path = Path(self.storage_path)
         if not path.exists():
             return
-        
+
         with open(path, 'r') as f:
             data = json.load(f)
-        
+
         self.memories = {}
         for mem_data in data.get("memories", []):
             memory = Memory.from_dict(mem_data)
@@ -356,15 +356,15 @@ class MemoryStore:
                 "average_importance": 0.0,
                 "total_accesses": 0,
             }
-        
+
         by_type = {}
         for memory in self.memories.values():
             mtype = memory.memory_type.value
             by_type[mtype] = by_type.get(mtype, 0) + 1
-        
+
         total_importance = sum(m.importance for m in self.memories.values())
         total_accesses = sum(m.access_count for m in self.memories.values())
-        
+
         return {
             "total_memories": len(self.memories),
             "by_type": by_type,

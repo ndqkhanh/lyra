@@ -2,7 +2,7 @@
 Dependency Manager - Handle task dependencies and execution ordering.
 """
 
-from typing import List, Dict, Set, Optional
+from typing import List, Dict, Optional
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -69,7 +69,7 @@ class DependencyManager:
         # Add to dependency list
         if task.task_id not in self.dependencies:
             self.dependencies[task.task_id] = []
-        
+
         dep = TaskDependency(
             task_id=task.task_id,
             depends_on=depends_on.task_id,
@@ -77,15 +77,15 @@ class DependencyManager:
             required=required,
         )
         self.dependencies[task.task_id].append(dep)
-        
+
         # Update graph
         self.graph.nodes[task.task_id] = task
         self.graph.nodes[depends_on.task_id] = depends_on
-        
+
         if task.task_id not in self.graph.edges:
             self.graph.edges[task.task_id] = []
         self.graph.edges[task.task_id].append(depends_on.task_id)
-        
+
         if depends_on.task_id not in self.graph.reverse_edges:
             self.graph.reverse_edges[depends_on.task_id] = []
         self.graph.reverse_edges[depends_on.task_id].append(task.task_id)
@@ -125,23 +125,23 @@ class DependencyManager:
             True if task is ready
         """
         deps = self.get_dependencies(task)
-        
+
         if not deps:
             return True
-        
+
         # Check all required dependencies
         for dep in deps:
             if not dep.required:
                 continue
-            
+
             dep_task = self.graph.nodes.get(dep.depends_on)
             if not dep_task:
                 continue
-            
+
             # Dependency must be completed
             if dep_task.status != TaskStatus.COMPLETED:
                 return False
-        
+
         return True
 
     def get_ready_tasks(self, tasks: List[Task]) -> List[Task]:
@@ -155,11 +155,11 @@ class DependencyManager:
             List of ready tasks
         """
         ready = []
-        
+
         for task in tasks:
             if task.status == TaskStatus.PENDING and self.is_ready(task):
                 ready.append(task)
-        
+
         return ready
 
     def get_execution_order(self, tasks: List[Task]) -> List[List[Task]]:
@@ -174,42 +174,42 @@ class DependencyManager:
         """
         # Build task map
         task_map = {t.task_id: t for t in tasks}
-        
+
         # Calculate in-degree for each task
         in_degree = {t.task_id: 0 for t in tasks}
         for task in tasks:
             deps = self.get_dependencies(task)
             in_degree[task.task_id] = len([d for d in deps if d.required])
-        
+
         # Find tasks with no dependencies
         batches = []
         remaining = set(task_map.keys())
-        
+
         while remaining:
             # Find tasks with no remaining dependencies
             ready = [
                 task_id for task_id in remaining
                 if in_degree[task_id] == 0
             ]
-            
+
             if not ready:
                 # Circular dependency detected
                 break
-            
+
             # Add batch
             batch = [task_map[task_id] for task_id in ready]
             batches.append(batch)
-            
+
             # Remove from remaining
             for task_id in ready:
                 remaining.remove(task_id)
-                
+
                 # Update in-degrees for dependents
                 dependents = self.get_dependents(task_map[task_id])
                 for dep_id in dependents:
                     if dep_id in in_degree:
                         in_degree[dep_id] -= 1
-        
+
         return batches
 
     def detect_circular_dependencies(self, tasks: List[Task]) -> Optional[List[str]]:
@@ -224,12 +224,12 @@ class DependencyManager:
         """
         visited = set()
         rec_stack = set()
-        
+
         def has_cycle(task_id: str, path: List[str]) -> Optional[List[str]]:
             visited.add(task_id)
             rec_stack.add(task_id)
             path.append(task_id)
-            
+
             # Check all dependencies
             deps = self.dependencies.get(task_id, [])
             for dep in deps:
@@ -241,17 +241,17 @@ class DependencyManager:
                     # Found cycle
                     cycle_start = path.index(dep.depends_on)
                     return path[cycle_start:] + [dep.depends_on]
-            
+
             rec_stack.remove(task_id)
             return None
-        
+
         # Check each task
         for task in tasks:
             if task.task_id not in visited:
                 cycle = has_cycle(task.task_id, [])
                 if cycle:
                     return cycle
-        
+
         return None
 
     def get_critical_path(self, tasks: List[Task]) -> List[Task]:
@@ -266,46 +266,46 @@ class DependencyManager:
         """
         # Build task map
         task_map = {t.task_id: t for t in tasks}
-        
+
         # Calculate longest path to each task
         longest_path = {t.task_id: 0 for t in tasks}
         predecessors = {t.task_id: None for t in tasks}
-        
+
         # Get execution order
         batches = self.get_execution_order(tasks)
-        
+
         for batch in batches:
             for task in batch:
                 deps = self.get_dependencies(task)
-                
+
                 if deps:
                     # Find longest path through dependencies
                     max_length = 0
                     max_pred = None
-                    
+
                     for dep in deps:
                         dep_length = longest_path.get(dep.depends_on, 0)
                         if dep_length + 1 > max_length:
                             max_length = dep_length + 1
                             max_pred = dep.depends_on
-                    
+
                     longest_path[task.task_id] = max_length
                     predecessors[task.task_id] = max_pred
-        
+
         # Find task with longest path
         if not longest_path:
             return []
-        
+
         end_task_id = max(longest_path.items(), key=lambda x: x[1])[0]
-        
+
         # Reconstruct path
         path = []
         current = end_task_id
-        
+
         while current:
             path.append(task_map[current])
             current = predecessors[current]
-        
+
         path.reverse()
         return path
 
@@ -318,14 +318,14 @@ class DependencyManager:
         """
         total_tasks = len(self.graph.nodes)
         total_deps = sum(len(deps) for deps in self.dependencies.values())
-        
+
         # Count dependency types
         dep_types = {}
         for deps in self.dependencies.values():
             for dep in deps:
                 dep_type = dep.dependency_type.value
                 dep_types[dep_type] = dep_types.get(dep_type, 0) + 1
-        
+
         # Find tasks with most dependencies
         max_deps = 0
         max_deps_task = None
@@ -333,7 +333,7 @@ class DependencyManager:
             if len(deps) > max_deps:
                 max_deps = len(deps)
                 max_deps_task = task_id
-        
+
         return {
             "total_tasks": total_tasks,
             "total_dependencies": total_deps,

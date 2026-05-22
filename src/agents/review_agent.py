@@ -3,7 +3,7 @@ Review Agent - specialist for code review and quality assurance.
 """
 
 import asyncio
-from typing import Dict, Any, List
+from typing import Dict, Any
 
 from src.agents.base import Agent, AgentCapability, AgentStatus
 from src.core.task import Task, TaskType, Result
@@ -55,10 +55,10 @@ class ReviewAgent(Agent):
         """
         self.status = AgentStatus.BUSY
         self.current_task = task
-        
+
         try:
             print(f"[{self.agent_id}] Executing {task.type.value}: {task.description}")
-            
+
             # Route to appropriate handler
             if task.type == TaskType.CODE_REVIEW:
                 result_data = await self.review_code(task)
@@ -66,14 +66,14 @@ class ReviewAgent(Agent):
                 result_data = await self.security_scan(task)
             else:
                 raise ValueError(f"Unsupported task type: {task.type}")
-            
+
             result = Result(
                 task_id=task.task_id,
                 success=True,
                 data=result_data,
                 agent_id=self.agent_id,
             )
-            
+
         except Exception as e:
             result = Result(
                 task_id=task.task_id,
@@ -81,11 +81,11 @@ class ReviewAgent(Agent):
                 error=str(e),
                 agent_id=self.agent_id,
             )
-        
+
         finally:
             self.status = AgentStatus.IDLE
             self.current_task = None
-        
+
         self.record_execution(result)
         return result
 
@@ -100,19 +100,19 @@ class ReviewAgent(Agent):
             Review results
         """
         file_path = task.params.get("file_path", "unknown")
-        
+
         await self.report_progress(0.2, "Reading code...")
         await asyncio.sleep(0.4)
-        
+
         await self.report_progress(0.4, "Checking style and conventions...")
         await asyncio.sleep(0.5)
-        
+
         await self.report_progress(0.6, "Analyzing logic and structure...")
         await asyncio.sleep(0.6)
-        
+
         await self.report_progress(0.8, "Checking for common issues...")
         await asyncio.sleep(0.4)
-        
+
         # Simulated review
         issues = [
             {
@@ -137,7 +137,7 @@ class ReviewAgent(Agent):
                 "suggestion": "Consider breaking into smaller functions",
             },
         ]
-        
+
         return {
             "file": file_path,
             "overall_quality": "good",
@@ -167,16 +167,16 @@ class ReviewAgent(Agent):
             Security scan results
         """
         target = task.params.get("target", ".")
-        
+
         await self.report_progress(0.2, "Scanning for vulnerabilities...")
         await asyncio.sleep(0.6)
-        
+
         await self.report_progress(0.5, "Checking dependencies...")
         await asyncio.sleep(0.5)
-        
+
         await self.report_progress(0.8, "Analyzing security patterns...")
         await asyncio.sleep(0.5)
-        
+
         # Simulated security scan
         vulnerabilities = [
             {
@@ -196,7 +196,7 @@ class ReviewAgent(Agent):
                 "recommendation": "Move to environment variables",
             },
         ]
-        
+
         return {
             "target": target,
             "scan_date": "2026-05-22",
@@ -226,7 +226,7 @@ class ReviewAgent(Agent):
         """
         await self.report_progress(0.5, "Assessing quality metrics...")
         await asyncio.sleep(0.7)
-        
+
         return {
             "overall_score": 7.8,
             "metrics": {

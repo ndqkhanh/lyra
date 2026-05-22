@@ -2,7 +2,6 @@
 Long-Term Memory - Persistent knowledge base.
 """
 
-import time
 from typing import List, Dict, Optional, Set
 from collections import defaultdict
 
@@ -35,10 +34,10 @@ class MemoryIndex:
         # Index by tags
         for tag in memory.tags:
             self.tag_index[tag].add(memory.memory_id)
-        
+
         # Index by type
         self.type_index[memory.memory_type].add(memory.memory_id)
-        
+
         # Index by time
         self.time_index.append((memory.timestamp, memory.memory_id))
         self.time_index.sort(reverse=True)  # Most recent first
@@ -53,10 +52,10 @@ class MemoryIndex:
         # Remove from tag index
         for tag in memory.tags:
             self.tag_index[tag].discard(memory.memory_id)
-        
+
         # Remove from type index
         self.type_index[memory.memory_type].discard(memory.memory_id)
-        
+
         # Remove from time index
         self.time_index = [
             (ts, mid) for ts, mid in self.time_index
@@ -76,7 +75,7 @@ class MemoryIndex:
         """
         if not tags:
             return set()
-        
+
         if match_all:
             # Intersection of all tag sets
             result = self.tag_index[tags[0]].copy()
@@ -118,14 +117,14 @@ class MemoryIndex:
             List of memory IDs (sorted by time, most recent first)
         """
         result = []
-        
+
         for timestamp, memory_id in self.time_index:
             if start_time and timestamp < start_time:
                 continue
             if end_time and timestamp > end_time:
                 continue
             result.append(memory_id)
-        
+
         return result
 
     def clear(self):
@@ -155,7 +154,7 @@ class LongTermMemory:
         """
         self.store = MemoryStore(storage_path)
         self.index = MemoryIndex()
-        
+
         # Build index from loaded memories
         self._rebuild_index()
 
@@ -187,7 +186,7 @@ class LongTermMemory:
             tags=tags,
             context=context,
         )
-        
+
         self.index.add_memory(memory)
         return memory
 
@@ -221,19 +220,19 @@ class LongTermMemory:
             List of matching memories
         """
         memory_ids = self.index.find_by_tags(tags, match_all)
-        
+
         memories = []
         for mid in memory_ids:
             memory = self.store.get(mid)
             if memory:
                 memories.append(memory)
-        
+
         # Sort by importance
         memories.sort(key=lambda m: m.importance, reverse=True)
-        
+
         if limit:
             memories = memories[:limit]
-        
+
         return memories
 
     def search_by_type(
@@ -252,19 +251,19 @@ class LongTermMemory:
             List of matching memories
         """
         memory_ids = self.index.find_by_type(memory_type)
-        
+
         memories = []
         for mid in memory_ids:
             memory = self.store.get(mid)
             if memory:
                 memories.append(memory)
-        
+
         # Sort by importance
         memories.sort(key=lambda m: m.importance, reverse=True)
-        
+
         if limit:
             memories = memories[:limit]
-        
+
         return memories
 
     def search_by_time_range(
@@ -285,16 +284,16 @@ class LongTermMemory:
             List of matching memories
         """
         memory_ids = self.index.find_by_time_range(start_time, end_time)
-        
+
         memories = []
         for mid in memory_ids:
             memory = self.store.get(mid)
             if memory:
                 memories.append(memory)
-        
+
         if limit:
             memories = memories[:limit]
-        
+
         return memories
 
     def search_by_content(
@@ -313,18 +312,18 @@ class LongTermMemory:
             List of matching memories
         """
         query_lower = query.lower()
-        
+
         matches = []
         for memory in self.store.get_all():
             if query_lower in memory.content.lower():
                 matches.append(memory)
-        
+
         # Sort by importance
         matches.sort(key=lambda m: m.importance, reverse=True)
-        
+
         if limit:
             matches = matches[:limit]
-        
+
         return matches
 
     def get_recent(self, limit: int = 10) -> List[Memory]:
@@ -371,31 +370,31 @@ class LongTermMemory:
         """
         # Simple implementation: merge memories with same content
         content_map: Dict[str, List[Memory]] = defaultdict(list)
-        
+
         for memory in self.store.get_all():
             content_map[memory.content].append(memory)
-        
+
         merged = 0
         for content, memories in content_map.items():
             if len(memories) > 1:
                 # Keep most important, merge others
                 memories.sort(key=lambda m: m.importance, reverse=True)
                 primary = memories[0]
-                
+
                 for other in memories[1:]:
                     # Merge tags and context
                     primary.tags = list(set(primary.tags + other.tags))
                     primary.context.update(other.context)
-                    
+
                     # Boost importance
                     primary.importance = min(1.0, primary.importance + 0.1)
-                    
+
                     # Remove duplicate
                     self.store.delete(other.memory_id)
                     self.index.remove_memory(other)
-                    
+
                     merged += 1
-        
+
         return merged
 
     def apply_decay(self, decay_rate: float = 0.01):
@@ -421,11 +420,11 @@ class LongTermMemory:
         for memory in self.store.get_all():
             if memory.importance < min_importance:
                 to_remove.append(memory)
-        
+
         for memory in to_remove:
             self.store.delete(memory.memory_id)
             self.index.remove_memory(memory)
-        
+
         return len(to_remove)
 
     def save(self):
@@ -456,9 +455,9 @@ class LongTermMemory:
             Statistics dictionary
         """
         stats = self.store.get_statistics()
-        
+
         # Add index statistics
         stats["indexed_tags"] = len(self.index.tag_index)
         stats["indexed_types"] = len(self.index.type_index)
-        
+
         return stats

@@ -3,11 +3,11 @@ Memory Retrieval - Intelligent memory search and retrieval.
 """
 
 import time
-from typing import List, Dict, Optional, Callable
+from typing import List, Dict, Optional
 from enum import Enum
 from dataclasses import dataclass
 
-from src.memory.memory_store import Memory, MemoryType
+from src.memory.memory_store import Memory
 from src.memory.long_term_memory import LongTermMemory
 
 
@@ -35,7 +35,7 @@ class RetrievalResult:
     score: float
     strategy: str
     metadata: Dict = None
-    
+
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
@@ -92,22 +92,22 @@ class RelevanceScorer:
         """
         if current_time is None:
             current_time = time.time()
-        
+
         # Importance score (already 0-1)
         importance_score = memory.importance
-        
+
         # Recency score (exponential decay)
         age_days = (current_time - memory.timestamp) / 86400
         recency_score = max(0.0, 1.0 - (age_days / 30))  # Decay over 30 days
-        
+
         # Frequency score (normalized access count)
         frequency_score = min(1.0, memory.access_count / 10)
-        
+
         # Content similarity score
         content_score = 0.5  # Default
         if query:
             content_score = self._calculate_content_similarity(memory.content, query)
-        
+
         # Weighted combination
         total_score = (
             self.importance_weight * importance_score +
@@ -115,7 +115,7 @@ class RelevanceScorer:
             self.frequency_weight * frequency_score +
             self.content_weight * content_score
         )
-        
+
         return total_score
 
     def _calculate_content_similarity(self, content: str, query: str) -> float:
@@ -131,21 +131,21 @@ class RelevanceScorer:
         """
         content_lower = content.lower()
         query_lower = query.lower()
-        
+
         # Simple keyword matching
         query_words = set(query_lower.split())
         content_words = set(content_lower.split())
-        
+
         if not query_words:
             return 0.0
-        
+
         # Jaccard similarity
         intersection = query_words & content_words
         union = query_words | content_words
-        
+
         if not union:
             return 0.0
-        
+
         return len(intersection) / len(union)
 
 
@@ -197,7 +197,7 @@ class MemoryRetriever:
             List of retrieval results
         """
         strategy = strategy or self.default_strategy
-        
+
         if strategy == RetrievalStrategy.KEYWORD:
             return self._retrieve_keyword(query, limit, min_score, filters)
         elif strategy == RetrievalStrategy.TEMPORAL:
@@ -220,22 +220,22 @@ class MemoryRetriever:
         """Retrieve using keyword matching."""
         # Get candidate memories
         candidates = self._get_candidates(filters)
-        
+
         # Score and filter
         results = []
         for memory in candidates:
             score = self.scorer.score(memory, query)
-            
+
             if score >= min_score:
                 results.append(RetrievalResult(
                     memory=memory,
                     score=score,
                     strategy="keyword",
                 ))
-        
+
         # Sort by score
         results.sort(key=lambda r: r.score, reverse=True)
-        
+
         return results[:limit]
 
     def _retrieve_temporal(
@@ -248,28 +248,28 @@ class MemoryRetriever:
         """Retrieve using temporal ordering."""
         # Get candidate memories (respects all filters)
         candidates = self._get_candidates(filters)
-        
+
         # Sort by recency
         candidates.sort(key=lambda m: m.timestamp, reverse=True)
-        
+
         # Take top candidates
         candidates = candidates[:limit * 2]
-        
+
         # Score and filter
         results = []
         for memory in candidates:
             score = self.scorer.score(memory, query)
-            
+
             if score >= min_score:
                 results.append(RetrievalResult(
                     memory=memory,
                     score=score,
                     strategy="temporal",
                 ))
-        
+
         # Sort by score
         results.sort(key=lambda r: r.score, reverse=True)
-        
+
         return results[:limit]
 
     def _retrieve_importance(
@@ -282,25 +282,25 @@ class MemoryRetriever:
         """Retrieve using importance weighting."""
         # Get candidate memories (respects all filters)
         candidates = self._get_candidates(filters)
-        
+
         # Filter by importance
         important = [m for m in candidates if m.importance >= 0.5]
-        
+
         # Score and filter
         results = []
         for memory in important:
             score = self.scorer.score(memory, query)
-            
+
             if score >= min_score:
                 results.append(RetrievalResult(
                     memory=memory,
                     score=score,
                     strategy="importance",
                 ))
-        
+
         # Sort by score
         results.sort(key=lambda r: r.score, reverse=True)
-        
+
         return results[:limit]
 
     def _retrieve_hybrid(
@@ -315,20 +315,20 @@ class MemoryRetriever:
         keyword_results = self._retrieve_keyword(query, limit, min_score, filters)
         temporal_results = self._retrieve_temporal(query, limit, min_score, filters)
         importance_results = self._retrieve_importance(query, limit, min_score, filters)
-        
+
         # Combine and deduplicate
         seen = set()
         combined = []
-        
+
         for result in keyword_results + temporal_results + importance_results:
             if result.memory.memory_id not in seen:
                 seen.add(result.memory.memory_id)
                 result.strategy = "hybrid"
                 combined.append(result)
-        
+
         # Re-score and sort
         combined.sort(key=lambda r: r.score, reverse=True)
-        
+
         return combined[:limit]
 
     def _get_candidates(self, filters: Optional[Dict]) -> List[Memory]:
@@ -343,41 +343,41 @@ class MemoryRetriever:
         """
         if not filters:
             return self.long_term_memory.store.get_all()
-        
+
         candidates = None
-        
+
         # Filter by type
         if "type" in filters:
             candidates = self.long_term_memory.search_by_type(filters["type"])
-        
+
         # Filter by tags
         if "tags" in filters:
             tag_results = self.long_term_memory.search_by_tags(
                 filters["tags"],
                 match_all=filters.get("match_all_tags", False),
             )
-            
+
             if candidates is None:
                 candidates = tag_results
             else:
                 # Intersection
                 candidate_ids = {m.memory_id for m in candidates}
                 candidates = [m for m in tag_results if m.memory_id in candidate_ids]
-        
+
         # Filter by time range
         if "time_range" in filters:
             time_results = self.long_term_memory.search_by_time_range(
                 start_time=filters["time_range"].get("start"),
                 end_time=filters["time_range"].get("end"),
             )
-            
+
             if candidates is None:
                 candidates = time_results
             else:
                 # Intersection
                 candidate_ids = {m.memory_id for m in candidates}
                 candidates = [m for m in time_results if m.memory_id in candidate_ids]
-        
+
         return candidates or self.long_term_memory.store.get_all()
 
     def retrieve_similar(
@@ -399,14 +399,14 @@ class MemoryRetriever:
         """
         # Use memory content as query
         query = memory.content
-        
+
         # Filter by same type and tags
         filters = {
             "type": memory.memory_type,
             "tags": memory.tags,
             "match_all_tags": False,
         }
-        
+
         results = self.retrieve(
             query=query,
             strategy=RetrievalStrategy.HYBRID,
@@ -414,10 +414,10 @@ class MemoryRetriever:
             min_score=min_score,
             filters=filters,
         )
-        
+
         # Remove the reference memory itself
         results = [r for r in results if r.memory.memory_id != memory.memory_id]
-        
+
         return results[:limit]
 
     def get_statistics(self) -> Dict:

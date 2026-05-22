@@ -7,7 +7,7 @@ from typing import List, Dict, Optional, Any
 from dataclasses import dataclass
 from collections import deque
 
-from src.memory.memory_store import Memory, MemoryType, MemoryStore
+from src.memory.memory_store import MemoryType, MemoryStore
 
 
 @dataclass
@@ -25,7 +25,7 @@ class ConversationTurn:
     content: str
     timestamp: float
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
@@ -82,7 +82,7 @@ class ShortTermMemory:
             timestamp=time.time(),
             metadata=metadata or {},
         )
-        
+
         self.turns.append(turn)
         return turn
 
@@ -111,11 +111,11 @@ class ShortTermMemory:
             Formatted context string
         """
         turns = self.get_recent(max_turns)
-        
+
         lines = []
         for turn in turns:
             lines.append(f"{turn.role}: {turn.content}")
-        
+
         return "\n".join(lines)
 
     def get_by_role(self, role: str) -> List[ConversationTurn]:
@@ -194,14 +194,14 @@ class ShortTermMemory:
         """
         if not self.should_consolidate():
             return 0
-        
+
         turns_to_consolidate = self.prepare_for_consolidation()
         consolidated = 0
-        
+
         for turn in turns_to_consolidate:
             # Calculate importance based on role and content length
             importance = self._calculate_importance(turn)
-            
+
             if importance >= importance_threshold:
                 # Create episodic memory from turn
                 long_term_store.add(
@@ -215,7 +215,7 @@ class ShortTermMemory:
                     },
                 )
                 consolidated += 1
-        
+
         return consolidated
 
     def _calculate_importance(self, turn: ConversationTurn) -> float:
@@ -230,22 +230,22 @@ class ShortTermMemory:
         """
         # Base importance
         importance = 0.5
-        
+
         # User turns are more important
         if turn.role == "user":
             importance += 0.2
-        
+
         # Longer content is more important
         content_length = len(turn.content)
         if content_length > 100:
             importance += 0.1
         if content_length > 500:
             importance += 0.1
-        
+
         # Metadata can indicate importance
         if turn.metadata.get("important"):
             importance += 0.2
-        
+
         return min(1.0, importance)
 
     def clear(self):
@@ -267,11 +267,11 @@ class ShortTermMemory:
                 "utilization": 0.0,
                 "by_role": {},
             }
-        
+
         by_role = {}
         for turn in self.turns:
             by_role[turn.role] = by_role.get(turn.role, 0) + 1
-        
+
         return {
             "total_turns": len(self.turns),
             "capacity": self.capacity,

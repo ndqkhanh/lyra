@@ -74,10 +74,10 @@ class CodeAgent(Agent):
         """
         self.status = AgentStatus.BUSY
         self.current_task = task
-        
+
         try:
             print(f"[{self.agent_id}] Executing {task.type.value}: {task.description}")
-            
+
             # Route to appropriate handler
             if task.type == TaskType.CODE_ANALYSIS:
                 result_data = await self.analyze_code(task)
@@ -89,14 +89,14 @@ class CodeAgent(Agent):
                 result_data = await self.review_code(task)
             else:
                 raise ValueError(f"Unsupported task type: {task.type}")
-            
+
             result = Result(
                 task_id=task.task_id,
                 success=True,
                 data=result_data,
                 agent_id=self.agent_id,
             )
-            
+
         except Exception as e:
             result = Result(
                 task_id=task.task_id,
@@ -104,11 +104,11 @@ class CodeAgent(Agent):
                 error=str(e),
                 agent_id=self.agent_id,
             )
-        
+
         finally:
             self.status = AgentStatus.IDLE
             self.current_task = None
-        
+
         self.record_execution(result)
         return result
 
@@ -124,13 +124,13 @@ class CodeAgent(Agent):
         """
         await self.report_progress(0.2, "Reading code...")
         await asyncio.sleep(0.5)  # Simulate work
-        
+
         await self.report_progress(0.5, "Analyzing structure...")
         await asyncio.sleep(0.5)
-        
+
         await self.report_progress(0.8, "Generating report...")
         await asyncio.sleep(0.3)
-        
+
         # Simulated analysis results
         return {
             "file": task.params.get("file_path", "unknown"),
@@ -159,13 +159,13 @@ class CodeAgent(Agent):
         """
         await self.report_progress(0.3, "Understanding requirements...")
         await asyncio.sleep(0.5)
-        
+
         await self.report_progress(0.6, "Generating code...")
         await asyncio.sleep(1.0)
-        
+
         await self.report_progress(0.9, "Validating output...")
         await asyncio.sleep(0.3)
-        
+
         # Simulated code generation
         spec = task.params.get("specification", "")
         return {
@@ -187,13 +187,13 @@ class CodeAgent(Agent):
         """
         await self.report_progress(0.2, "Analyzing current code...")
         await asyncio.sleep(0.5)
-        
+
         await self.report_progress(0.5, "Planning refactoring...")
         await asyncio.sleep(0.5)
-        
+
         await self.report_progress(0.8, "Applying changes...")
         await asyncio.sleep(0.7)
-        
+
         return {
             "file": task.params.get("file_path", "unknown"),
             "changes_made": [
@@ -217,13 +217,13 @@ class CodeAgent(Agent):
         """
         await self.report_progress(0.3, "Reading code...")
         await asyncio.sleep(0.4)
-        
+
         await self.report_progress(0.6, "Checking for issues...")
         await asyncio.sleep(0.6)
-        
+
         await self.report_progress(0.9, "Generating review...")
         await asyncio.sleep(0.3)
-        
+
         return {
             "file": task.params.get("file_path", "unknown"),
             "overall_quality": "good",

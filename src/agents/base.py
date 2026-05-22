@@ -93,7 +93,7 @@ class Agent(ABC):
         self.message_queue: asyncio.Queue[Message] = asyncio.Queue()
         self.execution_history: List[Result] = []
         self.metadata: Dict[str, Any] = {}
-        
+
         # Memory system
         self.short_term_memory = ShortTermMemory(
             capacity=10,
@@ -260,7 +260,7 @@ class Agent(ABC):
 
     # Memory-related methods
 
-    def remember(self, content: str, memory_type: MemoryType = MemoryType.EPISODIC, 
+    def remember(self, content: str, memory_type: MemoryType = MemoryType.EPISODIC,
                  importance: float = 0.5, tags: Optional[List[str]] = None) -> None:
         """
         Store information in long-term memory.
@@ -302,7 +302,7 @@ class Agent(ABC):
             filters=filters,
         )
 
-    def add_conversation_turn(self, role: str, content: str, 
+    def add_conversation_turn(self, role: str, content: str,
                              metadata: Optional[Dict[str, Any]] = None) -> None:
         """
         Add a conversation turn to short-term memory.
@@ -313,7 +313,7 @@ class Agent(ABC):
             metadata: Optional metadata
         """
         self.short_term_memory.add_turn(role, content, metadata)
-        
+
         # Auto-consolidate if needed
         if self.memory_consolidator.should_consolidate():
             self.memory_consolidator.auto_consolidate()
