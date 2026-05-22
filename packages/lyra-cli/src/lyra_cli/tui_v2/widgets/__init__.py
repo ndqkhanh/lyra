@@ -30,6 +30,11 @@ from .message_bubble import MessageBubbleWidget
 from .ecc_panel import ECCWidget
 from .monitor_panel import MonitorWidget
 
+# UX improvement widgets (Round 9 — last 3 lyra_ui ports)
+from .async_bridge import BackgroundTaskQueue, QueueStatusWidget
+from .rich_repl import RichReplWidget, MarkdownStreamBuffer
+from .progress_viz import ProgressVizWidget, ProgressStep, StepState
+
 __all__ = [
     # Original widgets
     "SlashDropdown",
@@ -67,4 +72,13 @@ __all__ = [
     # UX improvement widgets (Round 7 — ECC bridge + final)
     "ECCWidget",
     "MonitorWidget",
+
+    # UX improvement widgets (Round 9 — last 3 lyra_ui ports)
+    "BackgroundTaskQueue",
+    "QueueStatusWidget",
+    "RichReplWidget",
+    "MarkdownStreamBuffer",
+    "ProgressVizWidget",
+    "ProgressStep",
+    "StepState",
 ]
