@@ -193,6 +193,9 @@ class LyraTUI:
                     "status-bar-mode-plan": "bg:#1a1a2e #FFD700 bold",
                     "input-rule": rule_color,
                     "hint-bar": "#444444",
+                    # Claude-Code-style footer accents
+                    "hint-bar-prompt": "#FFD700 bold",   # ⏵⏵ glyph
+                    "hint-bar-state": "#888888",          # mode / turn state
                     "completion-menu": "bg:#1a1a2e #FFF8DC",
                     "completion-menu.completion.current": "bg:#333355 #FFD700",
                 }
@@ -373,29 +376,45 @@ class LyraTUI:
         return frags
 
     def _get_hint_bar_fragments(self) -> list[tuple[str, str]]:
-        """Wave 8: context-sensitive keyboard hint line."""
+        """Wave 8: context-sensitive footer.
+
+        Claude-Code-style: leading ``⏵⏵`` glyph + current state (mode,
+        turn) on the left, key hints on the right. Format mirrors
+        ``⏵⏵ bypass permissions on · 5 background tasks · esc to interrupt``.
+        """
         sep = ("class:hint-bar", "  ·  ")
+        glyph = ("class:hint-bar-prompt", " ⏵⏵ ")
+        mode = getattr(self, "_mode", "chat")
+        turn = getattr(self, "_turn_count", 0)
+
         if self._agent_running:
-            hints = [
-                ("class:hint-bar", " ctrl+c interrupt agent"),
+            return [
+                glyph,
+                ("class:hint-bar-state", "agent running"),
                 sep,
-                ("class:hint-bar", "ctrl+o expand tool"),
+                ("class:hint-bar", f"turn {turn}"),
+                sep,
+                ("class:hint-bar", "ctrl+c interrupt"),
+                sep,
+                ("class:hint-bar", "ctrl+o expand"),
             ]
-        else:
-            hints = [
-                ("class:hint-bar", " ctrl+c cancel"),
-                sep,
-                ("class:hint-bar", "ctrl+o expand tool"),
-                sep,
-                ("class:hint-bar", "ctrl+h history"),
-                sep,
-                ("class:hint-bar", "ctrl+r search"),
-                sep,
-                ("class:hint-bar", "shift+tab mode"),
-                sep,
-                ("class:hint-bar", "/help"),
-            ]
-        return hints
+
+        return [
+            glyph,
+            ("class:hint-bar-state", f"{mode} mode"),
+            sep,
+            ("class:hint-bar", f"turn {turn}"),
+            sep,
+            ("class:hint-bar", "ctrl+c cancel"),
+            sep,
+            ("class:hint-bar", "ctrl+o expand"),
+            sep,
+            ("class:hint-bar", "ctrl+h history"),
+            sep,
+            ("class:hint-bar", "shift+tab mode"),
+            sep,
+            ("class:hint-bar", "/help"),
+        ]
 
     def _process_loop(self):
         """Background processing loop.
@@ -917,6 +936,62 @@ class LyraTUI:
     def _begin_turn(self) -> None:
         """Reset per-turn counters before a new agent invocation."""
         self._turn_streamed_chars = 0
+        self._turn_tool_events: list[dict] = []
+
+    def _flush_tool_batch(self) -> None:
+        """Render buffered tool_display events as a single summary line.
+
+        Mirrors Claude Code's collapsed style: ``⎿ Used N tools (M lines ·
+        ctrl+o to expand)`` for batches, or the original
+        ``⎿ {name} {args}`` for a single tool. Stashes the full per-tool
+        breakdown into ``self._last_tool_output`` so ctrl+o can surface it.
+        """
+        events = getattr(self, "_turn_tool_events", [])
+        if not events:
+            return
+
+        total_lines = sum(
+            int(e.get("metadata", {}).get("lines") or 0) for e in events
+        )
+
+        if len(events) == 1:
+            meta = events[0].get("metadata", {})
+            name = meta.get("name", events[0].get("content", "tool"))
+            args = meta.get("args", "")
+            lines = meta.get("lines", 0)
+            output = meta.get("output", "")
+            self._last_tool_output = output
+            self._tool_output_expanded = False
+            suffix = f" ({lines} lines)" if lines else ""
+            trunc = (
+                " \033[33m[truncated]\033[0m"
+                if meta.get("truncated") else ""
+            )
+            self._print_output(
+                f"\033[2m⎿  {name} {args}{suffix}{trunc}\033[0m"
+            )
+        else:
+            names = [
+                str(e.get("metadata", {}).get("name") or e.get("content") or "tool")
+                for e in events
+            ]
+            unique = sorted(set(names))
+            if len(unique) == 1:
+                label = f"Used {unique[0]} ×{len(events)}"
+            else:
+                label = f"Used {len(events)} tools"
+            self._last_tool_output = "\n---\n".join(
+                f"[{i + 1}] {names[i]} {e.get('metadata', {}).get('args', '')}"
+                f"\n{e.get('metadata', {}).get('output', '')}"
+                for i, e in enumerate(events)
+            )
+            self._tool_output_expanded = False
+            self._print_output(
+                f"\033[2m⎿  {label}  ({total_lines} lines · "
+                f"ctrl+o to expand)\033[0m"
+            )
+
+        self._turn_tool_events = []
 
     async def _stream_to_output(self, prompt: str) -> None:
         """Send *prompt* to the LLM and print the streaming response.
@@ -930,6 +1005,8 @@ class LyraTUI:
             etype = event["type"]
 
             if etype in ("text", "tool"):
+                # Flush any pending tool batch before text starts streaming
+                self._flush_tool_batch()
                 content = event["content"]
                 if etype == "tool":
                     content = f"\033[2m[tool] {content}\033[0m"
@@ -941,6 +1018,7 @@ class LyraTUI:
                     self._print_output(line)
 
             elif etype == "thinking":
+                self._flush_tool_batch()
                 # Claude-Code-style collapsed "thought" indicator. Stash the
                 # full reasoning so ctrl+o can expand it (uses the same slot
                 # as last tool output for a single expand affordance).
@@ -958,25 +1036,18 @@ class LyraTUI:
                 )
 
             elif etype == "tool_display":
-                # Wave 2: ⎿ tool use line
+                # Buffer tool events for the turn and render as ONE Claude-
+                # Code-style summary line ("⎿ Used 3 tools (42 lines ·
+                # ctrl+o to expand)") instead of N inline ⎿ lines. Flushed
+                # below before any non-tool event renders.
                 if buf:
                     self._print_output(buf, end="")
                     buf = ""
-                meta = event.get("metadata", {})
-                name = meta.get("name", event.get("content", "tool"))
-                args = meta.get("args", "")
-                lines = meta.get("lines", 0)
-                output = meta.get("output", "")
-                self._last_tool_output = output
-                self._tool_output_expanded = False
-                suffix = f" ({lines} lines)" if lines else ""
-                trunc = " \033[33m[truncated]\033[0m" if meta.get("truncated") else ""
-                self._print_output(
-                    f"\033[2m⎿  {name} {args}{suffix}{trunc}\033[0m"
-                )
+                self._turn_tool_events.append(event)
 
             elif etype == "compaction":
                 # Wave 3: ✻ compaction notice
+                self._flush_tool_batch()
                 if buf:
                     self._print_output(buf, end="")
                     buf = ""
@@ -989,6 +1060,7 @@ class LyraTUI:
                 )
 
             elif etype == "usage":
+                self._flush_tool_batch()
                 self._flush_usage()
                 # Wave 3: cache hit notice when savings are meaningful
                 meta = event.get("metadata", {})
@@ -1001,11 +1073,14 @@ class LyraTUI:
                     )
 
             elif etype == "warning":
+                self._flush_tool_batch()
                 if buf:
                     self._print_output(buf, end="")
                     buf = ""
                 self._print_output(event["content"], end="")
 
+        # Final flush in case the turn ended with tools and no follow-up text.
+        self._flush_tool_batch()
         if buf:
             self._print_output(buf, end="")
         self._print_output("\n")
