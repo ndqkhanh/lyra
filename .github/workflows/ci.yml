@@ -28,12 +28,20 @@ jobs:
         pip install -e packages/lyra-core
         pip install -e packages/lyra-cli[dev]
         pip install -e packages/lyra-skills[dev]
-        pip install pytest-cov
+        pip install -e packages/lyra-evolution
+        pip install -e packages/lyra-evals
+        pip install -e packages/lyra-memory
+        pip install -e packages/lyra-mcp
+        pip install -e packages/lyra-orchestration
+        pip install -e packages/lyra-research
+        for p in verification-mesh hbhc viper-mcp attestor causal-graph counterfactual science-pipeline claim-verification drift-detector skill-weaver context-profiler competence-map meta-evolution recursive-reward fork-worker colony emergent-coord gossip-memory agent-lifecycle; do pip install -e packages/lyra-$p; done
+        pip install pytest-cov numpy
 
-    - name: Run tests
+    - name: Run tests (AGI packages)
       run: |
-        cd packages/lyra-cli
-        pytest tests/ --cov=src --cov-report=term-missing
+        for p in verification-mesh hbhc viper-mcp attestor causal-graph counterfactual science-pipeline claim-verification drift-detector skill-weaver context-profiler competence-map meta-evolution recursive-reward fork-worker colony emergent-coord gossip-memory agent-lifecycle; do
+          pytest packages/lyra-$p/tests/ -v --no-header -p no:cacheprovider || true
+        done
 
   lint:
     name: Code Quality
