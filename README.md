@@ -379,7 +379,51 @@ print(bt.summary)
 
 **MIT License** — free for any use, commercial or otherwise.
 
-Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Contributions welcome! See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for guidelines.
+
+---
+
+## 📁 Project Structure
+
+```
+lyra/
+├── README.md              # This file
+├── Makefile               # Build/test commands
+├── pyproject.toml          # Python project config
+├── LICENSE                # MIT license
+├──
+├── packages/              # 🧬 All 66 packages (source code)
+│   ├── lyra-core/         # Agent Loop 2.0, AGI Orchestrator
+│   ├── lyra-memory/       # 4-tier memory, graph tier
+│   ├── lyra-instincts/    # Behavioral patterns (Plan 6)
+│   ├── lyra-ecology/      # Agent ecology (Plan 10)
+│   └── ...                # 62 more
+├──
+├── plans/                 # 📋 15 ultra plans (architecture docs)
+│   ├── LYRA_ULTRA_PLAN_1_*.md
+│   ├── lyra-breakthrough-plans-6-10.md
+│   └── lyra-breakthrough-plans-11-15.md
+├──
+├── docs/                  # 📚 Documentation hub
+│   ├── CHANGELOG.md       # Release history
+│   ├── CONTRIBUTING.md    # Contribution guide
+│   ├── scripts/           # Test scripts & demos
+│   ├── examples/          # Usage examples
+│   └── *.md               # Architecture docs, research papers
+├──
+├── archive/               # 🗄️ Historical records
+│   ├── reports/           # Phase completion reports
+│   ├── verification/      # Verification reports
+│   └── *.md               # Archive of old root-level docs
+├──
+├── tests/                 # 🧪 Integration tests
+│   ├── test_all_10_plans.py
+│   └── test_agi_*.py
+├──
+├── harness_core/          # ⚡ Core harness primitives
+├── config/                # Configuration files
+└── .github/               # CI/CD workflows
+```
 
 ---
 
