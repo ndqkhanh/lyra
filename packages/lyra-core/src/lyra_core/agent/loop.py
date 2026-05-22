@@ -36,6 +36,11 @@ from concurrent.futures import Executor
 from dataclasses import dataclass, field
 from typing import Any, Callable, Mapping, MutableMapping, Optional
 
+from lyra_core.agent.event_sourced_loop import (
+    EventSourcedAgentLoop as _EventSourcedAgentLoop,
+    EventLog,
+    EventType,
+)
 from lyra_core.observability import (
     LLMCallFinished,
     LLMCallStarted,
