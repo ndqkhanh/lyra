@@ -2,7 +2,8 @@
 from __future__ import annotations
 import sys, os, argparse, json
 
-__all__ = ["main"]
+__version__ = "3.5.0"
+__all__ = ["main", "__version__"]
 
 BANNER = """
 ╔══════════════════════════════════════════════╗
