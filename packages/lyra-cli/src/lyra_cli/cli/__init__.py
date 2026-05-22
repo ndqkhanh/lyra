@@ -4,6 +4,8 @@ This module provides a streaming CLI interface inspired by Claude Code,
 replacing the Textual-based TUI with a simpler, more portable solution.
 """
 
+from rich.console import Console
+
 # Legacy exports (keep for backward compatibility)
 from .messages import (
     AssistantMessage,
@@ -18,7 +20,10 @@ from .repl import launch_streaming_repl
 
 # New CLI exports (Phase 2)
 from .app import app as cli_app
-from .output import console, OutputFormatter
+from .output import OutputFormatter
+
+# Create console instance
+console = Console()
 
 __all__ = [
     # Legacy

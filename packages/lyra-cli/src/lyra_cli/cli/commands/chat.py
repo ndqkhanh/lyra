@@ -24,7 +24,9 @@ def chat(
 
 def interactive_chat(model: str = "opus"):
     """Interactive chat loop"""
-    show_welcome(console, model=model.capitalize())
+    # Use Claude Code-style minimal welcome
+    from lyra_cli.cli.welcome import show_welcome_claude_code_style
+    show_welcome_claude_code_style(console, model=model.capitalize())
 
     prompt = LyraPrompt()
     formatter = OutputFormatter(console)
