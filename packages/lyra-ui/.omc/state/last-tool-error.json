@@ -1,7 +1,7 @@
 {
   "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"python -m pytest tests/test_formatter.py -v\",\"description\":\"Run formatter tests\"}",
-  "error": "Exit code 1\n============================= test session starts ==============================\nplatform darwin -- Python 3.11.8, pytest-9.0.2, pluggy-1.6.0 -- /Users/khanhnguyen/miniconda3/bin/python\ncachedir: .pytest_cache\nbenchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)\nrootdir: /Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-u...",
-  "timestamp": "2026-05-21T16:31:08.852Z",
+  "tool_input_preview": "{\"command\":\"cd packages/lyra-ui && python examples/streaming_repl_demo.py 2>&1 | head -150\",\"description\":\"Run streaming REPL demo\"}",
+  "error": "Exit code 1\n(eval):cd:1: no such file or directory: packages/lyra-ui",
+  "timestamp": "2026-05-22T04:09:58.830Z",
   "retry_count": 1
 }

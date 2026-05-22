@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "python -m pytest tests/ -v --tb=short 2>&1 | tail -30",
+    "testCommand": "cd packages/lyra-ui && python -m pytest tests/test_streaming_repl.py -v --tb=short 2>&1 | head -100",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -76,15 +76,15 @@
       "type": "file"
     },
     {
-      "path": "src/lyra_ui/formatter.py",
-      "accessCount": 10,
-      "lastAccessed": 1779381021596,
+      "path": "src/lyra_ui/__init__.py",
+      "accessCount": 12,
+      "lastAccessed": 1779422992170,
       "type": "file"
     },
     {
-      "path": "src/lyra_ui/__init__.py",
-      "accessCount": 9,
-      "lastAccessed": 1779381035094,
+      "path": "src/lyra_ui/formatter.py",
+      "accessCount": 10,
+      "lastAccessed": 1779381021596,
       "type": "file"
     },
     {
@@ -211,6 +211,18 @@
       "path": "src/lyra_ui/theme.py",
       "accessCount": 1,
       "lastAccessed": 1779380919508,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_ui/cli.py",
+      "accessCount": 1,
+      "lastAccessed": 1779422947694,
+      "type": "file"
+    },
+    {
+      "path": "examples/streaming_repl_demo.py",
+      "accessCount": 1,
+      "lastAccessed": 1779422971537,
       "type": "file"
     }
   ],
