@@ -224,15 +224,36 @@ class SequentialREPL:
         self.set_permission_mode(modes[next_index])
 
     def show_welcome(self):
-        """Show welcome banner once at startup"""
-        print_welcome_banner(
-            version="0.1.0",
-            model="Opus 4.7",
-            effort="high",
-            provider="Anthropic API",
-            user_name=os.getenv("USER", "User")
-        )
-        print()  # Blank line after welcome
+        """Show simple welcome banner (Claude Code style)"""
+        width = self.terminal_width
+
+        # Top border
+        print("╭─" + "─" * (width - 4) + "─╮")
+
+        # Title line
+        title = " Lyra v0.1.0 "
+        padding = (width - len(title) - 2) // 2
+        print("│" + " " * padding + title + " " * (width - len(title) - padding - 2) + "│")
+
+        # Model info
+        model_info = " Opus 4.7 · Anthropic API "
+        padding = (width - len(model_info) - 2) // 2
+        print("│" + " " * padding + model_info + " " * (width - len(model_info) - padding - 2) + "│")
+
+        # Working directory
+        cwd = os.getcwd()
+        home = os.path.expanduser("~")
+        if cwd.startswith(home):
+            cwd = "~" + cwd[len(home):]
+        if len(cwd) > width - 6:
+            cwd = "..." + cwd[-(width - 9):]
+        cwd_line = f" {cwd} "
+        padding = (width - len(cwd_line) - 2) // 2
+        print("│" + " " * padding + cwd_line + " " * (width - len(cwd_line) - padding - 2) + "│")
+
+        # Bottom border
+        print("╰─" + "─" * (width - 4) + "─╯")
+        print()
 
     def get_user_input(self) -> Optional[str]:
         """Get user input"""
