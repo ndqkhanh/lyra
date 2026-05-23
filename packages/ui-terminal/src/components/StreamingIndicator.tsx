@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Box, Text } from 'ink'
-
-const SPINNER_FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
-const FLOWING_FRAMES = ['✳', '✴', '✵', '✶', '✷', '✸']
+import { colors, symbols } from '@lyra/ui-core'
 
 interface StreamingIndicatorProps {
   type: 'thinking' | 'tool' | 'flowing'
@@ -14,7 +12,7 @@ export function StreamingIndicator({ type, duration, label }: StreamingIndicator
   const [frame, setFrame] = useState(0)
 
   useEffect(() => {
-    const frames = type === 'flowing' ? FLOWING_FRAMES : SPINNER_FRAMES
+    const frames = type === 'flowing' ? symbols.thinkingFrames : symbols.spinner
     const interval = setInterval(() => {
       setFrame(prev => (prev + 1) % frames.length)
     }, type === 'flowing' ? 60 : 80)
@@ -22,13 +20,13 @@ export function StreamingIndicator({ type, duration, label }: StreamingIndicator
     return () => clearInterval(interval)
   }, [type])
 
-  const frames = type === 'flowing' ? FLOWING_FRAMES : SPINNER_FRAMES
+  const frames = type === 'flowing' ? symbols.thinkingFrames : symbols.spinner
   const currentFrame = frames[frame]
 
   const color = {
-    thinking: 'yellow',
-    tool: 'cyan',
-    flowing: 'cyan'
+    thinking: colors.thinking,
+    tool: colors.userPrompt,
+    flowing: colors.userPrompt
   }[type]
 
   const formatDuration = (ms?: number) => {
@@ -46,7 +44,7 @@ export function StreamingIndicator({ type, duration, label }: StreamingIndicator
     <Box>
       <Text color={color}>{currentFrame} </Text>
       {label && <Text>{label}</Text>}
-      {duration && <Text dimColor> ({formatDuration(duration)})</Text>}
+      {duration && <Text color={colors.timestamp}> ({formatDuration(duration)})</Text>}
     </Box>
   )
 }
