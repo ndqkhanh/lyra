@@ -374,50 +374,74 @@ export function StreamingText({ content }: { content: string }) {
 
 ## Phase 8: Main Layout Integration
 
-### 8.1 Updated Main App
+### 8.1 Layout Structure
+
+**IMPORTANT**: The layout has three fixed sections:
+1. **Header** (top) - Logo, version, model info
+2. **Scrollable conversation area** (middle) - All messages, streaming, tool calls
+3. **Input + Status bar** (bottom) - Fixed input box and status
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│ HEADER (fixed at top)                                                           │
+│  ▐▛███▜▌   Lyra v1.0.0                                                          │
+│ ▝▜█████▛▘  Opus 4.7 (1M context) · Deep Research Mode                          │
+│   ▘▘ ▝▝    ~/projects/lyra                                                     │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│ SCROLLABLE CONVERSATION AREA (grows/scrolls)                                    │
+│                                                                                  │
+│ ❯ User message 1                                                                │
+│                                                                                  │
+│ ⏺ Assistant response 1                                                          │
+│                                                                                  │
+│ ⏺ Write(src/feature.ts)                                                         │
+│   ⎿ Wrote 50 lines to src/feature.ts                                           │
+│      1 export function feature() {                                              │
+│      2   return "implemented"                                                   │
+│      … +48 lines (ctrl+o to expand)                                             │
+│                                                                                  │
+│ ✳ Flowing… (2m 30s · ↑ 5.2k tokens)  ← STREAMING HAPPENS HERE                 │
+│   ⎿ ◻ Analyzing codebase structure                                             │
+│                                                                                  │
+│ ◯ researcher  Deep research on token optimization                    45s        │
+│ ◯ tester     Running integration tests                               30s        │
+│                                                                                  │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│ INPUT BOX (fixed at bottom)                                                     │
+│ ❯ [Type your message here...]                                                  │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│ STATUS BAR (fixed at bottom)                                                    │
+│ ⏵⏵ bypass permissions on · shift+tab to cycle · esc to interrupt · ↓ to manage│
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 8.2 Updated Main App
 **File**: `packages/ui-terminal/src/index.tsx`
 
 ```typescript
 import React from 'react'
 import { Box, render } from 'ink'
 import { Header } from './components/Header'
-import { UserMessage } from './components/UserMessage'
-import { AssistantMessage } from './components/AssistantMessage'
-import { ToolCall } from './components/ToolCall'
-import { ThinkingIndicator } from './components/ThinkingIndicator'
-import { BackgroundTasks } from './components/BackgroundTasks'
-import { StatusBar } from './components/StatusBar'
+import { ConversationView } from './components/ConversationView'
 import { InputArea } from './components/InputArea'
+import { StatusBar } from './components/StatusBar'
 
 function App() {
   return (
     <Box flexDirection="column" height="100%">
+      {/* Fixed header at top */}
       <Header />
       
-      <Box flexDirection="column" flexGrow={1}>
-        {/* Conversation */}
-        <UserMessage content="Help me implement feature X" />
-        <AssistantMessage content="I'll help you implement that." />
-        <ToolCall 
-          toolName="Write"
-          args="src/feature.ts"
-          result="Wrote 50 lines to src/feature.ts"
-          codePreview={[
-            { line: 1, content: 'export function feature() {' },
-            { line: 2, content: '  return "implemented"' },
-            { line: 3, content: '}' }
-          ]}
-        />
-        <ThinkingIndicator duration={5000} tokens={1200} />
-        
-        {/* Background tasks */}
-        <BackgroundTasks tasks={[
-          { id: '1', agent: 'researcher', description: 'Analyzing codebase', duration: 30000, active: true },
-          { id: '2', agent: 'tester', description: 'Running tests', duration: 15000, active: false }
-        ]} />
+      {/* Scrollable conversation area (grows to fill space) */}
+      <Box flexDirection="column" flexGrow={1} overflow="hidden">
+        <ConversationView />
       </Box>
       
+      {/* Fixed input box at bottom */}
       <InputArea />
+      
+      {/* Fixed status bar at bottom */}
       <StatusBar 
         mode="bypass permissions on (shift+tab to cycle)"
         shortcuts={['esc to interrupt', '↓ to manage']}
@@ -427,6 +451,69 @@ function App() {
 }
 
 render(<App />)
+```
+
+### 8.3 Conversation View Component
+**File**: `packages/ui-terminal/src/components/ConversationView.tsx`
+
+```typescript
+import React from 'react'
+import { Box } from 'ink'
+import { UserMessage } from './UserMessage'
+import { AssistantMessage } from './AssistantMessage'
+import { ToolCall } from './ToolCall'
+import { ThinkingIndicator } from './ThinkingIndicator'
+import { BackgroundTasks } from './BackgroundTasks'
+import { useUIStore } from '@lyra/ui-core'
+
+export function ConversationView() {
+  const messages = useUIStore(state => state.messages)
+  const isStreaming = useUIStore(state => state.isStreaming)
+  const streamingContent = useUIStore(state => state.streamingContent)
+  const backgroundTasks = useUIStore(state => state.backgroundTasks)
+  
+  return (
+    <Box flexDirection="column" paddingX={1}>
+      {/* Render all messages */}
+      {messages.map((msg, i) => {
+        if (msg.role === 'user') {
+          return <UserMessage key={i} content={msg.content} />
+        }
+        if (msg.role === 'assistant') {
+          return <AssistantMessage key={i} content={msg.content} />
+        }
+        if (msg.role === 'tool') {
+          return (
+            <ToolCall 
+              key={i}
+              toolName={msg.toolName}
+              args={msg.args}
+              result={msg.result}
+              codePreview={msg.codePreview}
+            />
+          )
+        }
+        return null
+      })}
+      
+      {/* Streaming indicator (appears in conversation area) */}
+      {isStreaming && (
+        <>
+          <ThinkingIndicator 
+            duration={streamingContent.duration} 
+            tokens={streamingContent.tokens} 
+          />
+          <AssistantMessage content={streamingContent.text} streaming />
+        </>
+      )}
+      
+      {/* Background tasks (appear in conversation area) */}
+      {backgroundTasks.length > 0 && (
+        <BackgroundTasks tasks={backgroundTasks} />
+      )}
+    </Box>
+  )
+}
 ```
 
 ## Implementation Checklist
