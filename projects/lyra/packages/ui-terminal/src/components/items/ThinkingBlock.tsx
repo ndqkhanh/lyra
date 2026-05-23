@@ -1,6 +1,8 @@
 import React from 'react'
 import { Box, Text } from 'ink'
 import type { ThinkingItem } from '@lyra/ui-core'
+import { CollapsibleText } from '../Collapsible'
+import { StreamingIndicator } from '../StreamingIndicator'
 
 interface Props {
   item: ThinkingItem
@@ -17,7 +19,14 @@ export function ThinkingBlock({ item }: Props) {
     )
   }
 
-  if (!item.content) return null
+  if (!item.content) {
+    // Still thinking (no duration yet)
+    return (
+      <Box marginBottom={1}>
+        <StreamingIndicator type="thinking" label="Thinking..." />
+      </Box>
+    )
+  }
 
   // Debug mode: show full thinking content
   return (
@@ -30,7 +39,7 @@ export function ThinkingBlock({ item }: Props) {
         )}
       </Box>
       <Box marginLeft={2} marginRight={1}>
-        <Text dimColor italic>{item.content}</Text>
+        <CollapsibleText content={item.content} maxLines={20} />
       </Box>
     </Box>
   )
