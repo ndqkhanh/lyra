@@ -1,4 +1,4 @@
-"""Welcome banner for Lyra - Claude Code style (simple print)"""
+"""Welcome banner for Lyra - Claude Code style with responsive layouts"""
 
 import os
 import shutil
@@ -11,26 +11,105 @@ def print_welcome_banner(
     effort: str = "high",
     provider: str = "Anthropic API",
     working_dir: Optional[str] = None,
-    context_window: Optional[str] = "1M context"
+    context_window: Optional[str] = "1M context",
+    user_name: Optional[str] = None
 ):
-    """Print welcome banner - simple version without TUI"""
+    """Print welcome banner with responsive layout
 
+    Args:
+        version: Lyra version
+        model: Model name
+        effort: Effort level
+        provider: Provider name
+        working_dir: Working directory
+        context_window: Context window size
+        user_name: User name for greeting
+    """
     if working_dir is None:
         working_dir = os.getcwd()
 
     # Get terminal width
     width = shutil.get_terminal_size().columns
-    if width > 90:
-        width = 90
 
-    # Shorten path if needed
-    path = _shorten_path(working_dir, width - 20)
+    # Choose layout based on width
+    if width >= 120:
+        _print_wide_banner(version, model, effort, provider, working_dir, context_window, user_name)
+    elif width >= 80:
+        _print_standard_banner(version, model, effort, provider, working_dir, context_window, user_name)
+    else:
+        _print_narrow_banner(version, model, working_dir)
+
+
+def _print_wide_banner(
+    version: str,
+    model: str,
+    effort: str,
+    provider: str,
+    working_dir: str,
+    context_window: Optional[str],
+    user_name: Optional[str]
+):
+    """Print two-column wide banner (>120 cols)"""
+    width = min(shutil.get_terminal_size().columns, 120)
+    path = _shorten_path(working_dir, 50)
 
     # Top border
     title = f"Lyra v{version}"
     border_content = f"─── {title} "
     remaining = width - len(border_content) - 1
-    top_border = f"╭{border_content}{'─' * remaining}"
+    top_border = f"╭{border_content}{'─' * remaining}╮"
+
+    # Left column content
+    greeting = f"Welcome back {user_name}!" if user_name else "Welcome to Lyra!"
+    art_line_1 = "  ╦  ╦ ╦ ╦═╗ ╔═╗"
+    art_line_2 = "  ║  ╚╦╝ ╠╦╝ ╠═╣"
+    art_line_3 = "  ╩═╝ ╩  ╩╚═ ╩ ╩"
+
+    context = f" ({context_window})" if context_window else ""
+    info_line = f"{model}{context} · {effort} effort · {provider}"
+
+    # Right column content
+    tips_title = "Tips for getting started"
+    tips_1 = "Run /help for commands"
+    tips_2 = "Use /model to switch models"
+    tips_divider = "─" * 25
+    news_title = "What's new"
+    news_1 = "Beautiful responsive UI"
+    news_2 = "Claude Code-style patterns"
+    news_3 = "/release-notes for more"
+
+    # Print banner
+    print(top_border)
+    print(f"│ {greeting:<50} │ {tips_title:<25} │")
+    print(f"│ {'':<50} │ {tips_1:<25} │")
+    print(f"│ {art_line_1:<50} │ {tips_2:<25} │")
+    print(f"│ {art_line_2:<50} │ {tips_divider:<25} │")
+    print(f"│ {art_line_3:<50} │ {news_title:<25} │")
+    print(f"│ {'':<50} │ {news_1:<25} │")
+    print(f"│ {info_line:<50} │ {news_2:<25} │")
+    print(f"│ {path:<50} │ {news_3:<25} │")
+    print(f"╰{'─' * (width - 2)}╯")
+    print()
+
+
+def _print_standard_banner(
+    version: str,
+    model: str,
+    effort: str,
+    provider: str,
+    working_dir: str,
+    context_window: Optional[str],
+    user_name: Optional[str]
+):
+    """Print standard single-column banner (80-120 cols)"""
+    width = min(shutil.get_terminal_size().columns, 90)
+    path = _shorten_path(working_dir, width - 10)
+
+    # Top border
+    title = f"Lyra v{version}"
+    border_content = f"─── {title} "
+    remaining = width - len(border_content) - 1
+    top_border = f"╭{border_content}{'─' * remaining}╮"
 
     # ASCII art lines
     art_line_1 = "  ╦  ╦ ╦ ╦═╗ ╔═╗"
@@ -45,9 +124,26 @@ def print_welcome_banner(
 
     # Print banner
     print(top_border)
-    print(f"{art_line_1}   {info_1}")
-    print(f"{art_line_2}   {info_2}")
-    print(f"{art_line_3}   {info_3}")
+    print(f"│ {art_line_1:<{width-4}} │")
+    print(f"│ {art_line_2:<{width-4}} │")
+    print(f"│ {art_line_3:<{width-4}} │")
+    print(f"│ {'':<{width-4}} │")
+    print(f"│ {info_1:<{width-4}} │")
+    print(f"│ {info_2:<{width-4}} │")
+    print(f"│ {info_3:<{width-4}} │")
+    print(f"╰{'─' * (width - 2)}╯")
+    print()
+
+
+def _print_narrow_banner(version: str, model: str, working_dir: str):
+    """Print compact narrow banner (<80 cols)"""
+    width = shutil.get_terminal_size().columns
+    path = _shorten_path(working_dir, width - 10)
+
+    print(f"╭─── Lyra v{version} ───╮")
+    print(f"│ {model:<{width-4}} │")
+    print(f"│ {path:<{width-4}} │")
+    print(f"╰{'─' * (width - 2)}╯")
     print()
 
 
@@ -76,12 +172,24 @@ def _shorten_path(path: str, max_length: int) -> str:
 
 
 if __name__ == "__main__":
-    # Demo
-    print_welcome_banner(
-        version="0.1.0",
-        model="Opus 4.7",
-        effort="xhigh",
-        provider="Anthropic API",
-        working_dir="~/Downloads/MyCV/research/harness-engineering",
-        context_window="1M context"
+    # Demo all layouts
+    print("Wide layout (>120 cols):")
+    _print_wide_banner(
+        "0.1.0", "Opus 4.7", "xhigh", "Anthropic API",
+        "~/Downloads/MyCV/research/harness-engineering",
+        "1M context", "Khanh"
     )
+
+    print("\nStandard layout (80-120 cols):")
+    _print_standard_banner(
+        "0.1.0", "Opus 4.7", "xhigh", "Anthropic API",
+        "~/Downloads/MyCV/research/harness-engineering",
+        "1M context", "Khanh"
+    )
+
+    print("\nNarrow layout (<80 cols):")
+    _print_narrow_banner(
+        "0.1.0", "Opus 4.7",
+        "~/Downloads/MyCV/research/harness-engineering"
+    )
+
