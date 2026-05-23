@@ -93,9 +93,10 @@ class IntegratedREPL:
         print()
         print()
 
-        # Show stats
+        # Show stats with actual timing
+        duration = getattr(event, 'duration_s', 0.0)
         stats_line = self.formatter.format_stats_line(
-            duration_s=0.0,  # Will be calculated from actual timing
+            duration_s=duration,
             tool_count=0,
             tokens=event.tokens_in + event.tokens_out
         )
@@ -169,6 +170,9 @@ class IntegratedREPL:
 
     def send_message(self, user_message: str):
         """Send message to Claude and stream response"""
+        import time
+        start_time = time.time()
+
         # Add user message to history
         self.messages.append({
             "role": "user",
@@ -210,15 +214,24 @@ class IntegratedREPL:
             })
 
             # Get usage stats
-            usage = stream.get_final_message().usage
+            final_message = stream.get_final_message()
+            usage = final_message.usage
 
-            # Emit turn finished event
-            self.dispatcher.emit(TurnFinished(
+            # Calculate duration
+            duration = time.time() - start_time
+
+            # Create turn finished event with duration
+            turn_finished = TurnFinished(
                 turn_id="turn-1",
                 tokens_in=usage.input_tokens,
                 tokens_out=usage.output_tokens,
-                stop_reason=stream.get_final_message().stop_reason or "end_turn"
-            ))
+                stop_reason=final_message.stop_reason or "end_turn"
+            )
+            # Add duration as attribute
+            turn_finished.duration_s = duration
+
+            # Emit turn finished event
+            self.dispatcher.emit(turn_finished)
 
         except Exception as e:
             error_line = self.formatter.format_error(f"Error: {str(e)}")
