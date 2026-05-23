@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Box, Text, useInput } from 'ink'
+import { colors, symbols } from '@lyra/ui-core'
 
 interface CollapsibleProps {
   children: React.ReactNode
@@ -36,7 +37,7 @@ export function Collapsible({
       {preview}
       {remaining > 0 && (
         <Box>
-          <Text dimColor>… +{remaining} lines ({expandHint})</Text>
+          <Text color={colors.timestamp}>{symbols.ellipsis} +{remaining} lines ({expandHint})</Text>
         </Box>
       )}
     </Box>
@@ -83,7 +84,7 @@ export function CollapsibleText({
         <Text key={idx}>{line}</Text>
       ))}
       <Box>
-        <Text dimColor>… +{remaining} lines ({expandHint})</Text>
+        <Text color={colors.timestamp}>{symbols.ellipsis} +{remaining} lines ({expandHint})</Text>
       </Box>
     </Box>
   )

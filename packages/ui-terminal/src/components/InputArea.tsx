@@ -1,7 +1,7 @@
 import React from 'react'
 import { Box, Text, useInput } from 'ink'
 import TextInput from 'ink-text-input'
-import { useUIStore } from '@lyra/ui-core'
+import { useUIStore, colors, symbols } from '@lyra/ui-core'
 import { useHistory } from '../hooks/useHistory'
 
 interface InputAreaProps {
@@ -45,8 +45,8 @@ export function InputArea({ sessionId }: InputAreaProps) {
 
   if (!session || session.isStreaming) {
     return (
-      <Box borderStyle="single" borderColor="gray" paddingX={1}>
-        <Text dimColor>Waiting for response...</Text>
+      <Box borderStyle="single" borderColor={colors.border} paddingX={1}>
+        <Text color={colors.timestamp}>Waiting for response...</Text>
       </Box>
     )
   }
@@ -54,10 +54,10 @@ export function InputArea({ sessionId }: InputAreaProps) {
   return (
     <Box flexDirection="column">
       <Box>
-        <Text dimColor>{'─'.repeat(80)}</Text>
+        <Text color={colors.separator}>{symbols.horizontalLine.repeat(80)}</Text>
       </Box>
-      <Box borderStyle="single" borderColor="cyan" paddingX={1}>
-        <Text bold color="cyan">❯ </Text>
+      <Box borderStyle="single" borderColor={colors.userPrompt} paddingX={1}>
+        <Text bold color={colors.userPrompt}>{symbols.userPrompt} </Text>
         <TextInput
           value={history.current}
           onChange={history.setCurrent}
