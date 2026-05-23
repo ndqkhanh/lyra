@@ -22,8 +22,8 @@ def chat(
 
 
 def interactive_chat(model: str = "opus"):
-    """Interactive chat with integrated REPL (Claude Code style)"""
-    from lyra_cli.repl import IntegratedREPL
+    """Interactive chat with Sequential REPL (Claude Code style with context & permission mode)"""
+    from lyra_cli.repl import SequentialREPL, REPLConfig
 
     # Model mapping
     model_map = {
@@ -41,12 +41,20 @@ def interactive_chat(model: str = "opus"):
         print("Please set ANTHROPIC_API_KEY to use Lyra")
         return
 
-    # Create and run integrated REPL
+    # Create config with context tracking and permission mode
+    config = REPLConfig(
+        context_budget=200000,  # 200k tokens
+        permission_mode="ask",  # ask, bypass, deny
+        show_context=True,
+        show_permission_mode=True
+    )
+
+    # Create and run Sequential REPL with enhanced status line
     try:
-        repl = IntegratedREPL(
+        repl = SequentialREPL(
             api_key=api_key,
             model=api_model,
-            max_tokens=4096
+            config=config
         )
         repl.run()
     except Exception as e:
