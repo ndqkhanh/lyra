@@ -115,26 +115,17 @@ class SequentialREPL:
         estimated_tokens = len(event.text) // 4
         self.context_used += estimated_tokens
 
-        # Re-render bottom UI at new position
-        # Note: We'll implement this properly in terminal_manager
-        # For now, just update status line
-        self._update_status_line()
-
     def _on_tool_started(self, event):
         """Handle tool started"""
         # Print tool call line
         tool_line = self.formatter.format_tool_call(event.name, str(event.input))
         print(f"\n{tool_line}")
 
-        # Re-render bottom UI
-        self._update_status_line()
-
     def _on_tool_finished(self, event):
         """Handle tool finished"""
         if event.status != "ok":
             error_line = self.formatter.format_error(f"Tool failed: {event.status}")
             print(f"\n{error_line}")
-            self._update_status_line()
 
     def _on_turn_finished(self, event):
         """Handle turn finished"""
@@ -151,11 +142,8 @@ class SequentialREPL:
         total_tokens = event.tokens_in + event.tokens_out
         self.context_used += total_tokens
 
-        # Re-render bottom UI with updated context
-        self._update_status_line()
-
-    def _update_status_line(self):
-        """Update status line with current state"""
+    def _render_bottom_ui_inline(self):
+        """Render bottom UI inline (not fixed at terminal bottom)"""
         # Calculate context percentage
         context_percentage = self._get_context_percentage()
 
@@ -165,21 +153,40 @@ class SequentialREPL:
         # Add context percentage if enabled
         if self.config.show_context and context_percentage > 0:
             ctx_text = f"{context_percentage}% context"
+            # Color code
+            if context_percentage < 50:
+                ctx_text = f"\033[32m{ctx_text}\033[0m"  # Green
+            elif context_percentage < 80:
+                ctx_text = f"\033[33m{ctx_text}\033[0m"  # Yellow
+            else:
+                ctx_text = f"\033[31m{ctx_text}\033[0m"  # Red
             parts.append(ctx_text)
 
         # Add permission mode if enabled
         if self.config.show_permission_mode:
             mode_text = f"{self.permission_mode} permissions"
+            # Color code
+            if self.permission_mode == "bypass":
+                mode_text = f"\033[33m{mode_text}\033[0m"  # Yellow
+            elif self.permission_mode == "ask":
+                mode_text = f"\033[32m{mode_text}\033[0m"  # Green
+            elif self.permission_mode == "deny":
+                mode_text = f"\033[31m{mode_text}\033[0m"  # Red
             parts.append(mode_text)
 
         # Add hints
         parts.extend(self.current_hints)
 
-        # Update status line
-        self.status_line.update(
-            mode=self.current_mode,
-            hints=parts
-        )
+        # Build status line
+        status_text = f"  ⏵⏵ {self.current_mode}"
+        if parts:
+            status_text += " · " + " · ".join(parts)
+
+        # Print divider
+        print("─" * self.terminal_width)
+
+        # Print status line
+        print(status_text)
 
     def _get_context_percentage(self) -> int:
         """Get current context usage percentage"""
@@ -233,9 +240,8 @@ class SequentialREPL:
     def get_user_input(self) -> Optional[str]:
         """Get user input"""
         try:
-            # Show prompt
-            prompt = self.formatter.format_prompt()
-            user_input = input(f"\n{prompt} ")
+            # Input is on the line after status line
+            user_input = input("❯ ")
 
             if not user_input:
                 return None
@@ -366,18 +372,18 @@ class SequentialREPL:
         print("\033[2J\033[H")
         self.show_welcome()
 
-        # Initial status line update
-        self._update_status_line()
-
         # Main loop
         while self.running:
+            # Render bottom UI inline (before input)
+            self._render_bottom_ui_inline()
+
             # Get user input
             user_input = self.get_user_input()
 
             if user_input is None:
                 continue
 
-            # Process message
+            # Process message (streaming output will push bottom UI down)
             self.process_message(user_input)
 
         # Cleanup
