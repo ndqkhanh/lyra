@@ -29,6 +29,9 @@ from .tool_formatter import (
 from .fixed_input import FixedInputBox
 from .status_line import StatusLine
 from .response_formatter import ResponseFormatter
+from .agent_tree import AgentTree, AgentNode
+from .selection_menu import SelectionMenu, MenuOption
+from .scroll_manager import ScrollManager
 
 __all__ = [
     # Symbols
@@ -63,6 +66,14 @@ __all__ = [
     "StatusLine",
     # Response Formatter
     "ResponseFormatter",
+    # Agent Tree
+    "AgentTree",
+    "AgentNode",
+    # Selection Menu
+    "SelectionMenu",
+    "MenuOption",
+    # Scroll Manager
+    "ScrollManager",
 ]
 
 __version__ = "1.0.0"
