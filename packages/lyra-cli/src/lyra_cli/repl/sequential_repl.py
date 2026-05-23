@@ -182,11 +182,8 @@ class SequentialREPL:
         if parts:
             status_text += " · " + " · ".join(parts)
 
-        # Print divider
+        # Print top divider
         print("─" * self.terminal_width)
-
-        # Print status line
-        print(status_text)
 
     def _get_context_percentage(self) -> int:
         """Get current context usage percentage"""
@@ -240,8 +237,44 @@ class SequentialREPL:
     def get_user_input(self) -> Optional[str]:
         """Get user input"""
         try:
-            # Input is on the line after status line
+            # Input is between two divider lines
             user_input = input("❯ ")
+
+            # Print bottom divider after input
+            print("─" * self.terminal_width)
+
+            # Print status line below bottom divider
+            context_percentage = self._get_context_percentage()
+            parts = []
+
+            if self.config.show_context and context_percentage > 0:
+                ctx_text = f"{context_percentage}% context"
+                if context_percentage < 50:
+                    ctx_text = f"\033[32m{ctx_text}\033[0m"
+                elif context_percentage < 80:
+                    ctx_text = f"\033[33m{ctx_text}\033[0m"
+                else:
+                    ctx_text = f"\033[31m{ctx_text}\033[0m"
+                parts.append(ctx_text)
+
+            if self.config.show_permission_mode:
+                mode_text = f"{self.permission_mode} permissions"
+                if self.permission_mode == "bypass":
+                    mode_text = f"\033[33m{mode_text}\033[0m"
+                elif self.permission_mode == "ask":
+                    mode_text = f"\033[32m{mode_text}\033[0m"
+                elif self.permission_mode == "deny":
+                    mode_text = f"\033[31m{mode_text}\033[0m"
+                parts.append(mode_text)
+
+            parts.extend(self.current_hints)
+
+            status_text = f"  ⏵⏵ {self.current_mode}"
+            if parts:
+                status_text += " · " + " · ".join(parts)
+
+            print(status_text)
+            print()  # Blank line after status
 
             if not user_input:
                 return None
