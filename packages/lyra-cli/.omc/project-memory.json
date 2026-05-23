@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1778915269174,
+  "lastScanned": 1779518934706,
   "projectRoot": "/Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-cli",
   "techStack": {
     "languages": [
@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "python -m pytest tests/test_phase_observability_commands.py -v 2>&1 | tail -40",
+    "testCommand": "pytest",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -40,25 +40,56 @@
     "isMonorepo": false,
     "workspaces": [],
     "mainDirectories": [
+      "docs",
       "src",
       "tests"
     ],
-    "gitBranches": null
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
   },
   "customNotes": [],
   "directoryMap": {
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 6,
+      "lastAccessed": 1779518934694,
+      "keyFiles": [
+        "AGENTS.md",
+        "COMMANDS.md",
+        "HOOKS.md",
+        "MEMORY.md",
+        "RULES.md"
+      ]
+    },
+    "packages": {
+      "path": "packages",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1779518934694,
+      "keyFiles": []
+    },
+    "specs": {
+      "path": "specs",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1779518934695,
+      "keyFiles": []
+    },
     "src": {
       "path": "src",
       "purpose": "Source code",
       "fileCount": 0,
-      "lastAccessed": 1778915269165,
+      "lastAccessed": 1779518934695,
       "keyFiles": []
     },
     "tests": {
       "path": "tests",
       "purpose": "Test files",
-      "fileCount": 177,
-      "lastAccessed": 1778915269166,
+      "fileCount": 182,
+      "lastAccessed": 1779518934700,
       "keyFiles": [
         "__init__.py",
         "conftest.py",

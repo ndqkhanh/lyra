@@ -23,85 +23,132 @@ def chat(
 
 
 def interactive_chat(model: str = "opus"):
-    """Interactive chat loop"""
-    # Use Claude Code-style minimal welcome
-    from lyra_cli.cli.welcome import show_welcome_claude_code_style
-    show_welcome_claude_code_style(console, model=model.capitalize())
-
-    prompt = LyraPrompt()
-    formatter = OutputFormatter(console)
-
-    # Initialize agent loop
-    from lyra_cli.cli.agent_handler import CLIAgentHandler
+    """Interactive chat loop with fixed bottom layout"""
+    # Import fixed layout components
+    from lyra_cli.ui.fixed_layout import FixedBottomLayout
+    from lyra_cli.cli.agent_handler import FixedLayoutAgentHandler
     from lyra_cli.agent import AgentLoopFactory
+    import signal
 
-    # Map model names to API model IDs
-    model_map = {
-        "opus": "claude-opus-4-20250514",
-        "sonnet": "claude-sonnet-4-20250514",
-        "haiku": "claude-haiku-4-20250514"
-    }
-    api_model = model_map.get(model.lower(), "claude-opus-4-20250514")
+    # Create fixed bottom layout
+    layout = FixedBottomLayout()
+    layout.use_alt_screen = True
+    layout.enter_alt_screen()
 
     try:
-        agent_handler = CLIAgentHandler(console)
-        agent_loop = AgentLoopFactory.create_simple_loop(
-            callback=agent_handler,
-            model=api_model
-        )
-        # Agent ready - show nothing, just ready to chat
-    except ValueError:
-        # Show beautiful error message
-        console.print("[yellow]⚠[/yellow] [bold]API key not configured[/bold]")
-        console.print("[dim]Run [cyan]lyra onboard[/cyan] to set up, or set ANTHROPIC_API_KEY[/dim]")
-        console.print()
-        agent_loop = None
+        # Show welcome banner
+        welcome = f"""
+╭─────────────────────────────── Lyra v0.1.0 ───────────────────────────────╮
+│                                                                            │
+│  Welcome back!                                                             │
+│                                                                            │
+│      ╦  ╦ ╦ ╦═╗ ╔═╗                                                       │
+│      ║  ╚╦╝ ╠╦╝ ╠═╣                                                       │
+│      ╩═╝ ╩  ╩╚═ ╩ ╩                                                       │
+│                                                                            │
+│  {model.capitalize()} · Claude Code Style UI                                        │
+│                                                                            │
+╰────────────────────────────────────────────────────────────────────────────╯
+"""
+        layout.append_content(welcome)
 
-    current_model = model
-    while True:
+        # Set initial status
+        layout.set_status("  ⏵⏵ ready · type to chat")
+
+        # Map model names to API model IDs
+        model_map = {
+            "opus": "claude-opus-4-20250514",
+            "sonnet": "claude-sonnet-4-20250514",
+            "haiku": "claude-haiku-4-20250514"
+        }
+        api_model = model_map.get(model.lower(), "claude-opus-4-20250514")
+
+        # Initialize agent loop with fixed layout handler
         try:
-            user_input = prompt.get_input()
+            agent_handler = FixedLayoutAgentHandler(layout)
+            agent_loop = AgentLoopFactory.create_simple_loop(
+                callback=agent_handler,
+                model=api_model
+            )
+        except ValueError:
+            layout.append_content("")
+            layout.append_content("⚠ API key not configured")
+            layout.append_content("  Run 'lyra onboard' to set up, or set ANTHROPIC_API_KEY")
+            layout.set_status("  ⏵⏵ demo mode · no API key")
+            agent_loop = None
 
-            if not user_input.strip():
-                continue
+        # Handle terminal resize
+        def handle_resize(signum, frame):
+            layout.handle_resize()
 
-            # Handle slash commands
-            if user_input.startswith("/"):
-                new_model = handle_slash_command(user_input, formatter, current_model)
-                if new_model != current_model:
-                    # Reinitialize agent loop with new model
-                    current_model = new_model
-                    api_model = model_map.get(current_model.lower(), "claude-opus-4-20250514")
-                    try:
-                        agent_handler = CLIAgentHandler(console)
-                        agent_loop = AgentLoopFactory.create_simple_loop(
-                            callback=agent_handler,
-                            model=api_model
-                        )
-                        formatter.success_message(f"Agent loop reinitialized with {current_model.capitalize()}")
-                    except ValueError:
-                        agent_loop = None
-                continue
+        signal.signal(signal.SIGWINCH, handle_resize)
 
-            # Send to agent loop
-            if agent_loop:
-                agent_loop.process_message(user_input)
-            else:
-                # Demo mode - beautiful feedback
-                console.print()
-                console.print(f"[dim]→ {user_input}[/dim]")
-                console.print("[yellow]⚠[/yellow] [dim]Demo mode - run [cyan]lyra onboard[/cyan] to enable agent[/dim]")
-                console.print()
+        # Initialize prompt
+        prompt = LyraPrompt()
+        current_model = model
 
-        except (KeyboardInterrupt, EOFError):
-            console.print("\n\nGoodbye!", style="cyan")
-            break
-        except Exception as e:
-            formatter.error_message(f"Error: {e}")
-            import os
-            if os.getenv("DEBUG"):
-                import traceback
-                traceback.print_exc()
+        # Main chat loop
+        while True:
+            try:
+                user_input = prompt.get_input()
+
+                if not user_input.strip():
+                    continue
+
+                # Handle slash commands
+                if user_input.startswith("/"):
+                    cmd = user_input.lower().strip()
+                    if cmd in ["/exit", "/quit", "/q", "/bye"]:
+                        break
+                    elif cmd == "/clear":
+                        layout.clear_scrollable()
+                        layout.append_content("Screen cleared")
+                        continue
+                    elif cmd.startswith("/model"):
+                        parts = cmd.split()
+                        if len(parts) > 1 and parts[1] in ["opus", "sonnet", "haiku"]:
+                            current_model = parts[1]
+                            api_model = model_map.get(current_model, "claude-opus-4-20250514")
+                            try:
+                                agent_handler = FixedLayoutAgentHandler(layout)
+                                agent_loop = AgentLoopFactory.create_simple_loop(
+                                    callback=agent_handler,
+                                    model=api_model
+                                )
+                                layout.append_content(f"✓ Switched to {current_model.capitalize()}")
+                            except ValueError:
+                                agent_loop = None
+                        continue
+                    else:
+                        layout.append_content(f"Unknown command: {user_input}")
+                        layout.append_content("Type /exit to quit, /clear to clear, /model <name> to switch model")
+                        continue
+
+                # Show user message
+                layout.append_content("")
+                layout.append_content(f"❯ {user_input}")
+                layout.append_content("")
+
+                # Send to agent loop
+                if agent_loop:
+                    agent_loop.process_message(user_input)
+                else:
+                    layout.append_content("⚠ Demo mode - run 'lyra onboard' to enable agent")
+
+            except (KeyboardInterrupt, EOFError):
+                layout.append_content("")
+                layout.append_content("Goodbye!")
+                break
+            except Exception as e:
+                layout.append_content("")
+                layout.append_content(f"✗ Error: {e}")
+                import os
+                if os.getenv("DEBUG"):
+                    import traceback
+                    traceback.print_exc()
+
+    finally:
+        layout.exit_alt_screen()
 
 
 def send_message(message: str, model: str):
