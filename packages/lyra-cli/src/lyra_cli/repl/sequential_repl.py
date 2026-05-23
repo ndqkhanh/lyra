@@ -293,11 +293,15 @@ class SequentialREPL:
         print()
 
     def process_message(self, user_message: str):
-        """Process user message (demo mode - no actual API call)
+        """Process user message with Anthropic API"""
+        import anthropic
 
-        This is a demo implementation that simulates streaming.
-        Real implementation would call Anthropic API.
-        """
+        # Check if API key is available
+        if not self.api_key:
+            print("\n\x1b[31m✘ Error: No API key provided\x1b[0m")
+            print("Set ANTHROPIC_API_KEY environment variable")
+            return
+
         # Emit turn started
         self.dispatcher.emit(TurnStarted(
             turn_id="turn-1",
@@ -308,23 +312,53 @@ class SequentialREPL:
         active_line = self.formatter.format_active_response("Thinking...")
         print(f"\n{active_line}\n")
 
-        # Simulate streaming response
-        response = f"You asked: {user_message}\n\nThis is a demo response showing the sequential output pattern."
+        try:
+            # Create Anthropic client
+            client = anthropic.Anthropic(api_key=self.api_key)
 
-        for char in response:
-            self.dispatcher.emit(TextDelta(
+            # Stream response from Claude
+            assistant_message = ""
+            start_time = time.time()
+
+            with client.messages.stream(
+                model=self.model,
+                max_tokens=4096,
+                messages=[{
+                    "role": "user",
+                    "content": user_message
+                }],
+            ) as stream:
+                for text in stream.text_stream:
+                    assistant_message += text
+                    # Emit text delta event
+                    self.dispatcher.emit(TextDelta(
+                        turn_id="turn-1",
+                        text=text
+                    ))
+
+            # Get usage stats
+            final_message = stream.get_final_message()
+            usage = final_message.usage
+
+            # Calculate duration
+            duration = time.time() - start_time
+
+            # Create turn finished event with duration
+            turn_finished = TurnFinished(
                 turn_id="turn-1",
-                text=char
-            ))
-            time.sleep(0.01)  # Simulate streaming delay
+                tokens_in=usage.input_tokens,
+                tokens_out=usage.output_tokens,
+                stop_reason=final_message.stop_reason or "end_turn"
+            )
+            # Add duration as attribute
+            turn_finished.duration_s = duration
 
-        # Emit turn finished
-        self.dispatcher.emit(TurnFinished(
-            turn_id="turn-1",
-            tokens_in=len(user_message) // 4,
-            tokens_out=len(response) // 4,
-            stop_reason="end_turn"
-        ))
+            # Emit turn finished event
+            self.dispatcher.emit(turn_finished)
+
+        except Exception as e:
+            error_line = self.formatter.format_error(f"Error: {str(e)}")
+            print(f"\n{error_line}\n")
 
     def run(self):
         """Main REPL loop"""
