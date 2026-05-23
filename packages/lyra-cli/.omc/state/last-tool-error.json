@@ -1,7 +1,7 @@
 {
   "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"git add OPENCLAW_PATTERNS.md && git commit -m \\\"docs: Add OpenClaw patterns documentation\\n\\nComplete documentation of OpenClaw-inspired implementation:\\n\\nResearch:\\n- OpenClaw GitHub rep...",
-  "error": "Exit code 128\nfatal: pathspec 'OPENCLAW_PATTERNS.md' did not match any files",
-  "timestamp": "2026-05-22T19:56:37.746Z",
-  "retry_count": 1
+  "tool_input_preview": "{\"command\":\"cp src/lyra_cli/ui/model_menu.py packages/lyra-cli/src/lyra_cli/ui/ && cp src/lyra_cli/cli/models.py packages/lyra-cli/src/lyra_cli/cli/ && ls -la packages/lyra-cli/src/lyra_cli/ui/ packag...",
+  "error": "Exit code 1\ncp: src/lyra_cli/cli/models.py: No such file or directory",
+  "timestamp": "2026-05-23T06:58:17.559Z",
+  "retry_count": 4
 }

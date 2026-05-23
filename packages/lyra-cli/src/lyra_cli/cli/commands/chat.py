@@ -36,20 +36,30 @@ def interactive_chat(model: str = "opus"):
     layout.enter_alt_screen()
 
     try:
-        # Show welcome banner
-        welcome = f"""
-╭─────────────────────────────── Lyra v0.1.0 ───────────────────────────────╮
-│                                                                            │
-│  Welcome back!                                                             │
-│                                                                            │
-│      ╦  ╦ ╦ ╦═╗ ╔═╗                                                       │
-│      ║  ╚╦╝ ╠╦╝ ╠═╣                                                       │
-│      ╩═╝ ╩  ╩╚═ ╩ ╩                                                       │
-│                                                                            │
-│  {model.capitalize()} · Claude Code Style UI                                        │
-│                                                                            │
-╰────────────────────────────────────────────────────────────────────────────╯
-"""
+        # Show welcome banner using new Lyra welcome
+        from lyra_cli.ui.welcome_banner import create_welcome_banner
+        from lyra_cli.cli.models import get_registry
+        import os
+
+        # Get model info
+        registry = get_registry()
+        model_info = registry.get_model(api_model)
+        if model_info:
+            model_display = model_info.name
+            context_display = registry.format_context_window(model_info.context_window)
+        else:
+            model_display = model.capitalize()
+            context_display = None
+
+        welcome = create_welcome_banner(
+            version="0.1.0",
+            model=model_display,
+            effort="high",  # Default effort
+            provider="Anthropic API",
+            working_dir=os.getcwd(),
+            context_window=context_display,
+            width=layout.dimensions.terminal_width
+        )
         layout.append_content(welcome)
 
         # Set initial status
@@ -105,19 +115,51 @@ def interactive_chat(model: str = "opus"):
                         layout.append_content("Screen cleared")
                         continue
                     elif cmd.startswith("/model"):
-                        parts = cmd.split()
-                        if len(parts) > 1 and parts[1] in ["opus", "sonnet", "haiku"]:
-                            current_model = parts[1]
-                            api_model = model_map.get(current_model, "claude-opus-4-20250514")
-                            try:
-                                agent_handler = FixedLayoutAgentHandler(layout)
-                                agent_loop = AgentLoopFactory.create_simple_loop(
-                                    callback=agent_handler,
-                                    model=api_model
-                                )
-                                layout.append_content(f"✓ Switched to {current_model.capitalize()}")
-                            except ValueError:
-                                agent_loop = None
+                        # Show interactive model selection menu
+                        from lyra_cli.ui.model_menu import show_model_menu
+
+                        layout.append_content("")
+                        layout.append_content("Opening model selection menu...")
+
+                        # Show menu (this will handle its own rendering)
+                        action = show_model_menu(api_model, "high")
+
+                        if action and action.action == "confirm":
+                            # User selected a model
+                            new_model_id = action.model_id
+                            new_effort = action.effort
+
+                            # Update current model
+                            from lyra_cli.cli.models import get_registry
+                            registry = get_registry()
+                            model_info = registry.get_model(new_model_id)
+
+                            if model_info:
+                                api_model = new_model_id
+                                current_model = model_info.name
+
+                                # Reinitialize agent loop
+                                try:
+                                    agent_handler = FixedLayoutAgentHandler(layout)
+                                    agent_loop = AgentLoopFactory.create_simple_loop(
+                                        callback=agent_handler,
+                                        model=api_model
+                                    )
+                                    layout.append_content("")
+                                    layout.append_content(f"✓ Switched to {model_info.name} with {new_effort} effort")
+                                except ValueError:
+                                    agent_loop = None
+                                    layout.append_content("")
+                                    layout.append_content(f"⚠ API key not configured for {model_info.provider}")
+                        elif action and action.action == "set_default":
+                            # User wants to set as default
+                            layout.append_content("")
+                            layout.append_content("✓ Model set as default (feature coming soon)")
+                        else:
+                            # User cancelled
+                            layout.append_content("")
+                            layout.append_content("Model selection cancelled")
+
                         continue
                     else:
                         layout.append_content(f"Unknown command: {user_input}")
