@@ -47,3 +47,4 @@ dmypy.json
 # Tool caches
 .frg/
 .omc/
+node_modules/

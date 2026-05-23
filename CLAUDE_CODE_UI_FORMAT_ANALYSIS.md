@@ -3,13 +3,13 @@
 ## Header Format
 
 ```
- ▐▛███▜▌   Claude Code v2.1.148
-▝▜█████▛▘  Opus 4.7 (1M context) with xhigh effort · API Usage Billing
-  ▘▘ ▝▝    ~/Downloads/MyCV/research/harness-engineering
+██╗  ██╗   ██╗██████╗  █████╗    Lyra v1.0.0
+██║  ╚██╗ ██╔╝██╔══██╗██╔══██╗   Opus 4.7 (1M context) with xhigh effort · API Usage Billing
+███████║ ╚████╔╝ ██████╔╝███████║  ~/Downloads/MyCV/research/harness-engineering
 ```
 
 **Components:**
-- ASCII art logo (left-aligned, 3 lines)
+- ASCII art logo "LYRA" (left-aligned, 3 lines)
 - Version info on line 1
 - Model + context + billing on line 2
 - Current directory on line 3
@@ -195,9 +195,9 @@
 
 ## Special Characters Used
 
-- `▐▛███▜▌` - Logo top
-- `▝▜█████▛▘` - Logo middle
-- `▘▘ ▝▝` - Logo bottom
+- `██╗  ██╗   ██╗██████╗  █████╗` - Logo line 1 (LYRA)
+- `██║  ╚██╗ ██╔╝██╔══██╗██╔══██╗` - Logo line 2 (LYRA)
+- `███████║ ╚████╔╝ ██████╔╝███████║` - Logo line 3 (LYRA)
 - `❯` - User prompt
 - `⏺` - Response marker
 - `✳` - Thinking/flowing

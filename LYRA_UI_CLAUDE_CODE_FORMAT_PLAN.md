@@ -59,9 +59,9 @@ export const symbols = {
   
   // Logo (3 lines)
   logo: [
-    ' ▐▛███▜▌',
-    '▝▜█████▛▘',
-    '  ▘▘ ▝▝'
+    '██╗  ██╗   ██╗██████╗  █████╗ ',
+    '██║  ╚██╗ ██╔╝██╔══██╗██╔══██╗',
+    '███████║ ╚████╔╝ ██████╔╝███████║'
   ]
 }
 ```
@@ -384,9 +384,9 @@ export function StreamingText({ content }: { content: string }) {
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │ HEADER (fixed at top)                                                           │
-│  ▐▛███▜▌   Lyra v1.0.0                                                          │
-│ ▝▜█████▛▘  Opus 4.7 (1M context) · Deep Research Mode                          │
-│   ▘▘ ▝▝    ~/projects/lyra                                                     │
+│ ██╗  ██╗   ██╗██████╗  █████╗    Lyra v1.0.0                                   │
+│ ██║  ╚██╗ ██╔╝██╔══██╗██╔══██╗   Opus 4.7 (1M context) · Deep Research Mode   │
+│ ███████║ ╚████╔╝ ██████╔╝███████║  ~/projects/lyra                             │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                  │
 │ SCROLLABLE CONVERSATION AREA (grows/scrolls)                                    │

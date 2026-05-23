@@ -27,7 +27,7 @@
   },
   "build": {
     "buildCommand": "npm run build 2>&1 | tail -20",
-    "testCommand": "git reset && git add packages/ui-* HOW_TO_RUN.md QUICKSTART.md babel.config.js jest.config.json jest.setup.js && git status --short | head -20",
+    "testCommand": "git commit -m \"refactor: Flatten UI structure - move from nested projects/lyra to root 🏗️\n\nMoved UI packages and config from projects/lyra/ to root:\n- packages/ui-core, ui-terminal, ui-transport → packages/\n- babel.config.js, jest.config.json, jest.setup.js → root\n- HOW_TO_RUN.md, QUICKSTART.md → root\n- Removed nested projects/ folder\n\nNow run with: npm run run --workspace=@lyra/ui-terminal\n\nCo-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>\"",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}

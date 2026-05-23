@@ -5,9 +5,9 @@
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │ HEADER (Fixed at Top)                                                           │
-│  ▐▛███▜▌   Lyra v1.0.0                                                          │
-│ ▝▜█████▛▘  Opus 4.7 (1M context) · Deep Research Mode                          │
-│   ▘▘ ▝▝    ~/projects/lyra                                                     │
+│ ██╗  ██╗   ██╗██████╗  █████╗    Lyra v1.0.0                                   │
+│ ██║  ╚██╗ ██╔╝██╔══██╗██╔══██╗   Opus 4.7 (1M context) · Deep Research Mode   │
+│ ███████║ ╚████╔╝ ██████╔╝███████║  ~/projects/lyra                             │
 │─────────────────────────────────────────────────────────────────────────────────│
 │                                                                                  │
 │ SCROLLABLE CONVERSATION AREA (Middle - Grows/Scrolls)                           │
