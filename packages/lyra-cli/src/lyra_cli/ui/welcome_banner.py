@@ -2,6 +2,7 @@
 
 import os
 import shutil
+from typing import Optional
 
 
 def print_welcome_banner(
@@ -9,8 +10,8 @@ def print_welcome_banner(
     model: str = "Opus 4.7",
     effort: str = "high",
     provider: str = "Anthropic API",
-    working_dir: str = None,
-    context_window: str = "1M context"
+    working_dir: Optional[str] = None,
+    context_window: Optional[str] = "1M context"
 ):
     """Print welcome banner - simple version without TUI"""
 

@@ -24,6 +24,7 @@ def chat(
 def interactive_chat(model: str = "opus"):
     """Interactive chat with simple REPL (Claude Code style)"""
     from lyra_cli.agent import AgentLoopFactory
+    from rich.console import Console
 
     # Model mapping
     model_map = {
@@ -53,8 +54,9 @@ def interactive_chat(model: str = "opus"):
         context_window=context_display
     )
 
-    # Create agent handler
-    agent_handler = StreamingAgentHandler()
+    # Create console and agent handler
+    console = Console()
+    agent_handler = StreamingAgentHandler(console)
 
     # Create agent loop
     try:
@@ -71,14 +73,8 @@ def interactive_chat(model: str = "opus"):
     def handle_message(user_input: str):
         """Handle user message"""
         try:
-            # Start turn
-            agent_handler.on_turn_start(f"turn-{id(user_input)}")
-
-            # Run agent loop (this will call callbacks)
-            result = agent_loop.run_turn(user_input)
-
-            # End turn
-            agent_handler.on_turn_end(f"turn-{id(user_input)}", result or {})
+            # Process message (callbacks are called internally)
+            agent_loop.process_message(user_input)
 
         except Exception as e:
             agent_handler.on_error(e)
