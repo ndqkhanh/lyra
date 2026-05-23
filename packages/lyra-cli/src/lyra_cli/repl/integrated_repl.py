@@ -14,11 +14,8 @@ from lyra_cli.events import (
     TurnFinished,
 )
 from lyra_cli.ui import (
-    FixedInputBox,
-    StatusLine,
     ResponseFormatter,
     AgentTree,
-    ScrollManager,
     print_welcome_banner,
 )
 
@@ -43,11 +40,8 @@ class IntegratedREPL:
         # UI Components
         self.dispatcher = EventDispatcher()
         self.streaming = StreamingRenderer()
-        self.input_box = FixedInputBox()
-        self.status_line = StatusLine()
         self.formatter = ResponseFormatter()
         self.agent_tree = AgentTree()
-        self.scroll = ScrollManager(fixed_height=4)
 
         # Setup event handlers
         self._setup_handlers()
@@ -113,19 +107,10 @@ class IntegratedREPL:
             user_name=None
         )
 
-    def render_fixed_ui(self, prompt_text: str = ""):
-        """Render fixed UI at bottom"""
-        self.input_box.render(prompt_text)
-        self.status_line.update("default", ["esc to exit", "enter to send"])
-
     def get_user_input(self) -> Optional[str]:
-        """Get user input"""
+        """Get user input - inline with conversation"""
         try:
-            # Clear fixed UI area
-            self.input_box.clear_input_area()
-            self.status_line.clear()
-
-            # Get input
+            # Simple inline input prompt
             user_input = input(self.formatter.format_prompt() + " ")
 
             if not user_input:
