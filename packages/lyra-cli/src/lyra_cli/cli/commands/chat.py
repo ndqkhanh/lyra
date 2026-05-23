@@ -22,9 +22,8 @@ def chat(
 
 
 def interactive_chat(model: str = "opus"):
-    """Interactive chat with simple REPL (Claude Code style)"""
-    from lyra_cli.agent import AgentLoopFactory
-    from rich.console import Console
+    """Interactive chat with integrated REPL (Claude Code style)"""
+    from lyra_cli.repl import IntegratedREPL
 
     # Model mapping
     model_map = {
@@ -35,53 +34,24 @@ def interactive_chat(model: str = "opus"):
 
     api_model = model_map.get(model, "claude-opus-4-20250514")
 
-    # Show welcome banner
-    registry = get_registry()
-    model_info = registry.get_model(api_model)
-    if model_info:
-        model_display = model_info.name
-        context_display = registry.format_context_window(model_info.context_window)
-    else:
-        model_display = model.capitalize()
-        context_display = None
-
-    print_welcome_banner(
-        version="0.1.0",
-        model=model_display,
-        effort="high",
-        provider="Anthropic API",
-        working_dir=os.getcwd(),
-        context_window=context_display
-    )
-
-    # Create console and agent handler
-    console = Console()
-    agent_handler = StreamingAgentHandler(console)
-
-    # Create agent loop
-    try:
-        agent_loop = AgentLoopFactory.create_simple_loop(
-            callback=agent_handler,
-            model=api_model
-        )
-    except ValueError as e:
-        print(f"\x1b[31m✘ Error: {e}\x1b[0m")
-        print("Please set ANTHROPIC_API_KEY environment variable")
+    # Get API key
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    if not api_key:
+        print(f"\x1b[31m✘ Error: ANTHROPIC_API_KEY environment variable not set\x1b[0m")
+        print("Please set ANTHROPIC_API_KEY to use Lyra")
         return
 
-    # Message handler
-    def handle_message(user_input: str):
-        """Handle user message"""
-        try:
-            # Process message (callbacks are called internally)
-            agent_loop.process_message(user_input)
-
-        except Exception as e:
-            agent_handler.on_error(e)
-
-    # Create and run REPL
-    repl = LyraREPL(model=api_model, on_message=handle_message)
-    repl.run()
+    # Create and run integrated REPL
+    try:
+        repl = IntegratedREPL(
+            api_key=api_key,
+            model=api_model,
+            max_tokens=4096
+        )
+        repl.run()
+    except Exception as e:
+        print(f"\x1b[31m✘ Error: {e}\x1b[0m")
+        return
 
 
 def send_message(message: str, model: str):
