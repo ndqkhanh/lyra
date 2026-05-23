@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
+import { enableMapSet } from 'immer'
 import type {
   SessionState,
   Message,
@@ -10,6 +11,9 @@ import type {
 } from '../types'
 import { DISPLAY_MODE_PRESETS } from '../types'
 import { toRenderItems } from '../utils/rendering'
+
+// Enable Immer MapSet plugin
+enableMapSet()
 
 interface UIStore {
   // Session state
