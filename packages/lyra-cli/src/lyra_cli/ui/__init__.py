@@ -26,6 +26,8 @@ from .tool_formatter import (
     DiffHunk,
     ToolCallFormatter,
 )
+from .fixed_input import FixedInputBox
+from .status_line import StatusLine
 
 __all__ = [
     # Symbols
@@ -55,6 +57,9 @@ __all__ = [
     "Diagnostic",
     "DiffHunk",
     "ToolCallFormatter",
+    # Fixed UI
+    "FixedInputBox",
+    "StatusLine",
 ]
 
 __version__ = "1.0.0"
