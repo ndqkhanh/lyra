@@ -1,7 +1,7 @@
 {
   "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"cp src/lyra_cli/ui/model_menu.py packages/lyra-cli/src/lyra_cli/ui/ && cp src/lyra_cli/cli/models.py packages/lyra-cli/src/lyra_cli/cli/ && ls -la packages/lyra-cli/src/lyra_cli/ui/ packag...",
-  "error": "Exit code 1\ncp: src/lyra_cli/cli/models.py: No such file or directory",
-  "timestamp": "2026-05-23T06:58:17.559Z",
-  "retry_count": 4
+  "tool_input_preview": "{\"command\":\"cd packages/lyra-cli && python -c \\\"from lyra_cli.cli.repl import LyraREPL; from lyra_cli.cli.agent_handler import StreamingAgentHandler; from lyra_cli.ui.welcome_banner import print_welco...",
+  "error": "Exit code 1\n(eval):cd:1: no such file or directory: packages/lyra-cli",
+  "timestamp": "2026-05-23T07:14:17.268Z",
+  "retry_count": 1
 }

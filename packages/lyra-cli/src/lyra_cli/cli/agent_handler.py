@@ -201,3 +201,7 @@ class CLIAgentHandler(AgentOutputCallback):
     def on_thinking_end(self) -> None:
         """Called when agent finishes thinking"""
         pass
+
+
+# Backward compatibility alias
+StreamingAgentHandler = CLIAgentHandler
