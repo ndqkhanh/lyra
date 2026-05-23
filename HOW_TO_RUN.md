@@ -7,10 +7,12 @@ Successfully rebuilt the entire Lyra UI system from scratch based on deep resear
 ## How to Run
 
 ```bash
-# Quick start (from projects/lyra directory)
+# Quick start (you're already in the right directory!)
 npm install --legacy-peer-deps
 npm run build
-npm run dev --workspace=@lyra/ui-terminal
+npm run run --workspace=@lyra/ui-terminal  # Single run, no auto-restart
+# OR
+npm run dev --workspace=@lyra/ui-terminal  # Dev mode with auto-restart
 ```
 
 See [QUICKSTART.md](QUICKSTART.md) for detailed instructions.

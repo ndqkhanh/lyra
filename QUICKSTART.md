@@ -8,8 +8,7 @@
 ## Installation & Setup
 
 ```bash
-# Navigate to the Lyra UI project
-cd projects/lyra
+# You're already in the right directory!
 
 # Install dependencies (use --legacy-peer-deps for React version conflicts)
 npm install --legacy-peer-deps
@@ -20,21 +19,19 @@ npm run build
 
 ## Running Lyra
 
-### Development Mode (Recommended)
+### Single Run (Recommended)
+```bash
+npm run run --workspace=@lyra/ui-terminal
+```
+
+Runs once. Press **Ctrl+C** to exit cleanly. No auto-restart.
+
+### Development Mode (Auto-Restart)
 ```bash
 npm run dev --workspace=@lyra/ui-terminal
 ```
 
-This starts the UI with hot reload. Press **Ctrl+C** to exit.
-
-### Production Mode
-```bash
-# Build first (if not already done)
-npm run build
-
-# Run the built version
-npm run start --workspace=@lyra/ui-terminal
-```
+Watches for file changes and auto-restarts. Press **Ctrl+C** to exit.
 
 ## Keyboard Shortcuts
 
@@ -55,13 +52,7 @@ npm run start --workspace=@lyra/ui-terminal
 ## Troubleshooting
 
 ### "Missing script: build" error
-Make sure you're in the correct directory:
-```bash
-cd projects/lyra  # Not just projects/
-```
-
-### "No workspaces found" error
-The workspace structure requires being in the root `projects/lyra` directory.
+This shouldn't happen anymore - the structure has been flattened!
 
 ### Dependency conflicts
 Use `--legacy-peer-deps` flag:
@@ -70,7 +61,7 @@ npm install --legacy-peer-deps
 ```
 
 ### Immer MapSet error
-This has been fixed in the latest commit. Make sure you've pulled the latest changes and rebuilt:
+This has been fixed. Make sure you've pulled the latest changes and rebuilt:
 ```bash
 git pull
 npm run build
@@ -79,13 +70,14 @@ npm run build
 ## Project Structure
 
 ```
-projects/lyra/
+projects/lyra/              # Main Lyra project root
 ├── packages/
-│   ├── ui-core/        # State management + types
-│   ├── ui-terminal/    # Terminal UI (Ink)
-│   └── ui-transport/   # WebSocket transport
-├── package.json        # Root workspace config
-└── README.md          # Full documentation
+│   ├── ui-core/           # State management + types
+│   ├── ui-terminal/       # Terminal UI (Ink)
+│   └── ui-transport/      # WebSocket transport
+├── package.json           # Root workspace config
+├── QUICKSTART.md          # This file
+└── HOW_TO_RUN.md         # Complete guide
 ```
 
 ## Development Workflow
