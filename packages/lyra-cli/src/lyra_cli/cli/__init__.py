@@ -16,7 +16,7 @@ from .messages import (
     ToolMessage,
     UserMessage,
 )
-from .repl import launch_streaming_repl
+from .repl import launch_streaming_repl, LyraREPL
 
 # New CLI exports (Phase 2)
 from .app import app as cli_app
@@ -35,6 +35,7 @@ __all__ = [
     "ToolMessage",
     "UserMessage",
     "launch_streaming_repl",
+    "LyraREPL",
     # New CLI
     "cli_app",
     "console",

@@ -12,12 +12,77 @@ from __future__ import annotations
 import asyncio
 import sys
 from pathlib import Path
-from typing import AsyncIterator
+from typing import AsyncIterator, Callable, Optional
 
 from lyra_cli import __version__
 
 from .formatter import CLIFormatter, get_formatter
 from .messages import StreamEvent
+
+# Simple REPL class for backward compatibility
+class LyraREPL:
+    """Simple REPL loop without fixed bottom layout"""
+
+    def __init__(self, model: str, on_message: Callable[[str], None]):
+        self.model = model
+        self.on_message = on_message
+
+    def run(self):
+        """Main REPL loop"""
+        try:
+            from prompt_toolkit import PromptSession
+            from prompt_toolkit.completion import WordCompleter
+            from prompt_toolkit.history import InMemoryHistory
+        except ImportError:
+            print("Error: prompt_toolkit not installed. Install with: pip install prompt_toolkit")
+            return
+
+        history = InMemoryHistory()
+        completer = WordCompleter(
+            ['/exit', '/quit', '/model', '/clear', '/help'],
+            ignore_case=True
+        )
+
+        session = PromptSession(
+            completer=completer,
+            history=history,
+            multiline=False
+        )
+
+        while True:
+            try:
+                user_input = session.prompt('❯ ')
+
+                if not user_input.strip():
+                    continue
+
+                # Handle slash commands
+                if user_input.startswith('/'):
+                    if user_input.lower().strip() in ['/exit', '/quit', '/q']:
+                        break
+                    elif user_input.lower().strip() == '/clear':
+                        print('\x1b[2J\x1b[H', end='', flush=True)
+                        continue
+                    elif user_input.lower().strip() == '/help':
+                        print("\n\x1b[36mAvailable Commands:\x1b[0m")
+                        print("  /exit, /quit    Exit Lyra")
+                        print("  /clear          Clear screen")
+                        print("  /model          Switch model")
+                        print("  /help           Show this help\n")
+                        continue
+
+                # Send to message handler
+                self.on_message(user_input)
+
+            except (KeyboardInterrupt, EOFError):
+                print("\nGoodbye!")
+                break
+            except Exception as e:
+                print(f"\x1b[31m✘ Error: {e}\x1b[0m")
+                import os
+                if os.getenv("DEBUG"):
+                    import traceback
+                    traceback.print_exc()
 
 
 async def launch_streaming_repl(
