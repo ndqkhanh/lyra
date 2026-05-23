@@ -32,6 +32,7 @@ from .response_formatter import ResponseFormatter
 from .agent_tree import AgentTree, AgentNode
 from .selection_menu import SelectionMenu, MenuOption
 from .scroll_manager import ScrollManager
+from .welcome_banner import print_welcome_banner
 
 __all__ = [
     # Symbols
@@ -74,6 +75,8 @@ __all__ = [
     "MenuOption",
     # Scroll Manager
     "ScrollManager",
+    # Welcome Banner
+    "print_welcome_banner",
 ]
 
 __version__ = "1.0.0"
