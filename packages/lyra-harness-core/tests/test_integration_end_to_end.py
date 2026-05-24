@@ -20,22 +20,22 @@ from typing import Any
 import pytest
 from pydantic import BaseModel
 
-from harness_core.continuous_learning import (
+from lyra_harness_core.continuous_learning import (
     ContinuousLearner,
     EditRecorder,
 )
-from harness_core.cost import CostTracker, PricingTable
-from harness_core.distributed import Bus
-from harness_core.eval_runner import EvalCase, EvalRunner, EvalSuite
-from harness_core.evals import BudgetController
-from harness_core.memory_consolidation import (
+from lyra_harness_core.cost import CostTracker, PricingTable
+from lyra_harness_core.distributed import Bus
+from lyra_harness_core.eval_runner import EvalCase, EvalRunner, EvalSuite
+from lyra_harness_core.evals import BudgetController
+from lyra_harness_core.memory_consolidation import (
     ConsolidationPolicy,
     MemoryConsolidator,
 )
-from harness_core.memory_store import MemoryItem, MemoryKind, MemoryStore
-from harness_core.messages import ToolCall
-from harness_core.provenance import WitnessLattice
-from harness_core.render import (
+from lyra_harness_core.memory_store import MemoryItem, MemoryKind, MemoryStore
+from lyra_harness_core.messages import ToolCall
+from lyra_harness_core.provenance import WitnessLattice
+from lyra_harness_core.render import (
     eval_run_to_json,
     eval_run_to_markdown,
     structured_log_lines,
@@ -43,12 +43,12 @@ from harness_core.render import (
     trace_to_markdown,
     witness_lattice_to_markdown,
 )
-from harness_core.replay import TraceBuilder
-from harness_core.routing import BELLERouter, QueryType
-from harness_core.skill_drift import DriftPolicy, SkillDriftMonitor
-from harness_core.tool_runtime import ExponentialBackoff, ToolEngine
-from harness_core.tools import Tool, ToolRegistry
-from harness_core.verifier import StubPolicyVerifier, VerifierComposer
+from lyra_harness_core.replay import TraceBuilder
+from lyra_harness_core.routing import BELLERouter, QueryType
+from lyra_harness_core.skill_drift import DriftPolicy, SkillDriftMonitor
+from lyra_harness_core.tool_runtime import ExponentialBackoff, ToolEngine
+from lyra_harness_core.tools import Tool, ToolRegistry
+from lyra_harness_core.verifier import StubPolicyVerifier, VerifierComposer
 
 
 class _ResearchTool(Tool):

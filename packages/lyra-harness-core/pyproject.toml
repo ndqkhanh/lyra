@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "harness-core"
+name = "lyra-harness-core"
 version = "0.1.0"
-description = "Shared harness primitives: agent loop, tools, hooks, permissions, memory, observability"
+description = "Lyra harness primitives: agent loop, tools, hooks, permissions, memory, observability"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }

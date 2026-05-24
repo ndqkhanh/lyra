@@ -1,10 +1,10 @@
-"""Tests for harness_core.eval_runner — types + runner + drift monitor."""
+"""Tests for lyra_harness_core.eval_runner — types + runner + drift monitor."""
 from __future__ import annotations
 
 import pytest
 
-from harness_core.cost import CostTracker
-from harness_core.eval_runner import (
+from lyra_harness_core.cost import CostTracker
+from lyra_harness_core.eval_runner import (
     DriftAlert,
     DriftMonitor,
     EvalCase,

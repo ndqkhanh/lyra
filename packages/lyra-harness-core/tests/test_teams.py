@@ -1,9 +1,9 @@
-"""Tests for harness_core.teams — TaskList + Mailbox + AgentTeam."""
+"""Tests for lyra_harness_core.teams — TaskList + Mailbox + AgentTeam."""
 from __future__ import annotations
 
 import pytest
 
-from harness_core.teams import (
+from lyra_harness_core.teams import (
     AgentRole,
     AgentTeam,
     Mailbox,

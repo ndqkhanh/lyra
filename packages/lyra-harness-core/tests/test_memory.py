@@ -1,6 +1,6 @@
 import time
 
-from harness_core.memory import Memory
+from lyra_harness_core.memory import Memory
 
 
 def test_add_and_all_roundtrip(tmp_path):

@@ -1,16 +1,16 @@
-"""Tests for harness_core.gates.kg_fact — KG-grounded fact verification."""
+"""Tests for lyra_harness_core.gates.kg_fact — KG-grounded fact verification."""
 from __future__ import annotations
 
 import pytest
 
-from harness_core.gates import (
+from lyra_harness_core.gates import (
     FactClaim,
     KGFactGate,
     KGFactVerdict,
     KGSource,
     StaticKGSource,
 )
-from harness_core.verifier import Severity
+from lyra_harness_core.verifier import Severity
 
 
 # --- FactClaim ---------------------------------------------------------

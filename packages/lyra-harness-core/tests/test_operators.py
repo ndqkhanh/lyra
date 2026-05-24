@@ -1,9 +1,9 @@
-"""Tests for harness_core.multi_hop.operators — Self-Ask + IRCoT."""
+"""Tests for lyra_harness_core.multi_hop.operators — Self-Ask + IRCoT."""
 from __future__ import annotations
 
 import pytest
 
-from harness_core.multi_hop.operators import (
+from lyra_harness_core.multi_hop.operators import (
     IRCoTOperator,
     RetrievedDoc,
     SelfAskOperator,

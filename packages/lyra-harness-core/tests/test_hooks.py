@@ -1,5 +1,5 @@
-from harness_core.hooks import Hook, HookDecision, HookEvent, HookRegistry
-from harness_core.messages import ToolCall
+from lyra_harness_core.hooks import Hook, HookDecision, HookEvent, HookRegistry
+from lyra_harness_core.messages import ToolCall
 
 
 def test_hook_fires_on_event():

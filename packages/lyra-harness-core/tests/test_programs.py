@@ -1,16 +1,16 @@
-"""Tests for harness_core.programs — DSPy-style compilable programs."""
+"""Tests for lyra_harness_core.programs — DSPy-style compilable programs."""
 from __future__ import annotations
 
 import pytest
 
-from harness_core.multi_hop import (
+from lyra_harness_core.multi_hop import (
     IRCoTOperator,
     SelfAskOperator,
     StubLLM,
     StubRetriever,
 )
-from harness_core.pipeline import MultiHopPipeline
-from harness_core.programs import (
+from lyra_harness_core.pipeline import MultiHopPipeline
+from lyra_harness_core.programs import (
     BootstrapFewShot,
     Demonstration,
     Example,
@@ -19,7 +19,7 @@ from harness_core.programs import (
     Signature,
     evaluate,
 )
-from harness_core.routing import BELLERouter
+from lyra_harness_core.routing import BELLERouter
 
 
 def _build_immediate_answer_pipeline(answer: str = "42") -> MultiHopPipeline:

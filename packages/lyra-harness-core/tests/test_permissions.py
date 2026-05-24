@@ -1,5 +1,5 @@
-from harness_core.messages import ToolCall
-from harness_core.permissions import (
+from lyra_harness_core.messages import ToolCall
+from lyra_harness_core.permissions import (
     Decision,
     PermissionMode,
     PermissionPolicy,

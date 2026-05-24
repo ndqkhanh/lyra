@@ -1,26 +1,26 @@
 """Integration test — runs the end-to-end demo and asserts the canonical trace.
 
 This is an *integration* test, not a unit test — it exercises 12+ modules
-composed together. If this passes, the harness_core stack works as a stack.
+composed together. If this passes, the lyra_harness_core stack works as a stack.
 """
 from __future__ import annotations
 
 import pytest
 
-from harness_core.examples import (
+from lyra_harness_core.examples import (
     DemoOutput,
     build_demo_pipeline,
     build_demo_program,
     run_research_demo,
 )
-from harness_core.examples.end_to_end_demo import (
+from lyra_harness_core.examples.end_to_end_demo import (
     build_demo_documents,
     build_demo_graph,
     build_demo_retriever,
 )
-from harness_core.multi_hop import HippoRAGRetriever, SimpleGraph
-from harness_core.pipeline import MultiHopPipeline, PipelineStep
-from harness_core.programs import MultiHopProgram, Signature
+from lyra_harness_core.multi_hop import HippoRAGRetriever, SimpleGraph
+from lyra_harness_core.pipeline import MultiHopPipeline, PipelineStep
+from lyra_harness_core.programs import MultiHopProgram, Signature
 
 
 class TestBuildDemoSubstrate:

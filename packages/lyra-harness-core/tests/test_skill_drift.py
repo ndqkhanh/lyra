@@ -1,10 +1,10 @@
-"""Tests for harness_core.skill_drift."""
+"""Tests for lyra_harness_core.skill_drift."""
 from __future__ import annotations
 
 import pytest
 
-from harness_core.provenance import WitnessLattice
-from harness_core.skill_drift import (
+from lyra_harness_core.provenance import WitnessLattice
+from lyra_harness_core.skill_drift import (
     DriftAlert,
     DriftPolicy,
     SkillDriftMonitor,

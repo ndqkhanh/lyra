@@ -1,4 +1,4 @@
-"""Tests for harness_core.routines — types, cron, registry."""
+"""Tests for lyra_harness_core.routines — types, cron, registry."""
 from __future__ import annotations
 
 import datetime as _dt
@@ -6,7 +6,7 @@ import time
 
 import pytest
 
-from harness_core.routines import (
+from lyra_harness_core.routines import (
     CronExpression,
     CronParseError,
     FireResult,

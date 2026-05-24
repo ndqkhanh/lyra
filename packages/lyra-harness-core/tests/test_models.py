@@ -1,7 +1,7 @@
 import pytest
 
-from harness_core.messages import Message, StopReason
-from harness_core.models import MockLLM, get_default_llm
+from lyra_harness_core.messages import Message, StopReason
+from lyra_harness_core.models import MockLLM, get_default_llm
 
 
 def test_mock_llm_returns_scripted_strings():

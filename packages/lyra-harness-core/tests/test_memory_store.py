@@ -1,11 +1,11 @@
-"""Tests for harness_core.memory_store — types + store + working memory."""
+"""Tests for lyra_harness_core.memory_store — types + store + working memory."""
 from __future__ import annotations
 
 import time
 
 import pytest
 
-from harness_core.memory_store import (
+from lyra_harness_core.memory_store import (
     MemoryItem,
     MemoryKind,
     MemoryStore,

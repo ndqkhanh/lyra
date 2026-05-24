@@ -1,4 +1,4 @@
-"""Tests for harness_core.tool_runtime — ToolEngine + retry policies."""
+"""Tests for lyra_harness_core.tool_runtime — ToolEngine + retry policies."""
 from __future__ import annotations
 
 from typing import Any
@@ -6,19 +6,19 @@ from typing import Any
 import pytest
 from pydantic import BaseModel
 
-from harness_core.cost import CostTracker, PricingTable
-from harness_core.evals import BudgetController
-from harness_core.messages import ToolCall
-from harness_core.provenance import WitnessLattice
-from harness_core.replay import ReplayEventKind, TraceBuilder
-from harness_core.tool_runtime import (
+from lyra_harness_core.cost import CostTracker, PricingTable
+from lyra_harness_core.evals import BudgetController
+from lyra_harness_core.messages import ToolCall
+from lyra_harness_core.provenance import WitnessLattice
+from lyra_harness_core.replay import ReplayEventKind, TraceBuilder
+from lyra_harness_core.tool_runtime import (
     ExponentialBackoff,
     NoRetry,
     ToolEngine,
     ToolExecution,
 )
-from harness_core.tools import Tool, ToolError, ToolRegistry
-from harness_core.verifier import (
+from lyra_harness_core.tools import Tool, ToolError, ToolRegistry
+from lyra_harness_core.verifier import (
     Severity,
     StubPolicyVerifier,
     VerifierAxis,
@@ -157,7 +157,7 @@ class TestVerifierGate:
 
             def verify(self, *, action):
                 seen.update(action)
-                from harness_core.verifier import AxisVerdict
+                from lyra_harness_core.verifier import AxisVerdict
                 return AxisVerdict(axis=self.axis, passed=True, severity=Severity.INFO)
 
         composer = VerifierComposer(verifiers=[_Capture()])

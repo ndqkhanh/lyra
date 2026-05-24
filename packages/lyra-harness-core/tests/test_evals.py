@@ -1,9 +1,9 @@
-"""Tests for harness_core.evals — equal_budget, ttc_curve, active_params."""
+"""Tests for lyra_harness_core.evals — equal_budget, ttc_curve, active_params."""
 from __future__ import annotations
 
 import pytest
 
-from harness_core.evals import (
+from lyra_harness_core.evals import (
     ActiveParamAccount,
     ActiveParamReading,
     BudgetController,

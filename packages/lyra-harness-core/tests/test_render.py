@@ -1,19 +1,19 @@
-"""Tests for harness_core.render — Markdown / JSON / structured-log output."""
+"""Tests for lyra_harness_core.render — Markdown / JSON / structured-log output."""
 from __future__ import annotations
 
 import json
 
 import pytest
 
-from harness_core.eval_runner import (
+from lyra_harness_core.eval_runner import (
     EvalCase,
     EvalResult,
     EvalRun,
     EvalRunner,
     EvalSuite,
 )
-from harness_core.provenance import WitnessLattice
-from harness_core.render import (
+from lyra_harness_core.provenance import WitnessLattice
+from lyra_harness_core.render import (
     eval_run_to_json,
     eval_run_to_markdown,
     structured_log_lines,
@@ -22,7 +22,7 @@ from harness_core.render import (
     witness_lattice_to_json,
     witness_lattice_to_markdown,
 )
-from harness_core.replay import ReplayEventKind, TraceBuilder
+from lyra_harness_core.replay import ReplayEventKind, TraceBuilder
 
 
 # --- Trace renderers ---------------------------------------------------
@@ -68,7 +68,7 @@ class TestTraceToMarkdown:
         assert "# Custom Title" in md
 
     def test_empty_trace(self):
-        from harness_core.replay import Trace
+        from lyra_harness_core.replay import Trace
         empty = Trace(trace_id="empty")
         md = trace_to_markdown(empty)
         assert "_No events._" in md

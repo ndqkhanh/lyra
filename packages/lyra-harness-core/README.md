@@ -1,4 +1,4 @@
-# harness_core
+# lyra-harness-core
 
 Shared harness primitives for the five agent systems in this monorepo.
 
@@ -26,15 +26,15 @@ make install
 Or standalone:
 
 ```bash
-pip install -e harness_core
-pip install -e 'harness_core[anthropic]'   # optional real-LLM deps
+pip install -e packages/lyra-harness-core
+pip install -e 'packages/lyra-harness-core[anthropic]'   # optional real-LLM deps
 ```
 
 ## Usage sketch
 
 ```python
-from harness_core import AgentLoop, ToolRegistry, PermissionMode, MockLLM
-from harness_core.tools_builtin import EchoTool
+from lyra_harness_core import AgentLoop, ToolRegistry, PermissionMode, MockLLM
+from lyra_harness_core.tools_builtin import EchoTool
 
 registry = ToolRegistry()
 registry.register(EchoTool())
@@ -52,5 +52,5 @@ print(result.final_text)
 ## Tests
 
 ```bash
-pytest harness_core/tests -v
+pytest packages/lyra-harness-core/tests -v
 ```

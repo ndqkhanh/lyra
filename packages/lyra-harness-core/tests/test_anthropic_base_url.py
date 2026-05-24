@@ -10,7 +10,7 @@ def test_anthropic_base_url_from_env():
     """Test that ANTHROPIC_BASE_URL is read from environment."""
     with patch.dict(os.environ, {"ANTHROPIC_BASE_URL": "https://custom.example.com"}):
         with patch("anthropic.Anthropic") as mock_anthropic:
-            from harness_core.models import AnthropicLLM
+            from lyra_harness_core.models import AnthropicLLM
 
             llm = AnthropicLLM(api_key="test-key")
 
@@ -24,7 +24,7 @@ def test_anthropic_base_url_parameter():
     """Test that base_url parameter takes precedence over environment."""
     with patch.dict(os.environ, {"ANTHROPIC_BASE_URL": "https://env.example.com"}):
         with patch("anthropic.Anthropic") as mock_anthropic:
-            from harness_core.models import AnthropicLLM
+            from lyra_harness_core.models import AnthropicLLM
 
             llm = AnthropicLLM(
                 api_key="test-key",
@@ -41,7 +41,7 @@ def test_anthropic_default_base_url():
     """Test that default base_url is not passed when using official API."""
     with patch.dict(os.environ, {}, clear=True):
         with patch("anthropic.Anthropic") as mock_anthropic:
-            from harness_core.models import AnthropicLLM
+            from lyra_harness_core.models import AnthropicLLM
 
             llm = AnthropicLLM(api_key="test-key")
 

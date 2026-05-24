@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from harness_core.integrations import (
+from lyra_harness_core.integrations import (
     AdaptedDocument,
     AdaptedEdge,
     AdaptedGraph,
@@ -11,8 +11,8 @@ from harness_core.integrations import (
     adapt_graph,
     verify_graph_protocol,
 )
-from harness_core.multi_hop import HippoRAGRetriever, SimpleDocument, SimpleGraph
-from harness_core.pages import (
+from lyra_harness_core.multi_hop import HippoRAGRetriever, SimpleDocument, SimpleGraph
+from lyra_harness_core.pages import (
     EditConflict,
     Page,
     PageEditor,

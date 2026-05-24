@@ -1,12 +1,12 @@
-"""Tests for harness_core.replay — types + builder + comparator."""
+"""Tests for lyra_harness_core.replay — types + builder + comparator."""
 from __future__ import annotations
 
 import pytest
 
-from harness_core.forensic import Trajectory, TrajectoryOutcome
-from harness_core.orchestration import AgentDecision, SideEffectRecord
-from harness_core.provenance import WitnessLattice
-from harness_core.replay import (
+from lyra_harness_core.forensic import Trajectory, TrajectoryOutcome
+from lyra_harness_core.orchestration import AgentDecision, SideEffectRecord
+from lyra_harness_core.provenance import WitnessLattice
+from lyra_harness_core.replay import (
     ReplayEvent,
     ReplayEventKind,
     Trace,
@@ -399,7 +399,7 @@ class TestIncidentReplayScenario:
         Production replay re-reads from the persistent ledger; in-process we
         build the trace twice from the *same* lattice + same fixed-id event.
         """
-        from harness_core.provenance import WitnessLattice
+        from lyra_harness_core.provenance import WitnessLattice
         # Single shared lattice — witness IDs are content-addressed by SHA256
         # over (kind, issuer, timestamp, content, parents), so reading the
         # same lattice twice produces identical witnesses.

@@ -1,11 +1,11 @@
-"""Tests for harness_core.pipeline.MultiHopPipeline — end-to-end composition."""
+"""Tests for lyra_harness_core.pipeline.MultiHopPipeline — end-to-end composition."""
 from __future__ import annotations
 
 import pytest
 
-from harness_core.evals import BudgetController
-from harness_core.gates import ChainOfNoteGate, DocVerdict, NoteVerdict
-from harness_core.multi_hop import (
+from lyra_harness_core.evals import BudgetController
+from lyra_harness_core.gates import ChainOfNoteGate, DocVerdict, NoteVerdict
+from lyra_harness_core.multi_hop import (
     DecompositionCache,
     IRCoTOperator,
     RetrievedDoc,
@@ -13,8 +13,8 @@ from harness_core.multi_hop import (
     StubLLM,
     StubRetriever,
 )
-from harness_core.pipeline import MultiHopPipeline, PipelineResult, PipelineStep
-from harness_core.routing import BELLERouter, QueryType
+from lyra_harness_core.pipeline import MultiHopPipeline, PipelineResult, PipelineStep
+from lyra_harness_core.routing import BELLERouter, QueryType
 
 
 def _self_ask_with_immediate_answer(answer: str = "42") -> SelfAskOperator:

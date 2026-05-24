@@ -1,9 +1,9 @@
-"""Tests for harness_core.continuous_learning."""
+"""Tests for lyra_harness_core.continuous_learning."""
 from __future__ import annotations
 
 import pytest
 
-from harness_core.continuous_learning import (
+from lyra_harness_core.continuous_learning import (
     ContinuousLearner,
     EditEvent,
     EditRecorder,
@@ -11,8 +11,8 @@ from harness_core.continuous_learning import (
     LearnedPreference,
     LearningReport,
 )
-from harness_core.memory_store import MemoryKind, MemoryStore, RetrievalSpec
-from harness_core.provenance import WitnessLattice
+from lyra_harness_core.memory_store import MemoryKind, MemoryStore, RetrievalSpec
+from lyra_harness_core.provenance import WitnessLattice
 
 
 # --- EditEvent --------------------------------------------------------

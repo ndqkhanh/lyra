@@ -1,9 +1,9 @@
-"""Tests for harness_core.orchestration — pure-function agents + replay."""
+"""Tests for lyra_harness_core.orchestration — pure-function agents + replay."""
 from __future__ import annotations
 
 import pytest
 
-from harness_core.orchestration import (
+from lyra_harness_core.orchestration import (
     AgentDecision,
     PureFunctionAgent,
     SideEffectLog,

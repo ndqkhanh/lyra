@@ -1,4 +1,4 @@
-from harness_core.messages import Message, StopReason, ToolCall, ToolResult
+from lyra_harness_core.messages import Message, StopReason, ToolCall, ToolResult
 
 
 def test_message_constructors_are_ergonomic():

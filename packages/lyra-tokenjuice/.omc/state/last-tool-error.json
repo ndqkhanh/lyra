@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"git add packages/lyra-tokenjuice/ && git status\",\"description\":\"Add tokenjuice package\"}",
-  "error": "Exit code 128\nwarning: could not open directory 'packages/lyra-tokenjuice/packages/lyra-tokenjuice/': No such file or directory\nfatal: pathspec 'packages/lyra-tokenjuice/' did not match any files",
-  "timestamp": "2026-05-19T15:27:16.496Z",
-  "retry_count": 4
-}

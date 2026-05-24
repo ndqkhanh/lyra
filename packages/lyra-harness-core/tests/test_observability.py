@@ -1,4 +1,4 @@
-from harness_core.observability import Tracer
+from lyra_harness_core.observability import Tracer
 
 
 def test_span_captures_duration():

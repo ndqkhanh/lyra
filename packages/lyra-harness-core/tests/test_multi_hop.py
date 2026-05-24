@@ -1,9 +1,9 @@
-"""Tests for harness_core.multi_hop — HippoRAG-2 + decomposition cache."""
+"""Tests for lyra_harness_core.multi_hop — HippoRAG-2 + decomposition cache."""
 from __future__ import annotations
 
 import pytest
 
-from harness_core.multi_hop import (
+from lyra_harness_core.multi_hop import (
     DecompositionCache,
     HashEmbedder,
     HippoRAGRetriever,

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from harness_core.forensic import (
+from lyra_harness_core.forensic import (
     ReplayComparator,
     Trajectory,
     TrajectoryOutcome,
@@ -11,21 +11,21 @@ from harness_core.forensic import (
     action_jaccard,
     fingerprint_jaccard,
 )
-from harness_core.gates import (
+from lyra_harness_core.gates import (
     RetractionGate,
     RetractionRecord,
     RetractionVerdict,
     StaticRetractionIndex,
 )
-from harness_core.isolation import (
+from lyra_harness_core.isolation import (
     ContextNamespace,
     IsolatedContext,
     NamespacePermission,
     PermissionGrant,
     register_grant,
 )
-from harness_core.isolation.context_namespace import _clear_grants_for_test
-from harness_core.orchestration import AgentDecision, SideEffectRecord
+from lyra_harness_core.isolation.context_namespace import _clear_grants_for_test
+from lyra_harness_core.orchestration import AgentDecision, SideEffectRecord
 
 
 # --- Forensic / replay comparator ---------------------------------------

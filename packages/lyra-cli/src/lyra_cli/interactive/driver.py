@@ -564,9 +564,9 @@ def _read_ui_settings() -> dict:
     try:
         from lyra_core.auth.store import lyra_home
 
-        from ..config_io import load_settings
+        from ..config_io import load_settings_dict
 
-        settings = load_settings(lyra_home() / "settings.json")
+        settings = load_settings_dict(lyra_home() / "settings.json")
     except Exception:
         return {}
     ui = settings.get("ui")

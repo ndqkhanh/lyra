@@ -1,15 +1,15 @@
-"""Tests for harness_core.distributed."""
+"""Tests for lyra_harness_core.distributed."""
 from __future__ import annotations
 
 import pytest
 
-from harness_core.distributed import (
+from lyra_harness_core.distributed import (
     Bus,
     Envelope,
     Subscription,
     topic_matches,
 )
-from harness_core.provenance import WitnessLattice
+from lyra_harness_core.provenance import WitnessLattice
 
 
 # --- topic_matches ---------------------------------------------------

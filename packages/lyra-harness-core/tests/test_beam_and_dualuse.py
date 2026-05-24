@@ -3,14 +3,14 @@ from __future__ import annotations
 
 import pytest
 
-from harness_core.gates import (
+from lyra_harness_core.gates import (
     DualUseGate,
     DualUseVerdict,
     GateAction,
     KeywordRiskClassifier,
     RiskLevel,
 )
-from harness_core.multi_hop import (
+from lyra_harness_core.multi_hop import (
     BeamCandidate,
     BeamRetriever,
     CoverageScorer,

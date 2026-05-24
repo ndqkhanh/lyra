@@ -1,10 +1,10 @@
 """End-to-end tests of the agent loop with scripted MockLLM."""
-from harness_core.hooks import Hook, HookDecision, HookEvent, HookRegistry
-from harness_core.loop import AgentLoop, auto_approve
-from harness_core.models import MockLLM
-from harness_core.permissions import PermissionMode
-from harness_core.tools import ToolRegistry
-from harness_core.tools_builtin import CalculatorTool, EchoTool
+from lyra_harness_core.hooks import Hook, HookDecision, HookEvent, HookRegistry
+from lyra_harness_core.loop import AgentLoop, auto_approve
+from lyra_harness_core.models import MockLLM
+from lyra_harness_core.permissions import PermissionMode
+from lyra_harness_core.tools import ToolRegistry
+from lyra_harness_core.tools_builtin import CalculatorTool, EchoTool
 
 
 def _registry():
@@ -54,7 +54,7 @@ def test_plan_mode_blocks_writes_but_script_still_completes():
     # EchoTool is read-only (writes=False), but we'll simulate a write tool here by
     # using a tool whose writes=True. Calculator/Echo are both reads so test behavior
     # by forcing denial via a deny rule.
-    from harness_core.permissions import PermissionPolicy
+    from lyra_harness_core.permissions import PermissionPolicy
 
     llm = MockLLM(
         scripted_outputs=[
@@ -77,7 +77,7 @@ def test_approval_rejection_blocks_call():
             "done",
         ]
     )
-    from harness_core.permissions import PermissionPolicy
+    from lyra_harness_core.permissions import PermissionPolicy
 
     # force this call to "ask" via policy
     policy = PermissionPolicy(ask=["calculator"])
@@ -142,7 +142,7 @@ def test_default_approval_is_auto_allow():
 def test_permission_mode_plan_denies_destructive_in_loop():
     """Plan mode + a write=True tool should result in blocking."""
     from pydantic import BaseModel
-    from harness_core.tools import Tool
+    from lyra_harness_core.tools import Tool
 
     class WriteTool(Tool):
         name = "write"

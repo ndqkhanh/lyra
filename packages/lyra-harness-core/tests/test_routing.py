@@ -1,9 +1,9 @@
-"""Tests for harness_core.routing — BELLE-style query-type router."""
+"""Tests for lyra_harness_core.routing — BELLE-style query-type router."""
 from __future__ import annotations
 
 import pytest
 
-from harness_core.routing import (
+from lyra_harness_core.routing import (
     BELLERouter,
     QueryType,
     RouteDecision,

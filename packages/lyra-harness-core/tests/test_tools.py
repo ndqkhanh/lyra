@@ -1,8 +1,8 @@
 import pytest
 
-from harness_core.messages import ToolCall
-from harness_core.tools import ToolRegistry
-from harness_core.tools_builtin import CalculatorTool, EchoTool
+from lyra_harness_core.messages import ToolCall
+from lyra_harness_core.tools import ToolRegistry
+from lyra_harness_core.tools_builtin import CalculatorTool, EchoTool
 
 
 @pytest.fixture

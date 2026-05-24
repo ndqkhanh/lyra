@@ -1,9 +1,9 @@
-"""Tests for harness_core.memory_consolidation."""
+"""Tests for lyra_harness_core.memory_consolidation."""
 from __future__ import annotations
 
 import pytest
 
-from harness_core.memory_consolidation import (
+from lyra_harness_core.memory_consolidation import (
     ConsolidationPolicy,
     ConsolidationReport,
     ExtractiveSummarizer,
@@ -11,8 +11,8 @@ from harness_core.memory_consolidation import (
     TagGrouping,
     TokenJaccardGrouping,
 )
-from harness_core.memory_store import MemoryItem, MemoryKind, MemoryStore
-from harness_core.provenance import WitnessLattice
+from lyra_harness_core.memory_store import MemoryItem, MemoryKind, MemoryStore
+from lyra_harness_core.provenance import WitnessLattice
 
 
 # --- Fixtures ---------------------------------------------------------

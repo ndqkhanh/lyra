@@ -1,9 +1,9 @@
-"""Tests for harness_core.provenance — Witness + Ledger + Lattice."""
+"""Tests for lyra_harness_core.provenance — Witness + Ledger + Lattice."""
 from __future__ import annotations
 
 import pytest
 
-from harness_core.provenance import (
+from lyra_harness_core.provenance import (
     ProvenanceLedger,
     Witness,
     WitnessKind,

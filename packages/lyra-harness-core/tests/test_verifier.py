@@ -1,9 +1,9 @@
-"""Tests for harness_core.verifier — multi-axis composer + built-in verifiers."""
+"""Tests for lyra_harness_core.verifier — multi-axis composer + built-in verifiers."""
 from __future__ import annotations
 
 import pytest
 
-from harness_core.verifier import (
+from lyra_harness_core.verifier import (
     AxisVerdict,
     CompositeVerdict,
     HITLVerifier,

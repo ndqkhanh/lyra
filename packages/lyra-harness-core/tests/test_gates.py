@@ -1,9 +1,9 @@
-"""Tests for harness_core.gates — Chain-of-Note quality gate."""
+"""Tests for lyra_harness_core.gates — Chain-of-Note quality gate."""
 from __future__ import annotations
 
 import pytest
 
-from harness_core.gates import (
+from lyra_harness_core.gates import (
     ChainOfNoteGate,
     DocVerdict,
     NoteVerdict,

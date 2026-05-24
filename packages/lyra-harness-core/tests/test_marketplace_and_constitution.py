@@ -5,13 +5,13 @@ import time
 
 import pytest
 
-from harness_core.constitution import (
+from lyra_harness_core.constitution import (
     Constitution,
     ConstitutionRegistry,
     Principle,
     suggest_principle_from_edit,
 )
-from harness_core.marketplace import (
+from lyra_harness_core.marketplace import (
     InMemoryCuratorHost,
     InMemoryMarketplaceHost,
     InstallResult,

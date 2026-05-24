@@ -1,13 +1,13 @@
-"""Tests for harness_core.skill_auto — extract + promote skills from trajectories."""
+"""Tests for lyra_harness_core.skill_auto — extract + promote skills from trajectories."""
 from __future__ import annotations
 
 import pytest
 
-from harness_core.forensic import Trajectory, TrajectoryOutcome
-from harness_core.marketplace import PromotedSkill
-from harness_core.orchestration import AgentDecision
-from harness_core.provenance import WitnessLattice
-from harness_core.skill_auto import (
+from lyra_harness_core.forensic import Trajectory, TrajectoryOutcome
+from lyra_harness_core.marketplace import PromotedSkill
+from lyra_harness_core.orchestration import AgentDecision
+from lyra_harness_core.provenance import WitnessLattice
+from lyra_harness_core.skill_auto import (
     PromotionVerdict,
     SkillCandidate,
     SkillExtractor,
