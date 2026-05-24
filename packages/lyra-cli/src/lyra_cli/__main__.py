@@ -171,14 +171,6 @@ def _root(
             "from the CLI flags alone."
         ),
     ),
-    tui: bool = typer.Option(
-        True,
-        "--tui/--classic",
-        help=(
-            "Launch the TypeScript/Ink TUI (default). Use --classic "
-            "for the prompt_toolkit REPL."
-        ),
-    ),
     output_format: str = typer.Option(
         "text",
         "--output-format",

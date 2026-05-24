@@ -1,19 +1,15 @@
 """Interactive REPL for ``lyra`` (Phase 13).
 
-Running ``lyra`` with no arguments drops into a Claude-Code-style
-shell: plain text is routed to the current mode, ``/``-prefixed words
-are slash commands, and a bottom status bar keeps the operator oriented.
+Running ``lyra`` with no arguments drops into the Ink/TypeScript TUI.
+``/``-prefixed words are slash commands dispatched by the session layer.
 
 The module is intentionally layered:
 
 - ``session`` — pure dispatch logic + slash registry. No I/O, no TTY.
 - ``banner``  — Rich-rendered start screen. No I/O beyond returning a string.
-- ``completer`` — prompt_toolkit slash completer (optional dep).
-- ``driver``  — prompt_toolkit + Rich front-end, with a graceful fallback
-                to plain ``input()`` when stdout isn't a TTY (or when
-                prompt_toolkit isn't installed).
 
-Only ``driver`` touches the terminal. Everything else is unit-testable.
+Only ``session`` contains pure logic. The Ink/TS TUI handles all
+terminal interaction. Everything else is unit-testable.
 
 Imports here are intentionally **lazy** (PEP 562 ``__getattr__``) so a
 test or external script that only wants the pure dispatcher doesn't pay
