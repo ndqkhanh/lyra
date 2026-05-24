@@ -54,6 +54,7 @@ PhaseState = Literal["done", "running", "pending", "error"]
 
 _INDENT_FIRST = "  ⎿  "
 _INDENT_REST  = "     "
+_FLOW_GLYPH = "✳"  # Claude Code's progress glyph
 
 
 # ---------------------------------------------------------------------------
@@ -109,8 +110,23 @@ def make_turn_phases(
 # ---------------------------------------------------------------------------
 
 
+def _humanise_tokens(n: int) -> str:
+    if n < 1_000:
+        return str(n)
+    if n < 1_000_000:
+        return f"{n / 1_000:.1f}k"
+    return f"{n / 1_000_000:.1f}M"
+
+
+def _fmt_elapsed(secs: float) -> str:
+    m, s = divmod(int(secs), 60)
+    if m:
+        return f"{m}m {s:02d}s"
+    return f"{s}s"
+
+
 class TurnProgressHeader:
-    """One-line nyan bar + optional phase checklist.
+    """Claude Code-style progress header with optional phase checklist.
 
     Designed to sit above the streaming ``chat_renderable`` panel inside
     a ``rich.console.Group`` so it scrolls away naturally when the Live
@@ -119,12 +135,12 @@ class TurnProgressHeader:
 
     Attributes rendered::
 
-        ━━━━━━  Thinking…  (3s)
+        ✳ Thinking… (3s · ↑ 1.2k tokens)
           ⎿  ✓ Skills loaded
           ⎿  ✓ Memory loaded
           ⎿  ◼ Streaming reply
 
-    Pass ``phases=[]`` and ``streaming=False`` to get just the bar + verb.
+    Pass ``phases=[]`` and ``streaming=False`` to get just the glyph + verb.
     """
 
     def __init__(
@@ -136,6 +152,8 @@ class TurnProgressHeader:
         verb: str = "Thinking",
         streaming: bool = True,
         nyan_width: int = 6,
+        tokens: int = 0,
+        tokens_down: bool = True,
     ) -> None:
         self.phases = phases
         self.tick = tick
@@ -143,6 +161,8 @@ class TurnProgressHeader:
         self.verb = verb
         self.streaming = streaming
         self.nyan_width = nyan_width
+        self.tokens = tokens
+        self.tokens_down = tokens_down
 
     def __rich__(self) -> Text:
         return self.render()
@@ -150,11 +170,15 @@ class TurnProgressHeader:
     def render(self) -> Text:
         """Return the full Text renderable for this header."""
         out = Text()
-        # Bar + verb + elapsed
-        out.append_text(nyan_bar(width=self.nyan_width, tick=self.tick))
-        out.append("  ")
+        # ✳ Verb… (elapsed · ↑/↓ tokens)
+        elapsed_str = _fmt_elapsed(self.elapsed)
+        out.append(f"{_FLOW_GLYPH} ", style="bold #00E5FF")
         out.append(f"{self.verb}…", style="bold bright_white")
-        out.append(f"  ({self.elapsed:.0f}s)", style="#6B7280")
+        out.append(f" ({elapsed_str}", style="#6B7280")
+        if self.tokens > 0:
+            arrow = "↓" if self.tokens_down else "↑"
+            out.append(f" · {arrow} {_humanise_tokens(self.tokens)}", style="#6B7280")
+        out.append(")", style="#6B7280")
         # Phase checklist
         all_phases = list(self.phases)
         if self.streaming:

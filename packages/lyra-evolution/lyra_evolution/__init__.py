@@ -47,6 +47,26 @@ from .moss_evolution import (
     GovernanceJIT,
 )
 
+# Phase 6 — Council Mode, Escher-Loop RSI, GEAR-Evolve, Self-Improvement
+from .council import CouncilMode as _CouncilMode
+from .escher import EscherLoop as _EscherLoop
+from .gear import GEAREvolve as _GEAREvolve
+from .improvement import SelfImprovement as _SelfImprovement
+from .models import (  # noqa: F401
+    CouncilDecision,
+    CouncilMember,
+    CouncilVote,
+    EscherGeneration,
+    EscherSolver,
+    EvolutionMetrics,
+    GEARStrategy,
+)
+
+CouncilMode = _CouncilMode
+EscherLoop = _EscherLoop
+GEAREvolve = _GEAREvolve
+SelfImprovement = _SelfImprovement
+
 __version__ = "0.2.0"
 
 __all__ = [
@@ -93,4 +113,16 @@ __all__ = [
     "ModificationSeverity",
     "UserConsentGate",
     "GovernanceJIT",
+    # Phase 6 — Council Mode, Escher-Loop RSI, GEAR-Evolve, Self-Improvement
+    "CouncilMember",
+    "CouncilVote",
+    "CouncilDecision",
+    "CouncilMode",
+    "EscherSolver",
+    "EscherGeneration",
+    "EscherLoop",
+    "GEARStrategy",
+    "GEAREvolve",
+    "SelfImprovement",
+    "EvolutionMetrics",
 ]

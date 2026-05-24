@@ -21,6 +21,10 @@ Frontmatter schema (all keys are optional unless noted):
   ``lyra doctor`` surface missing requirements.
 * ``progressive`` — bool; ``True`` means description-only at chat
   injection time, full body fetched on demand. N.7 will honour this.
+* ``allowed_tools`` — list of tool names the skill is permitted to use
+  when active. Empty list = unrestricted. Consumed by the tool-approval
+  pipeline so a skill that only needs ``Read`` and ``Glob`` can't
+  accidentally escalate to ``Bash`` or ``Write``.
 
 Unknown keys are stashed verbatim in :attr:`SkillManifest.extras` so
 authors can experiment without breaking forward-compat.
@@ -43,7 +47,7 @@ class SkillLoaderError(Exception):
 _KNOWN_KEYS: frozenset[str] = frozenset(
     {
         "id", "name", "description", "version", "keywords",
-        "applies_to", "requires", "progressive",
+        "applies_to", "requires", "progressive", "allowed_tools",
     }
 )
 
@@ -82,6 +86,7 @@ class SkillManifest:
     applies_to: list[str] = field(default_factory=list)
     requires: list[str] = field(default_factory=list)
     progressive: bool = False
+    allowed_tools: list[str] = field(default_factory=list)
     extras: dict[str, Any] = field(default_factory=dict)
 
 
@@ -158,6 +163,9 @@ def _parse_skill_md(md_path: Path) -> SkillManifest:
         if "progressive" in fm
         else False
     )
+    allowed_tools = _coerce_str_list(
+        fm.get("allowed_tools"), field_name="allowed_tools", source=md_path
+    )
     extras = {k: v for k, v in fm.items() if k not in _KNOWN_KEYS}
 
     body = m.group(2).strip()
@@ -172,6 +180,7 @@ def _parse_skill_md(md_path: Path) -> SkillManifest:
         applies_to=applies_to,
         requires=requires,
         progressive=progressive,
+        allowed_tools=allowed_tools,
         extras=extras,
     )
 

@@ -44,9 +44,15 @@ def render_agent_panel(
         List of plain-text strings, one per agent, with no trailing newlines.
         Returns ``[]`` when *records* is empty.
     """
+    if not records:
+        return []
     if now is None:
         now = time.monotonic()
-    lines = []
+    lines = [
+        f"{_ICON_ACTIVE} main"
+        f"{' ' * 43}"
+        f"↑/↓ to select · Enter to view"
+    ]
     for r in records:
         icon = _ICON_ACTIVE if r.state == "running" else _ICON_IDLE
         elapsed = _fmt_elapsed(now - r.started_at)

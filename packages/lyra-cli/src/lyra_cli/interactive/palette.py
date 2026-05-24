@@ -47,37 +47,64 @@ class Palette(TypedDict):
     tool_pending: str
     tool_success: str
     tool_error: str
+    # Expanded semantic tokens (Phase 2 — Claude Code parity).
+    info: str
+    warning: str
+    highlight: str
+    diagnostic_error: str
+    diagnostic_warning: str
+    diagnostic_info: str
+    tool_file_write: str
+    tool_file_read: str
 
 
 DARK: Palette = {
-    "text":         "#cccccc",
-    "text_strong":  "#ffffff",
-    "dim":          "#555555",
-    "meta":         "#888888",
-    "accent":       "#5fafff",
-    "accent_warm":  "#ffaf00",
-    "success":      "#5fff87",
-    "error":        "#ff6e6e",
-    "selected_bg":  "#1f2533",
-    "tool_pending": "#1f2a2f",
-    "tool_success": "#1e2d23",
-    "tool_error":   "#2f1f1f",
+    "text":               "#cccccc",
+    "text_strong":        "#ffffff",
+    "dim":                "#555555",
+    "meta":               "#888888",
+    "accent":             "#5fafff",
+    "accent_warm":        "#ffaf00",
+    "success":            "#5fff87",
+    "error":              "#ff6e6e",
+    "selected_bg":        "#1f2533",
+    "tool_pending":       "#1f2a2f",
+    "tool_success":       "#1e2d23",
+    "tool_error":         "#2f1f1f",
+    # Expanded tokens.
+    "info":               "#5fafff",
+    "warning":            "#ffaf00",
+    "highlight":          "#ffdd57",
+    "diagnostic_error":   "#ff5370",
+    "diagnostic_warning": "#ffc857",
+    "diagnostic_info":    "#82aaff",
+    "tool_file_write":    "#5fff87",
+    "tool_file_read":     "#5fafff",
 }
 
 
 LIGHT: Palette = {
-    "text":         "#222222",
-    "text_strong":  "#000000",
-    "dim":          "#888888",
-    "meta":         "#5b6472",
-    "accent":       "#0750a3",
-    "accent_warm":  "#a86200",
-    "success":      "#047857",
-    "error":        "#b91c1c",
-    "selected_bg":  "#e8eef8",
-    "tool_pending": "#eff6ff",
-    "tool_success": "#ecfdf5",
-    "tool_error":   "#fef2f2",
+    "text":               "#222222",
+    "text_strong":        "#000000",
+    "dim":                "#888888",
+    "meta":               "#5b6472",
+    "accent":             "#0750a3",
+    "accent_warm":        "#a86200",
+    "success":            "#047857",
+    "error":              "#b91c1c",
+    "selected_bg":        "#e8eef8",
+    "tool_pending":       "#eff6ff",
+    "tool_success":       "#ecfdf5",
+    "tool_error":         "#fef2f2",
+    # Expanded tokens.
+    "info":               "#0750a3",
+    "warning":            "#a86200",
+    "highlight":          "#b8860b",
+    "diagnostic_error":   "#b91c1c",
+    "diagnostic_warning": "#b45309",
+    "diagnostic_info":    "#1e40af",
+    "tool_file_write":    "#047857",
+    "tool_file_read":     "#0750a3",
 }
 
 

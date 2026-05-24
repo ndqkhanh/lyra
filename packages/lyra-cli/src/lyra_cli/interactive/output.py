@@ -44,6 +44,15 @@ C_GREEN = "#7CFFB2"
 C_AMBER = "#FFC857"
 C_RED = "#FF5370"
 C_DIM = "#6B7280"
+# Expanded tokens (Phase 2).
+C_INFO = "#00E5FF"
+C_WARNING = "#FFC857"
+C_HIGHLIGHT = "#FFD700"
+C_DIAG_ERROR = "#FF5370"
+C_DIAG_WARNING = "#FFC857"
+C_DIAG_INFO = "#82AAFF"
+C_FILE_WRITE = "#7CFFB2"
+C_FILE_READ = "#00E5FF"
 
 
 # ---------------------------------------------------------------------------
@@ -599,6 +608,62 @@ def chat_error_renderable(detail: str, *, mode: str = "agent") -> Panel:
     )
 
 
+def shell_output_renderable(cmd: str, text: str, *, is_error: bool = False) -> Panel:
+    """Panel for direct shell output (``!cmd`` prefix)."""
+    border = C_RED if is_error else C_DIM
+    title_color = C_RED if is_error else C_DIM
+    return Panel(
+        Text(text.strip() or f"(exit 0)", style="bright_white"),
+        box=ROUNDED,
+        border_style=border,
+        padding=(1, 2),
+        title=f"[{title_color}]!{cmd[:40]}[/]",
+        title_align="left",
+    )
+
+
+def tasklist_renderable(tasks: list) -> Panel:
+    """Panel for persistent task list (``/tasklist``)."""
+    if not tasks:
+        return Panel(
+            Text("no tasks yet. use /tasklist add <description>", style=C_DIM),
+            box=ROUNDED,
+            border_style=C_DIM,
+            padding=(1, 2),
+            title=f"[{C_DIM}]task list[/]",
+            title_align="left",
+        )
+    glyphs = {"pending": "◻", "running": "◼", "done": "✓"}
+    colors = {"pending": C_AMBER, "running": C_CYAN, "done": C_GREEN}
+    lines: list[Text] = []
+    for t in tasks:
+        glyph = glyphs.get(t.state, "?")
+        color = colors.get(t.state, C_DIM)
+        lines.append(
+            Text.assemble(
+                (f"  {glyph} ", f"bold {color}"),
+                (f"{t.id}: ", C_DIM),
+                (t.description, "bright_white"),
+            )
+        )
+    pending_count = sum(1 for t in tasks if t.state != "done")
+    return Panel(
+        Group(*lines),
+        box=ROUNDED,
+        border_style=C_CYAN,
+        padding=(1, 2),
+        title=f"[bold {C_CYAN}]tasks · {pending_count} remaining[/]",
+        title_align="left",
+    )
+
+
+def shell_mode_renderable(state: str) -> Text:
+    """Status line for /shell toggle."""
+    color = C_GREEN if state == "on" else C_DIM
+    return _oneline("shell mode", state, kind="ok" if state == "on" else "dim",
+                    hint="plain text runs as shell · /shell off to exit")
+
+
 def retro_renderable(note: str) -> Text:
     return _oneline("retro", note, kind="neutral")
 
@@ -692,37 +757,175 @@ def compact_renderable(*, before: int, after: int) -> Text:
     )
 
 
+# Source-colour mapping for context viz — mirrors Claude Code's
+# grid colouring: system=blue, SOUL.md/CLAUDE.md=purple, conversation=green,
+# tool-output=amber, skills=cyan, overhead=dim.
+_SOURCE_STYLES: dict[str, str] = {
+    "system":       "#5B9BD5",  # blue
+    "soul_md":      "#9B59B6",  # purple
+    "conversation": "#7CFFB2",  # green
+    "tool_output":  "#FFC857",  # amber
+    "skills":       "#00E5FF",  # cyan
+    "overhead":     "#6B7280",  # dim grey
+}
+
+_SOURCE_GLYPHS: dict[str, str] = {
+    "system":       "⬡",
+    "soul_md":       "◆",
+    "conversation": "●",
+    "tool_output":  "▲",
+    "skills":       "★",
+    "overhead":     "○",
+}
+
+
 def context_renderable(
-    *, buckets: list[tuple[str, int]], budget: int
+    *,
+    buckets: list[tuple[str, int]],
+    budget: int,
+    expanded: bool = False,
 ) -> Panel:
-    t = Table(
+    """Rich context-window visualization with color-coded grid.
+
+    Renders a bar chart colored by source (system, SOUL.md, conversation,
+    tool output, skills) plus a progress bar showing % of window used.
+    When *expanded* is True, adds per-item breakdown rows.
+    """
+    total_used = sum(tok for _, tok in buckets)
+    pct = min(total_used / budget * 100, 100) if budget else 0
+
+    # ── context composition bars ──────────────────────────
+    grid = Table(
         box=None,
         show_header=False,
         pad_edge=False,
         padding=(0, 2),
     )
-    t.add_column(style=C_DIM, no_wrap=True, width=14)
-    t.add_column(style="bright_white", no_wrap=True, width=8, justify="right")
-    t.add_column(style=f"{C_INDIGO}")
+    grid.add_column(style=C_DIM, no_wrap=True, width=2)
+    grid.add_column(style=C_DIM, no_wrap=True, width=14)
+    grid.add_column(style="bright_white", no_wrap=True, width=8, justify="right")
+    grid.add_column(width=30)
+
     for label, tok in buckets:
-        width = max(int(tok * 24 / budget), 1 if tok else 0)
-        bar = "█" * width
-        t.add_row(label, f"{tok:,}", bar)
-    t.add_row(
-        Text("budget", style=f"bold {C_AMBER}"),
-        Text(f"{budget:,}", style=f"bold {C_AMBER}"),
-        "",
-    )
+        source_key = _resolve_source_key(label.lower())
+        colour = _SOURCE_STYLES.get(source_key, C_INDIGO)
+        glyph = _SOURCE_GLYPHS.get(source_key, " ")
+        bar_width = max(int(tok * 30 / budget), 1 if tok else 0)
+        bar = Text("█" * bar_width, style=f"bold {colour}")
+        grid.add_row(
+            Text(glyph, style=f"bold {colour}"),
+            label,
+            f"{tok:,}",
+            bar,
+        )
+
+    # ── progress bar ──────────────────────────────────────
+    pct_colour = C_GREEN if pct < 60 else C_AMBER if pct < 85 else C_RED
+    progress_width = 30
+    filled = int(pct * progress_width / 100)
+    progress = Text()
+    progress.append("█" * filled, style=f"bold {pct_colour}")
+    progress.append("░" * (progress_width - filled), style=C_DIM)
+    progress.append(f"  {pct:.0f}%", style=f"bold {pct_colour}")
+
+    body_parts: list[Any] = [grid, Text(""), progress]
+
+    # ── optimization suggestions ──────────────────────────
+    tips: list[str] = []
+    # Check for large conversation overhead
+    conv_tok = _bucket_tok(buckets, "transcript", "conversation")
+    if conv_tok > budget * 0.35:
+        tips.append(f"conversation using {conv_tok:,} tokens — consider /compact")
+    # Check for large SOUL.md / skills
+    soul_tok = _bucket_tok(buckets, "soul.md", "soul_md")
+    if soul_tok > budget * 0.10:
+        tips.append(f"SOUL.md at {soul_tok:,} tokens — consider trimming")
+    # Check for large tool output
+    tool_tok = _bucket_tok(buckets, "tool results", "tool output")
+    if tool_tok > budget * 0.15:
+        tips.append(f"tool output at {tool_tok:,} tokens — /clear to flush")
+    # General high-usage warning
+    if pct > 75:
+        tips.append(f"context at {pct:.0f}% — start a fresh session with /new")
+
+    if tips:
+        tip_text = Text("\n", style=C_DIM)
+        for tip in tips:
+            tip_text.append("  ⚡ ", style=C_AMBER)
+            tip_text.append(tip, style=C_DIM)
+            tip_text.append("\n")
+        body_parts.append(tip_text)
+
+    body = Group(*body_parts)
+
+    # ── expanded per-item breakdown ───────────────────────
+    if expanded:
+        detail = Table(
+            box=SIMPLE,
+            show_header=True,
+            header_style=f"bold {C_DIM}",
+            pad_edge=False,
+            padding=(0, 2),
+        )
+        detail.add_column("source", style=C_DIM, width=18)
+        detail.add_column("tokens", justify="right", width=8)
+        detail.add_column("% of window", justify="right", width=12)
+        detail.add_column("bar", width=24)
+        for label, tok in buckets:
+            source_key = _resolve_source_key(label.lower())
+            colour = _SOURCE_STYLES.get(source_key, C_INDIGO)
+            item_pct = tok / budget * 100 if budget else 0
+            bw = max(int(tok * 24 / budget), 1 if tok else 0)
+            detail.add_row(
+                label,
+                f"{tok:,}",
+                f"{item_pct:.1f}%",
+                Text("█" * bw, style=f"bold {colour}"),
+            )
+        detail.add_row(
+            Text("total", style="bold"),
+            Text(f"{total_used:,}", style="bold"),
+            Text(f"{pct:.1f}%", style="bold"),
+            Text("█" * int(pct * 24 / 100), style=f"bold {pct_colour}"),
+        )
+        body = Group(body, Text(""), detail)
+
     return Panel(
-        t,
+        body,
         box=ROUNDED,
         border_style=C_INDIGO,
         padding=(1, 2),
         title=f"[bold {C_CYAN}]context[/]",
         title_align="left",
-        subtitle=f"[dim]usage vs {budget:,}-token window[/]",
+        subtitle=f"[dim]{total_used:,} / {budget:,} tokens ({pct:.0f}%)[/]",
         subtitle_align="right",
     )
+
+
+def _resolve_source_key(label: str) -> str:
+    """Map a bucket label to a canonical source key for colour/glyph lookup."""
+    if "soul" in label or "claude" in label:
+        return "soul_md"
+    if "system" in label:
+        return "system"
+    if "transcript" in label or "conversation" in label or "chat" in label:
+        return "conversation"
+    if "tool" in label:
+        return "tool_output"
+    if "skill" in label:
+        return "skills"
+    if "overhead" in label:
+        return "overhead"
+    return "conversation"
+
+
+def _bucket_tok(buckets: list[tuple[str, int]], *keywords: str) -> int:
+    """Sum token counts for buckets whose labels contain any of *keywords*."""
+    total = 0
+    for label, tok in buckets:
+        if any(kw in label.lower() for kw in keywords):
+            total += tok
+    return total
 
 
 def cost_renderable(

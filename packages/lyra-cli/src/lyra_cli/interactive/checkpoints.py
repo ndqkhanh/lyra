@@ -1,13 +1,22 @@
-"""Checkpoint commands — Wave F.
+"""Checkpoint commands — Wave F + Phase C Gap 3.
 
-``/checkpoint``, ``/rollback``, and ``/verify`` slash handlers.
+``/checkpoint``, ``/rollback``, ``/verify``, ``/checkpoint summarize``,
+and ``/checkpoint snapshot`` slash handlers.
+
+Phase C Gap 3 enhancements:
+  - Full message history save/restore in checkpoints
+  - Per-file snapshot tracking before Edit/Write tool calls
+  - Conversation summarization from turn N to current
+  - "Summarize from here" integration in /rewind
 
 All handlers follow the ``(session, args: str) -> CommandResult`` contract
 from :mod:`lyra_cli.interactive.session` and never raise.
 """
 from __future__ import annotations
 
+import hashlib
 import json
+import shutil
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -41,6 +50,11 @@ def _checkpoints_dir(session: Any) -> Path:
     return Path.home() / ".lyra" / "checkpoints" / str(sid)
 
 
+def _snapshots_dir(session: Any) -> Path:
+    """Directory for per-file snapshots (stored alongside checkpoint metadata)."""
+    return _checkpoints_dir(session) / "files"
+
+
 def _last_user_message(session: Any) -> str:
     history: list[str] = getattr(session, "history", [])
     for item in reversed(history):
@@ -49,8 +63,64 @@ def _last_user_message(session: Any) -> str:
     return ""
 
 
+def _capture_message_history(session: Any) -> list[dict[str, Any]]:
+    """Capture full message history (turns log + chat messages) for persistence."""
+    history: list[dict[str, Any]] = []
+    turns_log = getattr(session, "_turns_log", [])
+    for snap in turns_log:
+        entry: dict[str, Any] = {
+            "line": getattr(snap, "line", ""),
+            "mode": getattr(snap, "mode", ""),
+            "turn": getattr(snap, "turn", 0),
+            "cost_usd": getattr(snap, "cost_usd", 0.0),
+            "tokens_used": getattr(snap, "tokens_used", 0),
+        }
+        if getattr(snap, "model", None):
+            entry["model"] = snap.model
+        if getattr(snap, "ts", None):
+            entry["ts"] = snap.ts
+        if getattr(snap, "cost_delta_usd", None):
+            entry["cost_delta_usd"] = snap.cost_delta_usd
+        if getattr(snap, "latency_ms", None):
+            entry["latency_ms"] = snap.latency_ms
+        history.append(entry)
+    return history
+
+
+def _restore_message_history(session: Any, history: list[dict[str, Any]]) -> int:
+    """Restore session _turns_log from serialized history entries.
+
+    Returns the number of turns restored.
+    """
+    from .session import _TurnSnapshot  # type: ignore[attr-defined]
+
+    restored: list[Any] = []
+    for entry in history:
+        snap = _TurnSnapshot(
+            line=entry.get("line", ""),
+            mode=entry.get("mode", "edit_automatically"),
+            turn=entry.get("turn", 0),
+            pending_task=entry.get("pending_task"),
+            cost_usd=entry.get("cost_usd", 0.0),
+            tokens_used=entry.get("tokens_used", 0),
+            model=entry.get("model"),
+            ts=entry.get("ts"),
+            cost_delta_usd=entry.get("cost_delta_usd"),
+            latency_ms=entry.get("latency_ms"),
+        )
+        restored.append(snap)
+
+    session._turns_log = restored
+    if restored:
+        last = restored[-1]
+        session.turn = last.turn + 1
+        session.cost_usd = last.cost_usd
+        session.tokens_used = last.tokens_used
+    return len(restored)
+
+
 def _checkpoint_data(session: Any, label: str) -> dict[str, Any]:
-    return {
+    data = {
         "label": label,
         "session_id": str(getattr(session, "session_id", "unknown")),
         "turn": getattr(session, "turn", 0),
@@ -62,6 +132,48 @@ def _checkpoint_data(session: Any, label: str) -> dict[str, Any]:
         "mode": getattr(session, "mode", "edit_automatically"),
         "pending_task": getattr(session, "pending_task", None),
     }
+    return data
+
+
+# ---------------------------------------------------------------------------
+# File snapshotting (Phase C Gap 3)
+# ---------------------------------------------------------------------------
+
+def snapshot_files(session: Any, *file_paths: str) -> dict[str, str]:
+    """Snapshot files before a tool call writes to them.
+
+    Copies each file to ``.lyra/checkpoints/<session_id>/files/`` with
+    a hash suffix so the full edit chain is recoverable. Callers (e.g.
+    the Edit/Write tool dispatchers) invoke this before applying changes.
+
+    Returns a dict mapping file_path → snapshot_path for the checkpoint
+    metadata.
+    """
+    snap_dir = _snapshots_dir(session)
+    snap_dir.mkdir(parents=True, exist_ok=True)
+    snapshots: dict[str, str] = {}
+    for fp in file_paths:
+        path = Path(fp)
+        if not path.is_file():
+            continue
+        try:
+            content = path.read_bytes()
+            file_hash = hashlib.sha256(content).hexdigest()[:12]
+            dest = snap_dir / f"{path.name}.{file_hash}"
+            if not dest.exists():
+                shutil.copy2(path, dest)
+            snapshots[str(path)] = str(dest)
+        except Exception:
+            continue
+    return snapshots
+
+
+def list_file_snapshots(session: Any) -> list[Path]:
+    """List all file snapshots for the current session."""
+    snap_dir = _snapshots_dir(session)
+    if not snap_dir.is_dir():
+        return []
+    return sorted(snap_dir.iterdir())
 
 
 # ---------------------------------------------------------------------------
@@ -69,15 +181,53 @@ def _checkpoint_data(session: Any, label: str) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 def cmd_checkpoint(session: Any, args: str) -> Any:
-    """Save current agent state to ``~/.lyra/checkpoints/<session_id>/<label>.json``."""
+    """Save current agent state to ``~/.lyra/checkpoints/<session_id>/<label>.json``.
+
+    Sub-commands (Phase C Gap 3):
+      ``/checkpoint save <label>`` — full save (same as bare, with --full option)
+      ``/checkpoint summarize <N>`` — compact conversation from turn N
+      ``/checkpoint snapshot <file>`` — manual file snapshot
+    """
     try:
-        import rich as _rich  # noqa: F401 — presence check only
+        import rich as _rich  # noqa: F401
         _has_rich = True
     except ImportError:
         _has_rich = False
 
-    label = args.strip() or f"turn-{getattr(session, 'turn', 0)}"
+    tokens = (args or "").strip().split()
+    subcmd = tokens[0].lower() if tokens else ""
+    rest = " ".join(tokens[1:]) if len(tokens) > 1 else ""
+
+    # --- /checkpoint summarize <N> ---
+    if subcmd == "summarize":
+        return _cmd_summarize(session, rest)
+
+    # --- /checkpoint snapshot <file> ---
+    if subcmd == "snapshot":
+        files = [f for f in rest.split() if f]
+        if not files:
+            return _ok("usage: /checkpoint snapshot <file> [file ...]")
+        results = snapshot_files(session, *files)
+        if not results:
+            return _ok("no files were snapshotted (all missing or unreadable)")
+        plain_lines = [f"snapshotted {len(results)} file(s):"]
+        for orig, dest in results.items():
+            plain_lines.append(f"  {orig} → {dest}")
+        return _ok("\n".join(plain_lines))
+
+    # --- /checkpoint save [label] (or bare /checkpoint) ---
+    label = rest.strip() if subcmd == "save" else (args.strip() or f"turn-{getattr(session, 'turn', 0)}")
+    if subcmd not in ("save", "") and subcmd:
+        label = args.strip() or f"turn-{getattr(session, 'turn', 0)}"
+
     data = _checkpoint_data(session, label)
+    # Phase C Gap 3: include full message history
+    data["message_history"] = _capture_message_history(session)
+
+    # Include recent file snapshot references
+    snap_files = list_file_snapshots(session)
+    if snap_files:
+        data["file_snapshots"] = [str(p) for p in snap_files[-20:]]  # last 20
 
     try:
         cp_dir = _checkpoints_dir(session)
@@ -87,13 +237,17 @@ def cmd_checkpoint(session: Any, args: str) -> Any:
     except Exception as exc:
         return _ok(f"checkpoint save failed: {exc}")
 
+    history_count = len(data.get("message_history", []))
     plain = (
         f"checkpoint saved: {label}\n"
-        f"  file:  {cp_file}\n"
-        f"  turn:  {data['turn']}\n"
-        f"  model: {data['model']}\n"
-        f"  cost:  ${data['cost_usd']:.4f}"
+        f"  file:    {cp_file}\n"
+        f"  turn:    {data['turn']}\n"
+        f"  model:   {data['model']}\n"
+        f"  cost:    ${data['cost_usd']:.4f}\n"
+        f"  history: {history_count} turns"
     )
+    if snap_files:
+        plain += f"\n  files:   {len(snap_files)} snapshots"
 
     if not _has_rich:
         return _ok(plain)
@@ -111,6 +265,9 @@ def cmd_checkpoint(session: Any, args: str) -> Any:
     t.add_row("model",   data["model"])
     t.add_row("cost",    f"${data['cost_usd']:.4f}")
     t.add_row("mode",    data["mode"])
+    t.add_row("history", f"{history_count} turns")
+    if snap_files:
+        t.add_row("files", f"{len(snap_files)} snapshots")
     if data["pending_task"]:
         t.add_row("task", data["pending_task"][:80])
 
@@ -125,11 +282,91 @@ def cmd_checkpoint(session: Any, args: str) -> Any:
 
 
 # ---------------------------------------------------------------------------
+# /checkpoint summarize <N>
+# ---------------------------------------------------------------------------
+
+def _cmd_summarize(session: Any, args: str) -> Any:
+    """Compact conversation from turn N to current.
+
+    ``/checkpoint summarize 12`` produces a summary of turns 12 through current
+    that can be used to compact context, similar to Claude Code's checkpoint
+    summarize feature.
+    """
+    turns_log = getattr(session, "_turns_log", [])
+    if not turns_log:
+        return _ok("no turns to summarize — session has no recorded turns")
+
+    try:
+        n = int(args.strip())
+    except (ValueError, TypeError):
+        return _ok(f"usage: /checkpoint summarize <turn_number>  (got: {args!r})")
+
+    if n < 1 or n > len(turns_log):
+        return _ok(f"turn {n} out of range — session has turns 1–{len(turns_log)}")
+
+    # Collect turns from N to current
+    relevant = [s for s in turns_log if s.turn >= n]
+    if not relevant:
+        return _ok(f"no turns found at or after turn {n}")
+
+    lines: list[str] = []
+    for snap in relevant:
+        line_preview = snap.line[:100].replace("\n", " ") if snap.line else "(empty)"
+        lines.append(f"turn {snap.turn:>3} [{snap.mode}] {line_preview}")
+
+    summary_header = (
+        f"conversation summary — turns {n} → {turns_log[-1].turn}\n"
+        f"{'─' * 72}\n"
+    )
+    plain = summary_header + "\n".join(lines) + (
+        f"\n{'─' * 72}\n"
+        f"total: {len(relevant)} turns  ·  "
+        f"from turn {n} to {turns_log[-1].turn}\n"
+        f"paste this as context after /compact to preserve focus"
+    )
+
+    try:
+        from rich.box import ROUNDED
+        from rich.panel import Panel
+        from rich.text import Text
+
+        body = Text()
+        body.append(summary_header, style="bold #00E5FF")
+        for snap in relevant:
+            mode_style = {"edit_automatically": "#7CFFB2", "plan_mode": "#FFC857",
+                          "ask_before_edits": "#FF5370", "auto_mode": "#7C4DFF"}
+            style = mode_style.get(snap.mode, "#6B7280")
+            line_preview = snap.line[:100].replace("\n", " ") if snap.line else "(empty)"
+            body.append(f"turn {snap.turn:>3} ", style="dim")
+            body.append(f"[{snap.mode}] ", style=style)
+            body.append(line_preview + "\n", style="bright_white")
+        body.append(
+            f"\ntotal: {len(relevant)} turns  ·  from turn {n} to {turns_log[-1].turn}",
+            style="dim italic"
+        )
+
+        panel = Panel(
+            body,
+            box=ROUNDED,
+            border_style="#7C4DFF",
+            title=f"[bold #00E5FF]checkpoint summarize — turns {n}→{turns_log[-1].turn}[/]",
+            title_align="left",
+        )
+        return _ok(plain, panel)
+    except Exception:
+        return _ok(plain)
+
+
+# ---------------------------------------------------------------------------
 # /rollback
 # ---------------------------------------------------------------------------
 
 def cmd_rollback(session: Any, args: str) -> Any:
-    """Restore session config from a prior checkpoint, or list all checkpoints."""
+    """Restore session config + message history from a prior checkpoint, or list all checkpoints.
+
+    Phase C Gap 3: full message history restore — truncates the in-memory
+    ``_turns_log`` and rewinds the session to the checkpointed state.
+    """
     cp_dir = _checkpoints_dir(session)
     label = args.strip()
 
@@ -142,22 +379,24 @@ def cmd_rollback(session: Any, args: str) -> Any:
         if not files:
             return _ok("no checkpoints found for this session")
 
-        rows: list[tuple[str, str, str, str]] = []
+        rows: list[tuple[str, str, str, str, str]] = []
         for f in files:
             try:
                 d = json.loads(f.read_text(encoding="utf-8"))
+                history_ct = len(d.get("message_history", []))
                 rows.append((
                     d.get("label", f.stem),
                     str(d.get("turn", "?")),
                     d.get("timestamp", "")[:19].replace("T", " "),
                     d.get("model", "?"),
+                    f"{history_ct} turns",
                 ))
             except Exception:
-                rows.append((f.stem, "?", "?", "?"))
+                rows.append((f.stem, "?", "?", "?", "?"))
 
         plain_lines = ["checkpoints:"]
         for r in rows:
-            plain_lines.append(f"  {r[0]:<24}  turn={r[1]:<6}  {r[2]}  {r[3]}")
+            plain_lines.append(f"  {r[0]:<24}  turn={r[1]:<6}  {r[2]}  {r[3]}  {r[4]}")
         plain = "\n".join(plain_lines)
 
         try:
@@ -169,6 +408,7 @@ def cmd_rollback(session: Any, args: str) -> Any:
             t.add_column("turn",      style="bright_white", justify="right")
             t.add_column("timestamp", style="#6B7280")
             t.add_column("model",     style="#7CFFB2")
+            t.add_column("history",   style="#6B7280")
             for r in rows:
                 t.add_row(*r)
             panel = Panel(
@@ -185,7 +425,6 @@ def cmd_rollback(session: Any, args: str) -> Any:
     # --- args given: load a checkpoint ---
     cp_file = cp_dir / f"{label}.json"
     if not cp_file.exists():
-        # try stem match without .json
         candidates = list(cp_dir.glob(f"{label}*.json")) if cp_dir.is_dir() else []
         if len(candidates) == 1:
             cp_file = candidates[0]
@@ -208,17 +447,35 @@ def cmd_rollback(session: Any, args: str) -> Any:
             except Exception:
                 pass
 
-    note = "Note: message history rollback requires session restart. Config fields restored to session."
+    # Phase C Gap 3: restore message history if available
+    history_restored = 0
+    message_history = data.get("message_history", [])
+    if message_history:
+        history_restored = _restore_message_history(session, message_history)
+        # Also truncate persisted JSONL to match
+        _truncate_persisted_log(session, history_restored)
+
+    note_parts: list[str] = []
+    if history_restored:
+        note_parts.append(f"message history restored ({history_restored} turns)")
+    if not message_history:
+        note_parts.append("Note: no message history in checkpoint; config fields only")
+
+    note = "\n".join(note_parts) if note_parts else ""
+
     plain = (
-        f"rollback preview — {data.get('label', label)}\n"
+        f"rollback — {data.get('label', label)}\n"
         f"  turn:         {data.get('turn', '?')}\n"
         f"  model:        {data.get('model', '?')}\n"
         f"  mode:         {data.get('mode', '?')}\n"
         f"  cost_usd:     ${data.get('cost_usd', 0):.4f}\n"
         f"  pending_task: {data.get('pending_task') or '—'}\n"
         f"  timestamp:    {data.get('timestamp', '?')[:19].replace('T', ' ')}\n"
-        f"\n{note}"
     )
+    if history_restored:
+        plain += f"  turns restored: {history_restored}\n"
+    if note:
+        plain += f"\n{note}"
 
     try:
         from rich.box import ROUNDED
@@ -236,9 +493,13 @@ def cmd_rollback(session: Any, args: str) -> Any:
         t.add_row("cost_usd",     f"${data.get('cost_usd', 0):.4f}")
         t.add_row("pending_task", data.get("pending_task") or "—")
         t.add_row("timestamp",    str(data.get("timestamp", "?"))[:19].replace("T", " "))
-        note_text = Text(note, style="italic #6B7280")
+        if history_restored:
+            t.add_row("turns restored", str(history_restored))
+        elements: list[Any] = [t]
+        if note:
+            elements.append(Text(note, style="italic #6B7280"))
         panel = Panel(
-            Group(t, note_text),
+            Group(*elements),
             box=ROUNDED,
             border_style="#FFC857",
             title=f"[bold #FFC857]rollback: {data.get('label', label)}[/]",
@@ -247,6 +508,25 @@ def cmd_rollback(session: Any, args: str) -> Any:
         return _ok(plain, panel)
     except Exception:
         return _ok(plain)
+
+
+def _truncate_persisted_log(session: Any, target_length: int) -> None:
+    """Truncate the on-disk JSONL to match the restored turn count."""
+    sessions_root = getattr(session, "sessions_root", None)
+    session_id = getattr(session, "session_id", None)
+    if not sessions_root or not session_id:
+        return
+    try:
+        jsonl_path = Path(sessions_root) / str(session_id) / "turns.jsonl"
+        if not jsonl_path.exists():
+            return
+        lines = jsonl_path.read_text(encoding="utf-8").rstrip("\n").split("\n")
+        if len(lines) <= target_length:
+            return
+        truncated = lines[:target_length]
+        jsonl_path.write_text("\n".join(truncated) + "\n", encoding="utf-8")
+    except Exception:
+        pass  # best-effort — don't crash rollback on IO error
 
 
 # ---------------------------------------------------------------------------
@@ -424,4 +704,6 @@ __all__ = [
     "cmd_checkpoint",
     "cmd_rollback",
     "cmd_verify",
+    "snapshot_files",
+    "list_file_snapshots",
 ]

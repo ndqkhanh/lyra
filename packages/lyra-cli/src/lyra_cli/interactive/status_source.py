@@ -78,6 +78,8 @@ class StatusSource:
     current_verb: str = "Thinking"
     # Sub-task checklist (cleared each turn)
     task_list: list[TaskItem] = field(default_factory=list)
+    # Persistent task count (survives across turns — from session.persistent_tasks)
+    persistent_task_count: int = 0
     # Active sub-agent records shown in the agent panel
     sub_agents: list[SubAgentRecord] = field(default_factory=list)
 

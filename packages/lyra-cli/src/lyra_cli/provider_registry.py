@@ -32,7 +32,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Mapping
 
-from .config_io import load_settings
+from .config_io import load_settings_dict
 
 
 _log = logging.getLogger(__name__)
@@ -175,7 +175,7 @@ def load_registered_providers(settings_path: Path | str | None = None) -> dict[s
         home = os.environ.get("LYRA_HOME")
         base = Path(home) if home else Path.home() / ".lyra"
         settings_path = base / "settings.json"
-    settings = load_settings(settings_path)
+    settings = load_settings_dict(settings_path)
     return {e.slug: e for e in parse_providers(settings)}
 
 

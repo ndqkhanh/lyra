@@ -57,7 +57,7 @@ import time as _time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from .. import __version__
 from . import output as _out
@@ -65,6 +65,7 @@ from .config_store import Config as _ConfigT
 from .config_store import apply_to_session as _apply_config_to_session
 from .cron import CronCommandError, handle_cron
 from .status_source import StatusSource as _StatusSource
+from .status_source import TaskItem
 
 _VALID_MODES: tuple[str, ...] = (
     "edit_automatically",
@@ -125,6 +126,21 @@ _LEGACY_MODE_REMAP: dict[str, str] = {
     "run": "edit_automatically",
     "explore": "plan_mode",
     "retro": "auto_mode",
+}
+
+# Permission mode names from Claude Code / CLI flags → Lyra's internal names.
+# Maps the values accepted by ``--permission-mode`` (and settings.json) to
+# the session's ``permission_mode`` field values (normal / strict / yolo).
+_CC_PERMISSION_MODE_MAP: dict[str, str] = {
+    "default": "normal",
+    "acceptedits": "normal",
+    "acceptEdits": "normal",
+    "plan": "normal",  # plan mode is managed separately via session.mode
+    "auto": "normal",  # auto mode is managed separately
+    "dontask": "yolo",
+    "dontAsk": "yolo",
+    "bypasspermissions": "yolo",
+    "bypassPermissions": "yolo",
 }
 
 # Tab cycle order is intentionally NOT the same as ``_VALID_MODES``. We
@@ -278,9 +294,12 @@ class InteractiveSession:
     tokens_used: int = 0
     history: list[str] = field(default_factory=list)
     pending_task: str | None = None
+    pending_goal: str | None = None
+    goal_turn_start: int = 0
 
     # New in this wave (all optional so existing tests stay green):
     deep_think: bool = False
+    max_thinking_tokens: int | None = None
     verbose: bool = False
     vim_mode: bool = False
     theme: str = "aurora"
@@ -291,6 +310,19 @@ class InteractiveSession:
     # the persisted ``budget`` block, so toggling lives in
     # ``~/.lyra/auth.json`` rather than at the CLI flag level.
     budget_auto_stop: bool = True
+    # Phase C Gap 2 — CLI flag parity fields.
+    # ``max_turns``: auto-exit after N turns (headless/CI safety).
+    # ``max_budget_usd``: auto-exit when cumulative cost crosses threshold.
+    # ``effort``: session-level effort (low/medium/high/xhigh/max).
+    # ``additional_dirs``: extra directories accessible beyond repo_root.
+    # ``settings_path``: explicit path to a custom settings.json.
+    # ``verbose_view``: start with verbose tool-output view.
+    max_turns: int | None = None
+    max_budget_usd: float | None = None
+    effort: str | None = None
+    additional_dirs: list[str] | None = None
+    settings_path: str | None = None
+    verbose_view: bool = False
 
     # v2.2.4: streaming chat. ``_console`` is the ``rich.Console``
     # the driver creates for the REPL — the chat handler reuses it to
@@ -308,6 +340,16 @@ class InteractiveSession:
     # otherwise the driver would repaint the same reply.
     _stream_just_drew: bool = False
     task_panel: bool = False
+    # Persistent task list that survives across turns (populated by
+    # agent TodoWrite calls and user /tasklist commands). Distinct from
+    # ``status_source.task_list`` which is per-turn transient checklist.
+    persistent_tasks: list = field(default_factory=list)
+    # Ctrl+O toggles transcript overlay — prints recent turns above the prompt.
+    show_transcript: bool = False
+    # /shell toggles a dedicated shell sub-mode. When on, plain-text input
+    # (lines that don't start with ``/`` or ``!``) is executed as shell
+    # commands instead of being routed to the LLM.
+    shell_mode: bool = False
     # v1.7.5 Wave-C Task 6: cycled by Alt+M. ``strict`` requires
     # explicit confirmation for every tool call; ``normal`` is the
     # default; ``yolo`` skips confirmation prompts entirely.
@@ -374,7 +416,7 @@ class InteractiveSession:
     # is the canonical entry point that loads the file *and* applies
     # the known keys.
     config_path: Path | None = None
-    config: "_ConfigT | None" = field(default=None, repr=False)
+    config: _ConfigT | None = field(default=None, repr=False)
 
     # v1.8 (Wave-D, Task 2): live subagent process table.
     # ``subagent_registry`` is an injected
@@ -445,7 +487,7 @@ class InteractiveSession:
     # cheap (dozens of files, max) but pointless to repeat. The
     # cache is invalidated when ``/skills reload`` is invoked.
     skills_inject_enabled: bool = True
-    _cached_skill_block: Optional[str] = field(default=None, repr=False)
+    _cached_skill_block: str | None = field(default=None, repr=False)
 
     # v3.5.0 (Phase O.2): per-turn skill activation telemetry.
     #
@@ -543,6 +585,11 @@ class InteractiveSession:
     _reflexion_memory: Any = field(default=None, repr=False)
     _last_user_task: str | None = field(default=None, repr=False)
 
+    # Gap 17 (v3.6): Dynamic tool-search registry. None when
+    # ``LYRA_ENABLE_TOOL_SEARCH`` is false; populated lazily at boot
+    # when enabled. ``/tool-search`` reads this to print status.
+    _tool_registry: Any | None = field(default=None, repr=False)
+
     def __post_init__(self) -> None:
         """Normalise legacy mode names → v3.6 canonical and align permission posture.
 
@@ -575,10 +622,26 @@ class InteractiveSession:
 
         v3.7.0 (Phase 1): Auto-register discovered skills as slash commands.
         """
+        # First: normalise ``--permission-mode`` CLI values
+        # (``acceptEdits``, ``bypassPermissions``, etc.) to Lyra's internal
+        # permission_mode names (``normal``, ``yolo``). This must run
+        # *before* the mode alignment below so the alignment logic sees
+        # the canonical form.
+        mapped_perm = _CC_PERMISSION_MODE_MAP.get(self.permission_mode)
+        if mapped_perm is not None:
+            self.permission_mode = mapped_perm
+
         canonical = _LEGACY_MODE_REMAP.get(self.mode, self.mode)
         if canonical != self.mode:
             self.mode = canonical
-        if self.mode == "edit_automatically" and self.permission_mode == "normal":
+
+        # Align permission_mode to the mode's default posture, but
+        # preserve an explicit ``yolo`` override from
+        # ``--permission-mode bypassPermissions`` or
+        # ``--dangerously-skip-permissions``.
+        if self.permission_mode == "yolo":
+            pass  # user override — leave it alone
+        elif self.mode == "edit_automatically" and self.permission_mode == "normal":
             # Already aligned; nothing to do.
             pass
         elif self.mode == "edit_automatically":
@@ -588,6 +651,9 @@ class InteractiveSession:
 
         # Auto-register skills as slash commands
         self._register_skills()
+
+        # Gap 17: Bootstrap dynamic tool-search registry when enabled
+        self._init_tool_search()
 
     def _register_skills(self) -> None:
         """Auto-register discovered skills as slash commands."""
@@ -612,13 +678,29 @@ class InteractiveSession:
             # Skill system is optional; if it fails to load, continue without it
             pass
 
+    def _init_tool_search(self) -> None:
+        """Bootstrap ``ToolSearchRegistry`` when ``LYRA_ENABLE_TOOL_SEARCH`` is active."""
+        try:
+            from .tool_search import ToolSearchRegistry
+            from .tools import registered_tools
+
+            enabled, _ = ToolSearchRegistry.parse_enabled()
+            if enabled:
+                self._tool_registry = ToolSearchRegistry(registered_tools())
+        except Exception:
+            pass
+
     def dispatch(self, line: str) -> CommandResult:
         stripped = line.strip()
         if not stripped:
             return CommandResult()
         self.history.append(stripped)
+        if stripped.startswith("!"):
+            return self._dispatch_shell(stripped[1:].strip())
         if stripped.startswith("/"):
             return self._dispatch_slash(stripped)
+        if self.shell_mode:
+            return self._dispatch_shell(stripped)
         return self._dispatch_plain(stripped)
 
     def _dispatch_slash(self, line: str) -> CommandResult:
@@ -714,7 +796,71 @@ class InteractiveSession:
         self._last_user_task = line
         self.turn += 1
         handler = _MODE_HANDLERS.get(self.mode, _handle_plan_mode_text)
-        return handler(self, line)
+        result = handler(self, line)
+
+        if self.pending_goal is not None:
+            turns_elapsed = self.turn - self.goal_turn_start
+            max_goal_turns = self.max_turns or 20
+            if turns_elapsed >= max_goal_turns:
+                self.pending_goal = None
+                result = CommandResult(
+                    output=(result.output or "") + "\n\n[goal] max iterations reached — cleared",
+                    renderable=result.renderable,
+                )
+            else:
+                verified = _verify_goal(self)
+                if verified == "YES":
+                    self.pending_goal = None
+                    result = CommandResult(
+                        output=(result.output or "") + "\n\n[goal] condition met ✓",
+                        renderable=result.renderable,
+                    )
+
+        return result
+
+    def _dispatch_shell(self, cmd: str) -> CommandResult:
+        """Execute a shell command directly (``!cmd`` prefix).
+
+        Runs via ``subprocess`` with a 30s timeout. Captures stdout and
+        stderr, returns both in a dim-styled panel so shell output is
+        visually distinct from LLM replies.
+        """
+        if not cmd:
+            return CommandResult(output="usage: !<command>")
+
+        import subprocess
+
+        try:
+            result = subprocess.run(
+                cmd,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=30,
+                cwd=self.repo_root,
+            )
+        except subprocess.TimeoutExpired:
+            return CommandResult(
+                output=f"!{cmd} — timed out (30s)",
+                renderable=_out.shell_output_renderable(
+                    cmd, "(timed out after 30s)", is_error=True
+                ),
+            )
+
+        stdout = result.stdout.rstrip()
+        stderr = result.stderr.rstrip()
+        output_parts: list[str] = []
+        if stdout:
+            output_parts.append(stdout)
+        if stderr:
+            output_parts.append(stderr)
+        text = "\n".join(output_parts) if output_parts else f"!{cmd} — exit {result.returncode}"
+
+        is_error = result.returncode != 0
+        return CommandResult(
+            output=text,
+            renderable=_out.shell_output_renderable(cmd, text, is_error=is_error),
+        )
 
     def _execute_skill(self, skill_name: str, args: str) -> CommandResult:
         """Execute a skill by name with given arguments.
@@ -740,7 +886,6 @@ class InteractiveSession:
                 return CommandResult(output=f"Skill '{skill_name}' has no prompt_file defined")
 
             # Resolve prompt file path (relative to skill JSON location)
-            from pathlib import Path
             skill_dir = self._skill_manager.global_skills_dir
             if (self._skill_manager.local_skills_dir / f"{skill_name}.json").exists():
                 skill_dir = self._skill_manager.local_skills_dir
@@ -1099,7 +1244,7 @@ class InteractiveSession:
         session_id: str,
         sessions_root: Path,
         repo_root: Path,
-    ) -> "InteractiveSession | None":
+    ) -> InteractiveSession | None:
         """Re-build a session from its on-disk ``turns.jsonl``.
 
         Returns ``None`` when the directory or log is missing — callers
@@ -1236,7 +1381,7 @@ class InteractiveSession:
         repo_root: Path,
         config_path: Path | None = None,
         **overrides: Any,
-    ) -> "InteractiveSession":
+    ) -> InteractiveSession:
         """Boot a session honouring the user's persisted ``/config`` keys.
 
         ``config_path`` defaults to ``None`` — callers that want the
@@ -1282,17 +1427,17 @@ class InteractiveSession:
           local endpoint reachable)
         * ``—`` — provider not configured
         """
-        import os
+
+        from lyra_core.providers.aliases import (
+            DEFAULT_ALIASES,
+            resolve_alias,
+        )
 
         from lyra_cli.llm_factory import (
             provider_env_var,
             provider_has_credentials,
         )
         from lyra_cli.providers.openai_compatible import PRESETS
-        from lyra_core.providers.aliases import (
-            DEFAULT_ALIASES,
-            resolve_alias,
-        )
 
         # Display names + ordering. Local backends sit at the bottom so
         # the cloud catalog dominates the picker.
@@ -2426,6 +2571,17 @@ def _augment_system_prompt_with_skills(
         except Exception:
             pass
 
+        # v3.12: compute the tool allowlist from activated skills so
+        # ``_approve`` can enforce per-skill ``allowed_tools``. We
+        # compute the *union* of allowed_tools across all activated
+        # skills — if any skill declares a non-empty list, the tool
+        # call must be in that union. Skills with empty lists are
+        # unrestricted and don't contribute constraints.
+        try:
+            _cache_active_skill_allowlist(session, activated_ids)
+        except Exception:
+            pass
+
     if not block:
         return system_prompt
     return system_prompt.rstrip() + "\n\n" + block
@@ -2459,6 +2615,46 @@ def _render_skill_block_live(
     return result.text, list(result.activated_ids), dict(result.activation_reasons)
 
 
+def _cache_active_skill_allowlist(
+    session: InteractiveSession, activated_ids: list[str]
+) -> None:
+    """Compute the union of ``allowed_tools`` across activated skills.
+
+    Stores the result on ``session._active_skill_tool_allowlist`` so
+    ``_approve`` can enforce per-skill tool restrictions without
+    re-walking the skills directory on every tool call.
+
+    When the allowlist is ``None`` (no activated skill declared
+    ``allowed_tools``) the approval flow does no extra checking.
+    An empty set means *at least one* skill declared restrictions
+    but none of its tools overlap — every tool call will be denied
+    until the active skill set changes.
+    """
+    if not activated_ids:
+        session._active_skill_tool_allowlist = None  # type: ignore[attr-defined]
+        return
+    try:
+        from .skills_inject import _load_skills_safely, discover_skill_roots
+    except Exception:
+        session._active_skill_tool_allowlist = None  # type: ignore[attr-defined]
+        return
+    skills = _load_skills_safely(discover_skill_roots(session.repo_root))
+    by_id = {s.id: s for s in skills}
+    restricted = False
+    allowlist: set[str] = set()
+    for sid in activated_ids:
+        manifest = by_id.get(sid)
+        if manifest is None:
+            continue
+        tools = getattr(manifest, "allowed_tools", None) or []
+        if tools:
+            restricted = True
+            allowlist.update(tools)
+    session._active_skill_tool_allowlist = (  # type: ignore[attr-defined]
+        allowlist if restricted else None
+    )
+
+
 def _load_session_skills_state(session: InteractiveSession):
     """Return the user's per-skill overrides for this session.
 
@@ -2489,7 +2685,7 @@ def _stdin_is_tty() -> bool:
         return False
 
 
-def _launch_skills_picker(session: InteractiveSession) -> "CommandResult":
+def _launch_skills_picker(session: InteractiveSession) -> CommandResult:
     """Run the full-screen picker and persist the result.
 
     Falls back to a friendly error CommandResult if prompt_toolkit is
@@ -2497,8 +2693,9 @@ def _launch_skills_picker(session: InteractiveSession) -> "CommandResult":
     convenience, not load-bearing infrastructure.
     """
     try:
-        from .dialog_skills import run_skills_dialog
         from lyra_skills.state import SkillsState, load_state, save_state
+
+        from .dialog_skills import run_skills_dialog
     except Exception as exc:  # pragma: no cover — defensive
         return CommandResult(output=f"skills picker unavailable: {exc}")
 
@@ -2535,7 +2732,7 @@ def _launch_skills_picker(session: InteractiveSession) -> "CommandResult":
     )
 
 
-def _print_skills_state(session: InteractiveSession) -> "CommandResult":
+def _print_skills_state(session: InteractiveSession) -> CommandResult:
     """Show the user's persisted skill overrides as plain text."""
     try:
         from lyra_skills.state import SkillsState, load_state
@@ -2560,7 +2757,7 @@ def _print_skills_state(session: InteractiveSession) -> "CommandResult":
     return CommandResult(output="\n".join(lines))
 
 
-def _launch_sessions_picker(sessions_root: Path) -> Optional[str]:
+def _launch_sessions_picker(sessions_root: Path) -> str | None:
     """Open the full-screen sessions picker and return the chosen id.
 
     Returns ``None`` when the user cancels or the picker is otherwise
@@ -2578,7 +2775,7 @@ def _launch_sessions_picker(sessions_root: Path) -> Optional[str]:
     return None if result is None else result.session_id
 
 
-def _launch_agents_picker(session: InteractiveSession) -> "CommandResult":
+def _launch_agents_picker(session: InteractiveSession) -> CommandResult:
     """Run the full-screen agents picker (catalog + live views).
 
     The picker is non-destructive: it returns a chosen preset name
@@ -2608,7 +2805,7 @@ def _launch_agents_picker(session: InteractiveSession) -> "CommandResult":
     return CommandResult(output="agents picker: no selection.")
 
 
-def _render_preset_detail(entry) -> "CommandResult":
+def _render_preset_detail(entry) -> CommandResult:
     """Pretty-print a catalog preset the user picked."""
     lines = [
         f"agent preset: {entry.name}",
@@ -2627,7 +2824,7 @@ def _render_preset_detail(entry) -> "CommandResult":
     return CommandResult(output="\n".join(lines))
 
 
-def _render_live_detail(entry) -> "CommandResult":
+def _render_live_detail(entry) -> CommandResult:
     """Pretty-print a live subagent record the user picked."""
     lines = [
         f"subagent: {entry.record_id}",
@@ -2648,7 +2845,7 @@ def _toggle_skill_id(
     skill_id: str,
     *,
     enable: bool,
-) -> "CommandResult":
+) -> CommandResult:
     """Programmatic equivalent of pressing Space on *skill_id* in the picker.
 
     Refuses to disable locked skills (packaged packs) — same invariant
@@ -2656,6 +2853,7 @@ def _toggle_skill_id(
     """
     try:
         from lyra_skills.state import SkillsState, load_state, save_state
+
         from .skills_inject import (
             _load_skills_safely,
             _packaged_pack_root,
@@ -2910,8 +3108,8 @@ def _chat_with_tool_loop(
 
     def _approve(name: str, _args: dict[str, Any]) -> bool:
         policy, hook_specs, hooks_enabled = _load_policy_and_hooks()
-        from lyra_core.permissions.grammar import Verdict
         from lyra_core.hooks.user_hooks import run_hooks
+        from lyra_core.permissions.grammar import Verdict
 
         # Step 1: declarative deny rules short-circuit before we even
         # consider hooks — saves a subprocess hop on the safe path
@@ -2950,6 +3148,24 @@ def _chat_with_tool_loop(
             if outcome.mutated_args is not None:
                 _args.clear()
                 _args.update(outcome.mutated_args)
+
+        # Step 2.5: per-skill allowed-tools enforcement. When at least
+        # one activated skill declares ``allowed_tools``, the tool call
+        # must be in the union. Skills that don't declare a list are
+        # unrestricted. An empty allowlist means at least one skill
+        # declared restrictions but none matched — everything is denied
+        # until the active skill set changes.
+        allowlist = getattr(session, "_active_skill_tool_allowlist", None)
+        if allowlist is not None:
+            if name not in allowlist:
+                console = getattr(session, "_console", None)
+                if console is not None:
+                    console.print(
+                        f"[red]⎿  blocked by skill allowed-tools[/red] "
+                        f"(active skills restrict to: {', '.join(sorted(allowlist))})",
+                        highlight=False,
+                    )
+                return False
 
         # Step 3: declarative allow rules (matched but not denied) and
         # the legacy LOW_RISK fast path. Both auto-approve.
@@ -3219,7 +3435,7 @@ def _stream_chat_to_console(
     messages: list[Any],
     *,
     mode_for_panel: str,
-    completed_phases: "list[tuple[str, str]] | None" = None,
+    completed_phases: list[tuple[str, str]] | None = None,
 ) -> tuple[bool, str]:
     """Drive the streaming chat panel.
 
@@ -3241,8 +3457,8 @@ def _stream_chat_to_console(
     rather than just the model's words appearing from nowhere.
     """
     try:
-        from rich.live import Live
         from rich.console import Group
+        from rich.live import Live
     except Exception as exc:  # pragma: no cover — Rich is a hard dep
         return False, f"rich import failed: {exc}"
 
@@ -3381,6 +3597,26 @@ def _build_chat_handler(mode: str):
 
     _handler.__name__ = f"_handle_{mode}_text"
     return _handler
+
+
+def _verify_goal(session: InteractiveSession) -> str | None:
+    """Return 'YES', 'NO', or None on error."""
+    try:
+        provider = _ensure_llm(session)
+    except Exception:
+        return None
+    from harness_core.messages import Message
+    prompt = f"Does the following condition now hold: {session.pending_goal}?\nAnswer YES or NO."
+    try:
+        reply = provider.generate([Message.user(prompt)], max_tokens=32)
+    except Exception:
+        return None
+    text = (reply.content or "").strip().upper()
+    if text.startswith("YES") or "YES" in text[:15]:
+        return "YES"
+    if text.startswith("NO") or "NO" in text[:15]:
+        return "NO"
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -3622,7 +3858,7 @@ def _cmd_status(session: InteractiveSession, _args: str) -> CommandResult:
             f"verbose:     {'on' if session.verbose else 'off'}",
             f"vim:         {'on' if session.vim_mode else 'off'}",
             f"theme:       {session.theme}",
-            f"budget:      "
+            "budget:      "
             + (
                 f"${session.budget_cap_usd:.2f}"
                 if session.budget_cap_usd is not None
@@ -4438,9 +4674,10 @@ def _cmd_compact(session: InteractiveSession, _args: str) -> CommandResult:
 
 
 def _cmd_context(session: InteractiveSession, _args: str) -> CommandResult:
-    """``/context [checkpoint|prune|playbook|inject|breakdown]``
+    """``/context [all|checkpoint|prune|playbook|inject]``
 
-    Without args: context window breakdown.
+    Without args: color-coded context-window grid with optimization tips.
+    ``/context all``: expanded per-item breakdown with percentages.
     Sub-commands (Wave B): checkpoint, prune, playbook, inject.
     """
     _ce_verbs = {"checkpoint", "prune", "playbook", "inject"}
@@ -4448,24 +4685,104 @@ def _cmd_context(session: InteractiveSession, _args: str) -> CommandResult:
     if _verb in _ce_verbs:
         from .context_engineering import cmd_context_extended
         return cmd_context_extended(session, _args)
+    expanded = _verb == "all"
+
+    # Estimate context composition from session state.
+    # These are best-effort estimates since Lyra doesn't have direct
+    # access to the provider's token counter for each message block.
     budget = 200_000
-    used = session.tokens_used
+    total_used = session.tokens_used or 0
+
+    # SOUL.md: approximate from known file size (1 tok ≈ 0.75 words)
+    soul_tok = 0
+    try:
+        soul_path = Path(session.repo_root) / "SOUL.md"
+        if soul_path.is_file():
+            soul_text = soul_path.read_text(encoding="utf-8")
+            soul_tok = max(len(soul_text.split()) * 4 // 3, 200)
+    except Exception:
+        soul_tok = 400
+
+    # Skills content loaded in this session
+    skills_tok = _estimate_skills_tokens(session)
+
+    # Tool output: accumulated from turn results
+    tool_tok = _estimate_tool_output_tokens(session)
+
+    # System prompt overhead (Lyra internal instructions + provider framing)
+    sys_tok = 2_500
+
+    # Remaining is conversation transcript
+    conv_tok = max(total_used - soul_tok - skills_tok - tool_tok - sys_tok, 0)
+    # Clamp — conversation should never go negative but guard anyway
+    conv_tok = max(conv_tok, min(total_used // 3, 10_000) if total_used > 0 else 0)
+    # Re-normalize so buckets don't exceed budget
+    overhead = max(budget - soul_tok - skills_tok - conv_tok - tool_tok - sys_tok, 0)
+
     buckets: list[tuple[str, int]] = [
-        ("SOUL.md", max(budget // 40, 400)),
-        ("plan / task", 600 if session.pending_task else 0),
-        ("transcript", max(used - 1000, 0)),
-        ("tool results", 0),
-        ("skills", 120),
+        ("system",       sys_tok),
+        ("SOUL.md",      soul_tok),
+        ("skills",       skills_tok),
+        ("conversation", conv_tok),
+        ("tool output",  tool_tok),
+        ("overhead",     overhead),
     ]
+
     plain_lines = ["Context breakdown:"]
     for label, tok in buckets:
         bar = "█" * max(tok * 24 // budget, 1 if tok else 0)
         plain_lines.append(f"  {label:<14} {tok:>7,}  {bar}")
-    plain_lines.append(f"  budget        {budget:>7,}")
+    pct = total_used * 100 // budget if budget else 0
+    plain_lines.append(f"  {'budget':<14} {budget:>7,}  ({pct}% used)")
+
     return CommandResult(
         output="\n".join(plain_lines),
-        renderable=_out.context_renderable(buckets=buckets, budget=budget),
+        renderable=_out.context_renderable(
+            buckets=buckets, budget=budget, expanded=expanded,
+        ),
     )
+
+
+def _estimate_skills_tokens(session: InteractiveSession) -> int:
+    """Estimate tokens consumed by loaded skill definitions."""
+    tok = 120  # base overhead
+    try:
+        skills_dir = Path(session.repo_root) / ".lyra" / "skills"
+        if skills_dir.is_dir():
+            for skill_md in skills_dir.rglob("*.md"):
+                try:
+                    text = skill_md.read_text(encoding="utf-8")
+                    tok += len(text.split()) * 4 // 3
+                except Exception:
+                    tok += 200
+    except Exception:
+        pass
+    # Also count global skills
+    try:
+        global_skills = Path.home() / ".lyra" / "skills"
+        if global_skills.is_dir():
+            for skill_md in global_skills.rglob("*.md"):
+                try:
+                    text = skill_md.read_text(encoding="utf-8")
+                    tok += len(text.split()) * 4 // 3
+                except Exception:
+                    tok += 100
+    except Exception:
+        pass
+    return min(tok, 15_000)
+
+
+def _estimate_tool_output_tokens(session: InteractiveSession) -> int:
+    """Estimate tokens from accumulated tool output in turn history."""
+    tok = 0
+    for snap in session._turns_log:
+        # Each turn may have tool results — rough estimate
+        line = snap.line or ""
+        if line.startswith("!") or line.startswith("/run"):
+            tok += 300
+        elif len(line) > 500:
+            tok += len(line.split()) * 4 // 3
+    return min(tok, 50_000)
 
 
 def _cmd_cost(session: InteractiveSession, _args: str) -> CommandResult:
@@ -4497,11 +4814,11 @@ def _cmd_stats(session: InteractiveSession, _args: str) -> CommandResult:
     plain = "\n".join(
         [
             f"turns:            {session.turn}",
-            f"slash commands:   "
+            "slash commands:   "
             + str(sum(1 for h in session.history if h.startswith("/"))),
-            f"bash invocations: "
+            "bash invocations: "
             + str(sum(1 for h in session.history if h.startswith("!"))),
-            f"file mentions:    "
+            "file mentions:    "
             + str(sum(1 for h in session.history if h.startswith("@"))),
             f"cost:             ${session.cost_usd:.4f}",
             f"tokens:           {session.tokens_used:,}",
@@ -4525,13 +4842,23 @@ def _cmd_stats(session: InteractiveSession, _args: str) -> CommandResult:
 
 
 def _cmd_diff(session: InteractiveSession, args: str) -> CommandResult:
-    """Run a real ``git diff --stat`` + ``git diff`` against the working tree.
+    """Run ``git diff --stat`` + ``git diff`` against the working tree.
 
-    Falls back gracefully outside a git repo, on a clean tree, or when
-    git is not installed. v1.5 wrapped this with per-hunk author + age
-    annotations; v1.7.4 made it a first-class command instead of a stub
-    pointing at ``!git diff``.
+    Without args (or with ``-i``/``--interactive``): launch interactive
+    diff browser with left/right mode switching and up/down file browsing
+    (Phase C Gap 4).
+
+    With args: pass through to ``git diff`` directly.
     """
+    args_stripped = args.strip()
+    if not args_stripped or args_stripped in ("-i", "--interactive"):
+        try:
+            from .diff_viewer import run_diff_viewer
+            run_diff_viewer(session, session.repo_root)
+            return CommandResult(output="diff viewer closed.")
+        except ImportError:
+            # Fall back to text diff if prompt_toolkit isn't available
+            pass
     return CommandResult(
         output=session._cmd_diff_text(args),
         renderable=_out.diff_renderable(),
@@ -4539,6 +4866,17 @@ def _cmd_diff(session: InteractiveSession, args: str) -> CommandResult:
 
 
 def _cmd_rewind(session: InteractiveSession, _args: str) -> CommandResult:
+    """``/rewind [summarize]`` — undo the most recent turn.
+
+    Without args: pops the last turn and restores pre-turn state.
+    ``/rewind summarize``: checkpoint current state, then rewind to drop
+    a compactable summary (Phase C Gap 3 — mirrors Claude Code's
+    "summarize up to here" rewind menu option).
+    """
+    _verb = (_args or "").strip().lower()
+    if _verb == "summarize":
+        return _rewind_summarize(session)
+
     snap = session.rewind_one()
     if snap is None:
         return CommandResult(
@@ -4554,6 +4892,37 @@ def _cmd_rewind(session: InteractiveSession, _args: str) -> CommandResult:
         ),
         renderable=_out.rewind_renderable(snap),
         new_mode=snap.mode,
+    )
+
+
+def _rewind_summarize(session: InteractiveSession) -> CommandResult:
+    """Save a summary checkpoint then rewind — "summarize from here"."""
+    from .checkpoints import _cmd_summarize, cmd_checkpoint
+    from .output import _oneline as _ol
+
+    # First save a checkpoint of current state
+    label = f"rewind-summary-turn-{session.turn}"
+    current = session.turn
+
+    # Create a summary of the most recent turns
+    summary_start = max(current - 3, 1)
+    summary_result = _cmd_summarize(session, str(summary_start))
+
+    # Save the checkpoint
+    cp_result = cmd_checkpoint(session, f"save {label}")
+
+    combined = (
+        f"{cp_result.output}\n\n"
+        f"[summary of turns {summary_start}→{current}]\n"
+        f"{summary_result.output}"
+    )
+    return CommandResult(
+        output=combined,
+        renderable=_ol(
+            "rewind summarize",
+            f"checkpoint saved as '{label}'; summary covers turns {summary_start}→{current}",
+            kind="info",
+        ),
     )
 
 
@@ -5350,7 +5719,7 @@ def _cmd_export(session: InteractiveSession, args: str) -> CommandResult:
     )
 
 
-def _last_assistant_text(session: InteractiveSession) -> Optional[str]:
+def _last_assistant_text(session: InteractiveSession) -> str | None:
     """Return the most recent assistant message body, or None if absent.
 
     Reads the in-memory ``_chat_history`` rather than the on-disk JSONL
@@ -5374,7 +5743,7 @@ def _last_assistant_text(session: InteractiveSession) -> Optional[str]:
     return None
 
 
-def _nth_assistant_text(session: InteractiveSession, n: int) -> Optional[str]:
+def _nth_assistant_text(session: InteractiveSession, n: int) -> str | None:
     """Return the N-th most recent assistant reply (1 = latest)."""
     if n < 1:
         return None
@@ -5410,7 +5779,7 @@ def _cmd_copy(session: InteractiveSession, args: str) -> CommandResult:
 
     tokens = args.split()
     n = 1
-    write_path: Optional[Path] = None
+    write_path: Path | None = None
     iter_tokens = iter(tokens)
     for tok in iter_tokens:
         if tok in ("--write", "-w"):
@@ -5605,7 +5974,7 @@ def _cmd_permissions(session: InteractiveSession, args: str) -> CommandResult:
         lines.append(f"  {label}:")
         for rule in bucket:
             lines.append(f"    - {rule.source}")
-    lines.append(f"  (precedence: deny → ask → allow, first match wins)")
+    lines.append("  (precedence: deny → ask → allow, first match wins)")
     return CommandResult(output="\n".join(lines))
 
 
@@ -5870,19 +6239,43 @@ def _cmd_focus(session: InteractiveSession, args: str) -> CommandResult:
 
 
 def _cmd_tui(session: InteractiveSession, args: str) -> CommandResult:
-    """``/tui [classic|smooth]`` — switch the rendering mode.
+    """``/tui [classic|smooth|fullscreen|inline]`` — switch the rendering mode.
 
     ``classic`` is the historical "redraw the whole panel each frame"
     approach; ``smooth`` (default) uses prompt_toolkit's diff-based
     repaint. Some terminals (older Windows consoles, certain SSH
     multiplexers) flicker under smooth mode; ``classic`` trades a
-    little visual judder for guaranteed correct output. Persists on
-    the session field so the next ``/save`` captures it.
+    little visual judder for guaranteed correct output.
+
+    ``fullscreen`` enables the alternate screen buffer so the REPL
+    occupies the full terminal without scrollback from prior commands
+    bleeding through. ``inline`` returns to the default inline mode.
+    Persists on the session field so the next ``/save`` captures it.
     """
     raw = args.strip().lower() or "toggle"
-    valid = {"classic", "smooth", "toggle"}
+    valid = {"classic", "smooth", "fullscreen", "inline", "toggle"}
     if raw not in valid:
         return CommandResult(output=f"/tui: expected one of {sorted(valid)}")
+
+    if raw == "fullscreen":
+        session.tui_mode = "fullscreen"  # type: ignore[attr-defined]
+        try:
+            from ..terminal.terminal_manager import TerminalManager
+            tm = TerminalManager()
+            tm.enable_alternate_screen()
+        except Exception:
+            pass
+        return CommandResult(output="tui rendering: fullscreen (alt-screen)")
+    if raw == "inline":
+        session.tui_mode = "inline"  # type: ignore[attr-defined]
+        try:
+            from ..terminal.terminal_manager import TerminalManager
+            tm = TerminalManager()
+            tm.disable_alternate_screen()
+        except Exception:
+            pass
+        return CommandResult(output="tui rendering: inline")
+
     current = getattr(session, "tui_mode", "smooth")
     if raw == "toggle":
         new = "classic" if current == "smooth" else "smooth"
@@ -5976,7 +6369,7 @@ def _cmd_schedule(session: InteractiveSession, args: str) -> CommandResult:
 
 
 def _cmd_sandbox(session: InteractiveSession, args: str) -> CommandResult:
-    """``/sandbox [on|off|toggle]`` — toggle filesystem-sandbox mode.
+    """``/sandbox [on|off|toggle|blocklist|status]`` — toggle sandbox mode.
 
     Distinct from ``/perm`` (permission_mode) — sandbox mode means
     "tools that would write outside the repo root get refused, even
@@ -5985,8 +6378,55 @@ def _cmd_sandbox(session: InteractiveSession, args: str) -> CommandResult:
 
     The flag is read by the file-tool sandbox check at dispatch time;
     flipping it mid-session takes effect on the next tool call.
+
+    Subcommands:
+        ``/sandbox blocklist`` — show blocked bash commands.
+        ``/sandbox block <cmd>`` — add a command to the runtime blocklist.
+        ``/sandbox unblock <cmd>`` — remove a command from the blocklist.
+        ``/sandbox status`` — show sandbox state.
     """
     raw = args.strip().lower()
+
+    # Ensure blocklist exists on the session.
+    bl = getattr(session, "_bash_blocklist", None)
+    if bl is None:
+        from lyra_core.sandbox import BashBlocklist
+        bl = BashBlocklist()
+        session._bash_blocklist = bl  # type: ignore[attr-defined]
+
+    if raw.startswith("block "):
+        cmd = raw[6:].strip()
+        if not cmd:
+            return CommandResult(output="/sandbox block: specify a command name")
+        bl.add_blocked(cmd)
+        return CommandResult(output=f"sandbox: blocked {cmd!r}")
+    if raw.startswith("unblock ") or raw.startswith("allow "):
+        cmd = raw.split(maxsplit=1)[1].strip() if " " in raw else ""
+        if not cmd:
+            return CommandResult(output="/sandbox unblock: specify a command name")
+        bl.remove_blocked(cmd)
+        return CommandResult(output=f"sandbox: unblocked {cmd!r}")
+    if raw == "blocklist":
+        cmds = sorted(bl.blocked_commands)
+        if not cmds:
+            return CommandResult(output="sandbox blocklist: (empty — all commands allowed)")
+        return CommandResult(
+            output=f"sandbox blocklist ({len(cmds)} commands blocked):\n  "
+            + "\n  ".join(cmds)
+        )
+    if raw == "status":
+        strict = getattr(session, "sandbox_strict", False)
+        from lyra_core.sandbox import sandbox_mode as _sandbox_mode
+        mode = _sandbox_mode()
+        return CommandResult(
+            output=(
+                f"sandbox status:\n"
+                f"  filesystem: {'strict' if strict else 'normal'}\n"
+                f"  bash mode:  {mode}\n"
+                f"  blocked:    {len(bl.blocked_commands)} commands"
+            )
+        )
+
     current = getattr(session, "sandbox_strict", False)
     if raw in ("", "toggle"):
         new = not current
@@ -5995,7 +6435,9 @@ def _cmd_sandbox(session: InteractiveSession, args: str) -> CommandResult:
     elif raw in ("off", "false", "0", "loose"):
         new = False
     else:
-        return CommandResult(output=f"/sandbox: expected on|off|toggle, got {raw!r}")
+        return CommandResult(
+            output="/sandbox: expected on|off|toggle|blocklist|block|unblock|status"
+        )
     session.sandbox_strict = new  # type: ignore[attr-defined]
     return CommandResult(
         output=f"sandbox: {'strict' if new else 'normal'}"
@@ -6710,7 +7152,7 @@ def _cmd_research(session: InteractiveSession, args: str) -> CommandResult:
         return CommandResult(output=f"/research: shell parse failed: {exc}")
 
     depth = 3
-    time_range: Optional[str] = None
+    time_range: str | None = None
     domains: list[str] = []
     query_parts: list[str] = []
     it = iter(tokens)
@@ -6743,8 +7185,8 @@ def _cmd_research(session: InteractiveSession, args: str) -> CommandResult:
         return CommandResult(output="/research: no query provided")
 
     try:
-        from lyra_core.tools.web_search import make_web_search_tool
         from lyra_core.tools.web_fetch import make_web_fetch_tool
+        from lyra_core.tools.web_search import make_web_search_tool
     except Exception as exc:
         return CommandResult(output=f"/research: tools unavailable ({exc})")
 
@@ -7036,6 +7478,30 @@ def _cmd_tools(session: InteractiveSession, args: str) -> CommandResult:
     return CommandResult(
         output=plain,
         renderable=_out.tools_renderable([detail]),
+    )
+
+
+def _cmd_tool_search(session: InteractiveSession, _args: str) -> CommandResult:
+    """``/tool-search`` — show dynamic tool-search status.
+
+    ``LYRA_ENABLE_TOOL_SEARCH`` controls whether tool definitions are
+    lazy-loaded on demand (``true``, ``auto``, ``auto:N``) or all at
+    once (``false``, the default).
+    """
+    reg = session._tool_registry
+    if reg is None:
+        return CommandResult(
+            output=(
+                "tool search:  disabled (set LYRA_ENABLE_TOOL_SEARCH=true"
+                "|auto|auto:N to enable)"
+            )
+        )
+    env_val = os.environ.get("LYRA_ENABLE_TOOL_SEARCH", "")
+    return CommandResult(
+        output=(
+            f"LYRA_ENABLE_TOOL_SEARCH: {env_val}\n"
+            f"tools discovered:  {reg.discovered_count} / {reg.total_count}"
+        )
     )
 
 
@@ -7904,7 +8370,7 @@ def _cmd_budget(session: InteractiveSession, args: str) -> CommandResult:
     if not target:
         return CommandResult(
             output=(
-                f"current budget: "
+                "current budget: "
                 + (
                     f"${session.budget_cap_usd:.2f}"
                     if session.budget_cap_usd is not None
@@ -8824,6 +9290,30 @@ def _cmd_effort(session: InteractiveSession, args: str) -> CommandResult:
     )
 
 
+def _cmd_goal(session: InteractiveSession, args: str) -> CommandResult:
+    choice = args.strip()
+    if not choice:
+        return CommandResult(output="usage: /goal <condition> | status | clear")
+    sub = choice.lower()
+    if sub == "status":
+        if session.pending_goal is None:
+            return CommandResult(output="no goal pending")
+        turns_elapsed = session.turn - session.goal_turn_start
+        max_goal_turns = session.max_turns or 20
+        return CommandResult(
+            output=f"goal: {session.pending_goal}  (turn {turns_elapsed}/{max_goal_turns})"
+        )
+    if sub == "clear":
+        session.pending_goal = None
+        return CommandResult(output="goal cleared")
+    session.pending_goal = choice
+    session.goal_turn_start = session.turn
+    max_goal_turns = session.max_turns or 20
+    return CommandResult(
+        output=f"goal set: {choice} (auto-stop at {max_goal_turns} turns)"
+    )
+
+
 _DEFAULT_REVIEWER_VOICES: tuple[str, ...] = (
     "reviewer-A (correctness)",
     "reviewer-B (test coverage)",
@@ -9045,7 +9535,7 @@ _CONFIG_KNOWN_KEYS: tuple[str, ...] = (
 )
 
 
-def _persist_config(session: "InteractiveSession") -> None:
+def _persist_config(session: InteractiveSession) -> None:
     """Write ``session.config`` to disk, swallowing IO errors.
 
     Writes are best-effort so a read-only ``$HOME`` (CI sandbox, demo
@@ -9062,7 +9552,7 @@ def _persist_config(session: "InteractiveSession") -> None:
 
 
 def _apply_config_key_to_session(
-    session: "InteractiveSession", key: str, value: str
+    session: InteractiveSession, key: str, value: str
 ) -> str | None:
     """Side-effect: push one key onto the live session.
 
@@ -9119,7 +9609,7 @@ def _apply_config_key_to_session(
     return f"unknown config key {key!r}; valid: {', '.join(_CONFIG_KNOWN_KEYS)}."
 
 
-def _cmd_red_proof(session: "InteractiveSession", args: str) -> CommandResult:
+def _cmd_red_proof(session: InteractiveSession, args: str) -> CommandResult:
     """`/red-proof <pytest target>` — prove you went RED.
 
     Wave-C Task 13. Real pytest invocation; no parsing — exit code
@@ -9140,7 +9630,7 @@ def _cmd_red_proof(session: "InteractiveSession", args: str) -> CommandResult:
     return CommandResult(output=render(result, target=target))
 
 
-def _cmd_config(session: "InteractiveSession", args: str) -> CommandResult:
+def _cmd_config(session: InteractiveSession, args: str) -> CommandResult:
     """`/config list|get <key>|set <key>=<value>`.
 
     Persists every successful ``set`` to ``session.config_path`` so a
@@ -9257,6 +9747,112 @@ def _cmd_tasks(session: InteractiveSession, args: str) -> CommandResult:
     """
     from .spec_driven import cmd_tasks
     return cmd_tasks(session, args)
+
+
+def _cmd_tasklist(session: InteractiveSession, args: str) -> CommandResult:
+    """``/tasklist [add <desc> | done <id> | clear]`` — manage persistent tasks.
+
+    With no args: list all tasks with status indicators.
+    ``add <desc>``: append a new task (pending).
+    ``done <id>``: mark a task complete.
+    ``clear``: remove all completed tasks.
+    """
+    cmd_args = shlex.split(args)
+    subcmd = cmd_args[0].lower() if cmd_args else ""
+
+    if subcmd == "add":
+        desc = " ".join(cmd_args[1:]) if len(cmd_args) > 1 else ""
+        if not desc:
+            return CommandResult(output="usage: /tasklist add <description>")
+        task_id = f"task-{len(session.persistent_tasks) + 1:03d}"
+        item = TaskItem(id=task_id, description=desc, state="pending")
+        session.persistent_tasks.append(item)
+        session.status_source.update(
+            persistent_task_count=sum(
+                1 for t in session.persistent_tasks if t.state != "done"
+            )
+        )
+        return CommandResult(
+            output=f"added task {task_id}: {desc}",
+            renderable=_out.tasklist_renderable(session.persistent_tasks),
+        )
+
+    if subcmd == "done":
+        tid = cmd_args[1] if len(cmd_args) > 1 else ""
+        if not tid:
+            return CommandResult(output="usage: /tasklist done <id>")
+        for t in session.persistent_tasks:
+            if t.id == tid:
+                t.state = "done"
+                session.status_source.update(
+                    persistent_task_count=sum(
+                        1 for t2 in session.persistent_tasks
+                        if t2.state != "done"
+                    )
+                )
+                return CommandResult(
+                    output=f"marked {tid} done",
+                    renderable=_out.tasklist_renderable(session.persistent_tasks),
+                )
+        return CommandResult(
+            output=f"task {tid} not found",
+            renderable=_out.bad_command_renderable(tid),
+        )
+
+    if subcmd == "clear":
+        before = len(session.persistent_tasks)
+        session.persistent_tasks = [
+            t for t in session.persistent_tasks if t.state != "done"
+        ]
+        removed = before - len(session.persistent_tasks)
+        session.status_source.update(
+            persistent_task_count=sum(
+                1 for t in session.persistent_tasks if t.state != "done"
+            )
+        )
+        return CommandResult(
+            output=f"cleared {removed} completed task(s)",
+            renderable=_out.tasklist_renderable(session.persistent_tasks),
+        )
+
+    # Default: list all tasks
+    return CommandResult(
+        output=_render_tasklist_plain(session.persistent_tasks),
+        renderable=_out.tasklist_renderable(session.persistent_tasks),
+    )
+
+
+def _cmd_shell(session: InteractiveSession, args: str) -> CommandResult:
+    """``/shell [on|off]`` — toggle dedicated shell sub-mode.
+
+    When shell mode is on, plain-text input (lines that don't start with
+    ``/`` or ``!``) is executed as a shell command instead of being sent
+    to the LLM. Use ``/shell off`` or ``/shell`` (toggle) to exit.
+    """
+    sub = args.strip().lower()
+    if sub in ("", "toggle"):
+        session.shell_mode = not session.shell_mode
+    elif sub in ("on", "1", "true"):
+        session.shell_mode = True
+    elif sub in ("off", "0", "false"):
+        session.shell_mode = False
+    else:
+        return CommandResult(output=f"usage: /shell [on|off|toggle], got: {sub}")
+    state = "on" if session.shell_mode else "off"
+    return CommandResult(
+        output=f"shell mode {state}",
+        renderable=_out.shell_mode_renderable(state),
+    )
+
+
+def _render_tasklist_plain(tasks: list) -> str:
+    if not tasks:
+        return "no tasks yet. use /tasklist add <description> to create one."
+    lines: list[str] = []
+    for t in tasks:
+        glyph = {"pending": "◻", "running": "◼", "done": "✓"}.get(t.state, "?")
+        lines.append(f"  {glyph} {t.id}: {t.description}")
+    return "\n".join(lines)
 
 
 # ---------------------------------------------------------------------------
@@ -9379,11 +9975,16 @@ from lyra_cli.commands.registry import (  # noqa: E402
 # below can reference the four handlers.
 from .v311_commands import (  # noqa: E402
     cmd_bundle as _cmd_bundle_v311,
+)
+from .v311_commands import (
     cmd_coverage as _cmd_coverage_v311,
+)
+from .v311_commands import (
     cmd_scaling as _cmd_scaling_v311,
+)
+from .v311_commands import (
     cmd_team as _cmd_team_v311,
 )
-
 
 # --- Skill System Handlers (Phase 1) -----------------------------------------
 
@@ -9391,6 +9992,7 @@ from .v311_commands import (  # noqa: E402
 def _cmd_skill(session: InteractiveSession, args: str) -> CommandResult:
     """``/skill [list|search|reload|info|browse|install|update|uninstall]`` — manage skills or launch interactive picker."""
     import sys
+
     from lyra_cli.cli.skill_manager import SkillManager
 
     # If no args and stdin is a TTY, launch interactive picker
@@ -9580,6 +10182,7 @@ def _cmd_skill_info(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_skill_browse(session: InteractiveSession, args: str) -> CommandResult:
     """``/skill browse [query]`` — browse available skills from registries."""
     from pathlib import Path
+
     from lyra_cli.cli.registry_client import RegistryClient
 
     registry_path = Path.home() / ".lyra" / "registry.json"
@@ -9620,6 +10223,7 @@ def _cmd_skill_install(session: InteractiveSession, args: str) -> CommandResult:
     """``/skill install <name> [--version <version>]`` — install a skill from registry."""
     import json
     from pathlib import Path
+
     from lyra_cli.cli.registry_client import RegistryClient
     from lyra_cli.cli.skill_manager import SkillManager
 
@@ -9680,6 +10284,7 @@ def _cmd_skill_update(session: InteractiveSession, args: str) -> CommandResult:
     """``/skill update [name]`` — update installed skills."""
     import json
     from pathlib import Path
+
     from lyra_cli.cli.registry_client import RegistryClient
     from lyra_cli.cli.skill_manager import SkillManager
 
@@ -9741,6 +10346,7 @@ def _cmd_skill_update(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_skill_uninstall(session: InteractiveSession, args: str) -> CommandResult:
     """``/skill uninstall <name>`` — uninstall a skill."""
     from pathlib import Path
+
     from lyra_cli.cli.skill_manager import SkillManager
 
     name = args.strip()
@@ -9916,6 +10522,12 @@ COMMAND_REGISTRY: tuple[CommandSpec, ...] = (
         args_hint="[low|medium|high|ultra]",
     ),
     CommandSpec(
+        "goal", _cmd_goal,
+        "set a completion condition and auto-iterate until met",
+        "plan-build-run",
+        args_hint="[<condition>|status|clear]",
+    ),
+    CommandSpec(
         "ultrareview",
         _cmd_ultrareview,
         "multi-rubric deep review (3 verifier voices over /review)",
@@ -9950,6 +10562,12 @@ COMMAND_REGISTRY: tuple[CommandSpec, ...] = (
     ),
     # --- tools · agents ---------------------------------------------------
     CommandSpec("tools", _cmd_tools, "list registered tools and their risk level", "tools-agents"),
+    CommandSpec(
+        "tool-search",
+        _cmd_tool_search,
+        "show dynamic tool-search status (LYRA_ENABLE_TOOL_SEARCH)",
+        "tools-agents",
+    ),
     CommandSpec(
         "toolsets",
         _cmd_toolsets,
@@ -10489,6 +11107,20 @@ COMMAND_REGISTRY: tuple[CommandSpec, ...] = (
         "split plan/spec into independently testable task chunks",
         "plan-build-run",
         args_hint="[--from-spec <file>]",
+    ),
+    CommandSpec(
+        "tasklist",
+        _cmd_tasklist,
+        "view and manage persistent task list (add | done <id> | clear)",
+        "tools-agents",
+        args_hint="[add <desc> | done <id> | clear]",
+    ),
+    CommandSpec(
+        "shell",
+        _cmd_shell,
+        "toggle dedicated shell sub-mode: plain text becomes shell commands",
+        "tools-agents",
+        args_hint="[on|off|toggle]",
     ),
     # --- closed-loop control ----------------------------------------------
     CommandSpec(

@@ -61,15 +61,13 @@ from prompt_toolkit.formatted_text import HTML, FormattedText
 from prompt_toolkit.history import FileHistory, InMemoryHistory
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.styles import Style
-
-from .suggest import CommandAutoSuggest
 from rich.console import Console
 from rich.text import Text
 
-from .keybindings_help import show_keybindings_help
-
-from . import output as _out
 from . import keybinds as _keybinds
+from . import output as _out
+from . import store as _store
+from . import themes as _themes
 from .banner import render_banner, render_sparse_banner
 from .banner_claude import (
     render_claude_style_banner,
@@ -78,21 +76,47 @@ from .banner_claude import (
 )
 from .completer import SlashCompleter
 from .hir import HIRLogger, default_event_path
+from .keybindings_help import show_keybindings_help
 from .session import (
+    _MODE_CYCLE,
     CommandResult,
     InteractiveSession,
-    _MODE_CYCLE,
     display_mode,
 )
 from .spinner import Spinner
-from . import store as _store
-from . import themes as _themes
+from .suggest import CommandAutoSuggest
 
 
 def _history_path(repo_root: Path) -> Path:
     state_dir = repo_root / ".lyra"
     state_dir.mkdir(exist_ok=True)
     return state_dir / "interactive_history"
+
+
+def _config_path_default() -> Path:
+    """Return the default path for the user-level config YAML file."""
+    lyra_home = os.environ.get("LYRA_HOME", str(Path.home() / ".lyra"))
+    return Path(lyra_home) / "config.yaml"
+
+
+def _known_subagent_slugs() -> frozenset[str]:
+    """Return the set of subagent slugs callable via @mention.
+
+    Covers built-in presets (general, explore, plan) plus any user
+    YAML/JSON definitions in ``~/.lyra/agents/``. Cached per-process
+    — a restart picks up new agent defs.
+    """
+    slugs = {"general", "explore", "plan", "code-reviewer", "tdd-guide",
+             "security-reviewer", "refactor-cleaner", "doc-updater"}
+    try:
+        agents_dir = Path(os.environ.get("LYRA_HOME", str(Path.home() / ".lyra"))) / "agents"
+        if agents_dir.is_dir():
+            for f in agents_dir.glob("*"):
+                if f.suffix in (".yaml", ".yml", ".json"):
+                    slugs.add(f.stem)
+    except Exception:
+        pass
+    return frozenset(slugs)
 
 
 def _render_result(console: Console, result: CommandResult) -> None:
@@ -107,6 +131,45 @@ def _render_result(console: Console, result: CommandResult) -> None:
     # markup=False keeps ``[plan]``-style labels from being parsed as
     # Rich markup tags and silently dropped.
     console.print(result.output, markup=False, highlight=False)
+
+
+def _print_transcript_overlay(session, console: Console) -> None:
+    """Print recent conversation turns above the prompt (Ctrl+O toggle).
+
+    Renders the last 20 turns from ``session._turns_log`` as dim text
+    with turn numbers, modes, and timestamps, followed by a dismiss hint.
+    """
+    from rich.text import Text as _RichText
+
+    turns_log = getattr(session, "_turns_log", None) or []
+    if not turns_log:
+        console.print(
+            _RichText(" → no transcript available yet", style="#6B7280")
+        )
+        return
+
+    recent = turns_log[-20:]
+    console.print()
+    console.rule("[dim]transcript (ctrl+o to close)[/]", style="#3E4048")
+    for snap in recent:
+        ts = getattr(snap, "ts", 0.0) if hasattr(snap, "ts") else 0.0
+        import time as _t
+        age = int(_t.time() - ts) if ts else None
+        age_str = f" {age}s ago" if age is not None and age > 0 else ""
+        mode = getattr(snap, "mode", "?")
+        line = getattr(snap, "line", "")
+        if len(line) > 100:
+            line = line[:97] + "..."
+        console.print(
+            _RichText.assemble(
+                (f"  t{snap.turn:<4} ", "#4A4E56"),
+                (f"[{mode}] ", "#6B7280"),
+                (line, "bright_white"),
+                (age_str, "#4A4E56"),
+            )
+        )
+    console.rule(style="#3E4048")
+    console.print()
 
 
 def _resolve_banner_model(model: str) -> str:
@@ -135,6 +198,63 @@ def _resolve_banner_model(model: str) -> str:
         # Banner rendering must never crash the REPL; on any error
         # fall back to the raw flag value.
         return model
+
+
+def _apply_cli_session_opts(
+    kwargs: dict[str, Any],
+    *,
+    budget_cap_usd: float | None = None,
+    max_turns: int | None = None,
+    max_budget_usd: float | None = None,
+    session_name: str | None = None,
+    effort: str | None = None,
+    goal: str | None = None,
+    add_dirs: list[Path] | None = None,
+    settings_path: Path | None = None,
+    verbose: bool = False,
+    permission_mode: str | None = None,
+    dangerously_skip_permissions: bool = False,
+) -> None:
+    """Thread CLI flag overrides into the session constructor kwargs dict.
+
+    Only sets keys when the corresponding flag is non-default, so the
+    ``InteractiveSession`` dataclass defaults remain authoritative when
+    the user didn't pass an explicit override.
+
+    Also checks env vars for extended-thinking control:
+      ``LYRA_MAX_THINKING_TOKENS`` — cap on thinking budget (default: 8000)
+      ``LYRA_DISABLE_THINKING`` — set to ``1`` to disable extended thinking
+    """
+    if budget_cap_usd is not None:
+        kwargs["budget_cap_usd"] = budget_cap_usd
+    if max_turns is not None:
+        kwargs["max_turns"] = max_turns
+    if max_budget_usd is not None:
+        kwargs["max_budget_usd"] = max_budget_usd
+    if session_name is not None:
+        kwargs["session_name"] = session_name
+    if effort is not None:
+        kwargs["effort"] = effort
+    if goal is not None:
+        kwargs["pending_goal"] = goal
+    if add_dirs is not None:
+        kwargs["additional_dirs"] = list(add_dirs)
+    if settings_path is not None:
+        kwargs["settings_path"] = str(settings_path)
+    if verbose:
+        kwargs["verbose_view"] = True
+    if permission_mode is not None:
+        kwargs["permission_mode"] = permission_mode
+    if dangerously_skip_permissions:
+        kwargs["permission_mode"] = "yolo"
+
+    # Extended-thinking env var overrides (Phase C Gap 16)
+    import os as _os
+    if _os.environ.get("LYRA_DISABLE_THINKING", "").strip() in ("1", "true", "yes"):
+        kwargs["deep_think"] = False
+    mt = _os.environ.get("LYRA_MAX_THINKING_TOKENS", "").strip()
+    if mt and mt.isdigit():
+        kwargs["max_thinking_tokens"] = int(mt)
 
 
 def _apply_budget_settings(
@@ -222,8 +342,9 @@ def _wire_observability_to_lifecycle(
     must never break a chat turn.
     """
     try:
-        from .session import _ensure_lifecycle_bus
         from lyra_core.hooks.lifecycle import LifecycleEvent
+
+        from .session import _ensure_lifecycle_bus
     except Exception:
         return
 
@@ -329,8 +450,9 @@ def _wire_skill_telemetry_to_lifecycle(session: InteractiveSession) -> None:
     a read-only home directory, etc. must never break a chat turn.
     """
     try:
-        from .session import _ensure_lifecycle_bus
         from lyra_core.hooks.lifecycle import LifecycleEvent
+
+        from .session import _ensure_lifecycle_bus
         from .skills_telemetry import SkillActivationRecorder
     except Exception:
         return
@@ -386,8 +508,8 @@ def _wire_plugins_to_lifecycle(session: InteractiveSession) -> None:
     third-party plugin can't trip telemetry for the user.
     """
     try:
-        from lyra_core.plugins import discover_plugins
         from lyra_core.hooks.lifecycle import LifecycleEvent
+        from lyra_core.plugins import discover_plugins
     except Exception:
         return
 
@@ -441,6 +563,7 @@ def _read_ui_settings() -> dict:
     """Return the ``ui`` block from ``$LYRA_HOME/settings.json`` (or {})."""
     try:
         from lyra_core.auth.store import lyra_home
+
         from ..config_io import load_settings
 
         settings = load_settings(lyra_home() / "settings.json")
@@ -521,6 +644,18 @@ def run(
     pin_session_id: str | None = None,
     budget_cap_usd: float | None = None,
     bare: bool = False,
+    output_format: str = "text",
+    max_turns: int | None = None,
+    max_budget_usd: float | None = None,
+    session_name: str | None = None,
+    effort: str | None = None,
+    goal: str | None = None,
+    add_dirs: list[Path] | None = None,
+    settings_path: Path | None = None,
+    verbose: bool = False,
+    bg: bool = False,
+    permission_mode: str | None = None,
+    dangerously_skip_permissions: bool = False,
 ) -> int:
     """Start the REPL. Returns the process exit code.
 
@@ -617,7 +752,26 @@ def run(
                 )
                 if pin_session_id:
                     fresh_kwargs["session_id"] = pin_session_id
-                session = InteractiveSession(**fresh_kwargs)
+                _apply_cli_session_opts(
+                    fresh_kwargs,
+                    budget_cap_usd=budget_cap_usd,
+                    max_turns=max_turns,
+                    max_budget_usd=max_budget_usd,
+                    session_name=session_name,
+                    effort=effort,
+                    goal=goal,
+                    add_dirs=add_dirs,
+                    settings_path=settings_path,
+                    verbose=verbose,
+                    permission_mode=permission_mode,
+                    dangerously_skip_permissions=dangerously_skip_permissions,
+                )
+                config_path = _config_path_default()
+                if config_path.exists():
+                    fresh_kwargs["config_path"] = config_path
+                    session = InteractiveSession.from_config(**fresh_kwargs)
+                else:
+                    session = InteractiveSession(**fresh_kwargs)
         else:
             fresh_kwargs = dict(
                 repo_root=repo_root,
@@ -627,7 +781,26 @@ def run(
             )
             if pin_session_id:
                 fresh_kwargs["session_id"] = pin_session_id
-            session = InteractiveSession(**fresh_kwargs)
+            _apply_cli_session_opts(
+                fresh_kwargs,
+                budget_cap_usd=budget_cap_usd,
+                max_turns=max_turns,
+                max_budget_usd=max_budget_usd,
+                session_name=session_name,
+                effort=effort,
+                goal=goal,
+                add_dirs=add_dirs,
+                settings_path=settings_path,
+                verbose=verbose,
+                permission_mode=permission_mode,
+                dangerously_skip_permissions=dangerously_skip_permissions,
+            )
+            config_path = _config_path_default()
+            if config_path.exists():
+                fresh_kwargs["config_path"] = config_path
+                session = InteractiveSession.from_config(**fresh_kwargs)
+            else:
+                session = InteractiveSession(**fresh_kwargs)
 
     # v3.10 ``--bare`` mode: disable every auto-discovery surface so
     # headless / CI / debugging runs are deterministic. Setting these
@@ -844,7 +1017,7 @@ def _run_prompt_toolkit(
         # palette via our explicit ``start_completion``, but typing ``m`` clears
         # ``complete_state`` and never re-fires). Up/Down history walk still works;
         # Ctrl-R reverse-search remains available via the ``c-r`` keybinding below.
-        multiline=False,
+        multiline=True,
         prompt_continuation=_prompt_continuation,
         # Ghost text colour follows the skin's ``dim`` token so it
         # visually matches the rest of the chrome (otherwise the default
@@ -880,6 +1053,29 @@ def _run_prompt_toolkit(
         if stripped.startswith("!"):
             _run_bash(console, stripped[1:].strip(), session=session, hir=hir)
             continue
+
+        # @mention subagent routing: ``@agent-name <prompt>`` dispatches
+        # to ``/spawn --type <agent-name> <prompt>``. Known agent types
+        # (general, explore, plan, code-reviewer, etc.) get priority
+        # routing; unrecognised names fall through to normal chat so
+        # @file-path mention still works via the completer.
+        if stripped.startswith("@"):
+            parts = stripped[1:].split(maxsplit=1)
+            candidate = parts[0].strip().lower() if parts else ""
+            # Quick check against known subagent presets so we don't
+            # accidentally route ``@src/utils.py fix this`` as a spawn.
+            known = _known_subagent_slugs()
+            if candidate in known:
+                rest = parts[1].strip() if len(parts) > 1 else ""
+                spawn_line = f"/spawn --type {candidate} {rest}".strip()
+                result = session.dispatch(spawn_line)
+                hir.on_slash(
+                    turn=session.turn,
+                    name="spawn",
+                    args=f"--type {candidate} {rest}".strip(),
+                )
+                _render_result(console, result)
+                continue
 
         hir.on_prompt(turn=session.turn, mode=session.mode, line=stripped)
 
@@ -1010,7 +1206,7 @@ def _save_on_exit(session: InteractiveSession) -> None:  # pragma: no cover
 
 def _transcript_markdown(session: InteractiveSession) -> str:
     lines = [
-        f"# Lyra session transcript",
+        "# Lyra session transcript",
         "",
         f"- repo: `{session.repo_root}`",
         f"- model: `{session.model}`",
@@ -1084,11 +1280,12 @@ def _prompt_continuation(
 ) -> FormattedText:
     """Visual continuation marker for multiline input.
 
-    Uses the active skin's ``dim`` token so multiline prompts blend with
-    the rest of the chrome (white-on-aurora vs muted-on-mono, etc).
+    Shows ``· `` for continuation lines. On the very first continuation
+    line (line_number==1) appends a ``shift+enter for newline`` hint
+    that matches Claude Code's multiline input UI.
     """
-    glyph = "· "
     dim = _themes.get_active_skin().color("dim", "#6B7280")
+    glyph = "· "
     return FormattedText([(f"fg:{dim}", glyph.rjust(width))])
 
 
@@ -1144,7 +1341,19 @@ def _bottom_toolbar(session: InteractiveSession) -> HTML:
     so ``/theme hermes`` actually re-skins the bar in real time —
     previously the hex codes were hard-coded against the ``aurora``
     palette, which made every other skin feel half-applied.
+
+    When ``session.focus_mode`` is True (set by ``/focus on``) the
+    toolbar renders a single-line "FOCUS" indicator instead of the
+    full status bar — useful for screenshots, demos, and screen
+    recordings where the chrome is just visual noise.
     """
+    if getattr(session, "focus_mode", False):
+        skin = _themes.get_active_skin()
+        dim = skin.color("status_bar_dim", "#3E4048")
+        return HTML(
+            f"<style fg='{dim}'>◆ focus — /focus off to restore chrome</style>"
+        )
+
     skin = _themes.get_active_skin()
     accent = skin.color("accent", "#00E5FF")
     secondary = skin.color("secondary", "#7C4DFF")
@@ -1204,7 +1413,8 @@ def _bottom_toolbar(session: InteractiveSession) -> HTML:
     perm_badge = {
         "yolo": (
             f"{bar}<style fg='{danger}'><b>⏵⏵</b></style>"
-            f"<style fg='{danger}'> bypass permissions on</style>"
+            f"<style fg='{danger}'> bypass permissions on "
+            f"(shift+tab to cycle) · esc to interrupt · ↓ to manage</style>"
         ),
         "strict": (
             f"{bar}<style fg='{warning}'><b>🔒</b></style>"
@@ -1225,6 +1435,13 @@ def _bottom_toolbar(session: InteractiveSession) -> HTML:
         )
         interrupt_badge = f"{bar}<style fg='{text}'>esc to interrupt</style>"
 
+    goal_badge = (
+        f"{bar}<style fg='{warning}'><b>goal</b></style>"
+        f"<style fg='{accent}'>{_xml_escape(session.pending_goal[:30])}</style>"
+        if session.pending_goal
+        else ""
+    )
+
     left = (
         f"<style fg='{accent}'> ◆ </style>"
         f"<style fg='{text}'>repo </style>"
@@ -1241,6 +1458,7 @@ def _bottom_toolbar(session: InteractiveSession) -> HTML:
         f"<style fg='ansiwhite'>${session.cost_usd:.4f}</style>"
         + deep_badge
         + budget_badge
+        + goal_badge
         + skin_badge
         + perm_badge
         + bg_badge
@@ -1539,6 +1757,13 @@ def _build_key_bindings(
         )
         get_app().invalidate()
 
+    @kb.add("c-b")
+    def _(event: Any) -> None:
+        """Ctrl+B toggles background-turn mode for the next inference."""
+        toast = _keybinds.run_in_background(session)
+        console.print(Text(f" → {toast}", style="#7C4DFF"))
+        get_app().invalidate()
+
     def _jump_mode(target: str) -> None:
         """Snap directly to ``target`` mode (Hermes / Claude-Code style)."""
         toast = _keybinds.set_mode(session, target)
@@ -1619,20 +1844,17 @@ def _build_key_bindings(
 
     @kb.add("c-o")
     def _(event: Any) -> None:
-        """Ctrl-O → expand the last collapsed tool output.
+        """Ctrl-O → toggle transcript overlay (Claude Code style).
 
-        The chat-tool render stashes the full output on
-        ``session._last_tool_output`` whenever a tool finishes. This
-        dumps it to scrollback so the user can read past the truncated
-        ``… +N lines`` footer.
+        When enabled, recent conversation turns are printed above the
+        prompt so the user can scroll through context. Press again to
+        dismiss.
         """
-        full = getattr(session, "_last_tool_output", None)
-        if not full:
-            console.print(Text(" → no captured tool output to expand", style="#6B7280"))
-            return
-        console.rule("[dim]expanded tool output (Ctrl+O)[/]", style="#3E4048")
-        console.print(full)
-        console.rule(style="#3E4048")
+        toast = _keybinds.toggle_transcript(session)
+        console.print(Text(f" → {toast}", style="#7C4DFF"))
+        if session.show_transcript:
+            _print_transcript_overlay(session, console)
+        get_app().invalidate()
 
     @kb.add("escape", "escape")
     def _(event: Any) -> None:

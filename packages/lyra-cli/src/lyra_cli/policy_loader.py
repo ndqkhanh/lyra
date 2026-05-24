@@ -25,7 +25,7 @@ from typing import Any, Mapping
 from lyra_core.hooks.user_hooks import HookSpec, parse_hooks_config
 from lyra_core.permissions.grammar import Policy, policy_from_mapping
 
-from .config_io import load_settings
+from .config_io import load_settings_dict
 
 
 def _layered_payloads(repo_root: Path) -> list[Mapping[str, Any]]:
@@ -38,7 +38,7 @@ def _layered_payloads(repo_root: Path) -> list[Mapping[str, Any]]:
     project = repo_root / ".lyra" / "settings.json"
     user_home = Path(os.environ.get("LYRA_HOME") or "~/.lyra").expanduser()
     user_path = user_home / "settings.json"
-    return [load_settings(project), load_settings(user_path)]
+    return [load_settings_dict(project), load_settings_dict(user_path)]
 
 
 def _merged_permissions(

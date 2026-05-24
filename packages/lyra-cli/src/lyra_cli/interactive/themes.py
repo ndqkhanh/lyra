@@ -581,6 +581,29 @@ _BUILT_IN_SKINS: dict[str, Skin] = {
     )
 }
 
+
+def _fill_expanded_colors(skin: Skin) -> None:
+    """Ensure *skin* has every token in the expanded colour vocabulary.
+
+    Derives missing tokens from existing ones so every skin gets the
+    full set without forcing each built-in definition to enumerate 30+
+    hex codes.  Called once at module load and again when a user skin
+    is installed.
+    """
+    c = skin.colors
+    c.setdefault("info", c.get("accent", "#00E5FF"))
+    c.setdefault("warning", c.get("warning", c.get("accent_warm", c.get("danger", "#FFC857"))))
+    c.setdefault("highlight", c.get("highlight", c.get("warning", c.get("accent_warm", "#FFD700"))))
+    c.setdefault("diagnostic_error", c.get("error", "#FF5370"))
+    c.setdefault("diagnostic_warning", c.get("warning", c.get("accent_warm", "#FFC857")))
+    c.setdefault("diagnostic_info", c.get("info", c.get("accent", "#00E5FF")))
+    c.setdefault("tool_file_write", c.get("success", "#7CFFB2"))
+    c.setdefault("tool_file_read", c.get("accent", "#00E5FF"))
+
+
+for _s in _BUILT_IN_SKINS.values():
+    _fill_expanded_colors(_s)
+
 # Active skin tracked at module level so the prompt_toolkit renderers and
 # the spinner thread can pick it up without threading state through every
 # call. The driver may flip this when `/theme <name>` (or `/skin <name>`)
@@ -652,6 +675,7 @@ def install_user_skins(home: Path) -> None:
     so the user can edit a YAML file and rerun without restarting.
     """
     for s in load_user_skins(home):
+        _fill_expanded_colors(s)
         _BUILT_IN_SKINS[s.name] = s
 
 

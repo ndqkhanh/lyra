@@ -1,9 +1,8 @@
 """Sequential output REPL - Claude Code style with fixed bottom UI"""
 
 import os
-import sys
 import time
-from typing import Optional, List
+from typing import Optional
 from dataclasses import dataclass
 
 from ..events import (
@@ -11,8 +10,6 @@ from ..events import (
     StreamingRenderer,
     TurnStarted,
     TextDelta,
-    ToolStarted,
-    ToolFinished,
     TurnFinished,
 )
 from ..ui import (
@@ -20,7 +17,6 @@ from ..ui import (
     StatusLine,
     ResponseFormatter,
     AgentTree,
-    print_welcome_banner,
 )
 
 
@@ -76,8 +72,8 @@ class SequentialREPL:
         self.permission_mode = self.config.permission_mode
 
         # Current state
-        self.current_mode = "default"
-        self.current_hints = ["esc to exit", "enter to send"]
+        self.current_mode = "chat"
+        self.current_hints = ["/help for commands", "/mode to cycle permissions", "/exit to quit"]
         self.running = True
 
         # Setup event handlers
@@ -143,47 +139,46 @@ class SequentialREPL:
         self.context_used += total_tokens
 
     def _render_bottom_ui_inline(self):
-        """Render bottom UI inline (not fixed at terminal bottom)"""
+        """Render bottom UI inline (before input prompt)"""
         # Calculate context percentage
         context_percentage = self._get_context_percentage()
 
         # Build status parts
         parts = []
 
-        # Add context percentage if enabled
+        # Add permission mode if enabled
+        if self.config.show_permission_mode:
+            mode_text = f"{self.permission_mode} permissions"
+            # Color code
+            if self.permission_mode == "bypass":
+                mode_text = f"\033[33m⚠ {mode_text}\033[0m"  # Yellow with warning
+            elif self.permission_mode == "ask":
+                mode_text = f"\033[32m✓ {mode_text}\033[0m"  # Green with checkmark
+            elif self.permission_mode == "deny":
+                mode_text = f"\033[31m✗ {mode_text}\033[0m"  # Red with X
+            parts.append(mode_text)
+
+        # Add hints
+        parts.extend(self.current_hints)
+
+        # Add context percentage at the end if enabled
         if self.config.show_context and context_percentage > 0:
             ctx_text = f"{context_percentage}% context"
             # Color code
             if context_percentage < 50:
-                ctx_text = f"\033[32m{ctx_text}\033[0m"  # Green
+                ctx_text = f"\033[90m{ctx_text}\033[0m"  # Gray
             elif context_percentage < 80:
                 ctx_text = f"\033[33m{ctx_text}\033[0m"  # Yellow
             else:
                 ctx_text = f"\033[31m{ctx_text}\033[0m"  # Red
             parts.append(ctx_text)
 
-        # Add permission mode if enabled
-        if self.config.show_permission_mode:
-            mode_text = f"{self.permission_mode} permissions"
-            # Color code
-            if self.permission_mode == "bypass":
-                mode_text = f"\033[33m{mode_text}\033[0m"  # Yellow
-            elif self.permission_mode == "ask":
-                mode_text = f"\033[32m{mode_text}\033[0m"  # Green
-            elif self.permission_mode == "deny":
-                mode_text = f"\033[31m{mode_text}\033[0m"  # Red
-            parts.append(mode_text)
-
-        # Add hints
-        parts.extend(self.current_hints)
-
         # Build status line
-        status_text = f"  ⏵⏵ {self.current_mode}"
-        if parts:
-            status_text += " · " + " · ".join(parts)
+        status_text = f"  ⏵ {' · '.join(parts)}" if parts else "  ⏵"
 
-        # Print top divider
-        print("─" * self.terminal_width)
+        # Print status line
+        print(status_text)
+        print()
 
     def _get_context_percentage(self) -> int:
         """Get current context usage percentage"""
@@ -198,7 +193,6 @@ class SequentialREPL:
             tokens_used: Number of tokens used in this turn
         """
         self.context_used += tokens_used
-        self._update_status_line()
 
     def set_permission_mode(self, mode: str):
         """Set permission mode
@@ -210,7 +204,6 @@ class SequentialREPL:
             raise ValueError(f"Invalid permission mode: {mode}")
 
         self.permission_mode = mode
-        self._update_status_line()
 
         # Show notification
         print(f"\n  Permission mode: {self.permission_mode}")
@@ -227,75 +220,27 @@ class SequentialREPL:
         """Show simple welcome banner (Claude Code style)"""
         width = self.terminal_width
 
-        # Top border
-        print("╭─" + "─" * (width - 4) + "─╮")
-
-        # Title line
-        title = " Lyra v0.1.0 "
-        padding = (width - len(title) - 2) // 2
-        print("│" + " " * padding + title + " " * (width - len(title) - padding - 2) + "│")
-
-        # Model info
-        model_info = " Opus 4.7 · Anthropic API "
-        padding = (width - len(model_info) - 2) // 2
-        print("│" + " " * padding + model_info + " " * (width - len(model_info) - padding - 2) + "│")
+        # Simple centered banner
+        print()
+        print("   ✦✧✦✧✦✧✦   Lyra CLI v0.1.0")
+        print("  ✧✦✧✦✧✦✧✦✧  claude-opus-4-7 (200k context)")
 
         # Working directory
         cwd = os.getcwd()
         home = os.path.expanduser("~")
         if cwd.startswith(home):
             cwd = "~" + cwd[len(home):]
-        if len(cwd) > width - 6:
-            cwd = "..." + cwd[-(width - 9):]
-        cwd_line = f" {cwd} "
-        padding = (width - len(cwd_line) - 2) // 2
-        print("│" + " " * padding + cwd_line + " " * (width - len(cwd_line) - padding - 2) + "│")
-
-        # Bottom border
-        print("╰─" + "─" * (width - 4) + "─╯")
+        print(f"   ✦✧✦✧✦✧✦    {cwd}")
+        print()
+        print()
+        print("─" * width)
         print()
 
     def get_user_input(self) -> Optional[str]:
         """Get user input"""
         try:
-            # Input is between two divider lines
-            user_input = input("❯ ")
-
-            # Print bottom divider after input
-            print("─" * self.terminal_width)
-
-            # Print status line below bottom divider
-            context_percentage = self._get_context_percentage()
-            parts = []
-
-            if self.config.show_context and context_percentage > 0:
-                ctx_text = f"{context_percentage}% context"
-                if context_percentage < 50:
-                    ctx_text = f"\033[32m{ctx_text}\033[0m"
-                elif context_percentage < 80:
-                    ctx_text = f"\033[33m{ctx_text}\033[0m"
-                else:
-                    ctx_text = f"\033[31m{ctx_text}\033[0m"
-                parts.append(ctx_text)
-
-            if self.config.show_permission_mode:
-                mode_text = f"{self.permission_mode} permissions"
-                if self.permission_mode == "bypass":
-                    mode_text = f"\033[33m{mode_text}\033[0m"
-                elif self.permission_mode == "ask":
-                    mode_text = f"\033[32m{mode_text}\033[0m"
-                elif self.permission_mode == "deny":
-                    mode_text = f"\033[31m{mode_text}\033[0m"
-                parts.append(mode_text)
-
-            parts.extend(self.current_hints)
-
-            status_text = f"  ⏵⏵ {self.current_mode}"
-            if parts:
-                status_text += " · " + " · ".join(parts)
-
-            print(status_text)
-            print()  # Blank line after status
+            # Input prompt
+            user_input = input("  ❯ ")
 
             if not user_input:
                 return None
@@ -378,7 +323,6 @@ class SequentialREPL:
 
             # Stream response from Claude
             assistant_message = ""
-            start_time = time.time()
 
             with client.messages.stream(
                 model=self.model,
@@ -400,18 +344,13 @@ class SequentialREPL:
             final_message = stream.get_final_message()
             usage = final_message.usage
 
-            # Calculate duration
-            duration = time.time() - start_time
-
-            # Create turn finished event with duration
+            # Create turn finished event
             turn_finished = TurnFinished(
                 turn_id="turn-1",
                 tokens_in=usage.input_tokens,
                 tokens_out=usage.output_tokens,
                 stop_reason=final_message.stop_reason or "end_turn"
             )
-            # Add duration as attribute
-            turn_finished.duration_s = duration
 
             # Emit turn finished event
             self.dispatcher.emit(turn_finished)

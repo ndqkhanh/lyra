@@ -241,20 +241,21 @@ class Spinner:
             frame = self.frames[self._frame_idx % len(self.frames)]
             elapsed = time.time() - (self._start_time or time.time())
 
-            # Tokens part: "  ↓ 8.3k" (no "tokens" word — matches Claude Code).
+            # Elapsed: compact format — "3s" or "5m 24s".
+            m, s = divmod(int(elapsed), 60)
+            elapsed_str = f"{m}m {s:02d}s" if m else f"{s}s"
+
+            # Tokens part: " · ↓ 8.3k" (matches Claude Code format).
             tokens_part = ""
             if self._status_source is not None:
                 td = self._status_source.tokens_down_turn
                 if td > 0:
-                    tokens_part = f"  ↓ {_humanise_tokens(td)}"
+                    tokens_part = f" · ↓ {_humanise_tokens(td)}"
 
             # Use verb from status_source when available, else fall back to message.
             verb = self.message
             if self._status_source is not None:
                 verb = self._status_source.current_verb
-
-            # Elapsed: compact, always shown, no parens.
-            elapsed_part = f"  {elapsed:.0f}s"
 
             # Ctrl+B hint: shown for first 3 seconds when background mode is off.
             bg_active = self._status_source is not None and getattr(
@@ -262,11 +263,13 @@ class Spinner:
             )
             bg_hint = "  [ctrl+b: bg]" if elapsed < 3.0 and not bg_active else ""
 
+            status = f"{verb}… ({elapsed_str}{tokens_part}){bg_hint}"
+
             if self._wings:
                 left, right = self._wings[self._frame_idx % len(self._wings)]
-                line = f" {left} {frame} {verb}{tokens_part}{elapsed_part}{bg_hint} {right}"
+                line = f" {left} {frame} {status} {right}"
             else:
-                line = f" {frame} {verb}{tokens_part}{elapsed_part}{bg_hint}"
+                line = f" {frame} {status}"
             # Pad with spaces (NOT \033[K) to clear the previous frame —
             # \033[K renders as garbage under patch_stdout proxies.
             pad = max(self._last_line_len - len(line), 0)

@@ -27,6 +27,8 @@ Design choices for this module:
 """
 from __future__ import annotations
 
+import shutil
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -124,6 +126,23 @@ class Config:
         from .sessions_store import _atomic_write_text  # local: keep cold-start cheap
 
         _atomic_write_text(self.path, _dump(self._data))
+
+        # Timestamped backups — keep at most 5 so the user can roll
+        # back a bad hand-edit without losing prior settings.
+        try:
+            backup_dir = self.path.parent / "config_backups"
+            backup_dir.mkdir(exist_ok=True, parents=True)
+            ns = time.time_ns()
+            sec = ns // 1_000_000_000
+            usec = (ns // 1000) % 1_000_000
+            stamp = f"{time.strftime('%Y%m%dT%H%M%S', time.localtime(sec))}{usec:06d}"
+            shutil.copy(self.path, backup_dir / f"config_{stamp}.yaml")
+            # Rotate: keep only 5 most recent backups
+            backups = sorted(backup_dir.glob("config_*.yaml"))
+            for old in backups[:-5]:
+                old.unlink(missing_ok=True)
+        except Exception:
+            pass  # Non-critical — never crash on backup failure
 
 
 # ---------------------------------------------------------------------------

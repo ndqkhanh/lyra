@@ -31,8 +31,11 @@ __all__ = [
     "ToolPaint",
     "format_tool_output",
     "is_file_tool",
+    "paint_agent_backgrounded",
+    "paint_agent_done",
     "paint_call",
     "paint_denied",
+    "paint_diagnostics",
     "paint_file_call",
     "paint_file_result",
     "paint_limit",
@@ -210,7 +213,6 @@ def paint_result(
     """
     accent = PALETTE["accent"]
     meta = PALETTE["meta"]
-    success_col = PALETTE["success"]
     error_col = PALETTE["error"]
 
     collapsed, full = format_tool_output(output)
@@ -221,7 +223,7 @@ def paint_result(
             lead_rich = f"  [{error_col}]{glyphs.OUTPUT}[/]  [{error_col}]{glyphs.CROSS}[/] "
             lead_plain = f"  {glyphs.OUTPUT}  ✗ "
         else:
-            lead_rich = f"  [{success_col}]{glyphs.OUTPUT}[/]  "
+            lead_rich = f"  [{meta}]{glyphs.OUTPUT}[/]  "
             lead_plain = f"  {glyphs.OUTPUT}  "
         first_rich = (
             f"{lead_rich}{body_lines[0]}"
@@ -435,3 +437,136 @@ def paint_file_result(
         plain_lines.append(f"  … +{remainder} more lines")
 
     return ToolPaint(rich_lines=rich_lines, plain_lines=plain_lines), full_output
+
+
+# ── diagnostic summary (Claude Code parity) ──────────────────────
+
+
+def paint_diagnostics(
+    *,
+    errors: int = 0,
+    warnings: int = 0,
+    info: int = 0,
+    files: int = 0,
+) -> ToolPaint:
+    """Claude Code-style diagnostic summary after file writes.
+
+    Renders::
+
+        ⎿  Found 3 new diagnostic issues in 1 file (ctrl+o to expand)
+
+    Colour-coded by severity: errors=red, warnings=amber, info=dim.
+    When zero diagnostics are reported the function returns an empty
+    paint so callers can emit it unconditionally.
+    """
+    total = errors + warnings + info
+    if total == 0:
+        return ToolPaint(rich_lines=[], plain_lines=[])
+
+    meta = PALETTE["meta"]
+    diag_err = PALETTE["diagnostic_error"]
+    diag_warn = PALETTE["diagnostic_warning"]
+    diag_info = PALETTE["diagnostic_info"]
+
+    parts: list[str] = []
+    rich_parts: list[str] = []
+    if errors:
+        parts.append(f"{errors} error{'s' if errors != 1 else ''}")
+        rich_parts.append(f"[bold {diag_err}]{errors} error{'s' if errors != 1 else ''}[/]")
+    if warnings:
+        parts.append(f"{warnings} warning{'s' if warnings != 1 else ''}")
+        rich_parts.append(f"[bold {diag_warn}]{warnings} warning{'s' if warnings != 1 else ''}[/]")
+    if info:
+        parts.append(f"{info} info")
+        rich_parts.append(f"[{diag_info}]{info} info[/]")
+
+    file_word = "file" if files == 1 else "files"
+    suffix = f" in {files} {file_word} (ctrl+o to expand)"
+
+    plain = (
+        f"  {glyphs.OUTPUT}  Found "
+        + " · ".join(parts)
+        + f" {suffix}"
+    )
+    rich = (
+        f"  [{meta}]{glyphs.OUTPUT}[/]  "
+        f"[{meta}]Found [/]"
+        + f" [{meta}]· [/]".join(rich_parts)
+        + f" [{meta}]{suffix}[/]"
+    )
+
+    return ToolPaint(rich_lines=[rich], plain_lines=[plain])
+
+
+# ── agent lifecycle (Claude Code parity) ───────────────────────────
+
+
+def paint_agent_done(
+    *,
+    tool_uses: int = 0,
+    tokens: int = 0,
+    elapsed: float = 0.0,
+) -> ToolPaint:
+    """Claude Code-style agent completion summary.
+
+    Renders::
+
+        ⎿  Done (26 tool uses · 150.6k tokens · 4m 19s)
+    """
+    meta = PALETTE["meta"]
+    success_col = PALETTE["success"]
+
+    parts: list[str] = []
+    if tool_uses:
+        label = "tool use" if tool_uses == 1 else "tool uses"
+        parts.append(f"{tool_uses} {label}")
+    if tokens:
+        parts.append(f"{_humanise_tokens(tokens)} tokens")
+    if elapsed > 0:
+        parts.append(_fmt_elapsed_long(elapsed))
+
+    stats = " · ".join(parts) if parts else "complete"
+
+    plain = f"  {glyphs.OUTPUT}  Done ({stats})"
+    rich = (
+        f"  [{meta}]{glyphs.OUTPUT}[/]  "
+        f"[{meta}]Done[/] [{success_col}]({stats})[/]"
+    )
+    return ToolPaint(rich_lines=[rich], plain_lines=[plain])
+
+
+def paint_agent_backgrounded() -> ToolPaint:
+    """Claude Code-style backgrounded agent indicator.
+
+    Renders::
+
+        ⎿  Backgrounded agent (↓ to manage · ctrl+o to expand)
+    """
+    meta = PALETTE["meta"]
+    accent = PALETTE["accent"]
+
+    plain = (
+        f"  {glyphs.OUTPUT}  Backgrounded agent "
+        "(↓ to manage · ctrl+o to expand)"
+    )
+    rich = (
+        f"  [{meta}]{glyphs.OUTPUT}[/]  "
+        f"[{meta}]Backgrounded agent "
+        f"([{accent}]↓ to manage[/] · [{meta}]ctrl+o to expand[/])[/]"
+    )
+    return ToolPaint(rich_lines=[rich], plain_lines=[plain])
+
+
+def _humanise_tokens(n: int) -> str:
+    if n < 1_000:
+        return str(n)
+    if n < 1_000_000:
+        return f"{n / 1_000:.1f}k"
+    return f"{n / 1_000_000:.1f}M"
+
+
+def _fmt_elapsed_long(secs: float) -> str:
+    m, s = divmod(int(secs), 60)
+    if m:
+        return f"{m}m {s:02d}s"
+    return f"{s}s"

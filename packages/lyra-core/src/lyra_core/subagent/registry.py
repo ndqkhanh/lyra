@@ -23,9 +23,10 @@ transitions so ``list_all`` reflects live state.
 from __future__ import annotations
 
 import itertools
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Callable, Literal
+from typing import Any, Literal
 
 SubagentState = Literal["pending", "running", "done", "failed", "cancelled"]
 
@@ -45,6 +46,8 @@ class SubagentRecord:
     finished_at: datetime | None = None
     result: dict | None = None
     error: str | None = None
+    parent_id: str | None = None
+    transcript_path: str | None = None
 
     def is_terminal(self) -> bool:
         return self.state in ("done", "failed", "cancelled")
@@ -91,6 +94,7 @@ class SubagentRegistry:
         description: str,
         *,
         subagent_type: str = "general",
+        parent_id: str | None = None,
         **kwargs: Any,
     ) -> SubagentRecord:
         """Allocate an id for a subagent that will dispatch later.
@@ -108,11 +112,13 @@ class SubagentRegistry:
             id=rec_id,
             description=desc,
             subagent_type=subagent_type,
+            parent_id=parent_id,
         )
         self._records[rec_id] = rec
         self._order.append(rec_id)
         self._pending_kwargs[rec_id] = {
             "subagent_type": subagent_type,
+            "parent_id": parent_id,
             **kwargs,
         }
         return rec
@@ -137,11 +143,12 @@ class SubagentRegistry:
         description: str,
         *,
         subagent_type: str = "general",
+        parent_id: str | None = None,
         **kwargs: Any,
     ) -> SubagentRecord:
         """Reserve + dispatch a new subagent synchronously."""
         rec = self.reserve(
-            description, subagent_type=subagent_type, **kwargs
+            description, subagent_type=subagent_type, parent_id=parent_id, **kwargs
         )
         self._run(rec, {"subagent_type": subagent_type, **kwargs})
         # ``_run`` already consumed pending kwargs via self._run; drop

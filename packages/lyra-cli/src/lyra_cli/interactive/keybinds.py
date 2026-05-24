@@ -294,6 +294,17 @@ def run_in_background(session: "InteractiveSession") -> str:
     return f"background mode {state}"
 
 
+def toggle_transcript(session: "InteractiveSession") -> str:
+    """``Ctrl+O`` — toggle transcript panel overlay.
+
+    When enabled, the driver prints recent conversation turns above
+    the prompt so the user can review context without leaving the REPL.
+    """
+    current = getattr(session, "show_transcript", False)
+    session.show_transcript = not current
+    return f"transcript {'on' if session.show_transcript else 'off'}"
+
+
 def focus_foreground_subagent(session: "InteractiveSession") -> str:
     """``Ctrl+F`` — re-focus the most recently spawned subagent.
 

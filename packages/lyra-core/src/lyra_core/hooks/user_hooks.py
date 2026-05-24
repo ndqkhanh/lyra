@@ -52,8 +52,9 @@ import json
 import logging
 import os
 import subprocess
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
-from typing import Any, Iterable, Mapping, Optional
+from typing import Any
 
 from lyra_core.permissions.grammar import (
     Rule,
@@ -125,9 +126,18 @@ class HookOutcome:
     """
 
     block: bool = False
-    reason: Optional[str] = None
-    mutated_args: Optional[dict[str, Any]] = None
+    reason: str | None = None
+    mutated_args: dict[str, Any] | None = None
     fired: list[str] = field(default_factory=list)  # source rules that ran
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize for logging / compliance audit trails."""
+        return {
+            "block": self.block,
+            "reason": self.reason,
+            "mutated_args": self.mutated_args,
+            "fired": list(self.fired),
+        }
 
 
 def parse_hooks_config(payload: Mapping[str, Any]) -> tuple[list[HookSpec], bool]:
@@ -188,7 +198,7 @@ def _dispatch_one(
     args: Mapping[str, Any],
     session_id: str,
     timeout: float,
-) -> Optional[dict[str, Any]]:
+) -> dict[str, Any] | None:
     """Run a single hook command; return its parsed JSON response.
 
     Returns ``None`` when the hook fails (non-zero exit, timeout,
@@ -250,7 +260,7 @@ def run_hooks(
     session_id: str = "",
     timeout: float = _DEFAULT_TIMEOUT_SEC,
     enabled: bool = True,
-    env: Optional[Mapping[str, str]] = None,
+    env: Mapping[str, str] | None = None,
 ) -> HookOutcome:
     """Fire all matching hooks for ``event``; return aggregate :class:`HookOutcome`.
 

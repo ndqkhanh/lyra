@@ -173,87 +173,109 @@ def _root(
             "from the CLI flags alone."
         ),
     ),
-    legacy: bool = typer.Option(
+    tui: bool = typer.Option(
         False,
-        "--legacy",
+        "--tui",
         help=(
-            "Boot the legacy prompt_toolkit REPL instead of the v3.14 "
-            "Textual shell. Set ``LYRA_TUI=legacy`` in your shell rc "
-            "to make this the default for your account. The legacy "
-            "REPL is scheduled for removal in v3.15."
+            "Launch the TypeScript/Ink TUI instead of the default "
+            "prompt_toolkit REPL."
         ),
+    ),
+    output_format: str = typer.Option(
+        "text",
+        "--output-format",
+        help=(
+            "Output format for -p / run mode: text, json, or stream-json. "
+            "stream-json emits partial messages for Agent SDK compatibility."
+        ),
+    ),
+    max_turns: Optional[int] = typer.Option(
+        None,
+        "--max-turns",
+        help="Maximum turns before auto-exit (headless / CI safety limit).",
+    ),
+    max_budget_usd: Optional[float] = typer.Option(
+        None,
+        "--max-budget-usd",
+        help="Maximum budget in USD before auto-exit (headless / CI safety limit).",
+    ),
+    name: Optional[str] = typer.Option(
+        None,
+        "--name",
+        "-n",
+        metavar="NAME",
+        help="Human-readable session name (stored in session metadata).",
+    ),
+    effort: Optional[str] = typer.Option(
+        None,
+        "--effort",
+        help=(
+            "Effort level for this session: low, medium, high, xhigh, or max. "
+            "Controls extended thinking budget and response depth."
+        ),
+    ),
+    add_dir: Optional[list[Path]] = typer.Option(
+        None,
+        "--add-dir",
+        help=(
+            "Additional directories the agent can access. Repeatable. "
+            "Grants file read/write access beyond the repo root."
+        ),
+    ),
+    settings_path: Optional[Path] = typer.Option(
+        None,
+        "--settings",
+        metavar="PATH",
+        help="Path to a custom settings.json file (overrides default locations).",
+    ),
+    verbose: bool = typer.Option(
+        False,
+        "--verbose",
+        help="Start with verbose view mode (show full tool outputs).",
+    ),
+    bg: bool = typer.Option(
+        False,
+        "--bg",
+        help="Dispatch session in background (daemon mode, no TTY attached).",
+    ),
+    goal: Optional[str] = typer.Option(
+        None,
+        "--goal",
+        metavar="CONDITION",
+        help=(
+            "Set a goal condition for auto-iteration. After each turn "
+            "Lyra checks whether the condition holds and stops when "
+            "met or max-turns is reached."
+        ),
+    ),
+    permission_mode: Optional[str] = typer.Option(
+        None,
+        "--permission-mode",
+        metavar="MODE",
+        help="Permission mode: default, acceptEdits, plan, auto, dontAsk, or bypassPermissions.",
+    ),
+    dangerously_skip_permissions: bool = typer.Option(
+        False,
+        "--dangerously-skip-permissions",
+        help="Skip all permission prompts (equivalent to permission_mode=bypassPermissions).",
     ),
 ) -> None:
     """Lyra."""
     if ctx.invoked_subcommand is not None:
         return
 
-    # v3.2.0 (Phase L): unify --resume / --continue / --session into
-    # a single ``resume_id`` plumbed through the driver, plus an
-    # optional ``pin_session_id`` that takes effect when the id
-    # doesn't resolve to an existing session. Precedence mirrors
-    # Claude Code:
-    #   1. ``--resume <id>`` wins (must already exist; falls back to
-    #       a fresh auto-id session with a stderr warning when missing)
-    #   2. ``--continue`` is a shortcut for "latest"
-    #   3. ``--session <id>`` resumes when the id exists, otherwise
-    #      starts a brand-new session with that exact id so subsequent
-    #      ``--resume <id>`` attaches back to it
-    resume_target: Optional[str] = None
-    pin_id: Optional[str] = None
-    if resume is not None:
-        resume_target = resume or "latest"
-    elif cont:
-        resume_target = "latest"
-    elif session_id:
-        resume_target = session_id
-        pin_id = session_id
+    # TUI opt-in: Launch TypeScript/Ink TUI (Claude Code-style)
+    if tui:
+        from .tui_launcher import launch_tui
 
-    # Phase 4 — TUI v2 removed, new CLI (Rich + Typer) is now default.
-    # Bare ``lyra`` now opens the new CLI. Legacy prompt_toolkit REPL
-    # is still available via ``--legacy``.
-
-    use_legacy = legacy
-
-    if not use_legacy:
-        # Default: Launch new CLI (Rich + Typer based)
-        try:
-            from .cli.commands.chat import interactive_chat
-
-            interactive_chat(model=model)
-            raise typer.Exit(0)
-        except ImportError as e:
-            typer.echo(
-                f"lyra: new CLI not available ({e}). "
-                "Falling back to legacy REPL.",
-                err=True,
-            )
-            use_legacy = True
-
-    # Legacy path — surface a one-line deprecation hint via Click's
-    # stderr stream so CliRunner can capture it without monkeypatching.
-    typer.echo(
-        "lyra: launching legacy prompt_toolkit REPL. The v3.14 Textual "
-        "shell is now the default; drop --legacy / unset "
-        "LYRA_TUI=legacy to use it. (Legacy removed in v3.15.)",
-        err=True,
-    )
+        typer.echo("Launching Lyra TUI...", err=True)
+        raise typer.Exit(launch_tui())
 
     from .interactive.driver import run as _run_interactive
 
-    # v3.2.0 (Phase L): unify --resume / --continue / --session into
-    # a single ``resume_id`` plumbed through the driver, plus an
-    # optional ``pin_session_id`` that takes effect when the id
-    # doesn't resolve to an existing session. Precedence mirrors
-    # Claude Code:
-    #   1. ``--resume <id>`` wins (must already exist; falls back to
-    #       a fresh auto-id session with a stderr warning when missing)
-    #   2. ``--continue`` is a shortcut for "latest"
-    #   3. ``--session <id>`` resumes when the id exists, otherwise
-    #      starts a brand-new session with that exact id so subsequent
-    #      ``--resume <id>`` attaches back to it
+    # v3.2.0 (Phase L): unify --resume / --continue / --session
     resume_target: Optional[str] = None
-    pin_id: Optional[str] = None
+    pin_id: Optional[str] = session_id  # type: ignore[assignment]
     if resume is not None:
         resume_target = resume or "latest"
     elif cont:
@@ -270,6 +292,18 @@ def _root(
             resume_id=resume_target,
             pin_session_id=pin_id,
             bare=bare,
+            output_format=output_format,
+            max_turns=max_turns,
+            max_budget_usd=max_budget_usd,
+            session_name=name,
+            effort=effort,
+            add_dirs=add_dir,
+            settings_path=settings_path,
+            verbose=verbose,
+            bg=bg,
+            goal=goal,
+            permission_mode=permission_mode,
+            dangerously_skip_permissions=dangerously_skip_permissions,
         )
     )
 

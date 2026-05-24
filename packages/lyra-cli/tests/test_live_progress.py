@@ -109,10 +109,11 @@ def test_header_renders_elapsed():
     assert "7s" in text.plain
 
 
-def test_header_renders_nyan_bar():
-    header = TurnProgressHeader([], tick=0, elapsed=0.0, nyan_width=3)
+def test_header_renders_flow_glyph():
+    from lyra_cli.interactive.live_progress import _FLOW_GLYPH
+    header = TurnProgressHeader([], tick=0, elapsed=0.0)
     text = header.render()
-    assert "━━━" in text.plain
+    assert _FLOW_GLYPH in text.plain
 
 
 def test_header_renders_done_phase():
@@ -167,13 +168,13 @@ def test_header_rich_protocol():
     assert result is not None
 
 
-def test_header_tick_increments_nyan():
-    h0 = TurnProgressHeader([], tick=0, elapsed=0.0, nyan_width=1)
-    h1 = TurnProgressHeader([], tick=1, elapsed=0.0, nyan_width=1)
+def test_header_renders_tokens():
+    h0 = TurnProgressHeader([], tick=0, elapsed=0.0, tokens=0)
     t0 = h0.render()
+    assert "tokens" not in t0.plain.lower()
+    h1 = TurnProgressHeader([], tick=0, elapsed=0.0, tokens=1500)
     t1 = h1.render()
-    # Same character, different span colour
-    assert t0._spans[0].style != t1._spans[0].style
+    assert "1.5k" in t1.plain
 
 
 def test_header_multiple_phases_order():

@@ -48,17 +48,17 @@ root, mirroring :func:`lyra_skills.loader.load_skills`'s
 from __future__ import annotations
 
 import os
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Iterable, Optional
-
+from typing import Any
 
 # ---------------------------------------------------------------------------
 # Discovery
 # ---------------------------------------------------------------------------
 
 
-def _packaged_pack_root() -> Optional[Path]:
+def _packaged_pack_root() -> Path | None:
     """Locate the ``lyra_skills.packs`` directory inside the installed package.
 
     Returns ``None`` when ``lyra_skills`` isn't on the import path
@@ -76,7 +76,7 @@ def _packaged_pack_root() -> Optional[Path]:
     return root if root.is_dir() else None
 
 
-def _user_skill_root() -> Optional[Path]:
+def _user_skill_root() -> Path | None:
     """Honour ``$LYRA_HOME`` first; fall back to ``~/.lyra/skills``."""
     home = os.environ.get("LYRA_HOME")
     base = Path(home) if home else Path.home() / ".lyra"
@@ -488,10 +488,53 @@ def _load_skills_safely(roots: Iterable[Path]) -> list:
         return []
 
 
+def substitute_skill_vars(
+    body: str,
+    *,
+    session_id: str = "",
+    effort: str = "",
+    skill_dir: str = "",
+    arguments: str = "",
+) -> str:
+    """Replace template variables in skill body text.
+
+    Supports ``${VAR}`` and ``$VAR`` forms for:
+
+    * ``LYRA_SESSION_ID`` / ``SESSION_ID`` — current session identifier
+    * ``LYRA_EFFORT`` / ``EFFORT`` — effort level (low/medium/high/xhigh/max)
+    * ``LYRA_SKILL_DIR`` / ``SKILL_DIR`` — path to the skill's directory
+    * ``ARGUMENTS`` — user-supplied arguments to the skill invocation
+
+    Unknown variables are left untouched so authors can use ``$`` for
+    other purposes without false-positive substitutions.
+    """
+    import re
+
+    _VARS = {
+        "LYRA_SESSION_ID": session_id,
+        "SESSION_ID": session_id,
+        "LYRA_EFFORT": effort,
+        "EFFORT": effort,
+        "LYRA_SKILL_DIR": skill_dir,
+        "SKILL_DIR": skill_dir,
+        "ARGUMENTS": arguments,
+    }
+
+    def _replace(m: re.Match) -> str:
+        name = m.group(1)
+        return _VARS.get(name, m.group(0))
+
+    # ``${NAME}`` first (greedy), then bare ``$NAME`` (word boundary).
+    body = re.sub(r"\$\{([A-Z_][A-Z0-9_]*)\}", _replace, body)
+    body = re.sub(r"\$([A-Z_][A-Z0-9_]*)", _replace, body)
+    return body
+
+
 __all__ = [
     "SkillBlockResult",
     "discover_skill_roots",
     "is_locked_skill",
     "render_skill_block",
     "render_skill_block_with_activations",
+    "substitute_skill_vars",
 ]
