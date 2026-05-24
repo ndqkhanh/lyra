@@ -6,6 +6,10 @@ import { useHistory } from '../hooks/useHistory'
 import { useVim } from '../hooks/useVim'
 import { getFileSuggestions, getCurrentMention, type FileSuggestion } from '../utils/fileCompletion'
 import { ModelPicker } from './ModelPicker'
+import { EffortPicker } from './EffortPicker'
+import { ThemePicker } from './ThemePicker'
+import { OutputStylePicker } from './OutputStylePicker'
+import { GoalPanel } from './GoalPanel'
 import { ReleaseNotesPicker } from './ReleaseNotesPicker'
 import { getCommandNames } from '../constants/commands'
 
@@ -31,6 +35,11 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
   const [fileSuggestions, setFileSuggestions] = useState<FileSuggestion[]>([])
   const [showModelPicker, setShowModelPicker] = useState(false)
   const [showReleaseNotes, setShowReleaseNotes] = useState(false)
+  const [showEffortPicker, setShowEffortPicker] = useState(false)
+  const [showThemePicker, setShowThemePicker] = useState(false)
+  const [showOutputStylePicker, setShowOutputStylePicker] = useState(false)
+  const [showGoalPanel, setShowGoalPanel] = useState(false)
+  const [currentGoal, setCurrentGoal] = useState<string | null>(null)
   const { vim, vimActions } = useVim()
 
   // Track cursor position for vim motions
@@ -233,6 +242,41 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
       return
     }
 
+    // Intercept /effort to open effort picker
+    if (input === '/effort' || input.startsWith('/effort ')) {
+      setShowEffortPicker(true)
+      return
+    }
+
+    // Intercept /theme to open theme picker
+    if (input === '/theme' || input.startsWith('/theme ')) {
+      setShowThemePicker(true)
+      return
+    }
+
+    // Intercept /output-style to open style picker
+    if (input === '/output-style' || input.startsWith('/output-style ')) {
+      setShowOutputStylePicker(true)
+      return
+    }
+
+    // Intercept /goal to open goal panel
+    if (input === '/goal' || input.startsWith('/goal ')) {
+      const goalArg = input.slice(5).trim()
+      if (goalArg === 'clear') {
+        setCurrentGoal(null)
+        history.setCurrent('')
+        return
+      }
+      if (goalArg) {
+        setCurrentGoal(goalArg)
+        history.setCurrent('')
+        return
+      }
+      setShowGoalPanel(true)
+      return
+    }
+
     // Add to history
     history.addToHistory(history.current)
 
@@ -320,6 +364,71 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
         }}
         onClose={() => {
           setShowReleaseNotes(false)
+          history.setCurrent('')
+        }}
+      />
+
+      {/* Effort picker */}
+      <EffortPicker
+        visible={showEffortPicker}
+        onSelect={(level) => {
+          setShowEffortPicker(false)
+          history.setCurrent('')
+          if (transport) transport.sendMessage(`/effort ${level}`).catch(() => {})
+        }}
+        onClose={() => {
+          setShowEffortPicker(false)
+          history.setCurrent('')
+        }}
+      />
+
+      {/* Theme picker */}
+      <ThemePicker
+        visible={showThemePicker}
+        themes={[]}
+        currentTheme="dracula"
+        onSelect={(theme) => {
+          setShowThemePicker(false)
+          history.setCurrent('')
+          if (transport) transport.sendMessage(`/theme ${theme}`).catch(() => {})
+        }}
+        onClose={() => {
+          setShowThemePicker(false)
+          history.setCurrent('')
+        }}
+      />
+
+      {/* Output style picker */}
+      <OutputStylePicker
+        visible={showOutputStylePicker}
+        currentStyle="default"
+        onSelect={(style) => {
+          setShowOutputStylePicker(false)
+          history.setCurrent('')
+          if (transport) transport.sendMessage(`/output-style ${style}`).catch(() => {})
+        }}
+        onClose={() => {
+          setShowOutputStylePicker(false)
+          history.setCurrent('')
+        }}
+      />
+
+      {/* Goal panel */}
+      <GoalPanel
+        visible={showGoalPanel}
+        currentGoal={currentGoal}
+        onSetGoal={(goal) => {
+          setCurrentGoal(goal)
+          setShowGoalPanel(false)
+          history.setCurrent('')
+        }}
+        onClearGoal={() => {
+          setCurrentGoal(null)
+          setShowGoalPanel(false)
+          history.setCurrent('')
+        }}
+        onClose={() => {
+          setShowGoalPanel(false)
           history.setCurrent('')
         }}
       />
