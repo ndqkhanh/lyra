@@ -52,3 +52,8 @@ node_modules/
 # Lyra session data (local only)
 .lyra/
 .research/
+
+# Local-only docs/archive/plans
+docs/
+archive/
+plans/
