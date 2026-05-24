@@ -1,0 +1,23 @@
+{
+  "last_model": "anthropic:claude-sonnet-4-6",
+  "last_provider": "anthropic",
+  "fast_model": "deepseek-v4-flash",
+  "smart_model": "deepseek-v4-pro",
+  "fallback_chain": [
+    "anthropic",
+    "deepseek",
+    "gemini",
+    "openai",
+    "bedrock",
+    "kimi",
+    "qwen",
+    "ollama"
+  ],
+  "theme": "dracula",
+  "permission_mode": "plan",
+  "auto_detect_tasks": true,
+  "max_turns": 50,
+  "max_budget_usd": 10.0,
+  "effort": "high",
+  "config_version": 3
+}

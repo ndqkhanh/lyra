@@ -50,9 +50,10 @@ dmypy.json
 node_modules/
 
 # Lyra session data (local only)
-# Keep policy and cron structure, exclude everything else
+# Keep policy, cron structure, and example files, exclude everything else
 .lyra/*
 !.lyra/policy.yaml
+!.lyra/settings.json.example
 !.lyra/cron/
 .lyra/cron/*
 !.lyra/cron/.gitkeep
