@@ -110,7 +110,8 @@ export interface SystemNoticeItem extends BaseRenderItem {
 }
 
 // Display Configuration
-export type DisplayMode = 'minimal' | 'standard' | 'debug'
+export type DisplayMode = 'minimal' | 'standard' | 'debug' | 'focus'
+export type PermissionMode = 'ask' | 'allow' | 'deny'
 
 export interface DisplayConfig {
   showThinking: boolean
@@ -146,6 +147,40 @@ export const DISPLAY_MODE_PRESETS: Record<DisplayMode, DisplayConfig> = {
     showTraces: true,
     showStatusBar: true,
   },
+  focus: {
+    showThinking: false,
+    showCosts: true,
+    showToolArgs: false,
+    toolOutput: 'hidden',
+    showTraces: false,
+    showStatusBar: true,
+  },
+}
+
+// Model & Provider Types
+export interface ModelInfo {
+  slug: string
+  display_name: string
+  description: string
+  tags: string[]
+  context_window: number
+  max_output_tokens: number
+}
+
+export interface ProviderInfo {
+  key: string
+  display_name: string
+  icon: string
+  website: string
+  api_key_url: string
+  notes: string
+  default_model: string
+  context_window: number
+  supports_tools: boolean
+  supports_reasoning: boolean
+  supports_vision: boolean
+  env_vars: string[]
+  models: ModelInfo[]
 }
 
 // Session State
@@ -156,6 +191,9 @@ export interface SessionState {
   isStreaming: boolean
   displayMode: DisplayMode
   displayConfig: DisplayConfig
+  permissionMode: PermissionMode
+  currentModel: string
+  currentProvider: string
 }
 
 // Transport Interface
