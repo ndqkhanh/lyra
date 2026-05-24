@@ -76,7 +76,7 @@ graph TB
 sequenceDiagram
     participant User
     participant CLI as Lyra CLI
-    participant Loop as AgentLoop
+    participant Engine as AgentLoop
     participant Perms as PermissionBridge
     participant HIR as HIR Emitter
     participant Agent as Specialist Agent
@@ -87,18 +87,18 @@ sequenceDiagram
     participant Verify as Verifier
 
     User->>CLI: "Add caching to user service"
-    CLI->>Loop: run(task_description)
+    CLI->>Engine: run(task_description)
 
-    Loop->>Hook: fire(SESSION_START)
-    Hook-->>Loop: ✓
+    Engine->>Hook: fire(SESSION_START)
+    Hook-->>Engine: ✓
 
-    Loop->>Mem: recall(context)
-    Mem-->>Loop: relevant history + skills + rules
+    Engine->>Mem: recall(context)
+    Mem-->>Engine: relevant history + skills + rules
 
-    Loop->>Loop: plan(steps)
-    Loop->>HIR: emit(plan.created)
+    Engine->>Engine: plan(steps)
+    Engine->>HIR: emit(plan.created)
 
-    Loop->>Agent: delegate(subtask)
+    Engine->>Agent: delegate(subtask)
     Agent->>Perms: check(tool_call)
     Perms-->>Agent: plan-gated ✓
 
@@ -121,13 +121,13 @@ sequenceDiagram
     Tools-->>Agent: written
 
     Agent->>HIR: emit(tool.write)
-    Agent-->>Loop: result(success)
+    Agent-->>Engine: result(success)
 
-    Loop->>Mem: consolidate(learnings)
-    Loop->>HIR: emit(session.complete)
-    Loop->>Hook: fire(SESSION_END)
+    Engine->>Mem: consolidate(learnings)
+    Engine->>HIR: emit(session.complete)
+    Engine->>Hook: fire(SESSION_END)
 
-    Loop-->>CLI: final response
+    Engine-->>CLI: final response
     CLI-->>User: ✅ Implementation + tests
 ```
 

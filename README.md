@@ -81,9 +81,9 @@ graph TB
 
 ```mermaid
 sequenceDiagram
-    actor User
+    participant User
     participant CLI as Lyra CLI
-    participant Loop as AgentLoop
+    participant Engine as AgentLoop
     participant Orch as Orchestrator
     participant Agent as Specialist Agent
     participant LLM as LLM Provider
@@ -91,11 +91,11 @@ sequenceDiagram
     participant Verify as Verifier
 
     User->>CLI: "Implement a Redis cache"
-    CLI->>Loop: run(task)
-    Loop->>Mem: Recall context
-    Mem-->>Loop: Relevant history + skills
-    Loop->>Loop: Plan steps
-    Loop->>Orch: Decompose & delegate
+    CLI->>Engine: run(task)
+    Engine->>Mem: Recall context
+    Mem-->>Engine: Relevant history + skills
+    Engine->>Engine: Plan steps
+    Engine->>Orch: Decompose & delegate
 
     par Parallel Execution
         Orch->>Agent: CodeAgent → write cache.py
@@ -115,9 +115,9 @@ sequenceDiagram
         LLM-->>Agent: Review comments
     end
 
-    Orch->>Loop: Aggregate results
-    Loop->>Mem: Persist learnings
-    Loop->>CLI: Final response
+    Orch->>Engine: Aggregate results
+    Engine->>Mem: Persist learnings
+    Engine->>CLI: Final response
     CLI-->>User: ✅ Implementation + tests + review
 ```
 
