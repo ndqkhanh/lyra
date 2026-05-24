@@ -48,3 +48,7 @@ dmypy.json
 .frg/
 .omc/
 node_modules/
+
+# Lyra session data (local only)
+.lyra/
+.research/
