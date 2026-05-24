@@ -1,40 +1,140 @@
-"""Finance Agent — trading analysis, portfolio management, market intelligence."""
-from __future__ import annotations
-import logging, random, time
-from dataclasses import dataclass, field
-from typing import Any, Optional
+"""
+Lyra Finance Agent — Multi-Layer Trading, Analysis & Portfolio Management.
 
-logger = logging.getLogger(__name__)
-__all__ = ["Portfolio", "MarketAsset", "FinanceAgent"]
+5-Layer Architecture:
+  Layer 1 — Financial Foundation Models (models.py)
+  Layer 2 — Multi-Agent Trading System (analysts.py, trading.py)
+  Layer 3 — Financial Analysis Pipeline (valuation.py)
+  Layer 4 — Risk Management (risk.py)
+  Layer 5 — Portfolio Optimization (portfolio.py)
 
-@dataclass
-class MarketAsset:
-    symbol: str; price: float = 0.0; change_pct: float = 0.0; volume: int = 0
+Design principles:
+  - Deterministic math, AI reasoning (LLMs do not calculate)
+  - Structural constraints over LLM instructions for enforcement
+  - Multi-agent adversarial debate over single-agent predictions
+  - Frozen dataclasses, full type annotations, production-quality
+"""
 
-@dataclass
-class Portfolio:
-    cash: float = 10000.0; holdings: dict[str, int] = field(default_factory=dict)
+from lyra_finance.analysts import (
+    FinancialStatement,
+    FundamentalAnalyst,
+    NewsAnalyst,
+    SentimentAnalyst,
+    TechnicalAnalyst,
+)
+from lyra_finance.models import (
+    AnalystReport,
+    AnalystType,
+    Asset,
+    AssetClass,
+    CircuitBreakerEvent,
+    MarketData,
+    Order,
+    OrderSide,
+    OrderStatus,
+    OrderType,
+    PerformanceSnapshot,
+    Portfolio,
+    Position,
+    RiskMetrics,
+    RiskProfile,
+    SentimentSignal,
+    SignalSource,
+    Trade,
+    TradeDirection,
+    TradingDecision,
+    ValuationResult,
+)
+from lyra_finance.portfolio import (
+    AllocationMethod,
+    AllocationResult,
+    AllocationStrategy,
+    PortfolioOptimizer,
+    SharpeSnapshot,
+    SharpeTracker,
+)
+from lyra_finance.risk import (
+    BreakerConfig,
+    CircuitBreaker,
+    ComplianceMonitor,
+    ComplianceRule,
+    RiskLimits,
+    RiskManager,
+)
+from lyra_finance.trading import (
+    BullBearDebate,
+    DebateRound,
+    PortfolioConfig,
+    PortfolioManager,
+    TradingAgent,
+)
+from lyra_finance.valuation import (
+    DCFAssumptions,
+    DCFValuation,
+    EVEbitdaAssumptions,
+    EVEbitdaValuation,
+    HybridAssumptions,
+    HybridValuation,
+)
 
-class FinanceAgent:
-    def __init__(self):
-        self.portfolio = Portfolio()
-        self.watchlist: list[str] = []
-        self.trades: list[dict] = []
+__version__ = "0.1.0"
 
-    def add_to_watchlist(self, symbol: str) -> None:
-        self.watchlist.append(symbol)
-
-    def get_quote(self, symbol: str) -> MarketAsset:
-        return MarketAsset(symbol=symbol, price=random.uniform(10, 500), change_pct=random.uniform(-5, 5))
-
-    def buy(self, symbol: str, shares: int, price: float) -> bool:
-        cost = shares * price
-        if cost > self.portfolio.cash: return False
-        self.portfolio.cash -= cost
-        self.portfolio.holdings[symbol] = self.portfolio.holdings.get(symbol, 0) + shares
-        self.trades.append({"action": "buy", "symbol": symbol, "shares": shares, "price": price, "time": time.time()})
-        return True
-
-    def analyze_portfolio(self) -> dict[str, Any]:
-        total = self.portfolio.cash + sum(self.get_quote(s).price * q for s, q in self.portfolio.holdings.items())
-        return {"cash": self.portfolio.cash, "holdings": len(self.portfolio.holdings), "total_value": total, "trades": len(self.trades)}
+__all__ = [
+    # Version
+    "__version__",
+    # Layer 1 — Models
+    "Asset",
+    "AssetClass",
+    "MarketData",
+    "Position",
+    "Portfolio",
+    "Order",
+    "OrderSide",
+    "OrderType",
+    "OrderStatus",
+    "Trade",
+    "TradeDirection",
+    "RiskProfile",
+    "AnalystType",
+    "AnalystReport",
+    "SentimentSignal",
+    "SignalSource",
+    "TradingDecision",
+    "RiskMetrics",
+    "CircuitBreakerEvent",
+    "ValuationResult",
+    "PerformanceSnapshot",
+    # Layer 2 — Analysts
+    "FundamentalAnalyst",
+    "SentimentAnalyst",
+    "TechnicalAnalyst",
+    "NewsAnalyst",
+    "FinancialStatement",
+    # Layer 2 — Trading
+    "BullBearDebate",
+    "DebateRound",
+    "TradingAgent",
+    "PortfolioManager",
+    "PortfolioConfig",
+    # Layer 3 — Valuation
+    "DCFValuation",
+    "DCFAssumptions",
+    "EVEbitdaValuation",
+    "EVEbitdaAssumptions",
+    "HybridValuation",
+    "HybridAssumptions",
+    # Layer 4 — Risk
+    "RiskManager",
+    "RiskLimits",
+    "CircuitBreaker",
+    "BreakerConfig",
+    "ComplianceMonitor",
+    "ComplianceRule",
+    # Layer 5 — Portfolio
+    "PortfolioOptimizer",
+    "AllocationStrategy",
+    "AllocationMethod",
+    "AllocationResult",
+    "SharpeTracker",
+    "SharpeSnapshot",
+]

@@ -72,6 +72,23 @@ from lyra_memory.graph_tier import (
     FederatedRetriever,
     GraphMemoryStore,
 )
+from lyra_memory.pgvector_store import (
+    InMemoryVectorStore,
+    PgVectorConfig,
+    PgVectorEmbedding,
+    PgVectorStore,
+)
+from lyra_memory.world_graph import (
+    CrossWorldEdge,
+    World,
+    WorldGraph,
+    WorldGraphMemory,
+    WorldNode,
+    WorldNodeType,
+    WorldRelation,
+    WorldRelationType,
+    WorldSnapshot,
+)
 
 __version__ = "0.3.0"
 
@@ -136,4 +153,19 @@ __all__ = [
     "AutoDreamer",
     "FederatedRetriever",
     "GraphMemoryStore",
+    # World Graph (WorldDB-style)
+    "WorldGraphMemory",
+    "WorldGraph",
+    "World",
+    "WorldNode",
+    "WorldNodeType",
+    "WorldRelation",
+    "WorldRelationType",
+    "CrossWorldEdge",
+    "WorldSnapshot",
+    # PgVector Store
+    "PgVectorConfig",
+    "PgVectorStore",
+    "PgVectorEmbedding",
+    "InMemoryVectorStore",
 ]
