@@ -1,106 +1,179 @@
-# 🚀 Lyra UI - Quick Start Guide
+# Quickstart Guide
+
+Get Lyra running in under 5 minutes.
 
 ## Prerequisites
 
-- Node.js 18+ 
-- npm 9+
+- **Python 3.11+** with pip
+- **Node.js 20+** with npm (for TUI mode only)
+- **At least one LLM API key** (Anthropic, DeepSeek, OpenAI, or Google recommended)
 
-## Installation & Setup
+## Installation
 
 ```bash
-# You're already in the right directory!
+# Clone the repository
+git clone https://github.com/lyra-ai/lyra.git
+cd lyra
 
-# Install dependencies (use --legacy-peer-deps for React version conflicts)
-npm install --legacy-peer-deps
+# Install Python dependencies (core + dev tools)
+pip install -e ".[dev]"
 
-# Build all packages
-npm run build
+# Install TypeScript dependencies (for the Ink terminal UI, optional)
+npm install
+npm run build --workspaces
 ```
 
-## Running Lyra
+## Configure API Keys
 
-### Single Run (Recommended)
+Set at least one provider's API key. Lyra auto-detects available providers.
+
 ```bash
-npm run run --workspace=@lyra/ui-terminal
+# Recommended: Anthropic (best coding model)
+export ANTHROPIC_API_KEY="sk-ant-..."
+
+# DeepSeek (cost-effective reasoning)
+export DEEPSEEK_API_KEY="sk-..."
+
+# OpenAI
+export OPENAI_API_KEY="sk-..."
+
+# Google Gemini
+export GOOGLE_API_KEY="..."
+
+# Or use a .env file
+echo 'ANTHROPIC_API_KEY=sk-ant-...' > .env
+echo 'DEEPSEEK_API_KEY=sk-...' >> .env
 ```
 
-Runs once. Press **Ctrl+C** to exit cleanly. No auto-restart.
+Lyra auto-discovers the best available provider: **DeepSeek → Anthropic → OpenAI → Gemini → xAI → Groq → Mistral → Ollama**.
 
-### Development Mode (Auto-Restart)
+## Launch Lyra
+
 ```bash
-npm run dev --workspace=@lyra/ui-terminal
+# Interactive REPL (prompt_toolkit, Claude Code-style)
+lyra
+
+# With a specific model
+lyra --model deepseek-v4-pro
+
+# Resume your last session
+lyra --continue
+
+# Single-shot task (no REPL)
+lyra run "Add rate limiting to the API gateway"
+
+# Plan-only mode (no execution)
+lyra plan "Design a WebSocket notification system"
+
+# Full CLI help
+lyra --help
 ```
 
-Watches for file changes and auto-restarts. Press **Ctrl+C** to exit.
+## First Session
+
+```bash
+$ lyra
+
+  🧬 Lyra v5.0.0 — AGI Through Emergence
+  Model: deepseek-v4-pro | Mode: plan | Repo: ~/projects/my-app
+
+> Write a pytest fixture for a PostgreSQL test database
+
+  [Plan] Analyzing request...
+  [Agent] CodeAgent → Generating fixture code
+  [Verify] Output validated ✓
+
+  ```python
+  import pytest
+  from sqlalchemy import create_engine
+  from sqlalchemy.orm import sessionmaker
+
+  @pytest.fixture
+  def pg_session():
+      engine = create_engine("postgresql://localhost/test_db")
+      Session = sessionmaker(bind=engine)
+      session = Session()
+      yield session
+      session.rollback()
+      session.close()
+  ```
+
+  ✅ Done | 1 turn | 234 tokens | $0.002
+```
 
 ## Keyboard Shortcuts
 
 | Key | Action |
 |-----|--------|
-| **Ctrl+C** | Exit Lyra |
-| **Ctrl+\\** | Cycle display modes (minimal → standard → debug) |
-| **↑** | Previous command (history) |
-| **↓** | Next command (history) |
-| **Enter** | Submit message |
+| `Ctrl+K` | Command palette |
+| `Ctrl+D` | Exit session |
+| `Ctrl+L` | Clear screen |
+| `Ctrl+G` | Open in external editor |
+| `Alt+T` | Toggle deep thinking |
+| `Alt+P` | Model picker |
+| `Shift+Tab` | Cycle permission mode |
+| `Up/Down` | Navigate command history |
+| `Tab` | Accept autocomplete |
+| `!cmd` | Run shell command inline |
 
-## Display Modes
+## Permission Modes
 
-- **Minimal**: Clean, distraction-free interface
-- **Standard**: Balanced view with status and metadata
-- **Debug**: Full details including timestamps, IDs, and debug info
+| Mode | Behavior |
+|------|----------|
+| `plan` | All tool calls require approval (default, safest) |
+| `auto-edit` | File edits auto-approved; destructive ops still gated |
+| `bypass` | All operations auto-approved (use with caution) |
+
+Cycle modes with `Shift+Tab` or set in `~/.lyra/settings.json`.
+
+## TypeScript TUI (Optional)
+
+```bash
+# Launch the React/Ink terminal UI
+lyra --tui
+
+# Or directly via npm
+npm run dev --workspace=@lyra/ui-terminal
+```
+
+The TUI provides a model picker dropdown (`/model`), command palette (`Ctrl+K`), syntax-highlighted code blocks, agent tree visualization, and a token/cost status bar.
+
+## Running Tests
+
+```bash
+# All tests
+make test
+
+# Unit tests only
+make unit
+
+# Integration tests
+make integration
+
+# With coverage report
+pytest --cov=src --cov-report=html
+open htmlcov/index.html
+
+# Specific test file
+pytest tests/test_primary_agent.py -v
+
+# TypeScript tests
+npm test
+```
 
 ## Troubleshooting
 
-### "Missing script: build" error
-This shouldn't happen anymore - the structure has been flattened!
-
-### Dependency conflicts
-Use `--legacy-peer-deps` flag:
-```bash
-npm install --legacy-peer-deps
-```
-
-### Immer MapSet error
-This has been fixed. Make sure you've pulled the latest changes and rebuilt:
-```bash
-git pull
-npm run build
-```
-
-## Project Structure
-
-```
-projects/lyra/              # Main Lyra project root
-├── packages/
-│   ├── ui-core/           # State management + types
-│   ├── ui-terminal/       # Terminal UI (Ink)
-│   └── ui-transport/      # WebSocket transport
-├── package.json           # Root workspace config
-├── QUICKSTART.md          # This file
-└── HOW_TO_RUN.md         # Complete guide
-```
-
-## Development Workflow
-
-1. **Make changes** to source files in `packages/*/src/`
-2. **Build** with `npm run build` (or use dev mode for auto-rebuild)
-3. **Test** with `npm test`
-4. **Run** with `npm run dev --workspace=@lyra/ui-terminal`
+| Problem | Solution |
+|---------|----------|
+| **"No LLM provider configured"** | Set at least one `*_API_KEY` environment variable. Check with `lyra doctor`. |
+| **"Module not found: lyra_core"** | Run `pip install -e .` from the project root. |
+| **npm install fails** | Ensure Node 20+. Try `npm cache clean --force` then retry. |
+| **Import errors in tests** | Run `pip install -e ".[dev]"` to install pytest and coverage tools. |
+| **TUI shows blank screen** | Run `npm run build --workspaces` first. Check terminal supports 256 colors. |
 
 ## Next Steps
 
-- Read the full [README.md](README.md) for architecture details
-- Check [IMPLEMENTATION_COMPLETE.md](IMPLEMENTATION_COMPLETE.md) for implementation status
-- Explore the codebase in `packages/*/src/`
-
-## Need Help?
-
-- Check the main README.md for detailed documentation
-- Review the implementation guide in IMPLEMENTATION_COMPLETE.md
-- Examine the test files for usage examples
-
----
-
-**Status**: ✅ All systems operational
-**Version**: 1.0.0
-**Last Updated**: 2026-05-24
+- **[README](README.md)** — Full project overview with architecture diagrams
+- **[Architecture](ARCHITECTURE.md)** — System design and data flow
+- **[Examples](EXAMPLES.md)** — Code examples for common workflows
+- **[Contributing](docs/CONTRIBUTING.md)** — Development setup and guidelines
