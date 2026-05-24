@@ -1,32 +1,32 @@
-"""Continual Learning — experience replay, elastic weight consolidation, progressive neural networks.
+"""Continual Learning — MoLEM, skill packs, experience replay, EWC, and progressive networks.
 
 Enables Lyra to learn across thousands of tasks without catastrophic forgetting.
-Three complementary mechanisms: replay (rehearse past), EWC (protect important weights),
-and progressive networks (grow new columns).
+- MoLEM: Mixture of Learnable Experts with Memory (frozen base + dynamic router)
+- SkillPack: GraftLLM-style compressed domain expertise
+- ExperienceReplay: interleaved rehearsal of past experiences
+- ElasticWeightConsolidation: quadratic penalty on important weights
+- ProgressiveNetwork: new column per task, zero forgetting
 """
 
 from __future__ import annotations
 
 import logging
-import math
 import random
 from collections import deque
-from dataclasses import dataclass, field
-from typing import Any, Callable, Optional
+from dataclasses import dataclass
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
-__all__ = [
-    "AgentExperience",
-    "ExperienceReplay",
-    "ElasticWeightConsolidation",
-    "ProgressiveNetwork",
-    "ContinualLearner",
-]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Legacy — experience replay, EWC, progressive networks
+# ═══════════════════════════════════════════════════════════════════════════
 
 
 @dataclass
 class AgentExperience:
+    """A single agent experience for replay."""
     task_id: str
     state: dict[str, Any]
     action: str
@@ -129,3 +129,43 @@ class ContinualLearner:
             "total_experiences": len(self.replay.buffer),
             "total_tasks": self.task_count,
         }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# New models
+# ═══════════════════════════════════════════════════════════════════════════
+
+from .models import (  # noqa: E402
+    ContinualEpisode,
+    ExpertStats,
+    ForgettingMetrics,
+    MoEExpert,
+    MoELayer,
+    SkillPack,
+)
+
+# MoLEM engine
+from .molem import MoLEMEngine  # noqa: E402
+
+# SkillPack compression
+from .skill_pack import SkillPackCompressor  # noqa: E402
+
+__all__ = [
+    # Legacy
+    "AgentExperience",
+    "ExperienceReplay",
+    "ElasticWeightConsolidation",
+    "ProgressiveNetwork",
+    "ContinualLearner",
+    # New models
+    "MoEExpert",
+    "MoELayer",
+    "ContinualEpisode",
+    "SkillPack",
+    "ForgettingMetrics",
+    "ExpertStats",
+    # MoLEM
+    "MoLEMEngine",
+    # SkillPack
+    "SkillPackCompressor",
+]

@@ -1,42 +1,95 @@
 """
-Lyra Reasoning - Deep Reasoning Research Agent
+Lyra Reasoning — Deep Reasoning Research Agent.
 
-A breakthrough reasoning system combining:
-- Test-time compute scaling (o1/o3-style)
-- Multiple reasoning engines (CoT, Tree Search, Debate, Hypothesis)
+A comprehensive reasoning system combining:
+- ReflAct reasoning (Reflexion + Acting loop)
+- GRPO / SPIRAL training (Group Relative Policy Optimization)
+- Multiple advanced reasoning strategies
 - Multi-level verification
-- Reasoning memory and learning
-- Self-improvement through evolution
+- Reasoning memory and self-improvement
 
 Example:
-    >>> from lyra_reasoning import DeepReasoningAgent
-    >>> 
-    >>> agent = DeepReasoningAgent()
-    >>> result = agent.reason(
-    ...     task="Analyze the impact of attention mechanisms in transformers",
-    ...     strategy="auto",
-    ...     depth="comprehensive"
-    ... )
-    >>> print(result.conclusion)
-    >>> print(f"Verification score: {result.verification_score:.2f}")
+    >>> from lyra_reasoning import ReflActReasoner, ChainOfThought
+    >>>
+    >>> reasoner = ReflActReasoner()
+    >>> trace = reasoner.reason("Explain the impact of attention mechanisms in transformers")
+    >>> lessons = reasoner.reflect(trace)
 """
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
+# Existing (legacy) exports — keep backward compatibility
 from .agent import DeepReasoningAgent
 from .types import (
+    ComputeBudget,
+    DifficultyEstimate,
+    DifficultyLevel,
     ReasoningConfig,
     ReasoningDepth,
+    ReasoningPattern,
     ReasoningResult,
     ReasoningStrategy,
-    ReasoningTrace,
+    StepType,
+    StrategyPerformance,
+    VerificationResult,
+)
+
+# New models (ReflAct / GRPO / strategies)
+from .models import (
+    AnaloguePair,
+    GRPOTrajectory,
+    ReasoningStep as ReflActStep,
+    ReasoningTrace as ReflActTrace,
+    ReflActEpisode,
+    SpiralSample,
+    ThoughtNode,
+)
+
+# ReflAct reasoner
+from .reflect import ReflActReasoner
+
+# GRPO trainer
+from .grpo import GRPOTrainer
+
+# Advanced reasoning strategies
+from .strategies import (
+    AnalogicalReasoning,
+    ChainOfThought,
+    SelfConsistency,
+    StepBack,
+    TreeOfThoughts,
 )
 
 __all__ = [
+    # Legacy
     "DeepReasoningAgent",
     "ReasoningConfig",
     "ReasoningStrategy",
     "ReasoningDepth",
     "ReasoningResult",
-    "ReasoningTrace",
+    "ReasoningPattern",
+    "StrategyPerformance",
+    "VerificationResult",
+    "ComputeBudget",
+    "DifficultyEstimate",
+    "DifficultyLevel",
+    "StepType",
+    # Models
+    "ReflActStep",
+    "ReflActTrace",
+    "ReflActEpisode",
+    "GRPOTrajectory",
+    "SpiralSample",
+    "ThoughtNode",
+    "AnaloguePair",
+    # ReflAct
+    "ReflActReasoner",
+    # GRPO
+    "GRPOTrainer",
+    # Strategies
+    "ChainOfThought",
+    "TreeOfThoughts",
+    "SelfConsistency",
+    "StepBack",
+    "AnalogicalReasoning",
 ]
