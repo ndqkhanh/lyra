@@ -1,54 +1,101 @@
-# Lyra — Personal Superintelligent AI Research Agent
+<h2 align="center">
+  Lyra — Personal Superintelligent AI Research Agent
+  <br><br>
+  <p>
+    <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.11+-blue.svg" alt="Python" /></a>
+    <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.3+-3178C6.svg" alt="TypeScript" /></a>
+    <a href=""><img src="https://img.shields.io/badge/version-5.0.0-purple.svg" alt="Version" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License" /></a>
+    <a href="packages/"><img src="https://img.shields.io/badge/packages-135+-orange.svg" alt="Packages" /></a>
+    <a href=".github/workflows/ci.yml"><img src="https://img.shields.io/badge/CI-passing-brightgreen.svg" alt="CI" /></a>
+  </p>
+</h2>
 
-[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-3178C6.svg)](https://www.typescriptlang.org/)
-[![Version](https://img.shields.io/badge/version-5.0.0-purple.svg)](pyproject.toml)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Packages](https://img.shields.io/badge/packages-135+-orange.svg)](packages/)
-[![CI](https://img.shields.io/badge/CI-passing-brightgreen.svg)](.github/workflows/ci.yml)
+<p align="center">
+  <b>Lyra combines multi-agent orchestration, deep reasoning, hierarchical memory, and a Claude Code-style terminal interface into one extensible toolkit. 135+ composable packages. 16+ LLM providers. Built for builders.</b>
+</p>
 
-> **Lyra** is a production-grade, self-improving AI agent platform. It combines multi-agent orchestration, deep reasoning, hierarchical memory, and a Claude Code-style terminal interface into one extensible toolkit. 135+ composable packages. 16+ LLM providers. Built for builders.
+<p align="center">
+  <a href="#quickstart"><b>Quickstart</b></a> ·
+  <a href="docs/architecture/"><b>Architecture</b></a> ·
+  <a href="docs/CONTRIBUTING.md"><b>Contributing</b></a> ·
+  <a href="CHANGELOG.md"><b>Changelog</b></a>
+</p>
 
 ---
 
-## Architecture Overview
+## What Lyra handles for you
+
+Lyra isn't another chatbot or thin API wrapper. It's a production-grade agent platform that researches, codes, tests, reviews, and evolves — on its own or as your pair-programming teammate.
+
+### 🧠 For AI/ML Engineers — a research partner that digs deep
+
+- **Deep research** — 10-step pipeline crawls 7+ academic sources, traverses citations, and synthesizes findings into structured reports with verifiable provenance.
+- **Hypothesis generation** — Multi-agent debate with CoT, tree search, and counterfactual reasoning surfaces non-obvious research directions.
+- **Model routing** — Task-aware router picks the optimal model (Opus for architecture, Sonnet for coding, Haiku for triage) with automatic fallback chains across 16+ providers.
+- **Prompt optimization** — GEPA self-evolution engine continuously improves prompts, strategies, and agent behaviors from execution history.
+
+### ⚙️ For Engineering Teams — a dev teammate that ships with you
+
+- **Code generation with TDD gate** — Kernel enforces RED → GREEN → REFACTOR. Every change starts with a failing test, ships with passing tests, and meets 80%+ coverage.
+- **Multi-agent code review** — Specialist agents (code, test, review) work in parallel, orchestrated via DAG-based dependency graphs. Code review is not an afterthought — it's baked into the execution loop.
+- **Bug triage from context** — Bug reports, stack traces, and Slack threads become scoped issues with root-cause analysis. Not a log dump — a readout with reproduction steps.
+- **Release notes & changelogs** — Git history and merged PRs become changelog-ready notes, grouped by feature, fix, and refactor.
+
+### 🔬 For Researchers & Analysts — a thinking partner that reads
+
+- **Literature reviews** — Searches arXiv, Semantic Scholar, PubMed, and the open web. Cross-references citations, identifies consensus and controversy, flags methodological weaknesses.
+- **Data synthesis** — Aggregates findings across papers, highlights contradictory evidence, and surfaces gaps in the literature.
+- **Paper drafting** — Generated from research notes with proper citation formatting. You edit tone and argument, not reference hunting.
+- **Continuous learning** — Drift detection triggers re-evaluation when upstream data or models change. Knowledge consolidates from short-term to long-term memory automatically.
+
+### 🛡️ For Individual Developers — a pair-programming partner on demand
+
+- **Interactive REPL** — Claude Code-style terminal interface with 25+ CLI commands, syntax highlighting, command palette, and model switching.
+- **Project scaffolding** — Generates project skeletons from natural language descriptions, with tests, CI, and docs wired up.
+- **Self-directed task decomposition** — "Add Redis caching to user service" becomes a plan → sub-tasks → parallel execution → verification — without hand-holding.
+- **Context that persists** — 8-level hierarchical memory (sensory → episodic → semantic → procedural → strategic → meta → collective → eternal) with hybrid BM25+vector retrieval. No re-explaining.
+
+---
+
+## Architecture
 
 ```mermaid
 graph TB
-    subgraph Interface["🖥️ Interface Layer"]
+    subgraph Interface["Interface Layer"]
         CLI["lyra CLI<br/>(Typer + prompt_toolkit)"]
         TUI["Terminal UI<br/>(Ink/React)"]
         API["ACP Server<br/>(Agent Client Protocol)"]
     end
 
-    subgraph Kernel["⚙️ Kernel (lyra-core)"]
+    subgraph Kernel["Kernel (lyra-core)"]
         Loop["AgentLoop<br/>plan → tools → verify"]
         TDD["TDD Gate<br/>RED → GREEN → REFACTOR"]
         Perms["PermissionBridge<br/>plan | auto-edit | bypass"]
         HIR["HIR Emitter<br/>(JSONL event stream)"]
     end
 
-    subgraph Intelligence["🧠 Intelligence Layer"]
+    subgraph Intelligence["Intelligence Layer"]
         Reasoning["Deep Reasoning<br/>(CoT, Tree Search, Debate)"]
         Research["Research Pipeline<br/>(10-step, 7+ sources)"]
         Evolution["Self-Evolution<br/>(GEPA prompt optimizer)"]
         Memory["Hierarchical Memory<br/>(8-level, hybrid retrieval)"]
     end
 
-    subgraph Coordination["🔄 Coordination Layer"]
+    subgraph Coordination["Coordination Layer"]
         Orchestrator["Agent Orchestrator<br/>(DAG-based teams)"]
         Subagents["Subagent Runner<br/>(worktree isolation)"]
         Skills["Skill Registry<br/>(150+ trigger patterns)"]
         Rules["Rule Engine<br/>(coding, security, testing)"]
     end
 
-    subgraph Safety["🛡️ Safety Layer"]
+    subgraph Safety["Safety Layer"]
         Shield["AgentShield<br/>(secrets, injection, XSS)"]
         Observatory["TokenObservatory<br/>(13 categories, 7 wastes)"]
         Verifier["Two-Phase Verifier<br/>(step + trace)"]
     end
 
-    subgraph Providers["🌐 LLM Providers"]
+    subgraph Providers["LLM Providers"]
         Anthro["Anthropic<br/>Opus · Sonnet · Haiku"]
         DS["DeepSeek<br/>V4 Pro · Flash"]
         OAI["OpenAI<br/>GPT-4o · O3"]
@@ -77,219 +124,19 @@ graph TB
     Research --> Anthro & DS & OAI & Gemini & Others
 ```
 
-## How Lyra Thinks
+## Why Lyra is different
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant CLI as Lyra CLI
-    participant Engine as AgentLoop
-    participant Orch as Orchestrator
-    participant Agent as Specialist Agent
-    participant LLM as LLM Provider
-    participant Mem as Memory System
-    participant Verify as Verifier
+| | |
+|---|---|
+| 🧠 **Thinks before it acts** | CoT reasoning, tree search, and multi-agent debate are first-class primitives — not afterthought prompts. Every task passes through plan → execute → verify. |
+| 🧪 **Tests first, always** | The kernel enforces a TDD state machine. No code ships without passing tests. The two-phase verifier checks step-level and trace-level correctness independently. |
+| 🔄 **Self-evolves** | GEPA prompt optimizer continuously learns from execution history. Strategies that work are reinforced; patterns that fail are pruned. Meta-evolution discovers new strategies from scratch. |
+| 🧩 **135+ composable packages** | Every capability is an isolated package with its own tests, docs, and dependencies. Compose what you need — don't pay for what you don't. |
+| 🌐 **16+ LLM providers** | Anthropic, DeepSeek, OpenAI, Google, xAI, Mistral, Qwen, Kimi, Bedrock, Ollama. Task-aware routing with automatic fallback chains. Zero vendor lock-in. |
+| 🔒 **Defense-in-depth security** | Five-layer AgentShield (secrets, injection, XSS, SQLi, path traversal). Granular permission modes. Every tool call is gated. |
+| 📊 **Token-level observability** | 13 waste categories tracked in real-time. Burn reports show exactly where tokens go — cache misses, over-prompting, redundant context. |
 
-    User->>CLI: "Implement a Redis cache"
-    CLI->>Engine: run(task)
-    Engine->>Mem: Recall context
-    Mem-->>Engine: Relevant history + skills
-    Engine->>Engine: Plan steps
-    Engine->>Orch: Decompose & delegate
-
-    par Parallel Execution
-        Orch->>Agent: CodeAgent → write cache.py
-        Agent->>LLM: Generate implementation
-        LLM-->>Agent: Code + explanation
-        Agent->>Verify: Validate output
-        Verify-->>Agent: ✓ Verified
-    and
-        Orch->>Agent: TestAgent → write tests
-        Agent->>LLM: Generate test suite
-        LLM-->>Agent: Test code
-        Agent->>Verify: Validate tests
-        Verify-->>Agent: ✓ Verified
-    and
-        Orch->>Agent: ReviewAgent → review code
-        Agent->>LLM: Review implementation
-        LLM-->>Agent: Review comments
-    end
-
-    Orch->>Engine: Aggregate results
-    Engine->>Mem: Persist learnings
-    Engine->>CLI: Final response
-    CLI-->>User: ✅ Implementation + tests + review
-```
-
-## Data Model
-
-```mermaid
-classDiagram
-    class Task {
-        +String task_id
-        +TaskType type
-        +String description
-        +Dict params
-        +TaskPriority priority
-        +TaskStatus status
-        +assign_to(agent_id)
-        +start()
-        +complete()
-        +fail()
-    }
-
-    class Agent {
-        +String agent_id
-        +List~AgentCapability~ capabilities
-        +AgentStatus status
-        +List~Result~ execution_history
-        +can_handle(task) float
-        +execute(task) Result
-    }
-
-    class PrimaryAgent {
-        +Dict specialists
-        +register_specialist(agent)
-        +analyze_request(request) Task
-        +select_agent(task) Agent
-        +execute_parallel(tasks) List~Result~
-    }
-
-    class Memory {
-        +String id
-        +MemoryType type
-        +MemoryScope scope
-        +String content
-        +float confidence
-        +VerifierStatus verifier_status
-        +DateTime valid_from
-        +DateTime valid_until
-    }
-
-    class Skill {
-        +String name
-        +SkillCategory category
-        +List~String~ trigger_patterns
-        +String language
-        +Set~String~ tags
-        +matches_trigger(text) bool
-    }
-
-    class Rule {
-        +String rule_id
-        +RuleCategory category
-        +RuleSeverity severity
-        +List~String~ file_patterns
-        +evaluate(context) List~Violation~
-    }
-
-    class Hook {
-        +String hook_id
-        +HookType type
-        +Callable handler
-        +bool critical
-        +execute(context) HookResult
-    }
-
-    class BurnReport {
-        +String session_id
-        +int total_tokens
-        +float total_cost
-        +List~Activity~ activities
-        +float one_shot_rate
-        +List~WasteInstance~ waste_patterns
-        +List~String~ recommendations
-    }
-
-    Agent <|-- PrimaryAgent
-    PrimaryAgent --> Task : orchestrates
-    PrimaryAgent --> Agent : delegates to
-    Agent --> Memory : persists to
-    Agent --> Skill : uses
-    Agent --> Rule : checked by
-    Agent --> Hook : intercepted by
-    Agent --> BurnReport : tracked by
-```
-
-## Package Catalog
-
-Lyra is a **monorepo of 135+ composable packages** organized into three tiers:
-
-### Foundation Tier — Core Agent Runtime
-
-| Package | Purpose | Key Capabilities |
-|---------|---------|-----------------|
-| `lyra-core` | Kernel | AgentLoop, TDD state machine, permissions, HIR observability, ACP server |
-| `lyra-cli` | CLI Application | Typer CLI (25+ commands), prompt_toolkit REPL, 16 LLM providers |
-| `lyra-agents` | Agent System | Primary orchestrator, specialist agents (code, test, review, research) |
-| `lyra-orchestration` | Coordination | Event bus, agent coordinator, dependency management, parallel execution |
-| `lyra-memory` | Memory System | 8-level hierarchy, hybrid BM25+vector retrieval, temporal validity |
-| `lyra-skills` | Skill Engine | 150+ trigger patterns, 20+ skill categories, search & auto-load |
-| `lyra-evals` | Evaluation | Eval harness, rubric scoring, regression testing |
-| `lyra-mcp` | MCP Server | Model Context Protocol integration, tool exposure |
-
-### Breakthrough Tier — Advanced Intelligence
-
-| Package | Purpose | Key Capabilities |
-|---------|---------|-----------------|
-| `lyra-reasoning` | Deep Reasoning | CoT, tree search, multi-agent debate, hypothesis generation |
-| `lyra-research` | Research Agent | 10-step pipeline, 7+ academic sources, citation traversal |
-| `lyra-evolution` | Self-Improvement | GEPA prompt optimization, strategy synthesis, continuous learning |
-| `lyra-cognitive` | Cognitive Architecture | Belief revision, instinct system, competence mapping |
-| `lyra-continual` | Continual Learning | Drift detection, regression testing, knowledge consolidation |
-| `lyra-personalization` | User Modeling | Preference learning, behavior patterns, adaptive interaction |
-| `lyra-router` | Model Router | Task-based routing, cost optimization, fallback chains |
-| `lyra-streaming` | Real-time Streams | SSE streaming, token-by-token output, progress indicators |
-| `lyra-cost` | Cost Management | Budget tracking, token economics, burn reports |
-
-### AGI Ascent Tier — Frontier Capabilities
-
-| Package | Purpose | Key Capabilities |
-|---------|---------|-----------------|
-| `lyra-verification` | Multi-Level Verify | Step, trace, external, and cross-agent verification |
-| `lyra-world-model` | World Simulation | Causal graphs, counterfactual reasoning, digital twins |
-| `lyra-meta-evolution` | Meta Learning | Recursive self-improvement, strategy discovery |
-| `lyra-rsi` | Recursive Self-Improvement | Post-training loops, intelligence explosion safety |
-| `lyra-colony` | Agent Swarms | Emergent coordination, collective intelligence |
-| `lyra-gossip-memory` | Shared Memory | Cross-agent knowledge sharing, consensus formation |
-| `lyra-auto-mode` | Autonomous Operation | Self-directed task decomposition, autonomous loops |
-| `lyra-constitutional` | AI Safety | Constitutional AI principles, alignment verification |
-| `lyra-cyber` | Cybersecurity | Pentest automation, vulnerability discovery |
-| `lyra-finance` | Financial Analysis | Market analysis, risk modeling, portfolio optimization |
-
-### UI Layer — TypeScript Terminal Interface
-
-| Package | Purpose | Key Capabilities |
-|---------|---------|-----------------|
-| `ui-core` | UI Foundation | Zustand state store, Dracula theme, rendering pipeline |
-| `ui-terminal` | Ink TUI | StatusBar, ModelPicker, CommandPalette, AgentTree, SyntaxHighlight |
-| `ui-transport` | Transport | WebSocket + HTTP/SSE communication layer |
-
-> **Full catalog**: See [`packages/`](packages/) for all 135+ packages. Each package has its own README with API docs and examples.
-
-## LLM Provider Support
-
-```mermaid
-graph LR
-    subgraph "16+ Providers"
-        A[Anthropic<br/>Opus 4.7 · Sonnet 4.6 · Haiku 4.5]
-        B[DeepSeek<br/>V4 Pro · V4 Flash · Reasoner]
-        C[OpenAI<br/>GPT-4o · O3 · O1]
-        D[Google<br/>Gemini 2.5 Pro · 3.1 Pro]
-        E[xAI<br/>Grok 4 · Code Fast]
-        F[Mistral<br/>Codestral · Large]
-        G[Qwen<br/>3.7 Max · Turbo]
-        H[Kimi<br/>K2.6]
-        I[Bedrock<br/>Claude on AWS]
-        J[Ollama<br/>Local Models]
-    end
-
-    Router[Task Router] -->|Reasoning| A & B
-    Router -->|Coding| A & B & C
-    Router -->|Quick Tasks| B & E
-    Router -->|Vision| A & D
-    Router -->|Local/Offline| J
-```
+## Works with 16+ LLM providers
 
 | Provider | Models | Context | Reasoning | Vision | Tools | Best For |
 |----------|--------|---------|-----------|--------|-------|----------|
@@ -303,6 +150,26 @@ graph LR
 | **Kimi** | K2.6 | 128K | ✓ | — | ✓ | Chinese market |
 | **Bedrock** | Claude via AWS | 200K | ✓ | — | ✓ | Enterprise/regulated |
 | **Ollama** | Llama, Qwen Coder | 8K+ | — | — | ✓ | Local/offline dev |
+
+## Your data stays yours
+
+- **Granular permissions** — Three modes: `plan` (every tool call gated), `auto-edit` (trusted operations auto-approved), `bypass-perms` (full autonomy, audit-logged). Switch inline with `Shift+Tab`.
+- **Worktree isolation** — Subagents run in isolated git worktrees. Changes are reviewed before merging back. No cross-contamination.
+- **Fully auditable** — HIR (Human-Interpretable Representation) emits every agent action as a JSONL event stream. Replay, inspect, or audit any session.
+- **Open source** — This repo. Inspect, fork, or self-host. MIT licensed.
+
+## Package Catalog
+
+Lyra is a monorepo of 135+ composable packages across three tiers:
+
+| Tier | Packages | Highlights |
+|------|----------|------------|
+| **Foundation** | `lyra-core`, `lyra-cli`, `lyra-agents`, `lyra-orchestration`, `lyra-memory`, `lyra-skills`, `lyra-evals`, `lyra-mcp` | AgentLoop kernel, 25+ CLI commands, 8-level memory, 150+ skill triggers |
+| **Breakthrough** | `lyra-reasoning`, `lyra-research`, `lyra-evolution`, `lyra-cognitive`, `lyra-continual`, `lyra-personalization`, `lyra-router`, `lyra-streaming`, `lyra-cost` | Deep reasoning, 10-step research, GEPA optimizer, model router, burn reports |
+| **AGI Ascent** | `lyra-verification`, `lyra-world-model`, `lyra-meta-evolution`, `lyra-rsi`, `lyra-colony`, `lyra-gossip-memory`, `lyra-auto-mode`, `lyra-constitutional` | Multi-level verify, causal graphs, recursive self-improvement, constitutional AI |
+| **UI** | `ui-core`, `ui-terminal`, `ui-transport` | Zustand state store, Ink TUI, WebSocket + SSE transport |
+
+> See [`packages/`](packages/) for all 135+ packages. Each has its own README, tests, and pyproject.toml.
 
 ## Quickstart
 
@@ -349,10 +216,6 @@ lyra retro                              # Session retrospective
 lyra model list                         # List configured models
 lyra model set anthropic:sonnet         # Switch default model
 
-# MCP management
-lyra mcp list                           # List MCP servers
-lyra mcp add <config>                   # Add MCP server
-
 # Health & diagnostics
 lyra doctor                             # System health check
 lyra status                             # Runtime status
@@ -365,95 +228,6 @@ lyra memory search "deployment process" # Search memory
 # Development
 lyra evals                              # Run evaluation harness
 lyra evolve                             # Run prompt evolution
-```
-
-## Keyboard Shortcuts
-
-| Key | Action |
-|-----|--------|
-| `Ctrl+K` | Command palette |
-| `Ctrl+D` | Exit session |
-| `Ctrl+L` | Clear screen |
-| `Ctrl+G` | Open external editor |
-| `Ctrl+T` | Toggle side panel |
-| `Ctrl+O` | Toggle output panel |
-| `Alt+T` | Toggle deep thinking |
-| `Alt+P` | Model catalog |
-| `Shift+Tab` | Cycle permission mode |
-| `Up/Down` | Navigate history |
-| `Tab` | Accept autocomplete |
-| `Esc Esc` | Rewind last turn |
-| `!cmd` | Run shell command |
-
-## Project Structure
-
-```
-projects/lyra/
-├── src/                          # Core Python library
-│   ├── agents/                   # Agent implementations
-│   │   ├── primary.py            # PrimaryAgent — orchestrator
-│   │   ├── code_agent.py         # CodeAgent — code generation
-│   │   ├── research_agent.py     # ResearchAgent — deep research
-│   │   ├── test_agent.py         # TestAgent — test generation
-│   │   └── review_agent.py       # ReviewAgent — code review
-│   ├── coordination/             # Multi-agent coordination
-│   │   ├── task_allocator.py     # Smart task assignment
-│   │   ├── load_balancer.py      # Agent load balancing
-│   │   ├── dependency_manager.py # DAG-based dependencies
-│   │   └── conflict_resolver.py  # Resource conflict resolution
-│   ├── memory/                   # Memory system
-│   │   ├── memory_store.py       # Persistent memory storage
-│   │   ├── short_term_memory.py  # Recent context (STM)
-│   │   ├── long_term_memory.py   # Persistent knowledge (LTM)
-│   │   ├── memory_retrieval.py   # Hybrid BM25+vector search
-│   │   └── memory_consolidation.py # STM → LTM consolidation
-│   ├── hooks/                    # Hook system
-│   │   ├── hook.py               # Hook types (Pre/PostToolUse, Stop)
-│   │   ├── hook_engine.py        # Async hook execution engine
-│   │   └── hook_registry.py      # Hook registration & matching
-│   ├── rules/                    # Rule engine
-│   │   ├── rule.py               # Rule model (category, severity)
-│   │   ├── rule_engine.py        # Multi-category rule evaluation
-│   │   └── rule_registry.py      # Rule registration & lookup
-│   ├── skills/                   # Skill system
-│   │   ├── skill.py              # Skill model (triggers, tags)
-│   │   ├── registry.py           # Indexed skill registry
-│   │   └── importer.py           # ECC skill import
-│   ├── security/                 # Security scanner
-│   │   └── agent_shield.py       # Secrets, injection, XSS, SQLi
-│   ├── monitoring/               # Observability
-│   │   └── token_observatory.py  # Token usage & waste analysis
-│   ├── optimization/             # Token optimization
-│   │   └── token_optimizer.py    # Context compression
-│   ├── core/task.py              # Task, Result, metrics models
-│   └── safety/                   # Safety module
-│
-├── packages/                     # 135+ subpackages (3 tiers)
-│   ├── lyra-core/                # Kernel (AgentLoop, TDD, HIR)
-│   ├── lyra-cli/                 # CLI app (Typer, REPL, providers)
-│   ├── lyra-reasoning/           # Deep reasoning engine
-│   ├── lyra-research/            # 10-step research pipeline
-│   ├── lyra-memory/              # Hierarchical memory system
-│   ├── lyra-orchestration/       # Event bus + agent coordinator
-│   ├── lyra-evolution/           # Self-improvement engine
-│   ├── lyra-cognitive/           # Cognitive architecture
-│   ├── lyra-verification/        # Multi-level verification
-│   ├── lyra-rsi/                 # Recursive self-improvement
-│   ├── ui-core/                  # TS: State, theme, rendering
-│   ├── ui-terminal/              # TS: Ink terminal components
-│   └── ui-transport/             # TS: WebSocket/SSE transport
-│
-├── harness_core/                 # Shared harness primitives
-├── tests/                        # Integration & system tests
-├── docs/                         # Full MkDocs documentation
-│   ├── architecture/             # Architecture specs & commitments
-│   ├── ARCHITECTURE_DIAGRAMS.md  # Visual architecture reference
-│   └── CONTRIBUTING.md           # Development guide
-│
-├── pyproject.toml                # Python project config
-├── package.json                  # Node workspace config
-├── Makefile                      # Build & test orchestration
-└── SOUL.md                       # Project persona & conventions
 ```
 
 ## Configuration
@@ -475,6 +249,16 @@ projects/lyra/
 }
 ```
 
+## Key Design Principles
+
+1. **Tests First** — Every behavior change starts with a failing test. The TDD gate (`RED → GREEN → REFACTOR`) is enforced by the kernel.
+2. **Evidence Over Assertion** — Run the command before claiming the fix. The two-phase verifier ensures output correctness.
+3. **Minimum Viable Diff** — The smallest change that makes the test pass. No speculative abstraction.
+4. **Transparent Failure** — Errors print the specific blocked path or missing precondition. No silent swallowing.
+5. **Immutable State** — Create new objects, never mutate. Pydantic models with `frozen=True` throughout.
+6. **Provider Agnostic** — The kernel has zero network dependencies. All provider clients live in `lyra-cli`.
+7. **Package Isolation** — Each package has its own `pyproject.toml`, tests, and README. Compose, don't inherit.
+
 ## Development
 
 ```bash
@@ -492,46 +276,17 @@ make lint                    # ruff + mypy
 make format                  # black + isort
 make typecheck               # TypeScript type checking
 
-# Coverage
-pytest --cov=src --cov-report=html
-open htmlcov/index.html
-
 # CI pipeline (same as GitHub Actions)
 make ci
 ```
 
-## Key Design Principles
+## Contribute
 
-1. **Tests First** — Every behavior change starts with a failing test. The TDD gate (`RED → GREEN → REFACTOR`) is enforced by the kernel.
-2. **Evidence Over Assertion** — Run the command before claiming the fix. The two-phase verifier ensures output correctness.
-3. **Minimum Viable Diff** — The smallest change that makes the test pass. No speculative abstraction.
-4. **Transparent Failure** — Errors print the specific blocked path or missing precondition. No silent swallowing.
-5. **Immutable State** — Create new objects, never mutate. Pydantic models with `frozen=True` throughout.
-6. **Provider Agnostic** — The kernel has zero network dependencies. All provider clients live in `lyra-cli`.
-7. **Package Isolation** — Each package has its own `pyproject.toml`, tests, and README. Compose don't inherit.
+Lyra is open source under MIT. PRs, issues, and skill contributions are welcome.
 
-## Security
+See [`CONTRIBUTING.md`](docs/CONTRIBUTING.md) for developer setup, conventions, and the PR process.
 
-Lyra runs with a **defense-in-depth** security model:
-
-| Layer | Component | Protection |
-|-------|-----------|------------|
-| Input | `AgentShield.secrets_scanner` | Blocks hardcoded API keys, passwords, tokens |
-| Execution | `AgentShield.command_scanner` | Prevents shell injection (`;`, `\|`, `$()`, `` ` ``) |
-| Files | `AgentShield.path_scanner` | Blocks path traversal (`../`, absolute escapes) |
-| Data | `AgentShield.sql_scanner` | Detects SQL injection via string concatenation |
-| Output | `AgentShield.xss_scanner` | Sanitizes `<script>`, `javascript:`, event handlers |
-| Runtime | Permission modes | `plan` (gated), `auto-edit`, `bypass-perms` |
-
-Pre-commit hooks run security scans before every commit. CI runs the full `AgentShield` suite.
-
-## Related Projects
-
-| Project | Relationship |
-|---------|-------------|
-| [`harness-engineering`](../) | Parent monorepo — shared infrastructure |
-| [`harness_core`](harness_core/) | Shared harness primitives (AgentLoop, tools, permissions) |
-| [`orion-code`](../orion-code/) | Sibling agent — SWE-bench optimized |
+---
 
 ## License
 
@@ -541,7 +296,7 @@ MIT — see [LICENSE](LICENSE)
 
 <div align="center">
 
-**[Quickstart](QUICKSTART.md)** · **[Architecture](docs/architecture/)** · **[Contributing](docs/CONTRIBUTING.md)** · **[Changelog](CHANGELOG.md)** · **[Examples](EXAMPLES.md)**
+**[Quickstart](#quickstart)** · **[Architecture](docs/architecture/)** · **[Contributing](docs/CONTRIBUTING.md)** · **[Changelog](CHANGELOG.md)** · **[Examples](EXAMPLES.md)**
 
 Built with Python, TypeScript, and ambition.
 
