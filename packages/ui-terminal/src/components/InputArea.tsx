@@ -3,6 +3,7 @@ import { Box, Text, useInput } from 'ink'
 import TextInput from 'ink-text-input'
 import { useUIStore, colors, symbols } from '@lyra/ui-core'
 import { useHistory } from '../hooks/useHistory'
+import { useVim } from '../hooks/useVim'
 import { getFileSuggestions, getCurrentMention, type FileSuggestion } from '../utils/fileCompletion'
 import { ModelPicker } from './ModelPicker'
 import { ReleaseNotesPicker } from './ReleaseNotesPicker'
@@ -30,6 +31,10 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
   const [fileSuggestions, setFileSuggestions] = useState<FileSuggestion[]>([])
   const [showModelPicker, setShowModelPicker] = useState(false)
   const [showReleaseNotes, setShowReleaseNotes] = useState(false)
+  const { vim, vimActions } = useVim()
+
+  // Track cursor position for vim motions
+  const [vimCursor, setVimCursor] = useState(0)
 
   // Update suggestions when input changes (debounced to prevent infinite loops)
   useEffect(() => {
@@ -72,6 +77,42 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
   useInput((input, key) => {
     // Skip keyboard shortcuts when model picker is visible
     if (showModelPicker) return
+
+    // ── Vim Mode ──────────────────────────────────────────
+    if (vim.enabled) {
+      // Esc to enter NORMAL mode
+      if (key.escape) {
+        vimActions.enterNormal()
+        return
+      }
+
+      if (vim.mode === 'normal') {
+        if (input === 'i') { vimActions.enterInsert(); return }
+        if (input === 'a') { vimActions.enterInsertAfter(); setVimCursor(p => Math.min(history.current.length, p + 1)); return }
+        if (input === 'o') { history.setCurrent(history.current + '\n'); vimActions.enterInsert(); return }
+        if (input === 'O') { history.setCurrent('\n' + history.current); vimActions.enterInsert(); return }
+        if (input === 'h') { setVimCursor(p => vimActions.moveLeft(history.current, p)); return }
+        if (input === 'j') { setVimCursor(p => vimActions.moveDown(history.current, p)); return }
+        if (input === 'k') { setVimCursor(p => vimActions.moveUp(history.current, p)); return }
+        if (input === 'l') { setVimCursor(p => vimActions.moveRight(history.current, p)); return }
+        if (input === 'w') { setVimCursor(p => vimActions.wordForward(history.current, p)); return }
+        if (input === 'b') { setVimCursor(p => vimActions.wordBack(history.current, p)); return }
+        if (input === 'x') { const r = vimActions.deleteChar(history.current, vimCursor); history.setCurrent(r.text); setVimCursor(r.pos); return }
+        if (input === 'd') { history.setCurrent(vimActions.deleteLine(history.current, vimCursor)); setVimCursor(p => Math.min(p, history.current.length)); return }
+        if (input === '0') { setVimCursor(0); return }
+        if (input === '$') { const lineEnd = history.current.indexOf('\n', vimCursor); setVimCursor(lineEnd === -1 ? history.current.length : lineEnd); return }
+        if (input === 'u') { return }
+        if (key.return) { vimActions.enterInsert(); return }
+        return
+      }
+
+      if (vim.mode === 'insert') {
+        if (key.return && !key.shift) {
+          handleSubmit()
+          return
+        }
+      }
+    }
 
     // Shift+Enter to insert newline
     if (key.shift && key.return) {
@@ -174,6 +215,18 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
       return
     }
 
+    // Intercept /vim to toggle vim mode
+    if (input === '/vim' || input === '/vim on') {
+      vimActions.enable()
+      history.setCurrent('')
+      return
+    }
+    if (input === '/vim off') {
+      vimActions.disable()
+      history.setCurrent('')
+      return
+    }
+
     // Intercept /release-notes to open release picker
     if (input === '/release-notes' || input.startsWith('/release-notes ')) {
       setShowReleaseNotes(true)
@@ -273,6 +326,11 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
 
       {/* Input prompt - Claude Code style */}
       <Box paddingX={2}>
+        {vim.enabled && (
+          <Text color={vim.mode === 'normal' ? colors.warning : colors.info}>
+            [{vim.mode === 'normal' ? 'NORMAL' : 'INSERT'}]{' '}
+          </Text>
+        )}
         <Text bold color={colors.userPrompt}>❯ </Text>
         <Box flexGrow={1}>
           <TextInput
