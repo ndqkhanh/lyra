@@ -13,9 +13,7 @@ Subcommands:
     mcp      — manage MCP server config (list / add / remove / doctor)
     acp      — host Lyra as a stdio Agent Client Protocol server
 
-Running ``lyra`` with no subcommand drops into the interactive
-shell (Phase 13): a Claude-Code-style REPL with slash commands, status
-bar, and a graceful non-TTY fallback.
+Running ``lyra`` with no subcommand launches the Ink/TypeScript TUI.
 """
 from __future__ import annotations
 
@@ -174,11 +172,11 @@ def _root(
         ),
     ),
     tui: bool = typer.Option(
-        False,
-        "--tui",
+        True,
+        "--tui/--classic",
         help=(
-            "Launch the TypeScript/Ink TUI instead of the default "
-            "prompt_toolkit REPL."
+            "Launch the TypeScript/Ink TUI (default). Use --classic "
+            "for the prompt_toolkit REPL."
         ),
     ),
     output_format: str = typer.Option(
@@ -264,48 +262,10 @@ def _root(
     if ctx.invoked_subcommand is not None:
         return
 
-    # TUI opt-in: Launch TypeScript/Ink TUI (Claude Code-style)
-    if tui:
-        from .tui_launcher import launch_tui
+    from .tui_launcher import launch_tui
 
-        typer.echo("Launching Lyra TUI...", err=True)
-        raise typer.Exit(launch_tui())
-
-    from .interactive.driver import run as _run_interactive
-
-    # v3.2.0 (Phase L): unify --resume / --continue / --session
-    resume_target: Optional[str] = None
-    pin_id: Optional[str] = session_id  # type: ignore[assignment]
-    if resume is not None:
-        resume_target = resume or "latest"
-    elif cont:
-        resume_target = "latest"
-    elif session_id:
-        resume_target = session_id
-        pin_id = session_id
-
-    raise typer.Exit(
-        _run_interactive(
-            repo_root=repo_root,
-            model=model,
-            budget_cap_usd=budget,
-            resume_id=resume_target,
-            pin_session_id=pin_id,
-            bare=bare,
-            output_format=output_format,
-            max_turns=max_turns,
-            max_budget_usd=max_budget_usd,
-            session_name=name,
-            effort=effort,
-            add_dirs=add_dir,
-            settings_path=settings_path,
-            verbose=verbose,
-            bg=bg,
-            goal=goal,
-            permission_mode=permission_mode,
-            dangerously_skip_permissions=dangerously_skip_permissions,
-        )
-    )
+    typer.echo("Launching Lyra TUI...", err=True)
+    raise typer.Exit(launch_tui())
 
 
 app.command("init")(init_command)
