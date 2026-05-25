@@ -277,6 +277,11 @@ class InteractiveSession:
 
     repo_root: Path
     model: str = "auto"
+    # v6.0.0: Active provider tracking for single-provider routing.
+    # Set by build_llm() via LYRA_ACTIVE_PROVIDER env var. Used to
+    # route tasks within the provider's model family (opus/sonnet/haiku
+    # for Anthropic, v4-pro/v4-flash/chat for DeepSeek, etc.)
+    active_provider: str | None = None
     # v3.6.0: Lyra's interactive modes are permission-flavoured —
     # ``edit_automatically`` (default; full-access execution, edits
     # apply without confirmation), ``ask_before_edits`` (full-access
@@ -654,6 +659,46 @@ class InteractiveSession:
 
         # Gap 17: Bootstrap dynamic tool-search registry when enabled
         self._init_tool_search()
+
+        # v6.0.0: Sync active provider from environment
+        self._sync_active_provider()
+
+    def _sync_active_provider(self) -> None:
+        """Sync active_provider from LYRA_ACTIVE_PROVIDER env var.
+
+        Called during __post_init__ and whenever the provider changes.
+        This ensures the session knows which provider is active for
+        single-provider model routing.
+        """
+        import os
+        self.active_provider = os.environ.get("LYRA_ACTIVE_PROVIDER")
+
+    def route_model_for_task(self, prompt: str) -> str | None:
+        """Route to appropriate model within active provider's family.
+
+        Args:
+            prompt: User's message to analyze for task type
+
+        Returns:
+            Model slug for the task, or None if no active provider
+            or provider not found in routing table.
+
+        Example:
+            >>> session.active_provider = "anthropic"
+            >>> session.route_model_for_task("Explain quantum computing")
+            'claude-opus-4.7'  # reasoning task
+            >>> session.route_model_for_task("Write a function")
+            'claude-sonnet-4.6'  # coding task
+        """
+        if not self.active_provider:
+            return None
+
+        try:
+            from lyra_cli.llm_router import route_model_for_task
+            return route_model_for_task(prompt, self.active_provider)
+        except Exception:
+            # If routing fails, return None and let caller use default
+            return None
 
     def _register_skills(self) -> None:
         """Auto-register discovered skills as slash commands."""
@@ -1353,7 +1398,7 @@ class InteractiveSession:
         # exports and offline audit.
         if chat_records:
             try:
-                from harness_core.messages import Message as _Msg
+                from lyra_harness_core.messages import Message as _Msg
 
                 trimmed = chat_records[-_CHAT_HISTORY_TURNS:]
                 rebuilt: list[Any] = []
@@ -1367,7 +1412,7 @@ class InteractiveSession:
                         )
                 s._chat_history = rebuilt
             except Exception:
-                # ``harness_core`` should always be importable; we keep
+                # ``lyra_harness_core`` should always be importable; we keep
                 # the silent fallback so a partial install can still
                 # resume metadata even when Message reconstruction
                 # fails. Better than refusing to resume entirely.
@@ -1868,7 +1913,8 @@ class InteractiveSession:
 # LLM doesn't reach for those when the user asks the same question
 # from a stale screenshot or a half-migrated conversation.
 _LYRA_MODE_PREAMBLE = (
-    "You are Lyra, a CLI-native coding assistant. You operate in one "
+    "You are Lyra, a CLI-native coding assistant. ALWAYS respond in English "
+    "unless the user explicitly requests a different language. You operate in one "
     "of four modes:\n"
     "  • edit_automatically — default; full-access execution. You can "
     "write code and call tools when the runtime gives them; edits "
@@ -2199,9 +2245,9 @@ def _chat_with_llm(
     without monkey-patching the chat handler.
     """
     try:
-        from harness_core.messages import Message
-    except Exception as exc:  # pragma: no cover — harness_core ships with us
-        return False, f"harness_core import failed: {exc}"
+        from lyra_harness_core.messages import Message
+    except Exception as exc:  # pragma: no cover — lyra_harness_core ships with us
+        return False, f"lyra_harness_core import failed: {exc}"
 
     if not getattr(session, "_session_start_emitted", False):
         _emit_lifecycle(
@@ -2975,7 +3021,7 @@ def _should_run_chat_tools(session: InteractiveSession, provider: Any) -> bool:
         return False
     if getattr(provider, "model", "") in {"mock", "canned"}:
         return False
-    # Scripted mocks (``harness_core.models.MockLLM`` and friends) don't
+    # Scripted mocks (``lyra_harness_core.models.MockLLM`` and friends) don't
     # set ``provider_name``; recognise by class to keep a non-tool-aware
     # canned-output run from being routed through the loop.
     cls_name = type(provider).__name__
@@ -3605,7 +3651,7 @@ def _verify_goal(session: InteractiveSession) -> str | None:
         provider = _ensure_llm(session)
     except Exception:
         return None
-    from harness_core.messages import Message
+    from lyra_harness_core.messages import Message
     prompt = f"Does the following condition now hold: {session.pending_goal}?\nAnswer YES or NO."
     try:
         reply = provider.generate([Message.user(prompt)], max_tokens=32)
@@ -7681,7 +7727,7 @@ class _LyraCoreLLMAdapter:
     Rather than diverge the two loops further (or rewrite every provider
     to dual-shape) we wrap the provider in this adapter at the
     subagent boundary. The result: a single LLM substrate drives both
-    the harness_core one-shot ``run`` and the lyra_core subagent
+    the lyra_harness_core one-shot ``run`` and the lyra_core subagent
     fan-out, which is what "unify on single path" actually buys us in
     practice.
 
@@ -7700,7 +7746,7 @@ class _LyraCoreLLMAdapter:
         tools: list[dict] | None = None,
         **kwargs: Any,
     ) -> dict[str, Any]:
-        from harness_core.messages import Message
+        from lyra_harness_core.messages import Message
 
         cli_messages: list[Message] = []
         for msg in messages:
@@ -7718,7 +7764,7 @@ class _LyraCoreLLMAdapter:
 
     @staticmethod
     def _to_dict(message: Any) -> dict[str, Any]:
-        from harness_core.messages import Message
+        from lyra_harness_core.messages import Message
 
         if isinstance(message, Message):
             tool_calls = [
@@ -7754,7 +7800,7 @@ def _ensure_subagent_registry(session: InteractiveSession) -> Any | None:
     lyra-core isn't installed (tests on a stripped tree).
 
     Phase E.5 fixes the legacy bug where the factory passed
-    ``AgentLoop(provider=...)`` (the harness_core kwarg) to the
+    ``AgentLoop(provider=...)`` (the lyra_harness_core kwarg) to the
     lyra_core dataclass, which expects ``llm=``. The new factory
     materialises a proper lyra_core loop with the LLM provider
     adapted via :class:`_LyraCoreLLMAdapter`, an empty tool registry

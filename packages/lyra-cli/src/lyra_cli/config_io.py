@@ -1,9 +1,11 @@
 """Persist Lyra settings to ``~/.lyra/settings.json``.
 
-Settings are user preferences: last model, fallback chain, theme,
+Settings are user preferences: last model, primary provider, theme,
 permission mode, and task auto-detection. This is separate from
 ``auth.json`` which holds secrets. Both live in ``~/.lyra/`` with
 mode-0600 enforced.
+
+v6.0.0: Removed fallback_chain (deprecated). Use primary_provider instead.
 """
 
 from __future__ import annotations
@@ -17,7 +19,6 @@ from pathlib import Path
 from typing import Any
 
 __all__ = [
-    "DEFAULT_FALLBACK_CHAIN",
     "LYRA_CONFIG_VERSION",
     "SettingsConfig",
     "load_settings",
@@ -27,12 +28,14 @@ __all__ = [
     "write_env_file",
 ]
 
-DEFAULT_FALLBACK_CHAIN = [
+# DEPRECATED in v6.0.0: Use primary_provider instead
+# Kept for backward compatibility during migration
+_DEPRECATED_DEFAULT_FALLBACK_CHAIN = [
     "anthropic", "deepseek", "gemini", "openai",
     "bedrock", "kimi", "qwen", "ollama",
 ]
 
-LYRA_CONFIG_VERSION = 3
+LYRA_CONFIG_VERSION = 4  # Bumped for v6.0.0 config schema change
 
 _DEFAULT_HOME_DIRNAME = ".lyra"
 _SETTINGS_FILENAME = "settings.json"
@@ -67,15 +70,20 @@ def _time_str() -> str:
 
 @dataclass
 class SettingsConfig:
-    """User-facing settings persisted across sessions."""
+    """User-facing settings persisted across sessions.
+
+    v6.0.0: Replaced fallback_chain with primary_provider.
+    Old configs with fallback_chain are automatically migrated.
+    """
 
     last_model: str = ""
     last_provider: str = ""
-    fallback_chain: list[str] = field(default_factory=lambda: list(DEFAULT_FALLBACK_CHAIN))
+    primary_provider: str = "auto"  # v6.0.0: Replaces fallback_chain
+    enable_task_routing: bool = True  # v6.0.0: Enable smart model routing within provider
     theme: str = "dracula"
     permission_mode: str = "allow"
     auto_detect_tasks: bool = True
-    config_version: int = 2
+    config_version: int = 4  # v6.0.0: Bumped for schema change
 
 
 def lyra_home() -> Path:
@@ -116,6 +124,9 @@ def load_settings(path: Path | None = None) -> SettingsConfig:
     When *path* is ``None`` the canonical ``~/.lyra/settings.json`` is used.
     Pass an explicit path to load project-local overrides (e.g.
     ``<repo>/.lyra/settings.json``).
+
+    v6.0.0: Automatically migrates old configs with fallback_chain to
+    primary_provider (uses first provider in chain).
     """
     if path is None:
         path = settings_path()
@@ -127,14 +138,31 @@ def load_settings(path: Path | None = None) -> SettingsConfig:
         return SettingsConfig()
     if not isinstance(data, dict):
         return SettingsConfig()
+
+    # v6.0.0 migration: fallback_chain → primary_provider
+    primary_provider = data.get("primary_provider", "auto")
+    if "fallback_chain" in data and "primary_provider" not in data:
+        # Migrate: use first provider from old chain
+        fallback_chain = data.get("fallback_chain", [])
+        if fallback_chain and isinstance(fallback_chain, list):
+            primary_provider = fallback_chain[0]
+            import logging
+            logging.warning(
+                "Config migration: fallback_chain is deprecated. "
+                f"Using first provider '{primary_provider}' as primary_provider. "
+                "Update your config with: lyra config set primary_provider %s",
+                primary_provider
+            )
+
     return SettingsConfig(
         last_model=data.get("last_model", ""),
         last_provider=data.get("last_provider", ""),
-        fallback_chain=data.get("fallback_chain", list(DEFAULT_FALLBACK_CHAIN)),
+        primary_provider=primary_provider,
+        enable_task_routing=data.get("enable_task_routing", True),
         theme=data.get("theme", "dracula"),
         permission_mode=data.get("permission_mode", "allow"),
         auto_detect_tasks=data.get("auto_detect_tasks", True),
-        config_version=data.get("config_version", 2),
+        config_version=data.get("config_version", 4),
     )
 
 
@@ -161,12 +189,16 @@ def load_settings_dict(path: Path | str | None = None) -> dict[str, Any]:
 
 
 def save_settings(config: SettingsConfig) -> None:
-    """Persist settings to ``~/.lyra/settings.json`` (atomic, 0600)."""
+    """Persist settings to ``~/.lyra/settings.json`` (atomic, 0600).
+
+    v6.0.0: Saves primary_provider instead of fallback_chain.
+    """
     data: dict[str, Any] = {
         "config_version": config.config_version,
         "last_model": config.last_model,
         "last_provider": config.last_provider,
-        "fallback_chain": config.fallback_chain,
+        "primary_provider": config.primary_provider,
+        "enable_task_routing": config.enable_task_routing,
         "theme": config.theme,
         "permission_mode": config.permission_mode,
         "auto_detect_tasks": config.auto_detect_tasks,

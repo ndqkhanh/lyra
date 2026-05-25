@@ -2,6 +2,73 @@
 
 All notable changes to the Lyra project.
 
+## [6.0.0] — 2026-05-25
+
+### 🚀 Breaking Changes
+
+#### Single-Provider Model Routing
+Replaced multi-provider fallback system with predictable single-provider routing.
+
+**Before (v5.x):**
+```yaml
+fallback_chain: [anthropic, deepseek, openai]  # Unpredictable cascading
+```
+
+**After (v6.0.0):**
+```yaml
+primary_provider: anthropic  # Pick ONE provider explicitly
+enable_task_routing: true    # Smart routing within provider family
+```
+
+**Why this change?**
+- **Predictable**: Always know which provider you're using
+- **Cost-aware**: Choose provider based on pricing (DeepSeek is 10-20× cheaper)
+- **Quality-aware**: Choose provider based on model quality
+- **Transparent**: Clear errors instead of silent fallbacks
+
+### Added
+
+- **Provider-based model families**: Each provider now has a defined model family (reasoning/coding/quick/creative/planning tiers)
+- **Session provider tracking**: `LYRA_ACTIVE_PROVIDER` env var tracks active provider
+- **Config migration**: Automatic migration from `fallback_chain` to `primary_provider`
+- **Provider routing API**: `route_model_for_task(prompt, provider)` routes within provider family
+- **11 provider families**: Anthropic, DeepSeek, OpenAI, OpenAI-Reasoning, Gemini, xAI, Groq, Cerebras, Mistral, Qwen, Ollama
+
+### Changed
+
+- **Config schema v4**: Replaced `fallback_chain` with `primary_provider` and `enable_task_routing`
+- **Task routing**: Now routes within provider family instead of across providers
+- **Auto mode**: Picks ONE provider and sticks with it (no more cascading)
+- **llm_factory.py**: All provider builders now set `LYRA_ACTIVE_PROVIDER` env var
+- **session.py**: Added `active_provider` field and `route_model_for_task()` method
+
+### Deprecated
+
+- **llm_fallback.py**: `FallbackExecutor` class deprecated (use `build_llm()` instead)
+- **DEFAULT_FALLBACK_CHAIN**: Removed from public API
+- **Cross-provider task routing**: No longer supported
+
+### Migration
+
+See [MIGRATION.md](./MIGRATION.md) for detailed migration guide.
+
+**Quick migration:**
+```bash
+# Upgrade
+pip install --upgrade lyra-cli
+
+# Set primary provider
+lyra config set primary_provider anthropic  # or deepseek, openai, etc.
+
+# Verify
+lyra config show
+```
+
+### Testing
+
+- Added 37 unit tests for provider routing and config migration
+- All tests passing with 100% coverage of new routing logic
+
 ## [5.0.0] — 2026-05-24
 
 ### Added

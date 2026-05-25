@@ -55,7 +55,7 @@ import os
 from datetime import datetime, timezone
 from typing import Optional
 
-from harness_core.models import LLMProvider, MockLLM
+from lyra_harness_core.models import LLMProvider, MockLLM
 
 from lyra_core.providers.aliases import resolve_alias
 from lyra_core.providers.auth_hints import missing_credential_hint
@@ -560,6 +560,7 @@ def build_llm(
     if kind == "mock":
         llm = _build_mock(task_hint, session_id)
         _emit_provider_selected("mock", "canned", is_local=True)
+        os.environ["LYRA_ACTIVE_PROVIDER"] = "mock"
         return llm
 
     # -- explicit Anthropic ---------------------------------------------
@@ -573,6 +574,7 @@ def build_llm(
         llm = AnthropicLLM()
         model = os.environ.get("HARNESS_LLM_MODEL", "claude-3-5-sonnet-latest")
         _emit_provider_selected("anthropic", model, is_local=False)
+        os.environ["LYRA_ACTIVE_PROVIDER"] = "anthropic"
         return llm
 
     # -- explicit Gemini ------------------------------------------------
@@ -584,6 +586,7 @@ def build_llm(
             or GEMINI_DEFAULT_MODEL
         )
         _emit_provider_selected("gemini", model, is_local=False)
+        os.environ["LYRA_ACTIVE_PROVIDER"] = "gemini"
         return llm
 
     # -- explicit Bedrock (Anthropic via AWS) ---------------------------
@@ -607,6 +610,7 @@ def build_llm(
         )
         llm = AnthropicBedrockLLM(model=model, region=region)
         _emit_provider_selected("bedrock", model, is_local=False)
+        os.environ["LYRA_ACTIVE_PROVIDER"] = "bedrock"
         return llm
 
     # -- explicit Vertex AI (Gemini via Google Cloud) -------------------
@@ -636,6 +640,7 @@ def build_llm(
         )
         llm = GeminiVertexLLM(model=model, project=project, location=location)
         _emit_provider_selected("vertex", model, is_local=False)
+        os.environ["LYRA_ACTIVE_PROVIDER"] = "vertex"
         return llm
 
     # -- explicit Copilot (GitHub OAuth → Copilot chat) -----------------
@@ -670,6 +675,7 @@ def build_llm(
             token_store=CopilotTokenStore(),
         )
         _emit_provider_selected("copilot", model, is_local=False)
+        os.environ["LYRA_ACTIVE_PROVIDER"] = "copilot"
         return llm
 
     # -- explicit Ollama ------------------------------------------------
@@ -687,6 +693,7 @@ def build_llm(
             or OLLAMA_DEFAULT_MODEL
         )
         _emit_provider_selected("ollama", model, is_local=True)
+        os.environ["LYRA_ACTIVE_PROVIDER"] = "ollama"
         return llm
 
     # -- custom provider (N.8 import-string registry) -------------------
@@ -697,6 +704,7 @@ def build_llm(
     # returns ``None`` when the slug isn't registered.
     custom = _maybe_build_custom_provider(kind)
     if custom is not None:
+        os.environ["LYRA_ACTIVE_PROVIDER"] = kind
         return custom
 
     # -- explicit OpenAI-compatible preset ------------------------------
@@ -712,6 +720,7 @@ def build_llm(
             preset.read_model(),
             is_local=preset.auth_scheme == "none",
         )
+        os.environ["LYRA_ACTIVE_PROVIDER"] = preset.name
         return llm
 
     if kind != "auto":
@@ -737,6 +746,7 @@ def build_llm(
                 or "llama3.1"
             )
             _emit_provider_selected("ollama", model, is_local=True)
+            os.environ["LYRA_ACTIVE_PROVIDER"] = "ollama"
             return llm
         except ProviderNotConfigured:
             # Ollama daemon went down between probe and build; fall
@@ -774,6 +784,7 @@ def build_llm(
             _emit_provider_selected(
                 "deepseek", deepseek_preset.read_model(), is_local=False
             )
+            os.environ["LYRA_ACTIVE_PROVIDER"] = "deepseek"
             return llm
         except ProviderNotConfigured:
             # Defensive: env var was scrubbed between configured()
@@ -785,6 +796,7 @@ def build_llm(
             llm = AnthropicLLM()
             model = os.environ.get("HARNESS_LLM_MODEL", "claude-3-5-sonnet-latest")
             _emit_provider_selected("anthropic", model, is_local=False)
+            os.environ["LYRA_ACTIVE_PROVIDER"] = "anthropic"
             return llm
         except ImportError:
             pass  # ``anthropic`` disappeared between check and build
@@ -801,6 +813,7 @@ def build_llm(
             _emit_provider_selected(
                 p.name, p.read_model(), is_local=p.auth_scheme == "none"
             )
+            os.environ["LYRA_ACTIVE_PROVIDER"] = p.name
             return llm
         except ProviderNotConfigured:
             # Should not happen after ``configured()`` said True, but
@@ -817,6 +830,7 @@ def build_llm(
                 or GEMINI_DEFAULT_MODEL
             )
             _emit_provider_selected("gemini", model, is_local=False)
+            os.environ["LYRA_ACTIVE_PROVIDER"] = "gemini"
             return llm
         except ProviderNotConfigured:
             pass
@@ -834,6 +848,7 @@ def build_llm(
             or OLLAMA_DEFAULT_MODEL
         )
         _emit_provider_selected("ollama", model, is_local=True)
+        os.environ["LYRA_ACTIVE_PROVIDER"] = "ollama"
         return llm
 
     # No backend matched. Fail-loud per the v2.1 contract — the silent
