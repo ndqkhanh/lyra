@@ -1,69 +1,126 @@
-"""Colony — Self-organizing agent colony runtime with emergent coordination."""
+"""lyra-colony — Self-organizing agent colony runtime with emergent coordination.
+
+Provides:
+- Colony manager with agent spawning, monitoring, retirement
+- Agent specification system with role definitions and resource limits
+- Priority-queue scheduler with affinity-based assignment and load balancing
+- Inter-agent communication (pub/sub, broadcast, request-reply)
+- Colony observability with metrics, alerting, and audit logging
+"""
 
 from __future__ import annotations
 
-import asyncio
-import logging
-from dataclasses import dataclass, field
-from typing import Any, Optional
+from .agent_spec import (
+    AgentRole,
+    AgentRoleKind,
+    AgentSpec,
+    CapabilityConflictError,
+    InvalidSpecError,
+    LifecycleHooks,
+    ResourceLimitExceededError,
+    ResourceLimits,
+    SkillLevel,
+    SkillRequirement,
+)
+from .colony import (
+    AgentColony,
+    AgentNotFoundError,
+    ColonyConfig,
+    ColonyError,
+    ColonyHealth,
+    ColonyOverCapacityError,
+    ColonyState,
+    SpawnFailedError,
+)
+from .communication import (
+    Channel,
+    ChannelNotFoundError,
+    CommunicationError,
+    Message,
+    MessageBus,
+    MessageDeliveryError,
+    MessageDeliveryReceipt,
+    MessagePriority,
+    Protocol,
+    SubscriptionError,
+)
+from .monitoring import (
+    AgentStatus,
+    Alert,
+    AlertRule,
+    AlertSeverity,
+    AlertThresholdExceededError,
+    AuditEntry,
+    ColonyMonitor,
+    MetricsSnapshot,
+    MonitoringError,
+)
+from .scheduler import (
+    ColonyScheduler,
+    DeadlineExceededError,
+    DuplicateTaskError,
+    NoAvailableAgentError,
+    SchedulerMetrics,
+    SchedulingError,
+    SchedulingStrategy,
+    Task,
+    TaskAssignment,
+    TaskState,
+)
 
-from lyra_emergent_coord import Coalition, EmergentCoordinator
-from lyra_gossip_memory import GossipProtocol
-from lyra_agent_lifecycle import LifecycleManager
-
-logger = logging.getLogger(__name__)
+__version__ = "0.2.0"
 
 __all__ = [
-    "ColonyConfig",
+    # Agent Spec
+    "AgentRole",
+    "AgentRoleKind",
+    "AgentSpec",
+    "SkillLevel",
+    "SkillRequirement",
+    "ResourceLimits",
+    "LifecycleHooks",
+    "InvalidSpecError",
+    "CapabilityConflictError",
+    "ResourceLimitExceededError",
+    # Colony
     "AgentColony",
+    "ColonyConfig",
+    "ColonyState",
+    "ColonyHealth",
+    "ColonyError",
+    "AgentNotFoundError",
+    "ColonyOverCapacityError",
+    "SpawnFailedError",
+    # Communication
+    "Message",
+    "MessagePriority",
+    "MessageDeliveryReceipt",
+    "Protocol",
+    "Channel",
+    "MessageBus",
+    "CommunicationError",
+    "ChannelNotFoundError",
+    "MessageDeliveryError",
+    "SubscriptionError",
+    # Monitoring
+    "AgentStatus",
+    "MetricsSnapshot",
+    "Alert",
+    "AlertSeverity",
+    "AlertRule",
+    "AuditEntry",
+    "ColonyMonitor",
+    "MonitoringError",
+    "AlertThresholdExceededError",
+    # Scheduler
+    "Task",
+    "TaskState",
+    "TaskAssignment",
+    "ColonyScheduler",
+    "SchedulingStrategy",
+    "SchedulerMetrics",
+    "SchedulingError",
+    "NoAvailableAgentError",
+    "DeadlineExceededError",
+    "DuplicateTaskError",
 ]
-
-
-
-
-@dataclass
-class ColonyConfig:
-    max_agents: int = 20
-    min_agents: int = 3
-    task_timeout: float = 300.0
-    gossip_interval: float = 30.0
-
-
-class AgentColony:
-    """Self-organizing agent colony runtime."""
-
-    def __init__(self, config: Optional[ColonyConfig] = None):
-        self.config = config or ColonyConfig()
-        self.coordinator = EmergentCoordinator()
-        self.gossip = GossipProtocol()
-        self.lifecycle = LifecycleManager()
-        self.active_coalitions: dict[str, Coalition] = {}
-        self.metrics: dict[str, Any] = {}
-
-    async def process_task(self, task_spec: dict[str, Any]) -> dict[str, Any]:
-        coalition = await self.coordinator.form_coalition(task_spec)
-        self.active_coalitions[coalition.id] = coalition
-
-        leader = coalition.leader_id
-        results = {}
-        for member in coalition.member_ids:
-            results[member] = {"status": "assigned"}
-
-        results["coordinator"] = leader
-        results["coalition_id"] = coalition.id
-        return results
-
-    async def gossip_cycle(self):
-        while True:
-            for coalition in self.active_coalitions.values():
-                for member_id in coalition.member_ids:
-                    summary = self.gossip.share(member_id, {"task_type": "general", "success": True})
-            await asyncio.sleep(self.config.gossip_interval)
-
-    @property
-    def stats(self) -> dict[str, Any]:
-        return {
-            "active_coalitions": len(self.active_coalitions),
-            "total_agents": len(self.lifecycle.active_agents),
-            "gossip_messages": self.gossip.message_count,
-        }

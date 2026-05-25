@@ -4,11 +4,25 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lyra-counterfactual"
-version = "0.1.0"
-description = "Counterfactual simulation engine — what-if reasoning over causal graphs"
+version = "0.2.0"
+description = "Counterfactual reasoning engine — abduction, action, prediction over causal graphs and SCMs"
 requires-python = ">=3.11"
-dependencies = ["lyra-core", "lyra-causal-graph"]
+dependencies = [
+    "lyra-core",
+    "lyra-causal-graph>=0.2.0",
+    "numpy>=1.24",
+    "scipy>=1.10",
+]
 [project.optional-dependencies]
-dev = ["pytest>=7.0"]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "pytest-asyncio>=0.21",
+]
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+asyncio_mode = "auto"

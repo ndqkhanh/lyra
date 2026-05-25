@@ -1,139 +1,161 @@
-"""Meta Evolution — Four-level meta-cognitive stack for recursive self-improvement.
+"""Meta Evolution — Four-level meta-cognitive evolution stack for recursive self-improvement.
 
-L0: Execution - current task execution loop
-L1: Knowledge - skill/memory operations
-L2: Harness - source code modification
-L3: Meta-Evolution - improves L2's ability to improve
+Provides genetic optimization, strategy pools, fitness evaluation,
+and orchestration for autonomous agent self-improvement across four
+meta-cognitive levels.
+
+Level 1: Parameter optimization (hyperparameter tuning)
+Level 2: Strategy evolution (algorithm selection)
+Level 3: Architecture evolution (component restructuring)
+Level 4: Goal evolution (objective function adaptation)
 """
 
 from __future__ import annotations
 
-import logging
-from dataclasses import dataclass, field
-from typing import Any, Optional
-
-logger = logging.getLogger(__name__)
+from .fitness import (
+    BenchmarkConfig,
+    BenchmarkResult,
+    FitnessError,
+    FitnessEvaluator,
+    FitnessLandscape,
+    FitnessWeights,
+    IncompleteBenchmarkError,
+    ObjectiveDimension,
+    ObjectiveVector,
+    ParetoError,
+    ParetoFrontier,
+)
+from .genetic_optimizer import (
+    CrossoverError,
+    CrossoverOperator,
+    CrossoverResult,
+    GeneticOptimizationResult,
+    GeneticOptimizer,
+    GeneticOptimizerError,
+    MutationOperator,
+    PopulationEmptyError,
+    RankSelection,
+    RouletteSelection,
+    SelectionError,
+    SelectionResult,
+    SelectionStrategy,
+    TournamentSelection,
+)
+from .meta_evolution import (
+    AgentGenome,
+    ArchitectureController,
+    ConvergenceStatus,
+    CyclePhase,
+    EvolutionConfig,
+    EvolutionConvergedError,
+    EvolutionLevel,
+    EvolutionObserver,
+    EvolutionResult,
+    EvolutionState,
+    EvolutionTrigger,
+    FitnessFunction,
+    GoalController,
+    InvalidGenomeError,
+    LevelController,
+    LevelNotReadyError,
+    MetaCognitiveStack,
+    MetaEvolutionError,
+    ParameterController,
+    RollbackError,
+    StrategyController,
+)
+from .orchestrator import (
+    CycleConfig,
+    CycleInProgressError,
+    CycleResult,
+    EvolutionOrchestrator,
+    IntegrationError,
+    OrchestratorError,
+    OrchestratorSnapshot,
+    OrchestratorStatus,
+    RollbackError as OrchestratorRollbackError,
+)
+from .strategy_pool import (
+    PoolCapacityError,
+    SimilarityMetrics,
+    StrategyEncoding,
+    StrategyNotFoundError,
+    StrategyPool,
+    StrategyPoolError,
+    StrategyRecord,
+)
 
 __all__ = [
-    "LevelMetrics",
-    "Level0Executor",
-    "Level1Knowledge",
-    "Level2Harness",
-    "Level3MetaEvolution",
+    # ── Meta Evolution (Core) ─────────────────────────────────────────
     "MetaCognitiveStack",
+    "AgentGenome",
+    "EvolutionLevel",
+    "EvolutionTrigger",
+    "ConvergenceStatus",
+    "EvolutionConfig",
+    "EvolutionState",
+    "EvolutionResult",
+    "CyclePhase",
+    "LevelController",
+    "ParameterController",
+    "StrategyController",
+    "ArchitectureController",
+    "GoalController",
+    "FitnessFunction",
+    "EvolutionObserver",
+    # ── Meta Evolution Exceptions ─────────────────────────────────────
+    "MetaEvolutionError",
+    "EvolutionConvergedError",
+    "LevelNotReadyError",
+    "RollbackError",
+    "InvalidGenomeError",
+    # ── Genetic Optimizer ─────────────────────────────────────────────
+    "GeneticOptimizer",
+    "CrossoverOperator",
+    "MutationOperator",
+    "SelectionStrategy",
+    "TournamentSelection",
+    "RouletteSelection",
+    "RankSelection",
+    "SelectionResult",
+    "CrossoverResult",
+    "GeneticOptimizationResult",
+    # ── Genetic Optimizer Exceptions ──────────────────────────────────
+    "GeneticOptimizerError",
+    "PopulationEmptyError",
+    "SelectionError",
+    "CrossoverError",
+    # ── Strategy Pool ─────────────────────────────────────────────────
+    "StrategyPool",
+    "StrategyEncoding",
+    "StrategyRecord",
+    "SimilarityMetrics",
+    # ── Strategy Pool Exceptions ──────────────────────────────────────
+    "StrategyPoolError",
+    "StrategyNotFoundError",
+    "PoolCapacityError",
+    # ── Fitness ───────────────────────────────────────────────────────
+    "FitnessEvaluator",
+    "FitnessWeights",
+    "ParetoFrontier",
+    "ObjectiveVector",
+    "ObjectiveDimension",
+    "FitnessLandscape",
+    "BenchmarkConfig",
+    "BenchmarkResult",
+    # ── Fitness Exceptions ────────────────────────────────────────────
+    "FitnessError",
+    "IncompleteBenchmarkError",
+    "ParetoError",
+    # ── Orchestrator ──────────────────────────────────────────────────
+    "EvolutionOrchestrator",
+    "CycleConfig",
+    "CycleResult",
+    "OrchestratorSnapshot",
+    "OrchestratorStatus",
+    # ── Orchestrator Exceptions ───────────────────────────────────────
+    "OrchestratorError",
+    "CycleInProgressError",
+    "IntegrationError",
+    "OrchestratorRollbackError",
 ]
-
-
-
-
-@dataclass
-class LevelMetrics:
-    level: int
-    name: str
-    improvement_rate: float
-    iteration_count: int
-    success_rate: float
-
-
-class Level0Executor:
-    """Current task execution loop (baseline)."""
-
-    def execute(self, task: str) -> dict[str, Any]:
-        return {"task": task, "status": "executed", "level": 0}
-
-
-class Level1Knowledge:
-    """Skill and memory read/write operations."""
-
-    def __init__(self):
-        self.skills: dict[str, Any] = {}
-        self.access_count: int = 0
-
-    def read_skill(self, skill_name: str) -> Optional[Any]:
-        self.access_count += 1
-        return self.skills.get(skill_name)
-
-    def write_skill(self, skill_name: str, content: Any) -> None:
-        self.skills[skill_name] = content
-
-
-class Level2Harness:
-    """Source code modification via MOSS-style coding agent."""
-
-    def __init__(self):
-        self.patches_applied: int = 0
-        self.patch_history: list[dict[str, Any]] = []
-
-    async def generate_patch(self, failure: dict[str, Any]) -> str:
-        self.patches_applied += 1
-        patch = f"# Patch #{self.patches_applied} for: {failure.get('error', 'unknown')}"
-        self.patch_history.append({"patch": patch, "failure": failure})
-        return patch
-
-    async def apply_patch(self, patch: str) -> bool:
-        return True  # simulated
-
-
-class Level3MetaEvolution:
-    """The evolution engine that improves Level 2's ability to improve."""
-
-    def __init__(self):
-        self.generations: int = 0
-        self.evolution_history: list[dict[str, Any]] = []
-
-    def evolve_strategy(self, level2_history: list[dict[str, Any]]) -> dict[str, Any]:
-        self.generations += 1
-        success_rate = sum(1 for h in level2_history if h.get("success")) / max(len(level2_history), 1)
-        strategy = {
-            "generation": self.generations,
-            "patch_strategy": "mutation" if success_rate < 0.5 else "crossover",
-            "success_rate": success_rate,
-        }
-        self.evolution_history.append(strategy)
-        return strategy
-
-
-class MetaCognitiveStack:
-    """Coordinates all 4 levels of the meta-cognitive stack."""
-
-    def __init__(self):
-        self.l0 = Level0Executor()
-        self.l1 = Level1Knowledge()
-        self.l2 = Level2Harness()
-        self.l3 = Level3MetaEvolution()
-        self.metrics: list[LevelMetrics] = []
-
-    async def process_failure(self, failure: dict[str, Any]) -> dict[str, Any]:
-        # L2: try to fix the harness
-        patch = await self.l2.generate_patch(failure)
-        success = await self.l2.apply_patch(patch)
-
-        # L3: improve the evolution strategy
-        strategy = self.l3.evolve_strategy(self.l2.patch_history)
-
-        return {
-            "failure": failure,
-            "patch": patch,
-            "patch_success": success,
-            "evolution_strategy": strategy,
-        }
-
-    def record_metrics(self) -> LevelMetrics:
-        m = LevelMetrics(
-            level=3,
-            name="meta_cognitive_stack",
-            improvement_rate=self.l3.generations / max(self.l2.patches_applied, 1),
-            iteration_count=self.l3.generations,
-            success_rate=0.5,
-        )
-        self.metrics.append(m)
-        return m
-
-    @property
-    def summary(self) -> dict[str, Any]:
-        return {
-            "generations": self.l3.generations,
-            "patches": self.l2.patches_applied,
-            "skills_accessed": self.l1.access_count,
-            "current_strategy": self.l3.evolution_history[-1] if self.l3.evolution_history else None,
-        }

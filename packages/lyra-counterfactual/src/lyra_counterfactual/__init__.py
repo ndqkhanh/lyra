@@ -1,74 +1,102 @@
-"""Counterfactual — 'What if' simulation engine over causal graphs."""
+"""Lyra Counterfactual — 'What if' simulation engine over causal graphs and SCMs.
+
+This package provides a comprehensive counterfactual reasoning framework built
+on top of ``lyra-causal-graph``:
+
+- **Counterfactual Engine**: Orchestrates the three-step
+  abduction-action-prediction pipeline with both legacy ``CausalGraph``
+  and modern ``StructuralCausalModel`` backends.
+- **Abduction**: Infer posterior distributions over exogenous noise variables
+  given observed evidence. Supports inversion, MCMC, optimization, rejection,
+  and variational strategies.
+- **Action Prediction**: Apply interventions to SCMs and predict outcomes.
+  Features batch evaluation, action ranking by expected outcome, pairwise
+  and grid what-if analysis.
+- **Prediction**: Compute counterfactual outcome distributions with
+  comprehensive uncertainty quantification (entropy, quantile ranges,
+  distribution shape detection).
+
+Key design principles:
+- All modules use type hints and comprehensive docstrings.
+- Structured logging via ``logging.getLogger(__name__)``.
+- Custom exception hierarchy in ``errors.py``.
+- Async/await support for long-running operations.
+- Configuration via frozen dataclasses with sensible defaults.
+"""
 
 from __future__ import annotations
 
-import logging
-from dataclasses import dataclass, field
-from typing import Any, Optional
+# ── Errors ────────────────────────────────────────────────────────────────────
 
-from lyra_causal_graph import CausalGraph
+from .errors import (
+    AbductionError,
+    ActionPredictionError,
+    ConfidenceError,
+    CounterfactualEngineError,
+    PredictionError,
+    SCMIntegrationError,
+)
 
-logger = logging.getLogger(__name__)
+# ── Abduction ─────────────────────────────────────────────────────────────────
+
+from .abduction import (
+    AbductionConfig,
+    AbductionEngine,
+    AbductionResult,
+    AbductionStrategy,
+)
+
+# ── Action Prediction ─────────────────────────────────────────────────────────
+
+from .action_prediction import (
+    ActionConfig,
+    ActionPrediction,
+    ActionPredictor,
+)
+
+# ── Prediction ────────────────────────────────────────────────────────────────
+
+from .prediction import (
+    PredictionConfig,
+    PredictionEngine,
+    PredictionResult,
+    UncertaintyMetrics,
+)
+
+# ── Main Counterfactual Engine ────────────────────────────────────────────────
+
+from .counterfactual import (
+    CounterfactualEngine,
+    CounterfactualEngineConfig,
+    CounterfactualResult,
+    Intervention,
+)
 
 __all__ = [
-    "Intervention",
-    "SimulationResult",
+    # Main engine
     "CounterfactualEngine",
+    "CounterfactualEngineConfig",
+    "CounterfactualResult",
+    "Intervention",
+    # Errors
+    "CounterfactualEngineError",
+    "AbductionError",
+    "ActionPredictionError",
+    "PredictionError",
+    "SCMIntegrationError",
+    "ConfidenceError",
+    # Abduction
+    "AbductionEngine",
+    "AbductionConfig",
+    "AbductionResult",
+    "AbductionStrategy",
+    # Action
+    "ActionPredictor",
+    "ActionConfig",
+    "ActionPrediction",
+    # Prediction
+    "PredictionEngine",
+    "PredictionConfig",
+    "PredictionResult",
+    "UncertaintyMetrics",
 ]
-
-
-
-
-@dataclass
-class Intervention:
-    action_type: str
-    source_id: str
-    target_id: str
-    parameters: dict[str, Any] = field(default_factory=dict)
-
-
-@dataclass
-class SimulationResult:
-    predicted_outcome: str
-    confidence: float
-    causal_path: list[str]
-    alternative_prob: float = 0.0
-
-
-class CounterfactualEngine:
-    """Rewinds causal graph, applies intervention, simulates outcome."""
-
-    def __init__(self, causal_graph: CausalGraph):
-        self.graph = causal_graph
-
-    async def simulate(self, intervention: Intervention) -> SimulationResult:
-        path = self._trace_causal_path(intervention)
-        confidence = self._estimate_confidence(intervention, path)
-        return SimulationResult(
-            predicted_outcome=self._predict_outcome(intervention, path),
-            confidence=confidence,
-            causal_path=path,
-        )
-
-    def _trace_causal_path(self, intervention: Intervention) -> list[str]:
-        path = []
-        source_actions = self.graph.get_actions_for_entity(intervention.source_id)
-        for action in source_actions:
-            if action.action_type == intervention.action_type:
-                path.append(f"{intervention.source_id}->{action.target_id}")
-                outcome = self.graph.get_outcome_for_action(action.id)
-                if outcome:
-                    path.append(f"outcome:{outcome.result[:50]}")
-        if not path:
-            path.append(f"{intervention.source_id}->? (no prior {intervention.action_type} actions)")
-        return path
-
-    def _estimate_confidence(self, intervention: Intervention, path: list[str]) -> float:
-        te = self.graph.compute_li_cte(intervention.source_id, intervention.target_id)
-        base = 0.5 + (te * 0.4)
-        return min(base, 0.95)
-
-    def _predict_outcome(self, intervention: Intervention, path: list[str]) -> str:
-        if "execute" in intervention.action_type or "call" in intervention.action_type:
-            return f"Simulated {intervention.action_type} on {intervention.target_id}"
-        return f"Would affect {intervention.target_id} via {intervention.action_type}"
