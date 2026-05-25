@@ -482,6 +482,46 @@ export interface SafetyAuditLogResponse {
   review_log: { action: string; decision: string; layer: string }[]
 }
 
+// ── Routing (Model Cascade) RPCs ─────────────────────────────────────
+
+export interface RoutingStatusResponse {
+  strategy: string
+  model_count: number
+  decision_count: number
+  turn_count: number
+  router_snapshot: {
+    total_decisions: number
+    decisions_by_tier: Record<string, number>
+    total_cost: number
+    total_tokens: number
+    avg_confidence: number
+    fallback_rate: number
+  }
+}
+
+export interface RoutingCostSummaryResponse {
+  total_calls: number
+  total_cost_usd: number
+  by_model: Record<string, {
+    calls: number
+    cost: number
+    avg_latency_ms: number
+  }>
+}
+
+export interface RoutingSnapshotResponse {
+  strategy: string
+  router: {
+    total_decisions: number
+    decisions_by_tier: Record<string, number>
+    total_cost: number
+    total_tokens: number
+    avg_confidence: number
+    fallback_rate: number
+  }
+  costs: RoutingCostSummaryResponse
+}
+
 // ── Lyra-specific RPCs ───────────────────────────────────────────────
 
 export interface LyraStatsResponse {
