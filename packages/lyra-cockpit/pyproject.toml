@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lyra-cockpit"
+version = "0.1.0"
+description = "Intent-Action-Audit (IAA) engine, transparency dashboard, agent monitoring, claim tracking, budget management, and voice notifications for the Lyra AI research agent cockpit"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-cov>=5.0", "pytest-asyncio>=0.25"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
