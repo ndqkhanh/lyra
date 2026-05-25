@@ -6,7 +6,6 @@ structure, inter-community edge analysis, and community summary generation.
 
 from __future__ import annotations
 
-import math
 from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any
@@ -52,24 +51,33 @@ class CommunityDetector:
 
     # ── Detection ───────────────────────────────────────────────────────────
 
-    def detect_communities(self, graph: Any) -> list[Community]:
-        """Run community detection on a KnowledgeGraph. Returns flat communities."""
-        # Build adjacency
+    def detect_communities(self, *args: Any) -> list[Community] | tuple[Community, ...]:
+        """Run community detection.
+
+        Two modes:
+        - detect_communities(graph) -> KnowledgeGraph-based detection
+        - detect_communities(graph_nodes, graph_edges) -> dict-based detection
+        """
+        if len(args) == 1:
+            return self._detect_from_graph(args[0])
+        if len(args) >= 2:
+            return self._detect_from_dicts(args[0], args[1])
+        msg = "detect_communities requires 1 or 2 arguments"
+        raise TypeError(msg)
+
+    def _detect_from_graph(self, graph: Any) -> list[Community]:
+        """Run community detection on a KnowledgeGraph object."""
         adjacency: dict[str, set[str]] = defaultdict(set)
         for edge in graph.edges:
             adjacency[edge.source_id].add(edge.target_id)
             adjacency[edge.target_id].add(edge.source_id)
 
-        # Ensure all nodes have an entry
         for nid in graph.nodes:
             if nid not in adjacency:
                 adjacency[nid] = set()
 
-        # Initial: each node its own community
         node_ids = list(graph.nodes.keys())
         community_of: dict[str, str] = {nid: nid for nid in node_ids}
-
-        # Iterative local moving
         m = graph.edge_count
         if m == 0:
             return [
@@ -88,36 +96,29 @@ class CommunityDetector:
         while improved and iteration < max_iterations:
             improved = False
             iteration += 1
-
             for node in node_ids:
                 current_comm = community_of[node]
                 neighbor_comms: dict[str, float] = defaultdict(float)
                 for neighbor in adjacency.get(node, set()):
                     if neighbor in community_of:
                         neighbor_comms[community_of[neighbor]] += 1.0
-
-                # Find best community
                 best_comm = current_comm
                 best_gain = 0.0
-
-                for comm, weight in neighbor_comms.items():
+                for comm, _ in neighbor_comms.items():
                     gain = self._modularity_gain(
                         node, comm, community_of, adjacency, m, node_ids
                     )
                     if gain > best_gain:
                         best_gain = gain
                         best_comm = comm
-
                 if best_comm != current_comm:
                     community_of[node] = best_comm
                     improved = True
 
-        # Build communities
         comm_groups: dict[str, set[str]] = defaultdict(set)
         for nid, cid in community_of.items():
             comm_groups[cid].add(nid)
 
-        # Generate labels and create community objects
         communities: list[Community] = []
         for i, (cid, members) in enumerate(comm_groups.items()):
             label_parts: list[str] = []
@@ -134,8 +135,88 @@ class CommunityDetector:
                     level=0,
                 )
             )
-
         return communities
+
+    async def _detect_from_dicts(
+        self,
+        graph_nodes: dict[str, Any],
+        graph_edges: list[Any],
+    ) -> tuple[Community, ...]:
+        """Detect communities using dict-based node/edge input."""
+        adjacency: dict[str, set[str]] = defaultdict(set)
+        for edge in graph_edges:
+            adjacency[edge.source_id].add(edge.target_id)
+            adjacency[edge.target_id].add(edge.source_id)
+
+        for nid in graph_nodes:
+            if nid not in adjacency:
+                adjacency[nid] = set()
+
+        node_ids = list(graph_nodes.keys())
+        community_of: dict[str, str] = {nid: nid for nid in node_ids}
+        m = len(graph_edges)
+        if m == 0:
+            return (Community(
+                community_id="c0",
+                node_ids=frozenset(node_ids),
+                label="All nodes",
+                level=0,
+            ),)
+
+        improved = True
+        max_iterations = 10
+        iteration = 0
+
+        while improved and iteration < max_iterations:
+            improved = False
+            iteration += 1
+            for node in node_ids:
+                current_comm = community_of[node]
+                neighbor_comms: dict[str, float] = defaultdict(float)
+                for neighbor in adjacency.get(node, set()):
+                    if neighbor in community_of:
+                        neighbor_comms[community_of[neighbor]] += 1.0
+                best_comm = current_comm
+                best_gain = 0.0
+                for comm, _ in neighbor_comms.items():
+                    ki = len(adjacency.get(node, set()))
+                    if ki <= 0:
+                        continue
+                    comm_deg = sum(
+                        len(adjacency.get(nid, set())) for nid in node_ids
+                        if community_of.get(nid) == comm
+                    )
+                    internal = sum(
+                        1 for nbr in adjacency.get(node, set())
+                        if community_of.get(nbr) == comm
+                    )
+                    gain = (internal / m) - (self.resolution * ki * comm_deg) / (2 * m * m)
+                    if gain > best_gain:
+                        best_gain = gain
+                        best_comm = comm
+                if best_comm != current_comm:
+                    community_of[node] = best_comm
+                    improved = True
+
+        comm_groups: dict[str, set[str]] = defaultdict(set)
+        for nid, cid in community_of.items():
+            comm_groups[cid].add(nid)
+
+        communities: list[Community] = []
+        for i, (cid, members) in enumerate(comm_groups.items()):
+            label_parts: list[str] = []
+            for mid in list(members)[:3]:
+                node = graph_nodes.get(mid)
+                if node:
+                    label_parts.append(getattr(node, "label", str(mid)))
+            label = ", ".join(label_parts) if label_parts else f"Community {i}"
+            communities.append(Community(
+                community_id=cid if not cid.startswith("c") else f"c{i}",
+                node_ids=frozenset(members),
+                label=label,
+                level=0,
+            ))
+        return tuple(communities)
 
     def detect_hierarchical(self, graph: Any, max_levels: int = 3) -> list[Community]:
         """Run hierarchical community detection. Returns all communities at all levels."""
@@ -165,7 +246,6 @@ class CommunityDetector:
                     if nid not in sub_adj:
                         sub_adj[nid] = set()
 
-                # Simple split: use modularity on subgraph
                 sub_ids = list(member_ids)
                 m_sub = sum(len(v) for v in sub_adj.values()) // 2
                 if m_sub == 0:
@@ -209,7 +289,6 @@ class CommunityDetector:
                             parent_id=parent_id,
                         )
                     )
-
             level_nodes = next_level
             if not level_nodes:
                 break
@@ -290,12 +369,10 @@ class CommunityDetector:
         if ki == 0 or m == 0:
             return 0.0
 
-        # Sum of degrees in target community
         comm_deg = sum(
             len(adjacency.get(nid, set())) for nid in all_nodes
             if assignment.get(nid) == target_comm
         )
-        # Internal edges from node to target community
         internal = sum(
             1 for nbr in adjacency.get(node_id, set())
             if assignment.get(nbr) == target_comm

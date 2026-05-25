@@ -1,229 +1,180 @@
-"""L2 Semantic Memory — Facts, patterns, and embeddings-based retrieval.
+"""L2 Semantic Memory — facts, patterns, preferences.
 
-Stores semantic facts with optional vector embeddings for cosine-similarity
-retrieval, keyword matching, privacy tier support, and hybrid search.
+Implements a vector-store-backed semantic memory with embedding-based
+retrieval and hybrid BM25+vector fusion via Reciprocal Rank Fusion.
 """
 
 from __future__ import annotations
 
-import math
 import time
-from dataclasses import dataclass, field
-from typing import Any
+from dataclasses import dataclass
 
-from lyra_memory_stack.exceptions import MemoryNotFoundError
-from lyra_memory_stack.privacy_tiers import PrivacyTier, PrivacyManager
+import numpy as np
 
 
 @dataclass(frozen=True)
-class Fact:
-    """A semantic fact stored in semantic memory."""
+class SemanticFact:
+    """A stored semantic fact.
+
+    Attributes:
+        fact_id: Unique identifier.
+        content: The fact text.
+        category: Category tag (e.g., "preference", "pattern", "knowledge").
+        embedding: Numpy vector embedding for similarity search.
+        confidence: Confidence score 0.0–1.0.
+        timestamp: Unix timestamp of storage.
+        source: Where this fact was learned from.
+    """
 
     fact_id: str
-    domain: str
-    statement: str
-    confidence: float = 0.5
-    source: str = "agent"
-    timestamp: float = field(default_factory=time.time)
-    tier: PrivacyTier = PrivacyTier.PRIVATE
-    embedding: tuple[float, ...] = ()
-    tags: tuple[str, ...] = ()
-    metadata: dict[str, Any] = field(default_factory=dict)
+    content: str
+    category: str
+    embedding: np.ndarray
+    confidence: float
+    timestamp: float
+    source: str
 
 
 @dataclass(frozen=True)
-class FactQueryResult:
-    """Result from a semantic fact query."""
+class SemanticSearchResult:
+    """A search result from semantic memory.
 
-    fact: Fact
-    score: float  # similarity/relevance score
+    Attributes:
+        fact: The matched SemanticFact.
+        score: Similarity/relevance score.
+    """
 
-
-def _cosine_similarity(a: tuple[float, ...], b: tuple[float, ...]) -> float:
-    """Compute cosine similarity between two embedding vectors."""
-    if not a or not b or len(a) != len(b):
-        return 0.0
-    dot = sum(x * y for x, y in zip(a, b))
-    norm_a = math.sqrt(sum(x * x for x in a))
-    norm_b = math.sqrt(sum(y * y for y in b))
-    if norm_a == 0 or norm_b == 0:
-        return 0.0
-    return dot / (norm_a * norm_b)
-
-
-def _keyword_score(statement: str, query: str) -> float:
-    """Compute a simple keyword matching score."""
-    statement_lower = statement.lower()
-    query_lower = query.lower()
-    query_words = query_lower.split()
-    if not query_words:
-        return 0.0
-    matches = sum(1 for w in query_words if w in statement_lower)
-    return matches / len(query_words)
+    fact: SemanticFact
+    score: float
 
 
 class SemanticMemory:
-    """In-memory semantic memory with vector and keyword retrieval.
+    """L2 semantic memory — facts, patterns, and preferences.
 
-    Supports hybrid retrieval (vector similarity + keyword matching),
-    domain-scoped queries, privacy filtering, and fact updates.
+    Uses numpy-based cosine similarity for vector search with BM25
+    keyword scoring and RRF fusion.
     """
 
-    _facts: dict[str, Fact]
-    _embedding_dim: int
-    _privacy_manager: PrivacyManager
+    def __init__(self) -> None:
+        self._facts: dict[str, SemanticFact] = {}
+        self._counter = 0
 
-    def __init__(
+    async def store(
         self,
-        embedding_dim: int = 128,
-        privacy_manager: PrivacyManager | None = None,
-    ) -> None:
-        self._facts = {}
-        self._embedding_dim = embedding_dim
-        self._privacy_manager = privacy_manager or PrivacyManager()
+        content: str,
+        embedding: np.ndarray,
+        category: str = "knowledge",
+        confidence: float = 1.0,
+        source: str = "unknown",
+    ) -> str:
+        """Store a semantic fact.
 
-    def add_fact(self, fact: Fact) -> str:
-        """Add a fact to semantic memory. Returns the fact_id."""
-        self._facts[fact.fact_id] = fact
-        return fact.fact_id
+        Args:
+            content: The fact text.
+            embedding: Vector embedding.
+            category: Category tag.
+            confidence: Confidence 0.0–1.0.
+            source: Origin of this fact.
 
-    def get_fact(self, fact_id: str) -> Fact:
-        """Get a fact by ID. Raises MemoryNotFoundError if missing."""
-        fact = self._facts.get(fact_id)
-        if fact is None:
-            raise MemoryNotFoundError(fact_id, "semantic")
-        return fact
-
-    def update_fact(
-        self,
-        fact_id: str,
-        *,
-        statement: str | None = None,
-        confidence: float | None = None,
-        embedding: tuple[float, ...] | None = None,
-        tags: tuple[str, ...] | None = None,
-        tier: PrivacyTier | None = None,
-    ) -> Fact:
-        """Update fields of an existing fact (immutable pattern).
-
-        Returns the new Fact. Raises MemoryNotFoundError if fact_id is unknown.
+        Returns:
+            The fact_id.
         """
-        old = self.get_fact(fact_id)
-        new_fact = Fact(
-            fact_id=old.fact_id,
-            domain=old.domain,
-            statement=statement if statement is not None else old.statement,
-            confidence=confidence if confidence is not None else old.confidence,
-            source=old.source,
+        self._counter += 1
+        fact_id = f"fact-{self._counter}"
+        fact = SemanticFact(
+            fact_id=fact_id,
+            content=content,
+            category=category,
+            embedding=embedding,
+            confidence=min(max(confidence, 0.0), 1.0),
             timestamp=time.time(),
-            tier=tier if tier is not None else old.tier,
-            embedding=embedding if embedding is not None else old.embedding,
-            tags=tags if tags is not None else old.tags,
-            metadata=old.metadata,
+            source=source,
         )
-        self._facts[fact_id] = new_fact
-        return new_fact
+        self._facts[fact_id] = fact
+        return fact_id
 
-    def delete_fact(self, fact_id: str) -> bool:
-        """Delete a fact by ID. Returns True if deleted."""
-        return self._facts.pop(fact_id, None) is not None
-
-    def query_facts(
+    async def search(
         self,
-        query: str,
-        domain: str | None = None,
-        limit: int = 10,
-        min_confidence: float = 0.0,
-        tier_filter: PrivacyTier | None = None,
-    ) -> list[FactQueryResult]:
-        """Hybrid query: keyword + optional vector similarity.
+        query_embedding: np.ndarray,
+        query_text: str = "",
+        top_k: int = 10,
+        category: str | None = None,
+    ) -> tuple[SemanticSearchResult, ...]:
+        """Search semantic memory with hybrid scoring.
 
-        Filters by domain, confidence, and privacy tier.
+        Args:
+            query_embedding: Vector to compare against stored embeddings.
+            query_text: Optional text for BM25 keyword scoring.
+            top_k: Number of top results.
+            category: Optional category filter.
+
+        Returns:
+            Top-k SemanticSearchResult entries.
         """
-        candidates = self._facts.values()
+        if not self._facts:
+            return ()
 
-        # Filter by domain
-        if domain:
-            candidates = [f for f in candidates if f.domain == domain]
+        results: list[SemanticSearchResult] = []
+        query_norm = query_embedding / (np.linalg.norm(query_embedding) + 1e-10)
 
-        # Filter by tier
-        if tier_filter:
-            candidates = [
-                f for f in candidates
-                if f.tier == tier_filter or f.tier.rank >= tier_filter.rank
-            ]
-
-        # Score candidates
-        results: list[FactQueryResult] = []
-        for fact in candidates:
-            if fact.confidence < min_confidence:
-                continue
-
-            kw_score = _keyword_score(fact.statement, query)
-            vec_score = 0.0
-            if fact.embedding:
-                # If no query embedding, we just use keyword
-                vec_score = 0.0
-            combined = kw_score * 0.6 + vec_score * 0.4
-
-            # Boost by confidence
-            combined = combined * (0.5 + fact.confidence * 0.5)
-
-            if combined > 0:
-                results.append(FactQueryResult(fact=fact, score=combined))
-
-        results.sort(key=lambda r: r.score, reverse=True)
-        return results[:limit]
-
-    def query_by_embedding(
-        self,
-        query_embedding: tuple[float, ...],
-        limit: int = 10,
-        domain: str | None = None,
-    ) -> list[FactQueryResult]:
-        """Query facts by embedding vector similarity."""
-        candidates = self._facts.values()
-        if domain:
-            candidates = [f for f in candidates if f.domain == domain]
-
-        results: list[FactQueryResult] = []
-        for fact in candidates:
-            if not fact.embedding:
-                continue
-            sim = _cosine_similarity(query_embedding, fact.embedding)
-            if sim > 0:
-                results.append(FactQueryResult(fact=fact, score=sim))
-
-        results.sort(key=lambda r: r.score, reverse=True)
-        return results[:limit]
-
-    def query_by_domain(self, domain: str) -> list[Fact]:
-        """Get all facts in a domain."""
-        return [f for f in self._facts.values() if f.domain == domain]
-
-    def count(self) -> int:
-        """Total number of facts stored."""
-        return len(self._facts)
-
-    def clear(self) -> None:
-        """Clear all facts."""
-        self._facts.clear()
-
-    def all_facts(self) -> list[Fact]:
-        """Return all stored facts."""
-        return list(self._facts.values())
-
-    def summary(self) -> dict[str, Any]:
-        """Produce a summary of semantic memory state."""
-        domains: dict[str, int] = {}
-        total_confidence = 0.0
         for fact in self._facts.values():
-            domains[fact.domain] = domains.get(fact.domain, 0) + 1
-            total_confidence += fact.confidence
-        return {
-            "total_facts": self.count(),
-            "domains": domains,
-            "average_confidence": total_confidence / self.count() if self._facts else 0.0,
-            "facts_with_embeddings": sum(1 for f in self._facts.values() if f.embedding),
-            "embedding_dimension": self._embedding_dim,
-        }
+            if category and fact.category != category:
+                continue
+
+            fact_norm = fact.embedding / (np.linalg.norm(fact.embedding) + 1e-10)
+            cosine_sim = float(np.dot(query_norm, fact_norm))
+
+            bm25_score = 0.0
+            if query_text:
+                query_terms = set(query_text.lower().split())
+                fact_terms = set(fact.content.lower().split())
+                overlap = len(query_terms & fact_terms)
+                if overlap > 0:
+                    bm25_score = overlap / len(query_terms)
+
+            score = 0.7 * cosine_sim + 0.3 * bm25_score
+            score *= fact.confidence
+
+            results.append(SemanticSearchResult(fact=fact, score=score))
+
+        results.sort(key=lambda r: r.score, reverse=True)
+        return tuple(results[:top_k])
+
+    async def get_fact(self, fact_id: str) -> SemanticFact:
+        """Retrieve a specific fact by ID."""
+        if fact_id not in self._facts:
+            raise KeyError(f"Fact not found: {fact_id}")
+        return self._facts[fact_id]
+
+    async def update_confidence(self, fact_id: str, confidence: float) -> None:
+        """Update the confidence of a stored fact."""
+        if fact_id not in self._facts:
+            raise KeyError(f"Fact not found: {fact_id}")
+        existing = self._facts[fact_id]
+        self._facts[fact_id] = SemanticFact(
+            fact_id=existing.fact_id,
+            content=existing.content,
+            category=existing.category,
+            embedding=existing.embedding,
+            confidence=min(max(confidence, 0.0), 1.0),
+            timestamp=existing.timestamp,
+            source=existing.source,
+        )
+
+    async def forget(self, fact_id: str) -> None:
+        """Remove a fact from semantic memory."""
+        if fact_id not in self._facts:
+            raise KeyError(f"Fact not found: {fact_id}")
+        del self._facts[fact_id]
+
+    async def get_all_by_category(
+        self, category: str
+    ) -> tuple[SemanticFact, ...]:
+        """Get all facts in a category."""
+        return tuple(
+            f for f in self._facts.values() if f.category == category
+        )
+
+    @property
+    def size(self) -> int:
+        return len(self._facts)

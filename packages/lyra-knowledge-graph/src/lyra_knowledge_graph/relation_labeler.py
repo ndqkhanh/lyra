@@ -27,6 +27,16 @@ class EdgeLabel(Enum):
         return 0.3
 
 
+class RelationConfidence(Enum):
+    """EXTRACTED/INFERRED/AMBIGUOUS confidence tagging.
+
+    Mirrors EdgeLabel for the spec-defined label_relation API.
+    """
+    EXTRACTED = "extracted"
+    INFERRED = "inferred"
+    AMBIGUOUS = "ambiguous"
+
+
 @dataclass(frozen=True)
 class LabeledEdge:
     """An edge with a provenance label and confidence score."""
@@ -102,6 +112,24 @@ class RelationLabeler:
             self.label_edge(src, tgt, ctx, conf)
             for src, tgt, ctx, conf in pairs
         ]
+
+    # ── Spec-based Labeling ─────────────────────────────────────────────────
+
+    async def label_relation(
+        self,
+        subject: str,
+        relation: str,
+        object: str,
+        source_text: str = "",
+    ) -> tuple[str, str, str, RelationConfidence]:
+        """Label a relation with a confidence category.
+
+        Returns (subject, relation, object, confidence_label).
+        """
+        has_context = bool(source_text.strip())
+        confidence = 0.7 if has_context else 0.3
+        label = self._determine_label(confidence, has_context, relation)
+        return (subject, relation, object, RelationConfidence(label.value))
 
     # ── Propagation ─────────────────────────────────────────────────────────
 

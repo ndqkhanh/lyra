@@ -84,8 +84,8 @@ class PreIndexer:
 
     # ── Directory Scanning ─────────────────────────────────────────────────
 
-    def index_directory(self, path: str | None = None,
-                        exclude_dirs: frozenset[str] | None = None) -> PreIndexer:
+    async def index_directory(self, path: str | None = None,
+                               exclude_dirs: frozenset[str] | None = None) -> PreIndexer:
         """Scan a directory and index all supported files. Returns self for chaining."""
         scan_path = os.path.join(self.project_root, path) if path else self.project_root
         excludes = exclude_dirs or frozenset({
@@ -106,13 +106,13 @@ class PreIndexer:
                     continue
                 file_path = os.path.join(root, filename)
                 try:
-                    result = result.index_file(file_path)
+                    result = await result.index_file(file_path)
                 except (OSError, SyntaxError, ValueError):
                     continue
 
         return result
 
-    def index_file(self, file_path: str) -> PreIndexer:
+    async def index_file(self, file_path: str) -> PreIndexer:
         """Index a single file, extracting symbols and dependencies.
 
         Returns a new PreIndexer with the updated indices.
@@ -338,7 +338,7 @@ class PreIndexer:
             "dependents": {k: sorted(v) for k, v in deps_in.items()},
         }
 
-    def to_graph(self, graph: Any) -> Any:
+    async def to_graph(self, graph: Any) -> Any:
         """Import indexed symbols and files into a KnowledgeGraph."""
         from .graph_builder import KnowledgeNode, KnowledgeEdge, NodeType, EdgeRelation
 
@@ -396,6 +396,21 @@ class PreIndexer:
     @property
     def indexed_files_count(self) -> int:
         return len(self._file_indices)
+
+    @property
+    def files_processed(self) -> int:
+        """Number of files indexed."""
+        return self.indexed_files_count
+
+    @property
+    def symbols_found(self) -> int:
+        """Number of symbols extracted."""
+        return len(self._symbols)
+
+    @property
+    def edges_created(self) -> int:
+        """Number of dependency edges found."""
+        return len(self._dependencies)
 
     def find_symbol(self, name: str) -> list[SymbolEntry]:
         """Find all symbols matching a name."""

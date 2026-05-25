@@ -253,3 +253,31 @@ class InverseSearchEngine:
         if total == 0:
             return 0.0
         return (supports - refutes) / total
+
+
+class InverseSearch:
+    """Backward chaining from conclusions — find supporting evidence paths.
+
+    Wraps InverseSearchEngine with the specified API: search_backward
+    finds all paths leading to a conclusion; rank_hypotheses scores support.
+    """
+
+    def __init__(self, graph: Any) -> None:
+        self._engine = InverseSearchEngine(graph)
+
+    async def search_backward(
+        self, conclusion: str, kg: Any
+    ) -> list[list[dict[str, Any]]]:
+        """Find all paths leading to a conclusion in the knowledge graph."""
+        return self._engine.find_supporting_paths(conclusion, kg)
+
+    async def rank_hypotheses(
+        self, conclusion: str, candidates: list[str]
+    ) -> list[HypothesisScore]:
+        """Score candidate hypotheses by evidence support."""
+        scores: list[HypothesisScore] = []
+        for candidate in candidates:
+            score = self._engine.score_hypothesis(candidate)
+            scores.append(score)
+        scores.sort(key=lambda s: s.confidence, reverse=True)
+        return scores

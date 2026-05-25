@@ -5,10 +5,21 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "lyra-memory-stack"
 version = "0.1.0"
-description = "Multi-layered memory system for Lyra agents — active context, episodic, semantic, and procedural memory with progressive retrieval"
 requires-python = ">=3.11"
-dependencies = ["lyra-core"]
+dependencies = [
+    "numpy>=1.26",
+]
+
 [project.optional-dependencies]
-dev = ["pytest>=7.0", "pytest-asyncio>=0.21.0"]
+dev = [
+    "pytest>=7.4",
+    "pytest-asyncio>=0.21",
+    "pytest-cov>=4.1",
+]
+
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

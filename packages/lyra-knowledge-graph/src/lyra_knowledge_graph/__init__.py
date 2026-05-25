@@ -13,6 +13,7 @@ from .graph_builder import (
     KnowledgeNode,
     KnowledgeEdge,
     KnowledgeGraph,
+    GraphBuilder,
 )
 
 from .entity_extractor import (
@@ -23,6 +24,7 @@ from .entity_extractor import (
 
 from .relation_labeler import (
     EdgeLabel,
+    RelationConfidence,
     LabeledEdge,
     RelationLabeler,
 )
@@ -47,15 +49,18 @@ from .pre_indexer import (
 from .inverse_search import (
     InverseSearchEngine,
     HypothesisScore,
+    InverseSearch,
 )
 
 from .rrf_fusion import (
     RRFusion,
     FusionResult,
+    RRFFusion,
 )
 
 from .dream_cycle import (
     DreamCycle,
+    KGDreamCycle,
 )
 
 from .mcp_server import (
@@ -78,12 +83,14 @@ __all__ = [
     "KnowledgeNode",
     "KnowledgeEdge",
     "KnowledgeGraph",
+    "GraphBuilder",
     # Entity extractor
     "EntityKind",
     "ExtractedEntity",
     "EntityExtractor",
     # Relation labeler
     "EdgeLabel",
+    "RelationConfidence",
     "LabeledEdge",
     "RelationLabeler",
     # Community detector
@@ -100,11 +107,14 @@ __all__ = [
     # Inverse search
     "InverseSearchEngine",
     "HypothesisScore",
+    "InverseSearch",
     # RRF fusion
     "RRFusion",
     "FusionResult",
+    "RRFFusion",
     # Dream cycle
     "DreamCycle",
+    "KGDreamCycle",
     # MCP server
     "KnowledgeGraphMCPServer",
     # Exceptions

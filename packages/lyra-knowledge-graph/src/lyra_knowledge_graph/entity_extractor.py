@@ -215,6 +215,84 @@ class EntityExtractor:
             score += 0.1
         return min(score, 1.0)
 
+    # ── Named Entity Recognition ────────────────────────────────────────────
+
+    async def extract_entities(self, text: str) -> tuple[tuple[str, str, float], ...]:
+        """Extract named entities from text.
+
+        Returns tuples of (name, entity_type, confidence).
+        """
+        extracted = self.extract(text)
+        return tuple(
+            (e.name, e.kind.value, e.confidence) for e in extracted
+        )
+
+    async def extract_code_symbols(
+        self, source_code: str, language: str
+    ) -> tuple[tuple[str, str], ...]:
+        """Extract code symbols from source code.
+
+        Returns tuples of (symbol_name, symbol_type).
+        """
+        symbols: list[tuple[str, str]] = []
+
+        if language in {"py", "python"}:
+            for match in re.finditer(
+                r'^(?:async\s+)?(?:def|class)\s+(\w+)', source_code, re.MULTILINE
+            ):
+                line = source_code[:match.start()]
+                if "def " in match.group(0) or "async def " in match.group(0):
+                    symbols.append((match.group(1), "function"))
+                else:
+                    symbols.append((match.group(1), "class"))
+        elif language in {"js", "ts", "javascript", "typescript"}:
+            for match in re.finditer(
+                r'(?:function|class)\s+(\w+)', source_code
+            ):
+                line_text = match.group(0)
+                if "function " in line_text:
+                    symbols.append((match.group(1), "function"))
+                else:
+                    symbols.append((match.group(1), "class"))
+        else:
+            for match in re.finditer(
+                r'^(?:fn|func|fun|def)\s+(\w+)', source_code, re.MULTILINE
+            ):
+                symbols.append((match.group(1), "function"))
+            for match in re.finditer(r'^class\s+(\w+)', source_code, re.MULTILINE):
+                symbols.append((match.group(1), "class"))
+
+        return tuple(symbols)
+
+    async def extract_relations(
+        self, text: str
+    ) -> tuple[tuple[str, str, str, float], ...]:
+        """Extract subject-relation-object triples from text.
+
+        Returns tuples of (subject, relation, object, confidence).
+        """
+        relations: list[tuple[str, str, str, float]] = []
+
+        verb_patterns = [
+            (r'\b(\w+)\s+(?:supports|confirms|validates|proves)\s+(\w+)', "supports"),
+            (r'\b(\w+)\s+(?:refutes|contradicts|invalidates|disproves)\s+(\w+)', "refutes"),
+            (r'\b(\w+)\s+(?:cites|references|mentions|quotes)\s+(\w+)', "cites"),
+            (r'\b(\w+)\s+(?:depends on|requires|needs)\s+(\w+)', "depends_on"),
+            (r'\b(\w+)\s+(?:extends|enhances|augments|builds on)\s+(\w+)', "extends"),
+            (r'\b(\w+)\s+(?:uses|runs|calls|invokes)\s+(\w+)', "uses"),
+        ]
+
+        for pattern, rel_type in verb_patterns:
+            for match in re.finditer(pattern, text, re.IGNORECASE):
+                subj = match.group(1)
+                obj = match.group(2)
+                base_conf = 0.7
+                if subj[0].isupper() and obj[0].isupper():
+                    base_conf = 0.85
+                relations.append((subj, rel_type, obj, base_conf))
+
+        return tuple(relations)
+
     @property
     def patterns(self) -> dict[EntityKind, list[str]]:
         """Return current patterns (as source strings)."""

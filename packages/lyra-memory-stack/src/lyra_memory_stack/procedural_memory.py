@@ -1,280 +1,262 @@
-"""L3 Procedural Memory — Skills, workflows, and knowledge graph for agent procedures.
+"""L3 Procedural Memory — skills, workflows, knowledge graph entries.
 
-Stores agent skills (reusable capabilities), workflow templates with
-dependency graphs, and a lightweight knowledge graph with temporal
-validity windows.
+Stores learned procedures as structured skill entries with versioning
+and dependency tracking. Serves as the skill registry for the agent.
 """
 
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
-from typing import Any
-
-from lyra_memory_stack.exceptions import MemoryNotFoundError
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
-class Skill:
-    """A reusable agent skill with trigger conditions."""
+class Procedure:
+    """A learned procedure or skill.
 
-    skill_id: str
+    Attributes:
+        proc_id: Unique identifier.
+        name: Human-readable procedure name.
+        description: What the procedure does.
+        steps: Ordered tuple of step descriptions.
+        triggers: Keywords/contexts that activate this procedure.
+        dependencies: Tuple of proc_ids this procedure depends on.
+        success_count: Number of successful applications.
+        failure_count: Number of failed applications.
+        version: Monotonically increasing version number.
+        created_at: Unix timestamp of creation.
+        updated_at: Unix timestamp of last update.
+    """
+
+    proc_id: str
     name: str
     description: str
-    triggers: tuple[str, ...] = ()
-    content: str = ""
-    version: str = "1.0.0"
-    domain: str = "general"
-    author: str = "agent"
-    timestamp: float = field(default_factory=time.time)
-    metadata: dict[str, Any] = field(default_factory=dict)
-
-    def with_version(self, new_version: str) -> Skill:
-        """Return a new Skill with an updated version (immutable)."""
-        return Skill(
-            skill_id=self.skill_id,
-            name=self.name,
-            description=self.description,
-            triggers=self.triggers,
-            content=self.content,
-            version=new_version,
-            domain=self.domain,
-            author=self.author,
-            timestamp=time.time(),
-            metadata=self.metadata,
-        )
-
-    def with_content(self, new_content: str) -> Skill:
-        """Return a new Skill with updated content (immutable)."""
-        return Skill(
-            skill_id=self.skill_id,
-            name=self.name,
-            description=self.description,
-            triggers=self.triggers,
-            content=new_content,
-            version=self.version,
-            domain=self.domain,
-            author=self.author,
-            timestamp=time.time(),
-            metadata=self.metadata,
-        )
+    steps: tuple[str, ...]
+    triggers: tuple[str, ...]
+    dependencies: tuple[str, ...]
+    success_count: int
+    failure_count: int
+    version: int
+    created_at: float
+    updated_at: float
 
 
 @dataclass(frozen=True)
-class WorkflowStep:
-    """A single step in a workflow template."""
+class KnowledgeGraphEntry:
+    """A node in the procedural knowledge graph.
 
-    step_id: str
-    name: str
-    description: str = ""
-    depends_on: tuple[str, ...] = ()  # step_ids this step depends on
-    skill_ref: str | None = None  # skill_id to invoke
-    timeout_seconds: float = 300.0
-    retry_count: int = 3
+    Attributes:
+        node_id: Unique node identifier.
+        label: Display label.
+        node_type: Category (e.g., "concept", "tool", "pattern").
+        properties: Key-value metadata.
+        edges: Tuple of (target_node_id, relation_type) pairs.
+    """
 
-
-@dataclass(frozen=True)
-class WorkflowTemplate:
-    """A reusable workflow template with dependency DAG."""
-
-    workflow_id: str
-    name: str
-    description: str = ""
-    steps: tuple[WorkflowStep, ...] = ()
-    domain: str = "general"
-    version: str = "1.0.0"
-    timestamp: float = field(default_factory=time.time)
-
-    def dependency_graph(self) -> dict[str, list[str]]:
-        """Build adjacency list of step dependencies.
-
-        Returns dict mapping step_id -> list of step_ids that depend on it.
-        """
-        graph: dict[str, list[str]] = {s.step_id: [] for s in self.steps}
-        for step in self.steps:
-            for dep_id in step.depends_on:
-                if dep_id in graph:
-                    graph[dep_id].append(step.step_id)
-        return graph
-
-    def execution_order(self) -> list[WorkflowStep]:
-        """Return steps in topological order (dependencies first)."""
-        visited: set[str] = set()
-        result: list[WorkflowStep] = []
-        steps_map = {s.step_id: s for s in self.steps}
-
-        def _visit(step_id: str) -> None:
-            if step_id in visited:
-                return
-            visited.add(step_id)
-            step = steps_map.get(step_id)
-            if step is not None:
-                for dep_id in step.depends_on:
-                    _visit(dep_id)
-                result.append(step)
-
-        for step in self.steps:
-            _visit(step.step_id)
-
-        return result
-
-    def validate(self) -> list[str]:
-        """Validate the workflow. Returns list of error messages (empty = valid)."""
-        errors: list[str] = []
-        step_ids = {s.step_id for s in self.steps}
-        for step in self.steps:
-            for dep_id in step.depends_on:
-                if dep_id not in step_ids:
-                    errors.append(
-                        f"Step '{step.step_id}' depends on unknown step '{dep_id}'"
-                    )
-        return errors
-
-
-@dataclass(frozen=True)
-class KnowledgeEdge:
-    """An edge in the procedural knowledge graph."""
-
-    edge_id: str
-    source_id: str
-    target_id: str
-    relation: str
-    weight: float = 1.0
-    valid_from: float = 0.0
-    valid_until: float = float("inf")
-    timestamp: float = field(default_factory=time.time)
-    metadata: dict[str, Any] = field(default_factory=dict)
-
-    def is_valid(self, at_time: float | None = None) -> bool:
-        """Check whether this edge is temporally valid."""
-        t = at_time if at_time is not None else time.time()
-        return self.valid_from <= t <= self.valid_until
+    node_id: str
+    label: str
+    node_type: str
+    properties: dict[str, str]
+    edges: tuple[tuple[str, str], ...]
 
 
 class ProceduralMemory:
-    """Manages skills, workflows, and knowledge graph for agent procedures."""
+    """L3 procedural memory — skills and knowledge graph.
 
-    _skills: dict[str, Skill]
-    _workflows: dict[str, WorkflowTemplate]
-    _kg_edges: dict[str, KnowledgeEdge]
+    Manages learned procedures with success/failure tracking and
+    knowledge graph entries for relational reasoning.
+    """
 
     def __init__(self) -> None:
-        self._skills = {}
-        self._workflows = {}
-        self._kg_edges = {}
+        self._procedures: dict[str, Procedure] = {}
+        self._kg_entries: dict[str, KnowledgeGraphEntry] = {}
+        self._counter = 0
+        self._node_counter = 0
 
-    # ── Skills ──────────────────────────────────────────────────────────
-
-    def store_skill(self, skill: Skill) -> str:
-        """Store a skill. Returns the skill_id."""
-        self._skills[skill.skill_id] = skill
-        return skill.skill_id
-
-    def load_skill(self, skill_id: str) -> Skill:
-        """Load a skill by ID. Raises MemoryNotFoundError if missing."""
-        skill = self._skills.get(skill_id)
-        if skill is None:
-            raise MemoryNotFoundError(skill_id, "procedural/skill")
-        return skill
-
-    def delete_skill(self, skill_id: str) -> bool:
-        """Delete a skill by ID. Returns True if deleted."""
-        return self._skills.pop(skill_id, None) is not None
-
-    def list_skills(self, domain: str | None = None) -> list[Skill]:
-        """List all skills, optionally filtered by domain."""
-        if domain is None:
-            return list(self._skills.values())
-        return [s for s in self._skills.values() if s.domain == domain]
-
-    def find_skills_by_trigger(self, trigger: str) -> list[Skill]:
-        """Find skills whose trigger patterns match the given input."""
-        trigger_lower = trigger.lower()
-        return [
-            s for s in self._skills.values()
-            if any(trigger_lower in t.lower() for t in s.triggers)
-        ]
-
-    def skill_count(self) -> int:
-        """Number of stored skills."""
-        return len(self._skills)
-
-    # ── Workflows ───────────────────────────────────────────────────────
-
-    def store_workflow(self, workflow: WorkflowTemplate) -> str:
-        """Store a workflow template. Returns the workflow_id."""
-        self._workflows[workflow.workflow_id] = workflow
-        return workflow.workflow_id
-
-    def load_workflow(self, workflow_id: str) -> WorkflowTemplate:
-        """Load a workflow by ID. Raises MemoryNotFoundError if missing."""
-        wf = self._workflows.get(workflow_id)
-        if wf is None:
-            raise MemoryNotFoundError(workflow_id, "procedural/workflow")
-        return wf
-
-    def delete_workflow(self, workflow_id: str) -> bool:
-        """Delete a workflow by ID. Returns True if deleted."""
-        return self._workflows.pop(workflow_id, None) is not None
-
-    def list_workflows(self, domain: str | None = None) -> list[WorkflowTemplate]:
-        """List all workflows, optionally filtered by domain."""
-        if domain is None:
-            return list(self._workflows.values())
-        return [w for w in self._workflows.values() if w.domain == domain]
-
-    def workflow_count(self) -> int:
-        """Number of stored workflows."""
-        return len(self._workflows)
-
-    # ── Knowledge Graph ────────────────────────────────────────────────
-
-    def add_edge(self, edge: KnowledgeEdge) -> str:
-        """Add a knowledge graph edge. Returns the edge_id."""
-        self._kg_edges[edge.edge_id] = edge
-        return edge.edge_id
-
-    def remove_edge(self, edge_id: str) -> bool:
-        """Remove an edge by ID. Returns True if removed."""
-        return self._kg_edges.pop(edge_id, None) is not None
-
-    def query_edges(
+    async def register_procedure(
         self,
-        source_id: str | None = None,
-        target_id: str | None = None,
-        relation: str | None = None,
-        valid_at: float | None = None,
-    ) -> list[KnowledgeEdge]:
-        """Query knowledge graph edges with optional filters."""
-        results = list(self._kg_edges.values())
+        name: str,
+        description: str,
+        steps: tuple[str, ...],
+        triggers: tuple[str, ...] = (),
+        dependencies: tuple[str, ...] = (),
+    ) -> str:
+        """Register a new procedure.
 
-        if source_id is not None:
-            results = [e for e in results if e.source_id == source_id]
-        if target_id is not None:
-            results = [e for e in results if e.target_id == target_id]
-        if relation is not None:
-            results = [e for e in results if e.relation == relation]
-        if valid_at is not None:
-            results = [e for e in results if e.is_valid(valid_at)]
+        Args:
+            name: Human-readable name.
+            description: What the procedure does.
+            steps: Ordered steps.
+            triggers: Activation keywords.
+            dependencies: Required procedure IDs.
 
-        return results
+        Returns:
+            The proc_id.
+        """
+        self._counter += 1
+        proc_id = f"proc-{self._counter}"
+        now = time.time()
+        procedure = Procedure(
+            proc_id=proc_id,
+            name=name,
+            description=description,
+            steps=steps,
+            triggers=triggers,
+            dependencies=dependencies,
+            success_count=0,
+            failure_count=0,
+            version=1,
+            created_at=now,
+            updated_at=now,
+        )
+        self._procedures[proc_id] = procedure
+        return proc_id
 
-    def edge_count(self) -> int:
-        """Number of stored knowledge graph edges."""
-        return len(self._kg_edges)
+    async def find_by_trigger(self, trigger: str) -> tuple[Procedure, ...]:
+        """Find procedures matching a trigger keyword.
 
-    # ── General ─────────────────────────────────────────────────────────
+        Args:
+            trigger: The keyword to match.
 
-    def clear(self) -> None:
-        """Clear all procedural memory."""
-        self._skills.clear()
-        self._workflows.clear()
-        self._kg_edges.clear()
+        Returns:
+            Matching procedures sorted by success rate.
+        """
+        trigger_lower = trigger.lower()
+        matches = [
+            p
+            for p in self._procedures.values()
+            if any(trigger_lower in t.lower() for t in p.triggers)
+        ]
+        matches.sort(
+            key=lambda p: (
+                p.success_count / max(p.success_count + p.failure_count, 1)
+            ),
+            reverse=True,
+        )
+        return tuple(matches)
 
-    def summary(self) -> dict[str, Any]:
-        """Produce a summary of procedural memory state."""
-        return {
-            "skills": self.skill_count(),
-            "workflows": self.workflow_count(),
-            "knowledge_edges": self.edge_count(),
-        }
+    async def record_success(self, proc_id: str) -> None:
+        """Record a successful application of a procedure."""
+        if proc_id not in self._procedures:
+            raise KeyError(f"Procedure not found: {proc_id}")
+        p = self._procedures[proc_id]
+        self._procedures[proc_id] = Procedure(
+            proc_id=p.proc_id,
+            name=p.name,
+            description=p.description,
+            steps=p.steps,
+            triggers=p.triggers,
+            dependencies=p.dependencies,
+            success_count=p.success_count + 1,
+            failure_count=p.failure_count,
+            version=p.version,
+            created_at=p.created_at,
+            updated_at=time.time(),
+        )
+
+    async def record_failure(self, proc_id: str) -> None:
+        """Record a failed application of a procedure."""
+        if proc_id not in self._procedures:
+            raise KeyError(f"Procedure not found: {proc_id}")
+        p = self._procedures[proc_id]
+        self._procedures[proc_id] = Procedure(
+            proc_id=p.proc_id,
+            name=p.name,
+            description=p.description,
+            steps=p.steps,
+            triggers=p.triggers,
+            dependencies=p.dependencies,
+            success_count=p.success_count,
+            failure_count=p.failure_count + 1,
+            version=p.version,
+            created_at=p.created_at,
+            updated_at=time.time(),
+        )
+
+    async def get_reliable_procedures(
+        self, min_success_rate: float = 0.7
+    ) -> tuple[Procedure, ...]:
+        """Get procedures with success rate above the threshold."""
+        result = []
+        for p in self._procedures.values():
+            total = p.success_count + p.failure_count
+            if total == 0:
+                continue
+            rate = p.success_count / total
+            if rate >= min_success_rate:
+                result.append(p)
+        result.sort(key=lambda p: p.success_count, reverse=True)
+        return tuple(result)
+
+    async def add_kg_entry(
+        self,
+        label: str,
+        node_type: str,
+        properties: dict[str, str] | None = None,
+        edges: tuple[tuple[str, str], ...] = (),
+    ) -> str:
+        """Add a knowledge graph entry.
+
+        Args:
+            label: Display label.
+            node_type: Category of the node.
+            properties: Optional metadata.
+            edges: Outgoing edges as (target_node_id, relation) pairs.
+
+        Returns:
+            The node_id.
+        """
+        self._node_counter += 1
+        node_id = f"node-{self._node_counter}"
+        entry = KnowledgeGraphEntry(
+            node_id=node_id,
+            label=label,
+            node_type=node_type,
+            properties=properties or {},
+            edges=edges,
+        )
+        self._kg_entries[node_id] = entry
+        return node_id
+
+    async def traverse_kg(
+        self, start_node_id: str, relation: str | None = None
+    ) -> tuple[KnowledgeGraphEntry, ...]:
+        """Traverse the knowledge graph from a starting node.
+
+        Args:
+            start_node_id: Where to start traversal.
+            relation: Optional relation type filter.
+
+        Returns:
+            Connected KnowledgeGraphEntry nodes.
+        """
+        if start_node_id not in self._kg_entries:
+            raise KeyError(f"Node not found: {start_node_id}")
+
+        visited: set[str] = set()
+        result: list[KnowledgeGraphEntry] = []
+        queue = [start_node_id]
+
+        while queue:
+            node_id = queue.pop(0)
+            if node_id in visited:
+                continue
+            visited.add(node_id)
+
+            if node_id in self._kg_entries:
+                entry = self._kg_entries[node_id]
+                result.append(entry)
+                for target, rel in entry.edges:
+                    if target not in visited:
+                        if relation is None or rel == relation:
+                            queue.append(target)
+
+        return tuple(result)
+
+    @property
+    def procedure_count(self) -> int:
+        return len(self._procedures)
+
+    @property
+    def kg_node_count(self) -> int:
+        return len(self._kg_entries)

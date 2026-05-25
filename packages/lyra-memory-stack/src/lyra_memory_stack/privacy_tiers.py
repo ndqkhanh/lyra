@@ -1,170 +1,163 @@
-"""Privacy tier management for memory entries.
+"""Privacy tiers — ephemeral → private → durable → shared classification.
 
-Defines four privacy tiers with cascade forgetting and access control:
-- EPHEMERAL: session-only, cleared on session end
-- PRIVATE: user-only, visible only to owning user
-- DURABLE: project-scoped, persists across sessions within a project
-- SHARED: team-scoped, visible to all agents in the team
+Every memory entry is assigned a privacy tier controlling retention,
+visibility, and sharing behavior.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from enum import Enum, auto
-from typing import Any
+import enum
+import time
+from dataclasses import dataclass
 
 
-class PrivacyTier(Enum):
-    """Privacy tiers for memory entries, ordered from least to most durable."""
+class PrivacyTier(enum.Enum):
+    """Privacy classification for memory entries.
 
-    EPHEMERAL = auto()
-    PRIVATE = auto()
-    DURABLE = auto()
-    SHARED = auto()
-
-    @property
-    def rank(self) -> int:
-        """Numeric rank for comparison (higher = more durable)."""
-        return {
-            PrivacyTier.EPHEMERAL: 0,
-            PrivacyTier.PRIVATE: 1,
-            PrivacyTier.DURABLE: 2,
-            PrivacyTier.SHARED: 3,
-        }[self]
-
-    def __lt__(self, other: Any) -> bool:
-        if isinstance(other, PrivacyTier):
-            return self.rank < other.rank
-        return NotImplemented
-
-    def __le__(self, other: Any) -> bool:
-        if isinstance(other, PrivacyTier):
-            return self.rank <= other.rank
-        return NotImplemented
-
-
-# Mapping: elevated tiers cascade down to require clearance for lower tiers
-TIER_DEPENDENCIES: dict[PrivacyTier, frozenset[PrivacyTier]] = {
-    PrivacyTier.SHARED: frozenset({PrivacyTier.DURABLE, PrivacyTier.PRIVATE, PrivacyTier.EPHEMERAL}),
-    PrivacyTier.DURABLE: frozenset({PrivacyTier.PRIVATE, PrivacyTier.EPHEMERAL}),
-    PrivacyTier.PRIVATE: frozenset({PrivacyTier.EPHEMERAL}),
-    PrivacyTier.EPHEMERAL: frozenset(),
-}
-
-
-def cascade_tiers(tier: PrivacyTier) -> set[PrivacyTier]:
-    """Return the set of tiers that should be cleared when *tier* is cleared.
-
-    Cascade forgetting: clearing a higher tier also clears all lower tiers.
+    EPHEMERAL: Session-only, purged on session end.
+    PRIVATE: Persisted but never shared with other agents/sessions.
+    DURABLE: Persisted and available for self-reference across sessions.
+    SHARED: Persisted and shareable with other agents/sessions.
     """
-    result = {tier}
-    for lower_tier in PrivacyTier:
-        if lower_tier < tier:
-            result.add(lower_tier)
-    return result
 
-
-def requiring_clearance(tier: PrivacyTier) -> set[PrivacyTier]:
-    """Return the set of tiers that require clearance for access to *tier*."""
-    return TIER_DEPENDENCIES.get(tier, frozenset())
+    EPHEMERAL = "ephemeral"
+    PRIVATE = "private"
+    DURABLE = "durable"
+    SHARED = "shared"
 
 
 @dataclass(frozen=True)
-class PrivacyPolicy:
-    """A policy governing how a memory entry's privacy is managed."""
+class PrivacyLabel:
+    """Privacy metadata attached to a memory entry.
 
+    Attributes:
+        entry_ref: Reference to the memory entry.
+        tier: Privacy classification.
+        owner_id: The agent/session that owns this entry.
+        allowed_recipients: Explicit allowlist for shared access.
+        created_at: Unix timestamp.
+        expires_at: Optional expiry timestamp.
+    """
+
+    entry_ref: str
     tier: PrivacyTier
-    allowed_roles: tuple[str, ...] = field(default_factory=lambda: ("agent",))
-    max_retention_days: float | None = None
-    encrypt_at_rest: bool = False
-
-    def allows_access(self, role: str) -> bool:
-        """Check whether *role* is permitted to access this entry."""
-        return role in self.allowed_roles
-
-    def with_tier(self, new_tier: PrivacyTier) -> PrivacyPolicy:
-        """Return a new policy with a different tier (immutable)."""
-        return PrivacyPolicy(
-            tier=new_tier,
-            allowed_roles=self.allowed_roles,
-            max_retention_days=self.max_retention_days,
-            encrypt_at_rest=self.encrypt_at_rest,
-        )
-
-    def with_roles(self, *roles: str) -> PrivacyPolicy:
-        """Return a new policy with updated allowed roles (immutable)."""
-        return PrivacyPolicy(
-            tier=self.tier,
-            allowed_roles=roles,
-            max_retention_days=self.max_retention_days,
-            encrypt_at_rest=self.encrypt_at_rest,
-        )
-
-
-DEFAULT_POLICIES: dict[PrivacyTier, PrivacyPolicy] = {
-    PrivacyTier.EPHEMERAL: PrivacyPolicy(
-        tier=PrivacyTier.EPHEMERAL,
-        allowed_roles=("agent",),
-        max_retention_days=None,
-        encrypt_at_rest=False,
-    ),
-    PrivacyTier.PRIVATE: PrivacyPolicy(
-        tier=PrivacyTier.PRIVATE,
-        allowed_roles=("user", "agent"),
-        max_retention_days=90.0,
-        encrypt_at_rest=True,
-    ),
-    PrivacyTier.DURABLE: PrivacyPolicy(
-        tier=PrivacyTier.DURABLE,
-        allowed_roles=("user", "agent", "project"),
-        max_retention_days=365.0,
-        encrypt_at_rest=True,
-    ),
-    PrivacyTier.SHARED: PrivacyPolicy(
-        tier=PrivacyTier.SHARED,
-        allowed_roles=("user", "agent", "project", "team"),
-        max_retention_days=365.0,
-        encrypt_at_rest=False,
-    ),
-}
+    owner_id: str
+    allowed_recipients: tuple[str, ...]
+    created_at: float
+    expires_at: float | None
 
 
 class PrivacyManager:
-    """Manages privacy tiers and access control for memory entries."""
+    """Manages privacy tiers for memory entries.
 
-    _policies: dict[PrivacyTier, PrivacyPolicy]
+    Controls retention (ephemeral vs durable) and visibility (private vs shared)
+    for all memory entries in the stack.
+    """
 
-    def __init__(self, policies: dict[PrivacyTier, PrivacyPolicy] | None = None) -> None:
-        self._policies = dict(policies) if policies else dict(DEFAULT_POLICIES)
+    def __init__(self) -> None:
+        self._labels: dict[str, PrivacyLabel] = {}
 
-    def get_policy(self, tier: PrivacyTier) -> PrivacyPolicy:
-        """Get the policy for a given tier."""
-        return self._policies.get(tier, DEFAULT_POLICIES[tier])
+    async def classify(
+        self,
+        entry_ref: str,
+        tier: PrivacyTier,
+        owner_id: str,
+        allowed_recipients: tuple[str, ...] = (),
+        ttl: float | None = None,
+    ) -> PrivacyLabel:
+        """Classify a memory entry with a privacy tier.
 
-    def set_policy(self, tier: PrivacyTier, policy: PrivacyPolicy) -> None:
-        """Set or override a policy for a tier."""
-        self._policies[tier] = policy
+        Args:
+            entry_ref: Reference to the memory entry.
+            tier: Privacy classification.
+            owner_id: Owning agent/session.
+            allowed_recipients: Explicit sharing allowlist.
+            ttl: Optional time-to-live in seconds.
 
-    def check_access(self, tier: PrivacyTier, role: str) -> bool:
-        """Check whether *role* can access entries at the given tier."""
-        policy = self.get_policy(tier)
-        return policy.allows_access(role)
-
-    def cascade_forget(self, tier: PrivacyTier) -> set[PrivacyTier]:
-        """Return all tiers that should be forgotten when *tier* is cleared."""
-        return cascade_tiers(tier)
-
-    def escalate_tier(self, current_tier: PrivacyTier, target_tier: PrivacyTier) -> PrivacyTier:
-        """Escalate from current to target tier if target has higher durability."""
-        return max(current_tier, target_tier, key=lambda t: t.rank)
-
-    def validate_tier_transition(self, from_tier: PrivacyTier, to_tier: PrivacyTier) -> bool:
-        """Validate that a transition between tiers is allowed.
-
-        Downgrades are always allowed. Upgrades require that the
-        target tier's dependencies are satisfied.
+        Returns:
+            The created PrivacyLabel.
         """
-        if to_tier <= from_tier:
+        now = time.time()
+        expires_at = now + ttl if ttl is not None else None
+        label = PrivacyLabel(
+            entry_ref=entry_ref,
+            tier=tier,
+            owner_id=owner_id,
+            allowed_recipients=allowed_recipients,
+            created_at=now,
+            expires_at=expires_at,
+        )
+        self._labels[entry_ref] = label
+        return label
+
+    async def check_access(
+        self, entry_ref: str, requester_id: str
+    ) -> bool:
+        """Check if a requester can access an entry.
+
+        Args:
+            entry_ref: The memory entry reference.
+            requester_id: Who is requesting access.
+
+        Returns:
+            True if access is allowed.
+        """
+        if entry_ref not in self._labels:
             return True
-        # Escalation is always permitted
-        return True
+
+        label = self._labels[entry_ref]
+
+        if label.expires_at is not None and time.time() > label.expires_at:
+            return False
+
+        if label.tier == PrivacyTier.SHARED:
+            return True
+
+        if label.owner_id == requester_id:
+            return True
+
+        if requester_id in label.allowed_recipients:
+            return True
+
+        return False
+
+    async def get_tier(self, entry_ref: str) -> PrivacyTier:
+        """Get the privacy tier for an entry."""
+        if entry_ref not in self._labels:
+            return PrivacyTier.DURABLE
+        return self._labels[entry_ref].tier
+
+    async def purge_ephemeral(self) -> int:
+        """Purge all ephemeral entries.
+
+        Returns:
+            Number of entries purged.
+        """
+        to_remove = [
+            ref
+            for ref, label in self._labels.items()
+            if label.tier == PrivacyTier.EPHEMERAL
+        ]
+        for ref in to_remove:
+            del self._labels[ref]
+        return len(to_remove)
+
+    async def purge_expired(self) -> int:
+        """Purge all expired entries.
+
+        Returns:
+            Number of entries purged.
+        """
+        now = time.time()
+        to_remove = [
+            ref
+            for ref, label in self._labels.items()
+            if label.expires_at is not None and now > label.expires_at
+        ]
+        for ref in to_remove:
+            del self._labels[ref]
+        return len(to_remove)
+
+    @property
+    def label_count(self) -> int:
+        return len(self._labels)

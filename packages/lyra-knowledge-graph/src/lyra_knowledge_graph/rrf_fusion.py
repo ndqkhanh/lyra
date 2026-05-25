@@ -7,7 +7,6 @@ and re-ranking.
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -236,3 +235,32 @@ class RRFusion:
     @property
     def k(self) -> int:
         return self._k
+
+
+class RRFFusion:
+    """BM25+vector+RRF hybrid retrieval.
+
+    Applies Reciprocal Rank Fusion to combine vector search and
+    BM25/keyword search results.
+    """
+
+    def __init__(self, k: int = 60) -> None:
+        if k <= 0:
+            raise ValueError("k must be positive")
+        self._fusion = RRFusion(k=k)
+
+    @property
+    def k(self) -> int:
+        return self._fusion.k
+
+    async def fuse_results(
+        self,
+        vector_results: list[dict[str, Any]],
+        bm25_results: list[dict[str, Any]],
+        k: int = 60,
+    ) -> list[FusionResult]:
+        """Apply Reciprocal Rank Fusion to combine vector and BM25 results."""
+        if k <= 0:
+            raise ValueError("k must be positive")
+        temp = RRFusion(k=k)
+        return temp.fuse(keyword_results=bm25_results, vector_results=vector_results)

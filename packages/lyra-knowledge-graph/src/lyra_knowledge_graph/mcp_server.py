@@ -21,9 +21,9 @@ class KnowledgeGraphMCPServer:
 
     # ── Tool Definitions ───────────────────────────────────────────────────
 
-    def query_graph(self, query_text: str,
-                    node_type: str | None = None,
-                    max_results: int = 20) -> list[dict[str, Any]]:
+    async def query_graph(self, query_text: str,
+                           node_type: str | None = None,
+                           max_results: int = 20) -> list[dict[str, Any]]:
         """Search the graph for nodes matching a text query.
 
         Args:
@@ -46,7 +46,7 @@ class KnowledgeGraphMCPServer:
 
         return results
 
-    def get_node(self, node_id: str) -> dict[str, Any] | None:
+    async def get_node(self, node_id: str) -> dict[str, Any] | None:
         """Get detailed information about a specific node.
 
         Args:
@@ -61,7 +61,7 @@ class KnowledgeGraphMCPServer:
         except Exception:
             return None
 
-    def get_neighbors(self, node_id: str,
+    async def get_neighbors(self, node_id: str,
                       max_results: int = 50) -> list[dict[str, Any]]:
         """Get all nodes directly connected to a given node.
 
@@ -79,7 +79,7 @@ class KnowledgeGraphMCPServer:
 
         return [n.to_dict() for n in neighbors[:max_results]]
 
-    def shortest_path(self, from_id: str,
+    async def shortest_path(self, from_id: str,
                       to_id: str) -> dict[str, Any] | None:
         """Find the shortest path between two nodes.
 
@@ -102,7 +102,7 @@ class KnowledgeGraphMCPServer:
             return None
         return path.to_dict()
 
-    def get_community(self, node_id: str) -> dict[str, Any] | None:
+    async def get_community(self, node_id: str) -> dict[str, Any] | None:
         """Get community information for a node.
 
         Args:
@@ -132,7 +132,7 @@ class KnowledgeGraphMCPServer:
             "members": community_members[:20],
         }
 
-    def graph_summary(self) -> dict[str, Any]:
+    async def graph_summary(self) -> dict[str, Any]:
         """Get a summary of the entire knowledge graph.
 
         Returns:
@@ -142,7 +142,7 @@ class KnowledgeGraphMCPServer:
 
     # ── Batch Operations ──────────────────────────────────────────────────
 
-    def get_nodes_batch(self, node_ids: list[str]) -> list[dict[str, Any]]:
+    async def get_nodes_batch(self, node_ids: list[str]) -> list[dict[str, Any]]:
         """Get multiple nodes by their IDs."""
         results: list[dict[str, Any]] = []
         for nid in node_ids:
@@ -153,7 +153,7 @@ class KnowledgeGraphMCPServer:
                 continue
         return results
 
-    def get_subgraph(self, node_ids: list[str],
+    async def get_subgraph(self, node_ids: list[str],
                      depth: int = 1) -> dict[str, Any]:
         """Get a subgraph expanded around given nodes."""
         from .navigation_engine import NavigationEngine
@@ -171,7 +171,7 @@ class KnowledgeGraphMCPServer:
 
     # ── Query Support ──────────────────────────────────────────────────────
 
-    def graph_query(self, query_text: str) -> list[dict[str, Any]]:
+    async def graph_query(self, query_text: str) -> list[dict[str, Any]]:
         """Search graph nodes by label, type, and properties.
 
         More comprehensive than query_graph — also searches properties.

@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 import os
 import tempfile
-from pathlib import Path
 
 import pytest
 
@@ -16,12 +15,14 @@ from lyra_knowledge_graph import (
     KnowledgeNode,
     KnowledgeEdge,
     KnowledgeGraph,
+    GraphBuilder,
     # Entity extractor
     EntityKind,
     ExtractedEntity,
     EntityExtractor,
     # Relation labeler
     EdgeLabel,
+    RelationConfidence,
     LabeledEdge,
     RelationLabeler,
     # Community detector
@@ -38,11 +39,14 @@ from lyra_knowledge_graph import (
     # Inverse search
     InverseSearchEngine,
     HypothesisScore,
+    InverseSearch,
     # RRF fusion
     RRFusion,
     FusionResult,
+    RRFFusion,
     # Dream cycle
     DreamCycle,
+    KGDreamCycle,
     # MCP server
     KnowledgeGraphMCPServer,
     # Exceptions
@@ -620,45 +624,53 @@ from pathlib import Path
             return f.name
 
     @pytest.fixture
-    def preindexer(self, temp_py_file) -> PreIndexer:
+    async def preindexer(self, temp_py_file) -> PreIndexer:
         idx = PreIndexer(os.path.dirname(temp_py_file))
-        return idx.index_file(temp_py_file)
+        return await idx.index_file(temp_py_file)
 
-    def test_index_file(self, preindexer):
+    @pytest.mark.asyncio
+    async def test_index_file(self, preindexer):
         assert preindexer.indexed_files_count == 1
 
-    def test_extract_symbols(self, preindexer):
+    @pytest.mark.asyncio
+    async def test_extract_symbols(self, preindexer):
         symbols = preindexer.symbols
         names = [s.name for s in symbols]
         assert "hello" in names
         assert "MyClass" in names
 
-    def test_extract_dependencies(self, preindexer):
+    @pytest.mark.asyncio
+    async def test_extract_dependencies(self, preindexer):
         deps = preindexer.dependencies
         assert len(deps) >= 2
 
-    def test_find_symbol(self, preindexer):
+    @pytest.mark.asyncio
+    async def test_find_symbol(self, preindexer):
         found = preindexer.find_symbol("hello")
         assert len(found) >= 1
         assert found[0].symbol_type == "function"
 
-    def test_build_dependency_graph(self, preindexer):
+    @pytest.mark.asyncio
+    async def test_build_dependency_graph(self, preindexer):
         dep_graph = preindexer.build_dependency_graph()
         assert "dependencies" in dep_graph
         assert "dependents" in dep_graph
 
-    def test_to_graph(self, preindexer, empty_graph):
-        kg = preindexer.to_graph(empty_graph)
+    @pytest.mark.asyncio
+    async def test_to_graph(self, preindexer, empty_graph):
+        kg = await preindexer.to_graph(empty_graph)
         assert kg.node_count > 0
 
-    def test_index_directory(self):
-        idx = PreIndexer("/tmp").index_directory(exclude_dirs=frozenset({"__pycache__"}))
+    @pytest.mark.asyncio
+    async def test_index_directory(self):
+        idx = await PreIndexer("/tmp").index_directory(exclude_dirs=frozenset({"__pycache__"}))
         assert idx.indexed_files_count >= 0
 
-    def test_index_nonexistent_file(self):
+    @pytest.mark.asyncio
+    async def test_index_nonexistent_file(self):
         idx = PreIndexer("/tmp")
         with pytest.raises(IndexingError):
-            idx.index_file("/nonexistent/file.py")
+            await idx.index_file("/nonexistent/file.py")
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -796,7 +808,6 @@ class TestDreamCycle:
         assert result.edge_count >= dream._graph.edge_count
 
     def test_consolidate_communities(self, dream):
-        from lyra_knowledge_graph.community_detector import Community
         comms = [
             Community(
                 community_id="c1",
@@ -838,67 +849,315 @@ class TestMCPServer:
     def server(self, sample_graph) -> KnowledgeGraphMCPServer:
         return KnowledgeGraphMCPServer(sample_graph)
 
-    def test_query_graph(self, server):
-        results = server.query_graph("Python")
+    @pytest.mark.asyncio
+    async def test_query_graph(self, server):
+        results = await server.query_graph("Python")
         assert len(results) >= 1
         assert results[0]["node_id"] == "n1"
 
-    def test_query_graph_limit(self, server):
-        results = server.query_graph("a", max_results=2)
+    @pytest.mark.asyncio
+    async def test_query_graph_limit(self, server):
+        results = await server.query_graph("a", max_results=2)
         assert len(results) <= 2
 
-    def test_query_graph_by_type(self, server):
-        results = server.query_graph("", node_type="source")
+    @pytest.mark.asyncio
+    async def test_query_graph_by_type(self, server):
+        results = await server.query_graph("", node_type="source")
         assert all(r["node_type"] == "source" for r in results)
 
-    def test_get_node_found(self, server):
-        node = server.get_node("n1")
+    @pytest.mark.asyncio
+    async def test_get_node_found(self, server):
+        node = await server.get_node("n1")
         assert node is not None
         assert node["label"] == "Python"
 
-    def test_get_node_not_found(self, server):
-        node = server.get_node("nonexistent")
+    @pytest.mark.asyncio
+    async def test_get_node_not_found(self, server):
+        node = await server.get_node("nonexistent")
         assert node is None
 
-    def test_get_neighbors(self, server):
-        neighbors = server.get_neighbors("n1")
+    @pytest.mark.asyncio
+    async def test_get_neighbors(self, server):
+        neighbors = await server.get_neighbors("n1")
         assert len(neighbors) >= 1
 
-    def test_get_neighbors_nonexistent(self, server):
-        neighbors = server.get_neighbors("nonexistent")
+    @pytest.mark.asyncio
+    async def test_get_neighbors_nonexistent(self, server):
+        neighbors = await server.get_neighbors("nonexistent")
         assert len(neighbors) == 0
 
-    def test_shortest_path_found(self, server):
-        path = server.shortest_path("n4", "n3")
+    @pytest.mark.asyncio
+    async def test_shortest_path_found(self, server):
+        path = await server.shortest_path("n4", "n3")
         assert path is not None
         assert path["length"] > 1
 
-    def test_shortest_path_nonexistent(self, server):
-        path = server.shortest_path("n4", "nonexistent")
+    @pytest.mark.asyncio
+    async def test_shortest_path_nonexistent(self, server):
+        path = await server.shortest_path("n4", "nonexistent")
         assert path is None
 
-    def test_get_community(self, server):
-        result = server.get_community("n1")
+    @pytest.mark.asyncio
+    async def test_get_community(self, server):
+        result = await server.get_community("n1")
         assert result is not None
         assert result["node_id"] == "n1"
 
-    def test_graph_summary(self, server):
-        s = server.graph_summary()
+    @pytest.mark.asyncio
+    async def test_graph_summary(self, server):
+        s = await server.graph_summary()
         assert s["node_count"] == 5
 
-    def test_get_nodes_batch(self, server):
-        nodes = server.get_nodes_batch(["n1", "n2", "nonexistent"])
+    @pytest.mark.asyncio
+    async def test_get_nodes_batch(self, server):
+        nodes = await server.get_nodes_batch(["n1", "n2", "nonexistent"])
         assert len(nodes) == 2
 
-    def test_get_subgraph(self, server):
-        sub = server.get_subgraph(["n1"], depth=1)
+    @pytest.mark.asyncio
+    async def test_get_subgraph(self, server):
+        sub = await server.get_subgraph(["n1"], depth=1)
         assert "nodes" in sub
         assert "edges" in sub
 
-    def test_graph_query(self, server):
-        results = server.graph_query("Python")
+    @pytest.mark.asyncio
+    async def test_graph_query(self, server):
+        results = await server.graph_query("Python")
         assert len(results) >= 1
         assert "_search_score" in results[0]
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# GraphBuilder (new spec API)
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestGraphBuilder:
+    @pytest.mark.asyncio
+    async def test_add_node(self):
+        gb = GraphBuilder()
+        gb = await gb.add_node("n1", "Python", NodeType.CONCEPT)
+        assert gb.node_count == 1
+
+    @pytest.mark.asyncio
+    async def test_add_edge(self):
+        gb = GraphBuilder()
+        gb = await gb.add_node("a", "Node A", NodeType.CONCEPT)
+        gb = await gb.add_node("b", "Node B", NodeType.CONCEPT)
+        gb = await gb.add_edge("a", "b", EdgeRelation.SUPPORTS, 0.9)
+        assert gb.edge_count == 1
+
+    @pytest.mark.asyncio
+    async def test_query_nodes(self):
+        gb = GraphBuilder()
+        gb = await gb.add_node("n1", "Python", NodeType.CONCEPT)
+        nodes = await gb.query_nodes(label="Python")
+        assert len(nodes) == 1
+
+    @pytest.mark.asyncio
+    async def test_get_neighbors(self):
+        gb = GraphBuilder()
+        gb = await gb.add_node("a", "A", NodeType.CONCEPT)
+        gb = await gb.add_node("b", "B", NodeType.CONCEPT)
+        gb = await gb.add_edge("a", "b", EdgeRelation.RELATES_TO)
+        neighbors = await gb.get_neighbors("a")
+        assert len(neighbors) == 1
+
+    @pytest.mark.asyncio
+    async def test_merge_graphs(self):
+        gb1 = GraphBuilder()
+        gb1 = await gb1.add_node("a", "A", NodeType.CONCEPT)
+        gb2 = GraphBuilder()
+        gb2 = await gb2.add_node("b", "B", NodeType.CONCEPT)
+        merged = await gb1.merge_graphs(gb2)
+        assert merged.node_count == 2
+
+    @pytest.mark.asyncio
+    async def test_build_from_text(self):
+        gb = GraphBuilder()
+        gb = await gb.build_from_text("hello_world() uses https://example.com")
+        assert gb.node_count >= 1
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Entity Extractor (new spec methods)
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestEntityExtractorNew:
+    @pytest.fixture
+    def extractor(self) -> EntityExtractor:
+        return EntityExtractor()
+
+    @pytest.mark.asyncio
+    async def test_extract_entities(self, extractor):
+        entities = await extractor.extract_entities(
+            "Python is great and Kubernetes scales."
+        )
+        names = [e[0].lower() for e in entities]
+        assert "python" in names
+        assert all(isinstance(e[2], float) for e in entities)
+
+    @pytest.mark.asyncio
+    async def test_extract_code_symbols_python(self, extractor):
+        symbols = await extractor.extract_code_symbols(
+            "def hello():\n    pass\n\nclass MyClass:\n    pass",
+            "python",
+        )
+        names = [s[0] for s in symbols]
+        assert "hello" in names
+        assert "MyClass" in names
+
+    @pytest.mark.asyncio
+    async def test_extract_relations(self, extractor):
+        relations = await extractor.extract_relations(
+            "Alice supports Bob. Charlie refutes Dave."
+        )
+        assert len(relations) >= 2
+        assert any(r[1] == "supports" for r in relations)
+        assert any(r[1] == "refutes" for r in relations)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# RelationConfidence
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestRelationConfidence:
+    def test_enum_values(self):
+        assert RelationConfidence.EXTRACTED.value == "extracted"
+        assert RelationConfidence.INFERRED.value == "inferred"
+        assert RelationConfidence.AMBIGUOUS.value == "ambiguous"
+
+    @pytest.mark.asyncio
+    async def test_label_relation(self):
+        labeler = RelationLabeler()
+        result = await labeler.label_relation(
+            "Alice", "supports", "Bob", "Alice confirms Bob's theory"
+        )
+        subj, rel, obj, conf = result
+        assert subj == "Alice"
+        assert isinstance(conf, RelationConfidence)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# CommunityDetector dict-based API
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestCommunityDetectorDictAPI:
+    @pytest.mark.asyncio
+    async def test_detect_communities_from_dicts(self, sample_graph):
+        detector = CommunityDetector()
+        communities = await detector.detect_communities(
+            sample_graph.nodes, sample_graph.edges
+        )
+        assert isinstance(communities, tuple)
+        assert len(communities) >= 1
+        assert all(isinstance(c, Community) for c in communities)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# NavigationEngine find_path
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestNavigationEngineFindPath:
+    @pytest.mark.asyncio
+    async def test_find_path(self, sample_graph):
+        engine = NavigationEngine(sample_graph)
+        path = await engine.find_path("n4", "n3")
+        assert path is not None
+        assert path.length > 1
+
+    @pytest.mark.asyncio
+    async def test_find_path_same_node(self, sample_graph):
+        engine = NavigationEngine(sample_graph)
+        path = await engine.find_path("n1", "n1")
+        assert path is not None
+        assert path.length == 1
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# InverseSearch (new spec class)
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestInverseSearchNew:
+    @pytest.mark.asyncio
+    async def test_search_backward(self, sample_graph):
+        searcher = InverseSearch(sample_graph)
+        paths = await searcher.search_backward("n3", sample_graph)
+        assert isinstance(paths, list)
+
+    @pytest.mark.asyncio
+    async def test_rank_hypotheses(self, sample_graph):
+        searcher = InverseSearch(sample_graph)
+        scores = await searcher.rank_hypotheses("n3", ["n1", "n5"])
+        assert len(scores) == 2
+        for s in scores:
+            assert isinstance(s, HypothesisScore)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# RRFFusion (new spec class)
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestRRFFusionNew:
+    @pytest.mark.asyncio
+    async def test_fuse_results(self):
+        fusor = RRFFusion(k=60)
+        vec = [{"id": "a", "score": 1.0}, {"id": "b", "score": 0.8}]
+        bm25 = [{"id": "b", "score": 0.9}, {"id": "a", "score": 0.7}]
+        results = await fusor.fuse_results(vec, bm25, k=60)
+        assert len(results) >= 1
+        assert isinstance(results[0], FusionResult)
+
+    @pytest.mark.asyncio
+    async def test_fuse_results_empty(self):
+        fusor = RRFFusion()
+        results = await fusor.fuse_results([], [], k=60)
+        assert len(results) == 0
+
+    def test_k_invalid(self):
+        with pytest.raises(ValueError):
+            RRFFusion(k=0)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# KGDreamCycle (new spec class)
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestKGDreamCycle:
+    @pytest.mark.asyncio
+    async def test_dream(self, sample_graph):
+        kg_dream = KGDreamCycle(sample_graph)
+        report = await kg_dream.dream()
+        assert "cross_links_added" in report
+        assert "gaps_found" in report
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# PreIndexer stats
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestPreIndexerStats:
+    @pytest.mark.asyncio
+    async def test_stats_properties(self, sample_graph):
+        import tempfile
+        import os
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".py", delete=False, encoding="utf-8"
+        ) as f:
+            f.write("def foo(): pass\nclass Bar: pass\n")
+            fname = f.name
+        idx = PreIndexer(os.path.dirname(fname))
+        idx = await idx.index_file(fname)
+        assert idx.files_processed == 1
+        assert idx.symbols_found >= 2
+        os.unlink(fname)
 
 
 # ═══════════════════════════════════════════════════════════════════════════

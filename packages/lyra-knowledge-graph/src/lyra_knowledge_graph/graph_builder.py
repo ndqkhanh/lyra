@@ -7,8 +7,9 @@ graph mutation, querying, serialization, and merging.
 from __future__ import annotations
 
 import json
+import re
 from collections import defaultdict
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
@@ -351,3 +352,174 @@ class KnowledgeGraph:
             "nodes_by_type": dict(type_counts),
             "edges_by_relation": dict(relation_counts),
         }
+
+
+class GraphBuilder:
+    """Dynamic knowledge graph construction during research.
+
+    Wraps KnowledgeGraph with a simplified async builder API for node/edge
+    management, graph merging, and text-based graph construction.
+    Nodes have: node_id, label, node_type, properties, confidence.
+    Edges have: source_id, target_id, relation, confidence.
+    """
+
+    def __init__(self) -> None:
+        self._graph = KnowledgeGraph()
+
+    # ── Properties ────────────────────────────────────────────────────────────
+
+    @property
+    def nodes(self) -> dict[str, KnowledgeNode]:
+        return dict(self._graph.nodes)
+
+    @property
+    def edges(self) -> list[KnowledgeEdge]:
+        return list(self._graph.edges)
+
+    @property
+    def node_count(self) -> int:
+        return self._graph.node_count
+
+    @property
+    def edge_count(self) -> int:
+        return self._graph.edge_count
+
+    # ── Mutators ──────────────────────────────────────────────────────────────
+
+    async def add_node(
+        self,
+        node_id: str,
+        label: str,
+        node_type: NodeType = NodeType.CONCEPT,
+        properties: dict[str, Any] | None = None,
+        confidence: float = 1.0,
+    ) -> GraphBuilder:
+        """Add a node to the graph. Returns self for chaining."""
+        node = KnowledgeNode(
+            node_id=node_id,
+            node_type=node_type,
+            label=label,
+            properties=properties or {},
+            confidence=confidence,
+        )
+        self._graph = self._graph.add_node(node)
+        return self
+
+    async def add_edge(
+        self,
+        source_id: str,
+        target_id: str,
+        relation: EdgeRelation = EdgeRelation.RELATES_TO,
+        confidence: float = 1.0,
+    ) -> GraphBuilder:
+        """Add an edge to the graph. Returns self for chaining."""
+        edge_id = f"{source_id}->{target_id}"
+        edge = KnowledgeEdge(
+            edge_id=edge_id,
+            source_id=source_id,
+            target_id=target_id,
+            relation=relation,
+            confidence=confidence,
+        )
+        self._graph = self._graph.add_edge(edge)
+        return self
+
+    # ── Query ─────────────────────────────────────────────────────────────────
+
+    async def query_nodes(
+        self,
+        node_type: NodeType | None = None,
+        label: str | None = None,
+        min_confidence: float = 0.0,
+    ) -> list[KnowledgeNode]:
+        """Query nodes by optional type, label substring, and confidence."""
+        return self._graph.query(
+            node_type=node_type, label_contains=label, min_confidence=min_confidence
+        )
+
+    async def get_neighbors(self, node_id: str) -> list[KnowledgeNode]:
+        """Get all nodes directly connected to a given node."""
+        return self._graph.get_neighbors(node_id)
+
+    # ── Merge ─────────────────────────────────────────────────────────────────
+
+    async def merge_graphs(self, other: GraphBuilder) -> GraphBuilder:
+        """Merge another GraphBuilder's graph into this one."""
+        result = GraphBuilder()
+        result._graph = self._graph.merge_graphs(other._graph)
+        return result
+
+    # ── Text-Based Construction ────────────────────────────────────────────────
+
+    async def build_from_text(self, text: str) -> GraphBuilder:
+        """Extract entities and relations from text and add them as nodes/edges.
+
+        Uses regex-based extraction for file paths, function names, class names,
+        URLs, and common noun phrases.
+        """
+        if not text.strip():
+            return self
+
+        ent_id = 0
+
+        for match in re.finditer(
+            r'\b[\w./\\]+\.(?:py|ts|js|rs|go|java|cpp|h)\b', text
+        ):
+            path = match.group(0)
+            ent_id += 1
+            node = KnowledgeNode(
+                node_id=f"file:{ent_id}",
+                node_type=NodeType.SOURCE,
+                label=path.split("/")[-1],
+                properties={"path": path},
+            )
+            self._graph = self._graph.add_node(node)
+
+        for match in re.finditer(r'\b([a-zA-Z_]\w*)\s*\(', text):
+            name = match.group(1)
+            if name.lower() in {
+                "if", "for", "while", "def", "class", "return", "import",
+                "from", "with", "as", "in", "not", "and", "or", "is",
+                "async", "await", "yield", "raise", "try", "except",
+                "finally", "else", "elif", "pass", "break", "continue",
+            }:
+                continue
+            ent_id += 1
+            node = KnowledgeNode(
+                node_id=f"func:{ent_id}",
+                node_type=NodeType.CONCEPT,
+                label=name,
+                properties={"kind": "function"},
+            )
+            self._graph = self._graph.add_node(node)
+
+        for match in re.finditer(
+            r'\b[A-Z][a-zA-Z0-9]*(?:Error|Exception|Manager|Builder'
+            r'|Factory|Service|Controller|Handler)\b',
+            text,
+        ):
+            name = match.group(0)
+            ent_id += 1
+            ntype = NodeType.CONCEPT
+            if "Error" in name or "Exception" in name:
+                ntype = NodeType.CLAIM
+            node = KnowledgeNode(
+                node_id=f"class:{ent_id}",
+                node_type=ntype,
+                label=name,
+                properties={"kind": "class"},
+            )
+            self._graph = self._graph.add_node(node)
+
+        for match in re.finditer(r'https?://[^\s,)]+', text):
+            url = match.group(0)
+            ent_id += 1
+            node = KnowledgeNode(
+                node_id=f"url:{ent_id}",
+                node_type=NodeType.SOURCE,
+                label=url,
+                properties={"url": url},
+            )
+            self._graph = self._graph.add_node(node)
+
+        return self

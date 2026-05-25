@@ -325,3 +325,21 @@ class DreamCycle:
             return 0.2
         jaccard = len(shared) / len(all_nbrs)
         return min(threshold + jaccard * 0.5, 1.0)
+
+
+class KGDreamCycle:
+    """Overnight KG enrichment — cross-links entities, fills gaps, merges similar nodes.
+
+    Wraps DreamCycle to provide the specified dream() API for batch
+    enrichment during idle periods.
+    """
+
+    def __init__(self, graph: Any) -> None:
+        self._cycle = DreamCycle(graph)
+
+    async def dream(self) -> dict[str, Any]:
+        """Run a full enrichment cycle: cross-link, gap-fill, relation enrich.
+
+        Returns a report of all enrichment actions.
+        """
+        return self._cycle.run_full_cycle()

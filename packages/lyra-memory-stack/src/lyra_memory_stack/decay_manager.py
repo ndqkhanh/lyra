@@ -1,253 +1,152 @@
-"""TTL-based decay, staleness scoring, contradiction detection, and pruning.
+"""Decay manager — TTL, decay curves, and contradiction detection.
 
-Manages configurable half-life per memory type, scans for contradictions
-between stored facts, computes staleness scores, and automatically prunes
-expired or contradictory entries.
+Manages memory decay with configurable curves, age-based priority
+reduction, and automatic contradiction scanning.
 """
 
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
-from enum import Enum
-from typing import Any
+from dataclasses import dataclass
 
-from lyra_memory_stack.exceptions import DecayError
-from lyra_memory_stack.privacy_tiers import PrivacyTier
-
-
-class MemoryType(Enum):
-    """Types of memory subject to decay policies."""
-
-    EPISODIC = "episodic"
-    SEMANTIC = "semantic"
-    PROCEDURAL = "procedural"
-    WORKING = "working"
+import numpy as np
 
 
 @dataclass(frozen=True)
-class DecayPolicy:
-    """Decay configuration for a memory type."""
+class DecayConfig:
+    """Configuration for decay behavior.
 
-    memory_type: MemoryType
-    half_life_hours: float
-    max_staleness_score: float = 0.95
-    pruning_threshold: float = 0.90
-    soft_prune: bool = True
+    Attributes:
+        half_life: Seconds until priority halves.
+        min_priority: Priority floor; entries below this are evicted.
+        contradiction_threshold: Cosine similarity below which entries
+            are flagged as contradictory.
+        scan_interval: Seconds between contradiction scans.
+    """
 
-
-DEFAULT_DECAY_POLICIES: dict[MemoryType, DecayPolicy] = {
-    MemoryType.EPISODIC: DecayPolicy(
-        memory_type=MemoryType.EPISODIC,
-        half_life_hours=720.0,  # 30 days
-        max_staleness_score=0.95,
-        pruning_threshold=0.90,
-        soft_prune=True,
-    ),
-    MemoryType.SEMANTIC: DecayPolicy(
-        memory_type=MemoryType.SEMANTIC,
-        half_life_hours=2160.0,  # 90 days
-        max_staleness_score=0.95,
-        pruning_threshold=0.90,
-        soft_prune=True,
-    ),
-    MemoryType.PROCEDURAL: DecayPolicy(
-        memory_type=MemoryType.PROCEDURAL,
-        half_life_hours=4320.0,  # 180 days
-        max_staleness_score=0.95,
-        pruning_threshold=0.90,
-        soft_prune=True,
-    ),
-    MemoryType.WORKING: DecayPolicy(
-        memory_type=MemoryType.WORKING,
-        half_life_hours=1.0,  # 1 hour
-        max_staleness_score=0.95,
-        pruning_threshold=0.90,
-        soft_prune=False,
-    ),
-}
+    half_life: float = 86400.0
+    min_priority: float = 0.1
+    contradiction_threshold: float = -0.3
+    scan_interval: float = 3600.0
 
 
 @dataclass(frozen=True)
-class MemoryEntry:
-    """A memory entry with metadata for decay tracking."""
+class DecayEntry:
+    """An entry tracked for decay.
+
+    Attributes:
+        entry_id: Reference to the memory entry.
+        initial_priority: Starting priority value.
+        current_priority: Current decayed priority.
+        embedding: Optional embedding for contradiction detection.
+        content: Text content for contradiction scanning.
+        created_at: Unix timestamp.
+    """
 
     entry_id: str
-    memory_type: MemoryType
+    initial_priority: float
+    current_priority: float
+    embedding: np.ndarray | None
     content: str
-    timestamp: float = field(default_factory=time.time)
-    last_accessed: float = field(default_factory=time.time)
-    access_count: int = 0
-    tier: PrivacyTier = PrivacyTier.PRIVATE
-    tags: tuple[str, ...] = ()
-
-
-@dataclass(frozen=True)
-class Contradiction:
-    """Represents a detected contradiction between two memory entries."""
-
-    entry_a_id: str
-    entry_b_id: str
-    reason: str
-    severity: float  # 0.0 (weak) to 1.0 (strong contradiction)
-    detected_at: float = field(default_factory=time.time)
+    created_at: float
 
 
 class DecayManager:
-    """Manages TTL-based decay, staleness, contradictions, and pruning."""
+    """Manages priority decay and contradiction detection.
 
-    _policies: dict[MemoryType, DecayPolicy]
-    _entries: dict[str, MemoryEntry]
-    _contradictions: list[Contradiction]
+    Priorities decay exponentially with a configurable half-life.
+    Contradiction scanning detects semantically opposed facts.
+    """
 
-    def __init__(
+    def __init__(self, config: DecayConfig | None = None) -> None:
+        self._config = config or DecayConfig()
+        self._entries: dict[str, DecayEntry] = {}
+
+    @property
+    def config(self) -> DecayConfig:
+        return self._config
+
+    async def register(
         self,
-        policies: dict[MemoryType, DecayPolicy] | None = None,
+        entry_id: str,
+        priority: float,
+        content: str,
+        embedding: np.ndarray | None = None,
     ) -> None:
-        self._policies = dict(policies) if policies else dict(DEFAULT_DECAY_POLICIES)
-        self._entries = {}
-        self._contradictions = []
-
-    def register_entry(self, entry: MemoryEntry) -> None:
-        """Register a memory entry for decay tracking."""
-        self._entries[entry.entry_id] = entry
-
-    def unregister_entry(self, entry_id: str) -> None:
-        """Remove an entry from tracking."""
-        self._entries.pop(entry_id, None)
-        self._contradictions = [
-            c for c in self._contradictions
-            if c.entry_a_id != entry_id and c.entry_b_id != entry_id
-        ]
-
-    def get_policy(self, memory_type: MemoryType) -> DecayPolicy:
-        """Get the decay policy for a memory type."""
-        return self._policies.get(memory_type, DEFAULT_DECAY_POLICIES[memory_type])
-
-    def set_policy(self, memory_type: MemoryType, policy: DecayPolicy) -> None:
-        """Override the decay policy for a memory type."""
-        self._policies[memory_type] = policy
-
-    def compute_staleness(self, entry_id: str) -> float:
-        """Compute staleness score [0.0, 1.0] for a memory entry.
-
-        Uses exponential decay based on half-life and access recency.
-        """
-        entry = self._entries.get(entry_id)
-        if entry is None:
-            raise DecayError(f"Entry '{entry_id}' not found for staleness computation")
-
-        policy = self.get_policy(entry.memory_type)
-        now = time.time()
-        hours_since_access = (now - entry.last_accessed) / 3600.0
-        decay_factor = 0.5 ** (hours_since_access / policy.half_life_hours)
-        staleness = 1.0 - decay_factor
-
-        # Boost staleness for infrequently accessed items
-        if entry.access_count < 2:
-            staleness = min(1.0, staleness * 1.2)
-
-        return min(1.0, max(0.0, staleness))
-
-    def compute_all_staleness(self) -> dict[str, float]:
-        """Compute staleness scores for all registered entries."""
-        return {
-            eid: self.compute_staleness(eid)
-            for eid in self._entries
-        }
-
-    def record_access(self, entry_id: str) -> None:
-        """Record an access event for an entry, reducing its staleness."""
-        entry = self._entries.get(entry_id)
-        if entry is None:
-            raise DecayError(f"Entry '{entry_id}' not found for access recording")
-        self._entries[entry_id] = MemoryEntry(
-            entry_id=entry.entry_id,
-            memory_type=entry.memory_type,
-            content=entry.content,
-            timestamp=entry.timestamp,
-            last_accessed=time.time(),
-            access_count=entry.access_count + 1,
-            tier=entry.tier,
-            tags=entry.tags,
+        """Register an entry for decay tracking."""
+        entry = DecayEntry(
+            entry_id=entry_id,
+            initial_priority=priority,
+            current_priority=priority,
+            embedding=embedding,
+            content=content,
+            created_at=time.time(),
         )
+        self._entries[entry_id] = entry
 
-    def entries_needing_pruning(self, soft: bool | None = None) -> list[MemoryEntry]:
-        """Return entries whose staleness exceeds the pruning threshold."""
-        results: list[MemoryEntry] = []
-        for entry in self._entries.values():
-            policy = self.get_policy(entry.memory_type)
-            if soft is not None and policy.soft_prune != soft:
-                continue
-            staleness = self.compute_staleness(entry.entry_id)
-            if staleness >= policy.pruning_threshold:
-                results.append(entry)
-        return results
+    async def get_priority(self, entry_id: str) -> float:
+        """Get the current decayed priority for an entry.
 
-    def prune_expired(self) -> list[str]:
-        """Prune entries past their pruning threshold. Returns pruned IDs."""
-        to_prune = self.entries_needing_pruning()
-        pruned: list[str] = []
-        for entry in to_prune:
-            self._entries.pop(entry.entry_id, None)
-            pruned.append(entry.entry_id)
-        # Clean up contradictions referencing pruned entries
-        self._contradictions = [
-            c for c in self._contradictions
-            if c.entry_a_id in self._entries and c.entry_b_id in self._entries
-        ]
-        return pruned
-
-    def detect_contradictions(
-        self,
-        entry_pairs: list[tuple[str, str, str]],
-    ) -> list[Contradiction]:
-        """Detect contradictions between pairs of entries.
-
-        Args:
-            entry_pairs: List of (entry_a_id, entry_b_id, reason) tuples.
+        Applies exponential decay based on age and half-life config.
         """
-        contradictions: list[Contradiction] = []
-        for a_id, b_id, reason in entry_pairs:
-            if a_id not in self._entries or b_id not in self._entries:
+        if entry_id not in self._entries:
+            raise KeyError(f"Entry not found: {entry_id}")
+
+        entry = self._entries[entry_id]
+        age = time.time() - entry.created_at
+        decay_factor = np.exp(-np.log(2) * age / self._config.half_life)
+        current = entry.initial_priority * decay_factor
+        return current
+
+    async def find_contradictions(
+        self, query_embedding: np.ndarray, threshold: float | None = None
+    ) -> tuple[DecayEntry, ...]:
+        """Find entries that contradict the query embedding.
+
+        Uses cosine similarity — negative similarity suggests contradiction.
+        """
+        thresh = threshold or self._config.contradiction_threshold
+        query_norm = query_embedding / (np.linalg.norm(query_embedding) + 1e-10)
+
+        contradictions = []
+        for entry in self._entries.values():
+            if entry.embedding is None:
                 continue
-            contradiction = Contradiction(
-                entry_a_id=a_id,
-                entry_b_id=b_id,
-                reason=reason,
-                severity=0.8,
-            )
-            contradictions.append(contradiction)
-            self._contradictions.append(contradiction)
-        return contradictions
+            entry_norm = entry.embedding / (np.linalg.norm(entry.embedding) + 1e-10)
+            similarity = float(np.dot(query_norm, entry_norm))
+            if similarity < thresh:
+                contradictions.append(entry)
 
-    def get_contradictions(self, entry_id: str) -> list[Contradiction]:
-        """Get all contradictions involving a given entry."""
-        return [
-            c for c in self._contradictions
-            if c.entry_a_id == entry_id or c.entry_b_id == entry_id
-        ]
+        return tuple(contradictions)
 
-    def clear_contradictions(self) -> None:
-        """Clear all stored contradictions."""
-        self._contradictions.clear()
+    async def evict_decayed(self) -> tuple[str, ...]:
+        """Remove entries that have decayed below the minimum priority.
+
+        Returns:
+            IDs of evicted entries.
+        """
+        evicted = []
+        for entry_id in list(self._entries.keys()):
+            priority = await self.get_priority(entry_id)
+            if priority < self._config.min_priority:
+                del self._entries[entry_id]
+                evicted.append(entry_id)
+        return tuple(evicted)
+
+    async def boost_priority(self, entry_id: str, factor: float = 1.5) -> None:
+        """Boost an entry's priority (e.g., after successful retrieval)."""
+        if entry_id not in self._entries:
+            raise KeyError(f"Entry not found: {entry_id}")
+        entry = self._entries[entry_id]
+        self._entries[entry_id] = DecayEntry(
+            entry_id=entry.entry_id,
+            initial_priority=entry.initial_priority * factor,
+            current_priority=entry.current_priority * factor,
+            embedding=entry.embedding,
+            content=entry.content,
+            created_at=entry.created_at,
+        )
 
     @property
     def entry_count(self) -> int:
-        """Number of registered entries."""
         return len(self._entries)
-
-    @property
-    def contradiction_count(self) -> int:
-        """Number of detected contradictions."""
-        return len(self._contradictions)
-
-    def summary(self) -> dict[str, Any]:
-        """Produce a summary of the decay manager state."""
-        staleness = self.compute_all_staleness()
-        return {
-            "total_entries": self.entry_count,
-            "total_contradictions": self.contradiction_count,
-            "entries_needing_pruning": len(self.entries_needing_pruning()),
-            "average_staleness": sum(staleness.values()) / len(staleness) if staleness else 0.0,
-        }

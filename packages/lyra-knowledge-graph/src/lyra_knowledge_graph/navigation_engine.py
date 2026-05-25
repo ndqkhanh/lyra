@@ -198,6 +198,12 @@ class NavigationEngine:
             "edges": sub_edges,
         }
 
+    # ── Path Finding (spec API) ────────────────────────────────────────────
+
+    async def find_path(self, source_id: str, target_id: str) -> TraversalPath | None:
+        """Find shortest path between two nodes using BFS."""
+        return self.get_path(source_id, target_id)
+
     # ── Traversal ──────────────────────────────────────────────────────────
 
     def traverse(self, start_id: str,

@@ -2,116 +2,46 @@
 
 Routes agent tasks to optimal LLM models based on capability scoring, cost constraints,
 cross-model verification, and tool-usage gap detection. Supports tier-based routing with
-budget tracking, usage analytics, and hot-reloadable configuration.
+budget tracking, usage analytics, and configurable model registry.
 """
 
 from __future__ import annotations
 
-from .capability_analyzer import (
-    CapabilityAnalyzer,
-    ComplexityLevel,
-    DomainType,
-    LatencySensitivity,
-    MatchScore,
-    ModelCapability,
-    TaskProfile,
-)
+from .capability_analyzer import CapabilityAnalyzer, TaskRequirements
 
-from .cost_optimizer import (
-    BudgetLimits,
-    BudgetTracker,
-    CostOptimizer,
-    CostTier,
-)
+from .cost_optimizer import BudgetLimit, CostOptimizer
 
-from .knowing_doing_gap import (
-    GapRecommendation,
-    KnowingDoingGapDetector,
-    ToolCategory,
-    ToolNecessitySignal,
-)
+from .cross_model_verifier import CrossModelVerifier, VerificationResult
 
-from .cross_model_verifier import (
-    CrossModelVerifier,
-    ModelFamily,
-    ValidationResult,
-)
+from .exceptions import ModelRouterError
 
-from .router_config import (
-    FallbackRule,
-    HealthStatus,
-    ModelRegistryEntry,
-    PolicyType,
-    RouterConfig,
-    RoutingPolicy,
-)
+from .knowing_doing_gap import GapReport, KnowingDoingGapDetector
 
-from .router import (
-    ModelRouter,
-    ModelSelection,
-    RouterPipeline,
-)
+from .router_config import ModelCapability, RouterConfig, default_config
 
-from .usage_tracker import (
-    BudgetAlert,
-    UsageRecord,
-    UsageStats,
-    UsageTracker,
-)
-
-from .exceptions import (
-    BudgetExceededError,
-    CapabilityMismatchError,
-    ModelNotFoundError,
-    RouterError,
-    RoutingError,
-    VerificationError,
-)
+from .usage_tracker import UsageRecord, UsageStats, UsageTracker
 
 __all__ = [
     # Capability Analyzer
-    "TaskProfile",
-    "ModelCapability",
-    "MatchScore",
-    "ComplexityLevel",
-    "DomainType",
-    "LatencySensitivity",
+    "TaskRequirements",
     "CapabilityAnalyzer",
     # Cost Optimizer
-    "CostTier",
-    "BudgetLimits",
-    "BudgetTracker",
+    "BudgetLimit",
     "CostOptimizer",
-    # Knowing-Doing Gap
-    "ToolCategory",
-    "ToolNecessitySignal",
-    "GapRecommendation",
-    "KnowingDoingGapDetector",
     # Cross-Model Verifier
-    "ModelFamily",
-    "ValidationResult",
+    "VerificationResult",
     "CrossModelVerifier",
+    # Exceptions
+    "ModelRouterError",
+    # Knowing-Doing Gap
+    "GapReport",
+    "KnowingDoingGapDetector",
     # Router Config
-    "PolicyType",
+    "ModelCapability",
     "RouterConfig",
-    "RoutingPolicy",
-    "FallbackRule",
-    "ModelRegistryEntry",
-    "HealthStatus",
-    # Router
-    "ModelSelection",
-    "RouterPipeline",
-    "ModelRouter",
+    "default_config",
     # Usage Tracker
     "UsageRecord",
     "UsageStats",
-    "BudgetAlert",
     "UsageTracker",
-    # Exceptions
-    "RouterError",
-    "ModelNotFoundError",
-    "BudgetExceededError",
-    "VerificationError",
-    "CapabilityMismatchError",
-    "RoutingError",
 ]
