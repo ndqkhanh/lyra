@@ -25,6 +25,12 @@ from .fitness import (
     ParetoError,
     ParetoFrontier,
 )
+from .harness_opt import (
+    CodeCandidate,
+    HarnessComponent,
+    MetaHarnessOptimizer,
+    OptimizationResult,
+)
 from .genetic_optimizer import (
     CrossoverError,
     CrossoverOperator,
@@ -158,4 +164,9 @@ __all__ = [
     "CycleInProgressError",
     "IntegrationError",
     "OrchestratorRollbackError",
+    # ── Phase 13.4: Meta-Harness Optimizer ────────────────────────────
+    "HarnessComponent",
+    "CodeCandidate",
+    "OptimizationResult",
+    "MetaHarnessOptimizer",
 ]
