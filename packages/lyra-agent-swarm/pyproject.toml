@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lyra-agent-swarm"
+version = "0.1.0"
+description = "Multi-agent orchestration framework with discipline roles, Shapley-value team formation, sprint workflows, and consensus building"
+requires-python = ">=3.11"
+dependencies = ["numpy>=1.26"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-cov>=5.0", "pytest-asyncio>=0.25"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
