@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lyra-recursive-link"
+version = "0.1.0"
+description = "RecursiveMAS-style latent-space inter-agent communication — Package 2.3 of Phase 2: Reasoning Engine"
+requires-python = ">=3.11"
+dependencies = ["numpy>=1.26"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-cov>=5.0", "pytest-asyncio>=0.25"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
