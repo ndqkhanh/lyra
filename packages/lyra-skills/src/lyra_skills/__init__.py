@@ -38,6 +38,22 @@ from .ledger import (
 from .loader import SkillLoaderError, SkillManifest, load_skills
 from .packs import shipped_pack_roots
 from .router import SkillRouter
+from .compaction import (
+    COMPRESSION_TARGET,
+    MERGE_SIMILARITY_THRESHOLD,
+    MIN_USES_TO_KEEP,
+    STALE_THRESHOLD_DAYS,
+    CompactionAction,
+    CompactionPlan,
+    CompactionReport,
+    MergeCandidate,
+    SectionStatus,
+    SectionTrimResult,
+    SectionUsage,
+    SectionUsageTracker,
+    SkillCompactor,
+    SkillUsageProfile,
+)
 
 __version__ = "0.1.0"
 
@@ -72,4 +88,19 @@ __all__ = [
     "save_ledger",
     "shipped_pack_roots",
     "utility_score",
+    # compaction
+    "COMPRESSION_TARGET",
+    "MERGE_SIMILARITY_THRESHOLD",
+    "MIN_USES_TO_KEEP",
+    "STALE_THRESHOLD_DAYS",
+    "CompactionAction",
+    "CompactionPlan",
+    "CompactionReport",
+    "MergeCandidate",
+    "SectionStatus",
+    "SectionTrimResult",
+    "SectionUsage",
+    "SectionUsageTracker",
+    "SkillCompactor",
+    "SkillUsageProfile",
 ]
