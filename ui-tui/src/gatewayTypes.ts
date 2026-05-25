@@ -566,6 +566,44 @@ export interface MemorySnapshotResponse {
   stats: MemoryStatsResponse
 }
 
+// ── Agent Fleet RPCs ────────────────────────────────────────────────
+
+export interface FleetStatusResponse {
+  active_agents: number
+  idle_agents: number
+  total_agents: number
+  pending_tasks: number
+  running_tasks: number
+  completed_tasks: number
+  failed_tasks: number
+  squads: number
+  throughput: number
+  state: string
+}
+
+export interface FleetAgent {
+  id: string
+  role: string
+  description: string
+  status: string
+  tools: string[]
+  task_count: number
+}
+
+export interface FleetSquad {
+  id: string
+  name: string
+  leader: string
+  members: string[]
+}
+
+export interface FleetSnapshotResponse {
+  fleet: FleetStatusResponse
+  agents: Record<string, { role: string; status: string; task_count: number; tools: string[] }>
+  squads: Record<string, { leader: string; members: string[]; task_count: number }>
+  task_ids: string[]
+}
+
 // ── Lyra-specific RPCs ───────────────────────────────────────────────
 
 export interface LyraStatsResponse {
