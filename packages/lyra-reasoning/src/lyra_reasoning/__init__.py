@@ -60,6 +60,24 @@ from .strategies import (
     TreeOfThoughts,
 )
 
+# SR2AM — Self-Regulated Simulative Planning
+from .sr2am import (
+    ExecutionTrace,
+    PlanNode,
+    PlanningConfig,
+    PlanningStats,
+    SR2AMPlanner,
+    SystemLevel,
+    TaskComplexity,
+)
+
+# Reasoning Graph — structured CoT persistence
+from .reasoning_graph import (
+    EvidenceNode,
+    ReasoningEdge,
+    ReasoningGraph,
+)
+
 __all__ = [
     # Legacy
     "DeepReasoningAgent",
@@ -92,4 +110,16 @@ __all__ = [
     "SelfConsistency",
     "StepBack",
     "AnalogicalReasoning",
+    # SR2AM
+    "ExecutionTrace",
+    "PlanNode",
+    "PlanningConfig",
+    "PlanningStats",
+    "SR2AMPlanner",
+    "SystemLevel",
+    "TaskComplexity",
+    # Reasoning Graph
+    "EvidenceNode",
+    "ReasoningEdge",
+    "ReasoningGraph",
 ]

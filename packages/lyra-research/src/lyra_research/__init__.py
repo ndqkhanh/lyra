@@ -143,6 +143,15 @@ from lyra_research.sibyl_harness import (
     SibylPipeline,
 )
 
+# Zero-Index Retrieval — direct corpus search without pre-built indexes
+from lyra_research.zero_index import (
+    ContextLevel,
+    SearchResult,
+    ZeroIndexConfig,
+    ZeroIndexRetriever,
+    CorpusStats,
+)
+
 __version__ = "0.2.0"
 
 __all__ = [
@@ -261,4 +270,10 @@ __all__ = [
     "TrialFailure",
     "ExperimentStatus",
     "SibylPipeline",
+    # Zero-Index Retrieval
+    "ContextLevel",
+    "SearchResult",
+    "ZeroIndexConfig",
+    "ZeroIndexRetriever",
+    "CorpusStats",
 ]
