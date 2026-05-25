@@ -13,6 +13,22 @@ This package provides:
 
 from lyra_audio.adaptive_volume import AdaptiveVolumeController
 from lyra_audio.audio_player import AudioPlayer
+from lyra_audio.audio_suppression import (
+    AudioSuppression,
+    SilentHours,
+    SuppressionConfig,
+    SuppressionReason,
+    SuppressionResult,
+    create_default_suppression,
+)
+from lyra_audio.cesp_engine import (
+    CespCategory,
+    CespEngine,
+    HOOK_TO_CESP,
+    PackSelectionLayer,
+    PlaybackRecord,
+    SelectionResult,
+)
 from lyra_audio.event_hooks import EventHookSystem, LyraEvent
 from lyra_audio.productivity_mode import ProductivityModeController
 from lyra_audio.sound_cli import SoundPackCLI
@@ -34,6 +50,20 @@ __all__ = [
     "SoundPack",
     "SoundPackLoader",
     "SoundPackMetadata",
+    # CESP Engine
+    "CespCategory",
+    "CespEngine",
+    "HOOK_TO_CESP",
+    "PackSelectionLayer",
+    "PlaybackRecord",
+    "SelectionResult",
+    # Audio Suppression
+    "AudioSuppression",
+    "SilentHours",
+    "SuppressionConfig",
+    "SuppressionReason",
+    "SuppressionResult",
+    "create_default_suppression",
     # Advanced Features
     "AdaptiveVolumeController",
     "TimeBehaviorController",
