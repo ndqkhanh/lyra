@@ -44,6 +44,7 @@ def test_watermark_payload_instantiation() -> None:
     payload = WatermarkPayload(
         method="STATISTICAL",
         agent_id="agent-001",
+        content_type="TEXT",
         timestamp=1000.0,
         version="0.1.0",
         content_hash="abc123",
@@ -63,6 +64,7 @@ def test_watermark_payload_to_dict_roundtrip() -> None:
     payload = WatermarkPayload(
         method="CRYPTOGRAPHIC",
         agent_id="agent-002",
+        content_type="TEXT",
         timestamp=2000.0,
         version="0.1.0",
         content_hash="xyz789",
@@ -79,6 +81,7 @@ def test_watermark_result_instantiation() -> None:
     payload = WatermarkPayload(
         method="STATISTICAL",
         agent_id="agent-001",
+        content_type="TEXT",
         timestamp=1000.0,
         version="0.1.0",
         content_hash="abc",
@@ -104,6 +107,7 @@ def test_provenance_chain_instantiation() -> None:
     payload = WatermarkPayload(
         method="STATISTICAL",
         agent_id="agent-001",
+        content_type="TEXT",
         timestamp=1000.0,
         version="0.1.0",
         content_hash="abc",
@@ -128,6 +132,7 @@ def test_provenance_record_instantiation() -> None:
     payload = WatermarkPayload(
         method="STATISTICAL",
         agent_id="agent-001",
+        content_type="TEXT",
         timestamp=1000.0,
         version="0.1.0",
         content_hash="abc",
@@ -172,6 +177,7 @@ def test_all_data_classes_can_be_instantiated() -> None:
     payload = WatermarkPayload(
         method="TEST",
         agent_id="",
+        content_type="TEXT",
         timestamp=0.0,
         version="0.0.0",
         content_hash="",
@@ -257,8 +263,7 @@ def test_embed_with_content_type() -> None:
     payload = engine.embed(content, content_type="CODE", agent_id="agent-003")
 
     assert payload.method == "STATISTICAL"
-    # The content_type is accepted but we don't store it in the payload
-    # (the watermark method is in the payload)
+    assert payload.content_type == "CODE"
 
 
 def test_detect_finds_embedded_watermark() -> None:

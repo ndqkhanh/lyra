@@ -55,6 +55,8 @@ class WatermarkPayload:
         Watermark method used (e.g. STATISTICAL, CRYPTOGRAPHIC).
     agent_id : str
         Identifier of the agent that created the content.
+    content_type : str
+        Type of content being watermarked (see ``ContentType``).
     timestamp : float
         Unix timestamp when the watermark was embedded.
     version : str
@@ -69,6 +71,7 @@ class WatermarkPayload:
 
     method: str
     agent_id: str
+    content_type: str
     timestamp: float
     version: str
     content_hash: str
@@ -80,6 +83,7 @@ class WatermarkPayload:
         return {
             "method": self.method,
             "agent_id": self.agent_id,
+            "content_type": self.content_type,
             "timestamp": self.timestamp,
             "version": self.version,
             "content_hash": self.content_hash,
@@ -107,6 +111,7 @@ class WatermarkPayload:
         return cls(
             method=data["method"],
             agent_id=data["agent_id"],
+            content_type=data.get("content_type", "TEXT"),
             timestamp=data["timestamp"],
             version=data["version"],
             content_hash=data["content_hash"],
@@ -344,6 +349,7 @@ class WatermarkEngine:
         payload = WatermarkPayload(
             method=self.config.default_method,
             agent_id=agent_id,
+            content_type=content_type,
             timestamp=timestamp,
             version="0.1.0",
             content_hash=content_hash,
