@@ -604,6 +604,61 @@ export interface FleetSnapshotResponse {
   task_ids: string[]
 }
 
+// ── Self-Evolution RPCs ──────────────────────────────────────────────
+
+export interface EvolutionStatusResponse {
+  meta_level: string
+  trust_score: number
+  cycles_completed: number
+  total_improvement: number
+  current_fitness: number
+  mutation_count: number
+  active_goals: number
+  pending_goals: number
+  claims_count: number
+  snapshots_available: number
+  safe_mode: boolean
+}
+
+export interface EvolutionGoal {
+  id: string
+  description: string
+  status: string
+}
+
+export interface EvolutionCycle {
+  id: string
+  improvement: number
+  council_decision: string
+  duration_ms: number
+}
+
+export interface EvolutionSnapshotResponse {
+  status: EvolutionStatusResponse
+  goals: EvolutionGoal[]
+  recent_cycles: EvolutionCycle[]
+  claims: { claim: string; evidence: string; status: string }[]
+}
+
+export interface EvolutionSetGoalResponse {
+  id: string
+  description: string
+  status: string
+}
+
+export interface EvolutionRunCycleResponse {
+  id: string
+  mutations_applied: number
+  improvement: number
+  council_decision: string
+  duration_ms: number
+}
+
+export interface EvolutionAdjustTrustResponse {
+  trust_score: number
+  level: string
+}
+
 // ── Lyra-specific RPCs ───────────────────────────────────────────────
 
 export interface LyraStatsResponse {
@@ -702,3 +757,5 @@ export type GatewayEvent =
   | { payload?: { message?: string }; session_id?: string; type: 'error' }
   | { payload: SafetyStatusResponse; session_id?: string; type: 'safety.status' }
   | { payload: { decision: string; layer: string }; session_id?: string; type: 'safety.review' }
+  | { payload: EvolutionStatusResponse; session_id?: string; type: 'evolution.status' }
+  | { payload: EvolutionSnapshotResponse; session_id?: string; type: 'evolution.snapshot' }
