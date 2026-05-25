@@ -1,6 +1,13 @@
-"""Loop-layer extensions (refute-or-promote, auto-review, reflexion)."""
+"""Loop-layer extensions (refute-or-promote, auto-review, reflexion, pivot-refine)."""
 from __future__ import annotations
 
+from .pivot_refine import (
+    ErrorDatabase,
+    ErrorRecord,
+    PivotRefineExecutor,
+    RecoveryResult,
+    RecoveryStrategy,
+)
 from .reflexion import (
     LessonGenerator,
     Reflection,
@@ -18,7 +25,12 @@ from .refute_or_promote import (
 )
 
 __all__ = [
+    "ErrorDatabase",
+    "ErrorRecord",
     "LessonGenerator",
+    "PivotRefineExecutor",
+    "RecoveryResult",
+    "RecoveryStrategy",
     "Reflection",
     "ReflectionMemory",
     "RefuteError",

@@ -32,6 +32,15 @@ from lyra_memory.consolidation_engine import (
     ConsolidationPattern,
     ConsolidationResult,
 )
+from lyra_memory.dream_consolidator import (
+    ConsolidationCandidate,
+    ConsolidationStats,
+    DreamConsolidator,
+    DreamPhase,
+    EbbinghausCurve,
+    MemoryFragment,
+    MemorySignal,
+)
 from lyra_memory.extractor import MemoryExtractor, extract_memories_from_conversation
 from lyra_memory.importance_scorer import (
     ImportanceCategory,
@@ -139,6 +148,14 @@ __all__ = [
     "ConsolidationEngine",
     "ConsolidationResult",
     "ConsolidationPattern",
+    # Dream Consolidation
+    "MemorySignal",
+    "DreamPhase",
+    "MemoryFragment",
+    "ConsolidationCandidate",
+    "EbbinghausCurve",
+    "ConsolidationStats",
+    "DreamConsolidator",
     # Budget Management
     "MemoryBudgetController",
     "BudgetStatus",

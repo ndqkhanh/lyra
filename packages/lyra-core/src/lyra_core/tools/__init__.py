@@ -2,6 +2,14 @@
 from __future__ import annotations
 
 from .ask_user_question import AskCallback, make_ask_user_question_tool
+from .tool_search import (
+    DiscoveryStats,
+    ToolCategory,
+    ToolContextBudget,
+    ToolRegistry,
+    ToolSchema,
+    ToolSearchResult,
+)
 from .builtin import EditTool, GlobTool, GrepTool, ReadTool, WriteTool, register_builtin_tools
 from .todo_write import make_todo_write_tool
 from .toolsets import (
@@ -19,10 +27,16 @@ from .web_search import make_web_search_tool, WebSearchTool
 
 __all__ = [
     "AskCallback",
+    "DiscoveryStats",
     "EditTool",
     "GlobTool",
     "GrepTool",
     "ReadTool",
+    "ToolCategory",
+    "ToolContextBudget",
+    "ToolRegistry",
+    "ToolSchema",
+    "ToolSearchResult",
     "ToolsetApplication",
     "ToolsetRegistry",
     "WebFetchTool",
