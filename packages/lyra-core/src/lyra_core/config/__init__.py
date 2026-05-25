@@ -1,11 +1,13 @@
-"""Lyra configuration and feature flags.
+"""Lyra configuration — feature flags and enterprise settings hierarchy.
 
-Environment variables control optional features and behavior.
-All flags default to sensible production values.
+Feature flags are environment-variable-controlled constants evaluated at import
+time. The 4-tier settings hierarchy provides deny-first permission evaluation
+with priority-based resolution (managed > CLI > local > project > user).
 """
+from __future__ import annotations
+
 import os
 from typing import Final
-
 
 # ---------------------------------------------------------------------------
 # Process Transparency Feature Flags
@@ -149,23 +151,45 @@ LYRA_DEBUG_TUI: Final[bool] = (
 Default: false
 """
 
+# ---------------------------------------------------------------------------
+# Settings Hierarchy (Phase 13.5.4)
+# ---------------------------------------------------------------------------
+
+from .settings_hierarchy import (  # noqa: E402 — intentional late import
+    LockedSettingError,
+    ManagedPolicy,
+    PolicyRule,
+    PolicyViolationError,
+    SettingsError,
+    SettingsHierarchy,
+    SettingOverride,
+    SettingScope,
+    SettingValue,
+)
+
 
 __all__ = [
-    # Process transparency
-    "LYRA_ENABLE_PROCESS_TRANSPARENCY",
+    # Feature flags
+    "LYRA_DEBUG_EVENT_BUS",
+    "LYRA_DEBUG_TUI",
+    "LYRA_ENABLE_AGENT_PANEL",
+    "LYRA_ENABLE_CONTEXT_OPTIMIZATION",
     "LYRA_ENABLE_EVENT_BUS",
     "LYRA_ENABLE_EVENT_STORE",
     "LYRA_ENABLE_PROCESS_STATE_WRITER",
-    "LYRA_ENABLE_AGENT_PANEL",
-    # Legacy fallback
-    "LYRA_LEGACY_TUI",
-    # Context optimization
-    "LYRA_ENABLE_CONTEXT_OPTIMIZATION",
-    # Performance
-    "LYRA_TUI_REFRESH_RATE",
-    "LYRA_PROCESS_REGISTRY_POLL_INTERVAL",
+    "LYRA_ENABLE_PROCESS_TRANSPARENCY",
     "LYRA_EVENT_QUEUE_MAX_SIZE",
-    # Debugging
-    "LYRA_DEBUG_EVENT_BUS",
-    "LYRA_DEBUG_TUI",
+    "LYRA_LEGACY_TUI",
+    "LYRA_PROCESS_REGISTRY_POLL_INTERVAL",
+    "LYRA_TUI_REFRESH_RATE",
+    # Settings hierarchy
+    "LockedSettingError",
+    "ManagedPolicy",
+    "PolicyRule",
+    "PolicyViolationError",
+    "SettingsError",
+    "SettingsHierarchy",
+    "SettingOverride",
+    "SettingScope",
+    "SettingValue",
 ]

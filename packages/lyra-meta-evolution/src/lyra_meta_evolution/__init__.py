@@ -25,6 +25,15 @@ from .fitness import (
     ParetoError,
     ParetoFrontier,
 )
+from .aevo_meta import (
+    AEvoMetaEditor,
+    AccumulatedState,
+    CodeEdit,
+    DriftReport,
+    EditOperation,
+    EditResult,
+    ProcedureTarget,
+)
 from .harness_opt import (
     CodeCandidate,
     HarnessComponent,
@@ -169,4 +178,12 @@ __all__ = [
     "CodeCandidate",
     "OptimizationResult",
     "MetaHarnessOptimizer",
+    # ── Phase 13.4.2: AEvo Meta-Editing ───────────────────────────────
+    "AEvoMetaEditor",
+    "AccumulatedState",
+    "CodeEdit",
+    "DriftReport",
+    "EditOperation",
+    "EditResult",
+    "ProcedureTarget",
 ]
