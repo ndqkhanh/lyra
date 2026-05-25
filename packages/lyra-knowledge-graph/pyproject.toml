@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lyra-knowledge-graph"
+version = "0.1.0"
+description = "Dynamic knowledge graph construction, entity extraction, relation labeling, community detection, graph navigation, pre-indexing, inverse search, RRF fusion, dream cycle enrichment, and MCP tool access."
+requires-python = ">=3.11"
+dependencies = ["lyra-core"]
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "pytest-asyncio>=0.21"]
+[tool.setuptools.packages.find]
+where = ["src"]
