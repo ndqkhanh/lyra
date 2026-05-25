@@ -522,6 +522,50 @@ export interface RoutingSnapshotResponse {
   costs: RoutingCostSummaryResponse
 }
 
+// ── Unified Memory RPCs ─────────────────────────────────────────────
+
+export interface MemoryStatsResponse {
+  working_entries: number
+  working_tokens: number
+  episodic_events: number
+  semantic_facts: number
+  procedural_count: number
+  kg_nodes: number
+  kg_edges: number
+  token_index_docs: number
+  total_memories: number
+  active_memories: number
+  dormant_memories: number
+  last_consolidation: number
+  budget_status: string
+}
+
+export interface MemoryQueryResult {
+  tier: string
+  content: string
+  score: number
+  metadata: Record<string, unknown>
+}
+
+export interface MemoryQueryResponse {
+  query: string
+  results: MemoryQueryResult[]
+}
+
+export interface MemoryConsolidateResponse {
+  deep: boolean
+  actions: string[]
+  ultra?: { consolidated: number; pruned: number }
+}
+
+export interface MemorySnapshotResponse {
+  initialized: boolean
+  db_path: string
+  queries: number
+  writes: number
+  stats: MemoryStatsResponse
+}
+
 // ── Lyra-specific RPCs ───────────────────────────────────────────────
 
 export interface LyraStatsResponse {
