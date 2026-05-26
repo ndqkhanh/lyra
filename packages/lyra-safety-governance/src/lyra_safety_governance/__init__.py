@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from .audit_logger import AuditEntry, AuditLogger, AuditQuery, AuditStats
+from .crypto_audit import ChainVerification, CryptoAuditEngine
 from .behavioral_monitor import (
     AnomalyAction,
     AnomalyScore,
@@ -119,6 +120,9 @@ __all__ = [
     "AuditEntry",
     "AuditQuery",
     "AuditStats",
+    # Crypto Audit
+    "ChainVerification",
+    "CryptoAuditEngine",
     # Risk Assessor
     "RiskAssessor",
     "RiskScore",
