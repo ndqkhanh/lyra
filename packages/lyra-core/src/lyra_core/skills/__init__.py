@@ -13,6 +13,13 @@ from .federation import (
     FilesystemFederator,
     SkillManifest,
 )
+from .knowledge_transfer import (
+    KnowledgeTransferEngine,
+    PatternMatch,
+    SkillEmbedding,
+    TransferResult,
+    TransferStatus,
+)
 from .optimizer import OptimizationReport, TriggerOptimizer
 from .registry import (
     Skill,
@@ -30,6 +37,13 @@ from .synthesizer import (
     SynthesisError,
     SynthesisReport,
 )
+from .validation_gate import (
+    GateNumber,
+    GateResult,
+    GateStatus,
+    SkillValidationPipeline,
+    ValidationReport,
+)
 
 __all__ = [
     "CallableFederator",
@@ -37,17 +51,27 @@ __all__ = [
     "FederationConflict",
     "FederationReport",
     "FilesystemFederator",
+    "GateNumber",
+    "GateResult",
+    "GateStatus",
     "HybridSkillRouter",
+    "KnowledgeTransferEngine",
     "OptimizationReport",
+    "PatternMatch",
     "RouterDecision",
     "Skill",
     "SkillAlreadyExists",
+    "SkillEmbedding",
     "SkillNotFound",
     "SkillManifest",
     "SkillMatch",
     "SkillRegistry",
     "SkillSynthesizer",
+    "SkillValidationPipeline",
     "SynthesisError",
     "SynthesisReport",
+    "TransferResult",
+    "TransferStatus",
     "TriggerOptimizer",
+    "ValidationReport",
 ]
