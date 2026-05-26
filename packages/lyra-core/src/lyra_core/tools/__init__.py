@@ -2,6 +2,13 @@
 from __future__ import annotations
 
 from .ask_user_question import AskCallback, make_ask_user_question_tool
+from .tool_pipeline import (
+    PipelineResult,
+    PipelineStatus,
+    StageResult,
+    StageType,
+    ToolPipeline,
+)
 from .tool_search import (
     DiscoveryStats,
     ToolCategory,
@@ -29,15 +36,20 @@ __all__ = [
     "AskCallback",
     "DiscoveryStats",
     "EditTool",
+    "PipelineResult",
+    "PipelineStatus",
     "GlobTool",
     "GrepTool",
     "ReadTool",
+    "StageResult",
+    "StageType",
     "ToolCategory",
     "ToolContextBudget",
     "ToolRegistry",
     "ToolSchema",
     "ToolSearchResult",
     "ToolsetApplication",
+    "ToolPipeline",
     "ToolsetRegistry",
     "WebFetchTool",
     "WebSearchTool",

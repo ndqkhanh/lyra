@@ -19,6 +19,12 @@ doesn't care about the distinction can catch ``ValueError``.
 from __future__ import annotations
 
 from .discovery import Plugin, discover_plugins, fire
+from .hot_reload import (
+    PluginFileState,
+    PluginHotReloader,
+    ReloadEvent,
+    ReloadStatus,
+)
 from .manifest import (
     PLUGIN_MANIFEST_FILES,
     PluginManifestError,
@@ -44,7 +50,9 @@ __all__ = [
     "LoadedPlugin",
     "PLUGIN_MANIFEST_FILES",
     "Plugin",
+    "PluginFileState",
     "PluginHook",
+    "PluginHotReloader",
     "PluginManifest",
     "PluginManifestError",
     "PluginManifestSpec",
@@ -52,6 +60,8 @@ __all__ = [
     "PluginRegistry",
     "PluginRuntime",
     "PluginValidationError",
+    "ReloadEvent",
+    "ReloadStatus",
     "discover_plugins",
     "fire",
     "load_manifest",
