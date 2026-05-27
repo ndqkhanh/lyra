@@ -524,17 +524,271 @@ lyra-core (Agent Loop 2.0):
 
 ## Part V: AGI Benchmark Targets
 
-| Benchmark | Domain | Current SOTA | Lyra Target | Papers to Implement |
-|-----------|--------|-------------|-------------|-------------------|
-| **SpecBench** | Reward hacking resistance | 0% (all agents hack) | <5% reward hacking | SpecBench, Ratchet |
-| **BioXArena** | Biomedical ML agent | 0.666 (Gemini-3.1-Pro) | >0.80 | BioXArena |
-| **TerminalWorld** | Real terminal tasks | <30% | >60% | TerminalWorld |
-| **Pseudo-Formal** | Proof-verified reasoning | Pareto-dominates LLM-judge | >90% precision | Pseudo-Formalization |
-| **CLEAR** | Multi-level evaluation | Dynamic taxonomy | Full coverage | Agentic CLEAR |
-| **WorkstreamBench** | Financial spreadsheets | ~40% | >65% | WorkstreamBench |
-| **HIDBench** | Intrusion detection | ~50% | >75% | HIDBench |
-| **HSCO-Bench** | HW/SW co-design | <30% | >55% | HSCO-Bench |
-| **DecisionBench** | Delegation fidelity | 7.5-29.5% | >50% | DecisionBench |
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #8b5cf615, #06b6d410); border-left: 4px solid #8b5cf6; padding: 12px 16px; border-radius: 0 8px 8px 0;">
+
+<span style="color: #c084fc; font-weight: bold;">Lyra already ships</span> <span style="color: #94a3b8;">a production eval harness (`lyra-evals` v0.2.0) with SpecBench multi-level evaluation, 7 benchmark adapters, contamination guard, SLO tracking, and AER (Agent Execution Records). The targets below define the AGI trajectory — benchmarks where Lyra must match or exceed frontier models to demonstrate general intelligence.</span>
+
+</td></tr></table>
+
+### Evaluation Architecture (Already Built)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    lyra-evals v0.2.0                         │
+├─────────────────────────────────────────────────────────────┤
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
+│  │ SpecBench    │  │ PESS         │  │ Contamination    │  │
+│  │ Multi-Level  │  │ Probabilistic│  │ Guard            │  │
+│  │ (Sys/Trace/  │  │ Evaluator    │  │ (train/test      │  │
+│  │  Node)       │  │              │  │  overlap detect) │  │
+│  └──────────────┘  └──────────────┘  └──────────────────┘  │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
+│  │ AER Store    │  │ SLO Tracker  │  │ Harness          │  │
+│  │ (Agent Exec  │  │ (latency,    │  │ Snapshot          │  │
+│  │  Records)    │  │  success,    │  │ (drift gate      │  │
+│  │              │  │  cost SLOs)  │  │  0.85 default)   │  │
+│  └──────────────┘  └──────────────┘  └──────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**7 Benchmark Adapters Already Implemented:**
+
+| Adapter | Domain | Status | pass@k Support |
+|---------|--------|--------|---------------|
+| **SWE-Bench Pro** | Software engineering (real GitHub issues) | Production | Yes |
+| **Tau-Bench** | Tool-augmented agent tasks | Production | Yes |
+| **Terminal-Bench v2** | Real terminal/sysadmin tasks | Production | Yes |
+| **LoCoEval** | Long-context evaluation | Production | Yes |
+| **BRIGHT** | Biomedical reasoning | Production | Yes |
+| **BrowseComp+** | Web browsing comprehension | Production | Yes |
+| **MultiHop QA** | Multi-hop reasoning QA | Production | Yes |
+
+### AGI Benchmark Targets & Trajectory
+
+<table>
+<tr style="background: #7c3aed20;">
+<th style="color: #c084fc;">Benchmark</th>
+<th style="color: #c084fc;">Domain</th>
+<th style="color: #c084fc;">Current SOTA</th>
+<th style="color: #c084fc;">Lyra Target</th>
+<th style="color: #c084fc;">Status</th>
+<th style="color: #c084fc;">Gating Papers</th>
+</tr>
+
+<tr>
+<td style="color: #e2e8f0; font-weight: bold;">SpecBench</td>
+<td style="color: #94a3b8;">Reward hacking resistance</td>
+<td style="color: #f87171;">0% (all frontier agents hack)</td>
+<td style="color: #34d399;">&lt;5% reward hacking rate</td>
+<td style="color: #34d399;">Evaluator built</td>
+<td style="color: #94a3b8;">SpecBench (2605.21384), Ratchet (2605.22148)</td>
+</tr>
+
+<tr>
+<td style="color: #e2e8f0; font-weight: bold;">SWE-Bench Pro</td>
+<td style="color: #94a3b8;">Real-world software engineering</td>
+<td style="color: #fbbf24;">~49% (Devin)</td>
+<td style="color: #34d399;">&gt;65% resolved</td>
+<td style="color: #34d399;">Adapter in production</td>
+<td style="color: #94a3b8;">SWE-Bench, MOSS (2605.22794)</td>
+</tr>
+
+<tr>
+<td style="color: #e2e8f0; font-weight: bold;">Terminal-Bench v2</td>
+<td style="color: #94a3b8;">Real terminal/sysadmin tasks</td>
+<td style="color: #fbbf24;">&lt;30%</td>
+<td style="color: #34d399;">&gt;60%</td>
+<td style="color: #34d399;">Adapter in production</td>
+<td style="color: #94a3b8;">TerminalWorld, Terminal-Bench v2</td>
+</tr>
+
+<tr>
+<td style="color: #e2e8f0; font-weight: bold;">BioXArena</td>
+<td style="color: #94a3b8;">Biomedical ML agent</td>
+<td style="color: #fbbf24;">0.666 (Gemini-3.1-Pro)</td>
+<td style="color: #34d399;">&gt;0.80</td>
+<td style="color: #fbbf24;">Planned</td>
+<td style="color: #94a3b8;">BioXArena (2605.15766)</td>
+</tr>
+
+<tr>
+<td style="color: #e2e8f0; font-weight: bold;">Agentic CLEAR</td>
+<td style="color: #94a3b8;">Multi-level eval (system/trace/node)</td>
+<td style="color: #fbbf24;">Dynamic taxonomy (no fixed SOTA)</td>
+<td style="color: #34d399;">Full tri-level coverage</td>
+<td style="color: #34d399;">SpecBench evaluator built</td>
+<td style="color: #94a3b8;">Agentic CLEAR (2605.22608)</td>
+</tr>
+
+<tr>
+<td style="color: #e2e8f0; font-weight: bold;">Pseudo-Formal</td>
+<td style="color: #94a3b8;">Proof-verified reasoning eval</td>
+<td style="color: #fbbf24;">Pareto-dominates LLM-judge</td>
+<td style="color: #34d399;">&gt;90% precision, &gt;85% recall</td>
+<td style="color: #fbbf24;">Planned</td>
+<td style="color: #94a3b8;">Pseudo-Formalization (2605.20531)</td>
+</tr>
+
+<tr>
+<td style="color: #e2e8f0; font-weight: bold;">Tau-Bench</td>
+<td style="color: #94a3b8;">Tool-use + conversational agents</td>
+<td style="color: #fbbf24;">~55% (Claude 4)</td>
+<td style="color: #34d399;">&gt;70%</td>
+<td style="color: #34d399;">Adapter in production</td>
+<td style="color: #94a3b8;">Tau-Bench, τ²-Bench</td>
+</tr>
+
+<tr>
+<td style="color: #e2e8f0; font-weight: bold;">LoCoEval</td>
+<td style="color: #94a3b8;">Long-context comprehension (128K+)</td>
+<td style="color: #fbbf24;">~72% (Gemini 2.5 Pro)</td>
+<td style="color: #34d399;">&gt;80%</td>
+<td style="color: #34d399;">Adapter in production</td>
+<td style="color: #94a3b8;">LoCoEval, RULER, NIAH</td>
+</tr>
+
+<tr>
+<td style="color: #e2e8f0; font-weight: bold;">WorkstreamBench</td>
+<td style="color: #94a3b8;">Financial spreadsheet automation</td>
+<td style="color: #fbbf24;">~40%</td>
+<td style="color: #34d399;">&gt;65%</td>
+<td style="color: #fbbf24;">Planned</td>
+<td style="color: #94a3b8;">WorkstreamBench</td>
+</tr>
+
+<tr>
+<td style="color: #e2e8f0; font-weight: bold;">HIDBench</td>
+<td style="color: #94a3b8;">Host intrusion detection</td>
+<td style="color: #fbbf24;">~50%</td>
+<td style="color: #34d399;">&gt;75%</td>
+<td style="color: #fbbf24;">Planned</td>
+<td style="color: #94a3b8;">HIDBench</td>
+</tr>
+
+<tr>
+<td style="color: #e2e8f0; font-weight: bold;">HSCO-Bench</td>
+<td style="color: #94a3b8;">HW/SW co-design optimization</td>
+<td style="color: #fbbf24;">&lt;30%</td>
+<td style="color: #34d399;">&gt;55%</td>
+<td style="color: #fbbf24;">Planned</td>
+<td style="color: #94a3b8;">HSCO-Bench</td>
+</tr>
+
+<tr>
+<td style="color: #e2e8f0; font-weight: bold;">DecisionBench</td>
+<td style="color: #94a3b8;">Delegation fidelity & decision quality</td>
+<td style="color: #fbbf24;">7.5–29.5%</td>
+<td style="color: #34d399;">&gt;50%</td>
+<td style="color: #fbbf24;">Planned</td>
+<td style="color: #94a3b8;">DecisionBench</td>
+</tr>
+
+<tr>
+<td style="color: #e2e8f0; font-weight: bold;">BRIGHT</td>
+<td style="color: #94a3b8;">Biomedical reasoning & retrieval</td>
+<td style="color: #fbbf24;">~58% (Med-Gemini)</td>
+<td style="color: #34d399;">&gt;70%</td>
+<td style="color: #34d399;">Adapter in production</td>
+<td style="color: #94a3b8;">BRIGHT, MedPrompt</td>
+</tr>
+</table>
+
+### Evaluation Methodology: CLEAR Multi-Level
+
+<table>
+<tr style="background: #06b6d420;">
+<th style="color: #22d3ee;">Level</th>
+<th style="color: #22d3ee;">Scope</th>
+<th style="color: #22d3ee;">What It Measures</th>
+<th style="color: #22d3ee;">Lyra Implementation</th>
+</tr>
+<tr>
+<td style="color: #22d3ee; font-weight: bold;">System</td>
+<td style="color: #94a3b8;">Full task completion</td>
+<td style="color: #94a3b8;">End-to-end success rate, drift detection, cost efficiency</td>
+<td style="color: #34d399;"><code>SystemEval</code> + <code>HarnessSnapshot</code> (drift gate 0.85)</td>
+</tr>
+<tr>
+<td style="color: #22d3ee; font-weight: bold;">Trace</td>
+<td style="color: #94a3b8;">Execution trajectory</td>
+<td style="color: #94a3b8;">Reward hacking score, path efficiency, tool selection quality</td>
+<td style="color: #34d399;"><code>TraceEval</code> + <code>ProbabilisticEvaluator</code> (PESS-style)</td>
+</tr>
+<tr>
+<td style="color: #22d3ee; font-weight: bold;">Node</td>
+<td style="color: #94a3b8;">Per-step actions</td>
+<td style="color: #94a3b8;">Action correctness, expected vs actual, explanation quality</td>
+<td style="color: #34d399;"><code>NodeEval</code> (step-level verdict: PASS/FAIL/WARN)</td>
+</tr>
+</table>
+
+### SLO Framework (Already Operational)
+
+<table>
+<tr style="background: #10b98120;">
+<th style="color: #34d399;">SLO Metric</th>
+<th style="color: #34d399;">Target</th>
+<th style="color: #34d399;">Measurement</th>
+<th style="color: #34d399;">Breach Consequence</th>
+</tr>
+<tr>
+<td style="color: #e2e8f0;">Latency (p95)</td>
+<td style="color: #34d399;">&lt;5s per tool call</td>
+<td style="color: #94a3b8;">Per-invocation wall-clock timing</td>
+<td style="color: #f87171;">Triggers model downgrade</td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;">Success Rate</td>
+<td style="color: #34d399;">&gt;85% task completion</td>
+<td style="color: #94a3b8;">Rolling window (last 100 tasks)</td>
+<td style="color: #f87171;">Triggers drift alert + re-eval</td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;">Cost Efficiency</td>
+<td style="color: #34d399;">&lt;$0.50 per task avg</td>
+<td style="color: #94a3b8;">Token usage × provider pricing</td>
+<td style="color: #f87171;">Triggers routing review</td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;">Contamination</td>
+<td style="color: #34d399;">0% train/test overlap</td>
+<td style="color: #94a3b8;"><code>ContaminationGuard</code> checksum verification</td>
+<td style="color: #f87171;">Raises <code>ContaminationError</code></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;">Reward Hacking</td>
+<td style="color: #34d399;">&lt;5% divergence</td>
+<td style="color: #94a3b8;">SpecBench visible vs held-out score gap</td>
+<td style="color: #f87171;">Triggers safety gate + audit</td>
+</tr>
+</table>
+
+### Self-Improvement Loop via Benchmarks
+
+<table width="100%"><tr><td style="background: #1e293b; padding: 12px 16px; border-radius: 8px;">
+
+```
+Run evals → AER Store → Gap Analysis → GEPA Prompt Evolution → Re-run evals
+   │              │              │                    │
+   │              │              │                    └─ SkillOpt optimizer (+23.5pts)
+   │              │              └─ Identify weakest benchmark categories
+   │              └─ Agent Execution Records with SLO breach logs
+   └─ pass@k across all 13 benchmark targets
+
+Drift gate (0.85): If success rate drops below 85% → auto-rollback + alert
+Contamination guard: Prevents train/test overlap before any eval run
+```
+
+</td></tr></table>
+
+### Benchmark Priority Roadmap
+
+| Phase | Benchmarks | Success Criteria | Timeline |
+|-------|-----------|-----------------|----------|
+| **Phase 1 (Current)** | SWE-Bench Pro, Terminal-Bench v2, Tau-Bench, LoCoEval, BRIGHT, MultiHop QA, BrowseComp+ | All adapters passing, pass@k > baseline | Done (v0.2.0) |
+| **Phase 2 (Q3 2026)** | SpecBench, Agentic CLEAR, Pseudo-Formal | Reward hacking <5%, CLEAR tri-level coverage, proof precision >90% | 2–3 mo |
+| **Phase 3 (Q4 2026)** | BioXArena, WorkstreamBench, HIDBench | Score within 10% of frontier model on each | 2–3 mo |
+| **Phase 4 (Q1 2027)** | HSCO-Bench, DecisionBench | All 13 benchmarks at AGI-competitive levels | 2 mo |
 
 ---
 

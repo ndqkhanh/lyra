@@ -20,6 +20,7 @@ canonical spec: [`docs/blocks/12-safety-monitor.md`](../blocks/12-safety-monitor
 ## Where it sits
 
 ```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#8b5cf6', 'primaryTextColor': '#e2e8f0', 'primaryBorderColor': '#a78bfa', 'lineColor': '#94a3b8', 'secondaryColor': '#1e293b', 'tertiaryColor': '#0d1117', 'background': '#0d1117', 'mainBkg': '#1e293b', 'nodeBorder': '#a78bfa', 'clusterBkg': '#1e293b', 'clusterBorder': '#8b5cf6', 'titleColor': '#c084fc', 'edgeLabelBackground': '#1e293b' }}%%
 graph LR
     Loop[Agent loop<br/>generator] -->|every N steps| SM[Safety monitor<br/>nano model]
     Loop -->|every step| Hooks[Hooks<br/>synchronous gates]

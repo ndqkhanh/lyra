@@ -18,6 +18,7 @@ canonical spec: [`docs/blocks/11-verifier-cross-channel.md`](../blocks/11-verifi
 ## Two phases
 
 ```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#8b5cf6', 'primaryTextColor': '#e2e8f0', 'primaryBorderColor': '#a78bfa', 'lineColor': '#94a3b8', 'secondaryColor': '#1e293b', 'tertiaryColor': '#0d1117', 'background': '#0d1117', 'mainBkg': '#1e293b', 'nodeBorder': '#a78bfa', 'clusterBkg': '#1e293b', 'clusterBorder': '#8b5cf6', 'titleColor': '#c084fc', 'edgeLabelBackground': '#1e293b' }}%%
 flowchart TD
     A[Task complete claim] --> P1{Phase 1: Objective}
     P1 -->|fail| Reject1[Reject<br/>concrete reason]
@@ -123,6 +124,7 @@ Source: [`lyra_core/verifier/cross_channel.py`](https://github.com/lyra-contribu
 Three independent records of "what happened":
 
 ```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#8b5cf6', 'primaryTextColor': '#e2e8f0', 'primaryBorderColor': '#a78bfa', 'lineColor': '#94a3b8', 'secondaryColor': '#1e293b', 'tertiaryColor': '#0d1117', 'background': '#0d1117', 'mainBkg': '#1e293b', 'nodeBorder': '#a78bfa', 'clusterBkg': '#1e293b', 'clusterBorder': '#8b5cf6', 'titleColor': '#c084fc', 'edgeLabelBackground': '#1e293b' }}%%
 graph LR
     Trace[Trace<br/>tool calls + args]
     Diff[Diff<br/>git working tree]

@@ -33,6 +33,7 @@ The upgrade spans five interconnected systems:
 The theme engine resolves themes through a three-layer cascade. Project config overrides user config, which overrides built-in defaults. If any layer is missing, the engine falls through to the next.
 
 ```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#8b5cf6', 'primaryTextColor': '#e2e8f0', 'primaryBorderColor': '#a78bfa', 'lineColor': '#94a3b8', 'secondaryColor': '#1e293b', 'tertiaryColor': '#0d1117', 'background': '#0d1117', 'mainBkg': '#1e293b', 'nodeBorder': '#a78bfa', 'clusterBkg': '#1e293b', 'clusterBorder': '#8b5cf6', 'titleColor': '#c084fc', 'edgeLabelBackground': '#1e293b' }}%%
 graph TB
     START["ThemeEngine.init()"] --> BUILTIN["Layer 1: Built-in Themes<br/>13 curated themes bundled in package"]
     BUILTIN --> USER["Layer 2: User Config<br/>~/.lyra/themes/*.{json,yaml,toml}"]
@@ -421,6 +422,7 @@ semantic:
 The sound system hooks into Lyra's lifecycle events. Each event triggers an audio cue (non-blocking, via `afplay` on macOS, `paplay` on Linux, or a cross-platform fallback). Sounds are organized into profiles: **Productivity** (default, minimal), **Playful** (post-5pm, humor mode), **Quiet** (no sounds, visual indicators only).
 
 ```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#8b5cf6', 'primaryTextColor': '#e2e8f0', 'primaryBorderColor': '#a78bfa', 'lineColor': '#94a3b8', 'secondaryColor': '#1e293b', 'tertiaryColor': '#0d1117', 'background': '#0d1117', 'mainBkg': '#1e293b', 'nodeBorder': '#a78bfa', 'clusterBkg': '#1e293b', 'clusterBorder': '#8b5cf6', 'titleColor': '#c084fc', 'edgeLabelBackground': '#1e293b' }}%%
 graph LR
     subgraph "Lifecycle Events"
         S1["SessionStart"]
@@ -645,6 +647,7 @@ layers:
 Lyra uses a three-zone responsive layout that adapts to terminal width. At narrow widths (< 80 cols), the sidebar collapses to a bottom panel. At wide widths (>= 120 cols), the sidebar expands to show full agent details.
 
 ```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#8b5cf6', 'primaryTextColor': '#e2e8f0', 'primaryBorderColor': '#a78bfa', 'lineColor': '#94a3b8', 'secondaryColor': '#1e293b', 'tertiaryColor': '#0d1117', 'background': '#0d1117', 'mainBkg': '#1e293b', 'nodeBorder': '#a78bfa', 'clusterBkg': '#1e293b', 'clusterBorder': '#8b5cf6', 'titleColor': '#c084fc', 'edgeLabelBackground': '#1e293b' }}%%
 graph TB
     subgraph "Terminal Viewport"
         subgraph "Top Zone (2 lines)"

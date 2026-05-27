@@ -1121,6 +1121,7 @@ Region 1  Region 2  Region 3
 ### 8.2 Proposed Multi-Agent Architecture for Lyra
 
 ```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#8b5cf6', 'primaryTextColor': '#e2e8f0', 'primaryBorderColor': '#a78bfa', 'lineColor': '#94a3b8', 'secondaryColor': '#1e293b', 'tertiaryColor': '#0d1117', 'background': '#0d1117', 'mainBkg': '#1e293b', 'nodeBorder': '#a78bfa', 'clusterBkg': '#1e293b', 'clusterBorder': '#8b5cf6', 'titleColor': '#c084fc', 'edgeLabelBackground': '#1e293b' }}%%
 graph TB
     User[User Request] --> Orchestrator[Lyra Orchestrator]
     Orchestrator --> TaskDecomp[Task Decomposition]

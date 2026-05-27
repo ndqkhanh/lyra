@@ -16,6 +16,7 @@ Source: [`lyra_evals/`](https://github.com/lyra-contributors/lyra/tree/main/pack
 ## The pieces
 
 ```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#8b5cf6', 'primaryTextColor': '#e2e8f0', 'primaryBorderColor': '#a78bfa', 'lineColor': '#94a3b8', 'secondaryColor': '#1e293b', 'tertiaryColor': '#0d1117', 'background': '#0d1117', 'mainBkg': '#1e293b', 'nodeBorder': '#a78bfa', 'clusterBkg': '#1e293b', 'clusterBorder': '#8b5cf6', 'titleColor': '#c084fc', 'edgeLabelBackground': '#1e293b' }}%%
 graph LR
     Corpus[Corpus<br/>tasks + golds] --> Run[Runner<br/>spawns Lyra sessions]
     Run -->|trace.jsonl + diff| Score[Scorers<br/>rubric · pass@k · pass^k · PRM]
