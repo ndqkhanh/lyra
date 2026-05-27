@@ -110,8 +110,15 @@ from lyra_memory.health_monitor import (
     HealthSnapshot,
     MemoryHealthMonitor,
 )
+from lyra_memory.symbolic_ssm import (
+    CraniMemGate,
+    EntityNode,
+    Relation as SSMRelation,
+    SymbolicRepresentation,
+    SymbolicShortTermMemory,
+)
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 __all__ = [
     # Core
@@ -207,4 +214,10 @@ __all__ = [
     "HealthConfig",
     "HealthSnapshot",
     "MemoryHealthMonitor",
+    # Symbolic SSM (Phoenix Memory — Plan 30)
+    "SymbolicShortTermMemory",
+    "SymbolicRepresentation",
+    "CraniMemGate",
+    "EntityNode",
+    "SSMRelation",
 ]

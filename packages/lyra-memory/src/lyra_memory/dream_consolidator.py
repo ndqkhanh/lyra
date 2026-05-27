@@ -48,12 +48,18 @@ class MemorySignal(str, Enum):
 
 
 class DreamPhase(str, Enum):
-    """The four phases of dream-style memory consolidation."""
+    """The five phases of entropic dream-style memory consolidation.
+
+    Phase 5 (PROSPECTIVE) is the MemGrad integration phase — it uses
+    accumulated memory feedback to generate textual gradients that
+    optimize agent prompts for future performance.
+    """
 
     ORIENT = "orient"
     GATHER = "gather"
     CONSOLIDATE = "consolidate"
     PRUNE = "prune"
+    PROSPECTIVE = "prospective"
 
 
 # ---------------------------------------------------------------------------
