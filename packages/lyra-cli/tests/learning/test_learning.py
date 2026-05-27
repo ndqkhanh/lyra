@@ -1,5 +1,6 @@
 """Tests for Phase 3 Learning modules."""
 
+from datetime import datetime
 import pytest
 import tempfile
 import shutil
@@ -497,3 +498,229 @@ def test_skill_persistence(temp_dir):
     # Create new instance
     lib2 = SkillLibrary(data_dir=temp_dir)
     assert len(lib2.skills) == 1
+
+
+# ============================================================================
+# ECC Learning Tests — Observation Capture, Instinct Extraction, Evolution
+# ============================================================================
+
+from lyra_cli.learning.observation_capture import (
+    Observation,
+    ObservationCapture,
+    get_observation_capture,
+)
+from lyra_cli.learning.instinct_extractor import (
+    Instinct,
+    InstinctExtractor,
+    get_instinct_extractor,
+)
+from lyra_cli.learning.project_detector import (
+    ProjectDetector,
+    EvolutionPipeline,
+    get_evolution_pipeline,
+)
+
+
+class TestObservationCapture:
+    def test_capture_and_retrieve(self, temp_dir):
+        oc = ObservationCapture(data_dir=Path(temp_dir))
+        obs = Observation(
+            timestamp=datetime.now(),
+            session_id="test-session",
+            tool_name="Write",
+            tool_input={"file": "test.py"},
+            tool_output={"result": "ok"},
+            user_prompt="write a function",
+            agent_response="I created test.py",
+            project_id="proj-1",
+        )
+        oc.capture(obs)
+        results = oc.get_observations(project_id="proj-1")
+        assert len(results) == 1
+        assert results[0]["tool_name"] == "Write"
+
+    def test_capture_global_when_no_project(self, temp_dir):
+        oc = ObservationCapture(data_dir=Path(temp_dir))
+        obs = Observation(
+            timestamp=datetime.now(),
+            session_id="test",
+            tool_name="Bash",
+            tool_input={"cmd": "ls"},
+            tool_output=None,
+            user_prompt=None,
+            agent_response=None,
+            project_id=None,
+        )
+        oc.capture(obs)
+        results = oc.get_observations()
+        assert len(results) == 1
+
+    def test_capture_from_hook(self, temp_dir):
+        oc = ObservationCapture(data_dir=Path(temp_dir))
+        oc.capture_from_hook(
+            hook_context={"tool_name": "Read", "tool_input": {"path": "f.py"}},
+            session_id="s1",
+            project_id="p1",
+        )
+        results = oc.get_observations(project_id="p1")
+        assert any(r["tool_name"] == "Read" for r in results)
+
+    def test_get_observations_missing_project(self, temp_dir):
+        oc = ObservationCapture(data_dir=Path(temp_dir))
+        results = oc.get_observations(project_id="nonexistent")
+        assert results == []
+
+    def test_get_observations_respects_limit(self, temp_dir):
+        oc = ObservationCapture(data_dir=Path(temp_dir))
+        for i in range(10):
+            oc.capture(Observation(
+                timestamp=datetime.now(), session_id=f"s{i}",
+                tool_name=f"tool_{i}", tool_input={}, tool_output=None,
+                user_prompt=None, agent_response=None, project_id="p",
+            ))
+        results = oc.get_observations(project_id="p", limit=3)
+        assert len(results) == 3
+
+    def test_singleton(self):
+        oc1 = get_observation_capture()
+        oc2 = get_observation_capture()
+        assert oc1 is oc2
+
+
+class TestInstinctExtractor:
+    def test_extract_corrections(self):
+        ie = InstinctExtractor()
+        obs_list = [
+            {"tool_name": "Write", "user_prompt": "create a module", "timestamp": "2026-05-27T10:00:00", "project_id": "test"},
+            {"tool_name": "Write", "user_prompt": "no, that's not what I asked", "timestamp": "2026-05-27T10:01:00", "project_id": "test"},
+        ]
+        instincts = ie.extract_from_observations(obs_list)
+        assert any("correction" in i.id for i in instincts)
+
+    def test_extract_repeated_tools(self):
+        ie = InstinctExtractor()
+        obs_list = [
+            {"tool_name": "Write", "user_prompt": "", "timestamp": "2026-05-27T10:00:00", "project_id": "test"},
+            {"tool_name": "Write", "user_prompt": "", "timestamp": "2026-05-27T10:01:00", "project_id": "test"},
+            {"tool_name": "Write", "user_prompt": "", "timestamp": "2026-05-27T10:02:00", "project_id": "test"},
+        ]
+        instincts = ie.extract_from_observations(obs_list)
+        assert any("repeated" in i.id for i in instincts)
+
+    def test_save_and_load_instinct(self, temp_dir):
+        ie = InstinctExtractor(instincts_dir=Path(temp_dir))
+        instinct = Instinct(
+            id="test-001", trigger="on file write", action="run linter",
+            confidence=0.85, domain="code-style", evidence=["rule: pep8"],
+            scope="global", project_id=None, created_at=datetime.now(),
+        )
+        ie.save_instinct(instinct)
+        loaded = ie.load_instincts()
+        assert len(loaded) == 1
+        assert loaded[0].id == "test-001"
+
+    def test_extract_empty_observations(self):
+        ie = InstinctExtractor()
+        instincts = ie.extract_from_observations([])
+        assert instincts == []
+
+    def test_singleton(self):
+        ie1 = get_instinct_extractor()
+        ie2 = get_instinct_extractor()
+        assert ie1 is ie2
+
+
+class TestProjectDetector:
+    def test_detect_project_from_cwd(self):
+        pd = ProjectDetector()
+        import subprocess
+        result = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            capture_output=True, text=True, timeout=5,
+        )
+        if result.returncode != 0:
+            pytest.skip("Not in a git repository")
+        git_root = Path(result.stdout.strip())
+        project_id = pd.detect_project_id(cwd=git_root)
+        if project_id is None:
+            pytest.skip("No remote origin configured")
+        assert len(project_id) == 16
+
+    def test_get_project_name(self):
+        pd = ProjectDetector()
+        name = pd.get_project_name()
+        assert isinstance(name, str)
+        assert len(name) > 0
+
+    def test_detect_nonexistent_dir(self):
+        pd = ProjectDetector()
+        project_id = pd.detect_project_id(cwd=Path("/nonexistent/path"))
+        assert project_id is None
+
+
+class TestEvolutionPipeline:
+    def test_evolve_to_skill(self, temp_dir):
+        ep = EvolutionPipeline()
+        ep.evolved_dir = Path(temp_dir)
+        instinct = Instinct(
+            id="test-001", trigger="on write", action="run tests",
+            confidence=0.9, domain="testing", evidence=["99% pass rate"],
+            scope="project", project_id="p1", created_at=datetime.now(),
+        )
+        skill_path = ep.evolve_to_skill(instinct, "auto-test")
+        assert skill_path.exists()
+        content = skill_path.read_text()
+        assert "run tests" in content
+
+    def test_evolve_to_command(self, temp_dir):
+        ep = EvolutionPipeline()
+        ep.evolved_dir = Path(temp_dir)
+        instinct = Instinct(
+            id="test-002", trigger="on lint fail", action="auto-format",
+            confidence=0.8, domain="code-style", evidence=["save-time"],
+            scope="project", project_id="p1", created_at=datetime.now(),
+        )
+        cmd_path = ep.evolve_to_command(instinct, "auto-format")
+        assert cmd_path.exists()
+        content = cmd_path.read_text()
+        assert "auto-format" in content
+
+    def test_cluster_instincts(self):
+        ep = EvolutionPipeline()
+        instincts = [
+            Instinct("a", "t1", "a1", 0.7, "testing", [], "global", None, datetime.now()),
+            Instinct("b", "t2", "a2", 0.8, "testing", [], "global", None, datetime.now()),
+            Instinct("c", "t3", "a3", 0.9, "code-style", [], "global", None, datetime.now()),
+        ]
+        clusters = ep.cluster_instincts(instincts)
+        assert "testing" in clusters
+        assert "code-style" in clusters
+        assert len(clusters["testing"]) == 2
+
+    def test_promote_to_global(self, temp_dir):
+        ie = InstinctExtractor(instincts_dir=Path(temp_dir))
+        instinct = Instinct(
+            id="promote-me", trigger="on commit", action="run hooks",
+            confidence=0.9, domain="git", evidence=["faster"],
+            scope="project", project_id="p1", created_at=datetime.now(),
+        )
+        ie.save_instinct(instinct)
+        ep = EvolutionPipeline()
+        result = ep.promote_to_global(instinct)
+        assert result is True
+        assert instinct.scope == "global"
+
+    def test_promote_already_global(self):
+        ep = EvolutionPipeline()
+        instinct = Instinct(
+            id="global-1", trigger="on save", action="format",
+            confidence=0.7, domain="code-style", evidence=["clean"],
+            scope="global", project_id=None, created_at=datetime.now(),
+        )
+        result = ep.promote_to_global(instinct)
+        assert result is False
+
+    def test_singleton(self):
+        ep1 = get_evolution_pipeline()
+        ep2 = get_evolution_pipeline()
+        assert ep1 is ep2
