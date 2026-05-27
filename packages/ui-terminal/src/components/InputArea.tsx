@@ -30,6 +30,7 @@ import { ThemePicker } from './ThemePicker'
 import { OutputStylePicker } from './OutputStylePicker'
 import { GoalPanel } from './GoalPanel'
 import { ReleaseNotesPicker } from './ReleaseNotesPicker'
+import { ShortcutsHelp } from './ShortcutsHelp'
 import { getCommandNames } from '../constants/commands'
 import { logger } from '../utils/logger'
 
@@ -62,6 +63,7 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
   const [showThemePicker, setShowThemePicker] = useState(false)
   const [showOutputStylePicker, setShowOutputStylePicker] = useState(false)
   const [showGoalPanel, setShowGoalPanel] = useState(false)
+  const [showShortcutsHelp, setShowShortcutsHelp] = useState(false)
   const [currentGoal, setCurrentGoal] = useState<string | null>(null)
   const [goodVibesTick, setGoodVibesTick] = useState(0)
   const { vim, vimActions } = useVim()
@@ -118,7 +120,7 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
   // Handle keyboard shortcuts
   useInput((input, key) => {
     // Skip keyboard shortcuts when model picker is visible
-    if (showModelPicker) return
+    if (showModelPicker || showShortcutsHelp) return
 
     // ── Vim Mode ──────────────────────────────────────────
     if (vim.enabled) {
@@ -325,6 +327,12 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
       return
     }
 
+    // Intercept /help or /shortcuts to show keyboard shortcuts
+    if (input === '/help' || input === '/shortcuts') {
+      setShowShortcutsHelp(true)
+      return
+    }
+
     // Guard against submission during streaming
     if (session?.isStreaming) return
 
@@ -499,6 +507,15 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
         }}
       />
 
+      {/* Shortcuts help */}
+      <ShortcutsHelp
+        visible={showShortcutsHelp}
+        onClose={() => {
+          setShowShortcutsHelp(false)
+          history.setCurrent('')
+        }}
+      />
+
       {/* Prompt line — Hermes ComposerPane style */}
       <Box paddingX={1}>
         {vim.enabled && (
@@ -513,7 +530,7 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
             onChange={handleChange}
             onSubmit={handleSubmit}
             placeholder=""
-            focus={!showModelPicker && !showReleaseNotes && !showEffortPicker && !showThemePicker && !showOutputStylePicker && !showGoalPanel}
+            focus={!showModelPicker && !showReleaseNotes && !showEffortPicker && !showThemePicker && !showOutputStylePicker && !showGoalPanel && !showShortcutsHelp}
           />
         </Box>
         <GoodVibesHeart tick={goodVibesTick} thinkingColor={colors.thinking} />

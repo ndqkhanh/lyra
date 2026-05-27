@@ -7,6 +7,7 @@ import { InputArea } from './components/InputArea'
 import { StatusBar } from './components/StatusBar'
 import { CommandPalette } from './components/CommandPalette'
 import { AgentTree } from './components/AgentTree'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { logger } from './utils/logger'
 
 // Hermes-style layout — matches appLayout.tsx exactly:
@@ -198,29 +199,41 @@ export function App() {
 
   // Hermes layout: AlternateScreen → Box column → [Transcript, ComposerPane, StatusRule at bottom]
   return (
-    <Box flexDirection="column">
-      {/* Transcript area — Hermes TranscriptPane (ScrollBox) */}
-      <Box flexDirection="column" flexGrow={1}>
-        <ConversationView sessionId={activeSessionId} />
-      </Box>
-
-      {/* Composer area — StatusBar at top inside + TextInput = Hermes ComposerPane */}
-      <InputArea sessionId={activeSessionId} />
-
-      {/* Status bar at bottom — Hermes StatusRulePane at="bottom" */}
-      <StatusBar sessionId={activeSessionId} />
-
-      <AgentTree sessionId={activeSessionId} visible={showAgentTree} />
-
-      {showCommandPalette && (
-        <Box marginTop={5} marginLeft={35}>
-          <CommandPalette
-            visible={showCommandPalette}
-            onSelect={handleCommandPalette}
-            onClose={() => setShowCommandPalette(false)}
-          />
+    <ErrorBoundary>
+      <Box flexDirection="column">
+        {/* Transcript area — Hermes TranscriptPane (ScrollBox) */}
+        <Box flexDirection="column" flexGrow={1}>
+          <ErrorBoundary>
+            <ConversationView sessionId={activeSessionId} />
+          </ErrorBoundary>
         </Box>
-      )}
-    </Box>
+
+        {/* Composer area — StatusBar at top inside + TextInput = Hermes ComposerPane */}
+        <ErrorBoundary>
+          <InputArea sessionId={activeSessionId} />
+        </ErrorBoundary>
+
+        {/* Status bar at bottom — Hermes StatusRulePane at="bottom" */}
+        <ErrorBoundary>
+          <StatusBar sessionId={activeSessionId} />
+        </ErrorBoundary>
+
+        <ErrorBoundary>
+          <AgentTree sessionId={activeSessionId} visible={showAgentTree} />
+        </ErrorBoundary>
+
+        {showCommandPalette && (
+          <Box marginTop={5} marginLeft={35}>
+            <ErrorBoundary>
+              <CommandPalette
+                visible={showCommandPalette}
+                onSelect={handleCommandPalette}
+                onClose={() => setShowCommandPalette(false)}
+              />
+            </ErrorBoundary>
+          </Box>
+        )}
+      </Box>
+    </ErrorBoundary>
   )
 }
