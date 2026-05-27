@@ -12,19 +12,19 @@ from typing import Any
 # Patterns adapted from OWASP and GitLeaks secret detection rules
 _SECRET_PATTERNS: dict[str, str] = {
     "aws_access_key": r"AKIA[0-9A-Z]{16}",
-    "aws_secret_key": r"(?i)aws(.{0,20})?(?-i)['\"][0-9a-zA-Z\/+]{40}['\"]",
+    "aws_secret_key": r"[A-Za-z0-9/+]{40}",
     "google_api_key": r"AIza[0-9A-Za-z\-_]{35}",
     "github_token": r"(ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{36,255}",
-    "generic_api_key": r"(?i)(api[_-]?key|apikey|secret|token|password|auth)[\s]*[=:][\s]*['\"][A-Za-z0-9_\-\.]{16,}['\"]",
+    "generic_api_key": r"(?i)(api[_-]?key|apikey|secret|token|password|auth)\s*[=:]\s*['\"][A-Za-z0-9_\-\.]{16,}['\"]",
     "private_key_header": r"-----BEGIN (RSA|EC|DSA|OPENSSH) PRIVATE KEY-----",
     "jwt_token": r"eyJ[A-Za-z0-9\-_]+\.eyJ[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+",
     "slack_webhook": r"https://hooks\.slack\.com/services/T[A-Z0-9]+/B[A-Z0-9]+/[A-Za-z0-9]+",
     "discord_webhook": r"https://(?:discord|discordapp)\.com/api/webhooks/\d+/[A-Za-z0-9\-_]+",
     "stripe_key": r"(?:sk|pk)_(?:test|live)_[A-Za-z0-9]{24,}",
-    "openai_key": r"sk-[A-Za-z0-9]{32,}",
+    "openai_key": r"sk-[A-Za-z0-9\-]{32,}",
     "anthropic_key": r"sk-ant-[A-Za-z0-9\-_]{32,}",
-    "basic_auth": r"(?i)https?://[^:\s]+:[^@\s]+@",
-    "generic_password": r"(?i)(password|passwd|pwd)[\s]*[=:][\s]*['\"][^'\"]+['\"]",
+    "basic_auth": r"https?://[^:\s]+:[^@\s]+@",
+    "generic_password": r"(password|passwd|pwd)\s*[=:]\s*['\"][^'\"]+['\"]",
 }
 
 # Files to skip (binary, vendored, etc.)
