@@ -86,6 +86,15 @@ from .hooks import (
 )
 from .mailbox import Mailbox, MailboxMessage, MessageKind
 from .shared_tasks import SharedTaskList, Task, TaskState, TaskSummary
+from .hybrid_router import Channel, HybridCommunicationRouter, MessageCategory, RoutedMessage
+from .plan_approval import (
+    ApprovalDecision,
+    ApprovalRecord,
+    PlanApprovalWorkflow,
+    PlanDocument,
+    PlanState,
+)
+from .cleanup import CleanupAction, CleanupRecord, CleanupReport, TeamCleanupManager
 
 __all__ = [
     # Sequential pipeline (existing)
@@ -136,4 +145,20 @@ __all__ = [
     "register_lifecycle_bus",
     "reset_global_registry",
     "unregister_lifecycle_bus",
+    # Plan 29.2 — Hybrid Communication
+    "Channel",
+    "HybridCommunicationRouter",
+    "MessageCategory",
+    "RoutedMessage",
+    # Plan 29.3 — Plan Approval
+    "ApprovalDecision",
+    "ApprovalRecord",
+    "PlanApprovalWorkflow",
+    "PlanDocument",
+    "PlanState",
+    # Plan 29.6 — Team Cleanup
+    "CleanupAction",
+    "CleanupRecord",
+    "CleanupReport",
+    "TeamCleanupManager",
 ]
