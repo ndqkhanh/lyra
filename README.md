@@ -8,15 +8,15 @@
   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.3+-3178C6.svg" alt="TypeScript" /></a>
   <a href=""><img src="https://img.shields.io/badge/version-7.0.0-purple.svg" alt="Version" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License" /></a>
-  <a href="packages/"><img src="https://img.shields.io/badge/packages-135+-orange.svg" alt="Packages" /></a>
-  <a href="docs/roadmap.md"><img src="https://img.shields.io/badge/AGI%20Blueprint-20%20Plans-ff69b4.svg" alt="AGI Blueprint" /></a>
-  <a href="docs/research/papers.md"><img src="https://img.shields.io/badge/Research-500%2B%20papers%20%7C%2080%2B%20repos-brightgreen.svg" alt="Research" /></a>
+  <a href="packages/"><img src="https://img.shields.io/badge/packages-96-orange.svg" alt="Packages" /></a>
+  <a href="docs/roadmap.md"><img src="https://img.shields.io/badge/AGI%20Blueprint-17%20Plans-ff69b4.svg" alt="AGI Blueprint" /></a>
+  <a href="docs/research/papers.md"><img src="https://img.shields.io/badge/Research-79%20papers%20%7C%2050%2B%20repos-brightgreen.svg" alt="Research" /></a>
 </p>
 
 <p align="center">
   <b>Multi-agent orchestration. Deep reasoning. 6-layer NeuroMemory. Self-evolution.<br>
   Cognitive-executive safety separation. Latent-space agent communication. Dream consolidation.<br>
-  135+ composable packages. 16+ LLM providers. Skills ecosystem. Swarm architecture. One extensible platform.</b>
+  96 composable packages. 16+ LLM providers. Skills ecosystem. Swarm architecture. One extensible platform.</b>
 </p>
 
 <p align="center">
@@ -34,7 +34,7 @@
 
 ## What is Lyra?
 
-Lyra is a **production-grade agent platform** that researches, codes, tests, reviews, and evolves — autonomously or as your pair-programming teammate. It combines techniques from 500+ research papers and 80+ open-source agent frameworks into a unified, extensible system.
+Lyra is a **production-grade agent platform** that researches, codes, tests, reviews, and evolves — autonomously or as your pair-programming teammate. It combines techniques from 79 research papers and 50+ open-source agent frameworks into a unified, extensible system.
 
 Unlike thin API wrappers, Lyra ships with a **kernel-enforced TDD gate**, **6-layer NeuroMemory with A-MAC admission control and Dream consolidation**, **SkillOpt text-space skill optimization (+23.5pts)**, **64-skill catalog across 9 domains**, **multi-agent swarm with Raft/Byzantine/Gossip consensus**, **automatic prompt and harness evolution**, **RecursiveLink latent-space agent communication**, **Parallax-style cognitive-executive safety separation**, **SR2AM self-regulated planning**, **zero-trust agent federation**, **25+ color themes with voice/sound packs**, **36-tool Claude Code-compatible tool suite**, **MCP integration with OAuth 2.0**, **31-hook lifecycle system**, and a **Claude Code-style terminal interface** — all wired together through an observable, auditable event stream.
 
@@ -364,12 +364,12 @@ graph TB
 | 🧪 **Tests first, always** | The kernel enforces a TDD state machine (`RED → GREEN → REFACTOR`). No code ships without passing tests. |
 | 🔄 **Self-evolves** | GEPA v2 prompt optimizer + AEvo meta-editor + Meta-Harness loop continuously improve prompts AND harness code. Strategies that work are reinforced; patterns that fail are pruned. |
 | 🛡️ **Defense-in-depth safety** | 6-layer safety: cognitive-executive separation (Parallax, 98.9% block rate), AgentShield (5 scanners, 102 rules), multi-agent validation (executor→validator→critic), intent monitoring, PRISM drift detection, ARIS 3-stage verification. |
-| 🧩 **135+ composable packages** | Every capability is an isolated package with its own tests, docs, and dependencies. Compose what you need. |
+| 🧩 **96 composable packages** | Every capability is an isolated package with its own tests, docs, and dependencies. Compose what you need. |
 | 🌐 **16+ LLM providers** | Anthropic, DeepSeek, OpenAI, Google, xAI, Mistral, Qwen, Kimi, Bedrock, Ollama. 5-layer intelligent routing with automatic fallback. Zero vendor lock-in. |
 | 📊 **Token-level observability** | 13 waste categories tracked in real-time. JSONL event stream (HIR) for full auditability. Burn reports show exactly where tokens go. |
 | 🗣️ **Voice & audio** | CESP v1.0 cross-environment sound protocol. 6-layer sound pack selection. Warcraft III Peon, StarCraft Marine, Cyberpunk Netrunner packs. Audio suppression with silent hours. |
 | 🎨 **25+ color themes** | 7 families (Dark, Warm, Nature, Retro, Accessible, SilkCircuit, Classic) with live preview and instant switching. 13 full palettes with complete hex codes. |
-| 📚 **Research-backed** | 500+ papers and 80+ repos absorbed across 8+ deep-research streams. 6 ultra plan documents. Every technique traces to its source paper or reference implementation. |
+| 📚 **Research-backed** | 79 papers and 50+ repos absorbed with a documented absorption matrix. Every technique traces to its source paper or reference implementation. |
 | 🐝 **Multi-agent swarm** | 12-worker background pool, 3 consensus protocols (Raft/Byzantine/Gossip), latent-space agent communication (75.6% token reduction), federation auth, worktree isolation. |
 | 🔌 **Plugin ecosystem** | Manifest-based plugin system with SHA-256 hot-reload. 31-hook lifecycle engine. 6 permission modes. MCP OAuth 2.0 with DCR. 36-tool catalog. |
 
@@ -457,7 +457,7 @@ Lyra integrates techniques from cutting-edge research. Each innovation is docume
 | **Tool-Call Verification** | Post-hoc auditing for knowing-doing gap. Hidden-state confidence probe before tool execution | [Knowing-Doing Gap (2026)](https://arxiv.org/abs/2605.14038) |
 | **Intent-Based Security** | Continuous monitoring of action sequences for intent deviation. Temporal pattern analysis. Anomaly detection on agent behavior | Radware Intent-Based Security |
 
-> **Full absorption matrix**: See [`docs/research/papers.md`](docs/research/papers.md) (500+ papers) and [`docs/research/repos.md`](docs/research/repos.md) (80+ repos) for the complete bibliography with implementation locations. See [`docs/research/synthesis-2026-05-27.md`](docs/research/synthesis-2026-05-27.md) for the comprehensive synthesis across all 8+ research streams.
+> **Full absorption matrix**: See [`docs/research/papers.md`](docs/research/papers.md) (79 papers) and [`docs/research/repos.md`](docs/research/repos.md) (50+ repos) for the complete bibliography with implementation locations. See [`docs/research/synthesis-2026-05-27.md`](docs/research/synthesis-2026-05-27.md) for the comprehensive synthesis.
 
 ---
 
@@ -489,7 +489,7 @@ The latest breakthrough synthesis from deep research across 50+ sources identifi
 | [Plan 12](plans/LYRA_ULTRA_PLAN_12_AGENT_FLEET_SWARM.md) | Fleet — parallel fan-out, squads, colony, federation | Active |
 | [**Plan 13**](plans/LYRA_ULTRA_PLAN_13_BREAKTHROUGH_SYNTHESIS.md) | **Breakthrough — 6 AGI gaps, meta-evolution, safety separation, Dream memory** | **Active** |
 
-### Wave 3 Plans (May 2026 — Ultra Deep Research: 500+ Papers, 80+ Repos)
+### Wave 3 Plans (May 2026)
 
 | Plan | Focus | Key Deliverables |
 |------|-------|-----------------|
@@ -624,7 +624,7 @@ Switch themes with `lyra theme set <name>` or via the interactive picker (`Ctrl+
 
 ## Package Catalog
 
-Lyra is a monorepo of 135+ composable packages across four tiers. Each package has its own `pyproject.toml`, tests, and README.
+Lyra is a monorepo of 96 composable packages across four tiers. Each package has its own `pyproject.toml`, tests, and README.
 
 | Tier | Count | Purpose | Highlights |
 |------|-------|---------|------------|
@@ -633,7 +633,7 @@ Lyra is a monorepo of 135+ composable packages across four tiers. Each package h
 | **AGI Ascent** | 21 | Experimental/forward-looking | Multi-level verification, causal graphs, recursive self-improvement, constitutional AI |
 | **UI** | 3 | Terminal interface | Zustand state store, Ink/React 19 TUI, WebSocket + SSE transport |
 | **Providers** | 12 | LLM integrations | Anthropic, DeepSeek, OpenAI, Google, xAI, Mistral, Qwen, Bedrock, Ollama, Vertex, OpenRouter, Copilot |
-| **Skills** | 80+ | Domain expertise | Python, TypeScript, Go, Rust, React, Django, FastAPI, DevOps, Security, Research |
+| **Skills** | 56 | Domain expertise | Python, TypeScript, Go, Rust, React, Django, FastAPI, DevOps, Security, Research |
 
 ```
 packages/
@@ -805,7 +805,7 @@ Switch inline with `Shift+Tab`.
 
 ## Research Breakthroughs (V12 + Ultra Deep Research, May 2026)
 
-The culmination of **8+ parallel deep research streams** analyzing 500+ papers and 80+ repos. Results synthesized into **14 ULTRA PLANS** across 3 waves.
+The culmination of deep research streams analyzing 79 papers and 50+ repos. Results synthesized into **17 ULTRA PLANS** across 3 waves.
 
 ### 6-Stream Research Summary
 
@@ -879,8 +879,8 @@ make ci
 | [`docs/architecture/safety-architecture.md`](docs/architecture/safety-architecture.md) | Parallax-style cognitive-executive separation |
 | [`docs/architecture/memory-consolidation.md`](docs/architecture/memory-consolidation.md) | Dream 4-phase consolidation design |
 | [`docs/architecture/harness-evolution.md`](docs/architecture/harness-evolution.md) | Meta-optimization loop architecture |
-| [`docs/research/papers.md`](docs/research/papers.md) | 500+ paper absorption matrix |
-| [`docs/research/repos.md`](docs/research/repos.md) | 80+ repository absorption matrix |
+| [`docs/research/papers.md`](docs/research/papers.md) | 79 paper absorption matrix |
+| [`docs/research/repos.md`](docs/research/repos.md) | 50+ repository absorption matrix |
 | [`docs/synthesis/`](docs/synthesis/) | 7-domain synthesis: Memory, Skills, Tools, Orchestration, Autonomy, UI/UX, Safety |
 | [`docs/research/synthesis-2026-05-27.md`](docs/research/synthesis-2026-05-27.md) | Comprehensive research synthesis (May 2026) |
 | [`docs/research/index.md`](docs/research/index.md) | Research hub — 8+ deep-research streams |
@@ -902,14 +902,11 @@ make ci
 
 Lyra's architecture is informed by deep research across the AI agent ecosystem:
 
-**Papers absorbed (500+):** Tournament TTS, ReasoningBank, Skill-RAG, KnowRL, Neural Garbage Collection, PoisonedRAG, SemaClaw, SWE-Search, AlphaEvolve, FrugalGPT, RouteLLM, Confidence-Driven Router, Voyager, Reflexion, MetaGPT, ChatDev, DSPy, EAGLE-3, OSWorld, GDPval, Qwen PRM, Codex, Diversity Collapse, PolyKV, CALM, LoCoEval, Externalization Survey, Memento, Production Agent Gaps, Meta-Harness, SWE-TRACE, KLong, BACM-RL, Refute-or-Promote, VeRO, Agentless, Atomic Skills, SkillOpt, AEvo, SkillOS, Ratchet, SkillGen, MIND-Skill, SkillForge, SkillX, CoEvoSkills, Skills-Coach, SkillMaster, Skill-R1, SkillClaw, Knowing-Doing Gap, ARIS, Parallax, RecursiveMAS, AutoResearchClaw, PRISM, SR2AM, A-MAC, CoMem, CraniMem, Hindsight, ERL, R-KVHash, Continuous-Claude, SKILLRL, SkillsBench, Live-SWE-Agent, ReasoningBank, MRAgent, SABER, SkillOpt — **PLUS 22 MemAgent workshop papers**: Agentic Memory, SimpleMem, MEMRL, SKILL0, EvoSkills, CORAL, MetaClaw, AgentFactory, entropic consolidation, LP-RAG, goal-conditioned gating, and 11 more. **PLUS 400+ additional papers** from ai-agent-papers repo across Reasoning, Planning, Tool Use, Self-Evolution, Memory, Self-Correction, Safety, Evaluation, Knowledge, Learning, Perception, Research Agents, Deep Research Agents, Multi-Agent, and Enterprise Agents domains.
+**Papers absorbed (79):** 7 waves spanning reasoning (Tournament TTS, SR2AM, ReasoningBank, SWE-Search), memory (A-Mem, MRAgent, MemGrad, CoMem, CraniMem, NGC), self-evolution (GEPA v2, Meta-Harness, AEvo, PRISM, Trace2Skill), skills (SkillOpt, SkillOS, Ratchet, SkillGen, MIND-Skill), safety (Parallax, ARIS, Knowing-Doing Gap), agent communication (RecursiveMAS, SemaClaw), and 20 ICLR 2026 MemAgent Workshop papers.
 
-**Repositories studied (80+):** Claude Code, Hermes-agent, Continuous-Claude, OpenCode, OpenDev, RTK, Caveman, DCI-Agent-Lite, Graphify, TencentDB-Agent-Memory, Acontext, CodeGraph, Claude-Mem, MemPalace, CLI-Anything, ECC, OpenHuman, Superpowers, Multica, CowAgent, Mem0, Oh-My-Claudecode, Ruflo, GBrain, GStack, ABTop, Oh-My-OpenAgent, SkillOpt (Microsoft), Scoped-MCP, Tmux, Warp, Andrej-Karpathy-Skills, Claude-Code-Best-Practice, Academic-Research-Skills, PeonPing, CheetahClaws, DeepSearch, Augment Code, Factory, Devon, OpenHands, Cline, RooCode, Cursor, Windsurf, Codex CLI, Gemini CLI, Qwen Code, Copilot, Amazon Q, Continue, Aider, Tabby, Cody, Codeium, Sourcegraph, and more.
+**Repositories studied (50+):** Claude Code, Hermes-agent, Cline, Aider, OpenHands, CrewAI, AutoGPT, LangGraph, GBrain, OpenCode, OpenDev, RTK, Caveman, DCI-Agent-Lite, Graphify, TencentDB-Agent-Memory, Acontext, CodeGraph, claude-mem, MemPalace, CLI-Anything, ARS, ECC, OpenHuman, PeonPing, superpowers, continuous-claude, Multica, CowAgent, Mem0, oh-my-claudecode, Ruflo, and more.
 
-**Total sources analyzed:** 580+ unique sources across 8+ parallel deep-research streams
-**Research token investment:** 1,600,000+ tokens across 4 research campaigns (V12 + Ultra Deep Research)
-
-See [`docs/research/`](docs/research/) and [`docs/synthesis/`](docs/synthesis/) for the complete research library.
+See [`docs/research/`](docs/research/) for the complete research library.
 
 ---
 

@@ -86,7 +86,7 @@ graph TB
         AE["Audit Engine<br/>(HIR replay)"]
     end
 
-    subgraph Skills["Skills Ecosystem (80+ planned)"]
+    subgraph Skills["Skills Ecosystem (56 skills across 14 packs)"]
         SR["SkillRegistry<br/>(150+ triggers)"]
         SC["SkillCurator<br/>(discovery · recommendation)"]
         SL_L["SkillLearner<br/>(Trace2Skill pipeline)"]
@@ -479,7 +479,7 @@ graph LR
         REPL["Interactive REPL<br/>(driver · session · keybindings)"]
         CMD["Commands<br/>(run · plan · doctor · goal · fleet · theme)"]
         PROV["Providers<br/>(16+ LLM integrations)"]
-        SKILLS_L1["Skills Runtime<br/>(80+ skills · curator · loader · evolver · compaction)"]
+        SKILLS_L1["Skills Runtime<br/>(56 skills · curator · loader · evolver · compaction)"]
         MEM_L1["Memory Runtime<br/>(8-level · hybrid retrieval · Dream consolidation)"]
     end
 
@@ -595,7 +595,7 @@ graph TD
 | Decision | Rationale | Trade-off |
 |----------|-----------|-----------|
 | Kernel separate from CLI | `lyra-core` has zero network deps — reusable by MCP, evals, CI, SDK | Two packages to version |
-| Monorepo with 135+ packages | Each package has isolated deps, tests, and lifecycle | Build orchestration complexity |
+| Monorepo with 96 packages | Each package has isolated deps, tests, and lifecycle | Build orchestration complexity |
 | prompt_toolkit over Textual | Faster startup, better stdin/stdout compatibility, closer to Claude Code UX | Less rich TUI out of the box |
 | Optional Ink/React 19 TUI | React component model for complex UI (model picker, fleet panel, theme picker) | Requires Node.js runtime |
 | HIR JSONL as source of truth | All observability flows from one event stream | ~1MB/hour disk usage |
@@ -653,7 +653,7 @@ Each Lyra innovation traces to its research source. See [`docs/research/papers.m
 | Plan | Focus | Lines |
 |------|-------|-------|
 | [LYRA_ULTRA_PLAN_6_OMNI_AGI_BREAKTHROUGH.md](plans/LYRA_ULTRA_PLAN_6_OMNI_AGI_BREAKTHROUGH.md) | Master plan — 16 dimensions | ~1286 |
-| [LYRA_ULTRA_PLAN_7_SKILLS_ECOSYSTEM.md](plans/LYRA_ULTRA_PLAN_7_SKILLS_ECOSYSTEM.md) | Skills ecosystem — 80+ skills, 10 disciplines | ~500 |
+| [LYRA_ULTRA_PLAN_7_SKILLS_ECOSYSTEM.md](plans/LYRA_ULTRA_PLAN_7_SKILLS_ECOSYSTEM.md) | Skills ecosystem — 56 skills, 14 packs | ~500 |
 | [LYRA_ULTRA_PLAN_8_VOICE_AUDIO_SYSTEM.md](plans/LYRA_ULTRA_PLAN_8_VOICE_AUDIO_SYSTEM.md) | Voice & audio — packs, pipeline, dictation | ~400 |
 | [LYRA_ULTRA_PLAN_9_TOOLS_UNIVERSE.md](plans/LYRA_ULTRA_PLAN_9_TOOLS_UNIVERSE.md) | Tools universe — 200+ tools, 20 toolsets | ~450 |
 | [LYRA_ULTRA_PLAN_10_MODEL_ROUTER_V2.md](plans/LYRA_ULTRA_PLAN_10_MODEL_ROUTER_V2.md) | Intelligent router — 5 layers, cost cascading | ~400 |
@@ -667,8 +667,8 @@ Each Lyra innovation traces to its research source. See [`docs/research/papers.m
 - [`docs/architecture/safety-architecture.md`](docs/architecture/safety-architecture.md) — Parallax-style cognitive-executive separation
 - [`docs/architecture/memory-consolidation.md`](docs/architecture/memory-consolidation.md) — Dream 4-phase consolidation design
 - [`docs/architecture/harness-evolution.md`](docs/architecture/harness-evolution.md) — Meta-optimization loop architecture
-- [`docs/research/papers.md`](docs/research/papers.md) — 38+ paper absorption matrix
-- [`docs/research/repos.md`](docs/research/repos.md) — 45+ repository absorption matrix
+- [`docs/research/papers.md`](docs/research/papers.md) — 79 paper absorption matrix
+- [`docs/research/repos.md`](docs/research/repos.md) — 50+ repository absorption matrix
 - [`docs/research/breakthrough-synthesis.md`](docs/research/breakthrough-synthesis.md) — Plan 13 key findings
 - [`docs/roadmap.md`](docs/roadmap.md) — Development roadmap
 - [`README.md`](README.md) — Project overview with all visualizations

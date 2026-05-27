@@ -29,7 +29,7 @@
 
 ```
 src/                  # Core Python library (agents, memory, hooks, rules, skills, security)
-packages/             # 135+ subpackages in 3 tiers (Foundation → Breakthrough → AGI Ascent)
+packages/             # 96 packages in 3 tiers (Foundation → Breakthrough → AGI Ascent)
   lyra-core/          # Kernel: AgentLoop, TDD gate, permissions, HIR observability, Pivot/Refine
   lyra-cli/           # CLI application: Typer, prompt_toolkit REPL, 16 LLM providers
   lyra-*/             # Domain packages (reasoning, research, memory, evolution, safety, audio, etc.)
@@ -140,12 +140,12 @@ Lyra is downstream of a substantial research ecosystem. Every novel technique tr
 - **CESP v1.0**: Cross-Environment Sound Protocol → `lyra_audio/cesp_engine.py` — 12 event categories, 6-layer pack hierarchy
 - **Audio Suppression**: Silent hours, meeting detection, spam throttling → `lyra_audio/audio_suppression.py`
 
-See [`docs/research/papers.md`](docs/research/papers.md) for the complete 59 paper absorption matrix.
-See [`docs/research/repos.md`](docs/research/repos.md) for the 45+ repository absorption matrix.
+See [`docs/research/papers.md`](docs/research/papers.md) for the complete 79 paper absorption matrix.
+See [`docs/research/repos.md`](docs/research/repos.md) for the 50+ repository absorption matrix.
 
 ## Plans
 
-Lyra's AGI breakthrough is planned across 14 ultra plans:
+Lyra's AGI breakthrough is planned across 17 ultra plans:
 
 | Plan | Focus |
 |------|-------|
@@ -164,6 +164,9 @@ Lyra's AGI breakthrough is planned across 14 ultra plans:
 | [**Plan 25**](plans/LYRA_ULTRA_PLAN_25_SAFETY_VERIFICATION_UPGRADE.md) | **Safety — MAVEN, spectral guardrails, zkAgent proofs, 10 benchmarks** |
 | [**Plan 26**](plans/LYRA_ULTRA_PLAN_26_TOOLS_INTEGRATION_ECOSYSTEM.md) | **Tools — 200+ tools, plugin system, MCP gateway, 71 slash commands, channels** |
 | [**Plan 27**](plans/LYRA_ULTRA_PLAN_27_MEMAGENT_BREAKTHROUGH_MEMORY.md) | **Memory — 8-layer cognitive stack, 20 ICLR papers, active reconstruction, agentic Zettelkasten, neuroscience grounding, MemGrad optimization** |
+| [**Plan 28**](plans/LYRA_ULTRA_PLAN_28_PLUGIN_ECOSYSTEM.md) | **Plugin — Sound effects system, 12 curated themes, plugin architecture** |
+| [**Plan 20**](plans/LYRA_ULTRA_PLAN_20_OPEN_ENDED_LEARNER.md) | **Learning — Open-ended learner, Agent Arena challenge platform** |
+| [**Plan 19**](plans/LYRA_ULTRA_PLAN_19_CHALLENGE_EVALUATION.md) | **Evals — Challenge evaluation engine, multi-metric framework, adversarial generation** |
 
 ## Dangerous Operations
 

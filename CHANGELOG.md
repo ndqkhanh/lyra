@@ -2,6 +2,81 @@
 
 All notable changes to the Lyra project.
 
+## [7.0.0] — 2026-05-27
+
+### Phase 5: Breakthrough Production (5.1–5.4)
+
+#### Phase 5.4 — Production Consolidation
+- **UI**: New components (AgentTree, Markdown, ModelPicker, PhaseTracker), hooks, modes (Debug/Standard/Minimal), render optimization utilities, vitest test infrastructure
+- **Model Router v2**: Task classifier, complexity estimator, confidence escalation, performance history tracking
+- **Continual Learning**: Instinct module (TDD patterns, codebase conventions), Metaclaw module (cross-session learning)
+- **Production Hardening**: Conformal prediction, escape prevention, failure pattern detection, reliability scoring, trajectory analysis
+- **Evolution Phase 3**: Restructured into analysis/generation/sandbox subpackages with dedicated models and tests
+- **Reasoning**: ReAct engine (Reason + Act interleaved), updated reasoning types, engine test suite
+- **Core**: API module (core/errors/response), messaging module (eventbus/message/router/types), breakthrough tests
+- **New packages**: lyra-integrity (ARIS 3-stage adversarial review), lyra-tools (code quality, file ops, git ops, network ops, secrets scan, tool registry)
+- **UI overhaul**: Ink-based TUI (lyra-ink package), comprehensive component library, slash command system, gateway client, theme presets
+
+#### Phase 5.3 — MCP Protocol Integration
+- MCP server + enterprise gateway with trust banners and injection guards
+- Progressive tool discovery with deferred schema loading
+- Bidirectional MCP: Lyra as consumer and server
+
+#### Phase 5.2 — Skills Ecosystem v2
+- 56 skills across 14 packs
+- SkillOpt text-space optimizer integration
+- Cross-skill knowledge transfer with Skill Weaving
+
+#### Phase 5.1 — NeuroMemory Architecture
+- A-MAC Admission Control for memory writes
+- Health Monitor for memory system diagnostics
+- Dream 4-phase consolidation (Orient→Gather→Consolidate→Prune)
+- ICLR 2026 MemAgent Workshop papers integrated (A-Mem, MRAgent, MemGrad, CoMem, CraniMem, etc.)
+
+### Phase 4 — Production Hardening
+- Tool Pipelines with DAG-based execution
+- Hot Reload for configuration changes
+- Goal Decomposer for complex task breakdown
+- Benchmark Harness with pass@k evaluation
+
+### Phase 3 — Self-Improvement
+- 4-Gate Skill Validation pipeline
+- Cross-Skill Knowledge Transfer
+- GEPA v2 prompt evolution integration
+
+### Phase 2 — Compound Intelligence
+- Task Decomposer for hierarchical planning
+- 5-Slot Model Router (reasoning/coding/quick/creative/planning)
+- Latent Bridge for inter-agent state sharing
+- Hash Editor for content-addressable edits
+- Quality Arbiter for output validation
+
+### Phase 1 — Safety Governance Framework
+- 4 approval gates (plan, auto-edit, bypass, auto-mode)
+- Reasoning Monitor for chain-of-thought auditing
+- Crypto Audit trail for tamper-proof logs
+- Alignment Monitor for value drift detection
+
+### Plan 28 — Plugin Ecosystem + Theme Engine
+- Sound Effects System with 12 event categories
+- Theme Engine with 12 curated themes (Catppuccin, Tokyo Night, Dracula, Nord, Gruvbox, etc.)
+- Plugin architecture for extensibility
+
+### Plan 27 — MemAgent Breakthrough Memory
+- 20 ICLR 2026 MemAgent Workshop papers integrated across 8 phases (27.1–27.8)
+- Agentic Zettelkasten Memory (A-Mem), Active Memory Reconstruction (MRAgent)
+- Neuroscience-Grounded Cognitive Architecture, MemGrad Self-Optimization
+- CoMem Async Memory Pipeline, Cost-Sensitive Multi-Store Routing
+- Modular Compression, Gated Consolidation, Memory Transplant, Heuristic Pool
+
+### Plan 20 — Open-Ended Learner + Agent Arena
+- Challenge platform for agent evaluation
+- Open-ended learning environment
+
+### Plan 19 — Challenge Evaluation Engine
+- Multi-metric evaluation framework
+- Adversarial challenge generation
+
 ## [6.0.0] — 2026-05-25
 
 ### 🚀 Breaking Changes

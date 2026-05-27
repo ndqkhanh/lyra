@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lyra"
-version = "5.0.0"
-description = "🧬 Lyra — AGI Through Emergence. 124 packages, 20 plans, 23 research waves."
+version = "7.0.0"
+description = "Lyra — AGI Through Emergence. 96 packages, 17 plans, 7 research waves."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
