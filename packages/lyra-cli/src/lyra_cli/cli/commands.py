@@ -95,6 +95,7 @@ LYRA_COMMANDS = {
     "/tui": "Switch rendering mode",
     "/vim": "Toggle vim mode",
     "/sandbox": "Toggle filesystem sandbox",
+    "/sound": "Sound effects — list, select, toggle, preview",
 
     # === OBSERVABILITY & DEBUGGING ===
     "/trace": "Toggle event logging",
@@ -170,7 +171,7 @@ def get_command_category(command: str) -> str:
         "research": ["/research", "/investigate", "/deep-research"],
         "scheduling": ["/cron", "/schedule", "/loop"],
         "memory": ["/reflect", "/btw"],
-        "theme": ["/theme", "/color", "/statusline", "/fast", "/focus", "/tui", "/vim", "/sandbox"],
+        "theme": ["/theme", "/color", "/statusline", "/fast", "/focus", "/tui", "/vim", "/sandbox", "/sound"],
         "debug": ["/trace", "/self", "/context", "/stats", "/cost", "/badges", "/debug", "/doctor", "/hooks", "/permissions", "/usage"],
         "advanced": ["/autopilot", "/ultrawork", "/ralph", "/ralplan", "/continue", "/sharpen", "/directive", "/contract", "/batch", "/add-dir", "/pr-comments", "/feedback", "/release-notes", "/logout", "/plugin", "/reload-plugins", "/claude-api"],
         "unique": ["/scaling", "/coverage", "/bundle", "/meta-evolve", "/commands", "/keybindings", "/palette", "/soul", "/policy", "/evals", "/auth", "/init", "/rewind", "/redo", "/toolsets", "/wiki", "/voice", "/split", "/pair", "/recap"],

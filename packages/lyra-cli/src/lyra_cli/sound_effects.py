@@ -117,6 +117,10 @@ class SoundManager:
         return self._active_pack.name if self._active_pack else None
 
     @property
+    def active_pack(self) -> SoundPack | None:
+        return self._active_pack
+
+    @property
     def available_packs(self) -> list[str]:
         return list(self._packs.keys())
 
