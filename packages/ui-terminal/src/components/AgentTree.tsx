@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Box, Text } from 'ink'
-import { useUIStore, colors, symbols } from '@lyra/ui-core'
+import { useUIStore, useThemeColors, symbols } from '@lyra/ui-core'
 
 export interface AgentInfo {
   id: string
@@ -17,6 +17,7 @@ interface AgentTreeProps {
 }
 
 export function AgentTree({ sessionId, visible }: AgentTreeProps) {
+  const colors = useThemeColors()
   const session = useUIStore(state => state.sessions.get(sessionId))
   const [agents, setAgents] = useState<AgentInfo[]>([])
   const [elapsedMap, setElapsedMap] = useState<Record<string, number>>({})

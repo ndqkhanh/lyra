@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react'
 import { Box, Text, useInput } from 'ink'
-import { useUIStore, colors } from '@lyra/ui-core'
+import { useUIStore, useThemeColors } from '@lyra/ui-core'
 
 interface TranscriptViewerProps {
   sessionId: string
@@ -9,6 +9,7 @@ interface TranscriptViewerProps {
 }
 
 export function TranscriptViewer({ sessionId, visible, onClose }: TranscriptViewerProps) {
+  const colors = useThemeColors()
   const session = useUIStore(state => state.sessions.get(sessionId))
   const [searchQuery, setSearchQuery] = useState('')
   const [searchMode, setSearchMode] = useState(false)

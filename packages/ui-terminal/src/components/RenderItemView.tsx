@@ -1,5 +1,7 @@
 import React from 'react'
+import { Text } from 'ink'
 import type { RenderItem } from '@lyra/ui-core'
+import { useThemeColors } from '@lyra/ui-core'
 import { UserTextMessage } from './items/UserTextMessage'
 import { UserImageMessage } from './items/UserImageMessage'
 import { AssistantTextMessage } from './items/AssistantTextMessage'
@@ -13,6 +15,7 @@ interface RenderItemViewProps {
 }
 
 export const RenderItemView = React.memo(function RenderItemView({ item }: RenderItemViewProps) {
+  const colors = useThemeColors()
   switch (item.kind) {
     case 'user-text':
       return <UserTextMessage item={item} />
@@ -28,5 +31,7 @@ export const RenderItemView = React.memo(function RenderItemView({ item }: Rende
       return <ErrorItem item={item} />
     case 'system-notice':
       return <SystemNotice item={item} />
+    default:
+      return <Text color={colors.errorHigh}>Unknown render item: {(item as RenderItem).kind}</Text>
   }
 })

@@ -1,8 +1,7 @@
-import React, { useEffect, useState, useMemo } from 'react'
-import { Box, Text, useInput, useApp } from 'ink'
-import { useUIStore, colors, symbols } from '@lyra/ui-core'
+import React, { useEffect, useState, useCallback } from 'react'
+import { Box, useInput, useApp } from 'ink'
+import { useUIStore } from '@lyra/ui-core'
 import { LocalTransport } from '@lyra/ui-transport'
-import { Header } from './components/Header'
 import { ConversationView } from './components/ConversationView'
 import { InputArea } from './components/InputArea'
 import { StatusBar } from './components/StatusBar'
@@ -10,23 +9,14 @@ import { CommandPalette } from './components/CommandPalette'
 import { AgentTree } from './components/AgentTree'
 import { logger } from './utils/logger'
 
-// Clear screen and hide cursor
-process.stdout.write('\x1Bc')
-process.stdout.write('\x1B[?25l')
-
-function CleanDivider({ width }: { width: number }) {
-  return (
-    <Box>
-      <Text color={colors.border}>{symbols.horizontalLine.repeat(Math.max(0, width))}</Text>
-    </Box>
-  )
-}
-
+// Hermes-style layout — matches appLayout.tsx exactly:
+//   AlternateScreen → Box column → [
+//     TranscriptPane (ConversationView),
+//     ComposerPane (InputArea with StatusBar at top inside),
+//     StatusRulePane at bottom (StatusBar)
+//   ]
 export function App() {
   const { exit } = useApp()
-  // Only subscribe to the stable session ID string — never the session object
-  // (session is an Immer proxy that changes reference on every mutation,
-  // which would re-render the entire App tree including the header)
   const activeSessionId = useUIStore(state => state.activeSessionId)
   const createSession = useUIStore(state => state.createSession)
   const setTransport = useUIStore(state => state.setTransport)
@@ -34,12 +24,8 @@ export function App() {
   const setProviders = useUIStore(state => state.setProviders)
   const setModelAndProvider = useUIStore(state => state.setModelAndProvider)
 
-  const [terminalWidth, setTerminalWidth] = useState(process.stdout.columns || 120)
   const [showCommandPalette, setShowCommandPalette] = useState(false)
   const [showAgentTree, setShowAgentTree] = useState(false)
-
-  // Memoized header — only re-creates when terminal width changes
-  const headerEl = useMemo(() => <Header width={terminalWidth || 120} />, [terminalWidth])
 
   useEffect(() => {
     const sessionId = 'default'
@@ -50,12 +36,12 @@ export function App() {
       setModelAndProvider(lyraModel, 'anthropic')
     }
 
-    // Allow tests to inject a mock transport before rendering
     const existingTransport = useUIStore.getState().transport
     const transport = existingTransport ?? new LocalTransport()
     if (!existingTransport) {
       setTransport(transport)
     }
+    transport.setSessionId(sessionId)
 
     const unsubscribeMessage = transport.onMessage((message) => {
       useUIStore.getState().addMessage(sessionId, message)
@@ -73,7 +59,6 @@ export function App() {
           startTime: Date.now(),
         })
       } else if (chunk.type === 'tool-result') {
-        // Update the last running tool to success
         const session = useUIStore.getState().sessions.get(sessionId)
         if (session) {
           const runningTool = [...session.activeTools].reverse().find(t => t.status === 'running')
@@ -102,6 +87,8 @@ export function App() {
         content: `Error: ${error.message}`,
         timestamp: Date.now()
       })
+      // CRITICAL: Cancel streaming so the user can send another message
+      useUIStore.getState().cancelStreaming(sessionId)
     })
 
     const connectWithRetry = async (maxRetries = 10, delay = 500) => {
@@ -144,19 +131,19 @@ export function App() {
       fetchSettings()
     }, 1000)
 
-    const handleResize = () => {
-      setTerminalWidth(process.stdout.columns || 120)
-    }
-    process.stdout.on('resize', handleResize)
-
     return () => {
       unsubscribeMessage()
       unsubscribeStreamChunk()
       unsubscribeStreamEvent()
       unsubscribeError()
       transport.disconnect()
-      process.stdout.off('resize', handleResize)
     }
+  }, [])
+
+  const handleCommandPalette = useCallback((command: string) => {
+    const transport = useUIStore.getState().transport
+    if (transport) transport.sendMessage(command)
+    setShowCommandPalette(false)
   }, [])
 
   useInput((input, key) => {
@@ -192,12 +179,6 @@ export function App() {
       return
     }
 
-    // Ctrl+T — Hide tasks/agent tree
-    if (key.ctrl && input === 't') {
-      setShowAgentTree(false)
-      return
-    }
-
     if (key.shift && key.tab) {
       const session = useUIStore.getState().getActiveSession()
       if (session) {
@@ -215,29 +196,27 @@ export function App() {
     return null
   }
 
+  // Hermes layout: AlternateScreen → Box column → [Transcript, ComposerPane, StatusRule at bottom]
   return (
     <Box flexDirection="column">
-      {headerEl}
-      <ConversationView sessionId={activeSessionId} />
-      <CleanDivider width={terminalWidth} />
+      {/* Transcript area — Hermes TranscriptPane (ScrollBox) */}
+      <Box flexDirection="column" flexGrow={1}>
+        <ConversationView sessionId={activeSessionId} />
+      </Box>
+
+      {/* Composer area — StatusBar at top inside + TextInput = Hermes ComposerPane */}
       <InputArea sessionId={activeSessionId} />
-      <CleanDivider width={terminalWidth} />
-      <StatusBar sessionId={activeSessionId} width={terminalWidth} />
+
+      {/* Status bar at bottom — Hermes StatusRulePane at="bottom" */}
+      <StatusBar sessionId={activeSessionId} />
+
       <AgentTree sessionId={activeSessionId} visible={showAgentTree} />
 
       {showCommandPalette && (
-        <Box
-          position="absolute"
-          marginTop={5}
-          marginLeft={35}
-        >
+        <Box marginTop={5} marginLeft={35}>
           <CommandPalette
             visible={showCommandPalette}
-            onSelect={(command) => {
-              const transport = useUIStore.getState().transport
-              if (transport) transport.sendMessage(command)
-              setShowCommandPalette(false)
-            }}
+            onSelect={handleCommandPalette}
             onClose={() => setShowCommandPalette(false)}
           />
         </Box>

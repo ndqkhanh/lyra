@@ -1,13 +1,14 @@
 import React from 'react'
 import { Box, Text } from 'ink'
 import type { UserImageItem } from '@lyra/ui-core'
-import { colors } from '@lyra/ui-core'
+import { useThemeColors } from '@lyra/ui-core'
 
 interface Props {
   item: UserImageItem
 }
 
 export function UserImageMessage({ item }: Props) {
+  const colors = useThemeColors()
   return (
     <Box flexDirection="column" marginBottom={1}>
       <Box>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Box, Text, useInput } from 'ink'
-import { colors } from '@lyra/ui-core'
+import { useThemeColors } from '@lyra/ui-core'
 
 interface ScrollSpeedPickerProps {
   visible: boolean
@@ -17,6 +17,7 @@ const SPEEDS = [
 ]
 
 export function ScrollSpeedPicker({ visible, onSelect, onClose }: ScrollSpeedPickerProps) {
+  const colors = useThemeColors()
   const [selectedIndex, setSelectedIndex] = useState(2)
 
   useInput((_input, key) => {

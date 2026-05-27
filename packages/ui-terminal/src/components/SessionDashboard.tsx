@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { Box, Text, useInput } from 'ink'
-import { useUIStore, colors } from '@lyra/ui-core'
+import { useUIStore, useThemeColors } from '@lyra/ui-core'
 
 interface SessionDashboardProps {
   visible: boolean
@@ -18,6 +18,7 @@ interface SessionSummary {
 }
 
 export function SessionDashboard({ visible, activeSessionId, onSelect, onClose }: SessionDashboardProps) {
+  const colors = useThemeColors()
   const sessions = useUIStore(state => state.sessions)
   const [selectedIndex, setSelectedIndex] = useState(0)
 

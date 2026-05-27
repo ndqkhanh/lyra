@@ -188,6 +188,7 @@ export interface SessionState {
   id: string
   messages: Message[]
   previewMessages: Message[]  // Streaming zone
+  queuedMessages: Message[]   // Pending messages waiting to be processed
   isStreaming: boolean
   isThinking: boolean
   activeTools: ToolCallInfo[]
@@ -217,9 +218,11 @@ export interface PhaseInfo {
 
 // Transport Interface
 export interface Transport {
+  readonly status: ConnectionStatus
   connect(): Promise<void>
   disconnect(): Promise<void>
   sendMessage(content: string, attachments?: Attachment[], model?: string): Promise<void>
+  setSessionId(id: string): void
   onMessage(handler: (message: Message) => void): () => void
   onStreamChunk(handler: (chunk: StreamChunk) => void): () => void
   onStreamEvent(handler: (event: StreamEvent) => void): () => void

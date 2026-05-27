@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { Box, Text } from 'ink'
-import { useUIStore, colors } from '@lyra/ui-core'
+import { useUIStore, useThemeColors } from '@lyra/ui-core'
 import { RenderItemView } from './RenderItemView'
 
 interface FocusModeProps {
@@ -9,6 +9,7 @@ interface FocusModeProps {
 }
 
 export function FocusMode({ sessionId, enabled }: FocusModeProps) {
+  const colors = useThemeColors()
   const session = useUIStore(state => state.sessions.get(sessionId))
   const allItems = useUIStore(state => state.getRenderItems(sessionId))
 

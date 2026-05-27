@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { Box, Text, useInput } from 'ink'
-import { useUIStore, colors, symbols } from '@lyra/ui-core'
+import { useUIStore, useThemeColors, symbols } from '@lyra/ui-core'
 import type { ProviderInfo, ModelInfo } from '@lyra/ui-core'
 
 interface ModelPickerProps {
@@ -18,6 +18,7 @@ interface FlatEntry {
 }
 
 export function ModelPicker({ visible, onSelect, onCancel, onNeedKey }: ModelPickerProps) {
+  const colors = useThemeColors()
   const providers = useUIStore(state => state.providers)
   const currentModel = useUIStore(state => state.currentModel)
   const currentProvider = useUIStore(state => state.currentProvider)

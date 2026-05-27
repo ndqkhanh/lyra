@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Box, Text, useInput } from 'ink'
 import TextInput from 'ink-text-input'
-import { colors } from '@lyra/ui-core'
+import { useThemeColors } from '@lyra/ui-core'
 
 interface SideQuestionProps {
   visible: boolean
@@ -10,6 +10,7 @@ interface SideQuestionProps {
 }
 
 export function SideQuestion({ visible, onSubmit, onClose }: SideQuestionProps) {
+  const colors = useThemeColors()
   const [question, setQuestion] = useState('')
   const [submitted, setSubmitted] = useState(false)
 

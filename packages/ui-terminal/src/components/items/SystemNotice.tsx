@@ -1,19 +1,19 @@
 import React from 'react'
 import { Box, Text } from 'ink'
 import type { SystemNoticeItem as SystemNoticeItemType } from '@lyra/ui-core'
-import { colors, symbols } from '@lyra/ui-core'
+import { useThemeColors, symbols } from '@lyra/ui-core'
 
 interface Props {
   item: SystemNoticeItemType
 }
 
-const noticeStyle: Record<string, { color: string; icon: string }> = {
-  info:    { color: colors.info,    icon: symbols.info },
-  warning: { color: colors.warning, icon: symbols.warning },
-  success: { color: colors.success, icon: symbols.success },
-}
-
 export function SystemNotice({ item }: Props) {
+  const colors = useThemeColors()
+  const noticeStyle: Record<string, { color: string; icon: string }> = {
+    info:    { color: colors.info,    icon: symbols.info },
+    warning: { color: colors.warning, icon: symbols.warning },
+    success: { color: colors.success, icon: symbols.success },
+  }
   const style = noticeStyle[item.noticeType] || noticeStyle.info
   return (
     <Box marginBottom={1}>

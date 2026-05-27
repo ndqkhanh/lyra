@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Box, Text, useInput } from 'ink'
-import { colors } from '@lyra/ui-core'
+import { useThemeColors } from '@lyra/ui-core'
 import { COMMANDS, type Command } from '../constants/commands'
 
 interface CommandPaletteProps {
@@ -10,6 +10,7 @@ interface CommandPaletteProps {
 }
 
 export function CommandPalette({ visible, onSelect, onClose }: CommandPaletteProps) {
+  const colors = useThemeColors()
   const [query, setQuery] = useState('')
   const [selectedIndex, setSelectedIndex] = useState(0)
 

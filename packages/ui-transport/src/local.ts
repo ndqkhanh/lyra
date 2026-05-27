@@ -10,8 +10,12 @@ import type {
 
 export class LocalTransport extends EventEmitter implements Transport {
   private serverUrl = 'http://localhost:3737'
-  private status: ConnectionStatus = 'disconnected'
+  status: ConnectionStatus = 'disconnected'
   private sessionId: string | null = null
+
+  setSessionId(id: string): void {
+    this.sessionId = id
+  }
 
   async connect(): Promise<void> {
     this.status = 'connecting'
@@ -73,6 +77,7 @@ export class LocalTransport extends EventEmitter implements Transport {
       }
 
       let buffer = ''
+      let streamEnded = false
 
       while (true) {
         const { done, value } = await reader.read()
@@ -137,9 +142,10 @@ export class LocalTransport extends EventEmitter implements Transport {
                 break
               }
               case 'complete': {
+                streamEnded = true
                 const chunk: StreamChunk = {
                   type: 'text',
-                  content: '',
+                  content: data.payload || '',
                   done: true,
                   metadata: data.metadata,
                 }
@@ -147,12 +153,29 @@ export class LocalTransport extends EventEmitter implements Transport {
                 break
               }
               case 'error': {
+                streamEnded = true
                 this.emit('error', new Error(data.payload))
+                const doneChunk: StreamChunk = {
+                  type: 'text',
+                  content: '',
+                  done: true,
+                }
+                this.emit('stream-chunk', doneChunk)
                 break
               }
             }
           }
         }
+      }
+
+      // Safety: if the stream ended without a terminal event, unwind streaming state
+      if (!streamEnded) {
+        const doneChunk: StreamChunk = {
+          type: 'text',
+          content: '',
+          done: true,
+        }
+        this.emit('stream-chunk', doneChunk)
       }
     } catch (error) {
       this.emit('error', error instanceof Error ? error : new Error(String(error)))

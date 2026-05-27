@@ -1,132 +1,168 @@
 /**
- * Color palette for Lyra UI
- * Matches Claude Code's visual style with vibrant colors
+ * Color palette for Lyra UI — theme-driven via deriveColors().
+ * The static `colors` export is the Dracula default for backward compat.
+ * React components should use `useThemeColors()` for live theme switching.
  */
 
-export const colors = {
-  // Primary message colors (more vibrant)
-  userPrompt: '#00D9FF',      // Bright cyan for user prompts
-  userText: '#FFFFFF',        // White for user text
-  assistant: '#E0E0E0',       // Light gray for assistant text
-  thinking: '#FFD700',        // Gold for thinking indicator
-  backgroundTask: '#9370DB',  // Medium purple for background tasks
-  system: '#00CED1',          // Cyan for system messages
+import { useMemo } from 'react'
+import { useUIStore } from '../state/store'
+import type { ThemePalette } from './presets'
+import { getThemePreset, getDefaultTheme } from './presets'
 
-  // Status colors (vibrant)
-  success: '#00FF7F',         // Spring green
-  error: '#FF4444',           // Bright red
-  warning: '#FFA500',         // Orange
-  info: '#00BFFF',            // Deep sky blue
+export interface ColorSet {
+  gold: string; amber: string; bronze: string; cornsilk: string; dim: string
+  label: string; shellDollar: string
+  completionBg: string; completionCurrentBg: string; selectionBg: string
+  statusBg: string; statusFg: string; statusGood: string; statusWarn: string
+  statusBad: string; statusCritical: string
+  userPrompt: string; userText: string; assistant: string; thinking: string
+  backgroundTask: string; system: string
+  success: string; error: string; warning: string; info: string
+  toolName: string; toolSuccess: string; toolError: string
+  filePath: string; lineNumber: string; code: string
+  codeAdded: string; codeRemoved: string
+  timestamp: string; muted: string; emptyState: string; separator: string; border: string
+  background: string; backgroundAlt: string
+  keyword: string; string: string; number: string; comment: string
+  function: string; variable: string
+  statusIdle: string; statusActive: string; statusError: string
+  modeMinimal: string; modeStandard: string; modeDebug: string
+  permission: string
+  commandSuccess: string; commandError: string; commandStdout: string; commandStderr: string; commandPrompt: string
+  codeKeyword: string; codeString: string; codeNumber: string; codeComment: string
+  codeFunction: string; codeVariable: string; codeOperator: string; codeBackground: string
+  diffAdded: string; diffAddedBg: string; diffRemoved: string; diffRemovedBg: string; diffContext: string
+  markdownHeading: string; markdownBold: string; markdownItalic: string
+  markdownCode: string; markdownCodeBlock: string; markdownLink: string
+  markdownQuote: string; markdownList: string
+  agentThinking: string; agentComposing: string; agentToolRunning: string
+  agentStreaming: string; agentIdle: string; agentError: string
+  shortcutKey: string; shortcutDescription: string; shortcutSeparator: string
+  errorCritical: string; errorHigh: string; errorMedium: string; errorLow: string; errorInfo: string
+  collapsibleExpanded: string; collapsibleCollapsed: string; collapsibleBorder: string
+  statusPending: string; statusRunning: string; statusSuccess: string
+  statusCancelled: string; statusSkipped: string
+}
 
-  // Tool execution colors
-  toolName: '#FF79C6',        // Pink for tool names
-  toolSuccess: '#50FA7B',     // Green for success
-  toolError: '#FF5555',       // Red for errors
+/** Derive full ColorSet from a ThemePalette. */
+export function deriveColors(palette: ThemePalette): ColorSet {
+  return {
+    gold: palette.accent,
+    amber: palette.yellow,
+    bronze: palette.orange,
+    cornsilk: palette.foreground,
+    dim: palette.subtext0,
+    label: palette.accent,
+    shellDollar: palette.blue,
+    completionBg: palette.selection,
+    completionCurrentBg: palette.surface2,
+    selectionBg: palette.surface1,
+    statusBg: palette.statusBg,
+    statusFg: palette.statusFg,
+    statusGood: palette.statusSuccess,
+    statusWarn: palette.statusWarning,
+    statusBad: palette.orange,
+    statusCritical: palette.statusError,
+    userPrompt: palette.foreground,
+    userText: palette.foreground,
+    assistant: palette.text,
+    thinking: palette.yellow,
+    backgroundTask: palette.purple,
+    system: palette.subtext0,
+    success: palette.green,
+    error: palette.red,
+    warning: palette.yellow,
+    info: palette.blue,
+    toolName: palette.purple,
+    toolSuccess: palette.green,
+    toolError: palette.red,
+    filePath: palette.cyan,
+    lineNumber: palette.subtext0,
+    code: palette.text,
+    codeAdded: palette.green,
+    codeRemoved: palette.red,
+    timestamp: palette.subtext0,
+    muted: palette.subtext1,
+    emptyState: palette.cyan,
+    separator: palette.surface1,
+    border: palette.surface1,
+    background: palette.background,
+    backgroundAlt: palette.surface0,
+    keyword: palette.purple,
+    string: palette.green,
+    number: palette.purple,
+    comment: palette.comment,
+    function: palette.blue,
+    variable: palette.text,
+    statusIdle: palette.comment,
+    statusActive: palette.green,
+    statusError: palette.red,
+    modeMinimal: palette.cyan,
+    modeStandard: palette.green,
+    modeDebug: palette.orange,
+    permission: palette.red,
+    commandSuccess: palette.green,
+    commandError: palette.red,
+    commandStdout: palette.text,
+    commandStderr: palette.orange,
+    commandPrompt: palette.cyan,
+    codeKeyword: palette.purple,
+    codeString: palette.green,
+    codeNumber: palette.purple,
+    codeComment: palette.comment,
+    codeFunction: palette.blue,
+    codeVariable: palette.text,
+    codeOperator: palette.purple,
+    codeBackground: palette.background,
+    diffAdded: palette.green,
+    diffAddedBg: palette.surface0,
+    diffRemoved: palette.red,
+    diffRemovedBg: palette.surface0,
+    diffContext: palette.comment,
+    markdownHeading: palette.purple,
+    markdownBold: palette.text,
+    markdownItalic: palette.subtext1,
+    markdownCode: palette.yellow,
+    markdownCodeBlock: palette.text,
+    markdownLink: palette.cyan,
+    markdownQuote: palette.comment,
+    markdownList: palette.green,
+    agentThinking: palette.yellow,
+    agentComposing: palette.purple,
+    agentToolRunning: palette.cyan,
+    agentStreaming: palette.green,
+    agentIdle: palette.comment,
+    agentError: palette.red,
+    shortcutKey: palette.purple,
+    shortcutDescription: palette.comment,
+    shortcutSeparator: palette.surface1,
+    errorCritical: palette.red,
+    errorHigh: palette.red,
+    errorMedium: palette.orange,
+    errorLow: palette.yellow,
+    errorInfo: palette.cyan,
+    collapsibleExpanded: palette.green,
+    collapsibleCollapsed: palette.comment,
+    collapsibleBorder: palette.surface1,
+    statusPending: palette.orange,
+    statusRunning: palette.cyan,
+    statusSuccess: palette.green,
+    statusCancelled: palette.comment,
+    statusSkipped: palette.purple,
+  }
+}
 
-  // File/code colors
-  filePath: '#8BE9FD',        // Bright cyan for file paths
-  lineNumber: '#6272A4',      // Blue gray for line numbers
-  code: '#F8F8F2',            // Off white for code
-  codeAdded: '#50FA7B',       // Green for added lines
-  codeRemoved: '#FF5555',     // Red for removed lines
+/** React hook: returns theme-driven colors that update when activeThemeId changes. */
+export function useThemeColors(): ColorSet {
+  const activeThemeId = useUIStore(state => state.activeThemeId)
+  const preset = useMemo(() => {
+    const p = getThemePreset(activeThemeId)
+    return p ?? getDefaultTheme()
+  }, [activeThemeId])
+  return useMemo(() => deriveColors(preset.palette), [preset])
+}
 
-  // UI element colors
-  timestamp: '#6272A4',       // Blue gray for timestamps
-  muted: '#8899BB',           // Brighter muted text for readability
-  emptyState: '#8BE9FD',      // Cyan for empty state / placeholder
-  separator: '#44475A',       // Dark gray for separators
-  border: '#6272A4',          // Blue gray for borders
+/** Static colors — Dracula default for backward compat and non-React contexts. */
+export const colors: ColorSet = deriveColors(getDefaultTheme().palette)
 
-  // Background
-  background: '#282A36',      // Dracula background
-  backgroundAlt: '#1A1A1A',   // Darker gray
-
-  // Syntax highlighting (Dracula theme)
-  keyword: '#FF79C6',         // Pink
-  string: '#F1FA8C',          // Yellow
-  number: '#BD93F9',          // Purple
-  comment: '#6272A4',         // Blue gray
-  function: '#50FA7B',        // Green
-  variable: '#F8F8F2',        // Off white
-
-  // Status bar colors
-  statusIdle: '#6272A4',      // Blue gray
-  statusActive: '#50FA7B',    // Green
-  statusError: '#FF5555',     // Red
-
-  // Mode colors
-  modeMinimal: '#8BE9FD',     // Cyan
-  modeStandard: '#50FA7B',    // Green
-  modeDebug: '#FFB86C',       // Orange
-
-  // Permission & security
-  permission: '#FF4444',      // Red - permission warnings
-
-  // Command output
-  commandSuccess: '#50FA7B',  // Green
-  commandError: '#FF5555',    // Red
-  commandStdout: '#F8F8F2',   // Off white
-  commandStderr: '#FFB86C',   // Orange
-  commandPrompt: '#8BE9FD',   // Cyan
-
-  // Code syntax (enhanced)
-  codeKeyword: '#FF79C6',     // Pink
-  codeString: '#F1FA8C',      // Yellow
-  codeNumber: '#BD93F9',      // Purple
-  codeComment: '#6272A4',     // Blue gray
-  codeFunction: '#50FA7B',    // Green
-  codeVariable: '#F8F8F2',    // Off white
-  codeOperator: '#FF79C6',    // Pink
-  codeBackground: '#282A36',  // Dark background
-
-  // Diff colors
-  diffAdded: '#50FA7B',       // Green
-  diffAddedBg: '#1A3A1A',     // Dark green bg
-  diffRemoved: '#FF5555',     // Red
-  diffRemovedBg: '#3A1A1A',   // Dark red bg
-  diffContext: '#6272A4',     // Blue gray
-
-  // Markdown
-  markdownHeading: '#FF79C6', // Pink
-  markdownBold: '#F8F8F2',    // White
-  markdownItalic: '#E0E0E0',  // Light gray
-  markdownCode: '#F1FA8C',    // Yellow
-  markdownCodeBlock: '#F8F8F2', // Off white
-  markdownLink: '#8BE9FD',    // Cyan
-  markdownQuote: '#6272A4',   // Blue gray
-  markdownList: '#50FA7B',    // Green
-
-  // Agent states
-  agentThinking: '#FFD700',   // Gold
-  agentComposing: '#FF79C6',  // Pink
-  agentToolRunning: '#8BE9FD', // Cyan
-  agentStreaming: '#50FA7B',  // Green
-  agentIdle: '#6272A4',       // Gray
-  agentError: '#FF5555',      // Red
-
-  // Keyboard shortcuts
-  shortcutKey: '#BD93F9',     // Purple
-  shortcutDescription: '#6272A4', // Gray
-  shortcutSeparator: '#44475A', // Dark gray
-
-  // Error severity
-  errorCritical: '#FF0000',   // Bright red
-  errorHigh: '#FF5555',       // Red
-  errorMedium: '#FFB86C',     // Orange
-  errorLow: '#F1FA8C',        // Yellow
-  errorInfo: '#8BE9FD',       // Cyan
-
-  // Collapsible
-  collapsibleExpanded: '#50FA7B',   // Green
-  collapsibleCollapsed: '#6272A4',  // Gray
-  collapsibleBorder: '#44475A',     // Dark gray
-
-  // Status (enhanced)
-  statusPending: '#FFB86C',   // Orange
-  statusRunning: '#8BE9FD',   // Cyan
-  statusSuccess: '#50FA7B',   // Green
-  statusCancelled: '#6272A4', // Gray
-  statusSkipped: '#BD93F9',   // Purple
-} as const
-
-export type ColorName = keyof typeof colors
+export type ColorName = keyof ColorSet

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { Box, Text, useInput } from 'ink'
-import { useUIStore, colors } from '@lyra/ui-core'
+import { useUIStore, useThemeColors } from '@lyra/ui-core'
 
 interface RewindMenuProps {
   sessionId: string
@@ -16,6 +16,7 @@ interface Checkpoint {
 }
 
 export function RewindMenu({ sessionId, visible, onClose }: RewindMenuProps) {
+  const colors = useThemeColors()
   const session = useUIStore(state => state.sessions.get(sessionId))
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [showActions, setShowActions] = useState(false)

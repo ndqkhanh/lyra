@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Box, Text, useInput } from 'ink'
-import { colors, symbols } from '@lyra/ui-core'
+import { useThemeColors, symbols } from '@lyra/ui-core'
 
 interface CollapsibleProps {
   children: React.ReactNode
@@ -17,6 +17,7 @@ export function Collapsible({
   expandHint = 'ctrl+o to expand',
   animated = true
 }: CollapsibleProps) {
+  const colors = useThemeColors()
   const [collapsed, setCollapsed] = useState(initialCollapsed)
   const [animationFrame, setAnimationFrame] = useState(0)
 
@@ -77,6 +78,7 @@ export function CollapsibleText({
   expandHint = 'ctrl+o to expand',
   animated: _animated = false
 }: CollapsibleTextProps) {
+  const colors = useThemeColors()
   const [collapsed, setCollapsed] = useState(true)
 
   useInput((input, key) => {

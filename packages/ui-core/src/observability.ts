@@ -20,6 +20,9 @@ export type ObservabilityEventType =
   | 'session_start'
   | 'session_end'
   | 'message_commit'
+  | 'message_queued'
+  | 'message_dequeued'
+  | 'queue_cleared'
   | 'permission_mode_change'
 
 export interface ObservabilityEvent {

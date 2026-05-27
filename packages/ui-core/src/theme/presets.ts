@@ -72,6 +72,38 @@ export const THEME_PRESETS: Record<string, ThemePreset> = {
     },
   },
 
+  catppuccin_latte: {
+    id: 'catppuccin_latte',
+    name: 'Catppuccin Latte',
+    variant: 'light',
+    palette: {
+      background: '#EFF1F5',
+      foreground: '#4C4F69',
+      cursor: '#DC8A78',
+      selection: '#ACB0BE',
+      surface0: '#CCD0DA',
+      surface1: '#BCC0CC',
+      surface2: '#ACB0BE',
+      text: '#4C4F69',
+      subtext0: '#6C6F85',
+      subtext1: '#5C5F77',
+      comment: '#9CA0B0',
+      accent: '#8839EF',
+      red: '#D20F39',
+      green: '#40A02B',
+      yellow: '#DF8E1D',
+      blue: '#1E66F5',
+      purple: '#8839EF',
+      cyan: '#179299',
+      orange: '#FE640B',
+      statusBg: '#EFF1F5',
+      statusFg: '#4C4F69',
+      statusError: '#D20F39',
+      statusWarning: '#DF8E1D',
+      statusSuccess: '#40A02B',
+    },
+  },
+
   tokyo_night_storm: {
     id: 'tokyo_night_storm',
     name: 'Tokyo Night Storm',
@@ -423,11 +455,44 @@ export const THEME_PRESETS: Record<string, ThemePreset> = {
       statusSuccess: '#3ECF8E',
     },
   },
+
+  solarized_light: {
+    id: 'solarized_light',
+    name: 'Solarized Light',
+    variant: 'light',
+    palette: {
+      background: '#FDF6E3',
+      foreground: '#657B83',
+      cursor: '#657B83',
+      selection: '#EEE8D5',
+      surface0: '#EEE8D5',
+      surface1: '#93A1A1',
+      surface2: '#839496',
+      text: '#657B83',
+      subtext0: '#586E75',
+      subtext1: '#657B83',
+      comment: '#93A1A1',
+      accent: '#268BD2',
+      red: '#DC322F',
+      green: '#859900',
+      yellow: '#B58900',
+      blue: '#268BD2',
+      purple: '#6C71C4',
+      cyan: '#2AA198',
+      orange: '#CB4B16',
+      statusBg: '#FDF6E3',
+      statusFg: '#657B83',
+      statusError: '#DC322F',
+      statusWarning: '#B58900',
+      statusSuccess: '#859900',
+    },
+  },
 }
 
 /** Theme IDs in display order. */
 export const THEME_ORDER: string[] = [
   'catppuccin_mocha',
+  'catppuccin_latte',
   'tokyo_night_storm',
   'nord',
   'dracula',
@@ -439,6 +504,7 @@ export const THEME_ORDER: string[] = [
   'rose_pine_moon',
   'silk_circuit_neon',
   'sentry_sentinel_dark',
+  'solarized_light',
 ]
 
 /** Look up a theme preset by ID. */

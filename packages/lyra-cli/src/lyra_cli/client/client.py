@@ -166,9 +166,9 @@ class LyraClient:
         """
         req = self._normalize(request)
         sid = req.session_id or _new_session_id()
-        provider, slug = self._resolve_provider(req.model)
 
         try:
+            provider, slug = self._resolve_provider(req.model)
             messages = self._build_messages(sid, req)
 
             # Signal thinking phase start so the UI can show a spinner

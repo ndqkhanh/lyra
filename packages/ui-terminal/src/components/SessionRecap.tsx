@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { Box, Text } from 'ink'
-import { useUIStore, colors } from '@lyra/ui-core'
+import { useUIStore, useThemeColors } from '@lyra/ui-core'
 
 interface SessionRecapProps {
   sessionId: string
 }
 
 export function SessionRecap({ sessionId }: SessionRecapProps) {
+  const colors = useThemeColors()
   const session = useUIStore(state => state.sessions.get(sessionId))
   const [showRecap, setShowRecap] = useState(false)
 

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1779518934706,
+  "lastScanned": 1779853773534,
   "projectRoot": "/Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-cli",
   "techStack": {
     "languages": [
@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "cd packages/lyra-cli && python -m pytest tests/ -k \"llm\" --co -q 2>&1 | grep \"test_\" | wc -l",
+    "testCommand": "pytest",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -55,7 +55,7 @@
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 6,
-      "lastAccessed": 1779518934694,
+      "lastAccessed": 1779853773528,
       "keyFiles": [
         "AGENTS.md",
         "COMMANDS.md",
@@ -68,338 +68,42 @@
       "path": "packages",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1779518934694,
+      "lastAccessed": 1779853773528,
       "keyFiles": []
     },
     "specs": {
       "path": "specs",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1779518934695,
+      "lastAccessed": 1779853773528,
       "keyFiles": []
     },
     "src": {
       "path": "src",
       "purpose": "Source code",
-      "fileCount": 0,
-      "lastAccessed": 1779518934695,
-      "keyFiles": []
+      "fileCount": 4,
+      "lastAccessed": 1779853773529,
+      "keyFiles": [
+        "LYRA_UI_IMPLEMENTATION_COMPLETE.md",
+        "PROVIDER_ROUTING_REFACTOR_PLAN.md",
+        "REFACTOR_SUMMARY.md",
+        "test_phase5_6_integration.py"
+      ]
     },
     "tests": {
       "path": "tests",
       "purpose": "Test files",
-      "fileCount": 182,
-      "lastAccessed": 1779518934700,
+      "fileCount": 192,
+      "lastAccessed": 1779853773529,
       "keyFiles": [
         "__init__.py",
         "conftest.py",
+        "test_agent_fleet.py",
         "test_agent_loop_contract.py",
-        "test_agent_panel.py",
-        "test_ask_user_prompter.py"
+        "test_agent_panel.py"
       ]
     }
   },
-  "hotPaths": [
-    {
-      "path": "src/lyra_cli/interactive/session.py",
-      "accessCount": 116,
-      "lastAccessed": 1779676191271,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/cli/tui.py",
-      "accessCount": 79,
-      "lastAccessed": 1778860183176,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/cli/agent_integration.py",
-      "accessCount": 22,
-      "lastAccessed": 1778995656118,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/checkpoints.py",
-      "accessCount": 15,
-      "lastAccessed": 1778836708970,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/driver.py",
-      "accessCount": 10,
-      "lastAccessed": 1778834801206,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/status_source.py",
-      "accessCount": 9,
-      "lastAccessed": 1778838176810,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/tool_render.py",
-      "accessCount": 8,
-      "lastAccessed": 1778838176204,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/output.py",
-      "accessCount": 8,
-      "lastAccessed": 1779672066559,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/dialog_apikey.py",
-      "accessCount": 7,
-      "lastAccessed": 1778835562003,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/commands/registry.py",
-      "accessCount": 7,
-      "lastAccessed": 1778928918886,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/deepsearch.py",
-      "accessCount": 6,
-      "lastAccessed": 1778836230433,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/cli/input.py",
-      "accessCount": 6,
-      "lastAccessed": 1778858257561,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/__main__.py",
-      "accessCount": 6,
-      "lastAccessed": 1779285649095,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/spinner.py",
-      "accessCount": 5,
-      "lastAccessed": 1778837160763,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_live_progress.py",
-      "accessCount": 4,
-      "lastAccessed": 1778832620023,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_status_source_tasks.py",
-      "accessCount": 4,
-      "lastAccessed": 1778832768134,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/v311_commands.py",
-      "accessCount": 4,
-      "lastAccessed": 1778836190242,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/cli/progress_bars.py",
-      "accessCount": 3,
-      "lastAccessed": 1778826095874,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_tool_render.py",
-      "accessCount": 3,
-      "lastAccessed": 1778826781135,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/key_store.py",
-      "accessCount": 3,
-      "lastAccessed": 1778835380338,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/agent_panel.py",
-      "accessCount": 3,
-      "lastAccessed": 1778837160386,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_spinner_tokens.py",
-      "accessCount": 3,
-      "lastAccessed": 1778839291371,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/cli/repl.py",
-      "accessCount": 3,
-      "lastAccessed": 1779672082828,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_tui_v2_status_bg_tasks.py",
-      "accessCount": 2,
-      "lastAccessed": 1778834586401,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_agent_panel.py",
-      "accessCount": 2,
-      "lastAccessed": 1778834719565,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/config_store.py",
-      "accessCount": 2,
-      "lastAccessed": 1778834970372,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/cli/credentials.py",
-      "accessCount": 2,
-      "lastAccessed": 1778835019841,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_key_store.py",
-      "accessCount": 2,
-      "lastAccessed": 1778835583512,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/user_commands.py",
-      "accessCount": 2,
-      "lastAccessed": 1778836189862,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/worktree_command.py",
-      "accessCount": 2,
-      "lastAccessed": 1778836194426,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/ultrareview_command.py",
-      "accessCount": 2,
-      "lastAccessed": 1778836203559,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/spec_driven.py",
-      "accessCount": 2,
-      "lastAccessed": 1778836307674,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/model_router.py",
-      "accessCount": 2,
-      "lastAccessed": 1778836345942,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/status_bar.py",
-      "accessCount": 2,
-      "lastAccessed": 1778837161185,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/llm_factory.py",
-      "accessCount": 2,
-      "lastAccessed": 1779672034584,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/ask_user_prompter.py",
-      "accessCount": 1,
-      "lastAccessed": 1778825807248,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/stream.py",
-      "accessCount": 1,
-      "lastAccessed": 1778825807604,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/cli/messages.py",
-      "accessCount": 1,
-      "lastAccessed": 1778825817148,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/live_progress.py",
-      "accessCount": 1,
-      "lastAccessed": 1778826086809,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/glyphs.py",
-      "accessCount": 1,
-      "lastAccessed": 1778826534664,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/tools.py",
-      "accessCount": 1,
-      "lastAccessed": 1778826547655,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_task_list_renderer.py",
-      "accessCount": 1,
-      "lastAccessed": 1778832574070,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/task_list.py",
-      "accessCount": 1,
-      "lastAccessed": 1778832591571,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/auth.py",
-      "accessCount": 1,
-      "lastAccessed": 1778835019604,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/memory_inject.py",
-      "accessCount": 1,
-      "lastAccessed": 1778836112135,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/memory_lifecycle.py",
-      "accessCount": 1,
-      "lastAccessed": 1778836162445,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/skills_inject.py",
-      "accessCount": 1,
-      "lastAccessed": 1778836170665,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/budget.py",
-      "accessCount": 1,
-      "lastAccessed": 1778836207698,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/context_engineering.py",
-      "accessCount": 1,
-      "lastAccessed": 1778836212833,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/interactive/skills_lifecycle.py",
-      "accessCount": 1,
-      "lastAccessed": 1778836240225,
-      "type": "file"
-    }
-  ],
+  "hotPaths": [],
   "userDirectives": []
 }

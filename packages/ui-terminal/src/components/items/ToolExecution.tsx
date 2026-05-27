@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { Box, Text } from 'ink'
 import type { ToolExecutionItem } from '@lyra/ui-core'
-import { colors, symbols, observability } from '@lyra/ui-core'
+import { useThemeColors, symbols, observability } from '@lyra/ui-core'
 import { CollapsibleText } from '../Collapsible'
 import { StreamingIndicator } from '../StreamingIndicator'
 import { SyntaxHighlight } from '../SyntaxHighlight'
@@ -12,6 +12,7 @@ interface Props {
 }
 
 export function ToolExecution({ item, sessionId }: Props) {
+  const colors = useThemeColors()
   useEffect(() => {
     if (!sessionId) return
     if (item.status === 'running') {
@@ -51,13 +52,22 @@ export function ToolExecution({ item, sessionId }: Props) {
 
   const isWriteTool = item.toolName === 'Write' || item.toolName === 'write'
   const isBashTool = item.toolName === 'Bash' || item.toolName === 'bash'
+  const toolEmoji = {
+    Write: '📝', write: '📝',
+    Bash: '💻', bash: '💻',
+    Read: '📖', read: '📖',
+    Edit: '✏️', edit: '✏️',
+    Grep: '🔍', grep: '🔍',
+    WebFetch: '🌐', webfetch: '🌐',
+    WebSearch: '🔎', websearch: '🔎',
+  }[item.toolName] ?? '🔧'
   const outputLines = item.result?.output ? item.result.output.split('\n') : []
 
   return (
     <Box flexDirection="column" marginBottom={1}>
-      {/* Tool header: ⏺ Write(path/to/file.py) */}
+      {/* Tool header with Hermes-style emoji prefix */}
       <Box>
-        <Text color={colors.success}>{symbols.assistant} </Text>
+        <Text color={colors.success}>{toolEmoji} </Text>
         {item.status === 'running' ? (
           <StreamingIndicator type="tool" label={item.toolName} />
         ) : (

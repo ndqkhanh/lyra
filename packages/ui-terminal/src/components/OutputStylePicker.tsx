@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Box, Text, useInput } from 'ink'
-import { colors } from '@lyra/ui-core'
+import { useThemeColors } from '@lyra/ui-core'
 
 interface OutputStylePickerProps {
   visible: boolean
@@ -17,6 +17,7 @@ const STYLES = [
 ]
 
 export function OutputStylePicker({ visible, currentStyle, onSelect, onClose }: OutputStylePickerProps) {
+  const colors = useThemeColors()
   const [selectedIndex, setSelectedIndex] = useState(0)
 
   useInput((_input, key) => {

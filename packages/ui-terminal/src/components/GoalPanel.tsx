@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Box, Text, useInput } from 'ink'
 import TextInput from 'ink-text-input'
-import { colors } from '@lyra/ui-core'
+import { useThemeColors } from '@lyra/ui-core'
 
 interface GoalPanelProps {
   visible: boolean
@@ -12,6 +12,7 @@ interface GoalPanelProps {
 }
 
 export function GoalPanel({ visible, currentGoal, onSetGoal, onClearGoal: _onClearGoal, onClose }: GoalPanelProps) {
+  const colors = useThemeColors()
   const [input, setInput] = useState('')
 
   useInput((_input, key) => {

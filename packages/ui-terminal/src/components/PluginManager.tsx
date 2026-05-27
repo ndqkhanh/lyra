@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { Box, Text, useInput } from 'ink'
-import { colors } from '@lyra/ui-core'
+import { useThemeColors } from '@lyra/ui-core'
 
 interface Plugin {
   name: string
@@ -23,6 +23,7 @@ const FALLBACK_PLUGINS: Plugin[] = [
 ]
 
 export function PluginManager({ visible, onClose }: PluginManagerProps) {
+  const colors = useThemeColors()
   const [plugins, setPlugins] = useState<Plugin[]>(FALLBACK_PLUGINS)
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [tab, setTab] = useState<'installed' | 'marketplace'>('installed')

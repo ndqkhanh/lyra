@@ -1,13 +1,14 @@
 import React from 'react'
 import { Box, Text } from 'ink'
 import type { ErrorItem as ErrorItemType } from '@lyra/ui-core'
-import { colors, symbols } from '@lyra/ui-core'
+import { useThemeColors, symbols } from '@lyra/ui-core'
 
 interface Props {
   item: ErrorItemType
 }
 
 export function ErrorItem({ item }: Props) {
+  const colors = useThemeColors()
   return (
     <Box flexDirection="column" marginBottom={1}>
       <Box>

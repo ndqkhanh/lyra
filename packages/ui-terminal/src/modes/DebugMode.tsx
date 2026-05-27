@@ -1,6 +1,6 @@
 import React from 'react'
 import { Box, Text } from 'ink'
-import { useUIStore, colors } from '@lyra/ui-core'
+import { useUIStore, useThemeColors } from '@lyra/ui-core'
 import { ConversationView } from '../components/ConversationView'
 import { StatusBar } from '../components/StatusBar'
 import { Header } from '../components/Header'
@@ -18,6 +18,7 @@ interface DebugModeProps {
  * - State machine status
  */
 export function DebugMode({ sessionId }: DebugModeProps) {
+  const colors = useThemeColors()
   const session = useUIStore(state => state.sessions.get(sessionId))
   const metrics = useUIStore(state => state.getMetrics(sessionId))
   const stateMachine = useUIStore(state => state.getStateMachine(sessionId))

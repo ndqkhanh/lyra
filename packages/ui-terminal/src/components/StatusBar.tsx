@@ -1,174 +1,167 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Box, Text } from 'ink'
-import { colors, symbols, useUIStore } from '@lyra/ui-core'
+import { useThemeColors, useUIStore } from '@lyra/ui-core'
+import { useShallow } from 'zustand/react/shallow'
+import { usePersonality } from '../hooks/usePersonality'
 
 interface StatusBarProps {
   sessionId: string
   width?: number
 }
 
+const FACES = ['◉', '◎', '◍', '◌']
+
+function fmtK(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`
+  return String(n)
+}
+
+function ctxBar(pct: number, w = 10): string {
+  const filled = Math.round((Math.max(0, Math.min(100, pct)) / 100) * w)
+  return '█'.repeat(filled) + '░'.repeat(w - filled)
+}
+
+function ctxBarColor(pct: number, colors: { statusCritical: string; statusBad: string; statusWarn: string; statusGood: string }): string {
+  if (pct >= 95) return colors.statusCritical
+  if (pct > 80) return colors.statusBad
+  if (pct >= 50) return colors.statusWarn
+  return colors.statusGood
+}
+
+function fmtDuration(ms: number): string {
+  const s = Math.floor(ms / 1000)
+  const m = Math.floor(s / 60)
+  const h = Math.floor(m / 60)
+  if (h > 0) return `${h}h ${m % 60}m`
+  if (m > 0) return `${m}m ${s % 60}s`
+  return `${s}s`
+}
+
 export const StatusBar = React.memo(function StatusBar({
   sessionId,
   width = 120,
 }: StatusBarProps) {
+  const colors = useThemeColors()
   const session = useUIStore(state => state.sessions.get(sessionId))
+  const transport = useUIStore(state => state.transport)
   const isStreaming = session?.isStreaming ?? false
-  const permissionMode = session?.permissionMode || 'allow'
+  const permissionMode = session?.permissionMode || 'ask'
+  const model = useUIStore(useShallow((state) => state.currentModel)) || 'Lyra'
+  const { currentFace, currentVerb, tick } = usePersonality()
 
-  const agentCount = session?.previewMessages.filter(
-    m => m.metadata?.toolCalls
-  ).length ?? 0
-
-  const [tokensIn, setTokensIn] = useState(0)
-  const [tokensOut, setTokensOut] = useState(0)
-  const [totalTokens, setTotalTokens] = useState(0)
-  const [cost, setCost] = useState(0)
-  const [completed, setCompleted] = useState(0)
-
+  const [faceIdx, setFaceIdx] = useState(0)
+  const [elapsed, setElapsed] = useState(0)
   const streamStartRef = useRef<number | null>(null)
+  const sessionStartRef = useRef<number>(Date.now())
+  const [sessionDuration, setSessionDuration] = useState(0)
 
-  // Track streaming start time, capture completion when streaming ends
+  // Face/verb ticker (Hermes FACE_TICK_MS = 2500)
+  useEffect(() => {
+    if (!isStreaming) return
+    const id = setInterval(() => {
+      setFaceIdx(n => (n + 1) % FACES.length)
+      tick()
+    }, 2500)
+    return () => clearInterval(id)
+  }, [isStreaming]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Elapsed timer during streaming
   useEffect(() => {
     if (isStreaming) {
-      if (!streamStartRef.current) {
-        streamStartRef.current = Date.now()
-        setCompleted(0)
-      }
-    } else if (streamStartRef.current) {
-      const final = Math.floor((Date.now() - streamStartRef.current) / 1000)
-      setCompleted(final)
-      streamStartRef.current = null
+      if (!streamStartRef.current) streamStartRef.current = Date.now()
+      const id = setInterval(() => {
+        if (streamStartRef.current) setElapsed(Date.now() - streamStartRef.current)
+      }, 1000)
+      return () => clearInterval(id)
     }
+    streamStartRef.current = null
+    setElapsed(0)
+    return
   }, [isStreaming])
 
-  // Calculate tokens
+  // Session duration (Hermes SessionDuration)
   useEffect(() => {
-    if (!session) return
-    let totalIn = 0
-    let totalOut = 0
-    session.messages.forEach(msg => {
-      const tokenCount = Math.ceil(msg.content.length / 4)
-      if (msg.role === 'user') totalIn += tokenCount
-      else if (msg.role === 'assistant') totalOut += tokenCount
-    })
-    setTokensIn(totalIn)
-    setTokensOut(totalOut)
-    setTotalTokens(totalIn + totalOut)
+    const id = setInterval(() => {
+      setSessionDuration(Date.now() - sessionStartRef.current)
+    }, 1000)
+    return () => clearInterval(id)
+  }, [])
 
-    const costIn = (totalIn / 1000000) * 15
-    const costOut = (totalOut / 1000000) * 75
-    setCost(costIn + costOut)
-  }, [session?.messages])
-
-  const CONTEXT_WINDOW = 200_000
-
-  const formatNumber = (num: number): string => {
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}k`
-    return num.toString()
+  // Token usage
+  let tokensIn = 0
+  let tokensOut = 0
+  if (session) {
+    for (const msg of session.messages) {
+      const n = Math.ceil(msg.content.length / 4)
+      if (msg.role === 'user') tokensIn += n
+      else if (msg.role === 'assistant') tokensOut += n
+    }
   }
+  const totalTokens = tokensIn + tokensOut
+  const CONTEXT_WINDOW = 200_000
+  const pct = totalTokens > 0 ? Math.round((totalTokens / CONTEXT_WINDOW) * 100) : 0
 
-  const barUsageRatio = totalTokens / CONTEXT_WINDOW
-  const barColor = barUsageRatio > 0.8 ? colors.statusError
-    : barUsageRatio > 0.5 ? colors.warning
-    : colors.statusIdle
+  const permLabel = { ask: 'ask', allow: 'allow', deny: 'deny' }[permissionMode] || permissionMode
+  const permColor = { ask: colors.amber, allow: colors.statusGood, deny: colors.statusCritical }[permissionMode] || colors.dim
 
-  const permissionDisplay = {
-    ask:   { text: `${symbols.system} ask`,          color: colors.warning },
-    allow: { text: `${symbols.system} bypass`,        color: colors.error },
-    deny:  { text: `${symbols.system} deny`,          color: colors.success },
-  }[permissionMode]
+  const cwd = process.cwd().replace(process.env.HOME || '', '~')
+  const cwdMax = Math.max(12, Math.floor(width * 0.25))
+  const cwdLabel = cwd.length > cwdMax ? `…${cwd.slice(-cwdMax + 1)}` : cwd
 
-  const isCompact = width < 100
+  const statusColor = isStreaming ? colors.gold : colors.statusFg
+  const statusText = isStreaming
+    ? `${currentFace || FACES[faceIdx]} ${currentVerb}…`
+    : transport?.status === 'disconnected'
+      ? 'disconnected'
+      : transport?.status === 'connecting'
+        ? 'connecting…'
+        : 'idle'
 
-  if (!session) return null
+  const connColor = transport?.status === 'disconnected' ? colors.statusCritical
+    : transport?.status === 'connecting' ? colors.statusWarn
+    : colors.statusGood
 
-  const verb = completed < 10 ? 'Baked' : completed < 60 ? 'Cooked' : 'Synthesized'
+  const barColor = totalTokens > 0 ? ctxBarColor(pct, { statusCritical: colors.statusCritical, statusBad: colors.statusBad, statusWarn: colors.statusWarn, statusGood: colors.statusGood }) : colors.dim
 
   return (
-    <Box flexDirection="column">
-      {/* Completion status — only visible after streaming ends */}
-      {!isStreaming && completed > 0 && (
-        <Box paddingX={2}>
-          <Text color={colors.success}>{symbols.progressFrames[0]} </Text>
-          <Text color={colors.success} bold>{verb}</Text>
-          <Text color={colors.muted}> for </Text>
-          <Text color={colors.timestamp}>
-            {Math.floor(completed / 60)}m {completed % 60}s
-          </Text>
-          {tokensOut > 0 && (
+    <Box height={1}>
+      <Box flexShrink={1} width={Math.max(12, width - cwdLabel.length - 3)}>
+        <Text color={colors.bronze} wrap="truncate-end">
+          {'─ '}
+          <Text color={connColor}>● </Text>
+          <Text color={statusColor}>{statusText}</Text>
+          <Text color={colors.dim}> │ </Text>
+          <Text color={permColor}>{permLabel}</Text>
+          <Text color={colors.dim}> │ </Text>
+          <Text color={colors.label}>{model}</Text>
+          {totalTokens > 0 ? (
             <>
-              <Text color={colors.shortcutSeparator}> {symbols.separator} </Text>
-              <Text color={colors.success}>↓ {formatNumber(tokensOut)} tokens</Text>
+              <Text color={colors.dim}> │ </Text>
+              <Text color={colors.dim}>{fmtK(totalTokens)}/{fmtK(CONTEXT_WINDOW)}</Text>
+              <Text color={colors.dim}> [</Text>
+              <Text color={barColor}>{ctxBar(pct)}</Text>
+              <Text color={colors.dim}>] </Text>
+              <Text color={barColor}>{pct}%</Text>
+            </>
+          ) : (
+            <>
+              <Text color={colors.dim}> │ </Text>
+              <Text color={colors.dim}>0/200k</Text>
             </>
           )}
-        </Box>
-      )}
-
-      {/* Bottom status bar */}
-      <Box paddingX={2}>
-        {/* Permission mode */}
-        <Text color={permissionDisplay.color} bold>{permissionDisplay.text}</Text>
-
-        {/* Agent count */}
-        {agentCount > 0 && (
-          <>
-            <Text color={colors.shortcutSeparator}> {symbols.separator} </Text>
-            <Text color={colors.statusRunning}>{agentCount} agent{agentCount !== 1 ? 's' : ''}</Text>
-          </>
-        )}
-
-        <Text>  </Text>
-
-        {/* Context usage */}
-        <Text color={barColor}>
-          {formatNumber(totalTokens)}/{formatNumber(CONTEXT_WINDOW)}
+          {isStreaming && elapsed > 0 ? (
+            <>
+              <Text color={colors.dim}> │ </Text>
+              <Text color={colors.dim}>{fmtDuration(elapsed)}</Text>
+            </>
+          ) : null}
+          <Text color={colors.dim}> │ </Text>
+          <Text color={colors.dim}>{fmtDuration(sessionDuration)}</Text>
         </Text>
-
-        {/* Token counters — compact mode: omit */}
-        {!isCompact && (
-          <>
-            {tokensIn > 0 && (
-              <>
-                <Text color={colors.shortcutSeparator}> {symbols.separator} </Text>
-                <Text color={colors.info}>↑{formatNumber(tokensIn)}</Text>
-              </>
-            )}
-            {tokensOut > 0 && (
-              <>
-                <Text color={colors.shortcutSeparator}> {symbols.separator} </Text>
-                <Text color={colors.success}>↓{formatNumber(tokensOut)}</Text>
-              </>
-            )}
-            {cost > 0.01 && (
-              <>
-                <Text color={colors.shortcutSeparator}> {symbols.separator} </Text>
-                <Text color={colors.timestamp}>${cost.toFixed(2)}</Text>
-              </>
-            )}
-          </>
-        )}
-
-        {/* Keyboard hints */}
-        <Text color={colors.shortcutSeparator}> {symbols.separator} </Text>
-        {isCompact ? (
-          <>
-            <Text color={colors.shortcutKey}>esc</Text>
-            <Text color={colors.shortcutDescription}> stop</Text>
-          </>
-        ) : (
-          <>
-            <Text color={colors.shortcutKey}>esc</Text>
-            <Text color={colors.shortcutDescription}> stop</Text>
-            <Text color={colors.shortcutSeparator}> {symbols.separator} </Text>
-            <Text color={colors.shortcutKey}>ctrl+o</Text>
-            <Text color={colors.shortcutDescription}> agents</Text>
-            <Text color={colors.shortcutSeparator}> {symbols.separator} </Text>
-            <Text color={colors.shortcutKey}>ctrl+k</Text>
-            <Text color={colors.shortcutDescription}> commands</Text>
-          </>
-        )}
       </Box>
+      <Text color={colors.bronze}> ─ </Text>
+      <Text color={colors.label}>{cwdLabel}</Text>
     </Box>
   )
 })

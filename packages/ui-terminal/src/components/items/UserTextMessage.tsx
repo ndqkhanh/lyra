@@ -1,13 +1,14 @@
 import React from 'react'
 import { Box, Text } from 'ink'
 import type { UserTextItem } from '@lyra/ui-core'
-import { colors, symbols } from '@lyra/ui-core'
+import { useThemeColors, symbols } from '@lyra/ui-core'
 
 interface Props {
   item: UserTextItem
 }
 
 export function UserTextMessage({ item }: Props) {
+  const colors = useThemeColors()
   return (
     <Box flexDirection="column" marginBottom={1}>
       <Box>

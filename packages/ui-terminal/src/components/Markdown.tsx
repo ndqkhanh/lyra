@@ -1,6 +1,6 @@
 import React from 'react'
 import { Box, Text } from 'ink'
-import { colors, symbols } from '@lyra/ui-core'
+import { useThemeColors, symbols } from '@lyra/ui-core'
 import { SyntaxHighlight } from './SyntaxHighlight'
 
 interface MarkdownProps {
@@ -166,6 +166,7 @@ const parseInline = (text: string): Array<{ text: string; format: string }> => {
 }
 
 export function Markdown({ content }: MarkdownProps) {
+  const colors = useThemeColors()
   const nodes = parseMarkdown(content)
 
   return (

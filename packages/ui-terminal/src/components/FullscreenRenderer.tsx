@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { Box, Text, useInput } from 'ink'
-import { useUIStore, applyDisplayPolicy, partitionRenderItems, colors } from '@lyra/ui-core'
+import { useUIStore, applyDisplayPolicy, partitionRenderItems, useThemeColors } from '@lyra/ui-core'
 import { RenderItemView } from './RenderItemView'
 
 interface FullscreenRendererProps {
@@ -9,6 +9,7 @@ interface FullscreenRendererProps {
 }
 
 export function FullscreenRenderer({ sessionId, enabled }: FullscreenRendererProps) {
+  const colors = useThemeColors()
   const session = useUIStore(state => state.sessions.get(sessionId))
   const [scrollOffset, setScrollOffset] = useState(0)
   const [autoFollow, setAutoFollow] = useState(true)

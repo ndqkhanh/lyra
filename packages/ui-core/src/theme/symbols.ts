@@ -5,11 +5,13 @@
 
 export const symbols = {
   // Message markers
+  user: '❯',
   userPrompt: '❯',
   assistant: '⏺',
   thinking: '✳',
   backgroundTask: '◯',
   system: '⏵⏵',
+  queue: '⏳',
 
   // Tree/indent
   branch: '⎿',

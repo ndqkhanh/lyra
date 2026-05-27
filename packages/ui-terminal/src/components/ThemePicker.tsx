@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Box, Text, useInput } from 'ink'
-import { colors } from '@lyra/ui-core'
+import { useThemeColors } from '@lyra/ui-core'
 
 interface Theme {
   name: string
@@ -16,17 +16,22 @@ interface ThemePickerProps {
 }
 
 const DEFAULT_THEMES: Theme[] = [
-  { name: 'dracula', description: 'Purple-tinged dark theme (default)' },
+  { name: 'catppuccin_mocha', description: 'Soft pastel dark theme' },
+  { name: 'tokyo_night_storm', description: 'Neon-inspired night theme' },
   { name: 'nord', description: 'Cool arctic blue-toned theme' },
-  { name: 'solarized-dark', description: 'Warm dark theme, high contrast' },
-  { name: 'monokai', description: 'Vibrant syntax-highlighted theme' },
-  { name: 'gruvbox-dark', description: 'Retro groove dark theme' },
-  { name: 'one-dark', description: 'Atom-inspired dark theme' },
-  { name: 'github-dark', description: 'GitHub\'s dark theme' },
-  { name: 'tokyo-night', description: 'Neon-inspired night theme' },
+  { name: 'dracula', description: 'Purple-tinged dark theme (default)' },
+  { name: 'one_dark', description: 'Atom-inspired dark theme' },
+  { name: 'gruvbox_dark_medium', description: 'Retro groove dark theme' },
+  { name: 'selenized_dark', description: 'Warm dark, high contrast' },
+  { name: 'everforest_dark', description: 'Nature-inspired low contrast' },
+  { name: 'ayu_dark', description: 'Minimalist dark theme' },
+  { name: 'rose_pine_moon', description: 'Dreamy moonlit theme' },
+  { name: 'silk_circuit_neon', description: 'Cyberpunk neon circuit' },
+  { name: 'sentry_sentinel_dark', description: 'Industrial security theme' },
 ]
 
 export function ThemePicker({ visible, themes = DEFAULT_THEMES, currentTheme, onSelect, onClose }: ThemePickerProps) {
+  const colors = useThemeColors()
   const [selectedIndex, setSelectedIndex] = useState(0)
 
   useInput((_input, key) => {

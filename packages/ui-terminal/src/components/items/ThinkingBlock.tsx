@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { Box, Text } from 'ink'
 import type { ThinkingItem } from '@lyra/ui-core'
-import { colors, symbols, observability } from '@lyra/ui-core'
+import { useThemeColors, symbols, observability } from '@lyra/ui-core'
 import { CollapsibleText } from '../Collapsible'
 import { StreamingIndicator } from '../StreamingIndicator'
 
@@ -11,6 +11,7 @@ interface Props {
 }
 
 export function ThinkingBlock({ item, sessionId }: Props) {
+  const colors = useThemeColors()
   // Emit observability events for thinking
   useEffect(() => {
     if (!sessionId) return

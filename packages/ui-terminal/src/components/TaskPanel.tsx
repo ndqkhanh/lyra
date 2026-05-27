@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { Box, Text, useInput } from 'ink'
-import { colors } from '@lyra/ui-core'
+import { useThemeColors } from '@lyra/ui-core'
 
 interface Task {
   id: string
@@ -15,6 +15,7 @@ interface TaskPanelProps {
 }
 
 export function TaskPanel({ visible, tasks, onClose }: TaskPanelProps) {
+  const colors = useThemeColors()
   const [selectedIndex, setSelectedIndex] = useState(0)
 
   const activeTasks = useMemo(

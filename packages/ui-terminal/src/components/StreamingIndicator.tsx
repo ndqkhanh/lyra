@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Box, Text } from 'ink'
-import { colors, symbols } from '@lyra/ui-core'
+import { useThemeColors, symbols } from '@lyra/ui-core'
 
 interface StreamingIndicatorProps {
   type: 'thinking' | 'tool' | 'flowing' | 'completed'
@@ -22,6 +22,7 @@ export function StreamingIndicator({
   tokensOut = 0,
   phase
 }: StreamingIndicatorProps) {
+  const colors = useThemeColors()
   const [frame, setFrame] = useState(0)
   const [elapsedTime, setElapsedTime] = useState(0)
 

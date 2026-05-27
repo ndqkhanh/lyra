@@ -52,16 +52,18 @@ function messageToRenderItems(msg: Message, committed: boolean): RenderItem[] {
       content: msg.content
     } as UserTextItem)
   } else if (msg.role === 'system') {
-    // System messages (errors, notifications)
+    // System messages — route to error or system-notice based on content
+    const isError = msg.content.toLowerCase().startsWith('error')
     items.push({
-      kind: 'assistant-text',
-      id: `${msg.id}-text`,
+      kind: isError ? 'error' : 'system-notice',
+      id: `${msg.id}-${isError ? 'error' : 'notice'}`,
       sourceMessageId: msg.id,
       committed,
       timestamp: msg.timestamp,
-      content: msg.content,
-      streaming: false
-    } as AssistantTextItem)
+      message: isError ? msg.content : undefined,
+      content: isError ? undefined : msg.content,
+      noticeType: isError ? undefined : 'info'
+    } as RenderItem)
   } else if (msg.role === 'assistant') {
     const assistantMsg = msg as AssistantMessage
 

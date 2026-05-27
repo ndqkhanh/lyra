@@ -11,12 +11,17 @@ import type {
 
 export class WebSocketTransport extends EventEmitter implements Transport {
   private ws: WebSocket | null = null
-  private status: ConnectionStatus = 'disconnected'
+  status: ConnectionStatus = 'disconnected'
   private url: string
+  private sessionId: string | null = null
 
   constructor(url: string) {
     super()
     this.url = url
+  }
+
+  setSessionId(id: string): void {
+    this.sessionId = id
   }
 
   async connect(): Promise<void> {
@@ -76,6 +81,7 @@ export class WebSocketTransport extends EventEmitter implements Transport {
       type: 'message',
       content,
       model,
+      session_id: this.sessionId,
       attachments
     }))
   }

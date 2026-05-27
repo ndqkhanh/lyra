@@ -1,7 +1,26 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { Box, Text, useInput } from 'ink'
-import TextInput from 'ink-text-input'
-import { useUIStore, colors, symbols } from '@lyra/ui-core'
+import { FastTextInput } from './FastTextInput'
+import { useUIStore, useThemeColors, symbols, THEME_ORDER, getThemePreset } from '@lyra/ui-core'
+
+// Hermes-style GoodVibesHeart — flashes a ♥ on every keystroke
+const HEART_COLORS = ['#ff5fa2', '#ff4d6d']
+function GoodVibesHeart({ tick, thinkingColor }: { tick: number; thinkingColor: string }) {
+  const [active, setActive] = useState(false)
+  const [color, setColor] = useState<string>(thinkingColor)
+
+  useEffect(() => {
+    if (tick <= 0) return
+    const palette = [...HEART_COLORS, thinkingColor]
+    setColor(palette[Math.floor(Math.random() * palette.length)]!)
+    setActive(true)
+    const id = setTimeout(() => setActive(false), 650)
+    return () => clearTimeout(id)
+  }, [tick, thinkingColor])
+
+  if (!active) return null
+  return <Text color={color}>♥</Text>
+}
 import { useHistory } from '../hooks/useHistory'
 import { useVim } from '../hooks/useVim'
 import { getFileSuggestions, getCurrentMention, type FileSuggestion } from '../utils/fileCompletion'
@@ -23,10 +42,12 @@ interface InputAreaProps {
 const DEFAULT_COMMANDS = getCommandNames()
 
 export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }: InputAreaProps) {
+  const colors = useThemeColors()
   const history = useHistory()
   const session = useUIStore(state => state.sessions.get(sessionId))
   const transport = useUIStore(state => state.transport)
   const currentModel = useUIStore(state => state.currentModel)
+  const activeThemeId = useUIStore(state => state.activeThemeId)
   const addMessage = useUIStore(state => state.addMessage)
   const setModelAndProvider = useUIStore(state => state.setModelAndProvider)
 
@@ -42,10 +63,17 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
   const [showOutputStylePicker, setShowOutputStylePicker] = useState(false)
   const [showGoalPanel, setShowGoalPanel] = useState(false)
   const [currentGoal, setCurrentGoal] = useState<string | null>(null)
+  const [goodVibesTick, setGoodVibesTick] = useState(0)
   const { vim, vimActions } = useVim()
 
   // Guard against double-submission from both useInput and TextInput's onSubmit
   const _submitGuard = useRef(0)
+
+  // Hermes-style heart tick on every keystroke
+  const handleChange = useCallback((value: string) => {
+    history.setCurrent(value)
+    setGoodVibesTick(t => t + 1)
+  }, [history])
 
   // Track cursor position for vim motions
   const [vimCursor, setVimCursor] = useState(0)
@@ -297,6 +325,9 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
       return
     }
 
+    // Guard against submission during streaming
+    if (session?.isStreaming) return
+
     // Add to history
     history.addToHistory(history.current)
 
@@ -327,7 +358,7 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
     setShowSuggestions(false)
   }
 
-  if (!session || session.isStreaming) {
+  if (!session) {
     return (
       <Box paddingX={2}>
         <Text color={colors.thinking}>{symbols.thinkingFrames[0]}</Text>
@@ -337,37 +368,38 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
 
   return (
     <Box flexDirection="column">
-      {/* Autocomplete suggestions */}
+
+      {/* Streaming indicator — shown inline above prompt during AI response */}
+      {session?.isStreaming && (
+        <Box paddingX={1}>
+          <Text color={colors.thinking}>{symbols.thinkingFrames[0]} AI is responding...</Text>
+        </Box>
+      )}
+
+      {/* Completions overlay — Hermes FloatingOverlays */}
       {showSuggestions && (
-        <Box
-          flexDirection="column"
-          paddingX={2}
-          marginBottom={1}
-        >
-          <Text color={colors.timestamp} dimColor>
-            {suggestionType === 'command'
-              ? 'Commands (↑/↓ to navigate, Tab to select):'
-              : 'Files (↑/↓ to navigate, Tab to select):'}
-          </Text>
+        <Box flexDirection="column" paddingX={1} marginBottom={1}>
           {suggestionType === 'command' ? (
-            suggestions.slice(0, 5).map((suggestion, i) => (
-              <Box key={suggestion} paddingLeft={2}>
+            suggestions.slice(0, 8).map((suggestion, i) => (
+              <Box key={suggestion}>
                 <Text
-                  color={i === selectedSuggestion ? colors.userPrompt : colors.timestamp}
+                  color={i === selectedSuggestion ? colors.amber : colors.dim}
                   bold={i === selectedSuggestion}
+                  backgroundColor={i === selectedSuggestion ? colors.selectionBg : undefined}
                 >
-                  {i === selectedSuggestion ? symbols.rightArrow : ' '} /{suggestion}
+                  {i === selectedSuggestion ? '▸' : ' '} /{suggestion}
                 </Text>
               </Box>
             ))
           ) : (
-            fileSuggestions.slice(0, 5).map((file, i) => (
-              <Box key={file.path} paddingLeft={2}>
+            fileSuggestions.slice(0, 8).map((file, i) => (
+              <Box key={file.path}>
                 <Text
-                  color={i === selectedSuggestion ? colors.userPrompt : colors.timestamp}
+                  color={i === selectedSuggestion ? colors.amber : colors.dim}
                   bold={i === selectedSuggestion}
+                  backgroundColor={i === selectedSuggestion ? colors.selectionBg : undefined}
                 >
-                  {i === selectedSuggestion ? symbols.rightArrow : ' '}
+                  {i === selectedSuggestion ? '▸' : ' '}
                   {file.isDirectory ? '📁 ' : '📄 '}
                   {file.displayName}
                 </Text>
@@ -415,12 +447,16 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
       {/* Theme picker */}
       <ThemePicker
         visible={showThemePicker}
-        themes={[]}
-        currentTheme="dracula"
-        onSelect={(theme) => {
+        themes={THEME_ORDER.map(id => {
+          const preset = getThemePreset(id)
+          return { name: id, description: preset?.name ?? id }
+        })}
+        currentTheme={activeThemeId}
+        onSelect={(themeId) => {
+          useUIStore.getState().setActiveTheme(themeId)
           setShowThemePicker(false)
           history.setCurrent('')
-          if (transport) transport.sendMessage(`/theme ${theme}`).catch(() => {})
+          if (transport) transport.sendMessage(`/theme ${themeId}`).catch(() => {})
         }}
         onClose={() => {
           setShowThemePicker(false)
@@ -463,22 +499,24 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
         }}
       />
 
-      {/* Input prompt - Claude Code style */}
-      <Box paddingX={2}>
+      {/* Prompt line — Hermes ComposerPane style */}
+      <Box paddingX={1}>
         {vim.enabled && (
           <Text color={vim.mode === 'normal' ? colors.warning : colors.info}>
             [{vim.mode === 'normal' ? 'NORMAL' : 'INSERT'}]{' '}
           </Text>
         )}
-        <Text bold color={colors.userPrompt}>{symbols.userPrompt} </Text>
+        <Text bold color={colors.cornsilk}>{symbols.userPrompt} </Text>
         <Box flexGrow={1}>
-          <TextInput
+          <FastTextInput
             value={history.current}
-            onChange={history.setCurrent}
+            onChange={handleChange}
             onSubmit={handleSubmit}
             placeholder=""
+            focus={!showModelPicker && !showReleaseNotes && !showEffortPicker && !showThemePicker && !showOutputStylePicker && !showGoalPanel}
           />
         </Box>
+        <GoodVibesHeart tick={goodVibesTick} thinkingColor={colors.thinking} />
       </Box>
     </Box>
   )

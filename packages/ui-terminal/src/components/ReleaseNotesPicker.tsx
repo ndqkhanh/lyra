@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Box, Text, useInput } from 'ink'
-import { colors } from '@lyra/ui-core'
+import { useThemeColors } from '@lyra/ui-core'
 
 interface ChangelogEntry {
   version: string
@@ -17,6 +17,7 @@ interface ReleaseNotesPickerProps {
 const SERVER_URL = 'http://localhost:3737'
 
 export function ReleaseNotesPicker({ visible, onSelect, onClose }: ReleaseNotesPickerProps) {
+  const colors = useThemeColors()
   const [entries, setEntries] = useState<ChangelogEntry[]>([])
   const [selectedIndex, setSelectedIndex] = useState(0)
 

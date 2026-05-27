@@ -162,7 +162,30 @@ class LyraUIHandler(BaseHTTPRequestHandler):
             if self.client is None:
                 self.client = LyraClient(repo_root=Path.cwd())
 
-            # CRITICAL FIX: Add system prompt with English instruction
+            # Pre-check: verify at least one provider has credentials
+            from lyra_core.providers.registry import get_available_providers
+            from lyra_core.auth.store import list_providers
+            available = set(get_available_providers()) | set(list_providers())
+            if not available:
+                self.send_response(200)
+                self.send_header("Content-Type", "text/event-stream")
+                self.send_header("Cache-Control", "no-cache")
+                self.send_header("Connection", "keep-alive")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                error_event = json.dumps({
+                    "kind": "error",
+                    "payload": (
+                        "No API credentials configured. Configure at least one provider:\n"
+                        "  /auth set <provider> <api_key>  — save an API key\n"
+                        "  export ANTHROPIC_API_KEY=...      — or set via environment\n"
+                        "  /providers                        — list available providers"
+                    ),
+                })
+                self.wfile.write(f"data: {error_event}\n\n".encode())
+                self.wfile.flush()
+                return
+
             system_prompt = (
                 "You are Lyra, a CLI-native coding assistant. ALWAYS respond in English "
                 "unless the user explicitly requests a different language."
@@ -172,7 +195,7 @@ class LyraUIHandler(BaseHTTPRequestHandler):
                 prompt=prompt,
                 session_id=session_id,
                 model=model,
-                system_prompt=system_prompt,  # Add system prompt!
+                system_prompt=system_prompt,
             )
 
             self.send_response(200)
@@ -194,11 +217,13 @@ class LyraUIHandler(BaseHTTPRequestHandler):
 
         except Exception as e:
             error_msg = f"{e.__class__.__name__}: {e}"
-            self.send_response(500)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Access-Control-Allow-Origin", "*")
-            self.end_headers()
-            self.wfile.write(json.dumps({"error": error_msg}).encode())
+            # Try to send error via SSE if headers already sent, otherwise as JSON
+            try:
+                error_data = json.dumps({"kind": "error", "payload": error_msg})
+                self.wfile.write(f"data: {error_data}\n\n".encode())
+                self.wfile.flush()
+            except Exception:
+                pass
 
     def _handle_providers(self) -> None:
         """GET /providers — list all providers with their models."""
@@ -313,7 +338,7 @@ class LyraUIHandler(BaseHTTPRequestHandler):
         _json_response(self, {
             "last_model": config.last_model,
             "last_provider": config.last_provider,
-            "fallback_chain": config.fallback_chain,
+            "primary_provider": config.primary_provider,
             "theme": config.theme,
             "permission_mode": config.permission_mode,
             "auto_detect_tasks": config.auto_detect_tasks,
@@ -333,8 +358,8 @@ class LyraUIHandler(BaseHTTPRequestHandler):
                 config.last_model = data["last_model"]
             if "last_provider" in data:
                 config.last_provider = data["last_provider"]
-            if "fallback_chain" in data:
-                config.fallback_chain = data["fallback_chain"]
+            if "primary_provider" in data:
+                config.primary_provider = data["primary_provider"]
             if "theme" in data:
                 config.theme = data["theme"]
             if "permission_mode" in data:

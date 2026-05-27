@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { Box, Text, useInput } from 'ink'
-import { colors } from '@lyra/ui-core'
+import { useThemeColors } from '@lyra/ui-core'
 
 interface HistoryEntry {
   input: string
@@ -15,6 +15,7 @@ interface HistorySearchProps {
 }
 
 export function HistorySearch({ visible, history, onSelect, onClose }: HistorySearchProps) {
+  const colors = useThemeColors()
   const [query, setQuery] = useState('')
   const [selectedIndex, setSelectedIndex] = useState(0)
 

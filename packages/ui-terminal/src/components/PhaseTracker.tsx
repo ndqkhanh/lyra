@@ -1,6 +1,6 @@
 import React from 'react'
 import { Box, Text } from 'ink'
-import { useUIStore, colors, symbols } from '@lyra/ui-core'
+import { useUIStore, useThemeColors, symbols } from '@lyra/ui-core'
 
 interface PhaseTrackerProps {
   sessionId: string
@@ -8,6 +8,7 @@ interface PhaseTrackerProps {
 }
 
 export function PhaseTracker({ sessionId, maxVisible = 5 }: PhaseTrackerProps) {
+  const colors = useThemeColors()
   const session = useUIStore(state => state.sessions.get(sessionId))
   const phases = session?.phases ?? []
 

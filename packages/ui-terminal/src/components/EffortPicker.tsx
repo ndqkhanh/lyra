@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Box, Text, useInput } from 'ink'
-import { colors } from '@lyra/ui-core'
+import { useThemeColors } from '@lyra/ui-core'
 
 interface EffortPickerProps {
   visible: boolean
@@ -17,6 +17,7 @@ const LEVELS = [
 ]
 
 export function EffortPicker({ visible, onSelect, onClose }: EffortPickerProps) {
+  const colors = useThemeColors()
   const [selectedIndex, setSelectedIndex] = useState(2)
 
   useInput((_input, key) => {

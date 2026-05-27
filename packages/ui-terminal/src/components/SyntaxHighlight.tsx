@@ -1,6 +1,6 @@
 import React from 'react'
 import { Box, Text } from 'ink'
-import { colors } from '@lyra/ui-core'
+import { useThemeColors } from '@lyra/ui-core'
 
 interface SyntaxHighlightProps {
   code: string
@@ -62,29 +62,30 @@ const tokenize = (code: string, language: string): Array<{ text: string; type: s
   return tokens
 }
 
-const getTokenColor = (type: string): string => {
-  switch (type) {
-    case 'keyword':
-      return colors.codeKeyword      // Pink - keywords
-    case 'string':
-      return colors.codeString       // Yellow - strings
-    case 'number':
-      return colors.codeNumber       // Purple - numbers
-    case 'comment':
-      return colors.codeComment      // Blue gray - comments
-    case 'punctuation':
-      return colors.codeOperator     // Pink - operators/punctuation
-    default:
-      return colors.codeVariable     // Off white - variables/text
-  }
-}
-
 export function SyntaxHighlight({
   code,
   language = 'typescript',
   showLineNumbers = true,
   startLine = 1
 }: SyntaxHighlightProps) {
+  const colors = useThemeColors()
+  const getTokenColor = (type: string): string => {
+    switch (type) {
+      case 'keyword':
+        return colors.codeKeyword
+      case 'string':
+        return colors.codeString
+      case 'number':
+        return colors.codeNumber
+      case 'comment':
+        return colors.codeComment
+      case 'punctuation':
+        return colors.codeOperator
+      default:
+        return colors.codeVariable
+    }
+  }
+
   const lines = code.split('\n')
 
   return (
@@ -124,6 +125,7 @@ interface CodeBlockProps {
 }
 
 export function CodeBlock({ code, language = 'typescript', title, showLineNumbers = true }: CodeBlockProps) {
+  const colors = useThemeColors()
   return (
     <Box flexDirection="column" borderStyle="single" borderColor={colors.border} paddingX={1}>
       {title && (

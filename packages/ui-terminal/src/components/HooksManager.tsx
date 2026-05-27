@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { Box, Text, useInput } from 'ink'
-import { colors } from '@lyra/ui-core'
+import { useThemeColors } from '@lyra/ui-core'
 
 interface Hook {
   name: string
@@ -27,6 +27,7 @@ const FALLBACK_HOOKS: Hook[] = [
 ]
 
 export function HooksManager({ visible, onClose }: HooksManagerProps) {
+  const colors = useThemeColors()
   const [hooks, setHooks] = useState<Hook[]>(FALLBACK_HOOKS)
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [loading, setLoading] = useState(false)
