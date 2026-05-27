@@ -110,7 +110,7 @@ class PromptCacheAnchor:
     chars: int
 
     def is_expired(self, *, now: float | None = None) -> bool:
-        return (now or time.monotonic()) >= self.expires_at
+        return (now if now is not None else time.monotonic()) >= self.expires_at
 
 
 @dataclass

@@ -93,12 +93,15 @@ def test_pareto_front_keeps_non_dominated() -> None:
 
 def test_pareto_front_sorts_score_desc_then_length_asc() -> None:
     cs = [
-        EvolveCandidate(prompt="b", score=0.7, length=20, generation=0),
-        EvolveCandidate(prompt="a", score=0.9, length=10, generation=0),
-        EvolveCandidate(prompt="c", score=0.7, length=10, generation=0),
+        EvolveCandidate(prompt="long_mid", score=0.7, length=20, generation=0),
+        EvolveCandidate(prompt="best", score=0.9, length=10, generation=0),
+        EvolveCandidate(prompt="short_high", score=0.8, length=8, generation=0),
     ]
     front = pareto_front(cs)
-    assert [c.prompt for c in front] == ["a", "c", "b"]
+    # best (0.9, 10) and short_high (0.8, 8) are non-dominated.
+    # long_mid is dominated by both (worse score + worse length).
+    # Sort: score desc, then length asc, then prompt lexicographic.
+    assert [c.prompt for c in front] == ["best", "short_high"]
 
 
 def test_pareto_front_deduplicates_identical_prompts() -> None:

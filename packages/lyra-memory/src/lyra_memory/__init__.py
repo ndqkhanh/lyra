@@ -98,6 +98,18 @@ from lyra_memory.world_graph import (
     WorldRelationType,
     WorldSnapshot,
 )
+from lyra_memory.amac_admission import (
+    AdmissionConfig,
+    AdmissionScore,
+    AmacAdmissionGate,
+    ContentType,
+    MemoryCandidate,
+)
+from lyra_memory.health_monitor import (
+    HealthConfig,
+    HealthSnapshot,
+    MemoryHealthMonitor,
+)
 
 __version__ = "0.3.0"
 
@@ -185,4 +197,14 @@ __all__ = [
     "PgVectorStore",
     "PgVectorEmbedding",
     "InMemoryVectorStore",
+    # A-MAC Admission Control
+    "AdmissionConfig",
+    "AdmissionScore",
+    "AmacAdmissionGate",
+    "ContentType",
+    "MemoryCandidate",
+    # Health Monitor
+    "HealthConfig",
+    "HealthSnapshot",
+    "MemoryHealthMonitor",
 ]

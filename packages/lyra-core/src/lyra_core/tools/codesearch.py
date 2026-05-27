@@ -160,6 +160,9 @@ def _rg_search(
             rel = Path(path).resolve().relative_to(root.resolve()).as_posix()
         except ValueError:
             rel = path
+        # Skip hits inside ignored directories (parity with _python_search).
+        if any(rel.startswith(f"{d}/") or rel == d for d in _IGNORE_DIRS):
+            continue
         for sub in data.get("submatches", []):
             col = int(sub.get("start", 0)) + 1
             text = data.get("lines", {}).get("text", "").rstrip("\n")
