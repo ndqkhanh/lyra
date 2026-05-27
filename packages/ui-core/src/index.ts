@@ -39,3 +39,7 @@ export * from './orchestration'
 
 // Monitoring
 export * from './monitoring'
+
+// Config
+export { loadConfig, config } from './config'
+export type { LyraConfig } from './config'

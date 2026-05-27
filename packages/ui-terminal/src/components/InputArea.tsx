@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Box, Text, useInput } from 'ink'
 import { FastTextInput } from './FastTextInput'
 import { useUIStore, useThemeColors, symbols, THEME_ORDER, getThemePreset } from '@lyra/ui-core'
@@ -66,10 +66,8 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false)
   const [currentGoal, setCurrentGoal] = useState<string | null>(null)
   const [goodVibesTick, setGoodVibesTick] = useState(0)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { vim, vimActions } = useVim()
-
-  // Guard against double-submission from both useInput and TextInput's onSubmit
-  const _submitGuard = useRef(0)
 
   // Hermes-style heart tick on every keystroke
   const handleChange = useCallback((value: string) => {
@@ -254,13 +252,12 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
     // ModelPicker already handles showing the key prompt inline
   }
 
-  const handleSubmit = () => {
-    const now = Date.now()
-    if (now - _submitGuard.current < 300) {
-      logger.debug('InputArea', 'Double-fire guard triggered')
+  const handleSubmit = useCallback(() => {
+    // Prevent double-submission
+    if (isSubmitting) {
+      logger.debug('InputArea', 'Submit already in progress')
       return
     }
-    _submitGuard.current = now
 
     if (!history.current.trim() || !transport) return
 
@@ -336,6 +333,9 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
     // Guard against submission during streaming
     if (session?.isStreaming) return
 
+    // Set submitting state
+    setIsSubmitting(true)
+
     // Add to history
     history.addToHistory(history.current)
 
@@ -351,20 +351,27 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
     useUIStore.getState().beginStreaming(sessionId)
 
     // Send via transport with model
-    transport.sendMessage(history.current, undefined, currentModel || undefined).catch((err) => {
-      addMessage(sessionId, {
-        id: `error-${Date.now()}`,
-        role: 'system',
-        content: `Error: ${err.message}`,
-        timestamp: Date.now()
+    transport.sendMessage(history.current, undefined, currentModel || undefined)
+      .then(() => {
+        // Reset submitting state on success
+        setIsSubmitting(false)
       })
-      // Reset streaming state on error (no content to commit)
-      useUIStore.getState().cancelStreaming(sessionId)
-    })
+      .catch((err) => {
+        addMessage(sessionId, {
+          id: `error-${Date.now()}`,
+          role: 'system',
+          content: `Error: ${err.message}`,
+          timestamp: Date.now()
+        })
+        // Reset streaming state on error (no content to commit)
+        useUIStore.getState().cancelStreaming(sessionId)
+        // Reset submitting state on error
+        setIsSubmitting(false)
+      })
 
     history.setCurrent('')
     setShowSuggestions(false)
-  }
+  }, [isSubmitting, history, transport, session, sessionId, addMessage, currentModel, vimActions])
 
   if (!session) {
     return (

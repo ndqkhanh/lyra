@@ -186,9 +186,9 @@ export const ConversationView = React.memo(function ConversationView({ sessionId
   // Show intro panel when no messages have arrived yet
   const showIntro = !hasMessages && !isStreaming
 
-  const allItems = useUIStore(state => state.getRenderItems(sessionId))
+  const allItems = useUIStore(useShallow((state) => state.getRenderItems(sessionId)))
   const policyItems = useMemo(
-    () => applyDisplayPolicy(allItems, displayMode as any),
+    () => applyDisplayPolicy(allItems, displayMode),
     [allItems, displayMode]
   )
 

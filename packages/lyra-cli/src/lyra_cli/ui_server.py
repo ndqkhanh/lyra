@@ -222,8 +222,11 @@ class LyraUIHandler(BaseHTTPRequestHandler):
                 error_data = json.dumps({"kind": "error", "payload": error_msg})
                 self.wfile.write(f"data: {error_data}\n\n".encode())
                 self.wfile.flush()
-            except Exception:
-                pass
+            except Exception as write_error:
+                # If we can't write the error (connection closed, etc.), log it
+                # We're already in an error handler, so we can't do much more
+                import sys
+                print(f"Failed to send error to client: {write_error}", file=sys.stderr)
 
     def _handle_providers(self) -> None:
         """GET /providers — list all providers with their models."""

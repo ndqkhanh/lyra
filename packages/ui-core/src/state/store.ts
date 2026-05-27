@@ -15,7 +15,7 @@ import type {
 } from '../types'
 import { DISPLAY_MODE_PRESETS } from '../types'
 import { toRenderItems } from '../utils/rendering'
-import { observability } from '../observability'
+import { observability, type ObservabilityEventType } from '../observability'
 import { IndicatorStateMachine } from '../stateMachine'
 import { getThemePreset, getDefaultTheme, type ThemePalette } from '../theme/presets'
 import { buildSkinFromPreset, type SkinConfig } from '../theme/skin'
@@ -545,7 +545,7 @@ export const useUIStore = create<UIStore>()(
     // Observability actions
     emitEvent: (sessionId, type, data) => {
       observability.emit({
-        type: type as any,
+        type: type as ObservabilityEventType,
         timestamp: Date.now(),
         sessionId,
         data

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { Box, useInput, useApp } from 'ink'
-import { useUIStore } from '@lyra/ui-core'
+import { useUIStore, config, type ProviderInfo, type DisplayMode } from '@lyra/ui-core'
 import { LocalTransport } from '@lyra/ui-transport'
 import { ConversationView } from './components/ConversationView'
 import { InputArea } from './components/InputArea'
@@ -9,6 +9,37 @@ import { CommandPalette } from './components/CommandPalette'
 import { AgentTree } from './components/AgentTree'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { logger } from './utils/logger'
+
+// Type guard for providers response
+interface ProvidersResponse {
+  providers: ProviderInfo[]
+}
+
+function isProvidersResponse(data: unknown): data is ProvidersResponse {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'providers' in data &&
+    Array.isArray((data as Record<string, unknown>).providers)
+  )
+}
+
+// Type guard for settings response
+interface SettingsResponse {
+  last_model: string
+  last_provider: string
+}
+
+function isSettingsResponse(data: unknown): data is SettingsResponse {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'last_model' in data &&
+    'last_provider' in data &&
+    typeof (data as Record<string, unknown>).last_model === 'string' &&
+    typeof (data as Record<string, unknown>).last_provider === 'string'
+  )
+}
 
 // Hermes-style layout — matches appLayout.tsx exactly:
 //   AlternateScreen → Box column → [
@@ -82,49 +113,89 @@ export function App() {
 
     const unsubscribeError = transport.onError((error) => {
       logger.error('App', 'Transport error:', error.message)
-      useUIStore.getState().addMessage(sessionId, {
-        id: `error-${Date.now()}`,
-        role: 'system',
-        content: `Error: ${error.message}`,
-        timestamp: Date.now()
-      })
-      // CRITICAL: Cancel streaming so the user can send another message
+
+      // Cancel streaming first to ensure clean state
       useUIStore.getState().cancelStreaming(sessionId)
+
+      // Then add error message after a tick to ensure state is settled
+      setTimeout(() => {
+        useUIStore.getState().addMessage(sessionId, {
+          id: `error-${Date.now()}`,
+          role: 'system',
+          content: `Error: ${error.message}`,
+          timestamp: Date.now()
+        })
+      }, 0)
     })
 
     const connectWithRetry = async (maxRetries = 10, delay = 500) => {
       for (let i = 0; i < maxRetries; i++) {
         try {
           await transport.connect()
+          logger.info('App', 'Transport connected successfully')
           return
-        } catch {
+        } catch (error) {
+          logger.error('App', `Connection attempt ${i + 1}/${maxRetries} failed:`, error)
           if (i < maxRetries - 1) {
             await new Promise(resolve => setTimeout(resolve, delay))
+          } else {
+            // Show error to user after all retries exhausted
+            useUIStore.getState().addMessage(sessionId, {
+              id: `error-${Date.now()}`,
+              role: 'system',
+              content: `Failed to connect after ${maxRetries} attempts. Please check your connection and ensure the Lyra server is running.`,
+              timestamp: Date.now()
+            })
           }
         }
       }
     }
 
-    connectWithRetry().catch(() => {})
+    connectWithRetry().catch((error) => {
+      logger.error('App', 'Connection failed:', error)
+    })
 
-    const fetchProviders = async () => {
+    const fetchProviders = async (retries = 0, maxRetries = 5) => {
       try {
-        const resp = await fetch('http://localhost:3737/providers')
-        const data = await resp.json() as Record<string, unknown>
-        if (data.providers) setProviders(data.providers as any)
-      } catch {
-        setTimeout(fetchProviders, 2000)
+        const resp = await fetch(`${config.apiUrl}/providers`)
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
+        const data = await resp.json() as unknown
+        if (isProvidersResponse(data)) {
+          setProviders(data.providers)
+          logger.info('App', 'Providers fetched successfully')
+        } else {
+          throw new Error('Invalid providers response format')
+        }
+      } catch (error) {
+        logger.error('App', `Provider fetch failed (attempt ${retries + 1}/${maxRetries}):`, error)
+        if (retries < maxRetries) {
+          const delay = Math.min(config.fetchIntervals.providers * Math.pow(config.retryConfig.backoffMultiplier, retries), 30000)
+          setTimeout(() => fetchProviders(retries + 1, maxRetries), delay)
+        } else {
+          logger.error('App', 'Provider fetch failed after max retries')
+          useUIStore.getState().addMessage(sessionId, {
+            id: `error-${Date.now()}`,
+            role: 'system',
+            content: `Failed to load providers. Please ensure the Lyra server is running at ${config.apiUrl}.`,
+            timestamp: Date.now()
+          })
+        }
       }
     }
 
     const fetchSettings = async () => {
       try {
-        const resp = await fetch('http://localhost:3737/settings')
-        const data = await resp.json() as Record<string, unknown>
-        if (data.last_model && data.last_provider) {
-          setModelAndProvider(data.last_model as string, data.last_provider as string)
+        const resp = await fetch(`${config.apiUrl}/settings`)
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
+        const data = await resp.json() as unknown
+        if (isSettingsResponse(data)) {
+          setModelAndProvider(data.last_model, data.last_provider)
+          logger.info('App', 'Settings loaded successfully')
         }
-      } catch {}
+      } catch (error) {
+        logger.error('App', 'Failed to fetch settings:', error)
+        // Settings are optional, so we don't show an error to the user
+      }
     }
 
     setTimeout(() => {
@@ -139,7 +210,7 @@ export function App() {
       unsubscribeError()
       transport.disconnect()
     }
-  }, [])
+  }, [createSession, setModelAndProvider, setTransport, setProviders, setDisplayMode])
 
   const handleCommandPalette = useCallback((command: string) => {
     const transport = useUIStore.getState().transport
@@ -161,10 +232,12 @@ export function App() {
     if (key.ctrl && input === '\\') {
       const session = useUIStore.getState().getActiveSession()
       if (session) {
-        const modes = ['minimal', 'standard', 'debug'] as const
-        const currentIdx = modes.indexOf(session.displayMode as any)
+        const modes: DisplayMode[] = ['minimal', 'standard', 'debug']
+        const currentIdx = modes.indexOf(session.displayMode)
         const nextMode = modes[(currentIdx + 1) % modes.length]
-        setDisplayMode(session.id, nextMode)
+        if (nextMode) {
+          setDisplayMode(session.id, nextMode)
+        }
       }
       return
     }
