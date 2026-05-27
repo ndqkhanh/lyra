@@ -10,7 +10,7 @@ Provides comprehensive security scanning and protection:
 - Permission auditing
 """
 
-from security.agent_shield import (
+from src.security.agent_shield import (
     AgentShield,
     CommandInjectionScanner,
     PathTraversalScanner,

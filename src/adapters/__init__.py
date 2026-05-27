@@ -12,7 +12,7 @@ Enables Lyra to work across multiple AI harnesses:
 - OpenCode
 """
 
-from adapters.base import (
+from src.adapters.base import (
     AdapterFactory,
     ClaudeCodeAdapter,
     CursorAdapter,

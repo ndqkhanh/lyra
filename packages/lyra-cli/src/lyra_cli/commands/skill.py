@@ -377,7 +377,7 @@ def _call_llm_for_reflection(prompt: str) -> str:
     to ``"auto"`` so a fresh install with no model selected still
     produces a sensible error rather than a stack trace.
     """
-    from harness_core.messages import Message
+    from lyra_harness_core.messages import Message
 
     from ..llm_factory import build_llm
 
@@ -717,7 +717,7 @@ def _call_llm_for_consolidation(prompt: str) -> str:
     them into a single ``_one_shot(prompt)`` helper without breaking
     tests.
     """
-    from harness_core.messages import Message
+    from lyra_harness_core.messages import Message
 
     from ..llm_factory import build_llm
 
@@ -926,7 +926,7 @@ def _call_llm_for_optimize(
     output, so the optimizer parses JSON from text — we just need a
     sync ``str -> str`` call here.
     """
-    from harness_core.messages import Message
+    from lyra_harness_core.messages import Message
 
     from ..llm_factory import build_llm
 

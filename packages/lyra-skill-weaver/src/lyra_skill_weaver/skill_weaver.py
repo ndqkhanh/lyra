@@ -263,10 +263,10 @@ class SkillGraph:
         while queue:
             node = queue.popleft()
             result.append(node)
-            for dep_skill_id in self.get_dependencies(node):
-                in_degree[dep_skill_id] -= 1
-                if in_degree[dep_skill_id] == 0:
-                    queue.append(dep_skill_id)
+            for dependent_id in self.get_dependents(node):
+                in_degree[dependent_id] -= 1
+                if in_degree[dependent_id] == 0:
+                    queue.append(dependent_id)
 
         if len(result) != len(self._nodes):
             # Find the cycle

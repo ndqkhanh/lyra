@@ -8,7 +8,7 @@ Achieves 60-70% cost reduction through:
 - Output limiting
 """
 
-from optimization.token_optimizer import (
+from src.optimization.token_optimizer import (
     ContextCompressor,
     CostMetrics,
     LLMRequest,

@@ -1,6 +1,6 @@
 """TDD-aware permission decision resolver.
 
-Builds on harness_core.permissions but adds path-sensitive rules for RED /
+Builds on lyra_harness_core.permissions but adds path-sensitive rules for RED /
 GREEN / REFACTOR / RESEARCH. Full contract in ``docs/blocks/04-permission-bridge.md``.
 
 Decision precedence inside this resolver (invoked by the PermissionBridge):
@@ -13,7 +13,7 @@ Decision precedence inside this resolver (invoked by the PermissionBridge):
         GREEN     → ALLOW writes to src/** and tests/**, destructive ASK
         REFACTOR  → ALLOW writes anywhere, destructive ASK
         RESEARCH  → ALLOW writes only to notes/**, otherwise DENY; destructive ASK
-    4. Fall through to harness_core defaults (DEFAULT / ACCEPT_EDITS).
+    4. Fall through to lyra_harness_core defaults (DEFAULT / ACCEPT_EDITS).
 """
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ import fnmatch
 from dataclasses import dataclass
 from typing import Any
 
-from harness_core.messages import ToolCall
+from lyra_harness_core.messages import ToolCall
 
 from .modes import LyraMode
 
@@ -168,7 +168,7 @@ def resolve_lyra_decision(
             f"RESEARCH mode denies write outside notes/ (path={path!r})",
         )
 
-    # DEFAULT and ACCEPT_EDITS mirror harness_core semantics.
+    # DEFAULT and ACCEPT_EDITS mirror lyra_harness_core semantics.
     if mode == LyraMode.ACCEPT_EDITS:
         if tool_risk == "destructive":
             return PermissionDecision(

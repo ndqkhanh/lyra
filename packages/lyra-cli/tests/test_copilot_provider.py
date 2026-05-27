@@ -17,7 +17,7 @@ from lyra_cli.providers.copilot import (
     CopilotUnavailable,
     _refresh_copilot_token,
 )
-from harness_core.messages import Message
+from lyra_harness_core.messages import Message
 
 
 class _FakeHttp:

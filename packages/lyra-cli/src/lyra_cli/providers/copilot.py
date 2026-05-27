@@ -23,8 +23,8 @@ import time
 from pathlib import Path
 from typing import Any, Optional, Tuple
 
-from harness_core.messages import Message, StopReason, ToolCall
-from harness_core.models import LLMProvider
+from lyra_harness_core.messages import Message, StopReason, ToolCall
+from lyra_harness_core.models import LLMProvider
 
 
 COPILOT_TOKEN_URL = "https://api.github.com/copilot_internal/v2/token"

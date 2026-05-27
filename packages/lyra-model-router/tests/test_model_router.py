@@ -1,19 +1,34 @@
-"""Tests for lyra-model-router package (50+ tests)."""
+"""Tests for lyra-model-router package (100+ tests)."""
 
 from __future__ import annotations
+
+import time
 
 import pytest
 
 from lyra_model_router import (
     BudgetLimit,
     CapabilityAnalyzer,
+    ClassificationResult,
+    ComplexityEstimator,
+    ConfidenceEscalator,
     CostOptimizer,
     CrossModelVerifier,
     GapReport,
     KnowingDoingGapDetector,
     ModelCapability,
+    ModelProvider,
     ModelRouterError,
+    ModelSpec,
+    ModelTier,
+    PerformanceHistory,
+    PerformanceRecord,
+    ProviderHealth,
     RouterConfig,
+    RoutingDecision,
+    RoutingStrategy,
+    TaskCategory,
+    TaskClassifier,
     TaskRequirements,
     UsageRecord,
     UsageStats,
@@ -887,3 +902,457 @@ class TestIntegration:
         )
         model = await optimizer.select_model(req, budget_limit=budget)
         assert model.cost_per_1k_tokens <= 0.001 or model.tier >= 2
+
+
+# ═════════════════════════════════════════════════════════════════════════
+# V3 — TaskClassifier Tests (15 categories)
+# ═════════════════════════════════════════════════════════════════════════
+
+
+class TestTaskClassifier:
+    """Tests for the 15-category task classifier."""
+
+    def test_all_categories_exist(self):
+        assert len(TaskCategory) == 15
+
+    def test_classify_architecture(self):
+        classifier = TaskClassifier()
+        result = classifier.classify("Design a microservice architecture with trade-off analysis")
+        assert result.primary == TaskCategory.ARCHITECTURE
+        assert result.confidence > 0.3
+
+    def test_classify_code_implementation(self):
+        classifier = TaskClassifier()
+        result = classifier.classify("Implement a new API endpoint for user authentication")
+        assert result.primary == TaskCategory.CODE_IMPLEMENTATION
+
+    def test_classify_code_review(self):
+        classifier = TaskClassifier()
+        result = classifier.classify("Review this PR for code quality and approve if it passes the quality gate")
+        assert result.primary == TaskCategory.CODE_REVIEW
+
+    def test_classify_debugging(self):
+        classifier = TaskClassifier()
+        result = classifier.classify("Debug this stack trace and find the root cause of the crash")
+        assert result.primary == TaskCategory.DEBUGGING
+
+    def test_classify_refactoring(self):
+        classifier = TaskClassifier()
+        result = classifier.classify("Refactor this module to extract method and decouple dependencies")
+        assert result.primary == TaskCategory.REFACTORING
+
+    def test_classify_testing(self):
+        classifier = TaskClassifier()
+        result = classifier.classify("Write unit tests and integration tests for the e2e coverage")
+        assert result.primary == TaskCategory.TESTING
+
+    def test_classify_research(self):
+        classifier = TaskClassifier()
+        result = classifier.classify("Research the latest papers and do a deep dive survey on AGI")
+        assert result.primary == TaskCategory.RESEARCH
+
+    def test_classify_data_analysis(self):
+        classifier = TaskClassifier()
+        result = classifier.classify("Write an ETL pipeline with SQL queries and an analytics dashboard")
+        assert result.primary == TaskCategory.DATA_ANALYSIS
+
+    def test_classify_documentation(self):
+        classifier = TaskClassifier()
+        result = classifier.classify("Write API docs, README, and changelog documentation")
+        assert result.primary == TaskCategory.DOCUMENTATION
+
+    def test_classify_security_audit(self):
+        classifier = TaskClassifier()
+        result = classifier.classify("Run OWASP security vulnerability and penetration audit")
+        assert result.primary == TaskCategory.SECURITY_AUDIT
+
+    def test_classify_devops(self):
+        classifier = TaskClassifier()
+        result = classifier.classify("Set up CI/CD pipeline with Docker and Kubernetes deployment")
+        assert result.primary == TaskCategory.DEVOPS
+
+    def test_classify_simple_lookup(self):
+        classifier = TaskClassifier()
+        result = classifier.classify("Find where the config file is and list the settings")
+        assert result.primary == TaskCategory.SIMPLE_LOOKUP
+
+    def test_classify_batch_processing(self):
+        classifier = TaskClassifier()
+        result = classifier.classify("Batch process all files and bulk migrate the data")
+        assert result.primary == TaskCategory.BATCH_PROCESSING
+
+    def test_classify_creative_generation(self):
+        classifier = TaskClassifier()
+        result = classifier.classify("Brainstorm creative copywriting ideas for the logo design")
+        assert result.primary == TaskCategory.CREATIVE_GENERATION
+
+    def test_classify_conversation(self):
+        classifier = TaskClassifier()
+        result = classifier.classify("Hello! How are you? Can you help clarify something?")
+        assert result.primary == TaskCategory.CONVERSATION
+
+    def test_top_categories_are_returned(self):
+        classifier = TaskClassifier()
+        result = classifier.classify("Refactor the API and add unit tests")
+        assert len(result.top_categories) == 3
+
+    def test_all_scores_dict_is_complete(self):
+        classifier = TaskClassifier()
+        result = classifier.classify("Write documentation")
+        assert len(result.all_scores) == 15
+
+    def test_classification_result_is_frozen(self):
+        result = ClassificationResult(primary=TaskCategory.CODE_IMPLEMENTATION, confidence=0.9)
+        with pytest.raises(Exception):
+            result.confidence = 0.5
+
+    def test_classify_batch(self):
+        classifier = TaskClassifier()
+        results = classifier.classify_batch([
+            "Debug this bug", "Write documentation", "Deploy to Kubernetes",
+        ])
+        assert len(results) == 3
+        assert results[0].primary == TaskCategory.DEBUGGING
+        assert results[1].primary == TaskCategory.DOCUMENTATION
+        assert results[2].primary == TaskCategory.DEVOPS
+
+    def test_classification_counts(self):
+        classifier = TaskClassifier()
+        classifier.classify("Debug this")
+        classifier.classify("Debug that")
+        classifier.classify("Research AI")
+        counts = classifier.classification_counts
+        assert counts[TaskCategory.DEBUGGING] == 2
+        assert counts[TaskCategory.RESEARCH] == 1
+
+    def test_reset_counts(self):
+        classifier = TaskClassifier()
+        classifier.classify("Debug this")
+        classifier.reset_counts()
+        assert all(v == 0 for v in classifier.classification_counts.values())
+
+
+# ═════════════════════════════════════════════════════════════════════════
+# V3 — ComplexityEstimator Tests (1-10 scale)
+# ═════════════════════════════════════════════════════════════════════════
+
+
+class TestComplexityEstimator:
+    """Tests for the 1-10 complexity estimator."""
+
+    def test_trivial_task_scores_low(self):
+        estimator = ComplexityEstimator()
+        result = estimator.estimate("Fix a typo in the README")
+        assert result.score < 3.0
+
+    def test_complex_task_scores_high(self):
+        estimator = ComplexityEstimator()
+        result = estimator.estimate(
+            "Design a distributed recursive consensus protocol with encryption "
+            "and real-time performance critical optimizations for a multi-threaded "
+            "compiler with neural network integration",
+            context_tokens=120_000,
+            tools_required=15,
+        )
+        assert result.score >= 7.0
+
+    def test_score_in_1_to_10_range(self):
+        estimator = ComplexityEstimator()
+        for desc in ["x", "a" * 2000]:
+            result = estimator.estimate(desc)
+            assert 1.0 <= result.score <= 10.0
+
+    def test_factors_are_returned(self):
+        estimator = ComplexityEstimator()
+        result = estimator.estimate("Write a function", context_tokens=5000, tools_required=3)
+        assert "description" in result.factors
+        assert "context" in result.factors
+        assert "tools" in result.factors
+
+    def test_reasoning_string(self):
+        estimator = ComplexityEstimator()
+        result = estimator.estimate("Write code")
+        assert "Complexity" in result.reasoning
+        assert "tier" in result.reasoning
+
+    def test_recommended_tier_range(self):
+        estimator = ComplexityEstimator()
+        result = estimator.estimate("Simple task")
+        assert 0 <= result.recommended_tier <= 3
+
+    def test_high_complexity_signal_boosts_score(self):
+        estimator = ComplexityEstimator()
+        simple = estimator.estimate("Write a function")
+        complex = estimator.estimate("Write a compiler with recursive descent parser")
+        assert complex.score > simple.score
+
+    def test_context_tokens_influence_score(self):
+        estimator = ComplexityEstimator()
+        low_ctx = estimator.estimate("task", context_tokens=1000)
+        high_ctx = estimator.estimate("task", context_tokens=150_000)
+        assert high_ctx.score > low_ctx.score
+
+    def test_tools_count_influences_score(self):
+        estimator = ComplexityEstimator()
+        few = estimator.estimate("task", tools_required=1)
+        many = estimator.estimate("task", tools_required=15)
+        assert many.score > few.score
+
+    def test_dependencies_influence_score(self):
+        estimator = ComplexityEstimator()
+        no_deps = estimator.estimate("task", dependency_count=0)
+        many_deps = estimator.estimate("task", dependency_count=10)
+        assert many_deps.score > no_deps.score
+
+    def test_domain_difficulty(self):
+        estimator = ComplexityEstimator()
+        compiler = estimator.estimate("task", domain="compiler")
+        docs = estimator.estimate("task", domain="documentation")
+        assert compiler.score > docs.score
+
+    def test_estimate_is_frozen(self):
+        estimator = ComplexityEstimator()
+        result = estimator.estimate("task")
+        with pytest.raises(Exception):
+            result.score = 5.0
+
+    def test_recommend_tier_for_very_complex(self):
+        estimator = ComplexityEstimator()
+        result = estimator.estimate(
+            "Design a distributed OS kernel with real-time constraints",
+            context_tokens=150_000, tools_required=20, domain="os_kernel",
+        )
+        assert result.recommended_tier == 0
+
+    def test_recommend_tier_for_simple(self):
+        estimator = ComplexityEstimator()
+        result = estimator.estimate("Fix a typo")
+        assert result.recommended_tier == 3
+
+
+# ═════════════════════════════════════════════════════════════════════════
+# V3 — PerformanceHistory Tests
+# ═════════════════════════════════════════════════════════════════════════
+
+
+class TestPerformanceHistory:
+    """Tests for learned performance history tracking."""
+
+    def test_record_and_retrieve(self):
+        history = PerformanceHistory()
+        history.record(PerformanceRecord(
+            model_id="claude-sonnet-4-6", category=TaskCategory.CODE_IMPLEMENTATION,
+            complexity=5.0, success=True,
+        ))
+        assert history.record_count == 1
+
+    def test_get_model_performance(self):
+        history = PerformanceHistory()
+        for i in range(5):
+            history.record(PerformanceRecord(
+                model_id="claude-sonnet-4-6", category=TaskCategory.CODE_IMPLEMENTATION,
+                complexity=5.0, success=(i < 4),
+            ))
+        perf = history.get_model_performance("claude-sonnet-4-6", TaskCategory.CODE_IMPLEMENTATION)
+        assert perf.total_attempts == 5
+        assert perf.success_count == 4
+        assert perf.success_rate == pytest.approx(0.8, rel=0.01)
+
+    def test_cold_start_performance(self):
+        history = PerformanceHistory()
+        perf = history.get_model_performance("unknown-model", TaskCategory.CODE_IMPLEMENTATION)
+        assert perf.is_cold
+        assert perf.total_attempts == 0
+
+    def test_recommend_model_with_history(self):
+        history = PerformanceHistory()
+        for _ in range(10):
+            history.record(PerformanceRecord(
+                model_id="claude-opus-4.7", category=TaskCategory.ARCHITECTURE,
+                complexity=8.0, success=True,
+            ))
+        for _ in range(10):
+            history.record(PerformanceRecord(
+                model_id="claude-sonnet-4-6", category=TaskCategory.ARCHITECTURE,
+                complexity=8.0, success=False,
+            ))
+        rec = history.recommend_model(
+            TaskCategory.ARCHITECTURE, ["claude-opus-4.7", "claude-sonnet-4-6"],
+        )
+        assert rec is not None
+        assert rec.model_id == "claude-opus-4.7"
+
+    def test_recommend_requires_min_attempts(self):
+        history = PerformanceHistory()
+        history.record(PerformanceRecord(
+            model_id="claude-opus-4.7", category=TaskCategory.CODE_IMPLEMENTATION,
+            complexity=5.0, success=True,
+        ))
+        rec = history.recommend_model(
+            TaskCategory.CODE_IMPLEMENTATION, ["claude-opus-4.7"], min_attempts=3,
+        )
+        assert rec is None
+
+    def test_category_leaderboard(self):
+        history = PerformanceHistory()
+        for _ in range(5):
+            history.record(PerformanceRecord(
+                model_id="model-a", category=TaskCategory.CODE_IMPLEMENTATION,
+                complexity=5.0, success=True,
+            ))
+        for _ in range(5):
+            history.record(PerformanceRecord(
+                model_id="model-b", category=TaskCategory.CODE_IMPLEMENTATION,
+                complexity=5.0, success=False,
+            ))
+        board = history.get_category_leaderboard(TaskCategory.CODE_IMPLEMENTATION)
+        assert len(board) == 2
+        assert board[0].model_id == "model-a"
+
+    def test_global_stats(self):
+        history = PerformanceHistory()
+        history.record(PerformanceRecord(
+            model_id="m1", category=TaskCategory.CODE_IMPLEMENTATION, complexity=5.0, success=True,
+        ))
+        history.record(PerformanceRecord(
+            model_id="m2", category=TaskCategory.RESEARCH, complexity=7.0, success=False,
+        ))
+        stats = history.get_global_stats()
+        assert stats["total_decisions"] == 2
+        assert stats["global_success_rate"] == 0.5
+        assert stats["unique_models"] == 2
+
+    def test_prune_old_records(self):
+        history = PerformanceHistory()
+        history.record(PerformanceRecord(
+            model_id="old-model", category=TaskCategory.CODE_IMPLEMENTATION,
+            complexity=5.0, success=True,
+            timestamp=time.time() - 100 * 86400,
+        ))
+        history.record(PerformanceRecord(
+            model_id="new-model", category=TaskCategory.CODE_IMPLEMENTATION,
+            complexity=5.0, success=True,
+            timestamp=time.time(),
+        ))
+        removed = history.prune_old_records(max_age_days=50.0)
+        assert removed == 1
+        assert history.record_count == 1
+
+    def test_performance_record_is_frozen(self):
+        record = PerformanceRecord(
+            model_id="m1", category=TaskCategory.CODE_IMPLEMENTATION,
+            complexity=5.0, success=True,
+        )
+        with pytest.raises(Exception):
+            record.success = False
+
+    def test_recommendation_confidence_scales(self):
+        history = PerformanceHistory()
+        for _ in range(20):
+            history.record(PerformanceRecord(
+                model_id="m1", category=TaskCategory.CODE_IMPLEMENTATION,
+                complexity=5.0, success=True,
+            ))
+        rec = history.recommend_model(TaskCategory.CODE_IMPLEMENTATION, ["m1"])
+        assert rec is not None
+        assert rec.confidence >= 0.9
+
+
+# ═════════════════════════════════════════════════════════════════════════
+# V3 — ConfidenceEscalator Tests
+# ═════════════════════════════════════════════════════════════════════════
+
+
+class TestConfidenceEscalator:
+    """Tests for confidence-thresholded escalation with fallback chains."""
+
+    @staticmethod
+    def _mk_decision(name="claude-haiku-4-5", confidence=0.6):
+        return RoutingDecision(
+            model=ModelSpec(
+                name=name, provider=ModelProvider.ANTHROPIC, tier=ModelTier.FAST,
+                cost_per_1k_tokens=0.001, latency_ms=100.0, accuracy_estimate=confidence,
+            ),
+            confidence=confidence,
+            estimated_cost=0.0005,
+            strategy=RoutingStrategy.BALANCED,
+        )
+
+    @staticmethod
+    def _mk_model(name, provider, tier, accuracy, cost=0.003):
+        return ModelSpec(
+            name=name, provider=provider, tier=tier,
+            cost_per_1k_tokens=cost, latency_ms=300.0, accuracy_estimate=accuracy,
+        )
+
+    def test_low_confidence_triggers_escalation(self):
+        escalator = ConfidenceEscalator(confidence_threshold=0.75)
+        assert escalator.should_escalate(self._mk_decision(confidence=0.5))
+
+    def test_high_confidence_no_escalation(self):
+        escalator = ConfidenceEscalator(confidence_threshold=0.75)
+        assert not escalator.should_escalate(self._mk_decision(confidence=0.9))
+
+    def test_degraded_provider_triggers_escalation(self):
+        escalator = ConfidenceEscalator(confidence_threshold=0.75)
+        for _ in range(3):
+            escalator.record_failure(ModelProvider.ANTHROPIC)
+        assert escalator.should_escalate(self._mk_decision(confidence=0.9))
+
+    def test_escalation_finds_alternative(self):
+        escalator = ConfidenceEscalator(confidence_threshold=0.75)
+        decision = self._mk_decision("claude-haiku-4-5", confidence=0.5)
+        available = [
+            self._mk_model("claude-haiku-4-5", ModelProvider.ANTHROPIC, ModelTier.FAST, 0.8),
+            self._mk_model("gpt-5.4-nano", ModelProvider.OPENAI, ModelTier.FAST, 0.78),
+            self._mk_model("claude-sonnet-4-6", ModelProvider.ANTHROPIC, ModelTier.STANDARD, 0.88),
+            self._mk_model("deepseek-v4-pro", ModelProvider.LITELLM, ModelTier.REASONING, 0.92),
+        ]
+        result = escalator.escalate(decision, available)
+        assert result.escalated
+        assert result.final_decision is not None
+
+    def test_no_escalation_if_confident(self):
+        escalator = ConfidenceEscalator(confidence_threshold=0.75)
+        decision = self._mk_decision("claude-sonnet-4-6", confidence=0.88)
+        result = escalator.escalate(decision, [decision.model])
+        assert not result.escalated
+        assert result.final_decision == decision
+
+    def test_provider_health_tracking(self):
+        escalator = ConfidenceEscalator()
+        assert escalator.is_provider_healthy(ModelProvider.ANTHROPIC)
+        escalator.record_failure(ModelProvider.ANTHROPIC)
+        escalator.record_failure(ModelProvider.ANTHROPIC)
+        assert escalator.is_provider_healthy(ModelProvider.ANTHROPIC)
+        escalator.record_failure(ModelProvider.ANTHROPIC)
+        assert not escalator.is_provider_healthy(ModelProvider.ANTHROPIC)
+        escalator.record_success(ModelProvider.ANTHROPIC)
+        assert escalator.is_provider_healthy(ModelProvider.ANTHROPIC)
+
+    def test_escalation_result_steps_are_tuple(self):
+        escalator = ConfidenceEscalator(confidence_threshold=0.75)
+        decision = self._mk_decision(confidence=0.9)
+        result = escalator.escalate(decision, [decision.model])
+        assert isinstance(result.steps, tuple)
+
+
+class TestProviderHealth:
+    """Tests for provider health tracking."""
+
+    def test_initial_state(self):
+        health = ProviderHealth(provider=ModelProvider.ANTHROPIC)
+        assert not health.is_degraded
+        assert health.success_rate == 1.0
+
+    def test_record_success_resets(self):
+        health = ProviderHealth(provider=ModelProvider.ANTHROPIC)
+        health.record_failure()
+        health.record_success()
+        assert health.consecutive_failures == 0
+
+    def test_degraded_after_multiple_failures(self):
+        health = ProviderHealth(provider=ModelProvider.ANTHROPIC)
+        for _ in range(3):
+            health.record_failure()
+        assert health.is_degraded

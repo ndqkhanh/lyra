@@ -27,12 +27,33 @@ export const symbols = {
   // Status indicators
   spinner: ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'],
   thinkingFrames: ['✳', '✴', '✵', '✶'],
+  progressFrames: ['✢', '✶', '✳', '✽', '✻'],
+  pending: '⏳',
+  success: '✅',
+  error: '❌',
+  warning: '⚠',
+  info: 'ℹ',
 
-  // Logo (3 lines)
+  // Logo — Constellation LYRA wordmark
+  // Each row is colored independently for a gradient effect across the full mark
   logo: [
-    '██╗  ██╗   ██╗██████╗  █████╗ ',
-    '██║  ╚██╗ ██╔╝██╔══██╗██╔══██╗',
-    '███████║ ╚████╔╝ ██████╔╝███████║'
+    '╦   ╦╦ ╦╦═╗╔═╗',
+    '║   ╚╦╝╠╦╝╠═╣',
+    '╩═╝  ╩ ╩╚═╩ ╩',
+  ],
+
+  // Decorative constellation stars (rendered in scattered positions)
+  constellationTop:    '·   ✦   ·   ✧   ·   ✦   ·',
+  constellationBottom: '·   ✧   ·   ✦   ·   ✧   ·',
+
+  // Synthwave decorative divider
+  synthwaveDivider: '━★━━━━━━━━━━━━━━━━━━━━━━━━━━★━',
+
+  // Large block LYRA for alternative layouts
+  logoBlock: [
+    '╔╗ ╦ ╦╦═╗╔═╗',
+    '╠╩╗╚╦╝╠╦╝╠═╣',
+    '╚═╝ ╩ ╩╚═╩ ╩',
   ],
 
   // Borders

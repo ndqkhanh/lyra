@@ -51,6 +51,17 @@ function messageToRenderItems(msg: Message, committed: boolean): RenderItem[] {
       timestamp: msg.timestamp,
       content: msg.content
     } as UserTextItem)
+  } else if (msg.role === 'system') {
+    // System messages (errors, notifications)
+    items.push({
+      kind: 'assistant-text',
+      id: `${msg.id}-text`,
+      sourceMessageId: msg.id,
+      committed,
+      timestamp: msg.timestamp,
+      content: msg.content,
+      streaming: false
+    } as AssistantTextItem)
   } else if (msg.role === 'assistant') {
     const assistantMsg = msg as AssistantMessage
 

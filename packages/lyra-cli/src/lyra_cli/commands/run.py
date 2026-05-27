@@ -4,7 +4,7 @@ v2.1 wires the actual agent loop. Pre-2.1 this command stopped after
 the planner approved (with a literal "Phase 2 stops here") and the
 operator never saw an answer; that was the central bug behind the
 "my DeepSeek key works in `doctor` but `lyra run` does nothing"
-report. Now: planner → approval → :class:`harness_core.AgentLoop` →
+report. Now: planner → approval → :class:`lyra_harness_core.AgentLoop` →
 final answer rendered to the console.
 
 v2.1.2 polishes the output to claude-code class:
@@ -31,9 +31,9 @@ from pathlib import Path
 from typing import Optional, Union
 
 import typer
-from harness_core.loop import AgentLoop, LoopResult
-from harness_core.messages import StopReason
-from harness_core.tools import ToolRegistry
+from lyra_harness_core.loop import AgentLoop, LoopResult
+from lyra_harness_core.messages import StopReason
+from lyra_harness_core.tools import ToolRegistry
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text

@@ -1,0 +1,11 @@
+{
+  "phase": "recon",
+  "graph": {
+    "scope_id": "test",
+    "assets": [],
+    "vulnerabilities": [],
+    "paths": []
+  },
+  "timestamp": "2026-05-25T15:12:07.760967",
+  "cost": 0.0
+}

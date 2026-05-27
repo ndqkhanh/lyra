@@ -24,8 +24,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Literal
 
-from harness_core.hooks import HookDecision
-from harness_core.messages import ToolCall
+from lyra_harness_core.hooks import HookDecision
+from lyra_harness_core.messages import ToolCall
 
 from lyra_core.hooks.destructive_pattern import destructive_pattern_hook
 from lyra_core.hooks.secrets_scan import secrets_scan_hook
@@ -75,7 +75,7 @@ class PermissionStack:
         if self.mode == "yolo":
             return StackDecision(block=False)
 
-        # Synthesize a ToolCall for the harness_core hooks. The id is
+        # Synthesize a ToolCall for the lyra_harness_core hooks. The id is
         # stable-but-unique so we don't surface random ids in test output.
         call = ToolCall(
             id=f"stack-{inp.tool_name}",

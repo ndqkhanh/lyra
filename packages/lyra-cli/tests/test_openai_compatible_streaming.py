@@ -316,6 +316,6 @@ def __build_user_message(text: str) -> Any:
     The provider only needs ``role`` + ``content`` to build the
     OpenAI wire payload, so a thin object suffices.
     """
-    from harness_core.messages import Message
+    from lyra_harness_core.messages import Message
 
     return Message(role="user", content=text)

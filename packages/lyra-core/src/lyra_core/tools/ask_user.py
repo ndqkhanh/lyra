@@ -23,7 +23,7 @@ import json
 from dataclasses import dataclass
 from typing import Any, Callable, List, Optional, Sequence
 
-from harness_core.tools import Tool, ToolError
+from lyra_harness_core.tools import Tool, ToolError
 from pydantic import BaseModel, Field
 
 

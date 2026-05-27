@@ -24,7 +24,7 @@ from typing import Any
 
 import pytest
 
-from harness_core.messages import Message
+from lyra_harness_core.messages import Message
 from lyra_cli.interactive.driver import _wire_plugins_to_lifecycle
 from lyra_cli.interactive.session import (
     InteractiveSession,

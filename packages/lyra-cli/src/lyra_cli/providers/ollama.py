@@ -56,8 +56,8 @@ import urllib.error
 import urllib.request
 from typing import Any, Optional
 
-from harness_core.messages import Message, StopReason, ToolCall
-from harness_core.models import LLMProvider
+from lyra_harness_core.messages import Message, StopReason, ToolCall
+from lyra_harness_core.models import LLMProvider
 
 
 # ---------------------------------------------------------------------------

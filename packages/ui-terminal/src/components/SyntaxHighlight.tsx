@@ -1,87 +1,143 @@
 import React from 'react'
-import { Text } from 'ink'
-import chalk from 'chalk'
+import { Box, Text } from 'ink'
 import { colors } from '@lyra/ui-core'
 
 interface SyntaxHighlightProps {
   code: string
   language?: string
+  showLineNumbers?: boolean
+  startLine?: number
 }
 
 // Simple syntax highlighting for common languages
-export function SyntaxHighlight({ code, language }: SyntaxHighlightProps) {
-  if (!language) {
-    return <Text>{code}</Text>
+const tokenize = (code: string, language: string): Array<{ text: string; type: string }> => {
+  const tokens: Array<{ text: string; type: string }> = []
+
+  // Keywords by language
+  const keywords: Record<string, string[]> = {
+    typescript: ['const', 'let', 'var', 'function', 'class', 'interface', 'type', 'import', 'export', 'from', 'return', 'if', 'else', 'for', 'while', 'async', 'await', 'try', 'catch', 'throw', 'new'],
+    javascript: ['const', 'let', 'var', 'function', 'class', 'import', 'export', 'from', 'return', 'if', 'else', 'for', 'while', 'async', 'await', 'try', 'catch', 'throw', 'new'],
+    python: ['def', 'class', 'import', 'from', 'return', 'if', 'else', 'elif', 'for', 'while', 'async', 'await', 'with', 'as', 'try', 'except', 'finally', 'raise'],
+    rust: ['fn', 'let', 'mut', 'struct', 'enum', 'impl', 'trait', 'use', 'pub', 'return', 'if', 'else', 'for', 'while', 'match', 'Some', 'None', 'Ok', 'Err'],
+    go: ['func', 'var', 'const', 'type', 'struct', 'interface', 'import', 'return', 'if', 'else', 'for', 'range', 'go', 'defer', 'select', 'case'],
+    bash: ['cd', 'ls', 'git', 'npm', 'yarn', 'pnpm', 'cat', 'grep', 'find', 'echo', 'export', 'source', 'chmod', 'mkdir', 'rm', 'cp', 'mv', 'sudo', 'docker', 'kubectl', 'if', 'then', 'else', 'fi', 'for', 'do', 'done']
   }
 
+  const langKeywords = keywords[language] || []
+
+  // Simple tokenization
+  const regex = /(".*?"|'.*?'|`.*?`|\/\/.*|\/\*[\s\S]*?\*\/|\b\d+\b|\b[a-zA-Z_]\w*\b|[{}()\[\];,.])/g
+  let lastIndex = 0
+
+  code.replace(regex, (match, offset) => {
+    // Add whitespace before match
+    if (offset > lastIndex) {
+      tokens.push({ text: code.slice(lastIndex, offset), type: 'whitespace' })
+    }
+
+    // Classify token
+    let type = 'text'
+    if (match.startsWith('"') || match.startsWith("'") || match.startsWith('`')) {
+      type = 'string'
+    } else if (match.startsWith('//') || match.startsWith('/*')) {
+      type = 'comment'
+    } else if (/^\d+$/.test(match)) {
+      type = 'number'
+    } else if (langKeywords.includes(match)) {
+      type = 'keyword'
+    } else if (/^[{}()\[\];,.]$/.test(match)) {
+      type = 'punctuation'
+    }
+
+    tokens.push({ text: match, type })
+    lastIndex = offset + match.length
+    return match
+  })
+
+  // Add remaining text
+  if (lastIndex < code.length) {
+    tokens.push({ text: code.slice(lastIndex), type: 'whitespace' })
+  }
+
+  return tokens
+}
+
+const getTokenColor = (type: string): string => {
+  switch (type) {
+    case 'keyword':
+      return colors.codeKeyword      // Pink - keywords
+    case 'string':
+      return colors.codeString       // Yellow - strings
+    case 'number':
+      return colors.codeNumber       // Purple - numbers
+    case 'comment':
+      return colors.codeComment      // Blue gray - comments
+    case 'punctuation':
+      return colors.codeOperator     // Pink - operators/punctuation
+    default:
+      return colors.codeVariable     // Off white - variables/text
+  }
+}
+
+export function SyntaxHighlight({
+  code,
+  language = 'typescript',
+  showLineNumbers = true,
+  startLine = 1
+}: SyntaxHighlightProps) {
   const lines = code.split('\n')
 
   return (
-    <>
-      {lines.map((line, idx) => (
-        <Text key={idx}>{highlightLine(line, language)}</Text>
-      ))}
-    </>
+    <Box flexDirection="column">
+      {lines.map((line, idx) => {
+        const lineNumber = startLine + idx
+        const tokens = tokenize(line, language)
+
+        return (
+          <Box key={idx}>
+            {showLineNumbers && (
+              <Box width={4} marginRight={1}>
+                <Text color={colors.lineNumber} dimColor>
+                  {lineNumber.toString().padStart(3, ' ')}
+                </Text>
+              </Box>
+            )}
+            <Box>
+              {tokens.map((token, tokenIdx) => (
+                <Text key={tokenIdx} color={getTokenColor(token.type)}>
+                  {token.text}
+                </Text>
+              ))}
+            </Box>
+          </Box>
+        )
+      })}
+    </Box>
   )
 }
 
-function highlightLine(line: string, language: string): string {
-  switch (language) {
-    case 'javascript':
-    case 'typescript':
-    case 'tsx':
-      return highlightJavaScript(line)
-    case 'python':
-      return highlightPython(line)
-    default:
-      return line
-  }
+interface CodeBlockProps {
+  code: string
+  language?: string
+  title?: string
+  showLineNumbers?: boolean
 }
 
-function highlightJavaScript(line: string): string {
-  // Keywords
-  const keywords = /\b(const|let|var|function|return|if|else|for|while|class|import|export|from|async|await|try|catch|throw|new|this|super|extends|implements|interface|type|enum)\b/g
-  line = line.replace(keywords, chalk.hex(colors.keyword)('$1'))
-
-  // Strings
-  const strings = /(["'`])((?:\\.|(?!\1).)*?)\1/g
-  line = line.replace(strings, chalk.hex(colors.string)('$1$2$1'))
-
-  // Comments
-  const comments = /(\/\/.*$|\/\*[\s\S]*?\*\/)/g
-  line = line.replace(comments, chalk.hex(colors.comment)('$1'))
-
-  // Functions
-  const functions = /\b([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/g
-  line = line.replace(functions, chalk.hex(colors.function)('$1') + '(')
-
-  // Numbers
-  const numbers = /\b(\d+\.?\d*)\b/g
-  line = line.replace(numbers, chalk.hex(colors.number)('$1'))
-
-  return line
-}
-
-function highlightPython(line: string): string {
-  // Keywords
-  const keywords = /\b(def|class|return|if|elif|else|for|while|import|from|as|try|except|finally|raise|with|lambda|yield|async|await|pass|break|continue|global|nonlocal)\b/g
-  line = line.replace(keywords, chalk.hex(colors.keyword)('$1'))
-
-  // Strings
-  const strings = /(["'])((?:\\.|(?!\1).)*?)\1/g
-  line = line.replace(strings, chalk.hex(colors.string)('$1$2$1'))
-
-  // Comments
-  const comments = /(#.*$)/g
-  line = line.replace(comments, chalk.hex(colors.comment)('$1'))
-
-  // Functions
-  const functions = /\bdef\s+([a-zA-Z_][a-zA-Z0-9_]*)/g
-  line = line.replace(functions, 'def ' + chalk.hex(colors.function)('$1'))
-
-  // Built-ins
-  const builtins = /\b(print|len|range|str|int|float|list|dict|set|tuple|open|input|type|isinstance|hasattr|getattr|setattr)\b/g
-  line = line.replace(builtins, chalk.hex(colors.number)('$1'))
-
-  return line
+export function CodeBlock({ code, language = 'typescript', title, showLineNumbers = true }: CodeBlockProps) {
+  return (
+    <Box flexDirection="column" borderStyle="single" borderColor={colors.border} paddingX={1}>
+      {title && (
+        <Box borderBottom borderColor={colors.border} paddingBottom={0} marginBottom={1}>
+          <Text bold color={colors.filePath}>{title}</Text>
+          {language && (
+            <Text color={colors.timestamp} dimColor>
+              {' '}
+              ({language})
+            </Text>
+          )}
+        </Box>
+      )}
+      <SyntaxHighlight code={code} language={language} showLineNumbers={showLineNumbers} />
+    </Box>
+  )
 }

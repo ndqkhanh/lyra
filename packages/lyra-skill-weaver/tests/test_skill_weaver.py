@@ -134,7 +134,7 @@ class TestSkillGraph:
         g.add_edge(SkillEdge(source_id="B", target_id="A", edge_type="depends_on"))
         g.add_edge(SkillEdge(source_id="C", target_id="B", edge_type="depends_on"))
         order = g.topological_sort()
-        assert order == ["C", "B", "A"]
+        assert order == ["A", "B", "C"]  # Dependencies first
 
     def test_circular_dependency(self):
         g = SkillGraph()
@@ -345,10 +345,11 @@ class TestSkillDiscoveryEngine:
     async def test_discover_from_directory_empty(self):
         import tempfile
         import os
+        from pathlib import Path
         reg = SkillRegistry()
         engine = SkillDiscoveryEngine(reg)
         with tempfile.TemporaryDirectory() as tmpdir:
-            skills = await engine.discover_from_directory(tmpdir)
+            skills = await engine.discover_from_directory(Path(tmpdir))
             assert isinstance(skills, list)
 
     def test_evaluate_quality(self):

@@ -15,8 +15,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable, Literal
 
-from harness_core.hooks import HookDecision
-from harness_core.messages import ToolCall, ToolResult
+from lyra_harness_core.hooks import HookDecision
+from lyra_harness_core.messages import ToolCall, ToolResult
 
 WRITE_TOOL_NAMES = frozenset({"Write", "Edit", "MultiEdit"})
 

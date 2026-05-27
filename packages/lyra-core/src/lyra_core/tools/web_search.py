@@ -401,7 +401,7 @@ class _WebSearchArgs(BaseModel):
 
 
 class WebSearchTool:
-    """Tool wrapper for WebSearch compatible with harness_core.tools.ToolRegistry."""
+    """Tool wrapper for WebSearch compatible with lyra_harness_core.tools.ToolRegistry."""
 
     name = "WebSearch"
     description = "Search the web and return ranked snippets with URLs."

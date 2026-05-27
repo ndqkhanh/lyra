@@ -1,7 +1,7 @@
 """Pluggable LLM providers for Lyra.
 
 Providers in this package implement
-:class:`harness_core.models.LLMProvider` so they're drop-in
+:class:`lyra_harness_core.models.LLMProvider` so they're drop-in
 replacements for ``AnthropicLLM`` / ``MockLLM``. The CLI's
 :mod:`lyra_cli.llm_factory` wires them into the ``--llm auto``
 cascade so the tool works with whatever the user has.

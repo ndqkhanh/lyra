@@ -12,10 +12,12 @@ from pydantic import BaseModel, Field
 
 class ReasoningStrategy(str, Enum):
     """Available reasoning strategies."""
-    
+
     AUTO = "auto"
     CHAIN_OF_THOUGHT = "cot"
     TREE_SEARCH = "tree_search"
+    TREE_OF_THOUGHTS = "tot"  # Alias for tree_search
+    REACT = "react"  # Reasoning + Acting
     DEBATE = "debate"
     HYPOTHESIS = "hypothesis"
 
@@ -115,10 +117,10 @@ class ReasoningConfig(BaseModel):
 @dataclass
 class ComputeBudget:
     """Compute budget for reasoning."""
-    
+
     max_tokens: int
-    max_time_seconds: float
-    max_steps: int
+    max_time_seconds: float = 300.0  # Default 5 minutes
+    max_steps: int = 50
     tokens_used: int = 0
     time_used: float = 0.0
     steps_used: int = 0

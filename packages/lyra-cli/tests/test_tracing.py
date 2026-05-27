@@ -6,8 +6,8 @@ from typing import Any
 
 import pytest
 
-from harness_core.messages import Message
-from harness_core.models import MockLLM
+from lyra_harness_core.messages import Message
+from lyra_harness_core.models import MockLLM
 
 from lyra_cli.client import ChatRequest, LyraClient
 from lyra_cli.tracing import (

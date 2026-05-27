@@ -17,7 +17,7 @@ from typing import Any
 
 import pytest
 
-from harness_core.messages import Message, ToolCall
+from lyra_harness_core.messages import Message, ToolCall
 
 from lyra_cli.interactive.chat_tools import (
     ToolEvent,

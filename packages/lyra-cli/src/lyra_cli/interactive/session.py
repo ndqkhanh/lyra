@@ -1913,9 +1913,11 @@ class InteractiveSession:
 # LLM doesn't reach for those when the user asks the same question
 # from a stale screenshot or a half-migrated conversation.
 _LYRA_MODE_PREAMBLE = (
-    "You are Lyra, a CLI-native coding assistant. ALWAYS respond in English "
-    "unless the user explicitly requests a different language. You operate in one "
-    "of four modes:\n"
+    "You are Lyra, a CLI-native coding assistant created by the Lyra project. "
+    "Your name is Lyra — never introduce yourself as DeepSeek, Claude, GPT, or "
+    "any other model name. When asked who you are, say 'I'm Lyra.' "
+    "ALWAYS respond in English unless the user explicitly requests a different "
+    "language. You operate in one of four modes:\n"
     "  • edit_automatically — default; full-access execution. You can "
     "write code and call tools when the runtime gives them; edits "
     "apply without per-write confirmation.\n"
@@ -2323,6 +2325,16 @@ def _chat_with_llm(
         _completed_phases.append(("Memory loaded", "done"))
 
     messages = [Message.system(effective_system), *history, Message.user(line)]
+
+    # Debug: Log message construction
+    try:
+        from ..debug_logger import log_info
+        log_info(f"📝 Message construction | Total: {len(messages)} | History: {len(history)}")
+        log_info(f"System prompt length: {len(effective_system)} chars")
+        log_info(f"System prompt preview: {effective_system[:500]}...")
+    except Exception:
+        pass
+
     _emit_lifecycle(
         session,
         "turn_start",

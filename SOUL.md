@@ -78,6 +78,25 @@ Lyra is downstream of a substantial research ecosystem. Every novel technique tr
 - **Verbatim-First Retrieval**: [MemPalace](https://github.com/MemPalace/mempalace) → Memory retrieval strategy
 - **Skills as Memory**: [Acontext](https://github.com/memodb-io/Acontext) → Skill-memory equivalence
 
+### MemAgent Breakthrough Memory (ICLR 2026 Workshop — 20 papers, ULTRA PLAN 27)
+- **Agentic Zettelkasten Memory**: [A-Mem (ICLR 2026 MemAgent)](https://openreview.net/forum?id=FiM0M8gcct) → `lyra_memory/agentic/` — #1 on LoCoMo, 93.6% token reduction vs MemGPT
+- **Active Memory Reconstruction**: [MRAgent (ICLR 2026 MemAgent)](https://openreview.net/forum?id=YPoHy6lgKP) → `lyra_memory/reconstruction/` — Cue-Tag-Content graph, H_passive ⊊ H_active
+- **Neuroscience-Grounded Architecture**: [Human-Like Lifelong Memory (ICLR 2026 MemAgent)](https://openreview.net/forum?id=QufkvHbQs7) → `lyra_memory/cognitive/` — valence vectors, thalamic gateway, System 1/2, CBT beliefs
+- **Memory-Guided Optimization**: [MemGrad (ICLR 2026 MemAgent)](https://openreview.net/forum?id=GeaPE7iw1V) → `lyra_memory/optimization/` — textual gradient descent via feedback abstraction
+- **Cost-Sensitive Multi-Store Routing**: [Store Routing (ICLR 2026 MemAgent)](https://openreview.net/forum?id=iGRGjdhl9r) → `lyra_memory/routing/` — 86.7% accuracy, 62% fewer tokens
+- **Asynchronous Memory Pipeline**: [CoMem (ICLR 2026 MemAgent)](https://openreview.net/forum?id=tc9GAKlxQC) → `lyra_memory/async_pipeline/` — 1.4x latency improvement, GRPO-trained
+- **Modular Compression**: [Modular Compression (ICLR 2026 MemAgent)](https://openreview.net/forum?id=ztmwHisqJ4) → `lyra_memory/modular/` — interference bounds Δ_t ≤ ρ_t ε_t
+- **Gated Memory Consolidation**: [CraniMem (ICLR 2026 MemAgent)](https://openreview.net/forum?id=Tts94WVw40) → `lyra_memory/consolidation/` — RAS-inspired, noise drop 0.011
+- **Mutation-Gated Safeguards**: [SABER (ICLR 2026 MemAgent)](https://openreview.net/forum?id=En2z9dckgP) → `lyra_memory/safety/` — +28% relative on τ-Bench
+- **Latent Action Reparameterization**: [LAR (ICLR 2026 MemAgent)](https://openreview.net/forum?id=nmFfyHEs76) → `lyra_memory/abstraction/` — multi-step action compression
+- **Curriculum Curation**: [ACE (ICLR 2026 MemAgent)](https://openreview.net/forum?id=Qr5bhBbBOb) → `lyra_memory/curriculum/` — ~30% tasks match full-dataset
+- **Experiential Reflective Learning**: [ERL (ICLR 2026 MemAgent)](https://openreview.net/forum?id=hQgSl6kj1W) → `lyra_memory/heuristics/` — +7.8% on Gaia2
+- **Memory Transplant Protocol**: [Memory Transplants (ICLR 2026 MemAgent)](https://openreview.net/forum?id=AIJsjIqfsp) → `lyra_memory/transplant/` — cross-domain transfer
+- **LP-RAG Link Prediction**: [LP-RAG (ICLR 2026 MemAgent)](https://openreview.net/forum?id=Y8Txo8vaH7) → `lyra_memory/routing/` — outperforms HippoRAG/GFM-RAG/NodeRAG
+- **Feedback Descent Optimizer**: [Feedback Descent (ICLR 2026 MemAgent)](https://openreview.net/forum?id=Uw5G3H26ps) → `lyra_memory/optimization/` — dimension-free convergence
+- **KV-Cache Compression**: [R-KVHash (ICLR 2026 MemAgent)](https://openreview.net/forum?id=UTRuEFJ57H) + [Norm-Guided Eviction](https://openreview.net/forum?id=xOW2jXDKG3) → `lyra_memory/kv_cache/` — 2× throughput, 87.5% reduction
+- **Multi-Agent Operations Memory**: [AOI (ICLR 2026 MemAgent)](https://openreview.net/forum?id=Q16XXJou3O) → `lyra_memory/operations/` — 94.2% TSR, 34.4% MTTR reduction
+
 ### Self-Evolution & Learning
 - **GEPA v2 Multi-Agent Optimizer**: [GEPA (ICLR 2026 Oral)](https://arxiv.org/abs/2310.03714), [Combee](https://arxiv.org/abs/2604.15771) → `lyra_evolution/gepa_v2.py`
 - **Meta-Harness Optimization**: [Meta-Harness (2026)](https://arxiv.org/abs/2603.28052) → `lyra_meta_evolution/harness_opt.py` — +7.7pts, 4x fewer tokens
@@ -94,24 +113,39 @@ Lyra is downstream of a substantial research ecosystem. Every novel technique tr
 - **DAG Teams**: [SemaClaw (Midea, 2026)](https://arxiv.org/abs/2604.11548) → `lyra_core/adapters/dag_teams.py`
 - **Progressive Tool Discovery**: Claude Code Tool Search → `lyra_core/tools/tool_search.py` — 85% context savings
 
+### Skills Optimization & Evolution
+- **Text-Space Skill Optimization**: [SkillOpt (Microsoft, 2026)](https://arxiv.org/abs/2605.23904) → `lyra_cli/skills/optimizer/` — 52/52 benchmarks won, +23.5pts avg, 8-step loop
+- **Meta-Editing Evolution**: [AEvo (2026)](https://arxiv.org/abs/2605.13821) → `lyra_cli/skills/meta_evolution/` — +26% relative, harnessed evolution
+- **Harness Optimization**: [Meta-Harness (2026)](https://arxiv.org/abs/2603.28052) → `lyra_cli/skills/harness_optimizer/` — +7.7pts, 4x fewer tokens
+- **Skill Lifecycle Management**: [Ratchet (2026)](https://arxiv.org/abs/2605.22148) → `lyra_cli/skills/lifecycle/` — contribution scoring, bounded active-cap, non-divergence
+- **RL-Based Curation**: [SkillOS (2026)](https://arxiv.org/abs/2605.06614) → `lyra_cli/skills/lifecycle/curator.py` — GRPO-trained, composite reward
+- **Contrastive Skill Induction**: [SkillGen (2026)](https://arxiv.org/abs/2605.10999) → `lyra_cli/skills/lifecycle/synthesizer.py` — paired intervention testing
+- **Multi-Agent Skill Induction**: [MIND-Skill (2026)](https://arxiv.org/abs/2605.08670) → `lyra_cli/skills/optimizer/reflection.py` — 3 textual losses
+
 ### Safety & Verification
 - **Cognitive-Executive Separation**: [Parallax (2026)](https://arxiv.org/abs/2604.12986) → `lyra_safety/parallax.py` — 98.9% block rate
 - **ARIS Adversarial Review**: [ARIS (2026)](https://arxiv.org/abs/2605.03042) → `lyra_verification/adversarial.py` — 3-stage: integrity → claim → audit
-- **Tool-Call Verification**: [Knowing-Doing Gap (2026)](https://arxiv.org/abs/2605.14038) → `lyra_core/verifier/tool_audit.py`
+- **Tool-Call Verification**: [Knowing-Doing Gap (2026)](https://arxiv.org/abs/2605.14038) → `lyra_core/verifier/tool_audit.py` — bridges 26-54% gap
 - **TDD Reward Gate**: [KnowRL (ZJU, 2025)](https://arxiv.org/abs/2506.19807) → `lyra_core/verifier/tdd_reward.py`
 - **PRM Verifier**: [Qwen PRM (2025)](https://arxiv.org/abs/2501.07301) → `lyra_core/verifier/prm.py`
 - **Intent-Based Security**: Radware Intent-Based Security → `lyra_safety/intent_monitor.py`
+
+### Agent Autonomy & Federation
+- **Continuous Relay-Race Autonomy**: [Continuous-Claude](https://github.com/AnandChowdhary/continuous-claude) → `lyra_autonomous/` — triple-budget governance, stall detection
+- **Zero-Trust Federation**: [Ruflo](https://github.com/ruvnet/ruflo) → `lyra_federation/` — mTLS + behavioral trust scoring
+- **Compound Agent Architecture**: [OpenDev](https://github.com/opendev-to/opendev) → `lyra_core/compound/` — 5-slot design
+- **Output Compression**: [RTK](https://github.com/rtk-ai/rtk) (80%), [Caveman](https://github.com/juliusbrussee/caveman) (65%) → `lyra_core/context/compressor.py`
 
 ### Audio & Voice
 - **CESP v1.0**: Cross-Environment Sound Protocol → `lyra_audio/cesp_engine.py` — 12 event categories, 6-layer pack hierarchy
 - **Audio Suppression**: Silent hours, meeting detection, spam throttling → `lyra_audio/audio_suppression.py`
 
-See [`docs/research/papers.md`](docs/research/papers.md) for the complete 38+ paper absorption matrix.
+See [`docs/research/papers.md`](docs/research/papers.md) for the complete 59 paper absorption matrix.
 See [`docs/research/repos.md`](docs/research/repos.md) for the 45+ repository absorption matrix.
 
 ## Plans
 
-Lyra's AGI breakthrough is planned across 8 ultra plans:
+Lyra's AGI breakthrough is planned across 14 ultra plans:
 
 | Plan | Focus |
 |------|-------|
@@ -123,6 +157,13 @@ Lyra's AGI breakthrough is planned across 8 ultra plans:
 | [Plan 11](plans/LYRA_ULTRA_PLAN_11_AUTONOMOUS_SYSTEMS.md) | Autonomous — goals, continuous mode, hooks |
 | [Plan 12](plans/LYRA_ULTRA_PLAN_12_AGENT_FLEET_SWARM.md) | Fleet — parallel fan-out, squads, colony, federation |
 | [**Plan 13**](plans/LYRA_ULTRA_PLAN_13_BREAKTHROUGH_SYNTHESIS.md) | **Breakthrough — 6 AGI gaps, meta-evolution, Parallax safety, Dream memory, SR2AM planning** |
+| [**Plan 21**](plans/LYRA_ULTRA_PLAN_21_SKILLS_ECOSYSTEM_EVOLUTION.md) | **Skills — SkillOpt text optimizer, AEvo meta-editing, 50+ domain skills, 18 modules** |
+| [**Plan 22**](plans/LYRA_ULTRA_PLAN_22_MEMORY_CONTEXT_BREAKTHROUGH.md) | **Memory — 5-tier hierarchy, Dream upgrade, BM25+Vector+RRF, temporal KGs** |
+| [**Plan 23**](plans/LYRA_ULTRA_PLAN_23_AGENT_AUTONOMY_FEDERATION.md) | **Autonomy — relay-race, triple-budget, zero-trust federation, compound architecture** |
+| [**Plan 24**](plans/LYRA_ULTRA_PLAN_24_UI_UX_VOICE_BREAKTHROUGH.md) | **UI/UX — 17+ themes, voice packs, keybinding engine, Warp block model** |
+| [**Plan 25**](plans/LYRA_ULTRA_PLAN_25_SAFETY_VERIFICATION_UPGRADE.md) | **Safety — MAVEN, spectral guardrails, zkAgent proofs, 10 benchmarks** |
+| [**Plan 26**](plans/LYRA_ULTRA_PLAN_26_TOOLS_INTEGRATION_ECOSYSTEM.md) | **Tools — 200+ tools, plugin system, MCP gateway, 71 slash commands, channels** |
+| [**Plan 27**](plans/LYRA_ULTRA_PLAN_27_MEMAGENT_BREAKTHROUGH_MEMORY.md) | **Memory — 8-layer cognitive stack, 20 ICLR papers, active reconstruction, agentic Zettelkasten, neuroscience grounding, MemGrad optimization** |
 
 ## Dangerous Operations
 

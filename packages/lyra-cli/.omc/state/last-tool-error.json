@@ -1,7 +1,7 @@
 {
   "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"cd packages/lyra-cli && python -c \\\"from lyra_cli.cli.repl import LyraREPL; from lyra_cli.cli.agent_handler import StreamingAgentHandler; from lyra_cli.ui.welcome_banner import print_welco...",
-  "error": "Exit code 1\n(eval):cd:1: no such file or directory: packages/lyra-cli",
-  "timestamp": "2026-05-23T07:14:17.268Z",
+  "tool_input_preview": "{\"command\":\"cd /Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/ui-terminal && npm run build && echo \\\"✅ StatusBar enhanced with streaming stats!\\\"\",\"description\":...",
+  "error": "Exit code 2\n\n> @lyra/ui-terminal@1.0.0 build\n> tsc\n\nsrc/components/StatusBar.tsx(15,9): error TS6133: 'messageCount' is declared but its value is never read.\nsrc/components/StatusBar.tsx(31,10): error TS6133: 'streamingTokens' is declared but its value is never read.\nnpm error Lifecycle script `build` failed with error:\nnpm error code 2\nnpm error path /Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/ui-terminal\nnpm error workspace @lyra/ui-terminal@1.0.0\nnpm ...",
+  "timestamp": "2026-05-25T02:46:19.066Z",
   "retry_count": 1
 }

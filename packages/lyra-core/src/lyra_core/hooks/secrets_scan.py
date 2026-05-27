@@ -16,8 +16,8 @@ from __future__ import annotations
 
 import re
 
-from harness_core.hooks import HookDecision
-from harness_core.messages import ToolCall, ToolResult
+from lyra_harness_core.hooks import HookDecision
+from lyra_harness_core.messages import ToolCall, ToolResult
 
 _PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("aws_access_key", re.compile(r"\b(?:AKIA|ASIA|AIDA)[0-9A-Z]{16}\b")),

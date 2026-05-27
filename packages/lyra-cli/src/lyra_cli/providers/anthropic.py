@@ -1,6 +1,6 @@
 """Lyra-side Anthropic provider with token-usage capture.
 
-The upstream :class:`harness_core.models.AnthropicLLM` is a thin
+The upstream :class:`lyra_harness_core.models.AnthropicLLM` is a thin
 wrapper around the ``anthropic`` SDK that targets the agent loop and
 deliberately stays minimal — it has no concept of session billing
 because the harness layer it lives in doesn't bill turns. The
@@ -8,7 +8,7 @@ Lyra REPL *does* bill, and treats every provider's ``last_usage``
 dict as the ground truth for cost calculation
 (:func:`lyra_cli.interactive.session._bill_turn`).
 
-Subclassing here, rather than mutating ``harness_core``, has three
+Subclassing here, rather than mutating ``lyra_harness_core``, has three
 practical benefits:
 
 1. We don't push session-mode concerns into a package shared with
@@ -25,8 +25,8 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from harness_core.messages import Message
-from harness_core.models import AnthropicLLM as _UpstreamAnthropicLLM
+from lyra_harness_core.messages import Message
+from lyra_harness_core.models import AnthropicLLM as _UpstreamAnthropicLLM
 
 
 class LyraAnthropicLLM(_UpstreamAnthropicLLM):
@@ -70,6 +70,15 @@ class LyraAnthropicLLM(_UpstreamAnthropicLLM):
         max_tokens: int = 2048,
         temperature: float = 0.0,
     ) -> Message:
+        # Debug logging
+        try:
+            from ..debug_logger import log_info
+            last_msg = messages[-1] if messages else None
+            prompt_preview = last_msg.content[:200] if last_msg else "N/A"
+            log_info(f"🟣 Anthropic API call | Model: {self.model} | Prompt: {prompt_preview}...")
+        except Exception:
+            pass  # Don't let logging break the actual call
+
         # Reset before every turn so a failed call can't leak numbers
         # from the prior turn into the cost meter.
         self.last_usage = {}

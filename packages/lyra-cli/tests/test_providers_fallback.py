@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from harness_core.messages import Message, StopReason
+from lyra_harness_core.messages import Message, StopReason
 from lyra_cli.providers.fallback import (
     FallbackChain,
     FallbackExhausted,

@@ -20,7 +20,7 @@ from lyra_cli.providers.openai_compatible import (
     OpenAICompatibleLLM,
     ProviderRouting,
 )
-from harness_core.messages import Message
+from lyra_harness_core.messages import Message
 
 
 class _FakeResp:

@@ -17,8 +17,8 @@ from __future__ import annotations
 
 import re
 
-from harness_core.hooks import HookDecision
-from harness_core.messages import ToolCall, ToolResult
+from lyra_harness_core.hooks import HookDecision
+from lyra_harness_core.messages import ToolCall, ToolResult
 
 _DESTRUCTIVE_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     (

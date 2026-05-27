@@ -1,8 +1,8 @@
 """Lyra permission modes.
 
-Extends ``harness_core.permissions`` with TDD-aware modes (RED/GREEN/REFACTOR)
+Extends ``lyra_harness_core.permissions`` with TDD-aware modes (RED/GREEN/REFACTOR)
 and a research / notes-scratchpad mode. Hard deny rules and BYPASS semantics
-inherit from harness_core.
+inherit from lyra_harness_core.
 """
 from __future__ import annotations
 

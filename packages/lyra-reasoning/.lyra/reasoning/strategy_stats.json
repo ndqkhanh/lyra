@@ -1,0 +1,42 @@
+{
+  "cot": {
+    "total_uses": 104,
+    "success_count": 0,
+    "failure_count": 104,
+    "avg_tokens": 125.4807692307692,
+    "avg_duration": 36.70056580809447,
+    "avg_verification_score": 0.5345000000000005
+  },
+  "tree_search": {
+    "total_uses": 4,
+    "success_count": 4,
+    "failure_count": 0,
+    "avg_tokens": 0.0,
+    "avg_duration": 91.646888256073,
+    "avg_verification_score": 0.42249999999999993
+  },
+  "debate": {
+    "total_uses": 2,
+    "success_count": 2,
+    "failure_count": 0,
+    "avg_tokens": 140.0,
+    "avg_duration": 123.69330596923828,
+    "avg_verification_score": 0.5668181818181818
+  },
+  "auto": {
+    "total_uses": 31,
+    "success_count": 0,
+    "failure_count": 31,
+    "avg_tokens": 121.93548387096774,
+    "avg_duration": 27.477600559111565,
+    "avg_verification_score": 0.5344999999999999
+  },
+  "hypothesis": {
+    "total_uses": 2,
+    "success_count": 0,
+    "failure_count": 2,
+    "avg_tokens": 0.0,
+    "avg_duration": 29.73909020423889,
+    "avg_verification_score": 0.37
+  }
+}

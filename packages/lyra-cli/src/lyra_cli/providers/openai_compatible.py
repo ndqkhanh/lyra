@@ -32,7 +32,7 @@ Tool-call translation
 
 The rest of Lyra speaks *Anthropic-style* tool schemas
 (``{"name", "description", "input_schema"}``) because that's what
-``harness_core`` standardised on. OpenAI's shape is
+``lyra_harness_core`` standardised on. OpenAI's shape is
 ``{"type": "function", "function": {"name", "description",
 "parameters"}}``. We translate on the way out and on the way back
 so the rest of the stack stays blissfully unaware that it's
@@ -58,8 +58,8 @@ import urllib.request
 from dataclasses import dataclass
 from typing import Any, Callable, Iterable, Iterator, Optional
 
-from harness_core.messages import Message, StopReason, ToolCall
-from harness_core.models import LLMProvider
+from lyra_harness_core.messages import Message, StopReason, ToolCall
+from lyra_harness_core.models import LLMProvider
 
 
 # ---------------------------------------------------------------------------
@@ -276,6 +276,22 @@ class OpenAICompatibleLLM(LLMProvider):
             "model": self.model,
             "messages": [self._msg_to_openai(m) for m in messages],
         }
+
+        # Debug logging AFTER payload is built
+        try:
+            from ..debug_logger import log_info
+            log_info(f"🔵 OpenAI-compatible API call | Provider: {self.provider_name} | Model: {self.model}")
+            log_info(f"Total messages in payload: {len(payload['messages'])}")
+            for i, msg_dict in enumerate(payload['messages']):
+                role = msg_dict.get('role', 'unknown')
+                content = str(msg_dict.get('content', ''))[:500]
+                log_info(f"Payload message {i+1} [{role}]: {content}...")
+        except Exception as e:
+            try:
+                from ..debug_logger import log_info
+                log_info(f"Debug logging error: {e}")
+            except:
+                pass
 
         # Token limit: reasoning models reject ``max_tokens`` and need
         # ``max_completion_tokens``; classical chat models use the old

@@ -7,7 +7,7 @@ a write/edit tool is blocked with a loud error. This is Lyra's
 The Planner:
     - Uses a provided ``ToolRegistry`` (expected to include the read-only
       built-ins: Read / Glob / Grep).
-    - Runs ``harness_core.AgentLoop`` with a Plan-Mode system prompt.
+    - Runs ``lyra_harness_core.AgentLoop`` with a Plan-Mode system prompt.
     - Scans the final transcript for the first plan artifact (``---\\n`` fence +
       ``# Plan: ...`` header), parses it, lints it, and returns it.
 
@@ -19,13 +19,13 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from harness_core.hooks import Hook, HookDecision, HookEvent, HookRegistry
-from harness_core.loop import AgentLoop
-from harness_core.messages import Message, ToolCall, ToolResult
-from harness_core.models import LLMProvider
-from harness_core.observability import Tracer
-from harness_core.permissions import PermissionMode
-from harness_core.tools import ToolRegistry
+from lyra_harness_core.hooks import Hook, HookDecision, HookEvent, HookRegistry
+from lyra_harness_core.loop import AgentLoop
+from lyra_harness_core.messages import Message, ToolCall, ToolResult
+from lyra_harness_core.models import LLMProvider
+from lyra_harness_core.observability import Tracer
+from lyra_harness_core.permissions import PermissionMode
+from lyra_harness_core.tools import ToolRegistry
 
 from .artifact import Plan, PlanValidationError, load_plan
 

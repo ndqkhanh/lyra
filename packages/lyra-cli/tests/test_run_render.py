@@ -21,8 +21,8 @@ single-file test exercises every shape.
 """
 from __future__ import annotations
 
-from harness_core.loop import LoopResult
-from harness_core.messages import StopReason
+from lyra_harness_core.loop import LoopResult
+from lyra_harness_core.messages import StopReason
 
 from lyra_cli.commands.run import (
     _format_elapsed,

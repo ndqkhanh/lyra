@@ -38,7 +38,7 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
-from harness_core.messages import Message
+from lyra_harness_core.messages import Message
 
 from lyra_cli.interactive.session import InteractiveSession
 
@@ -48,7 +48,7 @@ from lyra_cli.interactive.session import InteractiveSession
 
 
 class FakeLLM:
-    """Minimal stand-in for :class:`harness_core.models.LLMProvider`.
+    """Minimal stand-in for :class:`lyra_harness_core.models.LLMProvider`.
 
     Records every ``generate`` call so tests can assert on the system
     prompt and the rolling history that gets sent. Mirrors the

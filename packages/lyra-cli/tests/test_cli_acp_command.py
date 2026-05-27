@@ -21,7 +21,7 @@ from typing import Any
 import pytest
 from typer.testing import CliRunner
 
-from harness_core.messages import Message
+from lyra_harness_core.messages import Message
 from lyra_cli.__main__ import app
 
 

@@ -73,7 +73,7 @@ def test_provider_records_last_usage_on_successful_call() -> None:
         return _fake_response(payload)
 
     llm = _build_llm(urlopen)
-    from harness_core.messages import Message
+    from lyra_harness_core.messages import Message
 
     llm.generate([Message.user("hi")])
     assert llm.last_usage == {
@@ -120,7 +120,7 @@ def test_provider_accumulates_usage_across_multiple_calls() -> None:
         return _fake_response(next(iterator))
 
     llm = _build_llm(urlopen)
-    from harness_core.messages import Message
+    from lyra_harness_core.messages import Message
 
     for _ in range(3):
         llm.generate([Message.user("hi")])
@@ -144,7 +144,7 @@ def test_provider_handles_missing_usage_gracefully() -> None:
         return _fake_response(payload_no_usage)
 
     llm = _build_llm(urlopen)
-    from harness_core.messages import Message
+    from lyra_harness_core.messages import Message
 
     llm.generate([Message.user("hi")])
 
@@ -168,7 +168,7 @@ def test_provider_handles_partial_usage_block() -> None:
         return _fake_response(payload)
 
     llm = _build_llm(urlopen)
-    from harness_core.messages import Message
+    from lyra_harness_core.messages import Message
 
     llm.generate([Message.user("hi")])
 

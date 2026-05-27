@@ -18,7 +18,7 @@ When ``--llm in-house`` is used, the CLI imports
 ``mypkg.providers``, looks up ``InHouseLLM``, and either
 instantiates it (if it's a class) or calls it (if it's a factory
 function). The result must implement
-:class:`harness_core.models.LLMProvider`.
+:class:`lyra_harness_core.models.LLMProvider`.
 
 This file owns the *parsing* and *resolution*; integration with the
 existing ``build_llm`` cascade lives at

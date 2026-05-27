@@ -5,7 +5,7 @@ Provides tools for monitoring token consumption, identifying waste patterns,
 and generating optimization recommendations.
 """
 
-from monitoring.token_observatory import (
+from src.monitoring.token_observatory import (
     Activity,
     ActivityCategory,
     ActivityClassifier,

@@ -405,7 +405,11 @@ class RealResearchPipeline:
 
     async def _llm(self, prompt: str, max_tokens: int = 800) -> str:
         """Single non-streaming LLM call for pipeline orchestration."""
+        from lyra_cli.debug_logger import log_api_call, log_api_response, log_error
+
         messages = [{"role": "user", "content": prompt}]
+        log_api_call(self._provider, self._model_name, prompt, max_tokens=max_tokens)
+
         try:
             if self._provider == "anthropic":
                 resp = await self._client.messages.create(
@@ -413,13 +417,18 @@ class RealResearchPipeline:
                     max_tokens=max_tokens,
                     messages=messages,
                 )
-                return resp.content[0].text if resp.content else ""
+                result = resp.content[0].text if resp.content else ""
+                log_api_response(self._provider, self._model_name, result)
+                return result
             else:  # openai / deepseek
                 resp = await self._client.chat.completions.create(
                     model=self._model_name,
                     max_tokens=max_tokens,
                     messages=messages,
                 )
-                return resp.choices[0].message.content or ""
+                result = resp.choices[0].message.content or ""
+                log_api_response(self._provider, self._model_name, result)
+                return result
         except Exception as e:
+            log_error(e, context="research_pipeline._llm")
             return f"[LLM error: {e}]"

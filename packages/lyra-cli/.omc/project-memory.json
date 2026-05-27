@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "pytest",
+    "testCommand": "cd packages/lyra-cli && python -m pytest tests/ -k \"llm\" --co -q 2>&1 | grep \"test_\" | wc -l",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -102,8 +102,8 @@
   "hotPaths": [
     {
       "path": "src/lyra_cli/interactive/session.py",
-      "accessCount": 100,
-      "lastAccessed": 1778929211940,
+      "accessCount": 116,
+      "lastAccessed": 1779676191271,
       "type": "file"
     },
     {
@@ -143,15 +143,15 @@
       "type": "file"
     },
     {
-      "path": "src/lyra_cli/interactive/dialog_apikey.py",
-      "accessCount": 7,
-      "lastAccessed": 1778835562003,
+      "path": "src/lyra_cli/interactive/output.py",
+      "accessCount": 8,
+      "lastAccessed": 1779672066559,
       "type": "file"
     },
     {
-      "path": "src/lyra_cli/interactive/output.py",
+      "path": "src/lyra_cli/interactive/dialog_apikey.py",
       "accessCount": 7,
-      "lastAccessed": 1778836217593,
+      "lastAccessed": 1778835562003,
       "type": "file"
     },
     {
@@ -233,6 +233,12 @@
       "type": "file"
     },
     {
+      "path": "src/lyra_cli/cli/repl.py",
+      "accessCount": 3,
+      "lastAccessed": 1779672082828,
+      "type": "file"
+    },
+    {
       "path": "tests/test_tui_v2_status_bg_tasks.py",
       "accessCount": 2,
       "lastAccessed": 1778834586401,
@@ -299,9 +305,9 @@
       "type": "file"
     },
     {
-      "path": "src/lyra_cli/cli/repl.py",
+      "path": "src/lyra_cli/llm_factory.py",
       "accessCount": 2,
-      "lastAccessed": 1778859753642,
+      "lastAccessed": 1779672034584,
       "type": "file"
     },
     {
@@ -356,12 +362,6 @@
       "path": "src/lyra_cli/interactive/auth.py",
       "accessCount": 1,
       "lastAccessed": 1778835019604,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_cli/llm_factory.py",
-      "accessCount": 1,
-      "lastAccessed": 1778835035372,
       "type": "file"
     },
     {

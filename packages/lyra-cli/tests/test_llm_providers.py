@@ -26,7 +26,7 @@ from typing import Any, Iterator
 from unittest.mock import MagicMock, patch
 
 import pytest
-from harness_core.messages import Message, StopReason, ToolCall, ToolResult
+from lyra_harness_core.messages import Message, StopReason, ToolCall, ToolResult
 
 from lyra_cli.llm_factory import (
     build_llm,

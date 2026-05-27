@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import typer
-from harness_core.tools import ToolRegistry
+from lyra_harness_core.tools import ToolRegistry
 from rich.console import Console
 
 from lyra_core.plan import (

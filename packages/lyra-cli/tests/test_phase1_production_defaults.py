@@ -121,7 +121,7 @@ def test_build_llm_explicit_mock_still_works(
     is still a first-class addressable backend; it's only the auto
     cascade that no longer falls through to it.
     """
-    from harness_core.models import MockLLM
+    from lyra_harness_core.models import MockLLM
     from lyra_cli.llm_factory import build_llm
 
     llm = build_llm("mock")
@@ -147,7 +147,7 @@ def test_build_llm_auto_picks_anthropic_when_only_anthropic_is_configured(
     except ImportError:
         pytest.skip("anthropic SDK not available in this environment")
 
-    from harness_core.models import AnthropicLLM
+    from lyra_harness_core.models import AnthropicLLM
     from lyra_cli.llm_factory import build_llm
 
     llm = build_llm("auto")
@@ -281,7 +281,7 @@ def test_run_no_plan_invokes_agent_loop_run_method(
 
     # Spy on AgentLoop.run so we can prove the wiring fires.
     invoked: list[dict] = []
-    from harness_core import loop as _loop_mod
+    from lyra_harness_core import loop as _loop_mod
 
     real_run = _loop_mod.AgentLoop.run
 

@@ -11,7 +11,7 @@ import re
 from pathlib import Path
 from typing import Any, Optional
 
-from harness_core.tools import Tool, ToolError, ToolRegistry
+from lyra_harness_core.tools import Tool, ToolError, ToolRegistry
 from pydantic import BaseModel, Field
 
 # ---------------------------------------------------------------------------

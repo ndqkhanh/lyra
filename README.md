@@ -6,17 +6,17 @@
 <p align="center">
   <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.11+-blue.svg" alt="Python" /></a>
   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.3+-3178C6.svg" alt="TypeScript" /></a>
-  <a href=""><img src="https://img.shields.io/badge/version-5.1.0-purple.svg" alt="Version" /></a>
+  <a href=""><img src="https://img.shields.io/badge/version-7.0.0-purple.svg" alt="Version" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License" /></a>
   <a href="packages/"><img src="https://img.shields.io/badge/packages-135+-orange.svg" alt="Packages" /></a>
-  <a href="docs/roadmap.md"><img src="https://img.shields.io/badge/AGI%20Blueprint-v13-ff69b4.svg" alt="AGI Blueprint" /></a>
-  <a href="plans/LYRA_ULTRA_PLAN_13_BREAKTHROUGH_SYNTHESIS.md"><img src="https://img.shields.io/badge/Research-50%2B%20sources-brightgreen.svg" alt="Research" /></a>
+  <a href="docs/roadmap.md"><img src="https://img.shields.io/badge/AGI%20Blueprint-20%20Plans-ff69b4.svg" alt="AGI Blueprint" /></a>
+  <a href="docs/research/papers.md"><img src="https://img.shields.io/badge/Research-500%2B%20papers%20%7C%2080%2B%20repos-brightgreen.svg" alt="Research" /></a>
 </p>
 
 <p align="center">
-  <b>Multi-agent orchestration. Deep reasoning. Hierarchical memory. Self-evolution.<br>
+  <b>Multi-agent orchestration. Deep reasoning. 6-layer NeuroMemory. Self-evolution.<br>
   Cognitive-executive safety separation. Latent-space agent communication. Dream consolidation.<br>
-  135+ composable packages. 16+ LLM providers. One extensible platform.</b>
+  135+ composable packages. 16+ LLM providers. Skills ecosystem. Swarm architecture. One extensible platform.</b>
 </p>
 
 <p align="center">
@@ -34,9 +34,9 @@
 
 ## What is Lyra?
 
-Lyra is a **production-grade agent platform** that researches, codes, tests, reviews, and evolves — autonomously or as your pair-programming teammate. It combines techniques from 38+ research papers and 45+ open-source agent frameworks into a unified, extensible system.
+Lyra is a **production-grade agent platform** that researches, codes, tests, reviews, and evolves — autonomously or as your pair-programming teammate. It combines techniques from 500+ research papers and 80+ open-source agent frameworks into a unified, extensible system.
 
-Unlike thin API wrappers, Lyra ships with a **kernel-enforced TDD gate**, **8-level hierarchical memory with Dream consolidation**, **multi-agent debate with tree search**, **automatic prompt and harness evolution**, **RecursiveLink latent-space agent communication**, **Parallax-style cognitive-executive safety separation**, **SR2AM self-regulated planning**, and a **Claude Code-style terminal interface** — all wired together through an observable, auditable event stream.
+Unlike thin API wrappers, Lyra ships with a **kernel-enforced TDD gate**, **6-layer NeuroMemory with A-MAC admission control and Dream consolidation**, **SkillOpt text-space skill optimization (+23.5pts)**, **64-skill catalog across 9 domains**, **multi-agent swarm with Raft/Byzantine/Gossip consensus**, **automatic prompt and harness evolution**, **RecursiveLink latent-space agent communication**, **Parallax-style cognitive-executive safety separation**, **SR2AM self-regulated planning**, **zero-trust agent federation**, **25+ color themes with voice/sound packs**, **36-tool Claude Code-compatible tool suite**, **MCP integration with OAuth 2.0**, **31-hook lifecycle system**, and a **Claude Code-style terminal interface** — all wired together through an observable, auditable event stream.
 
 ---
 
@@ -65,7 +65,7 @@ graph TB
         Reasoning["Deep Reasoning<br/>(CoT · Tree Search · Debate · SR2AM)"]
         Research["Research Pipeline<br/>(10-step · 7+ sources · DCI zero-index)"]
         Evolution["Self-Evolution<br/>(GEPA v2 · AEvo · Meta-Harness)"]
-        Memory["Hierarchical Memory<br/>(8-level · Dream consolidation · hybrid BM25+vector)"]
+        Memory["6-Layer NeuroMemory<br/>(A-MAC · CoMem async · free-energy consolidation)"]
         RecursiveLink["RecursiveLink<br/>(latent-space agent comms · 75.6% token reduction)"]
     end
 
@@ -175,56 +175,50 @@ sequenceDiagram
     CLI-->>User: "Done. 3 files changed. Tests passing ✓"
 ```
 
-### Memory Hierarchy (with Dream Consolidation)
+### Memory Hierarchy (6-Layer NeuroMemory with Dream Consolidation)
 
 ```mermaid
 graph LR
-    subgraph "Short-Term (deque)"
-        STM["Sensory<br/>~500 tokens"]
+    subgraph "L0: Sensory Buffer"
+        STM["Sensory Buffer<br/>~500 tokens · ephemeral"]
     end
 
-    subgraph "Working Memory"
-        WM["Episodic<br/>~2000 tokens"]
+    subgraph "L1-L2: Associative Memory"
+        WM["L1: Episodic<br/>Session traces · temporal"]
+        SM["L2: Semantic<br/>Facts · JSON indexed"]
     end
 
-    subgraph "Long-Term Storage"
-        SM["Semantic<br/>JSON indexed"]
-        PM["Procedural<br/>Skills library"]
-        STM2["Strategic<br/>Goal tracking"]
+    subgraph "L3-L4: Meta-Cognitive"
+        PM["L3: Procedural<br/>Skills library · action patterns"]
+        MM["L4: Meta-Memory<br/>Learning traces · strategy"]
     end
 
-    subgraph "Meta-Cognitive"
-        MM["Meta<br/>Learning traces"]
-        CM["Collective<br/>Fleet knowledge"]
+    subgraph "L5: Collective"
+        CM["L5: Collective<br/>Fleet knowledge · cross-session"]
     end
 
-    subgraph "Eternal"
-        EM["Eternal<br/>Cross-session"]
+    subgraph "Admission & Consolidation"
+        AMAC["A-MAC 5-Factor Gate<br/>utility · confidence · novelty · recency · type"]
+        DC1["CoMem Async Pipeline<br/>n-step-off decoupled"]
+        DC2["Free-Energy Consolidation<br/>utility + entropy dual objective"]
+        DC3["Auto-Dreamer GRPO<br/>offline consolidation"]
+        DC4["Dual-Process Retrieval<br/>System 1 (fast) + System 2 (deliberate)"]
     end
 
-    subgraph "Dream Consolidator"
-        DC1["Phase 1: Orient<br/>(identify new knowledge)"]
-        DC2["Phase 2: Gather<br/>(collect related memories)"]
-        DC3["Phase 3: Consolidate<br/>(ADD-only extraction · entity link · dedup)"]
-        DC4["Phase 4: Prune<br/>(Ebbinghaus forgetting · staleness eviction)"]
-    end
-
-    STM -->|"every 10 turns"| WM
-    WM -->|"session end"| SM
+    STM -->|"A-MAC gate"| WM
+    WM -->|"consolidation"| SM
     SM --> PM
-    PM --> STM2
-    STM2 --> MM
+    PM --> MM
     MM --> CM
-    CM --> EM
 
-    SM & PM & STM2 --> DC1
-    DC1 --> DC2 --> DC3 --> DC4
+    WM & SM & PM --> AMAC
+    AMAC --> DC1 --> DC2 --> DC3
     DC3 -->|"enriched memories"| SM & PM
 
-    MR["MemoryRetriever<br/>(hybrid BM25 + vector · RRF fusion)"]
+    MR["MemoryRetriever<br/>(hybrid BM25 + vector · RRF fusion · MRAgent reconstruction)"]
     SM -.-> MR
     PM -.-> MR
-    STM2 -.-> MR
+    CM -.-> MR
 ```
 
 ### Safety Architecture (Parallax-Style Cognitive-Executive Separation)
@@ -318,7 +312,7 @@ graph TB
         core["lyra-core<br/>Kernel · TDD · Permissions · Pivot/Refine"]
         agents["lyra-agents<br/>Specialist agents"]
         orchestration["lyra-orchestration<br/>DAG teams"]
-        memory["lyra-memory<br/>8-level · Dream consolidation"]
+        memory["lyra-memory<br/>6-layer NeuroMemory · A-MAC · CoMem"]
         skills["lyra-skills<br/>150+ triggers · auto-compaction"]
         evals["lyra-evals<br/>pass@k framework"]
         mcp["lyra-mcp<br/>MCP server · enterprise gateway"]
@@ -369,13 +363,15 @@ graph TB
 | 🧠 **Thinks before it acts** | CoT reasoning, tree search, SR2AM self-regulated planning, and multi-agent debate are first-class primitives. Every task passes through `plan → execute → verify`. |
 | 🧪 **Tests first, always** | The kernel enforces a TDD state machine (`RED → GREEN → REFACTOR`). No code ships without passing tests. |
 | 🔄 **Self-evolves** | GEPA v2 prompt optimizer + AEvo meta-editor + Meta-Harness loop continuously improve prompts AND harness code. Strategies that work are reinforced; patterns that fail are pruned. |
-| 🛡️ **Defense-in-depth safety** | 6-layer safety: cognitive-executive separation (Parallax, 98.9% block rate), AgentShield (5 scanners, 102 rules), multi-agent validation (executor→validator→critic), intent monitoring, PRISM drift detection, TEE verifiability. |
+| 🛡️ **Defense-in-depth safety** | 6-layer safety: cognitive-executive separation (Parallax, 98.9% block rate), AgentShield (5 scanners, 102 rules), multi-agent validation (executor→validator→critic), intent monitoring, PRISM drift detection, ARIS 3-stage verification. |
 | 🧩 **135+ composable packages** | Every capability is an isolated package with its own tests, docs, and dependencies. Compose what you need. |
 | 🌐 **16+ LLM providers** | Anthropic, DeepSeek, OpenAI, Google, xAI, Mistral, Qwen, Kimi, Bedrock, Ollama. 5-layer intelligent routing with automatic fallback. Zero vendor lock-in. |
 | 📊 **Token-level observability** | 13 waste categories tracked in real-time. JSONL event stream (HIR) for full auditability. Burn reports show exactly where tokens go. |
-| 🗣️ **Voice & audio** | CESP v1.0 cross-environment sound protocol. 6-layer sound pack selection. Funny session-start voices ("Ready to work!"). Audio suppression with silent hours. |
-| 🎨 **25 color themes** | 5 families (Dark, Warm, Nature, Retro, Accessible) with live preview and instant switching. Catppuccin, Tokyo Night, Dracula, Nord, Gruvbox, Rose Pine, and more. |
-| 📚 **Research-backed** | 38+ papers and 45+ repos absorbed with a documented absorption matrix. Every technique traces to its source paper or reference implementation. |
+| 🗣️ **Voice & audio** | CESP v1.0 cross-environment sound protocol. 6-layer sound pack selection. Warcraft III Peon, StarCraft Marine, Cyberpunk Netrunner packs. Audio suppression with silent hours. |
+| 🎨 **25+ color themes** | 7 families (Dark, Warm, Nature, Retro, Accessible, SilkCircuit, Classic) with live preview and instant switching. 13 full palettes with complete hex codes. |
+| 📚 **Research-backed** | 500+ papers and 80+ repos absorbed across 8+ deep-research streams. 6 ultra plan documents. Every technique traces to its source paper or reference implementation. |
+| 🐝 **Multi-agent swarm** | 12-worker background pool, 3 consensus protocols (Raft/Byzantine/Gossip), latent-space agent communication (75.6% token reduction), federation auth, worktree isolation. |
+| 🔌 **Plugin ecosystem** | Manifest-based plugin system with SHA-256 hot-reload. 31-hook lifecycle engine. 6 permission modes. MCP OAuth 2.0 with DCR. 36-tool catalog. |
 
 ---
 
@@ -399,12 +395,14 @@ Lyra integrates techniques from cutting-edge research. Each innovation is docume
 
 | Innovation | Description | Inspiration |
 |---|---|---|
-| **8-Level Memory Hierarchy** | Sensory → Episodic → Semantic → Procedural → Strategic → Meta → Collective → Eternal | [TencentDB-Agent-Memory](https://github.com/Tencent/TencentDB-Agent-Memory), [MemPalace](https://github.com/MemPalace/mempalace) |
-| **Dream 4-Phase Consolidation** | Orient → Gather → Consolidate (ADD-only extraction, entity linking) → Prune (Ebbinghaus forgetting). Background processing with multi-signal retrieval | Claude Code Dream, [Mem0](https://github.com/mem0ai/mem0) (91.6 LoCoMo, 93.4 LongMemEval) |
-| **Hybrid BM25+Vector Retrieval** | RRF fusion of keyword and embedding search with configurable per-language tokenization | [TencentDB-Agent-Memory](https://github.com/Tencent/TencentDB-Agent-Memory) |
+| **6-Layer NeuroMemory** | L0 Sensory → L1 Episodic → L2 Semantic → L3 Procedural → L4 Meta → L5 Collective. A-MAC 5-factor admission. CoMem async pipeline (1.4x latency). Free-energy consolidation | [TencentDB-Agent-Memory](https://github.com/Tencent/TencentDB-Agent-Memory), [MemPalace](https://github.com/MemPalace/mempalace), [CraniMem](https://arxiv.org/abs/2605.14309) |
+| **A-MAC Admission Control** | 5-factor gate: utility + factual confidence + semantic novelty + temporal recency + content type. F1=0.583, 31% latency reduction | [A-MAC (2026)](https://arxiv.org/abs/2605.20163) |
+| **CoMem Async Memory Pipeline** | n-step-off decoupled architecture. Separate memory model runs in parallel with agent inference. 1.4x latency improvement | [CoMem (2026)](https://arxiv.org/abs/2605.20163) |
+| **Dream Consolidation** | Free-energy minimization (utility + embedding entropy). Auto-Dreamer GRPO offline consolidation. +15% survival at 50% noise | [MemAgent Workshop (ICLR 2026)](https://memagent-workshop.github.io/) |
+| **Hybrid BM25+Vector Retrieval** | RRF fusion + MRAgent reconstruction. Dual-process: System 1 (<50ms fast) + System 2 (<200ms deliberate) | [TencentDB-Agent-Memory](https://github.com/Tencent/TencentDB-Agent-Memory), MRAgent |
+| **6-Dimension Health Monitoring** | Staleness, contradiction, hallucination, confidence, coverage, freshness tracking | MemAgent Workshop synthesis |
 | **Neural Garbage Collection** | Block-level context eviction with budget-aware interoception and full audit trail | [NGC (Stanford, 2026)](https://arxiv.org/abs/2604.18002) |
 | **Progressive Disclosure** | 3-level skill loading: metadata → triggers → full content. ~10x token savings | [claude-mem](https://github.com/thedotmack/claude-mem) |
-| **Symbolic Short-Term Memory** | Compress tool logs into Mermaid syntax with `node_id` drill-down for full auditability | [TencentDB-Agent-Memory](https://github.com/Tencent/TencentDB-Agent-Memory) |
 | **DCI Zero-Index Retrieval** | Direct corpus interaction via grep/rg without pre-built indexes. Tiered context management (truncation → compaction → summarization) | [DCI-Agent-Lite](https://github.com/DCI-Agent/DCI-Agent-Lite) |
 
 ### Self-Evolution & Learning
@@ -417,6 +415,16 @@ Lyra integrates techniques from cutting-edge research. Each innovation is docume
 | **Trace2Skill** | Automatic extraction of reusable skills from successful execution traces | [Trace2Skill (2026)](https://arxiv.org/abs/2605.21810) |
 | **PRISM Drift Detection** | Daily automated detection of LLM prompt degradation with auto-repair via GEPA re-optimization. Target: 99% prompt reliability | [PRISM (2026)](https://arxiv.org/abs/2605.14454) |
 | **Skill Weaving** | Composite skill creation by combining verified atomic skills | [Voyager (NVIDIA, TMLR 2024)](https://arxiv.org/abs/2305.16291) |
+
+### Skills Optimization & Management
+
+| Innovation | Description | Inspiration |
+|---|---|---|
+| **SkillOpt Text-Space Optimizer** | 8-step per-epoch loop: rollout evidence → minibatch reflection → hierarchical merge → LR-budgeted update → validation gate → rejected-edit buffer → slow update → meta skill. Separate optimizer/target model. +23.5pts avg, 52/52 benchmark cells won | [SkillOpt (Microsoft, 2026)](https://arxiv.org/abs/2605.23904) |
+| **Ratchet Lifecycle Management** | Contribution scoring c(s), bounded active-cap C=50, rollback on regression, meta-skill authoring prior. Non-divergence guarantee: worst-case floor E[p0] − 0.35 | [Ratchet (2026)](https://arxiv.org/abs/2605.22148) |
+| **SkillGen Contrastive Induction** | Embed + cluster failures vs successes, compare nearest neighbors, extract corrective rules. Paired intervention testing with gate threshold | [SkillGen (2026)](https://arxiv.org/abs/2605.10999) |
+| **MIND-Skill Multi-Agent Induction** | 3 textual losses jointly optimized: reconstruction, outcome, rubric. Induction agent + deduction agent cross-verify | [MIND-Skill (2026)](https://arxiv.org/abs/2605.08670) |
+| **Domain Skills Suite** | 64+ specialized skills across 9 domains + 1 meta: Engineering (12), Design (6), SRE (6), AI/ML (6), Architecture (6), Cloud (5), PM/BA (5), Brainstorming (5), Security (5) | [Karpathy Skills](https://github.com/forrestchang/andrej-karpathy-skills), [Academic Research](https://github.com/Imbad0202/academic-research-skills) |
 
 ### Agent Communication & Coordination
 
@@ -449,7 +457,7 @@ Lyra integrates techniques from cutting-edge research. Each innovation is docume
 | **Tool-Call Verification** | Post-hoc auditing for knowing-doing gap. Hidden-state confidence probe before tool execution | [Knowing-Doing Gap (2026)](https://arxiv.org/abs/2605.14038) |
 | **Intent-Based Security** | Continuous monitoring of action sequences for intent deviation. Temporal pattern analysis. Anomaly detection on agent behavior | Radware Intent-Based Security |
 
-> **Full absorption matrix**: See [`docs/research/papers.md`](docs/research/papers.md) (38+ papers) and [`docs/research/repos.md`](docs/research/repos.md) (45+ repos) for the complete bibliography with implementation locations.
+> **Full absorption matrix**: See [`docs/research/papers.md`](docs/research/papers.md) (500+ papers) and [`docs/research/repos.md`](docs/research/repos.md) (80+ repos) for the complete bibliography with implementation locations. See [`docs/research/synthesis-2026-05-27.md`](docs/research/synthesis-2026-05-27.md) for the comprehensive synthesis across all 8+ research streams.
 
 ---
 
@@ -480,6 +488,30 @@ The latest breakthrough synthesis from deep research across 50+ sources identifi
 | [Plan 11](plans/LYRA_ULTRA_PLAN_11_AUTONOMOUS_SYSTEMS.md) | Autonomous — goals, continuous mode, hooks | Active |
 | [Plan 12](plans/LYRA_ULTRA_PLAN_12_AGENT_FLEET_SWARM.md) | Fleet — parallel fan-out, squads, colony, federation | Active |
 | [**Plan 13**](plans/LYRA_ULTRA_PLAN_13_BREAKTHROUGH_SYNTHESIS.md) | **Breakthrough — 6 AGI gaps, meta-evolution, safety separation, Dream memory** | **Active** |
+
+### Wave 3 Plans (May 2026 — Ultra Deep Research: 500+ Papers, 80+ Repos)
+
+| Plan | Focus | Key Deliverables |
+|------|-------|-----------------|
+| [**Ultra Plan: Autonomy Engine**](docs/plans/ultra-plan-autonomy-engine.md) | **Full Autonomy & Self-Evolution** | 7-layer architecture, relay-race continuous ops, triple-budget governance, 7-stage research DAG, Hindsight cross-session identity, 4-level layered recovery, ARIS verification |
+| [**Ultra Plan: Memory Architecture**](docs/plans/ultra-plan-memory-architecture.md) | **6-Layer NeuroMemory** | A-MAC 5-factor admission, CoMem async pipeline, free-energy consolidation, Auto-Dreamer GRPO, dual-process retrieval (System 1/2), MRAgent reconstruction, 6-dimension health monitoring |
+| [**Ultra Plan: Skills Ecosystem**](docs/plans/ultra-plan-skills-ecosystem.md) | **64-Skill Catalog + Lifecycle** | 7-stage lifecycle, SkillOpt optimizer, Skill Creator, Skill Learner, MCTS bilevel optimization, Co-evolutionary verification, auto-compaction, 330 planned tests |
+| [**Ultra Plan: Multi-Agent Swarm**](docs/plans/ultra-plan-multi-agent-swarm.md) | **Swarm Architecture & Federation** | 12-worker background pool, 3 consensus protocols (Raft/Byzantine/Gossip), latent-space comms, federation auth, 3 new Greek-named agents (Aegis/Echo/Atlas), worktree isolation |
+| [**Ultra Plan: UI/UX Upgrade**](docs/plans/ultra-plan-ui-ux-upgrade.md) | **Themes, Voice, Keybindings** | 13 full color theme palettes, CESP sound system, 6-layer sound pack hierarchy, Warp block model, keybinding engine, Ink/React TUI |
+| [**Ultra Plan: Tools + MCP + Plugin**](docs/plans/ultra-plan-tools-mcp-plugin.md) | **Complete Tool Ecosystem** | 36 Claude Code-compatible tools, MCP OAuth 2.0 + DCR, plugin manifest system, 31-hook lifecycle engine, 6 permission modes, channels system, goal evaluator |
+
+### Wave 2 Plans (May 2026 — 6-Stream Deep Research)
+
+| Plan | Focus | Key Deliverables |
+|------|-------|-----------------|
+| [**Plan 21**](plans/LYRA_ULTRA_PLAN_21_SKILLS_ECOSYSTEM_EVOLUTION.md) | **Skills Ecosystem & Evolution** | SkillOpt text optimizer, AEvo meta-editing, 50+ domain skills, 18 modules |
+| [**Plan 22**](plans/LYRA_ULTRA_PLAN_22_MEMORY_CONTEXT_BREAKTHROUGH.md) | **Memory & Context Breakthrough** | 5-tier hierarchy, Dream upgrade, BM25+Vector+RRF, temporal KGs |
+| [**Plan 23**](plans/LYRA_ULTRA_PLAN_23_AGENT_AUTONOMY_FEDERATION.md) | **Agent Autonomy & Federation** | Relay-race, triple-budget, zero-trust federation, compound architecture |
+| [**Plan 24**](plans/LYRA_ULTRA_PLAN_24_UI_UX_VOICE_BREAKTHROUGH.md) | **UI/UX & Voice Breakthrough** | 17+ themes, voice packs, keybinding engine, Warp block model |
+| [**Plan 25**](plans/LYRA_ULTRA_PLAN_25_SAFETY_VERIFICATION_UPGRADE.md) | **Safety & Verification Upgrade** | MAVEN, spectral guardrails, zkAgent proofs, 10 benchmarks |
+| [**Plan 26**](plans/LYRA_ULTRA_PLAN_26_TOOLS_INTEGRATION_ECOSYSTEM.md) | **Tools & Integration Ecosystem** | 200+ tools, plugin system, MCP gateway, 71 slash commands, channels |
+
+[Full plans index →](plans/README.md)
 
 ---
 
@@ -527,7 +559,7 @@ Lyra works with 16+ providers through a unified interface. The intelligent route
 
 ## Color Themes
 
-Lyra ships with **25 professionally-designed color themes** across 5 families, with live preview and instant switching.
+Lyra ships with **25+ professionally-designed color themes** across 7 families, with live preview and instant switching.
 
 ### Dark & Modern
 | Theme | Palette | Vibe |
@@ -537,6 +569,10 @@ Lyra ships with **25 professionally-designed color themes** across 5 families, w
 | **Dracula** | `#282a36` `#f8f8f2` `#bd93f9` `#50fa7b` | Purple-tinted classic |
 | **One Dark Pro** | `#282c34` `#abb2bf` `#c678dd` `#61afef` | Atom editor iconic |
 | **Monokai Pro** | `#2d2a2e` `#fcfcfa` `#ab9df2` `#ffd866` | Pro-grade warm dark |
+| **Challenger Deep** | `#1e1c31` `#cbe3e7` `#62d1e5` `#95ffa4` | Deep ocean abyss |
+| **Moonfly** | `#080808` `#bdbdbd` `#9ccc65` `#80cbc4` | Ultra-dark charcoal |
+| **Nightfly** | `#011627` `#acb4c2` `#82aaff` `#fc514e` | Deep navy night |
+| **Klein Void** | `#000000` `#e0e0e0` `#7e8aa2` `#8fc0a9` | Absolute void |
 
 ### Warm & Cozy
 | Theme | Palette | Vibe |
@@ -546,6 +582,7 @@ Lyra ships with **25 professionally-designed color themes** across 5 families, w
 | **Kanagawa** | `#1f1f28` `#dcd7ba` `#957fb8` `#7e9cd8` | Japanese ink wash |
 | **Ayu Mirage** | `#1f2430` `#cbccc6` `#d4bfff` `#5ccfe6` | Muted elegant |
 | **Solarized Dark** | `#002b36` `#839496` `#6c71c4` `#268bd2` | Scientifically balanced |
+| **Ferra** | `#2b2530` `#dccda0` `#b8846a` `#d1a280` | Warm earthy terracotta |
 
 ### Nature & Forest
 | Theme | Palette | Vibe |
@@ -557,12 +594,29 @@ Lyra ships with **25 professionally-designed color themes** across 5 families, w
 | Theme | Palette | Vibe |
 |-------|---------|------|
 | **Synthwave 84** | `#262335` `#ff7edb` `#fede5d` `#36f9f6` | Neon 80s arcade |
-| **GitHub Dark** | `#0d1117` `#c9d1d9` `#d2a8ff` `#58a6ff` | GitHub native dark |
+| **SpaceGray Eighties** | `#222222` `#b3b9c5` `#ff5370` `#82aaff` | Retro synthwave |
+| **Eldritch** | `#212337` `#ebfafa` `#a6dbff` `#04d1f9` | Cosmic horror dark |
 
 ### Accessible & High Contrast
 | Theme | Palette | Vibe |
 |-------|---------|------|
 | **Night Owl** | `#011627` `#d6deeb` `#c792ea` `#82aaff` | WCAG-optimized |
+| **Oxocarbon Dark** | `#161616` `#d0d0d0` `#33b1ff` `#3ddbd9` | IBM Carbon-inspired |
+
+### SilkCircuit Family
+| Theme | Palette | Vibe |
+|-------|---------|------|
+| **SilkCircuit Dark** | `#1a1025` `#e0dce8` `#c9a0dc` `#7ec8e3` | Circuit board dark |
+| **SilkCircuit Amber** | `#1a1025` `#ffb347` `#ff8c00` `#ffd700` | Warm amber traces |
+| **SilkCircuit Mint** | `#1a1025` `#98ff98` `#3ddc84` `#7ec8e3` | Fresh mint green |
+| **SilkCircuit Matrix** | `#0d0f0d` `#00ff41` `#008f11` `#003b00` | Matrix rain green |
+
+### PaperColor & Classic
+| Theme | Palette | Vibe |
+|-------|---------|------|
+| **PaperColor Dark** | `#1c1c1c` `#d0d0d0` `#5fafd7` `#87d7af` | Print-ready dark |
+| **PaperColor Light** | `#eeeeee` `#444444` `#005f87` `#00875f` | Print-ready light |
+| **Zenburn** | `#3f3f3f` `#dcdccc` `#cc9393` `#7f9f7f` | Classic muted |
 
 Switch themes with `lyra theme set <name>` or via the interactive picker (`Ctrl+T`). Custom themes in `~/.lyra/themes/`. [Full theme gallery →](docs/themes.md)
 
@@ -574,7 +628,7 @@ Lyra is a monorepo of 135+ composable packages across four tiers. Each package h
 
 | Tier | Count | Purpose | Highlights |
 |------|-------|---------|------------|
-| **Foundation** | 8 | Core infrastructure | AgentLoop kernel, 25+ CLI commands, 8-level memory, 150+ skill triggers, TDD gate |
+| **Foundation** | 8 | Core infrastructure | AgentLoop kernel, 25+ CLI commands, 6-layer NeuroMemory, 64+ skill catalog, TDD gate |
 | **Breakthrough** | 14 | Advanced capabilities | Deep reasoning (SR2AM), RecursiveLink, Dream consolidation, GEPA v2, Meta-Harness, Parallax safety |
 | **AGI Ascent** | 21 | Experimental/forward-looking | Multi-level verification, causal graphs, recursive self-improvement, constitutional AI |
 | **UI** | 3 | Terminal interface | Zustand state store, Ink/React 19 TUI, WebSocket + SSE transport |
@@ -587,8 +641,8 @@ packages/
 ├── lyra-cli/               # CLI: Typer commands, interactive REPL, session mgmt
 ├── lyra-agents/            # Specialist agents: Code, Test, Review, Research
 ├── lyra-orchestration/     # DAG-based team orchestration, agent fleet
-├── lyra-memory/            # 8-level hierarchy + Dream 4-phase consolidation
-├── lyra-skills/            # Skill registry, 150+ triggers, auto-compaction
+├── lyra-memory/            # 6-layer NeuroMemory + A-MAC + CoMem async + Dream consolidation
+├── lyra-skills/            # 64-skill catalog, 7-stage lifecycle, SkillOpt optimizer, auto-compaction
 ├── lyra-evals/             # pass@k evaluation framework
 ├── lyra-mcp/               # MCP server + enterprise gateway
 ├── lyra-reasoning/         # CoT, Tree Search, SR2AM, Multi-agent debate
@@ -744,6 +798,49 @@ Switch inline with `Shift+Tab`.
 9. **Safety by Separation** — Reasoning and execution run in structurally separated contexts (Parallax architecture).
 10. **Continuous Self-Improvement** — The harness observes its own performance and optimizes prompts AND code (Meta-Harness + AEvo loop).
 11. **Research-Backed** — Every novel technique traces to its source paper with a documented absorption mode.
+12. **Memory as a First-Class System** — 6-layer NeuroMemory with A-MAC admission, CoMem async pipeline, free-energy consolidation, and dual-process retrieval. Memory is reconstructed, not just retrieved.
+13. **Swarm by Default** — Multi-agent coordination with Raft/Byzantine/Gossip consensus. Latent-space communication. Worktree isolation. 12-worker background pool.
+
+---
+
+## Research Breakthroughs (V12 + Ultra Deep Research, May 2026)
+
+The culmination of **8+ parallel deep research streams** analyzing 500+ papers and 80+ repos. Results synthesized into **14 ULTRA PLANS** across 3 waves.
+
+### 6-Stream Research Summary
+
+| Stream | Focus | Sources | Key Finding | → Plan |
+|--------|-------|---------|-------------|--------|
+| 1 | Claude Code + Hermes Agent | 44 tools, 71 commands, 24 hooks | Complete feature parity gap analysis | 26 |
+| 2 | Skills Optimization & Evolution | 15 papers, 5 repos | SkillOpt: 52/52 benchmarks, +23.5pts | 21 |
+| 3 | Memory & Context Systems | 7+14 repos | TencentDB: 61% token reduction, MemPalace: R@5 99% | 22 |
+| 4 | Autonomous Agents & Federation | 17+ frameworks | Continuous-Claude relay-race, Ruflo zero-trust | 23 |
+| 5 | UI/UX, Voice & Themes | 9 voice tools, CLI-Anything, Warp | PeonPing 5-stage pipeline, 17+ themes | 24 |
+| 6 | Safety, Verification & Reasoning | 10+ papers, 10 benchmarks | MAVEN, zkAgent 294x speedup, TrustBench 87% harm reduction | 25 |
+
+### Core Breakthroughs (V12)
+
+| # | Breakthrough | Source | Impact |
+|---|-------------|--------|--------|
+| 1 | **SkillOpt Text-Space Skill Optimizer** | [Microsoft](https://github.com/microsoft/SkillOpt) · [arXiv 2605.23904](https://arxiv.org/pdf/2605.23904) | +23.5pts, 52/52 cells won, 18-module impl |
+| 2 | **Ratchet Lifecycle Management** | [arXiv 2605.22148](https://arxiv.org/abs/2605.22148) | Non-divergence guarantee, C=50 active cap |
+| 3 | **5-Tier Memory Hierarchy** | [TencentDB-Agent-Memory](https://github.com/Tencent/TencentDB-Agent-Memory) + [MemPalace](https://github.com/MemPalace/mempalace) + [CodeGraph](https://github.com/colbymchenry/codegraph) | Verbatim-first, hybrid BM25+vector+RRF, temporal KGs |
+| 4 | **Continuous Relay-Race Autonomy** | [Continuous Claude](https://github.com/AnandChowdhary/continuous-claude) | Triple-budget governance, stall detection, checkpoint handoff |
+| 5 | **Zero-Trust Agent Federation** | [Ruflo](https://github.com/ruvnet/ruflo) | mTLS + behavioral trust scoring, mesh topology |
+| 6 | **MAVEN Adversarial Verification** | [ARIS](https://arxiv.org/abs/2605.03042) + MAVEN | Skeptic-Researcher-Judge, cross-model, diversity collapse prevention |
+| 7 | **Spectral Guardrails** | Spectral Guardrails | 97.7% recall hallucination detection, real-time monitoring |
+| 8 | **zkAgent Cryptographic Proofs** | zkAgent | 294x speedup, 0.45s verification of entire agent execution |
+| 9 | **Warp Block Model TUI** | [Warp](https://github.com/warpdotdev/warp) + [CLI-Anything](https://github.com/HKUDS/CLI-Anything) | BlockList/SumTree, dual-mode REPL, 10+ interactive features |
+| 10 | **CESP v1.0 Voice Protocol** | [PeonPing](https://github.com/PeonPing/peonping) + 9 voice tools | 12 event categories, 6-layer pack hierarchy, 3 game packs |
+| 11 | **200+ Tool Ecosystem** | [Hermes-Agent](https://github.com/nousresearch/hermes-agent) + [Claude Code](https://code.claude.com/docs/en/tools) | 20 toolsets, 25+ MCP servers, 24 hook events, 5 hook types |
+| 12 | **Plugin Marketplace** | Claude Code ecosystem (1,424+ skills) | Install/configure/enable/disable/upgrade lifecycle, sandboxed |
+
+**New color themes:** 25+ themes across 7 families — Dark & Modern (9), Warm & Cozy (6), Nature & Forest (2), Retro & Synth (3), Accessible & High Contrast (2), SilkCircuit (4), PaperColor & Classic (3)
+
+**Voice packs:** Warcraft III Peon, StarCraft Marine, Cyberpunk Netrunner + CESP v1.0 6-layer sound pack hierarchy
+
+**Ultra plan documents:** 6 documents, 8,128 lines, 42,687 words of actionable implementation plans
+**Research investment:** 1,600,000+ tokens across 8+ specialized research streams (V12 + Ultra Deep Research)
 
 ---
 
@@ -776,16 +873,24 @@ make ci
 |----------|-------------|
 | [`docs/architecture/`](docs/architecture/) | Canonical architecture reference with diagrams |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | High-level system topology and data flow |
+| [`docs/architecture/gap-analysis.md`](docs/architecture/gap-analysis.md) | Gap analysis: current Lyra vs AGI target state (7 domains) |
+| [`docs/architecture/breakthrough-architectures.md`](docs/architecture/breakthrough-architectures.md) | 3 breakthrough architectures: Safety, Compound AI, Self-Evolving Skills |
+| [`docs/architecture/implementation-roadmap.md`](docs/architecture/implementation-roadmap.md) | 16-week master implementation plan with milestones |
 | [`docs/architecture/safety-architecture.md`](docs/architecture/safety-architecture.md) | Parallax-style cognitive-executive separation |
 | [`docs/architecture/memory-consolidation.md`](docs/architecture/memory-consolidation.md) | Dream 4-phase consolidation design |
 | [`docs/architecture/harness-evolution.md`](docs/architecture/harness-evolution.md) | Meta-optimization loop architecture |
-| [`docs/research/papers.md`](docs/research/papers.md) | 38+ paper absorption matrix |
-| [`docs/research/repos.md`](docs/research/repos.md) | 45+ repository absorption matrix |
-| [`docs/research/breakthrough-synthesis.md`](docs/research/breakthrough-synthesis.md) | Plan 13 key findings and gap analysis |
-| [`docs/research/hermes-agent-features.md`](docs/research/hermes-agent-features.md) | Hermes-agent feature inventory |
-| [`docs/research/claude-code-features.md`](docs/research/claude-code-features.md) | Claude Code feature inventory |
-| [`docs/research/memory-context-systems.md`](docs/research/memory-context-systems.md) | 7-repo memory architecture analysis |
-| [`docs/research/skills-ui-ux-voice-systems.md`](docs/research/skills-ui-ux-voice-systems.md) | Skills, UI/UX, voice systems research |
+| [`docs/research/papers.md`](docs/research/papers.md) | 500+ paper absorption matrix |
+| [`docs/research/repos.md`](docs/research/repos.md) | 80+ repository absorption matrix |
+| [`docs/synthesis/`](docs/synthesis/) | 7-domain synthesis: Memory, Skills, Tools, Orchestration, Autonomy, UI/UX, Safety |
+| [`docs/research/synthesis-2026-05-27.md`](docs/research/synthesis-2026-05-27.md) | Comprehensive research synthesis (May 2026) |
+| [`docs/research/index.md`](docs/research/index.md) | Research hub — 8+ deep-research streams |
+| [`docs/plans/ultra-plan-autonomy-engine.md`](docs/plans/ultra-plan-autonomy-engine.md) | Full autonomy & self-evolution (1,252 lines) |
+| [`docs/plans/ultra-plan-memory-architecture.md`](docs/plans/ultra-plan-memory-architecture.md) | 6-layer NeuroMemory architecture (1,572 lines) |
+| [`docs/plans/ultra-plan-skills-ecosystem.md`](docs/plans/ultra-plan-skills-ecosystem.md) | 64-skill ecosystem & lifecycle (1,374 lines) |
+| [`docs/plans/ultra-plan-multi-agent-swarm.md`](docs/plans/ultra-plan-multi-agent-swarm.md) | Multi-agent swarm architecture (1,305 lines) |
+| [`docs/plans/ultra-plan-ui-ux-upgrade.md`](docs/plans/ultra-plan-ui-ux-upgrade.md) | Themes, voice, keybindings (1,255 lines) |
+| [`docs/plans/ultra-plan-tools-mcp-plugin.md`](docs/plans/ultra-plan-tools-mcp-plugin.md) | Tools, MCP, plugin & hook ecosystem (1,370 lines) |
+| [plans/README.md](plans/README.md) | Ultra Plans Index — all 20 plans |
 | [`docs/roadmap.md`](docs/roadmap.md) | Development roadmap |
 | [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) | Contributor guide |
 | [`CHANGELOG.md`](CHANGELOG.md) | Version history |
@@ -797,11 +902,14 @@ make ci
 
 Lyra's architecture is informed by deep research across the AI agent ecosystem:
 
-**Papers absorbed** (38+): Tournament TTS, ReasoningBank, Skill-RAG, KnowRL, Neural Garbage Collection, PoisonedRAG, SemaClaw, SWE-Search, AlphaEvolve, FrugalGPT, RouteLLM, Voyager, Reflexion, MetaGPT, ChatDev, DSPy, EAGLE-3, OSWorld, GDPval, Qwen PRM, Codex, AutoResearchClaw, RecursiveMAS, Meta-Harness, SciencePedia, AEvo, ARIS, MOSS, Trace2Skill, Knowing-Doing Gap, SR2AM, Parallax, PRISM, Code as Harness, Reasoning Graphs, Combee, GEPA, HyperAgents
+**Papers absorbed (500+):** Tournament TTS, ReasoningBank, Skill-RAG, KnowRL, Neural Garbage Collection, PoisonedRAG, SemaClaw, SWE-Search, AlphaEvolve, FrugalGPT, RouteLLM, Confidence-Driven Router, Voyager, Reflexion, MetaGPT, ChatDev, DSPy, EAGLE-3, OSWorld, GDPval, Qwen PRM, Codex, Diversity Collapse, PolyKV, CALM, LoCoEval, Externalization Survey, Memento, Production Agent Gaps, Meta-Harness, SWE-TRACE, KLong, BACM-RL, Refute-or-Promote, VeRO, Agentless, Atomic Skills, SkillOpt, AEvo, SkillOS, Ratchet, SkillGen, MIND-Skill, SkillForge, SkillX, CoEvoSkills, Skills-Coach, SkillMaster, Skill-R1, SkillClaw, Knowing-Doing Gap, ARIS, Parallax, RecursiveMAS, AutoResearchClaw, PRISM, SR2AM, A-MAC, CoMem, CraniMem, Hindsight, ERL, R-KVHash, Continuous-Claude, SKILLRL, SkillsBench, Live-SWE-Agent, ReasoningBank, MRAgent, SABER, SkillOpt — **PLUS 22 MemAgent workshop papers**: Agentic Memory, SimpleMem, MEMRL, SKILL0, EvoSkills, CORAL, MetaClaw, AgentFactory, entropic consolidation, LP-RAG, goal-conditioned gating, and 11 more. **PLUS 400+ additional papers** from ai-agent-papers repo across Reasoning, Planning, Tool Use, Self-Evolution, Memory, Self-Correction, Safety, Evaluation, Knowledge, Learning, Perception, Research Agents, Deep Research Agents, Multi-Agent, and Enterprise Agents domains.
 
-**Repositories studied** (45+): Claude Code, Hermes-agent, Cline, Aider, OpenHands, CrewAI, AutoGPT, LangGraph, GBrain, OpenCode, OpenDev, RTK, Caveman, DCI-Agent-Lite, Graphify, TencentDB-Agent-Memory, Acontext, CodeGraph, claude-mem, MemPalace, CLI-Anything, ARS, ECC, OpenHuman, PeonPing, superpowers, continuous-claude, Multica, CowAgent, Mem0, oh-my-claudecode
+**Repositories studied (80+):** Claude Code, Hermes-agent, Continuous-Claude, OpenCode, OpenDev, RTK, Caveman, DCI-Agent-Lite, Graphify, TencentDB-Agent-Memory, Acontext, CodeGraph, Claude-Mem, MemPalace, CLI-Anything, ECC, OpenHuman, Superpowers, Multica, CowAgent, Mem0, Oh-My-Claudecode, Ruflo, GBrain, GStack, ABTop, Oh-My-OpenAgent, SkillOpt (Microsoft), Scoped-MCP, Tmux, Warp, Andrej-Karpathy-Skills, Claude-Code-Best-Practice, Academic-Research-Skills, PeonPing, CheetahClaws, DeepSearch, Augment Code, Factory, Devon, OpenHands, Cline, RooCode, Cursor, Windsurf, Codex CLI, Gemini CLI, Qwen Code, Copilot, Amazon Q, Continue, Aider, Tabby, Cody, Codeium, Sourcegraph, and more.
 
-See [`docs/research/`](docs/research/) for the complete research library.
+**Total sources analyzed:** 580+ unique sources across 8+ parallel deep-research streams
+**Research token investment:** 1,600,000+ tokens across 4 research campaigns (V12 + Ultra Deep Research)
+
+See [`docs/research/`](docs/research/) and [`docs/synthesis/`](docs/synthesis/) for the complete research library.
 
 ---
 

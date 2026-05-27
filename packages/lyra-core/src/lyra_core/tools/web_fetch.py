@@ -152,7 +152,7 @@ def make_web_fetch_tool(
 
 
 class WebFetchTool:
-    """Tool wrapper for WebFetch compatible with harness_core.tools.ToolRegistry."""
+    """Tool wrapper for WebFetch compatible with lyra_harness_core.tools.ToolRegistry."""
 
     name = "WebFetch"
     description = "Fetch a URL and return its readable text content."

@@ -7,7 +7,7 @@ from typing import Optional
 
 def print_welcome_banner(
     version: str = "0.1.0",
-    model: str = "Opus 4.7",
+    model: str = "",
     effort: str = "high",
     provider: str = "Anthropic API",
     working_dir: Optional[str] = None,

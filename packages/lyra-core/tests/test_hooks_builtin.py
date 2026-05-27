@@ -5,7 +5,7 @@
 """
 from __future__ import annotations
 
-from harness_core.messages import ToolCall, ToolResult
+from lyra_harness_core.messages import ToolCall, ToolResult
 
 from lyra_core.hooks.destructive_pattern import destructive_pattern_hook
 from lyra_core.hooks.secrets_scan import secrets_scan_hook

@@ -82,14 +82,27 @@ class StreamEvent:
     iterator emits one ``delta`` followed by one ``complete`` so
     the call shape is identical regardless of backend.
 
+    Enriched event kinds (v2) enable Claude Code-style UI:
+    ``thinking_start`` / ``thinking_end`` bracket the reasoning
+    phase; ``tool_start`` / ``tool_end`` bracket tool calls so
+    the frontend can render inline progress with ``⎿`` branches.
+
     Attributes:
-        kind: One of ``"delta"``, ``"complete"``, ``"error"``.
+        kind: One of ``"delta"``, ``"thinking_start"``,
+            ``"thinking_end"``, ``"tool_start"``, ``"tool_end"``,
+            ``"complete"``, ``"error"``.
         payload: For ``delta`` and ``complete``, the (cumulative)
             text content. For ``error``, the diagnostic string.
+            For ``tool_start``, the tool name.
+            For ``tool_end``, the tool result summary.
+        metadata: Optional dict with extra context (tool_name,
+            tool_args, token_count, phase, etc.). ``None`` when
+            not applicable.
     """
 
     kind: str
     payload: Any
+    metadata: dict | None = None
 
 
 __all__ = ["ChatRequest", "ChatResponse", "StreamEvent"]

@@ -85,7 +85,7 @@ def test_openrouter_factory_picks_up_routing_from_settings(
     monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
 
     llm = llm_factory.build_llm("openrouter")
-    from harness_core.messages import Message
+    from lyra_harness_core.messages import Message
 
     llm.generate([Message.user("hi")], max_tokens=8)
 
@@ -114,7 +114,7 @@ def test_no_settings_means_no_provider_field(
     monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
 
     llm = llm_factory.build_llm("openrouter")
-    from harness_core.messages import Message
+    from lyra_harness_core.messages import Message
 
     llm.generate([Message.user("hi")], max_tokens=8)
 
@@ -150,7 +150,7 @@ def test_unknown_field_in_settings_is_silently_ignored(
     monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
 
     llm = llm_factory.build_llm("openrouter")
-    from harness_core.messages import Message
+    from lyra_harness_core.messages import Message
 
     llm.generate([Message.user("hi")], max_tokens=8)
 

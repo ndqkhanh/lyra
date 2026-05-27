@@ -137,11 +137,17 @@ class ContinualLearner:
 
 from .models import (  # noqa: E402
     ContinualEpisode,
+    CrossRunInsight,
+    EvolvedSkill,
     ExpertStats,
     ForgettingMetrics,
     MoEExpert,
     MoELayer,
+    PatternType,
+    RecurringPattern,
+    SessionTrace,
     SkillPack,
+    SkillState,
 )
 
 # MoLEM engine
@@ -149,6 +155,10 @@ from .molem import MoLEMEngine  # noqa: E402
 
 # SkillPack compression
 from .skill_pack import SkillPackCompressor  # noqa: E402
+
+# ECC v2 + MetaClaw
+from .instinct import InstinctEngine  # noqa: E402
+from .metaclaw import MetaClaw  # noqa: E402
 
 __all__ = [
     # Legacy
@@ -168,4 +178,13 @@ __all__ = [
     "MoLEMEngine",
     # SkillPack
     "SkillPackCompressor",
+    # ECC v2 + MetaClaw
+    "SkillState",
+    "PatternType",
+    "SessionTrace",
+    "RecurringPattern",
+    "EvolvedSkill",
+    "CrossRunInsight",
+    "InstinctEngine",
+    "MetaClaw",
 ]

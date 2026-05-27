@@ -43,7 +43,7 @@ from .types import ChatRequest, ChatResponse, StreamEvent
 
 
 # A provider factory returns an object exposing ``generate(messages)`` —
-# mirroring :class:`harness_core.models.LLMProvider`. We accept a
+# mirroring :class:`lyra_harness_core.models.LLMProvider`. We accept a
 # callable rather than a fixed class so tests can inject ``MockLLM``
 # directly without faking out :func:`build_llm`'s env-var cascade.
 ProviderFactory = Callable[[Optional[str]], Any]
@@ -129,9 +129,18 @@ class LyraClient:
         usage: Mapping[str, Any] | None = None
         try:
             messages = self._build_messages(sid, req)
-            reply = provider.generate(messages)
-            text = getattr(reply, "content", "") or ""
-            usage = self._extract_usage(reply)
+
+            # Use streaming if provider supports it
+            if hasattr(provider, 'stream') and callable(provider.stream):
+                # Stream token by token
+                for chunk in provider.stream(messages):
+                    text += chunk
+            else:
+                # Fallback to non-streaming
+                reply = provider.generate(messages)
+                text = getattr(reply, "content", "") or ""
+
+            usage = self._extract_usage(provider)
         except Exception as exc:  # noqa: BLE001 — explicit fail-soft
             error = f"{exc.__class__.__name__}: {exc}".strip()
 
@@ -146,22 +155,69 @@ class LyraClient:
         )
 
     def stream(self, request: ChatRequest | str) -> Iterator[StreamEvent]:
-        """Yield :class:`StreamEvent` objects for a single turn.
+        """Yield :class:`StreamEvent` objects for a single turn with real streaming.
 
-        Most providers in the cascade (Anthropic SDK, Gemini SDK, etc.)
-        only expose a single-shot ``generate`` today, so the MVP
-        wraps :meth:`chat` and emits exactly two events: a ``delta``
-        carrying the full reply, then a ``complete``. Errors collapse
-        into a single ``error`` event. N.6 (HTTP/SSE) and N.5
-        (sandbox provider) will upgrade this to genuine token-by-token
-        streaming.
+        Streams token-by-token from the provider if supported, otherwise
+        falls back to single-shot generation.
+
+        Emits enriched events (v2 protocol) so the TypeScript frontend can
+        render Claude Code-style progress indicators:
+        ``thinking_start`` → ``delta``* → ``thinking_end`` → ``complete``.
         """
-        resp = self.chat(request)
-        if resp.error:
-            yield StreamEvent(kind="error", payload=resp.error)
-            return
-        yield StreamEvent(kind="delta", payload=resp.text)
-        yield StreamEvent(kind="complete", payload=resp.text)
+        req = self._normalize(request)
+        sid = req.session_id or _new_session_id()
+        provider, slug = self._resolve_provider(req.model)
+
+        try:
+            messages = self._build_messages(sid, req)
+
+            # Signal thinking phase start so the UI can show a spinner
+            yield StreamEvent(
+                kind="thinking_start",
+                payload="",
+                metadata={"model": slug},
+            )
+
+            # Check if provider supports streaming
+            if hasattr(provider, 'stream') and callable(provider.stream):
+                # Real token-by-token streaming
+                accumulated = ""
+                for chunk in provider.stream(messages):
+                    accumulated += chunk
+                    yield StreamEvent(
+                        kind="delta",
+                        payload=chunk,
+                        metadata={"token_count": len(accumulated) // 4},
+                    )
+
+                # Detect tool calls in the accumulated response
+                yield from self._emit_tool_events(accumulated)
+
+                # Signal thinking phase end
+                yield StreamEvent(
+                    kind="thinking_end",
+                    payload="",
+                    metadata={"total_tokens": len(accumulated) // 4},
+                )
+                yield StreamEvent(kind="complete", payload=accumulated)
+            else:
+                # Fallback: single-shot generation
+                reply = provider.generate(messages)
+                text = getattr(reply, "content", "") or ""
+
+                # Detect tool calls in the response
+                yield from self._emit_tool_events(text)
+
+                yield StreamEvent(
+                    kind="thinking_end",
+                    payload="",
+                    metadata={"total_tokens": len(text) // 4},
+                )
+                yield StreamEvent(kind="delta", payload=text)
+                yield StreamEvent(kind="complete", payload=text)
+
+        except Exception as exc:
+            yield StreamEvent(kind="error", payload=str(exc))
 
     def list_models(self) -> list[str]:
         """Every canonical model slug Lyra knows about, sorted.
@@ -284,11 +340,11 @@ class LyraClient:
 
         Replays prior turns from ``turns.jsonl`` so a follow-up
         ``chat()`` call carries conversational context without the
-        caller having to re-send history. ``harness_core.messages``
+        caller having to re-send history. ``lyra_harness_core.messages``
         is imported lazily so an embedded user who just wants
         :meth:`list_models` doesn't pay the import cost.
         """
-        from harness_core.messages import Message
+        from lyra_harness_core.messages import Message
 
         msgs: list[Any] = []
         if req.system_prompt:
@@ -367,10 +423,65 @@ class LyraClient:
             for row in rows:
                 f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
+    def _emit_tool_events(self, text: str) -> Iterator[StreamEvent]:
+        """Detect tool-call patterns in *text* and emit ``tool_start`` /
+        ``tool_end`` events so the frontend can render inline progress.
+
+        Detects:
+        - XML-style: ``<tool_call>...</tool_call>``,
+          ``<function_call>...</function_call>``
+        - Anthropic-style JSON blocks with ``"name"`` / ``"input"``
+        - Markdown code fences labelled as ``json`` containing
+          tool-use payloads.
+        """
+        import re
+
+        # Pattern 1: XML-wrapped tool calls
+        xml_pattern = re.compile(
+            r"<(?:tool_call|function_call|invoke)\b[^>]*>\s*"
+            r"(?P<name>[\w_]+)\s*"
+            r"(?:\((?P<args>[^)]*)\))?",
+            re.IGNORECASE,
+        )
+        for m in xml_pattern.finditer(text):
+            tool_name = m.group("name") or "unknown"
+            tool_args = m.group("args") or ""
+            yield StreamEvent(
+                kind="tool_start",
+                payload=tool_name,
+                metadata={"tool_name": tool_name, "tool_args": tool_args},
+            )
+            yield StreamEvent(
+                kind="tool_end",
+                payload=f"{tool_name} completed",
+                metadata={"tool_name": tool_name, "status": "success"},
+            )
+
+        # Pattern 2: Anthropic-style JSON tool_use blocks
+        json_pattern = re.compile(
+            r'\{\s*"type"\s*:\s*"tool_use"\s*,\s*'
+            r'"name"\s*:\s*"(?P<name>[^"]+)"\s*,\s*'
+            r'"input"\s*:\s*(?P<input>\{[^}]+\})',
+            re.IGNORECASE,
+        )
+        for m in json_pattern.finditer(text):
+            tool_name = m.group("name")
+            tool_input = m.group("input")
+            yield StreamEvent(
+                kind="tool_start",
+                payload=tool_name,
+                metadata={"tool_name": tool_name, "tool_args": tool_input},
+            )
+            yield StreamEvent(
+                kind="tool_end",
+                payload=f"{tool_name} completed",
+                metadata={"tool_name": tool_name, "status": "success"},
+            )
+
     def _extract_usage(self, reply: Any) -> Mapping[str, Any] | None:
         """Pull a provider-agnostic usage dict off an assistant message.
 
-        ``harness_core.messages.Message`` has no usage field today;
+        ``lyra_harness_core.messages.Message`` has no usage field today;
         provider adapters set it ad-hoc. We poke a few common
         attribute / key shapes and return ``None`` when nothing is
         recognisable so callers can branch on truthiness.

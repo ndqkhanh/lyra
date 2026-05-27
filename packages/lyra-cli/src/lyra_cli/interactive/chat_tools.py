@@ -17,7 +17,7 @@ This module ships the missing piece: a real tool-dispatch loop that
 2. If the reply has ``tool_calls``, asks
    :class:`ToolApprovalCache` whether each is allowed (yolo skips,
    strict re-prompts), runs the approved ones via the
-   :class:`harness_core.tools.ToolRegistry`, builds a tool-result
+   :class:`lyra_harness_core.tools.ToolRegistry`, builds a tool-result
    ``Message``, and feeds it back into ``provider.generate`` for the
    next hop.
 3. Caps the loop at ``max_steps`` (default 8) so a misbehaving model
@@ -48,7 +48,7 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 
 # These imports are deliberately late-bound at function call sites to
-# avoid pulling all of harness_core into the module just to expose
+# avoid pulling all of lyra_harness_core into the module just to expose
 # types. Top-level imports here are pure typing or zero-cost.
 
 from .tool_approval import ToolApprovalCache
@@ -95,7 +95,7 @@ def build_chat_tool_registry(
     *,
     ask_user_prompter: Any = None,
 ) -> Any:
-    """Build a :class:`harness_core.tools.ToolRegistry` for chat mode.
+    """Build a :class:`lyra_harness_core.tools.ToolRegistry` for chat mode.
 
     Lazy-imports :mod:`lyra_core.tools.builtin` so a stripped install
     that doesn't ship lyra-core (rare — almost no one does that) can
@@ -123,7 +123,7 @@ def build_chat_tool_registry(
     Raises:
         ImportError: If ``lyra_core`` is not installed.
     """
-    from harness_core.tools import ToolRegistry
+    from lyra_harness_core.tools import ToolRegistry
     from lyra_core.tools.builtin import register_builtin_tools
 
     registry = ToolRegistry()
@@ -286,7 +286,7 @@ def run_chat_tool_loop(
     """Drive the ``LLMProvider`` think-act-observe loop until it ends.
 
     This is a strict, deterministic version of
-    :class:`harness_core.loop.AgentLoop` tuned for the chat REPL:
+    :class:`lyra_harness_core.loop.AgentLoop` tuned for the chat REPL:
 
     * No tracer / hooks — the chat handler doesn't consume them
       today (Phase D wires hooks into chat).
@@ -302,7 +302,7 @@ def run_chat_tool_loop(
     content from the *last* hop with no tool calls (or the last hop
     period if ``max_steps`` was hit).
     """
-    from harness_core.messages import Message  # late-bound
+    from lyra_harness_core.messages import Message  # late-bound
 
     approve_cb: ApproveFn = approve or _default_approve
     render_cb: RenderFn = render or _default_render
@@ -462,7 +462,7 @@ def run_chat_tool_loop(
                 )
                 continue
 
-            from harness_core.messages import ToolCall  # late-bound
+            from lyra_harness_core.messages import ToolCall  # late-bound
 
             wire_call = ToolCall(id=call_id, name=name, args=args)
             result = registry.execute(wire_call)
@@ -501,13 +501,13 @@ def run_chat_tool_loop(
 
 
 def _tool_result_obj(call_id: str, content: str, *, is_error: bool) -> Any:
-    """Build a :class:`harness_core.messages.ToolResult` dynamically.
+    """Build a :class:`lyra_harness_core.messages.ToolResult` dynamically.
 
     Late import keeps this module's import cost near-zero for code
     paths that never enter the loop (purely text turns, plain-mode
     sessions).
     """
-    from harness_core.messages import ToolResult
+    from lyra_harness_core.messages import ToolResult
 
     return ToolResult(call_id=call_id, content=content, is_error=is_error)
 

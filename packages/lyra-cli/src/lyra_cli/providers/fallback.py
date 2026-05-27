@@ -22,8 +22,8 @@ import re
 from dataclasses import dataclass
 from typing import Any, List, Optional, Sequence
 
-from harness_core.messages import Message
-from harness_core.models import LLMProvider
+from lyra_harness_core.messages import Message
+from lyra_harness_core.models import LLMProvider
 
 from lyra_cli.providers.openai_compatible import (
     ProviderHTTPError,

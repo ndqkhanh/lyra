@@ -6,6 +6,10 @@ budget tracking, usage analytics, and configurable model registry.
 
 V2 API (IntelligentModelRouter): multi-turn, cost-aware, anytime inference routing
 with 4-tier cascade (Haiku → Sonnet → Opus → Gemini/OpenRouter).
+
+V3 API (Plan 10): 5-layer intelligent router with 15-category task classification,
+1-10 complexity estimation, performance history learning, and confidence-thresholded
+escalation with cross-provider fallback chains.
 """
 
 from __future__ import annotations
@@ -31,6 +35,23 @@ from .models_v2 import (
     TurnContext,
 )
 from .router_v2 import IntelligentModelRouter
+
+# V3 API — Plan 10: 5-layer intelligent router
+from .task_classifier import ClassificationResult, TaskCategory, TaskClassifier
+from .complexity_estimator import ComplexityEstimate, ComplexityEstimator
+from .performance_history import (
+    ModelPerformance,
+    PerformanceHistory,
+    PerformanceRecord,
+    Recommendation,
+)
+from .confidence_escalation import (
+    ConfidenceEscalator,
+    EscalationReason,
+    EscalationResult,
+    EscalationStep,
+    ProviderHealth,
+)
 
 __all__ = [
     # V1 — Capability Analyzer
@@ -65,4 +86,22 @@ __all__ = [
     "RoutingStrategy",
     "TurnContext",
     "IntelligentModelRouter",
+    # V3 — Task Classifier (15 categories)
+    "ClassificationResult",
+    "TaskCategory",
+    "TaskClassifier",
+    # V3 — Complexity Estimator (1-10 scale)
+    "ComplexityEstimate",
+    "ComplexityEstimator",
+    # V3 — Performance History (learned success rates)
+    "ModelPerformance",
+    "PerformanceHistory",
+    "PerformanceRecord",
+    "Recommendation",
+    # V3 — Confidence Escalation (threshold + fallback chains)
+    "ConfidenceEscalator",
+    "EscalationReason",
+    "EscalationResult",
+    "EscalationStep",
+    "ProviderHealth",
 ]

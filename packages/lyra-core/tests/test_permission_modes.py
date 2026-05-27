@@ -1,6 +1,6 @@
 """Red tests for Lyra's extended permission modes.
 
-harness_core ships 4 modes (PLAN/DEFAULT/ACCEPT_EDITS/BYPASS); Lyra
+lyra_harness_core ships 4 modes (PLAN/DEFAULT/ACCEPT_EDITS/BYPASS); Lyra
 adds TDD-aware modes: RED, GREEN, REFACTOR, RESEARCH, RESUME.
 
 Contract from docs/blocks/04-permission-bridge.md:
@@ -11,12 +11,12 @@ Contract from docs/blocks/04-permission-bridge.md:
     - REFACTOR  : writes allowed anywhere, but destructive still asks
     - RESEARCH  : like PLAN but can write under notes/** (scratchpad)
     - RESUME    : inherits caller's last mode; proxy behavior tested separately
-    - DEFAULT   : harness_core semantics (writes ask)
+    - DEFAULT   : lyra_harness_core semantics (writes ask)
     - BYPASS    : anything goes (after hard deny)
 """
 from __future__ import annotations
 
-from harness_core.messages import ToolCall
+from lyra_harness_core.messages import ToolCall
 
 from lyra_core.permissions import (
     Decision,

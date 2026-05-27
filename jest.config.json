@@ -1,7 +1,9 @@
 {
   "preset": "ts-jest",
   "testEnvironment": "node",
-  "roots": ["<rootDir>/packages"],
+  "roots": [
+    "<rootDir>/packages"
+  ],
   "testMatch": [
     "**/__tests__/**/*.test.ts",
     "**/__tests__/**/*.test.tsx"
@@ -22,17 +24,34 @@
   "moduleNameMapper": {
     "^@lyra/ui-core$": "<rootDir>/packages/ui-core/src",
     "^@lyra/ui-terminal$": "<rootDir>/packages/ui-terminal/src",
-    "^@lyra/ui-transport$": "<rootDir>/packages/ui-transport/src"
+    "^@lyra/ui-transport$": "<rootDir>/packages/ui-transport/src",
+    "ink-testing-library": "<rootDir>/packages/ui-terminal/src/__tests__/__mocks__/ink-testing-library.ts"
   },
-  "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
+  "setupFilesAfterEnv": [
+    "<rootDir>/jest.setup.js"
+  ],
   "transform": {
-    "^.+\\.tsx?$": ["ts-jest", {
-      "tsconfig": {
-        "jsx": "react",
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true
-      },
-      "useESM": false
-    }]
-  }
+    "^.+\\.tsx?$": [
+      "ts-jest",
+      {
+        "tsconfig": {
+          "jsx": "react",
+          "esModuleInterop": true,
+          "allowSyntheticDefaultImports": true,
+          "moduleResolution": "node",
+          "module": "commonjs",
+          "target": "es2020",
+          "skipLibCheck": true,
+          "types": [
+            "node"
+          ]
+        },
+        "useESM": false,
+        "diagnostics": false
+      }
+    ]
+  },
+  "transformIgnorePatterns": [
+    "node_modules/(?!(ink-testing-library)/)"
+  ]
 }

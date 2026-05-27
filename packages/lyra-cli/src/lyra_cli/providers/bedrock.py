@@ -23,8 +23,8 @@ from __future__ import annotations
 import json
 from typing import Any, List, Optional
 
-from harness_core.messages import Message, StopReason, ToolCall
-from harness_core.models import LLMProvider
+from lyra_harness_core.messages import Message, StopReason, ToolCall
+from lyra_harness_core.models import LLMProvider
 
 
 class BedrockUnavailable(RuntimeError):

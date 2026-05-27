@@ -7,7 +7,7 @@ so every real ``/spawn`` invocation died with::
 
     TypeError: __init__() got an unexpected keyword argument 'provider'
 
-The fix unifies the two loop substrates (``harness_core.AgentLoop``
+The fix unifies the two loop substrates (``lyra_harness_core.AgentLoop``
 for one-shot ``run`` and ``lyra_core.agent.AgentLoop`` for subagent
 fan-out) on a single LLM provider via :class:`_LyraCoreLLMAdapter`:
 the adapter speaks Message-in / dict-out, which is what the lyra_core
@@ -20,7 +20,7 @@ from typing import Any
 
 import pytest
 
-from harness_core.messages import Message, StopReason
+from lyra_harness_core.messages import Message, StopReason
 
 from lyra_cli.interactive.session import (
     InteractiveSession,

@@ -162,10 +162,17 @@ class LyraUIHandler(BaseHTTPRequestHandler):
             if self.client is None:
                 self.client = LyraClient(repo_root=Path.cwd())
 
+            # CRITICAL FIX: Add system prompt with English instruction
+            system_prompt = (
+                "You are Lyra, a CLI-native coding assistant. ALWAYS respond in English "
+                "unless the user explicitly requests a different language."
+            )
+
             request = ChatRequest(
                 prompt=prompt,
                 session_id=session_id,
                 model=model,
+                system_prompt=system_prompt,  # Add system prompt!
             )
 
             self.send_response(200)
@@ -176,10 +183,12 @@ class LyraUIHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
             for event in self.client.stream(request):
-                event_data = {
+                event_data: dict[str, Any] = {
                     "kind": event.kind,
                     "payload": event.payload,
                 }
+                if event.metadata is not None:
+                    event_data["metadata"] = event.metadata
                 self.wfile.write(f"data: {json.dumps(event_data)}\n\n".encode())
                 self.wfile.flush()
 

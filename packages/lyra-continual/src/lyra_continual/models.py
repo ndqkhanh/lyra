@@ -7,8 +7,10 @@ All dataclasses are frozen for immutability (functional-core pattern).
 from __future__ import annotations
 
 import logging
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from enum import Enum
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -187,3 +189,92 @@ class ExpertStats:
     avg_weight: float = 0.0
     last_weight: float = 0.0
     weight_trend: float = 0.0  # positive = increasing importance
+
+
+# ── ECC v2 + MetaClaw Models ────────────────────────────────────────────────────
+
+
+class SkillState(str, Enum):
+    EMERGING = "emerging"
+    STABLE = "stable"
+    DEPRECATED = "deprecated"
+    RETIRED = "retired"
+
+
+class PatternType(str, Enum):
+    SUCCESS = "success"
+    FAILURE = "failure"
+    WORKAROUND = "workaround"
+    OPTIMIZATION = "optimization"
+    BUG = "bug"
+
+
+@dataclass(frozen=True)
+class SessionTrace:
+    """A recorded session trace for pattern analysis."""
+
+    id: str
+    session_id: str
+    events: tuple[dict[str, Any], ...]
+    outcome: str
+    duration_seconds: float
+    recorded_at: float = field(default_factory=time.time)
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class RecurringPattern:
+    """A detected recurring pattern across session traces."""
+
+    id: str
+    pattern_type: PatternType
+    description: str
+    frequency: int
+    sessions: tuple[str, ...]
+    confidence: float
+    first_seen: float
+    last_seen: float
+
+    @property
+    def is_strong(self) -> bool:
+        return self.confidence >= 0.7 and self.frequency >= 3
+
+
+@dataclass(frozen=True)
+class EvolvedSkill:
+    """A skill evolved from detected patterns."""
+
+    id: str
+    name: str
+    description: str
+    source_pattern_ids: tuple[str, ...]
+    state: SkillState = SkillState.EMERGING
+    version: int = 1
+    success_rate: float = 0.0
+    usage_count: int = 0
+    created_at: float = field(default_factory=time.time)
+    last_used: float = field(default_factory=time.time)
+
+    def record_use(self, success: bool) -> "EvolvedSkill":
+        new_rate = (self.success_rate * self.usage_count + (1.0 if success else 0.0)) / (self.usage_count + 1)
+        return EvolvedSkill(
+            id=self.id, name=self.name, description=self.description,
+            source_pattern_ids=self.source_pattern_ids, state=self.state,
+            version=self.version, success_rate=new_rate,
+            usage_count=self.usage_count + 1, last_used=time.time(),
+        )
+
+
+@dataclass(frozen=True)
+class CrossRunInsight:
+    """An insight that persists across multiple runs."""
+
+    id: str
+    insight: str
+    category: str
+    evidence_count: int
+    run_ids: tuple[str, ...]
+    confidence: float
+    actionable: bool = False
+    action_description: str = ""
+    created_at: float = field(default_factory=time.time)

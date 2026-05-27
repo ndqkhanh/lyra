@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Box, Text, useInput } from 'ink'
 import TextInput from 'ink-text-input'
 import { useUIStore, colors, symbols } from '@lyra/ui-core'
@@ -12,6 +12,7 @@ import { OutputStylePicker } from './OutputStylePicker'
 import { GoalPanel } from './GoalPanel'
 import { ReleaseNotesPicker } from './ReleaseNotesPicker'
 import { getCommandNames } from '../constants/commands'
+import { logger } from '../utils/logger'
 
 interface InputAreaProps {
   sessionId: string
@@ -25,6 +26,7 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
   const history = useHistory()
   const session = useUIStore(state => state.sessions.get(sessionId))
   const transport = useUIStore(state => state.transport)
+  const currentModel = useUIStore(state => state.currentModel)
   const addMessage = useUIStore(state => state.addMessage)
   const setModelAndProvider = useUIStore(state => state.setModelAndProvider)
 
@@ -41,6 +43,9 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
   const [showGoalPanel, setShowGoalPanel] = useState(false)
   const [currentGoal, setCurrentGoal] = useState<string | null>(null)
   const { vim, vimActions } = useVim()
+
+  // Guard against double-submission from both useInput and TextInput's onSubmit
+  const _submitGuard = useRef(0)
 
   // Track cursor position for vim motions
   const [vimCursor, setVimCursor] = useState(0)
@@ -121,6 +126,12 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
           return
         }
       }
+    }
+
+    // Enter to submit (belt-and-suspenders with TextInput's onSubmit)
+    if (key.return && !key.shift) {
+      handleSubmit()
+      return
     }
 
     // Shift+Enter to insert newline
@@ -214,9 +225,18 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
   }
 
   const handleSubmit = () => {
+    const now = Date.now()
+    if (now - _submitGuard.current < 300) {
+      logger.debug('InputArea', 'Double-fire guard triggered')
+      return
+    }
+    _submitGuard.current = now
+
     if (!history.current.trim() || !transport) return
 
     const input = history.current.trim()
+
+    logger.debug('InputArea', 'Submit:', input.slice(0, 80))
 
     // Intercept /model to open model picker
     if (input === '/model' || input.startsWith('/model ')) {
@@ -288,8 +308,20 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
       timestamp: Date.now()
     })
 
-    // Send via transport
-    transport.sendMessage(history.current).catch(console.error)
+    // Immediately show streaming state for instant feedback
+    useUIStore.getState().beginStreaming(sessionId)
+
+    // Send via transport with model
+    transport.sendMessage(history.current, undefined, currentModel || undefined).catch((err) => {
+      addMessage(sessionId, {
+        id: `error-${Date.now()}`,
+        role: 'system',
+        content: `Error: ${err.message}`,
+        timestamp: Date.now()
+      })
+      // Reset streaming state on error (no content to commit)
+      useUIStore.getState().cancelStreaming(sessionId)
+    })
 
     history.setCurrent('')
     setShowSuggestions(false)
@@ -298,9 +330,7 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
   if (!session || session.isStreaming) {
     return (
       <Box paddingX={2}>
-        <Text color={colors.timestamp} dimColor>
-          {symbols.spinner[0]} Waiting for response...
-        </Text>
+        <Text color={colors.thinking}>{symbols.thinkingFrames[0]}</Text>
       </Box>
     )
   }
@@ -440,7 +470,7 @@ export function InputArea({ sessionId, autocompleteCommands = DEFAULT_COMMANDS }
             [{vim.mode === 'normal' ? 'NORMAL' : 'INSERT'}]{' '}
           </Text>
         )}
-        <Text bold color={colors.userPrompt}>❯ </Text>
+        <Text bold color={colors.userPrompt}>{symbols.userPrompt} </Text>
         <Box flexGrow={1}>
           <TextInput
             value={history.current}

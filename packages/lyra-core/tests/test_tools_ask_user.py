@@ -10,7 +10,7 @@ from lyra_core.tools.ask_user import (
     AskUserQuestionTool,
     _AskUserArgs,
 )
-from harness_core.tools import ToolError
+from lyra_harness_core.tools import ToolError
 
 
 def _build_tool(picks):

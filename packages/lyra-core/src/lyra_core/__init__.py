@@ -8,7 +8,7 @@ Public surface:
     - HIR event emitter (``observability.hir``)
     - Event-Sourced Agent Loop 2.0 (``agent.event_sourced_loop``)
 
-Re-exports harness_core primitives under ``lyra_core.core`` for ergonomic
+Re-exports lyra_harness_core primitives under ``lyra_core.core`` for ergonomic
 imports downstream.
 """
 from __future__ import annotations

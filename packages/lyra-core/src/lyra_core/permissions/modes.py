@@ -8,8 +8,8 @@ Phase 1 supports:
     - GREEN     : implementation; writes allowed under ``src/**`` and ``tests/**``
     - REFACTOR  : free writes; destructive still ASK
     - RESEARCH  : scratchpad; writes limited to ``notes/**``
-    - DEFAULT   : harness_core defaults (writes ASK)
-    - ACCEPT_EDITS : harness_core ACCEPT_EDITS (edits auto, others ASK)
+    - DEFAULT   : lyra_harness_core defaults (writes ASK)
+    - ACCEPT_EDITS : lyra_harness_core ACCEPT_EDITS (edits auto, others ASK)
     - BYPASS    : anything goes (after hard-deny rules)
     - RESUME    : inherits caller's last mode (not decided at resolver layer)
 """

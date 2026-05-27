@@ -4,6 +4,7 @@ import type {
   Transport,
   ConnectionStatus,
   StreamChunk,
+  StreamEvent,
   Message,
   Attachment
 } from '@lyra/ui-core'
@@ -66,7 +67,7 @@ export class WebSocketTransport extends EventEmitter implements Transport {
     }
   }
 
-  async sendMessage(content: string, attachments?: Attachment[]): Promise<void> {
+  async sendMessage(content: string, attachments?: Attachment[], model?: string): Promise<void> {
     if (!this.ws || this.status !== 'connected') {
       throw new Error('Not connected')
     }
@@ -74,6 +75,7 @@ export class WebSocketTransport extends EventEmitter implements Transport {
     this.ws.send(JSON.stringify({
       type: 'message',
       content,
+      model,
       attachments
     }))
   }
@@ -86,6 +88,11 @@ export class WebSocketTransport extends EventEmitter implements Transport {
   onStreamChunk(handler: (chunk: StreamChunk) => void): () => void {
     this.on('stream-chunk', handler)
     return () => this.off('stream-chunk', handler)
+  }
+
+  onStreamEvent(handler: (event: StreamEvent) => void): () => void {
+    this.on('stream-event', handler)
+    return () => this.off('stream-event', handler)
   }
 
   onError(handler: (error: Error) => void): () => void {

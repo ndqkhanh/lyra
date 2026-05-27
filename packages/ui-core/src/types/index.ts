@@ -189,6 +189,9 @@ export interface SessionState {
   messages: Message[]
   previewMessages: Message[]  // Streaming zone
   isStreaming: boolean
+  isThinking: boolean
+  activeTools: ToolCallInfo[]
+  phases: PhaseInfo[]
   displayMode: DisplayMode
   displayConfig: DisplayConfig
   permissionMode: PermissionMode
@@ -196,13 +199,30 @@ export interface SessionState {
   currentProvider: string
 }
 
+/** Lightweight tool-call tracking for inline UI rendering. */
+export interface ToolCallInfo {
+  id: string
+  name: string
+  args?: string
+  status: 'running' | 'success' | 'error'
+  startTime: number
+}
+
+/** A tracked phase/task with checkbox state. */
+export interface PhaseInfo {
+  id: string
+  label: string
+  status: 'pending' | 'active' | 'completed'
+}
+
 // Transport Interface
 export interface Transport {
   connect(): Promise<void>
   disconnect(): Promise<void>
-  sendMessage(content: string, attachments?: Attachment[]): Promise<void>
+  sendMessage(content: string, attachments?: Attachment[], model?: string): Promise<void>
   onMessage(handler: (message: Message) => void): () => void
   onStreamChunk(handler: (chunk: StreamChunk) => void): () => void
+  onStreamEvent(handler: (event: StreamEvent) => void): () => void
   onError(handler: (error: Error) => void): () => void
   onStatusChange(handler: (status: ConnectionStatus) => void): () => void
 }
@@ -212,5 +232,13 @@ export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'er
 export interface StreamChunk {
   type: 'text' | 'thinking' | 'tool-call' | 'tool-result'
   content: string
+  done?: boolean
+  metadata?: Record<string, unknown>
+}
+
+/** Rich event emitted by the transport layer for thinking / tool lifecycle. */
+export interface StreamEvent {
+  kind: 'thinking_start' | 'thinking_end' | 'tool_start' | 'tool_end'
+  payload: string
   metadata?: Record<string, unknown>
 }
