@@ -1,7 +1,21 @@
-<h1 align="center">
-  <img src="docs/assets/lyra-banner.svg" alt="Lyra" width="600"><br>
-  <span style="background: linear-gradient(135deg, #c084fc 0%, #a78bfa 30%, #818cf8 60%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Personal Superintelligent AI Research Agent</span>
-</h1>
+<div align="center">
+
+<pre style="background: transparent; line-height: 1.1;">
+<span style="color: #a78bfa;">╔══════════════════════════════════════════════════════════════╗</span>
+<span style="color: #a78bfa;">║</span>                                                              <span style="color: #a78bfa;">║</span>
+<span style="color: #a78bfa;">║</span>   <span style="color: #c084fc;">██╗     ██╗   ██╗██████╗  █████╗ </span>                           <span style="color: #a78bfa;">║</span>
+<span style="color: #a78bfa;">║</span>   <span style="color: #a78bfa;">██║     ╚██╗ ██╔╝██╔══██╗██╔══██╗</span>                           <span style="color: #a78bfa;">║</span>
+<span style="color: #a78bfa;">║</span>   <span style="color: #818cf8;">██║      ╚████╔╝ ██████╔╝███████║</span>                           <span style="color: #a78bfa;">║</span>
+<span style="color: #a78bfa;">║</span>   <span style="color: #60a5fa;">██║       ╚██╔╝  ██╔══██╗██╔══██║</span>                           <span style="color: #a78bfa;">║</span>
+<span style="color: #a78bfa;">║</span>   <span style="color: #38bdf8;">███████╗   ██║   ██║  ██║██║  ██║</span>                           <span style="color: #a78bfa;">║</span>
+<span style="color: #a78bfa;">║</span>   <span style="color: #34d399;">╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝</span>                           <span style="color: #a78bfa;">║</span>
+<span style="color: #a78bfa;">║</span>                                                              <span style="color: #a78bfa;">║</span>
+<span style="color: #a78bfa;">║</span>   <span style="color: #94a3b8;">Personal Superintelligent AI Research Agent</span>                 <span style="color: #a78bfa;">║</span>
+<span style="color: #a78bfa;">║</span>   <span style="color: #64748b;">v7.1.0 · 99 packages · 35+ Phases · 33+ Ultra Plans</span>          <span style="color: #a78bfa;">║</span>
+<span style="color: #a78bfa;">╚══════════════════════════════════════════════════════════════╝</span>
+</pre>
+
+</div>
 
 <p align="center">
   <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=1e1e2e" alt="Python" /></a>
