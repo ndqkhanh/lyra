@@ -29,9 +29,19 @@ from lyra_core.agi_orchestrator import (
 )
 from lyra_core.agent.agi_plugin import AGILoopPlugin
 from lyra_core.agent.safety_hooks import SafetyHookPlugin
+from lyra_core.auto_fanout import AutoFanoutCompressor, FanoutResult
 from lyra_core.breakthrough import BreakthroughIntegration, breakthrough_available
+from lyra_core.canary import CanaryTokenGuard, ScanResult, ScanSeverity
+from lyra_core.stagnation import StagnationDetector, StagnationResult
+from lyra_core.two_circuit import (
+    CircuitMode,
+    ColdPathResult,
+    HotPathConfig,
+    ImprovementStatus,
+    TwoCircuitBridge,
+)
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 __all__ = [
     "__version__",
@@ -49,4 +59,16 @@ __all__ = [
     "SafetyHookPlugin",
     "BreakthroughIntegration",
     "breakthrough_available",
+    "AutoFanoutCompressor",
+    "FanoutResult",
+    "CanaryTokenGuard",
+    "ScanResult",
+    "ScanSeverity",
+    "StagnationDetector",
+    "StagnationResult",
+    "CircuitMode",
+    "ColdPathResult",
+    "HotPathConfig",
+    "ImprovementStatus",
+    "TwoCircuitBridge",
 ]
