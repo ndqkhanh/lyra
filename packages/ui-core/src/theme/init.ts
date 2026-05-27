@@ -7,6 +7,7 @@
 
 import { detectTerminalThemeSync, getRecommendedThemeId } from './autoDetect'
 import type { UIStore } from '../state/store'
+import { logger } from '../utils/logger'
 
 /**
  * Initialize theme based on terminal detection.
@@ -30,8 +31,8 @@ export function initializeTheme(store: UIStore, force = false): string {
   store.setActiveTheme(themeId)
 
   // Log detection result
-  console.log(`[Theme] Auto-detected ${detection.variant} theme via ${detection.method} (confidence: ${detection.confidence})`)
-  console.log(`[Theme] Applied theme: ${themeId}`)
+  logger.info('Theme', `Auto-detected ${detection.variant} theme via ${detection.method} (confidence: ${detection.confidence})`)
+  logger.info('Theme', `Applied theme: ${themeId}`)
 
   return themeId
 }
@@ -61,11 +62,11 @@ export async function initializeThemeAsync(store: UIStore, force = false): Promi
   store.setActiveTheme(themeId)
 
   // Log detection result
-  console.log(`[Theme] Auto-detected ${detection.variant} theme via ${detection.method} (confidence: ${detection.confidence})`)
+  logger.info('Theme', `Auto-detected ${detection.variant} theme via ${detection.method} (confidence: ${detection.confidence})`)
   if (detection.details) {
-    console.log(`[Theme] Details: ${detection.details}`)
+    logger.info('Theme', `Details: ${detection.details}`)
   }
-  console.log(`[Theme] Applied theme: ${themeId}`)
+  logger.info('Theme', `Applied theme: ${themeId}`)
 
   return themeId
 }

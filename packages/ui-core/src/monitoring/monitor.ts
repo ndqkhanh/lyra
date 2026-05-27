@@ -312,12 +312,8 @@ export class ProductionMonitor extends EventEmitter {
 
     this.emit('error', entry)
 
-    // Log to console based on severity
-    if (severity === 'critical' || severity === 'error') {
-      console.error(`[${severity.toUpperCase()}]`, error.message, context)
-    } else if (severity === 'warning') {
-      console.warn(`[WARNING]`, error.message, context)
-    }
+    // Errors are tracked internally, not logged to console
+    // Production monitoring system handles error reporting
   }
 
   /**

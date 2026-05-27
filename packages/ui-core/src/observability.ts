@@ -6,6 +6,8 @@
  * UI transitions, making the system more predictable and performant.
  */
 
+import { logger } from './utils/logger'
+
 export type ObservabilityEventType =
   | 'thinking_start'
   | 'thinking_end'
@@ -67,7 +69,7 @@ export class ObservabilityContext {
         try {
           handler(event)
         } catch (error) {
-          console.error(`Error in event handler for ${event.type}:`, error)
+          logger.error('Observability', `Error in event handler for ${event.type}:`, error)
         }
       })
     }
@@ -77,7 +79,7 @@ export class ObservabilityContext {
       try {
         handler(event)
       } catch (error) {
-        console.error('Error in global event handler:', error)
+        logger.error('Observability', 'Error in global event handler:', error)
       }
     })
   }

@@ -9,7 +9,7 @@ interface Props {
   sessionId?: string
 }
 
-export function AssistantTextMessage({ item, sessionId }: Props) {
+export const AssistantTextMessage = React.memo(function AssistantTextMessage({ item, sessionId }: Props) {
   const colors = useThemeColors()
   const [cursorVisible, setCursorVisible] = useState(true)
 
@@ -58,4 +58,4 @@ export function AssistantTextMessage({ item, sessionId }: Props) {
       </Box>
     </Box>
   )
-}
+})

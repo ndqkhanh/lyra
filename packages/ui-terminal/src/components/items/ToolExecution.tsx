@@ -11,7 +11,7 @@ interface Props {
   sessionId?: string
 }
 
-export function ToolExecution({ item, sessionId }: Props) {
+export const ToolExecution = React.memo(function ToolExecution({ item, sessionId }: Props) {
   const colors = useThemeColors()
   useEffect(() => {
     if (!sessionId) return
@@ -157,4 +157,4 @@ export function ToolExecution({ item, sessionId }: Props) {
       )}
     </Box>
   )
-}
+})

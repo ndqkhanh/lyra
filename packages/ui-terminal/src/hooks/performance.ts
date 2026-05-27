@@ -54,18 +54,14 @@ export function useMemoizedValue<T>(factory: () => T, deps: React.DependencyList
 /**
  * Track render performance
  */
-export function useRenderPerformance(componentName: string) {
+export function useRenderPerformance(_componentName: string) {
   const renderCount = useRef(0)
   const startTime = useRef(Date.now())
 
   useEffect(() => {
     renderCount.current++
-    const renderTime = Date.now() - startTime.current
-
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[${componentName}] Render #${renderCount.current} took ${renderTime}ms`)
-    }
-
+    // Performance tracking is handled by monitoring system
+    // No console logging in production
     startTime.current = Date.now()
   })
 

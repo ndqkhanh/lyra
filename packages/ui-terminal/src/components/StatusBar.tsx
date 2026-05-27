@@ -3,6 +3,7 @@ import { Box, Text } from 'ink'
 import { useThemeColors, useUIStore } from '@lyra/ui-core'
 import { useShallow } from 'zustand/react/shallow'
 import { usePersonality } from '../hooks/usePersonality'
+import { UI_TIMING, CONTEXT_CONFIG } from '../constants/timing'
 
 interface StatusBarProps {
   sessionId: string
@@ -55,38 +56,44 @@ export const StatusBar = React.memo(function StatusBar({
   const streamStartRef = useRef<number | null>(null)
   const sessionStartRef = useRef<number>(Date.now())
   const [sessionDuration, setSessionDuration] = useState(0)
+  const lastFaceTickRef = useRef<number>(Date.now())
 
-  // Face/verb ticker (Hermes FACE_TICK_MS = 2500)
+  // Combined timer for session duration and streaming elapsed (1 second interval)
   useEffect(() => {
-    if (!isStreaming) return
     const id = setInterval(() => {
-      setFaceIdx(n => (n + 1) % FACES.length)
-      tick()
-    }, 2500)
-    return () => clearInterval(id)
-  }, [isStreaming]) // eslint-disable-line react-hooks/exhaustive-deps
+      const now = Date.now()
 
-  // Elapsed timer during streaming
+      // Update session duration
+      setSessionDuration(now - sessionStartRef.current)
+
+      // Update streaming elapsed if active
+      if (isStreaming && streamStartRef.current) {
+        setElapsed(now - streamStartRef.current)
+
+        // Update face animation every 2.5 seconds
+        if (now - lastFaceTickRef.current >= UI_TIMING.FACE_TICK_MS) {
+          setFaceIdx(n => (n + 1) % FACES.length)
+          tick()
+          lastFaceTickRef.current = now
+        }
+      }
+    }, UI_TIMING.SESSION_DURATION_UPDATE_MS)
+
+    return () => clearInterval(id)
+  }, [isStreaming, tick])
+
+  // Reset streaming state when streaming stops
   useEffect(() => {
     if (isStreaming) {
-      if (!streamStartRef.current) streamStartRef.current = Date.now()
-      const id = setInterval(() => {
-        if (streamStartRef.current) setElapsed(Date.now() - streamStartRef.current)
-      }, 1000)
-      return () => clearInterval(id)
+      if (!streamStartRef.current) {
+        streamStartRef.current = Date.now()
+        lastFaceTickRef.current = Date.now()
+      }
+    } else {
+      streamStartRef.current = null
+      setElapsed(0)
     }
-    streamStartRef.current = null
-    setElapsed(0)
-    return
   }, [isStreaming])
-
-  // Session duration (Hermes SessionDuration)
-  useEffect(() => {
-    const id = setInterval(() => {
-      setSessionDuration(Date.now() - sessionStartRef.current)
-    }, 1000)
-    return () => clearInterval(id)
-  }, [])
 
   // Token usage
   let tokensIn = 0
@@ -99,8 +106,7 @@ export const StatusBar = React.memo(function StatusBar({
     }
   }
   const totalTokens = tokensIn + tokensOut
-  const CONTEXT_WINDOW = 200_000
-  const pct = totalTokens > 0 ? Math.round((totalTokens / CONTEXT_WINDOW) * 100) : 0
+  const pct = totalTokens > 0 ? Math.round((totalTokens / CONTEXT_CONFIG.CONTEXT_WINDOW_TOKENS) * 100) : 0
 
   const permLabel = { ask: 'ask', allow: 'allow', deny: 'deny' }[permissionMode] || permissionMode
   const permColor = { ask: colors.amber, allow: colors.statusGood, deny: colors.statusCritical }[permissionMode] || colors.dim
@@ -138,7 +144,7 @@ export const StatusBar = React.memo(function StatusBar({
           {totalTokens > 0 ? (
             <>
               <Text color={colors.dim}> │ </Text>
-              <Text color={colors.dim}>{fmtK(totalTokens)}/{fmtK(CONTEXT_WINDOW)}</Text>
+              <Text color={colors.dim}>{fmtK(totalTokens)}/{fmtK(CONTEXT_CONFIG.CONTEXT_WINDOW_TOKENS)}</Text>
               <Text color={colors.dim}> [</Text>
               <Text color={barColor}>{ctxBar(pct)}</Text>
               <Text color={colors.dim}>] </Text>

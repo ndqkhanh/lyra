@@ -7,7 +7,7 @@ interface Props {
   item: SystemNoticeItemType
 }
 
-export function SystemNotice({ item }: Props) {
+export const SystemNotice = React.memo(function SystemNotice({ item }: Props) {
   const colors = useThemeColors()
   const noticeStyle: Record<string, { color: string; icon: string }> = {
     info:    { color: colors.info,    icon: symbols.info },
@@ -23,4 +23,4 @@ export function SystemNotice({ item }: Props) {
       <Text color={style.color}>{item.content}</Text>
     </Box>
   )
-}
+})

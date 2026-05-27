@@ -6,6 +6,7 @@
  */
 
 import { observability, ObservabilityEvent } from './observability'
+import { logger } from './utils/logger'
 
 export type IndicatorState =
   | 'idle'
@@ -165,7 +166,7 @@ export class IndicatorStateMachine {
       try {
         listener(this.context)
       } catch (error) {
-        console.error('Error in state machine listener:', error)
+        logger.error('StateMachine', 'Error in state machine listener:', error)
       }
     })
   }

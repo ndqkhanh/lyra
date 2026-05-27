@@ -128,7 +128,7 @@ export function App() {
       }, 0)
     })
 
-    const connectWithRetry = async (maxRetries = 10, delay = 500) => {
+    const connectWithRetry = async (maxRetries = config.retryConfig.maxRetries, delay = config.retryConfig.initialDelay) => {
       for (let i = 0; i < maxRetries; i++) {
         try {
           await transport.connect()

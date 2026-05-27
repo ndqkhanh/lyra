@@ -157,7 +157,6 @@ class LyraUIHandler(BaseHTTPRequestHandler):
 
             session_id = data.get("session_id")
             model = data.get("model")
-            fallback_chain = data.get("fallback_chain")
 
             if self.client is None:
                 self.client = LyraClient(repo_root=Path.cwd())

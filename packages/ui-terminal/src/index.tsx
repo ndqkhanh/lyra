@@ -5,7 +5,7 @@ import { App } from './App'
 import { logger } from './utils/logger'
 
 if (!process.stdin.isTTY) {
-  console.log('lyra-tui: no TTY')
+  logger.info('App', 'lyra-tui: no TTY')
   process.exit(0)
 }
 

@@ -10,7 +10,7 @@ interface Props {
   sessionId?: string
 }
 
-export function ThinkingBlock({ item, sessionId }: Props) {
+export const ThinkingBlock = React.memo(function ThinkingBlock({ item, sessionId }: Props) {
   const colors = useThemeColors()
   // Emit observability events for thinking
   useEffect(() => {
@@ -74,4 +74,4 @@ export function ThinkingBlock({ item, sessionId }: Props) {
       </Box>
     </Box>
   )
-}
+})

@@ -7,7 +7,7 @@ interface Props {
   item: UserTextItem
 }
 
-export function UserTextMessage({ item }: Props) {
+export const UserTextMessage = React.memo(function UserTextMessage({ item }: Props) {
   const colors = useThemeColors()
   return (
     <Box flexDirection="column" marginBottom={1}>
@@ -19,4 +19,4 @@ export function UserTextMessage({ item }: Props) {
       </Box>
     </Box>
   )
-}
+})
