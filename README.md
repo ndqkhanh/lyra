@@ -338,13 +338,13 @@ graph TB
 
     CMD --> Reasoning
     Reasoning --> Gate
-    Gate -->|<b>approved</b> (98.9%+ safe)| Execution
-    Gate -->|<b>blocked</b>| Reject["<b>🚫 BLOCKED</b><br/>Action + Audit Log"]
+    Gate -->|"approved (98.9%+ safe)"| Execution
+    Gate -->|"blocked"| Reject["<b>🚫 BLOCKED</b><br/>Action + Audit Log"]
     Execution --> V1
     V1 --> V2
     V2 --> V3
-    V3 -->|anomaly| Reject
-    V3 -->|<b>clean</b>| Output["<b>✅ Safe Output</b>"]
+    V3 -->|"anomaly"| Reject
+    V3 -->|"clean"| Output["<b>✅ Safe Output</b>"]
 
     classDef input fill:#64748b20,stroke:#94a3b8,stroke-width:2px,color:#e2e8f0
     classDef reasoning fill:#3b82f620,stroke:#60a5fa,stroke-width:2px,color:#e2e8f0
@@ -405,11 +405,11 @@ flowchart TB
     end
 
     Observe --> Analyze --> Propose --> Verify
-    Verify -->|<b>pass ✓</b>| Deploy2
-    Verify -->|<b>fail ✗</b>| Refine["<b>🔄 Refine & Retry</b>"]
+    Verify -->|"pass ✓"| Deploy2
+    Verify -->|"fail ✗"| Refine["<b>🔄 Refine & Retry</b>"]
     Refine --> Propose
-    Monitor -->|regression| Rollback2["<b>⏪ Auto-Rollback</b>"]
-    Monitor -->|drift detected| Refine
+    Monitor -->|"regression"| Rollback2["<b>⏪ Auto-Rollback</b>"]
+    Monitor -->|"drift detected"| Refine
 
     classDef observe fill:#3b82f620,stroke:#60a5fa,stroke-width:2px,color:#e2e8f0
     classDef analyze fill:#f59e0b20,stroke:#fbbf24,stroke-width:2px,color:#e2e8f0
