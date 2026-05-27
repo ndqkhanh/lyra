@@ -5,7 +5,14 @@ HUD layouts without a live session.
 """
 from __future__ import annotations
 
+import re
+
 from . import HudState
+
+
+def strip_ansi(text: str) -> str:
+    """Remove ANSI escape sequences from *text*."""
+    return re.sub(r"\x1b\[[0-9;]*[a-zA-Z]", "", text)
 
 
 def sample_state() -> HudState:

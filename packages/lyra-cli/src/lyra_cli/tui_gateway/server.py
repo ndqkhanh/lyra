@@ -1,19 +1,12 @@
 """Lyra TUI Gateway — JSON-RPC server with session management, config I/O, and agent integration.
 
-Adapted from Hermes Agent's tui_gateway.server module.  Key differences:
-
-  - Paths use ``~/.lyra/`` instead of ``~/.hermes/``
-  - Session DB is a JSON file store at ``~/.lyra/sessions/``
-  - Agent factory (``_build_agent``) is a stub — wire it when Lyra's agent
-    system is ready.
-  - Lyra-specific RPC methods (``lyra.*``) are registered as stubs.
+Adapted from Hermes Agent's tui_gateway.server module.
 """
 
 from __future__ import annotations
 
 import atexit
 import concurrent.futures
-import contextvars
 import copy
 import json
 import logging
@@ -30,78 +23,14 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 
 from .render import make_stream_renderer, render_diff, render_message
-from .transport import (
-    StdioTransport,
-    Transport,
-    bind_transport,
-    current_transport,
-    reset_transport,
-)
-from .lyra_agent import LyraAgent
 
 logger = logging.getLogger(__name__)
 
 # ── Lyra home directory ──────────────────────────────────────────────
 _LYRA_HOME = Path.home() / ".lyra"
 
-# ── Panic logger ─────────────────────────────────────────────────────
+# ── Crash log path (for gateway diagnostics) ─────────────────────────
 _CRASH_LOG = os.path.join(str(_LYRA_HOME), "logs", "tui_gateway_crash.log")
-
-
-def _panic_hook(exc_type, exc_value, exc_tb):
-    import traceback as _tb
-
-    trace = "".join(_tb.format_exception(exc_type, exc_value, exc_tb))
-    try:
-        os.makedirs(os.path.dirname(_CRASH_LOG), exist_ok=True)
-        with open(_CRASH_LOG, "a", encoding="utf-8") as f:
-            f.write(
-                f"\n=== unhandled exception · {time.strftime('%Y-%m-%d %H:%M:%S')} ===\n"
-            )
-            f.write(trace)
-    except Exception:
-        pass
-    first = (
-        str(exc_value).strip().splitlines()[0]
-        if str(exc_value).strip()
-        else exc_type.__name__
-    )
-    print(f"[gateway-crash] {exc_type.__name__}: {first}", file=sys.stderr, flush=True)
-    sys.__excepthook__(exc_type, exc_value, exc_tb)
-
-
-sys.excepthook = _panic_hook
-
-
-def _thread_panic_hook(args):
-    import traceback as _tb
-
-    trace = "".join(
-        _tb.format_exception(args.exc_type, args.exc_value, args.exc_traceback)
-    )
-    try:
-        os.makedirs(os.path.dirname(_CRASH_LOG), exist_ok=True)
-        with open(_CRASH_LOG, "a", encoding="utf-8") as f:
-            f.write(
-                f"\n=== thread exception · {time.strftime('%Y-%m-%d %H:%M:%S')} "
-                f"· thread={args.thread.name} ===\n"
-            )
-            f.write(trace)
-    except Exception:
-        pass
-    first_line = (
-        str(args.exc_value).strip().splitlines()[0]
-        if str(args.exc_value).strip()
-        else args.exc_type.__name__
-    )
-    print(
-        f"[gateway-crash] thread {args.thread.name} raised {args.exc_type.__name__}: {first_line}",
-        file=sys.stderr,
-        flush=True,
-    )
-
-
-threading.excepthook = _thread_panic_hook
 
 # ── Module-level state ──────────────────────────────────────────────
 _sessions: dict[str, dict] = {}
@@ -113,9 +42,9 @@ _cfg_lock = threading.Lock()
 _cfg_cache: dict | None = None
 _cfg_mtime: float | None = None
 _cfg_path: Path | None = None
-_SLASH_WORKER_TIMEOUT_S = 45.0
-_DETAIL_SECTION_NAMES = ("thinking", "tools", "subagents", "activity")
-_DETAIL_MODES = frozenset({"hidden", "collapsed", "expanded"})
+_SLASH_WORKER_TIMEOUT_S = max(
+    5.0, float(os.environ.get("LYRA_TUI_SLASH_TIMEOUT_S", "45") or 45)
+)
 
 # ── Thread pool for long handlers ───────────────────────────────────
 _LONG_HANDLERS = frozenset({
@@ -139,12 +68,96 @@ _pool = concurrent.futures.ThreadPoolExecutor(
 atexit.register(lambda: _pool.shutdown(wait=False, cancel_futures=True))
 
 # Reserve real stdout for JSON-RPC only; redirect Python's stdout to stderr
-# so stray print() from libraries becomes harmless stderr messages.
 _real_stdout = sys.stdout
 sys.stdout = sys.stderr
 
-# Module-level stdio transport
-_stdio_transport = StdioTransport(lambda: _real_stdout, _stdout_lock)
+
+# ── Slash worker ────────────────────────────────────────────────────
+
+
+class _SlashWorker:
+    """Persistent subprocess for slash commands."""
+
+    def __init__(self, session_key: str, model: str):
+        self._lock = threading.Lock()
+        self._seq = 0
+        self.stderr_tail: list[str] = []
+        self.stdout_queue: queue.Queue[dict | None] = queue.Queue()
+
+        argv = [
+            sys.executable,
+            "-m",
+            "lyra_cli.tui_gateway.slash_worker",
+            "--session-key",
+            session_key,
+        ]
+        if model:
+            argv += ["--model", model]
+
+        self.proc = subprocess.Popen(
+            argv,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1,
+            cwd=os.getcwd(),
+            env=os.environ.copy(),
+        )
+        threading.Thread(target=self._drain_stdout, daemon=True).start()
+        threading.Thread(target=self._drain_stderr, daemon=True).start()
+
+    def _drain_stdout(self):
+        for line in self.proc.stdout or []:
+            try:
+                self.stdout_queue.put(json.loads(line))
+            except json.JSONDecodeError:
+                continue
+        self.stdout_queue.put(None)
+
+    def _drain_stderr(self):
+        for line in self.proc.stderr or []:
+            if text := line.rstrip("\n"):
+                self.stderr_tail = (self.stderr_tail + [text])[-80:]
+
+    def run(self, command: str) -> str:
+        if self.proc.poll() is not None:
+            raise RuntimeError("slash worker exited")
+
+        with self._lock:
+            self._seq += 1
+            rid = self._seq
+            self.proc.stdin.write(json.dumps({"id": rid, "command": command}) + "\n")
+            self.proc.stdin.flush()
+
+            while True:
+                try:
+                    msg = self.stdout_queue.get(timeout=_SLASH_WORKER_TIMEOUT_S)
+                except queue.Empty:
+                    raise RuntimeError("slash worker timed out")
+                if msg is None:
+                    break
+                if msg.get("id") != rid:
+                    continue
+                if not msg.get("ok"):
+                    raise RuntimeError(msg.get("error", "slash worker failed"))
+                return str(msg.get("output", "")).rstrip()
+
+            raise RuntimeError(
+                f"slash worker closed pipe"
+                + (": " + "\n".join(self.stderr_tail[-8:]) if self.stderr_tail else "")
+            )
+
+    def close(self):
+        try:
+            if self.proc.poll() is None:
+                self.proc.terminate()
+                self.proc.wait(timeout=1)
+        except Exception:
+            try:
+                self.proc.kill()
+            except Exception:
+                pass
 
 
 # ── Session JSON store ──────────────────────────────────────────────
@@ -161,7 +174,6 @@ def _session_path(session_id: str) -> Path:
 
 
 def _load_session_file(session_id: str) -> dict | None:
-    """Load a session from its JSON file, or return None."""
     p = _session_path(session_id)
     if not p.exists():
         return None
@@ -173,7 +185,6 @@ def _load_session_file(session_id: str) -> dict | None:
 
 
 def _save_session_file(session_id: str, data: dict) -> None:
-    """Save or update a session JSON file."""
     p = _session_path(session_id)
     p.parent.mkdir(parents=True, exist_ok=True)
     tmp = p.with_suffix(".tmp")
@@ -189,7 +200,6 @@ def _delete_session_file(session_id: str) -> None:
 
 
 def _list_sessions(limit: int = 200) -> list[dict]:
-    """List stored sessions, sorted by most recent activity, newest first."""
     sdir = _sessions_dir()
     results: list[dict] = []
     for fpath in sorted(sdir.glob("*.json"), reverse=True):
@@ -273,115 +283,23 @@ def _write_config_key(key_path: str, value):
     _save_cfg(cfg)
 
 
-# ── Slash worker ────────────────────────────────────────────────────
-
-
-class _SlashWorker:
-    """Persistent subprocess for slash commands."""
-
-    def __init__(self, session_key: str, model: str):
-        self._lock = threading.Lock()
-        self._seq = 0
-        self.stderr_tail: list[str] = []
-        self.stdout_queue: queue.Queue[dict | None] = queue.Queue()
-
-        argv = [
-            sys.executable,
-            "-m",
-            "tui_gateway.slash_worker",
-            "--session-key",
-            session_key,
-        ]
-        if model:
-            argv += ["--model", model]
-
-        self.proc = subprocess.Popen(
-            argv,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            bufsize=1,
-            cwd=os.getcwd(),
-            env=os.environ.copy(),
-        )
-        threading.Thread(target=self._drain_stdout, daemon=True).start()
-        threading.Thread(target=self._drain_stderr, daemon=True).start()
-
-    def _drain_stdout(self):
-        for line in self.proc.stdout or []:
-            try:
-                self.stdout_queue.put(json.loads(line))
-            except json.JSONDecodeError:
-                continue
-        self.stdout_queue.put(None)
-
-    def _drain_stderr(self):
-        for line in self.proc.stderr or []:
-            if text := line.rstrip("\n"):
-                self.stderr_tail = (self.stderr_tail + [text])[-80:]
-
-    def run(self, command: str) -> str:
-        if self.proc.poll() is not None:
-            raise RuntimeError("slash worker exited")
-
-        with self._lock:
-            self._seq += 1
-            rid = self._seq
-            self.proc.stdin.write(json.dumps({"id": rid, "command": command}) + "\n")
-            self.proc.stdin.flush()
-
-            while True:
-                try:
-                    msg = self.stdout_queue.get(timeout=_SLASH_WORKER_TIMEOUT_S)
-                except queue.Empty:
-                    raise RuntimeError("slash worker timed out")
-                if msg is None:
-                    break
-                if msg.get("id") != rid:
-                    continue
-                if not msg.get("ok"):
-                    raise RuntimeError(msg.get("error", "slash worker failed"))
-                return str(msg.get("output", "")).rstrip()
-
-            raise RuntimeError(
-                f"slash worker closed pipe"
-                + (": " + "\n".join(self.stderr_tail[-8:]) if self.stderr_tail else "")
-            )
-
-    def close(self):
-        try:
-            if self.proc.poll() is None:
-                self.proc.terminate()
-                self.proc.wait(timeout=1)
-        except Exception:
-            try:
-                self.proc.kill()
-            except Exception:
-                pass
-
-
 # ── Transport / Write / Emit helpers ────────────────────────────────
 
 
 def write_json(obj: dict) -> bool:
-    """Emit one JSON frame. Routes via the most-specific transport available.
-
-    Precedence:
-    1. Event frames with a session id -> the transport stored on that session.
-    2. Transport bound on the current context (set by :func:`dispatch`).
-    3. Module-level stdio transport.
-    """
-    if obj.get("method") == "event":
-        sid = ((obj.get("params") or {}).get("session_id")) or ""
-        if sid and (t := (_sessions.get(sid) or {}).get("transport")) is not None:
-            return t.write(obj)
-
-    return (current_transport() or _stdio_transport).write(obj)
+    """Emit one JSON frame. Return False when stdout is gone."""
+    line = json.dumps(obj, ensure_ascii=False) + "\n"
+    with _stdout_lock:
+        try:
+            _real_stdout.write(line)
+            _real_stdout.flush()
+        except (BrokenPipeError, ValueError, OSError):
+            return False
+    return True
 
 
 def _emit(event: str, sid: str, payload: dict | None = None):
-    params = {"type": event, "session_id": sid}
+    params: dict[str, Any] = {"type": event, "session_id": sid}
     if payload is not None:
         params["payload"] = payload
     write_json({"jsonrpc": "2.0", "method": "event", "params": params})
@@ -419,10 +337,7 @@ def method(name: str):
 # ── Dispatch ────────────────────────────────────────────────────────
 
 
-def _normalize_request(req: Any) -> tuple[Any, str, dict] | dict:
-    if not isinstance(req, dict):
-        return _err(None, -32600, "invalid request: expected an object")
-
+def handle_request(req: dict) -> dict | None:
     rid = req.get("id")
     method_name = req.get("method")
     if not isinstance(method_name, str) or not method_name:
@@ -434,52 +349,28 @@ def _normalize_request(req: Any) -> tuple[Any, str, dict] | dict:
     elif not isinstance(params, dict):
         return _err(rid, -32602, "invalid params: expected an object")
 
-    return rid, method_name, params
-
-
-def handle_request(req: dict) -> dict | None:
-    normalized = _normalize_request(req)
-    if isinstance(normalized, dict):
-        return normalized
-
-    rid, method_name, params = normalized
     fn = _methods.get(method_name)
     if not fn:
         return _err(rid, -32601, f"unknown method: {method_name}")
     return fn(rid, params)
 
 
-def dispatch(req: dict, transport: Optional[Transport] = None) -> dict | None:
-    """Route inbound RPCs — long handlers to the pool, everything else inline.
+def dispatch(req: dict) -> dict | None:
+    """Route inbound RPCs — long handlers to the pool, everything else inline."""
+    method_name = req.get("method", "")
+    if method_name not in _LONG_HANDLERS:
+        return handle_request(req)
 
-    Returns a response dict when handled inline. Returns None when the
-    handler was scheduled on the pool.
-    """
-    t = transport or _stdio_transport
-    token = bind_transport(t)
-    try:
-        normalized = _normalize_request(req)
-        if isinstance(normalized, dict):
-            return normalized
+    def run():
+        try:
+            resp = handle_request(req)
+        except Exception as exc:
+            resp = _err(req.get("id"), -32000, f"handler error: {exc}")
+        if resp is not None:
+            write_json(resp)
 
-        _rid, method_name, _params = normalized
-        if method_name not in _LONG_HANDLERS:
-            return handle_request(req)
-
-        ctx = contextvars.copy_context()
-
-        def run():
-            try:
-                resp = handle_request(req)
-            except Exception as exc:
-                resp = _err(req.get("id"), -32000, f"handler error: {exc}")
-            if resp is not None:
-                t.write(resp)
-
-        _pool.submit(lambda: ctx.run(run))
-        return None
-    finally:
-        reset_transport(token)
+    _pool.submit(run)
+    return None
 
 
 # ── Block / Wait — approval, clarify, sudo, secret flows ──────────
@@ -503,7 +394,7 @@ def _clear_pending(sid: str | None = None) -> None:
             ev.set()
 
 
-# ── Block-flow respond methods (registered at module level) ────────
+# ── Block-flow respond methods ──────────────────────────────────────
 
 
 @method("approval.respond")
@@ -518,7 +409,7 @@ def _approval_respond(rid, params: dict) -> dict:
 
 @method("clarify.respond")
 def _clarify_respond(rid, params: dict) -> dict:
-    return _approval_respond(rid, params)  # Same protocol
+    return _approval_respond(rid, params)
 
 
 @method("sudo.respond")
@@ -531,13 +422,61 @@ def _secret_respond(rid, params: dict) -> dict:
     return _approval_respond(rid, params)
 
 
-# ── Agent factory (STUB) ────────────────────────────────────────────
+# ── Agent factory ───────────────────────────────────────────────────
 
 
 def _build_agent(sid: str, key: str, session_id: str | None = None):
-    """Build a Lyra agent for the given session."""
-    model = _resolve_model()
-    return LyraAgent(session_id=sid, session_key=key, model=model)
+    """Build a Lyra agent for the given session.
+
+    Returns a stub agent object.  Wire to the real Lyra agent system when ready.
+    """
+    return _StubAgent(sid, key)
+
+
+class _StubAgent:
+    """Minimal agent stub that satisfies the TUI gateway interface."""
+
+    def __init__(self, sid: str, key: str):
+        self.model = _resolve_model()
+        self._sid = sid
+        self._key = key
+        self._interrupt = threading.Event()
+        self.session_input_tokens = 0
+        self.session_output_tokens = 0
+        self.session_cache_read_tokens = 0
+        self.session_cache_write_tokens = 0
+        self.session_reasoning_tokens = 0
+        self.session_total_tokens = 0
+        self.session_api_calls = 0
+
+    def interrupt(self):
+        self._interrupt.set()
+
+    def run_conversation(self, text: str, *, conversation_history=None, stream_callback=None):
+        self._interrupt.clear()
+        response = (
+            f"[Lyra] Agent received your message. "
+            f"The Lyra agent system is being initialized.\n\n"
+            f"Your message: {text[:200]}{'...' if len(text) > 200 else ''}"
+        )
+        if stream_callback:
+            for char in response:
+                stream_callback(char)
+        return {
+            "messages": (conversation_history or []) + [
+                {"role": "user", "content": text},
+                {"role": "assistant", "content": response},
+            ],
+            "final_response": response,
+        }
+
+    def _compress_context(self, history: list, _keep_last: int | None = None):
+        keep = _keep_last or 20
+        if len(history) <= keep:
+            return history, {"compressed": False}
+        system_msgs = [m for m in history if m.get("role") == "system"]
+        rest = [m for m in history if m.get("role") != "system"]
+        return system_msgs + rest[-keep:], {"compressed": True}
 
 
 def _wait_agent(session: dict, rid: str, timeout: float = 30.0) -> dict | None:
@@ -549,7 +488,6 @@ def _wait_agent(session: dict, rid: str, timeout: float = 30.0) -> dict | None:
 
 
 def _start_agent_build(sid: str, session: dict) -> None:
-    """Deferred agent build — runs on a background thread."""
     ready = session.get("agent_ready")
     if ready is None:
         return
@@ -577,7 +515,7 @@ def _start_agent_build(sid: str, session: dict) -> None:
             except Exception:
                 pass
 
-            info = _session_info(agent) if hasattr(agent, '__class__') else {}
+            info = _session_info(agent)
             _emit("session.info", sid, info)
         except Exception as e:
             current["agent_error"] = str(e)
@@ -613,14 +551,12 @@ def resolve_skin() -> dict:
 
 
 def _resolve_model() -> str:
-    # Try env first, then Claude settings.json, then Lyra config, then default
     env = (
         os.environ.get("LYRA_MODEL", "")
         or os.environ.get("ANTHROPIC_MODEL", "")
     ).strip()
     if env:
         return env
-    # Load from ~/.claude/settings.json (same as main.py's setup_environment)
     try:
         settings_path = Path.home() / ".claude" / "settings.json"
         if settings_path.exists():
@@ -653,25 +589,19 @@ def _session_info(agent) -> dict:
 
 
 def _gather_tools() -> dict[str, list[str]]:
-    """Gather available tools from the agent and built-in registries."""
-    tools: dict[str, list[str]] = {}
-
-    # Built-in Lyra CLI tools
-    tools["CLI Commands"] = [
-        "bash", "read", "write", "edit", "glob", "grep",
-        "task", "skill", "agent", "web_search", "web_fetch",
-    ]
-
-    # Provider-specific tools
-    tools["File Operations"] = ["read_file", "write_file", "edit_file", "list_directory"]
-    tools["Code Actions"] = ["run_tests", "lint", "typecheck", "format"]
-    tools["Research"] = ["web_search", "deep_research", "codebase_explore", "wiki_search"]
-
+    tools: dict[str, list[str]] = {
+        "CLI Commands": [
+            "bash", "read", "write", "edit", "glob", "grep",
+            "task", "skill", "agent", "web_search", "web_fetch",
+        ],
+        "File Operations": ["read_file", "write_file", "edit_file", "list_directory"],
+        "Code Actions": ["run_tests", "lint", "typecheck", "format"],
+        "Research": ["web_search", "deep_research", "codebase_explore", "wiki_search"],
+    }
     return tools
 
 
 def _gather_skills() -> dict[str, list[str]]:
-    """Gather available skills from the skills registry."""
     skills: dict[str, list[str]] = {}
     try:
         from lyra_cli.skills.registry import get_skills_registry
@@ -750,12 +680,11 @@ def _on_tool_start(sid: str, tool_call_id: str, name: str, args: dict):
     session = _sessions.get(sid)
     if session is not None:
         session.setdefault("tool_started_at", {})[tool_call_id] = time.time()
-    payload: dict[str, Any] = {
+    _emit("tool.start", sid, {
         "tool_id": tool_call_id,
         "name": name,
         "context": "",
-    }
-    _emit("tool.start", sid, payload)
+    })
 
 
 def _on_tool_complete(sid: str, tool_call_id: str, name: str, args: dict, result: str):
@@ -816,10 +745,8 @@ def _session_create(rid, params: dict) -> dict:
         "slash_worker": None,
         "tool_progress_mode": "all",
         "tool_started_at": {},
-        "transport": current_transport() or _stdio_transport,
     }
 
-    # Deferred agent build
     def _deferred_build() -> None:
         session = _sessions.get(sid)
         if session is not None:
@@ -905,7 +832,7 @@ def _session_resume(rid, params: dict) -> dict:
 
     try:
         agent = _build_agent(sid, target, session_id=target)
-    except NotImplementedError:
+    except Exception:
         agent = None
 
     _sessions[sid] = {
@@ -921,7 +848,6 @@ def _session_resume(rid, params: dict) -> dict:
         "tool_progress_mode": "all",
         "tool_started_at": {},
         "edit_snapshots": {},
-        "transport": current_transport() or _stdio_transport,
     }
 
     return _ok(
@@ -1105,7 +1031,7 @@ def _session_branch(rid, params: dict) -> dict:
     if agent:
         try:
             new_agent = _build_agent(new_sid, new_key, session_id=new_key)
-        except NotImplementedError:
+        except Exception:
             pass
 
     _sessions[new_sid] = {
@@ -1121,7 +1047,6 @@ def _session_branch(rid, params: dict) -> dict:
         "tool_progress_mode": session.get("tool_progress_mode", "all"),
         "tool_started_at": {},
         "edit_snapshots": {},
-        "transport": current_transport() or _stdio_transport,
     }
 
     return _ok(
@@ -1198,14 +1123,12 @@ def _prompt_submit(rid, params: dict) -> dict:
 
 
 def _run_prompt_submit(rid, sid: str, session: dict, text: str) -> None:
-    """Execute a prompt submission: build message, run agent, emit events."""
     with session["history_lock"]:
         history = list(session.get("history", []))
         history_version = int(session.get("history_version", 0))
 
     agent = session.get("agent")
     if agent is None:
-        # No agent wired yet — echo the prompt and mark completion
         _emit("message.start", sid)
         _emit(
             "message.delta", sid,
@@ -1269,7 +1192,6 @@ def _run_prompt_submit(rid, sid: str, session: dict, text: str) -> None:
 
 @method("prompt.background")
 def _prompt_background(rid, params: dict) -> dict:
-    """Submit a prompt to a background agent."""
     session, err = _sess_nowait(params, rid)
     if err:
         return err
@@ -1391,17 +1313,6 @@ def _config_set(rid, params: dict) -> dict:
 def _setup_status(rid, params: dict) -> dict:
     has_key = bool(os.environ.get("ANTHROPIC_API_KEY"))
     has_model = bool(_resolve_model())
-    # Write debug to crash log so we can inspect after run
-    try:
-        with open(_CRASH_LOG, "a", encoding="utf-8") as f:
-            f.write(f"\n=== setup.status debug · {time.strftime('%Y-%m-%d %H:%M:%S')} ===\n")
-            f.write(f"ANTHROPIC_API_KEY={'set' if has_key else 'MISSING'}\n")
-            f.write(f"ANTHROPIC_MODEL={os.environ.get('ANTHROPIC_MODEL','MISSING')!r}\n")
-            f.write(f"LYRA_MODEL={os.environ.get('LYRA_MODEL','MISSING')!r}\n")
-            f.write(f"_resolve_model()={_resolve_model()!r}\n")
-            f.write(f"provider_configured={has_key or has_model}\n")
-    except Exception:
-        pass
     return _ok(rid, {"provider_configured": has_key or has_model})
 
 
@@ -1445,9 +1356,6 @@ def _command_resolve(rid, params: dict) -> dict:
         "/copy": {"command": "/copy"},
         "/save": {"command": "/save"},
         "/stats": {"command": "/stats"},
-        "/deep-research": {"command": "/deep-research", "lyra_only": True},
-        "/knowledge-graph": {"command": "/knowledge-graph", "lyra_only": True},
-        "/memory": {"command": "/memory", "lyra_only": True},
     }
     if not input_text.startswith("/"):
         return _ok(rid, {"resolved": None, "suggestions": list(commands.keys())})
@@ -1513,9 +1421,6 @@ def _complete_slash(rid, params: dict) -> dict:
         {"name": "copy", "help": "Copy response"},
         {"name": "save", "help": "Save session"},
         {"name": "stats", "help": "Show stats"},
-        {"name": "deep-research", "help": "Start deep research"},
-        {"name": "knowledge-graph", "help": "Query knowledge graph"},
-        {"name": "memory", "help": "Search memory"},
     ]
     if partial:
         matches = [s for s in slashes if s["name"].startswith(partial)]
@@ -1645,464 +1550,7 @@ def _slash_exec(rid, params: dict) -> dict:
         return _err(rid, 5004, str(e))
 
 
-# ═══════════════════════════════════════════════════════════════════
-# LYRA-SPECIFIC RPC METHODS (stubs)
-# ═══════════════════════════════════════════════════════════════════
-
-
-@method("lyra.deep_research_start")
-def _lyra_deep_research_start(rid, params: dict) -> dict:
-    """Start a deep research task.
-
-    TODO: Wire to Lyra's deep research agent once available.
-    """
-    return _ok(rid, {
-        "status": "not_implemented",
-        "message": "Lyra Deep Research is not yet implemented.",
-    })
-
-
-@method("lyra.knowledge_graph_query")
-def _lyra_knowledge_graph_query(rid, params: dict) -> dict:
-    """Query the Lyra knowledge graph.
-
-    TODO: Wire to Lyra's knowledge graph module once available.
-    """
-    return _ok(rid, {
-        "status": "not_implemented",
-        "message": "Lyra Knowledge Graph is not yet implemented.",
-    })
-
-
-@method("lyra.memory_search")
-def _lyra_memory_search(rid, params: dict) -> dict:
-    """Search Lyra's memory store.
-
-    TODO: Wire to Lyra's memory system once available.
-    """
-    return _ok(rid, {
-        "status": "not_implemented",
-        "message": "Lyra Memory Search is not yet implemented.",
-    })
-
-
-@method("lyra.skill_invoke")
-def _lyra_skill_invoke(rid, params: dict) -> dict:
-    """Invoke a Lyra skill by name.
-
-    TODO: Wire to Lyra's skill system once available.
-    """
-    return _ok(rid, {
-        "status": "not_implemented",
-        "message": "Lyra Skill Invocation is not yet implemented.",
-    })
-
-
-@method("lyra.stats")
-def _lyra_stats(rid, params: dict) -> dict:
-    """Return Lyra usage statistics.
-
-    TODO: Wire to Lyra's statistics tracking once available.
-    """
-    return _ok(rid, {
-        "sessions_total": len(_list_sessions(limit=9999)),
-        "active_sessions": len(_sessions),
-        "model": _resolve_model(),
-    })
-
-
-@method("lyra.deep_research_status")
-def _lyra_deep_research_status(rid, params: dict) -> dict:
-    """Check the status of a deep research task.
-
-    TODO: Wire to Lyra's deep research agent once available.
-    """
-    return _ok(rid, {
-        "status": "not_implemented",
-        "message": "Lyra Deep Research status is not yet implemented.",
-    })
-
-
-# ═══════════════════════════════════════════════════════════════════
-# PARALLAX COS SAFETY RPC METHODS
-# ═══════════════════════════════════════════════════════════════════
-
-# Module-level safety gate — one instance shared across all sessions
-_safety_gate = None
-
-
-def _get_safety_gate():
-    """Lazy-init the safety gate on first use."""
-    global _safety_gate
-    if _safety_gate is None:
-        from .safety_gate import SafetyGate
-
-        _safety_gate = SafetyGate()
-    return _safety_gate
-
-
-@method("safety.status")
-def _safety_status(rid, params: dict) -> dict:
-    """Return comprehensive safety system status."""
-    gate = _get_safety_gate()
-    status = gate.status()
-    return _ok(rid, {
-        "governance_tier": status.governance_tier,
-        "trust_score": status.trust_score,
-        "containment_active": status.containment_active,
-        "quarantine_active": status.quarantine_active,
-        "tainted_count": status.tainted_count,
-        "blocked_flows": status.blocked_flows,
-        "escape_signals": status.escape_signals,
-        "self_modify_attempts": status.self_modify_attempts,
-        "violation_count": status.violation_count,
-        "action_count": status.action_count,
-    })
-
-
-@method("safety.review_action")
-def _safety_review_action(rid, params: dict) -> dict:
-    """Review a proposed action through all safety layers.
-
-    Returns the approval decision and which layer decided it.
-    """
-    action_text = params.get("action", "")
-    if not action_text:
-        return _err(rid, 4002, "action text required")
-
-    gate = _get_safety_gate()
-    decision = gate.validate_action(action_text)
-    log_entries = [e for e in gate.review_log if e.get("action", "").startswith(action_text[:50])]
-    last = log_entries[-1] if log_entries else {}
-
-    return _ok(rid, {
-        "decision": decision.value,
-        "layer": last.get("layer", "unknown"),
-        "governance_tier": gate.status().governance_tier,
-        "trust_score": gate.status().trust_score,
-    })
-
-
-@method("safety.containment_status")
-def _safety_containment_status(rid, params: dict) -> dict:
-    """Return detailed containment status."""
-    gate = _get_safety_gate()
-    status = gate.status()
-    return _ok(rid, {
-        "quarantine_active": status.quarantine_active,
-        "escape_signals": status.escape_signals,
-        "self_modify_attempts": status.self_modify_attempts,
-        "integrity_violations": 0,
-    })
-
-
-@method("safety.audit_log")
-def _safety_audit_log(rid, params: dict) -> dict:
-    """Return recent safety review audit log entries."""
-    limit = int(params.get("limit", 20))
-    gate = _get_safety_gate()
-    log = list(gate.review_log)[-limit:]
-    containment_audit = list(gate.containment_audit)[-limit:]
-    return _ok(rid, {
-        "review_log": log,
-        "containment_audit": containment_audit,
-    })
-
-
-# ── Model Cascade Executor singleton ─────────────────────────────────
-_cascade_executor = None
-
-
-def _get_cascade_executor():
-    """Lazy-init the model cascade executor on first use."""
-    global _cascade_executor
-    if _cascade_executor is None:
-        from .cascade_executor import ModelCascadeExecutor
-
-        _cascade_executor = ModelCascadeExecutor()
-    return _cascade_executor
-
-
-@method("routing.status")
-def _routing_status(rid, params: dict) -> dict:
-    """Return current routing strategy and model cascade status."""
-    ex = _get_cascade_executor()
-    return _ok(rid, {
-        "strategy": ex.strategy.value,
-        "model_count": ex.router.model_count,
-        "decision_count": ex.router.decision_count,
-        "turn_count": ex.router.turn_count,
-        "router_snapshot": ex.router.snapshot(),
-    })
-
-
-@method("routing.cost_summary")
-def _routing_cost_summary(rid, params: dict) -> dict:
-    """Return cost summary across all model tiers."""
-    ex = _get_cascade_executor()
-    return _ok(rid, ex.cost_summary())
-
-
-@method("routing.snapshot")
-def _routing_snapshot(rid, params: dict) -> dict:
-    """Return full routing snapshot with costs."""
-    ex = _get_cascade_executor()
-    return _ok(rid, ex.snapshot())
-
-
-@method("routing.set_strategy")
-def _routing_set_strategy(rid, params: dict) -> dict:
-    """Update the routing strategy at runtime."""
-    from lyra_model_router import RoutingStrategy
-
-    strategy_name = params.get("strategy", "cost_optimal")
-    try:
-        new_strategy = RoutingStrategy(strategy_name)
-    except ValueError:
-        return _err(rid, f"Unknown routing strategy: {strategy_name}")
-    ex = _get_cascade_executor()
-    ex.strategy = new_strategy
-    return _ok(rid, {"strategy": new_strategy.value})
-
-
-# ── Unified Memory singleton ────────────────────────────────────────
-_memory_orchestrator = None
-
-
-def _get_memory_orchestrator():
-    """Lazy-init the unified memory orchestrator on first use."""
-    global _memory_orchestrator
-    if _memory_orchestrator is None:
-        from .unified_memory import UnifiedMemoryOrchestrator
-
-        _memory_orchestrator = UnifiedMemoryOrchestrator(
-            db_path=str(_LYRA_HOME / "memory")
-        )
-        _memory_orchestrator.initialize()
-    return _memory_orchestrator
-
-
-@method("memory.stats")
-def _memory_stats(rid, params: dict) -> dict:
-    """Return aggregated memory stats across all tiers."""
-    orch = _get_memory_orchestrator()
-    stats = orch.stats()
-    return _ok(rid, {
-        "working_entries": stats.working_entries,
-        "working_tokens": stats.working_tokens,
-        "episodic_events": stats.episodic_events,
-        "semantic_facts": stats.semantic_facts,
-        "procedural_count": stats.procedural_count,
-        "kg_nodes": stats.kg_nodes,
-        "kg_edges": stats.kg_edges,
-        "token_index_docs": stats.token_index_docs,
-        "total_memories": stats.total_memories,
-        "active_memories": stats.active_memories,
-        "dormant_memories": stats.dormant_memories,
-        "last_consolidation": stats.last_consolidation,
-        "budget_status": stats.budget_status,
-    })
-
-
-@method("memory.query")
-def _memory_query(rid, params: dict) -> dict:
-    """Cross-tier memory query."""
-    query = params.get("query", "")
-    top_k = int(params.get("top_k", 10))
-    tiers = tuple(params.get("tiers", ["working", "episodic", "semantic"]))
-    orch = _get_memory_orchestrator()
-    results = orch.query(query, top_k=top_k, tiers=tiers)
-    return _ok(rid, {
-        "query": query,
-        "results": [
-            {"tier": r.tier, "content": r.content, "score": r.score, "metadata": r.metadata}
-            for r in results
-        ],
-    })
-
-
-@method("memory.consolidate")
-def _memory_consolidate(rid, params: dict) -> dict:
-    """Trigger memory consolidation across tiers."""
-    deep = bool(params.get("deep", False))
-    orch = _get_memory_orchestrator()
-    result = orch.consolidate(deep=deep)
-    return _ok(rid, result)
-
-
-@method("memory.dream_cycle")
-def _memory_dream_cycle(rid, params: dict) -> dict:
-    """Run one dream cycle for offline enrichment."""
-    orch = _get_memory_orchestrator()
-    result = orch.dream_cycle()
-    return _ok(rid, result)
-
-
-@method("memory.snapshot")
-def _memory_snapshot(rid, params: dict) -> dict:
-    """Return full memory system snapshot."""
-    orch = _get_memory_orchestrator()
-    return _ok(rid, orch.snapshot())
-
-
-# ── Agent Fleet singleton ───────────────────────────────────────────
-_agent_fleet = None
-
-
-def _get_agent_fleet():
-    """Lazy-init the unified agent fleet on first use."""
-    global _agent_fleet
-    if _agent_fleet is None:
-        from .agent_fleet import UnifiedAgentFleet
-
-        _agent_fleet = UnifiedAgentFleet()
-        _agent_fleet.initialize()
-    return _agent_fleet
-
-
-@method("fleet.status")
-def _fleet_status(rid, params: dict) -> dict:
-    """Return current fleet operational status."""
-    fleet = _get_agent_fleet()
-    s = fleet.status()
-    return _ok(rid, {
-        "active_agents": s.active_agents,
-        "idle_agents": s.idle_agents,
-        "total_agents": s.total_agents,
-        "pending_tasks": s.pending_tasks,
-        "running_tasks": s.running_tasks,
-        "completed_tasks": s.completed_tasks,
-        "failed_tasks": s.failed_tasks,
-        "squads": s.squads,
-        "throughput": s.throughput,
-        "state": s.state,
-    })
-
-
-@method("fleet.submit_task")
-def _fleet_submit_task(rid, params: dict) -> dict:
-    """Submit a task to the fleet."""
-    fleet = _get_agent_fleet()
-    task_id = fleet.submit_task(
-        description=params.get("description", ""),
-        category=params.get("category", "general"),
-        priority=float(params.get("priority", 1.0)),
-    )
-    return _ok(rid, {"task_id": task_id})
-
-
-@method("fleet.fan_out")
-def _fleet_fan_out(rid, params: dict) -> dict:
-    """Fan-out multiple tasks to the fleet."""
-    fleet = _get_agent_fleet()
-    tasks = params.get("tasks", [])
-    ids = fleet.fan_out(tasks)
-    return _ok(rid, {"task_ids": ids})
-
-
-@method("fleet.squads")
-def _fleet_squads(rid, params: dict) -> dict:
-    """List active squads."""
-    fleet = _get_agent_fleet()
-    squads = fleet.list_squads()
-    return _ok(rid, {
-        "squads": [{"id": s.id, "name": s.name, "leader": s.leader, "members": s.members} for s in squads]
-    })
-
-
-@method("fleet.create_squad")
-def _fleet_create_squad(rid, params: dict) -> dict:
-    """Create a new agent squad."""
-    fleet = _get_agent_fleet()
-    squad = fleet.create_squad(
-        name=params.get("name", "default"),
-        roles=params.get("roles", None),
-    )
-    return _ok(rid, {"id": squad.id, "name": squad.name, "leader": squad.leader, "members": squad.members})
-
-
-@method("fleet.agents")
-def _fleet_agents(rid, params: dict) -> dict:
-    """List all registered agents."""
-    fleet = _get_agent_fleet()
-    return _ok(rid, {"agents": fleet.list_agents()})
-
-
-@method("fleet.snapshot")
-def _fleet_snapshot(rid, params: dict) -> dict:
-    """Return full fleet snapshot."""
-    fleet = _get_agent_fleet()
-    return _ok(rid, fleet.snapshot())
-
-
-# ── Self-Evolution singleton ────────────────────────────────────────
-_evolution_engine = None
-
-
-def _get_evolution_engine():
-    """Lazy-init the self-evolution engine on first use."""
-    global _evolution_engine
-    if _evolution_engine is None:
-        from .self_evolution import SelfEvolutionEngine
-
-        _evolution_engine = SelfEvolutionEngine()
-        _evolution_engine.initialize()
-    return _evolution_engine
-
-
-@method("evolution.status")
-def _evolution_status(rid, params: dict) -> dict:
-    """Return self-evolution engine status."""
-    eng = _get_evolution_engine()
-    return _ok(rid, eng.status())
-
-
-@method("evolution.snapshot")
-def _evolution_snapshot(rid, params: dict) -> dict:
-    """Return full evolution engine snapshot."""
-    eng = _get_evolution_engine()
-    return _ok(rid, eng.snapshot())
-
-
-@method("evolution.set_goal")
-def _evolution_set_goal(rid, params: dict) -> dict:
-    """Register a new evolution goal."""
-    eng = _get_evolution_engine()
-    goal = eng.set_goal(
-        description=params.get("description", ""),
-        target_metric=params.get("target_metric", "fitness"),
-        target_value=float(params.get("target_value", 1.0)),
-    )
-    return _ok(rid, {"id": goal.id, "description": goal.description, "status": goal.status})
-
-
-@method("evolution.run_cycle")
-def _evolution_run_cycle(rid, params: dict) -> dict:
-    """Execute one evolution cycle."""
-    eng = _get_evolution_engine()
-    cycle = eng.run_cycle(
-        goal_id=params.get("goal_id"),
-        dry_run=bool(params.get("dry_run", False)),
-    )
-    return _ok(rid, {
-        "id": cycle.id,
-        "mutations_applied": cycle.mutations_applied,
-        "improvement": cycle.improvement,
-        "council_decision": cycle.council_decision,
-        "duration_ms": cycle.duration_ms,
-    })
-
-
-@method("evolution.adjust_trust")
-def _evolution_adjust_trust(rid, params: dict) -> dict:
-    """Adjust trust score by delta."""
-    eng = _get_evolution_engine()
-    delta = float(params.get("delta", 0.0))
-    new_trust = eng.adjust_trust(delta)
-    return _ok(rid, {"trust_score": round(new_trust, 4), "level": eng.meta_state.level})
-
-
-# ── Utility ─────────────────────────────────────────────────────────
+# ── Utility stubs ───────────────────────────────────────────────────
 
 
 @method("insights.get")
@@ -2142,13 +1590,11 @@ def _subagent_interrupt(rid, params: dict) -> dict:
 
 @method("shell.exec")
 def _shell_exec(rid, params: dict) -> dict:
-    """Execute a shell command (stub)."""
     return _ok(rid, {"output": "", "exit_code": 0})
 
 
 @method("cli.exec")
 def _cli_exec(rid, params: dict) -> dict:
-    """Execute a CLI command (stub)."""
     return _ok(rid, {"output": "", "status": "not_implemented"})
 
 

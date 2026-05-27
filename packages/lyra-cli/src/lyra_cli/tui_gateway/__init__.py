@@ -1,6 +1,5 @@
-"""Lyra TUI Gateway — JSON-RPC bridge between Ink TUI and the Lyra agent system.
+"""Lyra TUI Gateway — JSON-RPC bridge between the Ink TUI frontend and the Lyra agent backend.
 
-This package provides the Python-side gateway that communicates with the
-React + Ink TUI frontend via JSON-RPC over stdin/stdout.  Adapted from
-Hermes Agent's tui_gateway module.
+Communicates with the React + Ink TUI via JSON-RPC over stdin/stdout.
+Adapted from Hermes Agent's tui_gateway module.
 """
