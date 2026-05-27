@@ -72,164 +72,201 @@ Unlike thin API wrappers, Lyra ships with a **kernel-enforced TDD gate**, **Phoe
 ### System Topology
 
 ```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#7c3aed', 'primaryTextColor': '#e2e8f0', 'lineColor': '#6366f1', 'fontSize': '14px'}, 'flowchart': {'nodeSpacing': 30, 'rankSpacing': 50}}}%%
 graph TB
-    subgraph Interface["Interface Layer"]
-        CLI["lyra CLI<br/>(Typer + prompt_toolkit)"]
-        TUI["Terminal UI<br/>(Ink/React 19)"]
-        ACP["ACP Server<br/>(Agent Client Protocol)"]
-        Voice["Voice System<br/>(CESP v1.0 · 6-layer packs)"]
+    subgraph Interface["<b style='color:#c084fc;'>🎯 INTERFACE LAYER</b>"]
+        CLI["<b>lyra CLI</b><br/>Typer · prompt_toolkit"]
+        TUI["<b>Terminal UI</b><br/>Ink/React 19"]
+        ACP["<b>ACP Server</b><br/>Agent Client Protocol"]
+        Voice["<b>Voice System</b><br/>CESP v1.0 · 6-layer packs"]
     end
 
-    subgraph Kernel["Kernel (lyra-core)"]
-        Loop["AgentLoop<br/>plan → execute → verify"]
-        TDD["TDD Gate<br/>RED → GREEN → REFACTOR"]
-        Perms["PermissionBridge<br/>plan | auto-edit | bypass"]
-        HIR["HIR Emitter<br/>(JSONL event stream)"]
-        Pivot["Pivot/Refine Loop<br/>(failure recovery)"]
+    subgraph Kernel["<b style='color:#fbbf24;'>⚙️ KERNEL (lyra-core)</b>"]
+        Loop["<b>AgentLoop</b><br/>plan → execute → verify"]
+        TDD["<b>TDD Gate</b><br/>RED → GREEN → REFACTOR"]
+        Perms["<b>PermissionBridge</b><br/>plan | auto-edit | bypass"]
+        HIR["<b>HIR Emitter</b><br/>JSONL event stream"]
+        Pivot["<b>Pivot/Refine</b><br/>failure recovery"]
     end
 
-    subgraph Intelligence["Intelligence Layer"]
-        Reasoning["Deep Reasoning<br/>(CoT · Tree Search · Debate · SR2AM)"]
-        Research["Research Pipeline<br/>(10-step · 7+ sources · DCI zero-index)"]
-        Evolution["Self-Evolution<br/>(GEPA v2 · AEvo · Meta-Harness)"]
-        Memory["6-Layer NeuroMemory<br/>(A-MAC · CoMem async · free-energy consolidation)"]
-        RecursiveLink["RecursiveLink<br/>(latent-space agent comms · 75.6% token reduction)"]
+    subgraph Intelligence["<b style='color:#60a5fa;'>🧠 INTELLIGENCE LAYER</b>"]
+        Reasoning["<b>Deep Reasoning</b><br/>CoT · Tree Search · SR2AM"]
+        Research["<b>Research Pipeline</b><br/>10-step · 7+ sources"]
+        Evolution["<b>Self-Evolution</b><br/>GEPA v2 · AEvo · Meta-Harness"]
+        Memory["<b>6-Layer NeuroMemory</b><br/>A-MAC · CoMem · Dream"]
+        RecursiveLink["<b>RecursiveLink</b><br/>Latent-space · 75.6% reduction"]
     end
 
-    subgraph Coordination["Coordination Layer"]
-        Orchestrator["Agent Orchestrator<br/>(DAG-based teams · fleet)"]
-        Subagents["Subagent Runner<br/>(worktree isolation)"]
-        Skills["Skill Registry<br/>(150+ triggers · auto-compaction)"]
-        Rules["Rule Engine<br/>(coding · security · testing)"]
+    subgraph Coordination["<b style='color:#34d399;'>🔗 COORDINATION LAYER</b>"]
+        Orchestrator["<b>Agent Orchestrator</b><br/>DAG-based teams · fleet"]
+        Subagents["<b>Subagent Runner</b><br/>worktree isolation"]
+        Skills["<b>Skill Registry</b><br/>150+ triggers"]
+        Rules["<b>Rule Engine</b><br/>coding · security · testing"]
     end
 
-    subgraph Safety["Safety Layer (6-Layer)"]
-        CogExec["Cognitive-Executive Split<br/>(Parallax · 98.9% block rate)"]
-        Shield["AgentShield<br/>(5 scanners · 102 rules)"]
-        Observatory["TokenObservatory<br/>(13 categories · 7 wastes)"]
-        Verifier["Multi-Agent Verifier<br/>(executor→validator→critic)"]
-        IntentMon["Intent Monitor<br/>(behavioral anomaly detection)"]
-        DriftDetect["PRISM Drift Detector<br/>(prompt reliability · auto-repair)"]
+    subgraph Safety["<b style='color:#f87171;'>🛡️ SAFETY LAYER (6-Layer)</b>"]
+        CogExec["<b>Cognitive-Executive Split</b><br/>Parallax · 98.9% block"]
+        Shield["<b>AgentShield</b><br/>5 scanners · 102 rules"]
+        Observatory["<b>TokenObservatory</b><br/>13 categories · 7 wastes"]
+        Verifier["<b>Multi-Agent Verifier</b><br/>executor→validator→critic"]
+        IntentMon["<b>Intent Monitor</b><br/>behavioral anomaly detection"]
+        DriftDetect["<b>PRISM Drift</b><br/>prompt reliability · auto-repair"]
     end
 
-    subgraph Providers["16+ LLM Providers"]
-        Anthro["Anthropic<br/>Opus · Sonnet · Haiku"]
-        DS["DeepSeek<br/>V4 Pro · Flash"]
-        OAI["OpenAI<br/>GPT-4o · O3"]
-        Gemini["Google<br/>Gemini 2.5/3.1"]
-        Others["xAI · Mistral · Qwen<br/>Kimi · Bedrock · Ollama"]
+    subgraph Providers["<b style='color:#f472b6;'>☁️ 16+ LLM PROVIDERS</b>"]
+        Anthro["<b>Anthropic</b><br/>Opus · Sonnet · Haiku"]
+        DS["<b>DeepSeek</b><br/>V4 Pro · Flash"]
+        OAI["<b>OpenAI</b><br/>GPT-4o · O3"]
+        Gemini["<b>Google</b><br/>Gemini 2.5/3.1"]
+        Others["<b>xAI · Mistral · Qwen</b><br/>Kimi · Bedrock · Ollama"]
     end
 
-    CLI --> Loop
-    TUI --> Loop
-    ACP --> Loop
-    Voice --> Loop
+    CLI & TUI & ACP & Voice --> Loop
     Loop --> TDD & Perms & HIR & Pivot
     Loop --> Reasoning & Research & Memory & RecursiveLink
     Loop --> Evolution
     Loop --> Orchestrator & Subagents & Skills & Rules
     Loop --> CogExec & Shield & Observatory & Verifier & IntentMon & DriftDetect
     Orchestrator & Reasoning & Research --> Anthro & DS & OAI & Gemini & Others
+
+    classDef interface fill:#7c3aed20,stroke:#c084fc,stroke-width:2px,color:#e2e8f0
+    classDef kernel fill:#f59e0b15,stroke:#fbbf24,stroke-width:2px,color:#e2e8f0
+    classDef intelligence fill:#3b82f615,stroke:#60a5fa,stroke-width:2px,color:#e2e8f0
+    classDef coordination fill:#10b98115,stroke:#34d399,stroke-width:2px,color:#e2e8f0
+    classDef safety fill:#ef444415,stroke:#f87171,stroke-width:2px,color:#e2e8f0
+    classDef providers fill:#ec489915,stroke:#f472b6,stroke-width:2px,color:#e2e8f0
+
+    class CLI,TUI,ACP,Voice interface
+    class Loop,TDD,Perms,HIR,Pivot kernel
+    class Reasoning,Research,Evolution,Memory,RecursiveLink intelligence
+    class Orchestrator,Subagents,Skills,Rules coordination
+    class CogExec,Shield,Observatory,Verifier,IntentMon,DriftDetect safety
+    class Anthro,DS,OAI,Gemini,Others providers
+
+    style Interface fill:#7c3aed10,stroke:#c084fc,stroke-width:2px
+    style Kernel fill:#f59e0b10,stroke:#fbbf24,stroke-width:2px
+    style Intelligence fill:#3b82f610,stroke:#60a5fa,stroke-width:2px
+    style Coordination fill:#10b98110,stroke:#34d399,stroke-width:2px
+    style Safety fill:#ef444410,stroke:#f87171,stroke-width:2px
+    style Providers fill:#ec489910,stroke:#f472b6,stroke-width:2px
 ```
 
 ### Agent Execution Flow (with Safety Separation)
 
 ```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': {'actorBkg': '#1e293b', 'actorBorder': '#6366f1', 'actorTextColor': '#e2e8f0', 'signalColor': '#94a3b8', 'signalTextColor': '#e2e8f0', 'labelBoxBkgColor': '#1e293b', 'labelBoxBorderColor': '#6366f1', 'noteBkgColor': '#1e293b', 'noteBorderColor': '#fbbf24', 'activationBkgColor': '#7c3aed30', 'activationBorderColor': '#8b5cf6'}, 'sequence': {'mirrorActors': false, 'boxMargin': 10}}}%%
 sequenceDiagram
-    participant User
-    participant CLI as Lyra CLI
-    participant Voice as Voice System
-    participant Engine as AgentLoop
-    participant CogExec as Cognitive-Executive Split
-    participant Router as Intelligent Router
-    participant Perms as PermissionBridge
-    participant HIR as HIR Emitter
-    participant Agent as Specialist Agent
-    participant RecLink as RecursiveLink
-    participant LLM as LLM Provider
-    participant Tools as ToolKernel
-    participant Mem as Memory System
-    participant Verifier as Multi-Agent Verifier
-    participant Drift as PRISM Drift Detector
+    actor User
+    participant CLI as <b>🖥 Lyra CLI</b>
+    participant Voice as <b>🔊 Voice</b>
+    participant Engine as <b>⚙️ AgentLoop</b>
+    participant CogExec as <b>🛡️ COS Split</b>
+    participant Router as <b>🔀 Router</b>
+    participant Perms as <b>🔐 Permissions</b>
+    participant HIR as <b>📊 HIR</b>
+    participant Agent as <b>🤖 Specialist</b>
+    participant RecLink as <b>🔗 RecursiveLink</b>
+    participant LLM as <b>🧠 LLM</b>
+    participant Tools as <b>🔧 ToolKernel</b>
+    participant Mem as <b>💾 Memory</b>
+    participant Verifier as <b>✅ Verifier</b>
+    participant Drift as <b>📈 PRISM</b>
 
-    User->>CLI: "Add Redis caching to user service"
-    CLI->>Voice: play(session.start, "Ready to work!")
-    CLI->>Engine: run(task_description)
+    rect rgb(124, 58, 237, 0.15)
+        Note over User,CLI: 🎯 TASK SUBMISSION
+        User->>CLI: "Add Redis caching to user service"
+        CLI->>Voice: play(session.start)
+        CLI->>Engine: run(task_description)
+    end
 
-    Engine->>Mem: recall(context)
-    Mem-->>Engine: relevant history + skills + rules
+    rect rgb(59, 130, 246, 0.15)
+        Note over Engine,Mem: 🧠 CONTEXT + ROUTING
+        Engine->>Mem: recall(context)
+        Mem-->>Engine: history + skills + rules
+        Engine->>Router: route(task)
+        Router->>Router: classify → estimate → match
+        Router-->>Engine: ModelSelection(coding, sonnet)
+    end
 
-    Engine->>Router: route(task)
-    Router->>Router: classify → estimate → match → optimize
-    Router-->>Engine: ModelSelection(slot=coding, model=sonnet)
-
-    Engine->>CogExec: separate(reasoning, execution)
-    CogExec-->>Engine: reasoning_context, execution_context
+    rect rgb(239, 68, 68, 0.15)
+        Note over Engine,CogExec: 🛡️ SAFETY SPLIT
+        Engine->>CogExec: separate(reasoning, execution)
+        CogExec-->>Engine: reasoning_ctx, execution_ctx
+    end
 
     Engine->>Engine: plan(steps)
     Engine->>HIR: emit(plan.created)
 
-    loop For each step
-        Engine->>Perms: check(step.action)
-        Perms-->>Engine: plan-gated
+    rect rgb(245, 158, 11, 0.15)
+        Note over Engine,RecLink: ⚡ EXECUTION LOOP
+        loop For each step
+            Engine->>Perms: check(step.action)
+            Perms-->>Engine: plan-gated
 
-        par Parallel agents
-            Engine->>Agent: dispatch(step_a)
-            Engine->>Agent: dispatch(step_b)
-            Agent->>LLM: prompt + tools
-            LLM-->>Agent: response
-            Agent->>Tools: execute
-            Tools-->>Agent: result
-            Agent-->>Engine: step_complete
+            par Parallel agents
+                Engine->>Agent: dispatch(step_a)
+                Engine->>Agent: dispatch(step_b)
+                Agent->>LLM: prompt + tools
+                LLM-->>Agent: response
+                Agent->>Tools: execute
+                Tools-->>Agent: result
+                Agent-->>Engine: step_complete
+            end
+
+            Agent->>RecLink: share_latent_state
+            RecLink-->>Agent: compressed_context
         end
-
-        Agent->>RecLink: share_latent_state(peer_agents)
-        RecLink-->>Agent: compressed_context
     end
 
-    Engine->>Verifier: verify(output, trace)
-    Verifier->>Verifier: executor_validator_critic pipeline
-    Verifier-->>Engine: pass (step-level ✓, trace-level ✓, adversarial ✓)
+    rect rgb(16, 185, 129, 0.15)
+        Note over Engine,Verifier: ✅ VERIFICATION
+        Engine->>Verifier: verify(output, trace)
+        Verifier->>Verifier: executor→validator→critic
+        Verifier-->>Engine: pass ✓ (step, trace, adversarial)
+    end
 
-    Engine->>Mem: dream_consolidate(learnings)
-    Engine->>Drift: check(prompts)
-    Drift-->>Engine: reliability: 99.3%
+    rect rgb(139, 92, 246, 0.15)
+        Note over Engine,Drift: 🌙 CONSOLIDATION
+        Engine->>Mem: dream_consolidate
+        Engine->>Drift: check(prompts)
+        Drift-->>Engine: reliability: 99.3%
+    end
 
     Engine->>HIR: emit(session.complete)
     Engine->>Voice: play(task.complete)
-
     Engine-->>CLI: final response
-    CLI-->>User: "Done. 3 files changed. Tests passing ✓"
+    CLI-->>User: "Done. 3 files changed ✓"
 ```
 
 ### Memory Hierarchy (6-Layer NeuroMemory with Dream Consolidation)
 
 ```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#7c3aed', 'lineColor': '#6366f1', 'fontSize': '13px'}, 'flowchart': {'nodeSpacing': 20, 'rankSpacing': 40}}}%%
 graph LR
-    subgraph "L0: Sensory Buffer"
-        STM["Sensory Buffer<br/>~500 tokens · ephemeral"]
+    subgraph L0["<b style='color:#fbbf24;'>🔵 L0: Sensory Buffer</b>"]
+        STM["<b>Sensory Buffer</b><br/>~500 tokens · ephemeral"]
     end
 
-    subgraph "L1-L2: Associative Memory"
-        WM["L1: Episodic<br/>Session traces · temporal"]
-        SM["L2: Semantic<br/>Facts · JSON indexed"]
+    subgraph L12["<b style='color:#60a5fa;'>💠 L1-L2: Associative</b>"]
+        WM["<b>L1: Episodic</b><br/>Session traces · temporal"]
+        SM["<b>L2: Semantic</b><br/>Facts · JSON indexed"]
     end
 
-    subgraph "L3-L4: Meta-Cognitive"
-        PM["L3: Procedural<br/>Skills library · action patterns"]
-        MM["L4: Meta-Memory<br/>Learning traces · strategy"]
+    subgraph L34["<b style='color:#a78bfa;'>🧠 L3-L4: Meta-Cognitive</b>"]
+        PM["<b>L3: Procedural</b><br/>Skills · action patterns"]
+        MM["<b>L4: Meta-Memory</b><br/>Learning traces · strategy"]
     end
 
-    subgraph "L5: Collective"
-        CM["L5: Collective<br/>Fleet knowledge · cross-session"]
+    subgraph L5["<b style='color:#f472b6;'>🌐 L5: Collective</b>"]
+        CM["<b>L5: Collective</b><br/>Fleet knowledge · cross-session"]
     end
 
-    subgraph "Admission & Consolidation"
-        AMAC["A-MAC 5-Factor Gate<br/>utility · confidence · novelty · recency · type"]
-        DC1["CoMem Async Pipeline<br/>n-step-off decoupled"]
-        DC2["Free-Energy Consolidation<br/>utility + entropy dual objective"]
-        DC3["Auto-Dreamer GRPO<br/>offline consolidation"]
-        DC4["Dual-Process Retrieval<br/>System 1 (fast) + System 2 (deliberate)"]
+    subgraph Consolidation["<b style='color:#34d399;'>🔄 ADMISSION & CONSOLIDATION</b>"]
+        AMAC["<b>A-MAC 5-Factor Gate</b><br/>utility · confidence · novelty"]
+        DC1["<b>CoMem Async Pipeline</b><br/>n-step-off decoupled"]
+        DC2["<b>Free-Energy Consolidation</b><br/>utility + entropy dual objective"]
+        DC3["<b>Auto-Dreamer GRPO</b><br/>offline consolidation"]
+        DC4["<b>Dual-Process Retrieval</b><br/>System 1 fast · System 2 deliberate"]
     end
 
     STM -->|"A-MAC gate"| WM
@@ -242,133 +279,198 @@ graph LR
     AMAC --> DC1 --> DC2 --> DC3
     DC3 -->|"enriched memories"| SM & PM
 
-    MR["MemoryRetriever<br/>(hybrid BM25 + vector · RRF fusion · MRAgent reconstruction)"]
+    MR["<b>🔍 MemoryRetriever</b><br/>BM25 + Vector · RRF · MRAgent"]
     SM -.-> MR
     PM -.-> MR
     CM -.-> MR
+
+    classDef sensory fill:#f59e0b20,stroke:#fbbf24,stroke-width:2px,color:#e2e8f0
+    classDef associative fill:#3b82f620,stroke:#60a5fa,stroke-width:2px,color:#e2e8f0
+    classDef meta fill:#7c3aed20,stroke:#a78bfa,stroke-width:2px,color:#e2e8f0
+    classDef collective fill:#ec489920,stroke:#f472b6,stroke-width:2px,color:#e2e8f0
+    classDef cons fill:#10b98120,stroke:#34d399,stroke-width:2px,color:#e2e8f0
+    classDef retriever fill:#06b6d420,stroke:#22d3ee,stroke-width:2px,color:#e2e8f0
+
+    class STM sensory
+    class WM,SM associative
+    class PM,MM meta
+    class CM collective
+    class AMAC,DC1,DC2,DC3,DC4 cons
+    class MR retriever
+
+    style L0 fill:#f59e0b08,stroke:#fbbf24,stroke-width:2px
+    style L12 fill:#3b82f608,stroke:#60a5fa,stroke-width:2px
+    style L34 fill:#7c3aed08,stroke:#a78bfa,stroke-width:2px
+    style L5 fill:#ec489908,stroke:#f472b6,stroke-width:2px
+    style Consolidation fill:#10b98108,stroke:#34d399,stroke-width:2px
 ```
 
 ### Safety Architecture (Parallax-Style Cognitive-Executive Separation)
 
 ```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#ef4444', 'lineColor': '#f87171', 'fontSize': '13px'}, 'flowchart': {'nodeSpacing': 25, 'rankSpacing': 40}}}%%
 graph TB
-    subgraph Input["User Input"]
-        CMD["Task / Command"]
+    subgraph Input["<b style='color:#e2e8f0;'>📥 User Input</b>"]
+        CMD["<b>Task / Command</b>"]
     end
 
-    subgraph Reasoning["Reasoning Context (Read-Only)"]
-        Plan["Planning Engine<br/>(CoT · Tree Search · SR2AM)"]
-        Analysis["Analysis Engine<br/>(code understanding · research)"]
-        Memory2["Memory Access<br/>(read-only retrieval)"]
+    subgraph Reasoning["<b style='color:#60a5fa;'>🧠 REASONING CONTEXT<br/>(Read-Only)</b>"]
+        Plan["<b>Planning Engine</b><br/>CoT · Tree Search · SR2AM"]
+        Analysis["<b>Analysis Engine</b><br/>code · research · strategy"]
+        Memory2["<b>Memory Access</b><br/>read-only retrieval"]
     end
 
-    subgraph Barrier["=== STRUCTURAL SEPARATION BARRIER ==="]
-        Gate["Execution Gate<br/>(validator approval required)"]
+    subgraph Barrier["<b style='color:#fbbf24;'>⚠️ STRUCTURAL SEPARATION BARRIER</b>"]
+        Gate["<b>⚡ Execution Gate</b><br/>multi-agent approval required"]
     end
 
-    subgraph Execution["Execution Context (Action-Capable)"]
-        ToolExec["Tool Execution<br/>(filesystem · network · shell)"]
-        CodeGen["Code Generation<br/>(write · edit · refactor)"]
-        Deploy["Deployment Actions<br/>(git · CI · infrastructure)"]
+    subgraph Execution["<b style='color:#f87171;'>⚡ EXECUTION CONTEXT<br/>(Action-Capable)</b>"]
+        ToolExec["<b>Tool Execution</b><br/>filesystem · network · shell"]
+        CodeGen["<b>Code Generation</b><br/>write · edit · refactor"]
+        Deploy["<b>Deployment</b><br/>git · CI · infrastructure"]
     end
 
-    subgraph Validation["Multi-Agent Validation"]
-        V1["Validator Agent<br/>(different model family)"]
-        V2["Critic Agent<br/>(reviews validator reasoning)"]
-        V3["Intent Monitor<br/>(behavioral anomaly detection)"]
+    subgraph Validation["<b style='color:#34d399;'>✅ MULTI-AGENT VALIDATION</b>"]
+        V1["<b>🔍 Validator Agent</b><br/>different model family"]
+        V2["<b>🎯 Critic Agent</b><br/>reviews validator reasoning"]
+        V3["<b>📊 Intent Monitor</b><br/>behavioral anomaly detection"]
     end
 
     CMD --> Reasoning
     Reasoning --> Gate
-    Gate -->|"approved (98.9%+ safe)"| Execution
-    Gate -->|"blocked"| Reject["Action Blocked + Audit Log"]
+    Gate -->|<b>approved</b> (98.9%+ safe)| Execution
+    Gate -->|<b>blocked</b>| Reject["<b>🚫 BLOCKED</b><br/>Action + Audit Log"]
     Execution --> V1
     V1 --> V2
     V2 --> V3
-    V3 -->|"anomaly detected"| Reject
-    V3 -->|"clean"| Output["Safe Output"]
+    V3 -->|anomaly| Reject
+    V3 -->|<b>clean</b>| Output["<b>✅ Safe Output</b>"]
+
+    classDef input fill:#64748b20,stroke:#94a3b8,stroke-width:2px,color:#e2e8f0
+    classDef reasoning fill:#3b82f620,stroke:#60a5fa,stroke-width:2px,color:#e2e8f0
+    classDef barrier fill:#f59e0b20,stroke:#fbbf24,stroke-width:3px,color:#e2e8f0
+    classDef execution fill:#ef444420,stroke:#f87171,stroke-width:2px,color:#e2e8f0
+    classDef validation fill:#10b98120,stroke:#34d399,stroke-width:2px,color:#e2e8f0
+    classDef reject fill:#dc262620,stroke:#ef4444,stroke-width:2px,color:#fca5a5
+    classDef success fill:#16a34a20,stroke:#22c55e,stroke-width:2px,color:#86efac
+
+    class CMD input
+    class Plan,Analysis,Memory2 reasoning
+    class Gate barrier
+    class ToolExec,CodeGen,Deploy execution
+    class V1,V2,V3 validation
+    class Reject reject
+    class Output success
+
+    style Input fill:#64748b08,stroke:#94a3b8,stroke-width:2px
+    style Reasoning fill:#3b82f608,stroke:#60a5fa,stroke-width:2px
+    style Barrier fill:#f59e0b08,stroke:#fbbf24,stroke-width:3px,stroke-dasharray:5
+    style Execution fill:#ef444408,stroke:#f87171,stroke-width:2px
+    style Validation fill:#10b98108,stroke:#34d399,stroke-width:2px
 ```
 
 ### Self-Evolving Harness Pipeline
 
 ```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#8b5cf6', 'lineColor': '#a78bfa', 'fontSize': '13px'}, 'flowchart': {'nodeSpacing': 25, 'rankSpacing': 40}}}%%
 flowchart TB
-    subgraph Observe["1. Observe"]
-        Traces["Execution Traces<br/>(HIR events · tool calls · outcomes)"]
-        Metrics["Performance Metrics<br/>(success rate · latency · token usage)"]
-        Drift["Drift Signals<br/>(prompt degradation · pattern shifts)"]
+    subgraph Observe["<b style='color:#60a5fa;'>👁️ 1. OBSERVE</b>"]
+        Traces["<b>Execution Traces</b><br/>HIR events · tool calls · outcomes"]
+        Metrics["<b>Performance Metrics</b><br/>success rate · latency · tokens"]
+        Drift["<b>Drift Signals</b><br/>prompt degradation · pattern shifts"]
     end
 
-    subgraph Analyze["2. Analyze"]
-        Bottleneck["Bottleneck Detection<br/>(identify harness inefficiencies)"]
-        Pattern["Pattern Mining<br/>(successful vs failed strategies)"]
-        Gap["Gap Analysis<br/>(benchmark vs actual performance)"]
+    subgraph Analyze["<b style='color:#fbbf24;'>🔍 2. ANALYZE</b>"]
+        Bottleneck["<b>Bottleneck Detection</b><br/>identify harness inefficiencies"]
+        Pattern["<b>Pattern Mining</b><br/>successful vs failed strategies"]
+        Gap["<b>Gap Analysis</b><br/>benchmark vs actual performance"]
     end
 
-    subgraph Propose["3. Propose (Meta-Agent)"]
-        GEPA["GEPA v2 Optimizer<br/>(prompt evolution · Pareto frontier)"]
-        AEvo["AEvo Meta-Editor<br/>(procedure code edits)"]
-        Harness["Meta-Harness Loop<br/>(harness code search + optimization)"]
+    subgraph Propose["<b style='color:#a78bfa;'>🚀 3. PROPOSE (Meta-Agent)</b>"]
+        GEPA["<b>GEPA v2 Optimizer</b><br/>prompt evolution · Pareto frontier"]
+        AEvo["<b>AEvo Meta-Editor</b><br/>procedure code edits"]
+        Harness["<b>Meta-Harness Loop</b><br/>harness code search + optimize"]
     end
 
-    subgraph Verify["4. Verify (Adversarial)"]
-        ARIS["ARIS 3-Stage Review<br/>(integrity → claim → audit)"]
-        CrossModel["Cross-Model Testing<br/>(different provider families)"]
-        Rollback["Rollback Check<br/>(performance regression test)"]
+    subgraph Verify["<b style='color:#f87171;'>⚔️ 4. VERIFY (Adversarial)</b>"]
+        ARIS["<b>ARIS 3-Stage Review</b><br/>integrity → claim → audit"]
+        CrossModel["<b>Cross-Model Testing</b><br/>different provider families"]
+        Rollback["<b>Rollback Check</b><br/>performance regression test"]
     end
 
-    subgraph Deploy2["5. Deploy"]
-        Canary["Canary Release<br/>(10% traffic)"]
-        Monitor["Continuous Monitoring<br/>(PRISM drift detection)"]
-        FullDeploy["Full Rollout<br/>(on sustained improvement)"]
+    subgraph Deploy2["<b style='color:#34d399;'>📦 5. DEPLOY</b>"]
+        Canary["<b>Canary Release</b><br/>10% traffic"]
+        Monitor["<b>Continuous Monitoring</b><br/>PRISM drift detection"]
+        FullDeploy["<b>Full Rollout</b><br/>on sustained improvement"]
     end
 
     Observe --> Analyze --> Propose --> Verify
-    Verify -->|"pass"| Deploy2
-    Verify -->|"fail"| Refine["Refine & Retry"]
+    Verify -->|<b>pass ✓</b>| Deploy2
+    Verify -->|<b>fail ✗</b>| Refine["<b>🔄 Refine & Retry</b>"]
     Refine --> Propose
-    Monitor -->|"regression"| Rollback2["Auto-Rollback"]
-    Monitor -->|"drift detected"| Refine
+    Monitor -->|regression| Rollback2["<b>⏪ Auto-Rollback</b>"]
+    Monitor -->|drift detected| Refine
+
+    classDef observe fill:#3b82f620,stroke:#60a5fa,stroke-width:2px,color:#e2e8f0
+    classDef analyze fill:#f59e0b20,stroke:#fbbf24,stroke-width:2px,color:#e2e8f0
+    classDef propose fill:#7c3aed20,stroke:#a78bfa,stroke-width:2px,color:#e2e8f0
+    classDef verify fill:#ef444420,stroke:#f87171,stroke-width:2px,color:#e2e8f0
+    classDef deploy fill:#10b98120,stroke:#34d399,stroke-width:2px,color:#e2e8f0
+    classDef retry fill:#f9731620,stroke:#fb923c,stroke-width:2px,color:#e2e8f0
+
+    class Traces,Metrics,Drift observe
+    class Bottleneck,Pattern,Gap analyze
+    class GEPA,AEvo,Harness propose
+    class ARIS,CrossModel,Rollback verify
+    class Canary,Monitor,FullDeploy deploy
+    class Refine,Rollback2 retry
+
+    style Observe fill:#3b82f608,stroke:#60a5fa,stroke-width:2px
+    style Analyze fill:#f59e0b08,stroke:#fbbf24,stroke-width:2px
+    style Propose fill:#7c3aed08,stroke:#a78bfa,stroke-width:2px
+    style Verify fill:#ef444408,stroke:#f87171,stroke-width:2px
+    style Deploy2 fill:#10b98108,stroke:#34d399,stroke-width:2px
 ```
 
 ### Package Dependency Graph
 
 ```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#3b82f6', 'lineColor': '#6366f1', 'fontSize': '12px'}, 'flowchart': {'nodeSpacing': 20, 'rankSpacing': 45}}}%%
 graph TB
-    subgraph Foundation["Foundation (8 packages)"]
-        core["lyra-core<br/>Kernel · TDD · Permissions · Pivot/Refine"]
-        agents["lyra-agents<br/>Specialist agents"]
-        orchestration["lyra-orchestration<br/>DAG teams"]
-        memory["lyra-memory<br/>6-layer NeuroMemory · A-MAC · CoMem"]
-        skills["lyra-skills<br/>150+ triggers · auto-compaction"]
-        evals["lyra-evals<br/>pass@k framework"]
-        mcp["lyra-mcp<br/>MCP server · enterprise gateway"]
-        cli["lyra-cli<br/>25+ commands"]
+    subgraph Foundation["<b style='color:#3b82f6;'>🏗️ FOUNDATION (8 packages)</b>"]
+        core["<b>lyra-core</b><br/>Kernel · TDD · Permissions"]
+        agents["<b>lyra-agents</b><br/>Specialist agents"]
+        orchestration["<b>lyra-orchestration</b><br/>DAG teams"]
+        memory["<b>lyra-memory</b><br/>6-layer NeuroMemory"]
+        skills["<b>lyra-skills</b><br/>150+ triggers"]
+        evals["<b>lyra-evals</b><br/>pass@k framework"]
+        mcp["<b>lyra-mcp</b><br/>MCP server · gateway"]
+        cli["<b>lyra-cli</b><br/>25+ commands"]
     end
 
-    subgraph Breakthrough["Breakthrough (14 packages)"]
-        reasoning["lyra-reasoning<br/>CoT · Tree Search · SR2AM"]
-        research["lyra-research<br/>10-step pipeline · DCI zero-index"]
-        evolution["lyra-evolution<br/>GEPA v2 optimizer"]
-        router["lyra-router<br/>5-layer task-aware routing"]
-        cognitive["lyra-cognitive<br/>Debate agents"]
-        streaming["lyra-streaming<br/>Real-time output"]
-        cost["lyra-cost<br/>Burn reports"]
-        personalization["lyra-personalization<br/>User adaptation"]
-        continual["lyra-continual<br/>Lifelong learning"]
-        safety["lyra-safety<br/>AgentShield · Parallax · PRISM"]
-        observability["lyra-observability<br/>HIR · traces"]
-        verification["lyra-verification<br/>multi-agent verifier"]
-        recursive_link["lyra-recursive-link<br/>Latent-space agent comms"]
-        audio["lyra-audio<br/>CESP v1.0 · voice packs"]
+    subgraph Breakthrough["<b style='color:#a78bfa;'>🚀 BREAKTHROUGH (14 packages)</b>"]
+        reasoning["<b>lyra-reasoning</b><br/>CoT · Tree Search · SR2AM"]
+        research["<b>lyra-research</b><br/>10-step pipeline"]
+        evolution["<b>lyra-evolution</b><br/>GEPA v2 optimizer"]
+        router["<b>lyra-router</b><br/>5-layer task-aware"]
+        cognitive["<b>lyra-cognitive</b><br/>Debate agents"]
+        streaming["<b>lyra-streaming</b><br/>Real-time output"]
+        cost["<b>lyra-cost</b><br/>Burn reports"]
+        personalization["<b>lyra-personalization</b><br/>User adaptation"]
+        continual["<b>lyra-continual</b><br/>Lifelong learning"]
+        safety["<b>lyra-safety</b><br/>AgentShield · Parallax"]
+        observability["<b>lyra-observability</b><br/>HIR · traces"]
+        verification["<b>lyra-verification</b><br/>multi-agent verifier"]
+        recursive_link["<b>lyra-recursive-link</b><br/>Latent-space comms"]
+        audio["<b>lyra-audio</b><br/>CESP v1.0 · voice"]
     end
 
-    subgraph AGI["AGI Ascent (21 packages)"]
-        world["lyra-world-model<br/>Causal graphs"]
-        meta["lyra-meta-evolution<br/>Meta-Harness · AEvo · RSI"]
-        colony["lyra-colony<br/>Agent swarms · gossip memory"]
-        auto["lyra-auto-mode<br/>Full autonomy"]
-        constitutional["lyra-constitutional<br/>Constitutional AI"]
+    subgraph AGI["<b style='color:#f472b6;'>🌟 AGI ASCENT (21 packages)</b>"]
+        world["<b>lyra-world-model</b><br/>Causal graphs"]
+        meta["<b>lyra-meta-evolution</b><br/>Meta-Harness · AEvo"]
+        colony["<b>lyra-colony</b><br/>Agent swarms"]
+        auto["<b>lyra-auto-mode</b><br/>Full autonomy"]
+        constitutional["<b>lyra-constitutional</b><br/>Constitutional AI"]
     end
 
     cli --> core
@@ -379,6 +481,18 @@ graph TB
     skills --> evolution
     reasoning --> world
     evolution --> meta
+
+    classDef foundation fill:#3b82f620,stroke:#60a5fa,stroke-width:2px,color:#e2e8f0
+    classDef breakthrough fill:#7c3aed20,stroke:#a78bfa,stroke-width:2px,color:#e2e8f0
+    classDef agi fill:#ec489920,stroke:#f472b6,stroke-width:2px,color:#e2e8f0
+
+    class core,agents,orchestration,memory,skills,evals,mcp,cli foundation
+    class reasoning,research,evolution,router,cognitive,streaming,cost,personalization,continual,safety,observability,verification,recursive_link,audio breakthrough
+    class world,meta,colony,auto,constitutional agi
+
+    style Foundation fill:#3b82f608,stroke:#60a5fa,stroke-width:2px
+    style Breakthrough fill:#7c3aed08,stroke:#a78bfa,stroke-width:2px
+    style AGI fill:#ec489908,stroke:#f472b6,stroke-width:2px
 ```
 
 ---
