@@ -34,5 +34,8 @@ export * from './skills'
 // Plugins
 export * from './plugins'
 
+// Orchestration
+export * from './orchestration'
+
 // Plugins
 export * from './plugins'
