@@ -1,29 +1,34 @@
 <h1 align="center">
   <img src="docs/assets/lyra-banner.svg" alt="Lyra" width="600"><br>
-  Personal Superintelligent AI Research Agent
+  <span style="background: linear-gradient(135deg, #c084fc 0%, #a78bfa 30%, #818cf8 60%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Personal Superintelligent AI Research Agent</span>
 </h1>
 
 <p align="center">
-  <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.11+-blue.svg" alt="Python" /></a>
-  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.3+-3178C6.svg" alt="TypeScript" /></a>
-  <a href=""><img src="https://img.shields.io/badge/version-7.0.0-purple.svg" alt="Version" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License" /></a>
-  <a href="packages/"><img src="https://img.shields.io/badge/packages-96-orange.svg" alt="Packages" /></a>
-  <a href="docs/roadmap.md"><img src="https://img.shields.io/badge/AGI%20Blueprint-17%20Plans-ff69b4.svg" alt="AGI Blueprint" /></a>
-  <a href="docs/research/papers.md"><img src="https://img.shields.io/badge/Research-79%20papers%20%7C%2050%2B%20repos-brightgreen.svg" alt="Research" /></a>
+  <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=1e1e2e" alt="Python" /></a>
+  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.3%2B-3178C6?style=for-the-badge&logo=typescript&logoColor=white&labelColor=1e1e2e" alt="TypeScript" /></a>
+  <a href=""><img src="https://img.shields.io/badge/version-7.1.0-8b5cf6?style=for-the-badge&labelColor=1e1e2e" alt="Version" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge&labelColor=1e1e2e" alt="License" /></a>
+  <a href="packages/"><img src="https://img.shields.io/badge/packages-99-f97316?style=for-the-badge&labelColor=1e1e2e" alt="Packages" /></a>
+</p>
+
+<p align="center">
+  <a href="docs/roadmap.md"><img src="https://img.shields.io/badge/AGI_Blueprint-35%2B_Phases-ec4899?style=for-the-badge&labelColor=1e1e2e" alt="AGI Blueprint" /></a>
+  <a href="docs/research/papers.md"><img src="https://img.shields.io/badge/Research-100%2B_papers_|_80%2B_repos-10b981?style=for-the-badge&labelColor=1e1e2e" alt="Research" /></a>
+  <a href="plans/README.md"><img src="https://img.shields.io/badge/Ultra_Plans-33%2B-f472b6?style=for-the-badge&labelColor=1e1e2e" alt="Ultra Plans" /></a>
+  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/build-AGI_Ascent-7c3aed?style=for-the-badge&labelColor=1e1e2e" alt="Build" /></a>
 </p>
 
 <p align="center">
   <b>Multi-agent orchestration. Deep reasoning. 6-layer NeuroMemory. Self-evolution.<br>
   Cognitive-executive safety separation. Latent-space agent communication. Dream consolidation.<br>
-  96 composable packages. 16+ LLM providers. Skills ecosystem. Swarm architecture. One extensible platform.</b>
+  99 composable packages. 16+ LLM providers. Skills ecosystem. Swarm architecture. One extensible platform.</b>
 </p>
 
 <p align="center">
   <a href="#quickstart"><b>Quickstart</b></a> ·
   <a href="#architecture"><b>Architecture</b></a> ·
   <a href="#innovations"><b>Innovations</b></a> ·
-  <a href="#breakthrough-plan-13"><b>Plan 13</b></a> ·
+  <a href="#ultra-plans"><b>Ultra Plans</b></a> ·
   <a href="#package-catalog"><b>Packages</b></a> ·
   <a href="#color-themes"><b>Themes</b></a> ·
   <a href="docs/CONTRIBUTING.md"><b>Contributing</b></a> ·
@@ -32,15 +37,23 @@
 
 ---
 
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #7c3aed15, #a78bfa10, #38bdf810); border-left: 4px solid #8b5cf6; padding: 16px 20px; border-radius: 0 8px 8px 0;">
+
 ## What is Lyra?
 
-Lyra is a **production-grade agent platform** that researches, codes, tests, reviews, and evolves — autonomously or as your pair-programming teammate. It combines techniques from 79 research papers and 50+ open-source agent frameworks into a unified, extensible system.
+Lyra is a **production-grade agent platform** that researches, codes, tests, reviews, and evolves — autonomously or as your pair-programming teammate. It combines techniques from 100+ research papers and 80+ open-source agent frameworks into a unified, extensible system.
 
-Unlike thin API wrappers, Lyra ships with a **kernel-enforced TDD gate**, **6-layer NeuroMemory with A-MAC admission control and Dream consolidation**, **SkillOpt text-space skill optimization (+23.5pts)**, **64-skill catalog across 9 domains**, **multi-agent swarm with Raft/Byzantine/Gossip consensus**, **automatic prompt and harness evolution**, **RecursiveLink latent-space agent communication**, **Parallax-style cognitive-executive safety separation**, **SR2AM self-regulated planning**, **zero-trust agent federation**, **25+ color themes with voice/sound packs**, **36-tool Claude Code-compatible tool suite**, **MCP integration with OAuth 2.0**, **31-hook lifecycle system**, and a **Claude Code-style terminal interface** — all wired together through an observable, auditable event stream.
+Unlike thin API wrappers, Lyra ships with a **kernel-enforced TDD gate**, **Phoenix 5-tier Memory with Symbolic SSM (61% token reduction) and Entropic Dream consolidation**, **SkillOpt text-space skill optimization (+23.5pts)**, **Two-Circuit Architecture (Hot/Cold path)**, **64-skill catalog across 9 domains**, **multi-agent swarm with Raft/Byzantine/Gossip consensus**, **AlphaEvolve dual-model evolutionary loop**, **automatic prompt and harness evolution**, **RecursiveLink latent-space agent communication**, **Parallax-style cognitive-executive safety separation**, **SR2AM self-regulated planning**, **ARIS cross-model adversarial review**, **zero-trust agent federation**, **12 color themes with voice/sound packs**, **40+ keybindings with vim mode**, **40-tool Claude Code-compatible tool suite**, **MCP integration with OAuth 2.0**, **31-hook lifecycle system**, **plugin architecture with marketplace**, **cascade model routing with provider fallback**, and a **Claude Code-style terminal interface** — all wired together through an observable, auditable event stream.
+
+</td></tr></table>
 
 ---
 
-## Architecture
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
+
+## <span style="color: #818cf8;">🏗 Architecture</span>
+
+</td></tr></table></td></tr></table>
 
 ### System Topology
 
@@ -356,186 +369,601 @@ graph TB
 
 ---
 
-## Why Lyra is Different
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
 
-| Principle | What it means |
-|---|---|
-| 🧠 **Thinks before it acts** | CoT reasoning, tree search, SR2AM self-regulated planning, and multi-agent debate are first-class primitives. Every task passes through `plan → execute → verify`. |
-| 🧪 **Tests first, always** | The kernel enforces a TDD state machine (`RED → GREEN → REFACTOR`). No code ships without passing tests. |
-| 🔄 **Self-evolves** | GEPA v2 prompt optimizer + AEvo meta-editor + Meta-Harness loop continuously improve prompts AND harness code. Strategies that work are reinforced; patterns that fail are pruned. |
-| 🛡️ **Defense-in-depth safety** | 6-layer safety: cognitive-executive separation (Parallax, 98.9% block rate), AgentShield (5 scanners, 102 rules), multi-agent validation (executor→validator→critic), intent monitoring, PRISM drift detection, ARIS 3-stage verification. |
-| 🧩 **96 composable packages** | Every capability is an isolated package with its own tests, docs, and dependencies. Compose what you need. |
-| 🌐 **16+ LLM providers** | Anthropic, DeepSeek, OpenAI, Google, xAI, Mistral, Qwen, Kimi, Bedrock, Ollama. 5-layer intelligent routing with automatic fallback. Zero vendor lock-in. |
-| 📊 **Token-level observability** | 13 waste categories tracked in real-time. JSONL event stream (HIR) for full auditability. Burn reports show exactly where tokens go. |
-| 🗣️ **Voice & audio** | CESP v1.0 cross-environment sound protocol. 6-layer sound pack selection. Warcraft III Peon, StarCraft Marine, Cyberpunk Netrunner packs. Audio suppression with silent hours. |
-| 🎨 **25+ color themes** | 7 families (Dark, Warm, Nature, Retro, Accessible, SilkCircuit, Classic) with live preview and instant switching. 13 full palettes with complete hex codes. |
-| 📚 **Research-backed** | 79 papers and 50+ repos absorbed with a documented absorption matrix. Every technique traces to its source paper or reference implementation. |
-| 🐝 **Multi-agent swarm** | 12-worker background pool, 3 consensus protocols (Raft/Byzantine/Gossip), latent-space agent communication (75.6% token reduction), federation auth, worktree isolation. |
-| 🔌 **Plugin ecosystem** | Manifest-based plugin system with SHA-256 hot-reload. 31-hook lifecycle engine. 6 permission modes. MCP OAuth 2.0 with DCR. 36-tool catalog. |
+## <span style="color: #fbbf24;">⚡ Why Lyra is Different</span>
+
+</td></tr></table></td></tr></table>
+
+<table>
+<tr>
+<td width="50" align="center" style="background: #7c3aed20;">🧠</td>
+<td style="background: #0d1117;"><b style="color: #a78bfa;">Thinks before it acts</b></td>
+<td style="background: #0d1117; color: #94a3b8;">CoT reasoning, tree search, SR2AM self-regulated planning, and multi-agent debate are first-class primitives. Every task passes through <code style="background:#1e293b;color:#c084fc;">plan → execute → verify</code>.</td>
+</tr>
+<tr>
+<td width="50" align="center" style="background: #10b98120;">🧪</td>
+<td style="background: #0d1117;"><b style="color: #34d399;">Tests first, always</b></td>
+<td style="background: #0d1117; color: #94a3b8;">The kernel enforces a TDD state machine (<code style="background:#1e293b;color:#34d399;">RED → GREEN → REFACTOR</code>). No code ships without passing tests.</td>
+</tr>
+<tr>
+<td width="50" align="center" style="background: #f59e0b20;">🔄</td>
+<td style="background: #0d1117;"><b style="color: #fbbf24;">Self-evolves</b></td>
+<td style="background: #0d1117; color: #94a3b8;">GEPA v2 prompt optimizer + AEvo meta-editor + Meta-Harness loop continuously improve prompts AND harness code.</td>
+</tr>
+<tr>
+<td width="50" align="center" style="background: #ef444420;">🛡️</td>
+<td style="background: #0d1117;"><b style="color: #f87171;">Defense-in-depth safety</b></td>
+<td style="background: #0d1117; color: #94a3b8;">6-layer safety: cognitive-executive separation (Parallax, <b style="color:#34d399;">98.9% block rate</b>), AgentShield (5 scanners, 102 rules), multi-agent validation, intent monitoring, PRISM drift detection, ARIS 3-stage verification.</td>
+</tr>
+<tr>
+<td width="50" align="center" style="background: #f9731620;">🧩</td>
+<td style="background: #0d1117;"><b style="color: #fb923c;">99 composable packages</b></td>
+<td style="background: #0d1117; color: #94a3b8;">Every capability is an isolated package with its own tests, docs, and dependencies. Compose what you need.</td>
+</tr>
+<tr>
+<td width="50" align="center" style="background: #3b82f620;">🌐</td>
+<td style="background: #0d1117;"><b style="color: #60a5fa;">16+ LLM providers</b></td>
+<td style="background: #0d1117; color: #94a3b8;">Anthropic, DeepSeek, OpenAI, Google, xAI, Mistral, Qwen, Kimi, Bedrock, Ollama. 5-layer intelligent routing with automatic fallback. Zero vendor lock-in.</td>
+</tr>
+<tr>
+<td width="50" align="center" style="background: #06b6d420;">📊</td>
+<td style="background: #0d1117;"><b style="color: #22d3ee;">Token-level observability</b></td>
+<td style="background: #0d1117; color: #94a3b8;">13 waste categories tracked in real-time. JSONL event stream (HIR) for full auditability. Burn reports show exactly where tokens go.</td>
+</tr>
+<tr>
+<td width="50" align="center" style="background: #ec489920;">🗣️</td>
+<td style="background: #0d1117;"><b style="color: #f472b6;">Voice & audio</b></td>
+<td style="background: #0d1117; color: #94a3b8;">CESP v1.0 cross-environment sound protocol. 6-layer sound pack selection. Warcraft III Peon, StarCraft Marine, Cyberpunk Netrunner packs.</td>
+</tr>
+<tr>
+<td width="50" align="center" style="background: #8b5cf620;">🎨</td>
+<td style="background: #0d1117;"><b style="color: #a78bfa;">25+ color themes</b></td>
+<td style="background: #0d1117; color: #94a3b8;">7 families (Dark, Warm, Nature, Retro, Accessible, SilkCircuit, Classic) with live preview and instant switching.</td>
+</tr>
+<tr>
+<td width="50" align="center" style="background: #14b8a620;">📚</td>
+<td style="background: #0d1117;"><b style="color: #2dd4bf;">Research-backed</b></td>
+<td style="background: #0d1117; color: #94a3b8;">100+ papers and 80+ repos absorbed with a documented absorption matrix. Every technique traces to its source paper.</td>
+</tr>
+<tr>
+<td width="50" align="center" style="background: #eab30820;">🐝</td>
+<td style="background: #0d1117;"><b style="color: #facc15;">Multi-agent swarm</b></td>
+<td style="background: #0d1117; color: #94a3b8;">12-worker background pool, 3 consensus protocols (Raft/Byzantine/Gossip), latent-space agent communication (<b style="color:#34d399;">75.6% token reduction</b>).</td>
+</tr>
+<tr>
+<td width="50" align="center" style="background: #6366f120;">🔌</td>
+<td style="background: #0d1117;"><b style="color: #818cf8;">Plugin ecosystem</b></td>
+<td style="background: #0d1117; color: #94a3b8;">Manifest-based plugin system with SHA-256 hot-reload. 31-hook lifecycle engine. 6 permission modes. MCP OAuth 2.0 with DCR.</td>
+</tr>
+</table>
 
 ---
 
-## Innovations
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #10b981, #06b6d4, #3b82f6); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
+
+## <span style="color: #34d399;">🔬 Innovations</span>
+
+</td></tr></table></td></tr></table>
 
 Lyra integrates techniques from cutting-edge research. Each innovation is documented with its inspiration.
 
-### Reasoning & Problem Solving
+### <span style="color: #a78bfa;">🧠 Reasoning & Problem Solving</span>
 
-| Innovation | Description | Inspiration |
-|---|---|---|
-| **Tournament TTS** | Recursive tournament voting + parallel-distill-refine on coding attempts | [Scaling Test-Time Compute (Meta, 2026)](https://arxiv.org/abs/2604.16529) |
-| **SR2AM Self-Regulated Planning** | System I (reactive) / System II (world-model simulation) / System III (learned configurator). 8B matching 1T systems with 25.8-95.3% fewer reasoning tokens | [SR2AM (2026)](https://arxiv.org/abs/2605.22138) |
-| **ReasoningBank** | Distills successes *and* failures into structured lessons; memory-aware test-time scaling | [ReasoningBank (Google, 2025)](https://arxiv.org/abs/2509.25140) |
-| **Reflexion Loop** | Verbal RL: generate a verbal lesson on failure, inject into next attempt | [Reflexion (NeurIPS 2023)](https://arxiv.org/abs/2303.11366) |
-| **Pivot/Refine Recovery** | On failure: analyze error → generate alternative strategy → retry with cross-run evolution | [AutoResearchClaw (2026)](https://arxiv.org/abs/2605.20025) |
-| **Multi-Agent Debate** | K=3 debate agents with pivot/refine loop, cross-run lesson store | [AutoResearchClaw](https://arxiv.org/abs/2505.21549) |
-| **MCTS Code Search** | Intra-attempt Monte Carlo tree search for code exploration | [SWE-Search (ICLR 2025)](https://arxiv.org/abs/2410.20285) |
+<table>
+<tr style="background: #7c3aed20;">
+<th style="color: #c084fc;">Innovation</th><th style="color: #c084fc;">Description</th><th style="color: #c084fc;">Inspiration</th>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Tournament TTS</b></td>
+<td style="color: #94a3b8;">Recursive tournament voting + parallel-distill-refine on coding attempts</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2604.16529">Scaling Test-Time Compute (Meta, 2026)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>SR2AM Self-Regulated Planning</b></td>
+<td style="color: #94a3b8;">System I (reactive) / System II (world-model) / System III (learned configurator). 8B matching 1T systems with 25.8-95.3% fewer reasoning tokens</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.22138">SR2AM (2026)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>ReasoningBank</b></td>
+<td style="color: #94a3b8;">Distills successes <i>and</i> failures into structured lessons; memory-aware test-time scaling</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2509.25140">ReasoningBank (Google, 2025)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Reflexion Loop</b></td>
+<td style="color: #94a3b8;">Verbal RL: generate a verbal lesson on failure, inject into next attempt</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2303.11366">Reflexion (NeurIPS 2023)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Pivot/Refine Recovery</b></td>
+<td style="color: #94a3b8;">On failure: analyze error → generate alternative strategy → retry with cross-run evolution</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.20025">AutoResearchClaw (2026)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Multi-Agent Debate</b></td>
+<td style="color: #94a3b8;">K=3 debate agents with pivot/refine loop, cross-run lesson store</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2505.21549">AutoResearchClaw</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>MCTS Code Search</b></td>
+<td style="color: #94a3b8;">Intra-attempt Monte Carlo tree search for code exploration</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2410.20285">SWE-Search (ICLR 2025)</a></td>
+</tr>
+</table>
 
-### Memory & Context
+### <span style="color: #34d399;">💾 Memory & Context</span>
 
-| Innovation | Description | Inspiration |
-|---|---|---|
-| **6-Layer NeuroMemory** | L0 Sensory → L1 Episodic → L2 Semantic → L3 Procedural → L4 Meta → L5 Collective. A-MAC 5-factor admission. CoMem async pipeline (1.4x latency). Free-energy consolidation | [TencentDB-Agent-Memory](https://github.com/Tencent/TencentDB-Agent-Memory), [MemPalace](https://github.com/MemPalace/mempalace), [CraniMem](https://arxiv.org/abs/2605.14309) |
-| **A-MAC Admission Control** | 5-factor gate: utility + factual confidence + semantic novelty + temporal recency + content type. F1=0.583, 31% latency reduction | [A-MAC (2026)](https://arxiv.org/abs/2605.20163) |
-| **CoMem Async Memory Pipeline** | n-step-off decoupled architecture. Separate memory model runs in parallel with agent inference. 1.4x latency improvement | [CoMem (2026)](https://arxiv.org/abs/2605.20163) |
-| **Dream Consolidation** | Free-energy minimization (utility + embedding entropy). Auto-Dreamer GRPO offline consolidation. +15% survival at 50% noise | [MemAgent Workshop (ICLR 2026)](https://memagent-workshop.github.io/) |
-| **Hybrid BM25+Vector Retrieval** | RRF fusion + MRAgent reconstruction. Dual-process: System 1 (<50ms fast) + System 2 (<200ms deliberate) | [TencentDB-Agent-Memory](https://github.com/Tencent/TencentDB-Agent-Memory), MRAgent |
-| **6-Dimension Health Monitoring** | Staleness, contradiction, hallucination, confidence, coverage, freshness tracking | MemAgent Workshop synthesis |
-| **Neural Garbage Collection** | Block-level context eviction with budget-aware interoception and full audit trail | [NGC (Stanford, 2026)](https://arxiv.org/abs/2604.18002) |
-| **Progressive Disclosure** | 3-level skill loading: metadata → triggers → full content. ~10x token savings | [claude-mem](https://github.com/thedotmack/claude-mem) |
-| **DCI Zero-Index Retrieval** | Direct corpus interaction via grep/rg without pre-built indexes. Tiered context management (truncation → compaction → summarization) | [DCI-Agent-Lite](https://github.com/DCI-Agent/DCI-Agent-Lite) |
+<table>
+<tr style="background: #10b98120;">
+<th style="color: #34d399;">Innovation</th><th style="color: #34d399;">Description</th><th style="color: #34d399;">Inspiration</th>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>6-Layer NeuroMemory</b></td>
+<td style="color: #94a3b8;">L0 Sensory → L1 Episodic → L2 Semantic → L3 Procedural → L4 Meta → L5 Collective. A-MAC 5-factor admission. CoMem async pipeline (1.4x latency). Free-energy consolidation</td>
+<td style="color: #60a5fa;">TencentDB-Agent-Memory, MemPalace, CraniMem</td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>A-MAC Admission Control</b></td>
+<td style="color: #94a3b8;">5-factor gate: utility + factual confidence + semantic novelty + temporal recency + content type. F1=0.583, 31% latency reduction</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.20163">A-MAC (2026)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>CoMem Async Memory Pipeline</b></td>
+<td style="color: #94a3b8;">n-step-off decoupled architecture. Separate memory model runs in parallel with agent inference. 1.4x latency improvement</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.20163">CoMem (2026)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Dream Consolidation</b></td>
+<td style="color: #94a3b8;">Free-energy minimization (utility + embedding entropy). Auto-Dreamer GRPO offline consolidation. +15% survival at 50% noise</td>
+<td style="color: #60a5fa;">MemAgent Workshop (ICLR 2026)</td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Hybrid BM25+Vector Retrieval</b></td>
+<td style="color: #94a3b8;">RRF fusion + MRAgent reconstruction. Dual-process: System 1 (&lt;50ms fast) + System 2 (&lt;200ms deliberate)</td>
+<td style="color: #60a5fa;">TencentDB-Agent-Memory, MRAgent</td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>6-Dimension Health Monitoring</b></td>
+<td style="color: #94a3b8;">Staleness, contradiction, hallucination, confidence, coverage, freshness tracking</td>
+<td style="color: #60a5fa;">MemAgent Workshop synthesis</td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Neural Garbage Collection</b></td>
+<td style="color: #94a3b8;">Block-level context eviction with budget-aware interoception and full audit trail</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2604.18002">NGC (Stanford, 2026)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Progressive Disclosure</b></td>
+<td style="color: #94a3b8;">3-level skill loading: metadata → triggers → full content. ~10x token savings</td>
+<td style="color: #60a5fa;">claude-mem</td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>DCI Zero-Index Retrieval</b></td>
+<td style="color: #94a3b8;">Direct corpus interaction via grep/rg without pre-built indexes. Tiered context management</td>
+<td style="color: #60a5fa;">DCI-Agent-Lite</td>
+</tr>
+</table>
 
-### Self-Evolution & Learning
+### <span style="color: #fbbf24;">🔁 Self-Evolution & Learning</span>
 
-| Innovation | Description | Inspiration |
-|---|---|---|
-| **GEPA v2 Multi-Agent Optimizer** | Parallel prompt learning across fleet (Combee-inspired, 17x speedup). Pareto frontier selection. Joint optimization of prompts + harness code. $2-10/run | [GEPA (ICLR 2026 Oral)](https://arxiv.org/abs/2310.03714), [Combee](https://arxiv.org/abs/2604.15771) |
-| **Meta-Harness Optimization** | Outer-loop system searches over Lyra's own harness code. Agentic proposer with filesystem access to prior candidates. +7.7pts with 4x fewer tokens | [Meta-Harness (2026)](https://arxiv.org/abs/2603.28052) |
-| **AEvo Meta-Editing** | Meta-agent observes accumulated state and edits procedures. Harnessed meta-editing prevents drift. 26% relative improvement | [AEvo (2026)](https://arxiv.org/abs/2605.13821) |
-| **Trace2Skill** | Automatic extraction of reusable skills from successful execution traces | [Trace2Skill (2026)](https://arxiv.org/abs/2605.21810) |
-| **PRISM Drift Detection** | Daily automated detection of LLM prompt degradation with auto-repair via GEPA re-optimization. Target: 99% prompt reliability | [PRISM (2026)](https://arxiv.org/abs/2605.14454) |
-| **Skill Weaving** | Composite skill creation by combining verified atomic skills | [Voyager (NVIDIA, TMLR 2024)](https://arxiv.org/abs/2305.16291) |
+<table>
+<tr style="background: #f59e0b20;">
+<th style="color: #fbbf24;">Innovation</th><th style="color: #fbbf24;">Description</th><th style="color: #fbbf24;">Inspiration</th>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>GEPA v2 Multi-Agent Optimizer</b></td>
+<td style="color: #94a3b8;">Parallel prompt learning across fleet (Combee-inspired, 17x speedup). Pareto frontier selection. Joint optimization of prompts + harness code. $2-10/run</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2310.03714">GEPA (ICLR 2026 Oral)</a>, <a href="https://arxiv.org/abs/2604.15771">Combee</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Meta-Harness Optimization</b></td>
+<td style="color: #94a3b8;">Outer-loop system searches over Lyra's own harness code. Agentic proposer with filesystem access to prior candidates. +7.7pts with 4x fewer tokens</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2603.28052">Meta-Harness (2026)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>AEvo Meta-Editing</b></td>
+<td style="color: #94a3b8;">Meta-agent observes accumulated state and edits procedures. Harnessed meta-editing prevents drift. 26% relative improvement</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.13821">AEvo (2026)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Trace2Skill</b></td>
+<td style="color: #94a3b8;">Automatic extraction of reusable skills from successful execution traces</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.21810">Trace2Skill (2026)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>PRISM Drift Detection</b></td>
+<td style="color: #94a3b8;">Daily automated detection of LLM prompt degradation with auto-repair via GEPA re-optimization. Target: 99% prompt reliability</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.14454">PRISM (2026)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Skill Weaving</b></td>
+<td style="color: #94a3b8;">Composite skill creation by combining verified atomic skills</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2305.16291">Voyager (NVIDIA, TMLR 2024)</a></td>
+</tr>
+</table>
 
-### Skills Optimization & Management
+### <span style="color: #f472b6;">🛠 Skills Optimization & Management</span>
 
-| Innovation | Description | Inspiration |
-|---|---|---|
-| **SkillOpt Text-Space Optimizer** | 8-step per-epoch loop: rollout evidence → minibatch reflection → hierarchical merge → LR-budgeted update → validation gate → rejected-edit buffer → slow update → meta skill. Separate optimizer/target model. +23.5pts avg, 52/52 benchmark cells won | [SkillOpt (Microsoft, 2026)](https://arxiv.org/abs/2605.23904) |
-| **Ratchet Lifecycle Management** | Contribution scoring c(s), bounded active-cap C=50, rollback on regression, meta-skill authoring prior. Non-divergence guarantee: worst-case floor E[p0] − 0.35 | [Ratchet (2026)](https://arxiv.org/abs/2605.22148) |
-| **SkillGen Contrastive Induction** | Embed + cluster failures vs successes, compare nearest neighbors, extract corrective rules. Paired intervention testing with gate threshold | [SkillGen (2026)](https://arxiv.org/abs/2605.10999) |
-| **MIND-Skill Multi-Agent Induction** | 3 textual losses jointly optimized: reconstruction, outcome, rubric. Induction agent + deduction agent cross-verify | [MIND-Skill (2026)](https://arxiv.org/abs/2605.08670) |
-| **Domain Skills Suite** | 64+ specialized skills across 9 domains + 1 meta: Engineering (12), Design (6), SRE (6), AI/ML (6), Architecture (6), Cloud (5), PM/BA (5), Brainstorming (5), Security (5) | [Karpathy Skills](https://github.com/forrestchang/andrej-karpathy-skills), [Academic Research](https://github.com/Imbad0202/academic-research-skills) |
+<table>
+<tr style="background: #ec489920;">
+<th style="color: #f472b6;">Innovation</th><th style="color: #f472b6;">Description</th><th style="color: #f472b6;">Inspiration</th>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>SkillOpt Text-Space Optimizer</b></td>
+<td style="color: #94a3b8;">8-step per-epoch loop: rollout evidence → minibatch reflection → hierarchical merge → LR-budgeted update → validation gate → rejected-edit buffer → slow update → meta skill. <b style="color:#34d399;">+23.5pts avg, 52/52 benchmark cells won</b></td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.23904">SkillOpt (Microsoft, 2026)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Ratchet Lifecycle Management</b></td>
+<td style="color: #94a3b8;">Contribution scoring c(s), bounded active-cap C=50, rollback on regression, meta-skill authoring prior. Non-divergence guarantee</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.22148">Ratchet (2026)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>SkillGen Contrastive Induction</b></td>
+<td style="color: #94a3b8;">Embed + cluster failures vs successes, compare nearest neighbors, extract corrective rules. Paired intervention testing with gate threshold</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.10999">SkillGen (2026)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>MIND-Skill Multi-Agent Induction</b></td>
+<td style="color: #94a3b8;">3 textual losses jointly optimized: reconstruction, outcome, rubric. Induction agent + deduction agent cross-verify</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.08670">MIND-Skill (2026)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Domain Skills Suite</b></td>
+<td style="color: #94a3b8;">64+ specialized skills across 9 domains + 1 meta: Engineering (12), Design (6), SRE (6), AI/ML (6), Architecture (6), Cloud (5), PM/BA (5), Brainstorming (5), Security (5)</td>
+<td style="color: #60a5fa;">Karpathy Skills, Academic Research Skills</td>
+</tr>
+</table>
 
-### Agent Communication & Coordination
+### <span style="color: #60a5fa;">🔗 Agent Communication & Coordination</span>
 
-| Innovation | Description | Inspiration |
-|---|---|---|
-| **RecursiveLink Latent Comms** | Latent-space agent communication via RecursiveLink modules. 75.6% token reduction, 1.2-2.4x speedup. Hybrid text+latent mode with text fallback | [RecursiveMAS (2026)](https://arxiv.org/abs/2505.23119) |
-| **DAG-Based Agent Teams** | SOP-driven role topology (PM/Architect/Engineer/Reviewer/QA) | [MetaGPT (ICLR 2024)](https://arxiv.org/abs/2308.00352), [SemaClaw (2026)](https://arxiv.org/abs/2604.11548) |
-| **Cross-Model ARIS Verification** | 3-stage adversarial review: evidence integrity → result-to-claim → claim auditing. Executor ≠ Reviewer model family | [ARIS (2026)](https://arxiv.org/abs/2505.24168) |
-| **Agent Fleet** | Parallel fan-out with squad organization, task metrics, shared task lists, and polling | [Claude Code Agent Teams](https://code.claude.com/docs/en/agent-teams) |
-| **Worktree Isolation** | Subagents run in isolated git worktrees; changes reviewed before merging | [Claude Code](https://github.com/anthropics/claude-code) |
+<table>
+<tr style="background: #3b82f620;">
+<th style="color: #60a5fa;">Innovation</th><th style="color: #60a5fa;">Description</th><th style="color: #60a5fa;">Inspiration</th>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>RecursiveLink Latent Comms</b></td>
+<td style="color: #94a3b8;">Latent-space agent communication via RecursiveLink modules. <b style="color:#34d399;">75.6% token reduction, 1.2-2.4x speedup.</b> Hybrid text+latent mode with text fallback</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2505.23119">RecursiveMAS (2026)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>DAG-Based Agent Teams</b></td>
+<td style="color: #94a3b8;">SOP-driven role topology (PM/Architect/Engineer/Reviewer/QA)</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2308.00352">MetaGPT (ICLR 2024)</a>, <a href="https://arxiv.org/abs/2604.11548">SemaClaw (2026)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Cross-Model ARIS Verification</b></td>
+<td style="color: #94a3b8;">3-stage adversarial review: evidence integrity → result-to-claim → claim auditing. Executor ≠ Reviewer model family</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2505.24168">ARIS (2026)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Agent Fleet</b></td>
+<td style="color: #94a3b8;">Parallel fan-out with squad organization, task metrics, shared task lists, and polling</td>
+<td style="color: #60a5fa;">Claude Code Agent Teams</td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Worktree Isolation</b></td>
+<td style="color: #94a3b8;">Subagents run in isolated git worktrees; changes reviewed before merging</td>
+<td style="color: #60a5fa;">Claude Code</td>
+</tr>
+</table>
 
-### Routing & Cost Optimization
+### <span style="color: #f87171;">🛡 Safety & Verification</span>
 
-| Innovation | Description | Inspiration |
-|---|---|---|
-| **5-Layer Intelligent Router** | Task → complexity → capability → cost → performance history cascading with automatic fallback | [FrugalGPT (Stanford, 2023)](https://arxiv.org/abs/2305.05176), [RouteLLM (Berkeley, 2024)](https://arxiv.org/abs/2406.18665) |
-| **Confidence-Thresholded Escalation** | Route to stronger model only when confidence drops below threshold | [Confidence-Driven LLM Router (2025)](https://arxiv.org/abs/2502.11021) |
-| **Progressive Tool Discovery** | Deferred tool schema loading with semantic tool search. 85% context savings. Auto-pruning based on task relevance | Claude Code Tool Search, [Meta-Harness](https://arxiv.org/abs/2603.28052) |
-| **TokenJuice Compression** | Rule-based overlay compressing tool output before reaching LLM (up to 80% token savings) | [OpenHuman](https://github.com/tinyhumansai/openhuman) |
+<table>
+<tr style="background: #ef444420;">
+<th style="color: #f87171;">Innovation</th><th style="color: #f87171;">Description</th><th style="color: #f87171;">Inspiration</th>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Cognitive-Executive Separation</b></td>
+<td style="color: #94a3b8;">Structural separation of reasoning (read-only) from execution (action-capable). Independent verification agent. <b style="color:#34d399;">98.9% block rate</b></td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2604.12986">Parallax (2026)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Multi-Agent Validation Pipeline</b></td>
+<td style="color: #94a3b8;">Executor → Validator → Critic pipeline for all critical operations. Validator from different model family</td>
+<td style="color: #60a5fa;">AWS Stop Hallucinations Workshop</td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Two-Phase Verifier</b></td>
+<td style="color: #94a3b8;">Step-level correctness + trace-level consistency verification</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2501.07301">Qwen PRM Lessons (2025)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>AgentShield (5-Layer)</b></td>
+<td style="color: #94a3b8;">Secrets, injection, XSS, SQLi, path traversal scanners</td>
+<td style="color: #60a5fa;">ECC Adversarial Pipeline</td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>TDD Reward Gate</b></td>
+<td style="color: #94a3b8;">Numeric reward signal from citation verification, reused at inference time</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2506.19807">KnowRL (Zhejiang Univ, 2025)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Tool-Call Verification</b></td>
+<td style="color: #94a3b8;">Post-hoc auditing for knowing-doing gap. Hidden-state confidence probe before tool execution</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.14038">Knowing-Doing Gap (2026)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Intent-Based Security</b></td>
+<td style="color: #94a3b8;">Continuous monitoring of action sequences for intent deviation. Temporal pattern analysis</td>
+<td style="color: #60a5fa;">Radware Intent-Based Security</td>
+</tr>
+</table>
 
-### Safety & Verification
+### <span style="color: #22d3ee;">📡 Routing & Cost Optimization</span>
 
-| Innovation | Description | Inspiration |
-|---|---|---|
-| **Cognitive-Executive Separation** | Structural separation of reasoning (read-only) from execution (action-capable). Independent verification agent. 98.9% block rate | [Parallax (2026)](https://arxiv.org/abs/2604.12986) |
-| **Multi-Agent Validation Pipeline** | Executor → Validator → Critic pipeline for all critical operations. Validator from different model family. Critic reviews validator's reasoning | AWS Stop Hallucinations Workshop |
-| **Two-Phase Verifier** | Step-level correctness + trace-level consistency verification | [Qwen PRM Lessons (2025)](https://arxiv.org/abs/2501.07301) |
-| **AgentShield (5-Layer)** | Secrets, injection, XSS, SQLi, path traversal scanners | [ECC Adversarial Pipeline](https://github.com/affaan-m/ECC) |
-| **TDD Reward Gate** | Numeric reward signal from citation verification, reused at inference time | [KnowRL (Zhejiang Univ, 2025)](https://arxiv.org/abs/2506.19807) |
-| **Tool-Call Verification** | Post-hoc auditing for knowing-doing gap. Hidden-state confidence probe before tool execution | [Knowing-Doing Gap (2026)](https://arxiv.org/abs/2605.14038) |
-| **Intent-Based Security** | Continuous monitoring of action sequences for intent deviation. Temporal pattern analysis. Anomaly detection on agent behavior | Radware Intent-Based Security |
+<table>
+<tr style="background: #06b6d420;">
+<th style="color: #22d3ee;">Innovation</th><th style="color: #22d3ee;">Description</th><th style="color: #22d3ee;">Inspiration</th>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>5-Layer Intelligent Router</b></td>
+<td style="color: #94a3b8;">Task → complexity → capability → cost → performance history cascading with automatic fallback</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2305.05176">FrugalGPT (Stanford, 2023)</a>, <a href="https://arxiv.org/abs/2406.18665">RouteLLM (Berkeley, 2024)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Confidence-Thresholded Escalation</b></td>
+<td style="color: #94a3b8;">Route to stronger model only when confidence drops below threshold</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2502.11021">Confidence-Driven LLM Router (2025)</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Progressive Tool Discovery</b></td>
+<td style="color: #94a3b8;">Deferred tool schema loading with semantic tool search. 85% context savings</td>
+<td style="color: #60a5fa;">Claude Code Tool Search, Meta-Harness</td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>TokenJuice Compression</b></td>
+<td style="color: #94a3b8;">Rule-based overlay compressing tool output before reaching LLM (up to 80% token savings)</td>
+<td style="color: #60a5fa;">OpenHuman</td>
+</tr>
+</table>
 
-> **Full absorption matrix**: See [`docs/research/papers.md`](docs/research/papers.md) (79 papers) and [`docs/research/repos.md`](docs/research/repos.md) (50+ repos) for the complete bibliography with implementation locations. See [`docs/research/synthesis-2026-05-27.md`](docs/research/synthesis-2026-05-27.md) for the comprehensive synthesis.
+> **Full absorption matrix**: See [`docs/research/papers.md`](docs/research/papers.md) (100+ papers) and [`docs/research/repos.md`](docs/research/repos.md) (80+ repos) for the complete bibliography with implementation locations.
 
 ---
 
-## Breakthrough Plan 13
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #f97316, #ef4444, #ec4899); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
+
+## <span style="color: #fb923c;">🚀 Breakthrough Plan 13</span>
+
+</td></tr></table></td></tr></table>
 
 The latest breakthrough synthesis from deep research across 50+ sources identifies **6 critical gaps to AGI** and their solutions:
 
-| Gap | Solution | Key Lever | Phase |
-|-----|----------|-----------|-------|
-| No self-evolving harness | Meta-Harness + AEvo + GEPA v2 loop | +7.7pts, 4x fewer tokens | 13.4 |
-| Text-only agent communication | RecursiveLink latent-space comms | 75.6% token reduction | 13.2 |
-| No architectural safety separation | Parallax cognitive-executive split | 98.9% block rate | 13.3 |
-| Flat memory architecture | Dream 4-phase consolidation | 93%+ LoCoMo target | 13.1 |
-| No self-regulated planning | SR2AM 3-system reasoning | 8B matching 1T systems | 13.2 |
-| Static tool loading | Progressive tool discovery | 85% context savings | 13.1 |
+<table>
+<tr style="background: #f9731620;">
+<th style="color: #fb923c;">Gap</th><th style="color: #fb923c;">Solution</th><th style="color: #fb923c;">Key Lever</th><th style="color: #fb923c;">Phase</th>
+</tr>
+<tr>
+<td style="color: #e2e8f0;">No self-evolving harness</td>
+<td style="color: #94a3b8;">Meta-Harness + AEvo + GEPA v2 loop</td>
+<td style="color: #34d399;">+7.7pts, 4x fewer tokens</td>
+<td><img src="https://img.shields.io/badge/13.4-active-8b5cf6?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;">Text-only agent communication</td>
+<td style="color: #94a3b8;">RecursiveLink latent-space comms</td>
+<td style="color: #34d399;">75.6% token reduction</td>
+<td><img src="https://img.shields.io/badge/13.2-active-8b5cf6?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;">No architectural safety separation</td>
+<td style="color: #94a3b8;">Parallax cognitive-executive split</td>
+<td style="color: #34d399;">98.9% block rate</td>
+<td><img src="https://img.shields.io/badge/13.3-active-8b5cf6?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;">Flat memory architecture</td>
+<td style="color: #94a3b8;">Dream 4-phase consolidation</td>
+<td style="color: #34d399;">93%+ LoCoMo target</td>
+<td><img src="https://img.shields.io/badge/13.1-active-8b5cf6?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;">No self-regulated planning</td>
+<td style="color: #94a3b8;">SR2AM 3-system reasoning</td>
+<td style="color: #34d399;">8B matching 1T systems</td>
+<td><img src="https://img.shields.io/badge/13.2-active-8b5cf6?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;">Static tool loading</td>
+<td style="color: #94a3b8;">Progressive tool discovery</td>
+<td style="color: #34d399;">85% context savings</td>
+<td><img src="https://img.shields.io/badge/13.1-active-8b5cf6?style=flat-square"></td>
+</tr>
+</table>
 
 [**Read the full Plan 13 →**](plans/LYRA_ULTRA_PLAN_13_BREAKTHROUGH_SYNTHESIS.md)
 
-### All Ultra Plans
+### <span style="color: #c084fc;">All Ultra Plans</span>
 
-| Plan | Focus | Status |
-|------|-------|--------|
-| [Plan 6](plans/LYRA_ULTRA_PLAN_6_OMNI_AGI_BREAKTHROUGH.md) | Master — 16 dimensions, 52-week roadmap | Active |
-| [Plan 7](plans/LYRA_ULTRA_PLAN_7_SKILLS_ECOSYSTEM.md) | Skills — 80+ domain skills, curator, learner, evolver | Active |
-| [Plan 8](plans/LYRA_ULTRA_PLAN_8_VOICE_AUDIO_SYSTEM.md) | Voice — fantasy packs, CESP pipeline, dictation | Active |
-| [Plan 9](plans/LYRA_ULTRA_PLAN_9_TOOLS_UNIVERSE.md) | Tools — 200+ tools across 20 toolsets | Active |
-| [Plan 10](plans/LYRA_ULTRA_PLAN_10_MODEL_ROUTER_V2.md) | Router — 5-layer intelligent cascading | Active |
-| [Plan 11](plans/LYRA_ULTRA_PLAN_11_AUTONOMOUS_SYSTEMS.md) | Autonomous — goals, continuous mode, hooks | Active |
-| [Plan 12](plans/LYRA_ULTRA_PLAN_12_AGENT_FLEET_SWARM.md) | Fleet — parallel fan-out, squads, colony, federation | Active |
-| [**Plan 13**](plans/LYRA_ULTRA_PLAN_13_BREAKTHROUGH_SYNTHESIS.md) | **Breakthrough — 6 AGI gaps, meta-evolution, safety separation, Dream memory** | **Active** |
+<table>
+<tr style="background: #7c3aed20;">
+<th style="color: #c084fc;">Plan</th><th style="color: #c084fc;">Focus</th><th style="color: #c084fc;">Status</th>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><a href="plans/LYRA_ULTRA_PLAN_6_OMNI_AGI_BREAKTHROUGH.md">Plan 6</a></td>
+<td style="color: #94a3b8;">Master — 16 dimensions, 52-week roadmap</td>
+<td><img src="https://img.shields.io/badge/Active-10b981?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><a href="plans/LYRA_ULTRA_PLAN_7_SKILLS_ECOSYSTEM.md">Plan 7</a></td>
+<td style="color: #94a3b8;">Skills — 80+ domain skills, curator, learner, evolver</td>
+<td><img src="https://img.shields.io/badge/Active-10b981?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><a href="plans/LYRA_ULTRA_PLAN_8_VOICE_AUDIO_SYSTEM.md">Plan 8</a></td>
+<td style="color: #94a3b8;">Voice — fantasy packs, CESP pipeline, dictation</td>
+<td><img src="https://img.shields.io/badge/Active-10b981?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><a href="plans/LYRA_ULTRA_PLAN_9_TOOLS_UNIVERSE.md">Plan 9</a></td>
+<td style="color: #94a3b8;">Tools — 200+ tools across 20 toolsets</td>
+<td><img src="https://img.shields.io/badge/Active-10b981?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><a href="plans/LYRA_ULTRA_PLAN_10_MODEL_ROUTER_V2.md">Plan 10</a></td>
+<td style="color: #94a3b8;">Router — 5-layer intelligent cascading</td>
+<td><img src="https://img.shields.io/badge/Active-10b981?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><a href="plans/LYRA_ULTRA_PLAN_11_AUTONOMOUS_SYSTEMS.md">Plan 11</a></td>
+<td style="color: #94a3b8;">Autonomous — goals, continuous mode, hooks</td>
+<td><img src="https://img.shields.io/badge/Active-10b981?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><a href="plans/LYRA_ULTRA_PLAN_12_AGENT_FLEET_SWARM.md">Plan 12</a></td>
+<td style="color: #94a3b8;">Fleet — parallel fan-out, squads, colony, federation</td>
+<td><img src="https://img.shields.io/badge/Active-10b981?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b><a href="plans/LYRA_ULTRA_PLAN_13_BREAKTHROUGH_SYNTHESIS.md">Plan 13</a></b></td>
+<td style="color: #fbbf24;"><b>Breakthrough — 6 AGI gaps, meta-evolution, safety separation, Dream memory</b></td>
+<td><img src="https://img.shields.io/badge/★_Active-f97316?style=flat-square"></td>
+</tr>
+</table>
 
-### Wave 3 Plans (May 2026)
+### <span style="color: #f472b6;">Wave 3 Plans (May 2026)</span>
 
-| Plan | Focus | Key Deliverables |
-|------|-------|-----------------|
-| [**Ultra Plan: Autonomy Engine**](docs/plans/ultra-plan-autonomy-engine.md) | **Full Autonomy & Self-Evolution** | 7-layer architecture, relay-race continuous ops, triple-budget governance, 7-stage research DAG, Hindsight cross-session identity, 4-level layered recovery, ARIS verification |
-| [**Ultra Plan: Memory Architecture**](docs/plans/ultra-plan-memory-architecture.md) | **6-Layer NeuroMemory** | A-MAC 5-factor admission, CoMem async pipeline, free-energy consolidation, Auto-Dreamer GRPO, dual-process retrieval (System 1/2), MRAgent reconstruction, 6-dimension health monitoring |
-| [**Ultra Plan: Skills Ecosystem**](docs/plans/ultra-plan-skills-ecosystem.md) | **64-Skill Catalog + Lifecycle** | 7-stage lifecycle, SkillOpt optimizer, Skill Creator, Skill Learner, MCTS bilevel optimization, Co-evolutionary verification, auto-compaction, 330 planned tests |
-| [**Ultra Plan: Multi-Agent Swarm**](docs/plans/ultra-plan-multi-agent-swarm.md) | **Swarm Architecture & Federation** | 12-worker background pool, 3 consensus protocols (Raft/Byzantine/Gossip), latent-space comms, federation auth, 3 new Greek-named agents (Aegis/Echo/Atlas), worktree isolation |
-| [**Ultra Plan: UI/UX Upgrade**](docs/plans/ultra-plan-ui-ux-upgrade.md) | **Themes, Voice, Keybindings** | 13 full color theme palettes, CESP sound system, 6-layer sound pack hierarchy, Warp block model, keybinding engine, Ink/React TUI |
-| [**Ultra Plan: Tools + MCP + Plugin**](docs/plans/ultra-plan-tools-mcp-plugin.md) | **Complete Tool Ecosystem** | 36 Claude Code-compatible tools, MCP OAuth 2.0 + DCR, plugin manifest system, 31-hook lifecycle engine, 6 permission modes, channels system, goal evaluator |
+<table>
+<tr style="background: #ec489920;">
+<th style="color: #f472b6;">Plan</th><th style="color: #f472b6;">Focus</th><th style="color: #f472b6;">Key Deliverables</th>
+</tr>
+<tr><td style="color: #e2e8f0;"><b>Autonomy Engine</b></td><td style="color: #94a3b8;">Full Autonomy & Self-Evolution</td><td style="color: #94a3b8;">7-layer architecture, relay-race continuous ops, triple-budget governance, 7-stage research DAG, ARIS verification</td></tr>
+<tr><td style="color: #e2e8f0;"><b>Memory Architecture</b></td><td style="color: #94a3b8;">6-Layer NeuroMemory</td><td style="color: #94a3b8;">A-MAC 5-factor admission, CoMem async pipeline, free-energy consolidation, Auto-Dreamer GRPO, dual-process retrieval</td></tr>
+<tr><td style="color: #e2e8f0;"><b>Skills Ecosystem</b></td><td style="color: #94a3b8;">64-Skill Catalog + Lifecycle</td><td style="color: #94a3b8;">7-stage lifecycle, SkillOpt optimizer, Skill Creator, MCTS bilevel optimization, 330 planned tests</td></tr>
+<tr><td style="color: #e2e8f0;"><b>Multi-Agent Swarm</b></td><td style="color: #94a3b8;">Swarm Architecture & Federation</td><td style="color: #94a3b8;">12-worker pool, 3 consensus protocols, latent-space comms, federation auth, worktree isolation</td></tr>
+<tr><td style="color: #e2e8f0;"><b>UI/UX Upgrade</b></td><td style="color: #94a3b8;">Themes, Voice, Keybindings</td><td style="color: #94a3b8;">13 full color palettes, CESP sound system, 6-layer sound pack hierarchy, Warp block model, keybinding engine</td></tr>
+<tr><td style="color: #e2e8f0;"><b>Tools + MCP + Plugin</b></td><td style="color: #94a3b8;">Complete Tool Ecosystem</td><td style="color: #94a3b8;">36 Claude Code-compatible tools, MCP OAuth 2.0 + DCR, plugin manifest system, 31-hook lifecycle engine</td></tr>
+</table>
 
-### Wave 2 Plans (May 2026 — 6-Stream Deep Research)
+### <span style="color: #60a5fa;">Wave 2 Plans (May 2026 — 6-Stream Deep Research)</span>
 
-| Plan | Focus | Key Deliverables |
-|------|-------|-----------------|
-| [**Plan 21**](plans/LYRA_ULTRA_PLAN_21_SKILLS_ECOSYSTEM_EVOLUTION.md) | **Skills Ecosystem & Evolution** | SkillOpt text optimizer, AEvo meta-editing, 50+ domain skills, 18 modules |
-| [**Plan 22**](plans/LYRA_ULTRA_PLAN_22_MEMORY_CONTEXT_BREAKTHROUGH.md) | **Memory & Context Breakthrough** | 5-tier hierarchy, Dream upgrade, BM25+Vector+RRF, temporal KGs |
-| [**Plan 23**](plans/LYRA_ULTRA_PLAN_23_AGENT_AUTONOMY_FEDERATION.md) | **Agent Autonomy & Federation** | Relay-race, triple-budget, zero-trust federation, compound architecture |
-| [**Plan 24**](plans/LYRA_ULTRA_PLAN_24_UI_UX_VOICE_BREAKTHROUGH.md) | **UI/UX & Voice Breakthrough** | 17+ themes, voice packs, keybinding engine, Warp block model |
-| [**Plan 25**](plans/LYRA_ULTRA_PLAN_25_SAFETY_VERIFICATION_UPGRADE.md) | **Safety & Verification Upgrade** | MAVEN, spectral guardrails, zkAgent proofs, 10 benchmarks |
-| [**Plan 26**](plans/LYRA_ULTRA_PLAN_26_TOOLS_INTEGRATION_ECOSYSTEM.md) | **Tools & Integration Ecosystem** | 200+ tools, plugin system, MCP gateway, 71 slash commands, channels |
+<table>
+<tr style="background: #3b82f620;">
+<th style="color: #60a5fa;">Plan</th><th style="color: #60a5fa;">Focus</th><th style="color: #60a5fa;">Key Deliverables</th>
+</tr>
+<tr><td style="color: #e2e8f0;"><b>Plan 21</b></td><td style="color: #94a3b8;">Skills Ecosystem & Evolution</td><td style="color: #94a3b8;">SkillOpt text optimizer, AEvo meta-editing, 50+ domain skills, 18 modules</td></tr>
+<tr><td style="color: #e2e8f0;"><b>Plan 22</b></td><td style="color: #94a3b8;">Memory & Context Breakthrough</td><td style="color: #94a3b8;">5-tier hierarchy, Dream upgrade, BM25+Vector+RRF, temporal KGs</td></tr>
+<tr><td style="color: #e2e8f0;"><b>Plan 23</b></td><td style="color: #94a3b8;">Agent Autonomy & Federation</td><td style="color: #94a3b8;">Relay-race, triple-budget, zero-trust federation, compound architecture</td></tr>
+<tr><td style="color: #e2e8f0;"><b>Plan 24</b></td><td style="color: #94a3b8;">UI/UX & Voice Breakthrough</td><td style="color: #94a3b8;">17+ themes, voice packs, keybinding engine, Warp block model</td></tr>
+<tr><td style="color: #e2e8f0;"><b>Plan 25</b></td><td style="color: #94a3b8;">Safety & Verification Upgrade</td><td style="color: #94a3b8;">MAVEN, spectral guardrails, zkAgent proofs, 10 benchmarks</td></tr>
+<tr><td style="color: #e2e8f0;"><b>Plan 26</b></td><td style="color: #94a3b8;">Tools & Integration Ecosystem</td><td style="color: #94a3b8;">200+ tools, plugin system, MCP gateway, 71 slash commands, channels</td></tr>
+</table>
 
 [Full plans index →](plans/README.md)
 
 ---
 
-## LLM Providers
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #3b82f6, #06b6d4, #10b981); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
+
+## <span style="color: #60a5fa;">🌐 LLM Providers</span>
+
+</td></tr></table></td></tr></table>
 
 Lyra works with 16+ providers through a unified interface. The intelligent router selects the optimal model per task.
 
-| Provider | Models | Context | Reasoning | Vision | Best For |
-|----------|--------|---------|-----------|--------|----------|
-| **Anthropic** | Opus 4.7, Sonnet 4.6, Haiku 4.5 | 200K | ✓ | ✓ | Complex reasoning, architecture |
-| **DeepSeek** | V4 Pro, V4 Flash, Reasoner | 128K | ✓ | — | Cost-effective reasoning |
-| **OpenAI** | GPT-4o, O3, O3 Mini, O1 | 200K | ✓ | ✓ | Broad capability |
-| **Google** | Gemini 2.5 Pro, 3.1 Pro, Flash | 2M | ✓ | ✓ | Long context, multimodal |
-| **xAI** | Grok 4, Code Fast | 256K | — | — | Fast coding |
-| **Mistral** | Codestral, Large | 256K | — | — | Code generation |
-| **Qwen** | 3.7 Max, Turbo, Plus | 128K | ✓ | — | Asian language tasks |
-| **Kimi** | K2.6 | 128K | ✓ | — | Chinese market |
-| **Bedrock** | Claude via AWS | 200K | ✓ | — | Enterprise/regulated |
-| **Ollama** | Llama, Qwen Coder | 8K+ | — | — | Local/offline dev |
-| **Vertex AI** | Gemini via GCP | 2M | ✓ | ✓ | GCP workloads |
-| **OpenRouter** | 200+ models | varies | varies | varies | Model exploration |
-| **Copilot** | GPT-4o via GitHub | 128K | ✓ | ✓ | GitHub integration |
-| **Gemini CLI** | Gemini via Google CLI | 1M | ✓ | ✓ | Google ecosystem |
-| **Custom** | Any OpenAI-compatible | varies | varies | varies | Self-hosted, proxies |
+<table>
+<tr style="background: #3b82f620;">
+<th style="color: #60a5fa;">Provider</th><th style="color: #60a5fa;">Models</th><th style="color: #60a5fa;">Context</th><th style="color: #60a5fa;">Reasoning</th><th style="color: #60a5fa;">Vision</th><th style="color: #60a5fa;">Best For</th>
+</tr>
+<tr>
+<td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#d4a574;margin-right:8px;"></span><b style="color:#e2e8f0;">Anthropic</b></td>
+<td style="color: #94a3b8;">Opus 4.7, Sonnet 4.6, Haiku 4.5</td>
+<td style="color: #e2e8f0;">200K</td>
+<td style="color: #34d399;">✓</td>
+<td style="color: #34d399;">✓</td>
+<td style="color: #94a3b8;">Complex reasoning, architecture</td>
+</tr>
+<tr>
+<td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#6366f1;margin-right:8px;"></span><b style="color:#e2e8f0;">DeepSeek</b></td>
+<td style="color: #94a3b8;">V4 Pro, V4 Flash, Reasoner</td>
+<td style="color: #e2e8f0;">128K</td>
+<td style="color: #34d399;">✓</td>
+<td style="color: #ef4444;">—</td>
+<td style="color: #94a3b8;">Cost-effective reasoning</td>
+</tr>
+<tr>
+<td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10b981;margin-right:8px;"></span><b style="color:#e2e8f0;">OpenAI</b></td>
+<td style="color: #94a3b8;">GPT-4o, O3, O3 Mini, O1</td>
+<td style="color: #e2e8f0;">200K</td>
+<td style="color: #34d399;">✓</td>
+<td style="color: #34d399;">✓</td>
+<td style="color: #94a3b8;">Broad capability</td>
+</tr>
+<tr>
+<td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#4285f4;margin-right:8px;"></span><b style="color:#e2e8f0;">Google</b></td>
+<td style="color: #94a3b8;">Gemini 2.5 Pro, 3.1 Pro, Flash</td>
+<td style="color: #e2e8f0;"><b>2M</b></td>
+<td style="color: #34d399;">✓</td>
+<td style="color: #34d399;">✓</td>
+<td style="color: #94a3b8;">Long context, multimodal</td>
+</tr>
+<tr>
+<td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#fef08a;margin-right:8px;"></span><b style="color:#e2e8f0;">xAI</b></td>
+<td style="color: #94a3b8;">Grok 4, Code Fast</td>
+<td style="color: #e2e8f0;">256K</td>
+<td style="color: #ef4444;">—</td>
+<td style="color: #ef4444;">—</td>
+<td style="color: #94a3b8;">Fast coding</td>
+</tr>
+<tr>
+<td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f59e0b;margin-right:8px;"></span><b style="color:#e2e8f0;">Mistral</b></td>
+<td style="color: #94a3b8;">Codestral, Large</td>
+<td style="color: #e2e8f0;">256K</td>
+<td style="color: #ef4444;">—</td>
+<td style="color: #ef4444;">—</td>
+<td style="color: #94a3b8;">Code generation</td>
+</tr>
+<tr>
+<td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#8b5cf6;margin-right:8px;"></span><b style="color:#e2e8f0;">Qwen</b></td>
+<td style="color: #94a3b8;">3.7 Max, Turbo, Plus</td>
+<td style="color: #e2e8f0;">128K</td>
+<td style="color: #34d399;">✓</td>
+<td style="color: #ef4444;">—</td>
+<td style="color: #94a3b8;">Asian language tasks</td>
+</tr>
+<tr>
+<td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ec4899;margin-right:8px;"></span><b style="color:#e2e8f0;">Kimi</b></td>
+<td style="color: #94a3b8;">K2.6</td>
+<td style="color: #e2e8f0;">128K</td>
+<td style="color: #34d399;">✓</td>
+<td style="color: #ef4444;">—</td>
+<td style="color: #94a3b8;">Chinese market</td>
+</tr>
+<tr>
+<td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ff9900;margin-right:8px;"></span><b style="color:#e2e8f0;">Bedrock</b></td>
+<td style="color: #94a3b8;">Claude via AWS</td>
+<td style="color: #e2e8f0;">200K</td>
+<td style="color: #34d399;">✓</td>
+<td style="color: #ef4444;">—</td>
+<td style="color: #94a3b8;">Enterprise/regulated</td>
+</tr>
+<tr>
+<td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#9ca3af;margin-right:8px;"></span><b style="color:#e2e8f0;">Ollama</b></td>
+<td style="color: #94a3b8;">Llama, Qwen Coder</td>
+<td style="color: #e2e8f0;">8K+</td>
+<td style="color: #ef4444;">—</td>
+<td style="color: #ef4444;">—</td>
+<td style="color: #94a3b8;">Local/offline dev</td>
+</tr>
+<tr>
+<td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#34a853;margin-right:8px;"></span><b style="color:#e2e8f0;">Vertex AI</b></td>
+<td style="color: #94a3b8;">Gemini via GCP</td>
+<td style="color: #e2e8f0;"><b>2M</b></td>
+<td style="color: #34d399;">✓</td>
+<td style="color: #34d399;">✓</td>
+<td style="color: #94a3b8;">GCP workloads</td>
+</tr>
+<tr>
+<td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f97316;margin-right:8px;"></span><b style="color:#e2e8f0;">OpenRouter</b></td>
+<td style="color: #94a3b8;">200+ models</td>
+<td style="color: #e2e8f0;">varies</td>
+<td style="color: #fbbf24;">~</td>
+<td style="color: #fbbf24;">~</td>
+<td style="color: #94a3b8;">Model exploration</td>
+</tr>
+</table>
 
 ```json
 // ~/.lyra/settings.json — Provider configuration
@@ -557,83 +985,155 @@ Lyra works with 16+ providers through a unified interface. The intelligent route
 
 ---
 
-## Color Themes
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #a78bfa, #c084fc, #e879f9); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
+
+## <span style="color: #c084fc;">🎨 Color Themes</span>
+
+</td></tr></table></td></tr></table>
 
 Lyra ships with **25+ professionally-designed color themes** across 7 families, with live preview and instant switching.
 
-### Dark & Modern
-| Theme | Palette | Vibe |
-|-------|---------|------|
-| **Catppuccin Mocha** | `#1e1e2e` `#cdd6f4` `#cba6f7` `#89b4fa` | Soothing pastel dark |
-| **Tokyo Night** | `#1a1b26` `#c0caf5` `#bb9af7` `#7aa2f7` | Neon cyberpunk |
-| **Dracula** | `#282a36` `#f8f8f2` `#bd93f9` `#50fa7b` | Purple-tinted classic |
-| **One Dark Pro** | `#282c34` `#abb2bf` `#c678dd` `#61afef` | Atom editor iconic |
-| **Monokai Pro** | `#2d2a2e` `#fcfcfa` `#ab9df2` `#ffd866` | Pro-grade warm dark |
-| **Challenger Deep** | `#1e1c31` `#cbe3e7` `#62d1e5` `#95ffa4` | Deep ocean abyss |
-| **Moonfly** | `#080808` `#bdbdbd` `#9ccc65` `#80cbc4` | Ultra-dark charcoal |
-| **Nightfly** | `#011627` `#acb4c2` `#82aaff` `#fc514e` | Deep navy night |
-| **Klein Void** | `#000000` `#e0e0e0` `#7e8aa2` `#8fc0a9` | Absolute void |
+### <span style="color: #818cf8;">Dark & Modern</span>
 
-### Warm & Cozy
-| Theme | Palette | Vibe |
-|-------|---------|------|
-| **Gruvbox Dark** | `#282828` `#ebdbb2` `#d3869b` `#83a598` | Retro terminal warm |
-| **Rose Pine** | `#191724` `#e0def4` `#ebbcba` `#31748f` | Rosy dawn dark |
-| **Kanagawa** | `#1f1f28` `#dcd7ba` `#957fb8` `#7e9cd8` | Japanese ink wash |
-| **Ayu Mirage** | `#1f2430` `#cbccc6` `#d4bfff` `#5ccfe6` | Muted elegant |
-| **Solarized Dark** | `#002b36` `#839496` `#6c71c4` `#268bd2` | Scientifically balanced |
-| **Ferra** | `#2b2530` `#dccda0` `#b8846a` `#d1a280` | Warm earthy terracotta |
+<table>
+<tr>
+<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#1e1e2e;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#cba6f7;">Catppuccin Mocha</b></td>
+<td style="color:#94a3b8;">Soothing pastel dark</td>
+<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#1a1b26;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#bb9af7;">Tokyo Night</b></td>
+<td style="color:#94a3b8;">Neon cyberpunk</td>
+</tr>
+<tr>
+<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#282a36;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#bd93f9;">Dracula</b></td>
+<td style="color:#94a3b8;">Purple-tinted classic</td>
+<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#282c34;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#c678dd;">One Dark Pro</b></td>
+<td style="color:#94a3b8;">Atom editor iconic</td>
+</tr>
+<tr>
+<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#2d2a2e;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#ab9df2;">Monokai Pro</b></td>
+<td style="color:#94a3b8;">Pro-grade warm dark</td>
+<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#1e1c31;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#62d1e5;">Challenger Deep</b></td>
+<td style="color:#94a3b8;">Deep ocean abyss</td>
+</tr>
+<tr>
+<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#080808;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#9ccc65;">Moonfly</b></td>
+<td style="color:#94a3b8;">Ultra-dark charcoal</td>
+<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#011627;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#82aaff;">Nightfly</b></td>
+<td style="color:#94a3b8;">Deep navy night</td>
+</tr>
+<tr>
+<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#000000;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#7e8aa2;">Klein Void</b></td>
+<td style="color:#94a3b8;">Absolute void</td>
+<td></td><td></td>
+</tr>
+</table>
 
-### Nature & Forest
-| Theme | Palette | Vibe |
-|-------|---------|------|
-| **Everforest** | `#2d353b` `#d3c6aa` `#d699b6` `#7fbbb3` | Forest green calm |
-| **Nord** | `#2e3440` `#d8dee9` `#b48ead` `#88c0d0` | Arctic blue clean |
+### <span style="color: #fb923c;">Warm & Cozy</span>
 
-### Retro & Synth
-| Theme | Palette | Vibe |
-|-------|---------|------|
-| **Synthwave 84** | `#262335` `#ff7edb` `#fede5d` `#36f9f6` | Neon 80s arcade |
-| **SpaceGray Eighties** | `#222222` `#b3b9c5` `#ff5370` `#82aaff` | Retro synthwave |
-| **Eldritch** | `#212337` `#ebfafa` `#a6dbff` `#04d1f9` | Cosmic horror dark |
+<table>
+<tr>
+<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#282828;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#d3869b;">Gruvbox Dark</b></td>
+<td style="color:#94a3b8;">Retro terminal warm</td>
+<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#191724;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#ebbcba;">Rose Pine</b></td>
+<td style="color:#94a3b8;">Rosy dawn dark</td>
+</tr>
+<tr>
+<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#1f1f28;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#957fb8;">Kanagawa</b></td>
+<td style="color:#94a3b8;">Japanese ink wash</td>
+<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#1f2430;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#d4bfff;">Ayu Mirage</b></td>
+<td style="color:#94a3b8;">Muted elegant</td>
+</tr>
+<tr>
+<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#002b36;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#6c71c4;">Solarized Dark</b></td>
+<td style="color:#94a3b8;">Scientifically balanced</td>
+<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#2b2530;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#b8846a;">Ferra</b></td>
+<td style="color:#94a3b8;">Warm earthy terracotta</td>
+</tr>
+</table>
 
-### Accessible & High Contrast
-| Theme | Palette | Vibe |
-|-------|---------|------|
-| **Night Owl** | `#011627` `#d6deeb` `#c792ea` `#82aaff` | WCAG-optimized |
-| **Oxocarbon Dark** | `#161616` `#d0d0d0` `#33b1ff` `#3ddbd9` | IBM Carbon-inspired |
+### <span style="color: #34d399;">Nature & Forest</span>
 
-### SilkCircuit Family
-| Theme | Palette | Vibe |
-|-------|---------|------|
-| **SilkCircuit Dark** | `#1a1025` `#e0dce8` `#c9a0dc` `#7ec8e3` | Circuit board dark |
-| **SilkCircuit Amber** | `#1a1025` `#ffb347` `#ff8c00` `#ffd700` | Warm amber traces |
-| **SilkCircuit Mint** | `#1a1025` `#98ff98` `#3ddc84` `#7ec8e3` | Fresh mint green |
-| **SilkCircuit Matrix** | `#0d0f0d` `#00ff41` `#008f11` `#003b00` | Matrix rain green |
+<table>
+<tr>
+<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#2d353b;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#7fbbb3;">Everforest</b></td>
+<td style="color:#94a3b8;">Forest green calm</td>
+<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#2e3440;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#88c0d0;">Nord</b></td>
+<td style="color:#94a3b8;">Arctic blue clean</td>
+</tr>
+</table>
 
-### PaperColor & Classic
-| Theme | Palette | Vibe |
-|-------|---------|------|
-| **PaperColor Dark** | `#1c1c1c` `#d0d0d0` `#5fafd7` `#87d7af` | Print-ready dark |
-| **PaperColor Light** | `#eeeeee` `#444444` `#005f87` `#00875f` | Print-ready light |
-| **Zenburn** | `#3f3f3f` `#dcdccc` `#cc9393` `#7f9f7f` | Classic muted |
+### <span style="color: #f472b6;">Retro & Synth</span>
 
-Switch themes with `lyra theme set <name>` or via the interactive picker (`Ctrl+T`). Custom themes in `~/.lyra/themes/`. [Full theme gallery →](docs/themes.md)
+<table>
+<tr>
+<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#262335;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#ff7edb;">Synthwave 84</b></td>
+<td style="color:#94a3b8;">Neon 80s arcade</td>
+<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#222222;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#ff5370;">SpaceGray Eighties</b></td>
+<td style="color:#94a3b8;">Retro synthwave</td>
+</tr>
+<tr>
+<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#212337;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#04d1f9;">Eldritch</b></td>
+<td style="color:#94a3b8;">Cosmic horror dark</td>
+<td></td><td></td>
+</tr>
+</table>
+
+### <span style="color: #facc15;">Accessible & High Contrast</span> · <span style="color: #22d3ee;">SilkCircuit</span> · <span style="color: #e2e8f0;">PaperColor & Classic</span>
+
+Full theme gallery with all 25+ palettes and hex codes: `lyra theme list` or [`docs/themes.md`](docs/themes.md)
+
+Switch themes with `lyra theme set <name>` or via the interactive picker (`Ctrl+T`). Custom themes in `~/.lyra/themes/`.
 
 ---
 
-## Package Catalog
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #10b981, #34d399, #06b6d4); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
 
-Lyra is a monorepo of 96 composable packages across four tiers. Each package has its own `pyproject.toml`, tests, and README.
+## <span style="color: #34d399;">📦 Package Catalog</span>
 
-| Tier | Count | Purpose | Highlights |
-|------|-------|---------|------------|
-| **Foundation** | 8 | Core infrastructure | AgentLoop kernel, 25+ CLI commands, 6-layer NeuroMemory, 64+ skill catalog, TDD gate |
-| **Breakthrough** | 14 | Advanced capabilities | Deep reasoning (SR2AM), RecursiveLink, Dream consolidation, GEPA v2, Meta-Harness, Parallax safety |
-| **AGI Ascent** | 21 | Experimental/forward-looking | Multi-level verification, causal graphs, recursive self-improvement, constitutional AI |
-| **UI** | 3 | Terminal interface | Zustand state store, Ink/React 19 TUI, WebSocket + SSE transport |
-| **Providers** | 12 | LLM integrations | Anthropic, DeepSeek, OpenAI, Google, xAI, Mistral, Qwen, Bedrock, Ollama, Vertex, OpenRouter, Copilot |
-| **Skills** | 56 | Domain expertise | Python, TypeScript, Go, Rust, React, Django, FastAPI, DevOps, Security, Research |
+</td></tr></table></td></tr></table>
+
+Lyra is a monorepo of 99 composable packages across four tiers. Each package has its own `pyproject.toml`, tests, and README.
+
+<table>
+<tr style="background: #10b98120;">
+<th style="color: #34d399;">Tier</th><th style="color: #34d399;">Count</th><th style="color: #34d399;">Purpose</th><th style="color: #34d399;">Highlights</th>
+</tr>
+<tr>
+<td><img src="https://img.shields.io/badge/Foundation-8-3b82f6?style=flat-square"></td>
+<td style="color: #e2e8f0;">8</td>
+<td style="color: #94a3b8;">Core infrastructure</td>
+<td style="color: #94a3b8;">AgentLoop kernel, 25+ CLI commands, 6-layer NeuroMemory, 64+ skill catalog, TDD gate</td>
+</tr>
+<tr>
+<td><img src="https://img.shields.io/badge/Breakthrough-14-8b5cf6?style=flat-square"></td>
+<td style="color: #e2e8f0;">14</td>
+<td style="color: #94a3b8;">Advanced capabilities</td>
+<td style="color: #94a3b8;">Deep reasoning (SR2AM), RecursiveLink, Dream consolidation, GEPA v2, Meta-Harness, Parallax safety</td>
+</tr>
+<tr>
+<td><img src="https://img.shields.io/badge/AGI_Ascent-21-ec4899?style=flat-square"></td>
+<td style="color: #e2e8f0;">21</td>
+<td style="color: #94a3b8;">Experimental / forward-looking</td>
+<td style="color: #94a3b8;">Multi-level verification, causal graphs, recursive self-improvement, constitutional AI</td>
+</tr>
+<tr>
+<td><img src="https://img.shields.io/badge/UI-3-f97316?style=flat-square"></td>
+<td style="color: #e2e8f0;">3</td>
+<td style="color: #94a3b8;">Terminal interface</td>
+<td style="color: #94a3b8;">Zustand state store, Ink/React 19 TUI, WebSocket + SSE transport</td>
+</tr>
+<tr>
+<td><img src="https://img.shields.io/badge/Providers-12-06b6d4?style=flat-square"></td>
+<td style="color: #e2e8f0;">12</td>
+<td style="color: #94a3b8;">LLM integrations</td>
+<td style="color: #94a3b8;">Anthropic, DeepSeek, OpenAI, Google, xAI, Mistral, Qwen, Bedrock, Ollama, Vertex, OpenRouter, Copilot</td>
+</tr>
+<tr>
+<td><img src="https://img.shields.io/badge/Skills-56-10b981?style=flat-square"></td>
+<td style="color: #e2e8f0;">56</td>
+<td style="color: #94a3b8;">Domain expertise</td>
+<td style="color: #94a3b8;">Python, TypeScript, Go, Rust, React, Django, FastAPI, DevOps, Security, Research</td>
+</tr>
+</table>
 
 ```
 packages/
@@ -666,7 +1166,11 @@ packages/
 
 ---
 
-## Quickstart
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #22c55e, #10b981, #34d399); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
+
+## <span style="color: #4ade80;">⚡ Quickstart</span>
+
+</td></tr></table></td></tr></table>
 
 ```bash
 # 1. Clone and install
@@ -737,7 +1241,11 @@ lyra verify                             # Run adversarial cross-model verificati
 
 ---
 
-## Configuration
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #6366f1, #8b5cf6, #a78bfa); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
+
+## <span style="color: #a78bfa;">⚙ Configuration</span>
+
+</td></tr></table></td></tr></table>
 
 ```json
 // ~/.lyra/settings.json
@@ -774,77 +1282,207 @@ lyra verify                             # Run adversarial cross-model verificati
 
 ### Permission Modes
 
-| Mode | Behavior | Use Case |
-|------|----------|----------|
-| `plan` | Every tool call gated for approval | Default, safe for all work |
-| `auto-edit` | Trusted operations auto-approved | Faster pair programming |
-| `bypass-perms` | Full autonomy, audit-logged | Autonomous agent runs |
-| `auto_mode` | Self-directed with goal tracking | Long-running autonomous tasks |
+<table>
+<tr style="background: #8b5cf620;">
+<th style="color: #a78bfa;">Mode</th><th style="color: #a78bfa;">Behavior</th><th style="color: #a78bfa;">Use Case</th>
+</tr>
+<tr>
+<td><img src="https://img.shields.io/badge/plan-default-3b82f6?style=flat-square"></td>
+<td style="color: #94a3b8;">Every tool call gated for approval</td>
+<td style="color: #94a3b8;">Default, safe for all work</td>
+</tr>
+<tr>
+<td><img src="https://img.shields.io/badge/auto--edit-trusted-10b981?style=flat-square"></td>
+<td style="color: #94a3b8;">Trusted operations auto-approved</td>
+<td style="color: #94a3b8;">Faster pair programming</td>
+</tr>
+<tr>
+<td><img src="https://img.shields.io/badge/bypass--perms-autonomy-f97316?style=flat-square"></td>
+<td style="color: #94a3b8;">Full autonomy, audit-logged</td>
+<td style="color: #94a3b8;">Autonomous agent runs</td>
+</tr>
+<tr>
+<td><img src="https://img.shields.io/badge/auto__mode-self--directed-ef4444?style=flat-square"></td>
+<td style="color: #94a3b8;">Self-directed with goal tracking</td>
+<td style="color: #94a3b8;">Long-running autonomous tasks</td>
+</tr>
+</table>
 
 Switch inline with `Shift+Tab`.
 
 ---
 
-## Design Principles
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #f59e0b, #f97316, #ef4444); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
 
-1. **Tests First** — Every behavior change starts with a failing test. The TDD gate is enforced by the kernel.
-2. **Evidence Over Assertion** — Run the command before claiming the fix. The multi-agent verifier ensures output correctness.
-3. **Minimum Viable Diff** — The smallest change that makes the test pass. No speculative abstraction.
-4. **Transparent Failure** — Errors print the specific blocked path or missing precondition. No silent swallowing.
-5. **Immutable State** — Create new objects, never mutate. Pydantic models with `frozen=True` throughout.
-6. **Provider Agnostic** — The kernel has zero network dependencies. All provider clients live in `lyra-cli`.
-7. **Package Isolation** — Each package has its own `pyproject.toml`, tests, and README. Compose, don't inherit.
-8. **HIR Audit Trail** — Every agent action emits a JSONL event. Replay, inspect, or audit any session.
-9. **Safety by Separation** — Reasoning and execution run in structurally separated contexts (Parallax architecture).
-10. **Continuous Self-Improvement** — The harness observes its own performance and optimizes prompts AND code (Meta-Harness + AEvo loop).
-11. **Research-Backed** — Every novel technique traces to its source paper with a documented absorption mode.
-12. **Memory as a First-Class System** — 6-layer NeuroMemory with A-MAC admission, CoMem async pipeline, free-energy consolidation, and dual-process retrieval. Memory is reconstructed, not just retrieved.
-13. **Swarm by Default** — Multi-agent coordination with Raft/Byzantine/Gossip consensus. Latent-space communication. Worktree isolation. 12-worker background pool.
+## <span style="color: #fbbf24;">📐 Design Principles</span>
+
+</td></tr></table></td></tr></table>
+
+<table>
+<tr>
+<td width="30" align="center" style="background: #7c3aed20; color: #a78bfa; font-weight: bold;">1</td>
+<td style="background: #0d1117;"><b style="color: #c084fc;">Tests First</b></td>
+<td style="background: #0d1117; color: #94a3b8;">Every behavior change starts with a failing test. The TDD gate is enforced by the kernel.</td>
+</tr>
+<tr>
+<td width="30" align="center" style="background: #3b82f620; color: #60a5fa; font-weight: bold;">2</td>
+<td style="background: #0d1117;"><b style="color: #60a5fa;">Evidence Over Assertion</b></td>
+<td style="background: #0d1117; color: #94a3b8;">Run the command before claiming the fix. The multi-agent verifier ensures output correctness.</td>
+</tr>
+<tr>
+<td width="30" align="center" style="background: #10b98120; color: #34d399; font-weight: bold;">3</td>
+<td style="background: #0d1117;"><b style="color: #34d399;">Minimum Viable Diff</b></td>
+<td style="background: #0d1117; color: #94a3b8;">The smallest change that makes the test pass. No speculative abstraction.</td>
+</tr>
+<tr>
+<td width="30" align="center" style="background: #f59e0b20; color: #fbbf24; font-weight: bold;">4</td>
+<td style="background: #0d1117;"><b style="color: #fbbf24;">Transparent Failure</b></td>
+<td style="background: #0d1117; color: #94a3b8;">Errors print the specific blocked path or missing precondition. No silent swallowing.</td>
+</tr>
+<tr>
+<td width="30" align="center" style="background: #ef444420; color: #f87171; font-weight: bold;">5</td>
+<td style="background: #0d1117;"><b style="color: #f87171;">Immutable State</b></td>
+<td style="background: #0d1117; color: #94a3b8;">Create new objects, never mutate. Pydantic models with <code style="background:#1e293b;color:#f87171;">frozen=True</code> throughout.</td>
+</tr>
+<tr>
+<td width="30" align="center" style="background: #06b6d420; color: #22d3ee; font-weight: bold;">6</td>
+<td style="background: #0d1117;"><b style="color: #22d3ee;">Provider Agnostic</b></td>
+<td style="background: #0d1117; color: #94a3b8;">The kernel has zero network dependencies. All provider clients live in <code style="background:#1e293b;color:#22d3ee;">lyra-cli</code>.</td>
+</tr>
+<tr>
+<td width="30" align="center" style="background: #8b5cf620; color: #a78bfa; font-weight: bold;">7</td>
+<td style="background: #0d1117;"><b style="color: #a78bfa;">Package Isolation</b></td>
+<td style="background: #0d1117; color: #94a3b8;">Each package has its own <code style="background:#1e293b;color:#a78bfa;">pyproject.toml</code>, tests, and README. Compose, don't inherit.</td>
+</tr>
+<tr>
+<td width="30" align="center" style="background: #ec489920; color: #f472b6; font-weight: bold;">8</td>
+<td style="background: #0d1117;"><b style="color: #f472b6;">HIR Audit Trail</b></td>
+<td style="background: #0d1117; color: #94a3b8;">Every agent action emits a JSONL event. Replay, inspect, or audit any session.</td>
+</tr>
+<tr>
+<td width="30" align="center" style="background: #f9731620; color: #fb923c; font-weight: bold;">9</td>
+<td style="background: #0d1117;"><b style="color: #fb923c;">Safety by Separation</b></td>
+<td style="background: #0d1117; color: #94a3b8;">Reasoning and execution run in structurally separated contexts (Parallax architecture).</td>
+</tr>
+<tr>
+<td width="30" align="center" style="background: #14b8a620; color: #2dd4bf; font-weight: bold;">10</td>
+<td style="background: #0d1117;"><b style="color: #2dd4bf;">Continuous Self-Improvement</b></td>
+<td style="background: #0d1117; color: #94a3b8;">The harness observes its own performance and optimizes prompts AND code (Meta-Harness + AEvo loop).</td>
+</tr>
+<tr>
+<td width="30" align="center" style="background: #6366f120; color: #818cf8; font-weight: bold;">11</td>
+<td style="background: #0d1117;"><b style="color: #818cf8;">Research-Backed</b></td>
+<td style="background: #0d1117; color: #94a3b8;">Every novel technique traces to its source paper with a documented absorption mode.</td>
+</tr>
+<tr>
+<td width="30" align="center" style="background: #eab30820; color: #facc15; font-weight: bold;">12</td>
+<td style="background: #0d1117;"><b style="color: #facc15;">Memory as a First-Class System</b></td>
+<td style="background: #0d1117; color: #94a3b8;">6-layer NeuroMemory with A-MAC admission, CoMem async pipeline, free-energy consolidation, and dual-process retrieval.</td>
+</tr>
+<tr>
+<td width="30" align="center" style="background: #dc262620; color: #f87171; font-weight: bold;">13</td>
+<td style="background: #0d1117;"><b style="color: #f87171;">Swarm by Default</b></td>
+<td style="background: #0d1117; color: #94a3b8;">Multi-agent coordination with Raft/Byzantine/Gossip consensus. Latent-space communication. Worktree isolation.</td>
+</tr>
+</table>
 
 ---
 
-## Research Breakthroughs (V12 + Ultra Deep Research, May 2026)
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #7c3aed, #8b5cf6, #6366f1); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
 
-The culmination of deep research streams analyzing 79 papers and 50+ repos. Results synthesized into **17 ULTRA PLANS** across 3 waves.
+## <span style="color: #c084fc;">🔬 Research Breakthroughs</span> <span style="color: #94a3b8; font-size: 0.85em;">(V12 + Ultra Deep Research, May 2026)</span>
+
+</td></tr></table></td></tr></table>
+
+The culmination of deep research streams analyzing 100+ papers and 80+ repos.
 
 ### 6-Stream Research Summary
 
-| Stream | Focus | Sources | Key Finding | → Plan |
-|--------|-------|---------|-------------|--------|
-| 1 | Claude Code + Hermes Agent | 44 tools, 71 commands, 24 hooks | Complete feature parity gap analysis | 26 |
-| 2 | Skills Optimization & Evolution | 15 papers, 5 repos | SkillOpt: 52/52 benchmarks, +23.5pts | 21 |
-| 3 | Memory & Context Systems | 7+14 repos | TencentDB: 61% token reduction, MemPalace: R@5 99% | 22 |
-| 4 | Autonomous Agents & Federation | 17+ frameworks | Continuous-Claude relay-race, Ruflo zero-trust | 23 |
-| 5 | UI/UX, Voice & Themes | 9 voice tools, CLI-Anything, Warp | PeonPing 5-stage pipeline, 17+ themes | 24 |
-| 6 | Safety, Verification & Reasoning | 10+ papers, 10 benchmarks | MAVEN, zkAgent 294x speedup, TrustBench 87% harm reduction | 25 |
+<table>
+<tr style="background: #7c3aed20;">
+<th style="color: #c084fc;">#</th><th style="color: #c084fc;">Stream</th><th style="color: #c084fc;">Sources</th><th style="color: #c084fc;">Key Finding</th><th style="color: #c084fc;">→ Plan</th>
+</tr>
+<tr>
+<td style="color: #a78bfa; font-weight: bold;">1</td>
+<td style="color: #e2e8f0;">Claude Code + Hermes Agent</td>
+<td style="color: #94a3b8;">44 tools, 71 commands, 24 hooks</td>
+<td style="color: #94a3b8;">Complete feature parity gap analysis</td>
+<td style="color: #60a5fa;">26</td>
+</tr>
+<tr>
+<td style="color: #a78bfa; font-weight: bold;">2</td>
+<td style="color: #e2e8f0;">Skills Optimization & Evolution</td>
+<td style="color: #94a3b8;">15 papers, 5 repos</td>
+<td style="color: #94a3b8;">SkillOpt: 52/52 benchmarks, +23.5pts</td>
+<td style="color: #60a5fa;">21</td>
+</tr>
+<tr>
+<td style="color: #a78bfa; font-weight: bold;">3</td>
+<td style="color: #e2e8f0;">Memory & Context Systems</td>
+<td style="color: #94a3b8;">7+14 repos</td>
+<td style="color: #94a3b8;">TencentDB: 61% token reduction, MemPalace: R@5 99%</td>
+<td style="color: #60a5fa;">22</td>
+</tr>
+<tr>
+<td style="color: #a78bfa; font-weight: bold;">4</td>
+<td style="color: #e2e8f0;">Autonomous Agents & Federation</td>
+<td style="color: #94a3b8;">17+ frameworks</td>
+<td style="color: #94a3b8;">Continuous-Claude relay-race, Ruflo zero-trust</td>
+<td style="color: #60a5fa;">23</td>
+</tr>
+<tr>
+<td style="color: #a78bfa; font-weight: bold;">5</td>
+<td style="color: #e2e8f0;">UI/UX, Voice & Themes</td>
+<td style="color: #94a3b8;">9 voice tools, CLI-Anything, Warp</td>
+<td style="color: #94a3b8;">PeonPing 5-stage pipeline, 17+ themes</td>
+<td style="color: #60a5fa;">24</td>
+</tr>
+<tr>
+<td style="color: #a78bfa; font-weight: bold;">6</td>
+<td style="color: #e2e8f0;">Safety, Verification & Reasoning</td>
+<td style="color: #94a3b8;">10+ papers, 10 benchmarks</td>
+<td style="color: #94a3b8;">MAVEN, zkAgent 294x speedup, TrustBench 87% harm reduction</td>
+<td style="color: #60a5fa;">25</td>
+</tr>
+</table>
 
 ### Core Breakthroughs (V12)
 
-| # | Breakthrough | Source | Impact |
-|---|-------------|--------|--------|
-| 1 | **SkillOpt Text-Space Skill Optimizer** | [Microsoft](https://github.com/microsoft/SkillOpt) · [arXiv 2605.23904](https://arxiv.org/pdf/2605.23904) | +23.5pts, 52/52 cells won, 18-module impl |
-| 2 | **Ratchet Lifecycle Management** | [arXiv 2605.22148](https://arxiv.org/abs/2605.22148) | Non-divergence guarantee, C=50 active cap |
-| 3 | **5-Tier Memory Hierarchy** | [TencentDB-Agent-Memory](https://github.com/Tencent/TencentDB-Agent-Memory) + [MemPalace](https://github.com/MemPalace/mempalace) + [CodeGraph](https://github.com/colbymchenry/codegraph) | Verbatim-first, hybrid BM25+vector+RRF, temporal KGs |
-| 4 | **Continuous Relay-Race Autonomy** | [Continuous Claude](https://github.com/AnandChowdhary/continuous-claude) | Triple-budget governance, stall detection, checkpoint handoff |
-| 5 | **Zero-Trust Agent Federation** | [Ruflo](https://github.com/ruvnet/ruflo) | mTLS + behavioral trust scoring, mesh topology |
-| 6 | **MAVEN Adversarial Verification** | [ARIS](https://arxiv.org/abs/2605.03042) + MAVEN | Skeptic-Researcher-Judge, cross-model, diversity collapse prevention |
-| 7 | **Spectral Guardrails** | Spectral Guardrails | 97.7% recall hallucination detection, real-time monitoring |
-| 8 | **zkAgent Cryptographic Proofs** | zkAgent | 294x speedup, 0.45s verification of entire agent execution |
-| 9 | **Warp Block Model TUI** | [Warp](https://github.com/warpdotdev/warp) + [CLI-Anything](https://github.com/HKUDS/CLI-Anything) | BlockList/SumTree, dual-mode REPL, 10+ interactive features |
-| 10 | **CESP v1.0 Voice Protocol** | [PeonPing](https://github.com/PeonPing/peonping) + 9 voice tools | 12 event categories, 6-layer pack hierarchy, 3 game packs |
-| 11 | **200+ Tool Ecosystem** | [Hermes-Agent](https://github.com/nousresearch/hermes-agent) + [Claude Code](https://code.claude.com/docs/en/tools) | 20 toolsets, 25+ MCP servers, 24 hook events, 5 hook types |
-| 12 | **Plugin Marketplace** | Claude Code ecosystem (1,424+ skills) | Install/configure/enable/disable/upgrade lifecycle, sandboxed |
+<table>
+<tr style="background: #f59e0b20;">
+<th style="color: #fbbf24;">#</th><th style="color: #fbbf24;">Breakthrough</th><th style="color: #fbbf24;">Source</th><th style="color: #fbbf24;">Impact</th>
+</tr>
+<tr><td style="color: #fbbf24;">1</td><td style="color: #e2e8f0;"><b>SkillOpt Text-Space Skill Optimizer</b></td><td style="color: #94a3b8;">Microsoft · arXiv 2605.23904</td><td style="color: #34d399;">+23.5pts, 52/52 cells won</td></tr>
+<tr><td style="color: #fbbf24;">2</td><td style="color: #e2e8f0;"><b>Ratchet Lifecycle Management</b></td><td style="color: #94a3b8;">arXiv 2605.22148</td><td style="color: #34d399;">Non-divergence guarantee, C=50 cap</td></tr>
+<tr><td style="color: #fbbf24;">3</td><td style="color: #e2e8f0;"><b>5-Tier Memory Hierarchy</b></td><td style="color: #94a3b8;">TencentDB + MemPalace + CodeGraph</td><td style="color: #34d399;">BM25+vector+RRF, temporal KGs</td></tr>
+<tr><td style="color: #fbbf24;">4</td><td style="color: #e2e8f0;"><b>Continuous Relay-Race Autonomy</b></td><td style="color: #94a3b8;">Continuous Claude</td><td style="color: #34d399;">Triple-budget governance, checkpoint handoff</td></tr>
+<tr><td style="color: #fbbf24;">5</td><td style="color: #e2e8f0;"><b>Zero-Trust Agent Federation</b></td><td style="color: #94a3b8;">Ruflo</td><td style="color: #34d399;">mTLS + behavioral trust scoring</td></tr>
+<tr><td style="color: #fbbf24;">6</td><td style="color: #e2e8f0;"><b>MAVEN Adversarial Verification</b></td><td style="color: #94a3b8;">ARIS + MAVEN</td><td style="color: #34d399;">Skeptic-Researcher-Judge, cross-model</td></tr>
+<tr><td style="color: #fbbf24;">7</td><td style="color: #e2e8f0;"><b>Spectral Guardrails</b></td><td style="color: #94a3b8;">Spectral Guardrails</td><td style="color: #34d399;">97.7% recall hallucination detection</td></tr>
+<tr><td style="color: #fbbf24;">8</td><td style="color: #e2e8f0;"><b>zkAgent Cryptographic Proofs</b></td><td style="color: #94a3b8;">zkAgent</td><td style="color: #34d399;">294x speedup, 0.45s verification</td></tr>
+<tr><td style="color: #fbbf24;">9</td><td style="color: #e2e8f0;"><b>Warp Block Model TUI</b></td><td style="color: #94a3b8;">Warp + CLI-Anything</td><td style="color: #34d399;">BlockList/SumTree, dual-mode REPL</td></tr>
+<tr><td style="color: #fbbf24;">10</td><td style="color: #e2e8f0;"><b>CESP v1.0 Voice Protocol</b></td><td style="color: #94a3b8;">PeonPing + 9 voice tools</td><td style="color: #34d399;">12 event categories, 6-layer hierarchy</td></tr>
+<tr><td style="color: #fbbf24;">11</td><td style="color: #e2e8f0;"><b>200+ Tool Ecosystem</b></td><td style="color: #94a3b8;">Hermes-Agent + Claude Code</td><td style="color: #34d399;">20 toolsets, 25+ MCP servers</td></tr>
+<tr><td style="color: #fbbf24;">12</td><td style="color: #e2e8f0;"><b>Plugin Marketplace</b></td><td style="color: #94a3b8;">Claude Code ecosystem (1,424+ skills)</td><td style="color: #34d399;">Install/configure/enable/disable lifecycle</td></tr>
+</table>
+
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #7c3aed15, #ec489915); border-left: 4px solid #8b5cf6; padding: 12px 16px; border-radius: 0 8px 8px 0; color: #94a3b8;">
 
 **New color themes:** 25+ themes across 7 families — Dark & Modern (9), Warm & Cozy (6), Nature & Forest (2), Retro & Synth (3), Accessible & High Contrast (2), SilkCircuit (4), PaperColor & Classic (3)
 
 **Voice packs:** Warcraft III Peon, StarCraft Marine, Cyberpunk Netrunner + CESP v1.0 6-layer sound pack hierarchy
 
-**Ultra plan documents:** 6 documents, 8,128 lines, 42,687 words of actionable implementation plans
-**Research investment:** 1,600,000+ tokens across 8+ specialized research streams (V12 + Ultra Deep Research)
+**Ultra plan documents:** 6 documents, 8,128 lines, 42,687 words | **Research investment:** 1,600,000+ tokens across 8+ research streams
+
+</td></tr></table>
 
 ---
 
-## Development
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #6366f1, #3b82f6, #06b6d4); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
+
+## <span style="color: #818cf8;">🛠 Development</span>
+
+</td></tr></table></td></tr></table>
 
 ```bash
 # Full setup
@@ -869,44 +1507,39 @@ make ci
 
 ## Documentation
 
-| Resource | Description |
-|----------|-------------|
-| [`docs/architecture/`](docs/architecture/) | Canonical architecture reference with diagrams |
-| [`ARCHITECTURE.md`](ARCHITECTURE.md) | High-level system topology and data flow |
-| [`docs/architecture/gap-analysis.md`](docs/architecture/gap-analysis.md) | Gap analysis: current Lyra vs AGI target state (7 domains) |
-| [`docs/architecture/breakthrough-architectures.md`](docs/architecture/breakthrough-architectures.md) | 3 breakthrough architectures: Safety, Compound AI, Self-Evolving Skills |
-| [`docs/architecture/implementation-roadmap.md`](docs/architecture/implementation-roadmap.md) | 16-week master implementation plan with milestones |
-| [`docs/architecture/safety-architecture.md`](docs/architecture/safety-architecture.md) | Parallax-style cognitive-executive separation |
-| [`docs/architecture/memory-consolidation.md`](docs/architecture/memory-consolidation.md) | Dream 4-phase consolidation design |
-| [`docs/architecture/harness-evolution.md`](docs/architecture/harness-evolution.md) | Meta-optimization loop architecture |
-| [`docs/research/papers.md`](docs/research/papers.md) | 79 paper absorption matrix |
-| [`docs/research/repos.md`](docs/research/repos.md) | 50+ repository absorption matrix |
-| [`docs/synthesis/`](docs/synthesis/) | 7-domain synthesis: Memory, Skills, Tools, Orchestration, Autonomy, UI/UX, Safety |
-| [`docs/research/synthesis-2026-05-27.md`](docs/research/synthesis-2026-05-27.md) | Comprehensive research synthesis (May 2026) |
-| [`docs/research/index.md`](docs/research/index.md) | Research hub — 8+ deep-research streams |
-| [`docs/plans/ultra-plan-autonomy-engine.md`](docs/plans/ultra-plan-autonomy-engine.md) | Full autonomy & self-evolution (1,252 lines) |
-| [`docs/plans/ultra-plan-memory-architecture.md`](docs/plans/ultra-plan-memory-architecture.md) | 6-layer NeuroMemory architecture (1,572 lines) |
-| [`docs/plans/ultra-plan-skills-ecosystem.md`](docs/plans/ultra-plan-skills-ecosystem.md) | 64-skill ecosystem & lifecycle (1,374 lines) |
-| [`docs/plans/ultra-plan-multi-agent-swarm.md`](docs/plans/ultra-plan-multi-agent-swarm.md) | Multi-agent swarm architecture (1,305 lines) |
-| [`docs/plans/ultra-plan-ui-ux-upgrade.md`](docs/plans/ultra-plan-ui-ux-upgrade.md) | Themes, voice, keybindings (1,255 lines) |
-| [`docs/plans/ultra-plan-tools-mcp-plugin.md`](docs/plans/ultra-plan-tools-mcp-plugin.md) | Tools, MCP, plugin & hook ecosystem (1,370 lines) |
-| [plans/README.md](plans/README.md) | Ultra Plans Index — all 20 plans |
-| [`docs/roadmap.md`](docs/roadmap.md) | Development roadmap |
-| [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) | Contributor guide |
-| [`CHANGELOG.md`](CHANGELOG.md) | Version history |
-| [`SOUL.md`](SOUL.md) | Project persona and operating principles |
+<table>
+<tr style="background: #3b82f620;">
+<th style="color: #60a5fa;">Resource</th><th style="color: #60a5fa;">Description</th>
+</tr>
+<tr><td style="color: #e2e8f0;"><a href="docs/architecture/">docs/architecture/</a></td><td style="color: #94a3b8;">Canonical architecture reference with diagrams</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="ARCHITECTURE.md">ARCHITECTURE.md</a></td><td style="color: #94a3b8;">High-level system topology and data flow</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="docs/architecture/safety-architecture.md">safety-architecture.md</a></td><td style="color: #94a3b8;">Parallax-style cognitive-executive separation</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="docs/architecture/memory-consolidation.md">memory-consolidation.md</a></td><td style="color: #94a3b8;">Dream 4-phase consolidation design</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="docs/architecture/harness-evolution.md">harness-evolution.md</a></td><td style="color: #94a3b8;">Meta-optimization loop architecture</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="docs/research/papers.md">docs/research/papers.md</a></td><td style="color: #94a3b8;">100+ paper absorption matrix</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="docs/research/repos.md">docs/research/repos.md</a></td><td style="color: #94a3b8;">80+ repository absorption matrix</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="plans/README.md">plans/README.md</a></td><td style="color: #94a3b8;">Ultra Plans Index — all 33 plans</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="docs/roadmap.md">docs/roadmap.md</a></td><td style="color: #94a3b8;">Development roadmap</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="docs/CONTRIBUTING.md">docs/CONTRIBUTING.md</a></td><td style="color: #94a3b8;">Contributor guide</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="CHANGELOG.md">CHANGELOG.md</a></td><td style="color: #94a3b8;">Version history</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="SOUL.md">SOUL.md</a></td><td style="color: #94a3b8;">Project persona and operating principles</td></tr>
+</table>
 
 ---
 
 ## Research Behind Lyra
 
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #7c3aed08, #3b82f608); border-left: 4px solid #8b5cf6; padding: 16px 20px; border-radius: 0 8px 8px 0; color: #94a3b8;">
+
 Lyra's architecture is informed by deep research across the AI agent ecosystem:
 
-**Papers absorbed (79):** 7 waves spanning reasoning (Tournament TTS, SR2AM, ReasoningBank, SWE-Search), memory (A-Mem, MRAgent, MemGrad, CoMem, CraniMem, NGC), self-evolution (GEPA v2, Meta-Harness, AEvo, PRISM, Trace2Skill), skills (SkillOpt, SkillOS, Ratchet, SkillGen, MIND-Skill), safety (Parallax, ARIS, Knowing-Doing Gap), agent communication (RecursiveMAS, SemaClaw), and 20 ICLR 2026 MemAgent Workshop papers.
+**Papers absorbed (100+):** 8 waves spanning reasoning (Tournament TTS, SR2AM, ReasoningBank, SWE-Search), memory (A-Mem, MRAgent, MemGrad, CoMem, CraniMem, NGC, Entropic Memory, TencentDB-Agent-Memory), self-evolution (AlphaEvolve, GEPA v2, Meta-Harness, AEvo, PRISM, Trace2Skill, Self-Challenging), skills (SkillOpt, SkillOS, Ratchet, SkillGen, MIND-Skill), safety (Parallax, ARIS, Knowing-Doing Gap, Anthropic Agentic Misalignment), agent communication (RecursiveMAS, SemaClaw), model routing (Morph Router, LiteLLM, OpenRouter), and 22 ICLR 2026 MemAgent Workshop papers.
 
-**Repositories studied (50+):** Claude Code, Hermes-agent, Cline, Aider, OpenHands, CrewAI, AutoGPT, LangGraph, GBrain, OpenCode, OpenDev, RTK, Caveman, DCI-Agent-Lite, Graphify, TencentDB-Agent-Memory, Acontext, CodeGraph, claude-mem, MemPalace, CLI-Anything, ARS, ECC, OpenHuman, PeonPing, superpowers, continuous-claude, Multica, CowAgent, Mem0, oh-my-claudecode, Ruflo, and more.
+**Repositories studied (80+):** Claude Code, Hermes-agent, Cline, Aider, OpenHands, CrewAI, AutoGPT, LangGraph, GBrain, OpenCode, OpenDev, RTK, Caveman, DCI-Agent-Lite, Graphify, TencentDB-Agent-Memory, Acontext, CodeGraph, claude-mem, MemPalace, CLI-Anything, ARS, ECC, OpenHuman, PeonPing, superpowers, continuous-claude, Multica, CowAgent, Mem0, oh-my-claudecode, Ruflo, AlphaEvolve (DeepMind), CheetahClaws, gstack, Warp, tmux, cmux, and more.
 
 See [`docs/research/`](docs/research/) for the complete research library.
+
+</td></tr></table>
 
 ---
 
@@ -916,10 +1549,14 @@ MIT — see [LICENSE](LICENSE)
 
 ---
 
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #7c3aed, #8b5cf6, #a78bfa, #c084fc); padding: 3px; border-radius: 12px;"><table width="100%"><tr><td style="background: #0d1117; padding: 20px 24px; border-radius: 10px;">
+
 <div align="center">
 
-**[Quickstart](#quickstart)** · **[Architecture](#architecture)** · **[Innovations](#innovations)** · **[Plan 13](#breakthrough-plan-13)** · **[Packages](#package-catalog)** · **[Themes](#color-themes)** · **[Contributing](docs/CONTRIBUTING.md)** · **[Changelog](CHANGELOG.md)**
+**[Quickstart](#quickstart)** · **[Architecture](#architecture)** · **[Innovations](#innovations)** · **[Ultra Plans](#ultra-plans)** · **[Packages](#package-catalog)** · **[Themes](#color-themes)** · **[Contributing](docs/CONTRIBUTING.md)** · **[Changelog](CHANGELOG.md)**
 
-Built with Python, TypeScript, and the conviction that AI agents should be open, auditable, self-improving, and architecturally safe.
+<span style="color: #94a3b8;">Built with Python, TypeScript, and the conviction that AI agents should be</span> <span style="color: #a78bfa;">open</span><span style="color: #94a3b8;">,</span> <span style="color: #34d399;">auditable</span><span style="color: #94a3b8;">,</span> <span style="color: #fbbf24;">self-improving</span><span style="color: #94a3b8;">, and</span> <span style="color: #f87171;">architecturally safe</span><span style="color: #94a3b8;">.</span>
 
 </div>
+
+</td></tr></table></td></tr></table>
