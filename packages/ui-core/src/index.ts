@@ -37,5 +37,5 @@ export * from './plugins'
 // Orchestration
 export * from './orchestration'
 
-// Plugins
-export * from './plugins'
+// Monitoring
+export * from './monitoring'
