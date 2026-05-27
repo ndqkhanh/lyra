@@ -17,6 +17,10 @@ import { DISPLAY_MODE_PRESETS } from '../types'
 import { toRenderItems } from '../utils/rendering'
 import { observability } from '../observability'
 import { IndicatorStateMachine } from '../stateMachine'
+import { getThemePreset, getDefaultTheme, type ThemePalette } from '../theme/presets'
+import { buildSkinFromPreset, type SkinConfig } from '../theme/skin'
+import { LYRA_BRAND } from '../theme/theme'
+import { createStreamingDebouncer, type StreamingDebouncer } from '../streaming'
 
 // Enable Immer MapSet plugin
 enableMapSet()
@@ -33,7 +37,10 @@ interface PerformanceMetrics {
 // State machine registry
 const stateMachines = new Map<string, IndicatorStateMachine>()
 
-interface UIStore {
+// Streaming debouncer for 60 FPS updates
+let streamingDebouncer: StreamingDebouncer | null = null
+
+export interface UIStore {
   // Session state
   sessions: Map<string, SessionState>
   activeSessionId: string | null
@@ -65,6 +72,11 @@ interface UIStore {
   addToolCall: (sessionId: string, tool: ToolCallInfo) => void
   updateToolCall: (sessionId: string, toolId: string, status: ToolCallInfo['status']) => void
 
+  // Queue management actions
+  enqueueMessage: (sessionId: string, message: Message) => void
+  dequeueMessage: (sessionId: string) => Message | null
+  clearQueue: (sessionId: string) => void
+
   // Phase tracking actions
   setPhases: (sessionId: string, phases: PhaseInfo[]) => void
   updatePhase: (sessionId: string, phaseId: string, status: PhaseInfo['status']) => void
@@ -79,10 +91,20 @@ interface UIStore {
   emitEvent: (sessionId: string, type: string, data?: any) => void
   getStateMachine: (sessionId: string) => IndicatorStateMachine | null
 
+  // Theme actions
+  activeThemeId: string
+  _skinCache: SkinConfig | null
+  setActiveTheme: (themeId: string) => void
+  getActiveThemeColors: () => ThemePalette
+  getActiveSkin: () => SkinConfig
+
   // Selectors
   getActiveSession: () => SessionState | null
   getRenderItems: (sessionId: string) => RenderItem[]
   getMetrics: (sessionId: string) => PerformanceMetrics | null
+
+  // Session lifecycle
+  destroySession: (sessionId: string) => void
 
   // Performance monitoring
   recordRender: (sessionId: string, duration: number) => void
@@ -98,6 +120,8 @@ export const useUIStore = create<UIStore>()(
     currentModel: '',
     currentProvider: '',
     metrics: new Map(),
+    activeThemeId: 'dracula',
+    _skinCache: null as SkinConfig | null,
 
     setTransport: (transport) => {
       set((state) => {
@@ -111,13 +135,14 @@ export const useUIStore = create<UIStore>()(
           id,
           messages: [],
           previewMessages: [],
+          queuedMessages: [],
           isStreaming: false,
           isThinking: false,
           activeTools: [],
           phases: [],
           displayMode: 'standard',
           displayConfig: DISPLAY_MODE_PRESETS.standard,
-          permissionMode: 'allow',  // Default to bypass/allow mode
+          permissionMode: 'ask',  // Default to ask mode for security
           currentModel: state.currentModel,
           currentProvider: state.currentProvider,
         })
@@ -157,7 +182,6 @@ export const useUIStore = create<UIStore>()(
     },
 
     addMessage: (sessionId, message) => {
-      console.error(`[Store] addMessage: session=${sessionId}, role=${message.role}, content="${String(message.content).slice(0, 50)}"`)
       set((state) => {
         const session = state.sessions.get(sessionId)
         if (session) {
@@ -190,49 +214,67 @@ export const useUIStore = create<UIStore>()(
     },
 
     updateStreamingMessage: (sessionId, chunk) => {
-      set((state) => {
-        const session = state.sessions.get(sessionId)
-        if (!session) return
+      // Initialize debouncer on first use
+      if (!streamingDebouncer) {
+        streamingDebouncer = createStreamingDebouncer((update) => {
+          // This callback runs at 60 FPS with accumulated content
+          set((state) => {
+            const session = state.sessions.get(update.sessionId)
+            if (!session) return
 
-        session.isStreaming = true
+            session.isStreaming = true
 
-        if (session.previewMessages.length === 0) {
-          // Create new streaming message
-          const newMsg: AssistantMessage = {
-            id: `preview-${Date.now()}`,
-            role: 'assistant',
-            content: chunk,
-            timestamp: Date.now(),
-            streaming: true
-          }
-          session.previewMessages.push(newMsg)
+            if (session.previewMessages.length === 0) {
+              // Create new streaming message
+              const newMsg: AssistantMessage = {
+                id: `preview-${Date.now()}`,
+                role: 'assistant',
+                content: update.content,
+                timestamp: update.timestamp,
+                streaming: true
+              }
+              session.previewMessages.push(newMsg)
 
-          // Emit stream start event
-          observability.emit({
-            type: 'stream_start',
-            timestamp: Date.now(),
-            sessionId,
-            data: { messageId: newMsg.id }
+              // Emit stream start event
+              observability.emit({
+                type: 'stream_start',
+                timestamp: update.timestamp,
+                sessionId: update.sessionId,
+                data: { messageId: newMsg.id }
+              })
+            } else {
+              // Replace content with accumulated buffer
+              const lastMsg = session.previewMessages[session.previewMessages.length - 1]
+              if (lastMsg.role === 'assistant') {
+                lastMsg.content = update.content
+
+                // Emit stream chunk event
+                observability.emit({
+                  type: 'stream_chunk',
+                  timestamp: update.timestamp,
+                  sessionId: update.sessionId,
+                  data: { content: update.content }
+                })
+              }
+            }
           })
-        } else {
-          // Append chunk to existing content (accumulate tokens)
-          const lastMsg = session.previewMessages[session.previewMessages.length - 1]
-          if (lastMsg.role === 'assistant') {
-            lastMsg.content += chunk  // Append instead of replace
+        }, {
+          targetFPS: 60,
+          quantize: true,
+          quantizeBinSize: 10
+        })
+      }
 
-            // Emit stream chunk event
-            observability.emit({
-              type: 'stream_chunk',
-              timestamp: Date.now(),
-              sessionId,
-              data: { content: chunk }
-            })
-          }
-        }
-      })
+      // Push chunk to debouncer (will batch at 60 FPS)
+      streamingDebouncer.push(sessionId, chunk)
     },
 
     commitStreamingMessage: (sessionId) => {
+      // Flush any remaining buffered content
+      if (streamingDebouncer) {
+        streamingDebouncer.flush(sessionId)
+      }
+
       set((state) => {
         const session = state.sessions.get(sessionId)
         if (session && session.previewMessages.length > 0) {
@@ -265,6 +307,11 @@ export const useUIStore = create<UIStore>()(
           })
         }
       })
+
+      // Clean up debouncer state
+      if (streamingDebouncer) {
+        streamingDebouncer.cleanup(sessionId)
+      }
 
       // Emit stream end event
       observability.emit({
@@ -374,6 +421,73 @@ export const useUIStore = create<UIStore>()(
       })
     },
 
+    // Queue management actions
+
+    enqueueMessage: (sessionId, message) => {
+      set((state) => {
+        const session = state.sessions.get(sessionId)
+        if (session) {
+          session.queuedMessages.push(message)
+        }
+      })
+      observability.emit({
+        type: 'message_queued',
+        timestamp: Date.now(),
+        sessionId,
+        data: { messageId: message.id },
+      })
+    },
+
+    dequeueMessage: (sessionId) => {
+      let messageId: string | undefined = undefined
+      let messageContent: string | undefined = undefined
+
+      set((state) => {
+        const session = state.sessions.get(sessionId)
+        if (session && session.queuedMessages.length > 0) {
+          const msg = session.queuedMessages[0]
+          if (msg) {
+            messageId = msg.id
+            messageContent = msg.content
+          }
+          session.queuedMessages.shift()
+        }
+      })
+
+      if (messageId && messageContent !== undefined) {
+        observability.emit({
+          type: 'message_dequeued',
+          timestamp: Date.now(),
+          sessionId,
+          data: { messageId },
+        })
+
+        // Reconstruct the message from stored values
+        return {
+          id: messageId,
+          role: 'user' as const,
+          content: messageContent,
+          timestamp: Date.now(),
+        }
+      }
+
+      return null
+    },
+
+    clearQueue: (sessionId) => {
+      set((state) => {
+        const session = state.sessions.get(sessionId)
+        if (session) {
+          session.queuedMessages = []
+        }
+      })
+      observability.emit({
+        type: 'queue_cleared',
+        timestamp: Date.now(),
+        sessionId,
+      })
+    },
+
     // Phase tracking actions
 
     setPhases: (sessionId, phases) => {
@@ -451,13 +565,9 @@ export const useUIStore = create<UIStore>()(
     getRenderItems: (sessionId) => {
       const session = get().sessions.get(sessionId)
       if (!session) {
-        console.error(`[Store] getRenderItems: session ${sessionId} NOT FOUND`)
         return []
       }
       const items = toRenderItems(session.messages, session.previewMessages)
-      if (items.length > 0) {
-        console.error(`[Store] getRenderItems: ${items.length} items, msgs=${session.messages.length}, preview=${session.previewMessages.length}`)
-      }
       return items
     },
 
@@ -487,6 +597,60 @@ export const useUIStore = create<UIStore>()(
           metrics.peakMemoryUsage = Math.max(metrics.peakMemoryUsage, usage)
         }
       })
-    }
+    },
+
+    // Theme actions
+    setActiveTheme: (themeId) => {
+      set((state) => {
+        state.activeThemeId = themeId
+        // Rebuild skin cache so getActiveSkin() returns stable reference
+        const preset = getThemePreset(themeId) ?? getDefaultTheme()
+        state._skinCache = buildSkinFromPreset(preset, {
+          agentName: LYRA_BRAND.name,
+          welcome: LYRA_BRAND.welcome,
+          goodbye: LYRA_BRAND.goodbye,
+          promptSymbol: LYRA_BRAND.prompt,
+          helpHeader: LYRA_BRAND.helpHeader,
+        })
+      })
+    },
+
+    getActiveThemeColors: () => {
+      const themeId = get().activeThemeId
+      const preset = getThemePreset(themeId) ?? getDefaultTheme()
+      return preset.palette
+    },
+
+    getActiveSkin: () => {
+      const state = get()
+      if (state._skinCache) return state._skinCache
+      // Lazy init: build and cache on first access
+      const preset = getThemePreset(state.activeThemeId) ?? getDefaultTheme()
+      const skin = buildSkinFromPreset(preset, {
+        agentName: LYRA_BRAND.name,
+        welcome: LYRA_BRAND.welcome,
+        goodbye: LYRA_BRAND.goodbye,
+        promptSymbol: LYRA_BRAND.prompt,
+        helpHeader: LYRA_BRAND.helpHeader,
+      })
+      set((s) => { s._skinCache = skin })
+      return skin
+    },
+
+    // Session lifecycle
+    destroySession: (sessionId) => {
+      const machine = stateMachines.get(sessionId)
+      if (machine) {
+        machine.reset()
+        stateMachines.delete(sessionId)
+      }
+      set((state) => {
+        state.sessions.delete(sessionId)
+        state.metrics.delete(sessionId)
+        if (state.activeSessionId === sessionId) {
+          state.activeSessionId = null
+        }
+      })
+    },
   }))
 )
