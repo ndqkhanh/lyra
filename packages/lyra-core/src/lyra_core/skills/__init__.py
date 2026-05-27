@@ -37,6 +37,15 @@ from .synthesizer import (
     SynthesisError,
     SynthesisReport,
 )
+from .compactor import CompactionReport, SkillCompactor
+from .instinct import (
+    DetectedPattern,
+    InstinctReport,
+    InstinctSystem,
+    Observation,
+    ObservationType,
+    PatternType,
+)
 from .validation_gate import (
     GateNumber,
     GateResult,
@@ -46,6 +55,7 @@ from .validation_gate import (
 )
 
 __all__ = [
+    "CompactionReport",
     "CallableFederator",
     "FederatedRegistry",
     "FederationConflict",
@@ -54,13 +64,20 @@ __all__ = [
     "GateNumber",
     "GateResult",
     "GateStatus",
+    "DetectedPattern",
     "HybridSkillRouter",
+    "InstinctReport",
+    "InstinctSystem",
     "KnowledgeTransferEngine",
+    "Observation",
+    "ObservationType",
     "OptimizationReport",
     "PatternMatch",
+    "PatternType",
     "RouterDecision",
     "Skill",
     "SkillAlreadyExists",
+    "SkillCompactor",
     "SkillEmbedding",
     "SkillNotFound",
     "SkillManifest",
