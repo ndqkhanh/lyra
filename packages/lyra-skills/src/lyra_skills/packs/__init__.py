@@ -3,7 +3,22 @@ from __future__ import annotations
 
 from pathlib import Path
 
-_PACK_NAMES = ["atomic-skills", "tdd-sprint", "karpathy", "safety"]
+_PACK_NAMES = [
+    "atomic-skills",
+    "tdd-sprint",
+    "karpathy",
+    "safety",
+    "migration",
+    "debugging",
+    "optimization",
+    "security",
+    "refactoring",
+    "testing",
+    "devops",
+    "documentation",
+    "data",
+    "general",
+]
 
 
 def shipped_pack_roots() -> list[Path]:
