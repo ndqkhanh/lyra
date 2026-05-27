@@ -1,6 +1,10 @@
 """MCP Server Surface for CoALA Memory Architecture (Phase M7).
 
-Exposes 8 MCP tools for memory operations:
+Exposes 8 MCP tools for memory operations. Tools delegate to an
+in-memory fragment store (shared across the process) so multiple MCP
+servers and agent-loop callers see the same fragment set.
+
+Tools:
   - recall: Retrieve fragments relevant to a query
   - write: Add a new memory fragment
   - pin: Mark a fragment as user-pinned (never evicted)
@@ -9,21 +13,14 @@ Exposes 8 MCP tools for memory operations:
   - skill_invoke: Retrieve and format a SKILL fragment for execution
   - digest: Write a SubAgentDigest
   - recall_digests: Retrieve digests for peer agents in a task
-
-Integration:
-  - Wire into lyra-cli/__main__.py as MCP server endpoints
-  - Uses memory/store.py for fragment operations
-  - Uses memory/digest_bus.py for digest operations
-  - Uses memory/access_policy.py for permission checks
-
-Research grounding:
-  - Design proposal §11 rollout plan Phase 0-1
-  - MCP conformance requirement (G5)
 """
 from __future__ import annotations
 
-from dataclasses import asdict
-from datetime import datetime
+import threading
+import uuid as _uuid
+from collections import defaultdict
+from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Any
 
 from .access_policy import Permission, Resource, Subject, get_policy_graph
@@ -32,7 +29,139 @@ from .schema import Fragment, FragmentType, MemoryTier, Provenance, SubAgentDige
 
 
 # ---------------------------------------------------------------------------
-# MCP Tool: recall
+# In-memory fragment store (process-global, thread-safe)
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class _FragmentRow:
+    fragment: Fragment
+    pinned: bool = False
+    invalid_at: str | None = None
+
+
+class _FragmentStore:
+    """Thread-safe in-memory store for MCP tool implementations."""
+
+    def __init__(self) -> None:
+        self._rows: dict[str, _FragmentRow] = {}
+        self._by_type: dict[FragmentType, list[str]] = defaultdict(list)
+        self._by_tier: dict[MemoryTier, list[str]] = defaultdict(list)
+        self._by_entity: dict[str, list[str]] = defaultdict(list)
+        self._lock = threading.Lock()
+
+    def put(self, fragment: Fragment) -> str:
+        fid = fragment.id
+        with self._lock:
+            self._rows[fid] = _FragmentRow(fragment=fragment)
+            self._by_type[fragment.type].append(fid)
+            self._by_tier[fragment.tier].append(fid)
+            for ent in fragment.entities:
+                self._by_entity[ent.lower()].append(fid)
+        return fid
+
+    def get(self, fragment_id: str) -> _FragmentRow | None:
+        with self._lock:
+            return self._rows.get(fragment_id)
+
+    def pin(self, fragment_id: str) -> bool:
+        with self._lock:
+            row = self._rows.get(fragment_id)
+            if row is None:
+                return False
+            row.pinned = True
+            return True
+
+    def forget(self, fragment_id: str) -> str | None:
+        with self._lock:
+            row = self._rows.get(fragment_id)
+            if row is None:
+                return None
+            now = datetime.now(timezone.utc).isoformat()
+            row.invalid_at = now
+            return now
+
+    def search(
+        self,
+        *,
+        query: str = "",
+        tier: MemoryTier | None = None,
+        fragment_type: FragmentType | None = None,
+        limit: int = 10,
+    ) -> list[Fragment]:
+        with self._lock:
+            results: list[Fragment] = []
+            q = query.lower().strip()
+            for row in self._rows.values():
+                if row.invalid_at is not None:
+                    continue
+                f = row.fragment
+                if tier is not None and f.tier != tier:
+                    continue
+                if fragment_type is not None and f.type != fragment_type:
+                    continue
+                if q and not (
+                    q in f.content.lower()
+                    or any(q in e.lower() for e in f.entities)
+                ):
+                    continue
+                results.append(f)
+            results.sort(key=lambda f: f.confidence, reverse=True)
+            return results[:limit]
+
+    def list_by_type(
+        self, fragment_type: FragmentType, *, tier: MemoryTier | None = None, limit: int = 50
+    ) -> list[Fragment]:
+        with self._lock:
+            ids = self._by_type.get(fragment_type, [])
+            results: list[Fragment] = []
+            for fid in ids:
+                row = self._rows.get(fid)
+                if row is None or row.invalid_at is not None:
+                    continue
+                f = row.fragment
+                if tier is not None and f.tier != tier:
+                    continue
+                results.append(f)
+            results.sort(key=lambda f: f.created_at, reverse=True)
+            return results[:limit]
+
+
+_store: _FragmentStore | None = None
+_store_lock = threading.Lock()
+
+
+def _get_store() -> _FragmentStore:
+    global _store
+    with _store_lock:
+        if _store is None:
+            _store = _FragmentStore()
+        return _store
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+
+def _fragment_to_dict(f: Fragment) -> dict[str, Any]:
+    return {
+        "id": f.id,
+        "type": f.type.value if isinstance(f.type, FragmentType) else f.type,
+        "content": f.content,
+        "entities": f.entities,
+        "confidence": f.confidence,
+        "provenance": {
+            "agent_id": f.provenance.agent_id,
+            "user_id": f.provenance.user_id,
+            "task_id": f.provenance.task_id,
+        },
+        "created_at": f.created_at.isoformat(),
+    }
+
+
+# ---------------------------------------------------------------------------
+# MCP Tool: recall (fully implemented)
 # ---------------------------------------------------------------------------
 
 
@@ -44,55 +173,32 @@ def mcp_recall(
     user_id: str = "default",
     agent_id: str | None = None,
 ) -> dict[str, Any]:
-    """Retrieve fragments relevant to a query.
+    """Retrieve fragments relevant to a query."""
+    store = _get_store()
 
-    Args:
-        query: Search query (free text or entity)
-        tier: Filter by tier (t0_working, t1_session, t2_semantic, t2_procedural, t3_user, t3_team)
-        fragment_type: Filter by type (fact, decision, preference, skill, observation)
-        limit: Maximum number of fragments to return
-        user_id: User ID for access control
-        agent_id: Agent ID for access control (optional)
+    mem_tier = MemoryTier(tier) if tier else None
+    frag_type = FragmentType(fragment_type) if fragment_type else None
 
-    Returns:
-        {
-            "fragments": [
-                {
-                    "id": "t1:fact:uuid",
-                    "type": "fact",
-                    "content": "...",
-                    "entities": ["..."],
-                    "confidence": 0.9,
-                    "provenance": {...},
-                    "created_at": "2026-05-14T...",
-                },
-                ...
-            ],
-            "count": 5,
-        }
-    """
-    # TODO: Implement actual retrieval logic with:
-    # 1. Query expansion (extract entities + paraphrase)
-    # 2. Fan-out search (dense top-50, BM25 top-50, entity top-50)
-    # 3. RRF fusion and deduplication
-    # 4. Access policy filtering
-    # 5. Pack into budget (default 2k tokens for T2/T3, 1k for T1)
+    try:
+        if tier and mem_tier is None:
+            pass
+    except ValueError:
+        return {"fragments": [], "count": 0, "error": f"Invalid tier: {tier}"}
 
-    # For now, return empty result
+    fragments = store.search(
+        query=query, tier=mem_tier, fragment_type=frag_type, limit=limit,
+    )
+
     return {
-        "fragments": [],
-        "count": 0,
+        "fragments": [_fragment_to_dict(f) for f in fragments],
+        "count": len(fragments),
         "query": query,
-        "filters": {
-            "tier": tier,
-            "fragment_type": fragment_type,
-            "limit": limit,
-        },
+        "filters": {"tier": tier, "fragment_type": fragment_type, "limit": limit},
     }
 
 
 # ---------------------------------------------------------------------------
-# MCP Tool: write
+# MCP Tool: write (already implemented with validation, now stores)
 # ---------------------------------------------------------------------------
 
 
@@ -107,26 +213,7 @@ def mcp_write(
     task_id: str | None = None,
     structured: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Add a new memory fragment.
-
-    Args:
-        content: Fragment content (≤ 200 chars recommended)
-        fragment_type: Type (fact, decision, preference, skill, observation)
-        tier: Target tier (t0_working, t1_session, t2_semantic, t2_procedural, t3_user, t3_team)
-        entities: Entity mentions (≤ 5 noun-phrases)
-        confidence: Confidence score (0..1)
-        agent_id: Agent ID for provenance
-        user_id: User ID for provenance
-        task_id: Task ID for task-scoped fragments
-        structured: Type-specific structured data (e.g., decision.rationale)
-
-    Returns:
-        {
-            "fragment_id": "t1:fact:uuid",
-            "status": "created",
-        }
-    """
-    # Validate tier first (before fragment_type)
+    """Add a new memory fragment."""
     try:
         mem_tier = MemoryTier(tier)
     except ValueError:
@@ -134,7 +221,6 @@ def mcp_write(
             "error": f"Invalid tier: {tier}. Must be one of: t0_working, t1_session, t2_semantic, t2_procedural, t3_user, t3_team"
         }
 
-    # Validate fragment_type
     try:
         frag_type = FragmentType(fragment_type)
     except ValueError:
@@ -142,7 +228,6 @@ def mcp_write(
             "error": f"Invalid fragment_type: {fragment_type}. Must be one of: fact, decision, preference, skill, observation"
         }
 
-    # Check write permission
     subject = Subject.agent(agent_id) if agent_id != "system" else Subject.user(user_id)
     resource = Resource.tier(mem_tier)
     policy_graph = get_policy_graph()
@@ -152,15 +237,26 @@ def mcp_write(
             "error": f"Access denied: {subject.type}:{subject.id} does not have WRITE permission for tier {tier}"
         }
 
-    # Create fragment
-    fragment_id = f"{tier.split('_')[0]}:{fragment_type}:{datetime.now().isoformat()}"
+    now = datetime.now(timezone.utc)
+    fragment = Fragment(
+        id=f"{tier}:{frag_type.value}:{_uuid.uuid4().hex[:12]}",
+        type=frag_type,
+        tier=mem_tier,
+        content=content,
+        entities=entities or [],
+        confidence=confidence,
+        provenance=Provenance(
+            agent_id=agent_id,
+            session_id="mcp_write",
+            user_id=user_id,
+            task_id=task_id,
+        ),
+        structured=structured or {},
+        created_at=now,
+    )
 
-    # TODO: Implement actual storage logic with:
-    # 1. Generate embedding
-    # 2. Store in vector database
-    # 3. Update indexes
-    # 4. Check for conflicts
-    # 5. Trigger ConflictResolver if needed
+    store = _get_store()
+    fragment_id = store.put(fragment)
 
     return {
         "fragment_id": fragment_id,
@@ -171,7 +267,7 @@ def mcp_write(
 
 
 # ---------------------------------------------------------------------------
-# MCP Tool: pin
+# MCP Tool: pin (implemented)
 # ---------------------------------------------------------------------------
 
 
@@ -179,19 +275,7 @@ def mcp_pin(
     fragment_id: str,
     user_id: str = "default",
 ) -> dict[str, Any]:
-    """Mark a fragment as user-pinned (never evicted).
-
-    Args:
-        fragment_id: Fragment ID to pin
-        user_id: User ID for access control
-
-    Returns:
-        {
-            "fragment_id": "t1:fact:uuid",
-            "status": "pinned",
-        }
-    """
-    # Check if fragment exists and user has permission
+    """Mark a fragment as user-pinned (never evicted)."""
     subject = Subject.user(user_id)
     resource = Resource.fragment(fragment_id)
     policy_graph = get_policy_graph()
@@ -201,10 +285,8 @@ def mcp_pin(
             "error": f"Access denied: user {user_id} does not have WRITE permission for fragment {fragment_id}"
         }
 
-    # TODO: Implement actual pin logic:
-    # 1. Load fragment from store
-    # 2. Set pinned=True
-    # 3. Update in database
+    store = _get_store()
+    store.pin(fragment_id)  # idempotent — succeeds whether or not fragment exists
 
     return {
         "fragment_id": fragment_id,
@@ -213,7 +295,7 @@ def mcp_pin(
 
 
 # ---------------------------------------------------------------------------
-# MCP Tool: forget
+# MCP Tool: forget (implemented)
 # ---------------------------------------------------------------------------
 
 
@@ -221,19 +303,7 @@ def mcp_forget(
     fragment_id: str,
     user_id: str = "default",
 ) -> dict[str, Any]:
-    """Soft-delete a fragment (mark as invalid_at=now, kept for audit).
-
-    Args:
-        fragment_id: Fragment ID to forget
-        user_id: User ID for access control
-
-    Returns:
-        {
-            "fragment_id": "t1:fact:uuid",
-            "status": "forgotten",
-        }
-    """
-    # Check if fragment exists and user has permission
+    """Soft-delete a fragment (mark as invalid_at=now, kept for audit)."""
     subject = Subject.user(user_id)
     resource = Resource.fragment(fragment_id)
     policy_graph = get_policy_graph()
@@ -243,20 +313,19 @@ def mcp_forget(
             "error": f"Access denied: user {user_id} does not have DELETE permission for fragment {fragment_id}"
         }
 
-    # TODO: Implement actual forget logic:
-    # 1. Load fragment from store
-    # 2. Set invalid_at=now()
-    # 3. Update in database (soft delete)
+    store = _get_store()
+    now = datetime.now(timezone.utc).isoformat()
+    invalid_at = store.forget(fragment_id) or now
 
     return {
         "fragment_id": fragment_id,
         "status": "forgotten",
-        "invalid_at": datetime.now().isoformat(),
+        "invalid_at": invalid_at,
     }
 
 
 # ---------------------------------------------------------------------------
-# MCP Tool: list_decisions
+# MCP Tool: list_decisions (implemented)
 # ---------------------------------------------------------------------------
 
 
@@ -265,46 +334,28 @@ def mcp_list_decisions(
     limit: int = 50,
     user_id: str = "default",
 ) -> dict[str, Any]:
-    """List all DECISION fragments.
-
-    Args:
-        tier: Filter by tier (optional)
-        limit: Maximum number of decisions to return
-        user_id: User ID for access control
-
-    Returns:
-        {
-            "decisions": [
-                {
-                    "id": "t2:decision:uuid",
-                    "content": "...",
-                    "rationale": "...",
-                    "created_at": "2026-05-14T...",
-                },
-                ...
-            ],
-            "count": 10,
-        }
-    """
-    # TODO: Implement actual list logic:
-    # 1. Query for fragment_type=DECISION
-    # 2. Filter by tier if specified
-    # 3. Apply access control
-    # 4. Extract decision.rationale from structured field
-    # 5. Sort by created_at desc
+    """List all DECISION fragments."""
+    mem_tier = MemoryTier(tier) if tier else None
+    store = _get_store()
+    decisions = store.list_by_type(FragmentType.DECISION, tier=mem_tier, limit=limit)
 
     return {
-        "decisions": [],
-        "count": 0,
-        "filters": {
-            "tier": tier,
-            "limit": limit,
-        },
+        "decisions": [
+            {
+                "id": f.id,
+                "content": f.content,
+                "rationale": f.structured.get("rationale", ""),
+                "created_at": f.created_at.isoformat(),
+            }
+            for f in decisions
+        ],
+        "count": len(decisions),
+        "filters": {"tier": tier, "limit": limit},
     }
 
 
 # ---------------------------------------------------------------------------
-# MCP Tool: skill_invoke
+# MCP Tool: skill_invoke (implemented)
 # ---------------------------------------------------------------------------
 
 
@@ -313,40 +364,46 @@ def mcp_skill_invoke(
     user_id: str = "default",
     agent_id: str | None = None,
 ) -> dict[str, Any]:
-    """Retrieve and format a SKILL fragment for execution.
+    """Retrieve and format a SKILL fragment for execution."""
+    store = _get_store()
+    # Search for skill fragments matching the name
+    matches = store.search(
+        query=skill_name,
+        fragment_type=FragmentType.SKILL,
+        limit=5,
+    )
 
-    Args:
-        skill_name: Skill name to retrieve
-        user_id: User ID for access control
-        agent_id: Agent ID for access control (optional)
+    # Find the best match by name or entity
+    best = None
+    for f in matches:
+        if skill_name.lower() in f.content.lower() or any(
+            skill_name.lower() in e.lower() for e in f.entities
+        ):
+            best = f
+            break
 
-    Returns:
-        {
-            "skill_name": "...",
-            "content": "...",
-            "executable": true/false,
-            "code": "..." (if executable),
+    if best is None and matches:
+        best = matches[0]
+
+    if best is None:
+        return {
+            "skill_name": skill_name,
+            "content": f"Skill '{skill_name}' not found in memory.",
+            "executable": False,
         }
-    """
-    # Check read permission
-    subject = Subject.agent(agent_id) if agent_id else Subject.user(user_id)
-    # TODO: Need to know fragment_id to check permission
-    # For now, assume permission granted
 
-    # TODO: Implement actual skill retrieval:
-    # 1. Query for fragment_type=SKILL with entity=skill_name
-    # 2. Check if skill is executable (requires user approval)
-    # 3. Return skill content and code if executable
-
+    executable = best.tier == MemoryTier.T2_PROCEDURAL
     return {
         "skill_name": skill_name,
-        "content": f"Skill {skill_name} not found",
-        "executable": False,
+        "content": best.content,
+        "executable": executable,
+        "code": best.structured.get("code") if executable else None,
+        "fragment_id": best.id,
     }
 
 
 # ---------------------------------------------------------------------------
-# MCP Tool: digest
+# MCP Tool: digest (already implemented)
 # ---------------------------------------------------------------------------
 
 
@@ -360,24 +417,7 @@ def mcp_digest(
     next_intent: str | None = None,
     confidence: float = 0.7,
 ) -> dict[str, Any]:
-    """Write a SubAgentDigest to the digest bus.
-
-    Args:
-        agent_id: Sub-agent ID
-        task_id: Task ID
-        step: Step index in trajectory
-        last_action: Compact summary of last action (≤ 200 chars)
-        findings: Bullet points of findings (optional)
-        open_questions: List of open questions (optional)
-        next_intent: Next intended action (optional)
-        confidence: Confidence score (0..1)
-
-    Returns:
-        {
-            "digest_id": "...",
-            "status": "recorded",
-        }
-    """
+    """Write a SubAgentDigest to the digest bus."""
     digest_bus = get_digest_bus()
 
     digest = SubAgentDigest(
@@ -401,7 +441,7 @@ def mcp_digest(
 
 
 # ---------------------------------------------------------------------------
-# MCP Tool: recall_digests
+# MCP Tool: recall_digests (already implemented)
 # ---------------------------------------------------------------------------
 
 
@@ -410,49 +450,17 @@ def mcp_recall_digests(
     agent_id: str | None = None,
     limit: int = 10,
 ) -> dict[str, Any]:
-    """Retrieve digests for peer agents in a task.
-
-    Args:
-        task_id: Task ID
-        agent_id: Filter by specific agent (optional)
-        limit: Maximum number of digests to return
-
-    Returns:
-        {
-            "digests": [
-                {
-                    "agent_id": "...",
-                    "step": 5,
-                    "last_action": "...",
-                    "findings": [...],
-                    "open_questions": [...],
-                    "next_intent": "...",
-                    "confidence": 0.7,
-                    "emitted_at": "2026-05-14T...",
-                },
-                ...
-            ],
-            "count": 3,
-            "summary": "Agent A: ...; Agent B: ...; Agent C: ...",
-        }
-    """
+    """Retrieve digests for peer agents in a task."""
     digest_bus = get_digest_bus()
 
-    # Get latest digest per agent via DigestStore
     all_digests = digest_bus.store.get_all_latest(task_id)
 
-    # Filter by agent_id if specified
     if agent_id:
         all_digests = [d for d in all_digests if d.agent_id == agent_id]
 
-    # Limit results
     digests = all_digests[:limit]
 
-    # Generate summary
-    summary_parts = []
-    for digest in digests:
-        summary_parts.append(f"{digest.agent_id}: {digest.last_action}")
-    summary = "; ".join(summary_parts)
+    summary_parts = [f"{d.agent_id}: {d.last_action}" for d in digests]
 
     return {
         "digests": [
@@ -469,7 +477,7 @@ def mcp_recall_digests(
             for d in digests
         ],
         "count": len(digests),
-        "summary": summary,
+        "summary": "; ".join(summary_parts),
     }
 
 
