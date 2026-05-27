@@ -1,0 +1,108 @@
+/* Lyra docs site — small, focused stylesheet. The Material theme covers
+   the heavy lifting; everything here is a deliberate accent. */
+
+/* Brand accent: deep purple → cyan gradient on the hero word. */
+.lyra-hero-word {
+  background: linear-gradient(120deg, #7c3aed 0%, #06b6d4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+}
+
+/* Reader-track cards on the landing page. */
+.lyra-tracks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.lyra-track {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.6rem;
+  padding: 1rem 1.25rem;
+  background: var(--md-default-bg-color);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.lyra-track:hover {
+  transform: translateY(-2px);
+  border-color: var(--md-accent-fg-color);
+}
+
+.lyra-track h3 {
+  margin-top: 0;
+  font-size: 1.05rem;
+}
+
+.lyra-track p {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--md-default-fg-color--light);
+}
+
+/* "Stage" / level badges used in concept pages. */
+.lyra-badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  margin-left: 0.4rem;
+}
+.lyra-badge.beginner  { background: #ecfdf5; color: #047857; }
+.lyra-badge.intermediate { background: #eff6ff; color: #1d4ed8; }
+.lyra-badge.advanced  { background: #fdf4ff; color: #7c3aed; }
+.lyra-badge.reference { background: #fefce8; color: #a16207; }
+[data-md-color-scheme="slate"] .lyra-badge.beginner     { background: #064e3b; color: #6ee7b7; }
+[data-md-color-scheme="slate"] .lyra-badge.intermediate { background: #1e3a8a; color: #93c5fd; }
+[data-md-color-scheme="slate"] .lyra-badge.advanced     { background: #4c1d95; color: #d8b4fe; }
+[data-md-color-scheme="slate"] .lyra-badge.reference    { background: #713f12; color: #fde68a; }
+
+/* "ASCII screen" — for HUD samples and terminal demos. */
+.lyra-ascii {
+  background: #0b1020;
+  color: #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 1rem 1.25rem;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  overflow-x: auto;
+  margin: 1rem 0;
+  border: 1px solid #1e293b;
+}
+[data-md-color-scheme="default"] .lyra-ascii {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+/* Mermaid diagrams: cap height so a runaway DAG doesn't push the article
+   off-screen on mobile. */
+.mermaid svg {
+  max-height: 720px;
+  height: auto !important;
+}
+
+/* Small "next / prev" hint at the bottom of pages. */
+.lyra-pager {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--md-default-fg-color--lightest);
+  font-size: 0.9rem;
+}
+
+.lyra-pager a {
+  text-decoration: none;
+}
+
+.lyra-pager .lyra-pager-prev::before { content: "← "; }
+.lyra-pager .lyra-pager-next::after  { content: " →"; }

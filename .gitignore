@@ -59,7 +59,11 @@ node_modules/
 !.lyra/cron/.gitkeep
 .research/
 
-# Local-only docs/archive/plans
-docs/
-archive/
-plans/
+# Docs/archive/plans — ignore binaries, generated, and transient files only
+docs/*.pdf
+docs/.env*
+docs/research/repos/
+docs/research/*-repo
+docs/research/*-repo/
+archive/htmlcov/
+archive/dist/
