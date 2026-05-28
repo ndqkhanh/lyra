@@ -95,6 +95,14 @@ from .zkagent import (
     ToolReceipt,
     zkAgent,
 )
+from .validate_pipeline import (
+    PipelineResult,
+    StageResult,
+    StageStatus,
+    ValidatePipeline,
+    ValidationDecision,
+    ValidatorConfig,
+)
 
 __all__ = [
     "ActionRecord",
@@ -169,10 +177,16 @@ __all__ = [
     "ToolReceipt",
     "Trajectory",
     "TrajectoryStep",
+    "ValidatePipeline",
+    "ValidationDecision",
+    "ValidatorConfig",
     "Verdict",
     "VerificationRequest",
     "classify_risk",
     "default_corpus",
+    "PipelineResult",
     "score_monitor",
+    "StageResult",
+    "StageStatus",
     "zkAgent",
 ]

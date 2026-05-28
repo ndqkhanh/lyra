@@ -126,6 +126,16 @@ from lyra_agent_swarm.consensus.raft_consensus import (
     RaftNode,
 )
 
+# ── RecursiveLink Latent Communication (Plan 13) ───────────────
+from lyra_agent_swarm.recursive_link import (
+    LatentMessage,
+    LatentState,
+    LinkContext,
+    LinkMode,
+    LinkStatus,
+    RecursiveLink,
+)
+
 # ── Compound Agent (Plan 33) ────────────────────────────────────
 from lyra_agent_swarm.compound_agent import (
     CompoundAgent,
@@ -268,6 +278,13 @@ __all__ = [
     "FederationLevel",
     "FederationRegistry",
     "ZeroTrustFederation",
+    # recursive_link (Plan 13)
+    "LatentMessage",
+    "LatentState",
+    "LinkContext",
+    "LinkMode",
+    "LinkStatus",
+    "RecursiveLink",
     # consensus (raft)
     "LogEntry",
     "NodeState",
