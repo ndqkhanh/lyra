@@ -2,8 +2,8 @@ import { THEME_PRESETS, THEME_ORDER, getThemePreset, getDefaultTheme } from '../
 
 describe('Theme Presets', () => {
   describe('THEME_PRESETS', () => {
-    it('contains all 12 themes', () => {
-      expect(Object.keys(THEME_PRESETS)).toHaveLength(12)
+    it('contains all 14 themes', () => {
+      expect(Object.keys(THEME_PRESETS)).toHaveLength(14)
     })
 
     it.each(THEME_ORDER)('%s has valid id, name, and variant', (id) => {
@@ -28,16 +28,18 @@ describe('Theme Presets', () => {
       }
     })
 
-    it('all themes are dark variant', () => {
-      for (const theme of Object.values(THEME_PRESETS)) {
-        expect(theme.variant).toBe('dark')
-      }
+    it('most themes are dark variant with 2 light', () => {
+      const themes = Object.values(THEME_PRESETS)
+      const dark = themes.filter(t => t.variant === 'dark')
+      const light = themes.filter(t => t.variant === 'light')
+      expect(dark.length).toBe(12)
+      expect(light.length).toBe(2)
     })
   })
 
   describe('THEME_ORDER', () => {
-    it('has 12 entries in display order', () => {
-      expect(THEME_ORDER).toHaveLength(12)
+    it('has 14 entries in display order', () => {
+      expect(THEME_ORDER).toHaveLength(14)
     })
 
     it('every entry exists in THEME_PRESETS', () => {
@@ -48,7 +50,7 @@ describe('Theme Presets', () => {
 
     it('catppuccin_mocha is first, sentry_sentinel_dark is last', () => {
       expect(THEME_ORDER[0]).toBe('catppuccin_mocha')
-      expect(THEME_ORDER[11]).toBe('sentry_sentinel_dark')
+      expect(THEME_ORDER[13]).toBe('solarized_light')
     })
   })
 

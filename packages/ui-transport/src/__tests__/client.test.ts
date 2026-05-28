@@ -23,7 +23,7 @@ describe('TransportClient', () => {
     })
 
     it('emits connect event', async () => {
-      const connectSpy = jest.fn()
+      const connectSpy = vi.fn()
       client.on('connect', connectSpy)
       await client.connect()
       expect(connectSpy).toHaveBeenCalled()
@@ -38,7 +38,7 @@ describe('TransportClient', () => {
     })
 
     it('emits disconnect event', async () => {
-      const disconnectSpy = jest.fn()
+      const disconnectSpy = vi.fn()
       client.on('disconnect', disconnectSpy)
       await client.connect()
       client.disconnect()
@@ -70,7 +70,7 @@ describe('TransportClient', () => {
 
     it('emits message event', async () => {
       await client.connect()
-      const messageSpy = jest.fn()
+      const messageSpy = vi.fn()
       client.on('message', messageSpy)
 
       const message: TransportMessage = {
@@ -86,7 +86,7 @@ describe('TransportClient', () => {
   describe('receive', () => {
     it('receives messages', async () => {
       await client.connect()
-      const receiveSpy = jest.fn()
+      const receiveSpy = vi.fn()
       client.on('message', receiveSpy)
 
       const message: TransportMessage = {
@@ -100,7 +100,7 @@ describe('TransportClient', () => {
 
     it('handles streaming messages', async () => {
       await client.connect()
-      const streamSpy = jest.fn()
+      const streamSpy = vi.fn()
       client.on('stream', streamSpy)
 
       const chunk: TransportMessage = {
@@ -115,7 +115,7 @@ describe('TransportClient', () => {
 
   describe('error handling', () => {
     it('emits error event on connection failure', async () => {
-      const errorSpy = jest.fn()
+      const errorSpy = vi.fn()
       client.on('error', errorSpy)
 
       mockEmitter.emit('error', new Error('Connection failed'))
