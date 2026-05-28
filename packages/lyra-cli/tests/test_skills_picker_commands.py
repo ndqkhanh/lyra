@@ -11,10 +11,10 @@ from pathlib import Path
 from typing import Any
 
 from lyra_cli.interactive.session import (
-    InteractiveSession,
     SLASH_COMMANDS,
+    InteractiveSession,
 )
-from lyra_skills.state import SkillsState, load_state
+from lyra_skills.state import load_state
 
 
 def _write_skill(root: Path, sid: str, description: str = "do work.") -> None:

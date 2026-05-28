@@ -2,10 +2,8 @@
 from __future__ import annotations
 
 import json
-import time
 
 import pytest
-
 from lyra_core.transparency.interrupt_queue import InterruptQueue, _infer_severity
 
 

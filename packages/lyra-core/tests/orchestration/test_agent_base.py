@@ -3,7 +3,6 @@
 import asyncio
 
 import pytest
-
 from lyra_core.orchestration.agent_base import (
     AgentMetadata,
     AgentRole,

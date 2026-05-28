@@ -5,8 +5,6 @@ import json
 from pathlib import Path
 from typing import Any
 
-import pytest
-
 from lyra_cli.interactive.auth import (
     AuthFlowResult,
     DeviceCodeAuth,

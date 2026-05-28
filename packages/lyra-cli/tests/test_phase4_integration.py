@@ -14,7 +14,6 @@ import tempfile
 from pathlib import Path
 
 import pytest
-
 from lyra_cli.cli.skill_manager import SkillManager
 
 

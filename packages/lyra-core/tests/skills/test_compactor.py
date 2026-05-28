@@ -1,7 +1,6 @@
 """Tests for SkillCompactor — 6-phase skill lifecycle compaction."""
 
 from lyra_core.skills.compactor import (
-    CompactionReport,
     SkillCompactor,
     _estimate_tokens,
     _split_paragraphs,

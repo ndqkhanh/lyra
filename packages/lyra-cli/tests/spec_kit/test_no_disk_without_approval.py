@@ -1,7 +1,8 @@
 """Test that no files are written without approval."""
 
-import pytest
 from pathlib import Path
+
+import pytest
 from lyra_cli.spec_kit.writer import Writer
 
 

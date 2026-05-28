@@ -1,10 +1,10 @@
 """Expandable content system with collapse/expand functionality"""
 
 from dataclasses import dataclass, field
-from typing import Literal
-from .symbols import SymbolRegistry
+
 from .colors import ColorEngine
 from .layout import LayoutEngine
+from .symbols import SymbolRegistry
 
 
 @dataclass

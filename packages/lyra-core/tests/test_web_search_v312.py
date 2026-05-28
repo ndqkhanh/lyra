@@ -3,10 +3,8 @@ from __future__ import annotations
 
 import time
 from pathlib import Path
-from typing import Any
 
 import pytest
-
 from lyra_core.tools import web_search as ws
 from lyra_core.tools import web_search_cache as wsc
 from lyra_core.tools import web_search_providers as wsp

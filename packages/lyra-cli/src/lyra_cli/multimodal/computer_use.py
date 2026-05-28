@@ -6,8 +6,8 @@ Provides context engineering for computer-use scenarios with UI interaction trac
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional, Dict, Any
 from enum import Enum
+from typing import Any
 
 
 class ActionType(Enum):
@@ -27,9 +27,9 @@ class UIElement:
 
     element_id: str
     element_type: str  # button, input, link, etc.
-    text: Optional[str]
-    position: Dict[str, int]  # x, y, width, height
-    attributes: Dict[str, Any] = field(default_factory=dict)
+    text: str | None
+    position: dict[str, int]  # x, y, width, height
+    attributes: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -39,12 +39,12 @@ class UIAction:
     action_id: str
     action_type: ActionType
     timestamp: str
-    target_element: Optional[UIElement]
-    input_value: Optional[str] = None
-    screenshot_before: Optional[str] = None
-    screenshot_after: Optional[str] = None
+    target_element: UIElement | None
+    input_value: str | None = None
+    screenshot_before: str | None = None
+    screenshot_after: str | None = None
     success: bool = True
-    error: Optional[str] = None
+    error: str | None = None
 
 
 @dataclass
@@ -54,9 +54,9 @@ class ComputerUseSession:
     session_id: str
     task_description: str
     start_time: str
-    end_time: Optional[str] = None
-    actions: List[UIAction] = field(default_factory=list)
-    screenshots: List[str] = field(default_factory=list)
+    end_time: str | None = None
+    actions: list[UIAction] = field(default_factory=list)
+    screenshots: list[str] = field(default_factory=list)
     final_status: str = "in_progress"
 
 
@@ -72,8 +72,8 @@ class ComputerUseContext:
     """
 
     def __init__(self):
-        self.sessions: Dict[str, ComputerUseSession] = {}
-        self.ui_elements: Dict[str, UIElement] = {}
+        self.sessions: dict[str, ComputerUseSession] = {}
+        self.ui_elements: dict[str, UIElement] = {}
 
         # Statistics
         self.stats = {
@@ -110,8 +110,8 @@ class ComputerUseContext:
     def detect_ui_elements(
         self,
         screenshot: str,
-        context: Optional[Dict[str, Any]] = None
-    ) -> List[UIElement]:
+        context: dict[str, Any] | None = None
+    ) -> list[UIElement]:
         """
         Detect UI elements in a screenshot.
 
@@ -145,12 +145,12 @@ class ComputerUseContext:
         self,
         session_id: str,
         action_type: ActionType,
-        target_element: Optional[UIElement] = None,
-        input_value: Optional[str] = None,
-        screenshot_before: Optional[str] = None,
-        screenshot_after: Optional[str] = None,
+        target_element: UIElement | None = None,
+        input_value: str | None = None,
+        screenshot_before: str | None = None,
+        screenshot_after: str | None = None,
         success: bool = True,
-        error: Optional[str] = None
+        error: str | None = None
     ) -> str:
         """
         Record a UI action.
@@ -220,11 +220,11 @@ class ComputerUseContext:
         session.end_time = datetime.now().isoformat()
         session.final_status = status
 
-    def get_session(self, session_id: str) -> Optional[ComputerUseSession]:
+    def get_session(self, session_id: str) -> ComputerUseSession | None:
         """Get a session by ID."""
         return self.sessions.get(session_id)
 
-    def get_action_sequence(self, session_id: str) -> List[UIAction]:
+    def get_action_sequence(self, session_id: str) -> list[UIAction]:
         """
         Get the action sequence for a session.
 
@@ -240,7 +240,7 @@ class ComputerUseContext:
 
         return session.actions
 
-    def export_session(self, session_id: str) -> Optional[Dict[str, Any]]:
+    def export_session(self, session_id: str) -> dict[str, Any] | None:
         """
         Export a session in JSON format.
 
@@ -281,7 +281,7 @@ class ComputerUseContext:
             ],
         }
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get computer-use statistics."""
         success_rate = (
             self.stats["successful_actions"] / self.stats["total_actions"]

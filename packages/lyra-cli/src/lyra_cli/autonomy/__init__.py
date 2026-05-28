@@ -6,39 +6,39 @@ management, scheduling, lifecycle hooks, and budget tracking.
 
 from __future__ import annotations
 
-from lyra_cli.autonomy.state_machine import (
-    AutonomyState,
-    StateTransition,
-    StateMachine,
-    TransitionError,
-)
-from lyra_cli.autonomy.goal_decomposer import (
-    Goal,
-    Subtask,
-    DependencyGraph,
-    GoalDecomposer,
-    CyclicDependencyError,
-)
-from lyra_cli.autonomy.session_manager import (
-    SessionCheckpoint,
-    SessionManager,
-    CheckpointNotFoundError,
-)
 from lyra_cli.autonomy.automation_engine import (
+    AutomationEngine,
     Schedule,
     ScheduleKind,
-    AutomationEngine,
+)
+from lyra_cli.autonomy.budget_manager import (
+    BudgetExceededError,
+    BudgetManager,
+    BudgetSummary,
+    CostEntry,
+)
+from lyra_cli.autonomy.goal_decomposer import (
+    CyclicDependencyError,
+    DependencyGraph,
+    Goal,
+    GoalDecomposer,
+    Subtask,
 )
 from lyra_cli.autonomy.hooks_manager import (
     HookEvent,
     HookHandler,
     HooksManager,
 )
-from lyra_cli.autonomy.budget_manager import (
-    CostEntry,
-    BudgetSummary,
-    BudgetManager,
-    BudgetExceededError,
+from lyra_cli.autonomy.session_manager import (
+    CheckpointNotFoundError,
+    SessionCheckpoint,
+    SessionManager,
+)
+from lyra_cli.autonomy.state_machine import (
+    AutonomyState,
+    StateMachine,
+    StateTransition,
+    TransitionError,
 )
 
 __all__ = [

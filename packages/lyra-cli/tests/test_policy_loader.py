@@ -5,7 +5,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from lyra_cli.policy_loader import load_hooks, load_policy
 from lyra_core.permissions.grammar import Verdict
 

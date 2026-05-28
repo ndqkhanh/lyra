@@ -6,7 +6,7 @@ import asyncio
 import logging
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class StepEvent:
     agent_id: str
     timestamp: float
     data: dict[str, Any] = field(default_factory=dict)
-    parent_id: Optional[str] = None
+    parent_id: str | None = None
 
 
 class EventLog:

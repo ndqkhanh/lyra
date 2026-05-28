@@ -1,8 +1,9 @@
 """Event protocol - Pydantic models for AG-UI compatible events"""
 
-from pydantic import BaseModel, Field
-from typing import Literal, Any
 from datetime import datetime
+from typing import Any, Literal
+
+from pydantic import BaseModel, Field
 
 
 class Event(BaseModel):

@@ -3,14 +3,13 @@
 
 import argparse
 import sys
-from pathlib import Path
 
-from lyra_cli.commands import get_registry, CommandLoader
+from lyra_cli.agents import AgentRegistry, register_ecc_agents
+from lyra_cli.commands import CommandLoader, get_registry
 from lyra_cli.config import ConfigManager
-from lyra_cli.loops import LoopManager, SequentialPipeline
+from lyra_cli.loops import SequentialPipeline
 from lyra_cli.mcp import MCPManager, register_ecc_servers
 from lyra_cli.skills import SkillRegistry, register_ecc_skills
-from lyra_cli.agents import AgentRegistry, register_ecc_agents
 
 
 def main():

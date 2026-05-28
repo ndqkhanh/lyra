@@ -1,7 +1,6 @@
 """Tests for DriftDetector — PRISM prompt drift detection and auto-repair."""
 
 import pytest
-
 from lyra_core.evolve.drift_detector import (
     DriftDetector,
     DriftMetric,

@@ -19,14 +19,12 @@ The contract under test:
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.contracts.guardrails import (
     BehaviourEnvelope,
     GuardrailVerdict,
     TraceEvent,
     evaluate,
 )
-
 
 # --- empty / no signal --------------------------------------------------- #
 

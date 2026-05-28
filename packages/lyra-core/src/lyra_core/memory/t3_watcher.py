@@ -12,9 +12,9 @@ from __future__ import annotations
 
 import logging
 import time
+from collections.abc import Callable
 from pathlib import Path
 from threading import Lock, Thread
-from typing import Callable
 
 try:
     from watchdog.events import FileSystemEvent, FileSystemEventHandler
@@ -40,7 +40,7 @@ except ImportError:
         pass
 
 from .schema import Fragment
-from .t3_git_sync import GitSyncConfig, T3GitSync
+from .t3_git_sync import T3GitSync
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +85,7 @@ class T3MemoryWatcher(FileSystemEventHandler):
         self._pending_reload = False
         self._last_change_time: float | None = None
         self._debounce_thread: Thread | None = None
-        self._observer: "Observer | None" = None
+        self._observer: Observer | None = None
         self._last_modified_file: str | None = None
 
     def start(self) -> None:

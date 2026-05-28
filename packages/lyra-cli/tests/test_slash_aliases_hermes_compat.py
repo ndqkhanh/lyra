@@ -17,7 +17,6 @@ previously aliased to ``/context`` (the context-window grid), not to
 from __future__ import annotations
 
 import pytest
-
 from lyra_cli.interactive.session import (
     COMMAND_REGISTRY,
     SLASH_COMMANDS,

@@ -15,21 +15,18 @@ import time
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 from lyra_memory.activation_manager import ActivationManager, ActivationRecord
 from lyra_memory.budget_controller import (
     BudgetStatus,
-    BudgetTier,
     MemoryBudgetController,
 )
 from lyra_memory.consolidation_engine import (
     ConsolidationEngine,
-    ConsolidationPattern,
     ConsolidationResult,
 )
-from lyra_memory.importance_scorer import ImportanceScore, ImportanceScorer
-from lyra_memory.multi_graph import GraphType, MultiGraphStore
+from lyra_memory.importance_scorer import ImportanceScorer
+from lyra_memory.multi_graph import MultiGraphStore
 from lyra_memory.schema import MemoryRecord, MemoryScope, MemoryType
 from lyra_memory.store import MemoryStore
 
@@ -75,7 +72,7 @@ class MemoryStats:
     active_memories: int
     dormant_memories: int
     budget_status: BudgetStatus
-    last_consolidation: Optional[datetime]
+    last_consolidation: datetime | None
     avg_importance: float
     avg_activation: float
 
@@ -91,11 +88,11 @@ class UltraMemorySystem:
     - Runs periodic consolidation
     - Manages storage budget autonomously
     """
-    
+
     def __init__(
         self,
         db_path: Path,
-        config: Optional[UltraMemoryConfig] = None,
+        config: UltraMemoryConfig | None = None,
     ):
         """
         Initialize ultra memory system.
@@ -105,7 +102,7 @@ class UltraMemorySystem:
             config: Optional configuration
         """
         self.config = config or UltraMemoryConfig()
-        
+
         # Core components
         self.store = MemoryStore(db_path)
         self.importance_scorer = ImportanceScorer()
@@ -119,17 +116,17 @@ class UltraMemorySystem:
         self.budget_controller = MemoryBudgetController(
             capacity_limit=self.config.capacity_limit,
         )
-        
+
         # State tracking
-        self.last_consolidation: Optional[datetime] = None
-        self._activation_cache: Dict[str, ActivationRecord] = {}
-    
+        self.last_consolidation: datetime | None = None
+        self._activation_cache: dict[str, ActivationRecord] = {}
+
     def write(
         self,
         content: str,
         scope: MemoryScope,
         type: MemoryType,
-        metadata: Optional[Dict] = None,
+        metadata: dict | None = None,
         user_flagged: bool = False,
     ) -> MemoryRecord:
         """
@@ -146,22 +143,22 @@ class UltraMemorySystem:
             Created MemoryRecord with importance score
         """
         metadata = metadata or {}
-        
+
         # Score importance
         if user_flagged:
             metadata['user_flagged'] = True
-        
+
         importance_score = self.importance_scorer.score(
             content=content,
             memory_type=type,
             metadata=metadata,
             created_at=datetime.now(),
         )
-        
+
         # Add importance to metadata
         metadata['importance'] = importance_score.final_score
         metadata['importance_category'] = importance_score.category.value
-        
+
         # Write to store
         memory = self.store.write(
             content=content,
@@ -169,7 +166,7 @@ class UltraMemorySystem:
             type=type,
             metadata=metadata,
         )
-        
+
         # Initialize activation record
         activation_record = ActivationRecord(
             memory_id=memory.id,
@@ -177,24 +174,24 @@ class UltraMemorySystem:
             created_at=time.time(),
         )
         self._activation_cache[memory.id] = activation_record
-        
+
         # Check if consolidation or pruning needed
         if self.config.enable_auto_consolidation:
             self._maybe_consolidate()
-        
+
         if self.config.enable_auto_pruning:
             self._maybe_prune()
-        
+
         return memory
-    
+
     def retrieve(
         self,
         query: str,
-        scope: Optional[MemoryScope] = None,
-        type: Optional[MemoryType] = None,
+        scope: MemoryScope | None = None,
+        type: MemoryType | None = None,
         top_k: int = 20,
         use_graph: bool = True,
-    ) -> List[MemoryRecord]:
+    ) -> list[MemoryRecord]:
         """
         Retrieve memories with activation-based ranking.
         
@@ -215,11 +212,11 @@ class UltraMemorySystem:
             type=type,
             limit=top_k * 2,  # Get more for filtering
         )
-        
+
         # Filter by activation threshold
         accessible_results = []
         now = time.time()
-        
+
         for memory in results:
             # Get activation record
             activation_record = self._activation_cache.get(memory.id)
@@ -232,7 +229,7 @@ class UltraMemorySystem:
                     created_at=memory.created_at.timestamp(),
                 )
                 self._activation_cache[memory.id] = activation_record
-            
+
             # Check if accessible
             activation = self.activation_manager.compute_activation(
                 memory_id=memory.id,
@@ -241,23 +238,23 @@ class UltraMemorySystem:
                 created_at=activation_record.created_at,
                 current_time=now,
             )
-            
+
             if activation > self.config.retrieval_threshold:
                 # Update retrieval history
                 activation_record.retrieval_history.append(now)
                 activation_record.last_accessed = now
                 activation_record.access_count += 1
-                
+
                 # Store activation for ranking
                 memory.metadata['_activation'] = activation
                 accessible_results.append(memory)
-        
+
         # Sort by activation
         accessible_results.sort(
             key=lambda m: m.metadata.get('_activation', 0.0),
             reverse=True,
         )
-        
+
         # Optionally expand with graph
         if use_graph and accessible_results:
             graph_results = self._expand_with_graph(accessible_results[:5])
@@ -267,9 +264,9 @@ class UltraMemorySystem:
                 if mem.id not in seen:
                     accessible_results.append(mem)
                     seen.add(mem.id)
-        
+
         return accessible_results[:top_k]
-    
+
     def consolidate(self, deep: bool = False) -> ConsolidationResult:
         """
         Run memory consolidation.
@@ -282,12 +279,12 @@ class UltraMemorySystem:
         """
         # Get all memories
         all_memories = self._get_all_memories()
-        
+
         if deep:
             result, patterns = self.consolidation_engine.deep_consolidation(
                 memories=all_memories,
             )
-            
+
             # Store discovered patterns as new memories
             for pattern in patterns:
                 self.write(
@@ -304,10 +301,10 @@ class UltraMemorySystem:
             result = self.consolidation_engine.light_consolidation(
                 memories=all_memories,
             )
-        
+
         self.last_consolidation = datetime.now()
         return result
-    
+
     def get_stats(self) -> MemoryStats:
         """
         Get memory system statistics.
@@ -317,14 +314,14 @@ class UltraMemorySystem:
         """
         all_memories = self._get_all_memories()
         total = len(all_memories)
-        
+
         # Count active vs dormant
         active = 0
         dormant = 0
         total_importance = 0.0
         total_activation = 0.0
         now = time.time()
-        
+
         for memory in all_memories:
             activation_record = self._activation_cache.get(memory.id)
             if activation_record:
@@ -335,18 +332,18 @@ class UltraMemorySystem:
                     created_at=activation_record.created_at,
                     current_time=now,
                 )
-                
+
                 if activation > self.config.retrieval_threshold:
                     active += 1
                 else:
                     dormant += 1
-                
+
                 total_importance += activation_record.importance
                 total_activation += activation
-        
+
         # Get budget status
         budget_status = self.budget_controller.check_budget(total)
-        
+
         return MemoryStats(
             total_memories=total,
             active_memories=active,
@@ -356,8 +353,8 @@ class UltraMemorySystem:
             avg_importance=total_importance / max(1, total),
             avg_activation=total_activation / max(1, total),
         )
-    
-    def prune(self, target_count: Optional[int] = None) -> int:
+
+    def prune(self, target_count: int | None = None) -> int:
         """
         Prune low-value memories.
         
@@ -368,15 +365,15 @@ class UltraMemorySystem:
             Number of memories pruned
         """
         all_memories = self._get_all_memories()
-        
+
         if target_count is None:
             # Auto-calculate based on budget
             budget_status = self.budget_controller.check_budget(len(all_memories))
             target_count = budget_status.memories_to_prune
-        
+
         if target_count <= 0:
             return 0
-        
+
         # Get activation scores
         activation_scores = {}
         now = time.time()
@@ -391,63 +388,63 @@ class UltraMemorySystem:
                     current_time=now,
                 )
                 activation_scores[memory.id] = activation
-        
+
         # Select memories to prune
         to_prune = self.budget_controller.select_memories_to_prune(
             memories=all_memories,
             target_count=target_count,
             activation_scores=activation_scores,
         )
-        
+
         # Archive them (soft delete)
         for memory_id in to_prune:
             # Mark as archived in metadata
             # In production, would move to cold storage
             if memory_id in self._activation_cache:
                 del self._activation_cache[memory_id]
-        
+
         return len(to_prune)
-    
+
     def close(self):
         """Close the memory system."""
         self.store.close()
-    
-    def _get_all_memories(self) -> List[MemoryRecord]:
+
+    def _get_all_memories(self) -> list[MemoryRecord]:
         """Get all memories from store."""
         # This is a simplified version
         # In production, would paginate or use cursor
         return self.store.retrieve("", limit=100000)
-    
+
     def _maybe_consolidate(self):
         """Run consolidation if interval elapsed."""
         if not self.config.enable_auto_consolidation:
             return
-        
+
         if self.last_consolidation is None:
             return
-        
+
         hours_since = (datetime.now() - self.last_consolidation).total_seconds() / 3600
         if hours_since >= self.config.consolidation_interval_hours:
             self.consolidate(deep=False)
-    
+
     def _maybe_prune(self):
         """Prune if budget exceeded."""
         if not self.config.enable_auto_pruning:
             return
-        
+
         all_memories = self._get_all_memories()
         budget_status = self.budget_controller.check_budget(len(all_memories))
-        
+
         if budget_status.action_required:
             self.prune()
-    
+
     def _expand_with_graph(
         self,
-        seed_memories: List[MemoryRecord],
-    ) -> List[MemoryRecord]:
+        seed_memories: list[MemoryRecord],
+    ) -> list[MemoryRecord]:
         """Expand results using graph traversal."""
         expanded_ids = set()
-        
+
         for memory in seed_memories:
             # Get related memories from graph
             related = self.multi_graph.get_related_memories(
@@ -455,14 +452,14 @@ class UltraMemorySystem:
                 max_results=5,
             )
             expanded_ids.update(mem_id for mem_id, _ in related)
-        
+
         # Fetch expanded memories
         # In production, would batch fetch
         expanded = []
         for mem_id in expanded_ids:
             # Would fetch from store
             pass
-        
+
         return expanded
 
 

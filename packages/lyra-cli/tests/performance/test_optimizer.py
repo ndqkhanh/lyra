@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_cli.performance.optimizer import (
     OptimizationStatus,
     OptimizationSuggestion,

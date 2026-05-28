@@ -1,6 +1,6 @@
 """Agent registry for loading and managing agents."""
 from pathlib import Path
-from typing import Dict, List, Optional
+
 import yaml
 
 from .agent_metadata import AgentMetadata
@@ -9,11 +9,11 @@ from .agent_metadata import AgentMetadata
 class AgentRegistry:
     """Registry for loading and managing agents."""
 
-    def __init__(self, agent_dirs: Optional[List[Path]] = None):
+    def __init__(self, agent_dirs: list[Path] | None = None):
         self.agent_dirs = agent_dirs or []
-        self._agents: Dict[str, AgentMetadata] = {}
+        self._agents: dict[str, AgentMetadata] = {}
 
-    def load_agents(self) -> Dict[str, AgentMetadata]:
+    def load_agents(self) -> dict[str, AgentMetadata]:
         """Load all agents from configured directories."""
         self._agents.clear()
 
@@ -31,7 +31,7 @@ class AgentRegistry:
 
         return self._agents
 
-    def _parse_agent_file(self, file_path: Path) -> Optional[AgentMetadata]:
+    def _parse_agent_file(self, file_path: Path) -> AgentMetadata | None:
         """Parse agent file with YAML frontmatter."""
         content = file_path.read_text()
 
@@ -55,11 +55,11 @@ class AgentRegistry:
         except yaml.YAMLError:
             return None
 
-    def get_agent(self, name: str) -> Optional[AgentMetadata]:
+    def get_agent(self, name: str) -> AgentMetadata | None:
         """Get agent by name."""
         return self._agents.get(name)
 
-    def search_agents(self, query: str) -> List[AgentMetadata]:
+    def search_agents(self, query: str) -> list[AgentMetadata]:
         """Search agents by name or description."""
         query_lower = query.lower()
         return [
@@ -67,6 +67,6 @@ class AgentRegistry:
             if query_lower in agent.name.lower() or query_lower in agent.description.lower()
         ]
 
-    def list_agents(self) -> List[AgentMetadata]:
+    def list_agents(self) -> list[AgentMetadata]:
         """List all loaded agents."""
         return list(self._agents.values())

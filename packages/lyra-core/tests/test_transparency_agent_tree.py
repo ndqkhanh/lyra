@@ -1,13 +1,11 @@
 """Unit tests for agent_tree."""
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import pytest
-
-from lyra_core.transparency.event_store import EventStore, make_event
 from lyra_core.transparency.agent_tree import build_agent_tree, render_tree_text
+from lyra_core.transparency.event_store import EventStore, make_event
 
 
 @pytest.fixture

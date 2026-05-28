@@ -2,15 +2,12 @@
 
 from __future__ import annotations
 
-import asyncio
 import pytest
-
 from lyra_core.safety.adversarial_verifier import (
     AdversarialVerdict,
     AdversarialVerdictType,
     AdversarialVerifier,
     ModelFamily,
-    ModelProvider,
     ModelVote,
     VerificationRequest,
     _aggregate_votes,
@@ -24,7 +21,6 @@ from lyra_core.safety.approval_gate import (
     RiskLevel,
     RiskSurface,
 )
-
 
 # ── Mock Model Provider ────────────────────────────────────────────────
 

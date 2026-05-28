@@ -28,15 +28,6 @@ Usage::
 """
 from __future__ import annotations
 
-from .attestation import Attestation, AttestationError, sign_attestation, verify_attestation
-from .signing_backend import (
-    Ed25519Backend,
-    HmacBackend,
-    SigningBackend,
-    SigstoreBackend,
-    default_signing_backend,
-    set_default_signing_backend,
-)
 from .agent_installer import (
     AgentInstaller,
     DualUseAuthorizationError,
@@ -44,6 +35,47 @@ from .agent_installer import (
     InstallStep,
     SmokeEvalReport,
     SmokeEvalRunner,
+)
+from .attestation import Attestation, AttestationError, sign_attestation, verify_attestation
+from .exporters import (
+    ClaudeCodeExporter,
+    CodexExporter,
+    CursorExporter,
+    Exporter,
+    ExportError,
+    ExportManifest,
+    ExportTarget,
+    GeminiCLIExporter,
+    list_exporters,
+    resolve_exporter,
+)
+from .installed_registry import (
+    InstalledRecord,
+    InstalledRegistry,
+    UninstallError,
+    global_installed_registry,
+    reset_global_installed_registry,
+    uninstall_bundle,
+)
+from .marketplace import (
+    FetchedBundle,
+    FetchScopeError,
+    FetchSpec,
+    MarketplaceError,
+    MarketplaceFetcher,
+    MarketplaceKey,
+    MarketplaceRegistry,
+    SBOMEntry,
+    SignatureMismatchError,
+    sign_archive,
+)
+from .signing_backend import (
+    Ed25519Backend,
+    HmacBackend,
+    SigningBackend,
+    SigstoreBackend,
+    default_signing_backend,
+    set_default_signing_backend,
 )
 from .source_bundle import (
     BundleManifest,
@@ -62,38 +94,6 @@ from .verifier_coverage import (
     VerifierCoverageIndex,
     global_index,
     reset_global_index,
-)
-from .marketplace import (
-    FetchSpec,
-    FetchScopeError,
-    FetchedBundle,
-    MarketplaceError,
-    MarketplaceFetcher,
-    MarketplaceKey,
-    MarketplaceRegistry,
-    SBOMEntry,
-    SignatureMismatchError,
-    sign_archive,
-)
-from .installed_registry import (
-    InstalledRecord,
-    InstalledRegistry,
-    UninstallError,
-    global_installed_registry,
-    reset_global_installed_registry,
-    uninstall_bundle,
-)
-from .exporters import (
-    ClaudeCodeExporter,
-    CodexExporter,
-    CursorExporter,
-    ExportError,
-    ExportManifest,
-    ExportTarget,
-    Exporter,
-    GeminiCLIExporter,
-    list_exporters,
-    resolve_exporter,
 )
 
 __all__ = [

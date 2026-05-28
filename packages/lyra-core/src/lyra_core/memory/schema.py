@@ -30,7 +30,6 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Literal
 
-
 # ---------------------------------------------------------------------------
 # Enumerations
 # ---------------------------------------------------------------------------
@@ -90,7 +89,7 @@ class Provenance:
         }
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "Provenance":
+    def from_dict(cls, d: dict[str, Any]) -> Provenance:
         return cls(
             agent_id=d["agent_id"],
             session_id=d["session_id"],
@@ -209,7 +208,7 @@ class Fragment:
         }
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "Fragment":
+    def from_dict(cls, d: dict[str, Any]) -> Fragment:
         def _dt(v: str | None) -> datetime | None:
             return datetime.fromisoformat(v) if v else None
 
@@ -246,7 +245,7 @@ class Fragment:
         entities: list[str] | None = None,
         confidence: float | None = None,
         pinned: bool = False,
-    ) -> "Fragment":
+    ) -> Fragment:
         """Convenience constructor — generates id and timestamps."""
         if confidence is None:
             confidence = 0.5 if type is FragmentType.OBSERVATION else 0.7
@@ -305,7 +304,7 @@ class ConflictEvent:
         reason: Literal["contradiction", "stale", "agent_disagreement"],
         resolution: Literal["supersede", "branch", "human_required"] = "supersede",
         resolved_by: str | None = None,
-    ) -> "ConflictEvent":
+    ) -> ConflictEvent:
         return cls(
             id=str(uuid.uuid4()),
             old_fragment_id=old_id,

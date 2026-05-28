@@ -25,17 +25,14 @@ Invariants tested:
 from __future__ import annotations
 
 import sys
-from unittest import mock
 
 import pytest
-
 from lyra_core.lsp_backend import (
     FeatureUnavailable,
     MockLSPBackend,
     MultilspyBackend,
 )
-from lyra_core.tools.lsp import LSPBackend, make_lsp_tool
-
+from lyra_core.tools.lsp import make_lsp_tool
 
 # ---- MockLSPBackend satisfies adapter shape ----------------------- #
 

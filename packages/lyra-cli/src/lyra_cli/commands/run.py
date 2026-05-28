@@ -28,16 +28,8 @@ import hashlib
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional, Union
 
 import typer
-from lyra_harness_core.loop import AgentLoop, LoopResult
-from lyra_harness_core.messages import StopReason
-from lyra_harness_core.tools import ToolRegistry
-from rich.console import Console
-from rich.panel import Panel
-from rich.text import Text
-
 from lyra_core.plan import (
     ApprovalOutcome,
     approve_plan,
@@ -46,6 +38,12 @@ from lyra_core.plan import (
     run_planner,
 )
 from lyra_core.tools import register_builtin_tools
+from lyra_harness_core.loop import AgentLoop, LoopResult
+from lyra_harness_core.messages import StopReason
+from lyra_harness_core.tools import ToolRegistry
+from rich.console import Console
+from rich.panel import Panel
+from rich.text import Text
 
 from .. import __version__ as _LYRA_VERSION
 from ..llm_factory import NoProviderConfigured, build_llm, describe_selection
@@ -65,7 +63,7 @@ _console = Console()
 
 
 def _format_stop_reason(
-    reason: Union[str, StopReason, None],
+    reason: str | StopReason | None,
 ) -> str:
     """Strip ``StopReason.`` from the ``str(enum)`` representation.
 
@@ -126,7 +124,7 @@ def _format_run_header(*, provider_label: str, mode: str) -> Text:
     return line
 
 
-def _format_token_usage(usage: Optional[dict]) -> Optional[str]:
+def _format_token_usage(usage: dict | None) -> str | None:
     """Compact "7 in / 4 out" or "11 tokens" string from a usage dict.
 
     Returns ``None`` when the dict is missing / empty / all-zero so
@@ -151,7 +149,7 @@ def _format_run_footer(
     result: LoopResult,
     *,
     elapsed_s: float,
-    usage: Optional[dict] = None,
+    usage: dict | None = None,
 ) -> Text:
     """Build the bottom-of-run stats line.
 
@@ -199,7 +197,7 @@ def _format_run_footer(
     return line
 
 
-def _render_answer_panel(final_text: str) -> Optional[Panel]:
+def _render_answer_panel(final_text: str) -> Panel | None:
     """Wrap the agent's final reply in a labelled Rich panel.
 
     Returns ``None`` when there's nothing to render — callers should

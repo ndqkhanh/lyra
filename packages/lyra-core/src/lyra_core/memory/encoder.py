@@ -32,7 +32,6 @@ from typing import Any
 
 from .schema import Fragment, FragmentType, MemoryTier, Provenance, VisibilityScope
 
-
 # ---------------------------------------------------------------------------
 # Turn — input to the Encoder
 # ---------------------------------------------------------------------------

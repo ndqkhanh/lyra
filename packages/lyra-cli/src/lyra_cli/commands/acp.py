@@ -24,7 +24,6 @@ Reference: https://agentclientprotocol.com
 """
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -84,7 +83,6 @@ def acp_serve(
     from .. import __version__
     from ..interactive.session import (
         InteractiveSession,
-        _chat_with_llm,
         _ensure_lifecycle_bus,
     )
 
@@ -148,6 +146,7 @@ def _handle_send_user_message(session: Any, params: dict[str, Any]) -> dict[str,
         }
     """
     from lyra_core.acp import AcpError
+
     from ..interactive.session import _chat_with_llm
 
     text = (params.get("text") or "").strip()

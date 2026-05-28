@@ -7,11 +7,11 @@ Implements the generate-reflect-curate loop:
 3. Curate: Update playbook with new entries
 """
 
+import json
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-import json
+from typing import Any
 
 
 @dataclass
@@ -26,14 +26,14 @@ class PlaybookEntry:
     content: str
     category: str  # "pattern", "strategy", "lesson", "constraint"
     created_at: datetime
-    last_used: Optional[datetime] = None
+    last_used: datetime | None = None
     use_count: int = 0
     success_rate: float = 1.0
     confidence: float = 1.0
-    tags: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for storage."""
         return {
             "id": self.id,
@@ -50,7 +50,7 @@ class PlaybookEntry:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "PlaybookEntry":
+    def from_dict(cls, data: dict[str, Any]) -> "PlaybookEntry":
         """Create from dictionary."""
         return cls(
             id=data["id"],
@@ -83,7 +83,7 @@ class ContextPlaybook:
             playbook_path: Path to playbook JSON file
         """
         self.playbook_path = playbook_path
-        self.entries: Dict[str, PlaybookEntry] = {}
+        self.entries: dict[str, PlaybookEntry] = {}
         self._load()
 
     def generate_context(self, task: str, max_entries: int = 5) -> str:
@@ -116,7 +116,7 @@ class ContextPlaybook:
         self._save()
         return "\n".join(lines)
 
-    def reflect(self, task: str, attempt: str, outcome: Dict[str, Any]) -> List[PlaybookEntry]:
+    def reflect(self, task: str, attempt: str, outcome: dict[str, Any]) -> list[PlaybookEntry]:
         """
         Reflect on an attempt and extract lessons.
 
@@ -144,7 +144,7 @@ class ContextPlaybook:
 
         return entries
 
-    def curate(self, new_entries: List[PlaybookEntry]) -> None:
+    def curate(self, new_entries: list[PlaybookEntry]) -> None:
         """
         Curate playbook by adding or updating entries.
 
@@ -168,7 +168,7 @@ class ContextPlaybook:
         # Save
         self._save()
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get playbook statistics."""
         return {
             "total_entries": len(self.entries),
@@ -177,7 +177,7 @@ class ContextPlaybook:
             "most_used": self._most_used(5),
         }
 
-    def _find_relevant(self, task: str, limit: int) -> List[PlaybookEntry]:
+    def _find_relevant(self, task: str, limit: int) -> list[PlaybookEntry]:
         """Find relevant entries for a task."""
         # Simple keyword matching (can be enhanced with embeddings)
         task_lower = task.lower()
@@ -205,7 +205,7 @@ class ContextPlaybook:
         scored.sort(key=lambda x: x[1], reverse=True)
         return [entry for entry, _ in scored[:limit]]
 
-    def _find_similar(self, entry: PlaybookEntry) -> Optional[PlaybookEntry]:
+    def _find_similar(self, entry: PlaybookEntry) -> PlaybookEntry | None:
         """Find similar existing entry."""
         for existing in self.entries.values():
             # Same category and overlapping tags
@@ -233,8 +233,8 @@ class ContextPlaybook:
         self,
         task: str,
         attempt: str,
-        outcome: Dict[str, Any]
-    ) -> Optional[PlaybookEntry]:
+        outcome: dict[str, Any]
+    ) -> PlaybookEntry | None:
         """Extract a success pattern from a successful attempt."""
         # Simple extraction (can be enhanced with LLM)
         return PlaybookEntry(
@@ -251,8 +251,8 @@ class ContextPlaybook:
         self,
         task: str,
         attempt: str,
-        outcome: Dict[str, Any]
-    ) -> Optional[PlaybookEntry]:
+        outcome: dict[str, Any]
+    ) -> PlaybookEntry | None:
         """Extract a lesson from a failed attempt."""
         error = outcome.get("error", "Unknown error")
         return PlaybookEntry(
@@ -265,7 +265,7 @@ class ContextPlaybook:
             confidence=0.9,  # High confidence for failures
         )
 
-    def _extract_tags(self, text: str) -> List[str]:
+    def _extract_tags(self, text: str) -> list[str]:
         """Extract tags from text."""
         # Simple keyword extraction
         keywords = ["python", "test", "file", "api", "database", "memory", "skill"]
@@ -285,7 +285,7 @@ class ContextPlaybook:
         for entry_id in to_remove:
             del self.entries[entry_id]
 
-    def _count_by_category(self) -> Dict[str, int]:
+    def _count_by_category(self) -> dict[str, int]:
         """Count entries by category."""
         counts = {}
         for entry in self.entries.values():
@@ -298,7 +298,7 @@ class ContextPlaybook:
             return 0.0
         return sum(e.success_rate for e in self.entries.values()) / len(self.entries)
 
-    def _most_used(self, limit: int) -> List[Dict[str, Any]]:
+    def _most_used(self, limit: int) -> list[dict[str, Any]]:
         """Get most used entries."""
         sorted_entries = sorted(
             self.entries.values(),

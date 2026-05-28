@@ -20,7 +20,7 @@ from lyra_core.orchestration.models.code_review import (
     ReviewComment,
     ReviewSeverity,
 )
-from lyra_core.orchestration.protocol import Message, MessageType
+from lyra_core.orchestration.protocol import Message
 
 
 class LeadEngineerAgent(BaseAgent):

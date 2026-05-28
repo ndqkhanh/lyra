@@ -2,14 +2,12 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.eval import (
     Rubric,
     RubricSet,
     RubricSetReport,
     prm_score,
 )
-
 
 # ---- validation ----------------------------------------------------
 

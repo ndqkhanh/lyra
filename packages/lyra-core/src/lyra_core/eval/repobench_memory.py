@@ -467,7 +467,7 @@ class RepoBenchMemoryEval:
         Returns:
             EvalResult object
         """
-        with open(input_path, "r", encoding="utf-8") as f:
+        with open(input_path, encoding="utf-8") as f:
             result_dict = json.load(f)
 
         metrics = EvalMetrics(

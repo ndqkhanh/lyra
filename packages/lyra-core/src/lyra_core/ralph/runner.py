@@ -10,22 +10,20 @@ Refuses ``--dangerously-skip-permissions`` outright.
 """
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Optional
 
 from lyra_core.contracts import (
     AgentContract,
-    BudgetEnvelope,
     ContractObservation,
     ContractState,
 )
 from lyra_core.loops.directive import HumanDirective
 
-from .completion import CompletionSignal, parse_completion
+from .completion import CompletionSignal
 from .prd import Prd, UserStory, load_prd, save_prd
 from .progress import ProgressLog
-
 
 __all__ = [
     "RalphIterationResult",

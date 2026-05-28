@@ -4,17 +4,17 @@ import json
 import tempfile
 from pathlib import Path
 
-from lyra_cli.plugin.manifest import (
-    PluginDependency,
-    PluginKind,
-    PluginManifest,
-    PluginPermission,
-)
 from lyra_cli.plugin.manager import (
     PluginInstance,
     PluginManager,
     PluginState,
     get_plugin_manager,
+)
+from lyra_cli.plugin.manifest import (
+    PluginDependency,
+    PluginKind,
+    PluginManifest,
+    PluginPermission,
 )
 from lyra_cli.plugin.marketplace import PluginRegistry, RegistryEntry
 

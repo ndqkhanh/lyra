@@ -33,8 +33,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from .routines import CronTrigger, RoutineRegistry
-from .schedule import Schedule, parse_schedule
-
+from .schedule import parse_schedule
 
 _DEFAULT_TICK_S = 1.0
 

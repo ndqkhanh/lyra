@@ -1,7 +1,7 @@
 """Commands system for Lyra - Unified command registry"""
 
-from .command_registry import CommandRegistry, Command, get_registry
 from .command_loader import CommandLoader
+from .command_registry import Command, CommandRegistry, get_registry
 from .ecc_commands import register_ecc_commands
 
 __all__ = [

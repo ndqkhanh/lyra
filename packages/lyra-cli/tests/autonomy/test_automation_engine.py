@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import time
 
-import pytest
-
 from lyra_cli.autonomy.automation_engine import AutomationEngine, Schedule, ScheduleKind
 
 

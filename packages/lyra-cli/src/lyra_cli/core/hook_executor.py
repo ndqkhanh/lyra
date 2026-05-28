@@ -1,9 +1,9 @@
 """Hook executor for running hooks at lifecycle points."""
-from typing import Optional, Dict, Any, List
 from dataclasses import dataclass
+from typing import Any
 
+from .hook_metadata import HookMetadata, HookType
 from .hook_registry import HookRegistry
-from .hook_metadata import HookType, HookMetadata
 
 
 @dataclass
@@ -11,7 +11,7 @@ class HookResult:
     """Result from hook execution."""
     success: bool
     output: str
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class HookExecutor:
@@ -20,7 +20,7 @@ class HookExecutor:
     def __init__(self, registry: HookRegistry):
         self.registry = registry
 
-    def execute_hooks(self, hook_type: HookType, context: Optional[Dict[str, Any]] = None) -> List[HookResult]:
+    def execute_hooks(self, hook_type: HookType, context: dict[str, Any] | None = None) -> list[HookResult]:
         """Execute all hooks of a specific type."""
         hooks = self.registry.get_hooks_by_type(hook_type)
         results = []
@@ -31,7 +31,7 @@ class HookExecutor:
 
         return results
 
-    def _execute_hook(self, hook: HookMetadata, context: Optional[Dict[str, Any]] = None) -> HookResult:
+    def _execute_hook(self, hook: HookMetadata, context: dict[str, Any] | None = None) -> HookResult:
         """Execute a single hook."""
         try:
             # TODO: Implement actual hook execution

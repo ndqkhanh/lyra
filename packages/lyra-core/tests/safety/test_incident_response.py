@@ -3,8 +3,7 @@
 import time
 
 import pytest
-
-from lyra_core.safety.forensic_collector import ForensicCollector, IncidentCategory
+from lyra_core.safety.forensic_collector import IncidentCategory
 from lyra_core.safety.incident_response import (
     DEFAULT_PLAYBOOKS,
     IncidentRecord,

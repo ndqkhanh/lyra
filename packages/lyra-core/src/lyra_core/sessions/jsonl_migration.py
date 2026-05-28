@@ -16,11 +16,10 @@ lyra-legacy-aware
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable
 
 from .store import SessionStore
-
 
 _MARKER_NAME = "JSONL_MIGRATED"
 

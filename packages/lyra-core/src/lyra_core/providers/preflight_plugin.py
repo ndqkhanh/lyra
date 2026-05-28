@@ -26,7 +26,8 @@ hint without parsing strings.
 """
 from __future__ import annotations
 
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 from lyra_core.hir.events import emit
 from lyra_core.providers.preflight import (

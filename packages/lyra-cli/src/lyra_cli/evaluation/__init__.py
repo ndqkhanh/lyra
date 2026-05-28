@@ -6,7 +6,7 @@ Provides benchmark execution, metrics collection, and performance analysis.
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -15,11 +15,11 @@ class BenchmarkResult:
 
     benchmark_name: str
     score: float
-    metrics: Dict[str, float] = field(default_factory=dict)
+    metrics: dict[str, float] = field(default_factory=dict)
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
     duration_seconds: float = 0.0
     success: bool = True
-    error: Optional[str] = None
+    error: str | None = None
 
 
 @dataclass
@@ -28,7 +28,7 @@ class AblationStudy:
 
     study_name: str
     baseline_score: float
-    variant_scores: Dict[str, float] = field(default_factory=dict)
+    variant_scores: dict[str, float] = field(default_factory=dict)
     analysis: str = ""
 
 
@@ -44,8 +44,8 @@ class BenchmarkFramework:
     """
 
     def __init__(self):
-        self.results: List[BenchmarkResult] = []
-        self.ablation_studies: List[AblationStudy] = []
+        self.results: list[BenchmarkResult] = []
+        self.ablation_studies: list[AblationStudy] = []
 
         # Statistics
         self.stats = {
@@ -58,7 +58,7 @@ class BenchmarkFramework:
     def run_benchmark(
         self,
         benchmark_name: str,
-        config: Optional[Dict[str, Any]] = None
+        config: dict[str, Any] | None = None
     ) -> BenchmarkResult:
         """
         Run a benchmark.
@@ -91,8 +91,8 @@ class BenchmarkFramework:
     def run_ablation_study(
         self,
         study_name: str,
-        baseline_config: Dict[str, Any],
-        variants: Dict[str, Dict[str, Any]]
+        baseline_config: dict[str, Any],
+        variants: dict[str, dict[str, Any]]
     ) -> AblationStudy:
         """
         Run ablation study.
@@ -126,7 +126,7 @@ class BenchmarkFramework:
 
         return study
 
-    def get_benchmark_summary(self) -> Dict[str, Any]:
+    def get_benchmark_summary(self) -> dict[str, Any]:
         """Get benchmark summary statistics."""
         if not self.results:
             return {"avg_score": 0.0, "total_benchmarks": 0}
@@ -140,7 +140,7 @@ class BenchmarkFramework:
             "failed": self.stats["failed_benchmarks"],
         }
 
-    def export_results(self) -> Dict[str, Any]:
+    def export_results(self) -> dict[str, Any]:
         """Export all benchmark results."""
         return {
             "results": [
@@ -177,7 +177,7 @@ class InnovationEngine:
     """
 
     def __init__(self):
-        self.innovations: List[Dict[str, Any]] = []
+        self.innovations: list[dict[str, Any]] = []
 
         self.stats = {
             "total_innovations": 0,
@@ -206,11 +206,11 @@ class InnovationEngine:
 
         return innovation["innovation_id"]
 
-    def get_innovations(self) -> List[Dict[str, Any]]:
+    def get_innovations(self) -> list[dict[str, Any]]:
         """Get all innovations."""
         return self.innovations
 
-    def export_innovations(self) -> Dict[str, Any]:
+    def export_innovations(self) -> dict[str, Any]:
         """Export innovation data."""
         return {
             "innovations": self.innovations,

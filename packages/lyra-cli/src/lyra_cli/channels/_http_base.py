@@ -16,15 +16,19 @@ contract per adapter.
 """
 from __future__ import annotations
 
+from collections.abc import AsyncIterator, Awaitable, Callable
 from dataclasses import dataclass, field
-from typing import Any, AsyncIterator, Awaitable, Callable
+from typing import Any
 
 from ._errors import (
     AdapterAuthError as HttpAuthError,
+)
+from ._errors import (
     AdapterRateLimited as HttpRateLimited,
+)
+from ._errors import (
     FeatureUnavailable,
 )
-
 
 HttpClient = Callable[..., Awaitable[Any]]
 

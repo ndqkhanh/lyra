@@ -25,7 +25,6 @@ from __future__ import annotations
 
 import hashlib
 import hmac
-import json
 import os
 import tarfile
 import time
@@ -33,10 +32,8 @@ import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable
 
 from .source_bundle import SourceBundle
-
 
 _DEFAULT_CACHE_ENV = "LYRA_MARKETPLACE_CACHE"
 
@@ -82,7 +79,7 @@ class FetchedBundle:
     """A fetched, verified, unpacked bundle on local disk."""
 
     bundle: SourceBundle
-    sbom: "SBOMEntry"
+    sbom: SBOMEntry
 
 
 @dataclass(frozen=True)

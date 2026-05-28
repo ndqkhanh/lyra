@@ -10,7 +10,6 @@ Pins:
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.tdd import (
     GreenPassArtifact,
     PlanArtifact,
@@ -21,7 +20,6 @@ from lyra_core.tdd import (
     TDDStateMachine,
     TransitionError,
 )
-
 
 # ---- helpers ----------------------------------------------------
 

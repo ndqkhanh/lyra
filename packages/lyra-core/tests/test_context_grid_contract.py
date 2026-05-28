@@ -21,7 +21,6 @@ Invariants:
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.context.grid import render_context_grid
 from lyra_core.context.pipeline import _tok_estimate
 

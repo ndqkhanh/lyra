@@ -17,10 +17,9 @@ Usage::
 """
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
-
-from typing import Any, Callable
 
 # ``harness_eternal`` is an optional sibling package — present in the
 # orion-code monorepo and on production deployments, absent in lean

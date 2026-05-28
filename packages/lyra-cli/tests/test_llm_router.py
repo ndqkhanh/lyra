@@ -5,7 +5,6 @@ cross-provider fallback chain.
 """
 
 import pytest
-
 from lyra_cli.llm_router import (
     PROVIDER_FAMILIES,
     ProviderModelFamily,

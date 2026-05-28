@@ -8,9 +8,9 @@ Source: Cost-Sensitive Store Routing (iGRGjdhl9r) + LP-RAG (Y8Txo8vaH7),
 ICLR 2026 MemAgent Workshop.
 """
 
-from lyra_memory.routing.store import MemoryStore, MultiStoreRegistry
-from lyra_memory.routing.router import CostSensitiveRouter, QueryProfile
 from lyra_memory.routing.lp_rag import LPRAGRetriever
+from lyra_memory.routing.router import CostSensitiveRouter, QueryProfile
+from lyra_memory.routing.store import MemoryStore, MultiStoreRegistry
 
 __all__ = [
     "CostSensitiveRouter",

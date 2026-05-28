@@ -31,10 +31,8 @@ import textwrap
 from pathlib import Path
 
 import pytest
-
 from lyra_core.plugins import PluginManifestError
 from lyra_core.plugins.runtime import LoadedPlugin, PluginRuntime
-
 
 # --- helpers -------------------------------------------------------- #
 

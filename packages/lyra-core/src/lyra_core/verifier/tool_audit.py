@@ -26,8 +26,6 @@ from __future__ import annotations
 
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
-from typing import Optional
-
 
 __all__ = [
     "AuditFindings",
@@ -243,8 +241,8 @@ class ToolAuditor:
     def __init__(
         self,
         *,
-        confidence_probe: Optional[ConfidenceProbe] = None,
-        execution_gate: Optional[ExecutionGate] = None,
+        confidence_probe: ConfidenceProbe | None = None,
+        execution_gate: ExecutionGate | None = None,
     ) -> None:
         self._confidence_probe: ConfidenceProbe = (
             confidence_probe or _default_confidence_probe

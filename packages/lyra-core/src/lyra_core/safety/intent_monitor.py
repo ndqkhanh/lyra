@@ -10,9 +10,8 @@ from __future__ import annotations
 import time
 import uuid
 from collections import defaultdict
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Sequence
-
 
 __all__ = [
     "ActionRecord",
@@ -305,7 +304,7 @@ class IntentMonitor:
                     IntentDeviation(
                         deviation_id=f"dev-{uuid.uuid4().hex[:12]}",
                         expected_pattern=(
-                            f"tools in {{'"
+                            "tools in {'"
                             + "', '".join(sorted(baseline_tools))
                             + "'}}"
                         ),

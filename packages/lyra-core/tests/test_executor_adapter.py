@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
 from lyra_core.hooks.lifecycle import LifecycleBus, LifecycleEvent
 from lyra_core.teams import (
@@ -15,7 +14,6 @@ from lyra_core.teams import (
     register_lifecycle_bus,
     unregister_lifecycle_bus,
 )
-
 
 # ---- AgentLoopExecutor ----------------------------------------------
 

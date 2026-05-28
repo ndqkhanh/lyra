@@ -10,11 +10,8 @@ capture the outgoing request and assert on the marshalling.
 """
 from __future__ import annotations
 
-import io
 import json
 from typing import Any
-
-import pytest
 
 from lyra_cli.providers.openai_compatible import (
     OpenAICompatibleLLM,
@@ -27,7 +24,7 @@ class _FakeResp:
     def __init__(self, body: str) -> None:
         self._body = body.encode("utf-8")
 
-    def __enter__(self) -> "_FakeResp":
+    def __enter__(self) -> _FakeResp:
         return self
 
     def __exit__(self, *_: Any) -> None:

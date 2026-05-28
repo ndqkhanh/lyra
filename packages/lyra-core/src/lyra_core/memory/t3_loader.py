@@ -48,7 +48,6 @@ import yaml
 
 from .schema import Fragment, FragmentType, MemoryTier, Provenance
 
-
 # ---------------------------------------------------------------------------
 # Frontmatter parsing
 # ---------------------------------------------------------------------------
@@ -65,7 +64,7 @@ class T3Metadata:
     tags: list[str] | None = None
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "T3Metadata":
+    def from_dict(cls, d: dict[str, Any]) -> T3Metadata:
         last_updated = d.get("last_updated")
         if isinstance(last_updated, str):
             last_updated = datetime.fromisoformat(last_updated.replace("Z", "+00:00"))

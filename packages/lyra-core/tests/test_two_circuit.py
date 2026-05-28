@@ -1,7 +1,6 @@
 """Tests for Two-Circuit Architecture Bridge (Plan 33)."""
 
 import pytest
-
 from lyra_core.two_circuit import (
     CircuitMode,
     ColdPathResult,

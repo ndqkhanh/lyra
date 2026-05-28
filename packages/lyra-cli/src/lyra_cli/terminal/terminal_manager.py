@@ -1,10 +1,10 @@
 """Terminal manager - Handle terminal size, resize events, and cursor positioning"""
 
 import os
-import sys
-import signal
 import shutil
-from typing import Callable, Optional, Tuple
+import signal
+import sys
+from collections.abc import Callable
 from dataclasses import dataclass
 
 
@@ -32,7 +32,7 @@ class TerminalManager:
         self.bottom_ui_height = 4  # divider + input + divider + status
 
         # Resize callback
-        self.on_resize: Optional[Callable[[int, int], None]] = None
+        self.on_resize: Callable[[int, int], None] | None = None
 
         # Update initial size
         self.update_size()
@@ -118,7 +118,7 @@ class TerminalManager:
         sys.stdout.write("\033[2J")
         sys.stdout.flush()
 
-    def clear_line(self, line: Optional[int] = None):
+    def clear_line(self, line: int | None = None):
         """Clear a specific line or current line
 
         Args:
@@ -198,7 +198,7 @@ class TerminalManager:
 
         sys.stdout.flush()
 
-    def set_scroll_region(self, top: int = 1, bottom: Optional[int] = None):
+    def set_scroll_region(self, top: int = 1, bottom: int | None = None):
         """Set scrolling region
 
         Args:
@@ -226,7 +226,7 @@ class TerminalManager:
         sys.stdout.write("\033[?1049l")
         sys.stdout.flush()
 
-    def get_cursor_position(self) -> Tuple[int, int]:
+    def get_cursor_position(self) -> tuple[int, int]:
         """Get current cursor position
 
         Returns:

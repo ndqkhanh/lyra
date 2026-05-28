@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.safety.approval_gate import (
     ApprovalGate,
     GateAction,

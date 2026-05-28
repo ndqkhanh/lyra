@@ -26,7 +26,7 @@ the adapter:
 from __future__ import annotations
 
 import json
-from typing import Any, List, Optional
+from typing import Any
 
 from lyra_harness_core.messages import Message, StopReason, ToolCall
 from lyra_harness_core.models import LLMProvider
@@ -36,7 +36,7 @@ class VertexUnavailable(RuntimeError):
     """Raised when google-cloud-aiplatform isn't installed and no client given."""
 
 
-def _try_import_vertex() -> Optional[Any]:
+def _try_import_vertex() -> Any | None:
     try:
         import vertexai  # type: ignore  # noqa: F401
         from vertexai.generative_models import GenerativeModel  # type: ignore
@@ -59,7 +59,7 @@ class GeminiVertexLLM(LLMProvider):
         model: str,
         project: str,
         location: str = "us-central1",
-        client: Optional[Any] = None,
+        client: Any | None = None,
     ) -> None:
         if client is not None:
             self._client = client
@@ -151,8 +151,8 @@ class GeminiVertexLLM(LLMProvider):
 
     def generate(
         self,
-        messages: List[Message],
-        tools: Optional[List[dict]] = None,
+        messages: list[Message],
+        tools: list[dict] | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.0,
     ) -> Message:

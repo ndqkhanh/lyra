@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.terminal.events import (
     MouseButton,
     MouseEvent,
@@ -11,7 +10,6 @@ from lyra_core.terminal.events import (
     VoiceKind,
 )
 from lyra_core.terminal.fullscreen import DiffBlock, FullscreenRenderer
-
 
 # --- DiffBlock validation --------------------------------------------------
 

@@ -47,14 +47,13 @@ Usage::
 from __future__ import annotations
 
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Iterable, Literal
+from typing import Any, Literal
 
 from .mailbox import Mailbox, MailboxMessage
-from .shared_tasks import SharedTaskList, TaskState
-
+from .shared_tasks import SharedTaskList
 
 TeammateMode = Literal["in-process", "tmux", "iterm2", "auto"]
 """Display mode for teammate output. Only ``in-process`` runs work
@@ -264,7 +263,7 @@ class LeadSession:
         executor: Executor,
         mode: TeammateMode = "in-process",
         allow_unsafe_token_overage: bool = False,
-    ) -> "LeadSession":
+    ) -> LeadSession:
         return cls(
             team_name=team_name,
             team_dir=team_dir,

@@ -12,10 +12,9 @@ on the attachment path to get a description back.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Protocol, runtime_checkable
-
+from typing import Any, Protocol, runtime_checkable
 
 __all__ = [
     "ImageDescribeError",

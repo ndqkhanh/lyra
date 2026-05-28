@@ -19,14 +19,12 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-
-from lyra_harness_core.messages import Message, StopReason
-
 from lyra_cli.interactive.session import (
     InteractiveSession,
-    _LyraCoreLLMAdapter,
     _ensure_subagent_registry,
+    _LyraCoreLLMAdapter,
 )
+from lyra_harness_core.messages import Message, StopReason
 
 
 class _FakeProvider:
@@ -110,7 +108,6 @@ def test_spawn_factory_does_not_crash_with_provider_kwarg(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Direct check: the loop_factory must accept the lyra_core API."""
-    from lyra_core.agent.loop import AgentLoop
 
     sess = InteractiveSession(
         repo_root=tmp_path,

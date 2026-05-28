@@ -20,10 +20,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from lyra_core.subagent import SubagentRegistry
-
 from lyra_cli.interactive.keybinds import focus_foreground_subagent
 from lyra_cli.interactive.session import InteractiveSession
+from lyra_core.subagent import SubagentRegistry
 
 
 def _seed_registry(*, count: int = 2) -> SubagentRegistry:

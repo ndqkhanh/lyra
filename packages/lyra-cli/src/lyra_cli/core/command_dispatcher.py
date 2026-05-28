@@ -1,9 +1,8 @@
 """Command dispatcher for executing commands."""
-from typing import Optional, Dict, Any
 from dataclasses import dataclass
+from typing import Any
 
 from .command_registry import CommandRegistry
-from .command_metadata import CommandMetadata
 
 
 @dataclass
@@ -11,7 +10,7 @@ class CommandResult:
     """Result from command execution."""
     success: bool
     output: str
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class CommandDispatcher:
@@ -20,7 +19,7 @@ class CommandDispatcher:
     def __init__(self, registry: CommandRegistry):
         self.registry = registry
 
-    def dispatch(self, command_name: str, args: Optional[Dict[str, Any]] = None) -> CommandResult:
+    def dispatch(self, command_name: str, args: dict[str, Any] | None = None) -> CommandResult:
         """Dispatch a command by name."""
         command = self.registry.get_command(command_name)
 

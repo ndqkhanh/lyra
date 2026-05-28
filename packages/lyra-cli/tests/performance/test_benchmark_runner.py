@@ -6,7 +6,6 @@ import time
 from typing import Any
 
 import pytest
-
 from lyra_cli.performance.benchmark_runner import (
     BaselineComparison,
     BenchmarkCategory,
@@ -68,8 +67,8 @@ def test_run_single_with_custom_fn() -> None:
     result = runner.run_single(config)
     assert result.status == BenchmarkStatus.COMPLETE
     assert result.duration_seconds > 0
-    assert f"custom_test_p50_ms" in result.metrics
-    assert result.metrics[f"custom_test_p50_ms"] > 0
+    assert "custom_test_p50_ms" in result.metrics
+    assert result.metrics["custom_test_p50_ms"] > 0
 
 
 def test_run_single_handles_exception() -> None:

@@ -1,10 +1,9 @@
 """Tests for L0 Sensory Memory and L1 Short-term Memory."""
 
-import pytest
-from datetime import datetime, timedelta
+from datetime import datetime
 
-from lyra_cli.memory.l0_sensory import SensoryObservation, SensoryMemoryStore
-from lyra_cli.memory.l1_shortterm import TopicGroup, ShortTermMemoryStore
+from lyra_cli.memory.l0_sensory import SensoryMemoryStore, SensoryObservation
+from lyra_cli.memory.l1_shortterm import ShortTermMemoryStore
 
 
 class TestL0SensoryMemory:

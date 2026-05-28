@@ -10,7 +10,6 @@ import json
 from typing import Any
 
 import pytest
-
 from lyra_cli.providers.copilot import (
     CopilotLLM,
     CopilotTokenStore,

@@ -18,11 +18,9 @@ Three operational properties:
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
-
 
 __all__ = ["HumanDirective"]
 
@@ -39,7 +37,7 @@ class HumanDirective:
     """
 
     path: Path
-    archive_dir: Optional[Path] = None
+    archive_dir: Path | None = None
     _last_mtime: float = 0.0
     _seq: int = 0
 
@@ -52,7 +50,7 @@ class HumanDirective:
 
     # ---- public API ------------------------------------------------- #
 
-    def consume_if_changed(self) -> Optional[str]:
+    def consume_if_changed(self) -> str | None:
         if not self.path.exists():
             return None
         try:

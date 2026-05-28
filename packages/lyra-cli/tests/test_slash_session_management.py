@@ -15,10 +15,8 @@ import json
 from pathlib import Path
 
 import pytest
-
 from lyra_cli.interactive.session import InteractiveSession
 from lyra_cli.interactive.sessions_store import (
-    SessionMeta,
     SessionsStore,
     UnsupportedExportFormat,
 )

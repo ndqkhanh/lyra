@@ -13,10 +13,9 @@ from __future__ import annotations
 
 import difflib
 import json
-import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from textual.app import ComposeResult
 from textual.binding import Binding
@@ -124,7 +123,7 @@ class ReplayWidget(Widget):
 
     # ── Public API ─────────────────────────────────────────────────────
 
-    def load_session(self, session_dir: Optional[Path] = None) -> None:
+    def load_session(self, session_dir: Path | None = None) -> None:
         """Load replay events from a session directory."""
         if not session_dir:
             session_dir = Path.home() / ".lyra" / "sessions"
@@ -288,8 +287,8 @@ def cmd_replay(session: Any, args: str) -> CommandResult:
     # We can't easily drive the widget from here, so we return text
     # (widget is the visual interface; this is the CLI fallback)
     return CommandResult(
-        output=f"Replay: Use Ctrl+Shift+J for the TUI replay viewer, "
-               f"or specify a session id."
+        output="Replay: Use Ctrl+Shift+J for the TUI replay viewer, "
+               "or specify a session id."
     )
 
 

@@ -43,16 +43,15 @@ keeps the loop unit-testable without a Rich console.
 """
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any
 
 # These imports are deliberately late-bound at function call sites to
 # avoid pulling all of lyra_harness_core into the module just to expose
 # types. Top-level imports here are pure typing or zero-cost.
-
 from .tool_approval import ToolApprovalCache
-
 
 # ---------------------------------------------------------------------------
 # Curated chat-mode tool set
@@ -123,8 +122,8 @@ def build_chat_tool_registry(
     Raises:
         ImportError: If ``lyra_core`` is not installed.
     """
-    from lyra_harness_core.tools import ToolRegistry
     from lyra_core.tools.builtin import register_builtin_tools
+    from lyra_harness_core.tools import ToolRegistry
 
     registry = ToolRegistry()
     register_builtin_tools(
@@ -273,14 +272,14 @@ def run_chat_tool_loop(
     messages: list[Any],
     registry: Any,
     *,
-    approval_cache: Optional[ToolApprovalCache] = None,
-    approve: Optional[ApproveFn] = None,
-    render: Optional[RenderFn] = None,
+    approval_cache: ToolApprovalCache | None = None,
+    approve: ApproveFn | None = None,
+    render: RenderFn | None = None,
     max_steps: int = 8,
     max_tokens: int = 1024,
-    on_usage: Optional[Callable[[Any], None]] = None,
-    mcp_schemas: Optional[list[dict[str, Any]]] = None,
-    mcp_transports: Optional[dict[str, Any]] = None,
+    on_usage: Callable[[Any], None] | None = None,
+    mcp_schemas: list[dict[str, Any]] | None = None,
+    mcp_transports: dict[str, Any] | None = None,
     mcp_call_timeout_s: float = 60.0,
 ) -> ToolLoopReport:
     """Drive the ``LLMProvider`` think-act-observe loop until it ends.

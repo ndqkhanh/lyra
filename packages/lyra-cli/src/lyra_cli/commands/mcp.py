@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -111,7 +110,7 @@ def add_server(
         "-e",
         help="Repeat for each KEY=VAL env var to inject.",
     ),
-    cwd: Optional[str] = typer.Option(
+    cwd: str | None = typer.Option(
         None, "--cwd", help="Working directory for the spawned MCP server."
     ),
     trust: str = typer.Option(
@@ -119,7 +118,7 @@ def add_server(
         "--trust",
         help="'first-party' to skip the trust banner; 'third-party' (default) wraps tool output.",
     ),
-    config_path: Optional[Path] = typer.Option(
+    config_path: Path | None = typer.Option(
         None,
         "--config",
         help="Override the user-global config path (default: ~/.lyra/mcp.json).",
@@ -150,7 +149,7 @@ def add_server(
 @mcp_app.command("remove")
 def remove_server(
     name: str = typer.Argument(..., help="Logical name to remove."),
-    config_path: Optional[Path] = typer.Option(
+    config_path: Path | None = typer.Option(
         None,
         "--config",
         help="Override the user-global config path (default: ~/.lyra/mcp.json).",

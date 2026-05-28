@@ -2,13 +2,12 @@
 from __future__ import annotations
 
 import pytest
-
+from lyra_core.transparency.event_store import make_event
 from lyra_core.transparency.otel_exporter import (
     OtelConfig,
     OtelExporter,
     _build_span_attributes,
 )
-from lyra_core.transparency.event_store import make_event
 
 
 @pytest.mark.unit

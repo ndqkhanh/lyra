@@ -123,7 +123,7 @@ class PreIndexer:
             raise IndexingError(abs_path, "File does not exist")
 
         try:
-            with open(abs_path, "r", encoding="utf-8", errors="replace") as f:
+            with open(abs_path, encoding="utf-8", errors="replace") as f:
                 content = f.read()
         except OSError as e:
             from .exceptions import IndexingError
@@ -340,7 +340,7 @@ class PreIndexer:
 
     async def to_graph(self, graph: Any) -> Any:
         """Import indexed symbols and files into a KnowledgeGraph."""
-        from .graph_builder import KnowledgeNode, KnowledgeEdge, NodeType, EdgeRelation
+        from .graph_builder import EdgeRelation, KnowledgeEdge, KnowledgeNode, NodeType
 
         result = graph
         for idx in self._file_indices.values():

@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich import box
@@ -132,7 +131,7 @@ def _color_status(s: str) -> str:
     return f"[{_STATUS_COLORS.get(s, 'white')}]{s}[/]"
 
 
-def _load_dag(repo_root: Path, session: Optional[str]) -> Optional[dict]:
+def _load_dag(repo_root: Path, session: str | None) -> dict | None:
     dag_dir = repo_root / ".lyra" / "dag"
     if not dag_dir.exists():
         return None
@@ -178,7 +177,7 @@ def _render_node(parent: Tree, node_id: str, nodes: dict, edges: list[dict], vis
 def dag_command(
     ctx: typer.Context,
     repo_root: Path = typer.Option(Path.cwd(), "--repo-root", "-C", help="Repo root."),
-    session: Optional[str] = typer.Option(
+    session: str | None = typer.Option(
         None, "--session", "-s", help="Session ID (defaults to most recent)."
     ),
     json_out: bool = typer.Option(False, "--json", help="Emit JSON instead of a tree."),

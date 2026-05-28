@@ -1,7 +1,7 @@
 """Rules loader - Load and parse rule files"""
 
 from pathlib import Path
-from typing import List, Dict
+
 from .rules_manager import Rule
 
 
@@ -23,7 +23,7 @@ class RulesLoader:
         )
 
     @staticmethod
-    def load_from_directory(directory: Path, language: str = "common") -> List[Rule]:
+    def load_from_directory(directory: Path, language: str = "common") -> list[Rule]:
         """Load all rules from a directory"""
         rules = []
 

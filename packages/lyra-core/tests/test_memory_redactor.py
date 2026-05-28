@@ -3,12 +3,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from lyra_core.memory.auto_memory import AutoMemory, MemoryKind
 from lyra_core.memory.memory_tools import MemoryToolset
-from lyra_core.memory.redactor import RedactionResult, redact, redact_pair
-
+from lyra_core.memory.redactor import redact, redact_pair
 
 # --- redact() ---------------------------------------------------------
 

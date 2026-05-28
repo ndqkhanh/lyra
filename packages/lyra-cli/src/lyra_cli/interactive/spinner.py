@@ -125,7 +125,7 @@ class Spinner:
         frames: list[str] | None = None,
         preset: str = "star",
         out: Any | None = None,
-        status_source: "StatusSource | None" = None,
+        status_source: StatusSource | None = None,
     ) -> None:
         # Resolve frames in priority order:
         #   1. explicit ``frames=`` (caller knows best)
@@ -152,7 +152,7 @@ class Spinner:
         # Cache wings once at start to avoid a per-frame skin import.
         self._wings: list[tuple[str, str]] = []
         # Optional status source for per-turn token download display.
-        self._status_source: "StatusSource | None" = status_source
+        self._status_source: StatusSource | None = status_source
 
     @staticmethod
     def _frames_from_active_skin() -> list[str]:
@@ -336,7 +336,7 @@ class Spinner:
 
     # ----- context manager -----------------------------------------------
 
-    def __enter__(self) -> "Spinner":
+    def __enter__(self) -> Spinner:
         self.start()
         return self
 
@@ -443,7 +443,7 @@ class ThreadedSpinner:
 
     # Context manager niceties.
 
-    def __enter__(self) -> "ThreadedSpinner":  # pragma: no cover - trivial
+    def __enter__(self) -> ThreadedSpinner:  # pragma: no cover - trivial
         self.start(self._label)
         return self
 

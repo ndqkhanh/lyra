@@ -21,11 +21,10 @@ or LLM-judged at a higher tier.
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable, Sequence
 
 from .auto_memory import MemoryEntry, MemoryKind
-
 
 _TOKEN_RE = re.compile(r"[A-Za-z][A-Za-z\-']{3,}")
 

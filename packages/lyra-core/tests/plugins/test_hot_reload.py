@@ -5,7 +5,6 @@ import os
 import time
 
 import pytest
-
 from lyra_core.plugins.hot_reload import (
     PluginFileState,
     PluginHotReloader,

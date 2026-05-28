@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -34,7 +33,7 @@ def status_command(
         "-l",
         help="Run the live Rich dashboard (4 Hz refresh, Ctrl-C to stop).",
     ),
-    session_id: Optional[str] = typer.Option(
+    session_id: str | None = typer.Option(
         None,
         "--session",
         "-s",
@@ -69,7 +68,7 @@ def _run_live(session_id: str) -> None:
     display.run()
 
 
-def _run_snapshot(repo_root: Path, session_id: Optional[str]) -> None:
+def _run_snapshot(repo_root: Path, session_id: str | None) -> None:
     """Render a one-shot snapshot from .lyra/process_state.json."""
     try:
         from lyra_core.observability.live_display import DisplayState, build_layout

@@ -5,8 +5,8 @@ from __future__ import annotations
 import typer
 from rich.console import Console
 
-from lyra_cli.sound_effects import SoundEvent, get_sound_manager
 from lyra_cli.generate_sounds import generate_all_sounds
+from lyra_cli.sound_effects import SoundEvent, get_sound_manager
 
 app = typer.Typer()
 console = Console()

@@ -1,9 +1,9 @@
 """Rule validator for checking code against rules."""
-from typing import Optional, Dict, Any, List
 from dataclasses import dataclass
+from typing import Any
 
+from .rule_metadata import RuleCategory, RuleMetadata, RuleSeverity
 from .rule_registry import RuleRegistry
-from .rule_metadata import RuleCategory, RuleSeverity, RuleMetadata
 
 
 @dataclass
@@ -12,15 +12,15 @@ class RuleViolation:
     rule_name: str
     severity: RuleSeverity
     message: str
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
+    file_path: str | None = None
+    line_number: int | None = None
 
 
 @dataclass
 class ValidationResult:
     """Result from rule validation."""
     passed: bool
-    violations: List[RuleViolation]
+    violations: list[RuleViolation]
     rules_checked: int
 
 
@@ -30,7 +30,7 @@ class RuleValidator:
     def __init__(self, registry: RuleRegistry):
         self.registry = registry
 
-    def validate(self, context: Optional[Dict[str, Any]] = None) -> ValidationResult:
+    def validate(self, context: dict[str, Any] | None = None) -> ValidationResult:
         """Validate code against all enabled rules."""
         violations = []
         rules = [r for r in self.registry.list_rules() if r.enabled]
@@ -45,7 +45,7 @@ class RuleValidator:
             rules_checked=len(rules)
         )
 
-    def validate_category(self, category: RuleCategory, context: Optional[Dict[str, Any]] = None) -> ValidationResult:
+    def validate_category(self, category: RuleCategory, context: dict[str, Any] | None = None) -> ValidationResult:
         """Validate code against rules in a specific category."""
         violations = []
         rules = self.registry.get_rules_by_category(category)
@@ -60,7 +60,7 @@ class RuleValidator:
             rules_checked=len(rules)
         )
 
-    def _check_rule(self, rule: RuleMetadata, context: Optional[Dict[str, Any]] = None) -> List[RuleViolation]:
+    def _check_rule(self, rule: RuleMetadata, context: dict[str, Any] | None = None) -> list[RuleViolation]:
         """Check a single rule."""
         # TODO: Implement actual rule checking
         # For now, return empty list (no violations)

@@ -9,10 +9,8 @@ from __future__ import annotations
 import json
 import logging
 from dataclasses import dataclass
-from typing import Optional
 
 from .models import HookEvent
-
 
 _LOG = logging.getLogger(__name__)
 
@@ -93,10 +91,14 @@ def _init_tracer(cfg: OtelConfig):
     """Initialise OTel tracer. Returns None if opentelemetry is not installed."""
     try:
         from opentelemetry import trace  # type: ignore[import-untyped]
-        from opentelemetry.sdk.trace import TracerProvider  # type: ignore[import-untyped]
-        from opentelemetry.sdk.trace.export import BatchSpanProcessor  # type: ignore[import-untyped]
-        from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter  # type: ignore[import-untyped]
+        from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
+            OTLPSpanExporter,  # type: ignore[import-untyped]
+        )
         from opentelemetry.sdk.resources import Resource  # type: ignore[import-untyped]
+        from opentelemetry.sdk.trace import TracerProvider  # type: ignore[import-untyped]
+        from opentelemetry.sdk.trace.export import (
+            BatchSpanProcessor,  # type: ignore[import-untyped]
+        )
 
         resource = Resource({"service.name": cfg.service_name})
         provider = TracerProvider(resource=resource)

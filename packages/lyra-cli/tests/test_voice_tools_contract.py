@@ -5,17 +5,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import pytest
-
+from lyra_cli.interactive.session import InteractiveSession
 from lyra_cli.voice import (
-    STTBackend,
     STTError,
-    TTSBackend,
     TTSError,
     synthesise_speech,
     transcribe_audio,
 )
-from lyra_cli.interactive.session import InteractiveSession
-
 
 # ---------------------------------------------------------------------------
 # Stub backends

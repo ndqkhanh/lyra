@@ -18,11 +18,12 @@ import sys
 import threading
 import time
 import uuid
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any
 
-from .render import make_stream_renderer, render_diff, render_message
+from .render import make_stream_renderer, render_message
 
 logger = logging.getLogger(__name__)
 
@@ -144,7 +145,7 @@ class _SlashWorker:
                 return str(msg.get("output", "")).rstrip()
 
             raise RuntimeError(
-                f"slash worker closed pipe"
+                "slash worker closed pipe"
                 + (": " + "\n".join(self.stderr_tail[-8:]) if self.stderr_tail else "")
             )
 

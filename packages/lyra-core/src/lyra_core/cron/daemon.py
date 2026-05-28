@@ -19,11 +19,10 @@ Design invariants
 from __future__ import annotations
 
 import threading
-import time
+from collections.abc import Callable
 from datetime import datetime, timezone
-from typing import Callable
 
-from .schedule import Schedule, ScheduleParseError, parse_schedule
+from .schedule import ScheduleParseError, parse_schedule
 from .store import CronJob, CronStore
 
 __all__ = ["CronDaemon"]

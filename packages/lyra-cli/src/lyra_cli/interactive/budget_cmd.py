@@ -12,11 +12,10 @@ ECC reference: enterprise-controls.md emphasizes cost observability.
 from __future__ import annotations
 
 import json
-import os
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from textual.app import ComposeResult
 from textual.binding import Binding
@@ -25,7 +24,6 @@ from textual.widget import Widget
 from textual.widgets import Static
 
 from ..commands.registry import CommandResult
-
 
 # ── Budget config ──────────────────────────────────────────────────────
 
@@ -81,7 +79,7 @@ class BudgetState:
         }
 
     @classmethod
-    def from_dict(cls, d: dict) -> "BudgetState":
+    def from_dict(cls, d: dict) -> BudgetState:
         return cls(
             limit_usd=d.get("limit_usd", 10.0),
             spent_usd=d.get("spent_usd", 0.0),

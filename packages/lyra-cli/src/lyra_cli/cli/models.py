@@ -1,7 +1,6 @@
 """Model registry and definitions for Lyra"""
 
 from dataclasses import dataclass
-from typing import List, Optional
 
 
 @dataclass
@@ -14,7 +13,7 @@ class ModelInfo:
     input_price: float  # per Mtok
     output_price: float  # per Mtok
     context_window: int
-    capabilities: List[str]
+    capabilities: list[str]
     api_key_env: str  # Environment variable for API key
 
 
@@ -104,14 +103,14 @@ class ModelRegistry:
     def __init__(self):
         self.models = MODELS
 
-    def get_model(self, model_id: str) -> Optional[ModelInfo]:
+    def get_model(self, model_id: str) -> ModelInfo | None:
         """Get model by ID"""
         for model in self.models:
             if model.id == model_id:
                 return model
         return None
 
-    def get_all_models(self) -> List[ModelInfo]:
+    def get_all_models(self) -> list[ModelInfo]:
         """Get all models"""
         return self.models
 

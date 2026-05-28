@@ -5,13 +5,12 @@ google-cloud-aiplatform is an optional dependency (lyra[vertex]).
 from __future__ import annotations
 
 import pytest
-
-from lyra_harness_core.messages import Message, StopReason
 from lyra_cli.providers.vertex import (
     GeminiVertexLLM,
     VertexUnavailable,
     vertex_available,
 )
+from lyra_harness_core.messages import Message, StopReason
 
 
 class _FakeVertexResponse:

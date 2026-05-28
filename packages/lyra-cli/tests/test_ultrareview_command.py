@@ -6,8 +6,8 @@ from dataclasses import dataclass
 from lyra_cli.interactive.ultrareview_command import UltraReviewCommand
 from lyra_core.brains.ultrareview import (
     DiffHunk,
-    ReviewFinding,
     Reviewer,
+    ReviewFinding,
     Severity,
     UltraReviewPipeline,
 )

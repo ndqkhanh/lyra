@@ -1,21 +1,19 @@
 """Tests for Phase 4 Orchestration modules."""
 
 import pytest
-
-from lyra_cli.orchestration.specialist_agents import (
-    AgentRole,
-    AgentOrchestrator,
-)
-from lyra_cli.orchestration.model_router import (
-    ModelTier,
-    ModelRouter,
-)
 from lyra_cli.orchestration.closed_loop import (
     ClosedLoopController,
     SimpleVerifier,
     VerificationResult,
 )
-
+from lyra_cli.orchestration.model_router import (
+    ModelRouter,
+    ModelTier,
+)
+from lyra_cli.orchestration.specialist_agents import (
+    AgentOrchestrator,
+    AgentRole,
+)
 
 # ============================================================================
 # Specialist Agents Tests

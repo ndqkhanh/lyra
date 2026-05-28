@@ -2,11 +2,9 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.auto.benchmark_harness import (
     BenchmarkDomain,
     BenchmarkHarness,
-    BenchmarkResult,
     BenchmarkRun,
     BenchmarkStatus,
 )

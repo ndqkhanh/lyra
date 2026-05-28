@@ -1,22 +1,20 @@
 """Sequential output REPL - Claude Code style with fixed bottom UI"""
 
 import os
-import time
-from typing import Optional
 from dataclasses import dataclass
 
 from ..events import (
     EventDispatcher,
     StreamingRenderer,
-    TurnStarted,
     TextDelta,
     TurnFinished,
+    TurnStarted,
 )
 from ..ui import (
-    FixedInputBox,
-    StatusLine,
-    ResponseFormatter,
     AgentTree,
+    FixedInputBox,
+    ResponseFormatter,
+    StatusLine,
 )
 
 
@@ -42,9 +40,9 @@ class SequentialREPL:
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         model: str = "claude-opus-4-20250514",
-        config: Optional[REPLConfig] = None
+        config: REPLConfig | None = None
     ):
         # Configuration
         self.config = config or REPLConfig()
@@ -236,7 +234,7 @@ class SequentialREPL:
         print("─" * width)
         print()
 
-    def get_user_input(self) -> Optional[str]:
+    def get_user_input(self) -> str | None:
         """Get user input"""
         try:
             # Input prompt
@@ -255,7 +253,7 @@ class SequentialREPL:
             self.running = False
             return None
 
-    def _handle_command(self, command: str) -> Optional[str]:
+    def _handle_command(self, command: str) -> str | None:
         """Handle slash commands"""
         cmd = command.lower().strip()
 

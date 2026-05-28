@@ -1,12 +1,11 @@
 """Tests for StrategySelector (UCB1 bandit)."""
 
-import pytest
 
 from lyra_cli.research.strategy_selector import (
+    DEFAULT_QUERY_TYPES,
+    StrategyResult,
     StrategySelector,
     StrategyType,
-    StrategyResult,
-    DEFAULT_QUERY_TYPES,
 )
 
 

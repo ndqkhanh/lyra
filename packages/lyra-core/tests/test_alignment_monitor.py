@@ -1,17 +1,12 @@
 """Tests for the Phase 1 Alignment Drift Monitor."""
 from __future__ import annotations
 
-import math
-
 import pytest
-
 from lyra_core.safety.alignment_monitor import (
     AlignmentMonitor,
-    AlignmentSample,
     DriftReport,
     DriftStatus,
 )
-
 
 # ── Helpers ────────────────────────────────────────────────────────────
 

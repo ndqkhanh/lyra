@@ -15,14 +15,16 @@ to ``thread_id`` directly; inbound surfaces ``from`` as both
 """
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from dataclasses import dataclass
-from typing import Any, AsyncIterator, Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 from ._errors import (
     AdapterAuthError as SmsAuthError,
+)
+from ._errors import (
     FeatureUnavailable,
 )
-
 
 __all__ = [
     "FeatureUnavailable",

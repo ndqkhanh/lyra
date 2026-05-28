@@ -7,8 +7,8 @@ verification to every agent step. Integrates with the existing hook system.
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
-from typing import Any, Optional
+from dataclasses import dataclass
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class SafetyHookPlugin:
 
     # --- Duck-typed plugin hooks called by AgentLoop ---
 
-    def pre_agent_step(self, ctx: SafetyContext) -> Optional[dict[str, Any]]:
+    def pre_agent_step(self, ctx: SafetyContext) -> dict[str, Any] | None:
         """L1 check before agent step."""
         if not self._enabled or not self._mesh:
             return None
@@ -54,7 +54,7 @@ class SafetyHookPlugin:
         self._results.append(result)
         return result
 
-    def pre_tool_call(self, ctx: SafetyContext) -> Optional[dict[str, Any]]:
+    def pre_tool_call(self, ctx: SafetyContext) -> dict[str, Any] | None:
         """L2 check before tool call."""
         if not self._enabled or not self._mesh:
             return None
@@ -62,7 +62,7 @@ class SafetyHookPlugin:
         self._results.append(result)
         return result
 
-    def post_tool_call(self, ctx: SafetyContext) -> Optional[dict[str, Any]]:
+    def post_tool_call(self, ctx: SafetyContext) -> dict[str, Any] | None:
         """L3 check after tool call."""
         if not self._enabled or not self._mesh:
             return None

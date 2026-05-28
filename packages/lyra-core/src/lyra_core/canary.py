@@ -63,9 +63,9 @@ class CanaryTokenGuard:
                 leaked=True,
                 severity=ScanSeverity.CRITICAL,
                 message=(
-                    f"CANARY TOKEN DETECTED IN OUTPUT — "
-                    f"Possible prompt injection or misalignment. "
-                    f"Session should be investigated."
+                    "CANARY TOKEN DETECTED IN OUTPUT — "
+                    "Possible prompt injection or misalignment. "
+                    "Session should be investigated."
                 ),
                 output_snippet=output[:500],
             )

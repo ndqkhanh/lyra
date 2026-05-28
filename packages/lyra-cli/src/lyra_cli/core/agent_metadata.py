@@ -1,6 +1,5 @@
 """Agent metadata models."""
 from dataclasses import dataclass
-from typing import List, Optional
 
 
 @dataclass
@@ -9,7 +8,7 @@ class AgentMetadata:
 
     name: str
     description: str
-    tools: List[str]
+    tools: list[str]
     model: str  # haiku, sonnet, opus
     origin: str = "ECC"
-    file_path: Optional[str] = None
+    file_path: str | None = None

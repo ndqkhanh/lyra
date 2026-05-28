@@ -1,9 +1,9 @@
 """Event dispatcher - Event routing and handling"""
 
-from typing import Callable, Any
 from collections import defaultdict
-from .protocol import Event
+from collections.abc import Callable
 
+from .protocol import Event
 
 EventHandler = Callable[[Event], None]
 

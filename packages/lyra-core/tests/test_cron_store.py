@@ -13,7 +13,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from lyra_core.cron.store import CronJob, CronStore
 
 

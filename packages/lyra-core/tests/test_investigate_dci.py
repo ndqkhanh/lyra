@@ -14,7 +14,6 @@ from dataclasses import FrozenInstanceError
 from pathlib import Path
 
 import pytest
-
 from lyra_core.investigate import (
     INVESTIGATE_PROMPT_BODY,
     BudgetExceeded,

@@ -47,15 +47,15 @@ from __future__ import annotations
 import io
 import os
 import uuid
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Iterator, Literal, Optional
+from typing import Any, Literal
 
 from lyra_core.agent.loop import AgentLoop, TurnResult
 from lyra_core.hir.events import subscribe, unsubscribe
 from lyra_core.subagent.worktree import Worktree, WorktreeError, WorktreeManager
-
 
 # ---------------------------------------------------------------------------
 # Public dataclasses
@@ -118,7 +118,7 @@ class SubagentRunner:
         loop_factory: Callable[[], AgentLoop],
         repo_root: Path,
         worktree_root: Path,
-        worktree_manager: Optional[WorktreeManager] = None,
+        worktree_manager: WorktreeManager | None = None,
         use_git_worktree: bool = True,
     ) -> None:
         self._loop_factory = loop_factory

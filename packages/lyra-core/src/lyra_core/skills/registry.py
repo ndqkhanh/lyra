@@ -16,7 +16,7 @@ store keep the legacy in-memory-only behaviour bit-for-bit.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Iterable, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: no cover — import-cycle dodge
     from .telemetry import DecayedRate, SkillTelemetryStore
@@ -60,7 +60,7 @@ class Skill:
 @dataclass
 class SkillRegistry:
     _skills: dict[str, Skill] = field(default_factory=dict)
-    telemetry_store: Optional["SkillTelemetryStore"] = None
+    telemetry_store: SkillTelemetryStore | None = None
 
     # ---- CRUD ----------------------------------------------------
 
@@ -125,7 +125,7 @@ class SkillRegistry:
         skill_id: str,
         *,
         half_life_days: float = 14.0,
-    ) -> "DecayedRate | None":
+    ) -> DecayedRate | None:
         """L38-2 — half-life-weighted success rate from the ledger.
 
         Returns ``None`` when no telemetry store is attached so callers

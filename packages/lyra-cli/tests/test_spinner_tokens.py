@@ -4,9 +4,7 @@ from __future__ import annotations
 import io
 import time
 
-import pytest
-
-from lyra_cli.interactive.spinner import Spinner, set_enabled
+from lyra_cli.interactive.spinner import Spinner
 from lyra_cli.interactive.status_source import StatusSource
 
 

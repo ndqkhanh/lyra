@@ -15,17 +15,17 @@ ECC reference: ECC's everything-claude-code conventional commit conventions
 """
 from __future__ import annotations
 
-import subprocess
 import shlex
+import subprocess
 from pathlib import Path
-from typing import Optional
+
+from typing import Any
 
 from ..commands.registry import CommandResult
 
-
 # ── Git helpers (pure) ─────────────────────────────────────────────────
 
-def _run_git(args: list[str], cwd: Optional[Path] = None) -> tuple[str, str, int]:
+def _run_git(args: list[str], cwd: Path | None = None) -> tuple[str, str, int]:
     """Run a git command and return (stdout, stderr, exit_code)."""
     try:
         result = subprocess.run(
@@ -42,31 +42,31 @@ def _run_git(args: list[str], cwd: Optional[Path] = None) -> tuple[str, str, int
         return "", "git command timed out", -1
 
 
-def get_branch(repo_root: Optional[Path] = None) -> str:
+def get_branch(repo_root: Path | None = None) -> str:
     """Get current branch name."""
     out, _, _ = _run_git(["rev-parse", "--abbrev-ref", "HEAD"], repo_root)
     return out or "—"
 
 
-def get_dirty_count(repo_root: Optional[Path] = None) -> int:
+def get_dirty_count(repo_root: Path | None = None) -> int:
     """Count dirty (modified + untracked) files."""
     out, _, _ = _run_git(["status", "--porcelain"], repo_root)
     return len([l for l in out.split("\n") if l.strip()]) if out else 0
 
 
-def is_detached(repo_root: Optional[Path] = None) -> bool:
+def is_detached(repo_root: Path | None = None) -> bool:
     """Check if HEAD is detached."""
     out, _, _ = _run_git(["rev-parse", "--abbrev-ref", "HEAD"], repo_root)
     return out == "HEAD"
 
 
-def get_commits_ahead(repo_root: Optional[Path] = None) -> int:
+def get_commits_ahead(repo_root: Path | None = None) -> int:
     """Count commits ahead of remote."""
     out, _, ec = _run_git(["rev-list", "--count", "@{upstream}..HEAD", "--"], repo_root)
     return int(out) if out and ec == 0 else 0
 
 
-def render_status_badge(repo_root: Optional[Path] = None) -> str:
+def render_status_badge(repo_root: Path | None = None) -> str:
     """Compact status badge for the REPL status bar."""
     branch = get_branch(repo_root)
     dirty = get_dirty_count(repo_root)
@@ -222,7 +222,7 @@ def cmd_git(session: Any, args: str) -> CommandResult:
     if subcmd == "commit":
         if len(parts) < 2:
             return CommandResult(output="Usage: /git commit <message>")
-        
+
         if parts[1] == "--conventional" and len(parts) >= 4:
             msg_type = parts[2]
             msg_body = " ".join(parts[3:])

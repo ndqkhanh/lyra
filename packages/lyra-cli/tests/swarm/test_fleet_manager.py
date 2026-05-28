@@ -3,13 +3,9 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_cli.swarm.fleet_manager import (
-    FleetConfig,
-    FleetManager,
-    AgentInstance,
     AgentStatus,
-    ResourceProfile,
+    FleetManager,
 )
 
 

@@ -1,6 +1,6 @@
 """Callback protocol for agent output handling"""
 
-from typing import Protocol, Dict, Any, Optional
+from typing import Any, Protocol
 
 
 class AgentOutputCallback(Protocol):
@@ -14,7 +14,7 @@ class AgentOutputCallback(Protocol):
         """
         ...
 
-    def on_tool_use(self, tool: str, args: Dict[str, Any]) -> None:
+    def on_tool_use(self, tool: str, args: dict[str, Any]) -> None:
         """Called when agent uses a tool
 
         Args:
@@ -31,7 +31,7 @@ class AgentOutputCallback(Protocol):
         """
         ...
 
-    def on_turn_end(self, turn_id: str, result: Dict[str, Any]) -> None:
+    def on_turn_end(self, turn_id: str, result: dict[str, Any]) -> None:
         """Called when agent turn ends
 
         Args:

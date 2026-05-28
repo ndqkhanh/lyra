@@ -1,6 +1,6 @@
 """Tests for agent orchestrator."""
+
 import pytest
-from pathlib import Path
 from lyra_cli.core.agent_orchestrator import AgentOrchestrator, AgentResult
 from lyra_cli.core.agent_registry import AgentRegistry
 

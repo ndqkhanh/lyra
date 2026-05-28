@@ -22,7 +22,6 @@ Contract:
 from __future__ import annotations
 
 import json
-import os
 import stat
 from pathlib import Path
 
@@ -221,7 +220,7 @@ def test_save_budget_partial_update_preserves_other_fields(
 
 def test_save_budget_preserves_provider_keys(lyra_home: Path) -> None:
     """Budget writes must not touch the providers block."""
-    from lyra_core.auth.store import save, save_budget, load
+    from lyra_core.auth.store import load, save, save_budget
 
     save("deepseek", "sk-stable-key", model="deepseek-v4-pro")
     save_budget(cap_usd=5.0)

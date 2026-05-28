@@ -9,8 +9,8 @@ the REPL. Two forms:
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Callable, Iterable, Optional
+from collections.abc import Callable, Iterable
+from dataclasses import dataclass
 
 from lyra_core.brains.ultrareview import (
     DiffHunk,
@@ -19,17 +19,16 @@ from lyra_core.brains.ultrareview import (
     render_summary_md,
 )
 
-
 # Caller-supplied diff fetchers. Production wires git + gh; tests inject
 # deterministic fakes.
-DiffFetcher = Callable[[Optional[str]], Iterable[DiffHunk]]
+DiffFetcher = Callable[[str | None], Iterable[DiffHunk]]
 
 
 @dataclass(frozen=True)
 class UltraReviewCommandResult:
     ok: bool
     message: str
-    summary: Optional[ReviewSummary] = None
+    summary: ReviewSummary | None = None
 
 
 @dataclass
@@ -41,7 +40,7 @@ class UltraReviewCommand:
 
     def dispatch(self, args: str) -> UltraReviewCommandResult:
         parts = args.strip().split()
-        pr_id: Optional[str] = parts[0] if parts else None
+        pr_id: str | None = parts[0] if parts else None
         try:
             hunks = list(self.diff_fetcher(pr_id))
         except Exception as exc:                       # noqa: BLE001 — surface

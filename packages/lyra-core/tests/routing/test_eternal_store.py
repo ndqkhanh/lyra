@@ -1,12 +1,11 @@
 """Tests for the L7 Eternal Memory Store."""
 from __future__ import annotations
 
-import tempfile
 import json as _json
+import tempfile
 from pathlib import Path
 
 import pytest
-
 from lyra_memory.eternal_store import (
     EternalRecord,
     EternalStore,

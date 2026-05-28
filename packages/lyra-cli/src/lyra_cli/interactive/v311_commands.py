@@ -20,7 +20,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-
 # ---- result type proxy -----------------------------------------------
 #
 # We deliberately import lazily (and accept Any) so this module can be
@@ -486,7 +485,7 @@ def _create_default_lead(session: Any):
         team_dir=team_dir,
         executor=executor,
     )
-    setattr(session, "_v311_lead", lead)
+    session._v311_lead = lead
     return lead
 
 
@@ -550,7 +549,7 @@ def _resolve_scaling_axes(session: Any):
         sa.record_tool_use(
             native_count=10, mcp_server_count=3, avg_success_rate=0.85
         )
-        setattr(session, "_v311_scaling", sa)
+        session._v311_scaling = sa
     return sa
 
 
@@ -563,7 +562,7 @@ def _resolve_marketplace_registry(session: Any):
         from lyra_core.bundle import MarketplaceRegistry
 
         reg = MarketplaceRegistry()
-        setattr(session, "_v311_marketplace", reg)
+        session._v311_marketplace = reg
     return reg
 
 
@@ -584,7 +583,7 @@ def _resolve_coverage_index(session: Any):
         except Exception:
             from lyra_core.bundle import VerifierCoverageIndex
             idx = VerifierCoverageIndex()
-        setattr(session, "_v311_coverage", idx)
+        session._v311_coverage = idx
     return idx
 
 

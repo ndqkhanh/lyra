@@ -5,15 +5,15 @@ Implements Rich progress bars and alive-progress animations.
 
 from __future__ import annotations
 
+from rich.console import Console
 from rich.progress import (
+    BarColumn,
     Progress,
     SpinnerColumn,
-    BarColumn,
+    TaskProgressColumn,
     TextColumn,
     TimeElapsedColumn,
-    TaskProgressColumn,
 )
-from rich.console import Console
 
 
 class ProgressBarManager:

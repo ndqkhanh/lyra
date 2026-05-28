@@ -2,14 +2,19 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from dataclasses import replace
 from pathlib import Path
-from typing import Callable
 
 from .event_store import EventStore
 from .models import AgentProcess
 from .process_scanner import scan_agent_processes
-from .session_reader import list_session_files, read_session_tokens, read_last_tool, extract_session_id
+from .session_reader import (
+    extract_session_id,
+    list_session_files,
+    read_last_tool,
+    read_session_tokens,
+)
 
 _DEFAULT_CONTEXT_LIMIT = 200_000
 

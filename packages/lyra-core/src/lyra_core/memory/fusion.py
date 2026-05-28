@@ -21,7 +21,7 @@ records or pass through their own ``RecallResult`` objects.
 """
 from __future__ import annotations
 
-from typing import Iterable, Sequence
+from collections.abc import Sequence
 
 
 def rrf(

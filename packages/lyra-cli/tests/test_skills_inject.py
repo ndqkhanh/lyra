@@ -25,17 +25,15 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-
 from lyra_cli.interactive.session import (
-    InteractiveSession,
     SLASH_COMMANDS,
+    InteractiveSession,
     _augment_system_prompt_with_skills,
 )
 from lyra_cli.interactive.skills_inject import (
     discover_skill_roots,
     render_skill_block,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers

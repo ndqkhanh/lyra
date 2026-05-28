@@ -1,6 +1,5 @@
 """Rule metadata models."""
 from dataclasses import dataclass
-from typing import Optional
 from enum import Enum
 
 
@@ -31,4 +30,4 @@ class RuleMetadata:
     category: RuleCategory
     severity: RuleSeverity
     enabled: bool = True
-    file_path: Optional[str] = None
+    file_path: str | None = None

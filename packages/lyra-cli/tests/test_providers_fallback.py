@@ -9,8 +9,6 @@ callers can see what happened.
 from __future__ import annotations
 
 import pytest
-
-from lyra_harness_core.messages import Message, StopReason
 from lyra_cli.providers.fallback import (
     FallbackChain,
     FallbackExhausted,
@@ -21,6 +19,7 @@ from lyra_cli.providers.openai_compatible import (
     ProviderHTTPError,
     ProviderNotConfigured,
 )
+from lyra_harness_core.messages import Message, StopReason
 
 
 class _FakeProvider:

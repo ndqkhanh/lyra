@@ -3,12 +3,9 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_cli.swarm.communication import (
     AgentCommunication,
     Message,
-    MessageType,
-    SharedStateEntry,
 )
 
 

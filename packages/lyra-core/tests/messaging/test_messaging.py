@@ -3,10 +3,9 @@
 Phase 4, Week 1: System Integration - Cross-Component Communication
 Following TDD approach: RED → GREEN → REFACTOR
 """
-import pytest
-from typing import Any
 from dataclasses import dataclass
 
+import pytest
 from lyra_core.messaging import (
     EventBus,
     Message,

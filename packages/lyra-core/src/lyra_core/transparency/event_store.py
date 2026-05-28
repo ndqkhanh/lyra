@@ -6,10 +6,8 @@ import sqlite3
 import time
 import uuid
 from pathlib import Path
-from typing import Optional
 
 from .models import HookEvent
-
 
 _DEFAULT_DB = Path.home() / ".lyra" / "transparency.db"
 
@@ -60,7 +58,7 @@ class EventStore:
                 ),
             )
 
-    def tail(self, n: int = 50, *, session_id: Optional[str] = None) -> list[HookEvent]:
+    def tail(self, n: int = 50, *, session_id: str | None = None) -> list[HookEvent]:
         sql = "SELECT event_id, session_id, hook_type, tool_name, payload_json, received_at FROM hook_events"
         params: list = []
         if session_id:
@@ -72,7 +70,7 @@ class EventStore:
             rows = conn.execute(sql, params).fetchall()
         return [HookEvent(*row) for row in reversed(rows)]
 
-    def since(self, ts: float, *, session_id: Optional[str] = None) -> list[HookEvent]:
+    def since(self, ts: float, *, session_id: str | None = None) -> list[HookEvent]:
         sql = "SELECT event_id, session_id, hook_type, tool_name, payload_json, received_at FROM hook_events WHERE received_at > ?"
         params: list = [ts]
         if session_id:

@@ -25,28 +25,23 @@ direct ``Document`` construction (no key-loop, no stdin).
 from __future__ import annotations
 
 import io
-import os
-import sys
 from pathlib import Path
 
 import pytest
-
-from lyra_cli.interactive import session as _session
-from lyra_cli.interactive import themes as _themes
 from lyra_cli.interactive import output as _out
 from lyra_cli.interactive import spinner as _spin
+from lyra_cli.interactive import themes as _themes
 from lyra_cli.interactive.session import (
     COMMAND_REGISTRY,
+    SLASH_COMMANDS,
     CommandSpec,
     InteractiveSession,
-    SLASH_COMMANDS,
     aliases_for,
     command_spec,
     commands_by_category,
     slash_description,
     subcommands_for,
 )
-
 
 # ---------------------------------------------------------------------------
 # CommandSpec registry

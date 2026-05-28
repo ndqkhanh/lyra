@@ -13,14 +13,10 @@ Features:
 """
 from __future__ import annotations
 
-import shlex
 from dataclasses import dataclass
-from typing import Optional
 
-from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-from rich.text import Text
 
 # ── Risk levels ─────────────────────────────────────────────────────────
 
@@ -57,7 +53,7 @@ class ApprovalRequest:
         return {"low": "green", "medium": "yellow", "high": "red"}.get(self.risk_level, "dim")
 
     @classmethod
-    def from_tool_call(cls, tool_name: str, args: dict, mode: str = "normal") -> "ApprovalRequest":
+    def from_tool_call(cls, tool_name: str, args: dict, mode: str = "normal") -> ApprovalRequest:
         if tool_name in LOW_RISK_TOOLS:
             risk = "low"
         elif tool_name in MEDIUM_RISK_TOOLS:

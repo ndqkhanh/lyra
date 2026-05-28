@@ -53,7 +53,7 @@ class DreamCycle:
                 if pair not in linked:
                     linked.add(pair)
 
-        from .graph_builder import KnowledgeEdge, EdgeRelation
+        from .graph_builder import EdgeRelation, KnowledgeEdge
         edge_counter = result.edge_count
 
         for a, b in linked:
@@ -159,7 +159,7 @@ class DreamCycle:
         """
         graph = self._graph
         result = graph
-        from .graph_builder import KnowledgeEdge, EdgeRelation
+        from .graph_builder import EdgeRelation, KnowledgeEdge
 
         edge_counter = result.edge_count
 

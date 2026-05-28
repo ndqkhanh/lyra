@@ -1,7 +1,6 @@
 """Tests for workflow orchestrator."""
 
 import pytest
-
 from lyra_core.orchestration.message_bus import InMemoryMessageBus
 from lyra_core.orchestration.orchestrator import TeamOrchestrator
 from lyra_core.orchestration.state_store import InMemoryStateStore

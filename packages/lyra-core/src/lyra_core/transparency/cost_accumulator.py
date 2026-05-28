@@ -10,7 +10,6 @@ import json
 from .event_store import EventStore
 from .models import SessionCost
 
-
 # Claude pricing (USD per 1M tokens) — May 2026 snapshot
 _PRICING: dict[str, dict[str, float]] = {
     "claude-opus-4-7":    {"in": 15.0, "out": 75.0, "cache_read": 1.5,  "cache_write": 18.75},

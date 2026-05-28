@@ -8,19 +8,17 @@ from pathlib import Path
 from types import ModuleType
 
 import pytest
-
 from lyra_cli.config_io import LYRA_CONFIG_VERSION, load_settings, save_settings
 from lyra_cli.provider_registry import (
+    LYRA_PROVIDERS_CONFIG_VERSION,
     CustomProviderEntry,
     CustomProviderError,
-    LYRA_PROVIDERS_CONFIG_VERSION,
     build_provider,
     known_custom_slugs,
     load_registered_providers,
     parse_providers,
     resolve_entry,
 )
-
 
 # ---------------------------------------------------------------------------
 # Parsing

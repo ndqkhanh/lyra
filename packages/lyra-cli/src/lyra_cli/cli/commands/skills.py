@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import typer
+from lyra_skills import SkillRouter, load_skills, shipped_pack_roots
+from lyra_skills.ledger import load_ledger, top_n
 from rich.console import Console
 from rich.table import Table
 
 from lyra_cli.cli.output import OutputFormatter
-from lyra_skills import load_skills, shipped_pack_roots, SkillRouter
-from lyra_skills.ledger import load_ledger, top_n
 
 app = typer.Typer()
 console = Console()

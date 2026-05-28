@@ -10,9 +10,8 @@ of :func:`run_eval`.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Callable, Iterable, Sequence
-
+from collections.abc import Callable, Iterable
+from dataclasses import dataclass
 
 __all__ = [
     "EvalCase",
@@ -110,7 +109,7 @@ class EvalCorpus:
     def __len__(self) -> int:
         return len(self.cases)
 
-    def with_extras(self, extras: Iterable[EvalCase]) -> "EvalCorpus":
+    def with_extras(self, extras: Iterable[EvalCase]) -> EvalCorpus:
         return EvalCorpus(tuple(self.cases) + tuple(extras))
 
 

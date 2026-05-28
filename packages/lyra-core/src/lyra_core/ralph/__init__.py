@@ -22,15 +22,14 @@ Three load-bearing differences from snarktank's bash version:
 from __future__ import annotations
 
 from .completion import (
+    EXIT_SIGNAL_PATTERN,
+    PROMISE_COMPLETE_PATTERN,
     CompletionSignal,
     parse_completion,
-    PROMISE_COMPLETE_PATTERN,
-    EXIT_SIGNAL_PATTERN,
 )
 from .prd import Prd, UserStory, load_prd, save_prd
 from .progress import ProgressLog
-from .runner import RalphRunner, RalphIterationResult
-
+from .runner import RalphIterationResult, RalphRunner
 
 __all__ = [
     "CompletionSignal",

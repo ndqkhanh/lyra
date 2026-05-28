@@ -2,14 +2,12 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.memory.backend import (
     InMemoryBackend,
     MemoryRecord,
     SearchHit,
     make_record,
 )
-
 
 # ────────────────────────────────────────────────────────────────
 # MemoryRecord / SearchHit validation

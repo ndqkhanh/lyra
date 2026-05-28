@@ -8,7 +8,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from lyra_core.bundle import (
     AgentInstaller,
     SourceBundle,
@@ -16,7 +15,6 @@ from lyra_core.bundle import (
     resolve_exporter,
     verify_attestation,
 )
-
 
 # Each W1 project lives under projects/<name>/bundle/ relative to this test.
 # The test discovers them by walking up from this file.

@@ -2,13 +2,13 @@
 Tests for L2 Scenario Layer.
 """
 
-import pytest
-import tempfile
 import shutil
-from pathlib import Path
+import tempfile
 from datetime import datetime
+from pathlib import Path
 
-from lyra_cli.memory.l2_scenario import ScenarioStore, ScenarioBlock
+import pytest
+from lyra_cli.memory.l2_scenario import ScenarioBlock, ScenarioStore
 
 
 class TestScenarioBlock:

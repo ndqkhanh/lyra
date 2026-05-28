@@ -21,14 +21,12 @@ Sixteen cases:
 """
 from __future__ import annotations
 
-import json
 import time
 from pathlib import Path
 
 import pytest
-
 from lyra_core.loops.autopilot import Autopilot, AutopilotResumeError
-from lyra_core.loops.store import LoopRecord, LoopStore
+from lyra_core.loops.store import LoopStore
 
 
 @pytest.fixture

@@ -10,8 +10,6 @@ prompt_toolkit-free (cheap import for tests + non-TTY paths).
 """
 from __future__ import annotations
 
-from typing import Optional
-
 from prompt_toolkit.application import Application
 from prompt_toolkit.formatted_text import FormattedText
 from prompt_toolkit.key_binding import KeyBindings
@@ -20,7 +18,6 @@ from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.styles import Style
 
 from .effort import EffortPicker
-
 
 _STYLE = Style.from_dict(
     {
@@ -77,7 +74,7 @@ def _build_fragments(picker: EffortPicker, *, width: int) -> FormattedText:
     return FormattedText(fragments)
 
 
-def run_effort_picker(*, initial: str = "medium", width: int = 50) -> Optional[str]:
+def run_effort_picker(*, initial: str = "medium", width: int = 50) -> str | None:
     """Run the interactive picker. Returns the chosen level or ``None``
     on cancel. Requires a TTY — callers should fall back to the static
     render when ``run_in_terminal`` would fail.

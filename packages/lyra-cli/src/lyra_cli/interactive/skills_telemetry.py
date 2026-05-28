@@ -36,9 +36,9 @@ Design notes
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable
 
 from lyra_skills.ledger import (
     OUTCOME_FAILURE,

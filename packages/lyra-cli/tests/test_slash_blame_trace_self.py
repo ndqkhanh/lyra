@@ -19,7 +19,6 @@ from pathlib import Path
 from lyra_cli.interactive.session import InteractiveSession
 from lyra_core.hir import events as hir_events
 
-
 # ---- ring buffer ------------------------------------------------------
 
 def test_ring_buffer_captures_recent_emits() -> None:

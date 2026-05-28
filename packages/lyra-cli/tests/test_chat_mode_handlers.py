@@ -38,9 +38,8 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
-from lyra_harness_core.messages import Message
-
 from lyra_cli.interactive.session import InteractiveSession
+from lyra_harness_core.messages import Message
 
 # ---------------------------------------------------------------------------
 # Shared fakes

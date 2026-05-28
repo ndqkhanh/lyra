@@ -8,7 +8,7 @@ rewards. Achieves 1.4x latency improvement.
 Source: CoMem (tc9GAKlxQC), ICLR 2026 MemAgent Workshop.
 """
 
-from lyra_memory.pipeline.comem import CoMemPipeline, CompressionJob, CompressedContext
+from lyra_memory.pipeline.comem import CoMemPipeline, CompressedContext, CompressionJob
 from lyra_memory.pipeline.kv_cache import KVCacheCompressor, RKVHash
 
 __all__ = [

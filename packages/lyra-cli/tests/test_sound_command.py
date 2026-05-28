@@ -1,10 +1,9 @@
 """Tests for the /sound CLI command."""
 
 import pytest
-from typer.testing import CliRunner
-
 from lyra_cli.cli.commands.sound import app
 from lyra_cli.sound_effects import SoundEvent, get_sound_manager
+from typer.testing import CliRunner
 
 runner = CliRunner()
 

@@ -32,15 +32,11 @@ subagent fork all share one implementation.
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping, MutableMapping
 from concurrent.futures import Executor
 from dataclasses import dataclass, field
-from typing import Any, Callable, Mapping, MutableMapping, Optional
+from typing import Any
 
-from lyra_core.agent.event_sourced_loop import (
-    EventSourcedAgentLoop as _EventSourcedAgentLoop,
-    EventLog,
-    EventType,
-)
 from lyra_core.observability import (
     LLMCallFinished,
     LLMCallStarted,
@@ -214,7 +210,7 @@ class AgentLoop:
     plugins: list = field(default_factory=list)
     budget: IterationBudget = field(default_factory=IterationBudget)
     skill_nudge_interval: int = _DEFAULT_SKILL_NUDGE_INTERVAL
-    review_executor: Optional[Executor] = None
+    review_executor: Executor | None = None
     max_stop_extensions: int = 5  # L312-1: cap on on_stop re-feeds per turn
     _iters_since_skill: int = 0
 

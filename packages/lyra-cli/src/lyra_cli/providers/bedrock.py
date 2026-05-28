@@ -21,7 +21,7 @@ Tool calls round-trip through Bedrock's Converse API shape
 from __future__ import annotations
 
 import json
-from typing import Any, List, Optional
+from typing import Any
 
 from lyra_harness_core.messages import Message, StopReason, ToolCall
 from lyra_harness_core.models import LLMProvider
@@ -31,7 +31,7 @@ class BedrockUnavailable(RuntimeError):
     """Raised when boto3 isn't installed and no client was injected."""
 
 
-def _try_import_boto3() -> Optional[Any]:
+def _try_import_boto3() -> Any | None:
     try:
         import boto3  # type: ignore
     except ImportError:
@@ -64,8 +64,8 @@ class AnthropicBedrockLLM(LLMProvider):
         self,
         *,
         model: str,
-        region: Optional[str] = None,
-        client: Optional[Any] = None,
+        region: str | None = None,
+        client: Any | None = None,
     ) -> None:
         if client is not None:
             self._client = client
@@ -117,8 +117,8 @@ class AnthropicBedrockLLM(LLMProvider):
 
     def generate(
         self,
-        messages: List[Message],
-        tools: Optional[List[dict]] = None,
+        messages: list[Message],
+        tools: list[dict] | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.0,
     ) -> Message:

@@ -14,7 +14,6 @@ Locked surface (claw-code / opencode / hermes-agent parity):
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.tools import make_ask_user_question_tool
 
 
@@ -28,7 +27,7 @@ def _cancel_callback(*, questions, title=None):
 
 def test_ask_user_question_schema_is_locked():
     tool = make_ask_user_question_tool(ask=_ok_callback)
-    schema = getattr(tool, "__tool_schema__")
+    schema = tool.__tool_schema__
     assert schema["name"] == "AskUserQuestion"
     assert "description" in schema
     params = schema["parameters"]

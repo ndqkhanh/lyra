@@ -7,7 +7,6 @@ from pathlib import Path
 from textwrap import dedent
 
 import pytest
-
 from lyra_core.memory.schema import Fragment
 from lyra_core.memory.t3_git_sync import GitSyncConfig, T3GitSync
 from lyra_core.memory.t3_watcher import WATCHDOG_AVAILABLE, start_t3_watcher

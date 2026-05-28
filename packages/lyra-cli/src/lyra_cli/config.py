@@ -1,23 +1,23 @@
 """Configuration management for Lyra"""
 
-from pathlib import Path
-from typing import Dict, Any, Optional
 import json
+from pathlib import Path
+from typing import Any
 
 
 class ConfigManager:
     """Manages Lyra configuration"""
 
-    def __init__(self, config_file: Optional[str] = None):
+    def __init__(self, config_file: str | None = None):
         if config_file:
             self.config_file = Path(config_file)
         else:
             self.config_file = Path.home() / ".lyra" / "config.json"
 
         self.config_file.parent.mkdir(parents=True, exist_ok=True)
-        self.config: Dict[str, Any] = {}
+        self.config: dict[str, Any] = {}
 
-    def load(self) -> Dict[str, Any]:
+    def load(self) -> dict[str, Any]:
         """Load configuration from file"""
         if self.config_file.exists():
             with open(self.config_file) as f:
@@ -49,14 +49,14 @@ class ConfigManager:
         self.config[key] = value
         self.save()
 
-    def update(self, updates: Dict[str, Any]):
+    def update(self, updates: dict[str, Any]):
         """Update multiple configuration values"""
         self.config.update(updates)
         self.save()
 
 
 # Global config manager
-_config_manager: Optional[ConfigManager] = None
+_config_manager: ConfigManager | None = None
 
 
 def get_config_manager() -> ConfigManager:

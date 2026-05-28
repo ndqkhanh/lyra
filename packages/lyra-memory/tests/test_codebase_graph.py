@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from lyra_memory.codebase_graph import CodebaseGraph, GraphEdge, GraphNode, NodeKind, EdgeKind
+from lyra_memory.codebase_graph import CodebaseGraph, EdgeKind, GraphEdge, GraphNode, NodeKind
 
 
 class TestGraphNode:

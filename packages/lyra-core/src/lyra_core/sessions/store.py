@@ -31,9 +31,10 @@ import json
 import sqlite3
 import threading
 import time
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable, Optional
+from typing import Any
 
 __all__ = ["SessionStore"]
 
@@ -158,7 +159,7 @@ class SessionStore:
         *,
         role: str,
         content: str,
-        tool_calls: Optional[Iterable[dict]] = None,
+        tool_calls: Iterable[dict] | None = None,
         **_: Any,
     ) -> int:
         payload = json.dumps(list(tool_calls)) if tool_calls else None
@@ -262,7 +263,7 @@ class SessionStore:
             except sqlite3.ProgrammingError:
                 pass
 
-    def __enter__(self) -> "SessionStore":  # pragma: no cover - trivial
+    def __enter__(self) -> SessionStore:  # pragma: no cover - trivial
         return self
 
     def __exit__(self, *_: Any) -> None:  # pragma: no cover - trivial

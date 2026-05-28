@@ -35,10 +35,10 @@ parsing (so JSON presets always work, YAML presets degrade to a
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable, Literal
-
+from typing import Literal
 
 PresetRole = Literal["leaf", "orchestrator"]
 _VALID_ROLES: frozenset[str] = frozenset({"leaf", "orchestrator"})

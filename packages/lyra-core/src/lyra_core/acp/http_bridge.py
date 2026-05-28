@@ -39,7 +39,6 @@ from typing import Any
 
 from .server import AcpServer
 
-
 _DEFAULT_HOST = "127.0.0.1"
 _DEFAULT_MAX_BODY_BYTES = 1 << 20  # 1 MiB
 

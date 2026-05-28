@@ -31,8 +31,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Literal
 
-from .schema import Fragment, MemoryTier
-
+from .schema import MemoryTier
 
 # ---------------------------------------------------------------------------
 # Permission types

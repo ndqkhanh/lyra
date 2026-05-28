@@ -4,7 +4,6 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 import pytest
-
 from lyra_core.memory.retriever import (
     DEFAULT_WEIGHTS,
     RecallQuery,
@@ -22,7 +21,6 @@ from lyra_core.memory.schema import (
     MemoryTier,
     Provenance,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers

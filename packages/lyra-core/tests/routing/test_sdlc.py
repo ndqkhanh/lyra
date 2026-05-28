@@ -1,30 +1,30 @@
 """Tests for SDLC automation modules."""
 from __future__ import annotations
 
-from lyra_core.sdlc.test_pipeline import (
-    PipelineConfig,
-    StageStatus,
-    PipelineRunner,
-)
-from lyra_core.sdlc.quality_gates import (
-    Gate,
-    GateSeverity,
-    QualityGateRunner,
-)
 from lyra_core.sdlc.changelog_generator import (
-    ChangeType,
     ChangelogGenerator,
-)
-from lyra_core.sdlc.release_manager import (
-    BumpType,
-    ReleaseManager,
-    VersionBumper,
+    ChangeType,
 )
 from lyra_core.sdlc.hooks import (
     HookManager,
     HookStatus,
     PreCommitHook,
     PrePushHook,
+)
+from lyra_core.sdlc.quality_gates import (
+    Gate,
+    GateSeverity,
+    QualityGateRunner,
+)
+from lyra_core.sdlc.release_manager import (
+    BumpType,
+    ReleaseManager,
+    VersionBumper,
+)
+from lyra_core.sdlc.test_pipeline import (
+    PipelineConfig,
+    PipelineRunner,
+    StageStatus,
 )
 
 

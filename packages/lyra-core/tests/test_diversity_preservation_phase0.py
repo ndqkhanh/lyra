@@ -17,7 +17,6 @@ RED (xfail strict) until v1.8 Phase 6 / v1.9 Phase 1:
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.diversity import (
     effective_diversity,
     mean_pairwise_distance,
@@ -67,7 +66,7 @@ def test_mmr_lambda_one_recovers_top_k_relevance() -> None:
 def test_mmr_lambda_zero_maximises_novelty_over_relevance() -> None:
     """With ``lambda_=0.0`` the second pick is the *least similar* to the first."""
     candidates = ["alpha-zero", "alpha-one", "delta-omega"]
-    relevance = {c: 1.0 for c in candidates}  # tie on relevance
+    relevance = dict.fromkeys(candidates, 1.0)  # tie on relevance
     out = mmr_select(candidates, k=2, relevance=relevance, lambda_=0.0)
     assert out[1] == "delta-omega"
 

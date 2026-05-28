@@ -20,7 +20,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 from prompt_toolkit import Application
 from prompt_toolkit.buffer import Buffer
@@ -33,7 +32,6 @@ from prompt_toolkit.styles import Style
 
 from .palette import PALETTE
 from .sessions_store import SessionMeta, SessionsStore
-
 
 __all__ = [
     "SessionsDialogResult",
@@ -128,7 +126,7 @@ _PAGE = 8
 
 def run_sessions_dialog(
     sessions_root: Path,
-) -> Optional[SessionsDialogResult]:
+) -> SessionsDialogResult | None:
     """Drive the picker; return the chosen session id or None on cancel."""
     entries = build_session_entries(sessions_root)
     if not entries:
@@ -171,7 +169,7 @@ def run_sessions_dialog(
             )
             meta = (
                 f"{name_part}"
-                + (f"  " if name_part else "")
+                + ("  " if name_part else "")
                 + f"{e.turn_count} turn"
                 + ("" if e.turn_count == 1 else "s")
                 + f"  {e.created_at}"

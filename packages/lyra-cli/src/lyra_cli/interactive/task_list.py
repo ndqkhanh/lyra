@@ -31,7 +31,7 @@ _INDENT_FIRST = "  ⎿  "
 _INDENT_REST  = "     "
 
 
-def render_checklist(tasks: "list[TaskItem]", *, max_visible: int = _MAX_VISIBLE) -> list[str]:
+def render_checklist(tasks: list[TaskItem], *, max_visible: int = _MAX_VISIBLE) -> list[str]:
     """Return plain-text lines for the task checklist.
 
     Args:
@@ -60,7 +60,7 @@ def render_checklist(tasks: "list[TaskItem]", *, max_visible: int = _MAX_VISIBLE
     return lines
 
 
-def render_checklist_text(tasks: "list[TaskItem]", *, max_visible: int = _MAX_VISIBLE) -> str:
+def render_checklist_text(tasks: list[TaskItem], *, max_visible: int = _MAX_VISIBLE) -> str:
     """Convenience wrapper — join ``render_checklist`` output into a single string."""
     return "\n".join(render_checklist(tasks, max_visible=max_visible))
 

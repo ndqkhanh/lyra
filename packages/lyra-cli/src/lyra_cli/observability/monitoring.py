@@ -4,10 +4,10 @@ Split-View Monitoring Dashboard for Real-Time Agent Observation.
 Provides real-time monitoring of agent operations with metrics and visualizations.
 """
 
+from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional, Dict, Any
-from collections import deque
+from typing import Any
 
 
 @dataclass
@@ -16,7 +16,7 @@ class MetricPoint:
 
     timestamp: str
     value: float
-    labels: Dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -28,7 +28,7 @@ class TimeSeriesMetric:
     unit: str
     points: deque = field(default_factory=lambda: deque(maxlen=1000))
 
-    def add_point(self, value: float, labels: Optional[Dict[str, str]] = None):
+    def add_point(self, value: float, labels: dict[str, str] | None = None):
         """Add a data point."""
         point = MetricPoint(
             timestamp=datetime.now().isoformat(),
@@ -37,13 +37,13 @@ class TimeSeriesMetric:
         )
         self.points.append(point)
 
-    def get_latest(self) -> Optional[float]:
+    def get_latest(self) -> float | None:
         """Get latest value."""
         if not self.points:
             return None
         return self.points[-1].value
 
-    def get_average(self, last_n: Optional[int] = None) -> Optional[float]:
+    def get_average(self, last_n: int | None = None) -> float | None:
         """Get average value."""
         if not self.points:
             return None
@@ -61,7 +61,7 @@ class AgentStatus:
 
     agent_id: str
     status: str  # idle, active, error
-    current_task: Optional[str]
+    current_task: str | None
     tasks_completed: int
     tasks_failed: int
     uptime_seconds: float
@@ -78,7 +78,7 @@ class SystemHealth:
     success_rate: float
     avg_response_time_ms: float
     error_count: int
-    warnings: List[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
 
 
 class MonitoringDashboard:
@@ -96,10 +96,10 @@ class MonitoringDashboard:
         self.max_history = max_history
 
         # Metrics
-        self.metrics: Dict[str, TimeSeriesMetric] = {}
+        self.metrics: dict[str, TimeSeriesMetric] = {}
 
         # Agent statuses
-        self.agent_statuses: Dict[str, AgentStatus] = {}
+        self.agent_statuses: dict[str, AgentStatus] = {}
 
         # System health
         self.system_health = SystemHealth(
@@ -162,7 +162,7 @@ class MonitoringDashboard:
         self,
         name: str,
         value: float,
-        labels: Optional[Dict[str, str]] = None
+        labels: dict[str, str] | None = None
     ):
         """
         Record a metric value.
@@ -181,9 +181,9 @@ class MonitoringDashboard:
         self,
         agent_id: str,
         status: str,
-        current_task: Optional[str] = None,
-        tasks_completed: Optional[int] = None,
-        tasks_failed: Optional[int] = None
+        current_task: str | None = None,
+        tasks_completed: int | None = None,
+        tasks_failed: int | None = None
     ):
         """
         Update agent status.
@@ -275,7 +275,7 @@ class MonitoringDashboard:
             warnings=warnings,
         )
 
-    def get_dashboard_data(self) -> Dict[str, Any]:
+    def get_dashboard_data(self) -> dict[str, Any]:
         """
         Get complete dashboard data.
 
@@ -320,8 +320,8 @@ class MonitoringDashboard:
     def get_metric_history(
         self,
         metric_name: str,
-        last_n: Optional[int] = None
-    ) -> List[Dict[str, Any]]:
+        last_n: int | None = None
+    ) -> list[dict[str, Any]]:
         """
         Get metric history.
 
@@ -350,7 +350,7 @@ class MonitoringDashboard:
             for point in points
         ]
 
-    def get_agent_summary(self) -> Dict[str, Any]:
+    def get_agent_summary(self) -> dict[str, Any]:
         """Get summary of all agents."""
         return {
             "total_agents": len(self.agent_statuses),

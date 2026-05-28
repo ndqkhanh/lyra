@@ -14,7 +14,6 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 
 import pytest
-
 from lyra_core.cron.schedule import (
     ScheduleParseError,
     parse_schedule,

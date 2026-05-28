@@ -160,13 +160,12 @@ from .settings_hierarchy import (  # noqa: E402 — intentional late import
     ManagedPolicy,
     PolicyRule,
     PolicyViolationError,
-    SettingsError,
-    SettingsHierarchy,
     SettingOverride,
     SettingScope,
+    SettingsError,
+    SettingsHierarchy,
     SettingValue,
 )
-
 
 __all__ = [
     # Feature flags

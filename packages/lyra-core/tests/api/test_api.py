@@ -3,11 +3,10 @@
 Phase 4, Week 1: System Integration - Unified API
 Following TDD approach: RED → GREEN → REFACTOR
 """
-import pytest
 from pathlib import Path
-from typing import Any
 
-from lyra_core.api import LyraAPI, APIError, APIResponse
+import pytest
+from lyra_core.api import APIError, APIResponse, LyraAPI
 
 
 class TestLyraAPIInitialization:

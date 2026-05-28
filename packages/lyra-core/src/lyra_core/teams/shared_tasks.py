@@ -32,11 +32,10 @@ import contextlib
 import os
 import secrets
 import time
-from collections.abc import Iterator
-from dataclasses import dataclass, field
+from collections.abc import Iterable, Iterator
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable, Literal
-
+from typing import Any, Literal
 
 TaskState = Literal["pending", "in_progress", "completed", "blocked"]
 _STATES: tuple[TaskState, ...] = ("pending", "in_progress", "completed", "blocked")
@@ -185,7 +184,7 @@ class Task:
         }
 
     @classmethod
-    def from_meta(cls, meta: dict[str, Any], body: str) -> "Task":
+    def from_meta(cls, meta: dict[str, Any], body: str) -> Task:
         return cls(
             id=str(meta.get("id") or ""),
             title=str(meta.get("title") or ""),
@@ -366,7 +365,7 @@ class SharedTaskList:
                 self._write_atomic(t)
 
     def summary(self) -> TaskSummary:
-        counts = {s: 0 for s in _STATES}
+        counts = dict.fromkeys(_STATES, 0)
         total = 0
         for t in self._iter_tasks():
             counts[t.state] = counts.get(t.state, 0) + 1

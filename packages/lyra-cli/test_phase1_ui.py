@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """Test Phase 1: Core Formatting Infrastructure"""
 
-import sys
 import os
+import sys
 
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 from lyra_cli.ui import (
-    SymbolRegistry,
+    BOX_CHARS,
+    STATUS_SYMBOLS,
     ColorEngine,
     LayoutEngine,
     LyraUIRenderer,
-    STATUS_SYMBOLS,
-    BOX_CHARS,
+    SymbolRegistry,
 )
 
 

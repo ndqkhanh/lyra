@@ -1,6 +1,5 @@
 """Tests for command loader — Lyra + ECC unified registry."""
 
-import pytest
 
 from lyra_cli.commands.command_loader import CommandLoader
 from lyra_cli.commands.command_registry import Command, CommandRegistry, get_registry

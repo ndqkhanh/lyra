@@ -14,15 +14,13 @@ Usage:
 """
 from __future__ import annotations
 
-import os
 import textwrap
-import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any
 
 from ..commands.registry import CommandResult
-
 
 # ── Recipe definition ──────────────────────────────────────────────────
 

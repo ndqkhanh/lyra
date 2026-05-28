@@ -9,15 +9,13 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
-
 from lyra_core.cron.daemon import CronDaemon
-from lyra_core.cron.store import CronStore, CronJob
+from lyra_core.cron.store import CronJob, CronStore
 from lyra_core.cron.triggers import (
     AfterSessionTrigger,
     GitPushTrigger,
     SignalTrigger,
 )
-
 
 UTC = timezone.utc
 

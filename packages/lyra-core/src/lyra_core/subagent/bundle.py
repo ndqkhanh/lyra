@@ -125,7 +125,7 @@ class SubagentBundle:
 
 def bundle_to_result(
     bundle: SubagentBundle, *, spec_id: str
-) -> "SubagentResult":
+) -> SubagentResult:
     """Wrap a bundle in a :class:`SubagentResult` envelope.
 
     Centralises the convention so every caller emits the same
@@ -138,7 +138,7 @@ def bundle_to_result(
     return SubagentResult(id=spec_id, status="ok", payload=bundle, error=None)
 
 
-def result_to_bundle(result: "SubagentResult") -> SubagentBundle:
+def result_to_bundle(result: SubagentResult) -> SubagentBundle:
     """Recover the bundle from a result.
 
     Raises :class:`SubagentBundleError` when the payload is the wrong

@@ -3,11 +3,9 @@
 
 import argparse
 import sys
-from pathlib import Path
 
-from lyra_cli.commands import get_registry, CommandLoader
+from lyra_cli.commands import CommandLoader, get_registry
 from lyra_cli.config import ConfigManager
-from lyra_cli.multi_agent import MultiAgentOrchestrator
 from lyra_cli.loops import LoopManager
 from lyra_cli.mcp import MCPManager, register_ecc_servers
 

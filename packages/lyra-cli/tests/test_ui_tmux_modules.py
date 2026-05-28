@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
-from lyra_cli.ui.vibes_dashboard import (
-    VibeDimension,
-    VibeReading,
-    VibesDashboard,
+from lyra_cli.commands.btw import (
+    BtwNote,
+    BtwPriority,
+    BtwQueue,
 )
+from lyra_cli.commands.stats import (
+    StatsCollector,
+)
+from lyra_cli.terminal.tmux_manager import TmuxManager
 from lyra_cli.ui.fleet_view import (
     AgentStatus,
     FleetAgent,
@@ -16,15 +20,11 @@ from lyra_cli.ui.mode_manager import (
     AgentMode,
     ModeManager,
 )
-from lyra_cli.commands.btw import (
-    BtwPriority,
-    BtwNote,
-    BtwQueue,
+from lyra_cli.ui.vibes_dashboard import (
+    VibeDimension,
+    VibeReading,
+    VibesDashboard,
 )
-from lyra_cli.commands.stats import (
-    StatsCollector,
-)
-from lyra_cli.terminal.tmux_manager import TmuxManager
 
 
 class TestVibesDashboard:

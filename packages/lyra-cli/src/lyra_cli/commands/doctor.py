@@ -20,7 +20,6 @@ from rich.table import Table
 
 from ..diagnostics import Probe, run_all
 
-
 _console = Console()
 
 

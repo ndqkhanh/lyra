@@ -4,7 +4,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from lyra_core.subagent.fs_sandbox import (
     FsSandbox,
     FsSandboxViolation,

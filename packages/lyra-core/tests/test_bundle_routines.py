@@ -4,11 +4,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import pytest
-
 from lyra_core.bundle import (
     AgentInstaller,
-    RoutineSpec,
     SourceBundle,
 )
 from lyra_core.cron.routines import (
@@ -17,7 +14,6 @@ from lyra_core.cron.routines import (
     HttpApiTrigger,
     RoutineRegistry,
 )
-
 
 # ---- helpers ----------------------------------------------------------
 

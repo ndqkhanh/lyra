@@ -23,11 +23,10 @@ from __future__ import annotations
 
 import re
 from collections import Counter
-from dataclasses import dataclass, field
-from typing import Iterable, Sequence
+from collections.abc import Iterable
+from dataclasses import dataclass
 
 from .auto_memory import MemoryEntry, MemoryKind
-
 
 _TOKEN_RE = re.compile(r"[A-Za-z][A-Za-z\-']{3,}")
 

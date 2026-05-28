@@ -1,13 +1,8 @@
 """Tests for Phase 5 Observability modules."""
 
-import pytest
 import time
 
-from lyra_cli.observability.tracing import (
-    SpanKind,
-    TracingProvider,
-    MetricsProvider,
-)
+import pytest
 from lyra_cli.observability.aer import (
     ActionType,
     AERSystem,
@@ -15,7 +10,11 @@ from lyra_cli.observability.aer import (
 from lyra_cli.observability.monitoring import (
     MonitoringDashboard,
 )
-
+from lyra_cli.observability.tracing import (
+    MetricsProvider,
+    SpanKind,
+    TracingProvider,
+)
 
 # ============================================================================
 # Tracing Tests

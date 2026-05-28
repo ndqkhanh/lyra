@@ -1,9 +1,9 @@
 """Main Typer CLI application"""
 
+import sys
+
 import typer
 from rich.console import Console
-from typing import Optional
-import sys
 
 app = typer.Typer(
     name="lyra",
@@ -56,7 +56,8 @@ def main(
 
 
 # Import and register command modules
-from lyra_cli.cli.commands import chat, config, session, skills, debug as debug_cmd
+from lyra_cli.cli.commands import chat, config, session, skills
+from lyra_cli.cli.commands import debug as debug_cmd
 
 # Register subcommands
 app.command(name="chat")(chat.chat)

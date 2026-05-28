@@ -17,7 +17,7 @@ import time
 from collections import deque
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -231,7 +231,7 @@ class AgentHealthMonitor:
         self._consecutive_failures: int = 0
         self._loop_detection_active: bool = False
         self._last_memory_samples: deque[int] = deque(maxlen=_MEMORY_GROWTH_SAMPLES + 1)
-        self._last_report: Optional[HealthReport] = None
+        self._last_report: HealthReport | None = None
 
     # ── Public API ─────────────────────────────────────────────
 
@@ -317,7 +317,7 @@ class AgentHealthMonitor:
         self._last_report = report
         return report
 
-    def detect_loops(self, recent_actions: Optional[list[str]] = None) -> bool:
+    def detect_loops(self, recent_actions: list[str] | None = None) -> bool:
         """Detect repetitive action patterns that suggest an infinite loop.
 
         Scans the recent action type sequence for repeated back-to-back
@@ -370,7 +370,7 @@ class AgentHealthMonitor:
         self._loop_detection_active = False
         return False
 
-    def detect_degradation(self, vitals: Optional[AgentVitals] = None) -> list[AnomalySignal]:
+    def detect_degradation(self, vitals: AgentVitals | None = None) -> list[AnomalySignal]:
         """Detect performance and reliability anomalies.
 
         Checks for error rate spikes, response time degradation, memory

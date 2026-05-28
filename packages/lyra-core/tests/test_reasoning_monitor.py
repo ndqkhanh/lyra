@@ -1,14 +1,10 @@
 """Tests for the Phase 1 Reasoning Pattern Monitor."""
 from __future__ import annotations
 
-import pytest
-
 from lyra_core.safety.reasoning_monitor import (
     FlagSeverity,
-    ReasoningFlag,
     ReasoningMonitor,
     ReasoningPatternType,
-    ReasoningReport,
 )
 
 

@@ -1,7 +1,7 @@
 """Built-in skills registration"""
 
-from .skill_manager import SkillManager, SkillDefinition
 from .skill_loader import get_registry
+from .skill_manager import SkillDefinition, SkillManager
 
 
 def register_builtin_skills(manager: SkillManager):

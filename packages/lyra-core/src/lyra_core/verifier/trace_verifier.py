@@ -21,10 +21,9 @@ network or shell access, so the whole module is sandbox-safe.
 from __future__ import annotations
 
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable, Sequence
-
 
 __all__ = [
     "MiscitedClaim",

@@ -4,10 +4,9 @@ from __future__ import annotations
 import shutil
 
 import pytest
-
 from lyra_core.hooks.user_hooks import (
-    HookSpec,
     SUPPORTED_EVENTS,
+    HookSpec,
     parse_hooks_config,
     run_hooks,
 )

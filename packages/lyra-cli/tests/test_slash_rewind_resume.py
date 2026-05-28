@@ -20,9 +20,7 @@ import json
 from pathlib import Path
 
 import pytest
-
 from lyra_cli.interactive.session import InteractiveSession
-
 
 # ---- 1. Back-compat: in-memory rewind unchanged ----------------------
 

@@ -14,8 +14,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from lyra_cli.interactive.handoff import render_handoff
 from lyra_cli.interactive.session import InteractiveSession
 

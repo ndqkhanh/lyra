@@ -3,13 +3,10 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_cli.swarm.consensus import (
-    ConsensusConfig,
     ConsensusProtocol,
-    NodeState,
     ConsensusRole,
-    LogEntry,
+    NodeState,
 )
 
 

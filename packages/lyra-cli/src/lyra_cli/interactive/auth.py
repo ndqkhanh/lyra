@@ -14,7 +14,7 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from lyra_cli.providers.copilot import CopilotTokenStore
 
@@ -40,7 +40,7 @@ class DeviceCodeAuth:
         device_endpoint: str,
         token_endpoint: str,
         http: Any,
-        store_path: Optional[Path] = None,
+        store_path: Path | None = None,
         poll_interval_s: float = 5.0,
         poll_timeout_s: float = 600.0,
     ) -> None:
@@ -54,7 +54,7 @@ class DeviceCodeAuth:
         self.poll_interval_s = poll_interval_s
         self.poll_timeout_s = poll_timeout_s
 
-    def run(self) -> Optional[AuthFlowResult]:
+    def run(self) -> AuthFlowResult | None:
         start = self.http.request(
             "POST", self.device_endpoint,
             headers={"accept": "application/json"},
@@ -120,7 +120,7 @@ _SUPPORTED_PROVIDERS = ("copilot",)
 def run_auth_slash(
     *,
     argv: list[str],
-    store_path: Optional[Path] = None,
+    store_path: Path | None = None,
 ) -> str:
     """Dispatch `/auth <sub> [provider]`."""
     store = CopilotTokenStore(path=store_path)

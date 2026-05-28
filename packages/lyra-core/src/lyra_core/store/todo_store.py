@@ -15,9 +15,7 @@ from __future__ import annotations
 
 import json
 import os
-import tempfile
 from pathlib import Path
-
 
 _STATUS_VALUES: frozenset[str] = frozenset(
     {"pending", "in_progress", "completed", "cancelled"}

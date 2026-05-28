@@ -45,7 +45,6 @@ from dataclasses import dataclass, replace
 from enum import Enum
 from typing import Any
 
-
 # ---------------------------------------------------------------------------
 # Constants & Enums
 # ---------------------------------------------------------------------------

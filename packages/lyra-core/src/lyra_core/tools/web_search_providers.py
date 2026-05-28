@@ -24,12 +24,10 @@ another dataclass + ``call()`` method.
 from __future__ import annotations
 
 import os
-import time
 from dataclasses import dataclass
-from typing import Any, Callable, List, Optional
+from typing import Any
 
 from ..lsp_backend.errors import FeatureUnavailable
-
 
 _DEFAULT_TIMEOUT = 10.0
 
@@ -396,17 +394,17 @@ _REGISTRY: dict[str, _Provider] = {
 }
 
 
-def get_provider(name: str) -> Optional[_Provider]:
+def get_provider(name: str) -> _Provider | None:
     """Look up a registered provider by name (case-insensitive)."""
     return _REGISTRY.get(name.strip().lower())
 
 
-def all_providers() -> List[_Provider]:
+def all_providers() -> list[_Provider]:
     """Return providers sorted by priority (lowest = tried first)."""
     return sorted(_REGISTRY.values(), key=lambda p: p.priority)
 
 
-def configured_providers() -> List[_Provider]:
+def configured_providers() -> list[_Provider]:
     """Subset of :func:`all_providers` whose env keys are present."""
     return [p for p in all_providers() if p.configured()]
 

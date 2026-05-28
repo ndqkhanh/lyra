@@ -20,7 +20,6 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-
 # ---------------------------------------------------------------------------
 # Enums / dataclasses
 # ---------------------------------------------------------------------------
@@ -83,7 +82,7 @@ class AgentNode:
         }
 
     @classmethod
-    def from_dict(cls, d: dict) -> "AgentNode":
+    def from_dict(cls, d: dict) -> AgentNode:
         state = AgentLifecycleState(d.get("state", "running"))
         return cls(
             node_id=d["node_id"],
@@ -254,14 +253,14 @@ class ProcessTree:
         }
 
     @classmethod
-    def from_dict(cls, d: dict) -> "ProcessTree":
+    def from_dict(cls, d: dict) -> ProcessTree:
         tree = cls(session_id=d.get("session_id", ""))
         for nid, nd in d.get("nodes", {}).items():
             tree._nodes[nid] = AgentNode.from_dict(nd)
         return tree
 
     @classmethod
-    def from_state_file(cls, path: Path) -> "ProcessTree":
+    def from_state_file(cls, path: Path) -> ProcessTree:
         """Reconstruct a ProcessTree from a .lyra/process_state.json snapshot."""
         data = json.loads(path.read_text())
         # Minimal reconstruction from flat state schema
@@ -290,7 +289,7 @@ class ProcessTree:
     # Rich rendering
     # ------------------------------------------------------------------
 
-    def render(self) -> "rich.tree.Tree":  # type: ignore[name-defined]
+    def render(self):  # type: ignore[no-untyped-def]  # noqa: F821
         from rich.tree import Tree
 
         label = f"[bold]Lyra Process Tree[/bold]  session={self.session_id or '?'}  active={self.active_count()}"

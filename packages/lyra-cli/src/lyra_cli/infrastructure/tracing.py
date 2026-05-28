@@ -11,10 +11,11 @@ from __future__ import annotations
 
 import time
 import uuid
+from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any
 
 from lyra_cli.logging_config import get_logger
 
@@ -48,9 +49,9 @@ class SpanContext:
 
     trace_id: str
     span_id: str
-    parent_span_id: Optional[str] = None
+    parent_span_id: str | None = None
 
-    def to_dict(self) -> Dict[str, str]:
+    def to_dict(self) -> dict[str, str]:
         """Convert to dictionary for serialization."""
         result = {
             "trace_id": self.trace_id,
@@ -61,7 +62,7 @@ class SpanContext:
         return result
 
     @classmethod
-    def from_dict(cls, data: Dict[str, str]) -> SpanContext:
+    def from_dict(cls, data: dict[str, str]) -> SpanContext:
         """Create from dictionary."""
         return cls(
             trace_id=data["trace_id"],
@@ -76,7 +77,7 @@ class SpanEvent:
 
     name: str
     timestamp: float
-    attributes: Dict[str, Any] = field(default_factory=dict)
+    attributes: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -91,19 +92,19 @@ class Span:
     name: str
     kind: SpanKind
     start_time: float
-    parent_span_id: Optional[str] = None
-    end_time: Optional[float] = None
+    parent_span_id: str | None = None
+    end_time: float | None = None
     status: SpanStatus = SpanStatus.UNSET
-    attributes: Dict[str, Any] = field(default_factory=dict)
-    events: List[SpanEvent] = field(default_factory=list)
+    attributes: dict[str, Any] = field(default_factory=dict)
+    events: list[SpanEvent] = field(default_factory=list)
 
-    def duration_ms(self) -> Optional[float]:
+    def duration_ms(self) -> float | None:
         """Calculate span duration in milliseconds."""
         if self.end_time is None:
             return None
         return (self.end_time - self.start_time) * 1000
 
-    def add_event(self, name: str, attributes: Optional[Dict[str, Any]] = None) -> None:
+    def add_event(self, name: str, attributes: dict[str, Any] | None = None) -> None:
         """Add an event to the span."""
         event = SpanEvent(
             name=name,
@@ -116,19 +117,19 @@ class Span:
         """Set a span attribute."""
         self.attributes[key] = value
 
-    def set_status(self, status: SpanStatus, description: Optional[str] = None) -> None:
+    def set_status(self, status: SpanStatus, description: str | None = None) -> None:
         """Set span status."""
         self.status = status
         if description:
             self.attributes["status.description"] = description
 
-    def end(self, status: Optional[SpanStatus] = None) -> None:
+    def end(self, status: SpanStatus | None = None) -> None:
         """End the span."""
         self.end_time = time.time()
         if status:
             self.status = status
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for export."""
         return {
             "span_id": self.span_id,
@@ -157,22 +158,22 @@ class Trace:
     """A complete distributed trace."""
 
     trace_id: str
-    spans: List[Span] = field(default_factory=list)
+    spans: list[Span] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
 
     def add_span(self, span: Span) -> None:
         """Add a span to the trace."""
         self.spans.append(span)
 
-    def get_root_spans(self) -> List[Span]:
+    def get_root_spans(self) -> list[Span]:
         """Get root spans (spans with no parent)."""
         return [s for s in self.spans if s.parent_span_id is None]
 
-    def get_children(self, span_id: str) -> List[Span]:
+    def get_children(self, span_id: str) -> list[Span]:
         """Get child spans of a given span."""
         return [s for s in self.spans if s.parent_span_id == span_id]
 
-    def total_duration_ms(self) -> Optional[float]:
+    def total_duration_ms(self) -> float | None:
         """Calculate total trace duration from root spans."""
         root_spans = self.get_root_spans()
         if not root_spans:
@@ -181,7 +182,7 @@ class Trace:
         durations = [s.duration_ms() for s in root_spans if s.duration_ms() is not None]
         return max(durations) if durations else None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for export."""
         return {
             "trace_id": self.trace_id,
@@ -204,11 +205,11 @@ class DistributedTracer:
 
     def __init__(self):
         """Initialize distributed tracer."""
-        self._traces: Dict[str, Trace] = {}
-        self._active_spans: Dict[str, Span] = {}
-        self._current_context: Optional[SpanContext] = None
+        self._traces: dict[str, Trace] = {}
+        self._active_spans: dict[str, Span] = {}
+        self._current_context: SpanContext | None = None
 
-    def start_trace(self, trace_id: Optional[str] = None) -> str:
+    def start_trace(self, trace_id: str | None = None) -> str:
         """Start a new trace.
 
         Args:
@@ -230,9 +231,9 @@ class DistributedTracer:
         self,
         name: str,
         kind: SpanKind = SpanKind.INTERNAL,
-        trace_id: Optional[str] = None,
-        parent_span_id: Optional[str] = None,
-        attributes: Optional[Dict[str, Any]] = None,
+        trace_id: str | None = None,
+        parent_span_id: str | None = None,
+        attributes: dict[str, Any] | None = None,
     ) -> Span:
         """Start a new span.
 
@@ -281,7 +282,7 @@ class DistributedTracer:
         self,
         span: Span,
         status: SpanStatus = SpanStatus.OK,
-        attributes: Optional[Dict[str, Any]] = None,
+        attributes: dict[str, Any] | None = None,
     ) -> None:
         """End a span.
 
@@ -310,7 +311,7 @@ class DistributedTracer:
         self,
         name: str,
         kind: SpanKind = SpanKind.INTERNAL,
-        attributes: Optional[Dict[str, Any]] = None,
+        attributes: dict[str, Any] | None = None,
     ) -> Iterator[Span]:
         """Context manager for automatic span lifecycle.
 
@@ -345,27 +346,27 @@ class DistributedTracer:
             # Restore previous context
             self._current_context = previous_context
 
-    def get_trace(self, trace_id: str) -> Optional[Trace]:
+    def get_trace(self, trace_id: str) -> Trace | None:
         """Get a trace by ID."""
         return self._traces.get(trace_id)
 
-    def get_span(self, span_id: str) -> Optional[Span]:
+    def get_span(self, span_id: str) -> Span | None:
         """Get an active span by ID."""
         return self._active_spans.get(span_id)
 
-    def get_current_context(self) -> Optional[SpanContext]:
+    def get_current_context(self) -> SpanContext | None:
         """Get current span context."""
         return self._current_context
 
-    def set_current_context(self, context: Optional[SpanContext]) -> None:
+    def set_current_context(self, context: SpanContext | None) -> None:
         """Set current span context for propagation."""
         self._current_context = context
 
-    def get_all_traces(self) -> List[Trace]:
+    def get_all_traces(self) -> list[Trace]:
         """Get all traces."""
         return list(self._traces.values())
 
-    def export_trace(self, trace_id: str) -> Optional[Dict[str, Any]]:
+    def export_trace(self, trace_id: str) -> dict[str, Any] | None:
         """Export a trace in standard format.
 
         Args:
@@ -395,7 +396,7 @@ class TraceExporter:
         """
         self._tracer = tracer
 
-    def export_to_json(self, trace_id: str) -> Optional[Dict[str, Any]]:
+    def export_to_json(self, trace_id: str) -> dict[str, Any] | None:
         """Export trace to JSON format.
 
         Args:
@@ -406,7 +407,7 @@ class TraceExporter:
         """
         return self._tracer.export_trace(trace_id)
 
-    def export_all_traces(self) -> List[Dict[str, Any]]:
+    def export_all_traces(self) -> list[dict[str, Any]]:
         """Export all traces to JSON format.
 
         Returns:
@@ -417,7 +418,7 @@ class TraceExporter:
             for trace in self._tracer.get_all_traces()
         ]
 
-    def export_to_opentelemetry(self, trace_id: str) -> Optional[Dict[str, Any]]:
+    def export_to_opentelemetry(self, trace_id: str) -> dict[str, Any] | None:
         """Export trace in OpenTelemetry format.
 
         Args:

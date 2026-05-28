@@ -7,11 +7,8 @@ fails *before* a release ships with a weaker firewall.
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.safety import (
     RedTeamCase,
-    RedTeamCorpus,
-    SafetyMonitor,
     default_corpus,
     score_monitor,
 )

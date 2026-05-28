@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import uuid
-from typing import Any
 
 from lyra_core.orchestration.agent_base import AgentStatus, BaseAgent
 from lyra_core.orchestration.models.architecture import (
@@ -14,7 +13,7 @@ from lyra_core.orchestration.models.architecture import (
     TechStack,
 )
 from lyra_core.orchestration.models.requirements import Priority, Requirements
-from lyra_core.orchestration.protocol import Message, MessageType
+from lyra_core.orchestration.protocol import Message
 
 
 class PrincipalEngineerAgent(BaseAgent):

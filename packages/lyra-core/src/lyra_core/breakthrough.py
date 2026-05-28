@@ -26,9 +26,10 @@ import asyncio
 import logging
 import time
 from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Callable, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -124,7 +125,7 @@ class BreakthroughIntegration:
         self._health_history: list[SystemHealth] = []
         self._hooks: dict[str, list[Callable]] = defaultdict(list)
         self._running = False
-        self._task: Optional[asyncio.Task] = None
+        self._task: asyncio.Task | None = None
 
         for name, (domain, phase, pkgs) in self.UPGRADE_REGISTRY.items():
             self._upgrades[name] = UpgradeStatus(
@@ -156,7 +157,7 @@ class BreakthroughIntegration:
 
     # ── Initialization ───────────────────────────────────────────
 
-    def initialize(self, upgrades: Optional[list[str]] = None) -> dict[str, bool]:
+    def initialize(self, upgrades: list[str] | None = None) -> dict[str, bool]:
         """Lazy-initialize specified upgrades (or all available ones)."""
         targets = upgrades or list(self._upgrades.keys())
         results: dict[str, bool] = {}

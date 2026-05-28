@@ -1,11 +1,10 @@
 """Tests for L4 Procedural Memory Layer."""
 
-import pytest
-import tempfile
 import shutil
-from pathlib import Path
+import tempfile
 
-from lyra_cli.memory.l4_procedural import ProceduralSkill, ProceduralMemoryStore
+import pytest
+from lyra_cli.memory.l4_procedural import ProceduralMemoryStore, ProceduralSkill
 
 
 @pytest.fixture

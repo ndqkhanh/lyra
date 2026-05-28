@@ -14,7 +14,7 @@ import asyncio
 import time
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class NodeState(Enum):
@@ -42,7 +42,7 @@ class LogEntry:
     term: int
     index: int
     command: str = ""
-    data: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
     timestamp: float = field(default_factory=time.time)
 
 
@@ -73,28 +73,28 @@ class ConsensusProtocol:
     def __init__(
         self,
         node_id: str,
-        config: Optional[ConsensusConfig] = None,
+        config: ConsensusConfig | None = None,
     ) -> None:
         self.node_id = node_id
         self.config = config or ConsensusConfig()
         self.state: NodeState = NodeState.FOLLOWER
         self.role: ConsensusRole = ConsensusRole.VOTER
         self.current_term: int = 0
-        self.voted_for: Optional[str] = None
-        self.leader_id: Optional[str] = None
-        self.log: List[LogEntry] = []
+        self.voted_for: str | None = None
+        self.leader_id: str | None = None
+        self.log: list[LogEntry] = []
         self.commit_index: int = -1
         self.last_applied: int = -1
 
         self._votes_received: int = 0
         self._total_nodes: int = 0
-        self._node_states: Dict[str, NodeState] = {}
-        self._byzantine_scores: Dict[str, int] = {}
+        self._node_states: dict[str, NodeState] = {}
+        self._byzantine_scores: dict[str, int] = {}
         self._lock: asyncio.Lock = asyncio.Lock()
         self._running: bool = False
-        self._election_task: Optional[asyncio.Task] = None
-        self._heartbeat_task: Optional[asyncio.Task] = None
-        self._stats: Dict[str, int] = {
+        self._election_task: asyncio.Task | None = None
+        self._heartbeat_task: asyncio.Task | None = None
+        self._stats: dict[str, int] = {
             "elections_started": 0,
             "elections_won": 0,
             "votes_cast": 0,
@@ -138,7 +138,7 @@ class ConsensusProtocol:
         candidate_term: int,
         last_log_index: int,
         last_log_term: int,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Handle a vote request from a candidate.
 
@@ -178,8 +178,8 @@ class ConsensusProtocol:
         self,
         leader_id: str,
         leader_term: int,
-        entries: Optional[List[LogEntry]] = None,
-    ) -> Dict[str, Any]:
+        entries: list[LogEntry] | None = None,
+    ) -> dict[str, Any]:
         """
         Receive a heartbeat from the leader.
 
@@ -212,7 +212,7 @@ class ConsensusProtocol:
 
             return {"success": True, "term": self.current_term}
 
-    async def append_entry(self, command: str, data: Optional[Dict[str, Any]] = None) -> Optional[int]:
+    async def append_entry(self, command: str, data: dict[str, Any] | None = None) -> int | None:
         """
         Append an entry to the log (leader only).
 
@@ -245,7 +245,7 @@ class ConsensusProtocol:
                 self.commit_index = index
                 self.last_applied = index
 
-    async def make_decision(self, proposal: Dict[str, Any]) -> bool:
+    async def make_decision(self, proposal: dict[str, Any]) -> bool:
         """
         Make a quorum-based decision.
 
@@ -374,7 +374,7 @@ class ConsensusProtocol:
             self.config.election_timeout_max,
         )
 
-    def get_log_since(self, index: int) -> List[LogEntry]:
+    def get_log_since(self, index: int) -> list[LogEntry]:
         """Get log entries from a given index onward."""
         if index < 0:
             return list(self.log)
@@ -382,7 +382,7 @@ class ConsensusProtocol:
             return []
         return self.log[index:]
 
-    def get_stats(self) -> Dict[str, int]:
+    def get_stats(self) -> dict[str, int]:
         """Get consensus statistics."""
         return dict(self._stats)
 

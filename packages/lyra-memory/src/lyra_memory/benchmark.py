@@ -4,14 +4,13 @@ Performance benchmarking for memory retrieval.
 Measures and optimizes retrieval latency to achieve <100ms p95.
 """
 
+import statistics
+import tempfile
 import time
 from pathlib import Path
-from typing import Dict, List
-import tempfile
-import statistics
 
-from lyra_memory.store import MemoryStore
 from lyra_memory.schema import MemoryScope, MemoryType
+from lyra_memory.store import MemoryStore
 
 
 class MemoryBenchmark:
@@ -25,9 +24,9 @@ class MemoryBenchmark:
             store: Memory store to benchmark
         """
         self.store = store
-        self.results: Dict[str, List[float]] = {}
+        self.results: dict[str, list[float]] = {}
 
-    def benchmark_write(self, num_memories: int = 100) -> Dict[str, float]:
+    def benchmark_write(self, num_memories: int = 100) -> dict[str, float]:
         """
         Benchmark write performance.
 
@@ -61,7 +60,7 @@ class MemoryBenchmark:
             "max_ms": max(latencies),
         }
 
-    def benchmark_retrieve_bm25(self, num_queries: int = 100) -> Dict[str, float]:
+    def benchmark_retrieve_bm25(self, num_queries: int = 100) -> dict[str, float]:
         """
         Benchmark BM25 retrieval performance.
 
@@ -100,7 +99,7 @@ class MemoryBenchmark:
             "max_ms": max(latencies),
         }
 
-    def benchmark_retrieve_hybrid(self, num_queries: int = 100) -> Dict[str, float]:
+    def benchmark_retrieve_hybrid(self, num_queries: int = 100) -> dict[str, float]:
         """
         Benchmark hybrid retrieval performance.
 
@@ -139,7 +138,7 @@ class MemoryBenchmark:
             "max_ms": max(latencies),
         }
 
-    def benchmark_full_suite(self) -> Dict[str, Dict[str, float]]:
+    def benchmark_full_suite(self) -> dict[str, dict[str, float]]:
         """
         Run full benchmark suite.
 
@@ -195,14 +194,14 @@ class MemoryBenchmark:
 
         return results
 
-    def _percentile(self, data: List[float], percentile: int) -> float:
+    def _percentile(self, data: list[float], percentile: int) -> float:
         """Calculate percentile."""
         sorted_data = sorted(data)
         index = int(len(sorted_data) * percentile / 100)
         return sorted_data[min(index, len(sorted_data) - 1)]
 
 
-def run_benchmark() -> Dict[str, Dict[str, float]]:
+def run_benchmark() -> dict[str, dict[str, float]]:
     """
     Run memory benchmark suite.
 

@@ -29,7 +29,6 @@ from lyra_core.evolve import (
     templated_mutator,
 )
 
-
 # ----------------------------- scoring ----------------------------------- #
 
 

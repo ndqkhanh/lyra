@@ -5,11 +5,11 @@ This layer stores executable skills that can be reused across sessions.
 Each skill must have a verifier test to ensure correctness.
 """
 
+import json
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Dict, Any
-import json
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -19,18 +19,18 @@ class ProceduralSkill:
     skill_id: str
     skill_name: str
     code: str
-    interface: Dict[str, Any]  # Input/output schema
+    interface: dict[str, Any]  # Input/output schema
     verifier_test: str  # Test code that verifies the skill
     success_rate: float = 0.0
     cost: float = 0.0  # Average cost in USD
     latency: float = 0.0  # Average latency in seconds
-    last_used: Optional[str] = None
+    last_used: str | None = None
     usage_count: int = 0
-    lineage: Optional[str] = None  # Parent skill ID
+    lineage: str | None = None  # Parent skill ID
     evolution_round: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "skill_id": self.skill_id,
@@ -49,7 +49,7 @@ class ProceduralSkill:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ProceduralSkill":
+    def from_dict(cls, data: dict[str, Any]) -> "ProceduralSkill":
         """Create from dictionary."""
         return cls(**data)
 
@@ -66,7 +66,7 @@ class ProceduralMemoryStore:
     def _load_skills(self):
         """Load skills from disk."""
         if self.skills_file.exists():
-            with open(self.skills_file, "r") as f:
+            with open(self.skills_file) as f:
                 data = json.load(f)
                 self.skills = {
                     skill_id: ProceduralSkill.from_dict(skill_data)
@@ -90,7 +90,7 @@ class ProceduralMemoryStore:
         self._save_skills()
         return skill.skill_id
 
-    def get_skill(self, skill_id: str) -> Optional[ProceduralSkill]:
+    def get_skill(self, skill_id: str) -> ProceduralSkill | None:
         """Get a skill by ID."""
         return self.skills.get(skill_id)
 
@@ -108,7 +108,7 @@ class ProceduralMemoryStore:
         query: str,
         min_success_rate: float = 0.0,
         limit: int = 10
-    ) -> List[ProceduralSkill]:
+    ) -> list[ProceduralSkill]:
         """Search skills by name or description."""
         results = []
         query_lower = query.lower()
@@ -129,7 +129,7 @@ class ProceduralMemoryStore:
 
         return results[:limit]
 
-    def get_top_skills(self, limit: int = 10) -> List[ProceduralSkill]:
+    def get_top_skills(self, limit: int = 10) -> list[ProceduralSkill]:
         """Get top skills by success rate and usage."""
         skills = list(self.skills.values())
         skills.sort(

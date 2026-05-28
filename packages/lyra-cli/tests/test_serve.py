@@ -3,14 +3,11 @@ from __future__ import annotations
 
 import io
 import json
-from pathlib import Path
 from typing import Any
 
 import pytest
-
-from lyra_cli.client import ChatRequest, ChatResponse, LyraClient, StreamEvent
+from lyra_cli.client import ChatRequest, ChatResponse, StreamEvent
 from lyra_cli.serve.app import create_app
-
 
 # ---------------------------------------------------------------------------
 # Fakes

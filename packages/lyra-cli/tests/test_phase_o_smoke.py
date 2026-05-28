@@ -22,10 +22,9 @@ from __future__ import annotations
 import importlib
 
 import pytest
-from typer.testing import CliRunner
-
 from lyra_cli import __version__
 from lyra_cli.__main__ import app
+from typer.testing import CliRunner
 
 
 def test_phase_o_version_string() -> None:
@@ -44,7 +43,7 @@ def test_skill_help_advertises_phase_o_subcommand(subcommand: str) -> None:
 
 def test_lifecycle_event_exposes_skills_activated() -> None:
     mod = importlib.import_module("lyra_core.hooks.lifecycle")
-    LifecycleEvent = getattr(mod, "LifecycleEvent")
+    LifecycleEvent = mod.LifecycleEvent
     assert hasattr(LifecycleEvent, "SKILLS_ACTIVATED")
     assert LifecycleEvent.SKILLS_ACTIVATED.value == "skills_activated"
 

@@ -31,7 +31,6 @@ from enum import Enum
 
 from .schema import ConflictEvent, Fragment
 
-
 # ---------------------------------------------------------------------------
 # Write classification
 # ---------------------------------------------------------------------------

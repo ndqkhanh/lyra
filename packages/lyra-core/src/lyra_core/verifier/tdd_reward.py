@@ -21,8 +21,9 @@ Phase 0: contract only.
 """
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Mapping, Protocol, Sequence
+from typing import Protocol
 
 
 @dataclass(frozen=True)

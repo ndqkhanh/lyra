@@ -7,13 +7,12 @@ installed.
 from __future__ import annotations
 
 import pytest
-
-from lyra_harness_core.messages import Message, StopReason
 from lyra_cli.providers.bedrock import (
     AnthropicBedrockLLM,
     BedrockUnavailable,
     bedrock_available,
 )
+from lyra_harness_core.messages import Message, StopReason
 
 
 class _FakeBedrockClient:

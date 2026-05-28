@@ -18,8 +18,7 @@ import shutil
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable, Protocol
-
+from typing import Protocol
 
 _NAME_RE = re.compile(r"^[A-Za-z0-9_-]{1,40}$")
 

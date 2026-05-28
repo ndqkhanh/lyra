@@ -17,7 +17,6 @@ from typing import Any
 
 from ..commands.registry import CommandResult, commands_by_category
 
-
 # ── ECC-inspired command categories with emoji ─────────────────────────
 
 CATEGORY_EMOJI = {

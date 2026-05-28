@@ -24,7 +24,6 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-
 # ── Presets ─────────────────────────────────────────────────────────────
 
 _PRESETS: dict[str, dict[str, Any]] = {
@@ -93,7 +92,7 @@ def load_preset(name: str) -> HudConfig:
 
 def render(
     state: HudState,
-    config: Optional[HudConfig] = None,
+    config: HudConfig | None = None,
     max_width: int = 120,
 ) -> str:
     """Render the HUD as a Rich-markup string.

@@ -18,9 +18,9 @@ low-confidence buffer for later re-evaluation.
 from __future__ import annotations
 
 import time
+from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum
-from typing import Sequence
 
 
 class ContentType(str, Enum):

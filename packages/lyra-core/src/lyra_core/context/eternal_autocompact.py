@@ -18,7 +18,7 @@ maybe-mutating the message list before each call. AgentLoop is unaware.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any
 
 from .compactor import CompactResult, compact_messages
 

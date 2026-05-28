@@ -23,10 +23,10 @@ from __future__ import annotations
 
 import importlib.util
 import sys
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Iterable, Literal
-
+from typing import Any, Literal
 
 ToolRisk = Literal["safe", "network", "filesystem", "destructive"]
 _VALID_RISKS: frozenset[str] = frozenset({"safe", "network", "filesystem", "destructive"})

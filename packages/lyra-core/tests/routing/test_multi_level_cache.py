@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import tempfile
-from pathlib import Path
 
 from lyra_core.cache.multi_level_cache import CacheConfig, CacheStats, MultiLevelCache
 

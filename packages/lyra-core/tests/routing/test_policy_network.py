@@ -1,10 +1,7 @@
 """Tests for the RL policy network."""
 from __future__ import annotations
 
-import math
-
 import pytest
-
 from lyra_core.routing.policy_network import (
     ACTION_SPACE,
     HIDDEN_DIM,

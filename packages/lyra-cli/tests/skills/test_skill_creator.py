@@ -2,10 +2,9 @@
 
 import pytest
 from lyra_cli.skills.skill_creator import (
-    SkillCreator,
     ExecutionTrace,
     PatternType,
-    CreationSource,
+    SkillCreator,
 )
 
 

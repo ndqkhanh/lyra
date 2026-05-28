@@ -17,8 +17,9 @@ stable and agent plans can be composed.
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
-from typing import Any, Callable, Literal, Mapping
+from typing import Any, Literal
 
 from ..agent.loop import AgentLoop, IterationBudget, TurnResult
 

@@ -23,10 +23,8 @@ from __future__ import annotations
 import sys
 
 import pytest
-
 from lyra_core.lsp_backend import FeatureUnavailable
 from lyra_core.terminal import CommandResult, TerminalBackend
-
 
 # --- fake docker client -------------------------------------------- #
 

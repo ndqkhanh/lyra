@@ -19,7 +19,6 @@ from .base import Sandbox, SandboxNotAvailable
 from .docker_sandbox import DockerSandbox
 from .local_sandbox import LocalSandbox
 
-
 _Preference = Literal["auto", "docker", "local"]
 
 

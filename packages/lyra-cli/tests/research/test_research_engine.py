@@ -1,16 +1,15 @@
 """Tests for MultiHopResearchEngine."""
 
-import pytest
 
+from lyra_cli.research.knowledge_graph import ResearchKnowledgeGraph
 from lyra_cli.research.research_engine import (
-    MultiHopResearchEngine,
     ExploreResult,
+    MultiHopResearchEngine,
     ResearchReport,
 )
+from lyra_cli.research.source_evaluator import SourceCredibility
 from lyra_cli.research.strategy_selector import StrategyType
 from lyra_cli.research.trajectory import ResearchTrajectory
-from lyra_cli.research.source_evaluator import SourceCredibility
-from lyra_cli.research.knowledge_graph import ResearchKnowledgeGraph
 
 
 class TestMultiHopResearchEngine:

@@ -9,18 +9,17 @@ Slack workspace gate on ``LYRA_SLACK_TOKEN`` + ``LYRA_RUN_SMOKE=1``
 from __future__ import annotations
 
 import asyncio
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
-from typing import Any, AsyncIterator, List
+from typing import Any
 
 import pytest
-
 from lyra_cli.channels.base import ChannelAdapter, Inbound
 from lyra_cli.channels.slack import (
     FeatureUnavailable,
     SlackAdapter,
     SlackAuthError,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fake Slack client
@@ -32,7 +31,7 @@ class _FakeSlackClient:
     token: str = "xoxb-test"
     auth_ok: bool = True
     rate_limit_first: bool = False
-    posted: List[dict[str, Any]] = field(default_factory=list)
+    posted: list[dict[str, Any]] = field(default_factory=list)
     inbound_events: list[dict[str, Any]] = field(default_factory=list)
 
     async def auth_test(self) -> dict[str, Any]:
@@ -49,8 +48,8 @@ class _FakeSlackClient:
         self.posted.append(dict(payload))
         return {"ok": True, "ts": f"ts.{len(self.posted)}"}
 
-    def stream_events(self) -> "AsyncIterator[dict[str, Any]]":
-        async def _gen() -> "AsyncIterator[dict[str, Any]]":
+    def stream_events(self) -> AsyncIterator[dict[str, Any]]:
+        async def _gen() -> AsyncIterator[dict[str, Any]]:
             for evt in list(self.inbound_events):
                 yield evt
 

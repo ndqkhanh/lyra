@@ -9,12 +9,12 @@ Features:
 - Version control friendly
 """
 
+import json
 import logging
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Dict, Any
-import json
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -23,20 +23,20 @@ logger = logging.getLogger(__name__)
 class ScenarioBlock:
     """Single scenario/scene aggregated from L1 atoms."""
 
-    id: Optional[str] = None
+    id: str | None = None
     session_id: str = ""
     title: str = ""
     content: str = ""
     timestamp: str = ""
-    metadata: Optional[Dict[str, Any]] = None
-    source_atom_ids: Optional[List[int]] = None  # Traceability to L1
+    metadata: dict[str, Any] | None = None
+    source_atom_ids: list[int] | None = None  # Traceability to L1
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ScenarioBlock":
+    def from_dict(cls, data: dict[str, Any]) -> "ScenarioBlock":
         """Create from dictionary."""
         return cls(**data)
 
@@ -179,7 +179,7 @@ class ScenarioStore:
             logger.error(f"Failed to save scene {scene.id}: {e}")
             raise
 
-    def load(self, scene_id: str) -> Optional[ScenarioBlock]:
+    def load(self, scene_id: str) -> ScenarioBlock | None:
         """
         Load a scenario block from Markdown file.
 
@@ -205,8 +205,8 @@ class ScenarioStore:
             return None
 
     def list_scenes(
-        self, session_id: Optional[str] = None
-    ) -> List[ScenarioBlock]:
+        self, session_id: str | None = None
+    ) -> list[ScenarioBlock]:
         """
         List all scenes, optionally filtered by session.
 
@@ -263,7 +263,7 @@ class ScenarioStore:
             logger.error(f"Failed to delete scene {scene_id}: {e}")
             raise
 
-    def enforce_max_scenes(self, session_id: Optional[str] = None) -> int:
+    def enforce_max_scenes(self, session_id: str | None = None) -> int:
         """
         Enforce maximum scene limit by deleting oldest scenes.
 
@@ -291,7 +291,7 @@ class ScenarioStore:
         )
         return deleted_count
 
-    def count(self, session_id: Optional[str] = None) -> int:
+    def count(self, session_id: str | None = None) -> int:
         """
         Count total scenes, optionally filtered by session.
 
@@ -303,7 +303,7 @@ class ScenarioStore:
         """
         return len(self.list_scenes(session_id))
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """
         Get storage statistics.
 

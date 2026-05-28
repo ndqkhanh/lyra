@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-
 from lyra_core.tools.image_describe import (
     ImageDescribeError,
     describe_image,
@@ -22,7 +21,6 @@ from lyra_core.tools.image_ocr import (
     make_image_ocr_tool,
     ocr_image,
 )
-
 
 # Tiny 1x1 PNG (red pixel) — base64 decoded to bytes.
 _PNG_BYTES = (

@@ -1,11 +1,9 @@
 """Tests for Multimodal Memory Integration."""
 
 import pytest
-
 from lyra_cli.multimodal.memory_integration import (
     CompressionLevel,
     MultimodalMemoryIntegrator,
-    MultimodalReference,
 )
 
 

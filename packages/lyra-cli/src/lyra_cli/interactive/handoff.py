@@ -13,7 +13,8 @@ from __future__ import annotations
 
 import re
 import subprocess
-from typing import TYPE_CHECKING, Iterable
+from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: no cover
     from .session import InteractiveSession
@@ -60,7 +61,7 @@ def _collect_test_targets(history: Iterable[str]) -> list[str]:
 
 
 def render_handoff(
-    session: "InteractiveSession",
+    session: InteractiveSession,
     *,
     git_available: bool = True,
     title_cap: int = 80,

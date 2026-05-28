@@ -9,11 +9,11 @@ Features:
 """
 
 import json
-from dataclasses import dataclass, asdict
+import logging
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Optional, Dict, Any
-import logging
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -27,14 +27,14 @@ class ConversationLog:
     timestamp: str
     role: str  # 'user' or 'assistant'
     content: str
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: dict[str, Any] | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ConversationLog":
+    def from_dict(cls, data: dict[str, Any]) -> "ConversationLog":
         """Create from dictionary."""
         return cls(**data)
 
@@ -91,9 +91,9 @@ class ConversationStore:
     def get_session(
         self,
         session_id: str,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
-    ) -> List[ConversationLog]:
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+    ) -> list[ConversationLog]:
         """
         Retrieve all logs for a session within date range.
 
@@ -118,7 +118,7 @@ class ConversationStore:
 
             if shard_path.exists():
                 try:
-                    with open(shard_path, "r", encoding="utf-8") as f:
+                    with open(shard_path, encoding="utf-8") as f:
                         for line in f:
                             if line.strip():
                                 data = json.loads(line)
@@ -142,9 +142,9 @@ class ConversationStore:
     def search(
         self,
         query: str,
-        session_id: Optional[str] = None,
+        session_id: str | None = None,
         max_results: int = 50,
-    ) -> List[ConversationLog]:
+    ) -> list[ConversationLog]:
         """
         Full-text search over conversation history.
 
@@ -169,7 +169,7 @@ class ConversationStore:
 
             if shard_path.exists():
                 try:
-                    with open(shard_path, "r", encoding="utf-8") as f:
+                    with open(shard_path, encoding="utf-8") as f:
                         for line in f:
                             if line.strip():
                                 data = json.loads(line)
@@ -230,7 +230,7 @@ class ConversationStore:
 
         return deleted_count
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """
         Get storage statistics.
 

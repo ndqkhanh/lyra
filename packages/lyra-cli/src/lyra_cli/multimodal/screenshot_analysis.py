@@ -6,7 +6,7 @@ Analyzes screenshots for text extraction, UI elements, and action tracking.
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional, Dict, Any
+from typing import Any
 
 
 @dataclass
@@ -15,7 +15,7 @@ class OCRResult:
 
     text: str
     confidence: float
-    bounding_box: Dict[str, int]  # x, y, width, height
+    bounding_box: dict[str, int]  # x, y, width, height
     language: str = "en"
 
 
@@ -26,8 +26,8 @@ class DetectedObject:
     object_id: str
     object_type: str
     confidence: float
-    bounding_box: Dict[str, int]
-    attributes: Dict[str, Any] = field(default_factory=dict)
+    bounding_box: dict[str, int]
+    attributes: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -37,10 +37,10 @@ class ScreenshotAnalysis:
     analysis_id: str
     screenshot_path: str
     timestamp: str
-    ocr_results: List[OCRResult] = field(default_factory=list)
-    detected_objects: List[DetectedObject] = field(default_factory=list)
-    ui_elements: List[Dict[str, Any]] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    ocr_results: list[OCRResult] = field(default_factory=list)
+    detected_objects: list[DetectedObject] = field(default_factory=list)
+    ui_elements: list[dict[str, Any]] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class ScreenshotAnalyzer:
@@ -55,7 +55,7 @@ class ScreenshotAnalyzer:
     """
 
     def __init__(self):
-        self.analyses: Dict[str, ScreenshotAnalysis] = {}
+        self.analyses: dict[str, ScreenshotAnalysis] = {}
 
         # Statistics
         self.stats = {
@@ -113,7 +113,7 @@ class ScreenshotAnalyzer:
 
         return analysis.analysis_id
 
-    def _extract_text(self, screenshot_path: str) -> List[OCRResult]:
+    def _extract_text(self, screenshot_path: str) -> list[OCRResult]:
         """
         Extract text from screenshot using OCR.
 
@@ -135,7 +135,7 @@ class ScreenshotAnalyzer:
 
         return results
 
-    def _detect_objects(self, screenshot_path: str) -> List[DetectedObject]:
+    def _detect_objects(self, screenshot_path: str) -> list[DetectedObject]:
         """
         Detect objects in screenshot.
 
@@ -158,7 +158,7 @@ class ScreenshotAnalyzer:
 
         return objects
 
-    def _detect_ui_elements(self, screenshot_path: str) -> List[Dict[str, Any]]:
+    def _detect_ui_elements(self, screenshot_path: str) -> list[dict[str, Any]]:
         """
         Detect UI elements in screenshot.
 
@@ -187,7 +187,7 @@ class ScreenshotAnalyzer:
 
         return elements
 
-    def get_analysis(self, analysis_id: str) -> Optional[ScreenshotAnalysis]:
+    def get_analysis(self, analysis_id: str) -> ScreenshotAnalysis | None:
         """Get an analysis by ID."""
         return self.analyses.get(analysis_id)
 
@@ -207,7 +207,7 @@ class ScreenshotAnalyzer:
 
         return " ".join(ocr.text for ocr in analysis.ocr_results)
 
-    def search_text(self, query: str) -> List[ScreenshotAnalysis]:
+    def search_text(self, query: str) -> list[ScreenshotAnalysis]:
         """
         Search for text in analyzed screenshots.
 
@@ -228,7 +228,7 @@ class ScreenshotAnalyzer:
 
         return results
 
-    def export_analysis(self, analysis_id: str) -> Optional[Dict[str, Any]]:
+    def export_analysis(self, analysis_id: str) -> dict[str, Any] | None:
         """
         Export an analysis in JSON format.
 
@@ -269,7 +269,7 @@ class ScreenshotAnalyzer:
             "metadata": analysis.metadata,
         }
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get screenshot analysis statistics."""
         return {
             **self.stats,

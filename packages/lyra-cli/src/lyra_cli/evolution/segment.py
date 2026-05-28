@@ -1,7 +1,8 @@
 """Evolution segment runner."""
-from typing import Callable
+from collections.abc import Callable
+
+from lyra_cli.evolution.cost_meter import BudgetCap, CostMeter
 from lyra_cli.evolution.harness import EvolutionHarness
-from lyra_cli.evolution.cost_meter import CostMeter, BudgetCap
 
 
 class EvolutionSegment:

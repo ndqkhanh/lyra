@@ -12,9 +12,9 @@ Core components:
     ZettelkastenMemoryStore — Full integration combining all three operations
 """
 
-from lyra_memory.agentic.note_constructor import NoteConstructor
 from lyra_memory.agentic.link_generator import LinkGenerator, LinkType
 from lyra_memory.agentic.memory_evolver import MemoryEvolver
+from lyra_memory.agentic.note_constructor import NoteConstructor
 from lyra_memory.agentic.zettelkasten_store import (
     AgenticMemoryNote,
     ZettelkastenMemoryStore,

@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """Test Phase 3: Expandable Content System"""
 
-import sys
 import os
+import sys
 
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 from lyra_cli.ui import (
-    ExpandableSection,
     CollapseState,
-    TruncationEngine,
     ExpandableRenderer,
+    ExpandableSection,
+    TruncationEngine,
 )
 
 

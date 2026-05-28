@@ -211,55 +211,55 @@ class BrainstormFacilitator:
                 "White",
                 "Facts & Information",
                 f"Available data and information gaps about {topic}",
-                [f"Current metrics: TBD",
-                 f"Data sources: TBD",
-                 f"Information gaps: details unclear",
-                 f"Historical context: Consider past similar initiatives"],
+                ["Current metrics: TBD",
+                 "Data sources: TBD",
+                 "Information gaps: details unclear",
+                 "Historical context: Consider past similar initiatives"],
             ),
             (
                 "Red",
                 "Emotions & Intuition",
                 f"Gut feelings and emotional responses to {topic}",
-                [f"Initial reaction: Exciting but uncertain",
-                 f"Concern about: Implementation complexity",
-                 f"Hunch: This aligns with user needs",
-                 f"Emotional response: Cautiously optimistic"],
+                ["Initial reaction: Exciting but uncertain",
+                 "Concern about: Implementation complexity",
+                 "Hunch: This aligns with user needs",
+                 "Emotional response: Cautiously optimistic"],
             ),
             (
                 "Black",
                 "Critical Judgment",
                 f"Risks and potential problems with {topic}",
-                [f"Risk: Resource constraints",
-                 f"Risk: Technical complexity underestimated",
-                 f"Risk: Timeline may be aggressive",
-                 f"Risk: Stakeholder alignment needed"],
+                ["Risk: Resource constraints",
+                 "Risk: Technical complexity underestimated",
+                 "Risk: Timeline may be aggressive",
+                 "Risk: Stakeholder alignment needed"],
             ),
             (
                 "Yellow",
                 "Optimism & Benefits",
                 f"Positive outcomes and value of {topic}",
-                [f"Benefit: Improved user satisfaction",
-                 f"Benefit: Competitive advantage",
-                 f"Benefit: Operational efficiency gain",
-                 f"Benefit: Revenue growth opportunity"],
+                ["Benefit: Improved user satisfaction",
+                 "Benefit: Competitive advantage",
+                 "Benefit: Operational efficiency gain",
+                 "Benefit: Revenue growth opportunity"],
             ),
             (
                 "Green",
                 "Creativity & New Ideas",
                 f"Creative alternatives and possibilities for {topic}",
-                [f"Idea: Consider a simpler MVP approach",
-                 f"Idea: Integrate with existing tools",
-                 f"Idea: Explore partnership opportunities",
-                 f"Idea: Use incremental delivery"],
+                ["Idea: Consider a simpler MVP approach",
+                 "Idea: Integrate with existing tools",
+                 "Idea: Explore partnership opportunities",
+                 "Idea: Use incremental delivery"],
             ),
             (
                 "Blue",
                 "Process & Overview",
                 f"Meta-cognition and process management for {topic}",
-                [f"Process: Define success criteria first",
-                 f"Process: Establish decision-making framework",
-                 f"Process: Schedule regular checkpoints",
-                 f"Process: Document all decisions"],
+                ["Process: Define success criteria first",
+                 "Process: Establish decision-making framework",
+                 "Process: Schedule regular checkpoints",
+                 "Process: Document all decisions"],
             ),
         ]
 
@@ -312,13 +312,13 @@ class BrainstormFacilitator:
     def _run_reverse(topic: str) -> dict:
         reversals: list[tuple[str, str]] = [
             (f"How could we make {topic} as BAD as possible?",
-             f"Reverse: What's the worst experience we could create?"),
+             "Reverse: What's the worst experience we could create?"),
             (f"How could we maximize user frustration with {topic}?",
-             f"Reverse: What causes the most pain?"),
+             "Reverse: What causes the most pain?"),
             (f"How could we make {topic} extremely slow?",
-             f"Reverse: What adds unnecessary friction?"),
+             "Reverse: What adds unnecessary friction?"),
             (f"How could we make {topic} impossible to use?",
-             f"Reverse: What barriers can we eliminate?"),
+             "Reverse: What barriers can we eliminate?"),
         ]
 
         ideas: list[ReverseIdea] = []
@@ -439,10 +439,10 @@ class BrainstormFacilitator:
     def _generate_next_steps(topic: str) -> list[str]:
         return [
             f"Prioritize top concepts for {topic}",
-            f"Conduct feasibility analysis for shortlisted ideas",
-            f"Create prototype or storyboard for best concept",
-            f"Gather feedback from stakeholders",
-            f"Define success metrics and validation criteria",
+            "Conduct feasibility analysis for shortlisted ideas",
+            "Create prototype or storyboard for best concept",
+            "Gather feedback from stakeholders",
+            "Define success metrics and validation criteria",
         ]
 
 
@@ -479,7 +479,7 @@ def _generate_scamper_idea(technique: str, topic: str) -> str:
         ],
         "Reverse": [
             f"Flip the architecture of {topic}: bottom-up instead of top-down",
-            f"Invert the user flow: let the system initiate instead of the user",
+            "Invert the user flow: let the system initiate instead of the user",
         ],
     }
 

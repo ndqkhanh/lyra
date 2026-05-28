@@ -1,7 +1,7 @@
 """Tests for CommandDispatcher."""
 
+
 import pytest
-from pathlib import Path
 from lyra_cli.core.command_dispatcher import CommandDispatcher, CommandResult
 from lyra_cli.core.command_registry import CommandRegistry
 

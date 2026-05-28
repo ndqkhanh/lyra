@@ -21,7 +21,6 @@ from lyra_cli.interactive.dialog_agents import (
     build_live_entries,
 )
 
-
 # ── catalog entries ──────────────────────────────────────────────
 
 

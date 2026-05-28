@@ -1,6 +1,7 @@
 """Tool registry for LLM tool calling."""
-from typing import Callable, Any
 import json
+from collections.abc import Callable
+from typing import Any
 
 
 class ToolRegistry:

@@ -2,13 +2,11 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.skills.validation_gate import (
     GateNumber,
     GateResult,
     GateStatus,
     SkillValidationPipeline,
-    ValidationReport,
 )
 
 VALID_PYTHON = '''"""A test skill that parses JSON files."""
@@ -231,7 +229,13 @@ class TestValidationReport:
 # Helpers — import internal functions for direct gate testing
 from lyra_core.skills.validation_gate import (
     _gate1_syntax as _gate1,
+)
+from lyra_core.skills.validation_gate import (
     _gate2_semantic as _gate2,
+)
+from lyra_core.skills.validation_gate import (
     _gate3_performance as _gate3,
+)
+from lyra_core.skills.validation_gate import (
     _gate4_safety as _gate4,
 )

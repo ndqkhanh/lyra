@@ -12,8 +12,9 @@ from __future__ import annotations
 
 import asyncio
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 from uuid import uuid4
 
 
@@ -33,16 +34,16 @@ class WorkItem:
     """A unit of work for the parallel executor."""
 
     work_id: str = field(default_factory=lambda: f"work_{uuid4().hex[:8]}")
-    coro: Optional[Any] = None
-    func: Optional[Callable[[], Any]] = None
+    coro: Any | None = None
+    func: Callable[[], Any] | None = None
     timeout: float = 60.0
     priority: int = 0
     status: str = "pending"  # pending, running, completed, failed, timed_out
-    result: Optional[Any] = None
-    error: Optional[str] = None
+    result: Any | None = None
+    error: str | None = None
     created_at: float = field(default_factory=time.time)
-    started_at: Optional[float] = None
-    completed_at: Optional[float] = None
+    started_at: float | None = None
+    completed_at: float | None = None
 
 
 @dataclass
@@ -51,8 +52,8 @@ class WorkResult:
 
     work_id: str
     success: bool
-    result: Optional[Any] = None
-    error: Optional[str] = None
+    result: Any | None = None
+    error: str | None = None
     duration: float = 0.0
 
 
@@ -68,15 +69,15 @@ class ParallelExecutor:
     - Priority-based scheduling
     """
 
-    def __init__(self, config: Optional[ExecutorConfig] = None) -> None:
+    def __init__(self, config: ExecutorConfig | None = None) -> None:
         self.config = config or ExecutorConfig()
         self._semaphore: asyncio.Semaphore = asyncio.Semaphore(self.config.max_workers)
         self._queue: asyncio.Queue = asyncio.Queue(maxsize=self.config.queue_capacity)
         self._lock: asyncio.Lock = asyncio.Lock()
-        self._work_items: Dict[str, WorkItem] = {}
+        self._work_items: dict[str, WorkItem] = {}
         self._running: bool = False
-        self._workers: List[asyncio.Task] = []
-        self._stats: Dict[str, int] = {
+        self._workers: list[asyncio.Task] = []
+        self._stats: dict[str, int] = {
             "items_submitted": 0,
             "items_completed": 0,
             "items_failed": 0,
@@ -103,7 +104,7 @@ class ParallelExecutor:
     async def submit_coro(
         self,
         coro: Any,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
         priority: int = 0,
     ) -> str:
         """
@@ -127,7 +128,7 @@ class ParallelExecutor:
     async def submit_func(
         self,
         func: Callable[[], Any],
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
         priority: int = 0,
     ) -> str:
         """
@@ -197,7 +198,7 @@ class ParallelExecutor:
                 return WorkResult(work_id=work_id, success=False, error="Wait timeout")
             await asyncio.sleep(self.config.poll_interval)
 
-    async def wait_all(self, work_ids: List[str]) -> Dict[str, WorkResult]:
+    async def wait_all(self, work_ids: list[str]) -> dict[str, WorkResult]:
         """
         Wait for all specified work items.
 
@@ -207,7 +208,7 @@ class ParallelExecutor:
         Returns:
             Dict mapping work ID to WorkResult
         """
-        results: Dict[str, WorkResult] = {}
+        results: dict[str, WorkResult] = {}
         for work_id in work_ids:
             results[work_id] = await self.wait_for(work_id)
         return results
@@ -295,7 +296,7 @@ class ParallelExecutor:
                 work.completed_at = time.time()
                 self._stats["items_failed"] += 1
 
-    def get_work(self, work_id: str) -> Optional[WorkItem]:
+    def get_work(self, work_id: str) -> WorkItem | None:
         """Get a work item by ID."""
         return self._work_items.get(work_id)
 
@@ -303,6 +304,6 @@ class ParallelExecutor:
         """Get the number of pending work items."""
         return self._queue.qsize()
 
-    def get_stats(self) -> Dict[str, int]:
+    def get_stats(self) -> dict[str, int]:
         """Get executor statistics."""
         return dict(self._stats)

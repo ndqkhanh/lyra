@@ -10,8 +10,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from lyra_harness_core.tools import ToolError
-
 from lyra_core.tools.builtin import (
     EditTool,
     GlobTool,
@@ -19,6 +17,7 @@ from lyra_core.tools.builtin import (
     ReadTool,
     WriteTool,
 )
+from lyra_harness_core.tools import ToolError
 
 # ------------------------------------------------------------------
 # Read
@@ -197,9 +196,8 @@ def test_edit_tool_metadata() -> None:
 
 
 def test_register_all_builtin_tools(repo: Path) -> None:
-    from lyra_harness_core.tools import ToolRegistry
-
     from lyra_core.tools.builtin import register_builtin_tools
+    from lyra_harness_core.tools import ToolRegistry
 
     registry = ToolRegistry()
     register_builtin_tools(registry, repo_root=repo)

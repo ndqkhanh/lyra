@@ -1,7 +1,6 @@
 """Evolution harness with capability boundaries."""
-from pathlib import Path
 import json
-from typing import Optional
+from pathlib import Path
 
 
 class EvolutionHarness:
@@ -33,7 +32,7 @@ class EvolutionHarness:
         # Agent can submit but not read back
         return True
 
-    def workspace_read(self, path: str) -> Optional[str]:
+    def workspace_read(self, path: str) -> str | None:
         """Read from workspace (confined to workspace/)."""
         # Resolve paths to prevent traversal attacks
         full_path = (self.workspace_dir / path).resolve()

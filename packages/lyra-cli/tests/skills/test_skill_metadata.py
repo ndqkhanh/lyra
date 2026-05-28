@@ -1,5 +1,4 @@
 """Tests for skill metadata."""
-import pytest
 from lyra_cli.core.skill_metadata import SkillMetadata
 
 

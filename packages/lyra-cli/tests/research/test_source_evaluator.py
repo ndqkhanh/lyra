@@ -1,12 +1,10 @@
 """Tests for SourceCredibility."""
 
-import pytest
 
 from lyra_cli.research.source_evaluator import (
-    SourceCredibility,
-    SourceProfile,
-    SourceType,
     BASE_CREDIBILITY,
+    SourceCredibility,
+    SourceType,
 )
 
 

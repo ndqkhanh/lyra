@@ -13,8 +13,6 @@ Expected: 30+ tests covering all functionality.
 """
 from __future__ import annotations
 
-import pytest
-
 from lyra_core.context.isolation import (
     ContextBoundary,
     ContextMerger,
@@ -29,7 +27,6 @@ from lyra_core.context.layered_context import (
     LayeredContextManager,
 )
 from lyra_research.coordination import Task
-
 
 # ============================================================================
 # Merge Strategy Tests

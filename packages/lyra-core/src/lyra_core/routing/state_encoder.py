@@ -21,6 +21,7 @@ Vector dimensions (12 total):
 from __future__ import annotations
 
 from dataclasses import dataclass
+
 FEATURE_DIM = 12
 
 TOOL_CATEGORY_MAP: dict[str, int] = {

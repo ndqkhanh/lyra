@@ -1,9 +1,6 @@
 """CLI command for installing production resources."""
 
 import typer
-from rich.console import Console
-from rich.table import Table
-
 from lyra_skills.mcp_integration import (
     PRODUCTION_MCP_SERVERS,
     install_production_mcp_servers,
@@ -12,6 +9,8 @@ from lyra_skills.production_installer import (
     PRODUCTION_SKILLS,
     install_production_skills,
 )
+from rich.console import Console
+from rich.table import Table
 
 app = typer.Typer(help="Install production-ready resources for Lyra")
 console = Console()

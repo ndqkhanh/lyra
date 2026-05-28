@@ -1,10 +1,10 @@
 """Meta-agent controller for evolution."""
-from pathlib import Path
 import json
 from datetime import datetime
+from pathlib import Path
 
-from lyra_cli.evolution.context import EvolutionContext, Observation
 from lyra_cli.evolution.actions import EditAction, EditType
+from lyra_cli.evolution.context import EvolutionContext, Observation
 
 
 class MetaAgent:

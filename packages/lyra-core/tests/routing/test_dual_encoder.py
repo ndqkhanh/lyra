@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_memory.mragent.dual_encoder import (
     DenseVector,
     DualEncodedMemory,

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.safety.alignment_monitor import (
     DEFAULT_DIMENSIONS,
     AlignmentMonitor,

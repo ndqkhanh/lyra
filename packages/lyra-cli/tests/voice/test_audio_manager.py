@@ -2,17 +2,16 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
-
 from lyra_cli.voice.audio_manager import (
     AudioConfig,
     AudioDevice,
     AudioError,
     AudioManager,
-    DeviceType,
     DeviceState,
+    DeviceType,
 )
 
 

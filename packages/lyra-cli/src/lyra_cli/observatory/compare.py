@@ -5,13 +5,12 @@ import json
 from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
-from typing import Optional
 
 from rich.console import RenderableType
 from rich.panel import Panel
 from rich.table import Table
 
-from .classifier import classify_turn, Classification
+from .classifier import Classification, classify_turn
 from .pricing import cost_for_turn
 
 
@@ -31,9 +30,9 @@ class ModelMetrics:
 @dataclass(frozen=True)
 class ComparisonReport:
     models: tuple[ModelMetrics, ...]
-    winner_cost: Optional[str]
-    winner_one_shot: Optional[str]
-    winner_speed: Optional[str]
+    winner_cost: str | None
+    winner_one_shot: str | None
+    winner_speed: str | None
 
 
 def compare(

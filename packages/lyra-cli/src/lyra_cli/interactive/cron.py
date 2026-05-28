@@ -14,7 +14,7 @@ Usage from the REPL::
 """
 from __future__ import annotations
 
-from typing import Callable, Optional, Sequence
+from collections.abc import Callable, Sequence
 
 from lyra_core.cron.store import CronJob, CronStore
 
@@ -34,7 +34,7 @@ def handle_cron(
     args: Sequence[str],
     *,
     store: CronStore,
-    runner: Optional[CronRunner] = None,
+    runner: CronRunner | None = None,
 ) -> str:
     """Dispatch a ``/cron`` invocation and return the user-visible output.
 
@@ -132,7 +132,7 @@ def _handle_run(
     rest: Sequence[str],
     store: CronStore,
     *,
-    runner: Optional[CronRunner] = None,
+    runner: CronRunner | None = None,
 ) -> str:
     if not rest:
         raise CronCommandError("usage: /cron run <job_id>")

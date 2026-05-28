@@ -6,8 +6,8 @@ Records all agent decisions, actions, and reasoning for complete observability.
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional, Dict, Any
 from enum import Enum
+from typing import Any
 
 
 class ActionType(Enum):
@@ -29,12 +29,12 @@ class AgentAction:
     timestamp: str
     agent_id: str
     description: str
-    inputs: Dict[str, Any] = field(default_factory=dict)
-    outputs: Dict[str, Any] = field(default_factory=dict)
-    reasoning: Optional[str] = None
-    duration_ms: Optional[float] = None
+    inputs: dict[str, Any] = field(default_factory=dict)
+    outputs: dict[str, Any] = field(default_factory=dict)
+    reasoning: str | None = None
+    duration_ms: float | None = None
     success: bool = True
-    error: Optional[str] = None
+    error: str | None = None
 
 
 @dataclass
@@ -45,7 +45,7 @@ class AgentDecision:
     timestamp: str
     agent_id: str
     question: str
-    options: List[str]
+    options: list[str]
     selected_option: str
     reasoning: str
     confidence: float  # 0.0 to 1.0
@@ -60,12 +60,12 @@ class AgentExecutionRecord:
     session_id: str
     task_description: str
     start_time: str
-    end_time: Optional[str] = None
-    actions: List[AgentAction] = field(default_factory=list)
-    decisions: List[AgentDecision] = field(default_factory=list)
+    end_time: str | None = None
+    actions: list[AgentAction] = field(default_factory=list)
+    decisions: list[AgentDecision] = field(default_factory=list)
     final_status: str = "in_progress"  # in_progress, success, failure
-    final_output: Optional[Any] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    final_output: Any | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class AERSystem:
@@ -80,8 +80,8 @@ class AERSystem:
     """
 
     def __init__(self):
-        self.records: Dict[str, AgentExecutionRecord] = {}
-        self.active_records: Dict[str, str] = {}  # agent_id -> record_id
+        self.records: dict[str, AgentExecutionRecord] = {}
+        self.active_records: dict[str, str] = {}  # agent_id -> record_id
 
         # Statistics
         self.stats = {
@@ -97,7 +97,7 @@ class AERSystem:
         agent_id: str,
         session_id: str,
         task_description: str,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: dict[str, Any] | None = None
     ) -> str:
         """
         Start recording an agent execution.
@@ -134,12 +134,12 @@ class AERSystem:
         agent_id: str,
         action_type: ActionType,
         description: str,
-        inputs: Optional[Dict[str, Any]] = None,
-        outputs: Optional[Dict[str, Any]] = None,
-        reasoning: Optional[str] = None,
-        duration_ms: Optional[float] = None,
+        inputs: dict[str, Any] | None = None,
+        outputs: dict[str, Any] | None = None,
+        reasoning: str | None = None,
+        duration_ms: float | None = None,
         success: bool = True,
-        error: Optional[str] = None
+        error: str | None = None
     ) -> str:
         """
         Record an agent action.
@@ -187,7 +187,7 @@ class AERSystem:
         self,
         agent_id: str,
         question: str,
-        options: List[str],
+        options: list[str],
         selected_option: str,
         reasoning: str,
         confidence: float
@@ -232,7 +232,7 @@ class AERSystem:
         self,
         agent_id: str,
         status: str,
-        final_output: Optional[Any] = None
+        final_output: Any | None = None
     ):
         """
         End an agent execution recording.
@@ -261,18 +261,18 @@ class AERSystem:
         # Remove from active records
         del self.active_records[agent_id]
 
-    def get_record(self, record_id: str) -> Optional[AgentExecutionRecord]:
+    def get_record(self, record_id: str) -> AgentExecutionRecord | None:
         """Get an execution record by ID."""
         return self.records.get(record_id)
 
-    def get_agent_records(self, agent_id: str) -> List[AgentExecutionRecord]:
+    def get_agent_records(self, agent_id: str) -> list[AgentExecutionRecord]:
         """Get all records for a specific agent."""
         return [
             record for record in self.records.values()
             if record.agent_id == agent_id
         ]
 
-    def export_record(self, record_id: str) -> Optional[Dict[str, Any]]:
+    def export_record(self, record_id: str) -> dict[str, Any] | None:
         """
         Export a record in JSON format.
 
@@ -325,7 +325,7 @@ class AERSystem:
             ],
         }
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get AER system statistics."""
         success_rate = (
             self.stats["successful_executions"] /

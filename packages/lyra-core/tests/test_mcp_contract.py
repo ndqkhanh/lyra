@@ -29,8 +29,6 @@ Six RED tests:
 """
 from __future__ import annotations
 
-import pytest
-
 
 def test_empty_registry_has_no_servers() -> None:
     from lyra_core.mcp import MCPRegistry

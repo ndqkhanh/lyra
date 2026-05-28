@@ -30,7 +30,6 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-
 from lyra_core.context.compactor import CompactResult, compact_messages
 from lyra_core.context.pipeline import _tok_estimate
 

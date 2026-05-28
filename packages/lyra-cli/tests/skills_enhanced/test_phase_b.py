@@ -1,14 +1,13 @@
 """Tests for Phase B Skills System Enhancement."""
 
 import pytest
-
 from lyra_cli.skills_enhanced.skill_lifecycle import (
-    SkillLifecycleManager,
     SkillApplicability,
-    SkillPolicy,
-    SkillTermination,
     SkillInterface,
+    SkillLifecycleManager,
+    SkillPolicy,
     SkillStatus,
+    SkillTermination,
 )
 
 

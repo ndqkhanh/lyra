@@ -1,14 +1,14 @@
 """Hook registry - Built-in hook definitions"""
 
-from typing import Dict, List
-from .hook_manager import HookType, HookContext
+
+from .hook_manager import HookType
 
 
 class HookRegistry:
     """Registry of built-in hooks"""
 
     def __init__(self):
-        self.hooks: Dict[str, Dict] = {}
+        self.hooks: dict[str, dict] = {}
 
     def register_hook(self, name: str, hook_type: HookType, description: str,
                      handler: callable, enabled: bool = True):
@@ -20,11 +20,11 @@ class HookRegistry:
             "enabled": enabled,
         }
 
-    def get_hook(self, name: str) -> Dict:
+    def get_hook(self, name: str) -> dict:
         """Get hook definition"""
         return self.hooks.get(name)
 
-    def list_hooks(self, hook_type: HookType = None) -> List[Dict]:
+    def list_hooks(self, hook_type: HookType = None) -> list[dict]:
         """List all hooks, optionally filtered by type"""
         if hook_type:
             return [

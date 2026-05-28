@@ -25,7 +25,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-
 BrowserStatus = Literal["ok", "rejected", "unavailable", "error"]
 
 

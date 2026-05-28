@@ -20,7 +20,6 @@ from __future__ import annotations
 
 import json as _json
 from pathlib import Path
-from typing import Optional  # noqa: UP035 — typer needs runtime-resolvable annotations on Python 3.9
 
 import typer
 from rich.console import Console
@@ -37,7 +36,7 @@ memory_app = typer.Typer(
 _console = Console()
 
 
-def _resolve_db_path(db: Optional[str], repo_root: Optional[str]) -> Path:
+def _resolve_db_path(db: str | None, repo_root: str | None) -> Path:
     """Resolve the ReasoningBank SQLite path.
 
     Priority:
@@ -53,7 +52,7 @@ def _resolve_db_path(db: Optional[str], repo_root: Optional[str]) -> Path:
     return default_db_path(root)
 
 
-def _open_bank(db: Optional[str], repo_root: Optional[str]) -> object:
+def _open_bank(db: str | None, repo_root: str | None) -> object:
     """Open a SQLite-backed bank with the heuristic distiller wired in."""
     from lyra_core.memory import HeuristicDistiller, SqliteReasoningBank
 
@@ -73,7 +72,7 @@ def recall(
         help="Task signature / free-text query to recall lessons for.",
     ),
     k: int = typer.Option(5, "--k", "-k", help="Maximum number of lessons to return."),
-    polarity: Optional[str] = typer.Option(
+    polarity: str | None = typer.Option(
         None,
         "--polarity",
         help="Filter to 'success' or 'failure' lessons only.",
@@ -83,10 +82,10 @@ def recall(
         "--diversify",
         help="Apply MMR diversity re-ranking to the recall window.",
     ),
-    db: Optional[str] = typer.Option(
+    db: str | None = typer.Option(
         None, "--db", help="Override path to the bank SQLite file."
     ),
-    repo_root: Optional[str] = typer.Option(
+    repo_root: str | None = typer.Option(
         None,
         "--repo-root",
         help="Repository root used to resolve the default DB path.",
@@ -159,12 +158,12 @@ def recall(
 
 @memory_app.command("list")
 def list_lessons(
-    polarity: Optional[str] = typer.Option(
+    polarity: str | None = typer.Option(
         None, "--polarity", help="Filter to 'success' or 'failure' lessons only."
     ),
     limit: int = typer.Option(50, "--limit", "-n", help="Cap rows shown."),
-    db: Optional[str] = typer.Option(None, "--db"),
-    repo_root: Optional[str] = typer.Option(None, "--repo-root"),
+    db: str | None = typer.Option(None, "--db"),
+    repo_root: str | None = typer.Option(None, "--repo-root"),
     json_out: bool = typer.Option(False, "--json"),
 ) -> None:
     """List lessons currently in the bank, newest first."""
@@ -230,8 +229,8 @@ def list_lessons(
 @memory_app.command("show")
 def show(
     lesson_id: str = typer.Argument(..., help="Lesson id (from `lyra memory list`)."),
-    db: Optional[str] = typer.Option(None, "--db"),
-    repo_root: Optional[str] = typer.Option(None, "--repo-root"),
+    db: str | None = typer.Option(None, "--db"),
+    repo_root: str | None = typer.Option(None, "--repo-root"),
     json_out: bool = typer.Option(False, "--json"),
 ) -> None:
     """Show one lesson in full, including signatures + source trajectories."""
@@ -280,8 +279,8 @@ def show(
 
 @memory_app.command("stats")
 def stats(
-    db: Optional[str] = typer.Option(None, "--db"),
-    repo_root: Optional[str] = typer.Option(None, "--repo-root"),
+    db: str | None = typer.Option(None, "--db"),
+    repo_root: str | None = typer.Option(None, "--repo-root"),
     json_out: bool = typer.Option(False, "--json"),
 ) -> None:
     """One-screen summary of what's in the bank."""
@@ -308,8 +307,8 @@ def wipe(
     yes: bool = typer.Option(
         False, "--yes", "-y", help="Skip the confirmation prompt."
     ),
-    db: Optional[str] = typer.Option(None, "--db"),
-    repo_root: Optional[str] = typer.Option(None, "--repo-root"),
+    db: str | None = typer.Option(None, "--db"),
+    repo_root: str | None = typer.Option(None, "--repo-root"),
 ) -> None:
     """Delete every lesson in the bank. Cannot be undone."""
     bank = _open_bank(db, repo_root)
@@ -351,8 +350,8 @@ def record(
         "--trajectory-id",
         help="Identifier for the synthetic trajectory (audit trail).",
     ),
-    db: Optional[str] = typer.Option(None, "--db"),
-    repo_root: Optional[str] = typer.Option(None, "--repo-root"),
+    db: str | None = typer.Option(None, "--db"),
+    repo_root: str | None = typer.Option(None, "--repo-root"),
 ) -> None:
     """Record a synthetic trajectory.
 

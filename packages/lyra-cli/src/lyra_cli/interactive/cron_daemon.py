@@ -13,13 +13,12 @@ can opt out without changing the rest of the boot flow.
 from __future__ import annotations
 
 import os
-from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 __all__ = ["start_cron_daemon", "stop_cron_daemon"]
 
 
-def start_cron_daemon(session: Any) -> Optional[Any]:
+def start_cron_daemon(session: Any) -> Any | None:
     """Spawn the cron daemon thread for ``session`` if not already running.
 
     Returns the live :class:`CronDaemon` (cached on

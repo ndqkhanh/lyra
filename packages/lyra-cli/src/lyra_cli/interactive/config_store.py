@@ -33,7 +33,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-
 # Well-known keys recognised by the live session. The ordering here
 # drives ``/config list``, so put the most-used knobs first.
 KNOWN_KEYS: tuple[str, ...] = (
@@ -71,7 +70,7 @@ class Config:
     # ---- factory ----------------------------------------------------------
 
     @classmethod
-    def load(cls, path: Path | None) -> "Config":
+    def load(cls, path: Path | None) -> Config:
         """Read ``path`` if it exists; otherwise return an empty store.
 
         The store remembers ``path`` so subsequent :meth:`save` calls
@@ -163,7 +162,7 @@ def apply_to_session(cfg: Config, session: object) -> None:
         from . import themes as _t  # type: ignore[import-not-found]
 
         if theme in _t.names():
-            setattr(session, "theme", theme)
+            session.theme = theme
             try:
                 _t.set_active_skin(theme)
             except Exception:
@@ -173,15 +172,15 @@ def apply_to_session(cfg: Config, session: object) -> None:
 
     vim = cfg.get("vim")
     if vim is not None and vim.lower() in _TRUTHY | _FALSY:
-        setattr(session, "vim_mode", _to_bool(vim))
+        session.vim_mode = _to_bool(vim)
 
     perm = cfg.get("permission_mode")
     if perm in {"strict", "normal", "yolo"}:
-        setattr(session, "permission_mode", perm)
+        session.permission_mode = perm
 
     tdd = cfg.get("tdd_gate")
     if tdd is not None and tdd.lower() in _TRUTHY | _FALSY:
-        setattr(session, "tdd_gate_enabled", _to_bool(tdd))
+        session.tdd_gate_enabled = _to_bool(tdd)
 
     effort = cfg.get("effort")
     if effort:
@@ -197,17 +196,17 @@ def apply_to_session(cfg: Config, session: object) -> None:
     cap = cfg.get("budget_cap_usd")
     if cap:
         try:
-            setattr(session, "budget_cap_usd", float(cap))
+            session.budget_cap_usd = float(cap)
         except (TypeError, ValueError):
             pass
 
     model = cfg.get("model")
     if model:
-        setattr(session, "model", model)
+        session.model = model
 
     mode = cfg.get("mode")
     if mode:
-        setattr(session, "mode", mode)
+        session.mode = mode
 
 
 def to_bool(value: str) -> bool:

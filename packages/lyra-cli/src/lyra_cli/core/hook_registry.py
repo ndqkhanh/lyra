@@ -1,8 +1,8 @@
 """Hook registry for loading and managing hooks."""
-from pathlib import Path
-from typing import Dict, List, Optional
-import yaml
 import re
+from pathlib import Path
+
+import yaml
 
 from .hook_metadata import HookMetadata, HookType
 
@@ -10,16 +10,16 @@ from .hook_metadata import HookMetadata, HookType
 class HookRegistry:
     """Registry for loading and managing hooks."""
 
-    def __init__(self, hook_dirs: Optional[List[Path]] = None):
+    def __init__(self, hook_dirs: list[Path] | None = None):
         self.hook_dirs = hook_dirs or []
-        self._hooks: Dict[str, HookMetadata] = {}
+        self._hooks: dict[str, HookMetadata] = {}
 
     def _camel_to_snake(self, name: str) -> str:
         """Convert camelCase to UPPER_SNAKE_CASE."""
         s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
         return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).upper()
 
-    def load_hooks(self) -> Dict[str, HookMetadata]:
+    def load_hooks(self) -> dict[str, HookMetadata]:
         """Load all hooks from configured directories."""
         self._hooks.clear()
 
@@ -37,7 +37,7 @@ class HookRegistry:
 
         return self._hooks
 
-    def _parse_hook_file(self, file_path: Path) -> Optional[HookMetadata]:
+    def _parse_hook_file(self, file_path: Path) -> HookMetadata | None:
         """Parse hook file with YAML frontmatter."""
         content = file_path.read_text()
 
@@ -64,18 +64,18 @@ class HookRegistry:
         except (yaml.YAMLError, KeyError):
             return None
 
-    def get_hook(self, name: str) -> Optional[HookMetadata]:
+    def get_hook(self, name: str) -> HookMetadata | None:
         """Get hook by name."""
         return self._hooks.get(name)
 
-    def get_hooks_by_type(self, hook_type: HookType) -> List[HookMetadata]:
+    def get_hooks_by_type(self, hook_type: HookType) -> list[HookMetadata]:
         """Get all hooks of a specific type."""
         return [
             hook for hook in self._hooks.values()
             if hook.hook_type == hook_type and hook.enabled
         ]
 
-    def search_hooks(self, query: str) -> List[HookMetadata]:
+    def search_hooks(self, query: str) -> list[HookMetadata]:
         """Search hooks by name or description."""
         query_lower = query.lower()
         return [
@@ -83,6 +83,6 @@ class HookRegistry:
             if query_lower in hook.name.lower() or query_lower in hook.description.lower()
         ]
 
-    def list_hooks(self) -> List[HookMetadata]:
+    def list_hooks(self) -> list[HookMetadata]:
         """List all loaded hooks."""
         return list(self._hooks.values())

@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.context.compact_validate import (
     Invariant,
     ValidationReport,
@@ -11,7 +10,6 @@ from lyra_core.context.compact_validate import (
     validate_compaction,
 )
 from lyra_core.context.compactor import CompactResult
-
 
 # ────────────────────────────────────────────────────────────────
 # Default invariant extraction

@@ -3,12 +3,10 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_cli.swarm.orchestrator import (
     OrchestratorConfig,
     SwarmOrchestrator,
     SwarmTask,
-    PriorityLevel,
 )
 
 

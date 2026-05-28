@@ -5,7 +5,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from lyra_core.klong import (
     KLongCheckpoint,
     KLongError,
@@ -14,7 +13,6 @@ from lyra_core.klong import (
     snapshot,
 )
 from lyra_core.klong.checkpoint import CURRENT_SCHEMA_VERSION
-
 
 # ---- envelope round-trip -------------------------------------------
 

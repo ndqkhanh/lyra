@@ -1,10 +1,10 @@
 """Skill manager - Core skills system"""
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional
-from pathlib import Path
-import yaml
 import re
+from dataclasses import dataclass, field
+from pathlib import Path
+
+import yaml
 
 
 @dataclass
@@ -12,19 +12,19 @@ class SkillDefinition:
     """Skill definition from YAML frontmatter"""
     name: str
     description: str
-    triggers: List[str] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
+    triggers: list[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     model: str = "sonnet"
-    tools: List[str] = field(default_factory=list)
+    tools: list[str] = field(default_factory=list)
     prompt: str = ""
 
 
 class SkillManager:
     """Manages skill definitions and execution"""
 
-    def __init__(self, skills_dir: Optional[Path] = None):
+    def __init__(self, skills_dir: Path | None = None):
         self.skills_dir = skills_dir or Path.home() / ".lyra" / "skills"
-        self.skills: Dict[str, SkillDefinition] = {}
+        self.skills: dict[str, SkillDefinition] = {}
 
     def load_skills(self):
         """Load skill definitions from directory"""
@@ -39,7 +39,7 @@ class SkillManager:
             except Exception as e:
                 print(f"Warning: Failed to load skill {skill_file}: {e}")
 
-    def _parse_skill_file(self, file_path: Path) -> Optional[SkillDefinition]:
+    def _parse_skill_file(self, file_path: Path) -> SkillDefinition | None:
         """Parse skill file with YAML frontmatter"""
         content = file_path.read_text()
 
@@ -66,15 +66,15 @@ class SkillManager:
             prompt=prompt.strip(),
         )
 
-    def get_skill(self, name: str) -> Optional[SkillDefinition]:
+    def get_skill(self, name: str) -> SkillDefinition | None:
         """Get skill by name"""
         return self.skills.get(name)
 
-    def list_skills(self) -> List[SkillDefinition]:
+    def list_skills(self) -> list[SkillDefinition]:
         """List all skills"""
         return list(self.skills.values())
 
-    def find_by_trigger(self, trigger: str) -> List[SkillDefinition]:
+    def find_by_trigger(self, trigger: str) -> list[SkillDefinition]:
         """Find skills matching a trigger"""
         matching = []
         trigger_lower = trigger.lower()
@@ -85,7 +85,7 @@ class SkillManager:
 
         return matching
 
-    def find_by_tag(self, tag: str) -> List[SkillDefinition]:
+    def find_by_tag(self, tag: str) -> list[SkillDefinition]:
         """Find skills by tag"""
         matching = []
         tag_lower = tag.lower()
@@ -125,7 +125,7 @@ class SkillManager:
 
 
 # Global skill manager
-_skill_manager: Optional[SkillManager] = None
+_skill_manager: SkillManager | None = None
 
 
 def get_skill_manager() -> SkillManager:

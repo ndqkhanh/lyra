@@ -16,8 +16,9 @@ operator (or a later phase) decide on the policy.
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any
 
 from .compactor import CompactResult, compact_messages
 

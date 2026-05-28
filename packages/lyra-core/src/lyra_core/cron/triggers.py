@@ -18,13 +18,10 @@ on ``fired()`` so consumers see one `True` per real event.
 """
 from __future__ import annotations
 
-import os
 import signal as _signal
 import threading
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
-
 
 __all__ = [
     "EventTrigger",
@@ -71,7 +68,7 @@ class SignalTrigger(EventTrigger):
 
     signum: int = _signal.SIGUSR1 if hasattr(_signal, "SIGUSR1") else 0
     _seen: bool = field(default=False, init=False)
-    _previous: Optional[object] = field(default=None, init=False)
+    _previous: object | None = field(default=None, init=False)
 
     def arm(self) -> None:
         if not self.signum or not hasattr(_signal, "signal"):

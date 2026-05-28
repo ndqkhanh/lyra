@@ -4,7 +4,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from lyra_core.eval import (
     DriftGate,
     EvalCase,
@@ -12,7 +11,6 @@ from lyra_core.eval import (
     default_corpus,
     run_eval,
 )
-
 
 # ---------- canned answers for the seed corpus ------------------------
 
@@ -37,9 +35,7 @@ _GOOD_ANSWERS: dict[str, str] = {
     ),
 }
 
-_BAD_ANSWERS: dict[str, str] = {
-    k: "I don't know." for k in _GOOD_ANSWERS
-}
+_BAD_ANSWERS: dict[str, str] = dict.fromkeys(_GOOD_ANSWERS, "I don't know.")
 
 
 def _good(prompt: str) -> str:

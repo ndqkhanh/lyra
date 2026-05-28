@@ -14,6 +14,8 @@ import time
 import uuid
 from dataclasses import dataclass, field
 from enum import Enum
+
+
 class GoalType(Enum):
     FEATURE = "feature"
     REFACTOR = "refactor"

@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich import box
@@ -29,7 +28,7 @@ hops_app = typer.Typer(
 )
 
 
-def _find_latest_session(hops_dir: Path) -> Optional[Path]:
+def _find_latest_session(hops_dir: Path) -> Path | None:
     if not hops_dir.exists():
         return None
     candidates = sorted(
@@ -71,7 +70,7 @@ def _support_color(score: float) -> str:
 def hops_command(
     ctx: typer.Context,
     repo_root: Path = typer.Option(Path.cwd(), "--repo-root", "-C", help="Repo root."),
-    session: Optional[str] = typer.Option(
+    session: str | None = typer.Option(
         None, "--session", "-s", help="Session ID (defaults to most recent)."
     ),
     json_out: bool = typer.Option(False, "--json", help="Emit JSON instead of a table."),

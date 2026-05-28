@@ -21,9 +21,9 @@ import hashlib
 import hmac
 import json
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Iterable, Optional
-
+from typing import Any
 
 _LBL_AUTH: str = "LBL-ROUTINE-AUTH"
 _LBL_COST: str = "LBL-ROUTINE-COST"
@@ -113,7 +113,7 @@ class RoutineInvocation:
     payload: dict[str, Any]
     fired_ts: float
     deferred: bool = False
-    bright_line: Optional[str] = None
+    bright_line: str | None = None
     reason: str = ""
 
 
@@ -159,7 +159,7 @@ class RoutineRegistry:
         self.routines[routine.name] = routine
 
     def fire_cron(self, routine_name: str,
-                  *, payload: Optional[dict[str, Any]] = None) -> RoutineInvocation:
+                  *, payload: dict[str, Any] | None = None) -> RoutineInvocation:
         routine = self._routine(routine_name)
         if not isinstance(routine.trigger, CronTrigger):
             raise ValueError(

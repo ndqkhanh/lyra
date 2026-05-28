@@ -13,12 +13,11 @@ import json
 from pathlib import Path
 
 import pytest
-from typer.testing import CliRunner
-
 from lyra_cli.commands.agents import agents_app
 from lyra_cli.commands.hops import hops_app
 from lyra_cli.commands.model import model_app
 from lyra_cli.commands.skills_view import dag_app, skills_app
+from typer.testing import CliRunner
 
 
 @pytest.fixture()

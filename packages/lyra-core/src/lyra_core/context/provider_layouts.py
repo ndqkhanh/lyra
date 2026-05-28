@@ -21,7 +21,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-
 # ---------------------------------------------------------------------------
 # Style tokens — keep these centralised so call sites can switch on them.
 # ---------------------------------------------------------------------------

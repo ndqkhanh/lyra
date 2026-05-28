@@ -14,9 +14,9 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +75,7 @@ class AGIOrchestrator:
         }
         self._health_history: list[dict[str, Any]] = []
         self._running = False
-        self._task: Optional[asyncio.Task] = None
+        self._task: asyncio.Task | None = None
 
     async def health_check(self) -> dict[AGIPhase, PlanStatus]:
         """Run health checks across all 5 plans."""

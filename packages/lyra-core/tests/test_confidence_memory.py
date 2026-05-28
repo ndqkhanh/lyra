@@ -4,14 +4,12 @@ from __future__ import annotations
 import time
 
 import pytest
-
 from lyra_core.memory import (
     ConfidenceRecord,
     ConfidenceTracker,
     DemotionEvent,
     PromotionEvent,
 )
-
 
 # ---- record validation -----------------------------------------------
 

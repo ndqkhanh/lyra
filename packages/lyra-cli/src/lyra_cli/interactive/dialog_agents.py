@@ -21,9 +21,9 @@ Code's panel does it.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from prompt_toolkit import Application
 from prompt_toolkit.buffer import Buffer
@@ -76,8 +76,8 @@ class AgentsDialogResult:
     caller switches on which view the user was in when they hit Enter.
     """
 
-    catalog_pick: Optional[_CatalogEntry] = None
-    live_pick: Optional[_LiveEntry] = None
+    catalog_pick: _CatalogEntry | None = None
+    live_pick: _LiveEntry | None = None
 
 
 # ── pure helpers (testable without a TTY) ────────────────────────
@@ -219,7 +219,7 @@ def run_agents_dialog(
     *,
     registry: Any | None = None,
     user_dir: Path | None = None,
-) -> Optional[AgentsDialogResult]:
+) -> AgentsDialogResult | None:
     """Drive the picker; return the user's pick or None on cancel."""
     catalog = build_catalog_entries(user_dir=user_dir)
     live = build_live_entries(registry)

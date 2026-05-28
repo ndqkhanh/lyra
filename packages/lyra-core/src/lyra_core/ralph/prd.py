@@ -25,8 +25,6 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
-
 
 __all__ = ["Prd", "UserStory", "load_prd", "save_prd"]
 
@@ -53,7 +51,7 @@ class Prd:
     description: str = ""
     userStories: list[UserStory] = field(default_factory=list)
 
-    def next_pending_story(self) -> Optional[UserStory]:
+    def next_pending_story(self) -> UserStory | None:
         """Highest-priority story with ``passes=False`` (lowest priority int)."""
         pending = [s for s in self.userStories if not s.passes]
         if not pending:

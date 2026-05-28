@@ -17,7 +17,6 @@ from lyra_cli.interactive.tool_render import (
     tool_emoji,
 )
 
-
 # ── tool_emoji ──────────────────────────────────────────────────
 
 

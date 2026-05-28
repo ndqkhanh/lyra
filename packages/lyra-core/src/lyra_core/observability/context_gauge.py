@@ -24,7 +24,6 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
-
 # ---------------------------------------------------------------------------
 # ContextGauge
 # ---------------------------------------------------------------------------
@@ -89,7 +88,7 @@ class ContextGauge:
         if len(self._history) > 10:
             self._history.pop(0)
 
-    def render(self) -> "rich.panel.Panel":  # type: ignore[name-defined]
+    def render(self):  # type: ignore[no-untyped-def]  # noqa: F821
         from rich import box
         from rich.columns import Columns
         from rich.panel import Panel
@@ -216,7 +215,7 @@ class SkillPanel:
             ],
         }
 
-    def render(self) -> "rich.panel.Panel":  # type: ignore[name-defined]
+    def render(self):  # type: ignore[no-untyped-def]  # noqa: F821
         from rich import box
         from rich.panel import Panel
         from rich.table import Table
@@ -339,7 +338,7 @@ class AgentDAG:
                 node.status = event.status
                 node.cost_usd += event.cost_usd
 
-    def render(self) -> "rich.tree.Tree":  # type: ignore[name-defined]
+    def render(self):  # type: ignore[no-untyped-def]  # noqa: F821
         from rich.tree import Tree
 
         label = (

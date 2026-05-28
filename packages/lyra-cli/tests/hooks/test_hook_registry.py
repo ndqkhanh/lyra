@@ -1,9 +1,9 @@
 """Tests for HookRegistry."""
 
+
 import pytest
-from pathlib import Path
-from lyra_cli.core.hook_registry import HookRegistry
 from lyra_cli.core.hook_metadata import HookType
+from lyra_cli.core.hook_registry import HookRegistry
 
 
 @pytest.fixture

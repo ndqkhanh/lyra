@@ -6,7 +6,7 @@ Synchronizes screenshot/DOM/video with region-level evidence provenance.
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional, Dict, Any, Tuple
+from typing import Any
 
 
 @dataclass
@@ -14,7 +14,7 @@ class RegionEvidence:
     """Evidence from a specific region in a frame."""
 
     region_id: str
-    bounding_box: Dict[str, int]  # x, y, width, height
+    bounding_box: dict[str, int]  # x, y, width, height
     evidence_type: str  # text, ui_element, object, action
     content: str
     confidence: float
@@ -27,11 +27,11 @@ class MultimodalFrame:
 
     frame_id: str
     timestamp: str
-    screenshot: Optional[str] = None  # Base64 or path
-    dom_snapshot: Optional[Dict[str, Any]] = None
-    terminal_output: Optional[str] = None
-    code_context: Optional[Dict[str, Any]] = None
-    regions: List[RegionEvidence] = field(default_factory=list)
+    screenshot: str | None = None  # Base64 or path
+    dom_snapshot: dict[str, Any] | None = None
+    terminal_output: str | None = None
+    code_context: dict[str, Any] | None = None
+    regions: list[RegionEvidence] = field(default_factory=list)
 
 
 @dataclass
@@ -41,11 +41,11 @@ class HopTrace:
     hop_id: str
     hop_number: int
     reasoning_step: str
-    frames: List[MultimodalFrame] = field(default_factory=list)
+    frames: list[MultimodalFrame] = field(default_factory=list)
     input_query: str = ""
     output_answer: str = ""
     confidence: float = 0.0
-    provenance: List[str] = field(default_factory=list)
+    provenance: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -54,10 +54,10 @@ class MultimodalHopTraceChain:
 
     chain_id: str
     task_description: str
-    hops: List[HopTrace] = field(default_factory=list)
+    hops: list[HopTrace] = field(default_factory=list)
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    completed_at: Optional[str] = None
-    final_answer: Optional[str] = None
+    completed_at: str | None = None
+    final_answer: str | None = None
 
 
 class MultimodalHopTracer:
@@ -72,8 +72,8 @@ class MultimodalHopTracer:
     """
 
     def __init__(self):
-        self.chains: Dict[str, MultimodalHopTraceChain] = {}
-        self.frames: Dict[str, MultimodalFrame] = {}
+        self.chains: dict[str, MultimodalHopTraceChain] = {}
+        self.frames: dict[str, MultimodalFrame] = {}
 
         # Statistics
         self.stats = {
@@ -129,10 +129,10 @@ class MultimodalHopTracer:
         self,
         chain_id: str,
         hop_id: str,
-        screenshot: Optional[str] = None,
-        dom_snapshot: Optional[Dict[str, Any]] = None,
-        terminal_output: Optional[str] = None,
-        code_context: Optional[Dict[str, Any]] = None
+        screenshot: str | None = None,
+        dom_snapshot: dict[str, Any] | None = None,
+        terminal_output: str | None = None,
+        code_context: dict[str, Any] | None = None
     ) -> str:
         """Add a multimodal frame to a hop."""
         if chain_id not in self.chains:
@@ -168,7 +168,7 @@ class MultimodalHopTracer:
     def add_region_evidence(
         self,
         frame_id: str,
-        bounding_box: Dict[str, int],
+        bounding_box: dict[str, int],
         evidence_type: str,
         content: str,
         confidence: float
@@ -196,7 +196,7 @@ class MultimodalHopTracer:
     def complete_chain(
         self,
         chain_id: str,
-        final_answer: Optional[str] = None
+        final_answer: str | None = None
     ):
         """Complete a hop trace chain."""
         if chain_id not in self.chains:
@@ -206,11 +206,11 @@ class MultimodalHopTracer:
         chain.completed_at = datetime.now().isoformat()
         chain.final_answer = final_answer
 
-    def get_chain(self, chain_id: str) -> Optional[MultimodalHopTraceChain]:
+    def get_chain(self, chain_id: str) -> MultimodalHopTraceChain | None:
         """Get a chain by ID."""
         return self.chains.get(chain_id)
 
-    def export_chain(self, chain_id: str) -> Optional[Dict[str, Any]]:
+    def export_chain(self, chain_id: str) -> dict[str, Any] | None:
         """Export chain with full provenance."""
         chain = self.get_chain(chain_id)
         if not chain:
@@ -259,7 +259,7 @@ class MultimodalHopTracer:
             ],
         }
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get tracer statistics."""
         return {
             **self.stats,

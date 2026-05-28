@@ -13,8 +13,9 @@ instances (production wiring uses cross-family LLM reviewers via
 from __future__ import annotations
 
 import enum
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Iterable
+from typing import Any
 
 
 class Severity(str, enum.Enum):

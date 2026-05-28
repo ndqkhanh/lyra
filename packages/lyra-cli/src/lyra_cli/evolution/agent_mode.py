@@ -1,7 +1,6 @@
 """Agent mode for editing agent context files."""
-from pathlib import Path
-from typing import Optional
 import json
+from pathlib import Path
 
 
 class AgentMode:
@@ -11,7 +10,7 @@ class AgentMode:
         self.agent_context_dir = Path(agent_context_dir)
         self.agent_context_dir.mkdir(parents=True, exist_ok=True)
 
-    def read_context(self, name: str) -> Optional[str]:
+    def read_context(self, name: str) -> str | None:
         """Read an agent context file."""
         path = self.agent_context_dir / name
         if path.exists():

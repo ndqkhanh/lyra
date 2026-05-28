@@ -12,10 +12,10 @@ from typing import Any
 
 from lyra_cli.interactive.dialog_skills import (
     _classify_source,
+    _Entry,
     _matches,
     _sort_entries,
     build_entries,
-    _Entry,
 )
 from lyra_skills.state import SkillsState, with_toggled
 

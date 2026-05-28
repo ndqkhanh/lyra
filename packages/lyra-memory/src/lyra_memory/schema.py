@@ -7,7 +7,7 @@ Defines the core MemoryRecord dataclass and related enums.
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import uuid4
 
 
@@ -62,16 +62,16 @@ class MemoryRecord:
     scope: MemoryScope = MemoryScope.SESSION
     type: MemoryType = MemoryType.EPISODIC
     content: str = ""
-    source_span: Optional[str] = None
+    source_span: str | None = None
     created_at: datetime = field(default_factory=datetime.now)
-    valid_from: Optional[datetime] = None
-    valid_until: Optional[datetime] = None
+    valid_from: datetime | None = None
+    valid_until: datetime | None = None
     confidence: float = 1.0
-    links: List[str] = field(default_factory=list)
+    links: list[str] = field(default_factory=list)
     verifier_status: VerifierStatus = VerifierStatus.UNVERIFIED
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    superseded_by: Optional[str] = None
-    embedding: Optional[List[float]] = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+    superseded_by: str | None = None
+    embedding: list[float] | None = None
 
     def __post_init__(self):
         """Validate fields after initialization."""
@@ -94,7 +94,7 @@ class MemoryRecord:
         """Check if this memory has been superseded."""
         return self.superseded_by is not None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for storage."""
         return {
             "id": self.id,
@@ -113,7 +113,7 @@ class MemoryRecord:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "MemoryRecord":
+    def from_dict(cls, data: dict[str, Any]) -> "MemoryRecord":
         """Create from dictionary."""
         return cls(
             id=data["id"],

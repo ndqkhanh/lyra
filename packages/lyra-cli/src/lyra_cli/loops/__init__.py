@@ -1,9 +1,9 @@
 """Autonomous loops system for Lyra"""
 
-from .loop_manager import LoopManager, LoopConfig
-from .sequential_pipeline import SequentialPipeline
 from .continuous_loop import ContinuousLoop
+from .loop_manager import LoopConfig, LoopManager
 from .loop_monitor import LoopMonitor
+from .sequential_pipeline import SequentialPipeline
 
 __all__ = [
     "LoopManager",

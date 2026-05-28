@@ -3,12 +3,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from lyra_core.memory.auto_memory import AutoMemory, MemoryEntry, MemoryKind
 from lyra_core.memory.contradictions import (
     ContradictionDetector,
-    ContradictionPair,
 )
 from lyra_core.memory.memory_tools import MemoryToolset
 

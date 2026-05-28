@@ -3,16 +3,13 @@
 import time
 
 import pytest
-
 from lyra_cli.memory.search.dci_zero_index import DCIZeroIndex, GrepResult, MatchType
 from lyra_cli.memory.search.progressive_disclosure import (
-    DisclosureBatch,
-    DisclosureLevel,
     DisclosedMemory,
+    DisclosureLevel,
     ProgressiveDisclosure,
 )
 from lyra_cli.memory.search.retrieval_router import (
-    RankedResult,
     RetrievalContext,
     RetrievalReport,
     RetrievalRouter,

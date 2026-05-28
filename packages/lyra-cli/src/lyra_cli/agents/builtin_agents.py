@@ -1,6 +1,6 @@
 """Built-in agents - Core agent definitions"""
 
-from .agent_manager import AgentManager, AgentDefinition
+from .agent_manager import AgentDefinition, AgentManager
 from .agent_registry import get_registry
 
 

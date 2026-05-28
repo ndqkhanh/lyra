@@ -36,9 +36,9 @@ import os
 import subprocess
 import sys
 import tempfile
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Iterable, Literal
-
+from typing import Literal
 
 _DEFAULT_ALLOWED_IMPORTS: frozenset[str] = frozenset({
     "math",

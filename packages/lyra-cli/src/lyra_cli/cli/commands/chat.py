@@ -1,11 +1,8 @@
 """Chat command - Simple REPL with streaming"""
 
-import typer
-from lyra_cli.cli.repl import LyraREPL
-from lyra_cli.cli.agent_handler import StreamingAgentHandler
-from lyra_cli.ui.welcome_banner import print_welcome_banner
-from lyra_cli.cli.models import get_registry
 import os
+
+import typer
 
 
 def chat(
@@ -23,7 +20,7 @@ def chat(
 
 def interactive_chat(model: str = "opus"):
     """Interactive chat with Sequential REPL (Claude Code style with context & permission mode)"""
-    from lyra_cli.repl import SequentialREPL, REPLConfig
+    from lyra_cli.repl import REPLConfig, SequentialREPL
 
     # Model mapping
     model_map = {
@@ -37,7 +34,7 @@ def interactive_chat(model: str = "opus"):
     # Get API key
     api_key = os.getenv("ANTHROPIC_API_KEY")
     if not api_key:
-        print(f"\x1b[31m✘ Error: ANTHROPIC_API_KEY environment variable not set\x1b[0m")
+        print("\x1b[31m✘ Error: ANTHROPIC_API_KEY environment variable not set\x1b[0m")
         print("Please set ANTHROPIC_API_KEY to use Lyra")
         return
 

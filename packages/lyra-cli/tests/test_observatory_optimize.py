@@ -2,13 +2,11 @@
 from __future__ import annotations
 
 import json
-import time
 from pathlib import Path
-
-from typer.testing import CliRunner
 
 from lyra_cli.__main__ import app
 from lyra_cli.observatory.optimize import optimize
+from typer.testing import CliRunner
 
 
 def _seed(tmp_path: Path, rows: list[dict]) -> Path:

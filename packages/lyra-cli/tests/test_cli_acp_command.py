@@ -19,11 +19,9 @@ import json
 from typing import Any
 
 import pytest
-from typer.testing import CliRunner
-
-from lyra_harness_core.messages import Message
 from lyra_cli.__main__ import app
-
+from lyra_harness_core.messages import Message
+from typer.testing import CliRunner
 
 runner = CliRunner()
 

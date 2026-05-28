@@ -3,11 +3,9 @@ from __future__ import annotations
 
 import subprocess
 from pathlib import Path
-from textwrap import dedent
 
 import pytest
-
-from lyra_core.memory.t3_git_sync import GitSyncConfig, GitSyncResult, T3GitSync
+from lyra_core.memory.t3_git_sync import GitSyncConfig, T3GitSync
 
 
 @pytest.fixture

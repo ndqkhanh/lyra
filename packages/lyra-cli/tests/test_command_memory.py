@@ -5,9 +5,8 @@ import json
 from pathlib import Path
 
 import pytest
-from typer.testing import CliRunner
-
 from lyra_cli.commands.memory import memory_app
+from typer.testing import CliRunner
 
 
 @pytest.fixture

@@ -1,13 +1,12 @@
 """Tests for RetrospectiveMemory and ProspectiveMemory."""
 
-import pytest
 
-from lyra_memory.optimization.memgrad import FailurePattern, TextGrad
 from lyra_memory.optimization.dual_memory import (
     CorrectiveIntention,
     ProspectiveMemory,
     RetrospectiveMemory,
 )
+from lyra_memory.optimization.memgrad import FailurePattern, TextGrad
 
 
 class StubLLM:
@@ -123,7 +122,6 @@ class TestRetrospectiveMemory:
 
     def test_find_similar_no_overlap(self):
         rm = RetrospectiveMemory()
-        from lyra_memory.optimization.memgrad import FailurePattern
 
         existing = FailurePattern(role="planner", description="slow database queries timeout")
         rm.patterns["planner"] = [existing]
@@ -133,7 +131,6 @@ class TestRetrospectiveMemory:
 
     def test_find_similar_with_overlap(self):
         rm = RetrospectiveMemory()
-        from lyra_memory.optimization.memgrad import FailurePattern
 
         existing = FailurePattern(role="planner", description="specific milestone tracking missing for plans")
         rm.patterns["planner"] = [existing]

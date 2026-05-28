@@ -19,11 +19,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from lyra_cli.interactive.red_proof import RedProofResult, run_red_proof
 from lyra_cli.interactive.session import InteractiveSession
-
 
 # ---------------------------------------------------------------------------
 # Pure function: run_red_proof

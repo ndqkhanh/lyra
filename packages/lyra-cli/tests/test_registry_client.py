@@ -2,12 +2,9 @@
 
 import json
 import time
-from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
-import requests
-
 from lyra_cli.cli.registry_client import RegistryClient, SkillMetadata
 
 

@@ -1,11 +1,9 @@
 """L312-2 — RalphRunner contract tests."""
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import pytest
-
 from lyra_core.contracts import (
     AgentContract,
     BudgetEnvelope,
@@ -14,9 +12,9 @@ from lyra_core.contracts import (
 from lyra_core.ralph import (
     Prd,
     UserStory,
-    save_prd,
     load_prd,
     parse_completion,
+    save_prd,
 )
 from lyra_core.ralph.completion import CompletionSignal
 from lyra_core.ralph.runner import (

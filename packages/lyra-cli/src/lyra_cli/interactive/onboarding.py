@@ -23,7 +23,6 @@ from __future__ import annotations
 
 import os
 import sys
-from typing import Optional
 
 from rich.console import Console
 from rich.text import Text
@@ -133,7 +132,7 @@ def render_welcome() -> Text:
     return out
 
 
-def run_wizard(*, console: Optional[Console] = None) -> int:
+def run_wizard(*, console: Console | None = None) -> int:
     """Drive the welcome panel + provider picker on a fresh-install repo.
 
     Returns:

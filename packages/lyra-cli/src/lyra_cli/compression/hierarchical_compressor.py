@@ -5,11 +5,10 @@ Implements sensory → short-term → long-term consolidation pipeline.
 Achieves 117x token reduction with accuracy improvements.
 """
 
+from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import List, Optional, Dict, Any
-from collections import defaultdict
-import json
+from typing import Any
 
 
 @dataclass
@@ -29,8 +28,8 @@ class ShortTermItem:
 
     item_id: str
     topic: str
-    observations: List[str] = field(default_factory=list)
-    summary: Optional[str] = None
+    observations: list[str] = field(default_factory=list)
+    summary: str | None = None
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
     promoted: bool = False
 
@@ -41,7 +40,7 @@ class LongTermItem:
 
     item_id: str
     content: str
-    source_topics: List[str] = field(default_factory=list)
+    source_topics: list[str] = field(default_factory=list)
     importance: float = 0.5
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
 
@@ -67,9 +66,9 @@ class HierarchicalCompressor:
         self.shortterm_ttl = shortterm_ttl
 
         # Memory stages
-        self.sensory: List[SensoryItem] = []
-        self.short_term: List[ShortTermItem] = []
-        self.long_term: List[LongTermItem] = []
+        self.sensory: list[SensoryItem] = []
+        self.short_term: list[ShortTermItem] = []
+        self.long_term: list[LongTermItem] = []
 
         # Statistics
         self.stats = {
@@ -131,7 +130,7 @@ class HierarchicalCompressor:
             if datetime.fromisoformat(item.timestamp) > cutoff
         ]
 
-    def promote_to_shortterm(self, topic: str, observations: List[str]) -> str:
+    def promote_to_shortterm(self, topic: str, observations: list[str]) -> str:
         """
         Promote sensory observations to short-term memory.
 
@@ -162,7 +161,7 @@ class HierarchicalCompressor:
     def consolidate_to_longterm(
         self,
         content: str,
-        source_topics: List[str],
+        source_topics: list[str],
         importance: float = 0.5
     ) -> str:
         """
@@ -183,7 +182,7 @@ class HierarchicalCompressor:
 
         return item.item_id
 
-    def get_active_memory(self) -> Dict[str, Any]:
+    def get_active_memory(self) -> dict[str, Any]:
         """
         Get current active memory across all stages.
 
@@ -241,7 +240,7 @@ class HierarchicalCompressor:
 
         return original_estimate / current_tokens
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get compression statistics."""
         compression_ratio = self.get_compression_ratio()
         filter_rate = (

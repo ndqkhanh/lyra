@@ -1,12 +1,12 @@
 """Hook manager - Core hook system implementation"""
 
-from enum import Enum
-from typing import Dict, List, Callable, Any, Optional
-from dataclasses import dataclass
 import json
 import subprocess
-import os
+from collections.abc import Callable
+from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
+from typing import Any
 
 
 class HookType(Enum):
@@ -23,22 +23,22 @@ class HookType(Enum):
 class HookContext:
     """Context passed to hooks"""
     hook_type: HookType
-    tool_name: Optional[str] = None
-    tool_input: Optional[Dict[str, Any]] = None
-    tool_output: Optional[Dict[str, Any]] = None
-    session_id: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    tool_name: str | None = None
+    tool_input: dict[str, Any] | None = None
+    tool_output: dict[str, Any] | None = None
+    session_id: str | None = None
+    metadata: dict[str, Any] | None = None
 
 
 class HookManager:
     """Manages hook registration and execution"""
 
-    def __init__(self, hooks_dir: Optional[Path] = None):
+    def __init__(self, hooks_dir: Path | None = None):
         self.hooks_dir = hooks_dir or Path.home() / ".lyra" / "hooks"
-        self.hooks: Dict[HookType, List[Callable]] = {
+        self.hooks: dict[HookType, list[Callable]] = {
             hook_type: [] for hook_type in HookType
         }
-        self.disabled_hooks: List[str] = []
+        self.disabled_hooks: list[str] = []
         self._load_config()
 
     def _load_config(self):
@@ -167,7 +167,7 @@ class HookManager:
 
 
 # Global hook manager instance
-_hook_manager: Optional[HookManager] = None
+_hook_manager: HookManager | None = None
 
 
 def get_hook_manager() -> HookManager:

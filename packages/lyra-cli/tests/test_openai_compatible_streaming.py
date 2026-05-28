@@ -16,10 +16,8 @@ from __future__ import annotations
 
 import json
 from typing import Any
-from unittest.mock import MagicMock
 
 import pytest
-
 from lyra_cli.providers.openai_compatible import (
     OpenAICompatibleLLM,
     ProviderHTTPError,
@@ -229,8 +227,8 @@ def test_stream_raises_provider_http_error_on_4xx() -> None:
     """A 401/429 must surface as ProviderHTTPError so the chat
     handler can fall back to the non-streaming retry path or render
     a friendly error renderable."""
-    import urllib.error
     import io
+    import urllib.error
 
     def urlopen(req, timeout):  # type: ignore[no-untyped-def]
         raise urllib.error.HTTPError(

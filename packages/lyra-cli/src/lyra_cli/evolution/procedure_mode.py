@@ -1,6 +1,5 @@
 """Procedure mode for editing Python evolution code."""
 from pathlib import Path
-from typing import Optional
 
 
 class ProcedureMode:
@@ -10,7 +9,7 @@ class ProcedureMode:
         self.procedures_dir = Path(procedures_dir)
         self.procedures_dir.mkdir(parents=True, exist_ok=True)
 
-    def read_procedure(self, name: str) -> Optional[str]:
+    def read_procedure(self, name: str) -> str | None:
         """Read a procedure file."""
         path = self.procedures_dir / f"{name}.py"
         if path.exists():

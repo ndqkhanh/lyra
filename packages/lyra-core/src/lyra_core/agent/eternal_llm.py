@@ -26,8 +26,9 @@ hashed content. Counter keying is unambiguous: 1st call, 2nd call, ...
 """
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, Mapping
+from typing import Any
 
 from harness_eternal.restate.journal import Journal
 

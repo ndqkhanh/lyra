@@ -1,8 +1,7 @@
 """Session storage for persisting sessions."""
-from pathlib import Path
-from typing import Optional
 import json
 from datetime import datetime
+from pathlib import Path
 
 from .session_state import SessionState
 
@@ -27,7 +26,7 @@ class SessionStorage:
         }
         file_path.write_text(json.dumps(data, indent=2))
 
-    def load(self, session_id: str) -> Optional[SessionState]:
+    def load(self, session_id: str) -> SessionState | None:
         """Load a session by ID."""
         file_path = self.storage_dir / f"{session_id}.json"
         if not file_path.exists():

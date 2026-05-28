@@ -1,6 +1,5 @@
 """Tests for MCP Server Surface (Phase M7)."""
 import pytest
-
 from lyra_core.memory.access_policy import (
     Permission,
     Resource,
@@ -8,7 +7,7 @@ from lyra_core.memory.access_policy import (
     get_policy_graph,
     reset_policy_graph,
 )
-from lyra_core.memory.digest_bus import get_digest_bus, reset_digest_bus
+from lyra_core.memory.digest_bus import reset_digest_bus
 from lyra_core.memory.mcp_tools import (
     mcp_digest,
     mcp_forget,
@@ -20,7 +19,6 @@ from lyra_core.memory.mcp_tools import (
     mcp_write,
 )
 from lyra_core.memory.schema import MemoryTier
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

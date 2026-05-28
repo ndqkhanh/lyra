@@ -2,8 +2,6 @@
 from __future__ import annotations
 
 import json
-import time
-from typing import Optional
 
 from .event_store import EventStore
 from .models import HookEvent, ToolEvent
@@ -35,7 +33,7 @@ def _result_preview(payload_json: str, max_len: int = 80) -> str:
 def build_tool_timeline(
     store: EventStore,
     *,
-    session_id: Optional[str] = None,
+    session_id: str | None = None,
     n: int = 100,
 ) -> list[ToolEvent]:
     """Build an ordered tool call timeline from hook events."""

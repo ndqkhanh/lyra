@@ -3,7 +3,6 @@
 import asyncio
 
 import pytest
-
 from lyra_core.orchestration.message_bus import InMemoryMessageBus
 from lyra_core.orchestration.protocol import Message, MessageType
 

@@ -13,10 +13,9 @@ from __future__ import annotations
 import importlib
 
 import pytest
-from typer.testing import CliRunner
-
 from lyra_cli import __version__
 from lyra_cli.__main__ import app
+from typer.testing import CliRunner
 
 
 def test_phase_n_version_string() -> None:

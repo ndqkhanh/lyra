@@ -5,10 +5,9 @@ import time
 from pathlib import Path
 
 import pytest
-
-from lyra_core.transparency.process_registry import ProcessRegistry
 from lyra_core.transparency.event_store import EventStore
 from lyra_core.transparency.models import AgentProcess
+from lyra_core.transparency.process_registry import ProcessRegistry
 
 
 @pytest.fixture

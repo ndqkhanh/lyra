@@ -26,7 +26,6 @@ import platform
 import shutil
 import subprocess
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass(frozen=True)
@@ -39,10 +38,10 @@ class CopyResult:
 
     ok: bool
     backend: str
-    detail: Optional[str] = None
+    detail: str | None = None
 
 
-def _run(cmd: list[str], payload: str) -> Optional[str]:
+def _run(cmd: list[str], payload: str) -> str | None:
     """Pipe ``payload`` to ``cmd``; return None on success, error string otherwise."""
     try:
         proc = subprocess.run(

@@ -2,14 +2,11 @@
 
 from __future__ import annotations
 
-import pytest
-
 from lyra_cli.swarm.topology import (
     SwarmTopology,
-    TopologyNode,
     TopologyConfig,
+    TopologyNode,
     TopologyType,
-    RoutingEntry,
 )
 
 

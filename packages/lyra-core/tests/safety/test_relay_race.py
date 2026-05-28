@@ -3,7 +3,6 @@
 import time
 
 import pytest
-
 from lyra_core.safety.relay_race import (
     Baton,
     LegResult,

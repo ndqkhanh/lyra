@@ -7,8 +7,8 @@ Each agent has specialized prompts and capabilities.
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional, Dict, Any
 from enum import Enum
+from typing import Any
 
 
 class AgentRole(Enum):
@@ -27,7 +27,7 @@ class AgentCapability:
     capability_id: str
     name: str
     description: str
-    tools: List[str] = field(default_factory=list)
+    tools: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -37,12 +37,12 @@ class AgentTask:
     task_id: str
     role: AgentRole
     description: str
-    context: Dict[str, Any] = field(default_factory=dict)
+    context: dict[str, Any] = field(default_factory=dict)
     status: str = "pending"  # pending, in_progress, completed, failed
-    result: Optional[Any] = None
-    error: Optional[str] = None
+    result: Any | None = None
+    error: str | None = None
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    completed_at: Optional[str] = None
+    completed_at: str | None = None
 
 
 @dataclass
@@ -54,7 +54,7 @@ class SpecialistAgent:
     name: str
     description: str
     system_prompt: str
-    capabilities: List[AgentCapability] = field(default_factory=list)
+    capabilities: list[AgentCapability] = field(default_factory=list)
     tasks_completed: int = 0
     tasks_failed: int = 0
 
@@ -78,8 +78,8 @@ class AgentOrchestrator:
     """
 
     def __init__(self):
-        self.agents: Dict[AgentRole, SpecialistAgent] = {}
-        self.tasks: List[AgentTask] = []
+        self.agents: dict[AgentRole, SpecialistAgent] = {}
+        self.tasks: list[AgentTask] = []
 
         # Statistics
         self.stats = {
@@ -224,7 +224,7 @@ Your output should be thorough test coverage.""",
         self,
         role: AgentRole,
         description: str,
-        context: Optional[Dict[str, Any]] = None
+        context: dict[str, Any] | None = None
     ) -> str:
         """
         Assign a task to a specialist agent.
@@ -249,7 +249,7 @@ Your output should be thorough test coverage.""",
 
         return task.task_id
 
-    def execute_task(self, task_id: str) -> tuple[bool, Any, Optional[str]]:
+    def execute_task(self, task_id: str) -> tuple[bool, Any, str | None]:
         """
         Execute a task (placeholder for actual execution).
 
@@ -348,7 +348,7 @@ Your output should be thorough test coverage.""",
 
         return new_task.task_id
 
-    def get_agent_stats(self, role: AgentRole) -> Dict[str, Any]:
+    def get_agent_stats(self, role: AgentRole) -> dict[str, Any]:
         """Get statistics for a specific agent."""
         agent = self.agents.get(role)
         if not agent:
@@ -364,7 +364,7 @@ Your output should be thorough test coverage.""",
             "capabilities": len(agent.capabilities),
         }
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get orchestrator statistics."""
         return {
             **self.stats,

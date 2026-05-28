@@ -15,9 +15,9 @@ import hashlib
 import math
 import time
 import uuid
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Sequence
 
 
 class LatentStateType(Enum):

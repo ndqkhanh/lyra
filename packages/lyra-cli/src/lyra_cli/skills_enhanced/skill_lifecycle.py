@@ -4,10 +4,11 @@
 Complete skill lifecycle management with verification gates.
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional, Dict, Any, Callable
 from enum import Enum
+from typing import Any
 
 
 class SkillStatus(Enum):
@@ -24,9 +25,9 @@ class SkillStatus(Enum):
 class SkillApplicability:
     """When and where a skill applies."""
 
-    context_patterns: List[str] = field(default_factory=list)
-    preconditions: List[str] = field(default_factory=list)
-    trigger_keywords: List[str] = field(default_factory=list)
+    context_patterns: list[str] = field(default_factory=list)
+    preconditions: list[str] = field(default_factory=list)
+    trigger_keywords: list[str] = field(default_factory=list)
     confidence_threshold: float = 0.7
 
 
@@ -34,19 +35,19 @@ class SkillApplicability:
 class SkillPolicy:
     """How to execute the skill."""
 
-    execution_steps: List[str] = field(default_factory=list)
-    parameters: Dict[str, Any] = field(default_factory=dict)
-    constraints: List[str] = field(default_factory=list)
-    fallback_strategy: Optional[str] = None
+    execution_steps: list[str] = field(default_factory=list)
+    parameters: dict[str, Any] = field(default_factory=dict)
+    constraints: list[str] = field(default_factory=list)
+    fallback_strategy: str | None = None
 
 
 @dataclass
 class SkillTermination:
     """When to stop executing the skill."""
 
-    success_conditions: List[str] = field(default_factory=list)
-    failure_conditions: List[str] = field(default_factory=list)
-    timeout_seconds: Optional[int] = None
+    success_conditions: list[str] = field(default_factory=list)
+    failure_conditions: list[str] = field(default_factory=list)
+    timeout_seconds: int | None = None
     max_retries: int = 3
 
 
@@ -54,27 +55,27 @@ class SkillTermination:
 class SkillInterface:
     """Input/output specification."""
 
-    input_schema: Dict[str, Any] = field(default_factory=dict)
-    output_schema: Dict[str, Any] = field(default_factory=dict)
-    side_effects: List[str] = field(default_factory=list)
+    input_schema: dict[str, Any] = field(default_factory=dict)
+    output_schema: dict[str, Any] = field(default_factory=dict)
+    side_effects: list[str] = field(default_factory=list)
 
 
 @dataclass
 class SkillEdit:
     """How to modify the skill."""
 
-    editable_fields: List[str] = field(default_factory=list)
-    edit_history: List[Dict[str, Any]] = field(default_factory=list)
-    last_modified: Optional[str] = None
+    editable_fields: list[str] = field(default_factory=list)
+    edit_history: list[dict[str, Any]] = field(default_factory=list)
+    last_modified: str | None = None
 
 
 @dataclass
 class SkillVerification:
     """How to verify the skill."""
 
-    test_cases: List[Dict[str, Any]] = field(default_factory=list)
-    verification_fn: Optional[Callable] = None
-    last_verified: Optional[str] = None
+    test_cases: list[dict[str, Any]] = field(default_factory=list)
+    verification_fn: Callable | None = None
+    last_verified: str | None = None
     verification_score: float = 0.0
 
 
@@ -82,11 +83,11 @@ class SkillVerification:
 class SkillLineage:
     """Evolution history of the skill."""
 
-    parent_skill_id: Optional[str] = None
-    child_skill_ids: List[str] = field(default_factory=list)
+    parent_skill_id: str | None = None
+    child_skill_ids: list[str] = field(default_factory=list)
     version: str = "1.0.0"
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    evolution_log: List[Dict[str, Any]] = field(default_factory=list)
+    evolution_log: list[dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass
@@ -115,7 +116,7 @@ class Skill:
     edit: SkillEdit
     verification: SkillVerification
     lineage: SkillLineage
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class SkillLifecycleManager:
@@ -136,8 +137,8 @@ class SkillLifecycleManager:
     """
 
     def __init__(self):
-        self.skills: Dict[str, Skill] = {}
-        self.skill_index: Dict[str, List[str]] = {}  # keyword -> skill_ids
+        self.skills: dict[str, Skill] = {}
+        self.skill_index: dict[str, list[str]] = {}  # keyword -> skill_ids
 
         # Statistics
         self.stats = {
@@ -195,7 +196,7 @@ class SkillLifecycleManager:
     def refine(
         self,
         skill_id: str,
-        updates: Dict[str, Any]
+        updates: dict[str, Any]
     ) -> bool:
         """Operator 2: Refine existing skill."""
         if skill_id not in self.skills:
@@ -221,9 +222,9 @@ class SkillLifecycleManager:
 
     def merge(
         self,
-        skill_ids: List[str],
+        skill_ids: list[str],
         new_name: str
-    ) -> Optional[str]:
+    ) -> str | None:
         """Operator 3: Merge multiple skills."""
         if not all(sid in self.skills for sid in skill_ids):
             return None
@@ -264,8 +265,8 @@ class SkillLifecycleManager:
     def split(
         self,
         skill_id: str,
-        split_criteria: Dict[str, Any]
-    ) -> List[str]:
+        split_criteria: dict[str, Any]
+    ) -> list[str]:
         """Operator 4: Split skill into multiple."""
         if skill_id not in self.skills:
             return []
@@ -304,7 +305,7 @@ class SkillLifecycleManager:
         self.stats["operations"]["prune"] += 1
         return True
 
-    def distill(self, skill_id: str) -> Optional[str]:
+    def distill(self, skill_id: str) -> str | None:
         """Operator 6: Extract core logic."""
         if skill_id not in self.skills:
             return None
@@ -326,7 +327,7 @@ class SkillLifecycleManager:
         self.stats["operations"]["distill"] += 1
         return distilled_id
 
-    def abstract(self, skill_id: str) -> Optional[str]:
+    def abstract(self, skill_id: str) -> str | None:
         """Operator 7: Generalize skill."""
         if skill_id not in self.skills:
             return None
@@ -348,7 +349,7 @@ class SkillLifecycleManager:
         self.stats["operations"]["abstract"] += 1
         return abstract_id
 
-    def compose(self, skill_ids: List[str], composition_name: str) -> Optional[str]:
+    def compose(self, skill_ids: list[str], composition_name: str) -> str | None:
         """Operator 8: Compose multiple skills."""
         return self.merge(skill_ids, composition_name)  # Similar to merge
 
@@ -363,7 +364,7 @@ class SkillLifecycleManager:
         self.stats["operations"]["rewrite"] += 1
         return True
 
-    def rerank(self, skill_priorities: Dict[str, int]) -> bool:
+    def rerank(self, skill_priorities: dict[str, int]) -> bool:
         """Operator 10: Reorder skill priorities."""
         for skill_id, priority in skill_priorities.items():
             if skill_id in self.skills:
@@ -412,6 +413,6 @@ class SkillLifecycleManager:
                 self.skill_index[keyword] = []
             self.skill_index[keyword].append(skill.skill_id)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get lifecycle statistics."""
         return self.stats

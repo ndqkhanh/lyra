@@ -1,6 +1,5 @@
 """Tests for CommandMetadata."""
 
-import pytest
 from lyra_cli.core.command_metadata import CommandMetadata
 
 

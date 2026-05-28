@@ -10,8 +10,8 @@ from .outer_loop import (
     CandidateConfig,
     ConfigProposer,
     MetaHarness,
-    TaskEvaluator,
     MetaReport,
+    TaskEvaluator,
     TaskResult,
 )
 from .scaling_axes import (

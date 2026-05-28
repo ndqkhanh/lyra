@@ -7,15 +7,13 @@ real SSH server. Smoke tests gate on ``LYRA_RUN_SMOKE=1`` +
 from __future__ import annotations
 
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from io import BytesIO
-from typing import Any, List
+from typing import Any
 
 import pytest
-
 from lyra_core.lsp_backend import FeatureUnavailable
 from lyra_core.terminal import CommandResult, TerminalBackend
-
 
 # ---------------------------------------------------------------------------
 # Fake paramiko-shaped client
@@ -46,7 +44,7 @@ class _FakeParamikoClient:
 
     def __init__(self) -> None:
         self.connect_kwargs: dict[str, Any] = {}
-        self.exec_calls: List[dict[str, Any]] = []
+        self.exec_calls: list[dict[str, Any]] = []
         self._next: _FakeExecResult | None = None
         self.closed: bool = False
         self.raise_on_exec: Exception | None = None

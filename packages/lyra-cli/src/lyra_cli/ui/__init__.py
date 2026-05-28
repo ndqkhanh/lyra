@@ -8,30 +8,30 @@ Complete UI system for rendering Claude Code-style terminal output with:
 - ANSI colors and Unicode symbols
 """
 
-from .symbols import SymbolRegistry, STATUS_SYMBOLS, BOX_CHARS
-from .colors import ColorEngine, COLORS
-from .layout import LayoutEngine, TextSegment
-from .renderer import LyraUIRenderer
-from .tree import TreeNode, TreeRenderer, RenderContext
+from .agent_tree import AgentNode, AgentTree
+from .colors import COLORS, ColorEngine
 from .expandable import (
-    ExpandableSection,
     CollapseState,
-    TruncationEngine,
     ExpandableRenderer,
-)
-from .tool_formatter import (
-    ToolCall,
-    ToolResult,
-    Diagnostic,
-    DiffHunk,
-    ToolCallFormatter,
+    ExpandableSection,
+    TruncationEngine,
 )
 from .fixed_input import FixedInputBox
-from .status_line import StatusLine
+from .layout import LayoutEngine, TextSegment
+from .renderer import LyraUIRenderer
 from .response_formatter import ResponseFormatter
-from .agent_tree import AgentTree, AgentNode
-from .selection_menu import SelectionMenu, MenuOption
 from .scroll_manager import ScrollManager
+from .selection_menu import MenuOption, SelectionMenu
+from .status_line import StatusLine
+from .symbols import BOX_CHARS, STATUS_SYMBOLS, SymbolRegistry
+from .tool_formatter import (
+    Diagnostic,
+    DiffHunk,
+    ToolCall,
+    ToolCallFormatter,
+    ToolResult,
+)
+from .tree import RenderContext, TreeNode, TreeRenderer
 from .welcome_banner import print_welcome_banner
 
 __all__ = [

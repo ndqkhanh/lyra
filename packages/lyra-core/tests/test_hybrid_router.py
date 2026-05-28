@@ -1,6 +1,11 @@
 """Tests for Hybrid Communication Router (Plan 29.2)."""
 
-from lyra_core.teams.hybrid_router import Channel, HybridCommunicationRouter, MessageCategory, RoutedMessage
+from lyra_core.teams.hybrid_router import (
+    Channel,
+    HybridCommunicationRouter,
+    MessageCategory,
+    RoutedMessage,
+)
 
 
 class TestHybridCommunicationRouter:

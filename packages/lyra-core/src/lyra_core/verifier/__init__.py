@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 from .adversarial import (
+    AdversarialReviewer,
     ARISStage,
     ARISVerdict,
-    AdversarialReviewer,
     CrossModelPairing,
     ReviewHistory,
     StageResult,

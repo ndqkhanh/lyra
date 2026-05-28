@@ -19,8 +19,9 @@ raises :class:`LSPUnavailable` if no LSP backend can be imported.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, Literal, Mapping
+from typing import Any, Literal
 
 LSPOperation = Literal["diagnostics", "hover", "references", "definition"]
 

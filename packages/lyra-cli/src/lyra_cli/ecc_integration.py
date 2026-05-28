@@ -19,17 +19,15 @@ Usage:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import List, Optional, Dict, Set, Tuple
-from pathlib import Path
-from enum import Enum
 import ast
-import re
+from dataclasses import dataclass, field
+from enum import Enum
+from pathlib import Path
 
 
 class DependencyType(Enum):
     """Types of dependencies."""
-    
+
     IMPORT = "import"
     INHERITANCE = "inheritance"
     COMPOSITION = "composition"
@@ -39,7 +37,7 @@ class DependencyType(Enum):
 
 class SymbolType(Enum):
     """Types of symbols."""
-    
+
     CLASS = "class"
     FUNCTION = "function"
     METHOD = "method"
@@ -51,20 +49,20 @@ class SymbolType(Enum):
 @dataclass
 class Symbol:
     """A code symbol."""
-    
+
     name: str
     type: SymbolType
     file_path: str
     line_number: int
     definition: str = ""
-    docstring: Optional[str] = None
-    references: List[Tuple[str, int]] = field(default_factory=list)
+    docstring: str | None = None
+    references: list[tuple[str, int]] = field(default_factory=list)
 
 
 @dataclass
 class Dependency:
     """A dependency between code elements."""
-    
+
     source: str
     target: str
     type: DependencyType
@@ -75,11 +73,11 @@ class Dependency:
 @dataclass
 class ImpactAnalysis:
     """Impact analysis result."""
-    
+
     target_file: str
-    direct_dependents: List[str]
-    indirect_dependents: List[str]
-    affected_symbols: List[Symbol]
+    direct_dependents: list[str]
+    indirect_dependents: list[str]
+    affected_symbols: list[Symbol]
     risk_level: str  # "low", "medium", "high"
     blast_radius: int
 
@@ -87,14 +85,14 @@ class ImpactAnalysis:
 @dataclass
 class RepositoryContext:
     """Repository context information."""
-    
+
     root_path: Path
     total_files: int
     total_lines: int
-    languages: Dict[str, int]
-    symbols: List[Symbol]
-    dependencies: List[Dependency]
-    entry_points: List[str]
+    languages: dict[str, int]
+    symbols: list[Symbol]
+    dependencies: list[Dependency]
+    entry_points: list[str]
 
 
 class PythonAnalyzer:
@@ -107,13 +105,13 @@ class PythonAnalyzer:
     - Dependency detection
     - Cross-reference tracking
     """
-    
+
     def __init__(self):
         """Initialize the Python analyzer."""
-        self.symbols: Dict[str, Symbol] = {}
-        self.dependencies: List[Dependency] = []
-    
-    def analyze_file(self, file_path: Path) -> Tuple[List[Symbol], List[Dependency]]:
+        self.symbols: dict[str, Symbol] = {}
+        self.dependencies: list[Dependency] = []
+
+    def analyze_file(self, file_path: Path) -> tuple[list[Symbol], list[Dependency]]:
         """Analyze a Python file.
         
         Args:
@@ -123,20 +121,20 @@ class PythonAnalyzer:
             Tuple of (symbols, dependencies)
         """
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 content = f.read()
-            
+
             tree = ast.parse(content, filename=str(file_path))
-            
+
             symbols = self._extract_symbols(tree, file_path)
             dependencies = self._extract_dependencies(tree, file_path)
-            
+
             return symbols, dependencies
-        except Exception as e:
+        except Exception:
             # Handle parse errors gracefully
             return [], []
-    
-    def _extract_symbols(self, tree: ast.AST, file_path: Path) -> List[Symbol]:
+
+    def _extract_symbols(self, tree: ast.AST, file_path: Path) -> list[Symbol]:
         """Extract symbols from AST.
         
         Args:
@@ -147,7 +145,7 @@ class PythonAnalyzer:
             List of symbols
         """
         symbols = []
-        
+
         for node in ast.walk(tree):
             if isinstance(node, ast.ClassDef):
                 symbol = Symbol(
@@ -158,7 +156,7 @@ class PythonAnalyzer:
                     docstring=ast.get_docstring(node),
                 )
                 symbols.append(symbol)
-            
+
             elif isinstance(node, ast.FunctionDef):
                 # Determine if method or function
                 is_method = any(
@@ -166,7 +164,7 @@ class PythonAnalyzer:
                     for parent in ast.walk(tree)
                     if hasattr(parent, 'body') and node in parent.body
                 )
-                
+
                 symbol = Symbol(
                     name=node.name,
                     type=SymbolType.METHOD if is_method else SymbolType.FUNCTION,
@@ -175,10 +173,10 @@ class PythonAnalyzer:
                     docstring=ast.get_docstring(node),
                 )
                 symbols.append(symbol)
-        
+
         return symbols
-    
-    def _extract_dependencies(self, tree: ast.AST, file_path: Path) -> List[Dependency]:
+
+    def _extract_dependencies(self, tree: ast.AST, file_path: Path) -> list[Dependency]:
         """Extract dependencies from AST.
         
         Args:
@@ -189,7 +187,7 @@ class PythonAnalyzer:
             List of dependencies
         """
         dependencies = []
-        
+
         for node in ast.walk(tree):
             # Import dependencies
             if isinstance(node, ast.Import):
@@ -202,7 +200,7 @@ class PythonAnalyzer:
                         line_number=node.lineno,
                     )
                     dependencies.append(dep)
-            
+
             elif isinstance(node, ast.ImportFrom):
                 if node.module:
                     dep = Dependency(
@@ -213,7 +211,7 @@ class PythonAnalyzer:
                         line_number=node.lineno,
                     )
                     dependencies.append(dep)
-            
+
             # Inheritance dependencies
             elif isinstance(node, ast.ClassDef):
                 for base in node.bases:
@@ -226,7 +224,7 @@ class PythonAnalyzer:
                             line_number=node.lineno,
                         )
                         dependencies.append(dep)
-        
+
         return dependencies
 
 
@@ -240,13 +238,13 @@ class DependencyGraph:
     - Path finding
     - Impact analysis
     """
-    
+
     def __init__(self):
         """Initialize the dependency graph."""
-        self.nodes: Set[str] = set()
-        self.edges: Dict[str, Set[str]] = {}
-        self.reverse_edges: Dict[str, Set[str]] = {}
-    
+        self.nodes: set[str] = set()
+        self.edges: dict[str, set[str]] = {}
+        self.reverse_edges: dict[str, set[str]] = {}
+
     def add_dependency(self, source: str, target: str) -> None:
         """Add a dependency edge.
         
@@ -256,16 +254,16 @@ class DependencyGraph:
         """
         self.nodes.add(source)
         self.nodes.add(target)
-        
+
         if source not in self.edges:
             self.edges[source] = set()
         self.edges[source].add(target)
-        
+
         if target not in self.reverse_edges:
             self.reverse_edges[target] = set()
         self.reverse_edges[target].add(source)
-    
-    def get_dependents(self, node: str, max_depth: int = -1) -> Set[str]:
+
+    def get_dependents(self, node: str, max_depth: int = -1) -> set[str]:
         """Get all nodes that depend on this node.
         
         Args:
@@ -278,29 +276,29 @@ class DependencyGraph:
         dependents = set()
         visited = set()
         queue = [(node, 0)]
-        
+
         while queue:
             current, depth = queue.pop(0)
-            
+
             if current in visited:
                 continue
-            
+
             visited.add(current)
-            
+
             if current != node:
                 dependents.add(current)
-            
+
             if max_depth != -1 and depth >= max_depth:
                 continue
-            
+
             if current in self.reverse_edges:
                 for dependent in self.reverse_edges[current]:
                     if dependent not in visited:
                         queue.append((dependent, depth + 1))
-        
+
         return dependents
-    
-    def get_dependencies(self, node: str, max_depth: int = -1) -> Set[str]:
+
+    def get_dependencies(self, node: str, max_depth: int = -1) -> set[str]:
         """Get all nodes this node depends on.
         
         Args:
@@ -313,29 +311,29 @@ class DependencyGraph:
         dependencies = set()
         visited = set()
         queue = [(node, 0)]
-        
+
         while queue:
             current, depth = queue.pop(0)
-            
+
             if current in visited:
                 continue
-            
+
             visited.add(current)
-            
+
             if current != node:
                 dependencies.add(current)
-            
+
             if max_depth != -1 and depth >= max_depth:
                 continue
-            
+
             if current in self.edges:
                 for dependency in self.edges[current]:
                     if dependency not in visited:
                         queue.append((dependency, depth + 1))
-        
+
         return dependencies
-    
-    def detect_cycles(self) -> List[List[str]]:
+
+    def detect_cycles(self) -> list[list[str]]:
         """Detect cycles in the graph.
         
         Returns:
@@ -344,12 +342,12 @@ class DependencyGraph:
         cycles = []
         visited = set()
         rec_stack = set()
-        
-        def dfs(node: str, path: List[str]) -> None:
+
+        def dfs(node: str, path: list[str]) -> None:
             visited.add(node)
             rec_stack.add(node)
             path.append(node)
-            
+
             if node in self.edges:
                 for neighbor in self.edges[node]:
                     if neighbor not in visited:
@@ -359,13 +357,13 @@ class DependencyGraph:
                         cycle_start = path.index(neighbor)
                         cycle = path[cycle_start:] + [neighbor]
                         cycles.append(cycle)
-            
+
             rec_stack.remove(node)
-        
+
         for node in self.nodes:
             if node not in visited:
                 dfs(node, [])
-        
+
         return cycles
 
 
@@ -375,7 +373,7 @@ class ECCEngine:
     
     Provides repository analysis, dependency tracking, and impact analysis.
     """
-    
+
     def __init__(self, repo_path: Path):
         """Initialize the ECC engine.
         
@@ -385,9 +383,9 @@ class ECCEngine:
         self.repo_path = repo_path
         self.analyzer = PythonAnalyzer()
         self.graph = DependencyGraph()
-        self.symbols: Dict[str, Symbol] = {}
-        self.context: Optional[RepositoryContext] = None
-    
+        self.symbols: dict[str, Symbol] = {}
+        self.context: RepositoryContext | None = None
+
     def analyze_repository(self) -> RepositoryContext:
         """Analyze the entire repository.
         
@@ -399,52 +397,52 @@ class ECCEngine:
         total_files = 0
         total_lines = 0
         languages = {}
-        
+
         # Find all Python files
         python_files = list(self.repo_path.rglob("*.py"))
-        
+
         for file_path in python_files:
             # Skip virtual environments and caches
             if any(part in file_path.parts for part in ['.venv', 'venv', '__pycache__', '.git']):
                 continue
-            
+
             total_files += 1
-            
+
             # Count lines
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding='utf-8') as f:
                     lines = len(f.readlines())
                     total_lines += lines
             except Exception:
                 pass
-            
+
             # Analyze file
             symbols, dependencies = self.analyzer.analyze_file(file_path)
             all_symbols.extend(symbols)
             all_dependencies.extend(dependencies)
-            
+
             # Build dependency graph
             for dep in dependencies:
                 self.graph.add_dependency(dep.source, dep.target)
-        
+
         # Store symbols
         for symbol in all_symbols:
             key = f"{symbol.file_path}:{symbol.name}"
             self.symbols[key] = symbol
-        
+
         # Detect entry points (files with __main__)
         entry_points = []
         for file_path in python_files:
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding='utf-8') as f:
                     content = f.read()
                     if '__main__' in content:
                         entry_points.append(str(file_path))
             except Exception:
                 pass
-        
+
         languages['python'] = total_files
-        
+
         self.context = RepositoryContext(
             root_path=self.repo_path,
             total_files=total_files,
@@ -454,9 +452,9 @@ class ECCEngine:
             dependencies=all_dependencies,
             entry_points=entry_points,
         )
-        
+
         return self.context
-    
+
     def analyze_impact(self, file_path: str) -> ImpactAnalysis:
         """Analyze impact of changes to a file.
         
@@ -468,14 +466,14 @@ class ECCEngine:
         """
         # Get direct dependents
         direct = self.graph.get_dependents(file_path, max_depth=1)
-        
+
         # Get all dependents
         all_dependents = self.graph.get_dependents(file_path)
         indirect = all_dependents - direct
-        
+
         # Calculate blast radius
         blast_radius = len(all_dependents)
-        
+
         # Determine risk level
         if blast_radius == 0:
             risk_level = "low"
@@ -485,13 +483,13 @@ class ECCEngine:
             risk_level = "medium"
         else:
             risk_level = "high"
-        
+
         # Find affected symbols
         affected_symbols = [
             symbol for symbol in self.symbols.values()
             if symbol.file_path == file_path
         ]
-        
+
         return ImpactAnalysis(
             target_file=file_path,
             direct_dependents=list(direct),
@@ -500,8 +498,8 @@ class ECCEngine:
             risk_level=risk_level,
             blast_radius=blast_radius,
         )
-    
-    def find_symbol(self, name: str) -> List[Symbol]:
+
+    def find_symbol(self, name: str) -> list[Symbol]:
         """Find symbols by name.
         
         Args:
@@ -514,8 +512,8 @@ class ECCEngine:
             symbol for symbol in self.symbols.values()
             if symbol.name == name
         ]
-    
-    def get_symbol_references(self, symbol: Symbol) -> List[Tuple[str, int]]:
+
+    def get_symbol_references(self, symbol: Symbol) -> list[tuple[str, int]]:
         """Get all references to a symbol.
         
         Args:

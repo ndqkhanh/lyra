@@ -7,9 +7,9 @@ with structured escalation: AUTO → NOTIFY → CONFIRM → BLOCK.
 from __future__ import annotations
 
 import uuid
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Callable, Sequence
 
 
 class RiskLevel(Enum):

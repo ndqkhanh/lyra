@@ -11,12 +11,11 @@ from __future__ import annotations
 import io
 import json
 import tarfile
-import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
-
+from lyra_cli.interactive.v311_commands import cmd_bundle
 from lyra_core.bundle import (
     MarketplaceKey,
     global_installed_registry,
@@ -24,7 +23,6 @@ from lyra_core.bundle import (
     reset_global_installed_registry,
     sign_archive,
 )
-from lyra_cli.interactive.v311_commands import cmd_bundle
 
 
 @pytest.fixture

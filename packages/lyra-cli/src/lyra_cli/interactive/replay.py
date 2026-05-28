@@ -20,10 +20,9 @@ from __future__ import annotations
 
 import difflib
 import json
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable, Iterator, List
-
 
 __all__ = [
     "ReplayController",
@@ -58,7 +57,7 @@ def _turns_path(session_dir: Path) -> Path:
     return session_dir / "turns.jsonl"
 
 
-def load_replay(session_dir: Path | str) -> List[dict]:
+def load_replay(session_dir: Path | str) -> list[dict]:
     """Read every recorded turn for a session id.
 
     Malformed lines are skipped (best-effort matches the rest of
@@ -67,7 +66,7 @@ def load_replay(session_dir: Path | str) -> List[dict]:
     path = _turns_path(Path(session_dir))
     if not path.exists():
         raise ReplayError(f"replay: no turns recorded at {path}")
-    out: List[dict] = []
+    out: list[dict] = []
     for line in path.read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if not line:
@@ -121,7 +120,7 @@ class ReplayController:
     """REPL-friendly wrapper around the replay event stream."""
 
     session_dir: Path
-    _events: List[ReplayEvent] = field(default_factory=list)
+    _events: list[ReplayEvent] = field(default_factory=list)
     _cursor: int = -1
 
     def __post_init__(self) -> None:

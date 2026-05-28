@@ -6,6 +6,15 @@ from __future__ import annotations
 
 import time
 
+from lyra_memory.abstraction.concept_abstractor import (
+    AbstractConcept,
+    AbstractionLevel,
+    ConceptAbstractor,
+)
+from lyra_memory.abstraction.pattern_recognizer import (
+    CrossEpisodePattern,
+    PatternRecognizer,
+)
 from lyra_memory.curriculum.difficulty_scheduler import (
     DifficultyLevel,
     DifficultyScheduler,
@@ -16,15 +25,6 @@ from lyra_memory.curriculum.progress_tracker import (
     CompetencyMap,
     CurriculumPhase,
     ProgressTracker,
-)
-from lyra_memory.abstraction.concept_abstractor import (
-    AbstractConcept,
-    AbstractionLevel,
-    ConceptAbstractor,
-)
-from lyra_memory.abstraction.pattern_recognizer import (
-    CrossEpisodePattern,
-    PatternRecognizer,
 )
 from lyra_memory.operations.batch_processor import (
     BatchOpResult,

@@ -2,10 +2,8 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.loop import (
     RefuteError,
-    RefuteOrPromoteResult,
     RefutePass,
     RefutePromoteStage,
     refute_or_promote,

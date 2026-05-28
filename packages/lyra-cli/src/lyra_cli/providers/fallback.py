@@ -19,8 +19,9 @@ Why a separate module instead of baking this into the factory:
 from __future__ import annotations
 
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Any, List, Optional, Sequence
+from typing import Any
 
 from lyra_harness_core.messages import Message
 from lyra_harness_core.models import LLMProvider
@@ -29,7 +30,6 @@ from lyra_cli.providers.openai_compatible import (
     ProviderHTTPError,
     ProviderNotConfigured,
 )
-
 
 # 5xx + 429 are the canonical transient failures. We also retry on
 # timeouts and connection errors, which the OpenAI-compat adapter
@@ -76,7 +76,7 @@ class _ProviderError:
 class FallbackExhausted(RuntimeError):
     """Raised when every provider in the chain has been tried and failed."""
 
-    def __init__(self, errors: List[_ProviderError]) -> None:
+    def __init__(self, errors: list[_ProviderError]) -> None:
         self.errors = errors
         bullets = "\n".join(
             f"  - {e.provider_name}: {type(e.exc).__name__}: {e.exc}"
@@ -91,7 +91,7 @@ class FallbackChain(LLMProvider):
     """LLMProvider that delegates to the first healthy member of a chain."""
 
     def __init__(self, providers: Sequence[LLMProvider]) -> None:
-        self._providers: List[LLMProvider] = list(providers)
+        self._providers: list[LLMProvider] = list(providers)
 
     @staticmethod
     def _provider_label(p: LLMProvider) -> str:
@@ -100,12 +100,12 @@ class FallbackChain(LLMProvider):
 
     def generate(
         self,
-        messages: List[Message],
-        tools: Optional[List[dict[str, Any]]] = None,
+        messages: list[Message],
+        tools: list[dict[str, Any]] | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.0,
     ) -> Message:
-        errors: List[_ProviderError] = []
+        errors: list[_ProviderError] = []
         for provider in self._providers:
             try:
                 return provider.generate(
@@ -120,7 +120,7 @@ class FallbackChain(LLMProvider):
                     raise
                 errors.append(_ProviderError(self._provider_label(provider), exc))
                 continue
-            except Exception as exc:  # noqa: BLE001
+            except Exception:  # noqa: BLE001
                 # Anything else (TypeError, network library quirks…) is
                 # treated as fatal — we can't reason about it and the
                 # user deserves a real traceback rather than silent

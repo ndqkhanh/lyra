@@ -10,9 +10,7 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-
 from lyra_cli.interactive import glyphs, palette
-
 
 # ── glyphs ───────────────────────────────────────────────────────
 

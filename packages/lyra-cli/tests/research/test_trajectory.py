@@ -1,7 +1,6 @@
 """Tests for ResearchTrajectory."""
 
 import pytest
-
 from lyra_cli.research.trajectory import (
     ResearchAction,
     ResearchResult,

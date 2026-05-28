@@ -7,10 +7,9 @@ from pathlib import Path
 
 import pytest
 import typer
-from typer.testing import CliRunner
-
 from lyra_cli.commands.doctor import doctor_command
 from lyra_cli.commands.setup import setup_command
+from typer.testing import CliRunner
 
 
 @pytest.fixture(autouse=True)

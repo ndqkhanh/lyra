@@ -18,7 +18,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from lyra_cli.interactive.session import InteractiveSession
 from lyra_cli.interactive.user_commands import (
     expand_aliases,

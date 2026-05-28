@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.context.eternal_autocompact import (
     AutoCompactingLLM,
     ContextOverflow,

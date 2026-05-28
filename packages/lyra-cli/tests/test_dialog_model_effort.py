@@ -1,15 +1,13 @@
 """Tests for dialog_model.py effort-slider integration."""
 from __future__ import annotations
 
-import pytest
 from unittest.mock import patch
 
 from lyra_cli.interactive.dialog_model import (
-    _EFFORT_LEVELS,
     _EFFORT_LABELS,
+    _EFFORT_LEVELS,
     run_model_dialog,
 )
-
 
 # ---------------------------------------------------------------------------
 # Constants

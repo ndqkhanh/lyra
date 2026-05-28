@@ -6,9 +6,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import typer
-from lyra_harness_core.tools import ToolRegistry
-from rich.console import Console
-
 from lyra_core.plan import (
     ApprovalOutcome,
     approve_plan,
@@ -17,6 +14,8 @@ from lyra_core.plan import (
     run_planner,
 )
 from lyra_core.tools import register_builtin_tools
+from lyra_harness_core.tools import ToolRegistry
+from rich.console import Console
 
 from ..llm_factory import build_llm
 from ..paths import RepoLayout

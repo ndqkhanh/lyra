@@ -4,9 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from lyra_cli.interactive.session import InteractiveSession
-
 
 _PROVIDER_KEYS = (
     "ANTHROPIC_API_KEY",

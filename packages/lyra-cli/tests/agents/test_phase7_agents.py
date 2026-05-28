@@ -1,8 +1,8 @@
 """Tests for Phase 7 agents."""
-import pytest
 from pathlib import Path
-from lyra_cli.core.agent_registry import AgentRegistry
 
+import pytest
+from lyra_cli.core.agent_registry import AgentRegistry
 
 # List of all 50 Phase 7 agents
 PHASE_7_AGENTS = [

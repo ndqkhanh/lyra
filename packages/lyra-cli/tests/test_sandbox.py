@@ -5,7 +5,6 @@ import shutil
 from pathlib import Path
 
 import pytest
-
 from lyra_cli.sandbox import (
     CommandResult,
     DockerSandbox,
@@ -15,7 +14,6 @@ from lyra_cli.sandbox import (
     SandboxNotAvailable,
     pick_sandbox,
 )
-
 
 # ---------------------------------------------------------------------------
 # LocalSandbox

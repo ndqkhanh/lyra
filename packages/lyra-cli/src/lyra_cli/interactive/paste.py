@@ -130,7 +130,7 @@ def _normalise_ext(ext: str) -> str:
 
 
 def write_attachment(
-    session: "InteractiveSession", mime: str, b64_payload: str
+    session: InteractiveSession, mime: str, b64_payload: str
 ) -> Path:
     """Write the decoded bytes under the session's attachment dir.
 
@@ -187,7 +187,7 @@ def _next_ordinal(folder: Path, ext: str) -> int:
 
 
 def substitute_image_tokens(
-    session: "InteractiveSession", text: str
+    session: InteractiveSession, text: str
 ) -> tuple[str, list[Path]]:
     """Replace every detected image paste with ``[Image #N]`` tokens.
 

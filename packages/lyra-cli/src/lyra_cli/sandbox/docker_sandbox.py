@@ -15,12 +15,10 @@ that happens to also live inside a container at run time.
 """
 from __future__ import annotations
 
-import os
 import shutil
 import subprocess
 import time
-from pathlib import Path
-from typing import Iterable, Mapping
+from collections.abc import Iterable, Mapping
 
 from .base import CommandResult, SandboxError, SandboxNotAvailable
 from .local_sandbox import LocalSandbox

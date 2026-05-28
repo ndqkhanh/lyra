@@ -5,11 +5,10 @@ from __future__ import annotations
 import math
 
 import pytest
-
 from lyra_cli.performance.metrics_collector import (
     MetricSample,
-    MetricSeries,
     MetricsCollector,
+    MetricSeries,
 )
 
 

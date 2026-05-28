@@ -1,21 +1,18 @@
 """Tests for Phase 6 Multimodal modules."""
 
 import pytest
-
-from lyra_cli.multimodal.evidence_chain import (
-    MediaType,
-    MediaMetadata,
-    MultimodalEvidenceChain,
-)
 from lyra_cli.multimodal.computer_use import (
     ActionType,
-    UIElement,
     ComputerUseContext,
+    UIElement,
+)
+from lyra_cli.multimodal.evidence_chain import (
+    MediaType,
+    MultimodalEvidenceChain,
 )
 from lyra_cli.multimodal.screenshot_analysis import (
     ScreenshotAnalyzer,
 )
-
 
 # ============================================================================
 # Evidence Chain Tests

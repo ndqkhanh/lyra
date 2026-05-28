@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich import box
@@ -51,7 +50,7 @@ _KIND_SYMBOLS = {
 @trace_app.callback(invoke_without_command=True)
 def trace_command(
     ctx: typer.Context,
-    session: Optional[str] = typer.Option(None, "--session", "-s"),
+    session: str | None = typer.Option(None, "--session", "-s"),
     tail: int = typer.Option(40, "--tail", "-n", help="Last N events."),
     repo_root: Path = typer.Option(Path.cwd(), "--repo-root", "-C"),
 ) -> None:
@@ -157,7 +156,7 @@ def _render_trace(rows: list[dict]) -> None:
 
 @trace_app.command("cost")
 def cost_command(
-    session: Optional[str] = typer.Option(None, "--session", "-s",
+    session: str | None = typer.Option(None, "--session", "-s",
                                            help="Filter to one session."),
     json_out: bool = typer.Option(False, "--json", help="Emit JSON."),
     repo_root: Path = typer.Option(Path.cwd(), "--repo-root", "-C"),

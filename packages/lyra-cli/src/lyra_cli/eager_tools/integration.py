@@ -1,11 +1,10 @@
 """Integration layer for eager tools with Lyra agent loop."""
 
-import asyncio
 from typing import Any
 
-from lyra_cli.eager_tools.seal_detector import SealDetector
 from lyra_cli.eager_tools.executor_pool import EagerExecutorPool
 from lyra_cli.eager_tools.registry import ToolRegistry
+from lyra_cli.eager_tools.seal_detector import SealDetector
 from lyra_cli.eager_tools.types import StreamChunk, ToolSeal
 
 

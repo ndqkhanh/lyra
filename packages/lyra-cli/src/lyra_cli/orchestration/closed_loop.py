@@ -5,9 +5,10 @@ Implements verification loops that check outputs and retry with corrections.
 Target: +25% success rate through iterative refinement.
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional, Dict, Any, Callable
+from typing import Any
 
 
 @dataclass
@@ -16,8 +17,8 @@ class VerificationResult:
 
     passed: bool
     score: float  # 0.0 to 1.0
-    issues: List[str] = field(default_factory=list)
-    suggestions: List[str] = field(default_factory=list)
+    issues: list[str] = field(default_factory=list)
+    suggestions: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -29,7 +30,7 @@ class LoopIteration:
     input_data: Any
     output_data: Any
     verification: VerificationResult
-    corrections_applied: List[str] = field(default_factory=list)
+    corrections_applied: list[str] = field(default_factory=list)
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
 
 
@@ -40,11 +41,11 @@ class ClosedLoopExecution:
     execution_id: str
     task_description: str
     max_iterations: int
-    iterations: List[LoopIteration] = field(default_factory=list)
+    iterations: list[LoopIteration] = field(default_factory=list)
     final_success: bool = False
-    final_output: Optional[Any] = None
+    final_output: Any | None = None
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    completed_at: Optional[str] = None
+    completed_at: str | None = None
 
 
 class ClosedLoopController:
@@ -60,7 +61,7 @@ class ClosedLoopController:
 
     def __init__(self, max_iterations: int = 3):
         self.max_iterations = max_iterations
-        self.executions: List[ClosedLoopExecution] = []
+        self.executions: list[ClosedLoopExecution] = []
 
         # Statistics
         self.stats = {
@@ -78,8 +79,8 @@ class ClosedLoopController:
         verify_fn: Callable[[Any], VerificationResult],
         correct_fn: Callable[[Any, VerificationResult], Any],
         initial_input: Any,
-        max_iterations: Optional[int] = None
-    ) -> tuple[bool, Any, List[LoopIteration]]:
+        max_iterations: int | None = None
+    ) -> tuple[bool, Any, list[LoopIteration]]:
         """
         Execute a task with closed-loop verification.
 
@@ -156,7 +157,7 @@ class ClosedLoopController:
 
         return success, execution.final_output, execution.iterations
 
-    def _generate_corrections(self, verification: VerificationResult) -> List[str]:
+    def _generate_corrections(self, verification: VerificationResult) -> list[str]:
         """
         Generate correction actions from verification result.
 
@@ -211,7 +212,7 @@ class ClosedLoopController:
 
         return (actual_success_rate - baseline_success_rate) / baseline_success_rate
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get closed-loop statistics."""
         success_rate = self.get_success_rate()
         improvement_rate = self.get_improvement_rate()

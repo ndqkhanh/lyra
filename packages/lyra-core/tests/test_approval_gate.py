@@ -1,19 +1,15 @@
 """Tests for the Phase 1 Approval Gate Router."""
 from __future__ import annotations
 
-import pytest
-
 from lyra_core.safety.approval_gate import (
     ApprovalGate,
     GateAction,
     GateDecision,
     ReasoningFlag,
-    RiskClassification,
     RiskLevel,
     RiskSurface,
     classify_risk,
 )
-
 
 # ── Risk Classifier ────────────────────────────────────────────────────
 

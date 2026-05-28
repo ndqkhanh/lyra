@@ -25,13 +25,13 @@ audit can distinguish agent-driven from user-driven writes.
 """
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 
 from ..hooks.lifecycle import LifecycleBus, LifecycleEvent
 from .auto_memory import MemoryKind
 from .memory_tools import MemoryToolset
-
 
 # A predicate that decides whether to capture a given lifecycle payload.
 # Returning ``None`` means "skip"; returning a ``CaptureDirective`` means
@@ -56,12 +56,12 @@ class CapturePolicy:
     Defaults shipped here are conservative; tune per-deployment.
     """
 
-    on_tool_call: Optional[CaptureFilter] = None
-    on_turn_complete: Optional[CaptureFilter] = None
-    on_session_end: Optional[CaptureFilter] = None
+    on_tool_call: CaptureFilter | None = None
+    on_turn_complete: CaptureFilter | None = None
+    on_session_end: CaptureFilter | None = None
 
 
-def _default_tool_call_filter(payload: dict[str, Any]) -> Optional[CaptureDirective]:
+def _default_tool_call_filter(payload: dict[str, Any]) -> CaptureDirective | None:
     """Default policy: capture failed tool calls as `feedback` entries.
 
     Successful calls are skipped — the procedural memory + reasoning
@@ -86,7 +86,7 @@ def _default_tool_call_filter(payload: dict[str, Any]) -> Optional[CaptureDirect
     )
 
 
-def _default_session_end_filter(payload: dict[str, Any]) -> Optional[CaptureDirective]:
+def _default_session_end_filter(payload: dict[str, Any]) -> CaptureDirective | None:
     """Default policy: capture a one-line session summary as `project`.
 
     Only fires when the host harness has populated a ``summary`` field
@@ -135,7 +135,7 @@ class MemoryAutoCapture:
                 on_session_end=_default_session_end_filter,
             )
 
-    def bind(self) -> "MemoryAutoCapture":
+    def bind(self) -> MemoryAutoCapture:
         """Subscribe to the bus. Idempotent."""
         if self._bound:
             return self

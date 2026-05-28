@@ -10,7 +10,6 @@ This module implements the core layout pattern where:
 import os
 import sys
 from dataclasses import dataclass
-from typing import Literal
 
 
 @dataclass

@@ -1,6 +1,5 @@
 """Hook metadata models."""
 from dataclasses import dataclass
-from typing import Optional
 from enum import Enum
 
 
@@ -23,4 +22,4 @@ class HookMetadata:
     hook_type: HookType
     script: str
     enabled: bool = True
-    file_path: Optional[str] = None
+    file_path: str | None = None

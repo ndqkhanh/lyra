@@ -1,6 +1,5 @@
 """Skill loader for loading skill content and generating codemaps."""
 from pathlib import Path
-from typing import Optional
 
 from .skill_metadata import SkillMetadata
 
@@ -19,7 +18,7 @@ class SkillLoader:
 
         return file_path.read_text()
 
-    def generate_codemap(self, skill_name: str, skill_dir: Path) -> Optional[str]:
+    def generate_codemap(self, skill_name: str, skill_dir: Path) -> str | None:
         """Generate a codemap for a skill directory."""
         # TODO: Implement codemap generation
         # For now, return None

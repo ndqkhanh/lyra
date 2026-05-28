@@ -17,15 +17,14 @@ that knows how to redraw the prompt afterwards.
 """
 from __future__ import annotations
 
-from typing import Callable, Dict
+from collections.abc import Callable
 
 from lyra_core.hooks.lifecycle import LifecycleBus, LifecycleEvent
-
 
 Sink = Callable[[str], None]
 
 
-def _format(event: LifecycleEvent, payload: Dict) -> str:
+def _format(event: LifecycleEvent, payload: dict) -> str:
     """Render one lifecycle event as a single user-visible line.
 
     Keep it boring on purpose — paired terminals are a "watch the
@@ -53,7 +52,7 @@ class PairStream:
         self._bus = bus
         self._enabled = True
         self._attached = False
-        self._subs: list[tuple[LifecycleEvent, Callable[[Dict], None]]] = []
+        self._subs: list[tuple[LifecycleEvent, Callable[[dict], None]]] = []
 
     # ---- lifecycle ---------------------------------------------------
 
@@ -87,8 +86,8 @@ class PairStream:
 
     def _make_handler(
         self, event: LifecycleEvent
-    ) -> Callable[[Dict], None]:
-        def _handle(payload: Dict) -> None:
+    ) -> Callable[[dict], None]:
+        def _handle(payload: dict) -> None:
             if not self._enabled:
                 return
             try:

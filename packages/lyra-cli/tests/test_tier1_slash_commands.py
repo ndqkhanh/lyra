@@ -10,7 +10,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from lyra_cli.interactive.session import (
     COMMAND_REGISTRY,
     SLASH_COMMANDS,
@@ -148,7 +147,7 @@ class TestCmdPermissions:
         s = _new_session(tmp_path)
         s._policy_hooks_cache = ("sentinel",)  # type: ignore[attr-defined]
         result = _cmd_permissions(s, "reload")
-        assert getattr(s, "_policy_hooks_cache") is None
+        assert s._policy_hooks_cache is None
         assert "cache dropped" in result.output
 
 

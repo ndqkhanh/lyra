@@ -1,9 +1,10 @@
 """LLM-based artifact drafting with streaming."""
 
 from __future__ import annotations
+
 import asyncio
-from typing import Any
 from pathlib import Path
+from typing import Any
 
 from .events import SpecDraftChunk
 

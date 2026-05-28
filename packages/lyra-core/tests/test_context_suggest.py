@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.context.profile import MINIMAL, STANDARD, STRICT
 from lyra_core.context.suggest import (
     OBSERVATION_P95_MULTIPLE,
@@ -17,7 +16,6 @@ from lyra_core.context.suggest import (
     emit_advice_metrics,
     suggest_compaction,
 )
-
 
 # ────────────────────────────────────────────────────────────────
 # CompactionSignals

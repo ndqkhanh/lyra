@@ -28,7 +28,6 @@ from unittest.mock import patch
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Test scaffolding
 # ---------------------------------------------------------------------------
@@ -116,11 +115,11 @@ def repo_root(tmp_path: Path) -> Path:
 
 def test_no_tool_calls_returns_text_immediately(repo_root: Path) -> None:
     """A reply with no ``tool_calls`` ends the loop in one hop."""
-    from lyra_harness_core.messages import Message
     from lyra_cli.interactive.chat_tools import (
         build_chat_tool_registry,
         run_chat_tool_loop,
     )
+    from lyra_harness_core.messages import Message
 
     fake = ToolingFakeLLM(["hi there"])
     registry = build_chat_tool_registry(repo_root)
@@ -140,11 +139,11 @@ def test_no_tool_calls_returns_text_immediately(repo_root: Path) -> None:
 
 def test_one_tool_call_dispatches_and_continues(repo_root: Path) -> None:
     """Tool call → registry execution → result back to LLM → final text."""
-    from lyra_harness_core.messages import Message
     from lyra_cli.interactive.chat_tools import (
         build_chat_tool_registry,
         run_chat_tool_loop,
     )
+    from lyra_harness_core.messages import Message
 
     fake = ToolingFakeLLM(
         [
@@ -173,11 +172,11 @@ def test_one_tool_call_dispatches_and_continues(repo_root: Path) -> None:
 
 def test_multi_tool_call_in_single_hop(repo_root: Path) -> None:
     """Multiple tool calls per hop are dispatched in order."""
-    from lyra_harness_core.messages import Message
     from lyra_cli.interactive.chat_tools import (
         build_chat_tool_registry,
         run_chat_tool_loop,
     )
+    from lyra_harness_core.messages import Message
 
     fake = ToolingFakeLLM(
         [
@@ -207,11 +206,11 @@ def test_multi_tool_call_in_single_hop(repo_root: Path) -> None:
 
 def test_max_steps_caps_runaway_loop(repo_root: Path) -> None:
     """Infinite tool calls hit ``max_steps`` and surface a clear flag."""
-    from lyra_harness_core.messages import Message
     from lyra_cli.interactive.chat_tools import (
         build_chat_tool_registry,
         run_chat_tool_loop,
     )
+    from lyra_harness_core.messages import Message
 
     # Always emit one tool call → loop never terminates without a cap.
     fake = ToolingFakeLLM(
@@ -233,12 +232,12 @@ def test_max_steps_caps_runaway_loop(repo_root: Path) -> None:
 
 def test_renderer_emits_call_and_result_events(repo_root: Path) -> None:
     """The render callback fires once per call and once per result."""
-    from lyra_harness_core.messages import Message
     from lyra_cli.interactive.chat_tools import (
         ToolEvent,
         build_chat_tool_registry,
         run_chat_tool_loop,
     )
+    from lyra_harness_core.messages import Message
 
     fake = ToolingFakeLLM(
         [
@@ -263,12 +262,12 @@ def test_renderer_emits_call_and_result_events(repo_root: Path) -> None:
 
 def test_approval_deny_blocks_tool(repo_root: Path) -> None:
     """``approve`` returning False short-circuits dispatch."""
-    from lyra_harness_core.messages import Message
     from lyra_cli.interactive.chat_tools import (
         build_chat_tool_registry,
         run_chat_tool_loop,
     )
     from lyra_cli.interactive.tool_approval import ToolApprovalCache
+    from lyra_harness_core.messages import Message
 
     fake = ToolingFakeLLM(
         [
@@ -295,12 +294,12 @@ def test_approval_deny_blocks_tool(repo_root: Path) -> None:
 
 def test_yolo_mode_skips_approval(repo_root: Path) -> None:
     """``yolo`` mode auto-allows; the approve callback never fires."""
-    from lyra_harness_core.messages import Message
     from lyra_cli.interactive.chat_tools import (
         build_chat_tool_registry,
         run_chat_tool_loop,
     )
     from lyra_cli.interactive.tool_approval import ToolApprovalCache
+    from lyra_harness_core.messages import Message
 
     fake = ToolingFakeLLM(
         [
@@ -326,11 +325,11 @@ def test_yolo_mode_skips_approval(repo_root: Path) -> None:
 
 def test_billing_callback_runs_per_hop(repo_root: Path) -> None:
     """``on_usage`` fires once per ``generate`` call, not just the last."""
-    from lyra_harness_core.messages import Message
     from lyra_cli.interactive.chat_tools import (
         build_chat_tool_registry,
         run_chat_tool_loop,
     )
+    from lyra_harness_core.messages import Message
 
     fake = ToolingFakeLLM(
         [
@@ -406,9 +405,8 @@ def test_session_chat_skips_loop_for_mock_provider(repo_root: Path) -> None:
     through the loop wastes a hop; the gate must recognise them by
     class name.
     """
-    from lyra_harness_core.models import MockLLM
-
     from lyra_cli.interactive.session import InteractiveSession
+    from lyra_harness_core.models import MockLLM
 
     fake = MockLLM(scripted_outputs=["canned reply"])
     session = InteractiveSession(repo_root=repo_root)

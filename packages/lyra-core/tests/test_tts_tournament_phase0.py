@@ -12,7 +12,6 @@ implementation lands. Each test is marked ``phase0_red`` and
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.tts import (
     Attempt,
     AttemptGenerator,

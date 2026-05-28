@@ -1,11 +1,8 @@
 """Tests for team orchestrator module."""
 
 import pytest
-
 from lyra_core.orchestration.agent_base import (
-    AgentMetadata,
     AgentRole,
-    AgentStatus,
     BaseAgent,
 )
 from lyra_core.orchestration.message_bus import InMemoryMessageBus

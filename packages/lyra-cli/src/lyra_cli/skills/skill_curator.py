@@ -10,12 +10,10 @@ Implements SkillOS-inspired intelligent skill curation with:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+import re
+from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
-from typing import Optional
-import json
-import re
 
 
 class CuratorSignal(StrEnum):
@@ -47,7 +45,7 @@ class SelectionContext:
     task_description: str
     active_skills: tuple[str, ...]
     error_history: tuple[str, ...]
-    user_intent: Optional[str] = None
+    user_intent: str | None = None
 
 
 @dataclass(frozen=True)
@@ -98,8 +96,8 @@ class SkillCurator:
 
     def __init__(
         self,
-        project_root: Optional[Path] = None,
-        user_home: Optional[Path] = None,
+        project_root: Path | None = None,
+        user_home: Path | None = None,
     ):
         self.project_root = project_root or Path.cwd()
         self.user_home = user_home or Path.home()
@@ -157,7 +155,7 @@ class SkillCurator:
         self.stats.skills_discovered = len(self._skill_index)
         return self.stats.skills_discovered
 
-    def _parse_skill_metadata(self, file_path: Path) -> Optional[dict]:
+    def _parse_skill_metadata(self, file_path: Path) -> dict | None:
         """Parse YAML frontmatter from skill file."""
         content = file_path.read_text()
 

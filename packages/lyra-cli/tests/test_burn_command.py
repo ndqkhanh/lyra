@@ -5,10 +5,8 @@ import json
 import time
 
 import pytest
-from typer.testing import CliRunner
-
 from lyra_cli.__main__ import app
-
+from typer.testing import CliRunner
 
 runner = CliRunner()
 

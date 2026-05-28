@@ -1,22 +1,19 @@
 """Tests for ECC Integration."""
 
-import pytest
-from pathlib import Path
-import tempfile
 import os
+import tempfile
+from pathlib import Path
 
+import pytest
 from lyra_cli.ecc_integration import (
-    DependencyType,
-    SymbolType,
-    Symbol,
     Dependency,
-    ImpactAnalysis,
-    RepositoryContext,
-    PythonAnalyzer,
     DependencyGraph,
+    DependencyType,
     ECCEngine,
+    PythonAnalyzer,
+    Symbol,
+    SymbolType,
 )
-
 
 # ============================================================================
 # Symbol Tests
@@ -31,7 +28,7 @@ def test_symbol_creation():
         line_number=10,
         docstring="A test function",
     )
-    
+
     assert symbol.name == "test_function"
     assert symbol.type == SymbolType.FUNCTION
     assert symbol.file_path == "test.py"
@@ -52,7 +49,7 @@ def test_dependency_creation():
         file_path="module_a.py",
         line_number=5,
     )
-    
+
     assert dep.source == "module_a.py"
     assert dep.target == "module_b.py"
     assert dep.type == DependencyType.IMPORT
@@ -88,9 +85,9 @@ def test_function():
     return 42
 """)
         temp_path = f.name
-    
+
     yield Path(temp_path)
-    
+
     # Cleanup
     os.unlink(temp_path)
 
@@ -104,7 +101,7 @@ def test_analyzer_creation(analyzer):
 def test_analyzer_analyze_file(analyzer, temp_python_file):
     """Test analyzing a Python file."""
     symbols, dependencies = analyzer.analyze_file(temp_python_file)
-    
+
     assert len(symbols) > 0
     assert len(dependencies) > 0
 
@@ -112,7 +109,7 @@ def test_analyzer_analyze_file(analyzer, temp_python_file):
 def test_analyzer_extract_symbols(analyzer, temp_python_file):
     """Test extracting symbols."""
     symbols, _ = analyzer.analyze_file(temp_python_file)
-    
+
     # Should find class and functions
     symbol_names = [s.name for s in symbols]
     assert "TestClass" in symbol_names
@@ -122,7 +119,7 @@ def test_analyzer_extract_symbols(analyzer, temp_python_file):
 def test_analyzer_extract_dependencies(analyzer, temp_python_file):
     """Test extracting dependencies."""
     _, dependencies = analyzer.analyze_file(temp_python_file)
-    
+
     # Should find imports
     targets = [d.target for d in dependencies]
     assert "os" in targets
@@ -134,10 +131,10 @@ def test_analyzer_handle_parse_error(analyzer):
     with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
         f.write("invalid python syntax !!!")
         temp_path = f.name
-    
+
     try:
         symbols, dependencies = analyzer.analyze_file(Path(temp_path))
-        
+
         # Should return empty lists on error
         assert symbols == []
         assert dependencies == []
@@ -164,7 +161,7 @@ def test_graph_creation(graph):
 def test_graph_add_dependency(graph):
     """Test adding a dependency."""
     graph.add_dependency("A", "B")
-    
+
     assert "A" in graph.nodes
     assert "B" in graph.nodes
     assert "B" in graph.edges["A"]
@@ -175,9 +172,9 @@ def test_graph_get_dependents(graph):
     # A -> B -> C
     graph.add_dependency("A", "B")
     graph.add_dependency("B", "C")
-    
+
     dependents = graph.get_dependents("C")
-    
+
     assert "B" in dependents
     assert "A" in dependents
 
@@ -187,9 +184,9 @@ def test_graph_get_dependents_max_depth(graph):
     # A -> B -> C
     graph.add_dependency("A", "B")
     graph.add_dependency("B", "C")
-    
+
     dependents = graph.get_dependents("C", max_depth=1)
-    
+
     assert "B" in dependents
     assert "A" not in dependents
 
@@ -199,9 +196,9 @@ def test_graph_get_dependencies(graph):
     # A -> B -> C
     graph.add_dependency("A", "B")
     graph.add_dependency("B", "C")
-    
+
     dependencies = graph.get_dependencies("A")
-    
+
     assert "B" in dependencies
     assert "C" in dependencies
 
@@ -212,9 +209,9 @@ def test_graph_detect_cycles(graph):
     graph.add_dependency("A", "B")
     graph.add_dependency("B", "C")
     graph.add_dependency("C", "A")
-    
+
     cycles = graph.detect_cycles()
-    
+
     assert len(cycles) > 0
 
 
@@ -223,9 +220,9 @@ def test_graph_no_cycles(graph):
     # A -> B -> C (no cycle)
     graph.add_dependency("A", "B")
     graph.add_dependency("B", "C")
-    
+
     cycles = graph.detect_cycles()
-    
+
     # May detect cycles due to implementation
     assert isinstance(cycles, list)
 
@@ -239,7 +236,7 @@ def temp_repo():
     """Create a temporary repository."""
     temp_dir = tempfile.mkdtemp()
     repo_path = Path(temp_dir)
-    
+
     # Create some Python files
     (repo_path / "main.py").write_text("""
 import utils
@@ -250,14 +247,14 @@ def main():
 if __name__ == '__main__':
     main()
 """)
-    
+
     (repo_path / "utils.py").write_text("""
 def helper():
     return 42
 """)
-    
+
     yield repo_path
-    
+
     # Cleanup
     import shutil
     shutil.rmtree(temp_dir)
@@ -279,7 +276,7 @@ def test_engine_creation(engine, temp_repo):
 def test_engine_analyze_repository(engine):
     """Test analyzing repository."""
     context = engine.analyze_repository()
-    
+
     assert context is not None
     assert context.total_files > 0
     assert len(context.symbols) > 0
@@ -289,10 +286,10 @@ def test_engine_analyze_impact(engine):
     """Test analyzing impact."""
     # First analyze repository
     engine.analyze_repository()
-    
+
     # Analyze impact of utils.py
     impact = engine.analyze_impact("utils.py")
-    
+
     assert impact is not None
     assert impact.target_file == "utils.py"
     assert impact.risk_level in ["low", "medium", "high"]
@@ -302,10 +299,10 @@ def test_engine_find_symbol(engine):
     """Test finding symbols."""
     # First analyze repository
     engine.analyze_repository()
-    
+
     # Find main function
     symbols = engine.find_symbol("main")
-    
+
     # May or may not find depending on analysis
     assert isinstance(symbols, list)
 
@@ -318,9 +315,9 @@ def test_engine_get_symbol_references(engine):
         file_path="test.py",
         line_number=10,
     )
-    
+
     references = engine.get_symbol_references(symbol)
-    
+
     assert isinstance(references, list)
 
 
@@ -332,21 +329,21 @@ def test_full_analysis_workflow(engine):
     """Test complete analysis workflow."""
     # Analyze repository
     context = engine.analyze_repository()
-    
+
     assert context.total_files > 0
-    
+
     # Analyze impact
     if context.symbols:
         file_path = context.symbols[0].file_path
         impact = engine.analyze_impact(file_path)
-        
+
         assert impact is not None
 
 
 def test_repository_context_structure(engine):
     """Test repository context structure."""
     context = engine.analyze_repository()
-    
+
     assert hasattr(context, 'root_path')
     assert hasattr(context, 'total_files')
     assert hasattr(context, 'total_lines')
@@ -358,9 +355,9 @@ def test_repository_context_structure(engine):
 def test_impact_analysis_structure(engine):
     """Test impact analysis structure."""
     engine.analyze_repository()
-    
+
     impact = engine.analyze_impact("test.py")
-    
+
     assert hasattr(impact, 'target_file')
     assert hasattr(impact, 'direct_dependents')
     assert hasattr(impact, 'indirect_dependents')
@@ -376,11 +373,11 @@ def test_empty_repository():
     """Test with empty repository."""
     temp_dir = tempfile.mkdtemp()
     repo_path = Path(temp_dir)
-    
+
     try:
         engine = ECCEngine(repo_path)
         context = engine.analyze_repository()
-        
+
         assert context.total_files == 0
     finally:
         import shutil
@@ -392,15 +389,15 @@ def test_repository_with_subdirectories(temp_repo):
     # Create subdirectory
     sub_dir = temp_repo / "subdir"
     sub_dir.mkdir()
-    
+
     (sub_dir / "module.py").write_text("""
 def sub_function():
     pass
 """)
-    
+
     engine = ECCEngine(temp_repo)
     context = engine.analyze_repository()
-    
+
     # Should find files in subdirectories
     assert context.total_files >= 3
 
@@ -408,9 +405,9 @@ def sub_function():
 def test_impact_analysis_no_dependents(engine):
     """Test impact analysis with no dependents."""
     engine.analyze_repository()
-    
+
     impact = engine.analyze_impact("nonexistent.py")
-    
+
     assert impact.blast_radius == 0
     assert impact.risk_level == "low"
 
@@ -422,12 +419,12 @@ def test_impact_analysis_no_dependents(engine):
 def test_analyzer_performance(analyzer, temp_python_file):
     """Test analyzer performance."""
     import time
-    
+
     start = time.time()
     for _ in range(10):
         analyzer.analyze_file(temp_python_file)
     duration = time.time() - start
-    
+
     # Should be fast
     assert duration < 1.0
 
@@ -435,15 +432,15 @@ def test_analyzer_performance(analyzer, temp_python_file):
 def test_graph_performance(graph):
     """Test graph performance."""
     import time
-    
+
     # Build large graph
     for i in range(100):
         graph.add_dependency(f"node_{i}", f"node_{i+1}")
-    
+
     start = time.time()
     graph.get_dependents("node_50")
     duration = time.time() - start
-    
+
     # Should be fast
     assert duration < 0.1
 
@@ -451,10 +448,10 @@ def test_graph_performance(graph):
 def test_engine_performance(engine):
     """Test engine performance."""
     import time
-    
+
     start = time.time()
     engine.analyze_repository()
     duration = time.time() - start
-    
+
     # Should be reasonably fast
     assert duration < 5.0

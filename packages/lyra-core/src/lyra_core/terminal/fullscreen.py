@@ -12,8 +12,8 @@ the in-memory renderer to assert *which rows changed*.
 """
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Iterable, Optional
 
 
 @dataclass(frozen=True)

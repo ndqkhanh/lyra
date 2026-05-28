@@ -1,5 +1,4 @@
 """Tests for agent metadata."""
-import pytest
 from lyra_cli.core.agent_metadata import AgentMetadata
 
 

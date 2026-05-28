@@ -12,10 +12,11 @@ from __future__ import annotations
 
 import asyncio
 import inspect
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 from uuid import uuid4
 
 
@@ -46,21 +47,21 @@ class SwarmTask:
     """A unit of work within the swarm."""
 
     task_id: str = field(default_factory=lambda: f"task_{uuid4().hex[:8]}")
-    parent_id: Optional[str] = None
+    parent_id: str | None = None
     description: str = ""
     priority: PriorityLevel = PriorityLevel.MEDIUM
-    dependencies: List[str] = field(default_factory=list)
-    subtasks: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
+    subtasks: list[str] = field(default_factory=list)
     status: str = "created"  # created, queued, running, completed, failed, cancelled
-    assigned_agent: Optional[str] = None
-    payload: Dict[str, Any] = field(default_factory=dict)
-    result: Optional[Any] = None
-    error: Optional[str] = None
+    assigned_agent: str | None = None
+    payload: dict[str, Any] = field(default_factory=dict)
+    result: Any | None = None
+    error: str | None = None
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    started_at: Optional[str] = None
-    completed_at: Optional[str] = None
+    started_at: str | None = None
+    completed_at: str | None = None
     retry_count: int = 0
-    execution_func: Optional[Callable[[], Any]] = None
+    execution_func: Callable[[], Any] | None = None
 
 
 @dataclass
@@ -69,10 +70,10 @@ class TaskResult:
 
     task_id: str
     success: bool
-    result: Optional[Any] = None
-    error: Optional[str] = None
+    result: Any | None = None
+    error: str | None = None
     duration_seconds: float = 0.0
-    subtask_results: Dict[str, Any] = field(default_factory=dict)
+    subtask_results: dict[str, Any] = field(default_factory=dict)
 
 
 class SwarmOrchestrator:
@@ -87,14 +88,14 @@ class SwarmOrchestrator:
     - Automatic retry on failure
     """
 
-    def __init__(self, config: Optional[OrchestratorConfig] = None) -> None:
+    def __init__(self, config: OrchestratorConfig | None = None) -> None:
         self.config = config or OrchestratorConfig()
-        self.tasks: Dict[str, SwarmTask] = {}
+        self.tasks: dict[str, SwarmTask] = {}
         self._queue: asyncio.PriorityQueue = asyncio.PriorityQueue()
         self._lock: asyncio.Lock = asyncio.Lock()
         self._running: bool = False
-        self._workers: List[asyncio.Task] = []
-        self._stats: Dict[str, int] = {
+        self._workers: list[asyncio.Task] = []
+        self._stats: dict[str, int] = {
             "tasks_created": 0,
             "tasks_completed": 0,
             "tasks_failed": 0,
@@ -173,8 +174,8 @@ class SwarmOrchestrator:
     async def decompose_task(
         self,
         task: SwarmTask,
-        sub_descriptions: List[str],
-    ) -> List[str]:
+        sub_descriptions: list[str],
+    ) -> list[str]:
         """
         Decompose a task into parallel sub-tasks.
 
@@ -185,7 +186,7 @@ class SwarmOrchestrator:
         Returns:
             List of sub-task IDs
         """
-        sub_ids: List[str] = []
+        sub_ids: list[str] = []
         async with self._lock:
             self._stats["tasks_decomposed"] += 1
             for desc in sub_descriptions:
@@ -206,8 +207,8 @@ class SwarmOrchestrator:
     async def aggregate_results(
         self,
         task_id: str,
-        merge_func: Optional[Callable[[List[TaskResult]], Any]] = None,
-    ) -> Optional[Any]:
+        merge_func: Callable[[list[TaskResult]], Any] | None = None,
+    ) -> Any | None:
         """
         Aggregate results from all completed sub-tasks.
 
@@ -224,7 +225,7 @@ class SwarmOrchestrator:
                 return None
             sub_ids = list(task.subtasks)
 
-        sub_results: List[TaskResult] = []
+        sub_results: list[TaskResult] = []
         for sub_id in sub_ids:
             result = await self.await_result(sub_id)
             sub_results.append(result)
@@ -324,7 +325,7 @@ class SwarmOrchestrator:
 
     def _priority_to_int(self, priority: PriorityLevel) -> int:
         """Convert priority enum to integer for queue ordering (lower = higher priority)."""
-        mapping: Dict[PriorityLevel, int] = {
+        mapping: dict[PriorityLevel, int] = {
             PriorityLevel.CRITICAL: 0,
             PriorityLevel.HIGH: 1,
             PriorityLevel.MEDIUM: 2,
@@ -333,11 +334,11 @@ class SwarmOrchestrator:
         }
         return mapping.get(priority, 2)
 
-    def get_task(self, task_id: str) -> Optional[SwarmTask]:
+    def get_task(self, task_id: str) -> SwarmTask | None:
         """Get a task by ID."""
         return self.tasks.get(task_id)
 
-    def get_stats(self) -> Dict[str, int]:
+    def get_stats(self) -> dict[str, int]:
         """Get orchestrator statistics."""
         return dict(self._stats)
 

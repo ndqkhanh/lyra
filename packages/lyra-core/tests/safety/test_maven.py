@@ -1,7 +1,6 @@
 """Tests for MAVEN — Multi-perspective adversarial verification engine."""
 
 import pytest
-
 from lyra_core.safety.maven import (
     JudgePool,
     MavenConfig,
@@ -9,8 +8,8 @@ from lyra_core.safety.maven import (
     MavenResult,
     MavenVerdict,
     ModelIdentity,
-    ReviewPerspective,
     ReviewerRole,
+    ReviewPerspective,
 )
 
 

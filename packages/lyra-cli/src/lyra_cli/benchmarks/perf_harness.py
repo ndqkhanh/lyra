@@ -13,8 +13,8 @@ Reports P50/P95/P99 latency percentiles and throughput in ops/sec.
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable
 
 
 @dataclass
@@ -153,6 +153,7 @@ class PerformanceHarness:
     def _bench_memory(self) -> BenchmarkSuite:
         import tempfile
         from pathlib import Path
+
         from lyra_memory.eternal_store import EternalRecord, EternalStore
 
         tmpdir = tempfile.mkdtemp()

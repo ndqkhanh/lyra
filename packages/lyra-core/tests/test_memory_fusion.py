@@ -4,12 +4,10 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from lyra_core.memory.auto_memory import AutoMemory, MemoryKind
 from lyra_core.memory.fusion import rrf, rrf_topk
 from lyra_core.memory.memory_tools import MemoryToolset
 from lyra_core.memory.procedural import ProceduralMemory, SkillRecord
-
 
 # --- pure RRF -----------------------------------------------------------
 

@@ -10,9 +10,9 @@ import hashlib
 import time
 from dataclasses import dataclass
 
-from .identity_traits import IdentityModel, TraitCategory
+from .identity_traits import IdentityModel
 from .preference_accumulator import PreferenceAccumulator
-from .style_learner import StyleDimension, StyleLearner
+from .style_learner import StyleLearner
 
 
 @dataclass(frozen=True)

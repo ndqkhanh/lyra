@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import pytest
-from lyra_core.transparency.process_scanner import _matches_agent, RawProcess
+from lyra_core.transparency.process_scanner import RawProcess, _matches_agent
 
 
 @pytest.mark.unit

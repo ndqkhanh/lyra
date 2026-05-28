@@ -184,7 +184,7 @@ class DuckDuckGoProvider:
 
 # ── Provider factory ───────────────────────────────────────────────────────
 
-def build_provider(cred_mgr=None) -> "ExaProvider | FirecrawlProvider | DuckDuckGoProvider":
+def build_provider(cred_mgr=None) -> ExaProvider | FirecrawlProvider | DuckDuckGoProvider:
     """Auto-detect the best available search provider.
 
     Tries in order: Exa → Firecrawl → DuckDuckGo.

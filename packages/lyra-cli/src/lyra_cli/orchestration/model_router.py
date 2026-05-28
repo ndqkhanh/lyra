@@ -7,8 +7,8 @@ Target: 40% cost reduction through intelligent routing.
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional, Dict, Any
 from enum import Enum
+from typing import Any
 
 
 class ModelTier(Enum):
@@ -70,7 +70,7 @@ class ModelRouter:
         }
 
         # Routing decisions
-        self.decisions: List[RoutingDecision] = []
+        self.decisions: list[RoutingDecision] = []
 
         # Statistics
         self.stats = {
@@ -85,7 +85,7 @@ class ModelRouter:
     def assess_complexity(
         self,
         task_description: str,
-        context: Optional[Dict[str, Any]] = None
+        context: dict[str, Any] | None = None
     ) -> TaskComplexity:
         """
         Assess task complexity.
@@ -165,7 +165,7 @@ class ModelRouter:
     def route_task(
         self,
         task_description: str,
-        context: Optional[Dict[str, Any]] = None
+        context: dict[str, Any] | None = None
     ) -> RoutingDecision:
         """
         Route a task to the appropriate model.
@@ -212,7 +212,7 @@ class ModelRouter:
     def _select_model(
         self,
         complexity: TaskComplexity,
-        context: Optional[Dict[str, Any]] = None
+        context: dict[str, Any] | None = None
     ) -> ModelTier:
         """
         Select the appropriate model based on complexity.
@@ -302,7 +302,7 @@ class ModelRouter:
 
         return (opus_cost - actual_cost) / opus_cost
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get routing statistics."""
         cost_reduction = self.get_cost_reduction()
 

@@ -7,15 +7,12 @@ auditable, replayable, and agent-controlled.
 Based on Letta research (docs/182-memory-frontiers-2026.md)
 """
 
-from typing import List, Optional, Dict, Any
 from datetime import datetime
-import json
-import sqlite3
 
 
 def write_to_archival(
     text: str,
-    tags: Optional[List[str]] = None,
+    tags: list[str] | None = None,
     source: str = "agent_explicit",
     cognitive_weight: float = 0.5
 ) -> str:
@@ -60,7 +57,7 @@ def search_archival(
     query: str,
     k: int = 5,
     min_score: float = 0.0,
-    tags: Optional[List[str]] = None
+    tags: list[str] | None = None
 ) -> str:
     """
     Search long-term archival memory.
@@ -141,7 +138,7 @@ def update_core_memory(label: str, value: str) -> str:
     return f"Updated core memory: {label}"
 
 
-def read_core_memory(label: Optional[str] = None) -> str:
+def read_core_memory(label: str | None = None) -> str:
     """
     Read core memory blocks.
 
@@ -209,7 +206,7 @@ def forget_memory(entry_id: str) -> str:
         return f"Entry not found: {entry_id}"
 
 
-def list_recent_memories(limit: int = 10, tags: Optional[List[str]] = None) -> str:
+def list_recent_memories(limit: int = 10, tags: list[str] | None = None) -> str:
     """
     List recent memory entries.
 

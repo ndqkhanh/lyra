@@ -2,9 +2,10 @@
 
 from dataclasses import dataclass
 from typing import Any
-from .symbols import SymbolRegistry
+
 from .colors import ColorEngine
 from .layout import LayoutEngine
+from .symbols import SymbolRegistry
 
 
 @dataclass

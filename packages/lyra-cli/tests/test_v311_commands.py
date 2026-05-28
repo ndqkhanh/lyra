@@ -5,15 +5,12 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 
-import pytest
-
 from lyra_cli.interactive.v311_commands import (
     cmd_bundle,
     cmd_coverage,
     cmd_scaling,
     cmd_team,
 )
-
 
 # ---- helpers ----------------------------------------------------------
 
@@ -244,7 +241,7 @@ def test_bundle_list_after_install(tmp_path, monkeypatch):
 
 
 def test_bundle_uninstall_round_trip(tmp_path, monkeypatch):
-    from lyra_core.bundle import reset_global_installed_registry, global_installed_registry
+    from lyra_core.bundle import global_installed_registry, reset_global_installed_registry
 
     monkeypatch.setenv("HOME", str(tmp_path))
     reset_global_installed_registry(path=tmp_path / "installed.json")
@@ -291,7 +288,8 @@ def test_bundle_fetch_round_trip(tmp_path, monkeypatch):
     """Round-trip: trust → fetch → install → verify hash."""
     import io
     import tarfile
-    from lyra_core.bundle import sign_archive, MarketplaceKey
+
+    from lyra_core.bundle import MarketplaceKey, sign_archive
 
     payload_files = {
         "persona.md": "p\n",
@@ -338,8 +336,8 @@ def test_bundle_fetch_round_trip(tmp_path, monkeypatch):
 
 
 def test_bundle_fetch_signature_mismatch_surfaces(tmp_path, monkeypatch):
-    import io, tarfile
-    from lyra_core.bundle import MarketplaceKey
+    import io
+    import tarfile
 
     # Build any archive.
     buf = io.BytesIO()

@@ -46,8 +46,8 @@ from .dream_reflector import (
     SignalStrength,
 )
 from .dream_scheduler import (
-    DreamScheduleTrigger,
     DreamScheduler,
+    DreamScheduleTrigger,
     ScheduleEntry,
     SchedulerState,
 )
@@ -72,7 +72,6 @@ from .l5_persona import (
     IdentityModel,
     IdentityTrait,
     PersonaSnapshot,
-    PersonaStore as L5PersonaStore,
     PreferenceAccumulator,
     PreferenceSource,
     StyleDimension,
@@ -80,11 +79,14 @@ from .l5_persona import (
     StylePreference,
     TraitCategory,
 )
+from .l5_persona import (
+    PersonaStore as L5PersonaStore,
+)
 from .search import (
     DCIZeroIndex,
+    DisclosedMemory,
     DisclosureBatch,
     DisclosureLevel,
-    DisclosedMemory,
     GrepResult,
     MatchType,
     ProgressiveDisclosure,

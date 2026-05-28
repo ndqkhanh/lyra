@@ -682,7 +682,6 @@ import json as _json
 import os as _os
 from pathlib import Path as _Path
 
-
 _PER_MODEL_MAX_OUTPUT: dict[str, int] = {
     "claude-opus-4.5": 32_000,
     "claude-opus-4.7": 32_000,

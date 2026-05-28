@@ -1,7 +1,7 @@
 """Session state models."""
 from dataclasses import dataclass
-from typing import Optional, Dict, Any
 from datetime import datetime
+from typing import Any
 
 
 @dataclass
@@ -12,5 +12,5 @@ class SessionState:
     created_at: datetime
     last_updated: datetime
     conversation_history: list
-    context: Dict[str, Any]
-    metadata: Optional[Dict[str, Any]] = None
+    context: dict[str, Any]
+    metadata: dict[str, Any] | None = None

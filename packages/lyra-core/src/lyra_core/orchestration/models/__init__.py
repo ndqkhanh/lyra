@@ -4,8 +4,8 @@ from lyra_core.orchestration.models.architecture import (
     Architecture,
     ArchitectureReview,
     ScalabilityPlan,
-    TechStack,
     TechSpec,
+    TechStack,
 )
 from lyra_core.orchestration.models.code_review import CodeReview, PullRequest
 from lyra_core.orchestration.models.documentation import (

@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import datetime as _dt
-from typing import Optional
 
 from rich.console import Console, Group, RenderableType
 from rich.panel import Panel
@@ -15,7 +14,7 @@ from .aggregator import BurnReport
 def render_dashboard(
     report: BurnReport,
     *,
-    console: Optional[Console] = None,
+    console: Console | None = None,
 ) -> RenderableType:
     if report.total_turns == 0:
         return Panel(

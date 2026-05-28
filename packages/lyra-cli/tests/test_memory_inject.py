@@ -28,17 +28,15 @@ from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
-
-from lyra_cli.interactive.session import (
-    InteractiveSession,
-    SLASH_COMMANDS,
-    _augment_system_prompt_with_memory,
-)
 from lyra_cli.interactive.memory_inject import (
     _extract_query_tokens,
     render_memory_block,
 )
-
+from lyra_cli.interactive.session import (
+    SLASH_COMMANDS,
+    InteractiveSession,
+    _augment_system_prompt_with_memory,
+)
 
 # ---------------------------------------------------------------------------
 # Fakes

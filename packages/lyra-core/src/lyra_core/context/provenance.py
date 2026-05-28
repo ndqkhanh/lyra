@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from lyra_core.context.layered_context import (
     ContextEntry,
@@ -49,11 +49,11 @@ class AuditEvent:
 
     event_type: AuditEventType
     timestamp: datetime
-    entry: Optional[ContextEntry] = None
+    entry: ContextEntry | None = None
     reason: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "event_type": self.event_type.value,
@@ -106,7 +106,7 @@ class ContextAuditTrail:
 
     def __init__(self) -> None:
         """Initialize empty audit trail."""
-        self._events: List[AuditEvent] = []
+        self._events: list[AuditEvent] = []
 
     def record_add(self, entry: ContextEntry) -> None:
         """Record an add operation.
@@ -137,7 +137,7 @@ class ContextAuditTrail:
         )
         self._events.append(event)
 
-    def record_prune(self, entries: List[ContextEntry], reason: str) -> None:
+    def record_prune(self, entries: list[ContextEntry], reason: str) -> None:
         """Record a prune operation (multiple entries removed).
 
         Args:
@@ -154,7 +154,7 @@ class ContextAuditTrail:
             self._events.append(event)
 
     def record_budget_enforcement(
-        self, before: int, after: int, pruned: List[ContextEntry]
+        self, before: int, after: int, pruned: list[ContextEntry]
     ) -> None:
         """Record a budget enforcement operation.
 
@@ -179,7 +179,7 @@ class ContextAuditTrail:
         for entry in pruned:
             self.record_prune([entry], "Budget enforcement")
 
-    def get_history(self, limit: int = 100) -> List[AuditEvent]:
+    def get_history(self, limit: int = 100) -> list[AuditEvent]:
         """Get recent audit events.
 
         Args:
@@ -245,9 +245,9 @@ class LayerInspection:
     layer: ContextLayer
     entry_count: int
     token_count: int
-    sources: List[str]
-    priority_distribution: Dict[int, int]
-    age_distribution: Dict[str, int]
+    sources: list[str]
+    priority_distribution: dict[int, int]
+    age_distribution: dict[str, int]
 
 
 class ContextInspector:
@@ -280,7 +280,7 @@ class ContextInspector:
         sources = sorted(set(e.source for e in entries))
 
         # Priority distribution
-        priority_dist: Dict[int, int] = {}
+        priority_dist: dict[int, int] = {}
         for entry in entries:
             priority_dist[entry.priority] = priority_dist.get(entry.priority, 0) + 1
 
@@ -315,7 +315,7 @@ class ContextInspector:
             age_distribution=age_dist,
         )
 
-    def find_by_source(self, source: str) -> List[ContextEntry]:
+    def find_by_source(self, source: str) -> list[ContextEntry]:
         """Find all entries from a specific source.
 
         Args:
@@ -324,7 +324,7 @@ class ContextInspector:
         Returns:
             List of matching entries
         """
-        results: List[ContextEntry] = []
+        results: list[ContextEntry] = []
 
         for layer in ContextLayer:
             for entry in self._manager.get_layer(layer):
@@ -333,7 +333,7 @@ class ContextInspector:
 
         return results
 
-    def find_by_age(self, min_age_seconds: int) -> List[ContextEntry]:
+    def find_by_age(self, min_age_seconds: int) -> list[ContextEntry]:
         """Find all entries older than a specific age.
 
         Args:
@@ -342,7 +342,7 @@ class ContextInspector:
         Returns:
             List of matching entries
         """
-        results: List[ContextEntry] = []
+        results: list[ContextEntry] = []
 
         for layer in ContextLayer:
             for entry in self._manager.get_layer(layer):
@@ -351,7 +351,7 @@ class ContextInspector:
 
         return results
 
-    def find_by_priority(self, min_priority: int) -> List[ContextEntry]:
+    def find_by_priority(self, min_priority: int) -> list[ContextEntry]:
         """Find all entries with priority >= min_priority.
 
         Args:
@@ -360,7 +360,7 @@ class ContextInspector:
         Returns:
             List of matching entries
         """
-        results: List[ContextEntry] = []
+        results: list[ContextEntry] = []
 
         for layer in ContextLayer:
             for entry in self._manager.get_layer(layer):
@@ -369,13 +369,13 @@ class ContextInspector:
 
         return results
 
-    def get_timeline(self) -> List[Tuple[datetime, str, ContextEntry]]:
+    def get_timeline(self) -> list[tuple[datetime, str, ContextEntry]]:
         """Get chronological timeline of all entries.
 
         Returns:
             List of (timestamp, layer_name, entry) tuples, sorted by time
         """
-        timeline: List[Tuple[datetime, str, ContextEntry]] = []
+        timeline: list[tuple[datetime, str, ContextEntry]] = []
 
         for layer in ContextLayer:
             for entry in self._manager.get_layer(layer):
@@ -386,7 +386,7 @@ class ContextInspector:
 
         return timeline
 
-    def get_token_distribution(self) -> Dict[ContextLayer, float]:
+    def get_token_distribution(self) -> dict[ContextLayer, float]:
         """Get percentage of tokens used by each layer.
 
         Returns:
@@ -394,18 +394,18 @@ class ContextInspector:
         """
         total = self._manager.current_tokens
         if total == 0:
-            return {layer: 0.0 for layer in ContextLayer}
+            return dict.fromkeys(ContextLayer, 0.0)
 
         usage = self._manager.get_budget_usage()
         return {layer: (tokens / total) * 100.0 for layer, tokens in usage.items()}
 
-    def detect_bloat(self) -> List[str]:
+    def detect_bloat(self) -> list[str]:
         """Detect potential issues with context usage.
 
         Returns:
             List of warning messages
         """
-        warnings: List[str] = []
+        warnings: list[str] = []
 
         # Check for layers over budget (before enforcement)
         # We check the raw layer usage, not after budget enforcement
@@ -421,11 +421,11 @@ class ContextInspector:
                 )
 
         # Check for duplicate content
-        all_entries: List[ContextEntry] = []
+        all_entries: list[ContextEntry] = []
         for layer in ContextLayer:
             all_entries.extend(self._manager.get_layer(layer))
 
-        content_map: Dict[str, List[ContextEntry]] = {}
+        content_map: dict[str, list[ContextEntry]] = {}
         for entry in all_entries:
             content_map.setdefault(entry.content, []).append(entry)
 
@@ -463,8 +463,8 @@ class ChurnAnalysis:
     total_adds: int
     total_removes: int
     churn_rate: float
-    most_churned_sources: List[Tuple[str, int]]
-    most_churned_layers: List[Tuple[str, int]]
+    most_churned_sources: list[tuple[str, int]]
+    most_churned_layers: list[tuple[str, int]]
 
 
 class ContextDebugger:
@@ -491,7 +491,7 @@ class ContextDebugger:
         self._manager = context_manager
         self._audit = audit_trail
 
-    def why_pruned(self, content_snippet: str) -> Optional[str]:
+    def why_pruned(self, content_snippet: str) -> str | None:
         """Explain why content was pruned.
 
         Args:
@@ -515,7 +515,7 @@ class ContextDebugger:
 
         return None
 
-    def trace_entry(self, entry_id: str) -> List[AuditEvent]:
+    def trace_entry(self, entry_id: str) -> list[AuditEvent]:
         """Get full lifecycle of an entry.
 
         Args:
@@ -524,7 +524,7 @@ class ContextDebugger:
         Returns:
             List of audit events related to this entry
         """
-        results: List[AuditEvent] = []
+        results: list[AuditEvent] = []
 
         for event in self._audit._events:
             if event.entry:
@@ -537,18 +537,18 @@ class ContextDebugger:
 
         return results
 
-    def find_duplicates(self) -> List[List[ContextEntry]]:
+    def find_duplicates(self) -> list[list[ContextEntry]]:
         """Find duplicate content across all layers.
 
         Returns:
             List of duplicate groups (each group has 2+ entries with same content)
         """
-        all_entries: List[ContextEntry] = []
+        all_entries: list[ContextEntry] = []
         for layer in ContextLayer:
             all_entries.extend(self._manager.get_layer(layer))
 
         # Group by content
-        content_map: Dict[str, List[ContextEntry]] = {}
+        content_map: dict[str, list[ContextEntry]] = {}
         for entry in all_entries:
             content_map.setdefault(entry.content, []).append(entry)
 
@@ -564,8 +564,8 @@ class ContextDebugger:
         stats = self._audit.get_statistics()
 
         # Count by source
-        source_adds: Dict[str, int] = {}
-        source_removes: Dict[str, int] = {}
+        source_adds: dict[str, int] = {}
+        source_removes: dict[str, int] = {}
 
         for event in self._audit._events:
             if not event.entry:
@@ -579,15 +579,15 @@ class ContextDebugger:
                 source_removes[source] = source_removes.get(source, 0) + 1
 
         # Calculate churn per source
-        source_churn: Dict[str, int] = {}
+        source_churn: dict[str, int] = {}
         for source in set(source_adds.keys()) | set(source_removes.keys()):
             adds = source_adds.get(source, 0)
             removes = source_removes.get(source, 0)
             source_churn[source] = adds + removes
 
         # Count by layer
-        layer_adds: Dict[str, int] = {}
-        layer_removes: Dict[str, int] = {}
+        layer_adds: dict[str, int] = {}
+        layer_removes: dict[str, int] = {}
 
         for event in self._audit._events:
             if not event.entry:
@@ -601,7 +601,7 @@ class ContextDebugger:
                 layer_removes[layer] = layer_removes.get(layer, 0) + 1
 
         # Calculate churn per layer
-        layer_churn: Dict[str, int] = {}
+        layer_churn: dict[str, int] = {}
         for layer in set(layer_adds.keys()) | set(layer_removes.keys()):
             adds = layer_adds.get(layer, 0)
             removes = layer_removes.get(layer, 0)
@@ -627,13 +627,13 @@ class ContextDebugger:
             most_churned_layers=top_layers,
         )
 
-    def suggest_optimizations(self) -> List[str]:
+    def suggest_optimizations(self) -> list[str]:
         """Suggest optimizations based on usage patterns.
 
         Returns:
             List of optimization suggestions
         """
-        suggestions: List[str] = []
+        suggestions: list[str] = []
 
         # Check for high churn
         churn = self.analyze_churn()
@@ -687,7 +687,7 @@ class ContextDiff:
         self._before = before
         self._after = after
 
-    def get_added_entries(self) -> List[ContextEntry]:
+    def get_added_entries(self) -> list[ContextEntry]:
         """Get entries that were added.
 
         Returns:
@@ -698,7 +698,7 @@ class ContextDiff:
 
         return [e for e in after_entries if e.content not in before_contents]
 
-    def get_removed_entries(self) -> List[ContextEntry]:
+    def get_removed_entries(self) -> list[ContextEntry]:
         """Get entries that were removed.
 
         Returns:
@@ -709,7 +709,7 @@ class ContextDiff:
 
         return [e for e in before_entries if e.content not in after_contents]
 
-    def get_modified_entries(self) -> List[Tuple[ContextEntry, ContextEntry]]:
+    def get_modified_entries(self) -> list[tuple[ContextEntry, ContextEntry]]:
         """Get entries that were modified.
 
         Note: This implementation considers entries with same source but different
@@ -720,16 +720,16 @@ class ContextDiff:
             List of (before, after) tuples for modified entries
         """
         # Group by source
-        before_by_source: Dict[str, ContextEntry] = {}
+        before_by_source: dict[str, ContextEntry] = {}
         for entry in self._get_all_entries(self._before):
             before_by_source[entry.source] = entry
 
-        after_by_source: Dict[str, ContextEntry] = {}
+        after_by_source: dict[str, ContextEntry] = {}
         for entry in self._get_all_entries(self._after):
             after_by_source[entry.source] = entry
 
         # Find entries with same source but different content
-        modified: List[Tuple[ContextEntry, ContextEntry]] = []
+        modified: list[tuple[ContextEntry, ContextEntry]] = []
         for source in set(before_by_source.keys()) & set(after_by_source.keys()):
             before_entry = before_by_source[source]
             after_entry = after_by_source[source]
@@ -745,7 +745,7 @@ class ContextDiff:
         Returns:
             Formatted diff string
         """
-        lines: List[str] = []
+        lines: list[str] = []
 
         lines.append("# Context Diff")
         lines.append("")
@@ -793,7 +793,7 @@ class ContextDiff:
 
         return "\n".join(lines)
 
-    def to_json(self) -> Dict[str, Any]:
+    def to_json(self) -> dict[str, Any]:
         """Generate machine-readable diff.
 
         Returns:
@@ -840,9 +840,9 @@ class ContextDiff:
             ],
         }
 
-    def _get_all_entries(self, manager: LayeredContextManager) -> List[ContextEntry]:
+    def _get_all_entries(self, manager: LayeredContextManager) -> list[ContextEntry]:
         """Get all entries from a context manager."""
-        entries: List[ContextEntry] = []
+        entries: list[ContextEntry] = []
         for layer in ContextLayer:
             entries.extend(manager.get_layer(layer))
         return entries

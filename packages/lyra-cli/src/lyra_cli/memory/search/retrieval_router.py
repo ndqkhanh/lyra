@@ -68,7 +68,7 @@ class RetrievalRouter:
 
     def __init__(self) -> None:
         self._searchers: dict[RetrievalTier, object] = {}
-        self._stats: dict[RetrievalTier, int] = {t: 0 for t in RetrievalTier}
+        self._stats: dict[RetrievalTier, int] = dict.fromkeys(RetrievalTier, 0)
 
     def register(self, tier: RetrievalTier, searcher: object) -> None:
         self._searchers[tier] = searcher

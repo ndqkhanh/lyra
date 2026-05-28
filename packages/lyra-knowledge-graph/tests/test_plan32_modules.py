@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 
 import pytest
-
 from lyra_knowledge_graph.graph_builder import (
     EdgeRelation,
     KnowledgeEdge,

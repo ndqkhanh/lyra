@@ -1,10 +1,11 @@
 """Enhanced welcome screen with Claude Code-inspired design"""
 
+import os
+
+from rich.align import Align
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
-from rich.align import Align
-import os
 
 
 def show_welcome(console: Console, model: str = "Auto", user: str = None):

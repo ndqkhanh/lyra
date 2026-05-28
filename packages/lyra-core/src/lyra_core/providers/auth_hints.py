@@ -22,7 +22,6 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from typing import Optional, Tuple
 
 
 @dataclass(frozen=True)
@@ -36,7 +35,7 @@ class ForeignCred:
     suggested_alias_hint: str
 
 
-KNOWN_FOREIGN_CREDS: Tuple[ForeignCred, ...] = (
+KNOWN_FOREIGN_CREDS: tuple[ForeignCred, ...] = (
     ForeignCred(
         env_var="OPENAI_API_KEY",
         provider_key="openai",
@@ -122,7 +121,7 @@ def _present(env_var: str) -> bool:
 def missing_credential_hint(
     *,
     asking: str,
-) -> Optional[str]:
+) -> str | None:
     """Produce a fix-hint when the requested provider's creds are absent.
 
     *asking* is the provider name the user requested (lowercase).

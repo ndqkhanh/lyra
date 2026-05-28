@@ -19,18 +19,17 @@ import sqlite3
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 
 @dataclass
 class Lesson:
     """A lesson learned from experience."""
-    id: Optional[int]
+    id: int | None
     tags: list[str]
     verdict: str
     lesson: str
     timestamp: str
-    context: Optional[str] = None
+    context: str | None = None
 
 
 # ── Tier 1: Core Memory ────────────────────────────────────────────────────

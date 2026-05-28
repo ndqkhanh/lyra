@@ -13,7 +13,7 @@ import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import uuid4
 
 
@@ -50,7 +50,7 @@ class Entity:
     value: str = ""
     confidence: float = 1.0
     source: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.now)
 
 
@@ -63,7 +63,7 @@ class Relation:
     source_id: str = ""
     target_id: str = ""
     confidence: float = 1.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.now)
 
 
@@ -77,8 +77,8 @@ class IngestionJob:
     priority: int = 5  # 1-10, higher = more urgent
     status: str = "pending"  # pending, processing, completed, failed
     created_at: datetime = field(default_factory=datetime.now)
-    processed_at: Optional[datetime] = None
-    error: Optional[str] = None
+    processed_at: datetime | None = None
+    error: str | None = None
 
 
 class EntityExtractor:
@@ -94,7 +94,7 @@ class EntityExtractor:
         EntityType.URL: r"https?://[^\s]+",
     }
 
-    def extract(self, text: str, source: str = "unknown") -> List[Entity]:
+    def extract(self, text: str, source: str = "unknown") -> list[Entity]:
         """
         Extract entities from text.
 
@@ -174,8 +174,8 @@ class RelationExtractor:
     def extract(
         self,
         text: str,
-        entities: List[Entity],
-    ) -> List[Relation]:
+        entities: list[Entity],
+    ) -> list[Relation]:
         """
         Extract relations from text and entities.
 
@@ -251,7 +251,7 @@ class IngestionQueue:
             max_workers: Maximum concurrent workers
         """
         self.max_workers = max_workers
-        self.jobs: Dict[str, IngestionJob] = {}
+        self.jobs: dict[str, IngestionJob] = {}
         self.entity_extractor = EntityExtractor()
         self.relation_extractor = RelationExtractor()
         self._running = False
@@ -281,7 +281,7 @@ class IngestionQueue:
         self.jobs[job.id] = job
         return job
 
-    async def process_job(self, job: IngestionJob) -> Dict[str, Any]:
+    async def process_job(self, job: IngestionJob) -> dict[str, Any]:
         """
         Process a single job.
 
@@ -341,7 +341,7 @@ class IngestionQueue:
         """Stop processing queue."""
         self._running = False
 
-    def get_stats(self) -> Dict[str, int]:
+    def get_stats(self) -> dict[str, int]:
         """Get queue statistics."""
         return {
             "total": len(self.jobs),

@@ -6,10 +6,9 @@ import json
 import threading
 
 import pytest
-
 from lyra_core.observability.event_bus import (
-    CronJobFired,
     CostThreshold,
+    CronJobFired,
     DaemonIteration,
     EventBus,
     LLMCallFinished,
@@ -25,7 +24,6 @@ from lyra_core.observability.event_bus import (
     get_event_bus,
     reset_event_bus,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers

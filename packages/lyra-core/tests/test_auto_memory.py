@@ -1,12 +1,11 @@
 """Auto-memory tests (v3.7 L37-6)."""
 from __future__ import annotations
 
-import pytest
 from pathlib import Path
 
+import pytest
 from lyra_core.memory.auto_memory import (
     AutoMemory,
-    MemoryEntry,
     MemoryKind,
     project_slug,
 )

@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from lyra_core.bundle import (
     AgentInstaller,
     Attestation,
@@ -19,7 +18,6 @@ from lyra_core.bundle import (
     sign_attestation,
     verify_attestation,
 )
-
 
 # ---- helpers ----------------------------------------------------------
 

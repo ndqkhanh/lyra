@@ -2,12 +2,9 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.skills.knowledge_transfer import (
     KnowledgeTransferEngine,
     PatternMatch,
-    SkillEmbedding,
-    TransferResult,
     TransferStatus,
 )
 

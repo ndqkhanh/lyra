@@ -14,7 +14,6 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-
 # (group, chord, description)
 _KEYBINDINGS_HELP: tuple[tuple[str, str, str], ...] = (
     ("Completion", "/",            "open slash-command palette"),

@@ -14,15 +14,15 @@ from __future__ import annotations
 import datetime as _dt
 import json
 import subprocess
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
-from typing import Iterable, Literal, Mapping, Optional
+from typing import Literal
 
 from rich.console import RenderableType
 from rich.panel import Panel
 from rich.table import Table
-
 
 Outcome = Literal["productive", "reverted", "abandoned"]
 
@@ -116,7 +116,7 @@ def render_yield(rep: YieldReport) -> RenderableType:
 
 # ---- private helpers ------------------------------------------------------
 
-def _read_session(path: Path) -> Optional[Mapping]:
+def _read_session(path: Path) -> Mapping | None:
     rows = [json.loads(line) for line in path.read_text().splitlines()
             if line.strip()]
     rows = [r for r in rows if r.get("kind") == "turn"]

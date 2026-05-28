@@ -24,17 +24,16 @@ sourcing + ``env``.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, Optional
 
 
-def parse_dotenv(content: str) -> Dict[str, str]:
+def parse_dotenv(content: str) -> dict[str, str]:
     """Parse a ``.env`` file body into a dict.
 
     Returns a fresh dict on every call (no module-level cache); the
     parser is pure, so callers can safely memoise at a higher level if
     they want.
     """
-    out: Dict[str, str] = {}
+    out: dict[str, str] = {}
     for raw in content.splitlines():
         line = raw.strip()
         if not line or line.startswith("#"):
@@ -57,7 +56,7 @@ def parse_dotenv(content: str) -> Dict[str, str]:
     return out
 
 
-def load_dotenv_file(path: Path) -> Optional[Dict[str, str]]:
+def load_dotenv_file(path: Path) -> dict[str, str] | None:
     """Read and parse a ``.env`` file from *path*.
 
     Returns ``None`` if the file is missing so callers can use this as
@@ -72,7 +71,7 @@ def load_dotenv_file(path: Path) -> Optional[Dict[str, str]]:
     return parse_dotenv(body)
 
 
-def find_dotenv_path(start: Optional[Path] = None) -> Optional[Path]:
+def find_dotenv_path(start: Path | None = None) -> Path | None:
     """Walk up from *start* looking for a ``.env`` file.
 
     Mirrors claw-code's "nearest ancestor wins" lookup so users who
@@ -95,7 +94,7 @@ def find_dotenv_path(start: Optional[Path] = None) -> Optional[Path]:
     return None
 
 
-def dotenv_value(key: str) -> Optional[str]:
+def dotenv_value(key: str) -> str | None:
     """Look up *key* in the nearest-ancestor ``.env`` file.
 
     Searches the current working directory first and walks up to the

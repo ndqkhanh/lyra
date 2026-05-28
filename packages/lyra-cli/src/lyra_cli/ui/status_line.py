@@ -1,8 +1,8 @@
 """Status line - Fixed at bottom below input"""
 
-import sys
 import shutil
-from typing import TextIO, Optional
+import sys
+from typing import TextIO
 
 from .colors import ColorEngine
 
@@ -22,8 +22,8 @@ class StatusLine:
         self.colors = ColorEngine()
 
         # Enhanced features
-        self.context_percentage: Optional[int] = None
-        self.permission_mode: Optional[str] = None
+        self.context_percentage: int | None = None
+        self.permission_mode: str | None = None
 
     def get_terminal_size(self) -> tuple[int, int]:
         """Get terminal size (width, height)"""
@@ -34,8 +34,8 @@ class StatusLine:
         self,
         mode: str | None = None,
         hints: list[str] | None = None,
-        context_percentage: Optional[int] = None,
-        permission_mode: Optional[str] = None
+        context_percentage: int | None = None,
+        permission_mode: str | None = None
     ) -> None:
         """Update status line content
 

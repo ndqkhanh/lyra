@@ -24,9 +24,7 @@ from __future__ import annotations
 import json
 
 import pytest
-
 from lyra_core.plan.artifact import Plan, PlanValidationError, load_plan
-
 
 _FRONTMATTER = (
     "session_id: test-01HZZ\n"

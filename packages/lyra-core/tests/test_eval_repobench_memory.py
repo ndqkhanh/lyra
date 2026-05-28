@@ -15,7 +15,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-
 from lyra_core.eval.repobench_memory import (
     EvalContext,
     EvalMetrics,

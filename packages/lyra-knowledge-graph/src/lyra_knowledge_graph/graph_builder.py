@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-from .exceptions import NodeNotFoundError, EdgeNotFoundError
+from .exceptions import EdgeNotFoundError, NodeNotFoundError
 
 
 class NodeType(Enum):

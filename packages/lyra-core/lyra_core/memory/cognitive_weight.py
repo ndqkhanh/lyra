@@ -8,10 +8,9 @@ successful outcomes get higher weights; those with failures get lower weights.
 Based on MEMTIER research (docs/152-memtier-3-tier-architecture-and-retrieval.md)
 """
 
-from typing import List, Dict, Optional
+import sqlite3
 from dataclasses import dataclass
 from datetime import datetime
-import sqlite3
 
 
 @dataclass
@@ -152,7 +151,7 @@ class CognitiveWeightAttributor:
 
         return weighted_score
 
-    def get_entry_stats(self, entry_id: str) -> Optional[Dict]:
+    def get_entry_stats(self, entry_id: str) -> dict | None:
         """Get statistics for a memory entry."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -204,7 +203,7 @@ class CognitiveWeightAttributor:
 
 
 # Integration with existing retrieval
-def apply_cognitive_weights(results: List[Dict], attributor: CognitiveWeightAttributor) -> List[Dict]:
+def apply_cognitive_weights(results: list[dict], attributor: CognitiveWeightAttributor) -> list[dict]:
     """
     Apply cognitive weights to retrieval results.
 

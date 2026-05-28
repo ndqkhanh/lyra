@@ -20,7 +20,6 @@ makes the tool safe to register only when the user actually opts in.
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.tools.lsp import LSPBackend, LSPUnavailable, make_lsp_tool
 
 

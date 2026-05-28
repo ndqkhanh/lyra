@@ -1,7 +1,6 @@
 """ANSI color engine for terminal styling"""
 
 from dataclasses import dataclass
-from typing import Literal
 
 
 @dataclass(frozen=True)

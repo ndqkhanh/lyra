@@ -13,8 +13,9 @@ This preserves deterministic unit tests while enabling real deployment.
 from __future__ import annotations
 
 from collections import deque
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Any, Iterable
+from typing import Any
 
 from ...lsp_backend.errors import FeatureUnavailable
 from ..adapter import ChannelAdapter, GatewayError, InboundMessage, OutboundMessage

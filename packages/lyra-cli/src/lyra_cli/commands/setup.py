@@ -26,7 +26,6 @@ from __future__ import annotations
 import json as _json
 import os
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -44,7 +43,6 @@ from ..diagnostics import (
     probe_providers,
     run_all,
 )
-
 
 _console = Console()
 
@@ -83,14 +81,14 @@ def _user_env_path() -> Path:
 
 
 def setup_command(
-    provider: Optional[str] = typer.Option(
+    provider: str | None = typer.Option(
         None, "--provider",
         help="Provider slug to pre-select (deepseek/anthropic/openai/...).",
     ),
-    model: Optional[str] = typer.Option(
+    model: str | None = typer.Option(
         None, "--model", help="Default model alias to record.",
     ),
-    api_key: Optional[str] = typer.Option(
+    api_key: str | None = typer.Option(
         None, "--api-key",
         help=(
             "Provider API key. Stored under $LYRA_HOME/.env. "

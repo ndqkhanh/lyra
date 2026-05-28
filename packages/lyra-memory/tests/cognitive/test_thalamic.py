@@ -2,7 +2,7 @@
 
 import pytest
 
-from lyra_memory.cognitive.thalamic import ThalamicGateway, ThalamicGateResult
+from lyra_memory.cognitive.thalamic import ThalamicGateResult, ThalamicGateway
 
 
 class StubLLM:

@@ -10,7 +10,7 @@ import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -20,10 +20,10 @@ class TemplateVariable:
     name: str
     prompt: str
     required: bool
-    pattern: Optional[str] = None
-    choices: Optional[list[str]] = None
+    pattern: str | None = None
+    choices: list[str] | None = None
     multiline: bool = False
-    default: Optional[str] = None
+    default: str | None = None
 
 
 class SkillTemplateEngine:

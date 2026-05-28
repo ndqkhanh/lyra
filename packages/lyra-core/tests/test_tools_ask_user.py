@@ -4,7 +4,6 @@ from __future__ import annotations
 import json
 
 import pytest
-
 from lyra_core.tools.ask_user import (
     AskUserPrompt,
     AskUserQuestionTool,

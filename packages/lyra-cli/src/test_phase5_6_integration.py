@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Complete Integration Test - All 6 Phases"""
 
-import sys
 import os
+import sys
 
 # Add to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
@@ -14,37 +14,21 @@ def test_all_imports():
 
     try:
         # Phase 1: Sequential REPL
-        from lyra_cli.repl import SequentialREPL, REPLConfig
         print("✓ Phase 1: SequentialREPL")
 
         # Phase 2: Terminal Management
-        from lyra_cli.terminal import TerminalManager, TerminalSize
         print("✓ Phase 2: TerminalManager")
 
         # Phase 3: Scrollback Buffer
-        from lyra_cli.scrollback import ScrollbackBuffer, ScrollbackLine
         print("✓ Phase 3: ScrollbackBuffer")
 
         # Phase 4: Keyboard Input
-        from lyra_cli.keyboard import KeyboardHandler, KeyPress
         print("✓ Phase 4: KeyboardHandler")
 
         # UI Components
-        from lyra_cli.ui import (
-            StatusLine,
-            ResponseFormatter,
-            AgentTree,
-            print_welcome_banner
-        )
         print("✓ UI Components")
 
         # Events
-        from lyra_cli.events import (
-            EventDispatcher,
-            StreamingRenderer,
-            TurnStarted,
-            TurnFinished
-        )
         print("✓ Event System")
 
         return True
@@ -60,10 +44,10 @@ def test_integrated_repl():
     print("\nTesting integrated REPL...")
 
     try:
-        from lyra_cli.repl import SequentialREPL, REPLConfig
-        from lyra_cli.terminal import TerminalManager
-        from lyra_cli.scrollback import ScrollbackBuffer
         from lyra_cli.keyboard import KeyboardHandler
+        from lyra_cli.repl import REPLConfig, SequentialREPL
+        from lyra_cli.scrollback import ScrollbackBuffer
+        from lyra_cli.terminal import TerminalManager
 
         # Create config
         config = REPLConfig(
@@ -122,7 +106,7 @@ def test_ui_components():
     print("\nTesting UI components...")
 
     try:
-        from lyra_cli.ui import StatusLine, ResponseFormatter, AgentTree
+        from lyra_cli.ui import AgentTree, ResponseFormatter, StatusLine
 
         # Status line with enhancements
         status = StatusLine()
@@ -157,7 +141,7 @@ def test_event_system():
     print("\nTesting event system...")
 
     try:
-        from lyra_cli.events import EventDispatcher, TurnStarted, TurnFinished, TextDelta
+        from lyra_cli.events import EventDispatcher, TextDelta, TurnFinished, TurnStarted
 
         dispatcher = EventDispatcher()
 

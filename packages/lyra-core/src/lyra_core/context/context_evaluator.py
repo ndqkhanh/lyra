@@ -45,7 +45,7 @@ class ContextMetrics:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "ContextMetrics":
+    def from_dict(cls, d: dict[str, Any]) -> ContextMetrics:
         return cls(**d)
 
 

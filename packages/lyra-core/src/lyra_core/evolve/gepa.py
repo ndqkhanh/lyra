@@ -68,7 +68,7 @@ class EvolveCandidate:
     generation: int
     parents: tuple[str, ...] = ()
 
-    def dominates(self, other: "EvolveCandidate") -> bool:
+    def dominates(self, other: EvolveCandidate) -> bool:
         """Pareto dominance over (score↑, length↓).
 
         ``self`` dominates ``other`` iff every objective is at-least-as-

@@ -2,10 +2,8 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.memory.encoder import LLMEncoder, RuleEncoder, Turn
 from lyra_core.memory.schema import FragmentType, MemoryTier
-
 
 # ---------------------------------------------------------------------------
 # Helpers

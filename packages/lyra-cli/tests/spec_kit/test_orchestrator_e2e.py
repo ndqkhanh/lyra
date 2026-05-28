@@ -1,7 +1,8 @@
 """End-to-end orchestrator tests."""
 
-import pytest
 from pathlib import Path
+
+import pytest
 from lyra_cli.spec_kit.orchestrator import Orchestrator
 
 

@@ -7,7 +7,6 @@ dense embedding model supporting 100+ languages with 8192 token context.
 Used for HippoRAG 2 dense embedding fusion.
 """
 
-from typing import List, Union, Optional
 import numpy as np
 
 
@@ -64,13 +63,13 @@ class BGE_M3_Embedder:
 
     def encode(
         self,
-        texts: Union[str, List[str]],
+        texts: str | list[str],
         batch_size: int = 32,
         max_length: int = 8192,
         return_dense: bool = True,
         return_sparse: bool = False,
         return_colbert: bool = False
-    ) -> Union[np.ndarray, dict]:
+    ) -> np.ndarray | dict:
         """
         Encode texts to embeddings.
 
@@ -119,7 +118,7 @@ class BGE_M3_Embedder:
 
     def encode_queries(
         self,
-        queries: Union[str, List[str]],
+        queries: str | list[str],
         batch_size: int = 32
     ) -> np.ndarray:
         """
@@ -142,7 +141,7 @@ class BGE_M3_Embedder:
 
     def encode_corpus(
         self,
-        documents: List[str],
+        documents: list[str],
         batch_size: int = 32
     ) -> np.ndarray:
         """
@@ -229,7 +228,7 @@ class SentenceTransformerEmbedder:
 
     def encode(
         self,
-        texts: Union[str, List[str]],
+        texts: str | list[str],
         batch_size: int = 32
     ) -> np.ndarray:
         """Encode texts to embeddings."""
@@ -251,11 +250,11 @@ class SentenceTransformerEmbedder:
             return embeddings[0]
         return embeddings
 
-    def encode_queries(self, queries: Union[str, List[str]], batch_size: int = 32) -> np.ndarray:
+    def encode_queries(self, queries: str | list[str], batch_size: int = 32) -> np.ndarray:
         """Encode queries."""
         return self.encode(queries, batch_size)
 
-    def encode_corpus(self, documents: List[str], batch_size: int = 32) -> np.ndarray:
+    def encode_corpus(self, documents: list[str], batch_size: int = 32) -> np.ndarray:
         """Encode corpus."""
         return self.encode(documents, batch_size)
 
@@ -275,7 +274,7 @@ def get_embedder(
     model_type: str = "bge-m3",
     device: str = "cpu",
     **kwargs
-) -> Union[BGE_M3_Embedder, SentenceTransformerEmbedder]:
+) -> BGE_M3_Embedder | SentenceTransformerEmbedder:
     """
     Get embedder instance.
 

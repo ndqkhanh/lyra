@@ -10,7 +10,6 @@ These tests assert the transition table + illegal-transition rejection.
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.tdd.state import (
     IllegalTDDTransition,
     TDDState,

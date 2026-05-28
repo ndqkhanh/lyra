@@ -1,7 +1,7 @@
 """Meta-editing phase for two-phase loop."""
+from lyra_cli.evolution.actions import EditAction
 from lyra_cli.evolution.context import EvolutionContext
 from lyra_cli.evolution.meta_agent import MetaAgent
-from lyra_cli.evolution.actions import EditAction
 
 
 def meta_editing_phase(

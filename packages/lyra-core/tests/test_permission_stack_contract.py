@@ -25,8 +25,6 @@ Six RED tests:
 """
 from __future__ import annotations
 
-import pytest
-
 
 def test_stack_permits_benign_call() -> None:
     from lyra_core.permissions.stack import PermissionStack, StackInput

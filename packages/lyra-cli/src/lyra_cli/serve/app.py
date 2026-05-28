@@ -20,11 +20,10 @@ from __future__ import annotations
 import json
 import logging
 import os
-import time
-import urllib.parse
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import asdict
 from importlib import metadata as importlib_metadata
-from typing import Any, Callable, Iterable, Mapping
+from typing import Any
 from wsgiref.simple_server import WSGIRequestHandler, make_server
 
 from ..client import ChatRequest, LyraClient
@@ -259,7 +258,7 @@ def _handle_stream(environ: Mapping[str, Any], client: LyraClient) -> _Response:
     def sse() -> Iterable[bytes]:
         for event in client.stream(request):
             data = json.dumps({"kind": event.kind, "payload": event.payload}, default=_jsonable)
-            yield f"data: {data}\n\n".encode("utf-8")
+            yield f"data: {data}\n\n".encode()
         yield b"data: [DONE]\n\n"
 
     return _Response(

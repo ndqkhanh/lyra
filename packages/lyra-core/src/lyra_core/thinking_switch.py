@@ -21,7 +21,7 @@ import math
 import re
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -195,7 +195,7 @@ class ThinkingSwitch:
     ThinkingMode.DEEP
     """
 
-    def __init__(self, token_budget_override: Optional[dict[ThinkingMode, tuple[int, int]]] = None):
+    def __init__(self, token_budget_override: dict[ThinkingMode, tuple[int, int]] | None = None):
         self._budgets: dict[ThinkingMode, tuple[int, int]] = (
             token_budget_override if token_budget_override is not None
             else _MODE_BUDGETS

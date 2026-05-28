@@ -1,21 +1,19 @@
 """Integrated REPL with Claude Code-style UI"""
 
 import sys
+
 import anthropic
-from typing import Optional
 
 from lyra_cli.events import (
     EventDispatcher,
     StreamingRenderer,
-    TurnStarted,
     TextDelta,
-    ToolStarted,
-    ToolFinished,
     TurnFinished,
+    TurnStarted,
 )
 from lyra_cli.ui import (
-    ResponseFormatter,
     AgentTree,
+    ResponseFormatter,
     print_welcome_banner,
 )
 
@@ -107,7 +105,7 @@ class IntegratedREPL:
             user_name=None
         )
 
-    def get_user_input(self) -> Optional[str]:
+    def get_user_input(self) -> str | None:
         """Get user input - inline with conversation"""
         try:
             # Simple inline input prompt
@@ -126,7 +124,7 @@ class IntegratedREPL:
             self.running = False
             return None
 
-    def _handle_command(self, command: str) -> Optional[str]:
+    def _handle_command(self, command: str) -> str | None:
         """Handle slash commands"""
         cmd = command.lower().strip()
 

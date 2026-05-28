@@ -35,7 +35,6 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-
 # Colour tokens — keep in sync with banner.py.
 C_CYAN = "#00E5FF"
 C_INDIGO = "#7C4DFF"
@@ -613,7 +612,7 @@ def shell_output_renderable(cmd: str, text: str, *, is_error: bool = False) -> P
     border = C_RED if is_error else C_DIM
     title_color = C_RED if is_error else C_DIM
     return Panel(
-        Text(text.strip() or f"(exit 0)", style="bright_white"),
+        Text(text.strip() or "(exit 0)", style="bright_white"),
         box=ROUNDED,
         border_style=border,
         padding=(1, 2),
@@ -1193,7 +1192,7 @@ def theme_set_renderable(name: str) -> Panel:
         ("● ", f"bold {success}"),
         ("● ", f"bold {warning}"),
         ("  ", ""),
-        (f"now wearing: ", C_DIM),
+        ("now wearing: ", C_DIM),
         (name, f"bold {accent}"),
     )
     welcome_line = Text(welcome, style=f"italic {C_DIM}")

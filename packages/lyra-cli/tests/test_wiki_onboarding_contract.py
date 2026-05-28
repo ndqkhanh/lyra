@@ -3,11 +3,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from lyra_cli.interactive.session import InteractiveSession
 from lyra_core.wiki import (
-    WikiBundle,
     generate_onboarding,
     generate_wiki,
 )

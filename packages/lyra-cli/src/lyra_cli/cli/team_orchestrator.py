@@ -6,7 +6,7 @@ Coordinates multiple agents working in parallel on a task.
 from __future__ import annotations
 
 import asyncio
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from enum import Enum
 

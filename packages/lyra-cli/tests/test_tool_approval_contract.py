@@ -20,8 +20,6 @@ Six RED tests:
 """
 from __future__ import annotations
 
-import pytest
-
 
 def test_unknown_tool_returns_prompt() -> None:
     from lyra_cli.interactive.tool_approval import ToolApprovalCache

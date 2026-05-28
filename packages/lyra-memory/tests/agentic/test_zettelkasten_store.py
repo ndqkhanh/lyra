@@ -182,7 +182,7 @@ class TestZettelkastenMemoryStore:
         store.llm.responses = [
             '{"should_store": true, "keywords": ["refined"], "tags": ["refined"], "contextual_description": "refined", "merge_target_index": null, "merged_content": null, "reason": "refine"}',
             "[]",
-            f'{{"should_update": true, "reason": "refined", "new_content": "updated original", "new_keywords": ["updated"], "new_tags": ["updated"]}}',
+            '{"should_update": true, "reason": "refined", "new_content": "updated original", "new_keywords": ["updated"], "new_tags": ["updated"]}',
         ]
 
         refined = await store.write("more specific original knowledge")

@@ -4,8 +4,8 @@ from __future__ import annotations
 import enum
 import json
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 
 class SubjectiveVerdict(str, enum.Enum):

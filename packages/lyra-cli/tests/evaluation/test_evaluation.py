@@ -1,12 +1,10 @@
 """Tests for Phase 7 & 8 Evaluation modules."""
 
 import pytest
-
 from lyra_cli.evaluation import (
     BenchmarkFramework,
     InnovationEngine,
 )
-
 
 # ============================================================================
 # Benchmark Tests

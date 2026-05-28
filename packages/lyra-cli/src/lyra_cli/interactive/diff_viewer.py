@@ -17,12 +17,11 @@ from pathlib import Path
 from typing import Any
 
 from prompt_toolkit import Application
+from prompt_toolkit.formatted_text import FormattedText
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import HSplit, Layout, VSplit, Window
 from prompt_toolkit.layout.controls import FormattedTextControl
-from prompt_toolkit.formatted_text import FormattedText
 from prompt_toolkit.styles import Style
-
 
 _STYLE = Style.from_dict({
     "left-pane": "bg:#1a1a2e #ffffff",

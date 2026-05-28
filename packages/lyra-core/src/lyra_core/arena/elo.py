@@ -12,9 +12,8 @@ wins/losses use the standard formula ``R' = R + K * (S - E)``.
 """
 from __future__ import annotations
 
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
-from typing import Callable, Iterable, Mapping, Sequence
-
 
 __all__ = [
     "Arena",

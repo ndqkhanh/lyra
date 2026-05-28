@@ -1,13 +1,14 @@
 """CLI implementation of AgentOutputCallback with Fixed Bottom Layout support"""
 
-from rich.console import Console
-from typing import Dict, Any, Optional
 import time
+from typing import Any
+
+from rich.console import Console
 
 from lyra_cli.agent.callbacks import AgentOutputCallback
+from lyra_cli.ui.colors import ColorEngine
 from lyra_cli.ui.fixed_layout import FixedBottomLayout, StreamingRenderer
 from lyra_cli.ui.symbols import SymbolRegistry
-from lyra_cli.ui.colors import ColorEngine
 
 
 class FixedLayoutAgentHandler(AgentOutputCallback):
@@ -17,9 +18,9 @@ class FixedLayoutAgentHandler(AgentOutputCallback):
         self.layout = layout
         self.symbols = SymbolRegistry()
         self.colors = ColorEngine()
-        self.renderer: Optional[StreamingRenderer] = None
-        self.current_turn: Optional[str] = None
-        self.turn_start_time: Optional[float] = None
+        self.renderer: StreamingRenderer | None = None
+        self.current_turn: str | None = None
+        self.turn_start_time: float | None = None
         self.tool_count = 0
 
     def on_turn_start(self, turn_id: str) -> None:
@@ -38,7 +39,7 @@ class FixedLayoutAgentHandler(AgentOutputCallback):
         # Initialize streaming renderer
         self.renderer = StreamingRenderer(self.layout)
 
-    def on_tool_use(self, tool: str, args: Dict[str, Any]) -> None:
+    def on_tool_use(self, tool: str, args: dict[str, Any]) -> None:
         """Called when agent uses a tool"""
         self.tool_count += 1
 
@@ -52,7 +53,7 @@ class FixedLayoutAgentHandler(AgentOutputCallback):
         if self.renderer:
             self.renderer.append_delta(chunk)
 
-    def on_turn_end(self, turn_id: str, result: Dict[str, Any]) -> None:
+    def on_turn_end(self, turn_id: str, result: dict[str, Any]) -> None:
         """Called when agent turn ends"""
         # Finalize streaming
         if self.renderer:
@@ -143,8 +144,8 @@ class CLIAgentHandler(AgentOutputCallback):
         self.console = console
         from lyra_cli.cli.output import OutputFormatter
         self.formatter = OutputFormatter(console)
-        self.current_turn: Optional[str] = None
-        self.turn_start_time: Optional[float] = None
+        self.current_turn: str | None = None
+        self.turn_start_time: float | None = None
         self.tool_count = 0
 
     def on_turn_start(self, turn_id: str) -> None:
@@ -154,7 +155,7 @@ class CLIAgentHandler(AgentOutputCallback):
         self.tool_count = 0
         self.formatter.status_message("Processing your message...", spinner="⏺")
 
-    def on_tool_use(self, tool: str, args: Dict[str, Any]) -> None:
+    def on_tool_use(self, tool: str, args: dict[str, Any]) -> None:
         """Called when agent uses a tool"""
         self.tool_count += 1
         self.console.print(f"  ⎿ {tool}", style="dim")
@@ -163,7 +164,7 @@ class CLIAgentHandler(AgentOutputCallback):
         """Called for streaming text chunks"""
         self.console.print(chunk, end="", markup=False)
 
-    def on_turn_end(self, turn_id: str, result: Dict[str, Any]) -> None:
+    def on_turn_end(self, turn_id: str, result: dict[str, Any]) -> None:
         """Called when agent turn ends"""
         self.console.print()
 

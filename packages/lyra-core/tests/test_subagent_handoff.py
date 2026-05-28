@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.subagent.handoff import (
     HANDOFF_SEED_CAP_BYTES,
     REQUEST_MORE_CONTEXT_TOOL_NAME,
@@ -15,7 +14,6 @@ from lyra_core.subagent.handoff import (
     make_seed_from_parent,
     request_more_context_tool_handler,
 )
-
 
 # ────────────────────────────────────────────────────────────────
 # HandoffSeed validation

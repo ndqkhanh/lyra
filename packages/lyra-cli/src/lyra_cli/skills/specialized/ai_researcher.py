@@ -179,17 +179,17 @@ class AIResearcher:
             primary_question=question_text,
             sub_questions=(
                 f"What is the current state-of-the-art for {question_text.lower().rstrip('?')}?",
-                f"What are the key limitations of existing approaches to this problem?",
-                f"How does computational budget affect the proposed approach?",
+                "What are the key limitations of existing approaches to this problem?",
+                "How does computational budget affect the proposed approach?",
                 f"How does the approach generalize across different {domain} benchmarks?",
             ),
             null_hypothesis=(
-                f"The proposed method shows no statistically significant improvement over "
-                f"existing baselines for the stated problem."
+                "The proposed method shows no statistically significant improvement over "
+                "existing baselines for the stated problem."
             ),
             alternative_hypothesis=(
-                f"The proposed method achieves statistically significant improvement over "
-                f"existing baselines across multiple evaluation metrics."
+                "The proposed method achieves statistically significant improvement over "
+                "existing baselines across multiple evaluation metrics."
             ),
             scope_boundaries=(
                 f"Limited to {domain} tasks and benchmarks",
@@ -222,8 +222,8 @@ class AIResearcher:
             LiteratureSection(
                 title="Current State-of-the-Art",
                 description=(
-                    f"Latest methods and benchmarks that represent the current "
-                    f"best performance on relevant tasks"
+                    "Latest methods and benchmarks that represent the current "
+                    "best performance on relevant tasks"
                 ),
                 key_papers=(
                     f"Top-performing methods on {domain} benchmarks",
@@ -273,8 +273,8 @@ class AIResearcher:
             ExperimentDesign(
                 name="Main Comparison Experiment",
                 purpose=(
-                    f"Compare proposed method against established baselines on "
-                    f"standard benchmarks"
+                    "Compare proposed method against established baselines on "
+                    "standard benchmarks"
                 ),
                 independent_variables=("Method variant (proposed vs baselines)",
                                        "Hyperparameter configuration"),

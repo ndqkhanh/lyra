@@ -69,8 +69,8 @@ from .maven import (
     MavenResult,
     MavenVerdict,
     ModelIdentity,
-    ReviewPerspective,
     ReviewerRole,
+    ReviewPerspective,
 )
 from .monitor import SafetyFlag, SafetyMonitor
 from .parallax import CognitiveContext, ContextType, ExecutionPlan, ParallaxConfig, SeparationGate
@@ -102,13 +102,6 @@ from .spectral_guardrails import (
     SpectralResult,
     TokenAnomaly,
 )
-from .zkagent import (
-    ChainVerification,
-    ReceiptStatus,
-    ReceiptStore,
-    ToolReceipt,
-    zkAgent,
-)
 from .validate_pipeline import (
     PipelineResult,
     StageResult,
@@ -116,6 +109,13 @@ from .validate_pipeline import (
     ValidatePipeline,
     ValidationDecision,
     ValidatorConfig,
+)
+from .zkagent import (
+    ChainVerification,
+    ReceiptStatus,
+    ReceiptStore,
+    ToolReceipt,
+    zkAgent,
 )
 
 __all__ = [

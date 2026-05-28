@@ -13,9 +13,9 @@ import hashlib
 import os
 import time
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Callable
 
 
 class ReloadStatus(Enum):

@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from .personalities.butler import ButlerPersonality
+from .personalities.cowboy import CowboyPersonality
+from .personalities.drill_sergeant import DrillSergeantPersonality
 from .personalities.personality_base import PersonalityBase, PersonalityTrait, VoiceResponse
 from .personalities.pirate import PiratePersonality
 from .personalities.robot import RobotPersonality
-from .personalities.butler import ButlerPersonality
-from .personalities.cowboy import CowboyPersonality
 from .personalities.zen_master import ZenMasterPersonality
-from .personalities.drill_sergeant import DrillSergeantPersonality
 
 
 class PersonalityRegistry:

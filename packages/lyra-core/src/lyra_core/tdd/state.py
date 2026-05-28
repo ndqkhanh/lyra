@@ -24,10 +24,9 @@ thin wrapper that delegates to :class:`TDDStateMachine`.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Any
-
 
 __all__ = [
     "GreenPassArtifact",
@@ -86,20 +85,20 @@ class HistoryEntry(tuple):
 
     def __new__(
         cls,
-        from_state: "TDDPhase",
-        to_state: "TDDPhase",
+        from_state: TDDPhase,
+        to_state: TDDPhase,
         reason: str = "",
-    ) -> "HistoryEntry":
+    ) -> HistoryEntry:
         instance = super().__new__(cls, (from_state, to_state))
         instance._reason = reason
         return instance
 
     @property
-    def from_state(self) -> "TDDPhase":
+    def from_state(self) -> TDDPhase:
         return self[0]
 
     @property
-    def to_state(self) -> "TDDPhase":
+    def to_state(self) -> TDDPhase:
         return self[1]
 
     @property

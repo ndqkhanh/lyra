@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import asyncio
 from abc import ABC, abstractmethod
-from collections import defaultdict
 from typing import Any
 
 from lyra_core.orchestration.protocol import Message, MessageType

@@ -5,9 +5,9 @@ Extracts goal-relevant lines from large observations before action model.
 Achieves 95%+ compression (10,000 lines → 50 lines).
 """
 
-from dataclasses import dataclass
-from typing import List, Optional, Dict, Any
 import re
+from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass
@@ -18,7 +18,7 @@ class PruningResult:
     pruned_lines: int
     compression_ratio: float
     relevant_content: str
-    filtered_keywords: List[str]
+    filtered_keywords: list[str]
 
 
 class ObservationPruner:
@@ -45,7 +45,7 @@ class ObservationPruner:
         self,
         observation: str,
         goal: str,
-        context: Optional[Dict[str, Any]] = None
+        context: dict[str, Any] | None = None
     ) -> PruningResult:
         """
         Prune observation to extract goal-relevant lines.
@@ -101,7 +101,7 @@ class ObservationPruner:
             filtered_keywords=goal_keywords,
         )
 
-    def _extract_keywords(self, text: str) -> List[str]:
+    def _extract_keywords(self, text: str) -> list[str]:
         """Extract important keywords from text."""
         # Remove common stop words
         stop_words = {
@@ -125,8 +125,8 @@ class ObservationPruner:
     def _score_relevance(
         self,
         line: str,
-        goal_keywords: List[str],
-        context: Optional[Dict[str, Any]] = None
+        goal_keywords: list[str],
+        context: dict[str, Any] | None = None
     ) -> float:
         """
         Score line relevance to goal.
@@ -171,7 +171,7 @@ class ObservationPruner:
         # Cap at 1.0
         return min(score, 1.0)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get pruning statistics."""
         overall_compression = (
             (self.total_original - self.total_pruned) / self.total_original
@@ -213,7 +213,7 @@ class SmartObservationPruner(ObservationPruner):
         self,
         line: str,
         goal: str,
-        context: Optional[Dict[str, Any]] = None
+        context: dict[str, Any] | None = None
     ) -> float:
         """
         Score relevance using small model.
@@ -230,7 +230,7 @@ class SmartObservationPruner(ObservationPruner):
         self,
         observation: str,
         goal: str,
-        context: Optional[Dict[str, Any]] = None
+        context: dict[str, Any] | None = None
     ) -> PruningResult:
         """
         Prune with optional model-based scoring.

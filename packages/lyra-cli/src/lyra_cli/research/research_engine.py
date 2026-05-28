@@ -10,25 +10,23 @@ and adaptively selects strategies via StrategySelector (UCB1 bandit).
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
 
-from lyra_cli.research.trajectory import (
-    ResearchAction,
-    ResearchResult,
-    ResearchTrajectory,
-)
-from lyra_cli.research.source_evaluator import (
-    SourceCredibility,
-    SourceType,
-)
 from lyra_cli.research.knowledge_graph import (
     Finding,
     FindingRelation,
     ResearchKnowledgeGraph,
 )
+from lyra_cli.research.source_evaluator import (
+    SourceCredibility,
+)
 from lyra_cli.research.strategy_selector import (
     StrategySelector,
     StrategyType,
+)
+from lyra_cli.research.trajectory import (
+    ResearchAction,
+    ResearchResult,
+    ResearchTrajectory,
 )
 
 
@@ -76,10 +74,10 @@ class MultiHopResearchEngine:
 
     def __init__(
         self,
-        strategy_selector: Optional[StrategySelector] = None,
-        source_evaluator: Optional[SourceCredibility] = None,
-        knowledge_graph: Optional[ResearchKnowledgeGraph] = None,
-        trajectory: Optional[ResearchTrajectory] = None,
+        strategy_selector: StrategySelector | None = None,
+        source_evaluator: SourceCredibility | None = None,
+        knowledge_graph: ResearchKnowledgeGraph | None = None,
+        trajectory: ResearchTrajectory | None = None,
         max_hops: int = 5,
         min_confidence: float = 0.3,
     ) -> None:
@@ -91,8 +89,8 @@ class MultiHopResearchEngine:
         self.min_confidence = min_confidence
 
         # Active sub-queries: dict[query_id, ExploreResult]
-        self._pending: Dict[str, ExploreResult] = {}
-        self._completed: Dict[str, ExploreResult] = {}
+        self._pending: dict[str, ExploreResult] = {}
+        self._completed: dict[str, ExploreResult] = {}
         self._action_counter: int = 0
         self._result_counter: int = 0
         self._finding_counter: int = 0
@@ -103,7 +101,7 @@ class MultiHopResearchEngine:
         self,
         query: str,
         query_type: str = "exploratory",
-        strategy: Optional[StrategyType] = None,
+        strategy: StrategyType | None = None,
     ) -> ResearchReport:
         """
         Execute a full multi-hop deep research session.
@@ -150,7 +148,7 @@ class MultiHopResearchEngine:
     def explore(
         self,
         query: str,
-        strategy: Optional[StrategyType] = None,
+        strategy: StrategyType | None = None,
         query_type: str = "exploratory",
     ) -> ExploreResult:
         """Perform a single exploration step (one hop)."""
@@ -169,9 +167,9 @@ class MultiHopResearchEngine:
     def _execute_hop(
         self,
         strategy: StrategyType,
-    ) -> List[ExploreResult]:
+    ) -> list[ExploreResult]:
         """Execute one multi-hop round using the active strategy."""
-        results: List[ExploreResult] = []
+        results: list[ExploreResult] = []
 
         if strategy == StrategyType.BREADTH_FIRST:
             results = self._execute_breadth_first()
@@ -182,14 +180,14 @@ class MultiHopResearchEngine:
 
         return results
 
-    def _execute_breadth_first(self) -> List[ExploreResult]:
+    def _execute_breadth_first(self) -> list[ExploreResult]:
         """
         Explore all pending sub-queries at current depth.
 
         Expands each pending item once, collecting follow-up queries
         into the next pending set.
         """
-        results: List[ExploreResult] = []
+        results: list[ExploreResult] = []
         batch = dict(self._pending)
         self._pending.clear()
 
@@ -212,7 +210,7 @@ class MultiHopResearchEngine:
 
         return results
 
-    def _execute_depth_first(self) -> List[ExploreResult]:
+    def _execute_depth_first(self) -> list[ExploreResult]:
         """
         Follow the highest-confidence pending path to depth limit.
 
@@ -220,7 +218,7 @@ class MultiHopResearchEngine:
         explores it, chaining follow-ups until confidence drops below
         threshold or no more follow-ups exist.
         """
-        results: List[ExploreResult] = []
+        results: list[ExploreResult] = []
 
         # Pick the highest-confidence pending query
         best_qid = self._highest_confidence_pending()
@@ -261,14 +259,14 @@ class MultiHopResearchEngine:
 
         return results
 
-    def _execute_best_first(self) -> List[ExploreResult]:
+    def _execute_best_first(self) -> list[ExploreResult]:
         """
         Use a relevance heuristic to pick the next sub-query globally.
 
         Scores each pending query by confidence and exploration novelty,
         and explores the highest-scoring one.
         """
-        results: List[ExploreResult] = []
+        results: list[ExploreResult] = []
 
         best_qid = self._highest_confidence_pending()
         if best_qid is None:
@@ -301,7 +299,7 @@ class MultiHopResearchEngine:
         query: str,
         strategy: StrategyType,
         depth: int,
-        parent_id: Optional[str],
+        parent_id: str | None,
     ) -> ResearchAction:
         """Create and register a new research action."""
         self._action_counter += 1
@@ -336,7 +334,7 @@ class MultiHopResearchEngine:
         strategy: StrategyType,
     ) -> None:
         """Add findings from an exploration step into the knowledge graph."""
-        prev_finding_id: Optional[str] = None
+        prev_finding_id: str | None = None
 
         for i, text in enumerate(result.findings):
             self._finding_counter += 1
@@ -423,7 +421,7 @@ class MultiHopResearchEngine:
         consensus = self.source_evaluator.get_consensus_score(all_sources)
 
         # Strategy distribution
-        dist: Dict[str, int] = {}
+        dist: dict[str, int] = {}
         for node in self.trajectory._nodes.values():
             dist[node.action.strategy] = dist.get(node.action.strategy, 0) + 1
 
@@ -465,7 +463,7 @@ class MultiHopResearchEngine:
         """Extract action ID from a query ID."""
         return qid.replace("q_", "act_") if qid.startswith("q_") else qid
 
-    def _highest_confidence_pending(self) -> Optional[str]:
+    def _highest_confidence_pending(self) -> str | None:
         """Return the ID of the pending query with highest confidence."""
         if not self._pending:
             return None
@@ -476,8 +474,8 @@ class MultiHopResearchEngine:
 
     @staticmethod
     def _resolve_strategy_type_from_dist(
-        dist: Dict[str, int],
-    ) -> Optional[StrategyType]:
+        dist: dict[str, int],
+    ) -> StrategyType | None:
         """Resolve the dominant strategy type from a distribution dict."""
         if not dist:
             return None

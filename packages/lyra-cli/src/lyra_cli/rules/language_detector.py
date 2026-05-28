@@ -1,7 +1,6 @@
 """Language detector - Detect programming language from file"""
 
 from pathlib import Path
-from typing import Optional
 
 
 class LanguageDetector:
@@ -47,7 +46,7 @@ class LanguageDetector:
     }
 
     @staticmethod
-    def detect_from_path(file_path: Path) -> Optional[str]:
+    def detect_from_path(file_path: Path) -> str | None:
         """Detect language from file path"""
         if isinstance(file_path, str):
             file_path = Path(file_path)
@@ -56,7 +55,7 @@ class LanguageDetector:
         return LanguageDetector.EXTENSIONS.get(extension)
 
     @staticmethod
-    def detect_from_content(content: str) -> Optional[str]:
+    def detect_from_content(content: str) -> str | None:
         """Detect language from file content (basic heuristics)"""
         # Check for shebang
         if content.startswith("#!/usr/bin/env python") or content.startswith("#!/usr/bin/python"):
@@ -81,7 +80,7 @@ class LanguageDetector:
         return None
 
     @staticmethod
-    def detect(file_path: Optional[Path] = None, content: Optional[str] = None) -> Optional[str]:
+    def detect(file_path: Path | None = None, content: str | None = None) -> str | None:
         """Detect language from path or content"""
         if file_path:
             lang = LanguageDetector.detect_from_path(file_path)

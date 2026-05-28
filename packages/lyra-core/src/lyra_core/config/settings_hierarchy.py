@@ -37,7 +37,7 @@ import logging
 from dataclasses import dataclass
 from enum import IntEnum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -239,7 +239,7 @@ class SettingsHierarchy:
         return setting
 
     # ------------------------------------------------------------------ get_value
-    def get_value(self, key: str) -> Optional[SettingValue]:
+    def get_value(self, key: str) -> SettingValue | None:
         """Resolve a setting through the scope hierarchy by priority.
 
         Returns the highest-priority value for *key*, or ``None`` if the key

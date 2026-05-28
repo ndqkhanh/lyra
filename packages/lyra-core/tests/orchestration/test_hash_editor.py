@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.orchestration.hash_editor import (
     ContentAnchor,
     EditResult,
@@ -10,7 +9,6 @@ from lyra_core.orchestration.hash_editor import (
     HashAnchoredEdit,
     HashAnchoredEditor,
 )
-
 
 ORIGINAL_CODE = "def old_function():\n    return 'old'"
 

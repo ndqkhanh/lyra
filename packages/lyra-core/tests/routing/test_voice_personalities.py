@@ -1,13 +1,13 @@
 """Tests for voice personality system."""
 from __future__ import annotations
 
+from lyra_cli.voice.personalities.butler import ButlerPersonality
+from lyra_cli.voice.personalities.cowboy import CowboyPersonality
+from lyra_cli.voice.personalities.drill_sergeant import DrillSergeantPersonality
 from lyra_cli.voice.personalities.personality_base import PersonalityTrait
 from lyra_cli.voice.personalities.pirate import PiratePersonality
 from lyra_cli.voice.personalities.robot import RobotPersonality
-from lyra_cli.voice.personalities.butler import ButlerPersonality
-from lyra_cli.voice.personalities.cowboy import CowboyPersonality
 from lyra_cli.voice.personalities.zen_master import ZenMasterPersonality
-from lyra_cli.voice.personalities.drill_sergeant import DrillSergeantPersonality
 from lyra_cli.voice.personality_engine import PersonalityEngine, PersonalityRegistry
 
 

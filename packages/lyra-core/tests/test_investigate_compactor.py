@@ -10,7 +10,6 @@ model) is exercised separately in ``test_investigate_runner.py``.
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.investigate import (
     CompactionReport,
     ContextLevel,

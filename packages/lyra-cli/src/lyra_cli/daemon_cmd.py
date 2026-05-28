@@ -37,8 +37,9 @@ import argparse
 import asyncio
 import importlib
 import sys
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 # ``harness_eternal`` is an optional sibling — see eternal_factory.py
 # for context. Daemon mode is the heaviest consumer of this dependency
@@ -84,7 +85,6 @@ except ImportError as _exc:  # pragma: no cover — exercised in lean envs
         return _decorator
 
 from lyra_core.cron import CronDaemon, CronJob, CronStore
-
 
 JobRunner = Callable[[CronJob], None]
 

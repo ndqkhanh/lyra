@@ -1,27 +1,23 @@
 """Tests for Phase 3 Learning modules."""
 
-from datetime import datetime
-import pytest
-import tempfile
 import shutil
+import tempfile
+from datetime import datetime
 from pathlib import Path
 
+import pytest
 from lyra_cli.learning.experience_memory import (
-    Strategy,
-    ExperienceRecord,
     ExperienceMemory,
+)
+from lyra_cli.learning.skill_library import (
+    SkillLibrary,
+    VerificationTest,
 )
 from lyra_cli.learning.verifier import (
     Evidence,
     MemoryClaim,
     MemoryVerifier,
 )
-from lyra_cli.learning.skill_library import (
-    VerificationTest,
-    Skill,
-    SkillLibrary,
-)
-
 
 # ============================================================================
 # Experience Memory Tests
@@ -504,19 +500,19 @@ def test_skill_persistence(temp_dir):
 # ECC Learning Tests — Observation Capture, Instinct Extraction, Evolution
 # ============================================================================
 
-from lyra_cli.learning.observation_capture import (
-    Observation,
-    ObservationCapture,
-    get_observation_capture,
-)
 from lyra_cli.learning.instinct_extractor import (
     Instinct,
     InstinctExtractor,
     get_instinct_extractor,
 )
+from lyra_cli.learning.observation_capture import (
+    Observation,
+    ObservationCapture,
+    get_observation_capture,
+)
 from lyra_cli.learning.project_detector import (
-    ProjectDetector,
     EvolutionPipeline,
+    ProjectDetector,
     get_evolution_pipeline,
 )
 

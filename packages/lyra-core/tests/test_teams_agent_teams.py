@@ -7,17 +7,15 @@ be exercised end-to-end without API keys.
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.teams import (
+    TEAMMATE_BLOCK_THRESHOLD,
     LeadSession,
     Mailbox,
     SharedTaskList,
-    TEAMMATE_BLOCK_THRESHOLD,
     TeamCostError,
     TeammateNotFoundError,
     TeammateSpec,
 )
-
 
 # ---- shared task list -------------------------------------------------
 

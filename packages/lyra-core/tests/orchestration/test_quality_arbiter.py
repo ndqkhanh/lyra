@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.orchestration.quality_arbiter import (
     QualityArbiter,
     QualityDimension,

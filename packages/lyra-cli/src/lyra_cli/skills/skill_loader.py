@@ -1,7 +1,7 @@
 """Skill registry and loader"""
 
-from typing import List
 from pathlib import Path
+
 from .skill_manager import SkillDefinition
 
 
@@ -19,7 +19,7 @@ class SkillRegistry:
         """Get skill by name"""
         return self.skills.get(name)
 
-    def list(self) -> List[SkillDefinition]:
+    def list(self) -> list[SkillDefinition]:
         """List all skills"""
         return list(self.skills.values())
 

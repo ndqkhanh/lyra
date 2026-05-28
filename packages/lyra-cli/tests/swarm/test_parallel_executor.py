@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_cli.swarm.parallel_executor import (
     ExecutorConfig,
     ParallelExecutor,

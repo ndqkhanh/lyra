@@ -9,13 +9,8 @@ Tests the full safety pipeline integration with the existing permissions engine:
     6. Alignment tracking
 """
 
-import asyncio
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
-from lyra_harness_core.messages import ToolCall
-
 from lyra_core.permissions import (
     LyraMode,
     PermissionStack,
@@ -26,6 +21,7 @@ from lyra_core.safety.alignment_monitor import AlignmentMonitor
 from lyra_core.safety.approval_gate import ApprovalGate, GateAction, RiskLevel
 from lyra_core.safety.audit_engine import AuditLogger, Decision
 from lyra_core.safety.reasoning_monitor import ReasoningMonitor
+from lyra_harness_core.messages import ToolCall
 
 try:
     from lyra_core.safety.adversarial_verifier import (

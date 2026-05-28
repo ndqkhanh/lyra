@@ -9,9 +9,10 @@ from __future__ import annotations
 import json
 import os
 import uuid
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 __all__ = ["CronJob", "CronStore"]
 
@@ -31,7 +32,7 @@ class CronJob:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "CronJob":
+    def from_dict(cls, d: dict[str, Any]) -> CronJob:
         return cls(
             id=d["id"],
             prompt=d["prompt"],

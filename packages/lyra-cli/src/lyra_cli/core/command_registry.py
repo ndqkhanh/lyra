@@ -1,6 +1,6 @@
 """Command registry for loading and managing commands."""
 from pathlib import Path
-from typing import Dict, List, Optional
+
 import yaml
 
 from .command_metadata import CommandMetadata
@@ -9,11 +9,11 @@ from .command_metadata import CommandMetadata
 class CommandRegistry:
     """Registry for loading and managing commands."""
 
-    def __init__(self, command_dirs: Optional[List[Path]] = None):
+    def __init__(self, command_dirs: list[Path] | None = None):
         self.command_dirs = command_dirs or []
-        self._commands: Dict[str, CommandMetadata] = {}
+        self._commands: dict[str, CommandMetadata] = {}
 
-    def load_commands(self) -> Dict[str, CommandMetadata]:
+    def load_commands(self) -> dict[str, CommandMetadata]:
         """Load all commands from configured directories."""
         self._commands.clear()
 
@@ -31,7 +31,7 @@ class CommandRegistry:
 
         return self._commands
 
-    def _parse_command_file(self, file_path: Path) -> Optional[CommandMetadata]:
+    def _parse_command_file(self, file_path: Path) -> CommandMetadata | None:
         """Parse command file with YAML frontmatter."""
         content = file_path.read_text()
 
@@ -55,11 +55,11 @@ class CommandRegistry:
         except yaml.YAMLError:
             return None
 
-    def get_command(self, name: str) -> Optional[CommandMetadata]:
+    def get_command(self, name: str) -> CommandMetadata | None:
         """Get command by name."""
         return self._commands.get(name)
 
-    def search_commands(self, query: str) -> List[CommandMetadata]:
+    def search_commands(self, query: str) -> list[CommandMetadata]:
         """Search commands by name or description."""
         query_lower = query.lower()
         return [
@@ -67,6 +67,6 @@ class CommandRegistry:
             if query_lower in cmd.name.lower() or query_lower in cmd.description.lower()
         ]
 
-    def list_commands(self) -> List[CommandMetadata]:
+    def list_commands(self) -> list[CommandMetadata]:
         """List all loaded commands."""
         return list(self._commands.values())

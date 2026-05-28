@@ -19,9 +19,10 @@ Composition:
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 
 from lyra_core.contracts import (
     AgentContract,
@@ -29,8 +30,8 @@ from lyra_core.contracts import (
     ContractObservation,
     ContractState,
 )
-from .directive import HumanDirective
 
+from .directive import HumanDirective
 
 __all__ = [
     "LoopSession",
@@ -130,10 +131,10 @@ class LoopSession:
     prompt: str
     driver: DriverFn
     contract: AgentContract = field(default_factory=AgentContract)
-    interval_s: Optional[float] = None
-    until_pred: Optional[PredicateFn] = None
+    interval_s: float | None = None
+    until_pred: PredicateFn | None = None
     max_iter: int = 100
-    directive: Optional[HumanDirective] = None
+    directive: HumanDirective | None = None
     sleep_fn: Callable[[float], None] = time.sleep
     state: LoopState = field(default_factory=LoopState)
 

@@ -5,10 +5,10 @@ This layer groups sensory observations by topic and summarizes them
 before promoting to episodic memory (L2).
 """
 
+from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import List, Optional, Dict, Any
-from collections import defaultdict
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -17,12 +17,12 @@ class TopicGroup:
 
     topic_id: str
     topic_name: str
-    observations: List[str] = field(default_factory=list)
+    observations: list[str] = field(default_factory=list)
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
     last_updated: str = field(default_factory=lambda: datetime.now().isoformat())
-    summary: Optional[str] = None
+    summary: str | None = None
     importance: float = 0.5  # 0.0 to 1.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def add_observation(self, content: str):
         """Add an observation to this topic group."""
@@ -53,8 +53,8 @@ class ShortTermMemoryStore:
         self.max_groups = max_groups
         self.promotion_threshold = promotion_threshold
 
-        self.topic_groups: Dict[str, TopicGroup] = {}
-        self.topic_index: Dict[str, List[str]] = defaultdict(list)  # keyword -> topic_ids
+        self.topic_groups: dict[str, TopicGroup] = {}
+        self.topic_index: dict[str, list[str]] = defaultdict(list)  # keyword -> topic_ids
 
         # Statistics
         self.total_observations = 0
@@ -63,7 +63,7 @@ class ShortTermMemoryStore:
     def add_observation(
         self,
         content: str,
-        topic_keywords: List[str],
+        topic_keywords: list[str],
         importance: float = 0.5
     ) -> str:
         """
@@ -91,7 +91,7 @@ class ShortTermMemoryStore:
 
     def _find_or_create_topic(
         self,
-        keywords: List[str],
+        keywords: list[str],
         importance: float
     ) -> str:
         """Find existing topic or create new one."""
@@ -168,15 +168,15 @@ class ShortTermMemoryStore:
             group.metadata["promote_to_l2"] = True
             self.total_promotions += 1
 
-    def get_topic_group(self, topic_id: str) -> Optional[TopicGroup]:
+    def get_topic_group(self, topic_id: str) -> TopicGroup | None:
         """Get a topic group by ID."""
         return self.topic_groups.get(topic_id)
 
-    def get_all_groups(self) -> List[TopicGroup]:
+    def get_all_groups(self) -> list[TopicGroup]:
         """Get all active topic groups."""
         return list(self.topic_groups.values())
 
-    def get_groups_for_promotion(self) -> List[TopicGroup]:
+    def get_groups_for_promotion(self) -> list[TopicGroup]:
         """Get topic groups marked for promotion to L2."""
         return [
             group for group in self.topic_groups.values()
@@ -188,7 +188,7 @@ class ShortTermMemoryStore:
         if topic_id in self.topic_groups:
             self.topic_groups[topic_id].summary = summary
 
-    def search_by_keyword(self, keyword: str) -> List[TopicGroup]:
+    def search_by_keyword(self, keyword: str) -> list[TopicGroup]:
         """Search topic groups by keyword."""
         topic_ids = self.topic_index.get(keyword, [])
         return [
@@ -197,7 +197,7 @@ class ShortTermMemoryStore:
             if tid in self.topic_groups
         ]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get statistics."""
         return {
             "total_observations": self.total_observations,

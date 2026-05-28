@@ -12,13 +12,13 @@ Implements Darwin Gödel Machine-inspired architecture:
 8. Keep or revert based on metrics
 """
 
+import json
+import subprocess
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-import json
-import subprocess
+from typing import Any
 
 
 class ModificationLevel(str, Enum):
@@ -46,8 +46,8 @@ class CodeModification:
     level: ModificationLevel
     created_at: datetime = field(default_factory=datetime.now)
     verification_status: VerificationStatus = VerificationStatus.PENDING
-    verification_results: Dict[str, Any] = field(default_factory=dict)
-    performance_delta: Optional[float] = None
+    verification_results: dict[str, Any] = field(default_factory=dict)
+    performance_delta: float | None = None
     approved_by_human: bool = False
 
 
@@ -56,10 +56,10 @@ class AgentVariant:
     """A variant of the agent with performance metrics."""
     id: str
     description: str
-    code_snapshot: Dict[str, str]  # file_path -> content
-    metrics: Dict[str, float]
+    code_snapshot: dict[str, str]  # file_path -> content
+    metrics: dict[str, float]
     created_at: datetime
-    parent_id: Optional[str] = None
+    parent_id: str | None = None
 
 
 class SelfEvolutionEngine:
@@ -79,8 +79,8 @@ class SelfEvolutionEngine:
         """
         self.archive_path = archive_path
         self.test_command = test_command
-        self.modifications: Dict[str, CodeModification] = {}
-        self.variants: Dict[str, AgentVariant] = {}
+        self.modifications: dict[str, CodeModification] = {}
+        self.variants: dict[str, AgentVariant] = {}
         self._load()
 
     def propose_modification(
@@ -220,9 +220,9 @@ class SelfEvolutionEngine:
     def create_variant(
         self,
         description: str,
-        code_snapshot: Dict[str, str],
-        metrics: Dict[str, float],
-        parent_id: Optional[str] = None,
+        code_snapshot: dict[str, str],
+        metrics: dict[str, float],
+        parent_id: str | None = None,
     ) -> AgentVariant:
         """
         Create a new agent variant.
@@ -273,17 +273,17 @@ class SelfEvolutionEngine:
         except Exception:
             return False
 
-    def _run_linting(self, modification: CodeModification) -> Dict[str, Any]:
+    def _run_linting(self, modification: CodeModification) -> dict[str, Any]:
         """Run linting on modified code."""
         # Simplified - would use ruff/pylint in production
         return {"passed": True, "issues": []}
 
-    def _run_type_check(self, modification: CodeModification) -> Dict[str, Any]:
+    def _run_type_check(self, modification: CodeModification) -> dict[str, Any]:
         """Run type checking on modified code."""
         # Simplified - would use mypy/pyright in production
         return {"passed": True, "errors": []}
 
-    def _run_tests(self, modification: CodeModification) -> Dict[str, Any]:
+    def _run_tests(self, modification: CodeModification) -> dict[str, Any]:
         """Run test suite."""
         try:
             result = subprocess.run(
@@ -300,12 +300,12 @@ class SelfEvolutionEngine:
         except Exception as e:
             return {"passed": False, "error": str(e)}
 
-    def _benchmark_performance(self, modification: CodeModification) -> Dict[str, Any]:
+    def _benchmark_performance(self, modification: CodeModification) -> dict[str, Any]:
         """Benchmark performance delta."""
         # Simplified - would run actual benchmarks in production
         return {"delta": 0.0, "baseline": 1.0, "modified": 1.0}
 
-    def _run_security_scan(self, modification: CodeModification) -> Dict[str, Any]:
+    def _run_security_scan(self, modification: CodeModification) -> dict[str, Any]:
         """Run security scan."""
         # Simplified - would use bandit/semgrep in production
         suspicious_patterns = ["eval(", "exec(", "__import__", "os.system"]

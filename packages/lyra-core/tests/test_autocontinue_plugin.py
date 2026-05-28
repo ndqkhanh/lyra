@@ -23,14 +23,13 @@ from dataclasses import dataclass, field
 from typing import Any
 
 import pytest
-
 from lyra_core.agent.loop import (
     AgentLoop,
     ContinueLoop,
     IterationBudget,
     StopCtx,
 )
-from lyra_core.plugins.autocontinue import AutoContinuePlugin, AutoContinueState
+from lyra_core.plugins.autocontinue import AutoContinuePlugin
 
 
 @dataclass

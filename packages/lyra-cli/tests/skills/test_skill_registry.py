@@ -1,8 +1,8 @@
 """Tests for skill registry."""
-import pytest
 from pathlib import Path
+
+import pytest
 from lyra_cli.core.skill_registry import SkillRegistry
-from lyra_cli.core.skill_metadata import SkillMetadata
 
 
 @pytest.fixture

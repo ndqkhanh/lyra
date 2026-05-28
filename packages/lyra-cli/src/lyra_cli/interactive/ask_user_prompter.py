@@ -15,13 +15,12 @@ correctly in every terminal Lyra ships into and survives SSH /
 """
 from __future__ import annotations
 
-from typing import Sequence
+from collections.abc import Sequence
 
+from lyra_core.tools.ask_user import AskUserPrompt
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
-
-from lyra_core.tools.ask_user import AskUserPrompt
 
 
 def _build_panel(prompt: AskUserPrompt) -> Panel:

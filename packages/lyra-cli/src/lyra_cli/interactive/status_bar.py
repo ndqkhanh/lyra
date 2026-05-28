@@ -16,7 +16,7 @@ no Rich markup or unicode symbols, but field labels preserved.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 
 from rich.text import Text
 
@@ -51,7 +51,7 @@ SYM_LSP = "✦"
 SYM_MCP = "⊙"
 SEP = " · "
 
-def render_checklist_section(source: "StatusSource") -> str:
+def render_checklist_section(source: StatusSource) -> str:
     """Return the checklist block as a plain-text string (multi-line).
 
     Returns ``""`` when there are no tasks so callers can skip the newline.
@@ -156,11 +156,11 @@ def _format_cost(usd: float) -> str:
 
 
 def render_footer(
-    source: "StatusSource",
+    source: StatusSource,
     *,
     term_cols: int = 80,
     plain: bool = False,
-) -> Union[Text, str]:
+) -> Text | str:
     """Render the v2 footer for ``source``.
 
     Args:

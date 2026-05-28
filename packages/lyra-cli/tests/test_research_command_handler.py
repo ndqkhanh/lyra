@@ -2,9 +2,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import List
 from unittest.mock import MagicMock, patch
-
 
 from lyra_cli.commands.research import (
     _cmd_list,
@@ -14,7 +12,6 @@ from lyra_cli.commands.research import (
     handle_research_command,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -23,9 +20,9 @@ _CASE_BANK_PATH = "lyra_research.memory.SessionCaseBank"
 _ORC_PATH = "lyra_research.orchestrator.ResearchOrchestrator"
 
 
-def _capture() -> tuple[List[str], callable]:
+def _capture() -> tuple[list[str], callable]:
     """Return (lines, output_fn) so tests can collect printed output."""
-    lines: List[str] = []
+    lines: list[str] = []
     return lines, lines.append
 
 

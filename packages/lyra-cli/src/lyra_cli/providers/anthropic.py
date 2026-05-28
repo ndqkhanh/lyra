@@ -23,7 +23,7 @@ existing call path keeps working, the only change is a populated
 """
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 from lyra_harness_core.messages import Message
 from lyra_harness_core.models import AnthropicLLM as _UpstreamAnthropicLLM
@@ -48,9 +48,9 @@ class LyraAnthropicLLM(_UpstreamAnthropicLLM):
 
     def __init__(
         self,
-        model: Optional[str] = None,
-        api_key: Optional[str] = None,
-        base_url: Optional[str] = None,
+        model: str | None = None,
+        api_key: str | None = None,
+        base_url: str | None = None,
     ) -> None:
         """Initialize Anthropic provider with optional custom base_url.
 
@@ -66,7 +66,7 @@ class LyraAnthropicLLM(_UpstreamAnthropicLLM):
     def generate(
         self,
         messages: list[Message],
-        tools: Optional[list[dict[str, Any]]] = None,
+        tools: list[dict[str, Any]] | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.0,
     ) -> Message:

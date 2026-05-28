@@ -9,10 +9,9 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from typer.testing import CliRunner
-
 from lyra_cli.__main__ import app
 from lyra_cli.commands import investigate as investigate_mod
+from typer.testing import CliRunner
 
 
 @pytest.fixture

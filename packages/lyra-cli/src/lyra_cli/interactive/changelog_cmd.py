@@ -14,12 +14,11 @@ Usage:
 from __future__ import annotations
 
 import subprocess
-import textwrap
 from pathlib import Path
-from typing import Optional
+
+from typing import Any
 
 from ..commands.registry import CommandResult
-
 
 # ── Category definitions (ECC Conventional Commit prefixes) ────────────
 
@@ -53,7 +52,7 @@ def _classify(commit_msg: str) -> tuple[str, str, str]:
 
 def _run_git_log(since: str = "", to: str = "HEAD", max_count: int = 0) -> list[str]:
     """Run git log and return list of commit messages."""
-    args = ["git", "log", f"--format=%s", f"--no-merges"]
+    args = ["git", "log", "--format=%s", "--no-merges"]
     if since:
         args.append(f"{since}..{to}")
     if max_count:
@@ -149,7 +148,7 @@ def cmd_changelog(session: Any, args: str) -> CommandResult:
       /changelog --append <file>    — append to CHANGELOG.md
     """
     parts = args.strip().split() if args.strip() else []
-    append_file: Optional[str] = None
+    append_file: str | None = None
     since = ""
     to = "HEAD"
     max_count = 0

@@ -21,13 +21,12 @@ from __future__ import annotations
 
 import io
 import json
+from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import Any, Iterator
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
-from lyra_harness_core.messages import Message, StopReason, ToolCall, ToolResult
-
 from lyra_cli.llm_factory import (
     build_llm,
     describe_selection,
@@ -41,7 +40,7 @@ from lyra_cli.providers.openai_compatible import (
     ProviderNotConfigured,
     preset_by_name,
 )
-
+from lyra_harness_core.messages import Message, StopReason, ToolResult
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -58,7 +57,7 @@ class _FakeHTTPResponse:
     def read(self) -> bytes:
         return self._body
 
-    def __enter__(self) -> "_FakeHTTPResponse":
+    def __enter__(self) -> _FakeHTTPResponse:
         return self
 
     def __exit__(self, *exc_info: Any) -> None:

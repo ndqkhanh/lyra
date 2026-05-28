@@ -22,10 +22,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-import pytest
-
 from lyra_core.agent.loop import AgentLoop, IterationBudget
-
 
 # ---------------------------------------------------------------------------
 # Helpers — a deterministic LLM that emits one tool call then ends the turn.

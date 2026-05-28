@@ -6,7 +6,6 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from lyra_cli.voice.tts_engine import (
     EdgeTTSBackend,
     Pyttsx3Backend,

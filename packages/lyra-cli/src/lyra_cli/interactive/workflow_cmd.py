@@ -14,11 +14,9 @@ database-migration.md + add-language-rules.md structured workflows.
 """
 from __future__ import annotations
 
-import json
 import time
 from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from ..commands.registry import CommandResult
 
@@ -111,7 +109,7 @@ class WorkflowState:
 
 
 # In-memory workflow state (per-session; could be persisted)
-_active_workflow: Optional[WorkflowState] = None
+_active_workflow: WorkflowState | None = None
 
 
 # ── Command Handler ────────────────────────────────────────────────────
@@ -201,7 +199,7 @@ def cmd_workflow(session: Any, args: str) -> CommandResult:
                 else:
                     return CommandResult(output=f"Step must be 1–{len(steps)}")
             except ValueError:
-                return CommandResult(output=f"Usage: /workflow step <N>")
+                return CommandResult(output="Usage: /workflow step <N>")
         step = steps[wf.current_step] if wf.current_step < len(steps) else None
         if step:
             return CommandResult(

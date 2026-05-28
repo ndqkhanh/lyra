@@ -3,7 +3,6 @@
 import time
 
 import pytest
-
 from lyra_core.teams.sprint_pipeline import (
     Sprint,
     SprintPhase,

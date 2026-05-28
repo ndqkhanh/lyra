@@ -27,11 +27,10 @@ canonical fix.
 """
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable, Optional
 
 from lyra_core.agent.loop import ContinueLoop, StopCtx
-
 
 __all__ = ["AutoContinuePlugin", "AutoContinueState"]
 
@@ -73,9 +72,9 @@ class AutoContinuePlugin:
 
     max_extensions: int = 3
     cost_watermark_pct: float = 0.90
-    session_budget_usd: Optional[float] = None
-    cost_so_far_fn: Optional[CostFn] = None
-    verifier: Optional[VerifierFn] = None
+    session_budget_usd: float | None = None
+    cost_so_far_fn: CostFn | None = None
+    verifier: VerifierFn | None = None
     user_message: str = (
         "Continue. Verify the previous step actually completed; if it did, "
         "propose the next step from the plan and execute it."

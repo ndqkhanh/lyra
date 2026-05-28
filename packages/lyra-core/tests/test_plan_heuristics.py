@@ -8,7 +8,6 @@ Contract:
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.plan.heuristics import SkipDecision, plan_skip_decision
 
 

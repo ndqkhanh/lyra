@@ -23,12 +23,11 @@ once ``llm_factory.py``, ``run.py``, ``__main__.py``, ``session.py`` and
 """
 from __future__ import annotations
 
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Iterator
 
 import pytest
 from typer.testing import CliRunner
-
 
 # All credential env vars the cascade reads. Cleared in fixtures so the
 # "no provider configured" branch is exercised deterministically.
@@ -121,8 +120,8 @@ def test_build_llm_explicit_mock_still_works(
     is still a first-class addressable backend; it's only the auto
     cascade that no longer falls through to it.
     """
-    from lyra_harness_core.models import MockLLM
     from lyra_cli.llm_factory import build_llm
+    from lyra_harness_core.models import MockLLM
 
     llm = build_llm("mock")
     assert isinstance(llm, MockLLM), (
@@ -147,8 +146,8 @@ def test_build_llm_auto_picks_anthropic_when_only_anthropic_is_configured(
     except ImportError:
         pytest.skip("anthropic SDK not available in this environment")
 
-    from lyra_harness_core.models import AnthropicLLM
     from lyra_cli.llm_factory import build_llm
+    from lyra_harness_core.models import AnthropicLLM
 
     llm = build_llm("auto")
     assert isinstance(llm, AnthropicLLM)

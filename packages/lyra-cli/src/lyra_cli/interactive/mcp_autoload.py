@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 def autoload_mcp_servers(session: Any) -> None:
@@ -55,7 +55,7 @@ def autoload_mcp_servers(session: Any) -> None:
     session._mcp_load_issues = list(result.issues)
 
 
-def find_mcp_server(session: Any, name: str) -> Optional[Any]:
+def find_mcp_server(session: Any, name: str) -> Any | None:
     """Return the :class:`MCPServerConfig` named ``name``, or ``None``."""
     for s in getattr(session, "mcp_servers", []) or []:
         if getattr(s, "name", None) == name:
@@ -63,7 +63,7 @@ def find_mcp_server(session: Any, name: str) -> Optional[Any]:
     return None
 
 
-def ensure_mcp_client_started(session: Any, name: str) -> Optional[Any]:
+def ensure_mcp_client_started(session: Any, name: str) -> Any | None:
     """Spawn (and handshake) the MCP child for ``name`` on demand.
 
     Returns the live transport (already cached on

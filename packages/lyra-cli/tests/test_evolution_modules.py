@@ -2,17 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
-from lyra_cli.evolution.strategy_evolver import (
-    GeneType,
-    StrategyEvolver,
-    StrategyGene,
-)
-from lyra_cli.evolution.prompt_mutator import (
-    MutationOp,
-    PromptMutator,
-)
 from lyra_cli.evolution.fitness_evaluator import (
     FitnessEvaluator,
     FitnessTarget,
@@ -20,6 +9,15 @@ from lyra_cli.evolution.fitness_evaluator import (
 from lyra_cli.evolution.lineage_tracker import (
     EventType,
     LineageTracker,
+)
+from lyra_cli.evolution.prompt_mutator import (
+    MutationOp,
+    PromptMutator,
+)
+from lyra_cli.evolution.strategy_evolver import (
+    GeneType,
+    StrategyEvolver,
+    StrategyGene,
 )
 
 

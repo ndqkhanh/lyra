@@ -4,7 +4,6 @@ import json
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 import requests
 
@@ -97,7 +96,7 @@ class RegistryClient:
         return index
 
     def search_skills(
-        self, query: Optional[str] = None, tag: Optional[str] = None
+        self, query: str | None = None, tag: str | None = None
     ) -> list[SkillMetadata]:
         """Search for skills across all enabled registries.
 
@@ -130,7 +129,7 @@ class RegistryClient:
 
         return results
 
-    def download_skill(self, name: str, version: Optional[str] = None) -> dict:
+    def download_skill(self, name: str, version: str | None = None) -> dict:
         """Download skill package from registry.
 
         Args:

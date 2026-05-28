@@ -2,13 +2,11 @@
 from __future__ import annotations
 
 import sys
-from typing import Any, List
+from typing import Any
 
 import pytest
-
 from lyra_core.lsp_backend import FeatureUnavailable
 from lyra_core.terminal import CommandResult, TerminalBackend
-
 
 # ---------------------------------------------------------------------------
 # Daytona — fake client + tests
@@ -17,7 +15,7 @@ from lyra_core.terminal import CommandResult, TerminalBackend
 
 class _FakeDaytonaClient:
     def __init__(self, *, exit_code: int = 0, stdout: str = "", stderr: str = "") -> None:
-        self.calls: List[dict[str, Any]] = []
+        self.calls: list[dict[str, Any]] = []
         self._exit_code = exit_code
         self._stdout = stdout
         self._stderr = stderr
@@ -105,7 +103,7 @@ def test_daytona_argv_safety() -> None:
 
 class _FakeSingularityRunner:
     def __init__(self, *, exit_code: int = 0, stdout: str = "", stderr: str = "") -> None:
-        self.calls: List[dict[str, Any]] = []
+        self.calls: list[dict[str, Any]] = []
         self._exit_code = exit_code
         self._stdout = stdout
         self._stderr = stderr

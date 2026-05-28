@@ -10,10 +10,10 @@ from __future__ import annotations
 import importlib
 import json
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Callable
 
 from .manifest import PluginKind, PluginManifest
 

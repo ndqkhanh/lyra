@@ -21,8 +21,6 @@ Five RED tests:
 """
 from __future__ import annotations
 
-import pytest
-
 
 def test_ensure_playwright_returns_bool() -> None:
     from lyra_core.tools.browser import ensure_playwright

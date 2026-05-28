@@ -9,7 +9,7 @@ Implements Focus-style compression:
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 @dataclass
@@ -18,7 +18,7 @@ class ContextSegment:
     turn_number: int
     user_input: str
     assistant_response: str
-    tool_results: Optional[List[Dict[str, Any]]] = None
+    tool_results: list[dict[str, Any]] | None = None
     importance: float = 0.5  # 0.0-1.0
 
 
@@ -26,7 +26,7 @@ class ContextSegment:
 class KnowledgeBlock:
     """Extracted persistent knowledge."""
     content: str
-    source_turns: List[int]
+    source_turns: list[int]
     confidence: float
 
 
@@ -45,13 +45,13 @@ class ContextCompressor:
             max_tokens: Maximum context tokens
         """
         self.max_tokens = max_tokens
-        self.knowledge_blocks: List[KnowledgeBlock] = []
+        self.knowledge_blocks: list[KnowledgeBlock] = []
 
     def compress(
         self,
-        history: List[ContextSegment],
+        history: list[ContextSegment],
         current_task: str,
-    ) -> tuple[List[KnowledgeBlock], List[ContextSegment]]:
+    ) -> tuple[list[KnowledgeBlock], list[ContextSegment]]:
         """
         Compress context history.
 
@@ -83,9 +83,9 @@ class ContextCompressor:
 
     def _identify_focus_regions(
         self,
-        history: List[ContextSegment],
+        history: list[ContextSegment],
         current_task: str,
-    ) -> List[ContextSegment]:
+    ) -> list[ContextSegment]:
         """
         Identify important regions in history.
 
@@ -122,7 +122,7 @@ class ContextCompressor:
 
         return focus
 
-    def _extract_knowledge(self, focus_regions: List[ContextSegment]) -> List[KnowledgeBlock]:
+    def _extract_knowledge(self, focus_regions: list[ContextSegment]) -> list[KnowledgeBlock]:
         """Extract persistent knowledge from focus regions."""
         knowledge = []
 
@@ -154,9 +154,9 @@ class ContextCompressor:
 
     def _prune_transient(
         self,
-        history: List[ContextSegment],
-        focus_regions: List[ContextSegment],
-    ) -> List[ContextSegment]:
+        history: list[ContextSegment],
+        focus_regions: list[ContextSegment],
+    ) -> list[ContextSegment]:
         """Prune transient observations, keep only focus regions."""
         focus_turn_numbers = {seg.turn_number for seg in focus_regions}
 
@@ -170,8 +170,8 @@ class ContextCompressor:
 
     def _deduplicate_knowledge(
         self,
-        knowledge_blocks: List[KnowledgeBlock],
-    ) -> List[KnowledgeBlock]:
+        knowledge_blocks: list[KnowledgeBlock],
+    ) -> list[KnowledgeBlock]:
         """Remove duplicate knowledge blocks."""
         seen = set()
         unique = []
@@ -188,8 +188,8 @@ class ContextCompressor:
 
     def format_compressed_context(
         self,
-        knowledge_blocks: List[KnowledgeBlock],
-        compressed_history: List[ContextSegment],
+        knowledge_blocks: list[KnowledgeBlock],
+        compressed_history: list[ContextSegment],
     ) -> str:
         """Format compressed context for LLM."""
         lines = []
@@ -213,9 +213,9 @@ class ContextCompressor:
 
 
 def checkpoint_and_purge(
-    history: List[ContextSegment],
+    history: list[ContextSegment],
     checkpoint_path: str,
-) -> List[ContextSegment]:
+) -> list[ContextSegment]:
     """
     Checkpoint history and purge old turns.
 

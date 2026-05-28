@@ -33,7 +33,6 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from typing import Optional
 
 from prompt_toolkit import Application
 from prompt_toolkit.buffer import Buffer
@@ -166,9 +165,9 @@ def _matches(entry: _Entry, q: str) -> bool:
 
 
 def run_model_dialog(
-    current: Optional[str],
-    effort: Optional[str] = None,
-) -> tuple[Optional[str], Optional[str]]:
+    current: str | None,
+    effort: str | None = None,
+) -> tuple[str | None, str | None]:
     """Drive the model picker; return ``(slug, effort)`` or ``(None, None)`` on cancel.
 
     ``slug`` is ``""`` when the user picks ``Default (auto)``; callers should
@@ -197,7 +196,7 @@ def run_model_dialog(
 
     filter_buffer = Buffer(multiline=False)
 
-    def visible_groups() -> list[tuple[Optional[str], list[_Entry]]]:
+    def visible_groups() -> list[tuple[str | None, list[_Entry]]]:
         """Yield (group_label, entries) pairs honoring the current filter.
 
         With no filter we show curated groups verbatim. With a filter we

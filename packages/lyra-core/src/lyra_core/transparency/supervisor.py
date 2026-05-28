@@ -12,11 +12,10 @@ from __future__ import annotations
 
 import threading
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, Optional
 
 from .agent_view import AttentionPriority, FleetView
-
 
 __all__ = [
     "SupervisorConfig",
@@ -54,13 +53,13 @@ class FleetSupervisor:
     def __init__(
         self,
         fleet: FleetView,
-        config: Optional[SupervisorConfig] = None,
-        on_escalate: Optional[EscalationCallback] = None,
+        config: SupervisorConfig | None = None,
+        on_escalate: EscalationCallback | None = None,
     ) -> None:
         self._fleet = fleet
         self._config = config or SupervisorConfig()
         self._on_escalate = on_escalate or (lambda *_: None)
-        self._thread: Optional[threading.Thread] = None
+        self._thread: threading.Thread | None = None
         self._stop_event = threading.Event()
 
     # ---------------------------------------------------------------- #
@@ -97,7 +96,7 @@ class FleetSupervisor:
         escalations: list[tuple[str, AttentionPriority, str]] = []
 
         for rec in self._fleet.list_agents():
-            new_priority: Optional[AttentionPriority] = None
+            new_priority: AttentionPriority | None = None
             reason = ""
 
             if rec.state in ("error", "blocked"):

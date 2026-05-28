@@ -15,7 +15,6 @@ Key principles:
 import math
 import time
 from dataclasses import dataclass, field
-from typing import List, Optional
 
 
 @dataclass
@@ -35,11 +34,11 @@ class ActivationRecord:
     """
     memory_id: str
     importance: float = 0.5
-    retrieval_history: List[float] = field(default_factory=list)
+    retrieval_history: list[float] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
     last_accessed: float = 0.0
     access_count: int = 0
-    
+
     def __post_init__(self):
         """Initialize last_accessed if not set."""
         if self.last_accessed == 0.0:
@@ -62,7 +61,7 @@ class ActivationManager:
     
     Memories below the retrieval threshold become inaccessible (soft delete).
     """
-    
+
     def __init__(
         self,
         decay_rate: float = 0.5,
@@ -83,17 +82,17 @@ class ActivationManager:
         self.importance_weight = importance_weight
         self.retrieval_threshold = retrieval_threshold
         self.noise = noise
-        
+
         # In-memory activation cache
         self._activation_cache: dict[str, ActivationRecord] = {}
-    
+
     def compute_activation(
         self,
         memory_id: str,
         importance: float = 0.5,
-        retrieval_history: Optional[List[float]] = None,
-        created_at: Optional[float] = None,
-        current_time: Optional[float] = None,
+        retrieval_history: list[float] | None = None,
+        created_at: float | None = None,
+        current_time: float | None = None,
     ) -> float:
         """
         Compute current activation level for a memory.
@@ -111,39 +110,39 @@ class ActivationManager:
         now = current_time if current_time is not None else time.time()
         retrieval_history = retrieval_history or []
         created_at = created_at or now
-        
+
         # If never retrieved, use creation time as single "retrieval"
         if not retrieval_history:
             retrieval_history = [created_at]
-        
+
         # Compute base-level activation: ln(Σ t_i^(-d))
         activation_sum = 0.0
         for retrieval_time in retrieval_history:
             time_since = now - retrieval_time
             if time_since > 0:
                 activation_sum += time_since ** (-self.decay_rate)
-        
+
         # Handle edge case: no valid retrievals
         if activation_sum <= 0:
             base_activation = -10.0  # Very low activation
         else:
             base_activation = math.log(activation_sum)
-        
+
         # Importance boost: β·I
         importance_boost = self.importance_weight * importance
-        
+
         # Final activation
         activation = base_activation + importance_boost + self.noise
-        
+
         return activation
-    
+
     def is_accessible(
         self,
         memory_id: str,
         importance: float = 0.5,
-        retrieval_history: Optional[List[float]] = None,
-        created_at: Optional[float] = None,
-        current_time: Optional[float] = None,
+        retrieval_history: list[float] | None = None,
+        created_at: float | None = None,
+        current_time: float | None = None,
     ) -> bool:
         """
         Check if memory is above retrieval threshold.
@@ -166,12 +165,12 @@ class ActivationManager:
             current_time=current_time,
         )
         return activation > self.retrieval_threshold
-    
+
     def on_retrieval(
         self,
         memory_id: str,
         importance: float = 0.5,
-        retrieval_time: Optional[float] = None,
+        retrieval_time: float | None = None,
     ) -> ActivationRecord:
         """
         Update activation state when memory is retrieved.
@@ -185,7 +184,7 @@ class ActivationManager:
             Updated ActivationRecord
         """
         now = retrieval_time if retrieval_time is not None else time.time()
-        
+
         # Get or create activation record
         if memory_id in self._activation_cache:
             record = self._activation_cache[memory_id]
@@ -196,23 +195,23 @@ class ActivationManager:
                 created_at=now,
             )
             self._activation_cache[memory_id] = record
-        
+
         # Update retrieval history
         record.retrieval_history.append(now)
         record.last_accessed = now
         record.access_count += 1
         record.importance = importance  # Update importance
-        
+
         return record
-    
-    def get_activation_record(self, memory_id: str) -> Optional[ActivationRecord]:
+
+    def get_activation_record(self, memory_id: str) -> ActivationRecord | None:
         """Get activation record for a memory."""
         return self._activation_cache.get(memory_id)
-    
+
     def set_activation_record(self, record: ActivationRecord) -> None:
         """Store activation record."""
         self._activation_cache[record.memory_id] = record
-    
+
     def compute_decay_factor(
         self,
         age_seconds: float,
@@ -233,24 +232,24 @@ class ActivationManager:
         """
         if age_seconds <= 0:
             return 1.0
-        
+
         # Base decay: t^(-d)
         base_decay = age_seconds ** (-self.decay_rate)
-        
+
         # Importance slows decay
         importance_factor = 1.0 + importance * self.importance_weight
-        
+
         # Combined decay (normalized to 0-1 range)
         decay_factor = base_decay * importance_factor
-        
+
         # Clamp to [0, 1]
         return min(1.0, max(0.0, decay_factor))
-    
+
     def find_dormant_memories(
         self,
-        memory_records: List[tuple[str, float, List[float], float]],
-        current_time: Optional[float] = None,
-    ) -> List[str]:
+        memory_records: list[tuple[str, float, list[float], float]],
+        current_time: float | None = None,
+    ) -> list[str]:
         """
         Find memories that have fallen below retrieval threshold.
         
@@ -262,7 +261,7 @@ class ActivationManager:
             List of memory IDs that are dormant (below threshold)
         """
         dormant = []
-        
+
         for memory_id, importance, retrieval_history, created_at in memory_records:
             if not self.is_accessible(
                 memory_id=memory_id,
@@ -272,9 +271,9 @@ class ActivationManager:
                 current_time=current_time,
             ):
                 dormant.append(memory_id)
-        
+
         return dormant
-    
+
     def clear_cache(self) -> None:
         """Clear activation cache."""
         self._activation_cache.clear()

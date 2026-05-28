@@ -2,11 +2,11 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
-from typing import Any, AsyncIterator, List
+from typing import Any
 
 import pytest
-
 from lyra_cli.channels.base import ChannelAdapter, Inbound
 from lyra_cli.channels.email import (
     EmailAdapter,
@@ -21,7 +21,7 @@ class _FakeMailClient:
     password: str = "pw"
     auth_ok: bool = True
     inbox: list[dict[str, Any]] = field(default_factory=list)
-    sent: List[dict[str, Any]] = field(default_factory=list)
+    sent: list[dict[str, Any]] = field(default_factory=list)
 
     async def login(self) -> None:
         if not self.auth_ok:

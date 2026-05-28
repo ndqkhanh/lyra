@@ -20,11 +20,10 @@ from __future__ import annotations
 import json
 import sqlite3
 import time
+from collections.abc import Iterator
 from contextlib import contextmanager
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterator, Optional
-
 
 __all__ = ["LoopRecord", "LoopStore"]
 
@@ -58,7 +57,7 @@ class LoopRecord:
     cum_usd: float = 0.0
     iter_count: int = 0
     contract_state: str = "pending"
-    terminal_cause: Optional[str] = None
+    terminal_cause: str | None = None
     payload_json: str = "{}"
 
     def payload(self) -> dict:
@@ -121,7 +120,7 @@ class LoopStore:
                  record.terminal_cause, record.payload_json),
             )
 
-    def get(self, loop_id: str) -> Optional[LoopRecord]:
+    def get(self, loop_id: str) -> LoopRecord | None:
         with self._conn() as cx:
             row = cx.execute("SELECT * FROM loops WHERE id=?", (loop_id,)).fetchone()
         return _row_to_record(row) if row else None
@@ -161,7 +160,7 @@ class LoopStore:
         return ids
 
     def transition(self, loop_id: str, *, state: str,
-                   terminal_cause: Optional[str] = None) -> None:
+                   terminal_cause: str | None = None) -> None:
         with self._conn() as cx:
             cx.execute(
                 "UPDATE loops SET state=?, terminal_cause=?, updated_at=? WHERE id=?",

@@ -1,14 +1,14 @@
 """Responsive terminal UI that adapts to resize events"""
 
-from rich.console import Console
-from rich.live import Live
-from rich.layout import Layout
-from rich.panel import Panel
-from rich.text import Text
-import signal
 import os
 import shutil
-from typing import Optional, Callable
+import signal
+from collections.abc import Callable
+
+from rich.console import Console
+from rich.live import Live
+from rich.panel import Panel
+from rich.text import Text
 
 
 class ResponsiveUI:
@@ -169,7 +169,7 @@ class ResponsiveUI:
 
         return cwd
 
-    def responsive_text(self, text: str, max_width: Optional[int] = None):
+    def responsive_text(self, text: str, max_width: int | None = None):
         """Wrap text to fit terminal width"""
         if max_width is None:
             max_width = self.width - 4  # Leave margin
@@ -239,16 +239,15 @@ class ResponsiveUI:
 
     def live_resize_demo(self):
         """Demo that shows live resize handling"""
-        from rich.live import Live
         from rich.panel import Panel
 
         def make_panel():
             width, height = self.get_size()
             content = Text()
-            content.append(f"Terminal Size\n\n", style="bold cyan")
+            content.append("Terminal Size\n\n", style="bold cyan")
             content.append(f"Width: {width} columns\n", style="green")
             content.append(f"Height: {height} lines\n", style="green")
-            content.append(f"\nResize your terminal to see this update!\n", style="dim")
+            content.append("\nResize your terminal to see this update!\n", style="dim")
 
             return Panel(
                 content,

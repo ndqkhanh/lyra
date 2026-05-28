@@ -4,12 +4,10 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from lyra_core.memory.procedural import ProceduralMemory, SkillRecord
-from lyra_core.skills.bm25_tier import BM25Hit, BM25Tier
+from lyra_core.skills.bm25_tier import BM25Tier
 from lyra_core.skills.registry import Skill, SkillRegistry
 from lyra_core.skills.router import HybridSkillRouter, RouterDecision
-
 
 # ----- substrate ------------------------------------------------------
 

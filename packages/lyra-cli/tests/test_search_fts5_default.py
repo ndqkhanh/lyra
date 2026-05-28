@@ -22,7 +22,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from lyra_cli.interactive.session import (
     InteractiveSession,
     _cmd_search,

@@ -36,7 +36,6 @@ from typing import Any
 
 from .session import InteractiveSession, _TurnSnapshot
 
-
 _FORMAT_VERSION = 1
 
 

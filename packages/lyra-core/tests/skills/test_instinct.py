@@ -1,13 +1,12 @@
 """Tests for InstinctSystem — continual learning pattern detection."""
 
 import time
+
 from lyra_core.skills.instinct import (
-    DetectedPattern,
     InstinctReport,
     InstinctSystem,
     Observation,
     ObservationType,
-    PatternType,
 )
 
 

@@ -28,13 +28,13 @@ import enum
 import json
 import re
 import time
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
 from threading import Lock
-from typing import Any, Iterable
+from typing import Any
 
 from .decay import AccessStats, half_life_for, weighted_score
-
 
 _LBL_APPEND_ONLY: str = "LBL-AUTO-MEMORY-APPEND-ONLY"
 
@@ -73,7 +73,7 @@ class MemoryEntry:
         }
 
     @classmethod
-    def from_json(cls, row: dict[str, Any]) -> "MemoryEntry":
+    def from_json(cls, row: dict[str, Any]) -> MemoryEntry:
         return cls(
             entry_id=str(row["entry_id"]),
             kind=MemoryKind(str(row.get("kind", "project"))),

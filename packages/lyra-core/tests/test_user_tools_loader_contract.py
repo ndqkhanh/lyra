@@ -19,8 +19,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 
 def _write(tmp: Path, name: str, body: str) -> Path:
     path = tmp / name

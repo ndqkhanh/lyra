@@ -12,7 +12,6 @@ Source: Modular Compression (ztmwHisqJ4), ICLR 2026 MemAgent Workshop.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from uuid import uuid4
 
 

@@ -6,7 +6,6 @@ import time
 from pathlib import Path
 
 import pytest
-
 from lyra_core.transparency.event_store import EventStore, make_event
 
 

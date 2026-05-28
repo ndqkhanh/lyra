@@ -113,7 +113,7 @@ class DCIZeroIndex:
                 continue
             if path not in self._file_cache:
                 try:
-                    with open(path, 'r') as f:
+                    with open(path) as f:
                         self._file_cache[path] = f.readlines()
                 except (OSError, UnicodeDecodeError):
                     continue
@@ -147,7 +147,7 @@ class DCIZeroIndex:
 
     def index_file(self, filepath: str) -> None:
         try:
-            with open(filepath, 'r') as f:
+            with open(filepath) as f:
                 self._file_cache[filepath] = f.readlines()
         except (OSError, UnicodeDecodeError):
             pass

@@ -11,7 +11,6 @@ from __future__ import annotations
 import json as _json
 import os
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -53,15 +52,15 @@ def add(
     source: str = typer.Argument(
         ..., help="Local path or git URL pointing at a SKILL.md-rooted directory.",
     ),
-    target: Optional[str] = typer.Option(
+    target: str | None = typer.Option(
         None, "--target",
         help="Override install root (default: ~/.lyra/skills or $LYRA_HOME/skills).",
     ),
-    subpath: Optional[str] = typer.Option(
+    subpath: str | None = typer.Option(
         None, "--subpath",
         help="When the source repo holds many skills, point at one with this subpath.",
     ),
-    ref: Optional[str] = typer.Option(
+    ref: str | None = typer.Option(
         None, "--ref", help="Git ref (branch/tag/commit) to checkout when source is a URL.",
     ),
     force: bool = typer.Option(
@@ -128,7 +127,7 @@ def add(
 
 @skill_app.command("list")
 def _list(
-    target: Optional[str] = typer.Option(
+    target: str | None = typer.Option(
         None, "--target",
         help="Override install root (default: ~/.lyra/skills).",
     ),
@@ -178,7 +177,7 @@ def _list(
 @skill_app.command("remove")
 def remove(
     skill_id: str = typer.Argument(..., help="Skill id to remove (must already be installed)."),
-    target: Optional[str] = typer.Option(
+    target: str | None = typer.Option(
         None, "--target", help="Override install root (default: ~/.lyra/skills).",
     ),
     json_out: bool = typer.Option(False, "--json"),
@@ -223,7 +222,7 @@ def _format_age(ts: float, *, now: float) -> str:
 
 @skill_app.command("stats")
 def stats(
-    top: Optional[int] = typer.Option(
+    top: int | None = typer.Option(
         None,
         "--top",
         help="Show only the top-N skills by utility (default: all).",
@@ -397,7 +396,7 @@ def reflect(
     skill_id: str = typer.Argument(
         ..., help="Skill id to rewrite (must be installed locally)."
     ),
-    target: Optional[str] = typer.Option(
+    target: str | None = typer.Option(
         None, "--target",
         help="Override install root (default: ~/.lyra/skills).",
     ),
@@ -739,7 +738,7 @@ def consolidate(
         "--from",
         help="Path to events.jsonl (HIR log) to scan for recurring prompts.",
     ),
-    target: Optional[str] = typer.Option(
+    target: str | None = typer.Option(
         None,
         "--target",
         help="Override skills install root (default: ~/.lyra/skills).",
@@ -956,7 +955,6 @@ def _load_scenarios_yaml(path: Path) -> list:
     reads cleanly without quoting the reserved word.
     """
     import yaml
-
     from lyra_skills.optimizer import OptimizeScenario
 
     raw = yaml.safe_load(path.read_text(encoding="utf-8"))
@@ -1003,7 +1001,7 @@ def optimize(
         "--scenarios",
         help="Path to scenarios YAML: list of {prompt, eval} entries.",
     ),
-    target: Optional[str] = typer.Option(
+    target: str | None = typer.Option(
         None,
         "--target",
         help="Override install root (default: ~/.lyra/skills).",
@@ -1217,7 +1215,7 @@ def optimize(
 # ---------------------------------------------------------------------------
 
 
-def _build_argus_cascade(target: Optional[str]):
+def _build_argus_cascade(target: str | None):
     """Construct a :class:`LyraArgusCascade` and index every installed skill.
 
     Lazy import keeps the ``harness_skill_router`` dependency off the
@@ -1236,7 +1234,7 @@ def _build_argus_cascade(target: Optional[str]):
 @skill_app.command("route")
 def route(
     query: str = typer.Argument(..., help="Natural-language description of what you need."),
-    target: Optional[str] = typer.Option(
+    target: str | None = typer.Option(
         None, "--target", help="Override install root (default: ~/.lyra/skills).",
     ),
     mode: str = typer.Option(
@@ -1304,7 +1302,7 @@ def route(
 
 @skill_app.command("quality")
 def quality(
-    target: Optional[str] = typer.Option(None, "--target"),
+    target: str | None = typer.Option(None, "--target"),
     json_out: bool = typer.Option(False, "--json"),
 ) -> None:
     """Run Argus's A7 description-quality scorer over the catalog."""
@@ -1328,7 +1326,7 @@ def quality(
 
 @skill_app.command("heartbeat")
 def heartbeat(
-    target: Optional[str] = typer.Option(None, "--target"),
+    target: str | None = typer.Option(None, "--target"),
     json_out: bool = typer.Option(False, "--json"),
 ) -> None:
     """Run one Argus refinement pass — drift detection + telemetry rollup."""
@@ -1360,7 +1358,7 @@ def retract(
         ..., "--reason",
         help="Reason for retraction (lands in the Argus tombstone ledger).",
     ),
-    target: Optional[str] = typer.Option(None, "--target"),
+    target: str | None = typer.Option(None, "--target"),
     json_out: bool = typer.Option(False, "--json"),
 ) -> None:
     """Tombstone a skill so Argus never re-imports it (failure mode F-24)."""

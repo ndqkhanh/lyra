@@ -18,8 +18,6 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Tuple
-
 
 _REDACTED_TOKEN = "[REDACTED:{name}]"
 
@@ -76,7 +74,7 @@ def redact(text: str) -> RedactionResult:
     return RedactionResult(text=out, hits=tuple(fired))
 
 
-def redact_pair(*texts: str) -> Tuple[tuple[str, ...], tuple[str, ...]]:
+def redact_pair(*texts: str) -> tuple[tuple[str, ...], tuple[str, ...]]:
     """Convenience for ``remember(text, title=...)``: redact both, return
     the pair of redacted strings + the union of pattern hits."""
     redacted: list[str] = []

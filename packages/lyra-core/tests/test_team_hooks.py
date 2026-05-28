@@ -1,18 +1,13 @@
 """Tests for L311-1/3 — shell-script hook gates for team events."""
 from __future__ import annotations
 
-import json
-import os
 import stat
-from pathlib import Path
 
 import pytest
-
 from lyra_core.teams import (
-    GateResult,
     HOOKABLE_EVENTS,
+    GateResult,
     HookBlockedError,
-    HookDecision,
     HookSpec,
     LeadSession,
     TeamHookRegistry,

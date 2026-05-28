@@ -282,7 +282,7 @@ def default_registry() -> BrainRegistry:
 
 def install_brain(
     bundle: BrainBundle,
-    layout: "RepoLayout",
+    layout: RepoLayout,
     *,
     force: bool = False,
 ) -> InstallReport:

@@ -4,7 +4,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from lyra_core.tools.pdf_extract import (
     PdfExtractError,
     extract_text_from_pdf,

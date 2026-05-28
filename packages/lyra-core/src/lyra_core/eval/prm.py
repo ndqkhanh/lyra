@@ -13,9 +13,9 @@ deterministic and offline.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Callable, Iterable, Protocol, Sequence
-
+from collections.abc import Sequence
+from dataclasses import dataclass
+from typing import Protocol
 
 __all__ = [
     "Rubric",
@@ -30,7 +30,7 @@ __all__ = [
 class RubricJudge(Protocol):
     """A judge maps ``(rubric, output)`` → 0..1."""
 
-    def __call__(self, *, rubric: "Rubric", output: str) -> float: ...
+    def __call__(self, *, rubric: Rubric, output: str) -> float: ...
 
 
 @dataclass(frozen=True)

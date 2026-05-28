@@ -42,9 +42,9 @@ silently drops it and reports the diff via ``applied`` / ``skipped``.
 """
 from __future__ import annotations
 
+from collections.abc import Iterable
 from copy import deepcopy
 from dataclasses import dataclass, field
-from typing import Iterable
 
 _DEFAULT_TOOLSETS: dict[str, tuple[str, ...]] = {
     "default": (

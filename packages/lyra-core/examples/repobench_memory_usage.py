@@ -58,7 +58,7 @@ def example_1_basic_completion():
     )
 
     # Print results
-    print(f"\nResults:")
+    print("\nResults:")
     print(f"  Exact Match: {result.metrics.exact_match:.2%}")
     print(f"  Edit Similarity: {result.metrics.edit_similarity:.2%}")
     print(f"  CodeBLEU: {result.metrics.codebleu:.2%}")
@@ -108,7 +108,7 @@ def example_2_retrieval_evaluation():
     )
 
     # Print results
-    print(f"\nResults:")
+    print("\nResults:")
     print(f"  Accuracy@1: {result.metrics.accuracy_at_1:.2%}")
     print(f"  Accuracy@3: {result.metrics.accuracy_at_3:.2%}")
     print(f"  Accuracy@5: {result.metrics.accuracy_at_5:.2%}")
@@ -150,7 +150,7 @@ def example_3_lyra_integration():
 
             # Add cross-file context if available
             if cross_file_context:
-                prompt = f"Relevant imports:\n" + "\n".join(cross_file_context) + f"\n\n{prompt}"
+                prompt = "Relevant imports:\n" + "\n".join(cross_file_context) + f"\n\n{prompt}"
 
             # Generate completion
             response = provider.complete(prompt, max_tokens=100)
@@ -164,7 +164,7 @@ def example_3_lyra_integration():
             context=EvalContext.IN_FILE,
         )
 
-        print(f"\nResults with Lyra provider:")
+        print("\nResults with Lyra provider:")
         print(f"  Exact Match: {result.metrics.exact_match:.2%}")
         print(f"  Edit Similarity: {result.metrics.edit_similarity:.2%}")
         print(f"  CodeBLEU: {result.metrics.codebleu:.2%}")
@@ -331,7 +331,7 @@ def example_6_custom_t3_memory():
             context=EvalContext.IN_FILE,
         )
 
-        print(f"\nResults with T3 memory context:")
+        print("\nResults with T3 memory context:")
         print(f"  Exact Match: {result.metrics.exact_match:.2%}")
         print(f"  Edit Similarity: {result.metrics.edit_similarity:.2%}")
 

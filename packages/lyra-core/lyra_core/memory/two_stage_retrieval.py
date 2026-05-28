@@ -8,9 +8,9 @@ Based on research: docs/152 (memtier-3-tier-architecture-and-retrieval.md)
 Impact: -0.038 Acc cost to remove (largest single component after semantic tier)
 """
 
-from typing import List, Dict, Any, Optional, Set
-from dataclasses import dataclass
 import sqlite3
+from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass
@@ -20,8 +20,8 @@ class RetrievalResult:
     content: str
     score: float
     source: str  # "semantic" or "episodic"
-    session_id: Optional[str] = None
-    timestamp: Optional[str] = None
+    session_id: str | None = None
+    timestamp: str | None = None
     cognitive_weight: float = 0.0
 
 
@@ -62,7 +62,7 @@ class TwoStageRetriever:
         k: int = 10,
         stage1_sessions: int = 5,
         include_procedural: bool = True
-    ) -> List[RetrievalResult]:
+    ) -> list[RetrievalResult]:
         """
         Two-stage retrieval with semantic scoping.
 
@@ -84,7 +84,7 @@ class TwoStageRetriever:
         )
 
         # Extract unique session IDs from semantic facts
-        relevant_sessions: Set[str] = set()
+        relevant_sessions: set[str] = set()
         for fact_result in semantic_results:
             # Semantic facts store source_sessions
             fact = next(
@@ -128,9 +128,9 @@ class TwoStageRetriever:
     def _retrieve_episodic_scoped(
         self,
         query: str,
-        session_ids: Set[str],
+        session_ids: set[str],
         k: int
-    ) -> List[RetrievalResult]:
+    ) -> list[RetrievalResult]:
         """
         Retrieve episodic entries scoped to specific sessions.
 
@@ -173,7 +173,7 @@ class TwoStageRetriever:
         self,
         query: str,
         k: int
-    ) -> List[RetrievalResult]:
+    ) -> list[RetrievalResult]:
         """
         Retrieve from procedural memory (existing SQLite FTS5).
 
@@ -217,7 +217,7 @@ class TwoStageRetriever:
         query: str,
         k: int = 10,
         decay_factor: float = 0.95
-    ) -> List[RetrievalResult]:
+    ) -> list[RetrievalResult]:
         """
         Two-stage retrieval with time decay for episodic entries.
 
@@ -231,7 +231,7 @@ class TwoStageRetriever:
         Returns:
             List of RetrievalResult objects with time-adjusted scores
         """
-        from datetime import datetime, timedelta
+        from datetime import datetime
 
         results = self.retrieve(query, k=k * 2)  # Get more for filtering
 
@@ -253,7 +253,7 @@ class TwoStageRetriever:
         results.sort(key=lambda x: x.score, reverse=True)
         return results[:k]
 
-    def get_retrieval_stats(self) -> Dict[str, Any]:
+    def get_retrieval_stats(self) -> dict[str, Any]:
         """Get statistics about retrieval sources."""
         return {
             'semantic_facts': len(self.semantic.facts),

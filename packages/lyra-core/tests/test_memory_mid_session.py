@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.memory.mid_session import (
     AUTO_PROMOTE,
     REJECT_FLOOR,

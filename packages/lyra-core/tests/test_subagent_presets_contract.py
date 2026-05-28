@@ -20,8 +20,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 
 def test_load_presets_returns_builtins_when_dir_missing(tmp_path: Path) -> None:
     from lyra_core.subagent.presets import load_presets

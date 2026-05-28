@@ -2,7 +2,6 @@
 
 import os
 import shutil
-from typing import Optional
 
 
 def print_welcome_banner(
@@ -10,9 +9,9 @@ def print_welcome_banner(
     model: str = "",
     effort: str = "high",
     provider: str = "Anthropic API",
-    working_dir: Optional[str] = None,
-    context_window: Optional[str] = "1M context",
-    user_name: Optional[str] = None
+    working_dir: str | None = None,
+    context_window: str | None = "1M context",
+    user_name: str | None = None
 ):
     """Print welcome banner with responsive layout
 
@@ -46,8 +45,8 @@ def _print_wide_banner(
     effort: str,
     provider: str,
     working_dir: str,
-    context_window: Optional[str],
-    user_name: Optional[str]
+    context_window: str | None,
+    user_name: str | None
 ):
     """Print two-column wide banner (>120 cols)"""
     width = min(shutil.get_terminal_size().columns, 120)
@@ -98,8 +97,8 @@ def _print_standard_banner(
     effort: str,
     provider: str,
     working_dir: str,
-    context_window: Optional[str],
-    user_name: Optional[str]
+    context_window: str | None,
+    user_name: str | None
 ):
     """Print standard single-column banner (80-120 cols)"""
     width = min(shutil.get_terminal_size().columns, 90)

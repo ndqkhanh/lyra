@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.bundle import (
     Ed25519Backend,
     HmacBackend,
@@ -10,7 +9,6 @@ from lyra_core.bundle import (
     default_signing_backend,
     set_default_signing_backend,
 )
-
 
 # ---- HMAC backend ----------------------------------------------------
 

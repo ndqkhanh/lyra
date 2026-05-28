@@ -7,11 +7,9 @@ import subprocess
 import time
 
 import pytest
-from typer.testing import CliRunner
-
 from lyra_cli.__main__ import app
 from lyra_cli.observatory.yield_tracker import yield_report
-
+from typer.testing import CliRunner
 
 pytestmark = pytest.mark.skipif(
     shutil.which("git") is None,

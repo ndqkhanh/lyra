@@ -134,9 +134,7 @@ class SkillCompactor:
         if len(paras) <= 2:
             return body
 
-        return "\n\n".join(paras[:3]) + "\n\n_(compacted: {} paragraphs removed)_".format(
-            len(paras) - 3
-        )
+        return "\n\n".join(paras[:3]) + f"\n\n_(compacted: {len(paras) - 3} paragraphs removed)_"
 
     def _truncate_to_budget(
         self,

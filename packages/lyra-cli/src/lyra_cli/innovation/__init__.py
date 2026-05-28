@@ -10,13 +10,12 @@ These features differentiate Lyra from all other AI agents.
 
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
-import hashlib
-import json
-
 
 # ============================================================================
 # Mermaid Canvas Integration
@@ -24,7 +23,7 @@ import json
 
 class DiagramType(Enum):
     """Type of Mermaid diagram."""
-    
+
     KNOWLEDGE_GRAPH = "graph"  # Entity-relation visualization
     WORKFLOW = "flowchart"  # Agent step visualization
     MEMORY_TOPOLOGY = "graph"  # Memory tier connections
@@ -35,21 +34,21 @@ class DiagramType(Enum):
 @dataclass
 class MermaidNode:
     """A node in a Mermaid diagram."""
-    
+
     id: str
     label: str
     node_type: str = "default"
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     confidence: float = 1.0
 
 
 @dataclass
 class MermaidEdge:
     """An edge in a Mermaid diagram."""
-    
+
     source: str
     target: str
-    label: Optional[str] = None
+    label: str | None = None
     edge_type: str = "default"
     weight: float = 1.0
 
@@ -68,7 +67,7 @@ class MermaidCanvas:
     - Highlight paths
     - Export to PNG/SVG/Markdown
     """
-    
+
     def __init__(self, diagram_type: DiagramType = DiagramType.KNOWLEDGE_GRAPH):
         """Initialize the canvas.
         
@@ -76,10 +75,10 @@ class MermaidCanvas:
             diagram_type: Type of diagram to generate
         """
         self.diagram_type = diagram_type
-        self.nodes: Dict[str, MermaidNode] = {}
-        self.edges: List[MermaidEdge] = []
-        self.metadata: Dict[str, Any] = {}
-    
+        self.nodes: dict[str, MermaidNode] = {}
+        self.edges: list[MermaidEdge] = []
+        self.metadata: dict[str, Any] = {}
+
     def add_node(
         self,
         node_id: str,
@@ -104,12 +103,12 @@ class MermaidCanvas:
             confidence=confidence,
             metadata=metadata,
         )
-    
+
     def add_edge(
         self,
         source: str,
         target: str,
-        label: Optional[str] = None,
+        label: str | None = None,
         edge_type: str = "default",
         weight: float = 1.0,
     ) -> None:
@@ -131,8 +130,8 @@ class MermaidCanvas:
                 weight=weight,
             )
         )
-    
-    def filter_by_confidence(self, threshold: float) -> "MermaidCanvas":
+
+    def filter_by_confidence(self, threshold: float) -> MermaidCanvas:
         """Filter nodes by confidence threshold.
         
         Args:
@@ -142,20 +141,20 @@ class MermaidCanvas:
             New canvas with filtered nodes
         """
         filtered = MermaidCanvas(self.diagram_type)
-        
+
         # Filter nodes
         for node in self.nodes.values():
             if node.confidence >= threshold:
                 filtered.nodes[node.id] = node
-        
+
         # Filter edges (keep only if both nodes exist)
         for edge in self.edges:
             if edge.source in filtered.nodes and edge.target in filtered.nodes:
                 filtered.edges.append(edge)
-        
+
         return filtered
-    
-    def highlight_path(self, source: str, target: str) -> List[str]:
+
+    def highlight_path(self, source: str, target: str) -> list[str]:
         """Find and highlight path between nodes.
         
         Args:
@@ -167,27 +166,27 @@ class MermaidCanvas:
         """
         # Simple BFS to find path
         from collections import deque
-        
+
         if source not in self.nodes or target not in self.nodes:
             return []
-        
+
         queue = deque([(source, [source])])
         visited = {source}
-        
+
         while queue:
             current, path = queue.popleft()
-            
+
             if current == target:
                 return path
-            
+
             # Find neighbors
             for edge in self.edges:
                 if edge.source == current and edge.target not in visited:
                     visited.add(edge.target)
                     queue.append((edge.target, path + [edge.target]))
-        
+
         return []  # No path found
-    
+
     def to_mermaid(self) -> str:
         """Generate Mermaid diagram syntax.
         
@@ -195,7 +194,7 @@ class MermaidCanvas:
             Mermaid diagram as string
         """
         lines = []
-        
+
         # Diagram type
         if self.diagram_type == DiagramType.KNOWLEDGE_GRAPH:
             lines.append("graph TD")
@@ -207,7 +206,7 @@ class MermaidCanvas:
             lines.append("flowchart LR")
         elif self.diagram_type == DiagramType.SEQUENCE:
             lines.append("sequenceDiagram")
-        
+
         # Nodes
         for node in self.nodes.values():
             # Node shape based on type
@@ -221,9 +220,9 @@ class MermaidCanvas:
                 shape = f"({node.label})"
             else:
                 shape = f"[{node.label}]"
-            
+
             lines.append(f"    {node.id}{shape}")
-        
+
         # Edges
         for edge in self.edges:
             arrow = "-->"
@@ -231,14 +230,14 @@ class MermaidCanvas:
                 arrow = "-.->"
             elif edge.edge_type == "bidirectional":
                 arrow = "<-->"
-            
+
             if edge.label:
                 lines.append(f"    {edge.source} {arrow}|{edge.label}| {edge.target}")
             else:
                 lines.append(f"    {edge.source} {arrow} {edge.target}")
-        
+
         return "\n".join(lines)
-    
+
     def to_markdown(self) -> str:
         """Export as Markdown with embedded Mermaid.
         
@@ -246,8 +245,8 @@ class MermaidCanvas:
             Markdown string
         """
         return f"```mermaid\n{self.to_mermaid()}\n```"
-    
-    def to_dict(self) -> Dict[str, Any]:
+
+    def to_dict(self) -> dict[str, Any]:
         """Export as dictionary.
         
         Returns:
@@ -286,23 +285,23 @@ class MermaidCanvas:
 @dataclass
 class Hypothesis:
     """A testable hypothesis extracted from an answer."""
-    
+
     claim: str
     confidence: float
-    evidence: List[str] = field(default_factory=list)
-    counterexamples: List[str] = field(default_factory=list)
+    evidence: list[str] = field(default_factory=list)
+    counterexamples: list[str] = field(default_factory=list)
     status: str = "untested"  # untested, confirmed, refuted, uncertain
 
 
 @dataclass
 class CounterexampleTest:
     """A test designed to refute a hypothesis."""
-    
+
     test_id: str
     hypothesis: str
     test_description: str
     expected_outcome: str
-    actual_outcome: Optional[str] = None
+    actual_outcome: str | None = None
     refutes: bool = False
 
 
@@ -317,14 +316,14 @@ class FalsificationLoop:
     - Negative control checks
     - Falsification trace logging
     """
-    
+
     def __init__(self):
         """Initialize the falsification loop."""
-        self.hypotheses: Dict[str, Hypothesis] = {}
-        self.tests: Dict[str, CounterexampleTest] = {}
-        self.trace: List[Dict[str, Any]] = []
-    
-    def extract_claims(self, answer: str) -> List[Hypothesis]:
+        self.hypotheses: dict[str, Hypothesis] = {}
+        self.tests: dict[str, CounterexampleTest] = {}
+        self.trace: list[dict[str, Any]] = []
+
+    def extract_claims(self, answer: str) -> list[Hypothesis]:
         """Extract testable claims from an answer.
         
         Args:
@@ -335,18 +334,18 @@ class FalsificationLoop:
         """
         # Placeholder implementation
         # In production, use LLM to extract claims
-        
+
         hypotheses = []
-        
+
         # Normalize whitespace and split by sentence
         answer = " ".join(answer.split())  # Normalize whitespace
         sentences = answer.split(". ")
-        
+
         for i, sentence in enumerate(sentences):
             sentence = sentence.strip()
             if not sentence:
                 continue
-            
+
             # Look for definitive keywords
             if any(word in sentence.lower() for word in ["always", "never", "all", "none", "must", "every"]):
                 hypothesis = Hypothesis(
@@ -356,10 +355,10 @@ class FalsificationLoop:
                 hypothesis_id = f"hyp_{hashlib.md5(sentence.encode()).hexdigest()[:8]}"
                 self.hypotheses[hypothesis_id] = hypothesis
                 hypotheses.append(hypothesis)
-        
+
         return hypotheses
-    
-    def generate_counterexamples(self, hypothesis: Hypothesis) -> List[CounterexampleTest]:
+
+    def generate_counterexamples(self, hypothesis: Hypothesis) -> list[CounterexampleTest]:
         """Generate tests to refute a hypothesis.
         
         Args:
@@ -369,26 +368,26 @@ class FalsificationLoop:
             List of counterexample tests
         """
         tests = []
-        
+
         # Placeholder implementation
         # In production, use LLM to generate counterexamples
-        
+
         # Generate 3 counterexample tests
         for i in range(3):
             test_id = f"test_{hashlib.md5(f'{hypothesis.claim}_{i}'.encode()).hexdigest()[:8]}"
-            
+
             test = CounterexampleTest(
                 test_id=test_id,
                 hypothesis=hypothesis.claim,
                 test_description=f"Counterexample test {i+1} for: {hypothesis.claim[:50]}...",
                 expected_outcome="Hypothesis should hold",
             )
-            
+
             self.tests[test_id] = test
             tests.append(test)
-        
+
         return tests
-    
+
     def execute_test(self, test: CounterexampleTest) -> bool:
         """Execute a counterexample test.
         
@@ -400,14 +399,14 @@ class FalsificationLoop:
         """
         # Placeholder implementation
         # In production, actually execute the test
-        
+
         # Simulate test execution
         import random
         refutes = random.random() < 0.1  # 10% chance of refutation
-        
+
         test.actual_outcome = "Test passed" if not refutes else "Test failed - hypothesis refuted"
         test.refutes = refutes
-        
+
         # Log trace
         self.trace.append({
             "timestamp": datetime.now().isoformat(),
@@ -416,10 +415,10 @@ class FalsificationLoop:
             "refutes": refutes,
             "outcome": test.actual_outcome,
         })
-        
+
         return refutes
-    
-    def run_falsification(self, answer: str) -> Dict[str, Any]:
+
+    def run_falsification(self, answer: str) -> dict[str, Any]:
         """Run complete falsification loop on an answer.
         
         Args:
@@ -430,7 +429,7 @@ class FalsificationLoop:
         """
         # Extract claims
         hypotheses = self.extract_claims(answer)
-        
+
         results = {
             "total_claims": len(hypotheses),
             "confirmed": 0,
@@ -438,11 +437,11 @@ class FalsificationLoop:
             "uncertain": 0,
             "hypotheses": [],
         }
-        
+
         # Test each hypothesis
         for hypothesis in hypotheses:
             tests = self.generate_counterexamples(hypothesis)
-            
+
             refuted = False
             for test in tests:
                 if self.execute_test(test):
@@ -450,10 +449,10 @@ class FalsificationLoop:
                     hypothesis.status = "refuted"
                     hypothesis.counterexamples.append(test.test_description)
                     break
-            
+
             if not refuted:
                 hypothesis.status = "confirmed"
-            
+
             # Update counts
             if hypothesis.status == "confirmed":
                 results["confirmed"] += 1
@@ -461,14 +460,14 @@ class FalsificationLoop:
                 results["refuted"] += 1
             else:
                 results["uncertain"] += 1
-            
+
             results["hypotheses"].append({
                 "claim": hypothesis.claim,
                 "status": hypothesis.status,
                 "confidence": hypothesis.confidence,
                 "counterexamples": hypothesis.counterexamples,
             })
-        
+
         return results
 
 
@@ -479,13 +478,13 @@ class FalsificationLoop:
 @dataclass
 class SessionPattern:
     """A learned pattern from session history."""
-    
+
     pattern_id: str
     pattern_type: str  # workflow, error, success, optimization
     description: str
     frequency: int
     confidence: float
-    examples: List[str] = field(default_factory=list)
+    examples: list[str] = field(default_factory=list)
     learned_at: str = field(default_factory=lambda: datetime.now().isoformat())
 
 
@@ -500,43 +499,43 @@ class CrossSessionLearner:
     - Error prevention
     - Knowledge consolidation
     """
-    
+
     def __init__(self):
         """Initialize the learner."""
-        self.patterns: Dict[str, SessionPattern] = {}
-        self.session_history: List[Dict[str, Any]] = []
-    
-    def add_session(self, session_data: Dict[str, Any]) -> None:
+        self.patterns: dict[str, SessionPattern] = {}
+        self.session_history: list[dict[str, Any]] = []
+
+    def add_session(self, session_data: dict[str, Any]) -> None:
         """Add a session to history.
         
         Args:
             session_data: Session data
         """
         self.session_history.append(session_data)
-    
-    def extract_patterns(self) -> List[SessionPattern]:
+
+    def extract_patterns(self) -> list[SessionPattern]:
         """Extract patterns from session history.
         
         Returns:
             List of learned patterns
         """
         patterns = []
-        
+
         # Placeholder implementation
         # In production, use ML to extract patterns
-        
+
         # Simple heuristic: look for repeated workflows
-        workflow_counts: Dict[str, int] = {}
-        
+        workflow_counts: dict[str, int] = {}
+
         for session in self.session_history:
             workflow = session.get("workflow", "unknown")
             workflow_counts[workflow] = workflow_counts.get(workflow, 0) + 1
-        
+
         # Create patterns for frequent workflows
         for workflow, count in workflow_counts.items():
             if count >= 3:  # Seen at least 3 times
                 pattern_id = f"pattern_{hashlib.md5(workflow.encode()).hexdigest()[:8]}"
-                
+
                 pattern = SessionPattern(
                     pattern_id=pattern_id,
                     pattern_type="workflow",
@@ -544,13 +543,13 @@ class CrossSessionLearner:
                     frequency=count,
                     confidence=min(count / 10.0, 1.0),
                 )
-                
+
                 self.patterns[pattern_id] = pattern
                 patterns.append(pattern)
-        
+
         return patterns
-    
-    def get_recommendations(self, current_context: Dict[str, Any]) -> List[str]:
+
+    def get_recommendations(self, current_context: dict[str, Any]) -> list[str]:
         """Get recommendations based on learned patterns.
         
         Args:
@@ -560,14 +559,14 @@ class CrossSessionLearner:
             List of recommendations
         """
         recommendations = []
-        
+
         # Match current context to patterns
         for pattern in self.patterns.values():
             if pattern.confidence > 0.7:
                 recommendations.append(
                     f"Based on {pattern.frequency} similar sessions: {pattern.description}"
                 )
-        
+
         return recommendations
 
 

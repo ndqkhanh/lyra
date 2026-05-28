@@ -1,7 +1,7 @@
 """Tests for CommandRegistry."""
 
+
 import pytest
-from pathlib import Path
 from lyra_cli.core.command_registry import CommandRegistry
 
 

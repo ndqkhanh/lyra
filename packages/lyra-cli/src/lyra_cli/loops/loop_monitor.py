@@ -1,6 +1,5 @@
 """Loop monitor - Monitor loop execution"""
 
-from typing import Dict, Optional
 from datetime import datetime
 
 
@@ -8,7 +7,7 @@ class LoopMonitor:
     """Monitors loop execution and health"""
 
     def __init__(self):
-        self.metrics: Dict[str, Dict] = {}
+        self.metrics: dict[str, dict] = {}
 
     def record_iteration(self, loop_id: str, iteration: int, success: bool, duration: float):
         """Record iteration metrics"""
@@ -35,7 +34,7 @@ class LoopMonitor:
             self.metrics[loop_id]["failed_iterations"] += 1
         self.metrics[loop_id]["total_duration"] += duration
 
-    def get_metrics(self, loop_id: str) -> Dict:
+    def get_metrics(self, loop_id: str) -> dict:
         """Get metrics for a loop"""
         return self.metrics.get(loop_id, {})
 
@@ -57,7 +56,7 @@ class LoopMonitor:
 
 
 # Global monitor
-_monitor: Optional[LoopMonitor] = None
+_monitor: LoopMonitor | None = None
 
 
 def get_monitor() -> LoopMonitor:

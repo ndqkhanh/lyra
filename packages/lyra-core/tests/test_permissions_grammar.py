@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.permissions.grammar import (
     Policy,
     Rule,
@@ -11,7 +10,6 @@ from lyra_core.permissions.grammar import (
     parse_rule,
     policy_from_mapping,
 )
-
 
 # ---------------------------------------------------------------------------
 # parse_rule

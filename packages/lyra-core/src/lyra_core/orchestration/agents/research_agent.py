@@ -14,7 +14,7 @@ from lyra_core.orchestration.models.research import (
     RepoAnalysis,
     ResearchReport,
 )
-from lyra_core.orchestration.protocol import Message, MessageType
+from lyra_core.orchestration.protocol import Message
 
 
 class ResearchAgent(BaseAgent):

@@ -8,14 +8,14 @@ Acts as a duck-typed plugin (on_session_start, pre_llm_call, etc.).
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
-from typing import Any, Optional
+from dataclasses import dataclass
+from typing import Any
 
 from lyra_core.agent.event_sourced_loop import (
-    EventSourcedAgentLoop,
     EventLog,
-    StepEvent,
+    EventSourcedAgentLoop,
     EventType,
+    StepEvent,
 )
 
 logger = logging.getLogger(__name__)

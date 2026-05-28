@@ -2,11 +2,11 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
-from typing import Any, AsyncIterator, List
+from typing import Any
 
 import pytest
-
 from lyra_cli.channels.base import ChannelAdapter, Inbound
 from lyra_cli.channels.matrix import (
     FeatureUnavailable,
@@ -22,7 +22,7 @@ class _FakeMatrixClient:
     access_token: str = "tok"
     auth_ok: bool = True
     rate_limit_first: bool = False
-    posted: List[dict[str, Any]] = field(default_factory=list)
+    posted: list[dict[str, Any]] = field(default_factory=list)
     inbound_events: list[dict[str, Any]] = field(default_factory=list)
 
     async def login(self) -> None:

@@ -20,11 +20,12 @@ import csv
 import hashlib
 import json
 import uuid
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 from .approval_gate import ReasoningFlag, RiskLevel
 

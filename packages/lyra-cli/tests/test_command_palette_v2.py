@@ -19,8 +19,6 @@ can exercise them headlessly.
 """
 from __future__ import annotations
 
-import pytest
-
 
 def test_fuzzy_filter_empty_query_returns_all() -> None:
     from lyra_cli.interactive.command_palette import fuzzy_filter
@@ -65,10 +63,9 @@ def test_fuzzy_filter_unknown_returns_empty() -> None:
 
 
 def test_render_palette_returns_rich_text() -> None:
-    from rich.text import Text
-
     from lyra_cli.interactive.command_palette import render_palette
     from lyra_cli.interactive.session import COMMAND_REGISTRY
+    from rich.text import Text
 
     out = render_palette(list(COMMAND_REGISTRY)[:5], query=None)
     assert isinstance(out, Text)
@@ -78,9 +75,8 @@ def test_render_palette_returns_rich_text() -> None:
 
 
 def test_render_palette_handles_no_matches() -> None:
-    from rich.text import Text
-
     from lyra_cli.interactive.command_palette import render_palette
+    from rich.text import Text
 
     out = render_palette([], query="nothing")
     assert isinstance(out, Text)

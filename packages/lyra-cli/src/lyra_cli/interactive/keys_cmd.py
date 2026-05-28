@@ -13,8 +13,7 @@ ECC reference: enterprise-controls.md credential management.
 from __future__ import annotations
 
 import os
-from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from ..commands.registry import CommandResult
 
@@ -60,8 +59,8 @@ def _test_provider(provider: str) -> str:
     info = PROVIDERS.get(provider)
     if not info:
         return "unknown provider"
-    import urllib.request
     import urllib.error
+    import urllib.request
     try:
         req = urllib.request.Request(info["url"], method="HEAD")
         req.timeout = 5

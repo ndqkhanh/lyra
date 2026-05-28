@@ -12,10 +12,8 @@ from __future__ import annotations
 
 import asyncio
 import json
+from collections.abc import AsyncIterator
 from dataclasses import asdict
-from typing import AsyncIterator, List
-
-import pytest
 
 from lyra_cli.channels.base import (
     ChannelAdapter,
@@ -23,7 +21,6 @@ from lyra_cli.channels.base import (
     Inbound,
     Outbound,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fake adapter
@@ -39,12 +36,12 @@ class _FakeAdapter:
         self.name = name
         self._inbound_q: asyncio.Queue[Inbound] | None = None
         self._pending: list[Inbound] = []
-        self.sent: List[Outbound] = []
+        self.sent: list[Outbound] = []
         self.started = False
         self.stopped = False
         self.raise_on_iter = False
 
-    def _ensure_queue(self) -> "asyncio.Queue[Inbound]":
+    def _ensure_queue(self) -> asyncio.Queue[Inbound]:
         if self._inbound_q is None:
             self._inbound_q = asyncio.Queue()
             for inbound in self._pending:

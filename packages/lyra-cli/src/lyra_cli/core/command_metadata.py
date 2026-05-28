@@ -1,6 +1,5 @@
 """Command metadata models."""
 from dataclasses import dataclass
-from typing import List, Optional
 
 
 @dataclass
@@ -9,10 +8,10 @@ class CommandMetadata:
 
     name: str
     description: str
-    agent: Optional[str] = None
-    skill: Optional[str] = None
-    args: Optional[List[str]] = None
-    file_path: Optional[str] = None
+    agent: str | None = None
+    skill: str | None = None
+    args: list[str] | None = None
+    file_path: str | None = None
 
     def __post_init__(self):
         if self.args is None:

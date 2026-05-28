@@ -125,9 +125,8 @@ def test_render_welcome_returns_text(
     lyra_home: Path, clean_env: None
 ) -> None:
     """Welcome panel for the wizard is a Rich-renderable Text."""
-    from rich.text import Text
-
     from lyra_cli.interactive.onboarding import render_welcome
+    from rich.text import Text
 
     out = render_welcome()
     assert isinstance(out, Text)

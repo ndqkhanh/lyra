@@ -1,10 +1,11 @@
 """AEVO two-phase evolution loop."""
-from typing import Callable
+from collections.abc import Callable
+
 from lyra_cli.evolution.context import EvolutionContext
-from lyra_cli.evolution.meta_agent import MetaAgent
-from lyra_cli.evolution.segment import EvolutionSegment
-from lyra_cli.evolution.meta_phase import meta_editing_phase
 from lyra_cli.evolution.cost_meter import BudgetCap
+from lyra_cli.evolution.meta_agent import MetaAgent
+from lyra_cli.evolution.meta_phase import meta_editing_phase
+from lyra_cli.evolution.segment import EvolutionSegment
 
 
 def aevo_loop(

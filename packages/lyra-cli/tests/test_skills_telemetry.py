@@ -30,7 +30,6 @@ from pathlib import Path
 
 import pytest
 
-
 # ── render_skill_block_with_activations ──────────────────────────
 
 

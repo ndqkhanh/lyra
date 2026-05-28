@@ -11,7 +11,7 @@ Safety Integration:
 """
 from __future__ import annotations
 
-from .injection import GuardResult, INJECTION_PATTERNS, injection_guard
+from .injection import INJECTION_PATTERNS, GuardResult, injection_guard
 from .modes import LyraMode
 from .resolver import Decision, PermissionDecision, resolve_lyra_decision
 from .safety_integration import SafetyDecision, SafetyEnhancedPermissionResolver

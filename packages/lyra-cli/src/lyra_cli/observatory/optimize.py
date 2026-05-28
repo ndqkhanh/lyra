@@ -2,14 +2,14 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Mapping
 
 from rich.console import RenderableType
 from rich.panel import Panel
 from rich.table import Table
 
-from .optimize_rules import Finding, RULES
+from .optimize_rules import RULES, Finding
 
 
 def optimize(sessions_root: Path) -> list[Finding]:

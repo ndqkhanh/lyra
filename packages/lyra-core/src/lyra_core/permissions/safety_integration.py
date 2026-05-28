@@ -22,8 +22,9 @@ from __future__ import annotations
 
 import asyncio
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any
 
 from lyra_harness_core.messages import ToolCall
 
@@ -37,16 +38,13 @@ from lyra_core.safety.approval_gate import (
 )
 from lyra_core.safety.audit_engine import AuditLogger, Decision, Verdict
 from lyra_core.safety.reasoning_monitor import (
-    FlagSeverity,
     ReasoningMonitor,
     ReasoningReport,
 )
 
 from .modes import LyraMode
 from .resolver import Decision as PermissionDecision
-from .resolver import PermissionDecision as PermDecision
-from .resolver import resolve_lyra_decision
-from .stack import PermissionStack, StackDecision, StackInput
+from .stack import PermissionStack, StackInput
 
 try:
     from lyra_core.safety.adversarial_verifier import (

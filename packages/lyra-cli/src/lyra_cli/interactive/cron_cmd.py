@@ -10,7 +10,6 @@ Ctrl+Shift+C to toggle. /cron in the REPL.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 from textual.app import ComposeResult
 from textual.binding import Binding

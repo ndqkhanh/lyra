@@ -1,17 +1,13 @@
 """L38-2 — SkillTelemetryStore + decayed-rate contract tests."""
 from __future__ import annotations
 
-import math
-import time
 from pathlib import Path
 
 import pytest
-
 from lyra_core.skills.registry import Skill, SkillRegistry
 from lyra_core.skills.telemetry import (
     DecayedRate,
     SkillTelemetryStore,
-    TelemetryEvent,
 )
 
 

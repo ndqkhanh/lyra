@@ -9,15 +9,15 @@ Integrates all three memory tiers:
 Based on research: docs/151-153 (MEMTIER papers)
 """
 
-from typing import Optional, Dict, Any, List
-from pathlib import Path
-from datetime import datetime
 import logging
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
+from lyra_core.memory.cognitive_weight import CognitiveWeightAttributor
 from lyra_core.memory.episodic import EpisodicMemory
 from lyra_core.memory.semantic_consolidator import SemanticConsolidator
 from lyra_core.memory.two_stage_retrieval import TwoStageRetriever
-from lyra_core.memory.cognitive_weight import CognitiveWeightAttributor
 
 logger = logging.getLogger(__name__)
 
@@ -32,8 +32,8 @@ class MemTierMemorySystem:
 
     def __init__(
         self,
-        memory_dir: Optional[Path] = None,
-        procedural_db: Optional[str] = None,
+        memory_dir: Path | None = None,
+        procedural_db: str | None = None,
         llm_model: str = "deepseek-v4-flash",
         auto_consolidate: bool = True
     ):
@@ -87,7 +87,7 @@ class MemTierMemorySystem:
         event_type: str,
         content: str,
         tokens: int = 0,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: dict[str, Any] | None = None
     ) -> str:
         """
         Log an event to episodic memory.
@@ -122,7 +122,7 @@ class MemTierMemorySystem:
         include_episodic: bool = True,
         include_semantic: bool = True,
         include_procedural: bool = True
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Search across all memory tiers using two-stage retrieval.
 
@@ -165,7 +165,7 @@ class MemTierMemorySystem:
 
         return filtered_results
 
-    def consolidate(self, llm, days_back: int = 1) -> Dict[str, Any]:
+    def consolidate(self, llm, days_back: int = 1) -> dict[str, Any]:
         """
         Run semantic consolidation: extract facts from episodic memory.
 
@@ -214,7 +214,7 @@ class MemTierMemorySystem:
         logger.info(f"Pruned {count} low-weight entries")
         return count
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get statistics about all memory tiers."""
         episodic_stats = self.episodic.get_stats()
         retrieval_stats = self.retriever.get_retrieval_stats()
@@ -281,11 +281,11 @@ class MemTierMemorySystem:
 
 
 # Singleton instance for global access
-_memory_system: Optional[MemTierMemorySystem] = None
+_memory_system: MemTierMemorySystem | None = None
 
 
 def get_memory_system(
-    memory_dir: Optional[Path] = None,
+    memory_dir: Path | None = None,
     **kwargs
 ) -> MemTierMemorySystem:
     """
@@ -317,7 +317,7 @@ def log_tool_call(
     session_id: str,
     project: str,
     tool_name: str,
-    args: Dict[str, Any],
+    args: dict[str, Any],
     result: Any
 ) -> str:
     """Log tool call to episodic memory."""
@@ -332,7 +332,7 @@ def log_agent_response(session_id: str, project: str, content: str) -> str:
     return memory.log_event(session_id, project, "agent_response", content)
 
 
-def search_memory(query: str, k: int = 10) -> List[Dict[str, Any]]:
+def search_memory(query: str, k: int = 10) -> list[dict[str, Any]]:
     """Search across all memory tiers."""
     memory = get_memory_system()
     return memory.search(query, k=k)

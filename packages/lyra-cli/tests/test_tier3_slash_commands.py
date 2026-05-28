@@ -10,7 +10,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-
 from lyra_cli.interactive.session import (
     COMMAND_REGISTRY,
     InteractiveSession,
@@ -114,7 +113,7 @@ def test_reload_plugins_returns_summary(tmp_path: Path) -> None:
     s._policy_hooks_cache = ("sentinel",)  # type: ignore[attr-defined]
     result = _cmd_reload_plugins(s, "")
     # Cache was dropped.
-    assert getattr(s, "_policy_hooks_cache") is None
+    assert s._policy_hooks_cache is None
     assert "user_commands=" in result.output
     assert "policy_cache=dropped" in result.output
 

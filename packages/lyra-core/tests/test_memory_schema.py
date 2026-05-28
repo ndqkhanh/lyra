@@ -5,7 +5,6 @@ import uuid
 from datetime import datetime, timezone
 
 import pytest
-
 from lyra_core.memory.schema import (
     AccessEdge,
     ConflictEvent,
@@ -15,7 +14,6 @@ from lyra_core.memory.schema import (
     Provenance,
     SubAgentDigest,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers

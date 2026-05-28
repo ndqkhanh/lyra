@@ -12,20 +12,14 @@ proposes an ``mcp__server__tool`` call on the first hop, and assert:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Any
-
-import pytest
-
-from lyra_harness_core.messages import Message, ToolCall
 
 from lyra_cli.interactive.chat_tools import (
     ToolEvent,
-    chat_tool_schemas,
     collect_mcp_tool_specs,
     run_chat_tool_loop,
 )
-
+from lyra_harness_core.messages import Message, ToolCall
 
 # ---------------------------------------------------------------------------
 # Test fixtures: scripted LLM + fake registry/transport

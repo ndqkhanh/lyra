@@ -14,10 +14,11 @@ import io
 import pstats
 import time
 import tracemalloc
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from functools import wraps
-from typing import Any, Callable, Dict, Iterator, List, Optional, TypeVar
+from typing import Any, TypeVar
 
 from lyra_cli.logging_config import get_logger
 
@@ -33,12 +34,12 @@ class ProfileResult:
     name: str
     duration_ms: float
     call_count: int
-    memory_peak_mb: Optional[float] = None
-    memory_current_mb: Optional[float] = None
-    stats: Optional[pstats.Stats] = None
+    memory_peak_mb: float | None = None
+    memory_current_mb: float | None = None
+    stats: pstats.Stats | None = None
     timestamp: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "name": self.name,
@@ -54,9 +55,9 @@ class ProfileResult:
 class ProfileReport:
     """Comprehensive profiling report."""
 
-    profiles: List[ProfileResult] = field(default_factory=list)
+    profiles: list[ProfileResult] = field(default_factory=list)
     total_duration_ms: float = 0.0
-    bottlenecks: List[Dict[str, Any]] = field(default_factory=list)
+    bottlenecks: list[dict[str, Any]] = field(default_factory=list)
 
     def add_profile(self, result: ProfileResult) -> None:
         """Add a profile result."""
@@ -82,7 +83,7 @@ class ProfileReport:
         ]
         self.bottlenecks.sort(key=lambda x: x["duration_ms"], reverse=True)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "total_duration_ms": self.total_duration_ms,
@@ -110,12 +111,12 @@ class PerformanceProfiler:
             enable_memory_profiling: Enable memory profiling
         """
         self.enable_memory_profiling = enable_memory_profiling
-        self._profiles: List[ProfileResult] = []
-        self._active_profilers: Dict[str, cProfile.Profile] = {}
+        self._profiles: list[ProfileResult] = []
+        self._active_profilers: dict[str, cProfile.Profile] = {}
 
     def profile_function(
         self,
-        name: Optional[str] = None,
+        name: str | None = None,
     ) -> Callable[[Callable[..., T]], Callable[..., T]]:
         """Decorator for profiling functions.
 
@@ -216,7 +217,7 @@ class PerformanceProfiler:
 
         logger.debug(f"Started profiling: {name}")
 
-    def stop_profiling(self, name: str) -> Optional[ProfileResult]:
+    def stop_profiling(self, name: str) -> ProfileResult | None:
         """Stop a named profiling session.
 
         Args:
@@ -259,11 +260,11 @@ class PerformanceProfiler:
         logger.debug(f"Stopped profiling: {name}")
         return result
 
-    def get_profiles(self) -> List[ProfileResult]:
+    def get_profiles(self) -> list[ProfileResult]:
         """Get all profile results."""
         return self._profiles.copy()
 
-    def get_profile(self, name: str) -> Optional[ProfileResult]:
+    def get_profile(self, name: str) -> ProfileResult | None:
         """Get a specific profile result.
 
         Args:
@@ -300,7 +301,7 @@ class PerformanceProfiler:
 
     def print_stats(
         self,
-        name: Optional[str] = None,
+        name: str | None = None,
         sort_by: str = "cumulative",
         limit: int = 20,
     ) -> None:
@@ -337,14 +338,15 @@ class PerformanceProfiler:
         logger.debug("Cleared all profiles")
 
 
-def profile_memory_usage() -> Dict[str, float]:
+def profile_memory_usage() -> dict[str, float]:
     """Get current memory usage statistics.
 
     Returns:
         Memory usage statistics in MB
     """
-    import psutil
     import os
+
+    import psutil
 
     process = psutil.Process(os.getpid())
     memory_info = process.memory_info()
@@ -356,14 +358,15 @@ def profile_memory_usage() -> Dict[str, float]:
     }
 
 
-def profile_cpu_usage() -> Dict[str, float]:
+def profile_cpu_usage() -> dict[str, float]:
     """Get current CPU usage statistics.
 
     Returns:
         CPU usage statistics
     """
-    import psutil
     import os
+
+    import psutil
 
     process = psutil.Process(os.getpid())
 

@@ -32,7 +32,6 @@ import os
 from dataclasses import dataclass
 from typing import Protocol
 
-
 _DEFAULT_KEY_ENV = "LYRA_BUNDLE_ATTEST_KEY"
 
 

@@ -1,11 +1,11 @@
 """Onboarding wizard for Lyra CLI (OpenClaw-inspired)"""
 
-from rich.console import Console
-from rich.panel import Panel
-from rich.prompt import Prompt, Confirm
-from rich.progress import Progress, SpinnerColumn, TextColumn
 import os
 from pathlib import Path
+
+from rich.console import Console
+from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.prompt import Confirm, Prompt
 
 
 class OnboardingWizard:

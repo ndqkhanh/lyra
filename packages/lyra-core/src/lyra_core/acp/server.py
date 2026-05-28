@@ -7,8 +7,9 @@ the protocol handshake testable in isolation.
 from __future__ import annotations
 
 import json
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Iterable
+from typing import Any
 
 __all__ = [
     "ACP_ERROR_METHOD_NOT_FOUND",

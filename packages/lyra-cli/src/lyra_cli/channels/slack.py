@@ -25,15 +25,19 @@ Design notes
 from __future__ import annotations
 
 import asyncio
+from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass
-from typing import Any, AsyncIterator, Callable, Optional
+from typing import Any
 
 from ._errors import (
     AdapterAuthError as SlackAuthError,
+)
+from ._errors import (
     AdapterRateLimited as SlackRateLimited,
+)
+from ._errors import (
     FeatureUnavailable,
 )
-
 
 __all__ = [
     "FeatureUnavailable",

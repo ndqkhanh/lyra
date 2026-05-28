@@ -1,10 +1,9 @@
 """Instinct extractor - Extracts patterns from observations"""
 
 from dataclasses import dataclass
-from typing import List, Optional
 from datetime import datetime
 from pathlib import Path
-import json
+
 import yaml
 
 
@@ -16,20 +15,20 @@ class Instinct:
     action: str
     confidence: float  # 0.0 to 1.0
     domain: str  # code-style, testing, git, debugging, workflow
-    evidence: List[str]
+    evidence: list[str]
     scope: str  # "project" or "global"
-    project_id: Optional[str]
+    project_id: str | None
     created_at: datetime
 
 
 class InstinctExtractor:
     """Extracts instincts from observations"""
 
-    def __init__(self, instincts_dir: Optional[Path] = None):
+    def __init__(self, instincts_dir: Path | None = None):
         self.instincts_dir = instincts_dir or Path.home() / ".lyra" / "learning" / "instincts"
         self.instincts_dir.mkdir(parents=True, exist_ok=True)
 
-    def extract_from_observations(self, observations: List[dict]) -> List[Instinct]:
+    def extract_from_observations(self, observations: list[dict]) -> list[Instinct]:
         """Extract instincts from observations (simplified)"""
         instincts = []
 
@@ -65,7 +64,7 @@ class InstinctExtractor:
             if count >= 3:  # Repeated 3+ times
                 instinct = Instinct(
                     id=f"repeated-{tool}",
-                    trigger=f"when working on similar tasks",
+                    trigger="when working on similar tasks",
                     action=f"use {tool}",
                     confidence=min(0.9, 0.5 + (count * 0.1)),
                     domain="workflow",
@@ -116,7 +115,7 @@ class InstinctExtractor:
 
         instinct_file.write_text(content)
 
-    def load_instincts(self, project_id: Optional[str] = None) -> List[Instinct]:
+    def load_instincts(self, project_id: str | None = None) -> list[Instinct]:
         """Load instincts from files"""
         if project_id:
             instinct_dir = self.instincts_dir / project_id
@@ -156,7 +155,7 @@ class InstinctExtractor:
 
 
 # Global instinct extractor
-_instinct_extractor: Optional[InstinctExtractor] = None
+_instinct_extractor: InstinctExtractor | None = None
 
 
 def get_instinct_extractor() -> InstinctExtractor:

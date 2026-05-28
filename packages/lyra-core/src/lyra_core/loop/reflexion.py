@@ -35,7 +35,6 @@ import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 __all__ = [
     "LessonGenerator",
@@ -74,7 +73,7 @@ class Reflection:
         }
 
     @classmethod
-    def from_dict(cls, payload: dict[str, object]) -> "Reflection":
+    def from_dict(cls, payload: dict[str, object]) -> Reflection:
         return cls(
             task=str(payload["task"]),
             verdict=str(payload["verdict"]),
@@ -153,14 +152,14 @@ class ReflectionMemory:
     (chronological); ``recent(k)`` returns the K most-recent entries.
     """
 
-    def __init__(self, *, path: Optional[Path] = None) -> None:
+    def __init__(self, *, path: Path | None = None) -> None:
         self._items: list[Reflection] = []
-        self._path: Optional[Path] = Path(path) if path is not None else None
+        self._path: Path | None = Path(path) if path is not None else None
         if self._path is not None and self._path.exists():
             self._load()
 
     @property
-    def path(self) -> Optional[Path]:
+    def path(self) -> Path | None:
         return self._path
 
     def __len__(self) -> int:

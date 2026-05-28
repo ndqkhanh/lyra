@@ -13,7 +13,6 @@ The legacy ``dashscope`` preset stays for back-compat — anyone scripting
 from __future__ import annotations
 
 import pytest
-
 from lyra_cli.llm_factory import known_llm_names
 from lyra_cli.providers.openai_compatible import preset_by_name
 

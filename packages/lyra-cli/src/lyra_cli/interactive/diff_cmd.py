@@ -14,12 +14,11 @@ diffs — this command makes reviewing them effortless in the REPL.
 from __future__ import annotations
 
 import difflib
-import os
 from pathlib import Path
-from typing import Optional
+
+from typing import Any
 
 from ..commands.registry import CommandResult
-
 
 # ── Colors ─────────────────────────────────────────────────────────────
 
@@ -55,7 +54,7 @@ def _colorize_diff(diff_text: str, max_lines: int = 40) -> str:
     return "\n".join(out)
 
 
-def _run_diff(cmd: list[str], cwd: Optional[Path] = None) -> tuple[str, int]:
+def _run_diff(cmd: list[str], cwd: Path | None = None) -> tuple[str, int]:
     """Run a diff command and return (output, exit_code)."""
     import subprocess
     try:

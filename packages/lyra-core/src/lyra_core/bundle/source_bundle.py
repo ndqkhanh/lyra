@@ -18,9 +18,10 @@ from __future__ import annotations
 
 import hashlib
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Iterable, Literal
+from typing import Any, Literal
 
 
 class BundleValidationError(ValueError):
@@ -159,7 +160,7 @@ class SourceBundle:
     # ---- factory --------------------------------------------------
 
     @classmethod
-    def load(cls, root: Path | str) -> "SourceBundle":
+    def load(cls, root: Path | str) -> SourceBundle:
         root = Path(root).resolve()
         if not root.is_dir():
             raise BundleValidationError(f"bundle root not a directory: {root}")

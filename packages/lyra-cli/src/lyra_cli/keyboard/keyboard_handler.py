@@ -1,17 +1,17 @@
 """Keyboard handler - Capture special keys and key combinations"""
 
 import sys
-import tty
 import termios
+import tty
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Optional, Callable
 
 
 @dataclass
 class KeyPress:
     """Represents a key press event"""
     key: str
-    char: Optional[str] = None
+    char: str | None = None
     is_special: bool = False
 
 
@@ -50,7 +50,7 @@ class KeyboardHandler:
         """
         self.callbacks[key] = callback
 
-    def read_key(self) -> Optional[KeyPress]:
+    def read_key(self) -> KeyPress | None:
         """Read a single key press
 
         Returns:
@@ -112,7 +112,7 @@ class KeyboardHandler:
             # Restore terminal settings
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
-    def read_line(self, prompt: str = "") -> Optional[str]:
+    def read_line(self, prompt: str = "") -> str | None:
         """Read a line of input with special key support
 
         Args:

@@ -17,7 +17,6 @@ Returns the selected skill name on Enter, or None on Esc.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
 
 from prompt_toolkit import Application
 from prompt_toolkit.buffer import Buffer
@@ -60,7 +59,7 @@ _HEADER_FMT = "{n} skills · Enter to execute, / to search, Esc to cancel"
 _PAGE = 8
 
 
-def run_skill_picker(skills: dict) -> Optional[str]:
+def run_skill_picker(skills: dict) -> str | None:
     """Run the interactive skill picker dialog.
 
     Args:

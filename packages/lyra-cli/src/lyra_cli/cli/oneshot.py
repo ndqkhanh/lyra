@@ -5,8 +5,8 @@ Provides non-interactive execution mode for scripting and automation.
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from pathlib import Path
-from typing import AsyncIterator
 
 from .formatter import CLIFormatter, get_formatter
 from .messages import StreamEvent

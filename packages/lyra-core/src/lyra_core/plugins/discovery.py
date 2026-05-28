@@ -21,7 +21,8 @@ package shadowing making the symbol unreachable.
 """
 from __future__ import annotations
 
-from typing import Any, List, Mapping, Protocol, runtime_checkable
+from collections.abc import Mapping
+from typing import Any, Protocol, runtime_checkable
 
 __all__ = ["Plugin", "discover_plugins", "fire"]
 
@@ -56,7 +57,7 @@ class Plugin(Protocol):
 _ENTRY_POINT_GROUP = "lyra.plugins"
 
 
-def discover_plugins(*, extra: list | None = None) -> List[Any]:
+def discover_plugins(*, extra: list | None = None) -> list[Any]:
     """Load plugins from the ``lyra.plugins`` entry-point group.
 
     Returns a list of instantiated plugin objects. ``extra`` is
@@ -68,7 +69,7 @@ def discover_plugins(*, extra: list | None = None) -> List[Any]:
     constructor crash, etc.) is silently skipped. The remaining
     plugins still load.
     """
-    plugins: List[Any] = []
+    plugins: list[Any] = []
     try:
         from importlib.metadata import entry_points
     except Exception:  # pragma: no cover - stdlib always present on 3.9+

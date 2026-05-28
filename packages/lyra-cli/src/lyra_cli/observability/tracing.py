@@ -4,11 +4,11 @@ OpenTelemetry Integration for Distributed Tracing.
 Provides observability into agent operations with spans, metrics, and traces.
 """
 
+import time
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional, Dict, Any
 from enum import Enum
-import time
+from typing import Any
 
 
 class SpanKind(Enum):
@@ -35,7 +35,7 @@ class SpanEvent:
 
     name: str
     timestamp: str
-    attributes: Dict[str, Any] = field(default_factory=dict)
+    attributes: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -44,16 +44,16 @@ class Span:
 
     span_id: str
     trace_id: str
-    parent_span_id: Optional[str]
+    parent_span_id: str | None
     name: str
     kind: SpanKind
     start_time: float
-    end_time: Optional[float] = None
-    attributes: Dict[str, Any] = field(default_factory=dict)
-    events: List[SpanEvent] = field(default_factory=list)
+    end_time: float | None = None
+    attributes: dict[str, Any] = field(default_factory=dict)
+    events: list[SpanEvent] = field(default_factory=list)
     status: str = "unset"  # unset, ok, error
 
-    def duration_ms(self) -> Optional[float]:
+    def duration_ms(self) -> float | None:
         """Calculate span duration in milliseconds."""
         if self.end_time is None:
             return None
@@ -65,7 +65,7 @@ class Trace:
     """A complete trace with multiple spans."""
 
     trace_id: str
-    spans: List[Span] = field(default_factory=list)
+    spans: list[Span] = field(default_factory=list)
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
 
 
@@ -81,8 +81,8 @@ class TracingProvider:
     """
 
     def __init__(self):
-        self.traces: Dict[str, Trace] = {}
-        self.active_spans: Dict[str, Span] = {}
+        self.traces: dict[str, Trace] = {}
+        self.active_spans: dict[str, Span] = {}
 
         # Statistics
         self.stats = {
@@ -114,8 +114,8 @@ class TracingProvider:
         span_id: str,
         name: str,
         kind: SpanKind = SpanKind.INTERNAL,
-        parent_span_id: Optional[str] = None,
-        attributes: Optional[Dict[str, Any]] = None
+        parent_span_id: str | None = None,
+        attributes: dict[str, Any] | None = None
     ) -> Span:
         """
         Start a new span.
@@ -158,7 +158,7 @@ class TracingProvider:
         self,
         span_id: str,
         status: str = "ok",
-        attributes: Optional[Dict[str, Any]] = None
+        attributes: dict[str, Any] | None = None
     ):
         """
         End a span.
@@ -189,7 +189,7 @@ class TracingProvider:
         self,
         span_id: str,
         event_name: str,
-        attributes: Optional[Dict[str, Any]] = None
+        attributes: dict[str, Any] | None = None
     ):
         """
         Add an event to a span.
@@ -225,15 +225,15 @@ class TracingProvider:
         span = self.active_spans[span_id]
         span.attributes[key] = value
 
-    def get_trace(self, trace_id: str) -> Optional[Trace]:
+    def get_trace(self, trace_id: str) -> Trace | None:
         """Get a trace by ID."""
         return self.traces.get(trace_id)
 
-    def get_span(self, span_id: str) -> Optional[Span]:
+    def get_span(self, span_id: str) -> Span | None:
         """Get an active span by ID."""
         return self.active_spans.get(span_id)
 
-    def export_trace(self, trace_id: str) -> Optional[Dict[str, Any]]:
+    def export_trace(self, trace_id: str) -> dict[str, Any] | None:
         """
         Export a trace in OpenTelemetry format.
 
@@ -275,7 +275,7 @@ class TracingProvider:
             ],
         }
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get tracing statistics."""
         return {
             **self.stats,
@@ -294,9 +294,9 @@ class MetricsProvider:
     """
 
     def __init__(self):
-        self.counters: Dict[str, float] = {}
-        self.gauges: Dict[str, float] = {}
-        self.histograms: Dict[str, List[float]] = {}
+        self.counters: dict[str, float] = {}
+        self.gauges: dict[str, float] = {}
+        self.histograms: dict[str, list[float]] = {}
 
     def increment_counter(self, name: str, value: float = 1.0):
         """Increment a counter metric."""
@@ -316,11 +316,11 @@ class MetricsProvider:
         """Get counter value."""
         return self.counters.get(name, 0.0)
 
-    def get_gauge(self, name: str) -> Optional[float]:
+    def get_gauge(self, name: str) -> float | None:
         """Get gauge value."""
         return self.gauges.get(name)
 
-    def get_histogram_stats(self, name: str) -> Optional[Dict[str, float]]:
+    def get_histogram_stats(self, name: str) -> dict[str, float] | None:
         """Get histogram statistics."""
         if name not in self.histograms or not self.histograms[name]:
             return None
@@ -334,7 +334,7 @@ class MetricsProvider:
             "avg": sum(values) / len(values),
         }
 
-    def export_metrics(self) -> Dict[str, Any]:
+    def export_metrics(self) -> dict[str, Any]:
         """Export all metrics."""
         return {
             "counters": self.counters.copy(),

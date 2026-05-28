@@ -4,13 +4,11 @@ from __future__ import annotations
 import io
 import json
 import tarfile
-from pathlib import Path
 
 import pytest
-
 from lyra_core.bundle import (
-    FetchSpec,
     FetchScopeError,
+    FetchSpec,
     MarketplaceError,
     MarketplaceFetcher,
     MarketplaceKey,
@@ -18,7 +16,6 @@ from lyra_core.bundle import (
     SignatureMismatchError,
     sign_archive,
 )
-
 
 # ---- helpers ----------------------------------------------------------
 

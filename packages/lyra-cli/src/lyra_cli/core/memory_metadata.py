@@ -1,8 +1,8 @@
 """Memory metadata models."""
 from dataclasses import dataclass
-from typing import Optional, Dict, Any, List
 from datetime import datetime
 from enum import Enum
+from typing import Any
 
 
 class MemoryType(Enum):
@@ -20,5 +20,5 @@ class MemoryMetadata:
     content: str
     memory_type: MemoryType
     timestamp: datetime
-    tags: List[str]
-    metadata: Optional[Dict[str, Any]] = None
+    tags: list[str]
+    metadata: dict[str, Any] | None = None

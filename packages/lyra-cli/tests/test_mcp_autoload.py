@@ -21,7 +21,6 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-
 from lyra_cli.interactive import mcp_autoload as autoload
 from lyra_cli.interactive.session import InteractiveSession
 

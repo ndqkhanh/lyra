@@ -23,15 +23,13 @@ import time
 from pathlib import Path
 
 import pytest
-from typer.testing import CliRunner
-
 from lyra_cli.__main__ import app
 from lyra_cli.interactive.session import (
     InteractiveSession,
-    _TurnSnapshot,
     _resolve_session_reference,
+    _TurnSnapshot,
 )
-
+from typer.testing import CliRunner
 
 # ---------------------------------------------------------------------
 # helpers

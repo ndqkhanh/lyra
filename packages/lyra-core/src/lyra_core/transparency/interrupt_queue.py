@@ -4,7 +4,6 @@ from __future__ import annotations
 import json
 import time
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -16,7 +15,7 @@ class PendingInterrupt:
     action_preview: str
     severity: str    # "low" | "medium" | "high" | "critical"
     queued_at: float
-    resolved_at: Optional[float] = None
+    resolved_at: float | None = None
 
     @property
     def wait_s(self) -> float:

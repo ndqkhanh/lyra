@@ -14,11 +14,10 @@ ECC reference: ``.claude/identity.json`` structure + ``team-config.json``.
 from __future__ import annotations
 
 import json
-import os
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from ..commands.registry import CommandResult
 
@@ -197,7 +196,7 @@ def cmd_profile(session: Any, args: str) -> CommandResult:
     if parts[0] == "export":
         return CommandResult(output=json.dumps(profile.to_dict(), indent=2))
 
-    return CommandResult(output=f"Usage: /profile [show|set <key> <value>|reset|export]")
+    return CommandResult(output="Usage: /profile [show|set <key> <value>|reset|export]")
 
 
 def cmd_whoami(session: Any, _args: str) -> CommandResult:

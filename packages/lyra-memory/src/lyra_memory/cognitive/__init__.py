@@ -10,10 +10,10 @@ Grounds every memory design decision in cognitive neuroscience:
 Source: Human-Like Lifelong Memory (QufkvHbQs7), ICLR 2026 MemAgent Workshop.
 """
 
-from lyra_memory.cognitive.valence import ValenceEstimator, ValenceVector
+from lyra_memory.cognitive.beliefs import Belief, CBTBeliefHierarchy
 from lyra_memory.cognitive.router import System12MemoryRouter
 from lyra_memory.cognitive.thalamic import ThalamicGateway
-from lyra_memory.cognitive.beliefs import Belief, CBTBeliefHierarchy
+from lyra_memory.cognitive.valence import ValenceEstimator, ValenceVector
 
 __all__ = [
     "Belief",

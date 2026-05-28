@@ -1,12 +1,10 @@
 """Enhanced CLI output with Claude Code-inspired design"""
 
+
 from rich.console import Console
+from rich.live import Live
 from rich.panel import Panel
 from rich.text import Text
-from rich.live import Live
-from rich.spinner import Spinner
-from typing import Optional
-import time
 
 
 class OutputFormatter:
@@ -14,7 +12,7 @@ class OutputFormatter:
 
     def __init__(self, console: Console):
         self.console = console
-        self.live: Optional[Live] = None
+        self.live: Live | None = None
 
     # Status indicators (Claude Code style)
     SPINNER_WORKING = "dots"

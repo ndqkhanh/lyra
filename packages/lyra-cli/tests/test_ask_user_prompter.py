@@ -5,10 +5,9 @@ import io
 import json
 
 import pytest
-from rich.console import Console
-
 from lyra_cli.interactive.ask_user_prompter import _parse_picks, make_prompter
 from lyra_core.tools.ask_user import AskUserPrompt, AskUserQuestionTool, _AskUserArgs
+from rich.console import Console
 
 
 def _silent_console() -> Console:

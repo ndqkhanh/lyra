@@ -1,7 +1,6 @@
 """Scrollback buffer - Conversation history with line limit"""
 
 import os
-from typing import List, Optional
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -12,7 +11,7 @@ class ScrollbackLine:
     content: str
     timestamp: datetime
     line_type: str = "text"  # text, tool, error, system
-    metadata: Optional[dict] = None
+    metadata: dict | None = None
 
 
 class ScrollbackBuffer:
@@ -33,14 +32,14 @@ class ScrollbackBuffer:
             max_lines: Maximum number of lines to keep (default: 10,000)
         """
         self.max_lines = max_lines
-        self.lines: List[ScrollbackLine] = []
+        self.lines: list[ScrollbackLine] = []
         self.current_position = 0  # For scrolling through history
 
     def append(
         self,
         content: str,
         line_type: str = "text",
-        metadata: Optional[dict] = None
+        metadata: dict | None = None
     ):
         """Append a line to the buffer
 
@@ -62,7 +61,7 @@ class ScrollbackBuffer:
         if len(self.lines) > self.max_lines:
             self._prune_oldest()
 
-    def append_multiple(self, lines: List[str], line_type: str = "text"):
+    def append_multiple(self, lines: list[str], line_type: str = "text"):
         """Append multiple lines at once
 
         Args:
@@ -80,10 +79,10 @@ class ScrollbackBuffer:
 
     def get_lines(
         self,
-        start: Optional[int] = None,
-        end: Optional[int] = None,
-        line_type: Optional[str] = None
-    ) -> List[ScrollbackLine]:
+        start: int | None = None,
+        end: int | None = None,
+        line_type: str | None = None
+    ) -> list[ScrollbackLine]:
         """Get lines from buffer
 
         Args:
@@ -101,7 +100,7 @@ class ScrollbackBuffer:
 
         return lines
 
-    def get_recent(self, count: int = 100) -> List[ScrollbackLine]:
+    def get_recent(self, count: int = 100) -> list[ScrollbackLine]:
         """Get most recent N lines
 
         Args:
@@ -116,8 +115,8 @@ class ScrollbackBuffer:
         self,
         query: str,
         case_sensitive: bool = False,
-        line_type: Optional[str] = None
-    ) -> List[tuple[int, ScrollbackLine]]:
+        line_type: str | None = None
+    ) -> list[tuple[int, ScrollbackLine]]:
         """Search for lines containing query
 
         Args:
@@ -247,7 +246,7 @@ class ScrollbackBuffer:
         """Load from JSON file"""
         import json
 
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             data = json.load(f)
 
         self.lines = []
@@ -320,7 +319,7 @@ class ScrollbackBuffer:
         center_index: int,
         before: int = 5,
         after: int = 5
-    ) -> List[ScrollbackLine]:
+    ) -> list[ScrollbackLine]:
         """Get lines around a specific index (context window)
 
         Args:
@@ -351,7 +350,7 @@ def main():
     buffer.append("Tool: Read file.txt", "tool")
     buffer.append("Error: File not found", "error")
 
-    print(f"Added 4 lines")
+    print("Added 4 lines")
     print(f"Total lines: {buffer.get_line_count()}")
     print()
 

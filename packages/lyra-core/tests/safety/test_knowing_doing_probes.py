@@ -1,7 +1,6 @@
 """Tests for Knowing-Doing Probes — bridging the knowledge-execution gap."""
 
 import pytest
-
 from lyra_core.safety.knowing_doing_probes import (
     GapReport,
     GapSeverity,

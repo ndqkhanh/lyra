@@ -10,7 +10,6 @@ Provides /memory command with subcommands:
 """
 
 from datetime import datetime
-from typing import Optional
 
 from lyra_memory.schema import MemoryScope, MemoryType
 from lyra_memory.store import MemoryStore
@@ -31,8 +30,8 @@ class MemoryCommands:
     def search(
         self,
         query: str,
-        scope: Optional[str] = None,
-        type: Optional[str] = None,
+        scope: str | None = None,
+        type: str | None = None,
         limit: int = 10,
     ) -> str:
         """

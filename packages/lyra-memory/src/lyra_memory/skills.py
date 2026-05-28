@@ -11,12 +11,12 @@ Implements 7-tuple skill formalism:
 7. Lineage: Provenance graph
 """
 
+import json
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
-import json
+from typing import Any
 
 
 class SkillType(str, Enum):
@@ -38,7 +38,7 @@ class SkillStatus(str, Enum):
 @dataclass
 class SkillLineage:
     """Provenance tracking for skills."""
-    parent_id: Optional[str] = None
+    parent_id: str | None = None
     created_from: str = "manual"  # "manual", "trajectory", "merge", "split"
     created_at: datetime = field(default_factory=datetime.now)
     modified_at: datetime = field(default_factory=datetime.now)
@@ -64,21 +64,21 @@ class Skill:
     applicability: str  # Description of when to use
     policy: str  # Code or workflow description
     termination: str  # Completion criteria
-    interface: Dict[str, Any]  # {"input": schema, "output": schema}
+    interface: dict[str, Any]  # {"input": schema, "output": schema}
     type: SkillType = SkillType.CODE
     status: SkillStatus = SkillStatus.UNVERIFIED
     lineage: SkillLineage = field(default_factory=SkillLineage)
 
     # Metadata
     description: str = ""
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     use_count: int = 0
     success_count: int = 0
     failure_count: int = 0
-    last_used: Optional[datetime] = None
+    last_used: datetime | None = None
 
     # Verification
-    test_cases: List[Dict[str, Any]] = field(default_factory=list)
+    test_cases: list[dict[str, Any]] = field(default_factory=list)
     safety_level: str = "safe"  # "safe", "medium", "high-risk"
 
     @property
@@ -89,7 +89,7 @@ class Skill:
             return 1.0
         return self.success_count / total
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "name": self.name,
@@ -117,7 +117,7 @@ class Skill:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Skill":
+    def from_dict(cls, data: dict[str, Any]) -> "Skill":
         """Create from dictionary."""
         lineage_data = data.get("lineage", {})
         lineage = SkillLineage(
@@ -170,7 +170,7 @@ class SkillLibrary:
             library_path: Path to skills directory
         """
         self.library_path = library_path
-        self.skills: Dict[str, Skill] = {}
+        self.skills: dict[str, Skill] = {}
         self._load()
 
     def add(self, skill: Skill, verify: bool = True) -> bool:
@@ -194,11 +194,11 @@ class SkillLibrary:
         self._save()
         return True
 
-    def get(self, name: str) -> Optional[Skill]:
+    def get(self, name: str) -> Skill | None:
         """Get a skill by name."""
         return self.skills.get(name)
 
-    def search(self, query: str, limit: int = 10) -> List[Skill]:
+    def search(self, query: str, limit: int = 10) -> list[Skill]:
         """
         Search for relevant skills.
 
@@ -240,7 +240,7 @@ class SkillLibrary:
         scored.sort(key=lambda x: x[1], reverse=True)
         return [skill for skill, _ in scored[:limit]]
 
-    def refine(self, name: str, failure_info: Dict[str, Any]) -> Skill:
+    def refine(self, name: str, failure_info: dict[str, Any]) -> Skill:
         """
         Refine a skill based on failure.
 
@@ -300,7 +300,7 @@ class SkillLibrary:
         self.add(merged, verify=False)
         return merged
 
-    def prune(self, min_success_rate: float = 0.3, min_use_count: int = 5) -> List[str]:
+    def prune(self, min_success_rate: float = 0.3, min_use_count: int = 5) -> list[str]:
         """
         Remove low-quality skills.
 
@@ -321,7 +321,7 @@ class SkillLibrary:
         self._save()
         return pruned
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get library statistics."""
         return {
             "total_skills": len(self.skills),
@@ -355,14 +355,14 @@ class SkillLibrary:
 
         return True
 
-    def _count_by_type(self) -> Dict[str, int]:
+    def _count_by_type(self) -> dict[str, int]:
         """Count skills by type."""
         counts = {}
         for skill in self.skills.values():
             counts[skill.type.value] = counts.get(skill.type.value, 0) + 1
         return counts
 
-    def _count_by_status(self) -> Dict[str, int]:
+    def _count_by_status(self) -> dict[str, int]:
         """Count skills by status."""
         counts = {}
         for skill in self.skills.values():
@@ -375,7 +375,7 @@ class SkillLibrary:
             return 0.0
         return sum(s.success_rate for s in self.skills.values()) / len(self.skills)
 
-    def _most_used(self, limit: int) -> List[Dict[str, Any]]:
+    def _most_used(self, limit: int) -> list[dict[str, Any]]:
         """Get most used skills."""
         sorted_skills = sorted(
             self.skills.values(),

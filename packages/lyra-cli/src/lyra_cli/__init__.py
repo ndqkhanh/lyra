@@ -1,6 +1,10 @@
 """🧬 Lyra CLI — one command to run the AGI platform."""
 from __future__ import annotations
-import sys, os, argparse, json
+
+import argparse
+import json
+import os
+import sys
 
 __version__ = "3.5.0"
 __all__ = ["main", "__version__"]
@@ -21,7 +25,7 @@ def main():
     args = parser.parse_args()
 
     if args.version:
-        print(f"🧬 Lyra v5.0.0 — 124 packages, 20 plans")
+        print("🧬 Lyra v5.0.0 — 124 packages, 20 plans")
         return
 
     if args.status:
@@ -31,10 +35,10 @@ def main():
             bt = BreakthroughIntegration()
             status = bt.initialize()
             avail = sum(1 for v in status.values() if v)
-            print(f"  📦 Packages: 124")
+            print("  📦 Packages: 124")
             print(f"  🧬 Subsystems: {avail}/{len(status)} initialized")
-            print(f"  📋 Plans: 20")
-            print(f"  📚 Research: 23 waves, 290+ papers")
+            print("  📋 Plans: 20")
+            print("  📚 Research: 23 waves, 290+ papers")
             print()
         except ImportError:
             print("  ⚠ lyra-core not found. Run install.sh first.")
@@ -64,7 +68,7 @@ def main():
         bt = BreakthroughIntegration()
         bt.initialize()
         print(f"  🧬 Lyra Ready — {len([k for k,v in bt.available.items() if v])} subsystems active")
-        print(f"  💡 Run 'lyra --help' for options")
+        print("  💡 Run 'lyra --help' for options")
     except ImportError:
         print("  Installing Lyra...")
         os.system("curl -fsSL https://raw.githubusercontent.com/ndqkhanh/lyra/main/install.sh | bash")

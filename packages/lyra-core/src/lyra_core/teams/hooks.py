@@ -37,12 +37,10 @@ from __future__ import annotations
 
 import json
 import os
-import shlex
 import subprocess
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable, Literal
-
+from typing import Any, Literal
 
 HookableEvent = Literal[
     "team.task_created",

@@ -1,7 +1,7 @@
 """Fixed input box - Always visible at bottom during streaming"""
 
-import sys
 import shutil
+import sys
 from typing import TextIO
 
 

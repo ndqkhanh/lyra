@@ -1,6 +1,6 @@
 """Skill registry for loading and managing skills."""
 from pathlib import Path
-from typing import Dict, List, Optional
+
 import yaml
 
 from .skill_metadata import SkillMetadata
@@ -9,11 +9,11 @@ from .skill_metadata import SkillMetadata
 class SkillRegistry:
     """Registry for loading and managing skills."""
 
-    def __init__(self, skill_dirs: Optional[List[Path]] = None):
+    def __init__(self, skill_dirs: list[Path] | None = None):
         self.skill_dirs = skill_dirs or []
-        self._skills: Dict[str, SkillMetadata] = {}
+        self._skills: dict[str, SkillMetadata] = {}
 
-    def load_skills(self) -> Dict[str, SkillMetadata]:
+    def load_skills(self) -> dict[str, SkillMetadata]:
         """Load all skills from configured directories."""
         self._skills.clear()
 
@@ -32,7 +32,7 @@ class SkillRegistry:
 
         return self._skills
 
-    def _parse_skill_file(self, file_path: Path) -> Optional[SkillMetadata]:
+    def _parse_skill_file(self, file_path: Path) -> SkillMetadata | None:
         """Parse skill file with YAML frontmatter."""
         content = file_path.read_text()
 
@@ -57,11 +57,11 @@ class SkillRegistry:
         except yaml.YAMLError:
             return None
 
-    def get_skill(self, name: str) -> Optional[SkillMetadata]:
+    def get_skill(self, name: str) -> SkillMetadata | None:
         """Get skill by name."""
         return self._skills.get(name)
 
-    def search_skills(self, query: str) -> List[SkillMetadata]:
+    def search_skills(self, query: str) -> list[SkillMetadata]:
         """Search skills by name, description, or tags."""
         query_lower = query.lower()
         return [
@@ -71,7 +71,7 @@ class SkillRegistry:
             or any(query_lower in tag.lower() for tag in skill.tags)
         ]
 
-    def get_by_trigger(self, keyword: str) -> List[SkillMetadata]:
+    def get_by_trigger(self, keyword: str) -> list[SkillMetadata]:
         """Get skills by trigger keyword."""
         keyword_lower = keyword.lower()
         return [
@@ -79,6 +79,6 @@ class SkillRegistry:
             if any(keyword_lower in trigger.lower() for trigger in skill.triggers)
         ]
 
-    def list_skills(self) -> List[SkillMetadata]:
+    def list_skills(self) -> list[SkillMetadata]:
         """List all loaded skills."""
         return list(self._skills.values())

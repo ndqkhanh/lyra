@@ -5,7 +5,7 @@ Manages phase transitions and validates workflow state changes.
 
 from __future__ import annotations
 
-from typing import Callable
+from collections.abc import Callable
 
 from lyra_core.orchestration.workflow.models import SDLCPhase
 

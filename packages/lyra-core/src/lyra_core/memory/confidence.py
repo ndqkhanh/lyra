@@ -32,11 +32,11 @@ from __future__ import annotations
 
 import json
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 from threading import Lock
-from typing import Any, Callable
-
+from typing import Any
 
 _PROMOTION_SEEN_COUNT = 3
 _PROMOTION_CONFIDENCE = 0.85
@@ -81,7 +81,7 @@ class ConfidenceRecord:
         }
 
     @classmethod
-    def from_json(cls, row: dict[str, Any]) -> "ConfidenceRecord":
+    def from_json(cls, row: dict[str, Any]) -> ConfidenceRecord:
         return cls(
             entry_id=str(row["entry_id"]),
             confidence=float(row.get("confidence", 0.5)),

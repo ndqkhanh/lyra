@@ -1,7 +1,6 @@
 """Metrics and observability for eager tools."""
 import time
 from dataclasses import dataclass, field
-from typing import Optional
 
 
 @dataclass
@@ -43,8 +42,8 @@ class MetricsCollector:
 
     def __init__(self):
         self.metrics = SealMetrics()
-        self.stream_start: Optional[float] = None
-        self.last_seal: Optional[float] = None
+        self.stream_start: float | None = None
+        self.last_seal: float | None = None
 
     def start_stream(self) -> None:
         """Mark stream start time."""

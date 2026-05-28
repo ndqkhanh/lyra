@@ -21,11 +21,10 @@ import json
 import os
 import time
 from pathlib import Path
-from typing import Any, Optional, Tuple
+from typing import Any
 
 from lyra_harness_core.messages import Message, StopReason, ToolCall
 from lyra_harness_core.models import LLMProvider
-
 
 COPILOT_TOKEN_URL = "https://api.github.com/copilot_internal/v2/token"
 COPILOT_CHAT_URL = "https://api.githubcopilot.com/chat/completions"
@@ -38,7 +37,7 @@ class CopilotUnavailable(RuntimeError):
 class CopilotTokenStore:
     """JSON-file token store. ``chmod 600`` on save."""
 
-    def __init__(self, path: Optional[Path] = None) -> None:
+    def __init__(self, path: Path | None = None) -> None:
         self.path = path or (Path.home() / ".lyra" / "auth.json")
 
     def save(self, provider: str, token: str, *, expires_at: int) -> None:
@@ -56,7 +55,7 @@ class CopilotTokenStore:
         except OSError:
             pass
 
-    def load(self, provider: str) -> Optional[Tuple[str, int]]:
+    def load(self, provider: str) -> tuple[str, int] | None:
         if not self.path.exists():
             return None
         try:
@@ -87,7 +86,7 @@ def _refresh_copilot_token(
     *,
     github_token: str,
     http: Any,
-) -> Tuple[str, int]:
+) -> tuple[str, int]:
     """Exchange a gho_* token for a ghs_* session token."""
     resp = http.request(
         "GET",
@@ -117,10 +116,10 @@ class CopilotLLM(LLMProvider):
     def __init__(
         self,
         *,
-        github_token: Optional[str],
+        github_token: str | None,
         http: Any,
         model: str = "gpt-4o",
-        token_store: Optional[CopilotTokenStore] = None,
+        token_store: CopilotTokenStore | None = None,
     ) -> None:
         if not github_token:
             raise CopilotUnavailable(
@@ -150,7 +149,7 @@ class CopilotLLM(LLMProvider):
     def generate(
         self,
         messages: list[Message],
-        tools: Optional[list[dict[str, Any]]] = None,
+        tools: list[dict[str, Any]] | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.0,
     ) -> Message:

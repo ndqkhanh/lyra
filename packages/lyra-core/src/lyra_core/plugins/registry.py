@@ -21,10 +21,10 @@ import importlib
 import importlib.util
 import re
 import sys
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Iterable, Mapping, Protocol
-
+from typing import Any, Protocol
 
 __all__ = [
     "HarnessPlugin",
@@ -73,7 +73,7 @@ class PluginManifest:
     """Full declarative block (metadata + hook/tool registrations)."""
 
     metadata: PluginMetadata
-    hook_callables: Mapping[str, "PluginHook"] = field(default_factory=dict)
+    hook_callables: Mapping[str, PluginHook] = field(default_factory=dict)
     tool_factories: Mapping[str, Callable[..., Any]] = field(default_factory=dict)
 
 

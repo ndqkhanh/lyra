@@ -7,75 +7,35 @@ enrichment, and MCP tool access for research-grade knowledge graphs.
 
 from __future__ import annotations
 
-from .graph_builder import (
-    NodeType,
-    EdgeRelation,
-    KnowledgeNode,
-    KnowledgeEdge,
-    KnowledgeGraph,
-    GraphBuilder,
-)
-
-from .entity_extractor import (
-    EntityKind,
-    ExtractedEntity,
-    EntityExtractor,
-)
-
-from .relation_labeler import (
-    EdgeLabel,
-    RelationConfidence,
-    LabeledEdge,
-    RelationLabeler,
-)
-
 from .community_detector import (
     Community,
     CommunityDetector,
 )
-
-from .navigation_engine import (
-    TraversalStrategy,
-    NavigationEngine,
-)
-
-from .pre_indexer import (
-    FileIndex,
-    SymbolEntry,
-    DependencyEntry,
-    PreIndexer,
-)
-
-from .inverse_search import (
-    InverseSearchEngine,
-    HypothesisScore,
-    InverseSearch,
-)
-
-from .rrf_fusion import (
-    RRFusion,
-    FusionResult,
-    RRFFusion,
-)
-
 from .dream_cycle import (
     DreamCycle,
     KGDreamCycle,
 )
-
-from .mcp_server import (
-    KnowledgeGraphMCPServer,
+from .entity_extractor import (
+    EntityExtractor,
+    EntityKind,
+    ExtractedEntity,
 )
-
 from .exceptions import (
-    KnowledgeGraphError,
-    NodeNotFoundError,
     EdgeNotFoundError,
     ExtractionError,
     IndexingError,
+    KnowledgeGraphError,
     NavigationError,
+    NodeNotFoundError,
 )
-
+from .graph_builder import (
+    EdgeRelation,
+    GraphBuilder,
+    KnowledgeEdge,
+    KnowledgeGraph,
+    KnowledgeNode,
+    NodeType,
+)
 from .graph_querier import (
     GraphQuerier,
     PathResult,
@@ -84,18 +44,45 @@ from .graph_querier import (
     SortOrder,
     SubgraphResult,
 )
-
 from .graph_visualizer import (
     ExportFormat,
     GraphVisualizer,
     VisualStyle,
 )
-
+from .inverse_search import (
+    HypothesisScore,
+    InverseSearch,
+    InverseSearchEngine,
+)
 from .kg_consolidator import (
     ConflictResolution,
     ConsolidationReport,
     KGConsolidator,
     MergeStrategy,
+)
+from .mcp_server import (
+    KnowledgeGraphMCPServer,
+)
+from .navigation_engine import (
+    NavigationEngine,
+    TraversalStrategy,
+)
+from .pre_indexer import (
+    DependencyEntry,
+    FileIndex,
+    PreIndexer,
+    SymbolEntry,
+)
+from .relation_labeler import (
+    EdgeLabel,
+    LabeledEdge,
+    RelationConfidence,
+    RelationLabeler,
+)
+from .rrf_fusion import (
+    FusionResult,
+    RRFFusion,
+    RRFusion,
 )
 
 __all__ = [

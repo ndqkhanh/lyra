@@ -13,9 +13,10 @@ The tool is filesystem-scoped — it only touches files under
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Literal
+from typing import Any, Literal
 
 __all__ = ["NotebookEditError", "make_notebook_edit_tool"]
 

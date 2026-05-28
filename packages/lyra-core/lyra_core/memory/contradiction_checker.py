@@ -8,10 +8,10 @@ Based on research: Doc 316 (LLM Agent Memory Systems)
 Impact: Prevents conflicting facts in semantic memory
 """
 
-from typing import List, Dict, Any, Optional, Tuple
+import json
 from dataclasses import dataclass
 from datetime import datetime
-import json
+from typing import Any
 
 
 @dataclass
@@ -24,7 +24,7 @@ class Contradiction:
     contradiction_type: str  # "direct", "temporal", "logical"
     confidence: float
     explanation: str
-    resolution: Optional[str] = None  # "keep_fact1", "keep_fact2", "keep_both", "reject_both"
+    resolution: str | None = None  # "keep_fact1", "keep_fact2", "keep_both", "reject_both"
 
 
 class ContradictionChecker:
@@ -50,9 +50,9 @@ class ContradictionChecker:
         self,
         fact1: str,
         fact2: str,
-        fact1_time: Optional[datetime] = None,
-        fact2_time: Optional[datetime] = None
-    ) -> Optional[Contradiction]:
+        fact1_time: datetime | None = None,
+        fact2_time: datetime | None = None
+    ) -> Contradiction | None:
         """
         Check if two facts contradict each other.
 
@@ -113,8 +113,8 @@ Output JSON:
 
     def check_batch(
         self,
-        facts: List[Dict[str, Any]]
-    ) -> List[Contradiction]:
+        facts: list[dict[str, Any]]
+    ) -> list[Contradiction]:
         """
         Check for contradictions in a batch of facts.
 
@@ -198,8 +198,8 @@ Output JSON:
 
     def filter_contradictions(
         self,
-        facts: List[Dict[str, Any]]
-    ) -> Tuple[List[Dict[str, Any]], List[Contradiction]]:
+        facts: list[dict[str, Any]]
+    ) -> tuple[list[dict[str, Any]], list[Contradiction]]:
         """
         Filter out contradicting facts from a batch.
 

@@ -10,51 +10,46 @@ Implements:
 - ConsensusProtocol: Raft-like leader election and Byzantine fault detection
 """
 
-from lyra_cli.swarm.orchestrator import (
-    PriorityLevel,
-    SwarmTask,
-    TaskResult,
-    SwarmOrchestrator,
-    OrchestratorConfig,
-)
-
-from lyra_cli.swarm.fleet_manager import (
-    AgentStatus,
-    AgentInstance,
-    ResourceProfile,
-    FleetConfig,
-    FleetManager,
-)
-
-from lyra_cli.swarm.parallel_executor import (
-    ExecutorConfig,
-    WorkItem,
-    WorkResult,
-    ParallelExecutor,
-)
-
 from lyra_cli.swarm.communication import (
+    AgentCommunication,
+    CommunicationConfig,
     Message,
     MessageType,
     SharedStateEntry,
-    CommunicationConfig,
-    AgentCommunication,
 )
-
-from lyra_cli.swarm.topology import (
-    TopologyType,
-    TopologyNode,
-    RoutingEntry,
-    TopologyConfig,
-    SwarmTopology,
-)
-
 from lyra_cli.swarm.consensus import (
-    NodeState,
-    ConsensusRole,
-    LogEntry,
     ConsensusConfig,
     ConsensusProtocol,
+    ConsensusRole,
+    LogEntry,
+    NodeState,
+)
+from lyra_cli.swarm.fleet_manager import (
+    AgentInstance,
+    AgentStatus,
+    FleetConfig,
+    FleetManager,
+    ResourceProfile,
+)
+from lyra_cli.swarm.orchestrator import (
+    OrchestratorConfig,
+    PriorityLevel,
+    SwarmOrchestrator,
+    SwarmTask,
+    TaskResult,
+)
+from lyra_cli.swarm.parallel_executor import (
+    ExecutorConfig,
+    ParallelExecutor,
+    WorkItem,
+    WorkResult,
+)
+from lyra_cli.swarm.topology import (
+    RoutingEntry,
+    SwarmTopology,
+    TopologyConfig,
+    TopologyNode,
+    TopologyType,
 )
 
 __all__ = [

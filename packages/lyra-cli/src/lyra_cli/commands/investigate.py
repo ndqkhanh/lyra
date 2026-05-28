@@ -13,14 +13,13 @@ from __future__ import annotations
 from pathlib import Path
 
 import typer
-from rich.console import Console
-
 from lyra_core.investigate import (
     ContextLevel,
     CorpusMount,
     InvestigationBudget,
     InvestigationRunner,
 )
+from rich.console import Console
 
 from ..llm_factory import build_llm
 

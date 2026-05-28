@@ -6,18 +6,18 @@ Extends Agent Execution Record with frame-by-frame provenance tracking.
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional, Dict, Any
+from typing import Any
 
-from lyra_cli.observability.aer import AgentAction, AgentDecision
 from lyra_cli.multimodal_enhanced.hop_trace import MultimodalFrame, RegionEvidence
+from lyra_cli.observability.aer import AgentAction, AgentDecision
 
 
 @dataclass
 class MultimodalAgentAction(AgentAction):
     """Agent action with multimodal evidence."""
 
-    frames: List[MultimodalFrame] = field(default_factory=list)
-    regions: List[RegionEvidence] = field(default_factory=list)
+    frames: list[MultimodalFrame] = field(default_factory=list)
+    regions: list[RegionEvidence] = field(default_factory=list)
 
 
 @dataclass
@@ -29,13 +29,13 @@ class MultimodalExecutionRecord:
     session_id: str
     task_description: str
     start_time: str
-    end_time: Optional[str] = None
-    actions: List[MultimodalAgentAction] = field(default_factory=list)
-    decisions: List[AgentDecision] = field(default_factory=list)
-    frames: List[MultimodalFrame] = field(default_factory=list)
+    end_time: str | None = None
+    actions: list[MultimodalAgentAction] = field(default_factory=list)
+    decisions: list[AgentDecision] = field(default_factory=list)
+    frames: list[MultimodalFrame] = field(default_factory=list)
     final_status: str = "in_progress"
-    final_output: Optional[Any] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    final_output: Any | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class MultimodalAERSystem:
@@ -50,8 +50,8 @@ class MultimodalAERSystem:
     """
 
     def __init__(self):
-        self.records: Dict[str, MultimodalExecutionRecord] = {}
-        self.active_records: Dict[str, str] = {}
+        self.records: dict[str, MultimodalExecutionRecord] = {}
+        self.active_records: dict[str, str] = {}
 
         # Statistics
         self.stats = {
@@ -66,7 +66,7 @@ class MultimodalAERSystem:
         agent_id: str,
         session_id: str,
         task_description: str,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: dict[str, Any] | None = None
     ) -> str:
         """Start recording multimodal execution."""
         record_id = f"mer_{len(self.records):06d}"
@@ -91,11 +91,11 @@ class MultimodalAERSystem:
         agent_id: str,
         action_type: str,
         description: str,
-        frames: Optional[List[MultimodalFrame]] = None,
-        regions: Optional[List[RegionEvidence]] = None,
-        inputs: Optional[Dict[str, Any]] = None,
-        outputs: Optional[Dict[str, Any]] = None,
-        reasoning: Optional[str] = None,
+        frames: list[MultimodalFrame] | None = None,
+        regions: list[RegionEvidence] | None = None,
+        inputs: dict[str, Any] | None = None,
+        outputs: dict[str, Any] | None = None,
+        reasoning: str | None = None,
         success: bool = True
     ) -> str:
         """Record action with multimodal evidence."""
@@ -153,7 +153,7 @@ class MultimodalAERSystem:
         self,
         agent_id: str,
         status: str,
-        final_output: Optional[Any] = None
+        final_output: Any | None = None
     ):
         """End multimodal execution recording."""
         if agent_id not in self.active_records:
@@ -168,11 +168,11 @@ class MultimodalAERSystem:
 
         del self.active_records[agent_id]
 
-    def get_record(self, record_id: str) -> Optional[MultimodalExecutionRecord]:
+    def get_record(self, record_id: str) -> MultimodalExecutionRecord | None:
         """Get a record by ID."""
         return self.records.get(record_id)
 
-    def export_record(self, record_id: str) -> Optional[Dict[str, Any]]:
+    def export_record(self, record_id: str) -> dict[str, Any] | None:
         """Export record with full multimodal provenance."""
         record = self.get_record(record_id)
         if not record:
@@ -211,7 +211,7 @@ class MultimodalAERSystem:
             ],
         }
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get MER statistics."""
         return {
             **self.stats,

@@ -7,57 +7,48 @@ import os
 import tempfile
 
 import pytest
-
 from lyra_knowledge_graph import (
-    # Graph builder
-    NodeType,
-    EdgeRelation,
-    KnowledgeNode,
-    KnowledgeEdge,
-    KnowledgeGraph,
-    GraphBuilder,
-    # Entity extractor
-    EntityKind,
-    ExtractedEntity,
-    EntityExtractor,
-    # Relation labeler
-    EdgeLabel,
-    RelationConfidence,
-    LabeledEdge,
-    RelationLabeler,
     # Community detector
     Community,
     CommunityDetector,
-    # Navigation engine
-    TraversalStrategy,
-    NavigationEngine,
+    DreamCycle,
+    # Relation labeler
+    EdgeLabel,
+    EdgeNotFoundError,
+    EdgeRelation,
+    EntityExtractor,
+    # Entity extractor
+    EntityKind,
+    ExtractionError,
     # Pre-indexer
-    FileIndex,
-    SymbolEntry,
-    DependencyEntry,
-    PreIndexer,
+    FusionResult,
+    GraphBuilder,
+    HypothesisScore,
+    IndexingError,
+    InverseSearch,
     # Inverse search
     InverseSearchEngine,
-    HypothesisScore,
-    InverseSearch,
-    # RRF fusion
-    RRFusion,
-    FusionResult,
-    RRFFusion,
-    # Dream cycle
-    DreamCycle,
     KGDreamCycle,
-    # MCP server
-    KnowledgeGraphMCPServer,
+    KnowledgeEdge,
+    KnowledgeGraph,
     # Exceptions
     KnowledgeGraphError,
-    NodeNotFoundError,
-    EdgeNotFoundError,
-    ExtractionError,
-    IndexingError,
+    # MCP server
+    KnowledgeGraphMCPServer,
+    KnowledgeNode,
+    NavigationEngine,
     NavigationError,
+    NodeNotFoundError,
+    # Graph builder
+    NodeType,
+    PreIndexer,
+    RelationConfidence,
+    RelationLabeler,
+    RRFFusion,
+    # RRF fusion
+    RRFusion,
+    TraversalStrategy,
 )
-
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Fixtures
@@ -1146,8 +1137,8 @@ class TestKGDreamCycle:
 class TestPreIndexerStats:
     @pytest.mark.asyncio
     async def test_stats_properties(self, sample_graph):
-        import tempfile
         import os
+        import tempfile
         with tempfile.NamedTemporaryFile(
             mode="w", suffix=".py", delete=False, encoding="utf-8"
         ) as f:

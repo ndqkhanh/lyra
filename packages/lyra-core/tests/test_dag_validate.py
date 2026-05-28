@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.harnesses.dag_teams import (
     DAG,
     DAGValidationError,

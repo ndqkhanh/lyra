@@ -1,6 +1,5 @@
 """Tests for HookMetadata."""
 
-import pytest
 from lyra_cli.core.hook_metadata import HookMetadata, HookType
 
 

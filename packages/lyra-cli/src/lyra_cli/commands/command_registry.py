@@ -1,7 +1,8 @@
 """Command registry - Unified command management"""
 
+import builtins
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Callable
 
 
 @dataclass
@@ -10,7 +11,7 @@ class Command:
     name: str
     description: str
     handler: Callable
-    aliases: List[str] = None
+    aliases: list[str] = None
     category: str = "general"
     source: str = "lyra"  # "lyra" or "ecc"
 
@@ -23,8 +24,8 @@ class CommandRegistry:
     """Registry of all commands"""
 
     def __init__(self):
-        self.commands: Dict[str, Command] = {}
-        self.aliases: Dict[str, str] = {}  # alias -> command_name
+        self.commands: dict[str, Command] = {}
+        self.aliases: dict[str, str] = {}  # alias -> command_name
 
     def register(self, command: Command):
         """Register a command"""
@@ -34,7 +35,7 @@ class CommandRegistry:
         for alias in command.aliases:
             self.aliases[alias] = command.name
 
-    def get(self, name: str) -> Optional[Command]:
+    def get(self, name: str) -> Command | None:
         """Get command by name or alias"""
         # Check if it's an alias
         if name in self.aliases:
@@ -42,7 +43,7 @@ class CommandRegistry:
 
         return self.commands.get(name)
 
-    def list(self, category: Optional[str] = None, source: Optional[str] = None) -> List[Command]:
+    def list(self, category: str | None = None, source: str | None = None) -> list[Command]:
         """List commands"""
         commands = list(self.commands.values())
 
@@ -54,7 +55,7 @@ class CommandRegistry:
 
         return sorted(commands, key=lambda c: c.name)
 
-    def list_categories(self) -> List[str]:
+    def list_categories(self) -> builtins.list[str]:
         """List all categories"""
         categories = set(c.category for c in self.commands.values())
         return sorted(categories)

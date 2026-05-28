@@ -22,13 +22,13 @@ from __future__ import annotations
 
 import datetime as _dt
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
-from typing import Any, Literal, Mapping
+from typing import Any, Literal
 from urllib import request as _urlreq
 from urllib.error import URLError
-
 
 _CACHE_ROOT: Path = Path.home() / ".cache" / "lyra" / "pricing"
 _LITELLM_URL = (

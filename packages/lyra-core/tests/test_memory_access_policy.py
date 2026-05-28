@@ -1,12 +1,10 @@
 """Tests for Access Policy Graph (Phase M6)."""
 import pytest
-
 from lyra_core.memory.access_policy import (
     ACLEntry,
     Permission,
     PolicyGraph,
     PromotionGate,
-    PromotionRequest,
     Resource,
     Subject,
     get_policy_graph,
@@ -15,7 +13,6 @@ from lyra_core.memory.access_policy import (
     reset_promotion_gate,
 )
 from lyra_core.memory.schema import MemoryTier
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

@@ -3,13 +3,11 @@
 import time
 
 import pytest
-
-from lyra_cli.memory.context_optimizer.caveman_compressor import CavemanCompressor, CavemanResult
+from lyra_cli.memory.context_optimizer.caveman_compressor import CavemanCompressor
 from lyra_cli.memory.context_optimizer.entropy_filter import (
     ContextItem,
     EntropyFilter,
     EntropyLevel,
-    FilteredContext,
 )
 from lyra_cli.memory.context_optimizer.rtk_compressor import (
     CompressedContent,
@@ -17,8 +15,6 @@ from lyra_cli.memory.context_optimizer.rtk_compressor import (
     RTKCompressor,
 )
 from lyra_cli.memory.context_optimizer.symbol_offloader import (
-    OffloadedContext,
-    SymbolEntry,
     SymbolGraphOffloader,
 )
 

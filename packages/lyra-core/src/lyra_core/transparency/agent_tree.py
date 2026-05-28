@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from typing import Optional
 
 from .event_store import EventStore
 
@@ -16,7 +15,7 @@ class TreeNode:
     state: str           # from latest event
     cost_usd: float
     tokens_total: int
-    children: list["TreeNode"] = field(default_factory=list)
+    children: list[TreeNode] = field(default_factory=list)
 
     def total_cost(self) -> float:
         return self.cost_usd + sum(c.total_cost() for c in self.children)

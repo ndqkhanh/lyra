@@ -4,7 +4,6 @@ from __future__ import annotations
 import sys
 
 import pytest
-
 from lyra_core.terminal import (
     CommandResult,
     LocalBackend,
@@ -15,8 +14,8 @@ from lyra_core.terminal.stubs import (
     DaytonaBackend,
     DockerBackend,
     ModalBackend,
-    SSHBackend,
     SingularityBackend,
+    SSHBackend,
 )
 
 

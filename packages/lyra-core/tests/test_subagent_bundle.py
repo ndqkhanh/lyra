@@ -4,7 +4,6 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-
 from lyra_core.subagent.bundle import (
     MAX_FINDING_CLAIM_CHARS,
     MAX_SUMMARY_TOKENS,

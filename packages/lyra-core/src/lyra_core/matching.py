@@ -6,7 +6,6 @@ Scores agents for task suitability and selects optimal agent.
 """
 
 from dataclasses import dataclass
-from typing import List, Dict, Optional
 
 
 @dataclass
@@ -26,7 +25,7 @@ class AgentScore:
 class AgentState:
     """Current state of an agent."""
     id: str
-    capabilities: List[str]
+    capabilities: list[str]
     workload: float  # 0-1, where 1 is fully loaded
     success_rate: float  # 0-1, historical success rate
     health: float  # 0-1, current health
@@ -47,7 +46,7 @@ class AgentState:
 
 def score_agent(
     agent: AgentState,
-    required_capabilities: List[str],
+    required_capabilities: list[str],
     task_priority: int = 2
 ) -> AgentScore:
     """
@@ -141,11 +140,11 @@ def score_agent(
 
 
 def select_best_agent(
-    agents: List[AgentState],
-    required_capabilities: List[str],
+    agents: list[AgentState],
+    required_capabilities: list[str],
     task_priority: int = 2,
     min_score: float = 0.3
-) -> Optional[AgentScore]:
+) -> AgentScore | None:
     """
     Select best agent for task.
 
@@ -178,11 +177,11 @@ def select_best_agent(
 
 
 def select_agent_pool(
-    agents: List[AgentState],
-    required_capabilities: List[str],
+    agents: list[AgentState],
+    required_capabilities: list[str],
     pool_size: int = 3,
     task_priority: int = 2
-) -> List[AgentScore]:
+) -> list[AgentScore]:
     """
     Select pool of suitable agents (primary + backups).
 
@@ -214,7 +213,7 @@ def select_agent_pool(
 def update_agent_metrics(
     agent_id: str,
     task_success: bool,
-    agents: Dict[str, AgentState]
+    agents: dict[str, AgentState]
 ) -> None:
     """
     Update agent metrics after task completion.

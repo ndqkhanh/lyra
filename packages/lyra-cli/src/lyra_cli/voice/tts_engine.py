@@ -189,7 +189,6 @@ class Pyttsx3Backend:
         if not text.strip():
             raise TTSError("Cannot synthesize empty text")
 
-        import pyttsx3
 
         engine = self._get_engine()
         cfg = voice or VoiceConfig()

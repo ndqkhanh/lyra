@@ -5,7 +5,6 @@ import subprocess
 from pathlib import Path
 
 import pytest
-
 from lyra_core.subagent.orchestrator import (
     ScopeCollisionError,
     SubagentOrchestrator,

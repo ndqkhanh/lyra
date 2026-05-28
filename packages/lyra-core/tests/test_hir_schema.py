@@ -7,7 +7,6 @@ from __future__ import annotations
 import json
 
 import pytest
-
 from lyra_core.observability.hir import (
     HirEvent,
     HIRValidationError,

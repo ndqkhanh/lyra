@@ -18,8 +18,9 @@ from __future__ import annotations
 import asyncio
 import json
 import re
+from collections.abc import AsyncIterator
 from dataclasses import dataclass
-from typing import Any, AsyncIterator
+from typing import Any
 
 from .search_tools import SearchResult, build_provider
 
@@ -388,7 +389,8 @@ class RealResearchPipeline:
         try:
             from .memory_manager import MemoryManager
             mm = MemoryManager()
-            import hashlib, time
+            import hashlib
+            import time
             session_id = f"research_{hashlib.md5(topic.encode()).hexdigest()[:8]}_{int(time.time())}"
             summary = (
                 f"Deep research on '{topic}'. "

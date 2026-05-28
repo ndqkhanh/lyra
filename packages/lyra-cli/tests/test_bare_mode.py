@@ -140,9 +140,8 @@ def test_cli_flag_propagates_to_run(
     # run as _run_interactive`` *inside* the callback, so patching
     # the module's ``run`` is enough.
 
-    from typer.testing import CliRunner
-
     from lyra_cli.__main__ import app
+    from typer.testing import CliRunner
 
     # v3.14: bare default flipped to Textual shell, so the legacy REPL
     # only fires under ``--legacy``. The contract this test guards —

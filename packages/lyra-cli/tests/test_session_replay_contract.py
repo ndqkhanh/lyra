@@ -17,7 +17,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from lyra_cli.interactive.replay import (
     ReplayController,
     ReplayError,

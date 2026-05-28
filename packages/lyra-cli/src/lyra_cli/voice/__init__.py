@@ -17,20 +17,42 @@ voice_session    — Wake word detection, conversation state, command routing
 from __future__ import annotations
 
 from .audio_manager import AudioConfig, AudioDevice, AudioError, AudioManager
+from .personalities import (
+    ButlerPersonality,
+    CowboyPersonality,
+    DrillSergeantPersonality,
+    PersonalityBase,
+    PersonalityTrait,
+    PiratePersonality,
+    RobotPersonality,
+    VoiceResponse,
+    ZenMasterPersonality,
+)
+
+# ── Voice personality engine ──────────────────────────────────────
+from .personality_engine import PersonalityEngine, PersonalityRegistry
 from .sound_notifications import (
     AgentState,
     SoundConfig,
     SoundNotifier,
     get_sound_notifier,
 )
+
+# Re-export from legacy modules for backward compatibility
+from .stt import STTBackend as LegacySTTBackend  # noqa: F811
+from .stt import STTError as LegacySTTError  # noqa: F811
+from .stt import transcribe_audio as legacy_transcribe_audio  # noqa: F811
 from .stt_engine import (
+    SpeechRecognitionBackend,
     STTBackend,
     STTError,
     STTResult,
-    SpeechRecognitionBackend,
     WhisperBackend,
     transcribe_audio,
 )
+from .tts import TTSBackend as LegacyTTSBackend  # noqa: F811
+from .tts import TTSError as LegacyTTSError  # noqa: F811
+from .tts import synthesise_speech  # noqa: F401
 from .tts_engine import (
     EdgeTTSBackend,
     Pyttsx3Backend,
@@ -48,28 +70,6 @@ from .voice_session import (
     WakeWordDetector,
     WakeWordResult,
 )
-
-# ── Voice personality engine ──────────────────────────────────────
-from .personality_engine import PersonalityEngine, PersonalityRegistry
-from .personalities import (
-    ButlerPersonality,
-    CowboyPersonality,
-    DrillSergeantPersonality,
-    PersonalityBase,
-    PersonalityTrait,
-    PiratePersonality,
-    RobotPersonality,
-    VoiceResponse,
-    ZenMasterPersonality,
-)
-
-# Re-export from legacy modules for backward compatibility
-from .stt import STTBackend as LegacySTTBackend  # noqa: F811
-from .stt import STTError as LegacySTTError  # noqa: F811
-from .stt import transcribe_audio as legacy_transcribe_audio  # noqa: F811
-from .tts import TTSBackend as LegacyTTSBackend  # noqa: F811
-from .tts import TTSError as LegacyTTSError  # noqa: F811
-from .tts import synthesise_speech  # noqa: F401
 
 __all__ = [
     # TTS

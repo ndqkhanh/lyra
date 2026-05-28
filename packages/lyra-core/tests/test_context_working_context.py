@@ -4,7 +4,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from lyra_core.context.working_context import (
     DEFAULT_CAP_BYTES,
     DEFAULT_RELATIVE_PATH,
@@ -16,7 +15,6 @@ from lyra_core.context.working_context import (
     resolve_path,
     write_working_context,
 )
-
 
 # ────────────────────────────────────────────────────────────────
 # Roundtrip

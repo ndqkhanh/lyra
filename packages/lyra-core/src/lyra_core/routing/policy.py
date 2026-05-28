@@ -11,8 +11,7 @@ Grounded in:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal, Optional
-
+from typing import Literal
 
 __all__ = [
     "ModelTier",
@@ -129,7 +128,7 @@ class RoutingDecision:
 def route_step(
     signals: RoutingSignals,
     budget: TrajectoryBudget,
-    config: Optional[RoutingConfig] = None,
+    config: RoutingConfig | None = None,
 ) -> RoutingDecision:
     """Decide which model tier to use for the current turn.
 
@@ -205,7 +204,7 @@ class TrajectoryRouter:
         self,
         max_cost_usd: float = 5.0,
         max_advisor_calls: int = 3,
-        config: Optional[RoutingConfig] = None,
+        config: RoutingConfig | None = None,
     ) -> None:
         self._budget = TrajectoryBudget(
             max_cost_usd=max_cost_usd,

@@ -21,7 +21,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-
 _DEFAULT_KEY_ENV = "LYRA_BUNDLE_ATTEST_KEY"
 
 
@@ -71,7 +70,7 @@ class Attestation:
         }
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "Attestation":
+    def from_dict(cls, d: dict[str, Any]) -> Attestation:
         return cls(
             bundle_name=str(d["bundle_name"]),
             bundle_version=str(d["bundle_version"]),
@@ -91,7 +90,7 @@ class Attestation:
         )
 
     @classmethod
-    def load(cls, path: Path) -> "Attestation":
+    def load(cls, path: Path) -> Attestation:
         return cls.from_dict(json.loads(Path(path).read_text(encoding="utf-8")))
 
     def dump(self, path: Path) -> None:

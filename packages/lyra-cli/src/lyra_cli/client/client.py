@@ -32,8 +32,9 @@ from __future__ import annotations
 import json
 import time
 import uuid
+from collections.abc import Callable, Iterator, Mapping
 from pathlib import Path
-from typing import Any, Callable, Iterator, Mapping, Optional
+from typing import Any
 
 from lyra_core.paths import RepoLayout
 from lyra_core.providers.aliases import DEFAULT_ALIASES, resolve_alias
@@ -41,12 +42,11 @@ from lyra_core.providers.aliases import DEFAULT_ALIASES, resolve_alias
 from ..tracing import TracingHub
 from .types import ChatRequest, ChatResponse, StreamEvent
 
-
 # A provider factory returns an object exposing ``generate(messages)`` —
 # mirroring :class:`lyra_harness_core.models.LLMProvider`. We accept a
 # callable rather than a fixed class so tests can inject ``MockLLM``
 # directly without faking out :func:`build_llm`'s env-var cascade.
-ProviderFactory = Callable[[Optional[str]], Any]
+ProviderFactory = Callable[[str | None], Any]
 
 
 def _new_session_id() -> str:
@@ -297,7 +297,7 @@ class LyraClient:
         return None
 
     # Context manager sugar so ``with LyraClient() as c:`` Just Works.
-    def __enter__(self) -> "LyraClient":
+    def __enter__(self) -> LyraClient:
         return self
 
     def __exit__(self, exc_type, exc, tb) -> None:

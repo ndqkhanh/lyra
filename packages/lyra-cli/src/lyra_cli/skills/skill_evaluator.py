@@ -10,11 +10,10 @@ Implements comprehensive skill evaluation with:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+import statistics
+from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
-from typing import Optional
-import statistics
 
 
 class MetricType(StrEnum):
@@ -46,8 +45,8 @@ class SkillExecution:
     success: bool
     latency_ms: float
     tokens_used: int
-    error_message: Optional[str] = None
-    user_rating: Optional[float] = None  # 0.0-1.0
+    error_message: str | None = None
+    user_rating: float | None = None  # 0.0-1.0
 
 
 @dataclass
@@ -97,7 +96,7 @@ class ABTestResult:
     is_significant: bool  # p < 0.05
     sample_size_a: int
     sample_size_b: int
-    winner: Optional[str]
+    winner: str | None
 
 
 class SkillEvaluator:
@@ -138,7 +137,7 @@ class SkillEvaluator:
         if execution.skill_name in self._quality_scores:
             del self._quality_scores[execution.skill_name]
 
-    def get_performance_metrics(self, skill_name: str) -> Optional[PerformanceMetrics]:
+    def get_performance_metrics(self, skill_name: str) -> PerformanceMetrics | None:
         """
         Calculate performance metrics for a skill.
 
@@ -201,8 +200,8 @@ class SkillEvaluator:
     def calculate_quality_score(
         self,
         skill_name: str,
-        benchmark_results: Optional[dict[str, float]] = None,
-    ) -> Optional[QualityScore]:
+        benchmark_results: dict[str, float] | None = None,
+    ) -> QualityScore | None:
         """
         Calculate multi-dimensional quality score.
 
@@ -278,7 +277,7 @@ class SkillEvaluator:
         skill_a: str,
         skill_b: str,
         metric: MetricType = MetricType.SUCCESS_RATE,
-    ) -> Optional[ABTestResult]:
+    ) -> ABTestResult | None:
         """
         Compare two skills using A/B testing.
 
@@ -476,7 +475,7 @@ class SkillEvaluator:
 
         return report
 
-    def clear_history(self, skill_name: Optional[str] = None) -> None:
+    def clear_history(self, skill_name: str | None = None) -> None:
         """
         Clear execution history.
 

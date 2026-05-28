@@ -1,6 +1,7 @@
 """Core data models for Auto-Spec-Kit."""
 
 from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Literal
 

@@ -8,10 +8,10 @@ Based on research: docs/182 (memory-frontiers-2026.md), Zep/Graphiti
 Impact: +15pts on LongMemEval (63.8% vs 49.0%)
 """
 
-from typing import Optional, List, Dict, Any
-from datetime import datetime, timedelta
-from dataclasses import dataclass
 import json
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any
 
 
 @dataclass
@@ -20,11 +20,11 @@ class TemporalFact:
     id: str
     fact: str
     valid_at: datetime
-    invalid_at: Optional[datetime]
+    invalid_at: datetime | None
     source: str
     confidence: float
-    tags: List[str]
-    metadata: Dict[str, Any]
+    tags: list[str]
+    metadata: dict[str, Any]
 
     def is_valid_at(self, query_time: datetime) -> bool:
         """
@@ -44,7 +44,7 @@ class TemporalFact:
 
         return True
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             'id': self.id,
@@ -58,7 +58,7 @@ class TemporalFact:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'TemporalFact':
+    def from_dict(cls, data: dict[str, Any]) -> 'TemporalFact':
         """Create from dictionary."""
         return cls(
             id=data['id'],
@@ -91,12 +91,12 @@ class TemporalMemoryStore:
             store_path: Path to JSON storage file
         """
         self.store_path = store_path
-        self.facts: List[TemporalFact] = self._load_facts()
+        self.facts: list[TemporalFact] = self._load_facts()
 
-    def _load_facts(self) -> List[TemporalFact]:
+    def _load_facts(self) -> list[TemporalFact]:
         """Load facts from disk."""
         try:
-            with open(self.store_path, 'r') as f:
+            with open(self.store_path) as f:
                 data = json.load(f)
                 return [TemporalFact.from_dict(f) for f in data]
         except FileNotFoundError:
@@ -110,12 +110,12 @@ class TemporalMemoryStore:
     def add_fact(
         self,
         fact: str,
-        valid_at: Optional[datetime] = None,
-        invalid_at: Optional[datetime] = None,
+        valid_at: datetime | None = None,
+        invalid_at: datetime | None = None,
         source: str = "user",
         confidence: float = 1.0,
-        tags: Optional[List[str]] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        tags: list[str] | None = None,
+        metadata: dict[str, Any] | None = None
     ) -> TemporalFact:
         """
         Add a temporal fact.
@@ -153,7 +153,7 @@ class TemporalMemoryStore:
 
         return temporal_fact
 
-    def invalidate_fact(self, fact_id: str, invalid_at: Optional[datetime] = None) -> bool:
+    def invalidate_fact(self, fact_id: str, invalid_at: datetime | None = None) -> bool:
         """
         Mark a fact as invalid.
 
@@ -177,9 +177,9 @@ class TemporalMemoryStore:
 
     def query_at_time(
         self,
-        query_time: Optional[datetime] = None,
-        tags: Optional[List[str]] = None
-    ) -> List[TemporalFact]:
+        query_time: datetime | None = None,
+        tags: list[str] | None = None
+    ) -> list[TemporalFact]:
         """
         Query facts valid at a specific time.
 
@@ -209,8 +209,8 @@ class TemporalMemoryStore:
         self,
         start_time: datetime,
         end_time: datetime,
-        tags: Optional[List[str]] = None
-    ) -> List[TemporalFact]:
+        tags: list[str] | None = None
+    ) -> list[TemporalFact]:
         """
         Query facts valid during a time range.
 
@@ -241,7 +241,7 @@ class TemporalMemoryStore:
 
         return results
 
-    def get_fact_history(self, subject: str) -> List[TemporalFact]:
+    def get_fact_history(self, subject: str) -> list[TemporalFact]:
         """
         Get temporal history of facts about a subject.
 
@@ -260,7 +260,7 @@ class TemporalMemoryStore:
         results.sort(key=lambda f: f.valid_at)
         return results
 
-    def resolve_conflicts(self, subject: str, query_time: Optional[datetime] = None) -> Optional[TemporalFact]:
+    def resolve_conflicts(self, subject: str, query_time: datetime | None = None) -> TemporalFact | None:
         """
         Resolve temporal conflicts for a subject.
 
@@ -287,7 +287,7 @@ class TemporalMemoryStore:
         # Return most recently valid fact
         return max(valid_facts, key=lambda f: f.valid_at)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get statistics about temporal facts."""
         now = datetime.now()
 
@@ -303,7 +303,7 @@ class TemporalMemoryStore:
 
 
 # LLM-based temporal extraction
-def extract_temporal_facts(text: str, context_time: datetime, llm) -> List[Dict[str, Any]]:
+def extract_temporal_facts(text: str, context_time: datetime, llm) -> list[dict[str, Any]]:
     """
     Extract facts with temporal validity from text using LLM.
 

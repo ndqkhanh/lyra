@@ -12,7 +12,6 @@ from pathlib import Path
 from ..source_bundle import SourceBundle
 from .base import Exporter, ExportManifest, register
 
-
 _SLUG_RE = re.compile(r"[^a-z0-9]+")
 
 

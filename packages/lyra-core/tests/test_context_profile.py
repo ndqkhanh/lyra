@@ -4,7 +4,6 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-
 from lyra_core.context.profile import (
     MINIMAL,
     STANDARD,

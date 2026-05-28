@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
 
 
 class TopologyType(Enum):
@@ -30,7 +30,7 @@ class TopologyNode:
 
     node_id: str
     node_type: str = "agent"
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -52,7 +52,7 @@ class TopologyConfig:
     heartbeat_interval: float = 5.0
     max_hops: int = 10
     enable_route_optimization: bool = True
-    dag_dependency_graph: Dict[str, List[str]] = field(default_factory=dict)
+    dag_dependency_graph: dict[str, list[str]] = field(default_factory=dict)
 
 
 class SwarmTopology:
@@ -66,12 +66,12 @@ class SwarmTopology:
     - Topology validation and health checks
     """
 
-    def __init__(self, config: Optional[TopologyConfig] = None) -> None:
+    def __init__(self, config: TopologyConfig | None = None) -> None:
         self.config = config or TopologyConfig()
-        self.nodes: Dict[str, TopologyNode] = {}
-        self._connections: Dict[str, Set[str]] = {}
-        self._routing_table: Dict[str, List[RoutingEntry]] = {}
-        self._center_node: Optional[str] = None
+        self.nodes: dict[str, TopologyNode] = {}
+        self._connections: dict[str, set[str]] = {}
+        self._routing_table: dict[str, list[RoutingEntry]] = {}
+        self._center_node: str | None = None
 
     def add_node(self, node: TopologyNode) -> None:
         """
@@ -142,7 +142,7 @@ class SwarmTopology:
         self._rebuild_routing_table()
         return True
 
-    def get_neighbors(self, node_id: str) -> List[str]:
+    def get_neighbors(self, node_id: str) -> list[str]:
         """
         Get all neighbors of a node.
 
@@ -161,7 +161,7 @@ class SwarmTopology:
         conns = list(self._connections.get(node_id, set()))
         return list(set(conns + dag_deps))
 
-    def get_routing_table(self, node_id: str) -> List[RoutingEntry]:
+    def get_routing_table(self, node_id: str) -> list[RoutingEntry]:
         """
         Get the routing table for a specific node.
 
@@ -175,7 +175,7 @@ class SwarmTopology:
             return self._routing_table[node_id]
         return self._compute_routes(node_id)
 
-    def discover_route(self, source: str, target: str) -> List[str]:
+    def discover_route(self, source: str, target: str) -> list[str]:
         """
         Find a path between two nodes using BFS.
 
@@ -191,8 +191,8 @@ class SwarmTopology:
         if source == target:
             return [source]
 
-        visited: Set[str] = set()
-        queue: List[Tuple[str, List[str]]] = [(source, [source])]
+        visited: set[str] = set()
+        queue: list[tuple[str, list[str]]] = [(source, [source])]
         visited.add(source)
 
         while queue:
@@ -205,14 +205,14 @@ class SwarmTopology:
                     queue.append((neighbor, path + [neighbor]))
         return []
 
-    def validate_topology(self) -> List[str]:
+    def validate_topology(self) -> list[str]:
         """
         Validate the topology for correctness.
 
         Returns:
             List of validation error messages, empty if valid
         """
-        errors: List[str] = []
+        errors: list[str] = []
 
         if self.config.topology_type == TopologyType.STAR:
             if self._center_node is None and len(self.nodes) > 0:
@@ -274,9 +274,9 @@ class SwarmTopology:
         for node_id in self.nodes:
             self._routing_table[node_id] = self._compute_routes(node_id)
 
-    def _compute_routes(self, node_id: str) -> List[RoutingEntry]:
+    def _compute_routes(self, node_id: str) -> list[RoutingEntry]:
         """Compute routing entries for a node to all reachable targets."""
-        routes: List[RoutingEntry] = []
+        routes: list[RoutingEntry] = []
         for target_id in self.nodes:
             if target_id == node_id:
                 continue
@@ -294,8 +294,8 @@ class SwarmTopology:
 
     def _detect_cycle(self) -> bool:
         """Detect if the DAG topology contains a cycle using DFS."""
-        visited: Set[str] = set()
-        rec_stack: Set[str] = set()
+        visited: set[str] = set()
+        rec_stack: set[str] = set()
 
         def dfs(node: str) -> bool:
             visited.add(node)
@@ -315,7 +315,7 @@ class SwarmTopology:
                     return True
         return False
 
-    def get_topology_summary(self) -> Dict[str, Any]:
+    def get_topology_summary(self) -> dict[str, Any]:
         """Get a summary of the current topology."""
         return {
             "type": self.config.topology_type.name,

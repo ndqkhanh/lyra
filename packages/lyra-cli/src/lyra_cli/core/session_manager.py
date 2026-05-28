@@ -1,10 +1,9 @@
 """Session manager for managing sessions."""
-from typing import Optional, Dict, Any
-from datetime import datetime
 import uuid
+from datetime import datetime
 
-from .session_storage import SessionStorage
 from .session_state import SessionState
+from .session_storage import SessionStorage
 
 
 class SessionManager:
@@ -30,7 +29,7 @@ class SessionManager:
         session.last_updated = datetime.now()
         self.storage.save(session)
 
-    def load(self, session_id: str) -> Optional[SessionState]:
+    def load(self, session_id: str) -> SessionState | None:
         """Load a session by ID."""
         return self.storage.load(session_id)
 

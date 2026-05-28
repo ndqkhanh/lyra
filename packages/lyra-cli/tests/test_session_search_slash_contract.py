@@ -26,8 +26,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 
 def _make_session(tmp_path: Path, search_fn=None):
     from lyra_cli.interactive.session import InteractiveSession

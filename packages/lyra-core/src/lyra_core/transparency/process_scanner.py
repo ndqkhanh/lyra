@@ -7,9 +7,7 @@ from __future__ import annotations
 
 import re
 import subprocess
-import time
 from dataclasses import dataclass
-
 
 _AGENT_PATTERNS: tuple[str, ...] = (
     r"\bclaude\b",

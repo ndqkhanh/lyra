@@ -41,7 +41,7 @@ _MARKER_FOR_DIR = {
 }
 
 
-def migrate_legacy_state(layout: "RepoLayout") -> tuple[bool, Path | None]:
+def migrate_legacy_state(layout: RepoLayout) -> tuple[bool, Path | None]:
     """Migrate the first legacy state dir found under ``layout``.
 
     Walks ``layout.legacy_state_dirs`` newest-first:

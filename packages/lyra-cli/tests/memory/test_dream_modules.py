@@ -3,7 +3,6 @@
 import time
 
 import pytest
-
 from lyra_cli.memory.dream_reflector import (
     QuestionDrivenReflector,
     QuestionType,
@@ -13,8 +12,8 @@ from lyra_cli.memory.dream_reflector import (
     SignalStrength,
 )
 from lyra_cli.memory.dream_scheduler import (
-    DreamScheduleTrigger,
     DreamScheduler,
+    DreamScheduleTrigger,
     ScheduleEntry,
     SchedulerState,
 )

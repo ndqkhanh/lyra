@@ -2,13 +2,11 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.context.compaction_controller import (
     CompactionController,
     DecisionPreservingPrompt,
     EssentialsInjector,
 )
-
 
 # ---------------------------------------------------------------------------
 # CompactionController.check

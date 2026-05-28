@@ -2,11 +2,8 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.auto.goal_decomposer import (
-    Goal,
     GoalDecomposer,
-    GoalProgressReport,
     GoalType,
     Milestone,
     MilestoneStatus,

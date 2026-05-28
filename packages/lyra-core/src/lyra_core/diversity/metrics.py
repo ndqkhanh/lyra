@@ -6,7 +6,8 @@ point to the source paper (arXiv:2604.18005) by section number.
 from __future__ import annotations
 
 import difflib
-from typing import Callable, Iterable, Mapping, Protocol, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
+from typing import Protocol
 
 
 class DiversityMetric(Protocol):

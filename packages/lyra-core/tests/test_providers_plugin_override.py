@@ -11,7 +11,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from lyra_core.providers.registry import (
     get_provider,
     max_tokens_for_model,

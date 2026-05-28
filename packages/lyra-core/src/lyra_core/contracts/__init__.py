@@ -38,9 +38,9 @@ from __future__ import annotations
 import enum
 import re
 import time
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
-from typing import Any, Callable, Mapping, Optional
-
+from typing import Any, Optional
 
 __all__ = [
     "AgentContract",
@@ -120,9 +120,9 @@ class BudgetEnvelope:
       stringified args match, the contract VIOLATES.
     """
 
-    max_usd: Optional[float] = None
-    max_iterations: Optional[int] = None
-    max_wall_clock_s: Optional[float] = None
+    max_usd: float | None = None
+    max_iterations: int | None = None
+    max_wall_clock_s: float | None = None
     per_tool_max: Mapping[str, int] = field(default_factory=dict)
     deny_patterns: tuple[str, ...] = ()
 
@@ -198,12 +198,12 @@ class AgentContract:
     cum_seconds: float = 0.0
     iter_count: int = 0
     per_tool_count: dict[str, int] = field(default_factory=dict)
-    terminal_cause: Optional[str] = None
-    terminal_value: Optional[float] = None
-    terminal_limit: Optional[float] = None
-    triggered_at: Optional[float] = None
-    children: list["AgentContract"] = field(default_factory=list)
-    _parent: Optional["AgentContract"] = None
+    terminal_cause: str | None = None
+    terminal_value: float | None = None
+    terminal_limit: float | None = None
+    triggered_at: float | None = None
+    children: list[AgentContract] = field(default_factory=list)
+    _parent: AgentContract | None = None
 
     # ---- public API --------------------------------------------------- #
 
@@ -318,7 +318,7 @@ class AgentContract:
             ContractState.TERMINATED, cause=cause, value=None, limit=None,
         )
 
-    def spawn_child(self, budget: BudgetEnvelope) -> "AgentContract":
+    def spawn_child(self, budget: BudgetEnvelope) -> AgentContract:
         """Compose a child contract whose budget is bounded by this one.
 
         Cumulative-budget rule: the parent's ``cum_usd`` and

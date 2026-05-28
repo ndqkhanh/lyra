@@ -1,12 +1,10 @@
 """Tests for ResearchKnowledgeGraph."""
 
 import pytest
-
 from lyra_cli.research.knowledge_graph import (
     Finding,
     FindingRelation,
     ResearchKnowledgeGraph,
-    KnowledgeGap,
 )
 
 

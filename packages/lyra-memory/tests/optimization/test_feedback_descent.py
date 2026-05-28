@@ -1,6 +1,5 @@
 """Tests for Feedback Descent Optimizer."""
 
-import pytest
 
 from lyra_memory.optimization.feedback_descent import (
     FeedbackDescentOptimizer,

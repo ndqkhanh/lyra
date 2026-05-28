@@ -1,27 +1,19 @@
 """Tests for Phase 2 Context Compression modules."""
 
-import pytest
-import tempfile
 import shutil
-from pathlib import Path
+import tempfile
 
+import pytest
 from lyra_cli.compression.active_compressor import (
     ActiveCompressor,
-    FocusRegion,
-    KnowledgeBlock,
 )
 from lyra_cli.compression.hierarchical_compressor import (
     HierarchicalCompressor,
-    SensoryItem,
-    ShortTermItem,
-    LongTermItem,
 )
 from lyra_cli.compression.observation_pruner import (
     ObservationPruner,
     SmartObservationPruner,
-    PruningResult,
 )
-
 
 # ============================================================================
 # Active Compressor Tests

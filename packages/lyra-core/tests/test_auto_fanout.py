@@ -3,7 +3,6 @@
 import asyncio
 
 import pytest
-
 from lyra_core.auto_fanout import AutoFanoutCompressor, FanoutResult, _count_tokens
 
 

@@ -19,8 +19,9 @@ up a full session.
 from __future__ import annotations
 
 import os
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 from lyra_core.hooks.user_hooks import HookSpec, parse_hooks_config
 from lyra_core.permissions.grammar import Policy, policy_from_mapping

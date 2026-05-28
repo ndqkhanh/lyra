@@ -10,34 +10,28 @@ Tests exercise:
 
 from __future__ import annotations
 
-import asyncio
 from pathlib import Path
-from unittest.mock import MagicMock, patch
 
 import pytest
-
 from lyra_cli.autonomy import (
     AutonomyState,
+    BudgetManager,
     Goal,
     GoalDecomposer,
-    BudgetManager,
-    BudgetSummary,
-    CostEntry,
-    HooksManager,
     HookEvent,
+    HooksManager,
     SessionCheckpoint,
     SessionManager,
     StateMachine,
     TransitionError,
 )
 from lyra_cli.swarm import (
+    OrchestratorConfig,
     PriorityLevel,
+    SwarmOrchestrator,
     SwarmTask,
     TaskResult,
-    SwarmOrchestrator,
-    OrchestratorConfig,
 )
-
 
 # =========================================================================
 # Fixtures

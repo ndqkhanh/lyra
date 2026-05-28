@@ -6,12 +6,9 @@ keyboard-interrupt clean handling.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
 
 import pytest
-
 from lyra_core.contracts import (
     AgentContract,
     BudgetEnvelope,
@@ -23,7 +20,6 @@ from lyra_core.loops import (
     LoopSession,
     validate_interval,
 )
-
 
 # --- 1. Interval validation: 270 fine, 300 rejected, 1200 fine ---------- #
 

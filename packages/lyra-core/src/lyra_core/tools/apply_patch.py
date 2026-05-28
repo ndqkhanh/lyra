@@ -28,9 +28,10 @@ raise ``ApplyPatchError`` before touching the filesystem.
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Literal
+from typing import Literal
 
 
 class ApplyPatchError(Exception):

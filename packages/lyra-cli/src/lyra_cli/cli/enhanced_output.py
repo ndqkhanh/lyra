@@ -1,14 +1,13 @@
 """Enhanced output with best AI agent UI patterns"""
 
+
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
 from rich.live import Live
 from rich.panel import Panel
-from rich.table import Table
+from rich.progress import BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn
 from rich.syntax import Syntax
+from rich.table import Table
 from rich.tree import Tree
-from typing import Optional
-import time
 
 
 class EnhancedOutputFormatter:
@@ -16,7 +15,7 @@ class EnhancedOutputFormatter:
 
     def __init__(self, console: Console):
         self.console = console
-        self.live: Optional[Live] = None
+        self.live: Live | None = None
 
     # Status indicators (Claude Code + Continue patterns)
     SYMBOL_SUCCESS = "✓"

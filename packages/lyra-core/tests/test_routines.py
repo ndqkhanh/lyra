@@ -6,7 +6,6 @@ import hmac
 import json
 
 import pytest
-
 from lyra_core.cron.routines import (
     CronTrigger,
     GitHubWebhookTrigger,
@@ -18,7 +17,6 @@ from lyra_core.cron.routines import (
     verify_api_signature,
     verify_github_signature,
 )
-
 
 SECRET = b"test-routine-secret-32-bytes____"
 

@@ -11,13 +11,14 @@ from __future__ import annotations
 
 import asyncio
 import sys
+from collections.abc import AsyncIterator, Callable
 from pathlib import Path
-from typing import AsyncIterator, Callable, Optional
 
 from lyra_cli import __version__
 
 from .formatter import CLIFormatter, get_formatter
 from .messages import StreamEvent
+
 
 # Simple REPL class for backward compatibility
 class LyraREPL:
@@ -167,9 +168,10 @@ async def read_prompt(formatter: CLIFormatter) -> str:
         User input string
     """
     try:
-        from .input import create_prompt_session
-        from pathlib import Path
         import os
+        from pathlib import Path
+
+        from .input import create_prompt_session
 
         # Get history file path
         history_dir = Path.home() / ".lyra"

@@ -17,12 +17,12 @@ sink that auto-attaches at construction time and powers the new
 from __future__ import annotations
 
 from collections import deque
+from collections.abc import Callable
 from threading import RLock
-from typing import Any, Callable, Deque, Dict, List
-
+from typing import Any
 
 Subscriber = Callable[..., None]
-_subscribers: List[Subscriber] = []
+_subscribers: list[Subscriber] = []
 
 
 def subscribe(fn: Subscriber) -> None:
@@ -76,7 +76,7 @@ class RingBuffer:
     def __init__(self, cap: int = 1024) -> None:
         if cap <= 0:
             raise ValueError("RingBuffer cap must be > 0")
-        self._buf: Deque[Dict[str, Any]] = deque(maxlen=cap)
+        self._buf: deque[dict[str, Any]] = deque(maxlen=cap)
         self._lock = RLock()
         self._attached = True
         subscribe(self._on_event)
@@ -85,7 +85,7 @@ class RingBuffer:
         with self._lock:
             self._buf.append({"name": name, "attrs": dict(attrs)})
 
-    def snapshot(self) -> List[Dict[str, Any]]:
+    def snapshot(self) -> list[dict[str, Any]]:
         with self._lock:
             return list(self._buf)
 
@@ -104,7 +104,7 @@ class RingBuffer:
 # that emits an HIR event (factory cascade, plugin runtime, …) is
 # observable without touching call sites — even events fired before
 # the user runs the slash for the first time.
-_GLOBAL_RING: "RingBuffer | None" = None
+_GLOBAL_RING: RingBuffer | None = None
 
 
 def global_ring() -> RingBuffer:

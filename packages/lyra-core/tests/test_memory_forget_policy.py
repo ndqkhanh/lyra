@@ -4,10 +4,8 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 
 import pytest
-
 from lyra_core.memory.forget_policy import ForgetPolicy, utility_score
 from lyra_core.memory.schema import Fragment, FragmentType, MemoryTier, Provenance
-
 
 # ---------------------------------------------------------------------------
 # Helpers

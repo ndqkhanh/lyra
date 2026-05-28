@@ -36,7 +36,7 @@ logger.addHandler(console_handler)
 
 def log_api_call(provider: str, model: str, prompt: str, **kwargs: Any) -> None:
     """Log an LLM API call."""
-    logger.info(f"=== API CALL START ===")
+    logger.info("=== API CALL START ===")
     logger.info(f"Provider: {provider}")
     logger.info(f"Model: {model}")
     logger.info(f"Prompt length: {len(prompt)} chars")
@@ -44,12 +44,12 @@ def log_api_call(provider: str, model: str, prompt: str, **kwargs: Any) -> None:
     logger.info(f"Full prompt (first 1000 chars): {prompt[:1000]}")
     for key, value in kwargs.items():
         logger.info(f"{key}: {value}")
-    logger.info(f"=== API CALL END ===")
+    logger.info("=== API CALL END ===")
 
 
 def log_api_response(provider: str, model: str, response: str, **kwargs: Any) -> None:
     """Log an LLM API response."""
-    logger.info(f"=== API RESPONSE START ===")
+    logger.info("=== API RESPONSE START ===")
     logger.info(f"Provider: {provider}")
     logger.info(f"Model: {model}")
     logger.info(f"Response length: {len(response)} chars")
@@ -57,7 +57,7 @@ def log_api_response(provider: str, model: str, response: str, **kwargs: Any) ->
     logger.info(f"Full response: {response}")
     for key, value in kwargs.items():
         logger.info(f"{key}: {value}")
-    logger.info(f"=== API RESPONSE END ===")
+    logger.info("=== API RESPONSE END ===")
 
 
 def log_error(error: Exception, context: str = "") -> None:

@@ -1,11 +1,12 @@
 """Pluggable rule registry for ``lyra burn optimize``."""
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Callable, Iterable, Literal, Mapping
+from typing import Literal
 
-from .classifier import classify_turn, Classification
+from .classifier import Classification, classify_turn
 
 
 @dataclass(frozen=True)

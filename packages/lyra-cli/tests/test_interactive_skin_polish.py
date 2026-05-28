@@ -22,7 +22,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-
 from lyra_cli.interactive import banner as _banner
 from lyra_cli.interactive import output as _out
 from lyra_cli.interactive import session as _session
@@ -174,9 +173,8 @@ class TestAgentTurnWrapper:
         assert _driver.agent_verb_for_mode("zzz", bare) == "thinking"
 
     def test_run_agent_turn_returns_dispatch_result(self) -> None:
-        from rich.console import Console
-
         from lyra_cli.interactive import driver as _driver
+        from rich.console import Console
 
         s = _session.InteractiveSession(repo_root=Path.cwd(), model="m", mode="plan")
         # v3.6.0: legacy ``plan`` remaps to ``plan_mode``.
@@ -191,9 +189,8 @@ class TestAgentTurnWrapper:
         assert s.pending_task == "ship the thing"
 
     def test_run_agent_turn_reraises_on_handler_failure(self) -> None:
-        from rich.console import Console
-
         from lyra_cli.interactive import driver as _driver
+        from rich.console import Console
 
         s = _session.InteractiveSession(
             repo_root=Path.cwd(), model="m", mode="agent"
@@ -218,9 +215,8 @@ class TestAgentTurnWrapper:
         assert "[error]" in rendered
 
     def test_run_agent_turn_skips_completion_line_for_fast_handlers(self) -> None:
-        from rich.console import Console
-
         from lyra_cli.interactive import driver as _driver
+        from rich.console import Console
 
         s = _session.InteractiveSession(repo_root=Path.cwd(), model="m", mode="plan")
         console = Console(record=True)

@@ -9,23 +9,17 @@ Tests exercise:
 
 from __future__ import annotations
 
-import asyncio
-import json
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
-
 from lyra_cli.autonomy import (
     AutonomyState,
     BudgetManager,
-    BudgetSummary,
-    CostEntry,
     Goal,
     GoalDecomposer,
-    DependencyGraph,
-    HooksManager,
     HookEvent,
+    HooksManager,
     SessionCheckpoint,
     SessionManager,
     StateMachine,
@@ -33,47 +27,33 @@ from lyra_cli.autonomy import (
     TransitionError,
 )
 from lyra_cli.research import (
-    ContradictionReport,
-    ExploreResult,
     Finding,
-    FindingRelation,
-    KnowledgeGap,
     MultiHopResearchEngine,
     ResearchKnowledgeGraph,
-    ResearchReport,
     SourceCredibility,
-    SourceProfile,
     SourceType,
-    StrategyResult,
     StrategySelector,
     StrategyType,
 )
 from lyra_cli.skills.specialized.code_reviewer import (
     CodeReviewerSkill,
-    ReviewFinding,
-    Severity as ReviewSeverity,
 )
 from lyra_cli.skills.specialized.performance_profiler import (
     PerformanceProfilerSkill,
-    ComplexityClass,
 )
 from lyra_cli.swarm import (
     OrchestratorConfig,
     PriorityLevel,
     SwarmOrchestrator,
     SwarmTask,
-    TaskResult,
 )
 from lyra_cli.voice import (
     SessionConfig,
     TTSBackend,
     VoiceConfig,
     VoiceSession,
-    WakeWordDetector,
-    WakeWordResult,
     synthesize_speech,
 )
-
 
 # =========================================================================
 # Fixtures

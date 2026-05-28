@@ -39,7 +39,6 @@ from typing import Literal
 
 from .schema import AccessEdge, Fragment, MemoryTier
 
-
 # ---------------------------------------------------------------------------
 # Scoring weights (defaults from design proposal §5.3)
 # ---------------------------------------------------------------------------

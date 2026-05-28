@@ -13,11 +13,9 @@ learner later — the interface is stable.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Iterable
+from dataclasses import dataclass
 
 from .registry import Skill, SkillRegistry
-
 
 __all__ = [
     "OptimizationReport",

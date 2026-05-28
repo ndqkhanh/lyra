@@ -19,11 +19,10 @@ becoming a thousand-line opinion piece. Teams extend it with
 """
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Iterable, Sequence
 
 from .monitor import SafetyMonitor
-
 
 __all__ = [
     "RedTeamCase",
@@ -104,7 +103,7 @@ class RedTeamCorpus:
     def __len__(self) -> int:
         return len(self.cases)
 
-    def with_extras(self, extras: Iterable[RedTeamCase]) -> "RedTeamCorpus":
+    def with_extras(self, extras: Iterable[RedTeamCase]) -> RedTeamCorpus:
         merged = list(self.cases) + list(extras)
         return RedTeamCorpus(tuple(merged))
 

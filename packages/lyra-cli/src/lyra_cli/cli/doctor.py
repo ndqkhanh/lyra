@@ -1,12 +1,10 @@
 """Doctor command for diagnostics (OpenClaw pattern)"""
 
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
 import os
 import sys
 from pathlib import Path
-import shutil
+
+from rich.console import Console
 
 
 class DoctorCommand:

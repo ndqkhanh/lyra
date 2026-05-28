@@ -84,7 +84,7 @@ class ChangelogGenerator:
         for entry in self._entries:
             grouped[entry.change_type].append(entry)
 
-        lines = [f"# Changelog", f"", f"## {self.version}", ""]
+        lines = ["# Changelog", "", f"## {self.version}", ""]
 
         type_labels = {
             ChangeType.FEAT: "Features",

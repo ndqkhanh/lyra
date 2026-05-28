@@ -25,7 +25,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-
 # ---------------------------------------------------------------------------
 # CompactionController
 # ---------------------------------------------------------------------------
@@ -175,7 +174,7 @@ class DecisionPreservingPrompt:
         """Return a ``{"role": "system", "content": "..."}`` dict."""
         return {"role": "system", "content": self.render()}
 
-    def with_extra(self, instruction: str) -> "DecisionPreservingPrompt":
+    def with_extra(self, instruction: str) -> DecisionPreservingPrompt:
         """Return a new prompt with an additional instruction appended."""
         return DecisionPreservingPrompt(
             max_tokens=self.max_tokens,

@@ -1,7 +1,6 @@
 """Tests for RuleMetadata."""
 
-import pytest
-from lyra_cli.core.rule_metadata import RuleMetadata, RuleCategory, RuleSeverity
+from lyra_cli.core.rule_metadata import RuleCategory, RuleMetadata, RuleSeverity
 
 
 def test_rule_metadata_creation():

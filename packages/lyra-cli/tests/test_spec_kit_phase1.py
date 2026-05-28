@@ -1,6 +1,7 @@
 """Simple test for Phase 1 detector."""
 
 import asyncio
+
 from lyra_cli.spec_kit.detector import Detector
 from lyra_cli.spec_kit.orchestrator import Orchestrator
 

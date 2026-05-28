@@ -16,13 +16,12 @@ Contract from docs/blocks/04-permission-bridge.md:
 """
 from __future__ import annotations
 
-from lyra_harness_core.messages import ToolCall
-
 from lyra_core.permissions import (
     Decision,
     LyraMode,
     resolve_lyra_decision,
 )
+from lyra_harness_core.messages import ToolCall
 
 
 def _call(name: str, **args) -> ToolCall:

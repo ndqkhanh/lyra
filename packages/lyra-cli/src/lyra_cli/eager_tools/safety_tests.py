@@ -1,6 +1,5 @@
 """Safety validation tests for eager tools."""
 import asyncio
-from typing import Callable
 from dataclasses import dataclass
 
 

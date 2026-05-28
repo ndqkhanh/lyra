@@ -9,7 +9,6 @@ progressive consolidation and archival strategies.
 import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional, Tuple
 
 from lyra_memory.schema import MemoryRecord
 
@@ -68,7 +67,7 @@ class MemoryBudgetController:
     - Cold tier (85-95%): Aggressive pruning
     - Critical tier (95-100%): Emergency archival
     """
-    
+
     def __init__(
         self,
         capacity_limit: int = 10000,
@@ -92,7 +91,7 @@ class MemoryBudgetController:
         self.warm_threshold = warm_threshold
         self.cold_threshold = cold_threshold
         self.min_importance_for_keep = min_importance_for_keep
-    
+
     def check_budget(self, total_memories: int) -> BudgetStatus:
         """
         Check current budget status.
@@ -104,7 +103,7 @@ class MemoryBudgetController:
             BudgetStatus with current state
         """
         usage_percent = total_memories / self.capacity_limit
-        
+
         # Determine tier
         if usage_percent < self.hot_threshold:
             tier = BudgetTier.HOT
@@ -128,7 +127,7 @@ class MemoryBudgetController:
             # Prune back to 40%
             target = int(self.capacity_limit * 0.40)
             memories_to_prune = max(0, total_memories - target)
-        
+
         return BudgetStatus(
             total_memories=total_memories,
             capacity_limit=self.capacity_limit,
@@ -137,12 +136,12 @@ class MemoryBudgetController:
             memories_to_prune=memories_to_prune,
             action_required=action_required,
         )
-    
+
     def compute_prune_scores(
         self,
-        memories: List[MemoryRecord],
-        activation_scores: Optional[dict[str, float]] = None,
-    ) -> List[PruneCandidate]:
+        memories: list[MemoryRecord],
+        activation_scores: dict[str, float] | None = None,
+    ) -> list[PruneCandidate]:
         """
         Compute pruning scores for all memories.
         
@@ -166,27 +165,27 @@ class MemoryBudgetController:
         """
         activation_scores = activation_scores or {}
         candidates = []
-        
+
         now = time.time()
-        
+
         for memory in memories:
             # Skip critical memories
             importance = getattr(memory, 'importance', 0.5)
             if importance >= self.min_importance_for_keep:
                 continue
-            
+
             # Get activation score
             activation = activation_scores.get(memory.id, 0.5)
-            
+
             # Get access count
             access_count = getattr(memory, 'access_count', 0)
             access_factor = min(access_count / 10.0, 1.0)
-            
+
             # Calculate age in days
             created_ts = memory.created_at.timestamp()
             age_days = (now - created_ts) / 86400
             age_penalty = (age_days / 365.0) * 0.1
-            
+
             # Compute prune score
             prune_score = (
                 0.5 * activation +
@@ -194,7 +193,7 @@ class MemoryBudgetController:
                 0.2 * access_factor -
                 age_penalty
             )
-            
+
             # Determine reason
             if activation < 0.3:
                 reason = "Low activation (rarely accessed)"
@@ -204,24 +203,24 @@ class MemoryBudgetController:
                 reason = "Old and rarely used"
             else:
                 reason = "Low overall value"
-            
+
             candidates.append(PruneCandidate(
                 memory_id=memory.id,
                 prune_score=prune_score,
                 reason=reason,
             ))
-        
+
         # Sort by prune score (lowest first)
         candidates.sort(key=lambda c: c.prune_score)
-        
+
         return candidates
-    
+
     def select_memories_to_prune(
         self,
-        memories: List[MemoryRecord],
+        memories: list[MemoryRecord],
         target_count: int,
-        activation_scores: Optional[dict[str, float]] = None,
-    ) -> List[str]:
+        activation_scores: dict[str, float] | None = None,
+    ) -> list[str]:
         """
         Select memories to prune to reach target count.
         
@@ -235,21 +234,21 @@ class MemoryBudgetController:
         """
         if target_count <= 0:
             return []
-        
+
         # Compute prune scores
         candidates = self.compute_prune_scores(memories, activation_scores)
-        
+
         # Select bottom N
         to_prune = candidates[:target_count]
-        
+
         return [c.memory_id for c in to_prune]
-    
+
     def get_archival_candidates(
         self,
-        memories: List[MemoryRecord],
+        memories: list[MemoryRecord],
         min_age_days: int = 30,
         max_access_count: int = 2,
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Get memories that should be archived (cold storage).
         
@@ -268,30 +267,30 @@ class MemoryBudgetController:
         """
         now = time.time()
         candidates = []
-        
+
         for memory in memories:
             # Check age
             created_ts = memory.created_at.timestamp()
             age_days = (now - created_ts) / 86400
-            
+
             if age_days < min_age_days:
                 continue
-            
+
             # Check access count
             access_count = getattr(memory, 'access_count', 0)
             if access_count > max_access_count:
                 continue
-            
+
             # Check importance
             importance = getattr(memory, 'importance', 0.5)
             if importance >= 0.5:
                 continue
-            
+
             candidates.append(memory.id)
-        
+
         return candidates
-    
-    def estimate_storage_bytes(self, memories: List[MemoryRecord]) -> int:
+
+    def estimate_storage_bytes(self, memories: list[MemoryRecord]) -> int:
         """
         Estimate total storage bytes for memories.
         
@@ -302,18 +301,18 @@ class MemoryBudgetController:
             Estimated bytes
         """
         total_bytes = 0
-        
+
         for memory in memories:
             # Content
             total_bytes += len(memory.content.encode('utf-8'))
-            
+
             # Metadata (rough estimate)
             total_bytes += 500  # ID, timestamps, etc.
-            
+
             # Embeddings (if present)
             if hasattr(memory, 'embedding') and memory.embedding:
                 total_bytes += len(memory.embedding) * 4  # float32
-        
+
         return total_bytes
 
 

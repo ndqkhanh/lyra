@@ -1,8 +1,8 @@
 """Simple agent loop for CLI integration"""
 
-from typing import Optional, Dict, Any, Callable
-import anthropic
 import os
+
+import anthropic
 
 from lyra_cli.agent.callbacks import AgentOutputCallback
 
@@ -14,7 +14,7 @@ class SimpleAgentLoop:
         self,
         callback: AgentOutputCallback,
         model: str = "claude-opus-4-20250514",
-        api_key: Optional[str] = None
+        api_key: str | None = None
     ):
         self.callback = callback
         self.model = model

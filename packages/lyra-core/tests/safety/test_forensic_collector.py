@@ -1,7 +1,6 @@
 """Tests for ForensicCollector — forensic trace collection for safety incidents."""
 
 import pytest
-
 from lyra_core.safety.forensic_collector import (
     ForensicCollector,
     ForensicSnapshot,

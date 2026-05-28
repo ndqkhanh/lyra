@@ -68,7 +68,7 @@ class WorkingContext:
         return "\n".join(sections).rstrip() + "\n"
 
     @classmethod
-    def from_markdown(cls, text: str) -> "WorkingContext":
+    def from_markdown(cls, text: str) -> WorkingContext:
         wc = cls()
         if not text:
             return wc

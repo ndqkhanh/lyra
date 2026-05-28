@@ -1,12 +1,12 @@
 """Tests for skill curator."""
 
+
 import pytest
-from pathlib import Path
 from lyra_cli.skills.skill_curator import (
-    SkillCurator,
-    SelectionContext,
     CuratorSignal,
     DiscoverySource,
+    SelectionContext,
+    SkillCurator,
 )
 
 

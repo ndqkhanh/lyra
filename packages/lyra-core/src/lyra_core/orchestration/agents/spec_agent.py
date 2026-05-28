@@ -8,12 +8,12 @@ from typing import Any
 from lyra_core.orchestration.agent_base import AgentStatus, BaseAgent
 from lyra_core.orchestration.models.documentation import (
     APIDocumentation,
+    DocsReview,
     DocStatus,
     DocType,
-    DocsReview,
     Specification,
 )
-from lyra_core.orchestration.protocol import Message, MessageType
+from lyra_core.orchestration.protocol import Message
 
 
 class SpecKitSpecialistAgent(BaseAgent):

@@ -10,9 +10,10 @@ Provides comprehensive health checking:
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 from lyra_cli.logging_config import get_logger
 
@@ -35,14 +36,14 @@ class HealthCheckResult:
     status: HealthStatus
     message: str
     timestamp: float = field(default_factory=time.time)
-    details: Dict[str, Any] = field(default_factory=dict)
-    duration_ms: Optional[float] = None
+    details: dict[str, Any] = field(default_factory=dict)
+    duration_ms: float | None = None
 
     def is_healthy(self) -> bool:
         """Check if status is healthy."""
         return self.status == HealthStatus.HEALTHY
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "status": self.status.value,
@@ -78,7 +79,7 @@ class HealthCheck:
         self.check_func = check_func
         self.critical = critical
         self.timeout_seconds = timeout_seconds
-        self._last_result: Optional[HealthCheckResult] = None
+        self._last_result: HealthCheckResult | None = None
 
     def execute(self) -> HealthCheckResult:
         """Execute the health check.
@@ -104,7 +105,7 @@ class HealthCheck:
             self._last_result = result
             return result
 
-    def get_last_result(self) -> Optional[HealthCheckResult]:
+    def get_last_result(self) -> HealthCheckResult | None:
         """Get the last check result."""
         return self._last_result
 
@@ -121,9 +122,9 @@ class HealthCheckRegistry:
 
     def __init__(self):
         """Initialize health check registry."""
-        self._checks: Dict[str, HealthCheck] = {}
-        self._readiness_checks: List[str] = []
-        self._liveness_checks: List[str] = []
+        self._checks: dict[str, HealthCheck] = {}
+        self._readiness_checks: list[str] = []
+        self._liveness_checks: list[str] = []
 
     def register(
         self,
@@ -174,7 +175,7 @@ class HealthCheckRegistry:
         check = HealthCheck(name, wrapped_check, critical)
         self.register(check, readiness, liveness)
 
-    def check_all(self) -> Dict[str, HealthCheckResult]:
+    def check_all(self) -> dict[str, HealthCheckResult]:
         """Execute all health checks.
 
         Returns:
@@ -185,7 +186,7 @@ class HealthCheckRegistry:
             results[name] = check.execute()
         return results
 
-    def check_readiness(self) -> Dict[str, HealthCheckResult]:
+    def check_readiness(self) -> dict[str, HealthCheckResult]:
         """Execute readiness checks.
 
         Readiness checks determine if the service is ready to accept traffic.
@@ -199,7 +200,7 @@ class HealthCheckRegistry:
                 results[name] = self._checks[name].execute()
         return results
 
-    def check_liveness(self) -> Dict[str, HealthCheckResult]:
+    def check_liveness(self) -> dict[str, HealthCheckResult]:
         """Execute liveness checks.
 
         Liveness checks determine if the service is alive and should not be restarted.
@@ -215,7 +216,7 @@ class HealthCheckRegistry:
 
     def get_overall_status(
         self,
-        results: Optional[Dict[str, HealthCheckResult]] = None,
+        results: dict[str, HealthCheckResult] | None = None,
     ) -> HealthStatus:
         """Get overall health status from check results.
 
@@ -251,7 +252,7 @@ class HealthCheckRegistry:
 
         return HealthStatus.HEALTHY
 
-    def get_health_report(self) -> Dict[str, Any]:
+    def get_health_report(self) -> dict[str, Any]:
         """Get comprehensive health report.
 
         Returns:
@@ -275,7 +276,7 @@ class HealthCheckRegistry:
             },
         }
 
-    def get_readiness_report(self) -> Dict[str, Any]:
+    def get_readiness_report(self) -> dict[str, Any]:
         """Get readiness report.
 
         Returns:
@@ -294,7 +295,7 @@ class HealthCheckRegistry:
             },
         }
 
-    def get_liveness_report(self) -> Dict[str, Any]:
+    def get_liveness_report(self) -> dict[str, Any]:
         """Get liveness report.
 
         Returns:

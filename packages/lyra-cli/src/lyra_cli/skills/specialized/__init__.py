@@ -13,9 +13,9 @@ This module provides 20+ specialized skills across multiple domains:
 - Brainstorming (1 skill)
 """
 
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List
-from dataclasses import dataclass
 
 
 @dataclass
@@ -24,8 +24,8 @@ class SkillMetadata:
 
     name: str
     description: str
-    tags: List[str]
-    triggers: List[str]
+    tags: list[str]
+    triggers: list[str]
     model: str
     file_path: Path
     domain: str
@@ -36,7 +36,7 @@ class SpecializedSkillsRegistry:
 
     def __init__(self):
         self.skills_dir = Path(__file__).parent
-        self._skills: Dict[str, SkillMetadata] = {}
+        self._skills: dict[str, SkillMetadata] = {}
         self._load_skills()
 
     def _load_skills(self):
@@ -136,15 +136,15 @@ class SpecializedSkillsRegistry:
         """Get skill by name."""
         return self._skills.get(name)
 
-    def list_skills(self) -> List[SkillMetadata]:
+    def list_skills(self) -> list[SkillMetadata]:
         """List all skills."""
         return list(self._skills.values())
 
-    def list_by_domain(self, domain: str) -> List[SkillMetadata]:
+    def list_by_domain(self, domain: str) -> list[SkillMetadata]:
         """List skills by domain."""
         return [s for s in self._skills.values() if s.domain == domain]
 
-    def search_by_trigger(self, trigger: str) -> List[SkillMetadata]:
+    def search_by_trigger(self, trigger: str) -> list[SkillMetadata]:
         """Search skills by trigger keyword."""
         trigger_lower = trigger.lower()
         return [
@@ -152,7 +152,7 @@ class SpecializedSkillsRegistry:
             if any(trigger_lower in t.lower() for t in s.triggers)
         ]
 
-    def search_by_tag(self, tag: str) -> List[SkillMetadata]:
+    def search_by_tag(self, tag: str) -> list[SkillMetadata]:
         """Search skills by tag."""
         tag_lower = tag.lower()
         return [
@@ -181,7 +181,7 @@ def get_registry() -> SpecializedSkillsRegistry:
     return _registry
 
 
-def list_all_skills() -> List[str]:
+def list_all_skills() -> list[str]:
     """List all skill names."""
     registry = get_registry()
     return [s.name for s in registry.list_skills()]
@@ -193,7 +193,7 @@ def get_skill_by_name(name: str) -> SkillMetadata:
     return registry.get_skill(name)
 
 
-def search_skills(query: str) -> List[SkillMetadata]:
+def search_skills(query: str) -> list[SkillMetadata]:
     """Search skills by trigger or tag."""
     registry = get_registry()
     trigger_results = registry.search_by_trigger(query)
@@ -214,23 +214,51 @@ def search_skills(query: str) -> List[SkillMetadata]:
 # Executable specialized skills (Python-based, not markdown knowledge bases)
 # ---------------------------------------------------------------------------
 
-from .code_reviewer import CodeReviewerSkill, ReviewReport, ReviewFinding, Severity, FindingCategory
-from .security_auditor import SecurityAuditorSkill, AuditReport, Vulnerability, VulnerabilitySeverity, OwaspCategory
-from .test_generator import TestGeneratorSkill, TestSuite, GeneratedTest, TestCase
-from .refactoring_advisor import RefactoringAdvisorSkill, RefactoringReport, RefactoringSuggestion, RefactoringType
-from .documentation_writer import DocumentationWriterSkill, DocumentationReport, GeneratedDocstring, ApiEndpoint
-from .performance_profiler import PerformanceProfilerSkill, ProfileReport, ProfileResult, PerformanceIssue, ComplexityClass
-from .dependency_analyzer import DependencyAnalyzerSkill, DependencyReport, ImportInfo, CircularDependency, DependencySuggestion
-from .sre_incident_responder import SREIncidentResponder, IncidentResponsePlan, IncidentSeverity
-from .cloud_architect import CloudArchitect, CloudArchitectureDesign, CloudProvider
-from .solution_architect import SolutionArchitect, SolutionArchitectureDoc
-from .pm_planner import PMPlanner, PMPlan
-from .ba_analyzer import BAAnalyzer, BAAnalysis
-from .brainstorm_facilitator import BrainstormFacilitator, BrainstormSession, BrainstormMethod
-from .data_engineer import DataEngineer, DataEngineeringPlan
 from .ai_researcher import AIResearcher, ResearchPlan, ResearchType
-from .design_reviewer import DesignReviewer, DesignReviewReport, DesignQuality
-from .debugging_assistant import DebuggingAssistant, DebuggingPlan, BugCategory
+from .ba_analyzer import BAAnalysis, BAAnalyzer
+from .brainstorm_facilitator import BrainstormFacilitator, BrainstormMethod, BrainstormSession
+from .cloud_architect import CloudArchitect, CloudArchitectureDesign, CloudProvider
+from .code_reviewer import CodeReviewerSkill, FindingCategory, ReviewFinding, ReviewReport, Severity
+from .data_engineer import DataEngineer, DataEngineeringPlan
+from .debugging_assistant import BugCategory, DebuggingAssistant, DebuggingPlan
+from .dependency_analyzer import (
+    CircularDependency,
+    DependencyAnalyzerSkill,
+    DependencyReport,
+    DependencySuggestion,
+    ImportInfo,
+)
+from .design_reviewer import DesignQuality, DesignReviewer, DesignReviewReport
+from .documentation_writer import (
+    ApiEndpoint,
+    DocumentationReport,
+    DocumentationWriterSkill,
+    GeneratedDocstring,
+)
+from .performance_profiler import (
+    ComplexityClass,
+    PerformanceIssue,
+    PerformanceProfilerSkill,
+    ProfileReport,
+    ProfileResult,
+)
+from .pm_planner import PMPlan, PMPlanner
+from .refactoring_advisor import (
+    RefactoringAdvisorSkill,
+    RefactoringReport,
+    RefactoringSuggestion,
+    RefactoringType,
+)
+from .security_auditor import (
+    AuditReport,
+    OwaspCategory,
+    SecurityAuditorSkill,
+    Vulnerability,
+    VulnerabilitySeverity,
+)
+from .solution_architect import SolutionArchitect, SolutionArchitectureDoc
+from .sre_incident_responder import IncidentResponsePlan, IncidentSeverity, SREIncidentResponder
+from .test_generator import GeneratedTest, TestCase, TestGeneratorSkill, TestSuite
 
 __all__ = [
     # Registry

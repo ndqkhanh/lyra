@@ -25,10 +25,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from lyra_cli.interactive.config_store import Config
 from lyra_cli.interactive.session import InteractiveSession
-
 
 # ---------------------------------------------------------------------------
 # Config: pure store — no slash / no session

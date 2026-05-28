@@ -4,7 +4,6 @@ from __future__ import annotations
 import json
 
 import pytest
-
 from lyra_core.observability.event_bus import (
     LLMCallFinished,
     LLMCallStarted,
@@ -18,7 +17,6 @@ from lyra_core.observability.process_tree import (
     AgentNode,
     ProcessTree,
 )
-
 
 # ---------------------------------------------------------------------------
 # AgentNode

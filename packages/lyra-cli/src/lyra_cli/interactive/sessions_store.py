@@ -23,10 +23,10 @@ import os as _os
 import re as _re
 import shutil as _shutil
 import tempfile as _tempfile
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Literal
-
+from typing import Literal
 
 ExportFormat = Literal["md", "json", "jsonl"]
 

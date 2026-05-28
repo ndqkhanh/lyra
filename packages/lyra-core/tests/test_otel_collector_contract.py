@@ -17,7 +17,6 @@ Design:
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.lsp_backend import FeatureUnavailable
 
 
@@ -36,7 +35,7 @@ class _FakeSpan:
     def end(self) -> None:
         self.ended = True
 
-    def __enter__(self) -> "_FakeSpan":
+    def __enter__(self) -> _FakeSpan:
         return self
 
     def __exit__(self, *exc) -> None:

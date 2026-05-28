@@ -1,12 +1,8 @@
 """Tests for Phase 4.1a — Tool Composition Pipelines."""
 from __future__ import annotations
 
-import pytest
-
 from lyra_core.tools.tool_pipeline import (
-    PipelineResult,
     PipelineStatus,
-    StageResult,
     StageType,
     ToolPipeline,
 )

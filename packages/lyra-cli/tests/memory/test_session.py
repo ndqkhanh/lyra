@@ -1,10 +1,10 @@
 """Tests for session system."""
 
-import pytest
 from datetime import datetime
+
+from lyra_cli.core.session_manager import SessionManager
 from lyra_cli.core.session_state import SessionState
 from lyra_cli.core.session_storage import SessionStorage
-from lyra_cli.core.session_manager import SessionManager
 
 
 def test_session_state_creation():

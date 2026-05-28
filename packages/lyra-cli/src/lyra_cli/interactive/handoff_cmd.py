@@ -12,10 +12,9 @@ ECC reference: structured handoff documentation for PR creation.
 from __future__ import annotations
 
 import subprocess
-import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from textual.app import ComposeResult
 from textual.binding import Binding
@@ -96,7 +95,7 @@ def _git_diff_stat() -> str:
 def _git_log_recent(count: int = 5) -> list[str]:
     try:
         r = subprocess.run(
-            ["git", "log", f"--format=%s", f"-{count}", "--"],
+            ["git", "log", "--format=%s", f"-{count}", "--"],
             capture_output=True, text=True, timeout=10,
         )
         return [l.strip() for l in r.stdout.split("\n") if l.strip()]

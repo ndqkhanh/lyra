@@ -6,10 +6,9 @@ Displays recent memories, search interface, and statistics.
 
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Optional
 
+from lyra_memory.schema import MemoryScope
 from lyra_memory.store import MemoryStore
-from lyra_memory.schema import MemoryScope, MemoryType
 
 
 class MemoryViewerData:
@@ -24,7 +23,7 @@ class MemoryViewerData:
         """
         self.store = store
 
-    def get_recent_memories(self, limit: int = 10) -> List[dict]:
+    def get_recent_memories(self, limit: int = 10) -> list[dict]:
         """
         Get recent memories for display.
 
@@ -64,7 +63,7 @@ class MemoryViewerData:
             "hot_cache": stats["hot_cache_size"],
         }
 
-    def search_memories(self, query: str, limit: int = 10) -> List[dict]:
+    def search_memories(self, query: str, limit: int = 10) -> list[dict]:
         """
         Search memories.
 
@@ -91,7 +90,7 @@ class MemoryViewerData:
             for mem in results
         ]
 
-    def get_memory_by_scope(self, scope: str, limit: int = 10) -> List[dict]:
+    def get_memory_by_scope(self, scope: str, limit: int = 10) -> list[dict]:
         """
         Get memories by scope.
 
@@ -171,7 +170,7 @@ def format_memory_sidebar(viewer: MemoryViewerData) -> str:
     return "\n".join(lines)
 
 
-def format_memory_search_results(results: List[dict]) -> str:
+def format_memory_search_results(results: list[dict]) -> str:
     """
     Format search results for display.
 
@@ -217,7 +216,7 @@ def create_memory_tab(store_path: Path) -> tuple[str, str]:
 
 
 # CLI command for memory viewer
-def memory_viewer_cli(store_path: Path, query: Optional[str] = None) -> None:
+def memory_viewer_cli(store_path: Path, query: str | None = None) -> None:
     """
     CLI interface for memory viewer.
 

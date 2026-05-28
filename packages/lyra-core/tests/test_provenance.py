@@ -10,10 +10,8 @@ This test suite covers:
 import json
 import time
 from datetime import datetime, timedelta
-from pathlib import Path
 
 import pytest
-
 from lyra_core.context.layered_context import (
     ContextEntry,
     ContextLayer,
@@ -21,12 +19,10 @@ from lyra_core.context.layered_context import (
 )
 from lyra_core.context.provenance import (
     AuditEventType,
-    ChurnAnalysis,
     ContextAuditTrail,
     ContextDebugger,
     ContextDiff,
     ContextInspector,
-    LayerInspection,
 )
 
 

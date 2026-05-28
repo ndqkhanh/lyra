@@ -5,8 +5,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from textwrap import dedent
 
-import pytest
-
 from lyra_core.memory.schema import FragmentType, MemoryTier
 from lyra_core.memory.t3_loader import (
     extract_decision_rationale,

@@ -27,7 +27,6 @@ from .access_policy import Permission, Resource, Subject, get_policy_graph
 from .digest_bus import get_digest_bus
 from .schema import Fragment, FragmentType, MemoryTier, Provenance, SubAgentDigest
 
-
 # ---------------------------------------------------------------------------
 # In-memory fragment store (process-global, thread-safe)
 # ---------------------------------------------------------------------------

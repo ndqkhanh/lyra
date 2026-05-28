@@ -1,10 +1,9 @@
 """Phase M.8 - version + help-text smoke."""
 from __future__ import annotations
 
-from typer.testing import CliRunner
-
 from lyra_cli import __version__
 from lyra_cli.__main__ import app
+from typer.testing import CliRunner
 
 
 def test_version_string():

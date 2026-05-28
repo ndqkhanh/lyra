@@ -30,7 +30,6 @@ from pathlib import Path
 from threading import Lock
 from typing import Any
 
-
 _DEFAULT_REGISTRY_PATH = Path.home() / ".lyra" / "installed.json"
 
 
@@ -74,7 +73,7 @@ class InstalledRecord:
         }
 
     @classmethod
-    def from_json(cls, d: dict[str, Any]) -> "InstalledRecord":
+    def from_json(cls, d: dict[str, Any]) -> InstalledRecord:
         return cls(
             bundle_name=str(d["bundle_name"]),
             bundle_version=str(d["bundle_version"]),

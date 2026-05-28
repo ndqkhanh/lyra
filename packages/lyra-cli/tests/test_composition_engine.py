@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 import pytest
-
-from lyra_cli.cli.composition_engine import CompositionEngine, StageResult
+from lyra_cli.cli.composition_engine import CompositionEngine
 
 
 class MockSkillManager:

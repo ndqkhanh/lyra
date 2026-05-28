@@ -16,11 +16,11 @@ the outer loop is "sweep configs across the whole corpus".
 """
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Callable, Iterable, Protocol, Sequence
+from typing import Protocol
 
 from .corpus import HarnessTask, ParityCorpus
-
 
 __all__ = [
     "CandidateConfig",

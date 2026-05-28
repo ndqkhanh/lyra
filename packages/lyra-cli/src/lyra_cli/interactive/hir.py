@@ -68,7 +68,7 @@ class HIRLogger:
                 # Ignore — we're closing.
                 pass
 
-    def __enter__(self) -> "HIRLogger":
+    def __enter__(self) -> HIRLogger:
         return self
 
     def __exit__(self, *_exc: object) -> None:

@@ -4,9 +4,10 @@ RRF (Reciprocal Rank Fusion) hybrid search implementation.
 Combines BM25 (keyword) and vector (semantic) search without weight tuning.
 """
 
-from typing import List, Tuple, Callable, TypeVar, Generic
-from dataclasses import dataclass
 import logging
+from collections.abc import Callable
+from dataclasses import dataclass
+from typing import Generic, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -24,11 +25,11 @@ class SearchResult(Generic[T]):
 
 
 def rrf_merge(
-    bm25_results: List[Tuple[T, float]],
-    vector_results: List[Tuple[T, float]],
+    bm25_results: list[tuple[T, float]],
+    vector_results: list[tuple[T, float]],
     get_id: Callable[[T], str],
     k: int = 60,
-) -> List[SearchResult[T]]:
+) -> list[SearchResult[T]]:
     """
     Merge BM25 and vector search results using RRF.
 
@@ -100,13 +101,13 @@ def rrf_merge(
 
 def hybrid_search(
     query: str,
-    query_embedding: List[float],
-    bm25_search_fn: Callable[[str, int], List[Tuple[T, float]]],
-    vector_search_fn: Callable[[List[float], int], List[Tuple[T, float]]],
+    query_embedding: list[float],
+    bm25_search_fn: Callable[[str, int], list[tuple[T, float]]],
+    vector_search_fn: Callable[[list[float], int], list[tuple[T, float]]],
     get_id: Callable[[T], str],
     limit: int = 10,
     k: int = 60,
-) -> List[SearchResult[T]]:
+) -> list[SearchResult[T]]:
     """
     Perform hybrid search with 3-tier fallback strategy.
 

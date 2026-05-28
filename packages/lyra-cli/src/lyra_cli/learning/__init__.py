@@ -9,23 +9,14 @@ Implements:
 """
 
 from lyra_cli.learning.experience_memory import (
-    Strategy,
-    ExperienceRecord,
     ExperienceMemory,
+    ExperienceRecord,
+    Strategy,
 )
-
-from lyra_cli.learning.verifier import (
-    Evidence,
-    MemoryClaim,
-    VerificationResult,
-    MemoryVerifier,
-)
-
-from lyra_cli.learning.skill_library import (
-    VerificationTest,
-    SkillExecution,
-    Skill,
-    SkillLibrary,
+from lyra_cli.learning.instinct_extractor import (
+    Instinct,
+    InstinctExtractor,
+    get_instinct_extractor,
 )
 
 # ECC-style learning
@@ -34,17 +25,22 @@ from lyra_cli.learning.observation_capture import (
     ObservationCapture,
     get_observation_capture,
 )
-
-from lyra_cli.learning.instinct_extractor import (
-    Instinct,
-    InstinctExtractor,
-    get_instinct_extractor,
-)
-
 from lyra_cli.learning.project_detector import (
-    ProjectDetector,
     EvolutionPipeline,
+    ProjectDetector,
     get_evolution_pipeline,
+)
+from lyra_cli.learning.skill_library import (
+    Skill,
+    SkillExecution,
+    SkillLibrary,
+    VerificationTest,
+)
+from lyra_cli.learning.verifier import (
+    Evidence,
+    MemoryClaim,
+    MemoryVerifier,
+    VerificationResult,
 )
 
 __all__ = [

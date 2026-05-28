@@ -30,7 +30,6 @@ from dataclasses import dataclass, field
 
 from .schema import ConflictEvent, Fragment, SubAgentDigest
 
-
 # ---------------------------------------------------------------------------
 # DigestStore — fast-access table for SubAgentDigest
 # ---------------------------------------------------------------------------

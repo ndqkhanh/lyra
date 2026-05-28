@@ -1,14 +1,11 @@
 """Tests for interactive/live_progress.py — nyan bar and TurnProgressHeader."""
 from __future__ import annotations
 
-import pytest
-
 from lyra_cli.interactive.live_progress import (
     TurnProgressHeader,
     make_turn_phases,
     nyan_bar,
 )
-
 
 # ---------------------------------------------------------------------------
 # nyan_bar

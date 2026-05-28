@@ -42,8 +42,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Any, Iterable, List, Optional
-
+from typing import Any
 
 _DEFAULT_MAX_SKILLS = 4
 _DEFAULT_MAX_LESSONS = 4
@@ -56,7 +55,7 @@ _TOKEN_RE = re.compile(r"[A-Za-z0-9_\-]{3,}")
 # ---------------------------------------------------------------------------
 
 
-def _extract_query_tokens(text: str, *, max_tokens: int = 8) -> List[str]:
+def _extract_query_tokens(text: str, *, max_tokens: int = 8) -> list[str]:
     """Pull a small set of meaningful tokens out of the user line.
 
     Used to shape the FTS5 query for procedural memory and the
@@ -115,7 +114,7 @@ def _search_procedural(
     line: str,
     *,
     max_results: int,
-) -> List[dict]:
+) -> list[dict]:
     """Run a tokenised search and return ``[{id, description}, ...]``.
 
     Returns an empty list when the store is unavailable or the
@@ -153,7 +152,7 @@ def _recall_bank_lessons(
     line: str,
     *,
     k: int,
-) -> List[dict]:
+) -> list[dict]:
     """Return ``[{title, body, polarity}, ...]`` from the bank.
 
     ``bank`` is duck-typed: anything with a ``recall(task_signature,

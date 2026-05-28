@@ -1,7 +1,6 @@
 """Tests for state store module."""
 
 import pytest
-
 from lyra_core.orchestration.state_store import InMemoryStateStore
 
 

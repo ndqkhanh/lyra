@@ -19,16 +19,14 @@ Usage:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import List, Optional, Dict, Any, Set
-from enum import Enum
 import ast
-import re
+from dataclasses import dataclass, field
+from enum import Enum
 
 
 class SpecType(Enum):
     """Types of specifications."""
-    
+
     FUNCTION = "function"
     CLASS = "class"
     MODULE = "module"
@@ -37,7 +35,7 @@ class SpecType(Enum):
 
 class TestType(Enum):
     """Types of tests."""
-    
+
     UNIT = "unit"
     INTEGRATION = "integration"
     PROPERTY = "property"
@@ -47,58 +45,58 @@ class TestType(Enum):
 @dataclass
 class Parameter:
     """A function parameter."""
-    
+
     name: str
-    type_hint: Optional[str] = None
-    default: Optional[str] = None
+    type_hint: str | None = None
+    default: str | None = None
     description: str = ""
 
 
 @dataclass
 class ReturnValue:
     """A return value."""
-    
-    type_hint: Optional[str] = None
+
+    type_hint: str | None = None
     description: str = ""
 
 
 @dataclass
 class Specification:
     """A code specification."""
-    
+
     name: str
     type: SpecType
     description: str
-    parameters: List[Parameter] = field(default_factory=list)
-    return_value: Optional[ReturnValue] = None
-    preconditions: List[str] = field(default_factory=list)
-    postconditions: List[str] = field(default_factory=list)
-    invariants: List[str] = field(default_factory=list)
-    examples: List[str] = field(default_factory=list)
+    parameters: list[Parameter] = field(default_factory=list)
+    return_value: ReturnValue | None = None
+    preconditions: list[str] = field(default_factory=list)
+    postconditions: list[str] = field(default_factory=list)
+    invariants: list[str] = field(default_factory=list)
+    examples: list[str] = field(default_factory=list)
 
 
 @dataclass
 class TestCase:
     """A test case."""
-    
+
     name: str
     type: TestType
     description: str
     setup: str = ""
     code: str = ""
-    assertions: List[str] = field(default_factory=list)
-    expected_output: Optional[str] = None
+    assertions: list[str] = field(default_factory=list)
+    expected_output: str | None = None
 
 
 @dataclass
 class Documentation:
     """Generated documentation."""
-    
+
     title: str
     description: str
-    sections: Dict[str, str] = field(default_factory=dict)
-    examples: List[str] = field(default_factory=list)
-    api_reference: List[str] = field(default_factory=list)
+    sections: dict[str, str] = field(default_factory=dict)
+    examples: list[str] = field(default_factory=list)
+    api_reference: list[str] = field(default_factory=list)
 
 
 class CodeAnalyzer:
@@ -111,11 +109,11 @@ class CodeAnalyzer:
     - Contract extraction
     - Documentation parsing
     """
-    
+
     def __init__(self):
         """Initialize the code analyzer."""
         pass
-    
+
     def analyze_function(self, code: str) -> Specification:
         """Analyze a function and extract specification.
         
@@ -127,21 +125,21 @@ class CodeAnalyzer:
         """
         try:
             tree = ast.parse(code)
-            
+
             # Find function definition
             func_def = None
             for node in ast.walk(tree):
                 if isinstance(node, ast.FunctionDef):
                     func_def = node
                     break
-            
+
             if not func_def:
                 raise ValueError("No function definition found")
-            
+
             # Extract information
             name = func_def.name
             docstring = ast.get_docstring(func_def) or ""
-            
+
             # Extract parameters
             parameters = []
             for arg in func_def.args.args:
@@ -150,17 +148,17 @@ class CodeAnalyzer:
                     type_hint=self._get_type_annotation(arg),
                 )
                 parameters.append(param)
-            
+
             # Extract return type
             return_value = None
             if func_def.returns:
                 return_value = ReturnValue(
                     type_hint=ast.unparse(func_def.returns),
                 )
-            
+
             # Parse docstring for additional info
             description, examples = self._parse_docstring(docstring)
-            
+
             return Specification(
                 name=name,
                 type=SpecType.FUNCTION,
@@ -169,15 +167,15 @@ class CodeAnalyzer:
                 return_value=return_value,
                 examples=examples,
             )
-        
-        except Exception as e:
+
+        except Exception:
             # Return minimal spec on error
             return Specification(
                 name="unknown",
                 type=SpecType.FUNCTION,
                 description="",
             )
-    
+
     def analyze_class(self, code: str) -> Specification:
         """Analyze a class and extract specification.
         
@@ -189,37 +187,37 @@ class CodeAnalyzer:
         """
         try:
             tree = ast.parse(code)
-            
+
             # Find class definition
             class_def = None
             for node in ast.walk(tree):
                 if isinstance(node, ast.ClassDef):
                     class_def = node
                     break
-            
+
             if not class_def:
                 raise ValueError("No class definition found")
-            
+
             name = class_def.name
             docstring = ast.get_docstring(class_def) or ""
-            
+
             description, examples = self._parse_docstring(docstring)
-            
+
             return Specification(
                 name=name,
                 type=SpecType.CLASS,
                 description=description,
                 examples=examples,
             )
-        
-        except Exception as e:
+
+        except Exception:
             return Specification(
                 name="unknown",
                 type=SpecType.CLASS,
                 description="",
             )
-    
-    def _get_type_annotation(self, arg: ast.arg) -> Optional[str]:
+
+    def _get_type_annotation(self, arg: ast.arg) -> str | None:
         """Get type annotation for argument.
         
         Args:
@@ -231,8 +229,8 @@ class CodeAnalyzer:
         if arg.annotation:
             return ast.unparse(arg.annotation)
         return None
-    
-    def _parse_docstring(self, docstring: str) -> tuple[str, List[str]]:
+
+    def _parse_docstring(self, docstring: str) -> tuple[str, list[str]]:
         """Parse docstring to extract description and examples.
         
         Args:
@@ -245,21 +243,21 @@ class CodeAnalyzer:
         description_lines = []
         examples = []
         in_examples = False
-        
+
         for line in lines:
             line = line.strip()
-            
+
             if line.lower().startswith('example'):
                 in_examples = True
                 continue
-            
+
             if in_examples:
                 if line:
                     examples.append(line)
             else:
                 if line and not line.startswith(('Args:', 'Returns:', 'Raises:')):
                     description_lines.append(line)
-        
+
         description = ' '.join(description_lines)
         return description, examples
 
@@ -274,12 +272,12 @@ class TestGenerator:
     - Property-based test generation
     - Integration test generation
     """
-    
+
     def __init__(self):
         """Initialize the test generator."""
         pass
-    
-    def generate_tests(self, spec: Specification) -> List[TestCase]:
+
+    def generate_tests(self, spec: Specification) -> list[TestCase]:
         """Generate tests from specification.
         
         Args:
@@ -289,19 +287,19 @@ class TestGenerator:
             List of test cases
         """
         tests = []
-        
+
         # Generate basic unit test
         tests.append(self._generate_basic_test(spec))
-        
+
         # Generate edge case tests
         tests.extend(self._generate_edge_case_tests(spec))
-        
+
         # Generate property tests if applicable
         if spec.parameters:
             tests.extend(self._generate_property_tests(spec))
-        
+
         return tests
-    
+
     def _generate_basic_test(self, spec: Specification) -> TestCase:
         """Generate basic unit test.
         
@@ -313,7 +311,7 @@ class TestGenerator:
         """
         # Generate test name
         test_name = f"test_{spec.name}_basic"
-        
+
         # Generate test code
         if spec.type == SpecType.FUNCTION:
             # Create sample call
@@ -324,7 +322,7 @@ class TestGenerator:
             code = f"result = {spec.name}({params})"
         else:
             code = f"obj = {spec.name}()"
-        
+
         return TestCase(
             name=test_name,
             type=TestType.UNIT,
@@ -332,8 +330,8 @@ class TestGenerator:
             code=code,
             assertions=["assert result is not None"],
         )
-    
-    def _generate_edge_case_tests(self, spec: Specification) -> List[TestCase]:
+
+    def _generate_edge_case_tests(self, spec: Specification) -> list[TestCase]:
         """Generate edge case tests.
         
         Args:
@@ -343,7 +341,7 @@ class TestGenerator:
             List of test cases
         """
         tests = []
-        
+
         # Test with None values
         if spec.parameters:
             test = TestCase(
@@ -354,7 +352,7 @@ class TestGenerator:
                 assertions=["# Should handle None gracefully"],
             )
             tests.append(test)
-        
+
         # Test with empty values
         if spec.parameters:
             test = TestCase(
@@ -365,10 +363,10 @@ class TestGenerator:
                 assertions=["# Should handle empty values"],
             )
             tests.append(test)
-        
+
         return tests
-    
-    def _generate_property_tests(self, spec: Specification) -> List[TestCase]:
+
+    def _generate_property_tests(self, spec: Specification) -> list[TestCase]:
         """Generate property-based tests.
         
         Args:
@@ -378,7 +376,7 @@ class TestGenerator:
             List of test cases
         """
         tests = []
-        
+
         # Generate idempotence test
         test = TestCase(
             name=f"test_{spec.name}_idempotent",
@@ -391,9 +389,9 @@ result2 = {spec.name}(value)
             assertions=["assert result1 == result2"],
         )
         tests.append(test)
-        
+
         return tests
-    
+
     def _generate_sample_value(self, param: Parameter) -> str:
         """Generate sample value for parameter.
         
@@ -405,7 +403,7 @@ result2 = {spec.name}(value)
         """
         if param.default:
             return param.default
-        
+
         if param.type_hint:
             type_lower = param.type_hint.lower()
             if 'str' in type_lower:
@@ -420,7 +418,7 @@ result2 = {spec.name}(value)
                 return "[]"
             elif 'dict' in type_lower:
                 return "{}"
-        
+
         return "None"
 
 
@@ -434,12 +432,12 @@ class DocumentationGenerator:
     - Example generation
     - Usage guide generation
     """
-    
+
     def __init__(self):
         """Initialize the documentation generator."""
         pass
-    
-    def generate_documentation(self, specs: List[Specification]) -> Documentation:
+
+    def generate_documentation(self, specs: list[Specification]) -> Documentation:
         """Generate documentation from specifications.
         
         Args:
@@ -450,33 +448,33 @@ class DocumentationGenerator:
         """
         # Generate title
         title = "API Documentation"
-        
+
         # Generate description
         description = "Automatically generated API documentation."
-        
+
         # Generate sections
         sections = {}
-        
+
         # Functions section
         functions = [s for s in specs if s.type == SpecType.FUNCTION]
         if functions:
             sections["Functions"] = self._generate_functions_section(functions)
-        
+
         # Classes section
         classes = [s for s in specs if s.type == SpecType.CLASS]
         if classes:
             sections["Classes"] = self._generate_classes_section(classes)
-        
+
         # Generate API reference
         api_reference = []
         for spec in specs:
             api_reference.append(self._generate_api_entry(spec))
-        
+
         # Collect examples
         examples = []
         for spec in specs:
             examples.extend(spec.examples)
-        
+
         return Documentation(
             title=title,
             description=description,
@@ -484,8 +482,8 @@ class DocumentationGenerator:
             examples=examples,
             api_reference=api_reference,
         )
-    
-    def _generate_functions_section(self, functions: List[Specification]) -> str:
+
+    def _generate_functions_section(self, functions: list[Specification]) -> str:
         """Generate functions section.
         
         Args:
@@ -495,29 +493,29 @@ class DocumentationGenerator:
             Markdown text
         """
         lines = []
-        
+
         for func in functions:
             lines.append(f"### {func.name}")
             lines.append("")
             lines.append(func.description)
             lines.append("")
-            
+
             if func.parameters:
                 lines.append("**Parameters:**")
                 for param in func.parameters:
                     type_str = f" ({param.type_hint})" if param.type_hint else ""
                     lines.append(f"- `{param.name}`{type_str}: {param.description}")
                 lines.append("")
-            
+
             if func.return_value:
                 lines.append("**Returns:**")
                 type_str = f" ({func.return_value.type_hint})" if func.return_value.type_hint else ""
                 lines.append(f"{type_str}: {func.return_value.description}")
                 lines.append("")
-        
+
         return "\n".join(lines)
-    
-    def _generate_classes_section(self, classes: List[Specification]) -> str:
+
+    def _generate_classes_section(self, classes: list[Specification]) -> str:
         """Generate classes section.
         
         Args:
@@ -527,15 +525,15 @@ class DocumentationGenerator:
             Markdown text
         """
         lines = []
-        
+
         for cls in classes:
             lines.append(f"### {cls.name}")
             lines.append("")
             lines.append(cls.description)
             lines.append("")
-        
+
         return "\n".join(lines)
-    
+
     def _generate_api_entry(self, spec: Specification) -> str:
         """Generate API reference entry.
         
@@ -558,13 +556,13 @@ class AutoSpecKit:
     
     Combines code analysis, test generation, and documentation generation.
     """
-    
+
     def __init__(self):
         """Initialize the auto-spec kit."""
         self.analyzer = CodeAnalyzer()
         self.test_generator = TestGenerator()
         self.doc_generator = DocumentationGenerator()
-    
+
     def generate_spec(self, code: str, spec_type: SpecType = SpecType.FUNCTION) -> Specification:
         """Generate specification from code.
         
@@ -585,8 +583,8 @@ class AutoSpecKit:
                 type=spec_type,
                 description="",
             )
-    
-    def generate_tests(self, spec: Specification) -> List[TestCase]:
+
+    def generate_tests(self, spec: Specification) -> list[TestCase]:
         """Generate tests from specification.
         
         Args:
@@ -596,8 +594,8 @@ class AutoSpecKit:
             List of test cases
         """
         return self.test_generator.generate_tests(spec)
-    
-    def generate_documentation(self, specs: List[Specification]) -> Documentation:
+
+    def generate_documentation(self, specs: list[Specification]) -> Documentation:
         """Generate documentation from specifications.
         
         Args:
@@ -607,8 +605,8 @@ class AutoSpecKit:
             Generated documentation
         """
         return self.doc_generator.generate_documentation(specs)
-    
-    def generate_all(self, code: str) -> tuple[Specification, List[TestCase], Documentation]:
+
+    def generate_all(self, code: str) -> tuple[Specification, list[TestCase], Documentation]:
         """Generate spec, tests, and docs from code.
         
         Args:
@@ -619,13 +617,13 @@ class AutoSpecKit:
         """
         # Generate spec
         spec = self.generate_spec(code)
-        
+
         # Generate tests
         tests = self.generate_tests(spec)
-        
+
         # Generate documentation
         docs = self.generate_documentation([spec])
-        
+
         return spec, tests, docs
 
 

@@ -27,21 +27,14 @@ runs in <100ms with zero side effects.
 from __future__ import annotations
 
 import asyncio
+from collections.abc import AsyncIterator, Awaitable, Callable, Sequence
 from dataclasses import dataclass
 from typing import (
-    Any,
-    AsyncIterator,
-    Awaitable,
-    Callable,
-    Iterable,
-    List,
     Protocol,
-    Sequence,
     runtime_checkable,
 )
 
 from lyra_core.hir.events import emit
-
 
 # ---------------------------------------------------------------------------
 # Public dataclasses
@@ -149,11 +142,11 @@ class Gateway:
         # create them after the loop is running, so they're filled in
         # by ``start()`` instead of ``__init__``.
         self._queue: asyncio.Queue[Inbound] | None = None
-        self._producers: List[asyncio.Task[None]] = []
+        self._producers: list[asyncio.Task[None]] = []
         self._consumer: asyncio.Task[None] | None = None
         self._started: bool = False
         self._stopping: bool = False
-        self._outbound: List[Outbound] = []
+        self._outbound: list[Outbound] = []
 
     # ---- lifecycle ----------------------------------------------------
 
@@ -240,7 +233,7 @@ class Gateway:
     # ---- read --------------------------------------------------------
 
     @property
-    def outbound(self) -> List[Outbound]:
+    def outbound(self) -> list[Outbound]:
         """Read-only view of every outbound the consumer pushed."""
         return list(self._outbound)
 

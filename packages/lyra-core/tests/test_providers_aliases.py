@@ -8,10 +8,9 @@ should be safe (resolution falls back to the input).
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.providers.aliases import (
-    AliasRegistry,
     DEFAULT_ALIASES,
+    AliasRegistry,
     register_alias,
     resolve_alias,
 )

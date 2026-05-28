@@ -5,7 +5,6 @@ import json
 from decimal import Decimal
 
 import pytest
-
 from lyra_cli.observatory import pricing
 
 

@@ -1,7 +1,6 @@
 """Tests for Spectral Guardrails — hallucination detection via token-level anomaly scoring."""
 
 import pytest
-
 from lyra_core.safety.spectral_guardrails import (
     SpectralAlert,
     SpectralConfig,

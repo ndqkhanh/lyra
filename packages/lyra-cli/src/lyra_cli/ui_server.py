@@ -14,7 +14,8 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from typing import Any
 
-from lyra_core.auth.store import get_api_key, list_providers, save as auth_save
+from lyra_core.auth.store import get_api_key, list_providers
+from lyra_core.auth.store import save as auth_save
 from lyra_core.providers.registry import (
     PROVIDER_REGISTRY,
     get_available_providers,
@@ -162,8 +163,8 @@ class LyraUIHandler(BaseHTTPRequestHandler):
                 self.client = LyraClient(repo_root=Path.cwd())
 
             # Pre-check: verify at least one provider has credentials
-            from lyra_core.providers.registry import get_available_providers
             from lyra_core.auth.store import list_providers
+            from lyra_core.providers.registry import get_available_providers
             available = set(get_available_providers()) | set(list_providers())
             if not available:
                 self.send_response(200)

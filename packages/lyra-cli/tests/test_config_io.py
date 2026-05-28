@@ -6,15 +6,12 @@ import os
 import stat
 from pathlib import Path
 
-import pytest
-
 from lyra_cli.config_io import (
     LYRA_CONFIG_VERSION,
     load_settings,
     save_settings,
     write_env_file,
 )
-
 
 # ---------------------------------------------------------------------------
 # load_settings

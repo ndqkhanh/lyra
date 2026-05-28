@@ -1,12 +1,17 @@
 """Eager executor pool for concurrent tool dispatch during streaming."""
 import asyncio
 import time
-from typing import Callable, Any, Optional
+from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any
 
-from lyra_cli.eager_tools.types import ToolSeal
-from lyra_cli.eager_tools.logging import log_tool_dispatched, log_tool_cancelled, log_exception_boundary
+from lyra_cli.eager_tools.logging import (
+    log_exception_boundary,
+    log_tool_cancelled,
+    log_tool_dispatched,
+)
 from lyra_cli.eager_tools.metrics import MetricsCollector
+from lyra_cli.eager_tools.types import ToolSeal
 
 
 @dataclass
@@ -20,7 +25,7 @@ class ToolResult:
 class EagerExecutorPool:
     """Execute tools concurrently during streaming."""
 
-    def __init__(self, tool_registry: dict[str, Callable], metrics: Optional[MetricsCollector] = None):
+    def __init__(self, tool_registry: dict[str, Callable], metrics: MetricsCollector | None = None):
         self.tool_registry = tool_registry
         self.pending_tasks: list[asyncio.Task] = []
         self.results: list[ToolResult] = []

@@ -23,7 +23,6 @@ import json
 import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 from lyra_cli.cli.composition_engine import CompositionEngine
 from lyra_cli.cli.skill_analytics import SkillAnalytics, SkillInvocation
@@ -149,7 +148,7 @@ class SkillManager:
         """List installed skills."""
         return list(self.skills.keys())
 
-    def get_skill(self, name: str) -> Optional[dict]:
+    def get_skill(self, name: str) -> dict | None:
         """Get skill by name."""
         return self.skills.get(name)
 
@@ -278,7 +277,7 @@ class SkillManager:
 
     # Phase 4: Template Methods
     def create_from_template(
-        self, template_name: str, variables: dict[str, str], save_path: Optional[Path] = None
+        self, template_name: str, variables: dict[str, str], save_path: Path | None = None
     ) -> dict:
         """Create a new skill from a template.
 
@@ -331,7 +330,7 @@ class SkillManager:
         return self.config_manager.config.get("global", {})
 
     # Phase 4: Analytics Methods
-    def get_skill_stats(self, skill_name: Optional[str] = None) -> dict:
+    def get_skill_stats(self, skill_name: str | None = None) -> dict:
         """Get usage statistics for skills."""
         stats = self.analytics.get_stats(skill_name)
         return {
@@ -367,7 +366,7 @@ class SkillManager:
         skill_name: str,
         duration_ms: int,
         success: bool,
-        error: Optional[str] = None,
+        error: str | None = None,
         args_length: int = 0,
         output_length: int = 0,
     ):
@@ -408,7 +407,7 @@ class MCPManager:
         with open(self.mcp_config, "w") as f:
             json.dump(self.servers, f, indent=2)
 
-    def add_server(self, name: str, command: str, args: Optional[list[str]] = None, env: Optional[dict] = None):
+    def add_server(self, name: str, command: str, args: list[str] | None = None, env: dict | None = None):
         """Add an MCP server.
 
         Args:
@@ -434,7 +433,7 @@ class MCPManager:
         """List configured MCP servers."""
         return list(self.servers.keys())
 
-    def get_server(self, name: str) -> Optional[dict]:
+    def get_server(self, name: str) -> dict | None:
         """Get MCP server configuration."""
         return self.servers.get(name)
 

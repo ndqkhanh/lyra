@@ -4,10 +4,8 @@ from __future__ import annotations
 import time
 
 import pytest
-
 from lyra_core.transparency.agent_view import AgentViewRecord, AttentionPriority, FleetView
 from lyra_core.transparency.supervisor import FleetSupervisor, SupervisorConfig
-
 
 # ------------------------------------------------------------------ #
 # AgentViewRecord                                                      #

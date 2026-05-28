@@ -5,7 +5,6 @@ from __future__ import annotations
 import time
 
 import pytest
-
 from lyra_core.safety.intent_monitor import (
     ActionRecord,
     BehavioralBaseline,

@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "pytest",
+    "testCommand": "python -m pytest tests/skills/ tests/infrastructure/ tests/test_specialized_skills.py --tb=short -q 2>&1 | tail -40",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -104,6 +104,307 @@
       ]
     }
   },
-  "hotPaths": [],
+  "hotPaths": [
+    {
+      "path": "packages/lyra-cli/docs/architecture/SKILLS-SYSTEM.md",
+      "accessCount": 16,
+      "lastAccessed": 1779905644813,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/autonomy/budget_manager.py",
+      "accessCount": 14,
+      "lastAccessed": 1779911679515,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/autonomy/automation_engine.py",
+      "accessCount": 11,
+      "lastAccessed": 1779911374924,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/autonomy/session_manager.py",
+      "accessCount": 10,
+      "lastAccessed": 1779911676252,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/autonomy/state_machine.py",
+      "accessCount": 9,
+      "lastAccessed": 1779911672943,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/docs/architecture/AGENT-SWARM.md",
+      "accessCount": 8,
+      "lastAccessed": 1779905711100,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/docs/architecture/SDLC-AUTOMATION.md",
+      "accessCount": 8,
+      "lastAccessed": 1779905717704,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/autonomy/hooks_manager.py",
+      "accessCount": 8,
+      "lastAccessed": 1779911677776,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/docs/skills/SKILLS-CATALOG.md",
+      "accessCount": 7,
+      "lastAccessed": 1779905715453,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/swarm/orchestrator.py",
+      "accessCount": 7,
+      "lastAccessed": 1779911683330,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/autonomy/goal_decomposer.py",
+      "accessCount": 5,
+      "lastAccessed": 1779911674559,
+      "type": "file"
+    },
+    {
+      "path": "tests/conftest.py",
+      "accessCount": 5,
+      "lastAccessed": 1779911720709,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/swarm/fleet_manager.py",
+      "accessCount": 4,
+      "lastAccessed": 1779909268697,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/swarm/parallel_executor.py",
+      "accessCount": 4,
+      "lastAccessed": 1779909269144,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/research/source_evaluator.py",
+      "accessCount": 4,
+      "lastAccessed": 1779911700271,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/docs/architecture/CONTINUOUS-LEARNING.md",
+      "accessCount": 3,
+      "lastAccessed": 1779905656060,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/swarm/communication.py",
+      "accessCount": 3,
+      "lastAccessed": 1779909269370,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/__init__.py",
+      "accessCount": 3,
+      "lastAccessed": 1779911302421,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/research/research_engine.py",
+      "accessCount": 3,
+      "lastAccessed": 1779911698140,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/research/knowledge_graph.py",
+      "accessCount": 3,
+      "lastAccessed": 1779911705984,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/research/strategy_selector.py",
+      "accessCount": 3,
+      "lastAccessed": 1779911707956,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/skills/skill_evaluator.py",
+      "accessCount": 2,
+      "lastAccessed": 1779904480294,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/docs/architecture/MODEL-ROUTING.md",
+      "accessCount": 2,
+      "lastAccessed": 1779905563212,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/research/trajectory.py",
+      "accessCount": 2,
+      "lastAccessed": 1779909241465,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/autonomy/__init__.py",
+      "accessCount": 2,
+      "lastAccessed": 1779911671268,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/swarm/__init__.py",
+      "accessCount": 2,
+      "lastAccessed": 1779911681358,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/research/__init__.py",
+      "accessCount": 2,
+      "lastAccessed": 1779911684996,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/skills/skill_curator.py",
+      "accessCount": 1,
+      "lastAccessed": 1779904373043,
+      "type": "file"
+    },
+    {
+      "path": "tests/infrastructure/test_reliability.py",
+      "accessCount": 1,
+      "lastAccessed": 1779905067116,
+      "type": "file"
+    },
+    {
+      "path": "tests/infrastructure/test_health.py",
+      "accessCount": 1,
+      "lastAccessed": 1779905067372,
+      "type": "file"
+    },
+    {
+      "path": "tests/infrastructure/test_profiler.py",
+      "accessCount": 1,
+      "lastAccessed": 1779905067625,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/docs/architecture/AUTONOMY-SYSTEM.md",
+      "accessCount": 1,
+      "lastAccessed": 1779905503946,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/docs/architecture/CONTINUOUS-LOOP.md",
+      "accessCount": 1,
+      "lastAccessed": 1779905600910,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/docs/architecture/MODEL-ROUTING-IMPLEMENTATION.md",
+      "accessCount": 1,
+      "lastAccessed": 1779905675643,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/docs/architecture/GOAL-AUTOMATION.md",
+      "accessCount": 1,
+      "lastAccessed": 1779905695958,
+      "type": "file"
+    },
+    {
+      "path": "packages/lyra-cli/docs/architecture/HOOKS-SYSTEM.md",
+      "accessCount": 1,
+      "lastAccessed": 1779905769567,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/orchestration/__init__.py",
+      "accessCount": 1,
+      "lastAccessed": 1779906653012,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/orchestration/specialist_agents.py",
+      "accessCount": 1,
+      "lastAccessed": 1779906655574,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/memory/graph/__init__.py",
+      "accessCount": 1,
+      "lastAccessed": 1779906658886,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/memory/__init__.py",
+      "accessCount": 1,
+      "lastAccessed": 1779906658937,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_cli/memory/search/__init__.py",
+      "accessCount": 1,
+      "lastAccessed": 1779906662369,
+      "type": "file"
+    },
+    {
+      "path": "tests/memory/test_graph_memory.py",
+      "accessCount": 1,
+      "lastAccessed": 1779906662388,
+      "type": "file"
+    },
+    {
+      "path": "tests/research/__init__.py",
+      "accessCount": 1,
+      "lastAccessed": 1779906770842,
+      "type": "file"
+    },
+    {
+      "path": "tests/research/test_trajectory.py",
+      "accessCount": 1,
+      "lastAccessed": 1779906771078,
+      "type": "file"
+    },
+    {
+      "path": "tests/autonomy/__init__.py",
+      "accessCount": 1,
+      "lastAccessed": 1779906778204,
+      "type": "file"
+    },
+    {
+      "path": "tests/autonomy/test_state_machine.py",
+      "accessCount": 1,
+      "lastAccessed": 1779906778428,
+      "type": "file"
+    },
+    {
+      "path": "tests/autonomy/test_goal_decomposer.py",
+      "accessCount": 1,
+      "lastAccessed": 1779906778654,
+      "type": "file"
+    },
+    {
+      "path": "tests/autonomy/test_session_manager.py",
+      "accessCount": 1,
+      "lastAccessed": 1779906778882,
+      "type": "file"
+    },
+    {
+      "path": "tests/autonomy/test_automation_engine.py",
+      "accessCount": 1,
+      "lastAccessed": 1779906779108,
+      "type": "file"
+    },
+    {
+      "path": "tests/autonomy/test_hooks_manager.py",
+      "accessCount": 1,
+      "lastAccessed": 1779906779335,
+      "type": "file"
+    }
+  ],
   "userDirectives": []
 }

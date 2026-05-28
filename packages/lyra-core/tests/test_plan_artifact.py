@@ -32,8 +32,6 @@ Contract from docs/blocks/02-plan-mode.md:
 from __future__ import annotations
 
 import pytest
-from pydantic import ValidationError
-
 from lyra_core.plan.artifact import (
     FeatureItem,
     Plan,
@@ -41,6 +39,7 @@ from lyra_core.plan.artifact import (
     load_plan,
     render_plan,
 )
+from pydantic import ValidationError
 
 
 def _sample_plan() -> Plan:

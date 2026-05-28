@@ -10,7 +10,6 @@ ratio is closer to 3.5).
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.providers.preflight import (
     CONTEXT_WINDOW,
     ContextWindowExceeded,

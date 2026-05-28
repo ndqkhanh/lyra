@@ -19,9 +19,9 @@ same row + prev. No timestamps, randomness, or external state.
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from typing import Any, Iterable, Literal, Mapping
-
+from typing import Any, Literal
 
 TaskCategory = Literal[
     "coding", "debugging", "feature", "refactor", "test",

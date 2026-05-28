@@ -16,16 +16,12 @@ from __future__ import annotations
 
 import difflib
 import hashlib
-import json
-import os
-import subprocess
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from ..commands.registry import CommandResult
-
 
 # ── Snapshot model ─────────────────────────────────────────────────────
 
@@ -84,7 +80,7 @@ _next_id: int = 1
 _MAX_UNDO = 50
 
 
-def _snapshot_path(path: str) -> Optional[FileSnapshot]:
+def _snapshot_path(path: str) -> FileSnapshot | None:
     """Take a snapshot of a file's current state."""
     p = Path(path)
     if not p.exists():
@@ -117,7 +113,7 @@ def record_change(description: str, paths: list[str]) -> int:
     return entry.id
 
 
-def get_undo_entry(entry_id: Optional[int] = None) -> Optional[UndoEntry]:
+def get_undo_entry(entry_id: int | None = None) -> UndoEntry | None:
     """Get the most recent undo entry, or one by id."""
     if entry_id is not None:
         for e in reversed(_undo_stack):

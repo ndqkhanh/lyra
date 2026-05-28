@@ -25,7 +25,6 @@ Invariants tested:
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.subagent.registry import (
     SubagentRecord,
     SubagentRegistry,

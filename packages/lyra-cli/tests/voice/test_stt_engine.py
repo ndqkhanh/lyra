@@ -6,11 +6,10 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from lyra_cli.voice.stt_engine import (
+    SpeechRecognitionBackend,
     STTError,
     STTResult,
-    SpeechRecognitionBackend,
     WhisperBackend,
     detect_audio_format,
     transcribe_audio,

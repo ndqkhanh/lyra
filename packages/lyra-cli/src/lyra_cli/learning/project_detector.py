@@ -1,16 +1,15 @@
 """Project detector - Detects project context"""
 
-from pathlib import Path
-from typing import Optional
-import subprocess
 import hashlib
+import subprocess
+from pathlib import Path
 
 
 class ProjectDetector:
     """Detects project ID from git repository"""
 
     @staticmethod
-    def detect_project_id(cwd: Optional[Path] = None) -> Optional[str]:
+    def detect_project_id(cwd: Path | None = None) -> str | None:
         """Detect project ID from git remote or path"""
         if cwd is None:
             cwd = Path.cwd()
@@ -51,7 +50,7 @@ class ProjectDetector:
         return None
 
     @staticmethod
-    def get_project_name(cwd: Optional[Path] = None) -> Optional[str]:
+    def get_project_name(cwd: Path | None = None) -> str | None:
         """Get human-readable project name"""
         if cwd is None:
             cwd = Path.cwd()
@@ -86,7 +85,6 @@ class EvolutionPipeline:
 
     def evolve_to_skill(self, instinct, skill_name: str) -> Path:
         """Evolve instinct into a skill"""
-        from lyra_cli.learning.instinct_extractor import Instinct
 
         skill_file = self.evolved_dir / "skills" / f"{skill_name}.md"
         skill_file.parent.mkdir(parents=True, exist_ok=True)
@@ -177,7 +175,7 @@ def execute():
 
 
 # Global evolution pipeline
-_evolution_pipeline: Optional[EvolutionPipeline] = None
+_evolution_pipeline: EvolutionPipeline | None = None
 
 
 def get_evolution_pipeline() -> EvolutionPipeline:

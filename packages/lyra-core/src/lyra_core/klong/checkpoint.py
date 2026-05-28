@@ -19,11 +19,10 @@ instantiate the store.
 from __future__ import annotations
 
 import json
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Callable, Mapping
-
 
 __all__ = [
     "CURRENT_SCHEMA_VERSION",
@@ -67,7 +66,7 @@ class KLongCheckpoint:
         )
 
     @classmethod
-    def from_json(cls, raw: str) -> "KLongCheckpoint":
+    def from_json(cls, raw: str) -> KLongCheckpoint:
         try:
             data = json.loads(raw)
         except json.JSONDecodeError as exc:

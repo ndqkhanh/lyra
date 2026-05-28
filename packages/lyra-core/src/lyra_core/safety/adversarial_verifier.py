@@ -23,14 +23,13 @@ Target: 90%+ accuracy for catching single-model errors.
 from __future__ import annotations
 
 import asyncio
-import hashlib
 import time
 import uuid
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Callable, Protocol, Sequence
+from typing import Protocol
 
-from .approval_gate import GateDecision, ReasoningFlag, RiskClassification
+from .approval_gate import GateDecision, RiskClassification
 
 
 class AdversarialVerdictType(str, Enum):
@@ -369,7 +368,7 @@ def _aggregate_votes(
         final_confidence = 0.5
 
     # Generate reasoning summary
-    reasoning_lines = [f"Adversarial verification with 3 models:"]
+    reasoning_lines = ["Adversarial verification with 3 models:"]
     for i, vote in enumerate(votes, 1):
         reasoning_lines.append(
             f"  Model {i} ({vote.model_family.value}): {vote.verdict.value} "

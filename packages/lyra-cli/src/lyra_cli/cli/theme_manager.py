@@ -5,10 +5,8 @@ Implements Tokyo Night and other themes with Rich integration.
 
 from __future__ import annotations
 
-from typing import Dict
-from rich.theme import Theme
 from rich.console import Console
-
+from rich.theme import Theme
 
 # Tokyo Night Theme (Most popular 2026)
 TOKYO_NIGHT = {

@@ -7,27 +7,25 @@ Implements:
 - Closed-loop control with verification
 """
 
+from lyra_cli.orchestration.closed_loop import (
+    ClosedLoopController,
+    ClosedLoopExecution,
+    LoopIteration,
+    SimpleVerifier,
+    VerificationResult,
+)
+from lyra_cli.orchestration.model_router import (
+    ModelRouter,
+    ModelTier,
+    RoutingDecision,
+    TaskComplexity,
+)
 from lyra_cli.orchestration.specialist_agents import (
-    AgentRole,
     AgentCapability,
+    AgentOrchestrator,
+    AgentRole,
     AgentTask,
     SpecialistAgent,
-    AgentOrchestrator,
-)
-
-from lyra_cli.orchestration.model_router import (
-    ModelTier,
-    TaskComplexity,
-    RoutingDecision,
-    ModelRouter,
-)
-
-from lyra_cli.orchestration.closed_loop import (
-    VerificationResult,
-    LoopIteration,
-    ClosedLoopExecution,
-    ClosedLoopController,
-    SimpleVerifier,
 )
 
 __all__ = [

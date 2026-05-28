@@ -1,6 +1,6 @@
 """Agent selector - Proactive agent selection"""
 
-from typing import Optional, List
+
 from .agent_manager import AgentDefinition
 from .agent_registry import get_registry
 
@@ -11,7 +11,7 @@ class AgentSelector:
     def __init__(self):
         self.registry = get_registry()
 
-    def select_agent(self, task: str, context: dict = None) -> Optional[AgentDefinition]:
+    def select_agent(self, task: str, context: dict = None) -> AgentDefinition | None:
         """Select best agent for task"""
         context = context or {}
 
@@ -52,7 +52,7 @@ class AgentSelector:
         # No specific agent needed
         return None
 
-    def suggest_agents(self, task: str) -> List[AgentDefinition]:
+    def suggest_agents(self, task: str) -> list[AgentDefinition]:
         """Suggest multiple agents for task"""
         suggestions = []
 

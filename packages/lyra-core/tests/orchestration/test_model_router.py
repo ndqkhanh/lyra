@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.orchestration.model_router import (
     ModelRouter,
     ModelSlot,

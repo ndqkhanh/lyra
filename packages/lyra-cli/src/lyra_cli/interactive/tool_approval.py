@@ -26,7 +26,6 @@ from __future__ import annotations
 
 from typing import Literal
 
-
 PermissionMode = Literal["normal", "strict", "yolo"]
 Verdict = Literal["allow", "deny", "prompt"]
 

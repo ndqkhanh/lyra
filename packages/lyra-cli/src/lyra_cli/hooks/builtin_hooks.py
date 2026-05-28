@@ -1,8 +1,9 @@
 """Built-in hooks - ECC-inspired automation"""
 
-from .hook_manager import HookManager, HookType, HookContext
-from .hook_registry import get_registry
 import re
+
+from .hook_manager import HookContext, HookManager, HookType
+from .hook_registry import get_registry
 
 
 def tmux_reminder_hook(context: HookContext) -> bool:

@@ -13,9 +13,8 @@ from __future__ import annotations
 
 import os
 import time
-from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from textual.app import ComposeResult
 from textual.binding import Binding
@@ -148,7 +147,7 @@ def cmd_auth(session: Any, args: str) -> CommandResult:
         lines = [
             f"[bold]Login: {name}[/]",
             f"  1. Visit: [cyan]{info['url']}[/]",
-            f"  2. Create/grab an API key",
+            "  2. Create/grab an API key",
             f"  3. Set it: [accent]/keys set {name} <your-key>[/]",
         ]
         return CommandResult(

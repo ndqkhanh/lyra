@@ -2,10 +2,9 @@
 
 import pytest
 from lyra_cli.skills.skill_evaluator import (
+    MetricType,
     SkillEvaluator,
     SkillExecution,
-    MetricType,
-    QualityDimension,
 )
 
 

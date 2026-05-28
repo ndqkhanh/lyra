@@ -14,7 +14,7 @@ import asyncio
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import uuid4
 
 
@@ -54,9 +54,9 @@ class AgentInstance:
     current_load: float = 0.0
     tasks_completed: int = 0
     tasks_failed: int = 0
-    last_heartbeat: Optional[str] = None
-    spawned_at: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    last_heartbeat: str | None = None
+    spawned_at: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def get_success_rate(self) -> float:
         """Calculate the agent's task success rate."""
@@ -91,14 +91,14 @@ class FleetManager:
     - Auto-scaling based on fleet load metrics
     """
 
-    def __init__(self, config: Optional[FleetConfig] = None) -> None:
+    def __init__(self, config: FleetConfig | None = None) -> None:
         self.config = config or FleetConfig()
-        self.agents: Dict[str, AgentInstance] = {}
+        self.agents: dict[str, AgentInstance] = {}
         self._lock: asyncio.Lock = asyncio.Lock()
         self._running: bool = False
-        self._health_task: Optional[asyncio.Task] = None
-        self._scale_task: Optional[asyncio.Task] = None
-        self._stats: Dict[str, int] = {
+        self._health_task: asyncio.Task | None = None
+        self._scale_task: asyncio.Task | None = None
+        self._stats: dict[str, int] = {
             "agents_spawned": 0,
             "agents_terminated": 0,
             "health_checks_passed": 0,
@@ -111,8 +111,8 @@ class FleetManager:
         self,
         name: str,
         agent_type: str = "generic",
-        resources: Optional[ResourceProfile] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        resources: ResourceProfile | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> AgentInstance:
         """
         Spawn a new agent in the fleet.
@@ -163,12 +163,12 @@ class FleetManager:
             self._stats["agents_terminated"] += 1
         return True
 
-    async def get_agent(self, agent_id: str) -> Optional[AgentInstance]:
+    async def get_agent(self, agent_id: str) -> AgentInstance | None:
         """Get an agent by ID."""
         async with self._lock:
             return self.agents.get(agent_id)
 
-    async def get_idle_agents(self) -> List[AgentInstance]:
+    async def get_idle_agents(self) -> list[AgentInstance]:
         """Get all agents that are currently idle."""
         async with self._lock:
             return [
@@ -314,9 +314,9 @@ class FleetManager:
             async with self._lock:
                 self._stats["scale_downs"] += scale_count
 
-    def get_fleet_summary(self) -> Dict[str, Any]:
+    def get_fleet_summary(self) -> dict[str, Any]:
         """Get a summary of the fleet state."""
-        status_counts: Dict[str, int] = {}
+        status_counts: dict[str, int] = {}
         total_load = 0.0
         for agent in self.agents.values():
             status_counts[agent.status.name] = status_counts.get(agent.status.name, 0) + 1
@@ -331,6 +331,6 @@ class FleetManager:
             "max_agents": self.config.max_agents,
         }
 
-    def get_stats(self) -> Dict[str, int]:
+    def get_stats(self) -> dict[str, int]:
         """Get fleet manager statistics."""
         return dict(self._stats)

@@ -31,7 +31,7 @@ from __future__ import annotations
 import enum
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class ContextLayer(str, enum.Enum):
@@ -122,14 +122,14 @@ class ContextEntry:
     timestamp: datetime = field(default_factory=datetime.now)
     token_count: int = field(init=False)
     priority: int = 5
-    ttl_seconds: Optional[int] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    ttl_seconds: int | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         """Compute token count after initialization."""
         self.token_count = _estimate_tokens(self.content)
 
-    def is_expired(self, now: Optional[datetime] = None) -> bool:
+    def is_expired(self, now: datetime | None = None) -> bool:
         """Check if this entry has expired based on TTL."""
         if self.ttl_seconds is None:
             return False
@@ -138,7 +138,7 @@ class ContextEntry:
         expiry = self.timestamp + timedelta(seconds=self.ttl_seconds)
         return now >= expiry
 
-    def age_seconds(self, now: Optional[datetime] = None) -> float:
+    def age_seconds(self, now: datetime | None = None) -> float:
         """Get age of this entry in seconds."""
         if now is None:
             now = datetime.now()
@@ -175,9 +175,9 @@ class LayeredContextManager:
     """
 
     max_tokens: int = 100_000
-    layers: Dict[ContextLayer, List[ContextEntry]] = field(default_factory=dict)
+    layers: dict[ContextLayer, list[ContextEntry]] = field(default_factory=dict)
     current_tokens: int = field(default=0, init=False)
-    audit_trail: Optional[Any] = None  # ContextAuditTrail, avoid circular import
+    audit_trail: Any | None = None  # ContextAuditTrail, avoid circular import
 
     def __post_init__(self) -> None:
         """Initialize empty lists for each layer."""
@@ -190,8 +190,8 @@ class LayeredContextManager:
         content: str,
         source: str,
         priority: int = 5,
-        ttl_seconds: Optional[int] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        ttl_seconds: int | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Add a new entry to the specified layer.
 
@@ -225,7 +225,7 @@ class LayeredContextManager:
         if self.audit_trail is not None:
             self.audit_trail.record_add(entry)
 
-    def get_layer(self, layer: ContextLayer) -> List[ContextEntry]:
+    def get_layer(self, layer: ContextLayer) -> list[ContextEntry]:
         """Get all entries in a specific layer (including expired ones).
 
         Args:
@@ -237,7 +237,7 @@ class LayeredContextManager:
         return list(self.layers[layer])
 
     def assemble(
-        self, layers: Optional[List[ContextLayer]] = None
+        self, layers: list[ContextLayer] | None = None
     ) -> str:
         """Assemble context from selected layers into a single string.
 
@@ -256,7 +256,7 @@ class LayeredContextManager:
         # Enforce budget before assembly
         self.enforce_budget()
 
-        parts: List[str] = []
+        parts: list[str] = []
         for layer in _LAYER_ORDER:
             if layer not in layers:
                 continue
@@ -285,7 +285,7 @@ class LayeredContextManager:
         """
         now = datetime.now()
         removed = 0
-        pruned_entries: List[ContextEntry] = []
+        pruned_entries: list[ContextEntry] = []
 
         for layer in ContextLayer:
             entries = self.layers[layer]
@@ -309,7 +309,7 @@ class LayeredContextManager:
 
         return removed
 
-    def get_budget_usage(self) -> Dict[ContextLayer, int]:
+    def get_budget_usage(self) -> dict[ContextLayer, int]:
         """Get current token usage per layer.
 
         Returns:
@@ -329,7 +329,7 @@ class LayeredContextManager:
         2. Total budget enforcement (if still over)
         """
         before_tokens = self.current_tokens
-        all_pruned: List[ContextEntry] = []
+        all_pruned: list[ContextEntry] = []
 
         # Phase 1: Enforce per-layer budgets
         for layer in ContextLayer:
@@ -350,7 +350,7 @@ class LayeredContextManager:
             )
 
             # Keep entries until budget is reached
-            kept: List[ContextEntry] = []
+            kept: list[ContextEntry] = []
             used = 0
 
             for entry in sorted_entries:
@@ -374,7 +374,7 @@ class LayeredContextManager:
             return
 
         # Collect all entries with their layer
-        all_entries: List[tuple[ContextLayer, ContextEntry]] = []
+        all_entries: list[tuple[ContextLayer, ContextEntry]] = []
         for layer in ContextLayer:
             for entry in self.layers[layer]:
                 all_entries.append((layer, entry))
@@ -387,7 +387,7 @@ class LayeredContextManager:
         )
 
         # Rebuild layers keeping only what fits in total budget
-        new_layers: Dict[ContextLayer, List[ContextEntry]] = {
+        new_layers: dict[ContextLayer, list[ContextEntry]] = {
             layer: [] for layer in ContextLayer
         }
         used = 0
@@ -417,7 +417,7 @@ class LayeredContextManager:
         self.layers[layer] = []
         self._recompute_tokens()
 
-    def get_provenance(self, content_snippet: str) -> List[ContextEntry]:
+    def get_provenance(self, content_snippet: str) -> list[ContextEntry]:
         """Find entries containing a specific content snippet.
 
         Useful for debugging: "Where did this context come from?"
@@ -428,7 +428,7 @@ class LayeredContextManager:
         Returns:
             List of entries containing the snippet
         """
-        results: List[ContextEntry] = []
+        results: list[ContextEntry] = []
 
         for layer in ContextLayer:
             for entry in self.layers[layer]:
@@ -444,7 +444,7 @@ class LayeredContextManager:
             for entries in self.layers.values()
         )
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get statistics about the context manager.
 
         Returns:

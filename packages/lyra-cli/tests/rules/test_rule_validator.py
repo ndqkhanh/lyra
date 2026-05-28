@@ -1,10 +1,10 @@
 """Tests for RuleValidator."""
 
+
 import pytest
-from pathlib import Path
-from lyra_cli.core.rule_validator import RuleValidator, ValidationResult, RuleViolation
-from lyra_cli.core.rule_registry import RuleRegistry
 from lyra_cli.core.rule_metadata import RuleCategory
+from lyra_cli.core.rule_registry import RuleRegistry
+from lyra_cli.core.rule_validator import RuleValidator, ValidationResult
 
 
 @pytest.fixture

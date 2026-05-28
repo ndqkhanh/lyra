@@ -33,7 +33,8 @@ from __future__ import annotations
 
 import enum
 from collections import defaultdict
-from typing import Any, Callable, Dict, List
+from collections.abc import Callable
+from typing import Any
 
 
 class LifecycleEvent(str, enum.Enum):
@@ -65,14 +66,14 @@ class LifecycleEvent(str, enum.Enum):
     BUNDLE_ATTEST = "bundle.attest"
 
 
-Subscriber = Callable[[Dict[str, Any]], None]
+Subscriber = Callable[[dict[str, Any]], None]
 
 
 class LifecycleBus:
     """Per-process pub/sub for :class:`LifecycleEvent` notifications."""
 
     def __init__(self) -> None:
-        self._subs: Dict[LifecycleEvent, List[Subscriber]] = defaultdict(list)
+        self._subs: dict[LifecycleEvent, list[Subscriber]] = defaultdict(list)
 
     # ---- subscription -----------------------------------------------
 
@@ -91,7 +92,7 @@ class LifecycleBus:
 
     # ---- emission ----------------------------------------------------
 
-    def emit(self, event: LifecycleEvent, payload: Dict[str, Any] | None = None) -> None:
+    def emit(self, event: LifecycleEvent, payload: dict[str, Any] | None = None) -> None:
         """Best-effort broadcast; subscriber errors are swallowed.
 
         We snapshot the subscriber list before iterating so a

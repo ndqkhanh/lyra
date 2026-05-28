@@ -2,18 +2,16 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.context.cache_telemetry import (
+    CacheSessionSummary,
     CacheTelemetry,
     CacheTurnRecord,
-    CacheSessionSummary,
 )
 from lyra_core.context.prefix_stability import (
     PrefixStabilityChecker,
     StabilityIssue,
     StabilityReport,
 )
-
 
 # ---------------------------------------------------------------------------
 # CacheTurnRecord

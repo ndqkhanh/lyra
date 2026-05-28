@@ -5,11 +5,10 @@ import json
 from pathlib import Path
 
 import pytest
-
 from lyra_core.transparency.session_reader import (
-    read_session_tokens,
-    read_last_tool,
     extract_session_id,
+    read_last_tool,
+    read_session_tokens,
 )
 
 

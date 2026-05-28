@@ -48,7 +48,7 @@ class DataScientistSkill:
             elif null_pct > 5:
                 issues.append(DataIssue(name, DataQuality.WARNING,
                     f"{null_pct:.0f}% null values — imputation needed.",
-                    f"Impute nulls with mean/median/mode or use forward-fill."))
+                    "Impute nulls with mean/median/mode or use forward-fill."))
 
             if dtype == "object" and col.get("unique_values", 0) > row_count * 0.9:
                 issues.append(DataIssue(name, DataQuality.WARNING,

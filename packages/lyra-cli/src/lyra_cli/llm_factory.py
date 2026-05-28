@@ -53,13 +53,11 @@ from __future__ import annotations
 import hashlib
 import os
 from datetime import datetime, timezone
-from typing import Optional
-
-from lyra_harness_core.models import LLMProvider, MockLLM
 
 from lyra_core.providers.aliases import resolve_alias
 from lyra_core.providers.auth_hints import missing_credential_hint
 from lyra_core.providers.dotenv import dotenv_value
+from lyra_harness_core.models import LLMProvider, MockLLM
 
 from .providers.anthropic import LyraAnthropicLLM as AnthropicLLM
 from .providers.bedrock import (
@@ -89,7 +87,6 @@ from .providers.vertex import (
     VertexUnavailable,
     vertex_available,
 )
-
 
 _DOTENV_KEYS = (
     "ANTHROPIC_API_KEY",
@@ -294,6 +291,8 @@ def _route_kind_via_alias(kind: str) -> str:
         return kind
     from lyra_core.providers.aliases import (
         provider_key_for as _provider_key_for,
+    )
+    from lyra_core.providers.aliases import (
         resolve_alias as _resolve_alias,
     )
 
@@ -456,7 +455,7 @@ def _anthropic_available() -> bool:
     return True
 
 
-def _build_mock(task_hint: Optional[str], session_id: Optional[str]) -> MockLLM:
+def _build_mock(task_hint: str | None, session_id: str | None) -> MockLLM:
     sid = session_id or "01HMOCK0000000000000000000"
     task = task_hint or ""
     return MockLLM(scripted_outputs=[_canned_plan_text(task, session_id=sid)])
@@ -506,7 +505,7 @@ def known_llm_names() -> list[str]:
     return list(_ALWAYS_KNOWN) + preset_names + list(custom)
 
 
-def _maybe_build_custom_provider(kind: str) -> Optional[LLMProvider]:
+def _maybe_build_custom_provider(kind: str) -> LLMProvider | None:
     """Try to satisfy ``--llm <kind>`` from the custom-provider registry.
 
     Returns ``None`` when *kind* isn't a registered slug; the cascade
@@ -543,8 +542,8 @@ def _maybe_build_custom_provider(kind: str) -> Optional[LLMProvider]:
 def build_llm(
     kind: str,
     *,
-    task_hint: Optional[str] = None,
-    session_id: Optional[str] = None,
+    task_hint: str | None = None,
+    session_id: str | None = None,
 ) -> LLMProvider:
     """Resolve the CLI's ``--llm`` choice into an :class:`LLMProvider`.
 

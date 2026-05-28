@@ -21,7 +21,6 @@ from __future__ import annotations
 import io
 import json
 import tarfile
-from pathlib import Path
 
 import pytest
 
@@ -77,7 +76,6 @@ def test_v311_full_lifecycle(tmp_path, monkeypatch):
         MarketplaceFetcher,
         MarketplaceKey,
         MarketplaceRegistry,
-        SourceBundle,
         global_index,
         global_installed_registry,
         list_exporters,

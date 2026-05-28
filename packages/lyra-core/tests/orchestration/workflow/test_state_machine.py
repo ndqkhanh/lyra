@@ -1,7 +1,6 @@
 """Tests for workflow state machine."""
 
 import pytest
-
 from lyra_core.orchestration.workflow.models import SDLCPhase
 from lyra_core.orchestration.workflow.state_machine import WorkflowStateMachine
 

@@ -21,8 +21,7 @@ with ``id`` when emitting via the agent loop.
 """
 from __future__ import annotations
 
-from collections.abc import Iterable
-from typing import Callable
+from collections.abc import Callable, Iterable
 
 SPAN_ID_KEYS = ("id", "tool_call_id", "span_id")
 TOOL_ROLES = frozenset({"tool", "function", "tool_result"})

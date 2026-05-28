@@ -29,17 +29,18 @@ Usage:
 
 from __future__ import annotations
 
+import json
+import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
-import json
-import time
+from typing import Any, Dict, List, Optional
 
 
 class BenchmarkType(Enum):
     """Type of benchmark."""
-    
+
     MEMORY = "memory"  # Memory system benchmarks
     TASK = "task"  # Task completion benchmarks
     ABLATION = "ablation"  # Component ablation studies
@@ -48,7 +49,7 @@ class BenchmarkType(Enum):
 
 class BenchmarkStatus(Enum):
     """Benchmark execution status."""
-    
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETE = "complete"
@@ -59,32 +60,32 @@ class BenchmarkStatus(Enum):
 @dataclass
 class BenchmarkConfig:
     """Configuration for a benchmark run."""
-    
+
     name: str
     benchmark_type: BenchmarkType
     enabled: bool = True
     timeout_seconds: int = 3600
     max_retries: int = 3
-    baseline_score: Optional[float] = None
-    target_score: Optional[float] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    baseline_score: float | None = None
+    target_score: float | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class BenchmarkResult:
     """Result of a single benchmark run."""
-    
+
     config: BenchmarkConfig
     status: BenchmarkStatus
-    score: Optional[float] = None
-    baseline_score: Optional[float] = None
-    target_score: Optional[float] = None
-    improvement: Optional[float] = None
+    score: float | None = None
+    baseline_score: float | None = None
+    target_score: float | None = None
+    improvement: float | None = None
     duration_seconds: float = 0.0
-    error_message: Optional[str] = None
-    details: Dict[str, Any] = field(default_factory=dict)
+    error_message: str | None = None
+    details: dict[str, Any] = field(default_factory=dict)
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
-    
+
     @property
     def passed(self) -> bool:
         """Check if benchmark passed target."""
@@ -95,9 +96,9 @@ class BenchmarkResult:
         if target is None or self.score is None:
             return True  # No target, consider pass
         return self.score >= target
-    
+
     @property
-    def improvement_pct(self) -> Optional[float]:
+    def improvement_pct(self) -> float | None:
         """Calculate improvement percentage over baseline."""
         if self.baseline_score is None or self.score is None:
             return None
@@ -109,45 +110,45 @@ class BenchmarkResult:
 @dataclass
 class BenchmarkReport:
     """Aggregate report of all benchmark runs."""
-    
-    results: List[BenchmarkResult]
+
+    results: list[BenchmarkResult]
     total_duration_seconds: float
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
-    
+
     @property
     def total(self) -> int:
         return len(self.results)
-    
+
     @property
     def passed(self) -> int:
         return sum(1 for r in self.results if r.passed)
-    
+
     @property
     def failed(self) -> int:
         return sum(1 for r in self.results if r.status == BenchmarkStatus.FAILED)
-    
+
     @property
     def skipped(self) -> int:
         return sum(1 for r in self.results if r.status == BenchmarkStatus.SKIPPED)
-    
+
     @property
     def pass_rate(self) -> float:
         completed = [r for r in self.results if r.status == BenchmarkStatus.COMPLETE]
         if not completed:
             return 0.0
         return sum(1 for r in completed if r.passed) / len(completed)
-    
-    def by_type(self) -> Dict[BenchmarkType, List[BenchmarkResult]]:
+
+    def by_type(self) -> dict[BenchmarkType, list[BenchmarkResult]]:
         """Group results by benchmark type."""
-        grouped: Dict[BenchmarkType, List[BenchmarkResult]] = {}
+        grouped: dict[BenchmarkType, list[BenchmarkResult]] = {}
         for result in self.results:
             benchmark_type = result.config.benchmark_type
             if benchmark_type not in grouped:
                 grouped[benchmark_type] = []
             grouped[benchmark_type].append(result)
         return grouped
-    
-    def to_dict(self) -> Dict[str, Any]:
+
+    def to_dict(self) -> dict[str, Any]:
         """Export report as dictionary."""
         return {
             "summary": {
@@ -193,16 +194,16 @@ class BenchmarkRunner:
     Coordinates execution of all benchmarks, collects results,
     and generates comprehensive reports.
     """
-    
+
     def __init__(self):
         """Initialize the benchmark runner."""
         self.configs = self._create_benchmark_configs()
-        self.results: List[BenchmarkResult] = []
-    
-    def _create_benchmark_configs(self) -> List[BenchmarkConfig]:
+        self.results: list[BenchmarkResult] = []
+
+    def _create_benchmark_configs(self) -> list[BenchmarkConfig]:
         """Create all benchmark configurations."""
         configs = []
-        
+
         # Memory Benchmarks
         configs.extend([
             BenchmarkConfig(
@@ -248,7 +249,7 @@ class BenchmarkRunner:
                 metadata={"metric": "accuracy"},
             ),
         ])
-        
+
         # Task Benchmarks
         configs.extend([
             BenchmarkConfig(
@@ -280,7 +281,7 @@ class BenchmarkRunner:
                 metadata={"frontier": 0.50},
             ),
         ])
-        
+
         # Ablation Studies
         configs.extend([
             BenchmarkConfig(
@@ -333,13 +334,13 @@ class BenchmarkRunner:
                 metadata={"component": "multimodal_support"},
             ),
         ])
-        
+
         return configs
-    
+
     def run_all(self) -> BenchmarkReport:
         """Run all enabled benchmarks."""
         start_time = time.time()
-        
+
         for config in self.configs:
             if not config.enabled:
                 result = BenchmarkResult(
@@ -348,17 +349,17 @@ class BenchmarkRunner:
                 )
                 self.results.append(result)
                 continue
-            
+
             result = self.run_benchmark(config)
             self.results.append(result)
-        
+
         total_duration = time.time() - start_time
-        
+
         return BenchmarkReport(
             results=self.results,
             total_duration_seconds=total_duration,
         )
-    
+
     def run_benchmark(self, config: BenchmarkConfig) -> BenchmarkResult:
         """Run a single benchmark.
         
@@ -369,7 +370,7 @@ class BenchmarkRunner:
             Benchmark result
         """
         start_time = time.time()
-        
+
         try:
             # Dispatch to appropriate runner
             if config.benchmark_type == BenchmarkType.MEMORY:
@@ -380,9 +381,9 @@ class BenchmarkRunner:
                 score, details = self._run_ablation_study(config)
             else:
                 score, details = self._run_performance_benchmark(config)
-            
+
             duration = time.time() - start_time
-            
+
             return BenchmarkResult(
                 config=config,
                 status=BenchmarkStatus.COMPLETE,
@@ -392,21 +393,21 @@ class BenchmarkRunner:
                 duration_seconds=duration,
                 details=details,
             )
-        
+
         except Exception as e:
             duration = time.time() - start_time
-            
+
             return BenchmarkResult(
                 config=config,
                 status=BenchmarkStatus.FAILED,
                 duration_seconds=duration,
                 error_message=str(e),
             )
-    
+
     def _run_memory_benchmark(
         self,
         config: BenchmarkConfig,
-    ) -> tuple[float, Dict[str, Any]]:
+    ) -> tuple[float, dict[str, Any]]:
         """Run a memory benchmark.
         
         Args:
@@ -417,7 +418,7 @@ class BenchmarkRunner:
         """
         # Placeholder implementation
         # In production, this would run actual memory benchmarks
-        
+
         if "retrieval" in config.name:
             score = 0.96  # Simulated score
             details = {
@@ -459,13 +460,13 @@ class BenchmarkRunner:
                 "accuracy": 0.91,
                 "context_utilization": 0.93,
             }
-        
+
         return score, details
-    
+
     def _run_task_benchmark(
         self,
         config: BenchmarkConfig,
-    ) -> tuple[float, Dict[str, Any]]:
+    ) -> tuple[float, dict[str, Any]]:
         """Run a task completion benchmark.
         
         Args:
@@ -475,7 +476,7 @@ class BenchmarkRunner:
             (score, details)
         """
         # Placeholder implementation
-        
+
         if "gaia" in config.name:
             score = 0.82
             details = {
@@ -505,13 +506,13 @@ class BenchmarkRunner:
                 "avg_actions": 12.3,
                 "avg_time_seconds": 90,
             }
-        
+
         return score, details
-    
+
     def _run_ablation_study(
         self,
         config: BenchmarkConfig,
-    ) -> tuple[float, Dict[str, Any]]:
+    ) -> tuple[float, dict[str, Any]]:
         """Run an ablation study.
         
         Args:
@@ -523,9 +524,9 @@ class BenchmarkRunner:
         # Placeholder implementation
         # Score represents performance with component removed
         # Should be lower than baseline (1.0) to show component value
-        
+
         component = config.metadata.get("component", "unknown")
-        
+
         # Simulate component contribution
         contributions = {
             "graph_memory": 0.12,  # 12% contribution
@@ -536,10 +537,10 @@ class BenchmarkRunner:
             "multi_agent_orchestration": 0.09,
             "multimodal_support": 0.11,
         }
-        
+
         contribution = contributions.get(component, 0.05)
         score = 1.0 - contribution  # Performance without component
-        
+
         details = {
             "component": component,
             "contribution_pct": contribution * 100,
@@ -547,13 +548,13 @@ class BenchmarkRunner:
             "ablated_score": score,
             "degradation_pct": contribution * 100,
         }
-        
+
         return score, details
-    
+
     def _run_performance_benchmark(
         self,
         config: BenchmarkConfig,
-    ) -> tuple[float, Dict[str, Any]]:
+    ) -> tuple[float, dict[str, Any]]:
         """Run a performance benchmark.
         
         Args:
@@ -571,9 +572,9 @@ class BenchmarkRunner:
             "throughput_qps": 25,
             "cost_per_query_usd": 0.05,
         }
-        
+
         return score, details
-    
+
     def export_report(self, report: BenchmarkReport, path: str) -> None:
         """Export report to JSON file.
         
@@ -583,7 +584,7 @@ class BenchmarkRunner:
         """
         with open(path, 'w') as f:
             json.dump(report.to_dict(), f, indent=2)
-    
+
     def print_summary(self, report: BenchmarkReport) -> None:
         """Print a human-readable summary.
         
@@ -595,31 +596,31 @@ class BenchmarkRunner:
         print("=" * 80)
         print(f"\nTimestamp: {report.timestamp}")
         print(f"Duration: {report.total_duration_seconds:.2f}s")
-        print(f"\nSummary:")
+        print("\nSummary:")
         print(f"  Total: {report.total}")
         print(f"  Passed: {report.passed}")
         print(f"  Failed: {report.failed}")
         print(f"  Skipped: {report.skipped}")
         print(f"  Pass Rate: {report.pass_rate:.1%}")
-        
-        print(f"\nBy Type:")
+
+        print("\nBy Type:")
         for benchmark_type, results in report.by_type().items():
             passed = sum(1 for r in results if r.passed)
             print(f"  {benchmark_type.value.upper()}: {passed}/{len(results)} passed")
-        
-        print(f"\nTop Performers:")
+
+        print("\nTop Performers:")
         completed = [r for r in report.results if r.status == BenchmarkStatus.COMPLETE and r.score is not None]
         top = sorted(completed, key=lambda r: r.score, reverse=True)[:5]
         for r in top:
             improvement = f" (+{r.improvement_pct:.1f}%)" if r.improvement_pct else ""
             print(f"  {r.config.name}: {r.score:.3f}{improvement}")
-        
-        print(f"\nFailed Benchmarks:")
+
+        print("\nFailed Benchmarks:")
         failed = [r for r in report.results if r.status == BenchmarkStatus.FAILED]
         if failed:
             for r in failed:
                 print(f"  {r.config.name}: {r.error_message}")
         else:
             print("  None")
-        
+
         print("\n" + "=" * 80)

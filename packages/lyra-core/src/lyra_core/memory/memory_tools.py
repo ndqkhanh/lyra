@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Any, Iterable, Optional, Union
+from typing import Any, Union
 
 from ..hir.events import emit as hir_emit
 from .auto_memory import AutoMemory, MemoryEntry, MemoryKind
@@ -37,7 +37,6 @@ from .procedural import ProceduralMemory, SkillRecord
 from .reasoning_bank import Lesson, ReasoningBank, TrajectoryOutcome
 from .reasoning_bank_store import SqliteReasoningBank
 from .redactor import redact_pair
-
 
 Scope = str   # "auto" | "skill" | "lesson" | "any"
 
@@ -60,7 +59,7 @@ class RecallResult:
     title: str
     body: str
     score: float = 0.0  # tier-local rank score (not cross-scope normalised)
-    payload: Optional[SourceRecord] = field(default=None, repr=False)
+    payload: SourceRecord | None = field(default=None, repr=False)
 
 
 @dataclass(frozen=True)
@@ -71,8 +70,8 @@ class ImproveResult:
     skill_count: int
     lesson_count: int
     duration_s: float
-    contradictions: tuple["ContradictionPair", ...] = ()
-    consolidations: tuple["ConsolidationProposal", ...] = ()
+    contradictions: tuple[ContradictionPair, ...] = ()
+    consolidations: tuple[ConsolidationProposal, ...] = ()
 
     @property
     def contradiction_count(self) -> int:
@@ -92,11 +91,11 @@ class MemoryToolset:
     application config.
     """
 
-    auto_memory: Optional[AutoMemory] = None
-    procedural: Optional[ProceduralMemory] = None
-    reasoning_bank: Optional[Union[SqliteReasoningBank, ReasoningBank]] = None
-    contradiction_detector: Optional[ContradictionDetector] = None
-    consolidator: Optional[MemoryConsolidator] = None
+    auto_memory: AutoMemory | None = None
+    procedural: ProceduralMemory | None = None
+    reasoning_bank: SqliteReasoningBank | ReasoningBank | None = None
+    contradiction_detector: ContradictionDetector | None = None
+    consolidator: MemoryConsolidator | None = None
 
     # --- recall ----------------------------------------------------------
 
@@ -194,11 +193,11 @@ class MemoryToolset:
         *,
         scope: Scope,
         title: str = "",
-        kind: Optional[MemoryKind] = None,
-        skill_id: Optional[str] = None,
-        skill_name: Optional[str] = None,
-        skill_description: Optional[str] = None,
-        extra: Optional[dict[str, Any]] = None,
+        kind: MemoryKind | None = None,
+        skill_id: str | None = None,
+        skill_name: str | None = None,
+        skill_description: str | None = None,
+        extra: dict[str, Any] | None = None,
     ) -> RecallResult:
         """Write a new memory to the chosen substrate.
 
@@ -312,7 +311,7 @@ class MemoryToolset:
         proposal: ConsolidationProposal,
         *,
         polarity: TrajectoryOutcome = TrajectoryOutcome.SUCCESS,
-        lesson_id: Optional[str] = None,
+        lesson_id: str | None = None,
     ) -> Lesson:
         """Promote a :class:`ConsolidationProposal` into a reasoning_bank lesson.
 

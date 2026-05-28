@@ -1,9 +1,10 @@
 """Reactive state management for spec-kit flow."""
 
 from __future__ import annotations
-from typing import Callable
 
-from .models import SpecKitState, Phase
+from collections.abc import Callable
+
+from .models import Phase, SpecKitState
 
 
 class StateManager:

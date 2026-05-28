@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from typing import Literal
+
 from .colors import AnsiStyle, ColorEngine
 
 

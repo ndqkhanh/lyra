@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.observability.event_bus import (
     CronJobFired,
     DaemonIteration,
@@ -26,7 +25,6 @@ from lyra_core.observability.live_display import (
     render_header,
     render_stats,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers

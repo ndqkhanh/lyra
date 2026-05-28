@@ -12,13 +12,13 @@ from datetime import datetime, timezone
 from typing import Protocol
 from uuid import uuid4
 
+from lyra_memory.agentic.link_generator import Link, LinkGenerator
+from lyra_memory.agentic.memory_evolver import MemoryEvolver
 from lyra_memory.agentic.note_constructor import (
     EmbeddingModel,
     LLMClient,
     NoteConstructor,
 )
-from lyra_memory.agentic.link_generator import Link, LinkGenerator
-from lyra_memory.agentic.memory_evolver import MemoryEvolver
 
 
 @dataclass

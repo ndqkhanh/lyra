@@ -1,7 +1,7 @@
 """Continuous loop - Run until stopped"""
 
-from typing import Callable, Optional
 import time
+from collections.abc import Callable
 
 
 class ContinuousLoop:
@@ -13,7 +13,7 @@ class ContinuousLoop:
         self.running = False
         self.iteration = 0
 
-    def start(self, max_iterations: Optional[int] = None):
+    def start(self, max_iterations: int | None = None):
         """Start continuous loop"""
         self.running = True
         print(f"🔄 Starting continuous loop (interval: {self.interval}s)")

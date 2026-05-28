@@ -1,15 +1,13 @@
 """Tests for Phase A Multimodal Enhancement."""
 
 import pytest
-
 from lyra_cli.multimodal_enhanced.hop_trace import (
-    MultimodalHopTracer,
     MultimodalFrame,
+    MultimodalHopTracer,
 )
 from lyra_cli.multimodal_enhanced.mer import (
     MultimodalAERSystem,
 )
-
 
 # ============================================================================
 # Hop Trace Tests

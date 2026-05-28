@@ -5,6 +5,7 @@ synthesiser entry point (stitched onto the same registry).
 """
 from __future__ import annotations
 
+from .compactor import CompactionReport, SkillCompactor
 from .federation import (
     CallableFederator,
     FederatedRegistry,
@@ -12,6 +13,14 @@ from .federation import (
     FederationReport,
     FilesystemFederator,
     SkillManifest,
+)
+from .instinct import (
+    DetectedPattern,
+    InstinctReport,
+    InstinctSystem,
+    Observation,
+    ObservationType,
+    PatternType,
 )
 from .knowledge_transfer import (
     KnowledgeTransferEngine,
@@ -32,26 +41,17 @@ from .router import (
     RouterDecision,
     SkillMatch,
 )
-from .synthesizer import (
-    SkillSynthesizer,
-    SynthesisError,
-    SynthesisReport,
-)
-from .compactor import CompactionReport, SkillCompactor
-from .instinct import (
-    DetectedPattern,
-    InstinctReport,
-    InstinctSystem,
-    Observation,
-    ObservationType,
-    PatternType,
-)
 from .skill_opt import (
     OptimizationPass,
     OptimizationStrategy,
     SkillOptConfig,
     SkillOptimizer,
     TextEdit,
+)
+from .synthesizer import (
+    SkillSynthesizer,
+    SynthesisError,
+    SynthesisReport,
 )
 from .validation_gate import (
     GateNumber,

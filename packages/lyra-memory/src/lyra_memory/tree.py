@@ -10,7 +10,7 @@ Implements tree-based memory compression and retrieval:
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import uuid4
 
 import numpy as np
@@ -24,13 +24,13 @@ class TreeNode:
     content: str = ""
     summary: str = ""
     level: int = 0  # 0 = leaf, higher = more abstract
-    children: List[str] = field(default_factory=list)
-    parent: Optional[str] = None
+    children: list[str] = field(default_factory=list)
+    parent: str | None = None
     created_at: datetime = field(default_factory=datetime.now)
     last_accessed: datetime = field(default_factory=datetime.now)
     access_count: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    embedding: Optional[np.ndarray] = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+    embedding: np.ndarray | None = None
 
 
 class MemoryTree:
@@ -52,14 +52,14 @@ class MemoryTree:
             max_tokens_per_node: Maximum tokens per node
         """
         self.max_tokens = max_tokens_per_node
-        self.nodes: Dict[str, TreeNode] = {}
-        self.root_id: Optional[str] = None
+        self.nodes: dict[str, TreeNode] = {}
+        self.root_id: str | None = None
 
     def add_memory(
         self,
         content: str,
-        metadata: Optional[Dict[str, Any]] = None,
-        parent_id: Optional[str] = None,
+        metadata: dict[str, Any] | None = None,
+        parent_id: str | None = None,
     ) -> TreeNode:
         """
         Add a memory to the tree.
@@ -101,8 +101,8 @@ class MemoryTree:
     def _add_chunked_memory(
         self,
         content: str,
-        metadata: Optional[Dict[str, Any]],
-        parent_id: Optional[str],
+        metadata: dict[str, Any] | None,
+        parent_id: str | None,
     ) -> TreeNode:
         """Add large memory by chunking."""
         # Split into chunks of ~3k tokens
@@ -151,7 +151,7 @@ class MemoryTree:
         max_nodes: int = 10,
         include_children: bool = True,
         temporal_decay: float = 0.1,
-    ) -> List[TreeNode]:
+    ) -> list[TreeNode]:
         """
         Retrieve relevant nodes from tree.
 

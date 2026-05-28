@@ -21,14 +21,12 @@ import base64
 from pathlib import Path
 
 import pytest
-
 from lyra_cli.interactive.paste import (
     detect_image_paste,
     substitute_image_tokens,
     write_attachment,
 )
 from lyra_cli.interactive.session import InteractiveSession
-
 
 # A 1x1 transparent PNG. Smallest valid payload we can paste.
 _PNG_BYTES = base64.b64decode(

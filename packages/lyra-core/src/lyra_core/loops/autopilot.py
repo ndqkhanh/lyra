@@ -21,13 +21,10 @@ crash reconciliation, and queryable status.
 """
 from __future__ import annotations
 
-import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable, Optional
 
 from .store import LoopRecord, LoopStore
-
 
 __all__ = ["Autopilot", "AutopilotResumeError"]
 
@@ -69,7 +66,7 @@ class Autopilot:
         loop_id: str,
         kind: str,
         run_dir: Path | str,
-        payload: Optional[dict] = None,
+        payload: dict | None = None,
     ) -> LoopRecord:
         """Register a new running loop. Idempotent — re-registering an
         id refreshes ``updated_at`` and bumps the row back to ``running``."""
@@ -112,7 +109,7 @@ class Autopilot:
         loop_id: str,
         *,
         contract_state: str,
-        terminal_cause: Optional[str],
+        terminal_cause: str | None,
     ) -> None:
         """Move a loop to ``completed`` (FULFILLED/EXPIRED) or
         ``terminated`` (VIOLATED/TERMINATED)."""

@@ -12,7 +12,7 @@ import json
 import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from lyra_memory.schema import MemoryRecord, MemoryScope, MemoryType, VerifierStatus
 
@@ -113,7 +113,7 @@ class MemoryDatabase:
         )
         self.conn.commit()
 
-    def get(self, memory_id: str) -> Optional[MemoryRecord]:
+    def get(self, memory_id: str) -> MemoryRecord | None:
         """Get a memory by ID."""
         cursor = self.conn.execute(
             "SELECT * FROM memories WHERE id = ?",
@@ -157,7 +157,7 @@ class MemoryDatabase:
         self.conn.execute("DELETE FROM memories WHERE id = ?", (memory_id,))
         self.conn.commit()
 
-    def search_fts(self, query: str, limit: int = 10) -> List[MemoryRecord]:
+    def search_fts(self, query: str, limit: int = 10) -> list[MemoryRecord]:
         """Full-text search using SQLite FTS5."""
         cursor = self.conn.execute(
             """
@@ -173,12 +173,12 @@ class MemoryDatabase:
 
     def filter(
         self,
-        scope: Optional[MemoryScope] = None,
-        type: Optional[MemoryType] = None,
-        verifier_status: Optional[VerifierStatus] = None,
-        valid_at: Optional[datetime] = None,
+        scope: MemoryScope | None = None,
+        type: MemoryType | None = None,
+        verifier_status: VerifierStatus | None = None,
+        valid_at: datetime | None = None,
         limit: int = 100,
-    ) -> List[MemoryRecord]:
+    ) -> list[MemoryRecord]:
         """Filter memories by criteria."""
         conditions = []
         params = []
@@ -212,7 +212,7 @@ class MemoryDatabase:
         cursor = self.conn.execute(query, params)
         return [self._row_to_memory(row) for row in cursor.fetchall()]
 
-    def get_recent(self, days: int = 7, limit: int = 100) -> List[MemoryRecord]:
+    def get_recent(self, days: int = 7, limit: int = 100) -> list[MemoryRecord]:
         """Get recent memories within the last N days."""
         cutoff = datetime.now() - timedelta(days=days)
         cursor = self.conn.execute(
@@ -221,7 +221,7 @@ class MemoryDatabase:
         )
         return [self._row_to_memory(row) for row in cursor.fetchall()]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get database statistics."""
         cursor = self.conn.execute("""
             SELECT

@@ -1,8 +1,8 @@
 """Agent tree display - Hierarchical agent status with collapse/expand"""
 
 from dataclasses import dataclass
-from typing import Dict
-from lyra_cli.ui import SymbolRegistry, ColorEngine
+
+from lyra_cli.ui import ColorEngine, SymbolRegistry
 
 
 @dataclass
@@ -26,7 +26,7 @@ class AgentTree:
     """
 
     def __init__(self):
-        self.agents: Dict[str, AgentNode] = {}
+        self.agents: dict[str, AgentNode] = {}
         self.expanded = False
         self.symbols = SymbolRegistry()
         self.colors = ColorEngine()

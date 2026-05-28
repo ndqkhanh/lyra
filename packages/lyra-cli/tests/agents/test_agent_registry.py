@@ -1,8 +1,8 @@
 """Tests for agent registry."""
-import pytest
 from pathlib import Path
+
+import pytest
 from lyra_cli.core.agent_registry import AgentRegistry
-from lyra_cli.core.agent_metadata import AgentMetadata
 
 
 @pytest.fixture

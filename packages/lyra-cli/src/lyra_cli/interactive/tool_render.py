@@ -25,7 +25,6 @@ from dataclasses import dataclass
 from . import glyphs
 from .palette import PALETTE
 
-
 __all__ = [
     "PREVIEW_LINES",
     "ToolPaint",

@@ -1,8 +1,8 @@
 """Selection menu - Interactive menu with keyboard navigation"""
 
 from dataclasses import dataclass
-from typing import List
-from lyra_cli.ui import SymbolRegistry, ColorEngine
+
+from lyra_cli.ui import ColorEngine, SymbolRegistry
 
 
 @dataclass
@@ -26,7 +26,7 @@ class SelectionMenu:
     def __init__(self, title: str, description: str = ""):
         self.title = title
         self.description = description
-        self.options: List[MenuOption] = []
+        self.options: list[MenuOption] = []
         self.selected_index = 0
         self.symbols = SymbolRegistry()
         self.colors = ColorEngine()

@@ -5,10 +5,9 @@ Extracts memory candidates from observations, actions, and outcomes.
 Implements deduplication, contradiction checking, and verification.
 """
 
-from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
-from lyra_memory.schema import MemoryRecord, MemoryScope, MemoryType, VerifierStatus
+from lyra_memory.schema import MemoryRecord, MemoryScope, MemoryType
 from lyra_memory.store import MemoryStore
 
 
@@ -36,9 +35,9 @@ class MemoryExtractor:
         self,
         user_input: str,
         assistant_response: str,
-        tool_results: Optional[List[Dict[str, Any]]] = None,
-        turn_number: Optional[int] = None,
-    ) -> List[MemoryRecord]:
+        tool_results: list[dict[str, Any]] | None = None,
+        turn_number: int | None = None,
+    ) -> list[MemoryRecord]:
         """
         Extract memories from a conversation turn.
 
@@ -94,8 +93,8 @@ class MemoryExtractor:
     def _extract_from_user_input(
         self,
         user_input: str,
-        turn_number: Optional[int],
-    ) -> List[MemoryRecord]:
+        turn_number: int | None,
+    ) -> list[MemoryRecord]:
         """Extract memories from user input."""
         candidates = []
         source = f"turn {turn_number}" if turn_number else "user input"
@@ -142,8 +141,8 @@ class MemoryExtractor:
     def _extract_from_response(
         self,
         response: str,
-        turn_number: Optional[int],
-    ) -> List[MemoryRecord]:
+        turn_number: int | None,
+    ) -> list[MemoryRecord]:
         """Extract memories from assistant response."""
         candidates = []
         source = f"turn {turn_number}" if turn_number else "assistant response"
@@ -165,9 +164,9 @@ class MemoryExtractor:
 
     def _extract_from_tools(
         self,
-        tool_results: List[Dict[str, Any]],
-        turn_number: Optional[int],
-    ) -> List[MemoryRecord]:
+        tool_results: list[dict[str, Any]],
+        turn_number: int | None,
+    ) -> list[MemoryRecord]:
         """Extract memories from tool execution results."""
         candidates = []
         source = f"turn {turn_number}" if turn_number else "tool execution"
@@ -206,7 +205,7 @@ class MemoryExtractor:
 
         return candidates
 
-    def _deduplicate(self, candidates: List[MemoryRecord]) -> List[MemoryRecord]:
+    def _deduplicate(self, candidates: list[MemoryRecord]) -> list[MemoryRecord]:
         """
         Remove duplicate candidates.
 
@@ -229,7 +228,7 @@ class MemoryExtractor:
 
         return unique
 
-    def _find_contradictions(self, candidate: MemoryRecord) -> List[MemoryRecord]:
+    def _find_contradictions(self, candidate: MemoryRecord) -> list[MemoryRecord]:
         """
         Find existing memories that contradict the candidate.
 
@@ -303,8 +302,8 @@ class MemoryExtractor:
 
 def extract_memories_from_conversation(
     store: MemoryStore,
-    conversation_history: List[Tuple[str, str]],
-) -> List[MemoryRecord]:
+    conversation_history: list[tuple[str, str]],
+) -> list[MemoryRecord]:
     """
     Extract memories from a full conversation history.
 

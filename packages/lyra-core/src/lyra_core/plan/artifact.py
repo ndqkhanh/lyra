@@ -18,7 +18,7 @@ import hashlib
 import json as _json
 import re
 import time
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 from pydantic import BaseModel, Field, field_validator
@@ -191,7 +191,7 @@ def _emit_format_drift(reason: str) -> None:
         pass
 
 
-def _synth_defaults(*, task_hint: Optional[str], planner_model: str) -> dict[str, Any]:
+def _synth_defaults(*, task_hint: str | None, planner_model: str) -> dict[str, Any]:
     """Build a minimal valid frontmatter dict for the synthesizer paths.
 
     The strict :class:`Plan` schema requires non-empty ``session_id``,
@@ -271,7 +271,7 @@ def _build_plan_from_body(
     return plan
 
 
-def _try_strict(text: str) -> Optional[Plan]:
+def _try_strict(text: str) -> Plan | None:
     """Strict-shape parse: ``---\\n…---\\n# Plan: …``.
 
     Tolerates a prose prefix before the first fence — if the model
@@ -299,7 +299,7 @@ def _try_strict(text: str) -> Optional[Plan]:
         return None
 
 
-def _try_code_fenced_yaml(text: str, *, task_hint: Optional[str]) -> Optional[Plan]:
+def _try_code_fenced_yaml(text: str, *, task_hint: str | None) -> Plan | None:
     r"""Detect a ``\`\`\`yaml ... \`\`\``` block followed by a Markdown plan body."""
     m = _CODE_FENCE_YAML_RE.search(text)
     if not m:
@@ -327,7 +327,7 @@ def _try_code_fenced_yaml(text: str, *, task_hint: Optional[str]) -> Optional[Pl
     return plan
 
 
-def _try_json(text: str, *, task_hint: Optional[str]) -> Optional[Plan]:
+def _try_json(text: str, *, task_hint: str | None) -> Plan | None:
     """Detect a JSON object response and translate it into a Plan."""
     stripped = text.strip()
     if not (stripped.startswith("{") and stripped.endswith("}")):
@@ -406,7 +406,7 @@ def _try_json(text: str, *, task_hint: Optional[str]) -> Optional[Plan]:
     return plan
 
 
-def _try_synthesized_frontmatter(text: str, *, task_hint: Optional[str]) -> Optional[Plan]:
+def _try_synthesized_frontmatter(text: str, *, task_hint: str | None) -> Plan | None:
     """Body has ``# Plan: …`` but no frontmatter — synthesize defaults."""
     if not _PLAN_HEADER_RE.search(text):
         return None
@@ -419,7 +419,7 @@ def _try_synthesized_frontmatter(text: str, *, task_hint: Optional[str]) -> Opti
     return plan
 
 
-def _synthesize_from_prose(text: str, *, task_hint: Optional[str]) -> Plan:
+def _synthesize_from_prose(text: str, *, task_hint: str | None) -> Plan:
     """Last-resort: build a minimal Plan from pure prose."""
     summary = text.strip().splitlines()[0] if text.strip() else "(no output)"
     title = (task_hint or summary)[:80] or "Synthesized plan"
@@ -465,7 +465,7 @@ def _extract_plan_block(text: str) -> str:
     return text[idx:]
 
 
-def load_plan(text: str, *, task_hint: Optional[str] = None) -> Plan:
+def load_plan(text: str, *, task_hint: str | None = None) -> Plan:
     """Parse a plan artifact text back into a :class:`Plan`.
 
     The parser walks a cascade of progressively-looser strategies

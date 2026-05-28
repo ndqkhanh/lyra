@@ -19,7 +19,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-
 # ---------------------------------------------------------------------------
 # Decision markers — patterns that signal a decision was made
 # ---------------------------------------------------------------------------
@@ -56,7 +55,7 @@ class PinnedDecision:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "PinnedDecision":
+    def from_dict(cls, d: dict[str, Any]) -> PinnedDecision:
         return cls(**d)
 
 

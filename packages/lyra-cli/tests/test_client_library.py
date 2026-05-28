@@ -3,20 +3,15 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
 
 import pytest
-
-from lyra_harness_core.messages import Message
-from lyra_harness_core.models import MockLLM
-
 from lyra_cli.client import (
     ChatRequest,
     ChatResponse,
     LyraClient,
-    StreamEvent,
 )
-
+from lyra_harness_core.messages import Message
+from lyra_harness_core.models import MockLLM
 
 # ---------------------------------------------------------------------------
 # Fixtures

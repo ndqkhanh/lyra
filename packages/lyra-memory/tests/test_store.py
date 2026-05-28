@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from lyra_memory.schema import MemoryRecord, MemoryScope, MemoryType, VerifierStatus
+from lyra_memory.schema import MemoryScope, MemoryType, VerifierStatus
 from lyra_memory.store import MemoryStore
 
 

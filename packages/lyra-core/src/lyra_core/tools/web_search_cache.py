@@ -22,10 +22,10 @@ import json
 import os
 import sqlite3
 import time
+from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Iterator, Optional
-
+from typing import Any
 
 _DEFAULT_TTL_SEC = 3600  # 1 hour
 
@@ -87,8 +87,8 @@ def get_cached(
     max_results: int,
     opts: dict[str, Any],
     *,
-    path: Optional[Path] = None,
-) -> Optional[list[dict[str, Any]]]:
+    path: Path | None = None,
+) -> list[dict[str, Any]] | None:
     """Return the cached payload or None on miss/expiry."""
     cache_path = path or _cache_path()
     if not cache_path.is_file():
@@ -118,7 +118,7 @@ def put_cached(
     payload: list[dict[str, Any]],
     *,
     ttl_seconds: int = _DEFAULT_TTL_SEC,
-    path: Optional[Path] = None,
+    path: Path | None = None,
 ) -> None:
     """Store ``payload`` keyed by the call signature."""
     cache_path = path or _cache_path()
@@ -132,7 +132,7 @@ def put_cached(
         )
 
 
-def purge_expired(*, path: Optional[Path] = None) -> int:
+def purge_expired(*, path: Path | None = None) -> int:
     """Delete every row whose ``expires_at`` is in the past.
 
     Returns the count removed. Cheap because of the

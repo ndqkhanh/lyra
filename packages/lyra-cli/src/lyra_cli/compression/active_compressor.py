@@ -5,11 +5,11 @@ Implements explicit focus regions with persistent Knowledge blocks.
 Achieves 70%+ compression while preserving causal state.
 """
 
+import json
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional, Dict, Any
 from pathlib import Path
-import json
+from typing import Any
 
 
 @dataclass
@@ -20,10 +20,10 @@ class FocusRegion:
     start_step: int
     end_step: int
     phase: str  # "exploration" or "exploitation"
-    observations: List[str] = field(default_factory=list)
-    actions: List[str] = field(default_factory=list)
+    observations: list[str] = field(default_factory=list)
+    actions: list[str] = field(default_factory=list)
     compressed: bool = False
-    knowledge_extracted: Optional[str] = None
+    knowledge_extracted: str | None = None
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
 
 
@@ -33,10 +33,10 @@ class KnowledgeBlock:
 
     knowledge_id: str
     content: str
-    source_regions: List[str] = field(default_factory=list)
+    source_regions: list[str] = field(default_factory=list)
     confidence: float = 1.0
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    last_used: Optional[str] = None
+    last_used: str | None = None
     usage_count: int = 0
 
 
@@ -55,8 +55,8 @@ class ActiveCompressor:
         self.data_dir = Path(data_dir)
         self.data_dir.mkdir(parents=True, exist_ok=True)
 
-        self.focus_regions: List[FocusRegion] = []
-        self.knowledge_blocks: Dict[str, KnowledgeBlock] = {}
+        self.focus_regions: list[FocusRegion] = []
+        self.knowledge_blocks: dict[str, KnowledgeBlock] = {}
         self.current_step = 0
 
         # Statistics
@@ -70,7 +70,7 @@ class ActiveCompressor:
         """Load compression state from disk."""
         state_file = self.data_dir / "compression_state.json"
         if state_file.exists():
-            with open(state_file, "r") as f:
+            with open(state_file) as f:
                 data = json.load(f)
                 self.focus_regions = [
                     FocusRegion(**r) for r in data.get("focus_regions", [])
@@ -125,7 +125,7 @@ class ActiveCompressor:
     def add_observation(
         self,
         observation: str,
-        action: Optional[str] = None,
+        action: str | None = None,
         phase: str = "exploration"
     ):
         """Add observation to current focus region."""
@@ -224,7 +224,7 @@ class ActiveCompressor:
 
         return kb_id
 
-    def get_active_context(self) -> Dict[str, Any]:
+    def get_active_context(self) -> dict[str, Any]:
         """
         Get current active context (uncompressed + knowledge blocks).
 
@@ -260,7 +260,7 @@ class ActiveCompressor:
         # Compression ratio = (total - active) / total
         return (self.total_observations - active_obs_count) / self.total_observations
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get compression statistics."""
         return {
             "total_observations": self.total_observations,

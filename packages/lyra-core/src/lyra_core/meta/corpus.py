@@ -18,9 +18,8 @@ Callers can supplement the default corpus via
 """
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Iterable, Sequence
-
 
 __all__ = [
     "HarnessTask",
@@ -156,7 +155,7 @@ class ParityCorpus:
         if len(set(ids)) != len(ids):
             raise ValueError(f"duplicate task ids in ParityCorpus: {ids}")
 
-    def extend(self, more: Iterable[HarnessTask]) -> "ParityCorpus":
+    def extend(self, more: Iterable[HarnessTask]) -> ParityCorpus:
         return ParityCorpus(tasks=tuple(list(self.tasks) + list(more)))
 
     def by_category(self, category: str) -> tuple[HarnessTask, ...]:

@@ -15,29 +15,29 @@ Architecture:
 
 from __future__ import annotations
 
-from .research_engine import MultiHopResearchEngine, ExploreResult, ResearchReport
-from .trajectory import (
-    ResearchAction,
-    ResearchResult,
-    ResearchTrajectory,
-    TrajectoryNode,
-)
-from .source_evaluator import (
-    SourceCredibility,
-    SourceProfile,
-    SourceType,
-    ContradictionReport,
-)
 from .knowledge_graph import (
     Finding,
     FindingRelation,
-    ResearchKnowledgeGraph,
     KnowledgeGap,
+    ResearchKnowledgeGraph,
+)
+from .research_engine import ExploreResult, MultiHopResearchEngine, ResearchReport
+from .source_evaluator import (
+    ContradictionReport,
+    SourceCredibility,
+    SourceProfile,
+    SourceType,
 )
 from .strategy_selector import (
     StrategyResult,
     StrategySelector,
     StrategyType,
+)
+from .trajectory import (
+    ResearchAction,
+    ResearchResult,
+    ResearchTrajectory,
+    TrajectoryNode,
 )
 
 __all__ = [

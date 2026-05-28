@@ -1,14 +1,11 @@
 """Claude Code-style UI components"""
 
-from rich.console import Console
-from rich.table import Table
-from rich.tree import Tree
-from rich.panel import Panel
-from rich.columns import Columns
-from rich.text import Text
-from rich.align import Align
-from typing import List, Tuple
 import os
+
+from rich.columns import Columns
+from rich.console import Console
+from rich.panel import Panel
+from rich.text import Text
 
 
 class ClaudeCodeUI:
@@ -92,7 +89,7 @@ class ClaudeCodeUI:
         self.console.print(panel)
         self.console.print()
 
-    def agent_tree(self, agents: List[Tuple[str, str, int, int]]):
+    def agent_tree(self, agents: list[tuple[str, str, int, int]]):
         """Tree structure for running agents (Claude Code style)"""
 
         self.console.print(f"[cyan]{self.ACTIVE}[/cyan] Running {len(agents)} agents… [dim](ctrl+o to expand)[/dim]")
@@ -104,7 +101,7 @@ class ClaudeCodeUI:
             self.console.print(f"   {branch} {name} · {tools} tool uses · {tokens/1000:.1f}k tokens")
             self.console.print(f"   {'  ' if is_last else self.BOX_V} {self.TOOL}  {task}")
 
-    def interactive_menu(self, title: str, options: List[Tuple[str, str, str]], selected: int = 0, current: int = None):
+    def interactive_menu(self, title: str, options: list[tuple[str, str, str]], selected: int = 0, current: int = None):
         """Interactive menu with selection (Claude Code style)"""
 
         # Divider
@@ -112,7 +109,7 @@ class ClaudeCodeUI:
 
         # Title and description
         self.console.print(f"  [bold]{title}[/bold]")
-        self.console.print(f"  [dim]Select an option below[/dim]\n")
+        self.console.print("  [dim]Select an option below[/dim]\n")
 
         # Options
         for i, (label, name, desc) in enumerate(options):
@@ -151,7 +148,7 @@ class ClaudeCodeUI:
 
         self.console.print(status)
 
-    def background_tasks(self, tasks: List[Tuple[str, str]]):
+    def background_tasks(self, tasks: list[tuple[str, str]]):
         """Background tasks panel (Claude Code style)"""
 
         self.console.print(self.BOX_H * self.console.width, style="dim")
@@ -171,7 +168,7 @@ class ClaudeCodeUI:
         self.console.print()
         self.console.print("  [dim]↑/↓ to select · Enter to view · x to stop · ←/Esc to close[/dim]")
 
-    def collapsible_section(self, title: str, items: List[str], expanded: bool = False):
+    def collapsible_section(self, title: str, items: list[str], expanded: bool = False):
         """Collapsible section (Claude Code style)"""
 
         self.console.print(f"\n[dim]{self.STATS} {title} [dim](ctrl+o for history)[/dim][/dim]")
@@ -186,7 +183,7 @@ class ClaudeCodeUI:
         self.console.print(f"[yellow]{self.THINKING}[/yellow] {message} [dim]({duration} · ↓ {tokens/1000:.1f}k tokens · almost done thinking)[/dim]")
         self.console.print(f"  {self.TOOL}  [dim]Tip: Use /btw to ask a quick side question[/dim]")
 
-    def agent_list(self, agents: List[Tuple[str, str, str, int]]):
+    def agent_list(self, agents: list[tuple[str, str, str, int]]):
         """Agent list with status (Claude Code style)"""
 
         for i, (status, agent_type, task, time) in enumerate(agents):

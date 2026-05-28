@@ -2,12 +2,7 @@
 from __future__ import annotations
 
 import time
-from io import StringIO
-from pathlib import Path
-from unittest.mock import MagicMock, patch
-
-import pytest
-
+from unittest.mock import MagicMock
 
 # ── Wave 3: run_in_background ────────────────────────────────────────────────
 
@@ -141,7 +136,7 @@ def test_tips_panel_plain_mode(monkeypatch):
 
 def test_tips_panel_contains_all_5_tips(monkeypatch):
     monkeypatch.setenv("LYRA_TIPS", "1")
-    from lyra_cli.interactive.banner import render_tips_panel, _TIPS
+    from lyra_cli.interactive.banner import _TIPS, render_tips_panel
     result = render_tips_panel(plain=True)
     for key, _ in _TIPS:
         assert key in result, f"expected tip key {key!r} in plain output"

@@ -1,6 +1,8 @@
 """Agent registry - Built-in agent definitions"""
 
-from typing import Dict, List
+
+import builtins
+
 from .agent_manager import AgentDefinition
 
 
@@ -8,7 +10,7 @@ class AgentRegistry:
     """Registry of built-in agents"""
 
     def __init__(self):
-        self.agents: Dict[str, AgentDefinition] = {}
+        self.agents: dict[str, AgentDefinition] = {}
 
     def register(self, agent: AgentDefinition):
         """Register an agent"""
@@ -18,11 +20,11 @@ class AgentRegistry:
         """Get agent by name"""
         return self.agents.get(name)
 
-    def list(self) -> List[AgentDefinition]:
+    def list(self) -> list[AgentDefinition]:
         """List all agents"""
         return list(self.agents.values())
 
-    def find_by_trigger(self, trigger: str) -> List[AgentDefinition]:
+    def find_by_trigger(self, trigger: str) -> builtins.list[AgentDefinition]:
         """Find agents matching a trigger"""
         matching = []
         for agent in self.agents.values():

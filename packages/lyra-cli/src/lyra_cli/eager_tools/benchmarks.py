@@ -1,11 +1,7 @@
 """Performance benchmarks for eager tools."""
 import asyncio
 import time
-from typing import Callable, Any
 from dataclasses import dataclass
-
-from lyra_cli.eager_tools.seal_detector import SealDetector
-from lyra_cli.eager_tools.types import ToolSeal
 
 
 @dataclass

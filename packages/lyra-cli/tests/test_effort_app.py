@@ -14,10 +14,8 @@ from __future__ import annotations
 from unittest.mock import patch
 
 import pytest
-
 from lyra_cli.interactive.effort import EffortPicker
 from lyra_cli.interactive.effort_app import _build_fragments, run_effort_picker
-
 
 # ---------------------------------------------------------------------
 # _build_fragments — pure renderer

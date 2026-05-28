@@ -5,7 +5,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from lyra_core.acp.server import AcpServer
 from lyra_core.acp.v311_methods import register_v311_methods
 
@@ -223,7 +222,7 @@ def test_bundle_trust_then_fetch(server, tmp_path, monkeypatch):
     import io
     import tarfile
 
-    from lyra_core.bundle import sign_archive, MarketplaceKey
+    from lyra_core.bundle import MarketplaceKey, sign_archive
 
     payload_files = {
         "persona.md": "p\n",

@@ -11,9 +11,9 @@ from __future__ import annotations
 
 import time
 import uuid
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Callable, Sequence
 
 
 class QualityDimension(Enum):

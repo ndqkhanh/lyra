@@ -1,10 +1,10 @@
 """Unified rendering system for Claude Code-style UI patterns"""
 
 from dataclasses import dataclass
-from typing import Any
+
+from .colors import ColorEngine
+from .layout import LayoutConfig, LayoutEngine
 from .symbols import SymbolRegistry
-from .colors import ColorEngine, AnsiStyle
-from .layout import LayoutEngine, LayoutConfig
 
 
 @dataclass(frozen=True)

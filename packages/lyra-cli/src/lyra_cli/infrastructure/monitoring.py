@@ -10,11 +10,11 @@ Provides comprehensive monitoring capabilities for production systems:
 from __future__ import annotations
 
 import time
-from collections import defaultdict, deque
+from collections import deque
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 from lyra_cli.logging_config import get_logger
 
@@ -45,7 +45,7 @@ class MetricPoint:
 
     timestamp: float
     value: float
-    labels: Dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -56,10 +56,10 @@ class Metric:
     metric_type: MetricType
     description: str
     unit: str
-    labels: Dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
     points: deque = field(default_factory=lambda: deque(maxlen=10000))
 
-    def add_point(self, value: float, labels: Optional[Dict[str, str]] = None) -> None:
+    def add_point(self, value: float, labels: dict[str, str] | None = None) -> None:
         """Add a data point to the metric."""
         point = MetricPoint(
             timestamp=time.time(),
@@ -68,11 +68,11 @@ class Metric:
         )
         self.points.append(point)
 
-    def get_latest(self) -> Optional[float]:
+    def get_latest(self) -> float | None:
         """Get the latest value."""
         return self.points[-1].value if self.points else None
 
-    def get_average(self, last_n: Optional[int] = None) -> Optional[float]:
+    def get_average(self, last_n: int | None = None) -> float | None:
         """Get average value over last N points."""
         if not self.points:
             return None
@@ -83,7 +83,7 @@ class Metric:
 
         return sum(p.value for p in points_to_avg) / len(points_to_avg)
 
-    def get_percentile(self, percentile: float, last_n: Optional[int] = None) -> Optional[float]:
+    def get_percentile(self, percentile: float, last_n: int | None = None) -> float | None:
         """Get percentile value (0-100)."""
         if not self.points:
             return None
@@ -107,8 +107,8 @@ class Alert:
     metric_name: str
     threshold: float
     triggered_at: float = field(default_factory=time.time)
-    resolved_at: Optional[float] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    resolved_at: float | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def is_active(self) -> bool:
         """Check if alert is still active."""
@@ -118,7 +118,7 @@ class Alert:
         """Mark alert as resolved."""
         self.resolved_at = time.time()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "name": self.name,
@@ -148,7 +148,7 @@ class MetricsCollector:
         Args:
             max_points_per_metric: Maximum data points to retain per metric
         """
-        self._metrics: Dict[str, Metric] = {}
+        self._metrics: dict[str, Metric] = {}
         self._max_points = max_points_per_metric
 
     def register_metric(
@@ -157,7 +157,7 @@ class MetricsCollector:
         metric_type: MetricType,
         description: str,
         unit: str = "",
-        labels: Optional[Dict[str, str]] = None,
+        labels: dict[str, str] | None = None,
     ) -> None:
         """Register a new metric.
 
@@ -185,7 +185,7 @@ class MetricsCollector:
         self,
         name: str,
         value: float,
-        labels: Optional[Dict[str, str]] = None,
+        labels: dict[str, str] | None = None,
     ) -> None:
         """Record a metric value.
 
@@ -200,7 +200,7 @@ class MetricsCollector:
 
         self._metrics[name].add_point(value, labels)
 
-    def increment(self, name: str, value: float = 1.0, labels: Optional[Dict[str, str]] = None) -> None:
+    def increment(self, name: str, value: float = 1.0, labels: dict[str, str] | None = None) -> None:
         """Increment a counter metric.
 
         Args:
@@ -214,7 +214,7 @@ class MetricsCollector:
         current = self._metrics[name].get_latest() or 0.0
         self.record(name, current + value, labels)
 
-    def set_gauge(self, name: str, value: float, labels: Optional[Dict[str, str]] = None) -> None:
+    def set_gauge(self, name: str, value: float, labels: dict[str, str] | None = None) -> None:
         """Set a gauge metric value.
 
         Args:
@@ -227,7 +227,7 @@ class MetricsCollector:
 
         self.record(name, value, labels)
 
-    def observe(self, name: str, value: float, labels: Optional[Dict[str, str]] = None) -> None:
+    def observe(self, name: str, value: float, labels: dict[str, str] | None = None) -> None:
         """Observe a value for histogram/summary metrics.
 
         Args:
@@ -240,15 +240,15 @@ class MetricsCollector:
 
         self.record(name, value, labels)
 
-    def get_metric(self, name: str) -> Optional[Metric]:
+    def get_metric(self, name: str) -> Metric | None:
         """Get a metric by name."""
         return self._metrics.get(name)
 
-    def get_all_metrics(self) -> Dict[str, Metric]:
+    def get_all_metrics(self) -> dict[str, Metric]:
         """Get all registered metrics."""
         return self._metrics.copy()
 
-    def get_metric_summary(self, name: str) -> Optional[Dict[str, Any]]:
+    def get_metric_summary(self, name: str) -> dict[str, Any] | None:
         """Get summary statistics for a metric."""
         metric = self.get_metric(name)
         if not metric:
@@ -285,9 +285,9 @@ class AlertManager:
             metrics_collector: Metrics collector to monitor
         """
         self._collector = metrics_collector
-        self._alerts: List[Alert] = []
-        self._alert_rules: List[Dict[str, Any]] = []
-        self._callbacks: List[Callable[[Alert], None]] = []
+        self._alerts: list[Alert] = []
+        self._alert_rules: list[dict[str, Any]] = []
+        self._callbacks: list[Callable[[Alert], None]] = []
 
     def add_rule(
         self,
@@ -296,7 +296,7 @@ class AlertManager:
         condition: Callable[[float], bool],
         severity: AlertSeverity,
         message: str,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Add an alert rule.
 
@@ -365,7 +365,7 @@ class AlertManager:
         """
         self._callbacks.append(callback)
 
-    def check_rules(self) -> List[Alert]:
+    def check_rules(self) -> list[Alert]:
         """Check all alert rules and trigger alerts if needed.
 
         Returns:
@@ -415,11 +415,11 @@ class AlertManager:
 
         return new_alerts
 
-    def get_active_alerts(self) -> List[Alert]:
+    def get_active_alerts(self) -> list[Alert]:
         """Get all active alerts."""
         return [a for a in self._alerts if a.is_active()]
 
-    def get_all_alerts(self) -> List[Alert]:
+    def get_all_alerts(self) -> list[Alert]:
         """Get all alerts (active and resolved)."""
         return self._alerts.copy()
 
@@ -556,7 +556,7 @@ class MonitoringService:
             message="Agent response time exceeded 5 seconds",
         )
 
-    def get_dashboard_data(self) -> Dict[str, Any]:
+    def get_dashboard_data(self) -> dict[str, Any]:
         """Get complete dashboard data.
 
         Returns:

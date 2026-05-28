@@ -11,7 +11,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from lyra_core.bundle import (
     AgentInstaller,
     SourceBundle,

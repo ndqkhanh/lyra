@@ -20,8 +20,7 @@ import hmac
 import secrets
 import time
 from dataclasses import dataclass, field
-from typing import Any, Callable, Iterable, Optional
-
+from typing import Any
 
 _LBL_AUTH: str = "LBL-RC-AUTH"
 _LBL_SCOPE: str = "LBL-RC-SCOPE"
@@ -59,7 +58,7 @@ class AttachToken:
     ttl_s: float
     signature: str
 
-    def is_expired(self, *, now_ts: Optional[float] = None) -> bool:
+    def is_expired(self, *, now_ts: float | None = None) -> bool:
         now = time.time() if now_ts is None else now_ts
         return (now - self.issued_ts) > self.ttl_s
 
@@ -69,11 +68,11 @@ def issue_token(
     session_id: str,
     secret: bytes,
     ttl_s: float = DEFAULT_ATTACH_TTL_S,
-    now_ts: Optional[float] = None,
+    now_ts: float | None = None,
 ) -> AttachToken:
     issued = time.time() if now_ts is None else now_ts
     nonce = secrets.token_hex(16)
-    payload = f"{session_id}|{nonce}|{issued:.6f}|{ttl_s:.6f}".encode("utf-8")
+    payload = f"{session_id}|{nonce}|{issued:.6f}|{ttl_s:.6f}".encode()
     sig = hmac.new(secret, payload, hashlib.sha256).hexdigest()
     return AttachToken(
         session_id=session_id, nonce=nonce, issued_ts=issued,
@@ -82,14 +81,14 @@ def issue_token(
 
 
 def verify_token(token: AttachToken, *, secret: bytes,
-                 now_ts: Optional[float] = None) -> None:
+                 now_ts: float | None = None) -> None:
     """Raises ``RemoteAuthError`` if the token is invalid or expired."""
     if token.is_expired(now_ts=now_ts):
         raise RemoteAuthError(f"token expired (issued {token.issued_ts:.0f})")
     payload = (
         f"{token.session_id}|{token.nonce}|"
         f"{token.issued_ts:.6f}|{token.ttl_s:.6f}"
-    ).encode("utf-8")
+    ).encode()
     expected = hmac.new(secret, payload, hashlib.sha256).hexdigest()
     if not hmac.compare_digest(expected, token.signature):
         raise RemoteAuthError("HMAC signature mismatch")
@@ -131,7 +130,7 @@ class RemoteSession:
             session_id=self.session_id, secret=self.secret, ttl_s=ttl_s,
         )
 
-    def attach(self, token: AttachToken, *, now_ts: Optional[float] = None) -> RelayChannel:
+    def attach(self, token: AttachToken, *, now_ts: float | None = None) -> RelayChannel:
         if token.session_id != self.session_id:
             raise RemoteAuthError("session_id mismatch")
         verify_token(token, secret=self.secret, now_ts=now_ts)

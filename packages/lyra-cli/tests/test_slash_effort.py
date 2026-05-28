@@ -10,13 +10,11 @@ import os
 from pathlib import Path
 
 import pytest
-
 from lyra_cli.interactive.effort import (
     EffortPicker,
     effort_to_max_completion_tokens,
 )
 from lyra_cli.interactive.session import InteractiveSession
-
 
 # ---- picker -----------------------------------------------------------
 

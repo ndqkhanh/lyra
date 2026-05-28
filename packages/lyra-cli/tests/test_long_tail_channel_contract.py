@@ -11,11 +11,10 @@ fields) are exercised in smoke tier with live tokens.
 from __future__ import annotations
 
 import asyncio
-from typing import Any, AsyncIterator, List
+from typing import Any
 
 import pytest
-
-from lyra_cli.channels.base import ChannelAdapter, Inbound
+from lyra_cli.channels.base import ChannelAdapter
 from lyra_cli.channels.bluebubbles import BlueBubblesAdapter
 from lyra_cli.channels.dingtalk import DingTalkAdapter
 from lyra_cli.channels.feishu import FeishuAdapter

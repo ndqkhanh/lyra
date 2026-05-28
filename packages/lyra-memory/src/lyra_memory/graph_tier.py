@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-import asyncio
 import logging
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 
@@ -19,7 +18,7 @@ class KnowledgeGraphNode:
     label: str
     node_type: str  # entity, concept, action, outcome
     properties: dict[str, Any] = field(default_factory=dict)
-    embedding: Optional[np.ndarray] = None
+    embedding: np.ndarray | None = None
 
 
 @dataclass
@@ -46,7 +45,7 @@ class KnowledgeGraph:
         self.edges[edge.source_id].append(edge)
         self.reverse_edges[edge.target_id].append(edge)
 
-    def get_neighbors(self, node_id: str, relation: Optional[str] = None) -> list[tuple[str, str, float]]:
+    def get_neighbors(self, node_id: str, relation: str | None = None) -> list[tuple[str, str, float]]:
         neighbors = []
         for edge in self.edges.get(node_id, []):
             if relation is None or edge.relation == relation:
@@ -123,7 +122,7 @@ class ACTRMemoryModel:
     def encode(self, memory_id: str, initial_activation: float = 1.0) -> None:
         self.memories[memory_id] = initial_activation
 
-    def retrieve(self, memory_id: str) -> Optional[float]:
+    def retrieve(self, memory_id: str) -> float | None:
         activation = self.memories.get(memory_id)
         if activation is None:
             return None
@@ -188,7 +187,7 @@ class GraphMemoryStore:
         self.dreamer = AutoDreamer()
         self.federation = FederatedRetriever()
 
-    async def store(self, node: KnowledgeGraphNode, edges: Optional[list[KnowledgeGraphEdge]] = None) -> str:
+    async def store(self, node: KnowledgeGraphNode, edges: list[KnowledgeGraphEdge] | None = None) -> str:
         nid = self.graph.add_node(node)
         self.actr.encode(nid)
         if edges:

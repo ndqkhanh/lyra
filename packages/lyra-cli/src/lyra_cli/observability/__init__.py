@@ -7,30 +7,28 @@ Implements:
 - Split-view monitoring dashboard
 """
 
-from lyra_cli.observability.tracing import (
-    SpanKind,
-    SpanAttribute,
-    SpanEvent,
-    Span,
-    Trace,
-    TracingProvider,
-    MetricsProvider,
-)
-
 from lyra_cli.observability.aer import (
     ActionType,
+    AERSystem,
     AgentAction,
     AgentDecision,
     AgentExecutionRecord,
-    AERSystem,
 )
-
 from lyra_cli.observability.monitoring import (
-    MetricPoint,
-    TimeSeriesMetric,
     AgentStatus,
-    SystemHealth,
+    MetricPoint,
     MonitoringDashboard,
+    SystemHealth,
+    TimeSeriesMetric,
+)
+from lyra_cli.observability.tracing import (
+    MetricsProvider,
+    Span,
+    SpanAttribute,
+    SpanEvent,
+    SpanKind,
+    Trace,
+    TracingProvider,
 )
 
 __all__ = [

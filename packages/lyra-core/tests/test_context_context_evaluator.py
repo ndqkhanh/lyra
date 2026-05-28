@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.context.context_evaluator import (
     ContextMetrics,
     ContextOptEvaluator,
@@ -11,7 +10,6 @@ from lyra_core.context.context_evaluator import (
     SectionCost,
     SessionCostTracker,
 )
-
 
 # ---------------------------------------------------------------------------
 # ContextOptEvaluator

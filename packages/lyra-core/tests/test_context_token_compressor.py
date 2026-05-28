@@ -2,14 +2,12 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.context.token_compressor import (
     CompressionGuideline,
     CompressionPolicy,
     CompressionStats,
     ToolOutputCompressor,
 )
-
 
 # ---------------------------------------------------------------------------
 # CompressionPolicy

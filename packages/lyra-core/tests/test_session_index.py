@@ -23,8 +23,8 @@ context-engineering report:
 from __future__ import annotations
 
 from pathlib import Path
-import pytest
 
+import pytest
 from lyra_core.memory.reasoning_bank import (
     Lesson,
     ReasoningBank,
@@ -40,7 +40,6 @@ from lyra_core.memory.session_index import (
     search_index,
     timeline_around,
 )
-
 
 # --- shared fixtures ------------------------------------------------------ #
 

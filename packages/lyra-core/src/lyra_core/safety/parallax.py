@@ -12,7 +12,6 @@ import uuid
 from dataclasses import dataclass
 from enum import Enum
 
-
 __all__ = [
     "CognitiveContext",
     "ContextType",

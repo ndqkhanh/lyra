@@ -22,7 +22,6 @@ import os
 from pathlib import Path
 
 import pytest
-
 from lyra_cli.interactive.config_store import (
     MAX_CONFIG_BYTES,
     Config,
@@ -34,7 +33,6 @@ from lyra_cli.interactive.sessions_store import (
     _atomic_write_text,
     _validate_session_id,
 )
-
 
 # --- Path-traversal rejection ----------------------------------------
 

@@ -20,8 +20,8 @@ decides whether to surface it or fold it into a metric.
 from __future__ import annotations
 
 import statistics
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable
 
 from .clear import _is_tool_message, _looks_already_cleared
 from .compactor import _tok_estimate

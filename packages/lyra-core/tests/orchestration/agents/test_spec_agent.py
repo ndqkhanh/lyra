@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import pytest
 import pytest_asyncio
-
 from lyra_core.orchestration.agent_base import AgentMetadata, AgentRole, AgentStatus
 from lyra_core.orchestration.agents.spec_agent import SpecKitSpecialistAgent
 from lyra_core.orchestration.message_bus import InMemoryMessageBus

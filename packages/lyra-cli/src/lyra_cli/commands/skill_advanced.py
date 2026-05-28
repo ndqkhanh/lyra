@@ -114,7 +114,7 @@ def skill_compose_command(session: InteractiveSession, args: str) -> str:
     output = [f"Creating composition skill: {skill_name}\n"]
     output.append("This feature requires interactive input.")
     output.append("Use the skill template system instead:")
-    output.append(f"  /skill new composition-skill")
+    output.append("  /skill new composition-skill")
 
     return "\n".join(output)
 

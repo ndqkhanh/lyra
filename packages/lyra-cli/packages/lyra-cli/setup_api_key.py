@@ -87,7 +87,7 @@ def main():
 
     # Also export to environment for current session
     os.environ['ANTHROPIC_API_KEY'] = api_key
-    print(f"✅ API key exported to environment")
+    print("✅ API key exported to environment")
 
     print("\n🚀 Lyra is ready to use!")
     print("\nNext steps:")

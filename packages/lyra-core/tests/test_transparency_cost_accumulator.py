@@ -1,13 +1,11 @@
 """Unit tests for CostAccumulator."""
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import pytest
-
-from lyra_core.transparency.event_store import EventStore, make_event
 from lyra_core.transparency.cost_accumulator import CostAccumulator, _cost_usd
+from lyra_core.transparency.event_store import EventStore, make_event
 
 
 @pytest.fixture

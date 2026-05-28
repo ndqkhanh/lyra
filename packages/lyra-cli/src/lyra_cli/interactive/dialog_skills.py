@@ -24,8 +24,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
+from lyra_skills.state import SkillsState, with_toggled
 from prompt_toolkit import Application
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.document import Document
@@ -34,8 +34,6 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import HSplit, Layout, Window
 from prompt_toolkit.layout.controls import BufferControl, FormattedTextControl
 from prompt_toolkit.styles import Style
-
-from lyra_skills.state import SkillsState, with_toggled
 
 __all__ = ["SkillsDialogResult", "build_entries", "run_skills_dialog"]
 
@@ -77,7 +75,7 @@ class SkillsDialogResult:
 # ── pure helpers (testable without a TTY) ────────────────────────
 
 
-def _classify_source(skill_path: str, packaged_root: Optional[Path]) -> str:
+def _classify_source(skill_path: str, packaged_root: Path | None) -> str:
     """Tag a skill's discovery root for the meta column."""
     try:
         sp = Path(skill_path).resolve()
@@ -208,7 +206,7 @@ def run_skills_dialog(
     *,
     state: SkillsState,
     utility_resolver=None,
-) -> Optional[SkillsDialogResult]:
+) -> SkillsDialogResult | None:
     """Drive the picker; return changes on Enter or None on Esc.
 
     The dialog mutates a *working* :class:`SkillsState` in memory and
@@ -373,7 +371,7 @@ def run_skills_dialog(
         # diff vs initial state to report what flipped
         before = initial_state.disabled
         after = new_state.disabled
-        changed = sorted((before ^ after))
+        changed = sorted(before ^ after)
         ui["result"] = SkillsDialogResult(
             new_state=new_state,
             changed_ids=changed,

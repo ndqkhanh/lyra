@@ -5,11 +5,11 @@ Learns from successful strategies and avoids negative transfer.
 Implements CoPS-style conservative retrieval for high precision.
 """
 
+import json
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional, Dict, Any
 from pathlib import Path
-import json
+from typing import Any
 
 
 @dataclass
@@ -18,13 +18,13 @@ class Strategy:
 
     strategy_id: str
     description: str
-    context: Dict[str, Any]  # When this strategy applies
-    actions: List[str]  # What actions to take
+    context: dict[str, Any]  # When this strategy applies
+    actions: list[str]  # What actions to take
     success_count: int = 0
     failure_count: int = 0
     confidence: float = 0.5
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    last_used: Optional[str] = None
+    last_used: str | None = None
 
     def get_success_rate(self) -> float:
         """Calculate success rate."""
@@ -55,10 +55,10 @@ class ExperienceRecord:
 
     record_id: str
     task_description: str
-    context: Dict[str, Any]
+    context: dict[str, Any]
     strategy_used: str
     outcome: str  # "success" or "failure"
-    evidence: List[str]  # Evidence supporting the outcome
+    evidence: list[str]  # Evidence supporting the outcome
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
 
 
@@ -77,8 +77,8 @@ class ExperienceMemory:
         self.data_dir = Path(data_dir)
         self.data_dir.mkdir(parents=True, exist_ok=True)
 
-        self.strategies: Dict[str, Strategy] = {}
-        self.experiences: List[ExperienceRecord] = []
+        self.strategies: dict[str, Strategy] = {}
+        self.experiences: list[ExperienceRecord] = []
 
         # Statistics
         self.stats = {
@@ -95,7 +95,7 @@ class ExperienceMemory:
         """Load experience memory from disk."""
         state_file = self.data_dir / "experience_memory.json"
         if state_file.exists():
-            with open(state_file, "r") as f:
+            with open(state_file) as f:
                 data = json.load(f)
 
                 # Load strategies
@@ -151,10 +151,10 @@ class ExperienceMemory:
     def add_experience(
         self,
         task_description: str,
-        context: Dict[str, Any],
+        context: dict[str, Any],
         strategy_used: str,
         outcome: str,
-        evidence: List[str]
+        evidence: list[str]
     ) -> str:
         """
         Add a new experience record.
@@ -204,8 +204,8 @@ class ExperienceMemory:
     def learn_strategy(
         self,
         description: str,
-        context: Dict[str, Any],
-        actions: List[str]
+        context: dict[str, Any],
+        actions: list[str]
     ) -> str:
         """
         Learn a new strategy from successful experience.
@@ -234,10 +234,10 @@ class ExperienceMemory:
 
     def retrieve_strategies(
         self,
-        context: Dict[str, Any],
+        context: dict[str, Any],
         min_confidence: float = 0.7,
         top_k: int = 3
-    ) -> List[Strategy]:
+    ) -> list[Strategy]:
         """
         Conservative retrieval of strategies (CoPS-style).
 
@@ -275,8 +275,8 @@ class ExperienceMemory:
 
     def _compute_context_similarity(
         self,
-        context1: Dict[str, Any],
-        context2: Dict[str, Any]
+        context1: dict[str, Any],
+        context2: dict[str, Any]
     ) -> float:
         """
         Compute similarity between two contexts.
@@ -302,7 +302,7 @@ class ExperienceMemory:
 
         return intersection / union
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get experience memory statistics."""
         success_rate = (
             self.stats["successful_experiences"] / self.stats["total_experiences"]

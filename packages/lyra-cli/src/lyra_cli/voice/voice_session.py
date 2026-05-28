@@ -12,14 +12,15 @@ from __future__ import annotations
 
 import re
 import threading
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from typing import Any, Callable
+from typing import Any
 
 from .sound_notifications import AgentState, SoundNotifier
-from .stt_engine import STTBackend, STTResult, transcribe_audio
-from .tts_engine import TTSBackend, TTSConfig, VoiceConfig, synthesize_speech
+from .stt_engine import STTBackend
+from .tts_engine import TTSBackend, VoiceConfig, synthesize_speech
 
 __all__ = [
     "SessionConfig",

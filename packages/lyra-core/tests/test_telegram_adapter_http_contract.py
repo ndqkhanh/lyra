@@ -21,10 +21,8 @@ Tested invariants:
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.gateway import (
     GatewayError,
-    InboundMessage,
     OutboundMessage,
 )
 from lyra_core.gateway.adapters import TelegramAdapter

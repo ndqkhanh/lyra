@@ -31,7 +31,7 @@ observed in a half-written state.
 """
 from __future__ import annotations
 
-from typing import Any, Callable
+from collections.abc import Callable
 
 from ..store.todo_store import TodoStore
 

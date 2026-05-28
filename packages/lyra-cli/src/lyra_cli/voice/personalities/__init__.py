@@ -1,12 +1,12 @@
 """Voice personality system — transforms agent responses with character traits."""
 
+from .butler import ButlerPersonality
+from .cowboy import CowboyPersonality
+from .drill_sergeant import DrillSergeantPersonality
 from .personality_base import PersonalityBase, PersonalityTrait, VoiceResponse
 from .pirate import PiratePersonality
 from .robot import RobotPersonality
-from .butler import ButlerPersonality
-from .cowboy import CowboyPersonality
 from .zen_master import ZenMasterPersonality
-from .drill_sergeant import DrillSergeantPersonality
 
 __all__ = [
     "PersonalityBase",

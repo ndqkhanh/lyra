@@ -17,16 +17,16 @@ from __future__ import annotations
 
 
 def test_pair_stream_constructs() -> None:
-    from lyra_core.hooks.lifecycle import LifecycleBus
     from lyra_cli.interactive.pair_stream import PairStream
+    from lyra_core.hooks.lifecycle import LifecycleBus
 
     sink: list[str] = []
     PairStream(sink=sink.append, bus=LifecycleBus())
 
 
 def test_attach_subscribes_for_every_event() -> None:
-    from lyra_core.hooks.lifecycle import LifecycleBus, LifecycleEvent
     from lyra_cli.interactive.pair_stream import PairStream
+    from lyra_core.hooks.lifecycle import LifecycleBus, LifecycleEvent
 
     bus = LifecycleBus()
     sink: list[str] = []
@@ -43,8 +43,8 @@ def test_attach_subscribes_for_every_event() -> None:
 
 
 def test_turn_start_written_to_sink() -> None:
-    from lyra_core.hooks.lifecycle import LifecycleBus, LifecycleEvent
     from lyra_cli.interactive.pair_stream import PairStream
+    from lyra_core.hooks.lifecycle import LifecycleBus, LifecycleEvent
 
     bus = LifecycleBus()
     sink: list[str] = []
@@ -54,8 +54,8 @@ def test_turn_start_written_to_sink() -> None:
 
 
 def test_detach_removes_subscriptions() -> None:
-    from lyra_core.hooks.lifecycle import LifecycleBus, LifecycleEvent
     from lyra_cli.interactive.pair_stream import PairStream
+    from lyra_core.hooks.lifecycle import LifecycleBus, LifecycleEvent
 
     bus = LifecycleBus()
     sink: list[str] = []
@@ -67,8 +67,8 @@ def test_detach_removes_subscriptions() -> None:
 
 
 def test_set_enabled_false_mutes_sink() -> None:
-    from lyra_core.hooks.lifecycle import LifecycleBus, LifecycleEvent
     from lyra_cli.interactive.pair_stream import PairStream
+    from lyra_core.hooks.lifecycle import LifecycleBus, LifecycleEvent
 
     bus = LifecycleBus()
     sink: list[str] = []
@@ -83,8 +83,8 @@ def test_set_enabled_false_mutes_sink() -> None:
 
 
 def test_tool_call_formatting() -> None:
-    from lyra_core.hooks.lifecycle import LifecycleBus, LifecycleEvent
     from lyra_cli.interactive.pair_stream import PairStream
+    from lyra_core.hooks.lifecycle import LifecycleBus, LifecycleEvent
 
     bus = LifecycleBus()
     sink: list[str] = []

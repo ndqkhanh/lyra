@@ -5,11 +5,11 @@ This layer stores high-level strategies learned from successful and failed attem
 Implements ReasoningBank-style experience learning with conservative retrieval.
 """
 
+import json
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Dict, Any
-import json
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -18,18 +18,18 @@ class ExperienceRecord:
 
     experience_id: str
     strategy_pattern: str  # "When X, do Y because Z"
-    success_contexts: List[Dict[str, Any]]  # Task features where it worked
-    failure_contexts: List[Dict[str, Any]]  # Task features where it failed
+    success_contexts: list[dict[str, Any]]  # Task features where it worked
+    failure_contexts: list[dict[str, Any]]  # Task features where it failed
     confidence_score: float  # 0.0 to 1.0
-    evidence: List[str]  # Trajectory IDs that support this strategy
+    evidence: list[str]  # Trajectory IDs that support this strategy
     created_at: str
-    last_used: Optional[str] = None
+    last_used: str | None = None
     usage_count: int = 0
     success_count: int = 0
     failure_count: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "experience_id": self.experience_id,
@@ -47,7 +47,7 @@ class ExperienceRecord:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ExperienceRecord":
+    def from_dict(cls, data: dict[str, Any]) -> "ExperienceRecord":
         """Create from dictionary."""
         return cls(**data)
 
@@ -64,7 +64,7 @@ class ExperienceMemoryStore:
     def _load_experiences(self):
         """Load experiences from disk."""
         if self.experiences_file.exists():
-            with open(self.experiences_file, "r") as f:
+            with open(self.experiences_file) as f:
                 data = json.load(f)
                 self.experiences = {
                     exp_id: ExperienceRecord.from_dict(exp_data)
@@ -88,16 +88,16 @@ class ExperienceMemoryStore:
         self._save_experiences()
         return experience.experience_id
 
-    def get_experience(self, experience_id: str) -> Optional[ExperienceRecord]:
+    def get_experience(self, experience_id: str) -> ExperienceRecord | None:
         """Get an experience by ID."""
         return self.experiences.get(experience_id)
 
     def search_experiences(
         self,
-        task_features: Dict[str, Any],
+        task_features: dict[str, Any],
         min_confidence: float = 0.5,
         limit: int = 5
-    ) -> List[ExperienceRecord]:
+    ) -> list[ExperienceRecord]:
         """
         Search for relevant experiences using conservative retrieval.
 
@@ -138,8 +138,8 @@ class ExperienceMemoryStore:
 
     def _context_similarity(
         self,
-        task_features: Dict[str, Any],
-        contexts: List[Dict[str, Any]]
+        task_features: dict[str, Any],
+        contexts: list[dict[str, Any]]
     ) -> float:
         """
         Calculate similarity between task and contexts.
@@ -166,7 +166,7 @@ class ExperienceMemoryStore:
         self,
         experience_id: str,
         success: bool,
-        task_features: Dict[str, Any]
+        task_features: dict[str, Any]
     ):
         """Record experience usage and update metrics."""
         if experience_id not in self.experiences:
@@ -195,7 +195,7 @@ class ExperienceMemoryStore:
 
         self._save_experiences()
 
-    def get_top_experiences(self, limit: int = 10) -> List[ExperienceRecord]:
+    def get_top_experiences(self, limit: int = 10) -> list[ExperienceRecord]:
         """Get top experiences by confidence and usage."""
         experiences = list(self.experiences.values())
         experiences.sort(

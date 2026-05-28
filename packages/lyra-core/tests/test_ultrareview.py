@@ -4,12 +4,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import pytest
-
 from lyra_core.brains.ultrareview import (
     CrossFamilyError,
     DiffHunk,
-    ReviewFinding,
     Reviewer,
+    ReviewFinding,
     Severity,
     UltraReviewPipeline,
     aggregate,

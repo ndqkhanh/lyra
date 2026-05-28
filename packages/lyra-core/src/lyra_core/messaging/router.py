@@ -1,6 +1,6 @@
 """Message router for pattern-based routing."""
 import re
-from typing import Callable
+from collections.abc import Callable
 
 from lyra_core.messaging.message import Message
 

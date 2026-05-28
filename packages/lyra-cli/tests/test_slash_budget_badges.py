@@ -18,10 +18,8 @@ import json
 from pathlib import Path
 
 import pytest
-
 from lyra_cli.interactive.budget import BudgetCap, BudgetStatus, enforce
 from lyra_cli.interactive.session import InteractiveSession
-
 
 # ---- BudgetCap.enforce ------------------------------------------------
 

@@ -1,9 +1,7 @@
 """Tests for Plan Approval Workflow (Plan 29.3)."""
 
 import pytest
-
 from lyra_core.teams.plan_approval import (
-    ApprovalDecision,
     PlanApprovalWorkflow,
     PlanState,
 )

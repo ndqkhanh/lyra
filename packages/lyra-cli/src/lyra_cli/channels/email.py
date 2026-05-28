@@ -14,14 +14,16 @@ correctly. Bare new-thread sends pass ``thread_id=""`` (empty).
 """
 from __future__ import annotations
 
+from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass
-from typing import Any, AsyncIterator, Callable
+from typing import Any
 
 from ._errors import (
     AdapterAuthError as EmailAuthError,
+)
+from ._errors import (
     FeatureUnavailable,
 )
-
 
 __all__ = [
     "EmailAdapter",

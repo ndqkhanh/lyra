@@ -11,7 +11,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
-from typing import Dict, List, Optional, Set, Tuple
 
 
 class SourceType(Enum):
@@ -28,7 +27,7 @@ class SourceType(Enum):
 
 
 # Baseline credibility for each source type (0.0 – 1.0).
-BASE_CREDIBILITY: Dict[SourceType, float] = {
+BASE_CREDIBILITY: dict[SourceType, float] = {
     SourceType.ACADEMIC_PAPER: 0.90,
     SourceType.OFFICIAL_DOCS: 0.85,
     SourceType.TECHNICAL_REPORT: 0.75,
@@ -50,8 +49,8 @@ class SourceProfile:
     title: str
     credibility_score: float
     citation_count: int
-    detected_biases: Tuple[str, ...] = field(default_factory=tuple)
-    cited_by: Tuple[str, ...] = field(default_factory=tuple)  # source_ids
+    detected_biases: tuple[str, ...] = field(default_factory=tuple)
+    cited_by: tuple[str, ...] = field(default_factory=tuple)  # source_ids
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
 
 
@@ -80,8 +79,8 @@ class SourceCredibility:
     """
 
     def __init__(self) -> None:
-        self._sources: Dict[str, SourceProfile] = {}
-        self._contradictions: List[ContradictionReport] = []
+        self._sources: dict[str, SourceProfile] = {}
+        self._contradictions: list[ContradictionReport] = []
 
     # ---- evaluation -----------------------------------------------------
 
@@ -92,8 +91,8 @@ class SourceCredibility:
         source_type: SourceType = SourceType.UNKNOWN,
         title: str = "",
         citation_count: int = 0,
-        detected_biases: Optional[List[str]] = None,
-        cited_by: Optional[List[str]] = None,
+        detected_biases: list[str] | None = None,
+        cited_by: list[str] | None = None,
     ) -> SourceProfile:
         """Create or update a source profile with a credibility score."""
         base = BASE_CREDIBILITY.get(source_type, 0.4)
@@ -121,26 +120,26 @@ class SourceCredibility:
         self._sources[source_id] = profile
         return profile
 
-    def get_source(self, source_id: str) -> Optional[SourceProfile]:
+    def get_source(self, source_id: str) -> SourceProfile | None:
         """Retrieve a source profile by ID."""
         return self._sources.get(source_id)
 
-    def get_all_sources(self) -> List[SourceProfile]:
+    def get_all_sources(self) -> list[SourceProfile]:
         """Return all evaluated sources."""
         return list(self._sources.values())
 
     # ---- citation chains ------------------------------------------------
 
-    def get_citation_chain(self, source_id: str) -> List[SourceProfile]:
+    def get_citation_chain(self, source_id: str) -> list[SourceProfile]:
         """
         Walk the citation graph backwards from *source_id*.
 
         Returns the chain starting from the root (most-cited ancestor)
         to the given source.
         """
-        chain: List[SourceProfile] = []
-        visited: Set[str] = set()
-        current_id: Optional[str] = source_id
+        chain: list[SourceProfile] = []
+        visited: set[str] = set()
+        current_id: str | None = source_id
 
         while current_id is not None and current_id not in visited:
             visited.add(current_id)
@@ -155,7 +154,7 @@ class SourceCredibility:
         chain.reverse()
         return chain
 
-    def get_consensus_score(self, source_ids: List[str]) -> float:
+    def get_consensus_score(self, source_ids: list[str]) -> float:
         """
         Compute an aggregate credibility score for a set of sources.
 
@@ -207,8 +206,8 @@ class SourceCredibility:
 
     def get_contradictions(
         self,
-        source_id: Optional[str] = None,
-    ) -> List[ContradictionReport]:
+        source_id: str | None = None,
+    ) -> list[ContradictionReport]:
         """Return contradictions, optionally filtered by source."""
         if source_id is None:
             return self._contradictions.copy()
@@ -221,7 +220,7 @@ class SourceCredibility:
 
     # ---- helpers --------------------------------------------------------
 
-    def _count_contradictions_in(self, source_ids: List[str]) -> int:
+    def _count_contradictions_in(self, source_ids: list[str]) -> int:
         """Count contradictions where *both* sources are in the given set.
 
         A contradiction only matters for consensus when both sides of the

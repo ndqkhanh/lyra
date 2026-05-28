@@ -14,7 +14,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from lyra_core.tools.apply_patch import (
     ApplyPatchError,
     make_apply_patch_tool,

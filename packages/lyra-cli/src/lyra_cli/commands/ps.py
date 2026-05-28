@@ -19,7 +19,6 @@ from __future__ import annotations
 import json
 import time
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich import box
@@ -141,8 +140,8 @@ def _scan_state_dirs(state_dir: Path) -> list[dict]:
 
 @ps_app.command("events")
 def events_command(
-    session: Optional[str] = typer.Option(None, "--session", "-s", help="Filter by session ID."),
-    event_type: Optional[str] = typer.Option(
+    session: str | None = typer.Option(None, "--session", "-s", help="Filter by session ID."),
+    event_type: str | None = typer.Option(
         None, "--type", "-t", help="Filter by event kind substring (e.g. 'Tool')."
     ),
     tail: int = typer.Option(20, "--tail", "-n", help="Show last N events."),

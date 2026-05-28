@@ -23,10 +23,8 @@ Scoring contract: ``BM25Tier.score(query)`` returns a list of
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable, Sequence
 
 from ..memory.procedural import ProceduralMemory, SkillRecord
-
 
 __all__ = ["BM25Hit", "BM25Tier"]
 

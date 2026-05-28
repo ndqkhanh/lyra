@@ -2,11 +2,11 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
-from typing import Any, AsyncIterator, List
+from typing import Any
 
 import pytest
-
 from lyra_cli.channels.base import ChannelAdapter, Inbound
 from lyra_cli.channels.sms import (
     FeatureUnavailable,
@@ -20,7 +20,7 @@ from lyra_cli.channels.sms import (
 class _FakeTwilio:
     name: str = "twilio"
     auth_ok: bool = True
-    sent: List[dict[str, Any]] = field(default_factory=list)
+    sent: list[dict[str, Any]] = field(default_factory=list)
     inbound: list[dict[str, Any]] = field(default_factory=list)
 
     async def login(self) -> None:

@@ -71,7 +71,7 @@ class GraphVisualizer:
         return self._to_ascii()
 
     def _to_dot(self) -> str:
-        lines = [f"digraph KnowledgeGraph {{"]
+        lines = ["digraph KnowledgeGraph {"]
         lines.append(f"  rankdir={self._style.direction};")
         lines.append(f'  fontsize={self._style.font_size};')
         lines.append("")

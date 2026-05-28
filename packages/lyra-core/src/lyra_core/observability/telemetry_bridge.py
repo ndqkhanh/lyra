@@ -63,7 +63,7 @@ class _NoopSpan:
     def end(self) -> None:
         pass
 
-    def __enter__(self) -> "_NoopSpan":
+    def __enter__(self) -> _NoopSpan:
         return self
 
     def __exit__(self, *_args: Any) -> None:
@@ -108,7 +108,7 @@ class TelemetryBridge:
         self._tool_spans: dict[tuple[str, str], Any] = {}
 
     @classmethod
-    def from_env(cls) -> "TelemetryBridge":
+    def from_env(cls) -> TelemetryBridge:
         """Create from environment — enabled iff LYRA_ENABLE_TELEMETRY=1."""
         return cls(enabled=_is_enabled())
 

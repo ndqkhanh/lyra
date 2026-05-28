@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from lyra_cli.autonomy.budget_manager import (
     BudgetExceededError,
     BudgetManager,

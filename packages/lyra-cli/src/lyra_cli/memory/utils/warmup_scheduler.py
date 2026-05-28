@@ -10,7 +10,6 @@ Implements exponential warmup schedule:
 """
 
 import logging
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +110,7 @@ class WarmupScheduler:
 
     def get_extraction_window(
         self, session_id: str, current_turn: int
-    ) -> Optional[int]:
+    ) -> int | None:
         """
         Get the number of recent turns to extract from.
 

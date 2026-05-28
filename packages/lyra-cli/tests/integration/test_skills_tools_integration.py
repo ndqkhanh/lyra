@@ -10,49 +10,26 @@ Tests exercise:
 from __future__ import annotations
 
 import ast
-import re
-from pathlib import Path
-from unittest.mock import MagicMock, patch
 
 import pytest
-
 from lyra_cli.skills.specialized import (
-    SpecializedSkillsRegistry,
     get_registry,
 )
 from lyra_cli.skills.specialized.code_reviewer import (
     CodeReviewerSkill,
-    ReviewFinding,
-    ReviewReport,
-    Severity,
-    FindingCategory,
-)
-from lyra_cli.skills.specialized.security_auditor import (
-    SecurityAuditorSkill,
-    AuditReport,
-    Vulnerability,
-    VulnerabilitySeverity,
-    OwaspCategory,
-)
-from lyra_cli.skills.specialized.test_generator import (
-    TestGeneratorSkill,
-    TestSuite,
-    GeneratedTest,
-    TestCase,
-)
-from lyra_cli.skills.specialized.performance_profiler import (
-    PerformanceProfilerSkill,
-    ProfileReport,
-    ProfileResult,
-    PerformanceIssue,
-    ComplexityClass,
 )
 from lyra_cli.skills.specialized.dependency_analyzer import (
     DependencyAnalyzerSkill,
-    DependencyReport,
-    ImportInfo,
 )
-
+from lyra_cli.skills.specialized.performance_profiler import (
+    PerformanceProfilerSkill,
+)
+from lyra_cli.skills.specialized.security_auditor import (
+    SecurityAuditorSkill,
+)
+from lyra_cli.skills.specialized.test_generator import (
+    TestGeneratorSkill,
+)
 
 # =========================================================================
 # Test data

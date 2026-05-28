@@ -30,10 +30,9 @@ from __future__ import annotations
 
 import json
 import os
-import socket
 import urllib.error
 import urllib.request
-from typing import Any, Optional
+from typing import Any
 
 from lyra_harness_core.messages import Message, StopReason, ToolCall
 from lyra_harness_core.models import LLMProvider
@@ -58,10 +57,10 @@ class GeminiLLM(LLMProvider):
 
     def __init__(
         self,
-        model: Optional[str] = None,
+        model: str | None = None,
         *,
-        api_key: Optional[str] = None,
-        base_url: Optional[str] = None,
+        api_key: str | None = None,
+        base_url: str | None = None,
         timeout: float = 120.0,
     ) -> None:
         self.api_key = (
@@ -97,7 +96,7 @@ class GeminiLLM(LLMProvider):
     def generate(
         self,
         messages: list[Message],
-        tools: Optional[list[dict[str, Any]]] = None,
+        tools: list[dict[str, Any]] | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.0,
     ) -> Message:
@@ -148,7 +147,7 @@ class GeminiLLM(LLMProvider):
             raise ProviderHTTPError(
                 f"gemini HTTP {e.code}: {body.strip()[:500] or e.reason}"
             ) from e
-        except (urllib.error.URLError, socket.timeout, ConnectionError, OSError) as e:
+        except (TimeoutError, urllib.error.URLError, ConnectionError, OSError) as e:
             raise ProviderHTTPError(
                 f"gemini unreachable at {self.base_url}: {e}"
             ) from e
@@ -174,7 +173,7 @@ class GeminiLLM(LLMProvider):
         self._record_usage(parsed.get("usageMetadata"))
         return self._candidate_to_msg(candidates[0])
 
-    def _record_usage(self, usage_metadata: Optional[dict[str, Any]]) -> None:
+    def _record_usage(self, usage_metadata: dict[str, Any] | None) -> None:
         """Normalise Gemini's ``usageMetadata`` into the shared shape.
 
         Gemini emits ``promptTokenCount`` / ``candidatesTokenCount`` /

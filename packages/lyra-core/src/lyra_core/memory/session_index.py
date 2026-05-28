@@ -35,10 +35,9 @@ from __future__ import annotations
 import sqlite3
 import time
 from dataclasses import dataclass
-from typing import Optional, Protocol
+from typing import Protocol
 
 from .reasoning_bank import Lesson, TrajectoryOutcome
-
 
 # Polarity → emoji glyph. The single-cell glyph is two display
 # columns wide in most monospace fonts; widening it would push past
@@ -116,7 +115,7 @@ def _truncate_title(title: str, *, cap: int = 60) -> str:
     return title[: cap - 1] + "…"
 
 
-def _format_ago(then_julianday: float, *, now: Optional[float] = None) -> str:
+def _format_ago(then_julianday: float, *, now: float | None = None) -> str:
     """Short human-readable delta string for a Julian-day timestamp."""
     then_epoch = (then_julianday - _JD_EPOCH_OFFSET) * 86400.0
     now_epoch = now if now is not None else time.time()
@@ -155,7 +154,7 @@ def _has_sqlite_conn(bank: object) -> bool:
 
 
 def _index_rows_sqlite(
-    bank: object, limit: int, now: Optional[float]
+    bank: object, limit: int, now: float | None
 ) -> tuple[IndexRow, ...]:
     """SQLite fast path — one query, pulls ``inserted_at`` inline.
 
@@ -193,7 +192,7 @@ def index_rows(
     bank: IndexBank,
     *,
     limit: int = 20,
-    now: Optional[float] = None,
+    now: float | None = None,
 ) -> tuple[IndexRow, ...]:
     """Most-recent-first index rows for the top ``limit`` lessons.
 
@@ -213,7 +212,7 @@ def render_session_index(
     *,
     limit: int = 20,
     max_bytes: int = 1024,
-    now: Optional[float] = None,
+    now: float | None = None,
 ) -> str:
     """Render a ≤``max_bytes`` markdown index for SessionStart.
 
@@ -258,7 +257,7 @@ def search_index(
     *,
     limit: int = 10,
     polarity: TrajectoryOutcome | None = None,
-    now: Optional[float] = None,
+    now: float | None = None,
 ) -> tuple[IndexRow, ...]:
     """Search by query; return index rows only (no bodies).
 
@@ -279,7 +278,7 @@ def timeline_around(
     anchor_id: str,
     *,
     window: int = 5,
-    now: Optional[float] = None,
+    now: float | None = None,
 ) -> tuple[IndexRow, ...]:
     """Up to ``window`` lessons on each side of ``anchor_id``.
 
@@ -308,7 +307,7 @@ def _timeline_sqlite(
     bank: object,
     anchor_id: str,
     window: int,
-    now: Optional[float],
+    now: float | None,
 ) -> tuple[IndexRow, ...]:
     """SQLite timeline window — chronologically ordered around an anchor.
 

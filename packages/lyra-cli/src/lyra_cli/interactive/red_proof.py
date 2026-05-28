@@ -28,7 +28,6 @@ What this module deliberately does NOT do:
 """
 from __future__ import annotations
 
-import shlex
 import subprocess
 import sys
 from dataclasses import dataclass

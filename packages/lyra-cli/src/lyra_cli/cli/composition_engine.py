@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -18,7 +18,7 @@ class StageResult:
     name: str
     output: Any
     success: bool
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class CompositionEngine:

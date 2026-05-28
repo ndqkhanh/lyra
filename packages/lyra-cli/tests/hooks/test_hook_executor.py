@@ -1,10 +1,10 @@
 """Tests for HookExecutor."""
 
+
 import pytest
-from pathlib import Path
 from lyra_cli.core.hook_executor import HookExecutor, HookResult
-from lyra_cli.core.hook_registry import HookRegistry
 from lyra_cli.core.hook_metadata import HookType
+from lyra_cli.core.hook_registry import HookRegistry
 
 
 @pytest.fixture

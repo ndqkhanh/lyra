@@ -2,6 +2,7 @@
 
 import typer
 from rich.console import Console
+
 from lyra_cli.cli.output import OutputFormatter
 
 app = typer.Typer()

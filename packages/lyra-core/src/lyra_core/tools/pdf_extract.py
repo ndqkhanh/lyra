@@ -11,9 +11,9 @@ raising — the agent stays on the happy path.
 """
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable
 
 __all__ = ["PdfExtractError", "extract_text_from_pdf", "make_pdf_extract_tool"]
 

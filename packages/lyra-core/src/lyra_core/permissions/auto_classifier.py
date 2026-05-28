@@ -15,8 +15,7 @@ from __future__ import annotations
 import enum
 import re
 from dataclasses import dataclass, field
-from typing import Any, Iterable
-
+from typing import Any
 
 _LBL_REFUSE: str = "LBL-AUTO-REFUSE"
 

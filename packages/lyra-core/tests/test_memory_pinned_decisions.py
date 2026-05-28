@@ -11,7 +11,6 @@ from lyra_core.memory.temporal_fact_store import (
     TemporalFactStore,
 )
 
-
 # ---------------------------------------------------------------------------
 # DecisionExtractor — basic extraction
 # ---------------------------------------------------------------------------

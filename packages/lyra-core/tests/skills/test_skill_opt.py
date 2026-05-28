@@ -1,7 +1,6 @@
 """Tests for SkillOpt — text-space optimization for skill prompts."""
 
 import pytest
-
 from lyra_core.skills.skill_opt import (
     OptimizationPass,
     OptimizationStrategy,

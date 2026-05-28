@@ -21,12 +21,11 @@ backend is an optional helper that callers wire up.
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Iterable, Mapping, Sequence
 
 from .registry import Skill, SkillNotFound, SkillRegistry
-
 
 __all__ = [
     "Federator",
@@ -74,7 +73,7 @@ class SkillManifest:
         )
 
     @classmethod
-    def from_json(cls, payload: str) -> "SkillManifest":
+    def from_json(cls, payload: str) -> SkillManifest:
         try:
             data = json.loads(payload)
         except json.JSONDecodeError as exc:

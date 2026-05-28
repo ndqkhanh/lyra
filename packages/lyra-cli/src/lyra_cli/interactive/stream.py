@@ -20,8 +20,6 @@ Strategy:
 
 from __future__ import annotations
 
-from typing import Optional
-
 
 class MarkdownStreamState:
     """Deferred-flush buffer for streaming markdown with code fences."""
@@ -31,7 +29,7 @@ class MarkdownStreamState:
     def __init__(self) -> None:
         self._buf: str = ""
 
-    def push(self, delta: str) -> Optional[str]:
+    def push(self, delta: str) -> str | None:
         """Append ``delta``; return the prefix that is safe to flush now.
 
         Returns ``None`` (or an empty string, tolerated by callers)

@@ -1,12 +1,11 @@
 """Sequential pipeline - Execute steps in sequence"""
 
-from typing import List
 
 
 class SequentialPipeline:
     """Sequential pipeline execution (lyra -p pattern)"""
 
-    def __init__(self, steps: List[str]):
+    def __init__(self, steps: list[str]):
         self.steps = steps
         self.results = []
 
@@ -48,6 +47,6 @@ class SequentialPipeline:
         return True
 
 
-def create_pipeline(steps: List[str]) -> SequentialPipeline:
+def create_pipeline(steps: list[str]) -> SequentialPipeline:
     """Create a sequential pipeline"""
     return SequentialPipeline(steps)

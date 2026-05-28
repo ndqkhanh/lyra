@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_cli.observatory.classifier import (
     Classification,
     TaskCategory,
@@ -15,7 +14,6 @@ from lyra_cli.observatory.fixtures.sample_transcripts import (
     DEBUGGING_SESSION,
     RETRY_STREAK,
 )
-
 
 # --- category resolution ---------------------------------------------------
 

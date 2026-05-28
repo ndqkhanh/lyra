@@ -232,7 +232,7 @@ class GraphQuerier:
             return 0.0
 
         n = len(node_ids)
-        ranks: dict[str, float] = {nid: 1.0 / n for nid in node_ids}
+        ranks: dict[str, float] = dict.fromkeys(node_ids, 1.0 / n)
 
         for _ in range(iterations):
             new_ranks: dict[str, float] = {}

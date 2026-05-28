@@ -19,16 +19,15 @@ Usage:
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
-from typing import List, Optional, Dict, Set, Tuple
 from datetime import datetime
 from enum import Enum
-import re
 
 
 class ToolCategory(Enum):
     """Tool categories."""
-    
+
     FILE_OPS = "file_operations"
     CODE_ANALYSIS = "code_analysis"
     TESTING = "testing"
@@ -42,20 +41,20 @@ class ToolCategory(Enum):
 @dataclass
 class Tool:
     """A tool definition."""
-    
+
     name: str
     description: str
     category: ToolCategory
-    triggers: List[str] = field(default_factory=list)
-    prerequisites: List[str] = field(default_factory=list)
-    follows: List[str] = field(default_factory=list)  # Tools that typically follow this one
+    triggers: list[str] = field(default_factory=list)
+    prerequisites: list[str] = field(default_factory=list)
+    follows: list[str] = field(default_factory=list)  # Tools that typically follow this one
     confidence: float = 1.0
 
 
 @dataclass
 class ToolSuggestion:
     """A tool suggestion."""
-    
+
     tool: Tool
     reason: str
     confidence: float
@@ -66,9 +65,9 @@ class ToolSuggestion:
 @dataclass
 class ToolChain:
     """A sequence of tools that work together."""
-    
+
     name: str
-    tools: List[str]
+    tools: list[str]
     description: str
     success_rate: float = 1.0
     usage_count: int = 0
@@ -84,12 +83,12 @@ class ContextAnalyzer:
     - Pattern matching
     - Context scoring
     """
-    
+
     def __init__(self):
         """Initialize the context analyzer."""
         self.patterns = self._load_patterns()
-    
-    def _load_patterns(self) -> Dict[str, List[str]]:
+
+    def _load_patterns(self) -> dict[str, list[str]]:
         """Load context patterns.
         
         Returns:
@@ -136,8 +135,8 @@ class ContextAnalyzer:
                 r"\bwhere is\b",
             ],
         }
-    
-    def analyze(self, context: str) -> Dict[str, float]:
+
+    def analyze(self, context: str) -> dict[str, float]:
         """Analyze context and return intent scores.
         
         Args:
@@ -148,23 +147,23 @@ class ContextAnalyzer:
         """
         scores = {}
         context_lower = context.lower()
-        
+
         for intent, patterns in self.patterns.items():
             score = 0.0
             matches = 0
-            
+
             for pattern in patterns:
                 if re.search(pattern, context_lower):
                     matches += 1
-            
+
             if matches > 0:
                 score = min(1.0, matches / len(patterns) * 2)
-            
+
             scores[intent] = score
-        
+
         return scores
-    
-    def extract_entities(self, context: str) -> Dict[str, List[str]]:
+
+    def extract_entities(self, context: str) -> dict[str, list[str]]:
         """Extract entities from context.
         
         Args:
@@ -179,23 +178,23 @@ class ContextAnalyzer:
             "errors": [],
             "commands": [],
         }
-        
+
         # Extract file paths
         file_pattern = r'\b[\w/.-]+\.(py|js|ts|rs|go|java|cpp|h)\b'
         entities["files"] = re.findall(file_pattern, context)
-        
+
         # Extract function names
         func_pattern = r'\b[a-z_][a-z0-9_]*\(\)'
         entities["functions"] = re.findall(func_pattern, context)
-        
+
         # Extract error messages
         error_pattern = r'Error: .+'
         entities["errors"] = re.findall(error_pattern, context)
-        
+
         # Extract commands
         command_pattern = r'/\w+'
         entities["commands"] = re.findall(command_pattern, context)
-        
+
         return entities
 
 
@@ -209,15 +208,15 @@ class ToolRecommender:
     - Tool chaining
     - Confidence scoring
     """
-    
+
     def __init__(self):
         """Initialize the tool recommender."""
         self.tools = self._load_tools()
         self.chains = self._load_chains()
-        self.usage_history: List[Tuple[str, datetime]] = []
+        self.usage_history: list[tuple[str, datetime]] = []
         self.analyzer = ContextAnalyzer()
-    
-    def _load_tools(self) -> List[Tool]:
+
+    def _load_tools(self) -> list[Tool]:
         """Load available tools.
         
         Returns:
@@ -265,8 +264,8 @@ class ToolRecommender:
                 triggers=["find", "search", "where"],
             ),
         ]
-    
-    def _load_chains(self) -> List[ToolChain]:
+
+    def _load_chains(self) -> list[ToolChain]:
         """Load tool chains.
         
         Returns:
@@ -289,8 +288,8 @@ class ToolRecommender:
                 description="Debug, fix, verify",
             ),
         ]
-    
-    def recommend(self, context: str, limit: int = 5) -> List[ToolSuggestion]:
+
+    def recommend(self, context: str, limit: int = 5) -> list[ToolSuggestion]:
         """Recommend tools based on context.
         
         Args:
@@ -303,13 +302,13 @@ class ToolRecommender:
         # Analyze context
         intent_scores = self.analyzer.analyze(context)
         entities = self.analyzer.extract_entities(context)
-        
+
         # Score tools
         suggestions = []
-        
+
         for tool in self.tools:
             score = self._score_tool(tool, context, intent_scores, entities)
-            
+
             if score > 0.3:  # Threshold
                 suggestion = ToolSuggestion(
                     tool=tool,
@@ -318,18 +317,18 @@ class ToolRecommender:
                     context_match=score,
                 )
                 suggestions.append(suggestion)
-        
+
         # Sort by confidence
         suggestions.sort(key=lambda s: s.confidence, reverse=True)
-        
+
         return suggestions[:limit]
-    
+
     def _score_tool(
         self,
         tool: Tool,
         context: str,
-        intent_scores: Dict[str, float],
-        entities: Dict[str, List[str]],
+        intent_scores: dict[str, float],
+        entities: dict[str, list[str]],
     ) -> float:
         """Score a tool for the given context.
         
@@ -344,37 +343,37 @@ class ToolRecommender:
         """
         score = 0.0
         context_lower = context.lower()
-        
+
         # Check triggers
         for trigger in tool.triggers:
             if trigger in context_lower:
                 score += 0.3
-        
+
         # Check category match with intents
         category_name = tool.category.value.replace("_", " ")
         for intent, intent_score in intent_scores.items():
             if intent in category_name or category_name in intent:
                 score += intent_score * 0.5
-        
+
         # Boost if recently used
         recent_tools = [t for t, _ in self.usage_history[-5:]]
         if tool.name in recent_tools:
             score += 0.2
-        
+
         # Boost if follows recent tool
         if recent_tools:
             last_tool = recent_tools[-1]
             for t in self.tools:
                 if t.name == last_tool and tool.name in t.follows:
                     score += 0.4
-        
+
         return min(1.0, score)
-    
+
     def _generate_reason(
         self,
         tool: Tool,
-        intent_scores: Dict[str, float],
-        entities: Dict[str, List[str]],
+        intent_scores: dict[str, float],
+        entities: dict[str, list[str]],
     ) -> str:
         """Generate reason for suggestion.
         
@@ -387,24 +386,24 @@ class ToolRecommender:
             Reason string
         """
         reasons = []
-        
+
         # Check intents
         for intent, score in intent_scores.items():
             if score > 0.5:
                 reasons.append(f"Context suggests {intent}")
-        
+
         # Check entities
         if entities["errors"]:
             reasons.append("Errors detected")
-        
+
         if entities["files"]:
             reasons.append(f"Working with {len(entities['files'])} files")
-        
+
         if not reasons:
             reasons.append("Commonly used in this context")
-        
+
         return "; ".join(reasons)
-    
+
     def record_usage(self, tool_name: str) -> None:
         """Record tool usage.
         
@@ -412,12 +411,12 @@ class ToolRecommender:
             tool_name: Name of tool used
         """
         self.usage_history.append((tool_name, datetime.now()))
-        
+
         # Trim history
         if len(self.usage_history) > 100:
             self.usage_history = self.usage_history[-100:]
-    
-    def suggest_chain(self, current_tool: str) -> Optional[ToolChain]:
+
+    def suggest_chain(self, current_tool: str) -> ToolChain | None:
         """Suggest a tool chain based on current tool.
         
         Args:
@@ -429,7 +428,7 @@ class ToolRecommender:
         for chain in self.chains:
             if current_tool in chain.tools:
                 return chain
-        
+
         return None
 
 
@@ -440,13 +439,13 @@ class EagerToolEngine:
     Combines context analysis, tool recommendation, and learning
     to provide proactive tool suggestions.
     """
-    
+
     def __init__(self):
         """Initialize the eager tool engine."""
         self.recommender = ToolRecommender()
         self.enabled = True
-    
-    def suggest_tools(self, context: str, limit: int = 5) -> List[ToolSuggestion]:
+
+    def suggest_tools(self, context: str, limit: int = 5) -> list[ToolSuggestion]:
         """Suggest tools for the given context.
         
         Args:
@@ -458,9 +457,9 @@ class EagerToolEngine:
         """
         if not self.enabled:
             return []
-        
+
         return self.recommender.recommend(context, limit)
-    
+
     def record_tool_usage(self, tool_name: str) -> None:
         """Record that a tool was used.
         
@@ -468,8 +467,8 @@ class EagerToolEngine:
             tool_name: Name of tool
         """
         self.recommender.record_usage(tool_name)
-    
-    def suggest_next_tool(self, current_tool: str) -> Optional[ToolSuggestion]:
+
+    def suggest_next_tool(self, current_tool: str) -> ToolSuggestion | None:
         """Suggest next tool in a chain.
         
         Args:
@@ -479,14 +478,14 @@ class EagerToolEngine:
             Suggestion or None
         """
         chain = self.recommender.suggest_chain(current_tool)
-        
+
         if chain:
             # Find current position in chain
             try:
                 idx = chain.tools.index(current_tool)
                 if idx < len(chain.tools) - 1:
                     next_tool_name = chain.tools[idx + 1]
-                    
+
                     # Find tool
                     for tool in self.recommender.tools:
                         if tool.name == next_tool_name:
@@ -499,13 +498,13 @@ class EagerToolEngine:
                             )
             except ValueError:
                 pass
-        
+
         return None
-    
+
     def enable(self) -> None:
         """Enable eager suggestions."""
         self.enabled = True
-    
+
     def disable(self) -> None:
         """Disable eager suggestions."""
         self.enabled = False

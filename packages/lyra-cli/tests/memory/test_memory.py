@@ -1,11 +1,10 @@
 """Tests for memory system."""
 
-import pytest
-from pathlib import Path
 from datetime import datetime
+
+from lyra_cli.core.memory_manager import MemoryManager
 from lyra_cli.core.memory_metadata import MemoryMetadata, MemoryType
 from lyra_cli.core.memory_storage import MemoryStorage
-from lyra_cli.core.memory_manager import MemoryManager
 
 
 def test_memory_metadata_creation():

@@ -5,7 +5,6 @@ from __future__ import annotations
 import time
 
 import pytest
-
 from lyra_cli.infrastructure.reliability import (
     CircuitBreaker,
     CircuitBreakerConfig,

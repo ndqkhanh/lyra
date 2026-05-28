@@ -13,7 +13,7 @@ from lyra_core.orchestration.models.requirements import (
     StoryStatus,
     UserStory,
 )
-from lyra_core.orchestration.protocol import Message, MessageType
+from lyra_core.orchestration.protocol import Message
 
 
 class ProductManagerAgent(BaseAgent):

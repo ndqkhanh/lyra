@@ -34,7 +34,6 @@ import math
 import time
 from dataclasses import dataclass
 
-
 # Per-MemoryKind half-life defaults (seconds). The string keys mirror
 # :class:`~lyra_core.memory.auto_memory.MemoryKind` values; we don't
 # import the enum here to keep this module's dependency tree minimal.

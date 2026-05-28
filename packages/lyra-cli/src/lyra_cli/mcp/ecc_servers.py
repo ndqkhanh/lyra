@@ -1,6 +1,6 @@
 """ECC MCP servers - 27 servers from Everything Claude Code"""
 
-from .mcp_manager import MCPServer, MCPManager
+from .mcp_manager import MCPManager, MCPServer
 
 
 def register_ecc_servers(manager: MCPManager):

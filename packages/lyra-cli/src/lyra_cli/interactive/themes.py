@@ -36,7 +36,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, TypedDict
 
-
 # ---------------------------------------------------------------------------
 # Legacy 7-key Theme — kept so existing call-sites and tests keep working
 # ---------------------------------------------------------------------------

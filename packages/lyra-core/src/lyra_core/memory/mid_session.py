@@ -25,9 +25,8 @@ itself) only sees promoted lessons.
 from __future__ import annotations
 
 import time
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
-from typing import Callable
 
 from .distillers import HeuristicDistiller
 from .reasoning_bank import (

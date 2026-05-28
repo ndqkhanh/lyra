@@ -3,20 +3,18 @@
 These tests verify that all UI components update correctly during
 realistic agent scenarios.
 """
-import asyncio
 import time
 
 import pytest
-
 from lyra_core.observability.event_bus import (
     EventBus,
-    LLMCallStarted,
     LLMCallFinished,
+    LLMCallStarted,
     LLMTokenChunk,
-    SubagentSpawned,
     SubagentFinished,
-    ToolCallStarted,
+    SubagentSpawned,
     ToolCallFinished,
+    ToolCallStarted,
 )
 from lyra_core.observability.process_tree import ProcessTree
 

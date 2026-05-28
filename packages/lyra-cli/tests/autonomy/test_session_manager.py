@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from lyra_cli.autonomy.session_manager import (
     CheckpointNotFoundError,
     SessionCheckpoint,

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Test Phase 4: Tool Call Formatting"""
 
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
-from lyra_cli.ui.tool_formatter import (
-    ToolCall, ToolResult, Diagnostic, DiffHunk, ToolCallFormatter
-)
+from lyra_cli.ui.tool_formatter import Diagnostic, DiffHunk, ToolCall, ToolCallFormatter, ToolResult
+
 
 def print_section(title: str):
     print("\n" + "=" * 80)

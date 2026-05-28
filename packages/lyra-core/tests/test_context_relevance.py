@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.context.relevance import (
     COMPACT_TOOL_NAME,
     DEFAULT_WEIGHTS,
@@ -11,7 +10,6 @@ from lyra_core.context.relevance import (
     compact_messages_relevance,
     score_message,
 )
-
 
 # ────────────────────────────────────────────────────────────────
 # score_message

@@ -8,12 +8,12 @@ with 51× F1 improvement.
 Based on research: docs/153 (memtier-llm-distillation-and-the-three-invariants.md)
 """
 
-from typing import List, Dict, Any, Optional
+import hashlib
+import json
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-import json
-import hashlib
+from typing import Any
 
 
 @dataclass
@@ -21,11 +21,11 @@ class SemanticFact:
     """Distilled semantic fact from episodic memory."""
     id: str
     fact: str
-    source_sessions: List[str]
-    source_entry_ids: List[str]
+    source_sessions: list[str]
+    source_entry_ids: list[str]
     extracted_at: datetime
     cognitive_weight: float
-    tags: List[str]
+    tags: list[str]
     confidence: float  # LLM confidence in this fact
 
 
@@ -40,7 +40,7 @@ class SemanticConsolidator:
     def __init__(
         self,
         episodic_memory,
-        semantic_store_path: Optional[Path] = None,
+        semantic_store_path: Path | None = None,
         llm_model: str = "deepseek-v4-flash"
     ):
         """
@@ -60,14 +60,14 @@ class SemanticConsolidator:
         self.semantic_store_path.parent.mkdir(parents=True, exist_ok=True)
 
         self.llm_model = llm_model
-        self.facts: List[SemanticFact] = self._load_facts()
+        self.facts: list[SemanticFact] = self._load_facts()
 
-    def _load_facts(self) -> List[SemanticFact]:
+    def _load_facts(self) -> list[SemanticFact]:
         """Load existing semantic facts from disk."""
         if not self.semantic_store_path.exists():
             return []
 
-        with open(self.semantic_store_path, 'r') as f:
+        with open(self.semantic_store_path) as f:
             facts_data = json.load(f)
 
         facts = []
@@ -98,8 +98,8 @@ class SemanticConsolidator:
 
     def _cluster_entries(
         self,
-        entries: List[Any]
-    ) -> List[List[Any]]:
+        entries: list[Any]
+    ) -> list[list[Any]]:
         """
         Cluster episodic entries by session and time window.
 
@@ -112,7 +112,7 @@ class SemanticConsolidator:
             List of entry clusters
         """
         # Group by session
-        session_groups: Dict[str, List[Any]] = {}
+        session_groups: dict[str, list[Any]] = {}
         for entry in entries:
             if entry.session_id not in session_groups:
                 session_groups[entry.session_id] = []
@@ -147,9 +147,9 @@ class SemanticConsolidator:
 
     def _extract_facts_from_cluster(
         self,
-        cluster: List[Any],
+        cluster: list[Any],
         llm
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Extract semantic facts from a cluster using LLM.
 
@@ -230,7 +230,7 @@ Extract only novel, durable facts. Be concise."""
         llm,
         days_back: int = 1,
         dedup_threshold: float = 0.7
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Run consolidation: extract facts from recent episodic entries.
 
@@ -320,7 +320,7 @@ Extract only novel, durable facts. Be concise."""
         query: str,
         k: int = 5,
         min_confidence: float = 0.0
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Search semantic facts (simple keyword matching).
 

@@ -4,7 +4,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from lyra_core.plugins import (
     PluginManifest,
     PluginMetadata,
@@ -12,7 +11,6 @@ from lyra_core.plugins import (
     PluginValidationError,
     load_plugin,
 )
-
 
 # ---- registration validation ---------------------------------------
 

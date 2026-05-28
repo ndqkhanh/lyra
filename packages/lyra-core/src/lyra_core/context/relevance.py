@@ -26,9 +26,9 @@ override per-task. The defaults are tuned so a score >= 0.5 means
 from __future__ import annotations
 
 import re
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
 
 from .clear import _is_tool_message, _span_id
 from .compact_validate import (

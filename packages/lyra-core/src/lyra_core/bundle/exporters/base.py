@@ -8,7 +8,6 @@ from typing import Literal
 
 from ..source_bundle import SourceBundle
 
-
 ExportTarget = Literal["claude-code", "cursor", "codex", "gemini-cli"]
 
 

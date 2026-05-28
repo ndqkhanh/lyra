@@ -21,9 +21,10 @@ Dispatch semantics:
 from __future__ import annotations
 
 import importlib
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Mapping
+from typing import Any
 
 from .manifest import (
     PLUGIN_MANIFEST_FILES,
@@ -31,7 +32,6 @@ from .manifest import (
     PluginManifestSpec,
     load_manifest,
 )
-
 
 __all__ = [
     "LoadedPlugin",

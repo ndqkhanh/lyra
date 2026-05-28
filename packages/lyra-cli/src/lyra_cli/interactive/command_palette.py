@@ -18,9 +18,6 @@ mental models in sync.
 """
 from __future__ import annotations
 
-import re
-from typing import Optional
-
 from rich.text import Text
 
 __all__ = ["fuzzy_filter", "render_palette"]
@@ -116,7 +113,7 @@ def _highlight(text: str, query: str) -> Text:
 def render_palette(
     specs: list,
     *,
-    query: Optional[str] = None,
+    query: str | None = None,
     max_height: int = 12,
 ) -> Text:
     """Render the palette for the matched specs.

@@ -18,8 +18,8 @@ import shutil
 import subprocess
 import tempfile
 import time
+from collections.abc import Iterable, Mapping
 from pathlib import Path
-from typing import Iterable, Mapping
 
 from .base import CommandResult, SandboxError
 
@@ -118,7 +118,7 @@ class LocalSandbox:
         shutil.rmtree(self._workspace, ignore_errors=True)
         self._closed = True
 
-    def __enter__(self) -> "LocalSandbox":
+    def __enter__(self) -> LocalSandbox:
         return self
 
     def __exit__(self, exc_type, exc, tb) -> None:

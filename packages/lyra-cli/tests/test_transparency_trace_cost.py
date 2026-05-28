@@ -4,8 +4,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from typer.testing import CliRunner
-
 from lyra_cli.commands.trace import (
     _aggregate_cost,
     _classify_kind,
@@ -13,6 +11,7 @@ from lyra_cli.commands.trace import (
     _load_events,
     trace_app,
 )
+from typer.testing import CliRunner
 
 runner = CliRunner()
 

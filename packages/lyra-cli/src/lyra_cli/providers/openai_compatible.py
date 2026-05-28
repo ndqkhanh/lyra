@@ -52,15 +52,14 @@ from __future__ import annotations
 
 import json
 import os
-import socket
 import urllib.error
 import urllib.request
+from collections.abc import Callable, Iterable, Iterator
 from dataclasses import dataclass
-from typing import Any, Callable, Iterable, Iterator, Optional
+from typing import Any
 
 from lyra_harness_core.messages import Message, StopReason, ToolCall
 from lyra_harness_core.models import LLMProvider
-
 
 # ---------------------------------------------------------------------------
 # Errors
@@ -105,7 +104,7 @@ class _ReasoningConfig:
 
     use_max_completion_tokens: bool = False
     supports_reasoning_effort: bool = False
-    default_reasoning_effort: Optional[str] = None  # "low" | "medium" | "high"
+    default_reasoning_effort: str | None = None  # "low" | "medium" | "high"
 
 
 @dataclass(frozen=True)
@@ -124,12 +123,12 @@ class ProviderRouting:
     wire payload stays minimal.
     """
 
-    sort: Optional[str] = None                 # "price" | "throughput" | "latency"
+    sort: str | None = None                 # "price" | "throughput" | "latency"
     only: tuple[str, ...] = ()                  # whitelist of upstream provider names
     ignore: tuple[str, ...] = ()                # blacklist
     order: tuple[str, ...] = ()                 # priority order to try
-    require_parameters: Optional[bool] = None   # reject providers that drop unknown params
-    data_collection: Optional[str] = None       # "allow" | "deny"
+    require_parameters: bool | None = None   # reject providers that drop unknown params
+    data_collection: str | None = None       # "allow" | "deny"
 
     def to_payload(self) -> dict[str, Any]:
         """Return the ``provider`` sub-object for ``extra_body``.
@@ -193,16 +192,16 @@ class OpenAICompatibleLLM(LLMProvider):
     def __init__(
         self,
         *,
-        api_key: Optional[str],
+        api_key: str | None,
         base_url: str,
         model: str,
         provider_name: str,
-        extra_headers: Optional[dict[str, str]] = None,
+        extra_headers: dict[str, str] | None = None,
         auth_scheme: str = "bearer",
         timeout: float = 120.0,
-        reasoning: Optional[_ReasoningConfig] = None,
-        provider_routing: Optional[ProviderRouting] = None,
-        _urlopen: Optional[Callable[..., Any]] = None,
+        reasoning: _ReasoningConfig | None = None,
+        provider_routing: ProviderRouting | None = None,
+        _urlopen: Callable[..., Any] | None = None,
         api_path: str = "/chat/completions",
     ) -> None:
         self.api_key = api_key or None
@@ -243,7 +242,7 @@ class OpenAICompatibleLLM(LLMProvider):
                 f"Set the provider's API-key env var and retry."
             )
 
-    def _record_usage(self, usage: Optional[dict[str, Any]]) -> None:
+    def _record_usage(self, usage: dict[str, Any] | None) -> None:
         """Capture per-call usage on ``last_usage`` and add it to ``cumulative_usage``.
 
         Tolerates partial / missing blocks: providers that omit
@@ -268,7 +267,7 @@ class OpenAICompatibleLLM(LLMProvider):
     def generate(
         self,
         messages: list[Message],
-        tools: Optional[list[dict[str, Any]]] = None,
+        tools: list[dict[str, Any]] | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.0,
     ) -> Message:
@@ -346,7 +345,7 @@ class OpenAICompatibleLLM(LLMProvider):
                 f"{self.provider_name} HTTP {e.code}: "
                 f"{body.strip()[:500] or e.reason}"
             ) from e
-        except (urllib.error.URLError, socket.timeout, ConnectionError, OSError) as e:
+        except (TimeoutError, urllib.error.URLError, ConnectionError, OSError) as e:
             raise ProviderHTTPError(
                 f"{self.provider_name} unreachable at {self.base_url}: {e}"
             ) from e
@@ -401,7 +400,7 @@ class OpenAICompatibleLLM(LLMProvider):
     def stream(
         self,
         messages: list[Message],
-        tools: Optional[list[dict[str, Any]]] = None,
+        tools: list[dict[str, Any]] | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.0,
     ) -> Iterator[str]:
@@ -472,7 +471,7 @@ class OpenAICompatibleLLM(LLMProvider):
                 f"{self.provider_name} HTTP {e.code}: "
                 f"{body.strip()[:500] or e.reason}"
             ) from e
-        except (urllib.error.URLError, socket.timeout, ConnectionError, OSError) as e:
+        except (TimeoutError, urllib.error.URLError, ConnectionError, OSError) as e:
             raise ProviderHTTPError(
                 f"{self.provider_name} unreachable at {self.base_url}: {e}"
             ) from e
@@ -752,20 +751,20 @@ class _Preset:
     model_env_keys: tuple[str, ...] = ()   # optional model overrides
     extra_headers: tuple[tuple[str, str], ...] = ()   # frozen items
     auth_scheme: str = "bearer"
-    reasoning: Optional[_ReasoningConfig] = None
+    reasoning: _ReasoningConfig | None = None
     # If True, the factory *also* tries this preset when no env var is
     # set — useful for local servers that don't need a key.
     probe_reachable: bool = False
     reachable_path: str = "/models"   # used only when probe_reachable
 
-    def read_api_key(self) -> Optional[str]:
+    def read_api_key(self) -> str | None:
         for k in self.env_keys:
             v = os.environ.get(k, "").strip()
             if v:
                 return v
         return None
 
-    def read_model(self, explicit: Optional[str] = None) -> str:
+    def read_model(self, explicit: str | None = None) -> str:
         if explicit:
             return explicit
         for k in self.model_env_keys:
@@ -776,9 +775,9 @@ class _Preset:
 
     def build(
         self,
-        model: Optional[str] = None,
+        model: str | None = None,
         *,
-        provider_routing: "Optional[ProviderRouting]" = None,
+        provider_routing: ProviderRouting | None = None,
     ) -> OpenAICompatibleLLM:
         api_key = self.read_api_key()
         if not api_key and self.auth_scheme != "none":
@@ -821,7 +820,7 @@ def _endpoint_reachable(url: str, timeout: float = 0.8) -> bool:
         req = urllib.request.Request(url, method="GET")
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             return 200 <= resp.status < 500   # even 401/404 means *something* listened
-    except (urllib.error.URLError, socket.timeout, ConnectionError, OSError):
+    except (TimeoutError, urllib.error.URLError, ConnectionError, OSError):
         return False
 
 
@@ -1050,7 +1049,7 @@ PRESETS: tuple[_Preset, ...] = (
 )
 
 
-def preset_by_name(name: str) -> Optional[_Preset]:
+def preset_by_name(name: str) -> _Preset | None:
     """Return the preset whose ``name`` matches (case-insensitive)."""
     norm = name.lower().strip()
     for p in PRESETS:

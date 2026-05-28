@@ -20,8 +20,9 @@ Two design choices worth flagging:
 from __future__ import annotations
 
 import json
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from typing import Any, Callable, List, Optional, Sequence
+from typing import Any
 
 from lyra_harness_core.tools import Tool, ToolError
 from pydantic import BaseModel, Field
@@ -58,7 +59,7 @@ def _default_prompter(prompt: AskUserPrompt) -> Sequence[int]:
     ).strip()
     if not raw:
         return ()
-    out: List[int] = []
+    out: list[int] = []
     for chunk in raw.split(","):
         chunk = chunk.strip()
         if not chunk.isdigit():
@@ -71,7 +72,7 @@ def _default_prompter(prompt: AskUserPrompt) -> Sequence[int]:
 
 class _AskUserArgs(BaseModel):
     question: str = Field(..., description="The question to display.")
-    options: List[str] = Field(
+    options: list[str] = Field(
         ...,
         min_length=2,
         max_length=10,
@@ -101,7 +102,7 @@ class AskUserQuestionTool(Tool):
     writes = False
     ArgsModel = _AskUserArgs  # pyright: ignore[reportAssignmentType]
 
-    def __init__(self, prompter: Optional[Prompter] = None) -> None:
+    def __init__(self, prompter: Prompter | None = None) -> None:
         self._prompter: Prompter = prompter or _default_prompter
 
     def set_prompter(self, prompter: Prompter) -> None:
@@ -125,7 +126,7 @@ class AskUserQuestionTool(Tool):
         # Sanitize: keep only in-range, dedupe, preserve order. For
         # single-select, take the first valid pick.
         seen: set[int] = set()
-        clean: List[int] = []
+        clean: list[int] = []
         for n in indices:
             if 1 <= n <= len(a.options) and n not in seen:
                 seen.add(n)

@@ -17,7 +17,6 @@ from __future__ import annotations
 from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
 __all__ = [
     "NodeKind",
@@ -79,7 +78,7 @@ class CodebaseGraph:
         self._out[edge.source_id].append(edge)
         self._in[edge.target_id].append(edge)
 
-    def get_node(self, node_id: str) -> Optional[GraphNode]:
+    def get_node(self, node_id: str) -> GraphNode | None:
         return self._nodes.get(node_id)
 
     def successors(self, node_id: str) -> list[GraphEdge]:

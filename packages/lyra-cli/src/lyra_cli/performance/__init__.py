@@ -28,8 +28,8 @@ from lyra_cli.performance.competitor_benchmarks import (
 )
 from lyra_cli.performance.metrics_collector import (
     MetricSample,
-    MetricSeries,
     MetricsCollector,
+    MetricSeries,
 )
 from lyra_cli.performance.optimizer import (
     OptimizationImpact,

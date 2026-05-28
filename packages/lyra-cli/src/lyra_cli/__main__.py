@@ -17,39 +17,37 @@ Running ``lyra`` with no subcommand launches the Ink/TypeScript TUI.
 """
 from __future__ import annotations
 
-import os
 from pathlib import Path
-from typing import Optional
 
 import typer
 
 from . import __version__
 from .commands.acp import acp_app
 from .commands.agents import agents_app
-from .commands.context_opt import context_opt_app
-from .commands.hops import hops_app
-from .commands.model import model_app
-from .commands.ps import ps_app
-from .commands.skills_view import dag_app, skills_app
 from .commands.brain import brain_app
 from .commands.burn import burn_app
 from .commands.connect import connect_command
+from .commands.context_opt import context_opt_app
 from .commands.doctor import doctor_command
 from .commands.evals import evals_command
 from .commands.evolve import evolve_command
+from .commands.hops import hops_app
 from .commands.hud import hud_app
 from .commands.init import init_command
 from .commands.investigate import investigate_command
 from .commands.mcp import mcp_app
 from .commands.mcp_memory import mcp_memory_app
 from .commands.memory import memory_app
+from .commands.model import model_app
 from .commands.plan import plan_command
+from .commands.ps import ps_app
 from .commands.retro import retro_command
 from .commands.run import run_command
 from .commands.serve import serve_command
 from .commands.session import session_app
 from .commands.setup import setup_command
 from .commands.skill import skill_app
+from .commands.skills_view import dag_app, skills_app
 from .commands.status import status_app
 from .commands.trace import trace_app
 from .commands.tree import tree_app
@@ -119,7 +117,7 @@ def _root(
             "``/budget save <usd>``."
         ),
     ),
-    resume: Optional[str] = typer.Option(
+    resume: str | None = typer.Option(
         None,
         "--resume",
         "-r",
@@ -145,7 +143,7 @@ def _root(
             "this repo picks up where it left off."
         ),
     ),
-    session_id: Optional[str] = typer.Option(
+    session_id: str | None = typer.Option(
         None,
         "--session",
         metavar="ID",
@@ -179,24 +177,24 @@ def _root(
             "stream-json emits partial messages for Agent SDK compatibility."
         ),
     ),
-    max_turns: Optional[int] = typer.Option(
+    max_turns: int | None = typer.Option(
         None,
         "--max-turns",
         help="Maximum turns before auto-exit (headless / CI safety limit).",
     ),
-    max_budget_usd: Optional[float] = typer.Option(
+    max_budget_usd: float | None = typer.Option(
         None,
         "--max-budget-usd",
         help="Maximum budget in USD before auto-exit (headless / CI safety limit).",
     ),
-    name: Optional[str] = typer.Option(
+    name: str | None = typer.Option(
         None,
         "--name",
         "-n",
         metavar="NAME",
         help="Human-readable session name (stored in session metadata).",
     ),
-    effort: Optional[str] = typer.Option(
+    effort: str | None = typer.Option(
         None,
         "--effort",
         help=(
@@ -204,7 +202,7 @@ def _root(
             "Controls extended thinking budget and response depth."
         ),
     ),
-    add_dir: Optional[list[Path]] = typer.Option(
+    add_dir: list[Path] | None = typer.Option(
         None,
         "--add-dir",
         help=(
@@ -212,7 +210,7 @@ def _root(
             "Grants file read/write access beyond the repo root."
         ),
     ),
-    settings_path: Optional[Path] = typer.Option(
+    settings_path: Path | None = typer.Option(
         None,
         "--settings",
         metavar="PATH",
@@ -228,7 +226,7 @@ def _root(
         "--bg",
         help="Dispatch session in background (daemon mode, no TTY attached).",
     ),
-    goal: Optional[str] = typer.Option(
+    goal: str | None = typer.Option(
         None,
         "--goal",
         metavar="CONDITION",
@@ -238,7 +236,7 @@ def _root(
             "met or max-turns is reached."
         ),
     ),
-    permission_mode: Optional[str] = typer.Option(
+    permission_mode: str | None = typer.Option(
         None,
         "--permission-mode",
         metavar="MODE",

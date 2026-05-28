@@ -5,7 +5,6 @@ import uuid
 from datetime import datetime
 
 import pytest
-
 from lyra_core.orchestration.protocol import Message, MessageType
 
 

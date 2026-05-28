@@ -12,9 +12,7 @@ import os
 from pathlib import Path
 
 import pytest
-
 from lyra_cli.llm_factory import build_llm, describe_selection
-
 
 _PROVIDER_KEYS = (
     "ANTHROPIC_API_KEY",

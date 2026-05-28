@@ -24,11 +24,8 @@ dispatch layer (see ``_cmd_effort``).
 """
 from __future__ import annotations
 
-from typing import List, Tuple
-
-
-_LEVELS: Tuple[str, ...] = ("low", "medium", "high", "xhigh", "max")
-EFFORT_LEVELS: Tuple[str, ...] = _LEVELS
+_LEVELS: tuple[str, ...] = ("low", "medium", "high", "xhigh", "max")
+EFFORT_LEVELS: tuple[str, ...] = _LEVELS
 
 
 _BLURBS = {
@@ -66,7 +63,7 @@ class EffortPicker:
         self._cursor = _LEVELS.index(initial)
 
     @property
-    def levels(self) -> Tuple[str, ...]:
+    def levels(self) -> tuple[str, ...]:
         return _LEVELS
 
     @property
@@ -109,7 +106,7 @@ class EffortPicker:
         lines.append("(↑/↓ or ←/→ to move · Enter to confirm · Esc to cancel)")
         return "\n".join(lines)
 
-    def render_slider_lines(self, *, width: int = 50) -> List[str]:
+    def render_slider_lines(self, *, width: int = 50) -> list[str]:
         """Claude-Code-style horizontal slider as plain text.
 
         Returns four lines:

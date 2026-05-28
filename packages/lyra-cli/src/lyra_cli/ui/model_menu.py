@@ -1,13 +1,13 @@
 """Simple model selection menu - raw terminal control"""
 
 import sys
-import tty
 import termios
-from typing import Optional
+import tty
+
 from lyra_cli.cli.models import get_registry
 
 
-def show_model_menu_simple(current_model: str) -> Optional[str]:
+def show_model_menu_simple(current_model: str) -> str | None:
     """
     Show simple model selection menu
 

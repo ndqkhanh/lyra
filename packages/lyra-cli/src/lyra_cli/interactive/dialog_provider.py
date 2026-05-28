@@ -15,8 +15,6 @@ non-interactive path with the picked name.
 """
 from __future__ import annotations
 
-from typing import Optional
-
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
@@ -37,7 +35,7 @@ _ADDITIONAL = (
 )
 
 
-def _render_picker(console: Console, current: Optional[str]) -> None:
+def _render_picker(console: Console, current: str | None) -> None:
     body_lines = ["[bold cyan]First-class[/bold cyan]"]
     for i, name in enumerate(_FIRST_CLASS, 1):
         marker = "→" if name == current else " "
@@ -57,7 +55,7 @@ def _render_picker(console: Console, current: Optional[str]) -> None:
     )
 
 
-def _resolve_choice(raw: str) -> Optional[str]:
+def _resolve_choice(raw: str) -> str | None:
     """Resolve user input to a provider name or ``None`` for invalid."""
     raw = raw.strip().lower()
     if not raw:
@@ -77,7 +75,7 @@ def _resolve_choice(raw: str) -> Optional[str]:
 
 
 def run_provider_dialog(
-    initial: Optional[str], *, console: Optional[Console] = None
+    initial: str | None, *, console: Console | None = None
 ) -> int:
     """Drive the picker → key prompt → preflight → save loop.
 

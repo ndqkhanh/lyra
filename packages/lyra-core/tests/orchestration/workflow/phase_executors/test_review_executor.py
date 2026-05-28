@@ -1,11 +1,10 @@
 """Tests for review phase executor."""
 
 import pytest
-
 from lyra_core.orchestration.message_bus import InMemoryMessageBus
 from lyra_core.orchestration.orchestrator import TeamOrchestrator
 from lyra_core.orchestration.state_store import InMemoryStateStore
-from lyra_core.orchestration.workflow.models import Artifact, SDLCPhase
+from lyra_core.orchestration.workflow.models import SDLCPhase
 from lyra_core.orchestration.workflow.phase_executors.review_executor import (
     ReviewExecutor,
 )

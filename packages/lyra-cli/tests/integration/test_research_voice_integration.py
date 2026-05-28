@@ -10,34 +10,24 @@ Tests exercise:
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
-
 from lyra_cli.research import (
-    ExploreResult,
     Finding,
     FindingRelation,
     MultiHopResearchEngine,
     ResearchKnowledgeGraph,
-    ResearchReport,
     SourceCredibility,
-    SourceProfile,
     SourceType,
-    StrategySelector,
-    StrategyType,
 )
 from lyra_cli.voice import (
     SessionConfig,
     TTSBackend,
-    TTSConfig,
     VoiceConfig,
     VoiceSession,
-    WakeWordDetector,
-    WakeWordResult,
     synthesize_speech,
 )
-
 
 # =========================================================================
 # Fixtures

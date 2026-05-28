@@ -20,20 +20,20 @@ both write to a key the auto-cascade can later read.
 from __future__ import annotations
 
 import sys
-from typing import Optional
 
 import typer
-from rich.console import Console
-from rich.panel import Panel
-from rich.text import Text
-
 from lyra_core.auth.preflight import preflight
 from lyra_core.auth.store import (
     get_api_key,
     list_providers,
-    revoke as _revoke_provider,
     save,
 )
+from lyra_core.auth.store import (
+    revoke as _revoke_provider,
+)
+from rich.console import Console
+from rich.panel import Panel
+from rich.text import Text
 
 _console = Console()
 
@@ -104,7 +104,7 @@ def _revoke_action(provider: str) -> int:
     return 0
 
 
-def _interactive_dialog(provider: Optional[str]) -> int:
+def _interactive_dialog(provider: str | None) -> int:
     """Open the Rich + prompt_toolkit interactive picker.
 
     Imported lazily so non-interactive callers (CI, ``--no-prompt``)
@@ -124,19 +124,19 @@ def _interactive_dialog(provider: Optional[str]) -> int:
 
 
 def connect_command(
-    provider: Optional[str] = typer.Argument(
+    provider: str | None = typer.Argument(
         None,
         help=(
             "Provider to connect (anthropic, openai, gemini, deepseek, "
             "qwen, ollama, …). Omit to open the interactive picker."
         ),
     ),
-    key: Optional[str] = typer.Option(
+    key: str | None = typer.Option(
         None,
         "--key",
         help="API key. With ``--no-prompt`` this disables the masked input.",
     ),
-    model: Optional[str] = typer.Option(
+    model: str | None = typer.Option(
         None,
         "--model",
         help="Optional default model slug to remember alongside the key.",

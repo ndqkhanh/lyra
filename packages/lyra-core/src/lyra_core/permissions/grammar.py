@@ -33,8 +33,9 @@ from __future__ import annotations
 import enum
 import fnmatch
 import re
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from typing import Any, Iterable, Mapping, Optional
+from typing import Any
 
 
 class Verdict(str, enum.Enum):
@@ -64,7 +65,7 @@ class Rule:
     """
 
     tool: str
-    specifier: Optional[str]
+    specifier: str | None
     source: str
 
     @property
@@ -189,7 +190,7 @@ class Policy:
         allow: Iterable[str] = (),
         ask: Iterable[str] = (),
         deny: Iterable[str] = (),
-    ) -> "Policy":
+    ) -> Policy:
         """Convenience constructor from raw rule literals.
 
         Skips empty entries silently so a settings file with a stray

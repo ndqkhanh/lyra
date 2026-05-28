@@ -25,10 +25,8 @@ import json
 from pathlib import Path
 
 import pytest
-
 from lyra_core.store.todo_store import TodoStore
 from lyra_core.tools.todo_write import make_todo_write_tool
-
 
 # ---- schema -------------------------------------------------------- #
 

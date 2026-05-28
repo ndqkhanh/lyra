@@ -6,7 +6,6 @@ import os
 from pathlib import Path
 
 import pytest
-
 from lyra_cli.interactive.key_store import KeyStore, _mask
 
 

@@ -11,7 +11,6 @@ import urllib.request
 from pathlib import Path
 
 import pytest
-
 from lyra_core.acp import AcpServer, HttpBridge, register_v311_methods
 
 

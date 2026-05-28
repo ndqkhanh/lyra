@@ -13,7 +13,6 @@ from __future__ import annotations
 import pytest
 from lyra_core.eval import EvalCase, run_passk
 
-
 _CASE_PASS = EvalCase(
     name="hello-world",
     prompt="say hello",

@@ -13,15 +13,12 @@ Eighteen cases covering:
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.contracts import (
     AgentContract,
     BudgetEnvelope,
     ContractObservation,
     ContractState,
-    TerminalCause,
 )
-
 
 # --- 1. Default contract starts PENDING ---------------------------------- #
 

@@ -5,9 +5,8 @@ import json
 from pathlib import Path
 
 import pytest
-
 from lyra_core.transparency.event_store import EventStore, make_event
-from lyra_core.transparency.tool_timeline import build_tool_timeline, _args_preview
+from lyra_core.transparency.tool_timeline import _args_preview, build_tool_timeline
 
 
 @pytest.fixture

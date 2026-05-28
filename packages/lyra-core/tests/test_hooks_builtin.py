@@ -5,11 +5,10 @@
 """
 from __future__ import annotations
 
-from lyra_harness_core.messages import ToolCall, ToolResult
-
 from lyra_core.hooks.destructive_pattern import destructive_pattern_hook
 from lyra_core.hooks.secrets_scan import secrets_scan_hook
 from lyra_core.hooks.tdd_gate import TDDGateContext, make_tdd_gate_hook
+from lyra_harness_core.messages import ToolCall, ToolResult
 
 # ------------------------------------------------------------------
 # secrets-scan

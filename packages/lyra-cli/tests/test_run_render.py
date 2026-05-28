@@ -21,16 +21,14 @@ single-file test exercises every shape.
 """
 from __future__ import annotations
 
-from lyra_harness_core.loop import LoopResult
-from lyra_harness_core.messages import StopReason
-
 from lyra_cli.commands.run import (
     _format_elapsed,
     _format_run_footer,
     _format_run_header,
     _format_stop_reason,
 )
-
+from lyra_harness_core.loop import LoopResult
+from lyra_harness_core.messages import StopReason
 
 # ---------------------------------------------------------------------------
 # _format_stop_reason — strip the ``StopReason.`` prefix

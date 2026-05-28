@@ -22,14 +22,14 @@ mirrors the v3.11 test contract.
 from __future__ import annotations
 
 import re
-from typing import Any, Callable, List, Optional
+from collections.abc import Callable
+from typing import Any
 
 from pydantic import BaseModel, Field
 
+from ..lsp_backend.errors import FeatureUnavailable
 from . import web_search_cache as _cache
 from . import web_search_providers as _providers
-from ..lsp_backend.errors import FeatureUnavailable
-
 
 # Time-range → TTL: queries that ask for recent data shouldn't be
 # cached as long as evergreen ones. ``None`` falls back to the
@@ -116,8 +116,8 @@ def _rerank(
 def _apply_filters(
     hits: list[dict[str, Any]],
     *,
-    domains_allow: Optional[list[str]],
-    domains_block: Optional[list[str]],
+    domains_allow: list[str] | None,
+    domains_block: list[str] | None,
 ) -> list[dict[str, Any]]:
     """Substring-match URL filters applied after the provider call.
 
@@ -165,7 +165,7 @@ def _try_provider(
     query: str,
     max_results: int,
     opts: dict[str, Any],
-) -> Optional[list[dict[str, Any]]]:
+) -> list[dict[str, Any]] | None:
     """Call ``provider`` once; return None on failure (logged via breaker)."""
     if _CIRCUIT_BREAKER.get(provider.name, 0) >= _BREAKER_TRIP_THRESHOLD:
         return None
@@ -217,10 +217,10 @@ def make_web_search_tool(
         *,
         query: str,
         max_results: int = 5,
-        provider_name: Optional[str] = None,
-        time_range: Optional[str] = None,
-        domains_allow: Optional[list[str]] = None,
-        domains_block: Optional[list[str]] = None,
+        provider_name: str | None = None,
+        time_range: str | None = None,
+        domains_allow: list[str] | None = None,
+        domains_block: list[str] | None = None,
         rerank: bool = True,
         cache: bool = True,
     ) -> dict:
@@ -380,19 +380,19 @@ class _WebSearchArgs(BaseModel):
     """Pydantic model for WebSearch arguments."""
     query: str = Field(..., description="Search query")
     max_results: int = Field(default=5, description="Maximum number of results to return")
-    provider_name: Optional[str] = Field(
+    provider_name: str | None = Field(
         default=None,
         description="Pin a specific provider. Omit to let the fallback chain pick."
     )
-    time_range: Optional[str] = Field(
+    time_range: str | None = Field(
         default=None,
         description="Time range filter: day, week, month, or year"
     )
-    domains_allow: Optional[List[str]] = Field(
+    domains_allow: list[str] | None = Field(
         default=None,
         description="Only include results from these domains"
     )
-    domains_block: Optional[List[str]] = Field(
+    domains_block: list[str] | None = Field(
         default=None,
         description="Exclude results from these domains"
     )

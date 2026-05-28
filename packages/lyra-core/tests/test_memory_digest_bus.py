@@ -1,6 +1,5 @@
 """Tests for SubAgentDigest broadcast bus (Phase M5)."""
 import pytest
-
 from lyra_core.memory.digest_bus import (
     DigestBus,
     DigestStore,
@@ -15,7 +14,6 @@ from lyra_core.memory.schema import (
     Provenance,
     SubAgentDigest,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

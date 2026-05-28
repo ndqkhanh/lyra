@@ -8,33 +8,30 @@ Implements:
 - Memory integration with compression (10MB → 2KB)
 """
 
-from lyra_cli.multimodal.evidence_chain import (
-    MediaType,
-    MediaMetadata,
-    MediaEvidence,
-    EvidenceChain,
-    MultimodalEvidenceChain,
-)
-
 from lyra_cli.multimodal.computer_use import (
     ActionType,
-    UIElement,
-    UIAction,
-    ComputerUseSession,
     ComputerUseContext,
+    ComputerUseSession,
+    UIAction,
+    UIElement,
 )
-
-from lyra_cli.multimodal.screenshot_analysis import (
-    OCRResult,
-    DetectedObject,
-    ScreenshotAnalysis,
-    ScreenshotAnalyzer,
+from lyra_cli.multimodal.evidence_chain import (
+    EvidenceChain,
+    MediaEvidence,
+    MediaMetadata,
+    MediaType,
+    MultimodalEvidenceChain,
 )
-
 from lyra_cli.multimodal.memory_integration import (
     CompressionLevel,
-    MultimodalReference,
     MultimodalMemoryIntegrator,
+    MultimodalReference,
+)
+from lyra_cli.multimodal.screenshot_analysis import (
+    DetectedObject,
+    OCRResult,
+    ScreenshotAnalysis,
+    ScreenshotAnalyzer,
 )
 
 __all__ = [

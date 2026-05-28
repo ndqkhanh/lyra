@@ -3,8 +3,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from lyra_core.memory.auto_memory import AutoMemory, MemoryEntry, MemoryKind
 from lyra_core.memory.consolidator import (
     ConsolidationProposal,

@@ -10,7 +10,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
 
 
 @dataclass(frozen=True)
@@ -22,7 +21,7 @@ class ResearchAction:
     query: str
     strategy: str  # "breadth_first", "depth_first", "best_first"
     depth: int
-    parent_id: Optional[str] = None
+    parent_id: str | None = None
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
 
 
@@ -32,8 +31,8 @@ class ResearchResult:
 
     result_id: str
     action_id: str
-    findings: Tuple[str, ...] = field(default_factory=tuple)
-    sources: Tuple[str, ...] = field(default_factory=tuple)
+    findings: tuple[str, ...] = field(default_factory=tuple)
+    sources: tuple[str, ...] = field(default_factory=tuple)
     confidence: float = 1.0
     source_count: int = 0
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
@@ -44,9 +43,9 @@ class TrajectoryNode:
     """A node in the exploration tree, linking action + result."""
 
     action: ResearchAction
-    result: Optional[ResearchResult] = None
-    children: List[TrajectoryNode] = field(default_factory=list)
-    parent: Optional[TrajectoryNode] = None
+    result: ResearchResult | None = None
+    children: list[TrajectoryNode] = field(default_factory=list)
+    parent: TrajectoryNode | None = None
 
 
 class ResearchTrajectory:
@@ -64,8 +63,8 @@ class ResearchTrajectory:
     """
 
     def __init__(self) -> None:
-        self._nodes: Dict[str, TrajectoryNode] = {}
-        self._root_id: Optional[str] = None
+        self._nodes: dict[str, TrajectoryNode] = {}
+        self._root_id: str | None = None
 
     # ---- mutation -------------------------------------------------------
 
@@ -98,11 +97,11 @@ class ResearchTrajectory:
 
     # ---- query ----------------------------------------------------------
 
-    def get_node(self, action_id: str) -> Optional[TrajectoryNode]:
+    def get_node(self, action_id: str) -> TrajectoryNode | None:
         """Retrieve a node by action ID."""
         return self._nodes.get(action_id)
 
-    def get_root(self) -> Optional[ResearchAction]:
+    def get_root(self) -> ResearchAction | None:
         """Return the root action, if any."""
         root_node = self._nodes.get(self._root_id) if self._root_id else None
         return root_node.action if root_node else None
@@ -111,31 +110,31 @@ class ResearchTrajectory:
         """Return the total number of actions recorded."""
         return len(self._nodes)
 
-    def get_path_to(self, action_id: str) -> List[ResearchAction]:
+    def get_path_to(self, action_id: str) -> list[ResearchAction]:
         """Return the ordered path from root to the given action."""
         node = self._nodes.get(action_id)
         if node is None:
             raise KeyError(f"Action {action_id} not found")
 
-        path: List[ResearchAction] = []
-        current: Optional[TrajectoryNode] = node
+        path: list[ResearchAction] = []
+        current: TrajectoryNode | None = node
         while current is not None:
             path.append(current.action)
             current = current.parent
         path.reverse()
         return path
 
-    def get_leaf_nodes(self) -> List[TrajectoryNode]:
+    def get_leaf_nodes(self) -> list[TrajectoryNode]:
         """Return all leaf nodes (actions with no children)."""
         return [
             node for node in self._nodes.values()
             if not node.children
         ]
 
-    def get_all_findings(self) -> List[str]:
+    def get_all_findings(self) -> list[str]:
         """Collect all unique findings across every result."""
         seen: set = set()
-        findings: List[str] = []
+        findings: list[str] = []
         for node in self._nodes.values():
             if node.result is not None:
                 for finding in node.result.findings:
@@ -175,7 +174,7 @@ class ResearchTrajectory:
                 all_sources.update(node.result.sources)
 
         # Breadth per depth level
-        breadth: Dict[int, int] = {}
+        breadth: dict[int, int] = {}
         for node in nodes:
             d = self._depth_of(node)
             breadth[d] = breadth.get(d, 0) + 1

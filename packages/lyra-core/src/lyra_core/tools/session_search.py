@@ -9,7 +9,8 @@ dumping full conversations into the context window — the hermes
 
 from __future__ import annotations
 
-from typing import Any, Callable, Iterable
+from collections.abc import Callable, Iterable
+from typing import Any
 
 
 def _format_raw_hits(hits: Iterable[dict], *, max_chars: int = 400) -> str:

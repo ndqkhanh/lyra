@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any, Optional
+from typing import Any
 
 from .base import TurnTrace
 
@@ -41,9 +41,9 @@ class LangSmithCallback:
 
     def __init__(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
         *,
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         client: Any = None,
     ) -> None:
         self.project = project or os.environ.get("LANGSMITH_PROJECT") or "lyra"
@@ -127,7 +127,7 @@ class LangSmithCallback:
         return self._client
 
     @staticmethod
-    def _extract_run_id(run: Any) -> Optional[str]:
+    def _extract_run_id(run: Any) -> str | None:
         """Pull the run id off whatever shape ``create_run`` returned.
 
         Older SDKs return a dataclass with ``.id``; newer ones return

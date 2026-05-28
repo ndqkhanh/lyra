@@ -26,8 +26,6 @@ Six RED tests:
 """
 from __future__ import annotations
 
-import pytest
-
 
 def test_lifecycle_event_names() -> None:
     from lyra_core.hooks.lifecycle import LifecycleEvent

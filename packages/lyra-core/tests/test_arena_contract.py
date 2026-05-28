@@ -2,14 +2,12 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.arena import (
     Arena,
     ArenaMatch,
     expected_score,
     update_elo,
 )
-
 
 # ---- primitives ----------------------------------------------------
 

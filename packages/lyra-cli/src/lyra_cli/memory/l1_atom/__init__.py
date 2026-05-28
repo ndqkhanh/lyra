@@ -9,14 +9,14 @@ Features:
 - RRF hybrid search (BM25 + Vector)
 """
 
-import sqlite3
+import hashlib
 import json
 import logging
-from dataclasses import dataclass, asdict
+import sqlite3
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Dict, Any, Tuple
-import hashlib
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -25,15 +25,15 @@ logger = logging.getLogger(__name__)
 class StructuredFact:
     """Single structured fact extracted from conversations."""
 
-    id: Optional[int] = None
+    id: int | None = None
     session_id: str = ""
     content: str = ""
-    embedding: Optional[List[float]] = None
+    embedding: list[float] | None = None
     timestamp: str = ""
-    metadata: Optional[Dict[str, Any]] = None
-    source_turn_ids: Optional[List[int]] = None  # Traceability to L0
+    metadata: dict[str, Any] | None = None
+    source_turn_ids: list[int] | None = None  # Traceability to L0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         data = asdict(self)
         # Convert embedding to list if present
@@ -42,7 +42,7 @@ class StructuredFact:
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "StructuredFact":
+    def from_dict(cls, data: dict[str, Any]) -> "StructuredFact":
         """Create from dictionary."""
         return cls(**data)
 
@@ -222,7 +222,7 @@ class AtomStore:
         finally:
             conn.close()
 
-    def get_by_id(self, fact_id: int) -> Optional[StructuredFact]:
+    def get_by_id(self, fact_id: int) -> StructuredFact | None:
         """
         Retrieve a fact by ID.
 
@@ -254,7 +254,7 @@ class AtomStore:
 
     def get_by_session(
         self, session_id: str, limit: int = 100
-    ) -> List[StructuredFact]:
+    ) -> list[StructuredFact]:
         """
         Retrieve all facts for a session.
 
@@ -287,7 +287,7 @@ class AtomStore:
         logger.info(f"Retrieved {len(facts)} facts for session {session_id}")
         return facts
 
-    def search_bm25(self, query: str, limit: int = 10) -> List[Tuple[StructuredFact, float]]:
+    def search_bm25(self, query: str, limit: int = 10) -> list[tuple[StructuredFact, float]]:
         """
         Full-text search using BM25 (via FTS5).
 
@@ -327,8 +327,8 @@ class AtomStore:
         return results
 
     def search_vector(
-        self, query_embedding: List[float], limit: int = 10, threshold: float = 0.3
-    ) -> List[Tuple[StructuredFact, float]]:
+        self, query_embedding: list[float], limit: int = 10, threshold: float = 0.3
+    ) -> list[tuple[StructuredFact, float]]:
         """
         Vector similarity search using cosine similarity.
 
@@ -376,7 +376,7 @@ class AtomStore:
 
     def find_duplicates(
         self, content: str, threshold: float = 0.8
-    ) -> List[StructuredFact]:
+    ) -> list[StructuredFact]:
         """
         Find potential duplicates by content hash and similarity.
 
@@ -411,7 +411,7 @@ class AtomStore:
         logger.debug(f"Found {len(duplicates)} potential duplicates")
         return duplicates
 
-    def count(self, session_id: Optional[str] = None) -> int:
+    def count(self, session_id: str | None = None) -> int:
         """
         Count total facts, optionally filtered by session.
 
@@ -436,7 +436,7 @@ class AtomStore:
 
         return count
 
-    def _row_to_fact(self, row: Tuple) -> StructuredFact:
+    def _row_to_fact(self, row: tuple) -> StructuredFact:
         """Convert database row to StructuredFact."""
         (
             fact_id,
@@ -473,7 +473,7 @@ class AtomStore:
             source_turn_ids=source_turn_ids,
         )
 
-    def _cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:
+    def _cosine_similarity(self, vec1: list[float], vec2: list[float]) -> float:
         """Compute cosine similarity between two vectors."""
         if len(vec1) != len(vec2):
             return 0.0

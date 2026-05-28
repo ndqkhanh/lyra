@@ -30,16 +30,15 @@ import asyncio
 import hashlib
 import json
 import time
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Any, Callable, Mapping
+from typing import Any
 
 from harness_eternal import CircuitBreaker
 from harness_eternal.restate import LocalRuntime, RestateRuntime, step, workflow
 from harness_eternal.restate.journal import Journal
 
 from .eternal_llm import JournaledLLM
-
 
 # ---------------------------------------------------------------------------
 # Tool proxies — sync-friendly, journal-backed idempotency
@@ -139,7 +138,7 @@ class EternalAgentLoop:
         self.runtime.register(_turn_workflow, name=self.workflow_name)
         self._workflow = _turn_workflow
 
-    def run_conversation(self, user_text: str, *, session_id: str) -> "_TurnView":
+    def run_conversation(self, user_text: str, *, session_id: str) -> _TurnView:
         """``AgentLoop``-shaped alias for :meth:`run_conversation_durable`.
 
         Returns a lightweight view object exposing the same ``final_text``,
@@ -187,7 +186,7 @@ class EternalAgentLoop:
         # Each turn gets a unique invocation_id so concurrent turns do not
         # share journal rows.
         digest = hashlib.sha256(
-            f"{session_id}|{time.time()}|{user_text}".encode("utf-8")
+            f"{session_id}|{time.time()}|{user_text}".encode()
         ).hexdigest()[:16]
         invocation_id = f"{self.workflow_name}:{digest}"
 

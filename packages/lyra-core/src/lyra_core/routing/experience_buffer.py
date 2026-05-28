@@ -9,9 +9,8 @@ Stores (state, action, reward, next_state, done) tuples with:
 from __future__ import annotations
 
 import random
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Sequence
-
 
 # Action space for routing: which tier was chosen
 VALID_ACTIONS = ("fast", "reasoning", "advisor")
@@ -56,7 +55,7 @@ class ExperienceBuffer:
     _buffer: list[Experience] = field(default_factory=list)
     _position: int = 0
     _total_pushed: int = 0
-    _action_counts: dict[str, int] = field(default_factory=lambda: {a: 0 for a in VALID_ACTIONS})
+    _action_counts: dict[str, int] = field(default_factory=lambda: dict.fromkeys(VALID_ACTIONS, 0))
 
     def push(self, experience: Experience) -> None:
         if len(self._buffer) < self.capacity:
@@ -138,7 +137,7 @@ class ExperienceBuffer:
         self._buffer.clear()
         self._position = 0
         self._total_pushed = 0
-        self._action_counts = {a: 0 for a in VALID_ACTIONS}
+        self._action_counts = dict.fromkeys(VALID_ACTIONS, 0)
 
     @property
     def size(self) -> int:

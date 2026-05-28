@@ -7,9 +7,10 @@ SOTA on factual + multi-hop + sense-making simultaneously.
 Based on research: arXiv:2502.14802 (ICML 2025), docs/316
 """
 
-from typing import List, Dict, Any, Set, Tuple, Optional
-from dataclasses import dataclass
 from collections import defaultdict
+from dataclasses import dataclass
+from typing import Any
+
 import numpy as np
 
 
@@ -18,7 +19,7 @@ class Entity:
     """Entity in the knowledge graph."""
     name: str
     entity_type: str  # person, organization, concept, etc.
-    mentions: List[str]  # Memory entry IDs where this entity appears
+    mentions: list[str]  # Memory entry IDs where this entity appears
 
 
 @dataclass
@@ -39,9 +40,9 @@ class EntityGraph:
     """
 
     def __init__(self):
-        self.entities: Dict[str, Entity] = {}
-        self.relations: List[EntityRelation] = []
-        self.adjacency: Dict[str, Dict[str, float]] = defaultdict(dict)
+        self.entities: dict[str, Entity] = {}
+        self.relations: list[EntityRelation] = []
+        self.adjacency: dict[str, dict[str, float]] = defaultdict(dict)
 
     def add_entity(self, name: str, entity_type: str, mention_id: str) -> None:
         """
@@ -89,7 +90,7 @@ class EntityGraph:
         self.adjacency[source][target] = weight
         self.adjacency[target][source] = weight  # Undirected graph
 
-    def get_neighbors(self, entity: str) -> List[Tuple[str, float]]:
+    def get_neighbors(self, entity: str) -> list[tuple[str, float]]:
         """
         Get neighbors of an entity.
 
@@ -104,7 +105,7 @@ class EntityGraph:
 
         return [(neighbor, weight) for neighbor, weight in self.adjacency[entity].items()]
 
-    def get_entity_mentions(self, entity: str) -> List[str]:
+    def get_entity_mentions(self, entity: str) -> list[str]:
         """
         Get memory entry IDs where entity is mentioned.
 
@@ -119,7 +120,7 @@ class EntityGraph:
 
         return self.entities[entity].mentions
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get graph statistics."""
         return {
             'num_entities': len(self.entities),
@@ -149,10 +150,10 @@ class PersonalizedPageRank:
 
     def compute_ppr(
         self,
-        seed_entities: List[str],
+        seed_entities: list[str],
         max_iter: int = 100,
         tol: float = 1e-6
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """
         Compute Personalized PageRank scores.
 
@@ -240,7 +241,7 @@ class HippoRAG2Retriever:
         self.alpha = alpha
         self.ppr = PersonalizedPageRank(entity_graph, alpha=ppr_alpha)
 
-    def extract_entities(self, text: str) -> List[str]:
+    def extract_entities(self, text: str) -> list[str]:
         """
         Extract entities from text.
 
@@ -266,9 +267,9 @@ class HippoRAG2Retriever:
     def retrieve(
         self,
         query: str,
-        memory_entries: List[Dict[str, Any]],
+        memory_entries: list[dict[str, Any]],
         k: int = 10
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Retrieve using HippoRAG 2: PPR + embedding fusion.
 
@@ -328,9 +329,9 @@ class HippoRAG2Retriever:
     def _embedding_only_retrieval(
         self,
         query: str,
-        memory_entries: List[Dict[str, Any]],
+        memory_entries: list[dict[str, Any]],
         k: int
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Fallback to pure embedding similarity."""
         query_embedding = self.embedder.encode(query)
 
@@ -359,7 +360,7 @@ class HippoRAG2Retriever:
 
 # Entity graph builder
 def build_entity_graph_from_memory(
-    memory_entries: List[Dict[str, Any]],
+    memory_entries: list[dict[str, Any]],
     entity_extractor
 ) -> EntityGraph:
     """
@@ -375,7 +376,7 @@ def build_entity_graph_from_memory(
     graph = EntityGraph()
 
     # Extract entities from each entry
-    entry_entities: Dict[str, List[str]] = {}
+    entry_entities: dict[str, list[str]] = {}
 
     for entry in memory_entries:
         entities = entity_extractor(entry['content'])

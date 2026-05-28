@@ -18,9 +18,8 @@ single function? Two reasons:
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Callable, Protocol
-
+from dataclasses import dataclass
+from typing import Protocol
 
 __all__ = [
     "AdversaryCallable",
@@ -45,8 +44,8 @@ class AdversaryCallable(Protocol):
         *,
         solution: str,
         attempt: int,
-        history: tuple["RefutePass", ...],
-    ) -> "RefutePass": ...
+        history: tuple[RefutePass, ...],
+    ) -> RefutePass: ...
 
 
 @dataclass(frozen=True)

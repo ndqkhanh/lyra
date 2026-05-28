@@ -5,7 +5,6 @@ import pytest
 
 from lyra_memory.reconstruction.graph import (
     CueTagContentGraph,
-    GraphEdge,
     GraphNode,
     NodeType,
 )

@@ -21,7 +21,6 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
 
 
 @dataclass(frozen=True)
@@ -44,8 +43,8 @@ class AliasRegistry:
        after exact lookup misses, so explicit registrations always win.
     """
 
-    _aliases: Dict[str, AliasEntry] = field(default_factory=dict)
-    _patterns: List[Tuple[re.Pattern[str], AliasEntry]] = field(default_factory=list)
+    _aliases: dict[str, AliasEntry] = field(default_factory=dict)
+    _patterns: list[tuple[re.Pattern[str], AliasEntry]] = field(default_factory=list)
 
     def register(self, alias: str, slug: str, *, provider: str = "") -> None:
         self._aliases[alias.lower().strip()] = AliasEntry(slug=slug, provider=provider)
@@ -60,7 +59,7 @@ class AliasRegistry:
         compiled = re.compile(pattern, re.IGNORECASE)
         self._patterns.append((compiled, AliasEntry(slug=slug, provider=provider)))
 
-    def _lookup(self, model: str) -> Optional[AliasEntry]:
+    def _lookup(self, model: str) -> AliasEntry | None:
         norm = (model or "").lower().strip()
         if not norm:
             return None
@@ -76,7 +75,7 @@ class AliasRegistry:
         entry = self._lookup(model)
         return entry.slug if entry else (model or "").strip()
 
-    def provider_for(self, model: str) -> Optional[str]:
+    def provider_for(self, model: str) -> str | None:
         entry = self._lookup(model)
         return entry.provider if entry and entry.provider else None
 
@@ -429,7 +428,7 @@ def resolve_alias(model: str) -> str:
     return DEFAULT_ALIASES.resolve(model)
 
 
-def provider_key_for(model: str) -> Optional[str]:
+def provider_key_for(model: str) -> str | None:
     """Return the provider key for a model alias, or ``None`` if unknown."""
     return DEFAULT_ALIASES.provider_for(model)
 

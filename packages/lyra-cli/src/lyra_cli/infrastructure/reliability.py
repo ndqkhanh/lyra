@@ -11,9 +11,10 @@ from __future__ import annotations
 
 import asyncio
 import time
-from dataclasses import dataclass, field
+from collections.abc import Callable
+from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Optional, TypeVar
+from typing import Any, TypeVar
 
 from lyra_cli.logging_config import get_logger
 
@@ -52,7 +53,7 @@ class CircuitBreaker:
     - HALF_OPEN: Testing recovery, limited requests allowed
     """
 
-    def __init__(self, name: str, config: Optional[CircuitBreakerConfig] = None):
+    def __init__(self, name: str, config: CircuitBreakerConfig | None = None):
         """Initialize circuit breaker.
 
         Args:
@@ -64,7 +65,7 @@ class CircuitBreaker:
         self.state = CircuitState.CLOSED
         self.failure_count = 0
         self.success_count = 0
-        self.last_failure_time: Optional[float] = None
+        self.last_failure_time: float | None = None
         self.half_open_calls = 0
 
     def call(self, func: Callable[..., T], *args: Any, **kwargs: Any) -> T:
@@ -91,7 +92,7 @@ class CircuitBreaker:
             result = func(*args, **kwargs)
             self._on_success()
             return result
-        except Exception as e:
+        except Exception:
             self._on_failure()
             raise
 
@@ -124,7 +125,7 @@ class CircuitBreaker:
             result = await func(*args, **kwargs)
             self._on_success()
             return result
-        except Exception as e:
+        except Exception:
             self._on_failure()
             raise
 
@@ -225,7 +226,7 @@ class RetryPolicy:
     - Exception filtering
     """
 
-    def __init__(self, config: Optional[RetryConfig] = None):
+    def __init__(self, config: RetryConfig | None = None):
         """Initialize retry policy.
 
         Args:
@@ -402,7 +403,7 @@ class ReliabilityManager:
     def get_circuit_breaker(
         self,
         name: str,
-        config: Optional[CircuitBreakerConfig] = None,
+        config: CircuitBreakerConfig | None = None,
     ) -> CircuitBreaker:
         """Get or create a circuit breaker.
 
@@ -420,7 +421,7 @@ class ReliabilityManager:
     def get_retry_policy(
         self,
         name: str,
-        config: Optional[RetryConfig] = None,
+        config: RetryConfig | None = None,
     ) -> RetryPolicy:
         """Get or create a retry policy.
 
@@ -438,9 +439,9 @@ class ReliabilityManager:
     def execute_with_reliability(
         self,
         func: Callable[..., T],
-        circuit_breaker_name: Optional[str] = None,
-        retry_policy_name: Optional[str] = None,
-        fallback_func: Optional[Callable[..., T]] = None,
+        circuit_breaker_name: str | None = None,
+        retry_policy_name: str | None = None,
+        fallback_func: Callable[..., T] | None = None,
         *args: Any,
         **kwargs: Any,
     ) -> T:

@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.acp.remote_control import (
     AttachToken,
     RelayHub,
@@ -12,7 +11,6 @@ from lyra_core.acp.remote_control import (
     issue_token,
     verify_token,
 )
-
 
 SECRET = b"test-secret-32-bytes-________"
 

@@ -4,7 +4,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from lyra_core.adapters.agents_manifest import (
     AgentsManifest,
     CatalogEntry,
@@ -12,7 +11,6 @@ from lyra_core.adapters.agents_manifest import (
     render_manifest,
     write_manifest,
 )
-
 
 # ────────────────────────────────────────────────────────────────
 # CatalogEntry validation

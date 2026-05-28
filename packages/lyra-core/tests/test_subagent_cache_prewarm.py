@@ -11,7 +11,6 @@ from __future__ import annotations
 import threading
 
 import pytest
-
 from lyra_core.providers.prompt_cache import (
     CacheStatus,
     PromptCacheCoordinator,

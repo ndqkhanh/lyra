@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.observability.context_gauge import (
     AgentDAG,
     ContextGauge,
@@ -14,7 +13,6 @@ from lyra_core.observability.event_bus import (
     SubagentFinished,
     SubagentSpawned,
 )
-
 
 # ---------------------------------------------------------------------------
 # ContextGauge

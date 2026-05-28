@@ -32,7 +32,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from lyra_cli.interactive.keybinds import _MODE_CYCLE_TAB
 from lyra_cli.interactive.session import (
     _LEGACY_MODE_REMAP,

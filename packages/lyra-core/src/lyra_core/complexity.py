@@ -6,7 +6,6 @@ Calculates task complexity (0-1 scale) for intelligent agent routing.
 """
 
 from dataclasses import dataclass
-from typing import List, Optional
 
 
 @dataclass
@@ -40,10 +39,10 @@ PRIORITY_MULTIPLIERS = {
 
 def calculate_complexity(
     task: str,
-    subtasks: Optional[List[str]] = None,
-    dependencies: Optional[List[str]] = None,
+    subtasks: list[str] | None = None,
+    dependencies: list[str] | None = None,
     priority: int = 2,
-    task_type: Optional[str] = None
+    task_type: str | None = None
 ) -> TaskComplexity:
     """
     Calculate task complexity on 0-1 scale.

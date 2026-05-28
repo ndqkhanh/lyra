@@ -20,10 +20,10 @@ from __future__ import annotations
 import hashlib
 import json
 import time
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Sequence
 
 try:
     from cryptography.hazmat.primitives import serialization as _serialization

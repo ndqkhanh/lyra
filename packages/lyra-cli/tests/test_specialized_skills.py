@@ -2,39 +2,35 @@
 Tests for specialized skills
 """
 
+
 import pytest
-from pathlib import Path
 from lyra_cli.skills.specialized import (
     get_registry,
-    list_all_skills,
     get_skill_by_name,
+    list_all_skills,
     search_skills,
 )
-from lyra_cli.skills.specialized.code_reviewer import (
-    CodeReviewerSkill,
-    Severity,
-    FindingCategory,
-)
-from lyra_cli.skills.specialized.security_auditor import (
-    SecurityAuditorSkill,
-    VulnerabilitySeverity,
-)
-from lyra_cli.skills.specialized.test_generator import TestGeneratorSkill
-from lyra_cli.skills.specialized.refactoring_advisor import RefactoringAdvisorSkill
-from lyra_cli.skills.specialized.documentation_writer import DocumentationWriterSkill
-from lyra_cli.skills.specialized.performance_profiler import PerformanceProfilerSkill
-from lyra_cli.skills.specialized.dependency_analyzer import DependencyAnalyzerSkill
-from lyra_cli.skills.specialized.sre_incident_responder import SREIncidentResponder
-from lyra_cli.skills.specialized.cloud_architect import CloudArchitect
-from lyra_cli.skills.specialized.solution_architect import SolutionArchitect
-from lyra_cli.skills.specialized.pm_planner import PMPlanner
+from lyra_cli.skills.specialized.ai_researcher import AIResearcher
 from lyra_cli.skills.specialized.ba_analyzer import BAAnalyzer
 from lyra_cli.skills.specialized.brainstorm_facilitator import BrainstormFacilitator
+from lyra_cli.skills.specialized.cloud_architect import CloudArchitect
+from lyra_cli.skills.specialized.code_reviewer import (
+    CodeReviewerSkill,
+)
 from lyra_cli.skills.specialized.data_engineer import DataEngineer
-from lyra_cli.skills.specialized.ai_researcher import AIResearcher
-from lyra_cli.skills.specialized.design_reviewer import DesignReviewer
 from lyra_cli.skills.specialized.debugging_assistant import DebuggingAssistant
-
+from lyra_cli.skills.specialized.dependency_analyzer import DependencyAnalyzerSkill
+from lyra_cli.skills.specialized.design_reviewer import DesignReviewer
+from lyra_cli.skills.specialized.documentation_writer import DocumentationWriterSkill
+from lyra_cli.skills.specialized.performance_profiler import PerformanceProfilerSkill
+from lyra_cli.skills.specialized.pm_planner import PMPlanner
+from lyra_cli.skills.specialized.refactoring_advisor import RefactoringAdvisorSkill
+from lyra_cli.skills.specialized.security_auditor import (
+    SecurityAuditorSkill,
+)
+from lyra_cli.skills.specialized.solution_architect import SolutionArchitect
+from lyra_cli.skills.specialized.sre_incident_responder import SREIncidentResponder
+from lyra_cli.skills.specialized.test_generator import TestGeneratorSkill
 
 # =========================================================================
 # Existing Registry Tests
@@ -185,7 +181,7 @@ class TestSkillIntegration:
 
     def test_skill_selection(self):
         """Test that skills can be selected based on context."""
-        from lyra_cli.skills.skill_curator import SkillCurator, SelectionContext
+        from lyra_cli.skills.skill_curator import SelectionContext, SkillCurator
 
         curator = SkillCurator()
         curator.discover_skills()

@@ -4,8 +4,8 @@ Keeping these as Python literals (not on-disk fixtures) makes the test
 suite self-contained and ~5x faster than reading from tmp_path."""
 from __future__ import annotations
 
-from typing import Any, Mapping
-
+from collections.abc import Mapping
+from typing import Any
 
 CODING_HAPPY_PATH: list[Mapping[str, Any]] = [
     {"kind": "turn", "turn": 1, "ts": 1.0, "user_input": "add validation",

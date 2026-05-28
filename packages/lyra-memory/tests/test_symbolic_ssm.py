@@ -1,8 +1,8 @@
 """Tests for Symbolic SSM (Mermaid Canvas) and CraniMem gate."""
 
-from pathlib import Path
 import tempfile
-import pytest
+from pathlib import Path
+
 from lyra_memory.symbolic_ssm import (
     CraniMemGate,
     SymbolicRepresentation,
@@ -10,7 +10,6 @@ from lyra_memory.symbolic_ssm import (
     _estimate_tokens,
     _slugify,
 )
-
 
 SAMPLE_BASH_OUTPUT = """test_foo.py
 test_bar.py

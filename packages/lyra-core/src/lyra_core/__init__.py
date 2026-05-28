@@ -13,22 +13,22 @@ imports downstream.
 """
 from __future__ import annotations
 
+from lyra_core.agent.agi_plugin import AGILoopPlugin
 from lyra_core.agent.event_sourced_loop import (
-    EventSourcedAgentLoop,
     EventLog,
-    StepEvent,
+    EventSourcedAgentLoop,
     EventType,
     MultiStreamExecutor,
-    SpeculativePlanner,
     RuntimeHarnessAdaptor,
+    SpeculativePlanner,
+    StepEvent,
 )
+from lyra_core.agent.safety_hooks import SafetyHookPlugin
 from lyra_core.agi_orchestrator import (
     AGIOrchestrator,
     AGIPhase,
     PlanStatus,
 )
-from lyra_core.agent.agi_plugin import AGILoopPlugin
-from lyra_core.agent.safety_hooks import SafetyHookPlugin
 from lyra_core.auto_fanout import AutoFanoutCompressor, FanoutResult
 from lyra_core.breakthrough import BreakthroughIntegration, breakthrough_available
 from lyra_core.canary import CanaryTokenGuard, ScanResult, ScanSeverity

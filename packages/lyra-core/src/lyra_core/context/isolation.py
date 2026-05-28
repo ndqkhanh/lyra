@@ -18,14 +18,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
 
 from lyra_core.context.layered_context import (
     ContextEntry,
     ContextLayer,
     LayeredContextManager,
 )
-
 
 # ============================================================================
 # Merge Strategies
@@ -47,7 +45,7 @@ class MergeResult:
 
     entries_merged: int = 0
     tokens_merged: int = 0
-    layers_affected: List[ContextLayer] = field(default_factory=list)
+    layers_affected: list[ContextLayer] = field(default_factory=list)
     skipped_entries: int = 0  # Entries not merged due to strategy
 
 
@@ -58,7 +56,7 @@ class ContextMerger:
         self,
         parent: LayeredContextManager,
         child: LayeredContextManager,
-        layers: List[ContextLayer],
+        layers: list[ContextLayer],
         strategy: MergeStrategy,
     ) -> MergeResult:
         """Merge child context into parent using strategy.
@@ -115,8 +113,8 @@ class ContextMerger:
         return result
 
     def _filter_entries(
-        self, entries: List[ContextEntry], strategy: MergeStrategy
-    ) -> List[ContextEntry]:
+        self, entries: list[ContextEntry], strategy: MergeStrategy
+    ) -> list[ContextEntry]:
         """Filter entries based on merge strategy.
 
         Args:
@@ -152,8 +150,8 @@ class IsolationPolicy:
         max_tokens: Maximum tokens for child context
     """
 
-    inherit_layers: List[ContextLayer]
-    merge_layers: List[ContextLayer]
+    inherit_layers: list[ContextLayer]
+    merge_layers: list[ContextLayer]
     merge_strategy: MergeStrategy = MergeStrategy.SELECTIVE
     max_tokens: int = 50_000
 
@@ -242,7 +240,7 @@ class ContextScope:
     def __init__(
         self,
         parent_context: LayeredContextManager,
-        inherit_layers: List[ContextLayer],
+        inherit_layers: list[ContextLayer],
         max_tokens: int = 50_000,
     ) -> None:
         """Initialize context scope.
@@ -287,7 +285,7 @@ class ContextScope:
     def merge_child_results(
         self,
         child_context: LayeredContextManager,
-        merge_layers: List[ContextLayer],
+        merge_layers: list[ContextLayer],
         strategy: MergeStrategy = MergeStrategy.SELECTIVE,
     ) -> MergeResult:
         """Merge child results back to parent (selective).
@@ -354,8 +352,8 @@ class ContextBoundary:
         """
         self.parent = parent
         self.policy = policy
-        self.children: Dict[str, LayeredContextManager] = {}
-        self.scopes: Dict[str, ContextScope] = {}
+        self.children: dict[str, LayeredContextManager] = {}
+        self.scopes: dict[str, ContextScope] = {}
 
     def spawn_child(self, task_id: str) -> LayeredContextManager:
         """Create child context with policy-based inheritance.
@@ -415,7 +413,7 @@ class ContextBoundary:
 
         return result
 
-    def get_isolation_stats(self, task_id: Optional[str] = None) -> IsolationStats:
+    def get_isolation_stats(self, task_id: str | None = None) -> IsolationStats:
         """Get statistics on context isolation.
 
         Args:
@@ -496,7 +494,7 @@ class ContextBoundary:
             else 0.0,
         )
 
-    def get_active_children(self) -> List[str]:
+    def get_active_children(self) -> list[str]:
         """Get list of active child task IDs.
 
         Returns:

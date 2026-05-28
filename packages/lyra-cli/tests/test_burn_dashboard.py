@@ -4,12 +4,14 @@ from __future__ import annotations
 from decimal import Decimal
 
 import pytest
-from rich.console import Console
-
 from lyra_cli.observatory.aggregator import (
-    BurnReport, ModelBreakdown, CategoryBreakdown, SessionRow,
+    BurnReport,
+    CategoryBreakdown,
+    ModelBreakdown,
+    SessionRow,
 )
 from lyra_cli.observatory.dashboard import render_dashboard
+from rich.console import Console
 
 
 @pytest.fixture

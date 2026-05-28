@@ -6,7 +6,6 @@ from decimal import Decimal
 from pathlib import Path
 
 import pytest
-
 from lyra_cli.observatory.aggregator import aggregate
 
 

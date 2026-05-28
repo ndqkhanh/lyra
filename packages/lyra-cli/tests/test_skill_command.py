@@ -4,10 +4,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from typer.testing import CliRunner
-
 from lyra_cli.commands.skill import skill_app
-
+from typer.testing import CliRunner
 
 runner = CliRunner()
 
@@ -313,7 +311,6 @@ def _seed_failure_history(
 
     from lyra_skills.ledger import (
         OUTCOME_FAILURE,
-        OUTCOME_SUCCESS,
         SkillOutcome,
         record_outcome,
     )

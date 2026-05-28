@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.routing.policy import RoutingSignals
 from lyra_core.routing.state_encoder import (
     FEATURE_DIM,

@@ -14,9 +14,10 @@ tokens.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from collections.abc import Sequence
+from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, Sequence, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from .registry import Skill, SkillRegistry
 
@@ -56,7 +57,7 @@ class HybridSkillRouter:
 
     registry: SkillRegistry
     reuse_threshold: float = 0.6
-    bm25_tier: Optional["BM25Tier"] = None
+    bm25_tier: BM25Tier | None = None
     # Blend weights — must sum to 1.0 when all three signals are live.
     overlap_weight: float = 0.5
     bm25_weight: float = 0.3

@@ -32,7 +32,6 @@ from lyra_core.hooks.secrets_scan import secrets_scan_hook
 
 from .injection import injection_guard
 
-
 PermissionMode = Literal["normal", "strict", "yolo"]
 
 

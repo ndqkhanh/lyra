@@ -23,7 +23,6 @@ from __future__ import annotations
 from collections.abc import Iterable
 from typing import Literal, TypedDict
 
-
 Risk = Literal["low", "medium", "high"]
 
 

@@ -1,22 +1,16 @@
 """Decay + access-strengthening tests (steal #3 from agentmemory)."""
 from __future__ import annotations
 
-import json
-import math
 from pathlib import Path
 
 import pytest
-
 from lyra_core.memory.auto_memory import AutoMemory, MemoryKind
 from lyra_core.memory.decay import (
-    DEFAULT_HALF_LIFE_S,
-    AccessStats,
     access_boost,
     ebbinghaus_decay,
     half_life_for,
     weighted_score,
 )
-
 
 # --- pure functions --------------------------------------------------
 

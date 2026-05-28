@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich import box
@@ -89,7 +88,7 @@ def agents_command(
     ctx: typer.Context,
     repo_root: Path = typer.Option(Path.cwd(), "--repo-root", "-C", help="Repo root."),
     json_out: bool = typer.Option(False, "--json", help="Emit JSON instead of a table."),
-    priority: Optional[str] = typer.Option(
+    priority: str | None = typer.Option(
         None, "--priority", "-p", help="Filter to one priority (P0..P4)."
     ),
 ) -> None:

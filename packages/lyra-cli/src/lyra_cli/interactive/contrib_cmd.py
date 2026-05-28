@@ -17,7 +17,6 @@ from typing import Any
 
 from ..commands.registry import CommandResult
 
-
 # ── ECC-inspired quality sections ──────────────────────────────────────
 
 SECTIONS = {

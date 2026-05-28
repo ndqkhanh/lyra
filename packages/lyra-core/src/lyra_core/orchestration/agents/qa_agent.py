@@ -16,7 +16,7 @@ from lyra_core.orchestration.models.testing import (
     TestStrategy,
     TestType,
 )
-from lyra_core.orchestration.protocol import Message, MessageType
+from lyra_core.orchestration.protocol import Message
 
 
 class QAEngineerAgent(BaseAgent):

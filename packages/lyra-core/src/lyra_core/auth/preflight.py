@@ -25,8 +25,8 @@ preflight has zero new third-party dependencies. Tests monkey-patch
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Mapping
 from urllib import request as _urlreq
 from urllib.error import HTTPError, URLError
 

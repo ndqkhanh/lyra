@@ -1,10 +1,10 @@
 """Observation capture - Records user interactions for learning"""
 
+import json
 from dataclasses import dataclass
-from typing import Optional, Dict, Any
 from datetime import datetime
 from pathlib import Path
-import json
+from typing import Any
 
 
 @dataclass
@@ -13,17 +13,17 @@ class Observation:
     timestamp: datetime
     session_id: str
     tool_name: str
-    tool_input: Dict[str, Any]
-    tool_output: Optional[Dict[str, Any]]
-    user_prompt: Optional[str]
-    agent_response: Optional[str]
-    project_id: Optional[str]
+    tool_input: dict[str, Any]
+    tool_output: dict[str, Any] | None
+    user_prompt: str | None
+    agent_response: str | None
+    project_id: str | None
 
 
 class ObservationCapture:
     """Captures observations from hooks for learning"""
 
-    def __init__(self, data_dir: Optional[Path] = None):
+    def __init__(self, data_dir: Path | None = None):
         self.data_dir = data_dir or Path.home() / ".lyra" / "learning" / "observations"
         self.data_dir.mkdir(parents=True, exist_ok=True)
 
@@ -51,7 +51,7 @@ class ObservationCapture:
             }
             f.write(json.dumps(obs_dict) + "\n")
 
-    def get_observations(self, project_id: Optional[str] = None, limit: int = 100) -> list:
+    def get_observations(self, project_id: str | None = None, limit: int = 100) -> list:
         """Get recent observations"""
         if project_id:
             obs_file = self.data_dir / project_id / "observations.jsonl"
@@ -73,7 +73,7 @@ class ObservationCapture:
 
         return observations
 
-    def capture_from_hook(self, hook_context: Dict[str, Any], session_id: str, project_id: Optional[str] = None):
+    def capture_from_hook(self, hook_context: dict[str, Any], session_id: str, project_id: str | None = None):
         """Capture observation from hook context"""
         observation = Observation(
             timestamp=datetime.now(),
@@ -89,7 +89,7 @@ class ObservationCapture:
 
 
 # Global observation capture
-_observation_capture: Optional[ObservationCapture] = None
+_observation_capture: ObservationCapture | None = None
 
 
 def get_observation_capture() -> ObservationCapture:

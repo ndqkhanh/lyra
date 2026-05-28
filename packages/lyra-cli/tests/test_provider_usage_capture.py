@@ -25,11 +25,8 @@ import json
 from typing import Any
 from unittest.mock import MagicMock
 
-import pytest
-
 from lyra_cli.providers.openai_compatible import (
     OpenAICompatibleLLM,
-    ProviderHTTPError,
 )
 
 

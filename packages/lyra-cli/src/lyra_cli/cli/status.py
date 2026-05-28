@@ -1,9 +1,8 @@
 """Enhanced status bar with Claude Code-inspired design"""
 
-from rich.console import Console
-from rich.text import Text
-from typing import Optional
 import time
+
+from rich.console import Console
 
 
 class StatusBar:
@@ -19,10 +18,10 @@ class StatusBar:
 
     def update(
         self,
-        model: Optional[str] = None,
-        tokens: Optional[int] = None,
-        cost: Optional[float] = None,
-        session_id: Optional[str] = None,
+        model: str | None = None,
+        tokens: int | None = None,
+        cost: float | None = None,
+        session_id: str | None = None,
     ):
         """Update status bar values"""
         if model:

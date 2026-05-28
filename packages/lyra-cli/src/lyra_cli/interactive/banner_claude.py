@@ -18,19 +18,16 @@ without spinning a real Console.
 from __future__ import annotations
 
 import io
-import os
 import shutil
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 from rich.box import ROUNDED
 from rich.console import Console
-from rich.padding import Padding
 from rich.table import Table
 from rich.text import Text
 
 from .. import __version__
-
 
 # Compact 3-line brand mark — visual match for Claude Code's asterisk-block.
 # Lyra-themed: slimmer pillars with a tilted base to read as "L Y" at a glance.

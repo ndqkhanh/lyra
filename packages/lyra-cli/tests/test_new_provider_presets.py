@@ -10,8 +10,6 @@ plus five local OpenAI-compatible servers:
 """
 from __future__ import annotations
 
-import pytest
-
 from lyra_cli.providers.openai_compatible import PRESETS, preset_by_name
 
 

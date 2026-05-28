@@ -41,12 +41,11 @@ Research grounding:
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Callable
 
 from .schema import Fragment, MemoryTier
-
 
 # ---------------------------------------------------------------------------
 # Utility weights

@@ -34,6 +34,53 @@ with a stub callable in unit tests.
 """
 from __future__ import annotations
 
+# L311 — Anthropic Agent Teams parallel runtime (lead-and-spokes).
+# Coexists with the MetaGPT sequential pipeline above.
+from .agent_teams import (
+    TEAMMATE_BLOCK_THRESHOLD,
+    TEAMMATE_WARN_THRESHOLD,
+    AgentTeamError,
+    Executor,
+    HookBlockedError,
+    LeadSession,
+    TeamCostError,
+    TeammateMode,
+    TeammateNotFoundError,
+    TeammateSpec,
+    TeamNestError,
+    TeamPromoteError,
+    TeamReport,
+    register_lifecycle_bus,
+    unregister_lifecycle_bus,
+)
+from .cleanup import CleanupAction, CleanupRecord, CleanupReport, TeamCleanupManager
+from .executor_adapter import (
+    AgentLoopExecutor,
+    CallableLLMExecutor,
+    LoopFactory,
+    make_executor_from_chat,
+    make_executor_from_factory,
+)
+from .hooks import (
+    HOOKABLE_EVENTS,
+    GateResult,
+    HookableEvent,
+    HookDecision,
+    HookSpec,
+    TeamHookRegistry,
+    global_registry,
+    load_hooks_yaml,
+    reset_global_registry,
+)
+from .hybrid_router import Channel, HybridCommunicationRouter, MessageCategory, RoutedMessage
+from .mailbox import Mailbox, MailboxMessage, MessageKind
+from .plan_approval import (
+    ApprovalDecision,
+    ApprovalRecord,
+    PlanApprovalWorkflow,
+    PlanDocument,
+    PlanState,
+)
 from .registry import (
     AgentCallable,
     TeamPlan,
@@ -46,55 +93,7 @@ from .registry import (
     default_software_plan,
     run_team_plan,
 )
-
-# L311 — Anthropic Agent Teams parallel runtime (lead-and-spokes).
-# Coexists with the MetaGPT sequential pipeline above.
-from .agent_teams import (
-    AgentTeamError,
-    Executor,
-    HookBlockedError,
-    LeadSession,
-    TEAMMATE_BLOCK_THRESHOLD,
-    TEAMMATE_WARN_THRESHOLD,
-    TeamCostError,
-    TeamNestError,
-    TeamPromoteError,
-    TeamReport,
-    TeammateMode,
-    TeammateNotFoundError,
-    TeammateSpec,
-    register_lifecycle_bus,
-    unregister_lifecycle_bus,
-)
-from .executor_adapter import (
-    AgentLoopExecutor,
-    CallableLLMExecutor,
-    LoopFactory,
-    make_executor_from_chat,
-    make_executor_from_factory,
-)
-from .hooks import (
-    GateResult,
-    HOOKABLE_EVENTS,
-    HookDecision,
-    HookSpec,
-    HookableEvent,
-    TeamHookRegistry,
-    global_registry,
-    load_hooks_yaml,
-    reset_global_registry,
-)
-from .mailbox import Mailbox, MailboxMessage, MessageKind
 from .shared_tasks import SharedTaskList, Task, TaskState, TaskSummary
-from .hybrid_router import Channel, HybridCommunicationRouter, MessageCategory, RoutedMessage
-from .plan_approval import (
-    ApprovalDecision,
-    ApprovalRecord,
-    PlanApprovalWorkflow,
-    PlanDocument,
-    PlanState,
-)
-from .cleanup import CleanupAction, CleanupRecord, CleanupReport, TeamCleanupManager
 from .sprint_pipeline import (
     Sprint,
     SprintPhase,

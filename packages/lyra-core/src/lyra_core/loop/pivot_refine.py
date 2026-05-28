@@ -28,8 +28,6 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
-from typing import Optional
-
 
 __all__ = [
     "ErrorRecord",
@@ -181,11 +179,11 @@ class ErrorDatabase:
     def __init__(
         self,
         *,
-        path: Optional[Path] = None,
-        similarity_scorer: Optional[_SimilarityScorer] = None,
+        path: Path | None = None,
+        similarity_scorer: _SimilarityScorer | None = None,
     ) -> None:
         self._records: list[ErrorRecord] = []
-        self._path: Optional[Path] = Path(path) if path is not None else None
+        self._path: Path | None = Path(path) if path is not None else None
         self._scorer: _SimilarityScorer = similarity_scorer or _default_similarity
         if self._path is not None and self._path.exists():
             self._load()
@@ -193,7 +191,7 @@ class ErrorDatabase:
     # ---- public API --------------------------------------------------------
 
     @property
-    def path(self) -> Optional[Path]:
+    def path(self) -> Path | None:
         return self._path
 
     def __len__(self) -> int:
@@ -402,9 +400,9 @@ class PivotRefineExecutor:
     def __init__(
         self,
         *,
-        alternative_generator: Optional[AlternativeGenerator] = None,
-        executor: Optional[RecoveryExecutor] = None,
-        analyze_hook: Optional[AnalyzeFailureHook] = None,
+        alternative_generator: AlternativeGenerator | None = None,
+        executor: RecoveryExecutor | None = None,
+        analyze_hook: AnalyzeFailureHook | None = None,
         default_strategy: RecoveryStrategy = RecoveryStrategy.RETRY,
     ) -> None:
         self._alternative_generator = alternative_generator
@@ -497,8 +495,8 @@ class PivotRefineExecutor:
             return [
                 f"Pivot approach for stage '{error.failure_stage}'. "
                 f"Change the methodology while keeping the goal fixed.",
-                f"Break the task into smaller probing steps before committing "
-                f"to a full solution.",
+                "Break the task into smaller probing steps before committing "
+                "to a full solution.",
             ]
         if strategy == RecoveryStrategy.DECOMPOSE:
             return [

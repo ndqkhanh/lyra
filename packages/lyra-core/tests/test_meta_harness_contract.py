@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.meta import (
     CandidateConfig,
     HarnessTask,
@@ -11,7 +10,6 @@ from lyra_core.meta import (
     default_parity_corpus,
 )
 from lyra_core.meta.outer_loop import StaticProposer
-
 
 # ---- corpus --------------------------------------------------------
 

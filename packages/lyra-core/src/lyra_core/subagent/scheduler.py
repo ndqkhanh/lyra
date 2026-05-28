@@ -22,8 +22,9 @@ the picture.
 from __future__ import annotations
 
 import concurrent.futures as cf
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Literal, Set
+from typing import Any, Literal
 
 
 class SchedulerError(Exception):
@@ -87,7 +88,7 @@ class SubagentScheduler:
         *,
         worker: WorkerFn,
     ) -> SubagentDAGRun:
-        by_id: Dict[str, SubagentDAGSpec] = {}
+        by_id: dict[str, SubagentDAGSpec] = {}
         for spec in specs:
             if spec.id in by_id:
                 raise SchedulerError(f"duplicate spec id: {spec.id!r}")
@@ -103,10 +104,10 @@ class SubagentScheduler:
         levels = _topological_levels(by_id)
 
         run = SubagentDAGRun()
-        results_by_id: Dict[str, SubagentNodeResult] = {}
+        results_by_id: dict[str, SubagentNodeResult] = {}
         for level in levels:
             # Skip nodes whose deps already failed/were skipped.
-            runnable: List[SubagentDAGSpec] = []
+            runnable: list[SubagentDAGSpec] = []
             for nid in level:
                 spec = by_id[nid]
                 blocked = [
@@ -166,9 +167,9 @@ class SubagentScheduler:
 
 
 def _topological_levels(
-    by_id: Dict[str, SubagentDAGSpec],
+    by_id: dict[str, SubagentDAGSpec],
 ) -> list[list[str]]:
-    remaining: Dict[str, Set[str]] = {
+    remaining: dict[str, set[str]] = {
         nid: set(spec.depends_on) for nid, spec in by_id.items()
     }
     levels: list[list[str]] = []

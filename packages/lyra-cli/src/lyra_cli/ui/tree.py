@@ -2,8 +2,9 @@
 
 from dataclasses import dataclass, field
 from typing import Any
-from .symbols import SymbolRegistry
+
 from .colors import ColorEngine
+from .symbols import SymbolRegistry
 
 
 @dataclass

@@ -3,7 +3,6 @@
 import time
 
 import pytest
-
 from lyra_cli.memory.l5_persona.identity_traits import (
     IdentityModel,
     IdentityTrait,

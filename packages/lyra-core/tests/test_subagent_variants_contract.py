@@ -21,8 +21,6 @@ from __future__ import annotations
 
 from typing import Any
 
-import pytest
-
 
 def _scoring_judge(outcomes: list[Any]) -> Any:
     """Default judge: pick the variant with the highest ``score``."""

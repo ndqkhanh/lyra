@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_cli.hud import HudState, available_presets, load_preset, render
 from lyra_cli.hud.testing import sample_state, strip_ansi
 from lyra_cli.hud.widgets import widget_names

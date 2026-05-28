@@ -20,8 +20,9 @@ prompt_toolkit installed.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Callable, Tuple
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:  # pragma: no cover
     from .session import InteractiveSession
@@ -114,38 +115,38 @@ class LeaderChords:
 #   - Pre-v3.2 used ``build → plan → run → retro → explore`` (5 modes).
 # Both legacy taxonomies are remapped at session boot via
 # ``_LEGACY_MODE_REMAP`` in :mod:`lyra_cli.interactive.session`.
-_MODE_CYCLE_TAB: Tuple[str, ...] = (
+_MODE_CYCLE_TAB: tuple[str, ...] = (
     "edit_automatically",
     "plan_mode",
     "ask_before_edits",
     "auto_mode",
 )
 
-_PERMISSION_CYCLE: Tuple[str, ...] = ("normal", "strict", "yolo")
+_PERMISSION_CYCLE: tuple[str, ...] = ("normal", "strict", "yolo")
 
 
-def toggle_task_panel(session: "InteractiveSession") -> str:
+def toggle_task_panel(session: InteractiveSession) -> str:
     """``Ctrl+T`` — flip the live task-panel visibility flag."""
     session.task_panel = not getattr(session, "task_panel", False)
     state = "on" if session.task_panel else "off"
     return f"task panel {state}"
 
 
-def toggle_verbose_tool_output(session: "InteractiveSession") -> str:
+def toggle_verbose_tool_output(session: InteractiveSession) -> str:
     """``Ctrl+O`` — flip verbose tool-call output."""
     session.verbose = not getattr(session, "verbose", False)
     state = "on" if session.verbose else "off"
     return f"verbose tool output {state}"
 
 
-def toggle_deep_think(session: "InteractiveSession") -> str:
+def toggle_deep_think(session: InteractiveSession) -> str:
     """``Alt+T`` — flip the deep-think flag (extra plan-mode reasoning)."""
     session.deep_think = not getattr(session, "deep_think", False)
     state = "on" if session.deep_think else "off"
     return f"deep-think {state}"
 
 
-def cycle_mode(session: "InteractiveSession") -> str:
+def cycle_mode(session: InteractiveSession) -> str:
     """``Tab`` — advance through ``edit_automatically → plan_mode → ask_before_edits → auto_mode``.
 
     When the current mode isn't in the rotation (legacy v1.x / v2.x /
@@ -177,7 +178,7 @@ def cycle_mode(session: "InteractiveSession") -> str:
     return f"mode → {nxt}"
 
 
-def set_mode(session: "InteractiveSession", mode: str) -> str:
+def set_mode(session: InteractiveSession, mode: str) -> str:
     """Direct mode setter — Claude-Code-style ``Alt+P`` / ``Alt+E`` / ``Alt+A``.
 
     Cycling via ``Tab`` is fine for browsing, but power users know
@@ -202,7 +203,7 @@ def set_mode(session: "InteractiveSession", mode: str) -> str:
     return f"mode → {mode}"
 
 
-def _propagate_perm_to_substrate(session: "InteractiveSession", perm: str) -> None:
+def _propagate_perm_to_substrate(session: InteractiveSession, perm: str) -> None:
     """Push ``perm`` into the permission stack + tool-approval cache.
 
     Best-effort; swallows errors so a Tab press can never crash the
@@ -222,7 +223,7 @@ def _propagate_perm_to_substrate(session: "InteractiveSession", perm: str) -> No
             pass
 
 
-def toggle_permission_mode(session: "InteractiveSession") -> str:
+def toggle_permission_mode(session: InteractiveSession) -> str:
     """``Alt+M`` — cycle ``normal → strict → yolo → normal …``.
 
     Wave-D wires the substrate side too: when a
@@ -254,7 +255,7 @@ def toggle_permission_mode(session: "InteractiveSession") -> str:
     return f"permission mode → {nxt}"
 
 
-def rewind_one_persisted(session: "InteractiveSession") -> str:
+def rewind_one_persisted(session: InteractiveSession) -> str:
     """``Esc Esc`` — pop the last turn and shrink the on-disk JSONL."""
     snap = session.rewind_one()
     if snap is None:
@@ -262,7 +263,7 @@ def rewind_one_persisted(session: "InteractiveSession") -> str:
     return f"rewound turn {snap.turn + 1} (mode={snap.mode!r})"
 
 
-def new_chat(session: "InteractiveSession") -> str:
+def new_chat(session: InteractiveSession) -> str:
     """``Ctrl-N`` — start a fresh chat in the same session shell.
 
     Wipes in-memory message log, input history, turn counter, and
@@ -281,7 +282,7 @@ def new_chat(session: "InteractiveSession") -> str:
     return "new chat (mode + model preserved)"
 
 
-def run_in_background(session: "InteractiveSession") -> str:
+def run_in_background(session: InteractiveSession) -> str:
     """``Ctrl+B`` — toggle background-turn mode for the current inference.
 
     When enabled, the next LLM call is dispatched as a background task so
@@ -294,7 +295,7 @@ def run_in_background(session: "InteractiveSession") -> str:
     return f"background mode {state}"
 
 
-def toggle_transcript(session: "InteractiveSession") -> str:
+def toggle_transcript(session: InteractiveSession) -> str:
     """``Ctrl+O`` — toggle transcript panel overlay.
 
     When enabled, the driver prints recent conversation turns above
@@ -305,7 +306,7 @@ def toggle_transcript(session: "InteractiveSession") -> str:
     return f"transcript {'on' if session.show_transcript else 'off'}"
 
 
-def focus_foreground_subagent(session: "InteractiveSession") -> str:
+def focus_foreground_subagent(session: InteractiveSession) -> str:
     """``Ctrl+F`` — re-focus the most recently spawned subagent.
 
     Wave-D Task 2. The REPL keeps a single ``focused_subagent`` slot
@@ -338,7 +339,7 @@ def focus_foreground_subagent(session: "InteractiveSession") -> str:
     return f"focused → {chosen.id} ({chosen.state})"
 
 
-def launch_skill_picker(session: "InteractiveSession") -> tuple[str | None, str]:
+def launch_skill_picker(session: InteractiveSession) -> tuple[str | None, str]:
     """``Alt+K`` — launch interactive skill picker and return selected skill + args.
 
     Returns a tuple of (skill_name, args_string) if a skill was selected,
@@ -404,7 +405,7 @@ def launch_skill_picker(session: "InteractiveSession") -> tuple[str | None, str]
 class _StubBinding:
     """One vi-mode binding declared without prompt_toolkit installed."""
 
-    keys: Tuple[str, ...]
+    keys: tuple[str, ...]
     description: str
 
 

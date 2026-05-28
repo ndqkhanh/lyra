@@ -1,9 +1,9 @@
 """Tests for RuleRegistry."""
 
+
 import pytest
-from pathlib import Path
+from lyra_cli.core.rule_metadata import RuleCategory
 from lyra_cli.core.rule_registry import RuleRegistry
-from lyra_cli.core.rule_metadata import RuleCategory, RuleSeverity
 
 
 @pytest.fixture

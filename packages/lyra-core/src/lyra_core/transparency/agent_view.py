@@ -14,8 +14,6 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Optional
-
 
 __all__ = [
     "AttentionPriority",
@@ -44,7 +42,7 @@ class AgentViewRecord:
     is_attached: bool = False              # True when operator is watching this agent
     registered_at: float = field(default_factory=time.time)
     last_updated: float = field(default_factory=time.time)
-    _pending_reply: Optional[str] = field(default=None, repr=False)
+    _pending_reply: str | None = field(default=None, repr=False)
 
     def touch(self) -> None:
         self.last_updated = time.time()
@@ -102,7 +100,7 @@ class FleetView:
     # Observation                                                        #
     # ---------------------------------------------------------------- #
 
-    def peek(self, agent_id: str) -> Optional[AgentViewRecord]:
+    def peek(self, agent_id: str) -> AgentViewRecord | None:
         return self._agents.get(agent_id)
 
     def list_agents(self) -> list[AgentViewRecord]:
@@ -145,7 +143,7 @@ class FleetView:
         rec._pending_reply = message
         rec.touch()
 
-    def pop_reply(self, agent_id: str) -> Optional[str]:
+    def pop_reply(self, agent_id: str) -> str | None:
         """Consume and return the pending reply, or None if absent."""
         rec = self._agents.get(agent_id)
         if rec and rec._pending_reply is not None:

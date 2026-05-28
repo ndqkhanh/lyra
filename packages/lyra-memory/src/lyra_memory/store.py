@@ -9,9 +9,9 @@ Implements the complete memory system with:
 - Verifier-gated writes
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 from rank_bm25 import BM25Okapi
@@ -50,7 +50,7 @@ class MemoryStore:
         self.enable_embeddings = enable_embeddings
 
         # Hot tier: in-memory cache
-        self.hot_cache: Dict[str, MemoryRecord] = {}
+        self.hot_cache: dict[str, MemoryRecord] = {}
 
         # Embedding model for vector search
         self.embedder = None
@@ -58,8 +58,8 @@ class MemoryStore:
             self.embedder = SentenceTransformer(embedding_model)
 
         # BM25 index (rebuilt on demand)
-        self._bm25_index: Optional[BM25Okapi] = None
-        self._bm25_docs: List[MemoryRecord] = []
+        self._bm25_index: BM25Okapi | None = None
+        self._bm25_docs: list[MemoryRecord] = []
         self._bm25_dirty = True
 
     def write(
@@ -67,12 +67,12 @@ class MemoryStore:
         content: str,
         scope: MemoryScope = MemoryScope.SESSION,
         type: MemoryType = MemoryType.EPISODIC,
-        source_span: Optional[str] = None,
-        valid_from: Optional[datetime] = None,
-        valid_until: Optional[datetime] = None,
+        source_span: str | None = None,
+        valid_from: datetime | None = None,
+        valid_until: datetime | None = None,
         confidence: float = 1.0,
-        links: Optional[List[str]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        links: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
         verify: bool = True,
     ) -> MemoryRecord:
         """
@@ -130,12 +130,12 @@ class MemoryStore:
     def retrieve(
         self,
         query: str,
-        scope: Optional[MemoryScope] = None,
-        type: Optional[MemoryType] = None,
-        valid_at: Optional[datetime] = None,
+        scope: MemoryScope | None = None,
+        type: MemoryType | None = None,
+        valid_at: datetime | None = None,
         limit: int = 10,
         hybrid_alpha: float = 0.5,
-    ) -> List[MemoryRecord]:
+    ) -> list[MemoryRecord]:
         """
         Retrieve memories using hybrid BM25 + vector search.
 
@@ -176,7 +176,7 @@ class MemoryStore:
 
         return results
 
-    def get(self, memory_id: str) -> Optional[MemoryRecord]:
+    def get(self, memory_id: str) -> MemoryRecord | None:
         """Get a memory by ID."""
         # Check hot cache first
         if memory_id in self.hot_cache:
@@ -211,7 +211,7 @@ class MemoryStore:
             old_memory.valid_until = datetime.now()
             self.update(old_memory)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get memory statistics."""
         db_stats = self.db.get_stats()
         return {
@@ -221,10 +221,10 @@ class MemoryStore:
 
     def _get_candidates(
         self,
-        scope: Optional[MemoryScope],
-        type: Optional[MemoryType],
+        scope: MemoryScope | None,
+        type: MemoryType | None,
         valid_at: datetime,
-    ) -> List[MemoryRecord]:
+    ) -> list[MemoryRecord]:
         """Get candidate memories from all tiers."""
         candidates = []
 
@@ -248,8 +248,8 @@ class MemoryStore:
     def _matches_filters(
         self,
         memory: MemoryRecord,
-        scope: Optional[MemoryScope],
-        type: Optional[MemoryType],
+        scope: MemoryScope | None,
+        type: MemoryType | None,
         valid_at: datetime,
     ) -> bool:
         """Check if memory matches filters."""
@@ -263,7 +263,7 @@ class MemoryStore:
             return False
         return True
 
-    def _bm25_score(self, query: str, candidates: List[MemoryRecord]) -> List[float]:
+    def _bm25_score(self, query: str, candidates: list[MemoryRecord]) -> list[float]:
         """Score candidates using BM25."""
         if self._bm25_dirty:
             self._rebuild_bm25_index(candidates)
@@ -275,7 +275,7 @@ class MemoryStore:
         scores = self._bm25_index.get_scores(query_tokens)
         return scores.tolist()
 
-    def _vector_score(self, query: str, candidates: List[MemoryRecord]) -> List[float]:
+    def _vector_score(self, query: str, candidates: list[MemoryRecord]) -> list[float]:
         """Score candidates using vector similarity."""
         if not self.embedder:
             return [0.0] * len(candidates)
@@ -298,9 +298,9 @@ class MemoryStore:
     def _hybrid_score(
         self,
         query: str,
-        candidates: List[MemoryRecord],
+        candidates: list[MemoryRecord],
         alpha: float,
-    ) -> List[float]:
+    ) -> list[float]:
         """Combine BM25 and vector scores."""
         bm25_scores = self._bm25_score(query, candidates)
         vector_scores = self._vector_score(query, candidates)
@@ -317,7 +317,7 @@ class MemoryStore:
 
         return hybrid_scores
 
-    def _normalize(self, scores: List[float]) -> List[float]:
+    def _normalize(self, scores: list[float]) -> list[float]:
         """Normalize scores to [0, 1]."""
         if not scores:
             return []
@@ -330,7 +330,7 @@ class MemoryStore:
 
         return [(s - min_score) / (max_score - min_score) for s in scores]
 
-    def _rebuild_bm25_index(self, candidates: List[MemoryRecord]) -> None:
+    def _rebuild_bm25_index(self, candidates: list[MemoryRecord]) -> None:
         """Rebuild BM25 index from candidates."""
         self._bm25_docs = candidates
         tokenized_docs = [doc.content.lower().split() for doc in candidates]

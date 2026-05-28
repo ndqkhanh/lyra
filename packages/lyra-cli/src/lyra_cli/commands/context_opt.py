@@ -10,13 +10,8 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Optional
 
 import typer
-from rich import box
-from rich.console import Console
-from rich.table import Table
-
 from lyra_core.context.cache_telemetry import CacheTelemetry
 from lyra_core.context.context_evaluator import (
     ContextMetrics,
@@ -24,6 +19,9 @@ from lyra_core.context.context_evaluator import (
 )
 from lyra_core.memory.pinned_decisions import PinnedDecisionStore
 from lyra_core.memory.temporal_fact_store import TemporalFactStore
+from rich import box
+from rich.console import Console
+from rich.table import Table
 
 _console = Console()
 
@@ -150,13 +148,13 @@ def status_command(
 
 @context_opt_app.command("tune")
 def tune_command(
-    compaction: Optional[float] = typer.Option(
+    compaction: float | None = typer.Option(
         None, "--compaction", help="Compaction trigger % (e.g. 60)."
     ),
-    cache_alert: Optional[float] = typer.Option(
+    cache_alert: float | None = typer.Option(
         None, "--cache-alert", help="Cache hit alert threshold (e.g. 0.7)."
     ),
-    compress_threshold: Optional[int] = typer.Option(
+    compress_threshold: int | None = typer.Option(
         None, "--compress-threshold", help="Min chars before compression applies."
     ),
     repo_root: Path = typer.Option(Path.cwd(), "--repo-root", "-C"),
@@ -248,7 +246,7 @@ def facts_command(
     include_invalid: bool = typer.Option(
         False, "--include-invalid", "-a", help="Show invalidated facts too."
     ),
-    category: Optional[str] = typer.Option(
+    category: str | None = typer.Option(
         None, "--category", help="Filter by category."
     ),
     repo_root: Path = typer.Option(Path.cwd(), "--repo-root", "-C"),

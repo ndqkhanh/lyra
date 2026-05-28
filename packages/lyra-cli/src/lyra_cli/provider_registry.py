@@ -28,12 +28,12 @@ from __future__ import annotations
 
 import importlib
 import logging
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Mapping
+from typing import Any
 
 from .config_io import load_settings_dict
-
 
 _log = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ class CustomProviderEntry:
     symbol: str
 
     @classmethod
-    def parse(cls, slug: str, import_string: str) -> "CustomProviderEntry":
+    def parse(cls, slug: str, import_string: str) -> CustomProviderEntry:
         slug = (slug or "").strip()
         if not slug:
             raise CustomProviderError("provider slug must be a non-empty string")

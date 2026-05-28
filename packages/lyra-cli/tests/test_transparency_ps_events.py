@@ -4,8 +4,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from typer.testing import CliRunner
-
 from lyra_cli.commands.ps import (
     _collect_events,
     _find_event_files,
@@ -14,6 +12,7 @@ from lyra_cli.commands.ps import (
     _scan_state_dirs,
     ps_app,
 )
+from typer.testing import CliRunner
 
 runner = CliRunner()
 

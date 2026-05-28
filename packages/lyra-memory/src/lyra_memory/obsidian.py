@@ -8,11 +8,10 @@ Exports memory as Markdown files with:
 - Auto-generated index
 """
 
+import re
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
-import re
 
 
 @dataclass
@@ -21,12 +20,12 @@ class WikiPage:
 
     title: str
     content: str
-    tags: List[str]
-    links: List[str]  # Links to other pages
-    backlinks: List[str]  # Pages that link to this one
+    tags: list[str]
+    links: list[str]  # Links to other pages
+    backlinks: list[str]  # Pages that link to this one
     created_at: datetime
     updated_at: datetime
-    metadata: Dict[str, str]
+    metadata: dict[str, str]
 
 
 class ObsidianWiki:
@@ -58,7 +57,7 @@ class ObsidianWiki:
         (self.vault_path / "exploits").mkdir(exist_ok=True)
         (self.vault_path / "reports").mkdir(exist_ok=True)
 
-        self.pages: Dict[str, WikiPage] = {}
+        self.pages: dict[str, WikiPage] = {}
         self._load_existing_pages()
 
     def _load_existing_pages(self):
@@ -106,9 +105,9 @@ class ObsidianWiki:
         self,
         title: str,
         content: str,
-        tags: Optional[List[str]] = None,
+        tags: list[str] | None = None,
         category: str = "findings",
-        metadata: Optional[Dict[str, str]] = None,
+        metadata: dict[str, str] | None = None,
     ) -> WikiPage:
         """
         Create a new wiki page.
@@ -206,8 +205,8 @@ class ObsidianWiki:
     def create_attack_graph(
         self,
         target: str,
-        vulnerabilities: List[Dict],
-        exploits: List[Dict],
+        vulnerabilities: list[dict],
+        exploits: list[dict],
     ) -> str:
         """
         Create an attack graph visualization.
@@ -276,7 +275,7 @@ class ObsidianWiki:
 
         return title
 
-    def create_daily_note(self, findings: List[str]) -> str:
+    def create_daily_note(self, findings: list[str]) -> str:
         """
         Create a daily note with findings.
 
@@ -338,7 +337,7 @@ class ObsidianWiki:
 
         return "INDEX"
 
-    def search(self, query: str, tags: Optional[List[str]] = None) -> List[WikiPage]:
+    def search(self, query: str, tags: list[str] | None = None) -> list[WikiPage]:
         """
         Search wiki pages.
 

@@ -11,10 +11,11 @@ Implements:
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any
 from uuid import uuid4
 
 
@@ -38,11 +39,11 @@ class Message:
     message_id: str = field(default_factory=lambda: f"msg_{uuid4().hex[:8]}")
     msg_type: MessageType = MessageType.REQUEST
     sender_id: str = ""
-    recipient_id: Optional[str] = None
-    topic: Optional[str] = None
-    payload: Dict[str, Any] = field(default_factory=dict)
+    recipient_id: str | None = None
+    topic: str | None = None
+    payload: dict[str, Any] = field(default_factory=dict)
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
-    correlation_id: Optional[str] = None
+    correlation_id: str | None = None
 
 
 @dataclass
@@ -77,14 +78,14 @@ class AgentCommunication:
     - Subscription management and filtering
     """
 
-    def __init__(self, config: Optional[CommunicationConfig] = None) -> None:
+    def __init__(self, config: CommunicationConfig | None = None) -> None:
         self.config = config or CommunicationConfig()
-        self._mailboxes: Dict[str, asyncio.Queue] = {}
-        self._subscriptions: Dict[str, Set[str]] = {}
-        self._shared_state: Dict[str, SharedStateEntry] = {}
-        self._subscriber_callbacks: Dict[str, List[Callable[[Message], Any]]] = {}
+        self._mailboxes: dict[str, asyncio.Queue] = {}
+        self._subscriptions: dict[str, set[str]] = {}
+        self._shared_state: dict[str, SharedStateEntry] = {}
+        self._subscriber_callbacks: dict[str, list[Callable[[Message], Any]]] = {}
         self._lock: asyncio.Lock = asyncio.Lock()
-        self._stats: Dict[str, int] = {
+        self._stats: dict[str, int] = {
             "messages_sent": 0,
             "messages_received": 0,
             "broadcasts_sent": 0,
@@ -139,9 +140,9 @@ class AgentCommunication:
         self,
         recipient_id: str,
         sender_id: str,
-        payload: Dict[str, Any],
-        timeout: Optional[float] = None,
-    ) -> Optional[Message]:
+        payload: dict[str, Any],
+        timeout: float | None = None,
+    ) -> Message | None:
         """
         Send a request and wait for a response.
 
@@ -189,7 +190,7 @@ class AgentCommunication:
         self,
         request: Message,
         sender_id: str,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
     ) -> bool:
         """
         Send a response to a previous request.
@@ -280,7 +281,7 @@ class AgentCommunication:
                 self._subscriber_callbacks[agent_id] = []
             self._subscriber_callbacks[agent_id].append(callback)
 
-    async def read_messages(self, agent_id: str) -> List[Message]:
+    async def read_messages(self, agent_id: str) -> list[Message]:
         """
         Read all pending messages for an agent.
 
@@ -290,7 +291,7 @@ class AgentCommunication:
         Returns:
             List of pending messages
         """
-        messages: List[Message] = []
+        messages: list[Message] = []
         async with self._lock:
             mailbox = self._mailboxes.get(agent_id)
             if mailbox is None:
@@ -309,7 +310,7 @@ class AgentCommunication:
         key: str,
         value: Any,
         agent_id: str,
-        expected_version: Optional[int] = None,
+        expected_version: int | None = None,
     ) -> bool:
         """
         Set a shared state value with optimistic locking.
@@ -339,17 +340,17 @@ class AgentCommunication:
             self._stats["state_updates"] += 1
         return True
 
-    async def get_state(self, key: str) -> Optional[SharedStateEntry]:
+    async def get_state(self, key: str) -> SharedStateEntry | None:
         """Get a shared state entry by key."""
         async with self._lock:
             return self._shared_state.get(key)
 
-    async def get_all_state(self) -> Dict[str, SharedStateEntry]:
+    async def get_all_state(self) -> dict[str, SharedStateEntry]:
         """Get all shared state entries."""
         async with self._lock:
             return dict(self._shared_state)
 
-    def get_stats(self) -> Dict[str, int]:
+    def get_stats(self) -> dict[str, int]:
         """Get communication statistics."""
         return dict(self._stats)
 

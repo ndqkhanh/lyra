@@ -10,11 +10,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from lyra_harness_core.models import MockLLM
-from lyra_harness_core.tools import ToolRegistry
-
 from lyra_core.plan.planner import PlannerResult, run_planner
 from lyra_core.tools import register_builtin_tools
+from lyra_harness_core.models import MockLLM
+from lyra_harness_core.tools import ToolRegistry
 
 # ---------------------------------------------------------------------------
 # Core contract: planner is read-only

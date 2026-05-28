@@ -5,11 +5,11 @@ This layer stores failure patterns to prevent repeated mistakes.
 Each failure includes trigger conditions to detect similar situations.
 """
 
+import json
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Dict, Any
-import json
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -18,18 +18,18 @@ class FailureRecord:
 
     failure_id: str
     error_pattern: str  # Description of what went wrong
-    trigger_conditions: Dict[str, Any]  # Conditions that led to failure
+    trigger_conditions: dict[str, Any]  # Conditions that led to failure
     lesson: str  # What was learned
     avoid_pattern: str  # How to avoid this failure
     severity: str  # "low", "medium", "high", "critical"
     occurred_at: str
-    last_triggered: Optional[str] = None
+    last_triggered: str | None = None
     trigger_count: int = 0
     prevented_count: int = 0  # Times we successfully avoided this
-    evidence: List[str] = field(default_factory=list)  # Trajectory IDs
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    evidence: list[str] = field(default_factory=list)  # Trajectory IDs
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "failure_id": self.failure_id,
@@ -47,7 +47,7 @@ class FailureRecord:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "FailureRecord":
+    def from_dict(cls, data: dict[str, Any]) -> "FailureRecord":
         """Create from dictionary."""
         return cls(**data)
 
@@ -64,7 +64,7 @@ class FailureMemoryStore:
     def _load_failures(self):
         """Load failures from disk."""
         if self.failures_file.exists():
-            with open(self.failures_file, "r") as f:
+            with open(self.failures_file) as f:
                 data = json.load(f)
                 self.failures = {
                     fail_id: FailureRecord.from_dict(fail_data)
@@ -88,15 +88,15 @@ class FailureMemoryStore:
         self._save_failures()
         return failure.failure_id
 
-    def get_failure(self, failure_id: str) -> Optional[FailureRecord]:
+    def get_failure(self, failure_id: str) -> FailureRecord | None:
         """Get a failure by ID."""
         return self.failures.get(failure_id)
 
     def check_triggers(
         self,
-        current_context: Dict[str, Any],
+        current_context: dict[str, Any],
         min_severity: str = "low"
-    ) -> List[FailureRecord]:
+    ) -> list[FailureRecord]:
         """
         Check if current context matches any failure trigger conditions.
 
@@ -133,8 +133,8 @@ class FailureMemoryStore:
 
     def _matches_conditions(
         self,
-        context: Dict[str, Any],
-        conditions: Dict[str, Any],
+        context: dict[str, Any],
+        conditions: dict[str, Any],
         threshold: float = 0.8
     ) -> bool:
         """
@@ -186,14 +186,14 @@ class FailureMemoryStore:
         failure.prevented_count += 1
         self._save_failures()
 
-    def get_critical_failures(self) -> List[FailureRecord]:
+    def get_critical_failures(self) -> list[FailureRecord]:
         """Get all critical failures."""
         return [
             f for f in self.failures.values()
             if f.severity == "critical"
         ]
 
-    def get_frequent_failures(self, limit: int = 10) -> List[FailureRecord]:
+    def get_frequent_failures(self, limit: int = 10) -> list[FailureRecord]:
         """Get most frequently triggered failures."""
         failures = list(self.failures.values())
         failures.sort(key=lambda f: f.trigger_count, reverse=True)

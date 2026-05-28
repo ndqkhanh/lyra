@@ -9,7 +9,6 @@ and cognitive psychology principles.
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Dict, Optional
 
 from lyra_memory.schema import MemoryType
 
@@ -42,13 +41,13 @@ class ImportanceScore:
     recency_boost: float = 0.0
     final_score: float = 0.0
     category: ImportanceCategory = ImportanceCategory.MEDIUM
-    
+
     def __post_init__(self):
         """Calculate final score after initialization."""
         self.final_score = min(1.0, max(0.0,
-            self.base_score + 
-            self.emotional_salience + 
-            self.user_flag_boost + 
+            self.base_score +
+            self.emotional_salience +
+            self.user_flag_boost +
             self.recency_boost
         ))
 
@@ -63,18 +62,18 @@ class ImportanceScorer:
     3. User flags (explicit "remember this")
     4. Recency (temporary boost for new memories)
     """
-    
+
     # Base scores by memory type
-    TYPE_BASE_SCORES: Dict[MemoryType, float] = {
+    TYPE_BASE_SCORES: dict[MemoryType, float] = {
         MemoryType.PREFERENCE: 0.95,  # User preferences are critical
         MemoryType.PROCEDURAL: 0.85,  # Workflows are important
         MemoryType.SEMANTIC: 0.75,    # Facts are valuable
         MemoryType.FAILURE: 0.80,     # Learn from mistakes
         MemoryType.EPISODIC: 0.50,    # Events vary in importance
     }
-    
+
     # Emotional keywords and their salience scores
-    EMOTIONAL_KEYWORDS: Dict[str, float] = {
+    EMOTIONAL_KEYWORDS: dict[str, float] = {
         # Frustration/confusion (high salience)
         "frustrated": 0.25,
         "confused": 0.25,
@@ -85,7 +84,7 @@ class ImportanceScorer:
         "bug": 0.15,
         "issue": 0.15,
         "problem": 0.15,
-        
+
         # Satisfaction (medium salience)
         "works": 0.15,
         "fixed": 0.15,
@@ -94,7 +93,7 @@ class ImportanceScorer:
         "great": 0.10,
         "perfect": 0.10,
         "excellent": 0.10,
-        
+
         # Critical actions (high salience)
         "important": 0.25,
         "critical": 0.30,
@@ -105,9 +104,9 @@ class ImportanceScorer:
         "always": 0.15,
         "never": 0.15,
     }
-    
+
     # Content patterns for category classification
-    CATEGORY_PATTERNS: Dict[ImportanceCategory, list[str]] = {
+    CATEGORY_PATTERNS: dict[ImportanceCategory, list[str]] = {
         ImportanceCategory.CRITICAL: [
             "my name is",
             "i prefer",
@@ -144,17 +143,17 @@ class ImportanceScorer:
             "goodbye",
         ],
     }
-    
+
     def __init__(self):
         """Initialize the importance scorer."""
         pass
-    
+
     def score(
         self,
         content: str,
         memory_type: MemoryType,
-        metadata: Optional[Dict] = None,
-        created_at: Optional[datetime] = None,
+        metadata: dict | None = None,
+        created_at: datetime | None = None,
     ) -> ImportanceScore:
         """
         Score the importance of a memory.
@@ -169,13 +168,13 @@ class ImportanceScorer:
             ImportanceScore with all dimensions calculated
         """
         metadata = metadata or {}
-        
+
         # 1. Base score from memory type
         base_score = self.TYPE_BASE_SCORES.get(memory_type, 0.5)
-        
+
         # 2. Classify content into category
         category = self._classify_content(content)
-        
+
         # Adjust base score by category (override if category is more specific)
         category_adjustments = {
             ImportanceCategory.CRITICAL: 0.95,
@@ -189,16 +188,16 @@ class ImportanceScorer:
             base_score = category_adjustments[category]
         else:
             base_score = max(base_score, category_adjustments[category])
-        
+
         # 3. Emotional salience
         emotional_salience = self._detect_emotional_salience(content)
-        
+
         # 4. User flag boost
         user_flag_boost = 0.2 if metadata.get("user_flagged") else 0.0
-        
+
         # 5. Recency boost (decays over 24 hours)
         recency_boost = self._calculate_recency_boost(created_at)
-        
+
         return ImportanceScore(
             base_score=base_score,
             emotional_salience=emotional_salience,
@@ -206,11 +205,11 @@ class ImportanceScorer:
             recency_boost=recency_boost,
             category=category,
         )
-    
+
     def _classify_content(self, content: str) -> ImportanceCategory:
         """Classify content into importance category."""
         content_lower = content.lower()
-        
+
         # Check patterns in priority order
         for category in [
             ImportanceCategory.CRITICAL,
@@ -221,29 +220,29 @@ class ImportanceScorer:
             patterns = self.CATEGORY_PATTERNS.get(category, [])
             if any(pattern in content_lower for pattern in patterns):
                 return category
-        
+
         # Default to medium
         return ImportanceCategory.MEDIUM
-    
+
     def _detect_emotional_salience(self, content: str) -> float:
         """Detect emotional salience from content."""
         content_lower = content.lower()
-        
+
         max_salience = 0.0
         for keyword, salience in self.EMOTIONAL_KEYWORDS.items():
             if keyword in content_lower:
                 max_salience = max(max_salience, salience)
-        
+
         return min(0.3, max_salience)  # Cap at 0.3
-    
-    def _calculate_recency_boost(self, created_at: Optional[datetime]) -> float:
+
+    def _calculate_recency_boost(self, created_at: datetime | None) -> float:
         """Calculate recency boost (decays over 24 hours)."""
         if not created_at:
             return 0.0
-        
+
         now = datetime.now()
         age_hours = (now - created_at).total_seconds() / 3600
-        
+
         # Exponential decay over 24 hours
         if age_hours < 0:
             return 0.0

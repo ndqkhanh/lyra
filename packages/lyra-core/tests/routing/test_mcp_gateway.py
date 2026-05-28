@@ -5,8 +5,6 @@ from lyra_cli.mcp.mcp_gateway import (
     CircuitState,
     GatewayConfig,
     McpGateway,
-    RouteResult,
-    ServerHealth,
 )
 
 

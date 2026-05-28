@@ -56,7 +56,7 @@ def _cmd_research(topic: str, output_fn=print) -> int:
     output_fn(f"   Gaps found: {progress.gaps_found}")
     if progress.report:
         output_fn(f"   Quality score: {progress.report.quality_score:.0%}")
-        output_fn(f"\n--- Report Preview ---\n")
+        output_fn("\n--- Report Preview ---\n")
         md = progress.report.to_markdown()
         output_fn(md[:2000] + ("\n... (truncated)" if len(md) > 2000 else ""))
     return 0

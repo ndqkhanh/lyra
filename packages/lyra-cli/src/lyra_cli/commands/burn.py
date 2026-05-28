@@ -6,21 +6,23 @@ import json as _json
 import re
 import time as _time
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
 
-from ..paths import RepoLayout
-from ..observatory.aggregator import aggregate, BurnReport
-from ..observatory.compare import compare as _compare_fn, render_comparison
+from ..observatory.aggregator import BurnReport, aggregate
+from ..observatory.compare import compare as _compare_fn
+from ..observatory.compare import render_comparison
 from ..observatory.dashboard import render_dashboard
-from ..observatory.optimize import optimize as _optimize_fn, render_optimize
+from ..observatory.optimize import optimize as _optimize_fn
+from ..observatory.optimize import render_optimize
 from ..observatory.yield_tracker import (
-    yield_report as _yield_report_fn,
     render_yield,
 )
-
+from ..observatory.yield_tracker import (
+    yield_report as _yield_report_fn,
+)
+from ..paths import RepoLayout
 
 burn_app = typer.Typer(
     name="burn",
@@ -42,11 +44,11 @@ def _sleep(secs: float) -> None:
 @burn_app.callback(invoke_without_command=True)
 def _root(
     ctx: typer.Context,
-    since: Optional[str] = typer.Option(
+    since: str | None = typer.Option(
         "7d", "--since",
         help="Lower bound: ISO date ('2026-04-20') or relative ('7d', '24h').",
     ),
-    until: Optional[str] = typer.Option(None, "--until"),
+    until: str | None = typer.Option(None, "--until"),
     limit: int = typer.Option(10, "--limit"),
     json_out: bool = typer.Option(False, "--json"),
     refresh: bool = typer.Option(False, "--refresh-pricing"),
@@ -80,7 +82,7 @@ def _root(
         return
 
 
-def _resolve_period(spec: Optional[str], *, default_back: Optional[int]) -> Optional[float]:
+def _resolve_period(spec: str | None, *, default_back: int | None) -> float | None:
     if spec is None:
         if default_back is None:
             return None
@@ -100,8 +102,8 @@ def _resolve_period(spec: Optional[str], *, default_back: Optional[int]) -> Opti
 @burn_app.command("compare")
 def _compare_cmd(
     models: list[str] = typer.Argument(..., help=">=2 model slugs to compare"),
-    since: Optional[str] = typer.Option("30d", "--since"),
-    until: Optional[str] = typer.Option(None, "--until"),
+    since: str | None = typer.Option("30d", "--since"),
+    until: str | None = typer.Option(None, "--until"),
     json_out: bool = typer.Option(False, "--json"),
 ) -> None:
     if len(models) < 2:
@@ -141,8 +143,8 @@ def _optimize_cmd(
 
 @burn_app.command("yield")
 def _yield_cmd(
-    since: Optional[str] = typer.Option("30d", "--since"),
-    until: Optional[str] = typer.Option(None, "--until"),
+    since: str | None = typer.Option("30d", "--since"),
+    until: str | None = typer.Option(None, "--until"),
     json_out: bool = typer.Option(False, "--json"),
 ) -> None:
     repo = Path.cwd()

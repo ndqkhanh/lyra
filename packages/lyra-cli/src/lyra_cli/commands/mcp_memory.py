@@ -15,7 +15,6 @@ Integration with CoALA 4-tier memory architecture (Phase M7).
 from __future__ import annotations
 
 import json as _json
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -43,19 +42,19 @@ def recall(
         ...,
         help="Search query (free text or entity).",
     ),
-    tier: Optional[str] = typer.Option(
+    tier: str | None = typer.Option(
         None,
         "--tier",
         help="Filter by tier (t0_working, t1_session, t2_semantic, t2_procedural, t3_user, t3_team).",
     ),
-    fragment_type: Optional[str] = typer.Option(
+    fragment_type: str | None = typer.Option(
         None,
         "--type",
         help="Filter by type (fact, decision, preference, skill, observation).",
     ),
     limit: int = typer.Option(10, "--limit", "-n", help="Maximum number of fragments to return."),
     user_id: str = typer.Option("default", "--user-id", help="User ID for access control."),
-    agent_id: Optional[str] = typer.Option(None, "--agent-id", help="Agent ID for access control."),
+    agent_id: str | None = typer.Option(None, "--agent-id", help="Agent ID for access control."),
     json_out: bool = typer.Option(False, "--json", help="Emit JSON instead of a table."),
 ) -> None:
     """Retrieve fragments relevant to a query."""
@@ -118,7 +117,7 @@ def write(
         "--tier",
         help="Target tier (t0_working, t1_session, t2_semantic, t2_procedural, t3_user, t3_team).",
     ),
-    entities: Optional[str] = typer.Option(
+    entities: str | None = typer.Option(
         None,
         "--entities",
         help="Comma-separated entity mentions (≤ 5 noun-phrases).",
@@ -126,7 +125,7 @@ def write(
     confidence: float = typer.Option(0.8, "--confidence", help="Confidence score (0..1)."),
     agent_id: str = typer.Option("system", "--agent-id", help="Agent ID for provenance."),
     user_id: str = typer.Option("default", "--user-id", help="User ID for provenance."),
-    task_id: Optional[str] = typer.Option(None, "--task-id", help="Task ID for task-scoped fragments."),
+    task_id: str | None = typer.Option(None, "--task-id", help="Task ID for task-scoped fragments."),
     json_out: bool = typer.Option(False, "--json", help="Emit JSON instead of a table."),
 ) -> None:
     """Add a new memory fragment."""
@@ -225,7 +224,7 @@ def forget(
 
 @mcp_memory_app.command("list-decisions")
 def list_decisions(
-    tier: Optional[str] = typer.Option(
+    tier: str | None = typer.Option(
         None,
         "--tier",
         help="Filter by tier (optional).",
@@ -275,7 +274,7 @@ def list_decisions(
 def skill_invoke(
     skill_name: str = typer.Argument(..., help="Skill name to retrieve."),
     user_id: str = typer.Option("default", "--user-id", help="User ID for access control."),
-    agent_id: Optional[str] = typer.Option(None, "--agent-id", help="Agent ID for access control."),
+    agent_id: str | None = typer.Option(None, "--agent-id", help="Agent ID for access control."),
     json_out: bool = typer.Option(False, "--json", help="Emit JSON instead of a table."),
 ) -> None:
     """Retrieve and format a SKILL fragment for execution."""
@@ -312,17 +311,17 @@ def digest(
     task_id: str = typer.Argument(..., help="Task ID."),
     step: int = typer.Argument(..., help="Step index in trajectory."),
     last_action: str = typer.Argument(..., help="Compact summary of last action (≤ 200 chars)."),
-    findings: Optional[str] = typer.Option(
+    findings: str | None = typer.Option(
         None,
         "--findings",
         help="Comma-separated bullet points of findings.",
     ),
-    open_questions: Optional[str] = typer.Option(
+    open_questions: str | None = typer.Option(
         None,
         "--questions",
         help="Comma-separated list of open questions.",
     ),
-    next_intent: Optional[str] = typer.Option(None, "--next", help="Next intended action."),
+    next_intent: str | None = typer.Option(None, "--next", help="Next intended action."),
     confidence: float = typer.Option(0.7, "--confidence", help="Confidence score (0..1)."),
     json_out: bool = typer.Option(False, "--json", help="Emit JSON instead of a table."),
 ) -> None:
@@ -361,7 +360,7 @@ def digest(
 @mcp_memory_app.command("recall-digests")
 def recall_digests(
     task_id: str = typer.Argument(..., help="Task ID."),
-    agent_id: Optional[str] = typer.Option(None, "--agent-id", help="Filter by specific agent."),
+    agent_id: str | None = typer.Option(None, "--agent-id", help="Filter by specific agent."),
     limit: int = typer.Option(10, "--limit", "-n", help="Maximum number of digests to return."),
     json_out: bool = typer.Option(False, "--json", help="Emit JSON instead of a table."),
 ) -> None:

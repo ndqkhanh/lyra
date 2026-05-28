@@ -10,13 +10,10 @@ Implements SkillX-inspired automatic skill construction with:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+import hashlib
+from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
-from pathlib import Path
-from typing import Optional
-import hashlib
-import re
 
 
 class PatternType(StrEnum):
@@ -49,7 +46,7 @@ class ExecutionTrace:
     success: bool
     duration_ms: float
     tokens_used: int
-    error_message: Optional[str] = None
+    error_message: str | None = None
 
 
 @dataclass(frozen=True)
@@ -178,7 +175,7 @@ class SkillCreator:
 
         return patterns
 
-    def _extract_tool_sequence(self, trace: ExecutionTrace) -> Optional[ExtractedPattern]:
+    def _extract_tool_sequence(self, trace: ExecutionTrace) -> ExtractedPattern | None:
         """Extract tool sequence pattern."""
         if len(trace.tools_used) < 2:
             return None
@@ -218,7 +215,7 @@ class SkillCreator:
 
         return patterns
 
-    def _extract_error_recovery(self, trace: ExecutionTrace) -> Optional[ExtractedPattern]:
+    def _extract_error_recovery(self, trace: ExecutionTrace) -> ExtractedPattern | None:
         """Extract error recovery pattern."""
         if not trace.error_message:
             return None
@@ -271,9 +268,9 @@ class SkillCreator:
     def propose_skill(
         self,
         patterns: list[ExtractedPattern],
-        name: Optional[str] = None,
-        category: Optional[str] = None,
-    ) -> Optional[SkillProposal]:
+        name: str | None = None,
+        category: str | None = None,
+    ) -> SkillProposal | None:
         """
         Create a skill proposal from extracted patterns.
 

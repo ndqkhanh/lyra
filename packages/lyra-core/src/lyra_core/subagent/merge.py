@@ -3,11 +3,11 @@ from __future__ import annotations
 
 import re
 import subprocess
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, Optional
 
-Resolver = Callable[[Path, str], Optional[str]]
+Resolver = Callable[[Path, str], str | None]
 
 
 @dataclass

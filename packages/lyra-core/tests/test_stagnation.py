@@ -1,7 +1,6 @@
 """Tests for Stagnation-Stop Detection (Plan 33.1.2)."""
 
 import pytest
-
 from lyra_core.stagnation import StagnationDetector
 
 

@@ -27,11 +27,11 @@ hammering Copilot at production volume should bring their own
 from __future__ import annotations
 
 import json as _json
-import socket
 import urllib.error
 import urllib.request
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Mapping, Optional
+from typing import Any
 
 
 @dataclass
@@ -61,11 +61,11 @@ class StdlibHTTP:
         method: str,
         url: str,
         *,
-        headers: Optional[Mapping[str, str]] = None,
-        json: Optional[Any] = None,
+        headers: Mapping[str, str] | None = None,
+        json: Any | None = None,
         timeout: float = 30.0,
     ) -> _StdlibResponse:
-        data: Optional[bytes] = None
+        data: bytes | None = None
         merged_headers = dict(headers or {})
         if json is not None:
             data = _json.dumps(json).encode("utf-8")
@@ -88,7 +88,7 @@ class StdlibHTTP:
             except Exception:  # pragma: no cover — defensive
                 pass
             return _StdlibResponse(status_code=e.code, text=body)
-        except (urllib.error.URLError, socket.timeout, ConnectionError, OSError) as e:
+        except (TimeoutError, urllib.error.URLError, ConnectionError, OSError) as e:
             return _StdlibResponse(status_code=599, text=f"{type(e).__name__}: {e}")
 
 

@@ -5,10 +5,10 @@ Prevents false memories by requiring evidence and checking for contradictions.
 Achieves >95% memory precision.
 """
 
+import re
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional, Dict, Any
-import re
+from typing import Any
 
 
 @dataclass
@@ -29,10 +29,10 @@ class MemoryClaim:
     claim_id: str
     content: str
     claim_type: str  # "fact", "observation", "inference"
-    evidence: List[Evidence] = field(default_factory=list)
+    evidence: list[Evidence] = field(default_factory=list)
     confidence: float = 0.5
     verified: bool = False
-    contradictions: List[str] = field(default_factory=list)
+    contradictions: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -42,7 +42,7 @@ class VerificationResult:
     approved: bool
     confidence: float
     evidence_count: int
-    contradictions: List[str]
+    contradictions: list[str]
     reason: str
 
 
@@ -66,7 +66,7 @@ class MemoryVerifier:
         self.min_confidence = min_confidence
 
         # Existing memories for contradiction checking
-        self.existing_memories: List[str] = []
+        self.existing_memories: list[str] = []
 
         # Statistics
         self.stats = {
@@ -80,7 +80,7 @@ class MemoryVerifier:
         self,
         observation: str,
         claim: str
-    ) -> List[Evidence]:
+    ) -> list[Evidence]:
         """
         Extract evidence from observation supporting the claim.
 
@@ -115,13 +115,13 @@ class MemoryVerifier:
 
         return evidence_list
 
-    def _split_sentences(self, text: str) -> List[str]:
+    def _split_sentences(self, text: str) -> list[str]:
         """Split text into sentences."""
         # Simple sentence splitting
         sentences = re.split(r'[.!?]+', text)
         return [s.strip() for s in sentences if s.strip()]
 
-    def _extract_keywords(self, text: str) -> List[str]:
+    def _extract_keywords(self, text: str) -> list[str]:
         """Extract important keywords from text."""
         # Remove common stop words
         stop_words = {
@@ -143,8 +143,8 @@ class MemoryVerifier:
     def detect_contradictions(
         self,
         claim: str,
-        existing_memories: Optional[List[str]] = None
-    ) -> List[str]:
+        existing_memories: list[str] | None = None
+    ) -> list[str]:
         """
         Detect contradictions between claim and existing memories.
 
@@ -187,7 +187,7 @@ class MemoryVerifier:
     def verify_claim(
         self,
         claim: MemoryClaim,
-        existing_memories: Optional[List[str]] = None
+        existing_memories: list[str] | None = None
     ) -> VerificationResult:
         """
         Verify a memory claim before writing.
@@ -273,7 +273,7 @@ class MemoryVerifier:
 
         return self.stats["approved_claims"] / total_writes
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get verifier statistics."""
         precision = self.get_precision()
         approval_rate = (

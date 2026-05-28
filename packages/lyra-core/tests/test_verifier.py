@@ -164,7 +164,6 @@ def test_evidence_validator_rejects_hallucinated_line(tmp_path: Path) -> None:
 
 def test_evidence_validator_rejects_missing_file(tmp_path: Path) -> None:
     import pytest
-
     from lyra_core.verifier.evidence import EvidenceError, validate_file_line
 
     with pytest.raises(EvidenceError):

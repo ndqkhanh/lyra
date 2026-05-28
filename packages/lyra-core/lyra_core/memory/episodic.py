@@ -7,12 +7,11 @@ of the MEMTIER 3-tier memory architecture.
 Based on research: docs/151-153 (MEMTIER papers)
 """
 
-from typing import Dict, Any, Optional, List
-from dataclasses import dataclass, asdict
+import json
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-import json
-import os
+from typing import Any
 
 
 @dataclass
@@ -25,18 +24,18 @@ class EpisodicEntry:
     event_type: str  # "user_input", "tool_call", "agent_response", "error"
     content: str
     tokens: int
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     promoted: bool = False  # Promoted to semantic tier
     cognitive_weight: float = 0.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         d = asdict(self)
         d['timestamp'] = self.timestamp.isoformat()
         return d
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> 'EpisodicEntry':
+    def from_dict(cls, d: dict[str, Any]) -> 'EpisodicEntry':
         """Create from dictionary."""
         d['timestamp'] = datetime.fromisoformat(d['timestamp'])
         return cls(**d)
@@ -50,7 +49,7 @@ class EpisodicMemory:
     append and sequential read operations.
     """
 
-    def __init__(self, memory_dir: Optional[Path] = None):
+    def __init__(self, memory_dir: Path | None = None):
         """
         Initialize episodic memory.
 
@@ -64,7 +63,7 @@ class EpisodicMemory:
         self.memory_dir = Path(memory_dir)
         self.memory_dir.mkdir(parents=True, exist_ok=True)
 
-    def _get_daily_file(self, date: Optional[datetime] = None) -> Path:
+    def _get_daily_file(self, date: datetime | None = None) -> Path:
         """Get JSONL file path for a specific date."""
         if date is None:
             date = datetime.now()
@@ -92,7 +91,7 @@ class EpisodicMemory:
         event_type: str,
         content: str,
         tokens: int = 0,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: dict[str, Any] | None = None
     ) -> EpisodicEntry:
         """
         Convenience method to create and append an event.
@@ -126,7 +125,7 @@ class EpisodicMemory:
         self.append(entry)
         return entry
 
-    def read_day(self, date: datetime) -> List[EpisodicEntry]:
+    def read_day(self, date: datetime) -> list[EpisodicEntry]:
         """
         Read all entries for a specific day.
 
@@ -142,7 +141,7 @@ class EpisodicMemory:
             return []
 
         entries = []
-        with open(daily_file, 'r') as f:
+        with open(daily_file) as f:
             for line in f:
                 if line.strip():
                     entry_dict = json.loads(line)
@@ -150,7 +149,7 @@ class EpisodicMemory:
 
         return entries
 
-    def read_session(self, session_id: str) -> List[EpisodicEntry]:
+    def read_session(self, session_id: str) -> list[EpisodicEntry]:
         """
         Read all entries for a specific session.
 
@@ -164,7 +163,7 @@ class EpisodicMemory:
 
         # Scan all daily files (could be optimized with index)
         for daily_file in sorted(self.memory_dir.glob("*.jsonl")):
-            with open(daily_file, 'r') as f:
+            with open(daily_file) as f:
                 for line in f:
                     if line.strip():
                         entry_dict = json.loads(line)
@@ -177,7 +176,7 @@ class EpisodicMemory:
         self,
         start_date: datetime,
         end_date: datetime
-    ) -> List[EpisodicEntry]:
+    ) -> list[EpisodicEntry]:
         """
         Read entries within a date range.
 
@@ -217,7 +216,7 @@ class EpisodicMemory:
             entries = []
             found = False
 
-            with open(daily_file, 'r') as f:
+            with open(daily_file) as f:
                 for line in f:
                     if line.strip():
                         entry_dict = json.loads(line)
@@ -238,8 +237,8 @@ class EpisodicMemory:
 
     def get_unpromoted_entries(
         self,
-        limit: Optional[int] = None
-    ) -> List[EpisodicEntry]:
+        limit: int | None = None
+    ) -> list[EpisodicEntry]:
         """
         Get entries that haven't been promoted to semantic tier.
 
@@ -252,7 +251,7 @@ class EpisodicMemory:
         entries = []
 
         for daily_file in sorted(self.memory_dir.glob("*.jsonl")):
-            with open(daily_file, 'r') as f:
+            with open(daily_file) as f:
                 for line in f:
                     if line.strip():
                         entry_dict = json.loads(line)
@@ -264,7 +263,7 @@ class EpisodicMemory:
 
         return entries
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get statistics about episodic memory."""
         total_entries = 0
         total_tokens = 0
@@ -272,7 +271,7 @@ class EpisodicMemory:
         event_types = {}
 
         for daily_file in self.memory_dir.glob("*.jsonl"):
-            with open(daily_file, 'r') as f:
+            with open(daily_file) as f:
                 for line in f:
                     if line.strip():
                         entry_dict = json.loads(line)

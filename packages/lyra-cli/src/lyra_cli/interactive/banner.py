@@ -51,7 +51,6 @@ from pathlib import Path
 from rich.align import Align
 from rich.box import ROUNDED
 
-
 # Mode display labels, mirroring ``session._MODE_DISPLAY``. Embedded
 # locally rather than imported because banner.py is imported eagerly
 # from the driver and we want zero-circularity at import time. The
@@ -417,7 +416,7 @@ def _render_plain(*, repo_root: Path, model: str, mode: str) -> str:
         f"Repo    {repo_root}",
         f"Model   {model}",
         f"Mode    {_display_mode(mode)}",
-        f"CLI     lyra · alias: ly",
+        "CLI     lyra · alias: ly",
     ]
     if skin_tag:
         # Only printed when the user has switched off the default skin,

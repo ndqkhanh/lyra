@@ -1,7 +1,6 @@
 """Scrollable area manager - Manage scrollable content above fixed UI"""
 
 import shutil
-from typing import List
 
 
 class ScrollManager:
@@ -16,7 +15,7 @@ class ScrollManager:
     def __init__(self, fixed_height: int = 4):
         self.fixed_height = fixed_height  # Height of fixed UI at bottom
         self.scroll_offset = 0
-        self.content_lines: List[str] = []
+        self.content_lines: list[str] = []
         self.auto_scroll = True
 
     def get_terminal_size(self) -> tuple[int, int]:
@@ -47,7 +46,7 @@ class ScrollManager:
             if len(self.content_lines) > visible_height:
                 self.scroll_offset = len(self.content_lines) - visible_height
 
-    def append_lines(self, lines: List[str]) -> None:
+    def append_lines(self, lines: list[str]) -> None:
         """Append multiple lines
 
         Args:
@@ -93,7 +92,7 @@ class ScrollManager:
         self.scroll_offset = 0
         self.auto_scroll = False
 
-    def get_visible_lines(self) -> List[str]:
+    def get_visible_lines(self) -> list[str]:
         """Get currently visible lines
 
         Returns:

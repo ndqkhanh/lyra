@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.observability.event_bus import (
     EventBus,
     LLMCallFinished,
@@ -14,11 +13,10 @@ from lyra_core.observability.event_bus import (
 )
 from lyra_core.observability.telemetry_bridge import (
     TelemetryBridge,
+    _is_enabled,
     _NoopSpan,
     _NoopTracer,
-    _is_enabled,
 )
-
 
 # ---------------------------------------------------------------------------
 # _is_enabled

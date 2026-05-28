@@ -1,12 +1,12 @@
 """Interactive prompt handling with prompt_toolkit"""
 
+from pathlib import Path
+
 from prompt_toolkit import PromptSession
-from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.completion import WordCompleter
+from prompt_toolkit.history import FileHistory
 from prompt_toolkit.key_binding import KeyBindings
-from pathlib import Path
-import os
 
 
 class LyraPrompt:

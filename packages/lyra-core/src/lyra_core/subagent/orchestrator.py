@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 import concurrent.futures as cf
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable
 
 from .worktree import WorktreeManager
 

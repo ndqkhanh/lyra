@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from lyra_cli.voice.sound_notifications import (
     DEFAULT_SOUND_PRESETS,
     AgentState,

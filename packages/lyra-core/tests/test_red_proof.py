@@ -14,7 +14,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from lyra_core.tdd.red_proof import (
     RedProof,
     RedProofError,

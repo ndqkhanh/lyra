@@ -8,7 +8,6 @@ keys ARE set in the environment.
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.providers.auth_hints import KNOWN_FOREIGN_CREDS, missing_credential_hint
 
 

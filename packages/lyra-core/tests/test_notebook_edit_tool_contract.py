@@ -5,7 +5,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from lyra_core.tools.notebook_edit import make_notebook_edit_tool
 
 

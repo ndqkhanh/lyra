@@ -11,8 +11,8 @@ Fail-closed: if none of the three is provided, the plan is rejected with a
 from __future__ import annotations
 
 import enum
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 from .artifact import Plan
 

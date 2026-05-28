@@ -20,7 +20,23 @@ Ultra Memory System (v0.3.0):
 - Autonomous budget management
 """
 
+from lyra_memory.abstraction.concept_abstractor import (
+    AbstractConcept,
+    AbstractionLevel,
+    ConceptAbstractor,
+)
+from lyra_memory.abstraction.pattern_recognizer import (
+    CrossEpisodePattern,
+    PatternRecognizer,
+)
 from lyra_memory.activation_manager import ActivationManager, ActivationRecord
+from lyra_memory.amac_admission import (
+    AdmissionConfig,
+    AdmissionScore,
+    AmacAdmissionGate,
+    ContentType,
+    MemoryCandidate,
+)
 from lyra_memory.budget_controller import (
     BudgetStatus,
     BudgetTier,
@@ -32,6 +48,24 @@ from lyra_memory.consolidation_engine import (
     ConsolidationPattern,
     ConsolidationResult,
 )
+from lyra_memory.cranimem_gate import (
+    CraniMemAdmissionGate,
+    CraniMemCandidate,
+    CraniMemConfig,
+    GateAction,
+    GateDecision,
+)
+from lyra_memory.curriculum.difficulty_scheduler import (
+    DifficultyLevel,
+    DifficultyScheduler,
+    SkillGap,
+    TaskCurriculum,
+)
+from lyra_memory.curriculum.progress_tracker import (
+    CompetencyMap,
+    CurriculumPhase,
+    ProgressTracker,
+)
 from lyra_memory.dream_consolidator import (
     ConsolidationCandidate,
     ConsolidationStats,
@@ -41,7 +75,39 @@ from lyra_memory.dream_consolidator import (
     MemoryFragment,
     MemorySignal,
 )
+from lyra_memory.entropic_consolidation import (
+    ConsolidatedMemory,
+    ConsolidationPhase,
+    EntropicConfig,
+    EntropicConsolidator,
+)
+from lyra_memory.entropic_consolidation import (
+    MemoryFragment as EntropicMemoryFragment,
+)
 from lyra_memory.extractor import MemoryExtractor, extract_memories_from_conversation
+from lyra_memory.gossip.consensus_protocol import (
+    ConsensusConfig,
+    GossipMessage,
+    GossipNode,
+    MemoryUpdate,
+    MergeResult,
+    VectorClock,
+)
+from lyra_memory.graph_tier import (
+    ACTRMemoryModel,
+    AutoDreamer,
+    FederatedRetriever,
+    GraphMemoryStore,
+    KnowledgeGraph,
+    KnowledgeGraphEdge,
+    KnowledgeGraphNode,
+    MMRReranker,
+)
+from lyra_memory.health_monitor import (
+    HealthConfig,
+    HealthSnapshot,
+    MemoryHealthMonitor,
+)
 from lyra_memory.importance_scorer import (
     ImportanceCategory,
     ImportanceScore,
@@ -57,6 +123,13 @@ from lyra_memory.ingestion import (
     RelationExtractor,
     RelationType,
 )
+from lyra_memory.mragent.dual_encoder import (
+    DenseVector,
+    DualEncodedMemory,
+    DualEncoder,
+    EncoderConfig,
+    SparseVector,
+)
 from lyra_memory.multi_graph import (
     CausalRelation,
     EntityRelation,
@@ -67,25 +140,39 @@ from lyra_memory.multi_graph import (
     TemporalRelation,
 )
 from lyra_memory.obsidian import ObsidianWiki, WikiPage
-from lyra_memory.schema import MemoryRecord, MemoryScope, MemoryType, VerifierStatus
-from lyra_memory.store import MemoryStore
-from lyra_memory.tree import MemoryTree, TreeNode
-from lyra_memory.ultra_system import MemoryStats, UltraMemoryConfig, UltraMemorySystem
-from lyra_memory.graph_tier import (
-    KnowledgeGraph,
-    KnowledgeGraphNode,
-    KnowledgeGraphEdge,
-    MMRReranker,
-    ACTRMemoryModel,
-    AutoDreamer,
-    FederatedRetriever,
-    GraphMemoryStore,
+from lyra_memory.operations.batch_processor import (
+    BatchOpResult,
+    BatchProcessor,
+    OperationType,
+)
+from lyra_memory.operations.integrity_checker import (
+    IntegrityChecker,
+    IntegrityReport,
+    IntegrityStatus,
 )
 from lyra_memory.pgvector_store import (
     InMemoryVectorStore,
     PgVectorConfig,
     PgVectorEmbedding,
     PgVectorStore,
+)
+from lyra_memory.schema import MemoryRecord, MemoryScope, MemoryType, VerifierStatus
+from lyra_memory.store import MemoryStore
+from lyra_memory.symbolic_ssm import (
+    CraniMemGate,
+    EntityNode,
+    SymbolicRepresentation,
+    SymbolicShortTermMemory,
+)
+from lyra_memory.symbolic_ssm import (
+    Relation as SSMRelation,
+)
+from lyra_memory.tree import MemoryTree, TreeNode
+from lyra_memory.ultra_system import MemoryStats, UltraMemoryConfig, UltraMemorySystem
+from lyra_memory.verbatim_cache import (
+    CachePriority,
+    VerbatimCache,
+    VerbatimEntry,
 )
 from lyra_memory.world_graph import (
     CrossWorldEdge,
@@ -97,89 +184,6 @@ from lyra_memory.world_graph import (
     WorldRelation,
     WorldRelationType,
     WorldSnapshot,
-)
-from lyra_memory.amac_admission import (
-    AdmissionConfig,
-    AdmissionScore,
-    AmacAdmissionGate,
-    ContentType,
-    MemoryCandidate,
-)
-from lyra_memory.health_monitor import (
-    HealthConfig,
-    HealthSnapshot,
-    MemoryHealthMonitor,
-)
-from lyra_memory.symbolic_ssm import (
-    CraniMemGate,
-    EntityNode,
-    Relation as SSMRelation,
-    SymbolicRepresentation,
-    SymbolicShortTermMemory,
-)
-from lyra_memory.mragent.dual_encoder import (
-    DenseVector,
-    DualEncodedMemory,
-    DualEncoder,
-    EncoderConfig,
-    SparseVector,
-)
-from lyra_memory.gossip.consensus_protocol import (
-    ConsensusConfig,
-    GossipMessage,
-    GossipNode,
-    MemoryUpdate,
-    MergeResult,
-    VectorClock,
-)
-from lyra_memory.entropic_consolidation import (
-    ConsolidatedMemory,
-    ConsolidationPhase,
-    EntropicConfig,
-    EntropicConsolidator,
-    MemoryFragment as EntropicMemoryFragment,
-)
-from lyra_memory.cranimem_gate import (
-    CraniMemAdmissionGate,
-    CraniMemCandidate,
-    CraniMemConfig,
-    GateAction,
-    GateDecision,
-)
-from lyra_memory.verbatim_cache import (
-    CachePriority,
-    VerbatimCache,
-    VerbatimEntry,
-)
-from lyra_memory.curriculum.difficulty_scheduler import (
-    DifficultyLevel,
-    DifficultyScheduler,
-    SkillGap,
-    TaskCurriculum,
-)
-from lyra_memory.curriculum.progress_tracker import (
-    CompetencyMap,
-    CurriculumPhase,
-    ProgressTracker,
-)
-from lyra_memory.abstraction.concept_abstractor import (
-    AbstractConcept,
-    AbstractionLevel,
-    ConceptAbstractor,
-)
-from lyra_memory.abstraction.pattern_recognizer import (
-    CrossEpisodePattern,
-    PatternRecognizer,
-)
-from lyra_memory.operations.batch_processor import (
-    BatchOpResult,
-    BatchProcessor,
-    OperationType,
-)
-from lyra_memory.operations.integrity_checker import (
-    IntegrityChecker,
-    IntegrityReport,
-    IntegrityStatus,
 )
 
 __version__ = "0.4.0"

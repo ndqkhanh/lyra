@@ -9,7 +9,6 @@ from lyra_core.verifier import (
     verify_trace,
 )
 
-
 # ---- seed a tiny repo ----------------------------------------------
 
 

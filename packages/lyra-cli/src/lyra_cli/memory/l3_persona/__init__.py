@@ -8,13 +8,13 @@ Features:
 - Human-editable Markdown format
 """
 
+import json
 import logging
-from dataclasses import dataclass, asdict
+import shutil
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Dict, Any, List
-import json
-import shutil
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -26,15 +26,15 @@ class UserPersona:
     session_id: str = ""
     content: str = ""
     timestamp: str = ""
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: dict[str, Any] | None = None
     atom_count: int = 0  # Number of atoms used to generate this persona
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "UserPersona":
+    def from_dict(cls, data: dict[str, Any]) -> "UserPersona":
         """Create from dictionary."""
         return cls(**data)
 
@@ -171,7 +171,7 @@ class PersonaStore:
             logger.error(f"Failed to save persona: {e}")
             raise
 
-    def load(self) -> Optional[UserPersona]:
+    def load(self) -> UserPersona | None:
         """
         Load user persona from Markdown file.
 
@@ -238,9 +238,9 @@ class PersonaStore:
         backup_path = self.data_dir / "persona.backup.1.md"
         shutil.copy2(self.persona_path, backup_path)
 
-        logger.debug(f"Created persona backup")
+        logger.debug("Created persona backup")
 
-    def list_backups(self) -> List[Path]:
+    def list_backups(self) -> list[Path]:
         """
         List all backup files.
 
@@ -303,7 +303,7 @@ class PersonaStore:
             logger.error(f"Failed to delete persona: {e}")
             raise
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """
         Get storage statistics.
 

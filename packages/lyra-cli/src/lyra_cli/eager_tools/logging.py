@@ -1,6 +1,5 @@
 """Structured logging for eager tools."""
 import logging
-from typing import Any
 
 logger = logging.getLogger("lyra.eager_tools")
 

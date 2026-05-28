@@ -1,8 +1,8 @@
 """DAG teams: dynamic LLM-planned DAG + deterministic scheduler."""
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable
 
 
 class DAGValidationError(Exception):
@@ -29,7 +29,7 @@ class DAG:
 
 def _detect_cycle(nodes: dict[str, Node]) -> bool:
     WHITE, GRAY, BLACK = 0, 1, 2
-    color = {nid: WHITE for nid in nodes}
+    color = dict.fromkeys(nodes, WHITE)
 
     def dfs(nid: str) -> bool:
         color[nid] = GRAY

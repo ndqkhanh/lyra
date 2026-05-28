@@ -1,6 +1,7 @@
 """Simple integration hook for Auto-Spec-Kit."""
 
 from typing import Any
+
 from lyra_cli.spec_kit.orchestrator import Orchestrator
 
 

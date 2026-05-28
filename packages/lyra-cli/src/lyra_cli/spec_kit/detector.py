@@ -1,11 +1,12 @@
 """Two-stage detector for spec-worthiness classification."""
 
 from __future__ import annotations
+
+import os
 import re
 import time
-import os
-from typing import Any
 from functools import lru_cache
+from typing import Any
 
 from .models import Verdict
 

@@ -1,7 +1,6 @@
 """Rules manager - Core rules system with language override"""
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional
 from pathlib import Path
 
 
@@ -18,10 +17,10 @@ class Rule:
 class RulesManager:
     """Manages coding rules with language-specific overrides"""
 
-    def __init__(self, rules_dir: Optional[Path] = None):
+    def __init__(self, rules_dir: Path | None = None):
         self.rules_dir = rules_dir or Path.home() / ".lyra" / "rules"
-        self.rules: Dict[str, List[Rule]] = {}  # category -> rules
-        self.language_rules: Dict[str, Dict[str, List[Rule]]] = {}  # lang -> category -> rules
+        self.rules: dict[str, list[Rule]] = {}  # category -> rules
+        self.language_rules: dict[str, dict[str, list[Rule]]] = {}  # lang -> category -> rules
 
     def load_rules(self):
         """Load all rules from directory"""
@@ -69,7 +68,7 @@ class RulesManager:
             except Exception as e:
                 print(f"Warning: Failed to load rule {rule_file}: {e}")
 
-    def get_rules(self, language: Optional[str] = None, category: Optional[str] = None) -> List[Rule]:
+    def get_rules(self, language: str | None = None, category: str | None = None) -> list[Rule]:
         """Get rules with language-specific override
 
         Language-specific rules override common rules (CSS specificity model)
@@ -96,7 +95,7 @@ class RulesManager:
 
         return result
 
-    def get_rules_text(self, language: Optional[str] = None) -> str:
+    def get_rules_text(self, language: str | None = None) -> str:
         """Get all rules as formatted text"""
         rules = self.get_rules(language)
 
@@ -116,20 +115,20 @@ class RulesManager:
 
         return "\n".join(text)
 
-    def list_categories(self) -> List[str]:
+    def list_categories(self) -> list[str]:
         """List all rule categories"""
         categories = set(self.rules.keys())
         for lang_rules in self.language_rules.values():
             categories.update(lang_rules.keys())
         return sorted(categories)
 
-    def list_languages(self) -> List[str]:
+    def list_languages(self) -> list[str]:
         """List all supported languages"""
         return ["common"] + sorted(self.language_rules.keys())
 
 
 # Global rules manager
-_rules_manager: Optional[RulesManager] = None
+_rules_manager: RulesManager | None = None
 
 
 def get_rules_manager() -> RulesManager:

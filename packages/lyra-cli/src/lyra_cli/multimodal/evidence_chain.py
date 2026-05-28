@@ -6,9 +6,8 @@ Processes multimodal inputs with context preservation and evidence tracking.
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional, Dict, Any
 from enum import Enum
-import base64
+from typing import Any
 
 
 class MediaType(Enum):
@@ -24,12 +23,12 @@ class MediaType(Enum):
 class MediaMetadata:
     """Metadata for media content."""
 
-    width: Optional[int] = None
-    height: Optional[int] = None
-    format: Optional[str] = None
-    size_bytes: Optional[int] = None
-    duration_seconds: Optional[float] = None
-    fps: Optional[int] = None
+    width: int | None = None
+    height: int | None = None
+    format: str | None = None
+    size_bytes: int | None = None
+    duration_seconds: float | None = None
+    fps: int | None = None
 
 
 @dataclass
@@ -41,10 +40,10 @@ class MediaEvidence:
     timestamp: str
     content: str  # Base64 encoded or file path
     description: str
-    extracted_text: Optional[str] = None
-    detected_objects: List[str] = field(default_factory=list)
-    metadata: Optional[MediaMetadata] = None
-    context: Dict[str, Any] = field(default_factory=dict)
+    extracted_text: str | None = None
+    detected_objects: list[str] = field(default_factory=list)
+    metadata: MediaMetadata | None = None
+    context: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -53,9 +52,9 @@ class EvidenceChain:
 
     chain_id: str
     task_description: str
-    evidence_items: List[MediaEvidence] = field(default_factory=list)
+    evidence_items: list[MediaEvidence] = field(default_factory=list)
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    completed_at: Optional[str] = None
+    completed_at: str | None = None
 
 
 class MultimodalEvidenceChain:
@@ -70,8 +69,8 @@ class MultimodalEvidenceChain:
     """
 
     def __init__(self):
-        self.chains: Dict[str, EvidenceChain] = {}
-        self.evidence_index: Dict[str, MediaEvidence] = {}
+        self.chains: dict[str, EvidenceChain] = {}
+        self.evidence_index: dict[str, MediaEvidence] = {}
 
         # Statistics
         self.stats = {
@@ -110,10 +109,10 @@ class MultimodalEvidenceChain:
         media_type: MediaType,
         content: str,
         description: str,
-        extracted_text: Optional[str] = None,
-        detected_objects: Optional[List[str]] = None,
-        metadata: Optional[MediaMetadata] = None,
-        context: Optional[Dict[str, Any]] = None
+        extracted_text: str | None = None,
+        detected_objects: list[str] | None = None,
+        metadata: MediaMetadata | None = None,
+        context: dict[str, Any] | None = None
     ) -> str:
         """
         Add evidence to a chain.
@@ -175,19 +174,19 @@ class MultimodalEvidenceChain:
         chain = self.chains[chain_id]
         chain.completed_at = datetime.now().isoformat()
 
-    def get_chain(self, chain_id: str) -> Optional[EvidenceChain]:
+    def get_chain(self, chain_id: str) -> EvidenceChain | None:
         """Get a chain by ID."""
         return self.chains.get(chain_id)
 
-    def get_evidence(self, evidence_id: str) -> Optional[MediaEvidence]:
+    def get_evidence(self, evidence_id: str) -> MediaEvidence | None:
         """Get evidence by ID."""
         return self.evidence_index.get(evidence_id)
 
     def search_evidence(
         self,
-        media_type: Optional[MediaType] = None,
-        text_query: Optional[str] = None
-    ) -> List[MediaEvidence]:
+        media_type: MediaType | None = None,
+        text_query: str | None = None
+    ) -> list[MediaEvidence]:
         """
         Search for evidence.
 
@@ -221,7 +220,7 @@ class MultimodalEvidenceChain:
 
         return results
 
-    def export_chain(self, chain_id: str) -> Optional[Dict[str, Any]]:
+    def export_chain(self, chain_id: str) -> dict[str, Any] | None:
         """
         Export a chain in JSON format.
 
@@ -261,7 +260,7 @@ class MultimodalEvidenceChain:
             ],
         }
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get evidence chain statistics."""
         return {
             **self.stats,

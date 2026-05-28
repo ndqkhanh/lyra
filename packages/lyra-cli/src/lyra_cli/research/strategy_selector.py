@@ -12,7 +12,6 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
 from math import log, sqrt
-from typing import Dict, List, Optional
 
 
 class StrategyType(Enum):
@@ -24,7 +23,7 @@ class StrategyType(Enum):
 
 
 # Default query type categories — consumers can add more.
-DEFAULT_QUERY_TYPES: List[str] = [
+DEFAULT_QUERY_TYPES: list[str] = [
     "factual",
     "comparative",
     "exploratory",
@@ -59,23 +58,23 @@ class StrategySelector:
     def __init__(
         self,
         exploration_constant: float = 2.0,
-        query_types: Optional[List[str]] = None,
+        query_types: list[str] | None = None,
     ) -> None:
         self.exploration_constant = exploration_constant
 
         # Available strategies
-        self._strategies: List[StrategyType] = list(StrategyType)
+        self._strategies: list[StrategyType] = list(StrategyType)
 
         # Per-query-type counts and cumulative rewards
-        self._query_types: List[str] = query_types or DEFAULT_QUERY_TYPES.copy()
+        self._query_types: list[str] = query_types or DEFAULT_QUERY_TYPES.copy()
 
         # counts[query_type][strategy_name] -> int
-        self._counts: Dict[str, Dict[str, int]] = {}
+        self._counts: dict[str, dict[str, int]] = {}
         # rewards[query_type][strategy_name] -> float (cumulative)
-        self._rewards: Dict[str, Dict[str, float]] = {}
+        self._rewards: dict[str, dict[str, float]] = {}
 
         # Feedback history
-        self._history: List[StrategyResult] = []
+        self._history: list[StrategyResult] = []
 
         self._init_bandits()
 
@@ -110,7 +109,7 @@ class StrategySelector:
                 return s
 
         # UCB1 selection
-        best_strategy: Optional[StrategyType] = None
+        best_strategy: StrategyType | None = None
         best_value = -float("inf")
 
         for s in self._strategies:
@@ -154,7 +153,7 @@ class StrategySelector:
 
     # ---- analysis -------------------------------------------------------
 
-    def get_strategy_stats(self, query_type: str) -> Dict[str, dict]:
+    def get_strategy_stats(self, query_type: str) -> dict[str, dict]:
         """Return per-strategy statistics for a query type."""
         if query_type not in self._counts:
             return {}
@@ -162,7 +161,7 @@ class StrategySelector:
         counts = self._counts[query_type]
         rewards = self._rewards[query_type]
 
-        stats: Dict[str, dict] = {}
+        stats: dict[str, dict] = {}
         for s in self._strategies:
             pulls = counts[s.name]
             stats[s.name] = {
@@ -174,19 +173,19 @@ class StrategySelector:
             }
         return stats
 
-    def get_confusion_matrix(self) -> Dict[str, Dict[str, float]]:
+    def get_confusion_matrix(self) -> dict[str, dict[str, float]]:
         """
         Build a confusion matrix showing strategy performance per query type.
 
         Returns {query_type: {strategy_name: mean_reward}}.
         """
-        matrix: Dict[str, Dict[str, float]] = {}
+        matrix: dict[str, dict[str, float]] = {}
         for qt in self._query_types:
             if qt not in self._counts:
                 continue
             counts = self._counts[qt]
             rewards = self._rewards[qt]
-            row: Dict[str, float] = {}
+            row: dict[str, float] = {}
             for s in self._strategies:
                 pulls = counts[s.name]
                 row[s.name] = round(
@@ -195,6 +194,6 @@ class StrategySelector:
             matrix[qt] = row
         return matrix
 
-    def get_history(self) -> List[StrategyResult]:
+    def get_history(self) -> list[StrategyResult]:
         """Return the full feedback history."""
         return self._history.copy()

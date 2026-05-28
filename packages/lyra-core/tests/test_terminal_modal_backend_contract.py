@@ -9,13 +9,11 @@ from __future__ import annotations
 
 import sys
 from dataclasses import dataclass, field
-from typing import Any, List
+from typing import Any
 
 import pytest
-
 from lyra_core.lsp_backend import FeatureUnavailable
 from lyra_core.terminal import CommandResult, TerminalBackend
-
 
 # ---------------------------------------------------------------------------
 # Fake Modal runner
@@ -26,7 +24,7 @@ from lyra_core.terminal import CommandResult, TerminalBackend
 class _FakeModalSandbox:
     """Mimics the surface of ``modal.Sandbox.create``."""
 
-    cmd: List[str]
+    cmd: list[str]
     image: str
     cpu: float
     memory_mb: int
@@ -56,7 +54,7 @@ class _FakeModalRunner:
     """Modal-shaped runner — matches ``modal.Sandbox.create``."""
 
     def __init__(self) -> None:
-        self.create_calls: List[dict[str, Any]] = []
+        self.create_calls: list[dict[str, Any]] = []
         self._next: _FakeModalSandbox | None = None
 
     def preload(self, sandbox: _FakeModalSandbox) -> None:
@@ -66,7 +64,7 @@ class _FakeModalRunner:
         self,
         *,
         image: str,
-        cmd: List[str],
+        cmd: list[str],
         cpu: float,
         memory_mb: int,
         env: dict[str, str] | None = None,

@@ -1,10 +1,9 @@
 """Memory manager for managing memory entries."""
-from typing import List, Optional
-from datetime import datetime
 import uuid
+from datetime import datetime
 
-from .memory_storage import MemoryStorage
 from .memory_metadata import MemoryMetadata, MemoryType
+from .memory_storage import MemoryStorage
 
 
 class MemoryManager:
@@ -13,7 +12,7 @@ class MemoryManager:
     def __init__(self, storage: MemoryStorage):
         self.storage = storage
 
-    def add(self, content: str, memory_type: MemoryType, tags: List[str]) -> MemoryMetadata:
+    def add(self, content: str, memory_type: MemoryType, tags: list[str]) -> MemoryMetadata:
         """Add a new memory entry."""
         memory = MemoryMetadata(
             id=str(uuid.uuid4()),
@@ -25,11 +24,11 @@ class MemoryManager:
         self.storage.save(memory)
         return memory
 
-    def get(self, memory_id: str) -> Optional[MemoryMetadata]:
+    def get(self, memory_id: str) -> MemoryMetadata | None:
         """Get a memory by ID."""
         return self.storage.load(memory_id)
 
-    def search(self, query: str) -> List[MemoryMetadata]:
+    def search(self, query: str) -> list[MemoryMetadata]:
         """Search memories by content or tags."""
         query_lower = query.lower()
         return [
@@ -37,7 +36,7 @@ class MemoryManager:
             if query_lower in m.content.lower() or any(query_lower in tag.lower() for tag in m.tags)
         ]
 
-    def filter_by_type(self, memory_type: MemoryType) -> List[MemoryMetadata]:
+    def filter_by_type(self, memory_type: MemoryType) -> list[MemoryMetadata]:
         """Filter memories by type."""
         return [m for m in self.storage.list_all() if m.memory_type == memory_type]
 
@@ -45,6 +44,6 @@ class MemoryManager:
         """Delete a memory."""
         return self.storage.delete(memory_id)
 
-    def list_all(self) -> List[MemoryMetadata]:
+    def list_all(self) -> list[MemoryMetadata]:
         """List all memories."""
         return self.storage.list_all()

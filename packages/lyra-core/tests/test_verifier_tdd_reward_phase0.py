@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.verifier import TddTestOutcome, compute_tdd_reward
 
 

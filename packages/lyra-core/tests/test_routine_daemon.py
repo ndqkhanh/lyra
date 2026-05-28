@@ -4,7 +4,6 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 
 import pytest
-
 from lyra_core.cron import RoutineDaemon, RoutineFiring
 from lyra_core.cron.routines import (
     CronTrigger,

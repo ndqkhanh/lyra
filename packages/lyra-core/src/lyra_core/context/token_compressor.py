@@ -25,7 +25,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-
 # ---------------------------------------------------------------------------
 # CompressionPolicy — what to protect vs what to compress
 # ---------------------------------------------------------------------------
@@ -130,7 +129,7 @@ class GuidelineEntry:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "GuidelineEntry":
+    def from_dict(cls, d: dict[str, Any]) -> GuidelineEntry:
         return cls(**d)
 
 

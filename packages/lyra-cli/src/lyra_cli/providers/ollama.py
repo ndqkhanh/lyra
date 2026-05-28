@@ -51,14 +51,12 @@ from __future__ import annotations
 
 import json
 import os
-import socket
 import urllib.error
 import urllib.request
-from typing import Any, Optional
+from typing import Any
 
 from lyra_harness_core.messages import Message, StopReason, ToolCall
 from lyra_harness_core.models import LLMProvider
-
 
 # ---------------------------------------------------------------------------
 # Public constants
@@ -124,7 +122,7 @@ def _resolve_host() -> str:
     return f"http://{raw.rstrip('/')}" if ":" in raw else f"http://{raw}:11434"
 
 
-def _resolve_model(explicit: Optional[str]) -> str:
+def _resolve_model(explicit: str | None) -> str:
     """Pick a model tag.
 
     Order: explicit > ``OPEN_HARNESS_LOCAL_MODEL`` > ``OLLAMA_MODEL``
@@ -145,7 +143,7 @@ def _resolve_model(explicit: Optional[str]) -> str:
 # ---------------------------------------------------------------------------
 
 
-def ollama_reachable(host: Optional[str] = None, *, timeout: Optional[float] = None) -> bool:
+def ollama_reachable(host: str | None = None, *, timeout: float | None = None) -> bool:
     """Return True iff an Ollama daemon responds to ``/api/tags`` on *host*.
 
     Used by :func:`lyra_cli.llm_factory.build_llm` to decide
@@ -166,11 +164,11 @@ def ollama_reachable(host: Optional[str] = None, *, timeout: Optional[float] = N
         req = urllib.request.Request(url, method="GET")
         with urllib.request.urlopen(req, timeout=t) as resp:
             return 200 <= resp.status < 300
-    except (urllib.error.URLError, socket.timeout, ConnectionError, OSError):
+    except (TimeoutError, urllib.error.URLError, ConnectionError, OSError):
         return False
 
 
-def list_pulled_models(host: Optional[str] = None) -> list[str]:
+def list_pulled_models(host: str | None = None) -> list[str]:
     """Return the list of model tags currently pulled on the daemon.
 
     Returns an empty list (not an error) when the daemon is unreachable
@@ -182,7 +180,7 @@ def list_pulled_models(host: Optional[str] = None) -> list[str]:
         req = urllib.request.Request(url, method="GET")
         with urllib.request.urlopen(req, timeout=_OLLAMA_REACHABILITY_TIMEOUT_SEC) as resp:
             data = json.loads(resp.read().decode("utf-8"))
-    except (urllib.error.URLError, socket.timeout, ConnectionError, OSError, json.JSONDecodeError):
+    except (TimeoutError, urllib.error.URLError, ConnectionError, OSError, json.JSONDecodeError):
         return []
     models = data.get("models") or []
     tags: list[str] = []
@@ -221,9 +219,9 @@ class OllamaLLM(LLMProvider):
 
     def __init__(
         self,
-        model: Optional[str] = None,
+        model: str | None = None,
         *,
-        host: Optional[str] = None,
+        host: str | None = None,
         timeout: float = 120.0,
     ) -> None:
         self.model = _resolve_model(model)
@@ -244,7 +242,7 @@ class OllamaLLM(LLMProvider):
     def generate(
         self,
         messages: list[Message],
-        tools: Optional[list[dict[str, Any]]] = None,
+        tools: list[dict[str, Any]] | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.0,
     ) -> Message:
@@ -293,7 +291,7 @@ class OllamaLLM(LLMProvider):
             raise OllamaConnectionError(
                 f"ollama HTTP {e.code} from {url}: {body.strip() or e.reason}"
             ) from e
-        except (urllib.error.URLError, socket.timeout, ConnectionError, OSError) as e:
+        except (TimeoutError, urllib.error.URLError, ConnectionError, OSError) as e:
             raise OllamaConnectionError(
                 f"ollama unreachable at {self.host}: {e}. "
                 f"Is the daemon running? (`ollama serve` or the Ollama app)"

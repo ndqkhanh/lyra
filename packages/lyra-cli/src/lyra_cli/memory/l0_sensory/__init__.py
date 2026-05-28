@@ -5,10 +5,10 @@ This layer acts as the first filter for incoming observations, aggressively
 removing noise and irrelevant information before passing to short-term memory.
 """
 
+from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import List, Optional, Dict, Any
-from collections import deque
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -19,10 +19,10 @@ class SensoryObservation:
     content: str
     timestamp: str
     source: str  # "user", "tool", "system", etc.
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     relevance_score: float = 0.0  # 0.0 to 1.0
     filtered: bool = False
-    filter_reason: Optional[str] = None
+    filter_reason: str | None = None
 
 
 class SensoryMemoryStore:
@@ -57,7 +57,7 @@ class SensoryMemoryStore:
         # Statistics
         self.total_received = 0
         self.total_filtered = 0
-        self.filter_reasons: Dict[str, int] = {}
+        self.filter_reasons: dict[str, int] = {}
 
     def add_observation(
         self,
@@ -163,11 +163,11 @@ class SensoryMemoryStore:
         self.total_filtered += 1
         self.filter_reasons[reason] = self.filter_reasons.get(reason, 0) + 1
 
-    def get_recent(self, limit: int = 100) -> List[SensoryObservation]:
+    def get_recent(self, limit: int = 100) -> list[SensoryObservation]:
         """Get recent non-filtered observations."""
         return list(self.observations)[-limit:]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get filtering statistics."""
         total_kept = len(self.observations)
         filter_rate = (

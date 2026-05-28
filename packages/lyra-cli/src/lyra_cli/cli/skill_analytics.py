@@ -10,7 +10,6 @@ import json
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 
 @dataclass
@@ -21,7 +20,7 @@ class SkillInvocation:
     timestamp: datetime
     duration_ms: int
     success: bool
-    error: Optional[str] = None
+    error: str | None = None
     args_length: int = 0
     output_length: int = 0
 
@@ -65,7 +64,7 @@ class SkillAnalytics:
             f.write(json.dumps(record) + "\n")
 
     def get_stats(
-        self, skill_name: Optional[str] = None
+        self, skill_name: str | None = None
     ) -> dict[str, SkillStats]:
         """Get aggregated statistics for skills.
 

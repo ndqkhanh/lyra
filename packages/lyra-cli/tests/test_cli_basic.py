@@ -1,9 +1,6 @@
 """Test the new streaming CLI."""
 
 import asyncio
-from pathlib import Path
-
-from lyra_cli.cli.repl import launch_streaming_repl
 
 
 async def test_cli():

@@ -1,6 +1,5 @@
 """Skill metadata models."""
 from dataclasses import dataclass
-from typing import List, Optional
 
 
 @dataclass
@@ -10,10 +9,10 @@ class SkillMetadata:
     name: str
     description: str
     origin: str
-    tags: List[str]
-    triggers: Optional[List[str]] = None
-    codemap: Optional[str] = None
-    file_path: Optional[str] = None
+    tags: list[str]
+    triggers: list[str] | None = None
+    codemap: str | None = None
+    file_path: str | None = None
 
     def __post_init__(self):
         if self.triggers is None:

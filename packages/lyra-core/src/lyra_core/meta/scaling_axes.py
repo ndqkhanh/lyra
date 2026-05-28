@@ -29,7 +29,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
 
-
 Axis = Literal["pretrain", "ttc", "memory", "tool_use"]
 
 

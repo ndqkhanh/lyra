@@ -1,20 +1,20 @@
 """Event system for Lyra - AG-UI compatible protocol"""
 
+from .dispatcher import EventDispatcher
 from .protocol import (
+    ContextBudget,
     Event,
-    TurnStarted,
-    ThinkingDelta,
+    StatusUpdate,
+    SubagentFinished,
+    SubagentSpawned,
     TextDelta,
-    ToolStarted,
+    ThinkingDelta,
     ToolDelta,
     ToolFinished,
+    ToolStarted,
     TurnFinished,
-    SubagentSpawned,
-    SubagentFinished,
-    StatusUpdate,
-    ContextBudget,
+    TurnStarted,
 )
-from .dispatcher import EventDispatcher
 from .streaming import StreamingRenderer
 
 __all__ = [

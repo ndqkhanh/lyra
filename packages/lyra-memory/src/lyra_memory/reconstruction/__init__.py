@@ -10,7 +10,6 @@ Core components:
     ActiveReconstructionEngine — Beam search reconstruction via iterative graph traversal
 """
 
-from lyra_memory.reconstruction.graph import CueTagContentGraph, GraphNode, NodeType
 from lyra_memory.reconstruction.dual_memory import DualMemoryGraph, ReconstructionProof
 from lyra_memory.reconstruction.engine import (
     ActiveReconstructionEngine,
@@ -18,6 +17,7 @@ from lyra_memory.reconstruction.engine import (
     ReconstructionResult,
     ReconstructionTrace,
 )
+from lyra_memory.reconstruction.graph import CueTagContentGraph, GraphNode, NodeType
 
 __all__ = [
     "ActiveReconstructionEngine",

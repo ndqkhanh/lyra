@@ -1,8 +1,7 @@
 """Memory storage for persisting memories."""
-from pathlib import Path
-from typing import List, Optional
 import json
 from datetime import datetime
+from pathlib import Path
 
 from .memory_metadata import MemoryMetadata, MemoryType
 
@@ -27,7 +26,7 @@ class MemoryStorage:
         }
         file_path.write_text(json.dumps(data, indent=2))
 
-    def load(self, memory_id: str) -> Optional[MemoryMetadata]:
+    def load(self, memory_id: str) -> MemoryMetadata | None:
         """Load a memory entry by ID."""
         file_path = self.storage_dir / f"{memory_id}.json"
         if not file_path.exists():
@@ -43,7 +42,7 @@ class MemoryStorage:
             metadata=data.get("metadata")
         )
 
-    def list_all(self) -> List[MemoryMetadata]:
+    def list_all(self) -> list[MemoryMetadata]:
         """List all memory entries."""
         memories = []
         for file_path in self.storage_dir.glob("*.json"):

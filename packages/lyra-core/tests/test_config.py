@@ -1,6 +1,4 @@
 """Tests for lyra_core.config feature flags."""
-import os
-import pytest
 
 
 def test_process_transparency_enabled_by_default():
@@ -14,6 +12,7 @@ def test_process_transparency_can_be_disabled(monkeypatch):
     monkeypatch.setenv("LYRA_ENABLE_PROCESS_TRANSPARENCY", "false")
     # Re-import to pick up new env var
     import importlib
+
     import lyra_core.config
     importlib.reload(lyra_core.config)
     from lyra_core.config import LYRA_ENABLE_PROCESS_TRANSPARENCY
@@ -24,13 +23,14 @@ def test_sub_flags_follow_master_flag(monkeypatch):
     """Sub-flags should follow master flag when master is disabled."""
     monkeypatch.setenv("LYRA_ENABLE_PROCESS_TRANSPARENCY", "false")
     import importlib
+
     import lyra_core.config
     importlib.reload(lyra_core.config)
     from lyra_core.config import (
+        LYRA_ENABLE_AGENT_PANEL,
         LYRA_ENABLE_EVENT_BUS,
         LYRA_ENABLE_EVENT_STORE,
         LYRA_ENABLE_PROCESS_STATE_WRITER,
-        LYRA_ENABLE_AGENT_PANEL,
     )
     assert LYRA_ENABLE_EVENT_BUS is False
     assert LYRA_ENABLE_EVENT_STORE is False
@@ -48,6 +48,7 @@ def test_legacy_tui_can_be_enabled(monkeypatch):
     """Legacy TUI can be enabled for rollback."""
     monkeypatch.setenv("LYRA_LEGACY_TUI", "true")
     import importlib
+
     import lyra_core.config
     importlib.reload(lyra_core.config)
     from lyra_core.config import LYRA_LEGACY_TUI
@@ -64,6 +65,7 @@ def test_tui_refresh_rate_can_be_tuned(monkeypatch):
     """TUI refresh rate can be tuned via env var."""
     monkeypatch.setenv("LYRA_TUI_REFRESH_RATE", "60.0")
     import importlib
+
     import lyra_core.config
     importlib.reload(lyra_core.config)
     from lyra_core.config import LYRA_TUI_REFRESH_RATE

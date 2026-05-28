@@ -29,8 +29,8 @@ from .scheduler import (
 from .variants import (
     VariantOutcome,
     VariantSpec,
-    VariantStatus,
     VariantsResult,
+    VariantStatus,
     run_variants,
 )
 from .worktree import Worktree, WorktreeError, WorktreeManager

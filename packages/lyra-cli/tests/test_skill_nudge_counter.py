@@ -17,8 +17,9 @@ Contract (plan Phase 3):
 """
 from __future__ import annotations
 
+from collections.abc import Callable
 from concurrent.futures import Executor, Future
-from typing import Any, Callable
+from typing import Any
 
 import pytest
 

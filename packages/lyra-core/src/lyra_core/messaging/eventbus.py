@@ -1,7 +1,6 @@
 """Event bus for publish-subscribe messaging."""
-import asyncio
 from collections import defaultdict
-from typing import Callable, Awaitable
+from collections.abc import Awaitable, Callable
 
 from lyra_core.messaging.message import Message
 from lyra_core.messaging.types import MessageType

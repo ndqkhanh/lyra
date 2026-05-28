@@ -10,7 +10,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, List, Optional, Set, Tuple
 
 
 @dataclass(frozen=True)
@@ -20,8 +19,8 @@ class Finding:
     finding_id: str
     content: str
     confidence: float = 1.0
-    sources: Tuple[str, ...] = field(default_factory=tuple)
-    tags: Tuple[str, ...] = field(default_factory=tuple)
+    sources: tuple[str, ...] = field(default_factory=tuple)
+    tags: tuple[str, ...] = field(default_factory=tuple)
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
 
 
@@ -42,7 +41,7 @@ class KnowledgeGap:
 
     gap_id: str
     description: str
-    related_finding_ids: Tuple[str, ...] = field(default_factory=tuple)
+    related_finding_ids: tuple[str, ...] = field(default_factory=tuple)
     suggested_query: str = ""
     priority: float = 0.5  # 0.0 (low) – 1.0 (high)
 
@@ -59,12 +58,12 @@ class ResearchKnowledgeGraph:
     """
 
     def __init__(self) -> None:
-        self._findings: Dict[str, Finding] = {}
-        self._relations: Dict[str, FindingRelation] = {}
+        self._findings: dict[str, Finding] = {}
+        self._relations: dict[str, FindingRelation] = {}
         # Adjacency: finding_id -> list of relation_ids (outgoing)
-        self._outgoing: Dict[str, List[str]] = {}
+        self._outgoing: dict[str, list[str]] = {}
         # Adjacency: finding_id -> list of relation_ids (incoming)
-        self._incoming: Dict[str, List[str]] = {}
+        self._incoming: dict[str, list[str]] = {}
 
     # ---- mutation -------------------------------------------------------
 
@@ -94,7 +93,7 @@ class ResearchKnowledgeGraph:
 
     # ---- query ----------------------------------------------------------
 
-    def get_finding(self, finding_id: str) -> Optional[Finding]:
+    def get_finding(self, finding_id: str) -> Finding | None:
         """Retrieve a finding by ID."""
         return self._findings.get(finding_id)
 
@@ -106,11 +105,11 @@ class ResearchKnowledgeGraph:
         """Return the number of relations in the graph."""
         return len(self._relations)
 
-    def get_all_findings(self) -> List[Finding]:
+    def get_all_findings(self) -> list[Finding]:
         """Return all findings."""
         return list(self._findings.values())
 
-    def find_findings_by_tag(self, tag: str) -> List[Finding]:
+    def find_findings_by_tag(self, tag: str) -> list[Finding]:
         """Return findings that have the given tag."""
         return [
             f for f in self._findings.values()
@@ -121,14 +120,14 @@ class ResearchKnowledgeGraph:
         self,
         finding_id: str,
         direction: str = "both",
-    ) -> List[Tuple[Finding, FindingRelation]]:
+    ) -> list[tuple[Finding, FindingRelation]]:
         """
         Get neighboring findings connected by relations.
         """
-        neighbors: List[Tuple[Finding, FindingRelation]] = []
+        neighbors: list[tuple[Finding, FindingRelation]] = []
 
-        seen: Set[str] = set()
-        relation_ids: List[str] = []
+        seen: set[str] = set()
+        relation_ids: list[str] = []
         if direction in ("outgoing", "both"):
             relation_ids.extend(self._outgoing.get(finding_id, []))
         if direction in ("incoming", "both"):
@@ -156,10 +155,10 @@ class ResearchKnowledgeGraph:
 
     def compute_ppr(
         self,
-        query_finding_ids: List[str],
+        query_finding_ids: list[str],
         damping: float = 0.85,
         iterations: int = 20,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """
         Compute Personalized PageRank scores.
 
@@ -168,9 +167,7 @@ class ResearchKnowledgeGraph:
         if not self._findings:
             return {}
 
-        scores: Dict[str, float] = {
-            fid: 0.0 for fid in self._findings
-        }
+        scores: dict[str, float] = dict.fromkeys(self._findings, 0.0)
         # Personalization vector: uniform over query findings
         teleport = 1.0 / len(query_finding_ids) if query_finding_ids else 0.0
         for fid in query_finding_ids:
@@ -178,7 +175,7 @@ class ResearchKnowledgeGraph:
                 scores[fid] = teleport
 
         for _ in range(iterations):
-            new_scores: Dict[str, float] = {fid: 0.0 for fid in self._findings}
+            new_scores: dict[str, float] = dict.fromkeys(self._findings, 0.0)
 
             for finding_id in self._findings:
                 # Teleport probability
@@ -208,13 +205,13 @@ class ResearchKnowledgeGraph:
 
     def get_relevant_findings(
         self,
-        query_finding_ids: List[str],
+        query_finding_ids: list[str],
         top_k: int = 5,
-    ) -> List[Tuple[Finding, float]]:
+    ) -> list[tuple[Finding, float]]:
         """Return the top-k findings most relevant to the query set."""
         ppr = self.compute_ppr(query_finding_ids)
 
-        results: List[Tuple[Finding, float]] = []
+        results: list[tuple[Finding, float]] = []
         for fid, score in ppr.items():
             if fid in query_finding_ids:
                 continue  # skip the query nodes themselves
@@ -227,7 +224,7 @@ class ResearchKnowledgeGraph:
 
     # ---- knowledge gaps -------------------------------------------------
 
-    def find_knowledge_gaps(self) -> List[KnowledgeGap]:
+    def find_knowledge_gaps(self) -> list[KnowledgeGap]:
         """
         Detect knowledge gaps in the graph.
 
@@ -236,7 +233,7 @@ class ResearchKnowledgeGraph:
         - A finding has contradictory relations pointing to it
         - A region has low connectivity (orphan findings)
         """
-        gaps: List[KnowledgeGap] = []
+        gaps: list[KnowledgeGap] = []
 
         # 1. Orphan findings (no relations at all)
         orphans = [

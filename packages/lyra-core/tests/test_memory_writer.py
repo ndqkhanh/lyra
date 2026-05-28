@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.memory.schema import Fragment, FragmentType, MemoryTier, Provenance
 from lyra_core.memory.writer import (
     ConflictResolver,
@@ -10,7 +9,6 @@ from lyra_core.memory.writer import (
     WriteAction,
     Writer,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers

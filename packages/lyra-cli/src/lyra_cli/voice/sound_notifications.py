@@ -8,10 +8,10 @@ from __future__ import annotations
 
 import platform
 import subprocess
-from dataclasses import dataclass, field
+from collections.abc import Callable
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Callable
 
 __all__ = [
     "AgentState",
@@ -191,7 +191,7 @@ class SoundNotifier:
             try:
                 if self._system == "Darwin":
                     subprocess.run(
-                        ["say", f"beep"],
+                        ["say", "beep"],
                         capture_output=True, check=False, timeout=1,
                     )
                 elif self._system == "Linux":

@@ -4,8 +4,6 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-import pytest
-
 from lyra_cli.eternal_factory import make_eternal_loop, make_eternal_loop_factory
 
 
@@ -69,8 +67,8 @@ def test_run_conversation_reflects_quarantine_in_view(tmp_path: Path) -> None:
     """When the breaker quarantines the workflow, the AgentLoop-shaped view
     surfaces ``stopped_by="quarantined"`` rather than crashing the caller."""
     from harness_eternal import CircuitBreaker
-    from lyra_core.agent.eternal_turn import EternalAgentLoop
     from harness_eternal.restate import LocalRuntime
+    from lyra_core.agent.eternal_turn import EternalAgentLoop
 
     runtime = LocalRuntime(tmp_path / "rt")
     breaker = CircuitBreaker(after=1)

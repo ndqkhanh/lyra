@@ -25,7 +25,7 @@ import threading
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional, cast
+from typing import Any, cast
 from uuid import uuid4
 
 logger = logging.getLogger(__name__)
@@ -218,7 +218,7 @@ class CheckpointManager:
         self,
         file_path: str,
         content: str,
-        conversation_state: Optional[dict[str, Any]] = None,
+        conversation_state: dict[str, Any] | None = None,
     ) -> Checkpoint:
         """Snapshot file content and optional conversation state.
 
@@ -264,7 +264,7 @@ class CheckpointManager:
         )
         return cp
 
-    def get_checkpoint(self, checkpoint_id: str) -> Optional[Checkpoint]:
+    def get_checkpoint(self, checkpoint_id: str) -> Checkpoint | None:
         """Retrieve a checkpoint by its unique identifier.
 
         Parameters
@@ -282,7 +282,7 @@ class CheckpointManager:
 
     def list_checkpoints(
         self,
-        file_path: Optional[str] = None,
+        file_path: str | None = None,
         limit: int = 50,
     ) -> list[Checkpoint]:
         """List stored checkpoints, most recent first.
@@ -502,7 +502,7 @@ class CheckpointManager:
             newest_timestamp=newest,
         )
 
-    def clear(self, file_path: Optional[str] = None) -> None:
+    def clear(self, file_path: str | None = None) -> None:
         """Remove all checkpoints, optionally filtered by *file_path*.
 
         Parameters
@@ -627,7 +627,7 @@ class CheckpointManager:
         with open(fpath, "w") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
-    def _load_checkpoint(self, checkpoint_id: str) -> Optional[Checkpoint]:
+    def _load_checkpoint(self, checkpoint_id: str) -> Checkpoint | None:
         """Load a checkpoint from disk by its ID.
 
         Parameters

@@ -10,11 +10,11 @@ import typer
 from rich.console import Console
 
 from lyra_cli.evolution import (
-    EvolutionHarness,
-    CostMeter,
     BudgetCap,
-    MetaAgent,
+    CostMeter,
+    EvolutionHarness,
     EvolutionSegment,
+    MetaAgent,
     aevo_loop,
 )
 

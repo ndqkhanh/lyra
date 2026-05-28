@@ -1,6 +1,6 @@
 """Server registry - Registry of MCP servers"""
 
-from typing import Dict, List
+
 from .mcp_manager import MCPServer
 
 
@@ -8,7 +8,7 @@ class ServerRegistry:
     """Registry of MCP servers"""
 
     def __init__(self):
-        self.servers: Dict[str, MCPServer] = {}
+        self.servers: dict[str, MCPServer] = {}
 
     def register(self, server: MCPServer):
         """Register a server"""
@@ -18,13 +18,13 @@ class ServerRegistry:
         """Get server by name"""
         return self.servers.get(name)
 
-    def list(self, category: str = None) -> List[MCPServer]:
+    def list(self, category: str = None) -> list[MCPServer]:
         """List servers"""
         servers = list(self.servers.values())
-        
+
         if category:
             servers = [s for s in servers if s.category == category]
-        
+
         return sorted(servers, key=lambda s: s.name)
 
 

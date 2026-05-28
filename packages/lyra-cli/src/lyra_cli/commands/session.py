@@ -20,7 +20,6 @@ import datetime as _dt
 import json as _json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -50,15 +49,15 @@ _console = Console()
 @dataclass
 class _SessionSummary:
     session_id: str
-    name: Optional[str]
+    name: str | None
     msgs: int
     turns: int
     modified: float
-    mode: Optional[str]
-    model: Optional[str]
+    mode: str | None
+    model: str | None
     cost_usd: float
     tokens: int
-    forked_from: Optional[str]
+    forked_from: str | None
     path: Path
 
 
@@ -85,7 +84,7 @@ def _read_meta(session_dir: Path) -> dict:
         return {}
 
 
-def _summarize_session(session_dir: Path) -> Optional[_SessionSummary]:
+def _summarize_session(session_dir: Path) -> _SessionSummary | None:
     """Walk the JSONL once and roll up everything ``list`` / ``show`` need.
 
     Returns ``None`` when there's no ``turns.jsonl`` (the directory was
@@ -98,8 +97,8 @@ def _summarize_session(session_dir: Path) -> Optional[_SessionSummary]:
     meta = _read_meta(session_dir)
     msgs = 0
     turns = 0
-    last_mode: Optional[str] = None
-    last_model: Optional[str] = None
+    last_mode: str | None = None
+    last_model: str | None = None
     cost_usd = 0.0
     tokens = 0
     try:
@@ -329,7 +328,7 @@ def show_session(
 
     # Resolve "latest" / unique-prefix the same way the slash command
     # does so the CLI feels symmetric.
-    target: Optional[str]
+    target: str | None
     ref = session_id.strip().lower()
     if ref in ("latest", "last", "recent"):
         target = summaries[0].session_id if summaries else None

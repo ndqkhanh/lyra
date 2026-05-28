@@ -7,12 +7,12 @@ Implements hybrid LightRAG + HippoRAG approach:
 - Graphiti: Temporal validity windows
 """
 
-from dataclasses import dataclass, field
-from datetime import datetime
-from typing import List, Optional, Dict, Any, Set, Tuple
-from pathlib import Path
 import json
 import math
+from dataclasses import dataclass, field
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 
 @dataclass
@@ -22,8 +22,8 @@ class GraphEntity:
     entity_id: str
     name: str
     entity_type: str  # "person", "concept", "event", etc.
-    embedding: Optional[List[float]] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    embedding: list[float] | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
 
 
@@ -36,11 +36,11 @@ class GraphRelation:
     target_id: str
     relation_type: str  # "causes", "related_to", "part_of", etc.
     confidence: float = 1.0  # 0.0 to 1.0
-    valid_from: Optional[str] = None  # Temporal validity
-    valid_until: Optional[str] = None
-    supersedes: List[str] = field(default_factory=list)  # Superseded relation IDs
-    superseded_by: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    valid_from: str | None = None  # Temporal validity
+    valid_until: str | None = None
+    supersedes: list[str] = field(default_factory=list)  # Superseded relation IDs
+    superseded_by: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
 
 
@@ -59,15 +59,15 @@ class GraphMemoryStore:
         self.data_dir = Path(data_dir)
         self.data_dir.mkdir(parents=True, exist_ok=True)
 
-        self.entities: Dict[str, GraphEntity] = {}
-        self.relations: Dict[str, GraphRelation] = {}
+        self.entities: dict[str, GraphEntity] = {}
+        self.relations: dict[str, GraphRelation] = {}
 
         # Adjacency lists for fast traversal
-        self.outgoing: Dict[str, List[str]] = {}  # entity_id -> [relation_ids]
-        self.incoming: Dict[str, List[str]] = {}  # entity_id -> [relation_ids]
+        self.outgoing: dict[str, list[str]] = {}  # entity_id -> [relation_ids]
+        self.incoming: dict[str, list[str]] = {}  # entity_id -> [relation_ids]
 
         # PageRank scores (computed on demand)
-        self.pagerank_scores: Dict[str, float] = {}
+        self.pagerank_scores: dict[str, float] = {}
         self.pagerank_dirty = True
 
         self._load_graph()
@@ -78,7 +78,7 @@ class GraphMemoryStore:
         relations_file = self.data_dir / "relations.json"
 
         if entities_file.exists():
-            with open(entities_file, "r") as f:
+            with open(entities_file) as f:
                 data = json.load(f)
                 self.entities = {
                     eid: GraphEntity(**edata)
@@ -86,7 +86,7 @@ class GraphMemoryStore:
                 }
 
         if relations_file.exists():
-            with open(relations_file, "r") as f:
+            with open(relations_file) as f:
                 data = json.load(f)
                 self.relations = {
                     rid: GraphRelation(**rdata)
@@ -179,20 +179,20 @@ class GraphMemoryStore:
         self._save_graph()
         return relation.relation_id
 
-    def get_entity(self, entity_id: str) -> Optional[GraphEntity]:
+    def get_entity(self, entity_id: str) -> GraphEntity | None:
         """Get entity by ID."""
         return self.entities.get(entity_id)
 
-    def get_relation(self, relation_id: str) -> Optional[GraphRelation]:
+    def get_relation(self, relation_id: str) -> GraphRelation | None:
         """Get relation by ID."""
         return self.relations.get(relation_id)
 
     def find_entities(
         self,
-        name_pattern: Optional[str] = None,
-        entity_type: Optional[str] = None,
+        name_pattern: str | None = None,
+        entity_type: str | None = None,
         limit: int = 10
-    ) -> List[GraphEntity]:
+    ) -> list[GraphEntity]:
         """Find entities by name pattern or type."""
         results = []
 
@@ -209,8 +209,8 @@ class GraphMemoryStore:
         self,
         entity_id: str,
         direction: str = "outgoing",
-        relation_type: Optional[str] = None
-    ) -> List[Tuple[GraphEntity, GraphRelation]]:
+        relation_type: str | None = None
+    ) -> list[tuple[GraphEntity, GraphRelation]]:
         """
         Get neighboring entities.
 
@@ -255,7 +255,7 @@ class GraphMemoryStore:
         start_entity_id: str,
         max_hops: int = 3,
         min_confidence: float = 0.5
-    ) -> List[Tuple[GraphEntity, float, List[str]]]:
+    ) -> list[tuple[GraphEntity, float, list[str]]]:
         """
         Multi-hop search using Personalized PageRank.
 
@@ -295,7 +295,7 @@ class GraphMemoryStore:
         min_confidence: float = 0.5,
         damping: float = 0.85,
         iterations: int = 20
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """
         Compute Personalized PageRank scores.
 
@@ -310,12 +310,12 @@ class GraphMemoryStore:
             Dict of entity_id -> score
         """
         # Initialize scores
-        scores = {eid: 0.0 for eid in self.entities.keys()}
+        scores = dict.fromkeys(self.entities.keys(), 0.0)
         scores[start_entity_id] = 1.0
 
         # Iterative computation
         for _ in range(iterations):
-            new_scores = {eid: 0.0 for eid in self.entities.keys()}
+            new_scores = dict.fromkeys(self.entities.keys(), 0.0)
 
             for entity_id in self.entities.keys():
                 # Teleport probability
@@ -338,7 +338,7 @@ class GraphMemoryStore:
 
         return scores
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get graph statistics."""
         return {
             "num_entities": len(self.entities),

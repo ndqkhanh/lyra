@@ -8,13 +8,12 @@ This module consolidates the remaining phases:
 - Phase 8: Integration & Polish
 """
 
+import json
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-import json
-
+from typing import Any
 
 # ============================================================================
 # PHASE 5: RESEARCH & LEARNING
@@ -24,8 +23,8 @@ import json
 class ResearchQuery:
     """A research query with results."""
     query: str
-    sources: List[str]
-    findings: List[str]
+    sources: list[str]
+    findings: list[str]
     confidence: float
     timestamp: datetime = field(default_factory=datetime.now)
 
@@ -35,10 +34,10 @@ class ReasoningStrategy:
     """A reusable reasoning strategy."""
     name: str
     description: str
-    steps: List[str]
+    steps: list[str]
     success_count: int = 0
     failure_count: int = 0
-    examples: List[Dict[str, Any]] = field(default_factory=list)
+    examples: list[dict[str, Any]] = field(default_factory=list)
 
 
 class ReasoningBank:
@@ -50,7 +49,7 @@ class ReasoningBank:
 
     def __init__(self, bank_path: Path):
         self.bank_path = bank_path
-        self.strategies: Dict[str, ReasoningStrategy] = {}
+        self.strategies: dict[str, ReasoningStrategy] = {}
         self._load()
 
     def add_strategy(self, strategy: ReasoningStrategy) -> None:
@@ -58,7 +57,7 @@ class ReasoningBank:
         self.strategies[strategy.name] = strategy
         self._save()
 
-    def retrieve_strategy(self, task: str, min_success_rate: float = 0.7) -> Optional[ReasoningStrategy]:
+    def retrieve_strategy(self, task: str, min_success_rate: float = 0.7) -> ReasoningStrategy | None:
         """
         Retrieve relevant strategy with conservative threshold.
 
@@ -118,7 +117,7 @@ class ResearchEngine:
 
     def __init__(self, reasoning_bank: ReasoningBank):
         self.reasoning_bank = reasoning_bank
-        self.research_history: List[ResearchQuery] = []
+        self.research_history: list[ResearchQuery] = []
 
     def conduct_research(self, query: str) -> ResearchQuery:
         """
@@ -176,10 +175,10 @@ class SafetyGuard:
     """
 
     def __init__(self):
-        self.threats: List[SecurityThreat] = []
-        self.quarantine: List[Any] = []
+        self.threats: list[SecurityThreat] = []
+        self.quarantine: list[Any] = []
 
-    def validate_input(self, user_input: str) -> tuple[bool, Optional[SecurityThreat]]:
+    def validate_input(self, user_input: str) -> tuple[bool, SecurityThreat | None]:
         """
         Validate user input for prompt injection.
 
@@ -211,7 +210,7 @@ class SafetyGuard:
 
         return True, None
 
-    def validate_memory(self, memory_content: str) -> tuple[bool, Optional[SecurityThreat]]:
+    def validate_memory(self, memory_content: str) -> tuple[bool, SecurityThreat | None]:
         """Validate memory for poisoning attempts."""
         # Check for suspicious patterns
         if any(pattern in memory_content.lower() for pattern in ["<script>", "eval(", "exec("]):
@@ -225,7 +224,7 @@ class SafetyGuard:
 
         return True, None
 
-    def validate_skill(self, skill_code: str) -> tuple[bool, Optional[SecurityThreat]]:
+    def validate_skill(self, skill_code: str) -> tuple[bool, SecurityThreat | None]:
         """Validate skill code for malicious patterns."""
         dangerous_patterns = [
             "os.system",
@@ -248,7 +247,7 @@ class SafetyGuard:
 
         return True, None
 
-    def get_threat_report(self) -> Dict[str, Any]:
+    def get_threat_report(self) -> dict[str, Any]:
         """Generate threat report."""
         return {
             "total_threats": len(self.threats),
@@ -258,14 +257,14 @@ class SafetyGuard:
             "active": sum(1 for t in self.threats if not t.mitigated),
         }
 
-    def _count_by_level(self) -> Dict[str, int]:
+    def _count_by_level(self) -> dict[str, int]:
         """Count threats by level."""
         counts = {}
         for threat in self.threats:
             counts[threat.level.value] = counts.get(threat.level.value, 0) + 1
         return counts
 
-    def _count_by_type(self) -> Dict[str, int]:
+    def _count_by_type(self) -> dict[str, int]:
         """Count threats by type."""
         counts = {}
         for threat in self.threats:
@@ -301,7 +300,7 @@ class TelemetrySystem:
 
     def __init__(self, telemetry_path: Path):
         self.telemetry_path = telemetry_path
-        self.metrics: List[Metric] = []
+        self.metrics: list[Metric] = []
 
     def record_metric(self, name: str, value: float, unit: str = "") -> None:
         """Record a metric."""
@@ -309,7 +308,7 @@ class TelemetrySystem:
         self.metrics.append(metric)
         self._save()
 
-    def get_metrics_summary(self) -> Dict[str, Any]:
+    def get_metrics_summary(self) -> dict[str, Any]:
         """Get metrics summary."""
         if not self.metrics:
             return {}
@@ -388,7 +387,7 @@ class LyraSystem:
         # Phase 7: Telemetry
         self.telemetry = TelemetrySystem(base_path / "telemetry.json")
 
-    def get_system_status(self) -> Dict[str, Any]:
+    def get_system_status(self) -> dict[str, Any]:
         """Get overall system status."""
         return {
             "reasoning_strategies": len(self.reasoning_bank.strategies),
@@ -398,7 +397,7 @@ class LyraSystem:
             "system_health": "operational",
         }
 
-    def run_health_check(self) -> Dict[str, bool]:
+    def run_health_check(self) -> dict[str, bool]:
         """Run system health check."""
         return {
             "reasoning_bank": self.reasoning_bank.bank_path.exists(),

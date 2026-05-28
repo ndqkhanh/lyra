@@ -16,7 +16,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from lyra_core.observability.hir import (
     HIREmitter,
     HIREvent,

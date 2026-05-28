@@ -12,13 +12,15 @@ from __future__ import annotations
 
 import json
 from collections import defaultdict
+from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
-from typing import Iterator, Mapping
 
 from .classifier import (
-    Classification, TaskCategory, classify_turn,
+    Classification,
+    TaskCategory,
+    classify_turn,
 )
 from .pricing import cost_for_turn
 

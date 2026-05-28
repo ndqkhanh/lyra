@@ -1,6 +1,5 @@
 """State machine transition tests."""
 
-import pytest
 from lyra_cli.spec_kit.state import StateManager
 
 

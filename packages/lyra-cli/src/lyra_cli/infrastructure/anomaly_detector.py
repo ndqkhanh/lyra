@@ -12,7 +12,7 @@ Uses rolling statistics (mean, stddev) with configurable window sizes.
 from __future__ import annotations
 
 from collections import deque
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import StrEnum
 
 

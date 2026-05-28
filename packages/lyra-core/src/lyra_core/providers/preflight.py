@@ -31,9 +31,9 @@ handling than block a request we can't reason about.
 """
 from __future__ import annotations
 
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from typing import Any, Iterable, Mapping, Optional
-
+from typing import Any
 
 CONTEXT_WINDOW: dict[str, int] = {
     "claude-opus-4.5": 200_000,
@@ -66,7 +66,7 @@ class PreflightReport:
     model: str
     estimated_input_tokens: int
     max_output_tokens: int
-    context_window: Optional[int]
+    context_window: int | None
     would_exceed: bool
 
 

@@ -1,10 +1,11 @@
 """Beautiful responsive banner for Lyra CLI"""
 
+import os
+
+from rich.align import Align
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
-from rich.align import Align
-import os
 
 
 def show_banner(console: Console, model: str = "Auto", show_full: bool = True):

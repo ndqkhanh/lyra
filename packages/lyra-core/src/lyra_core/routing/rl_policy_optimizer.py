@@ -109,7 +109,7 @@ class RLPriorityOptimizer:
     _total_steps: int = 0
     _total_episodes: int = 0
     _cumulative_reward: float = 0.0
-    _action_counts: dict[str, int] = field(default_factory=lambda: {a: 0 for a in ACTION_SPACE})
+    _action_counts: dict[str, int] = field(default_factory=lambda: dict.fromkeys(ACTION_SPACE, 0))
     _cost_history: list[float] = field(default_factory=list)
 
     def start_episode(self, episode_id: str | None = None) -> str:
@@ -291,7 +291,7 @@ class RLPriorityOptimizer:
         self._total_steps = 0
         self._total_episodes = 0
         self._cumulative_reward = 0.0
-        self._action_counts = {a: 0 for a in ACTION_SPACE}
+        self._action_counts = dict.fromkeys(ACTION_SPACE, 0)
         self._cost_history.clear()
         self._episode_rewards.clear()
         self._episode_states.clear()

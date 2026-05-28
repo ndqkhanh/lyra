@@ -7,14 +7,9 @@ the loop factory is wrapped through eternal-mode; when unset, it isn't.
 """
 from __future__ import annotations
 
-import os
 import sys
 import types
 from pathlib import Path
-from unittest.mock import patch
-
-import pytest
-
 
 # Avoid importing the real session.py at module-import time — it pulls in
 # heavy interactive stack. We monkeypatch its dependencies before we

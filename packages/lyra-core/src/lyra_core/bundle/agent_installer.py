@@ -36,7 +36,6 @@ from typing import Any, Literal
 from .attestation import Attestation, sign_attestation
 from .source_bundle import BundleValidationError, SourceBundle
 
-
 InstallStep = Literal[
     "provision", "register_skills", "wire_tools", "smoke_eval", "attest"
 ]
