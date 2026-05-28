@@ -126,6 +126,28 @@ from lyra_agent_swarm.consensus.raft_consensus import (
     RaftNode,
 )
 
+# ── Compound Agent (Plan 33) ────────────────────────────────────
+from lyra_agent_swarm.compound_agent import (
+    CompoundAgent,
+    CompoundConfig,
+    CompoundResult,
+    SlotConfig,
+    SlotOutput,
+    SlotRole,
+)
+
+# ── Zero-Trust Federation (Plan 33) ─────────────────────────────
+from lyra_agent_swarm.zero_trust_federation import (
+    AuthDecision,
+    AuthStatus,
+    Capability,
+    FederationConfig,
+    FederationIdentity,
+    FederationLevel,
+    FederationRegistry,
+    ZeroTrustFederation,
+)
+
 __all__ = [
     # discipline_agents
     "AgentRole",
@@ -230,6 +252,22 @@ __all__ = [
     "TaskItemStatus",
     "chunk_items",
     "estimate_fleet_cost",
+    # compound_agent (Plan 33)
+    "CompoundAgent",
+    "CompoundConfig",
+    "CompoundResult",
+    "SlotConfig",
+    "SlotOutput",
+    "SlotRole",
+    # zero_trust_federation (Plan 33)
+    "AuthDecision",
+    "AuthStatus",
+    "Capability",
+    "FederationConfig",
+    "FederationIdentity",
+    "FederationLevel",
+    "FederationRegistry",
+    "ZeroTrustFederation",
     # consensus (raft)
     "LogEntry",
     "NodeState",

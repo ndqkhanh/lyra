@@ -132,6 +132,20 @@ from lyra_memory.gossip.consensus_protocol import (
     MergeResult,
     VectorClock,
 )
+from lyra_memory.entropic_consolidation import (
+    ConsolidatedMemory,
+    ConsolidationPhase,
+    EntropicConfig,
+    EntropicConsolidator,
+    MemoryFragment as EntropicMemoryFragment,
+)
+from lyra_memory.cranimem_gate import (
+    CraniMemAdmissionGate,
+    CraniMemCandidate,
+    CraniMemConfig,
+    GateAction,
+    GateDecision,
+)
 
 __version__ = "0.4.0"
 
@@ -241,6 +255,18 @@ __all__ = [
     "DualEncoder",
     "EncoderConfig",
     "SparseVector",
+    # Entropic Consolidation (Plan 30)
+    "ConsolidatedMemory",
+    "ConsolidationPhase",
+    "EntropicConfig",
+    "EntropicConsolidator",
+    "EntropicMemoryFragment",
+    # CraniMem Admission Gate (Plan 30)
+    "CraniMemAdmissionGate",
+    "CraniMemCandidate",
+    "CraniMemConfig",
+    "GateAction",
+    "GateDecision",
     # Gossip Consensus Protocol
     "ConsensusConfig",
     "GossipMessage",

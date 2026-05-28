@@ -1,4 +1,4 @@
-"""Lyra safety monitor (Phase 9 + Wave-E red-team corpus + Phase 13.3 modules + Phase 1 AGI Safety)."""
+"""Lyra safety monitor (Phase 9 + Wave-E red-team corpus + Phase 13.3 modules + Phase 1 AGI Safety + Wave 2-3)."""
 from __future__ import annotations
 
 from .adversarial_verifier import (
@@ -32,7 +32,32 @@ from .audit_engine import (
     Decision,
     Verdict,
 )
+from .hindsight import (
+    HindsightConfig,
+    HindsightEngine,
+    HindsightLesson,
+    OutcomeType,
+    Trajectory,
+    TrajectoryStep,
+)
 from .intent_monitor import ActionRecord, BehavioralBaseline, IntentDeviation, IntentMonitor
+from .knowing_doing_probes import (
+    GapReport,
+    GapSeverity,
+    KnowingDoingProbe,
+    ProbeConfig,
+    ProbeResult,
+)
+from .maven import (
+    JudgePool,
+    MavenConfig,
+    MavenEngine,
+    MavenResult,
+    MavenVerdict,
+    ModelIdentity,
+    ReviewPerspective,
+    ReviewerRole,
+)
 from .monitor import SafetyFlag, SafetyMonitor
 from .parallax import CognitiveContext, ContextType, ExecutionPlan, ParallaxConfig, SeparationGate
 from .reasoning_monitor import (
@@ -48,6 +73,28 @@ from .redteam import (
     default_corpus,
     score_monitor,
 )
+from .relay_race import (
+    Baton,
+    LegResult,
+    LegStatus,
+    RelayConfig,
+    RelayRace,
+    RelayState,
+)
+from .spectral_guardrails import (
+    SpectralAlert,
+    SpectralConfig,
+    SpectralGuardrail,
+    SpectralResult,
+    TokenAnomaly,
+)
+from .zkagent import (
+    ChainVerification,
+    ReceiptStatus,
+    ReceiptStore,
+    ToolReceipt,
+    zkAgent,
+)
 
 __all__ = [
     "ActionRecord",
@@ -59,7 +106,9 @@ __all__ = [
     "ApprovalGate",
     "AuditLogger",
     "AuditRecord",
+    "Baton",
     "BehavioralBaseline",
+    "ChainVerification",
     "CognitiveContext",
     "ContextType",
     "Decision",
@@ -67,30 +116,63 @@ __all__ = [
     "DriftStatus",
     "ExecutionPlan",
     "FlagSeverity",
+    "GapReport",
+    "GapSeverity",
     "GateAction",
     "GateDecision",
+    "HindsightConfig",
+    "HindsightEngine",
+    "HindsightLesson",
     "IntentDeviation",
     "IntentMonitor",
+    "JudgePool",
+    "KnowingDoingProbe",
+    "LegResult",
+    "LegStatus",
+    "MavenConfig",
+    "MavenEngine",
+    "MavenResult",
+    "MavenVerdict",
     "ModelFamily",
+    "ModelIdentity",
     "ModelProvider",
     "ModelVote",
+    "OutcomeType",
     "ParallaxConfig",
+    "ProbeConfig",
+    "ProbeResult",
     "ReasoningFlag",
     "ReasoningMonitor",
     "ReasoningPatternType",
     "ReasoningReport",
+    "ReceiptStatus",
+    "ReceiptStore",
     "RedTeamCase",
     "RedTeamCorpus",
     "RedTeamReport",
+    "RelayConfig",
+    "RelayRace",
+    "RelayState",
+    "ReviewPerspective",
+    "ReviewerRole",
     "RiskClassification",
     "RiskLevel",
     "RiskSurface",
     "SafetyFlag",
     "SafetyMonitor",
     "SeparationGate",
+    "SpectralAlert",
+    "SpectralConfig",
+    "SpectralGuardrail",
+    "SpectralResult",
+    "TokenAnomaly",
+    "ToolReceipt",
+    "Trajectory",
+    "TrajectoryStep",
     "Verdict",
     "VerificationRequest",
     "classify_risk",
     "default_corpus",
     "score_monitor",
+    "zkAgent",
 ]

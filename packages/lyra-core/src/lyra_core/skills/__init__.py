@@ -46,6 +46,13 @@ from .instinct import (
     ObservationType,
     PatternType,
 )
+from .skill_opt import (
+    OptimizationPass,
+    OptimizationStrategy,
+    SkillOptConfig,
+    SkillOptimizer,
+    TextEdit,
+)
 from .validation_gate import (
     GateNumber,
     GateResult,
@@ -71,7 +78,9 @@ __all__ = [
     "KnowledgeTransferEngine",
     "Observation",
     "ObservationType",
+    "OptimizationPass",
     "OptimizationReport",
+    "OptimizationStrategy",
     "PatternMatch",
     "PatternType",
     "RouterDecision",
@@ -82,11 +91,14 @@ __all__ = [
     "SkillNotFound",
     "SkillManifest",
     "SkillMatch",
+    "SkillOptConfig",
+    "SkillOptimizer",
     "SkillRegistry",
     "SkillSynthesizer",
     "SkillValidationPipeline",
     "SynthesisError",
     "SynthesisReport",
+    "TextEdit",
     "TransferResult",
     "TransferStatus",
     "TriggerOptimizer",
