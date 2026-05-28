@@ -1,43 +1,176 @@
 """
-Lyra Memory System - TencentDB-inspired 4-tier semantic pyramid.
+Lyra Memory System — 5-tier semantic pyramid with hybrid retrieval.
 
 Architecture:
-    L3 Persona (User Profile)          → Always loaded, ~500 tokens
+    L5 Persona (Identity & Style)       → Always loaded, ~2K tokens
         ↓ distills from
-    L2 Scenario (Scene Blocks)         → Loaded on-demand, ~2K tokens
+    L4 Meta (Cross-Session Patterns)    → Loaded on-demand, ~5K tokens
+        ↓ synthesizes from
+    L3 Procedural (Skills & Workflows)  → Trigger-indexed, ~10K tokens
         ↓ aggregates
-    L1 Atom (Structured Facts)         → Queried via hybrid search
-        ↓ extracts from
-    L0 Conversation (Raw Dialogue)     → Archived, retrieved for evidence
+    L2 Semantic (Knowledge Graph)       → Entity-relation with PPR
+        ↓ populates from
+    L1 Episodic + L0 Working            → BM25+Vector+RRF + verbatim cache
 
 Key Features:
 - Progressive disclosure (load only relevant layers)
-- Heterogeneous storage (JSONL + SQLite + Markdown)
+- DCI zero-index grep (Tier 0 retrieval, <1ms)
 - RRF hybrid search (BM25 + Vector, no weight tuning)
-- Warmup scheduling (1→2→4→8→5 turns)
-- Cache-friendly injection (user message prefix)
+- RTK + Caveman context compression (80% token reduction)
+- Entropy filtering (10-38x low-info removal)
+- Dream consolidation with spaced repetition
+- Question-driven reflection for memory strengthening
+- Cross-session pattern weaving
 """
 
-from .l0_conversation import ConversationStore, ConversationLog
+from .context_optimizer import (
+    CavemanCompressor,
+    CavemanResult,
+    CompressedContent,
+    CompressionStrategy,
+    ContextItem,
+    EntropyFilter,
+    EntropyLevel,
+    FilteredContext,
+    OffloadedContext,
+    RTKCompressor,
+    SymbolEntry,
+    SymbolGraphOffloader,
+)
+from .dream_reflector import (
+    QuestionDrivenReflector,
+    QuestionType,
+    ReflectionQuestion,
+    ReflectionSession,
+    ReflectionSignal,
+    SignalStrength,
+)
+from .dream_scheduler import (
+    DreamScheduleTrigger,
+    DreamScheduler,
+    ScheduleEntry,
+    SchedulerState,
+)
+from .l0_conversation import ConversationLog, ConversationStore
 from .l1_atom import AtomStore, StructuredFact
-from .l2_scenario import ScenarioStore, ScenarioBlock
+from .l2_scenario import ScenarioBlock, ScenarioStore
 from .l3_persona import PersonaStore, UserPersona
-from .search import rrf_merge, hybrid_search, SearchResult
+from .l4_meta import (
+    CrossSessionPattern,
+    CrossSessionWeaver,
+    KnowledgeConfidence,
+    KnowledgeType,
+    MetaKnowledge,
+    MetaKnowledgeStore,
+    Strategy,
+    StrategyEvolution,
+    StrategyStatus,
+    StrategyType,
+)
+from .l5_persona import (
+    AccumulatedPreference,
+    IdentityModel,
+    IdentityTrait,
+    PersonaSnapshot,
+    PersonaStore as L5PersonaStore,
+    PreferenceAccumulator,
+    PreferenceSource,
+    StyleDimension,
+    StyleLearner,
+    StylePreference,
+    TraitCategory,
+)
+from .search import (
+    DCIZeroIndex,
+    DisclosureBatch,
+    DisclosureLevel,
+    DisclosedMemory,
+    GrepResult,
+    MatchType,
+    ProgressiveDisclosure,
+    RankedResult,
+    RetrievalContext,
+    RetrievalReport,
+    RetrievalRouter,
+    RetrievalTier,
+    SearchResult,
+    VerbatimHit,
+    VerbatimLayer,
+    hybrid_search,
+    rrf_merge,
+)
 from .utils import WarmupScheduler
 
 __all__ = [
-    "ConversationStore",
-    "ConversationLog",
+    "AccumulatedPreference",
     "AtomStore",
-    "StructuredFact",
-    "ScenarioStore",
-    "ScenarioBlock",
+    "CavemanCompressor",
+    "CavemanResult",
+    "CompressedContent",
+    "CompressionStrategy",
+    "ContextItem",
+    "ConversationLog",
+    "ConversationStore",
+    "CrossSessionPattern",
+    "CrossSessionWeaver",
+    "DCIZeroIndex",
+    "DisclosureBatch",
+    "DisclosureLevel",
+    "DisclosedMemory",
+    "DreamScheduleTrigger",
+    "DreamScheduler",
+    "EntropyFilter",
+    "EntropyLevel",
+    "FilteredContext",
+    "GrepResult",
+    "IdentityModel",
+    "IdentityTrait",
+    "KnowledgeConfidence",
+    "KnowledgeType",
+    "L5PersonaStore",
+    "MatchType",
+    "MetaKnowledge",
+    "MetaKnowledgeStore",
+    "OffloadedContext",
+    "PersonaSnapshot",
     "PersonaStore",
-    "UserPersona",
-    "rrf_merge",
-    "hybrid_search",
+    "PreferenceAccumulator",
+    "PreferenceSource",
+    "ProgressiveDisclosure",
+    "QuestionDrivenReflector",
+    "QuestionType",
+    "RTKCompressor",
+    "RankedResult",
+    "ReflectionQuestion",
+    "ReflectionSession",
+    "ReflectionSignal",
+    "RetrievalContext",
+    "RetrievalReport",
+    "RetrievalRouter",
+    "RetrievalTier",
+    "ScenarioBlock",
+    "ScenarioStore",
+    "ScheduleEntry",
+    "SchedulerState",
     "SearchResult",
+    "SignalStrength",
+    "Strategy",
+    "StrategyEvolution",
+    "StrategyStatus",
+    "StrategyType",
+    "StructuredFact",
+    "StyleDimension",
+    "StyleLearner",
+    "StylePreference",
+    "SymbolEntry",
+    "SymbolGraphOffloader",
+    "TraitCategory",
+    "UserPersona",
+    "VerbatimHit",
+    "VerbatimLayer",
     "WarmupScheduler",
+    "hybrid_search",
+    "rrf_merge",
 ]
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
