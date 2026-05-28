@@ -76,6 +76,28 @@ from .exceptions import (
     NavigationError,
 )
 
+from .graph_querier import (
+    GraphQuerier,
+    PathResult,
+    QueryResult,
+    QueryStrategy,
+    SortOrder,
+    SubgraphResult,
+)
+
+from .graph_visualizer import (
+    ExportFormat,
+    GraphVisualizer,
+    VisualStyle,
+)
+
+from .kg_consolidator import (
+    ConflictResolution,
+    ConsolidationReport,
+    KGConsolidator,
+    MergeStrategy,
+)
+
 __all__ = [
     # Graph builder
     "NodeType",
@@ -117,6 +139,22 @@ __all__ = [
     "KGDreamCycle",
     # MCP server
     "KnowledgeGraphMCPServer",
+    # Graph querier (Plan 32)
+    "GraphQuerier",
+    "PathResult",
+    "QueryResult",
+    "QueryStrategy",
+    "SortOrder",
+    "SubgraphResult",
+    # Graph visualizer (Plan 32)
+    "ExportFormat",
+    "GraphVisualizer",
+    "VisualStyle",
+    # KG consolidator (Plan 32)
+    "ConflictResolution",
+    "ConsolidationReport",
+    "KGConsolidator",
+    "MergeStrategy",
     # Exceptions
     "KnowledgeGraphError",
     "NodeNotFoundError",

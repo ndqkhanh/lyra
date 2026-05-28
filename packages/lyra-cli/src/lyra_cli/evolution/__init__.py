@@ -9,6 +9,28 @@ from lyra_cli.evolution.agent_mode import AgentMode
 from lyra_cli.evolution.segment import EvolutionSegment
 from lyra_cli.evolution.meta_phase import meta_editing_phase
 from lyra_cli.evolution.aevo_loop import aevo_loop
+from lyra_cli.evolution.strategy_evolver import (
+    EvolutionStrategy,
+    GeneType,
+    StrategyEvolver,
+    StrategyGene,
+)
+from lyra_cli.evolution.prompt_mutator import (
+    MutationOp,
+    MutationResult,
+    PromptMutator,
+)
+from lyra_cli.evolution.fitness_evaluator import (
+    FitnessEvaluator,
+    FitnessReport,
+    FitnessTarget,
+)
+from lyra_cli.evolution.lineage_tracker import (
+    EventType,
+    EvolutionEvent,
+    LineageTracker,
+    LineageTree,
+)
 
 __all__ = [
     "EvolutionHarness",
@@ -24,4 +46,18 @@ __all__ = [
     "EvolutionSegment",
     "meta_editing_phase",
     "aevo_loop",
+    "EvolutionStrategy",
+    "GeneType",
+    "StrategyEvolver",
+    "StrategyGene",
+    "MutationOp",
+    "MutationResult",
+    "PromptMutator",
+    "FitnessEvaluator",
+    "FitnessReport",
+    "FitnessTarget",
+    "EventType",
+    "EvolutionEvent",
+    "LineageTracker",
+    "LineageTree",
 ]

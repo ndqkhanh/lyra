@@ -151,6 +151,36 @@ from lyra_memory.verbatim_cache import (
     VerbatimCache,
     VerbatimEntry,
 )
+from lyra_memory.curriculum.difficulty_scheduler import (
+    DifficultyLevel,
+    DifficultyScheduler,
+    SkillGap,
+    TaskCurriculum,
+)
+from lyra_memory.curriculum.progress_tracker import (
+    CompetencyMap,
+    CurriculumPhase,
+    ProgressTracker,
+)
+from lyra_memory.abstraction.concept_abstractor import (
+    AbstractConcept,
+    AbstractionLevel,
+    ConceptAbstractor,
+)
+from lyra_memory.abstraction.pattern_recognizer import (
+    CrossEpisodePattern,
+    PatternRecognizer,
+)
+from lyra_memory.operations.batch_processor import (
+    BatchOpResult,
+    BatchProcessor,
+    OperationType,
+)
+from lyra_memory.operations.integrity_checker import (
+    IntegrityChecker,
+    IntegrityReport,
+    IntegrityStatus,
+)
 
 __version__ = "0.4.0"
 
@@ -283,4 +313,25 @@ __all__ = [
     "CachePriority",
     "VerbatimCache",
     "VerbatimEntry",
+    # Curriculum Learning (Plan 27)
+    "CompetencyMap",
+    "CurriculumPhase",
+    "DifficultyLevel",
+    "DifficultyScheduler",
+    "ProgressTracker",
+    "SkillGap",
+    "TaskCurriculum",
+    # Abstraction Layer (Plan 27)
+    "AbstractConcept",
+    "AbstractionLevel",
+    "ConceptAbstractor",
+    "CrossEpisodePattern",
+    "PatternRecognizer",
+    # Batch Operations (Plan 27)
+    "BatchOpResult",
+    "BatchProcessor",
+    "IntegrityChecker",
+    "IntegrityReport",
+    "IntegrityStatus",
+    "OperationType",
 ]
