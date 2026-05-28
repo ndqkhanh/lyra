@@ -146,6 +146,11 @@ from lyra_memory.cranimem_gate import (
     GateAction,
     GateDecision,
 )
+from lyra_memory.verbatim_cache import (
+    CachePriority,
+    VerbatimCache,
+    VerbatimEntry,
+)
 
 __version__ = "0.4.0"
 
@@ -274,4 +279,8 @@ __all__ = [
     "MemoryUpdate",
     "MergeResult",
     "VectorClock",
+    # Verbatim Cache
+    "CachePriority",
+    "VerbatimCache",
+    "VerbatimEntry",
 ]
