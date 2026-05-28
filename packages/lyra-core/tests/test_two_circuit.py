@@ -87,37 +87,34 @@ class TestTwoCircuitBridge:
         assert status == ImprovementStatus.APPROVED
         assert result.review_rounds == 2
 
-    def test_review_unknown_id_raises(self):
+    @pytest.mark.asyncio
+    async def test_review_unknown_id_raises(self):
         bridge = TwoCircuitBridge()
 
         with pytest.raises(KeyError):
-            import asyncio
+            await bridge.review("nonexistent", async_noop)
 
-            asyncio.get_event_loop().run_until_complete(bridge.review("nonexistent", async_noop))
-
-    def test_get_hot_path_config(self):
+    @pytest.mark.asyncio
+    async def test_get_hot_path_config(self):
         bridge = TwoCircuitBridge(review_required=False)
 
         result = self._make_result()
         bridge.submit_cold_path_result(result)
 
-        import asyncio
-
-        asyncio.get_event_loop().run_until_complete(bridge.review("imp-001", async_noop))
+        await bridge.review("imp-001", async_noop)
 
         config = bridge.get_hot_path_config()
         assert "test_skill" in config.skill_overrides
         assert config.skill_overrides["test_skill"] == "improved prompt"
         assert "imp-001" in config.approved_improvements
 
-    def test_deploy_approved(self):
+    @pytest.mark.asyncio
+    async def test_deploy_approved(self):
         bridge = TwoCircuitBridge(review_required=False)
         result = self._make_result()
         bridge.submit_cold_path_result(result)
 
-        import asyncio
-
-        asyncio.get_event_loop().run_until_complete(bridge.review("imp-001", async_noop))
+        await bridge.review("imp-001", async_noop)
 
         deployed = bridge.deploy_approved()
         assert deployed == ["imp-001"]

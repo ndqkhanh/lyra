@@ -1,9 +1,8 @@
 """Wave-E Task 11b: text-to-speech pipeline."""
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 
 __all__ = ["TTSBackend", "TTSError", "synthesise_speech"]

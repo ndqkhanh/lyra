@@ -117,6 +117,21 @@ from lyra_memory.symbolic_ssm import (
     SymbolicRepresentation,
     SymbolicShortTermMemory,
 )
+from lyra_memory.mragent.dual_encoder import (
+    DenseVector,
+    DualEncodedMemory,
+    DualEncoder,
+    EncoderConfig,
+    SparseVector,
+)
+from lyra_memory.gossip.consensus_protocol import (
+    ConsensusConfig,
+    GossipMessage,
+    GossipNode,
+    MemoryUpdate,
+    MergeResult,
+    VectorClock,
+)
 
 __version__ = "0.4.0"
 
@@ -220,4 +235,17 @@ __all__ = [
     "CraniMemGate",
     "EntityNode",
     "SSMRelation",
+    # MRAgent Dual Encoding
+    "DenseVector",
+    "DualEncodedMemory",
+    "DualEncoder",
+    "EncoderConfig",
+    "SparseVector",
+    # Gossip Consensus Protocol
+    "ConsensusConfig",
+    "GossipMessage",
+    "GossipNode",
+    "MemoryUpdate",
+    "MergeResult",
+    "VectorClock",
 ]

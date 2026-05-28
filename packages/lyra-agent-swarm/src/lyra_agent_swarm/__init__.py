@@ -118,6 +118,14 @@ from lyra_agent_swarm.fleet_orchestrator import (
     estimate_fleet_cost,
 )
 
+# ── Consensus (Raft) ─────────────────────────────────────────────
+from lyra_agent_swarm.consensus.raft_consensus import (
+    LogEntry,
+    NodeState,
+    RaftConfig,
+    RaftNode,
+)
+
 __all__ = [
     # discipline_agents
     "AgentRole",
@@ -222,4 +230,9 @@ __all__ = [
     "TaskItemStatus",
     "chunk_items",
     "estimate_fleet_cost",
+    # consensus (raft)
+    "LogEntry",
+    "NodeState",
+    "RaftConfig",
+    "RaftNode",
 ]

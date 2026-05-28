@@ -5,6 +5,10 @@ tool categorization, search, and dependency management.
 
 Phase 5.4: Extended Tool Suite with 16 real tool implementations across
 filesystem, code quality, security, network, git, and observability domains.
+
+US-009: Comprehensive tools ecosystem matching Claude Code and Hermes-agent
+capabilities with memory operations, model routing, skill management, and
+code analysis tools.
 """
 
 from __future__ import annotations
@@ -26,6 +30,12 @@ from . import network_ops
 from . import git_ops
 from . import obs_health
 
+# US-009 — New Tool Modules
+from . import memory_ops
+from . import model_routing
+from . import code_analysis
+from . import skill_ops
+
 __all__ = [
     # Registry
     "ToolCategory",
@@ -41,4 +51,9 @@ __all__ = [
     "network_ops",
     "git_ops",
     "obs_health",
+    # US-009 Tool modules
+    "memory_ops",
+    "model_routing",
+    "code_analysis",
+    "skill_ops",
 ]

@@ -1,6 +1,15 @@
 """Lyra safety monitor (Phase 9 + Wave-E red-team corpus + Phase 13.3 modules + Phase 1 AGI Safety)."""
 from __future__ import annotations
 
+from .adversarial_verifier import (
+    AdversarialVerdict,
+    AdversarialVerdictType,
+    AdversarialVerifier,
+    ModelFamily,
+    ModelProvider,
+    ModelVote,
+    VerificationRequest,
+)
 from .alignment_monitor import (
     AlignmentMonitor,
     AlignmentSample,
@@ -16,6 +25,12 @@ from .approval_gate import (
     RiskLevel,
     RiskSurface,
     classify_risk,
+)
+from .audit_engine import (
+    AuditLogger,
+    AuditRecord,
+    Decision,
+    Verdict,
 )
 from .intent_monitor import ActionRecord, BehavioralBaseline, IntentDeviation, IntentMonitor
 from .monitor import SafetyFlag, SafetyMonitor
@@ -36,12 +51,18 @@ from .redteam import (
 
 __all__ = [
     "ActionRecord",
+    "AdversarialVerdict",
+    "AdversarialVerdictType",
+    "AdversarialVerifier",
     "AlignmentMonitor",
     "AlignmentSample",
     "ApprovalGate",
+    "AuditLogger",
+    "AuditRecord",
     "BehavioralBaseline",
     "CognitiveContext",
     "ContextType",
+    "Decision",
     "DriftReport",
     "DriftStatus",
     "ExecutionPlan",
@@ -50,6 +71,9 @@ __all__ = [
     "GateDecision",
     "IntentDeviation",
     "IntentMonitor",
+    "ModelFamily",
+    "ModelProvider",
+    "ModelVote",
     "ParallaxConfig",
     "ReasoningFlag",
     "ReasoningMonitor",
@@ -64,6 +88,8 @@ __all__ = [
     "SafetyFlag",
     "SafetyMonitor",
     "SeparationGate",
+    "Verdict",
+    "VerificationRequest",
     "classify_risk",
     "default_corpus",
     "score_monitor",
