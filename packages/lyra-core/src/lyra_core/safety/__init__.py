@@ -32,6 +32,12 @@ from .audit_engine import (
     Decision,
     Verdict,
 )
+from .forensic_collector import (
+    ForensicCollector,
+    ForensicSnapshot,
+    IncidentCategory,
+    SnapshotChain,
+)
 from .hindsight import (
     HindsightConfig,
     HindsightEngine,
@@ -39,6 +45,14 @@ from .hindsight import (
     OutcomeType,
     Trajectory,
     TrajectoryStep,
+)
+from .incident_response import (
+    DEFAULT_PLAYBOOKS,
+    IncidentRecord,
+    IncidentResponse,
+    IncidentSeverity,
+    Playbook,
+    PlaybookAction,
 )
 from .intent_monitor import ActionRecord, BehavioralBaseline, IntentDeviation, IntentMonitor
 from .knowing_doing_probes import (
@@ -119,11 +133,14 @@ __all__ = [
     "ChainVerification",
     "CognitiveContext",
     "ContextType",
+    "DEFAULT_PLAYBOOKS",
     "Decision",
     "DriftReport",
     "DriftStatus",
     "ExecutionPlan",
     "FlagSeverity",
+    "ForensicCollector",
+    "ForensicSnapshot",
     "GapReport",
     "GapSeverity",
     "GateAction",
@@ -131,6 +148,10 @@ __all__ = [
     "HindsightConfig",
     "HindsightEngine",
     "HindsightLesson",
+    "IncidentCategory",
+    "IncidentRecord",
+    "IncidentResponse",
+    "IncidentSeverity",
     "IntentDeviation",
     "IntentMonitor",
     "JudgePool",
@@ -173,6 +194,8 @@ __all__ = [
     "SpectralConfig",
     "SpectralGuardrail",
     "SpectralResult",
+    "StageResult",
+    "StageStatus",
     "TokenAnomaly",
     "ToolReceipt",
     "Trajectory",
@@ -185,8 +208,9 @@ __all__ = [
     "classify_risk",
     "default_corpus",
     "PipelineResult",
+    "Playbook",
+    "PlaybookAction",
     "score_monitor",
-    "StageResult",
-    "StageStatus",
+    "SnapshotChain",
     "zkAgent",
 ]

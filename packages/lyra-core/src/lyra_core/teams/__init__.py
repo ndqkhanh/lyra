@@ -95,6 +95,14 @@ from .plan_approval import (
     PlanState,
 )
 from .cleanup import CleanupAction, CleanupRecord, CleanupReport, TeamCleanupManager
+from .sprint_pipeline import (
+    Sprint,
+    SprintPhase,
+    SprintPipeline,
+    SprintTask,
+    TaskPriority,
+    TaskStatus,
+)
 
 __all__ = [
     # Sequential pipeline (existing)
@@ -161,4 +169,11 @@ __all__ = [
     "CleanupRecord",
     "CleanupReport",
     "TeamCleanupManager",
+    # Plan 29 — Sprint Pipeline
+    "Sprint",
+    "SprintPhase",
+    "SprintPipeline",
+    "SprintTask",
+    "TaskPriority",
+    "TaskStatus",
 ]
