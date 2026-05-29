@@ -138,6 +138,25 @@ from lyra_core.events import (
     Subscription,
 )
 
+# ── Phase 7: Experience & Learning Engine ──────────────────────────────
+from lyra_core.experience import (
+    AntiPattern,
+    AntiPatternRegistry,
+    DistillationResult,
+    DistilledSkill,
+    ExperienceExtractor,
+    ExperienceRecord,
+    ExtractedPattern,
+    ImprovementCycle,
+    LearningLoop,
+    LoopConfig,
+    LoopState,
+    MatchResult,
+    PatternType,
+    SkillCandidate,
+    SkillDistiller,
+)
+
 # ── Phase 1: Unified Agent Protocol ────────────────────────────────────
 from lyra_core.protocol import (
     AgentFactory,
@@ -170,7 +189,7 @@ from lyra_core.watchdog import (
     WatchdogStatus,
 )
 
-__version__ = "0.9.0"  # Phase 6: streaming backpressure + circuit breaker + adaptive throttling
+__version__ = "0.10.0"  # Phase 7: experience extraction + learning loop + anti-patterns + skill distillation
 
 __all__ = [
     "__version__",
@@ -271,6 +290,22 @@ __all__ = [
     "ThrottleConfig",
     "TokenBucket",
     "Watermark",
+    # Phase 7: Experience
+    "AntiPattern",
+    "AntiPatternRegistry",
+    "DistillationResult",
+    "DistilledSkill",
+    "ExperienceExtractor",
+    "ExperienceRecord",
+    "ExtractedPattern",
+    "ImprovementCycle",
+    "LearningLoop",
+    "LoopConfig",
+    "LoopState",
+    "MatchResult",
+    "PatternType",
+    "SkillCandidate",
+    "SkillDistiller",
     # Existing
     "EventSourcedAgentLoop",
     "EventLog",
