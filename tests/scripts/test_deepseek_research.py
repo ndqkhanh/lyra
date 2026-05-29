@@ -11,20 +11,44 @@ sys.path.insert(0, str(Path(__file__).parent / "packages/lyra-research/src"))
 sys.path.insert(0, str(Path(__file__).parent / "packages/lyra-core/src"))
 
 def check_deepseek_config():
-    """Check if DeepSeek is configured."""
+    """Check if DeepSeek is configured (supports both direct key and Anthropic bridge)."""
     print("=" * 80)
     print("DEEPSEEK CONFIGURATION CHECK")
     print("=" * 80)
 
-    api_key = os.environ.get("DEEPSEEK_API_KEY")
-    if not api_key:
-        print("✗ DEEPSEEK_API_KEY not found in environment")
-        print("\nPlease export your DeepSeek API key:")
-        print("  export DEEPSEEK_API_KEY='your-key-here'")
+    # Check for direct DeepSeek API key
+    direct_key = os.environ.get("DEEPSEEK_API_KEY")
+
+    # Check for Anthropic bridge config (DeepSeek via Anthropic-compatible endpoint)
+    anthropic_key = os.environ.get("ANTHROPIC_API_KEY")
+    anthropic_url = os.environ.get("ANTHROPIC_BASE_URL", "")
+    anthropic_model = os.environ.get("ANTHROPIC_MODEL", "")
+
+    if direct_key:
+        print(f"✓ DEEPSEEK_API_KEY found (direct): {direct_key[:8]}...{direct_key[-4:]}")
+        return True
+
+    if anthropic_key and "deepseek" in anthropic_url.lower():
+        print(f"✓ DeepSeek via Anthropic bridge detected")
+        print(f"  Base URL: {anthropic_url}")
+        print(f"  Model: {anthropic_model}")
+        print(f"  API Key: {anthropic_key[:8]}...{anthropic_key[-4:]}")
+        return True
+
+    if anthropic_key and not anthropic_url:
+        print("⚠ ANTHROPIC_API_KEY found but ANTHROPIC_BASE_URL not set")
+        print("  Cannot confirm DeepSeek routing. Set ANTHROPIC_BASE_URL=https://api.deepseek.com/anthropic")
         return False
 
-    print(f"✓ DEEPSEEK_API_KEY found: {api_key[:8]}...{api_key[-4:]}")
-    return True
+    print("✗ No DeepSeek configuration found")
+    print("\nConfigure one of:")
+    print("  Option A (direct key):")
+    print("    export DEEPSEEK_API_KEY='your-key-here'")
+    print("  Option B (Anthropic bridge):")
+    print("    export ANTHROPIC_API_KEY='your-key-here'")
+    print("    export ANTHROPIC_BASE_URL='https://api.deepseek.com/anthropic'")
+    print("    export ANTHROPIC_MODEL='deepseek-v4-pro'")
+    return False
 
 def test_deepseek_research():
     """Test research with DeepSeek provider."""

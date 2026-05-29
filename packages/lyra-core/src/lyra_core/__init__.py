@@ -1,6 +1,10 @@
 """Lyra core kernel.
 
 Public surface:
+    - Agent Protocol v1.0 (``protocol``) — unified agent interface
+    - Event Bus (``events``) — unified pub/sub with JSONL persistence
+    - Agent Watchdog (``watchdog``) — lifecycle × health monitoring
+    - Agent Adapters (``adapters.agent_adapters``) — legacy system bridges
     - TDD state machine (``tdd.state``)
     - LyraMode + resolve_lyra_decision (``permissions``)
     - Shipped hooks (``hooks``)
@@ -13,6 +17,52 @@ imports downstream.
 """
 from __future__ import annotations
 
+# ── Phase 1: Unified Agent Protocol ────────────────────────────────────
+from lyra_core.protocol import (
+    AgentFactory,
+    AgentHealth,
+    AgentIdentity,
+    AgentLifecycle,
+    AgentMode,
+    AgentProtocol,
+    AgentState,
+    ItemKind,
+    ItemStatus,
+    Task,
+    TaskResult,
+    WorkstreamItem,
+)
+
+# ── Phase 1: Unified Event Bus ─────────────────────────────────────────
+from lyra_core.events import (
+    Event,
+    EventBus,
+    EventCategory,
+    EventMetrics,
+    ProjectEventBus,
+    Subscription,
+)
+
+# ── Phase 1: Agent Watchdog ────────────────────────────────────────────
+from lyra_core.watchdog import (
+    AgentWatchdog,
+    CrashRecord,
+    WatchdogConfig,
+    WatchdogStatus,
+)
+
+# ── Phase 1: Adapters ──────────────────────────────────────────────────
+from lyra_core.adapters.agent_adapters import (
+    AdapterRegistry,
+    BaseAgentAdapter,
+    CoreLoopAdapter,
+    LegacyAgentAdapter,
+    PentestAgentAdapter,
+    SwarmAgentAdapter,
+    get_adapter_registry,
+)
+
+# ── Existing exports ───────────────────────────────────────────────────
 from lyra_core.agent.agi_plugin import AGILoopPlugin
 from lyra_core.agent.event_sourced_loop import (
     EventLog,
@@ -41,10 +91,44 @@ from lyra_core.two_circuit import (
     TwoCircuitBridge,
 )
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"  # Phase 1: unified agent protocol + event bus
 
 __all__ = [
     "__version__",
+    # Phase 1: Protocol
+    "AgentProtocol",
+    "AgentFactory",
+    "AgentIdentity",
+    "AgentState",
+    "AgentLifecycle",
+    "AgentHealth",
+    "AgentMode",
+    "Task",
+    "TaskResult",
+    "WorkstreamItem",
+    "ItemKind",
+    "ItemStatus",
+    # Phase 1: Events
+    "EventBus",
+    "Event",
+    "EventCategory",
+    "Subscription",
+    "ProjectEventBus",
+    "EventMetrics",
+    # Phase 1: Watchdog
+    "AgentWatchdog",
+    "WatchdogConfig",
+    "WatchdogStatus",
+    "CrashRecord",
+    # Phase 1: Adapters
+    "AdapterRegistry",
+    "BaseAgentAdapter",
+    "LegacyAgentAdapter",
+    "CoreLoopAdapter",
+    "SwarmAgentAdapter",
+    "PentestAgentAdapter",
+    "get_adapter_registry",
+    # Existing
     "EventSourcedAgentLoop",
     "EventLog",
     "StepEvent",
