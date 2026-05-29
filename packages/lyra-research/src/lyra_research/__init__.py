@@ -157,6 +157,21 @@ from lyra_research.zero_index import (
     ZeroIndexRetriever,
 )
 
+# Phase 21 Architecture Upgrades
+from lyra_research.research_daemon import (
+    DaemonConfig,
+    ResearchDaemon,
+)
+from lyra_research.research_notebook import (
+    NotebookEntry,
+    ResearchNotebook,
+)
+from lyra_research.research_state import (
+    ResearchPhase,
+    SessionStatus,
+    UnifiedResearchState,
+)
+
 __version__ = "0.2.0"
 
 __all__ = [
@@ -281,4 +296,12 @@ __all__ = [
     "ZeroIndexConfig",
     "ZeroIndexRetriever",
     "CorpusStats",
+    # Phase 21 Architecture Upgrades
+    "DaemonConfig",
+    "NotebookEntry",
+    "ResearchDaemon",
+    "ResearchNotebook",
+    "ResearchPhase",
+    "SessionStatus",
+    "UnifiedResearchState",
 ]

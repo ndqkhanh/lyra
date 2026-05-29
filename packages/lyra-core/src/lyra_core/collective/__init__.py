@@ -779,3 +779,33 @@ class SelfReorganization:
     @property
     def applied_plan_count(self) -> int:
         return len(self._applied_plans)
+
+
+# Late import to avoid circular dependency (embedding_registry imports from this module)
+from lyra_core.collective.embedding_registry import (  # noqa: E402
+    EmbeddingDeadEndEntry,
+    EmbeddingDeadEndRegistry,
+    TFIDFVectorizer,
+)
+
+__all__ = [
+    "CollectiveState",
+    "ConsensusLevel",
+    "DeadEndEntry",
+    "DeadEndRegistry",
+    "DiscussionForum",
+    "DiscussionThread",
+    "EmbeddingDeadEndEntry",
+    "EmbeddingDeadEndRegistry",
+    "ForumPost",
+    "Hypothesis",
+    "HypothesisTeam",
+    "MetaImprovementLoop",
+    "NoiseGate",
+    "PostKind",
+    "ReorganizationPlan",
+    "ReorganizationTrigger",
+    "SelfReorganization",
+    "TeamFormationReason",
+    "TFIDFVectorizer",
+]
