@@ -101,6 +101,21 @@ from lyra_research.reporter import (
     ResearchReportGenerator,
     SynthesisResult,
 )
+
+# Phase 21 Architecture Upgrades
+from lyra_research.research_daemon import (
+    DaemonConfig,
+    ResearchDaemon,
+)
+from lyra_research.research_notebook import (
+    NotebookEntry,
+    ResearchNotebook,
+)
+from lyra_research.research_state import (
+    ResearchPhase,
+    SessionStatus,
+    UnifiedResearchState,
+)
 from lyra_research.sibyl_harness import (
     ExperimentStatus,
     ExperimentTrial,
@@ -155,21 +170,6 @@ from lyra_research.zero_index import (
     SearchResult,
     ZeroIndexConfig,
     ZeroIndexRetriever,
-)
-
-# Phase 21 Architecture Upgrades
-from lyra_research.research_daemon import (
-    DaemonConfig,
-    ResearchDaemon,
-)
-from lyra_research.research_notebook import (
-    NotebookEntry,
-    ResearchNotebook,
-)
-from lyra_research.research_state import (
-    ResearchPhase,
-    SessionStatus,
-    UnifiedResearchState,
 )
 
 __version__ = "0.2.0"

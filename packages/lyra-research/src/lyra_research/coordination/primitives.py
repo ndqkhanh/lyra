@@ -351,6 +351,49 @@ class HealthChecker:
         self.metrics[agent_type].completed += 1
         self.metrics[agent_type].last_completion_time = datetime.now(timezone.utc)
 
+    def get_metrics(self, agent_type: str) -> HealthMetrics | None:
+        """Get health metrics for an agent type."""
+        return self.metrics.get(agent_type)
+
+    def check_memory(self, task: Task) -> bool:
+        """Check if task memory usage exceeds limit. Returns True if exceeded."""
+        return task.memory_mb >= self.max_memory_mb
+
+    def check_hanging(self, task: Task) -> bool:
+        """Check if task is hanging. Returns True if hanging."""
+        if task.state != TaskState.RUNNING:
+            return False
+        return task.elapsed_seconds() >= self.hang_timeout
+
+    def check_spawn_rate(self, agent_type: str) -> bool:
+        """Check if agent spawn rate is healthy. Returns True if OK."""
+        metrics = self.metrics.get(agent_type)
+        if metrics is None:
+            return True
+        rate = metrics.spawn_rate_per_minute()
+        return rate >= self.min_spawn_rate
+
+    def kill_if_unhealthy(self, task: Task) -> bool:
+        """Kill task if unhealthy. Returns True if task was killed."""
+        if self.check_memory(task):
+            task.fail("Memory limit exceeded", FailureType.UNKNOWN)
+            if task.agent_type in self.metrics:
+                self.metrics[task.agent_type].memory_exceeded += 1
+            return True
+        if self.check_hanging(task):
+            task.fail("Task hanging", FailureType.UNKNOWN)
+            if task.agent_type in self.metrics:
+                self.metrics[task.agent_type].hanging += 1
+            return True
+        return False
+
+    def reset(self, agent_type: str | None = None) -> None:
+        """Reset health metrics. If agent_type is None, reset all."""
+        if agent_type is None:
+            self.metrics.clear()
+        elif agent_type in self.metrics:
+            del self.metrics[agent_type]
+
 
 # ---------------------------------------------------------------------------
 # Task Graph for Parallel Execution

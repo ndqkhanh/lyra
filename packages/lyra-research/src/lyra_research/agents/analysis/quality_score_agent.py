@@ -14,7 +14,23 @@ class QualityScoreAgent(AnalysisAgent):
         super().__init__(analysis_type="quality", model=model)
         self.scorer = SourceQualityScorer()
 
-    async def analyze(self, source: ResearchSource) -> Analysis:
+    async def analyze(self, sources: list[ResearchSource]) -> list[Analysis]:
+        """
+        Score quality of sources.
+
+        Args:
+            sources: List of research sources
+
+        Returns:
+            List of quality analyses
+        """
+        results = []
+        for source in sources:
+            analysis = await self._analyze_one(source)
+            results.append(analysis)
+        return results
+
+    async def _analyze_one(self, source: ResearchSource) -> Analysis:
         """
         Score quality of a single source.
 

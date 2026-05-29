@@ -435,7 +435,7 @@ async def test_synthesis_role_execute_success(context_manager, sample_analyses):
 
     assert result.status == RoleStatus.RUNNING
     assert result.report is not None
-    assert result.report.title == "Test Report"
+    assert result.report.topic == "Test Report"
 
 
 @pytest.mark.asyncio
@@ -477,14 +477,9 @@ async def test_review_role_validate_input(sample_report):
 
     # Invalid report (missing fields)
     bad_report = ResearchReport(
-        title="",
-        summary="",
-        findings=[],
-        taxonomy={},
-        contradictions=[],
-        evidence={},
-        falsification_tests={},
-        sources_analyzed=0,
+        topic="",
+        executive_summary="",
+        sources_used=0,
     )
     assert role.validate_input(bad_report) is False
 

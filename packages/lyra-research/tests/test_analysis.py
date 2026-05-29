@@ -54,17 +54,34 @@ def test_repository_analyzer():
     readme = """
     # Awesome ML Library
 
-    ## Installation
-    pip install awesome-ml
+    A comprehensive machine learning library for building, training, and deploying
+    state-of-the-art ML models with ease. This library provides a unified interface
+    for popular frameworks including PyTorch, TensorFlow, and JAX.
 
-    ## Usage
-    ```python
-    import awesome_ml
-    model = awesome_ml.Model()
+    ## Installation
+    ```bash
+    pip install awesome-ml
     ```
 
+    ## Quick Start
+    ```python
+    import awesome_ml
+    model = awesome_ml.Model.from_pretrained("awesome/bert-base")
+    results = model.train(dataset, epochs=10, batch_size=32, learning_rate=1e-4)
+    predictions = model.predict(test_data)
+    accuracy = awesome_ml.metrics.accuracy(predictions, labels)
+    ```
+
+    ## Features
+    - Multi-framework support (PyTorch, TensorFlow, JAX)
+    - Pretrained model hub with 500+ models
+    - Distributed training with mixed precision
+    - Automatic hyperparameter optimization
+    - Built-in experiment tracking
+
     ## API Documentation
-    See docs/ for full API reference.
+    See docs/ for full API reference and advanced usage examples.
+    For more information visit https://awesome-ml.readthedocs.io
     """
 
     analysis = analyzer.analyze(repo_metadata, readme)
