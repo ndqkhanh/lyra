@@ -110,6 +110,23 @@ from lyra_core.collective import (
     TeamFormationReason,
 )
 
+# ── Phase 5: Adversarial Review & Convergence ──────────────────────────
+from lyra_core.adversarial import (
+    AdversarialReview,
+    ConvergenceCheck,
+    ConvergenceResult,
+    ConvergenceStatus,
+    ResumableWorkflow,
+    ReviewFinding,
+    ReviewRole,
+    ReviewSession,
+    ReviewVerdict,
+    Severity,
+    WorkflowCheckpoint,
+    WorkflowStatus,
+    WorkflowStep,
+)
+
 # ── Existing exports ───────────────────────────────────────────────────
 from lyra_core.agent.agi_plugin import AGILoopPlugin
 from lyra_core.agent.event_sourced_loop import (
@@ -139,7 +156,7 @@ from lyra_core.two_circuit import (
     TwoCircuitBridge,
 )
 
-__version__ = "0.7.0"  # Phase 4: collective intelligence (AutoScientists-inspired decentralized teams)
+__version__ = "0.8.0"  # Phase 5: adversarial review + convergence + resumable workflows
 
 __all__ = [
     "__version__",
@@ -215,6 +232,20 @@ __all__ = [
     "SelfReorganization",
     "ReorganizationPlan",
     "ReorganizationTrigger",
+    # Phase 5: Adversarial
+    "AdversarialReview",
+    "ReviewFinding",
+    "ReviewRole",
+    "ReviewVerdict",
+    "Severity",
+    "ConvergenceCheck",
+    "ConvergenceResult",
+    "ConvergenceStatus",
+    "ReviewSession",
+    "ResumableWorkflow",
+    "WorkflowStep",
+    "WorkflowCheckpoint",
+    "WorkflowStatus",
     # Existing
     "EventSourcedAgentLoop",
     "EventLog",
