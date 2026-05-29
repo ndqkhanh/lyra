@@ -17,40 +17,6 @@ imports downstream.
 """
 from __future__ import annotations
 
-# ── Phase 1: Unified Agent Protocol ────────────────────────────────────
-from lyra_core.protocol import (
-    AgentFactory,
-    AgentHealth,
-    AgentIdentity,
-    AgentLifecycle,
-    AgentMode,
-    AgentProtocol,
-    AgentState,
-    ItemKind,
-    ItemStatus,
-    Task,
-    TaskResult,
-    WorkstreamItem,
-)
-
-# ── Phase 1: Unified Event Bus ─────────────────────────────────────────
-from lyra_core.events import (
-    Event,
-    EventBus,
-    EventCategory,
-    EventMetrics,
-    ProjectEventBus,
-    Subscription,
-)
-
-# ── Phase 1: Agent Watchdog ────────────────────────────────────────────
-from lyra_core.watchdog import (
-    AgentWatchdog,
-    CrashRecord,
-    WatchdogConfig,
-    WatchdogStatus,
-)
-
 # ── Phase 1: Adapters ──────────────────────────────────────────────────
 from lyra_core.adapters.agent_adapters import (
     AdapterRegistry,
@@ -60,54 +26,6 @@ from lyra_core.adapters.agent_adapters import (
     PentestAgentAdapter,
     SwarmAgentAdapter,
     get_adapter_registry,
-)
-
-# ── Phase 2: Containment Hierarchy ─────────────────────────────────────
-from lyra_core.containment import (
-    ConfigNode,
-    ConfigTree,
-    ModeStack,
-    Project,
-    ProjectRegistry,
-    ProjectStatus,
-    Team,
-    TeamMembership,
-    TopologyKind,
-    TopologyTree,
-    get_project_registry,
-)
-
-# ── Phase 3: Command Queue & Three-Surface Protocol ─────────────────────
-from lyra_core.command_queue import (
-    Command,
-    CommandGroup,
-    CommandGroupStatus,
-    CommandPriority,
-    CommandQueue,
-    CommandStatus,
-    SurfaceKind,
-    SurfaceMessage,
-    ThreeSurfaceProtocol,
-)
-
-# ── Phase 4: Collective Intelligence ───────────────────────────────────
-from lyra_core.collective import (
-    CollectiveState,
-    ConsensusLevel,
-    DeadEndEntry,
-    DeadEndRegistry,
-    DiscussionForum,
-    DiscussionThread,
-    ForumPost,
-    Hypothesis,
-    HypothesisTeam,
-    MetaImprovementLoop,
-    NoiseGate,
-    PostKind,
-    ReorganizationPlan,
-    ReorganizationTrigger,
-    SelfReorganization,
-    TeamFormationReason,
 )
 
 # ── Phase 5: Adversarial Review & Convergence ──────────────────────────
@@ -145,8 +63,96 @@ from lyra_core.agi_orchestrator import (
     PlanStatus,
 )
 from lyra_core.auto_fanout import AutoFanoutCompressor, FanoutResult
+
+# ── Phase 6: Streaming Backpressure & Circuit Breaker ─────────────────
+from lyra_core.backpressure import (
+    AdaptiveThrottler,
+    BackpressureConfig,
+    BackpressureRegulator,
+    BackpressureState,
+    CircuitBreaker,
+    CircuitBreakerConfig,
+    CircuitState,
+    ThrottleConfig,
+    TokenBucket,
+    Watermark,
+)
 from lyra_core.breakthrough import BreakthroughIntegration, breakthrough_available
 from lyra_core.canary import CanaryTokenGuard, ScanResult, ScanSeverity
+
+# ── Phase 4: Collective Intelligence ───────────────────────────────────
+from lyra_core.collective import (
+    CollectiveState,
+    ConsensusLevel,
+    DeadEndEntry,
+    DeadEndRegistry,
+    DiscussionForum,
+    DiscussionThread,
+    ForumPost,
+    Hypothesis,
+    HypothesisTeam,
+    MetaImprovementLoop,
+    NoiseGate,
+    PostKind,
+    ReorganizationPlan,
+    ReorganizationTrigger,
+    SelfReorganization,
+    TeamFormationReason,
+)
+
+# ── Phase 3: Command Queue & Three-Surface Protocol ─────────────────────
+from lyra_core.command_queue import (
+    Command,
+    CommandGroup,
+    CommandGroupStatus,
+    CommandPriority,
+    CommandQueue,
+    CommandStatus,
+    SurfaceKind,
+    SurfaceMessage,
+    ThreeSurfaceProtocol,
+)
+
+# ── Phase 2: Containment Hierarchy ─────────────────────────────────────
+from lyra_core.containment import (
+    ConfigNode,
+    ConfigTree,
+    ModeStack,
+    Project,
+    ProjectRegistry,
+    ProjectStatus,
+    Team,
+    TeamMembership,
+    TopologyKind,
+    TopologyTree,
+    get_project_registry,
+)
+
+# ── Phase 1: Unified Event Bus ─────────────────────────────────────────
+from lyra_core.events import (
+    Event,
+    EventBus,
+    EventCategory,
+    EventMetrics,
+    ProjectEventBus,
+    Subscription,
+)
+
+# ── Phase 1: Unified Agent Protocol ────────────────────────────────────
+from lyra_core.protocol import (
+    AgentFactory,
+    AgentHealth,
+    AgentIdentity,
+    AgentLifecycle,
+    AgentMode,
+    AgentProtocol,
+    AgentState,
+    ItemKind,
+    ItemStatus,
+    Task,
+    TaskResult,
+    WorkstreamItem,
+)
 from lyra_core.stagnation import StagnationDetector, StagnationResult
 from lyra_core.two_circuit import (
     CircuitMode,
@@ -156,7 +162,15 @@ from lyra_core.two_circuit import (
     TwoCircuitBridge,
 )
 
-__version__ = "0.8.0"  # Phase 5: adversarial review + convergence + resumable workflows
+# ── Phase 1: Agent Watchdog ────────────────────────────────────────────
+from lyra_core.watchdog import (
+    AgentWatchdog,
+    CrashRecord,
+    WatchdogConfig,
+    WatchdogStatus,
+)
+
+__version__ = "0.9.0"  # Phase 6: streaming backpressure + circuit breaker + adaptive throttling
 
 __all__ = [
     "__version__",
@@ -246,6 +260,17 @@ __all__ = [
     "WorkflowStep",
     "WorkflowCheckpoint",
     "WorkflowStatus",
+    # Phase 6: Backpressure
+    "AdaptiveThrottler",
+    "BackpressureConfig",
+    "BackpressureRegulator",
+    "BackpressureState",
+    "CircuitBreaker",
+    "CircuitBreakerConfig",
+    "CircuitState",
+    "ThrottleConfig",
+    "TokenBucket",
+    "Watermark",
     # Existing
     "EventSourcedAgentLoop",
     "EventLog",
