@@ -241,7 +241,7 @@ from lyra_core.watchdog import (
     WatchdogStatus,
 )
 
-__version__ = "0.14.0"  # Phase 11: agent health monitoring + anomaly detection + recovery playbooks
+__version__ = "0.15.0"  # Phase 12: checkpoint & settings test hardening
 
 __all__ = [
     "__version__",
