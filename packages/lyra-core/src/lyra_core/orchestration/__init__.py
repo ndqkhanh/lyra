@@ -10,6 +10,25 @@ from lyra_core.orchestration.agent_base import (
     AgentStatus,
     BaseAgent,
 )
+
+# Phase C — Adversarial Convergence
+from lyra_core.orchestration.convergence import (
+    ConvergenceAttempt,
+    ConvergenceConfig,
+    ConvergenceLoop,
+    ConvergencePhase,
+    ConvergenceReport,
+    GateResult,
+)
+
+# Phase C — Dynamic Workflow Engine
+from lyra_core.orchestration.dynamic_workflow import (
+    DynamicWorkflowEngine,
+    StepKind,
+    StepStatus,
+    WorkflowContext,
+    WorkflowStep,
+)
 from lyra_core.orchestration.hash_editor import (
     ContentAnchor,
     EditResult,
@@ -111,4 +130,17 @@ __all__ = [
     "QualityReport",
     "QualityScore",
     "QualityStatus",
+    # Phase C — Adversarial Convergence
+    "ConvergenceAttempt",
+    "ConvergenceConfig",
+    "ConvergenceLoop",
+    "ConvergencePhase",
+    "ConvergenceReport",
+    "GateResult",
+    # Phase C — Dynamic Workflow Engine
+    "DynamicWorkflowEngine",
+    "StepKind",
+    "StepStatus",
+    "WorkflowContext",
+    "WorkflowStep",
 ]
