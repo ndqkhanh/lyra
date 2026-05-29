@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import logging
 import time
-from collections import defaultdict, deque
+from collections import deque
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 
@@ -17,7 +17,6 @@ from .belief_system import (
     BeliefSystem,
     UpdateMethod,
 )
-from .exceptions import UpdateError, SourceReliabilityError
 
 logger = logging.getLogger(__name__)
 
@@ -442,7 +441,7 @@ class BeliefUpdater:
 
         return result
 
-    def get_consensus(self, topic: str) -> Optional[ConsensusResult]:
+    def get_consensus(self, topic: str) -> ConsensusResult | None:
         """Get the most recent consensus on a topic.
 
         Args:

@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_harness_core.distributed import (
     Bus,
     Envelope,
@@ -10,7 +9,6 @@ from lyra_harness_core.distributed import (
     topic_matches,
 )
 from lyra_harness_core.provenance import WitnessLattice
-
 
 # --- topic_matches ---------------------------------------------------
 

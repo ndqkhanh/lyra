@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class ActivityCategory(Enum):
@@ -57,7 +57,7 @@ class Turn:
     tokens: int
     model: str
     cost: float
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -65,7 +65,7 @@ class Activity:
     """Classified activity."""
 
     category: ActivityCategory
-    turns: List[Turn]
+    turns: list[Turn]
     tokens: int
     cost: float
     duration: float
@@ -77,7 +77,7 @@ class WasteInstance:
     """Instance of waste pattern."""
 
     pattern: WastePattern
-    turns: List[Turn]
+    turns: list[Turn]
     wasted_tokens: int
     wasted_cost: float
     description: str
@@ -93,12 +93,12 @@ class BurnReport:
     end_time: datetime
     total_tokens: int
     total_cost: float
-    activities: List[Activity]
+    activities: list[Activity]
     one_shot_rate: float
     retry_count: int
-    waste_patterns: List[WasteInstance]
-    recommendations: List[str]
-    model_breakdown: Dict[str, Dict[str, float]]
+    waste_patterns: list[WasteInstance]
+    recommendations: list[str]
+    model_breakdown: dict[str, dict[str, float]]
 
 
 class ActivityClassifier:
@@ -240,7 +240,7 @@ class WasteAnalyzer:
             WastePattern.EXCESSIVE_RETRIES: self._detect_excessive_retries,
         }
 
-    def find_waste(self, turns: List[Turn]) -> List[WasteInstance]:
+    def find_waste(self, turns: list[Turn]) -> list[WasteInstance]:
         """
         Find waste patterns in turns.
 
@@ -252,13 +252,13 @@ class WasteAnalyzer:
         """
         waste = []
 
-        for pattern, detector in self.patterns.items():
+        for _pattern, detector in self.patterns.items():
             instances = detector(turns)
             waste.extend(instances)
 
         return waste
 
-    def _detect_repeated_errors(self, turns: List[Turn]) -> List[WasteInstance]:
+    def _detect_repeated_errors(self, turns: list[Turn]) -> list[WasteInstance]:
         """Detect repeated errors."""
         waste = []
         error_turns = [t for t in turns if "error" in t.metadata]
@@ -280,7 +280,7 @@ class WasteAnalyzer:
 
         return waste
 
-    def _detect_unnecessary_context(self, turns: List[Turn]) -> List[WasteInstance]:
+    def _detect_unnecessary_context(self, turns: list[Turn]) -> list[WasteInstance]:
         """Detect unnecessary context."""
         waste = []
 
@@ -303,7 +303,7 @@ class WasteAnalyzer:
 
         return waste
 
-    def _detect_over_generation(self, turns: List[Turn]) -> List[WasteInstance]:
+    def _detect_over_generation(self, turns: list[Turn]) -> list[WasteInstance]:
         """Detect over-generation."""
         waste = []
 
@@ -326,7 +326,7 @@ class WasteAnalyzer:
 
         return waste
 
-    def _detect_redundant_requests(self, turns: List[Turn]) -> List[WasteInstance]:
+    def _detect_redundant_requests(self, turns: list[Turn]) -> list[WasteInstance]:
         """Detect redundant requests."""
         waste = []
         seen_content = {}
@@ -354,7 +354,7 @@ class WasteAnalyzer:
 
         return waste
 
-    def _detect_inefficient_model(self, turns: List[Turn]) -> List[WasteInstance]:
+    def _detect_inefficient_model(self, turns: list[Turn]) -> list[WasteInstance]:
         """Detect inefficient model usage."""
         waste = []
 
@@ -378,7 +378,7 @@ class WasteAnalyzer:
 
         return waste
 
-    def _detect_missing_cache(self, turns: List[Turn]) -> List[WasteInstance]:
+    def _detect_missing_cache(self, turns: list[Turn]) -> list[WasteInstance]:
         """Detect missing cache opportunities."""
         waste = []
 
@@ -401,7 +401,7 @@ class WasteAnalyzer:
 
         return waste
 
-    def _detect_excessive_retries(self, turns: List[Turn]) -> List[WasteInstance]:
+    def _detect_excessive_retries(self, turns: list[Turn]) -> list[WasteInstance]:
         """Detect excessive retries."""
         waste = []
         retry_turns = [t for t in turns if "retry" in t.metadata]
@@ -437,7 +437,7 @@ class TokenObservatory:
         self.classifier = ActivityClassifier()
         self.analyzer = WasteAnalyzer()
 
-    def parse_jsonl(self, log_path: Path) -> List[Turn]:
+    def parse_jsonl(self, log_path: Path) -> list[Turn]:
         """
         Parse JSONL session log.
 
@@ -449,7 +449,7 @@ class TokenObservatory:
         """
         turns = []
 
-        with open(log_path, "r") as f:
+        with open(log_path) as f:
             for line in f:
                 data = json.loads(line)
 
@@ -519,7 +519,7 @@ class TokenObservatory:
             model_breakdown=model_breakdown,
         )
 
-    def _group_activities(self, turns: List[Turn]) -> List[Activity]:
+    def _group_activities(self, turns: list[Turn]) -> list[Activity]:
         """Group turns into activities."""
         activities = []
         current_activity = None
@@ -568,7 +568,7 @@ class TokenObservatory:
 
         return activities
 
-    def _calculate_one_shot_rate(self, turns: List[Turn]) -> float:
+    def _calculate_one_shot_rate(self, turns: list[Turn]) -> float:
         """Calculate one-shot success rate."""
         user_turns = [t for t in turns if t.role == "user"]
         successful_turns = [
@@ -581,8 +581,8 @@ class TokenObservatory:
         return len(successful_turns) / len(user_turns)
 
     def _generate_recommendations(
-        self, waste_patterns: List[WasteInstance]
-    ) -> List[str]:
+        self, waste_patterns: list[WasteInstance]
+    ) -> list[str]:
         """Generate recommendations from waste patterns."""
         recommendations = set()
 
@@ -592,8 +592,8 @@ class TokenObservatory:
         return sorted(recommendations)
 
     def _calculate_model_breakdown(
-        self, turns: List[Turn]
-    ) -> Dict[str, Dict[str, float]]:
+        self, turns: list[Turn]
+    ) -> dict[str, dict[str, float]]:
         """Calculate token and cost breakdown by model."""
         breakdown = {}
 

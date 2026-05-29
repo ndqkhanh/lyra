@@ -10,14 +10,12 @@ Each level has triggers, convergence criteria, and observability hooks.
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import time
 from abc import ABC, abstractmethod
-from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, AsyncIterator, Callable, Optional, Protocol
+from typing import Any, Protocol
 
 logger = logging.getLogger(__name__)
 
@@ -119,7 +117,7 @@ class EvolutionState:
     last_improvement_iter: int = 0
     history: list[float] = field(default_factory=list)  # Score history
     metrics: dict[str, Any] = field(default_factory=dict)
-    checkpoint: Optional[dict[str, Any]] = None
+    checkpoint: dict[str, Any] | None = None
 
 
 @dataclass
@@ -160,7 +158,7 @@ class AgentGenome:
     fitness_history: list[float] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
 
-    def clone(self, new_id: Optional[str] = None) -> AgentGenome:
+    def clone(self, new_id: str | None = None) -> AgentGenome:
         """Create a deep copy of this genome."""
         import copy
         cloned = copy.deepcopy(self)
@@ -312,8 +310,8 @@ class ParameterController(LevelController):
 
     def __init__(
         self,
-        config: Optional[EvolutionConfig] = None,
-        parameter_bounds: Optional[dict[str, tuple[float, float]]] = None,
+        config: EvolutionConfig | None = None,
+        parameter_bounds: dict[str, tuple[float, float]] | None = None,
     ):
         super().__init__(
             config or EvolutionConfig(
@@ -404,8 +402,8 @@ class StrategyController(LevelController):
 
     def __init__(
         self,
-        config: Optional[EvolutionConfig] = None,
-        available_strategies: Optional[list[str]] = None,
+        config: EvolutionConfig | None = None,
+        available_strategies: list[str] | None = None,
     ):
         super().__init__(
             config or EvolutionConfig(
@@ -508,8 +506,8 @@ class ArchitectureController(LevelController):
 
     def __init__(
         self,
-        config: Optional[EvolutionConfig] = None,
-        allowed_modules: Optional[list[str]] = None,
+        config: EvolutionConfig | None = None,
+        allowed_modules: list[str] | None = None,
     ):
         super().__init__(
             config or EvolutionConfig(
@@ -627,8 +625,8 @@ class GoalController(LevelController):
 
     def __init__(
         self,
-        config: Optional[EvolutionConfig] = None,
-        objective_dimensions: Optional[list[str]] = None,
+        config: EvolutionConfig | None = None,
+        objective_dimensions: list[str] | None = None,
     ):
         super().__init__(
             config or EvolutionConfig(
@@ -761,7 +759,7 @@ class MetaCognitiveStack:
 
     def __init__(
         self,
-        configs: Optional[dict[EvolutionLevel, EvolutionConfig]] = None,
+        configs: dict[EvolutionLevel, EvolutionConfig] | None = None,
     ):
         self._controllers: dict[EvolutionLevel, LevelController] = {
             EvolutionLevel.L1_PARAMETER: ParameterController(
@@ -781,7 +779,7 @@ class MetaCognitiveStack:
         self._history: list[EvolutionResult] = []
         self._genomes: dict[str, AgentGenome] = {}
         self._observers: list[EvolutionObserver] = []
-        self._fitness_fn: Optional[FitnessFunction] = None
+        self._fitness_fn: FitnessFunction | None = None
 
     # ── Evolution API ───────────────────────────────────────────────────────
 
@@ -789,7 +787,7 @@ class MetaCognitiveStack:
         self,
         genome: AgentGenome,
         trigger: EvolutionTrigger,
-        target_level: Optional[EvolutionLevel] = None,
+        target_level: EvolutionLevel | None = None,
     ) -> EvolutionResult:
         """Evolve a genome at a specific level or all applicable levels."""
         result = None

@@ -9,18 +9,15 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import math
 import random
 import time
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Any, Callable, Optional, Sequence, TypeVar
+from typing import Any, TypeVar
 
 from .meta_evolution import (
     AgentGenome,
-    EvolutionResult,
-    EvolutionTrigger,
     FitnessFunction,
     MetaEvolutionError,
 )
@@ -342,7 +339,7 @@ class CrossoverOperator:
     def single_point_crossover(
         parent1: AgentGenome,
         parent2: AgentGenome,
-        crossover_point: Optional[str] = None,
+        crossover_point: str | None = None,
     ) -> AgentGenome:
         """Single-point crossover: split at a point, swap halves."""
         fields = [
@@ -504,12 +501,12 @@ class GeneticOptimizer:
     def __init__(
         self,
         population_size: int = 100,
-        selection: Optional[SelectionStrategy] = None,
+        selection: SelectionStrategy | None = None,
         crossover_rate: float = 0.7,
         mutation_rate: float = 0.1,
         elite_count: int = 2,
-        crossover: Optional[CrossoverOperator] = None,
-        mutation: Optional[MutationOperator] = None,
+        crossover: CrossoverOperator | None = None,
+        mutation: MutationOperator | None = None,
     ):
         self.population_size = population_size
         self.selection = selection or TournamentSelection(elite_count=elite_count)
@@ -526,7 +523,7 @@ class GeneticOptimizer:
 
     def initialize_population(
         self,
-        base_genome: Optional[AgentGenome] = None,
+        base_genome: AgentGenome | None = None,
         variant_count: int = 0,
     ) -> None:
         """Initialize or seed the population.
@@ -573,7 +570,7 @@ class GeneticOptimizer:
             tasks = [fitness_fn.evaluate(genome) for genome in batch]
             batch_scores = await asyncio.gather(*tasks, return_exceptions=True)
 
-            for genome, score in zip(batch, batch_scores):
+            for genome, score in zip(batch, batch_scores, strict=False):
                 if isinstance(score, Exception):
                     logger.warning(
                         "Fitness evaluation failed for %s: %s", genome.agent_id, score,
@@ -647,7 +644,7 @@ class GeneticOptimizer:
         self._population = new_population[:self.population_size]
 
         # 6. Evaluate new population
-        fitness_after = await self.evaluate_population(fitness_fn)
+        await self.evaluate_population(fitness_fn)
 
         self._generation += 1
 
@@ -775,7 +772,7 @@ class GeneticOptimizer:
         return self._generation
 
     @property
-    def best_genome(self) -> Optional[AgentGenome]:
+    def best_genome(self) -> AgentGenome | None:
         if not self._population or not self._fitness_cache:
             return None
         return max(self._population, key=lambda g: self._fitness_cache.get(g.agent_id, 0.0))

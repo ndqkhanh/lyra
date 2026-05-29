@@ -9,10 +9,11 @@ Inspired by OpenHuman's event bus architecture:
 """
 
 import asyncio
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Type
+from typing import Any
 from uuid import uuid4
 
 from pydantic import BaseModel
@@ -34,7 +35,7 @@ class Event(BaseModel):
     event_type: str
     timestamp: datetime = field(default_factory=datetime.now)
     priority: EventPriority = EventPriority.NORMAL
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     class Config:
         arbitrary_types_allowed = True
@@ -56,7 +57,7 @@ class AgentCompleted(Event):
     event_type: str = "agent.completed"
     agent_id: str
     agent_type: str
-    result: Optional[Dict[str, Any]] = None
+    result: dict[str, Any] | None = None
 
 
 class AgentFailed(Event):
@@ -73,7 +74,7 @@ class ScanCompleted(Event):
 
     event_type: str = "scan.completed"
     target: str
-    findings: List[Dict[str, Any]]
+    findings: list[dict[str, Any]]
     scan_type: str
 
 
@@ -95,7 +96,7 @@ class ExploitAttempted(Event):
     target: str
     exploit_name: str
     success: bool
-    evidence: Optional[str] = None
+    evidence: str | None = None
 
 
 class MemoryIngested(Event):
@@ -140,8 +141,8 @@ class EventBus:
 
     def __init__(self):
         """Initialize event bus."""
-        self._subscriptions: Dict[str, Set[Subscription]] = {}
-        self._event_history: List[Event] = []
+        self._subscriptions: dict[str, set[Subscription]] = {}
+        self._event_history: list[Event] = []
         self._max_history = 1000
 
     def subscribe(
@@ -238,9 +239,9 @@ class EventBus:
 
     def get_history(
         self,
-        event_type: Optional[str] = None,
+        event_type: str | None = None,
         limit: int = 100,
-    ) -> List[Event]:
+    ) -> list[Event]:
         """
         Get event history.
 
@@ -262,7 +263,7 @@ class EventBus:
         """Clear event history."""
         self._event_history.clear()
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """
         Get event bus statistics.
 

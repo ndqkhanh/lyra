@@ -2,8 +2,9 @@
 """Interactive test of Lyra research command."""
 
 import subprocess
-import time
 import sys
+import time
+
 
 def test_research_command():
     """Test /research command interactively."""

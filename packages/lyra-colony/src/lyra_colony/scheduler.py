@@ -13,8 +13,6 @@ from enum import Enum, auto
 from typing import Any
 from uuid import uuid4
 
-from .agent_spec import AgentSpec
-
 logger = logging.getLogger(__name__)
 
 

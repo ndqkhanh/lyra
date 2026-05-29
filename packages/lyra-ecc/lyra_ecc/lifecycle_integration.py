@@ -37,7 +37,7 @@ class ECCLifecycleIntegration:
     def _on_tool_call(self, context: Dict[str, Any]) -> None:
         """Handle TOOL_CALL event."""
         # Fire POST_TOOL_USE hooks
-        ecc_context = self._build_ecc_context(HookType.POST_TOOL_USE, context)
+        self._build_ecc_context(HookType.POST_TOOL_USE, context)
         # Note: Lyra's lifecycle is sync, but ECC hooks are async
         # In production, this would need proper async handling
         # For now, we'll skip async execution in the subscriber
@@ -45,12 +45,12 @@ class ECCLifecycleIntegration:
 
     def _on_session_start(self, context: Dict[str, Any]) -> None:
         """Handle SESSION_START event."""
-        ecc_context = self._build_ecc_context(HookType.SESSION_START, context)
+        self._build_ecc_context(HookType.SESSION_START, context)
         context["ecc_hook_fired"] = True
 
     def _on_session_end(self, context: Dict[str, Any]) -> None:
         """Handle SESSION_END event."""
-        ecc_context = self._build_ecc_context(HookType.SESSION_END, context)
+        self._build_ecc_context(HookType.SESSION_END, context)
         context["ecc_hook_fired"] = True
 
     def _build_ecc_context(

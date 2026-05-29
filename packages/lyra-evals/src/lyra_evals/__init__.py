@@ -1,8 +1,6 @@
 """lyra-evals: eval runner + corpora + public-benchmark adapters."""
 from __future__ import annotations
 
-from .aer import AERStore, AgentExecutionRecord, new_aer
-from .slo import DEFAULT_SLOS, SLOBreach, SLOTracker
 from .adapters import (
     ConversationDriver,
     LoCoEvalResult,
@@ -13,6 +11,7 @@ from .adapters import (
     score_requirement_coverage,
     write_submission,
 )
+from .aer import AERStore, AgentExecutionRecord, new_aer
 from .contamination import ContaminationError, ContaminationGuard
 from .corpora import (
     Task,
@@ -21,8 +20,9 @@ from .corpora import (
     red_team_tasks,
 )
 from .runner import EvalRunner, Report, TaskResult
+from .slo import DEFAULT_SLOS, SLOBreach, SLOTracker
 from .snapshot import HarnessSnapshot, snapshot_hash
-from .spec_bench import SpecBenchEvaluator, ProbabilisticEvaluator, SystemEval, TraceEval, NodeEval
+from .spec_bench import NodeEval, ProbabilisticEvaluator, SpecBenchEvaluator, SystemEval, TraceEval
 
 __version__ = "0.2.0"
 

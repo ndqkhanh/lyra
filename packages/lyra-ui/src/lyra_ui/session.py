@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class SessionEventType(Enum):
@@ -34,8 +34,8 @@ class SessionEvent:
     id: str
     type: SessionEventType
     timestamp: datetime
-    data: Dict[str, Any]
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any]
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -59,7 +59,7 @@ class SessionMetadata:
     author: str
     title: str
     description: str
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     total_events: int = 0
     total_tokens: int = 0
     total_cost: float = 0.0
@@ -76,7 +76,7 @@ class SessionManager:
     - Session analytics
     """
 
-    def __init__(self, storage_path: Optional[Path] = None):
+    def __init__(self, storage_path: Path | None = None):
         """
         Initialize session manager.
 
@@ -85,9 +85,9 @@ class SessionManager:
         """
         self.storage_path = storage_path or Path.home() / ".lyra" / "sessions"
         self.storage_path.mkdir(parents=True, exist_ok=True)
-        self.current_session: Optional[SessionMetadata] = None
-        self.events: List[SessionEvent] = []
-        self.annotations: List[SessionAnnotation] = []
+        self.current_session: SessionMetadata | None = None
+        self.events: list[SessionEvent] = []
+        self.annotations: list[SessionAnnotation] = []
 
     def create_session(
         self,
@@ -95,7 +95,7 @@ class SessionManager:
         author: str,
         title: str,
         description: str = "",
-        tags: Optional[List[str]] = None,
+        tags: list[str] | None = None,
     ) -> SessionMetadata:
         """
         Create new session.
@@ -128,8 +128,8 @@ class SessionManager:
         self,
         event_id: str,
         event_type: SessionEventType,
-        data: Dict[str, Any],
-        metadata: Optional[Dict[str, Any]] = None,
+        data: dict[str, Any],
+        metadata: dict[str, Any] | None = None,
     ) -> SessionEvent:
         """
         Add event to session.
@@ -186,7 +186,7 @@ class SessionManager:
         self.annotations.append(annotation)
         return annotation
 
-    def export_session(self, session_id: Optional[str] = None) -> Dict[str, Any]:
+    def export_session(self, session_id: str | None = None) -> dict[str, Any]:
         """
         Export session to dictionary.
 
@@ -240,7 +240,7 @@ class SessionManager:
             ],
         }
 
-    def import_session(self, session_data: Dict[str, Any]):
+    def import_session(self, session_data: dict[str, Any]):
         """
         Import session from dictionary.
 
@@ -283,7 +283,7 @@ class SessionManager:
             for ann in session_data["annotations"]
         ]
 
-    def save_session(self, session_id: Optional[str] = None):
+    def save_session(self, session_id: str | None = None):
         """
         Save session to storage.
 
@@ -313,16 +313,16 @@ class SessionManager:
         session_data = self._load_session(session_id)
         self.import_session(session_data)
 
-    def _load_session(self, session_id: str) -> Dict[str, Any]:
+    def _load_session(self, session_id: str) -> dict[str, Any]:
         """Load session data from file."""
         session_file = self.storage_path / f"{session_id}.json"
         if not session_file.exists():
             raise FileNotFoundError(f"Session not found: {session_id}")
 
-        with open(session_file, "r") as f:
+        with open(session_file) as f:
             return json.load(f)
 
-    def list_sessions(self) -> List[SessionMetadata]:
+    def list_sessions(self) -> list[SessionMetadata]:
         """
         List all sessions.
 
@@ -354,10 +354,10 @@ class SessionManager:
 
     def search_sessions(
         self,
-        query: Optional[str] = None,
-        author: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-    ) -> List[SessionMetadata]:
+        query: str | None = None,
+        author: str | None = None,
+        tags: list[str] | None = None,
+    ) -> list[SessionMetadata]:
         """
         Search sessions.
 
@@ -388,7 +388,7 @@ class SessionManager:
 
         return sessions
 
-    def get_analytics(self) -> Dict[str, Any]:
+    def get_analytics(self) -> dict[str, Any]:
         """
         Get session analytics.
 
@@ -439,7 +439,7 @@ class SessionReplay:
         """Start replay from beginning."""
         self.current_index = 0
 
-    def next_event(self) -> Optional[SessionEvent]:
+    def next_event(self) -> SessionEvent | None:
         """
         Get next event.
 
@@ -453,7 +453,7 @@ class SessionReplay:
         self.current_index += 1
         return event
 
-    def previous_event(self) -> Optional[SessionEvent]:
+    def previous_event(self) -> SessionEvent | None:
         """
         Get previous event.
 
@@ -466,7 +466,7 @@ class SessionReplay:
         self.current_index -= 1
         return self.session_manager.events[self.current_index]
 
-    def goto_event(self, index: int) -> Optional[SessionEvent]:
+    def goto_event(self, index: int) -> SessionEvent | None:
         """
         Go to specific event.
 

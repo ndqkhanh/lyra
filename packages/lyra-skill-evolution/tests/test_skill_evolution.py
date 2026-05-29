@@ -2,20 +2,10 @@
 
 from __future__ import annotations
 
-import time
 from dataclasses import FrozenInstanceError
 from typing import Any
 
 import pytest
-
-from lyra_skill_evolution.exceptions import (
-    BenchmarkError,
-    EvolutionError,
-    MetricsError,
-    PatchError,
-    RegressionError,
-    VersionError,
-)
 from lyra_skill_evolution.evolution_metrics import (
     EvolutionMetrics,
     EvolutionReport,
@@ -23,6 +13,14 @@ from lyra_skill_evolution.evolution_metrics import (
     MetricsSnapshot,
     PeriodComparison,
     TrendDirection,
+)
+from lyra_skill_evolution.exceptions import (
+    BenchmarkError,
+    EvolutionError,
+    MetricsError,
+    PatchError,
+    RegressionError,
+    VersionError,
 )
 from lyra_skill_evolution.lifelong_learner import (
     LearningConfig,
@@ -59,7 +57,6 @@ from lyra_skill_evolution.version_manager import (
     VersionManager,
     VersionStatus,
 )
-
 
 # ── Fixtures ──────────────────────────────────────────────────────────────
 
@@ -641,7 +638,7 @@ class TestRegressionTester:
 
     def test_compute_match_exact(self, regression_tester: RegressionTester) -> None:
         tc = TestCase("t1", "cap", "in", "expected")
-        result = RegressionResult(test=tc, passed=True)
+        RegressionResult(test=tc, passed=True)
         # Use _compute_match via quick_smoke_test or test structure
         assert True  # Property testing covered by other tests
 
@@ -701,7 +698,7 @@ class TestVersionManager:
         assert history.latest.version_number == 2
 
     def test_rollback(self, version_manager: VersionManager, sample_skill: Skill) -> None:
-        v1 = version_manager.create_version(sample_skill, "v1")
+        version_manager.create_version(sample_skill, "v1")
         _ = version_manager.create_version(sample_skill, "v2")
         rolled = version_manager.rollback("test_skill", 1)
         assert rolled.parent_version == 1
@@ -772,7 +769,7 @@ class TestVersionManager:
         assert vd.modified == []
 
     def test_version_deprecation(self, version_manager: VersionManager, sample_skill: Skill) -> None:
-        v1 = version_manager.create_version(sample_skill, "v1")
+        version_manager.create_version(sample_skill, "v1")
         # Rollback marks v2 as ROLLED_BACK
         _ = version_manager.create_version(sample_skill, "v2")
         version_manager.rollback("test_skill", 1)

@@ -4,7 +4,6 @@ import asyncio
 import time
 
 import pytest
-
 from lyra_context_profiler.importance import (
     DependencyScorer,
     ImportanceCalculator,
@@ -15,7 +14,6 @@ from lyra_context_profiler.importance import (
     TaskRelevanceScorer,
     TfidfCalculator,
 )
-
 
 # ── Fixtures ────────────────────────────────────────────────────────────────────
 
@@ -102,7 +100,7 @@ class TestTfidfCalculator:
         common_doc = "the cat sat on the mat with another cat"
         rare_doc = "quantum mechanics describes subatomic particle behavior"
         tfidf.fit([common_doc, common_doc, rare_doc])
-        common_score = tfidf.score(common_doc)
+        tfidf.score(common_doc)
         rare_score = tfidf.score(rare_doc)
         # Rare document should score higher due to distinctive words
         assert rare_score > 0.0

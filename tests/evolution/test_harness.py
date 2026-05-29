@@ -1,6 +1,6 @@
 """Tests for evolution harness permission boundaries."""
+
 import pytest
-from pathlib import Path
 
 
 def test_workspace_read_allowed(mock_harness):
@@ -145,7 +145,7 @@ def test_harness_error_messages_clear(mock_harness):
     # Try to access protected path
     try:
         mock_harness.workspace_read("../evaluator/secret.py")
-        assert False, "Should have raised PermissionError"
+        raise AssertionError("Should have raised PermissionError")
     except PermissionError as e:
         # Error message should be clear
         assert "Access denied" in str(e)

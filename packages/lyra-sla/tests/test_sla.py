@@ -6,44 +6,31 @@ import asyncio
 import time
 
 import pytest
-
 from lyra_sla import (
-    # SLA Manager
-    SLIMetric,
-    BudgetType,
-    ViolationSeverity,
-    SLO,
     SLA,
-    SLAViolation,
-    Budget,
-    SLAManager,
+    SLO,
+    AutoScaler,
+    BudgetExceededError,
+    BudgetType,
+    ComplianceReport,
+    ComplianceReporter,
+    DashboardGenerator,
+    InvalidMetricError,
     # Metrics
     MetricsCollector,
-    RollingStats,
-    # Auto-scaler
-    ScalingDirection,
-    ScalingStrategy,
-    ScalingDecision,
-    ResourceConfig,
-    AutoScaler,
-    ReactiveScaler,
     PredictiveScaler,
+    ReactiveScaler,
+    ReportExporter,
     # Reporting
     ReportFormat,
-    ComplianceReport,
-    DashboardGenerator,
-    ComplianceReporter,
-    TrendAnalyzer,
-    PostMortemGenerator,
-    ReportExporter,
-    # Exceptions
+    ResourceConfig,
+    ScalingDirection,
     SLAError,
+    SLAManager,
     SLANotFoundError,
-    SLAViolationError,
-    BudgetExceededError,
-    InvalidMetricError,
+    SLIMetric,
+    TrendAnalyzer,
 )
-
 
 # ── SLAManager ──────────────────────────────────────────────────────────
 
@@ -213,7 +200,6 @@ class TestAutoScaler:
 class TestReactiveScaler:
     def test_evaluate_no_data(self):
         rs = ReactiveScaler()
-        from lyra_sla.metrics import RollingStats
         config = ResourceConfig(current_replicas=2)
         decision = rs.evaluate("agent_1", {}, config)
         assert decision.direction == ScalingDirection.NONE

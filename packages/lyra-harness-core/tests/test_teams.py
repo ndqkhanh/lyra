@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_harness_core.teams import (
     AgentRole,
     AgentTeam,
@@ -13,7 +12,6 @@ from lyra_harness_core.teams import (
     TaskList,
     TaskStatus,
 )
-
 
 # --- Task / TaskList ----------------------------------------------------
 
@@ -361,8 +359,8 @@ class TestAgentTeam:
         """Full workflow: lead adds task → spoke claims → spoke completes →
         spoke notifies lead → lead acks via broadcast."""
         team = self._basic_team()
-        t1 = team.add_task(description="search papers", added_by="lead")
-        t2 = team.add_task(description="summarise", added_by="lead")
+        team.add_task(description="search papers", added_by="lead")
+        team.add_task(description="summarise", added_by="lead")
         # Spokes claim concurrently.
         c1 = team.claim_next(agent_id="spoke-1")
         c2 = team.claim_next(agent_id="spoke-2")

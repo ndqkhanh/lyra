@@ -96,11 +96,11 @@ def validate_manifest(data: Mapping[str, Any]) -> PluginManifestSpec:
             f"manifest missing required fields: {missing}"
         )
 
-    for field in _REQUIRED:
-        value = data[field]
+    for req_field in _REQUIRED:
+        value = data[req_field]
         if not isinstance(value, str) or not value.strip():
             raise PluginManifestError(
-                f"manifest field {field!r} must be a non-empty string"
+                f"manifest field {req_field!r} must be a non-empty string"
             )
 
     hooks = _as_str_tuple(data.get("hooks"), field_name="hooks")

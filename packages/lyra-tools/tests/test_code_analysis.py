@@ -1,11 +1,7 @@
 """Tests for code analysis tools."""
 from __future__ import annotations
 
-import tempfile
-from pathlib import Path
-
 import pytest
-
 from lyra_tools.code_analysis import (
     analyze_complexity,
     extract_imports,

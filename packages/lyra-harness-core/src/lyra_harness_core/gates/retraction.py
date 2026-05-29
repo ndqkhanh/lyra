@@ -19,7 +19,7 @@ ends a biomed agent's deployment. This is Tier-0 for Helix-Bio.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Protocol
+from typing import Protocol
 
 
 @dataclass(frozen=True)
@@ -41,7 +41,7 @@ class RetractionIndex(Protocol):
 
     name: str
 
-    def is_retracted(self, paper_id: str) -> Optional[RetractionRecord]: ...
+    def is_retracted(self, paper_id: str) -> RetractionRecord | None: ...
 
 
 @dataclass
@@ -66,7 +66,7 @@ class StaticRetractionIndex:
     def add(self, record: RetractionRecord) -> None:
         self.records[record.paper_id] = record
 
-    def is_retracted(self, paper_id: str) -> Optional[RetractionRecord]:
+    def is_retracted(self, paper_id: str) -> RetractionRecord | None:
         return self.records.get(paper_id)
 
 
@@ -75,9 +75,9 @@ class RetractionVerdict:
     """The gate's per-doc decision."""
 
     doc_id: str
-    paper_id: Optional[str]  # may be None if the doc had no extractable id
+    paper_id: str | None  # may be None if the doc had no extractable id
     is_retracted: bool
-    record: Optional[RetractionRecord]
+    record: RetractionRecord | None
     note: str = ""
 
 
@@ -123,7 +123,7 @@ class RetractionGate:
                 kept.append(doc)
         return kept, verdicts
 
-    def _check(self, *, doc_id: str, paper_id: Optional[str]) -> RetractionVerdict:
+    def _check(self, *, doc_id: str, paper_id: str | None) -> RetractionVerdict:
         if not paper_id:
             return RetractionVerdict(
                 doc_id=doc_id,

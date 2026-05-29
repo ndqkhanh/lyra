@@ -114,7 +114,7 @@ class MemoryMCPServer:
         contents = await self._pipeline.get_details(entry_ids)
         return tuple(
             {"entry_id": eid, "content": content}
-            for eid, content in zip(entry_ids, contents)
+            for eid, content in zip(entry_ids, contents, strict=False)
         )
 
     async def search_events(self, query: str, limit: int = 50) -> tuple[dict, ...]:

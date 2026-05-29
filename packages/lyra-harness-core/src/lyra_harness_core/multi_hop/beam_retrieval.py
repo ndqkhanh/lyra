@@ -18,10 +18,11 @@ operator returns the highest-scoring final beam.
 """
 from __future__ import annotations
 
+from collections.abc import Sequence  # noqa: F401
 from dataclasses import dataclass, field
-from typing import Optional, Protocol, Sequence  # noqa: F401
+from typing import Protocol
 
-from .operators.protocols import Retriever, RetrievedDoc
+from .operators.protocols import RetrievedDoc, Retriever
 
 
 @dataclass(frozen=True, order=True)
@@ -48,7 +49,7 @@ class BeamCandidate:
         docs: tuple[RetrievedDoc, ...] | Sequence[RetrievedDoc],
         accept: bool = False,
         reason: str = "",
-    ) -> "BeamCandidate":
+    ) -> BeamCandidate:
         return cls(
             sort_key=-score,
             score=score,
@@ -107,7 +108,7 @@ class BeamResult:
 
     query: str
     beams: tuple[BeamCandidate, ...]  # all surviving beams at termination
-    best: Optional[BeamCandidate]  # highest-scoring (accept-flagged if any)
+    best: BeamCandidate | None  # highest-scoring (accept-flagged if any)
     n_retrieval_calls: int = 0
     n_score_calls: int = 0
     n_hops_executed: int = 0

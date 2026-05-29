@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_self_rewrite.constraint_generator import (
     ConstraintCheck,
     ConstraintGenerator,

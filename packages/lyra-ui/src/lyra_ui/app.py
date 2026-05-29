@@ -9,7 +9,7 @@ Features:
 """
 
 from textual.app import App, ComposeResult
-from textual.containers import Container, Horizontal, Vertical
+from textual.containers import Container, Horizontal
 from textual.widgets import Footer, Header, Static
 
 

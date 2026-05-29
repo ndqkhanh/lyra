@@ -4,12 +4,11 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Callable, Optional
+from typing import Any
 
 import numpy as np
-from scipy import optimize, stats
-
-from lyra_causal_graph.scm import ExogenousVariable, NoiseModel, StructuralCausalModel
+from lyra_causal_graph.scm import StructuralCausalModel
+from scipy import optimize
 
 from .errors import AbductionError
 
@@ -46,7 +45,7 @@ class AbductionConfig:
     optimization_lr: float = 0.01
     noise_tolerance: float = 1e-6
     max_iterations: int = 100
-    random_seed: Optional[int] = None
+    random_seed: int | None = None
 
 
 @dataclass
@@ -123,7 +122,7 @@ class AbductionEngine:
     def __init__(
         self,
         scm: StructuralCausalModel,
-        config: Optional[AbductionConfig] = None,
+        config: AbductionConfig | None = None,
     ) -> None:
         if scm is None:
             raise AbductionError("SCM must not be None.")
@@ -144,7 +143,7 @@ class AbductionEngine:
     def abduce(
         self,
         evidence: dict[str, float],
-        strategy: Optional[str] = None,
+        strategy: str | None = None,
     ) -> AbductionResult:
         """Infer noise posterior given observed evidence.
 
@@ -178,7 +177,7 @@ class AbductionEngine:
     async def abduce_async(
         self,
         evidence: dict[str, float],
-        strategy: Optional[str] = None,
+        strategy: str | None = None,
     ) -> AbductionResult:
         """Async version for long-running MCMC or variational abduction."""
         return self.abduce(evidence, strategy)
@@ -186,7 +185,7 @@ class AbductionEngine:
     def batch_abduce(
         self,
         evidence_list: list[dict[str, float]],
-        strategy: Optional[str] = None,
+        strategy: str | None = None,
     ) -> list[AbductionResult]:
         """Abduce noise posteriors for multiple evidence sets.
 
@@ -515,7 +514,7 @@ class AbductionEngine:
 
         lr = self._config.optimization_lr
 
-        for iteration in range(self._config.max_iterations):
+        for _iteration in range(self._config.max_iterations):
             # Sample from current variational distribution
             eps = np.random.normal(0, 1, (100, n_exo))
             samples = mu + sigma * eps

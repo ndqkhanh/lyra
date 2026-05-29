@@ -6,7 +6,6 @@ research, writing, analysis, and other capability areas.
 
 from __future__ import annotations
 
-import math
 import time
 from dataclasses import dataclass, field
 from enum import Enum, auto
@@ -350,9 +349,9 @@ class SkillBenchmark:
                 task_id += 1
 
         # Fill remaining tasks to reach 166 by adding more per family
-        tasks_per_family = len(family_tasks)  # 20 families
+        len(family_tasks)  # 20 families
         current_count = len(tasks)  # 8 * 20 = 160
-        needed = 166 - current_count  # 6 more
+        166 - current_count  # 6 more
 
         extra_patterns = [
             {"desc": "Solve an additional advanced problem in {family}", "cap": "advanced_{family}_problem", "diff": Difficulty.EXPERT, "truth": "correct solution"},

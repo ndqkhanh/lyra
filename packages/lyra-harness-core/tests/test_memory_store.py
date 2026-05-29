@@ -4,7 +4,6 @@ from __future__ import annotations
 import time
 
 import pytest
-
 from lyra_harness_core.memory_store import (
     MemoryItem,
     MemoryKind,
@@ -12,7 +11,6 @@ from lyra_harness_core.memory_store import (
     RetrievalSpec,
     WorkingMemory,
 )
-
 
 # --- MemoryItem --------------------------------------------------------
 

@@ -2,13 +2,11 @@
 Tests for AgentShield security scanner.
 """
 
+import sys
 import tempfile
 from pathlib import Path
 
 import pytest
-
-import sys
-from pathlib import Path
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
@@ -17,10 +15,10 @@ from security.agent_shield import (
     AgentShield,
     CommandInjectionScanner,
     PathTraversalScanner,
-    SQLInjectionScanner,
     SecretsScanner,
     SecurityCategory,
     SecuritySeverity,
+    SQLInjectionScanner,
     XSSScanner,
 )
 
@@ -164,7 +162,7 @@ class TestCommandInjectionScanner:
         scanner = CommandInjectionScanner()
         command = "ls -la /home/user"
 
-        issues = scanner.scan_command(command)
+        scanner.scan_command(command)
 
         # May have issues due to redirect operators, but should be minimal
         assert True  # Command is relatively safe
@@ -393,7 +391,7 @@ class TestAgentShield:
         tool_name = "Read"
         args = {"file_path": "/home/user/file.txt"}
 
-        report = shield.scan_tool_call(tool_name, args)
+        shield.scan_tool_call(tool_name, args)
 
         # May have no issues for safe path
         assert True

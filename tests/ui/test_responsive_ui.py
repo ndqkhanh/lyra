@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Test responsive UI with terminal resize"""
 
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
 
-from rich.console import Console
-from lyra_cli.cli.responsive_ui import ResponsiveUI, ResponsiveChatUI
 import time
+
+from lyra_cli.cli.responsive_ui import ResponsiveChatUI, ResponsiveUI
+from rich.console import Console
 
 
 def test_responsive_banner():

@@ -4,11 +4,10 @@ Tests for Adaptive Mutation Engine (T104)
 Tests adaptive mutation rates, plateau detection, and automatic escape.
 """
 
-import pytest
 from lyra_evolution.adaptive_evolution import (
     AdaptiveEvolutionEngine,
     AdaptiveMutationEngine,
-    EvolutionState
+    EvolutionState,
 )
 
 
@@ -108,8 +107,8 @@ class TestAdaptiveMutationEngine:
         engine = AdaptiveMutationEngine()
 
         # Simulate improving scores
-        rate1 = engine.get_mutation_rate(0.5)
-        rate2 = engine.get_mutation_rate(0.6)
+        engine.get_mutation_rate(0.5)
+        engine.get_mutation_rate(0.6)
         rate3 = engine.get_mutation_rate(0.7)
 
         # Should use low rate (min_rate)
@@ -323,7 +322,7 @@ class TestIntegration:
         engine = AdaptiveEvolutionEngine(n_workers=4, cache_size=5000)
 
         baseline = {"skills": ["skill1", "skill2", "skill3"]}
-        root_id = engine.initialize(baseline)
+        engine.initialize(baseline)
 
         # Run 20 generations with adaptive mutation
         for gen in range(20):

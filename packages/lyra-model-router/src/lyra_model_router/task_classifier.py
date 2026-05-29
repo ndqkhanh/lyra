@@ -138,9 +138,7 @@ class TaskClassifier:
     """
 
     def __init__(self) -> None:
-        self._classification_counts: dict[TaskCategory, int] = {
-            c: 0 for c in TaskCategory
-        }
+        self._classification_counts: dict[TaskCategory, int] = dict.fromkeys(TaskCategory, 0)
 
     def classify(self, description: str) -> ClassificationResult:
         """Classify a task description into one of 15 categories.
@@ -190,4 +188,4 @@ class TaskClassifier:
 
     def reset_counts(self) -> None:
         """Reset the classification counter."""
-        self._classification_counts = {c: 0 for c in TaskCategory}
+        self._classification_counts = dict.fromkeys(TaskCategory, 0)

@@ -1,9 +1,10 @@
 """Tests for OAuth client."""
 
-import pytest
 from datetime import datetime, timedelta
 
-from lyra_integrations.oauth import OAuthClient, OAuthConfig, OAuthToken, GrantType
+import pytest
+
+from lyra_integrations.oauth import OAuthClient, OAuthConfig, OAuthToken
 
 
 def test_oauth_config_creation():

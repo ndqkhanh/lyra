@@ -13,7 +13,6 @@ from lyra_meta_evolution import (
     EvolutionOrchestrator,
     EvolutionTrigger,
     FitnessEvaluator,
-    FitnessWeights,
     GeneticOptimizer,
     MetaCognitiveStack,
     MutationOperator,
@@ -186,7 +185,7 @@ class TestFullPipeline:
         evaluator = FitnessEvaluator(dynamic_weights=True)
         config = BenchmarkConfig(name="adapt_test", description="Adaptation test", task_count=2)
 
-        initial_weights = dict(evaluator.weights.weights)
+        dict(evaluator.weights.weights)
 
         # Run enough evaluations to trigger adaptation
         for i in range(11):
@@ -194,5 +193,5 @@ class TestFullPipeline:
             asyncio.run(evaluator.evaluate(genome, config))
 
         # Weights may or may not have changed depending on adaptation trigger
-        final_weights = dict(evaluator.weights.weights)
+        dict(evaluator.weights.weights)
         assert evaluator.evaluation_count == 11

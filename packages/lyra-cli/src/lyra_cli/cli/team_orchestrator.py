@@ -130,7 +130,7 @@ class TeamOrchestrator:
         """Lead agent breaks down task into subtasks."""
         # Use LLM to break down task
         prompt = f"Break down this task into 3-5 subtasks: {task}"
-        response = await self.llm.generate(prompt)
+        await self.llm.generate(prompt)
 
         # Parse subtasks (simplified)
         subtasks = [

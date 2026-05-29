@@ -227,15 +227,15 @@ class TestValidationReport:
 
 
 # Helpers — import internal functions for direct gate testing
-from lyra_core.skills.validation_gate import (
+from lyra_core.skills.validation_gate import (  # noqa: E402
     _gate1_syntax as _gate1,
 )
-from lyra_core.skills.validation_gate import (
+from lyra_core.skills.validation_gate import (  # noqa: E402
     _gate2_semantic as _gate2,
 )
-from lyra_core.skills.validation_gate import (
+from lyra_core.skills.validation_gate import (  # noqa: E402
     _gate3_performance as _gate3,
 )
-from lyra_core.skills.validation_gate import (
+from lyra_core.skills.validation_gate import (  # noqa: E402
     _gate4_safety as _gate4,
 )

@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import enum
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Sequence, Tuple
 
 
 class Verdict(enum.Enum):
@@ -102,7 +102,7 @@ class EntityGrounding:
 
     entity: str
     present_in_kg: bool
-    supporting_triples: Sequence[Tuple[str, str, str]] = field(default_factory=list)
+    supporting_triples: Sequence[tuple[str, str, str]] = field(default_factory=list)
     confidence: float = 0.0
 
 
@@ -125,7 +125,7 @@ class HallucinationSignal:
     """
 
     token_uncertainty: float = 0.0
-    attention_eigenvalues: Optional[AttributionEigenvalues] = None
+    attention_eigenvalues: AttributionEigenvalues | None = None
     entity_groundings: Sequence[EntityGrounding] = field(default_factory=list)
     relation_preservation: float = 0.0
     hybrid_score: float = 0.0
@@ -171,7 +171,7 @@ class JudgeEvaluation:
 class BehavioralFingerprint:
     """Behavioural profile for regression testing."""
 
-    metrics: Dict[str, float] = field(default_factory=dict)
+    metrics: dict[str, float] = field(default_factory=dict)
     sample_size: int = 0
 
     def cosine_similarity(self, other: BehavioralFingerprint) -> float:

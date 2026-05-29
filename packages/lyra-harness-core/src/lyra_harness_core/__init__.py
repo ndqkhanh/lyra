@@ -19,14 +19,7 @@ Public API:
 """
 from __future__ import annotations
 
-from .evals import (
-    ActiveParamAccount,
-    ActiveParamReading,
-    BudgetController,
-    BudgetExhausted,
-    TTCCurve,
-    TTCPoint,
-)
+from .agi_integration import AGIAwareLoop, AGIState
 from .constitution import (
     Constitution,
     ConstitutionRegistry,
@@ -56,32 +49,19 @@ from .distributed import (
     Subscription,
     topic_matches,
 )
+from .evals import (
+    ActiveParamAccount,
+    ActiveParamReading,
+    BudgetController,
+    BudgetExhausted,
+    TTCCurve,
+    TTCPoint,
+)
 from .forensic import (
     ReplayComparator,
     Trajectory,
     TrajectoryOutcome,
     TrajectorySimilarity,
-)
-from .integrations import (
-    AdaptedDocument,
-    AdaptedEdge,
-    AdaptedGraph,
-    AdaptedNode,
-    adapt_graph,
-    verify_graph_protocol,
-)
-from .marketplace import (
-    CuratorHost,
-    InMemoryCuratorHost,
-    InMemoryMarketplaceHost,
-    InstallResult,
-    MCPServer,
-    MarketplaceHost,
-    PromotedSkill,
-    SubmitResult,
-    TrajectoryRecord,
-    TrustTier,
-    TrustVerdict,
 )
 from .gates import (
     ChainOfNoteGate,
@@ -99,14 +79,35 @@ from .gates import (
     StaticKGSource,
     StaticRetractionIndex,
 )
+from .hooks import Hook, HookDecision, HookEvent, HookRegistry
+from .integrations import (
+    AdaptedDocument,
+    AdaptedEdge,
+    AdaptedGraph,
+    AdaptedNode,
+    adapt_graph,
+    verify_graph_protocol,
+)
 from .isolation import (
     ContextNamespace,
     IsolatedContext,
     NamespacePermission,
     PermissionGrant,
 )
-from .hooks import Hook, HookDecision, HookEvent, HookRegistry
 from .loop import AgentLoop, LoopResult
+from .marketplace import (
+    CuratorHost,
+    InMemoryCuratorHost,
+    InMemoryMarketplaceHost,
+    InstallResult,
+    MarketplaceHost,
+    MCPServer,
+    PromotedSkill,
+    SubmitResult,
+    TrajectoryRecord,
+    TrustTier,
+    TrustVerdict,
+)
 from .memory import Memory, MemoryEntry
 from .memory_consolidation import (
     ConsolidationPolicy,
@@ -146,7 +147,33 @@ from .multi_hop import (
     TitleEntityExtractor,
 )
 from .observability import Span, Tracer
+from .orchestration import (
+    AgentDecision,
+    PureFunctionAgent,
+    SideEffectLog,
+    SideEffectRecord,
+    TrajectoryReplay,
+    decision_fingerprint,
+)
+from .pages import (
+    EditConflict,
+    Page,
+    PageEditor,
+    PageHistory,
+    PageSnapshot,
+    line_diff_summary,
+)
+from .permissions import PermissionDecision, PermissionMode, PermissionPolicy
 from .pipeline import MultiHopPipeline, PipelineResult, PipelineStep
+from .programs import (
+    BootstrapFewShot,
+    Demonstration,
+    Example,
+    MultiHopProgram,
+    ProgramOutput,
+    Signature,
+    evaluate,
+)
 from .provenance import (
     ProvenanceLedger,
     Witness,
@@ -171,32 +198,6 @@ from .replay import (
     TraceDelta,
     TraceDeltaKind,
 )
-from .programs import (
-    BootstrapFewShot,
-    Demonstration,
-    Example,
-    MultiHopProgram,
-    ProgramOutput,
-    Signature,
-    evaluate,
-)
-from .pages import (
-    EditConflict,
-    Page,
-    PageEditor,
-    PageHistory,
-    PageSnapshot,
-    line_diff_summary,
-)
-from .orchestration import (
-    AgentDecision,
-    PureFunctionAgent,
-    SideEffectLog,
-    SideEffectRecord,
-    TrajectoryReplay,
-    decision_fingerprint,
-)
-from .permissions import PermissionDecision, PermissionMode, PermissionPolicy
 from .routines import (
     CronExpression,
     CronParseError,
@@ -228,6 +229,14 @@ from .teams import (
     TaskList,
     TaskStatus,
 )
+from .tool_runtime import (
+    ExponentialBackoff,
+    NoRetry,
+    RetryPolicy,
+    ToolEngine,
+    ToolExecution,
+)
+from .tools import Tool, ToolError, ToolRegistry
 from .verifier import (
     AxisVerdict,
     CompositeVerdict,
@@ -241,15 +250,6 @@ from .verifier import (
     VerifierAxis,
     VerifierComposer,
 )
-from .tool_runtime import (
-    ExponentialBackoff,
-    NoRetry,
-    RetryPolicy,
-    ToolEngine,
-    ToolExecution,
-)
-from .tools import Tool, ToolError, ToolRegistry
-from .agi_integration import AGIAwareLoop, AGIState
 
 __all__ = [
     "ActiveParamAccount",

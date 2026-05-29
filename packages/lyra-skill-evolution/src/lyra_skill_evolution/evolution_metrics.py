@@ -6,7 +6,6 @@ import math
 import time
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any
 
 from .exceptions import MetricsError
 from .lifelong_learner import LearningState

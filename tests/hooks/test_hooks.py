@@ -6,11 +6,11 @@ import pytest
 
 from src.hooks import (
     Hook,
-    HookType,
     HookContext,
-    HookResult,
-    HookRegistry,
     HookEngine,
+    HookRegistry,
+    HookResult,
+    HookType,
 )
 
 

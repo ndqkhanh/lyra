@@ -12,7 +12,6 @@ import shutil
 import subprocess
 import threading
 from pathlib import Path
-from typing import Optional
 
 
 class AudioPlayer:
@@ -30,7 +29,7 @@ class AudioPlayer:
         self.platform = platform.system()
         self.player_cmd = self._detect_player()
 
-    def _detect_player(self) -> Optional[str]:
+    def _detect_player(self) -> str | None:
         """
         Detect available audio player.
 

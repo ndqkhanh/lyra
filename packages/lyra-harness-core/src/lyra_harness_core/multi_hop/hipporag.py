@@ -17,10 +17,11 @@ import hashlib
 import math
 import re
 import struct
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
-from typing import Iterable, List, Optional, Protocol, Sequence
+from typing import Protocol
 
-from .types import Document, Graph, Node
+from .types import Document, Graph
 
 _TOKEN_RE = re.compile(r"[A-Za-z][A-Za-z0-9\-_]{2,}")
 
@@ -34,7 +35,7 @@ class Embedder(Protocol):
     name: str
     dim: int
 
-    def embed_batch(self, texts: Sequence[str]) -> List[List[float]]: ...
+    def embed_batch(self, texts: Sequence[str]) -> list[list[float]]: ...
 
 
 class EntityExtractor(Protocol):
@@ -48,7 +49,7 @@ class EntityExtractor(Protocol):
 # --- Helpers --------------------------------------------------------------
 
 
-def _normalize(vec: Sequence[float]) -> List[float]:
+def _normalize(vec: Sequence[float]) -> list[float]:
     norm = math.sqrt(sum(v * v for v in vec))
     if norm == 0:
         return list(vec)
@@ -58,7 +59,7 @@ def _normalize(vec: Sequence[float]) -> List[float]:
 def cosine(a: Sequence[float], b: Sequence[float]) -> float:
     if not a or not b or len(a) != len(b):
         return 0.0
-    return sum(x * y for x, y in zip(a, b))
+    return sum(x * y for x, y in zip(a, b, strict=False))
 
 
 # --- Stub implementations (zero-dep defaults) -----------------------------
@@ -75,10 +76,10 @@ class HashEmbedder:
     dim: int = 256
     name: str = "hash-embedder-v1"
 
-    def embed_batch(self, texts: Sequence[str]) -> List[List[float]]:
+    def embed_batch(self, texts: Sequence[str]) -> list[list[float]]:
         return [self._embed_one(t) for t in texts]
 
-    def _embed_one(self, text: str) -> List[float]:
+    def _embed_one(self, text: str) -> list[float]:
         text = (text or "").lower()
         vec = [0.0] * self.dim
         for word in text.split():
@@ -240,7 +241,7 @@ class HippoRAGRetriever:
     alpha: float = 0.5  # cosine vs PPR mix; 1.0 = pure dense, 0.0 = pure PPR
 
     _docs_by_id: dict[str, Document] = field(default_factory=dict, init=False)
-    _doc_embeddings: dict[str, List[float]] = field(default_factory=dict, init=False)
+    _doc_embeddings: dict[str, list[float]] = field(default_factory=dict, init=False)
     _doc_anchors: dict[str, tuple[str, ...]] = field(default_factory=dict, init=False)
     _adjacency: dict[str, list[str]] = field(default_factory=dict, init=False)
 
@@ -254,7 +255,7 @@ class HippoRAGRetriever:
         if not doc_list:
             return
         embeddings = self.embedder.embed_batch([d.text for d in doc_list])
-        for doc, embedding in zip(doc_list, embeddings):
+        for doc, embedding in zip(doc_list, embeddings, strict=False):
             self._docs_by_id[doc.doc_id] = doc
             self._doc_embeddings[doc.doc_id] = _normalize(embedding)
             anchors: list[str] = []
@@ -273,7 +274,7 @@ class HippoRAGRetriever:
         *,
         top_k: int = 10,
         min_score: float = 0.0,
-    ) -> List[RetrievalResult]:
+    ) -> list[RetrievalResult]:
         """Run HippoRAG retrieval. Returns top-K ranked documents."""
         if not self._docs_by_id:
             return []
@@ -291,7 +292,7 @@ class HippoRAGRetriever:
             ppr_weights = {k: v / max_ppr for k, v in ppr_weights.items()}
 
         # 3. Score every doc.
-        scored: List[RetrievalResult] = []
+        scored: list[RetrievalResult] = []
         for doc_id, doc in self._docs_by_id.items():
             embedding = self._doc_embeddings.get(doc_id, [])
             cosine_score = cosine(query_embedding, embedding)

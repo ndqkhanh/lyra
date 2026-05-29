@@ -1,10 +1,7 @@
 """Tests for permission management system."""
 
-import json
 import tempfile
 from pathlib import Path
-
-import pytest
 
 from lyra_permissions import (
     PermissionDecision,
@@ -14,7 +11,6 @@ from lyra_permissions import (
     PermissionStore,
     PolicyEngine,
 )
-
 
 # Permission Manager Tests
 

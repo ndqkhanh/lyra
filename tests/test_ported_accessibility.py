@@ -75,7 +75,7 @@ def test_watchers_no_crash():
 
 def test_high_contrast_keys():
     from lyra_cli.tui_v2.widgets.accessibility_bridge import HIGH_CONTRAST_OVERRIDES
-    for theme, overrides in HIGH_CONTRAST_OVERRIDES.items():
+    for _theme, overrides in HIGH_CONTRAST_OVERRIDES.items():
         assert "primary" in overrides
         assert "foreground" in overrides
         assert "background" in overrides

@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 import logging
-import math
 import time
 from collections import defaultdict
-from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Any
 from uuid import uuid4
@@ -272,7 +270,7 @@ class EmergenceDetector:
     ) -> InteractionPattern:
         """Get existing pattern or create a new one for overlapping agents."""
         # Check for existing overlapping pattern
-        for pid, pattern in self._patterns.items():
+        for _pid, pattern in self._patterns.items():
             if (
                 pattern.pattern_type == pattern_type
                 and set(agents) & set(pattern.agents_involved)
@@ -388,8 +386,8 @@ class EmergenceDetector:
         if not a or not b:
             return 0.0
         # Jaccard-like: shared bigrams / total bigrams
-        bigrams_a = set(a[i : i + 2] for i in range(len(a) - 1))
-        bigrams_b = set(b[i : i + 2] for i in range(len(b) - 1))
+        bigrams_a = {a[i : i + 2] for i in range(len(a) - 1)}
+        bigrams_b = {b[i : i + 2] for i in range(len(b) - 1)}
         if not bigrams_a or not bigrams_b:
             return 0.0
         intersection = bigrams_a & bigrams_b
@@ -435,7 +433,7 @@ class EmergenceDetector:
         strategies = self.identify_emergent_strategies()
 
         # Pattern diversity
-        unique_types = len(set(p.pattern_type for p in self._patterns.values()))
+        unique_types = len({p.pattern_type for p in self._patterns.values()})
         total_patterns = len(self._patterns)
 
         # Novelty rate

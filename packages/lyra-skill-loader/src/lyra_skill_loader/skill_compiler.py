@@ -3,14 +3,12 @@ from __future__ import annotations
 
 import hashlib
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import numpy as np
 
-from lyra_skill_loader.exceptions import CompilationError
 from lyra_skill_loader.tiered_loader import LoadedSkill, SkillMetadata
-from lyra_skill_loader.trigger_matcher import Trigger
 
 if TYPE_CHECKING:
     from collections.abc import Sequence

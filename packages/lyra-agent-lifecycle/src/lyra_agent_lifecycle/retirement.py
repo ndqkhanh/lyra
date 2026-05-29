@@ -5,12 +5,12 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from collections.abc import Callable, Awaitable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any
 from uuid import uuid4
 
-from .lifecycle import AgentLifecycleManager, AgentRecord, LifecycleState
+from .lifecycle import AgentLifecycleManager, LifecycleState
 
 logger = logging.getLogger(__name__)
 
@@ -408,7 +408,7 @@ class AgentRetirement:
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
         outcomes: dict[str, RetirementAuditEntry] = {}
-        for aid, result in zip(agent_ids, results):
+        for aid, result in zip(agent_ids, results, strict=False):
             if isinstance(result, Exception):
                 logger.error("Failed to retire %s: %s", aid, result)
                 continue

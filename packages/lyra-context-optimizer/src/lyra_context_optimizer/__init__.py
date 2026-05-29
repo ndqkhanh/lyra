@@ -9,61 +9,53 @@ metrics tracking for compression effectiveness.
 from __future__ import annotations
 
 from .agent_driven_compaction import (
-    CompactionDecider,
-    CompactionStrategy,
-    CompactionPlanner,
     CompactionAction,
+    CompactionDecider,
+    CompactionPlanner,
+    CompactionStrategy,
 )
-
-from .verbatim_pruner import (
-    VerbatimPruner,
-    PruneStrategy,
-    PruneResult,
-)
-
 from .async_compactor import (
     AsyncCompactor,
     CompactionJudge,
     JudgeVerdict,
 )
-
-from .knowledge_blocks import (
-    KnowledgeBlock,
-    PriorityLevel,
-    KnowledgeBlockRegistry,
-)
-
-from .input_compressor import (
-    InputCompressor,
-    CompressionStrategy,
-    CompressionResult,
-)
-
-from .output_compressor import (
-    OutputCompressor,
-    CompressionConfig,
-)
-
-from .dacs_switcher import (
-    DACSManager,
-    DACSMode,
-    DACSConfig,
-)
-
 from .compression_metrics import (
     CompressionMetrics,
+    MetricsReport,
     MetricsSnapshot,
     StrategyStats,
-    MetricsReport,
 )
-
+from .dacs_switcher import (
+    DACSConfig,
+    DACSManager,
+    DACSMode,
+)
 from .exceptions import (
-    ContextOptimizerError,
     CompactionError,
     CompressionError,
-    KnowledgeBlockNotFoundError,
+    ContextOptimizerError,
     DACSConfigError,
     FidelityLossError,
+    KnowledgeBlockNotFoundError,
+)
+from .input_compressor import (
+    CompressionResult,
+    CompressionStrategy,
+    InputCompressor,
+)
+from .knowledge_blocks import (
+    KnowledgeBlock,
+    KnowledgeBlockRegistry,
+    PriorityLevel,
+)
+from .output_compressor import (
+    CompressionConfig,
+    OutputCompressor,
+)
+from .verbatim_pruner import (
+    PruneResult,
+    PruneStrategy,
+    VerbatimPruner,
 )
 
 __all__ = [

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Test agent system implementation"""
 
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
 
-from lyra_cli.agents import AgentManager, register_builtin_agents, AgentSelector
+from lyra_cli.agents import AgentManager, AgentSelector, register_builtin_agents
 
 
 def test_agent_system():
@@ -50,7 +51,7 @@ def test_agent_system():
             print(f"  → Selected: {agent.name} ({agent.model})")
         else:
             print(f"  Task: {task}")
-            print(f"  → No specific agent")
+            print("  → No specific agent")
     print()
 
     # Test agent prompt generation
@@ -58,15 +59,15 @@ def test_agent_system():
     planner = manager.get_agent("planner")
     if planner:
         prompt = manager.create_agent_prompt(planner, "Implement OAuth2 login")
-        print(f"  Generated prompt for 'planner' agent:")
+        print("  Generated prompt for 'planner' agent:")
         print(f"  Length: {len(prompt)} characters")
-        print(f"  Includes: task, instructions, tools, model")
+        print("  Includes: task, instructions, tools, model")
     print()
 
     # Test trigger matching
     print("4. Testing trigger matching:")
     suggestions = selector.suggest_agents("I need to plan a new feature")
-    print(f"  Suggestions for 'plan a new feature':")
+    print("  Suggestions for 'plan a new feature':")
     for agent in suggestions:
         print(f"  • {agent.name}")
     print()

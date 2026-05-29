@@ -13,13 +13,12 @@ from __future__ import annotations
 import logging
 import math
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
+from typing import Any
 
 from lyra_verification.models import (
     AttributionEigenvalues,
     EntityGrounding,
     HallucinationSignal,
-    Verdict,
 )
 
 logger = logging.getLogger(__name__)
@@ -29,7 +28,7 @@ logger = logging.getLogger(__name__)
 class _AttentionMatrix:
     """Lightweight stand-in for an attention matrix for testing."""
 
-    data: List[List[float]] = field(default_factory=list)
+    data: list[list[float]] = field(default_factory=list)
     n_heads: int = 1
 
 
@@ -71,13 +70,13 @@ class HallucinationDetector:
         ref_tokens = reference.split() if reference else []
 
         # Build reference token distribution
-        ref_freq: Dict[str, int] = {}
+        ref_freq: dict[str, int] = {}
         for t in ref_tokens:
             ref_freq[t] = ref_freq.get(t, 0) + 1
         ref_total = len(ref_tokens) if ref_tokens else 1
 
         # Per-token uncertainty: -log P(token|reference)
-        uncertainties: List[float] = []
+        uncertainties: list[float] = []
         for token in gen_tokens:
             # Laplace-smoothed probability
             prob = (ref_freq.get(token, 0) + 1) / (ref_total + len(ref_freq) + 1)
@@ -98,7 +97,7 @@ class HallucinationDetector:
     def compute_attention_eigenvalues(
         self,
         attention_matrix: Any,
-    ) -> Optional[List[float]]:
+    ) -> list[float] | None:
         """LapEigvals: spectral decomposition of attention.
 
         Converts an attention matrix to a Laplacian and returns its
@@ -118,7 +117,7 @@ class HallucinationDetector:
             degenerate.
         """
         if hasattr(attention_matrix, "data"):
-            data: List[List[float]] = attention_matrix.data
+            data: list[list[float]] = attention_matrix.data
         elif isinstance(attention_matrix, list):
             data = attention_matrix
         else:
@@ -141,7 +140,7 @@ class HallucinationDetector:
 
         # Spectral proxy: eigenvalues approximated from row similarities.
         # Use the Gram matrix of the normalised adjacency as a surrogate.
-        eigvals: List[float] = []
+        eigvals: list[float] = []
         for i in range(min(n_layers, n_tokens)):
             # Approximate i-th eigenvalue from i-th row of the
             # normalised Laplacian surrogate.
@@ -162,8 +161,8 @@ class HallucinationDetector:
     def check_entity_grounding(
         self,
         text: str,
-        knowledge_graph: Optional[Dict[str, List[Tuple[str, str]]]] = None,
-    ) -> List[EntityGrounding]:
+        knowledge_graph: dict[str, list[tuple[str, str]]] | None = None,
+    ) -> list[EntityGrounding]:
         """HalluGraph: verify named entities against a knowledge graph.
 
         Parameters
@@ -185,11 +184,11 @@ class HallucinationDetector:
         kg = knowledge_graph or {}
         entities = self._extract_noun_phrases(text)
 
-        results: List[EntityGrounding] = []
+        results: list[EntityGrounding] = []
         for entity in entities:
             raw_triples = kg.get(entity, [])
             if raw_triples:
-                expanded: List[Tuple[str, str, str]] = [
+                expanded: list[tuple[str, str, str]] = [
                     (entity, rel, obj) for rel, obj in raw_triples
                 ]
                 results.append(
@@ -292,13 +291,13 @@ class HallucinationDetector:
         self,
         text: str,
         reference: str,
-        attention_matrix: Optional[Any] = None,
-        knowledge_graph: Optional[Dict[str, List[Tuple[str, str]]]] = None,
+        attention_matrix: Any | None = None,
+        knowledge_graph: dict[str, list[tuple[str, str]]] | None = None,
     ) -> HallucinationSignal:
         """Run all detection methods and return a combined signal."""
         token_uncertainty = self.detect_haMI(text, reference)
 
-        eigenvalues: Optional[AttributionEigenvalues] = None
+        eigenvalues: AttributionEigenvalues | None = None
         if attention_matrix is not None:
             raw_eigvals = self.compute_attention_eigenvalues(attention_matrix)
             if raw_eigvals and len(raw_eigvals) >= 2:
@@ -332,10 +331,10 @@ class HallucinationDetector:
     # Internal helpers
     # ------------------------------------------------------------------
     @staticmethod
-    def _extract_noun_phrases(text: str) -> List[str]:
+    def _extract_noun_phrases(text: str) -> list[str]:
         """Simple heuristic noun-phrase extraction using capitalization."""
         words = text.split()
-        entities: List[str] = []
+        entities: list[str] = []
         for w in words:
             clean = w.strip(".,!?;:()[]{}\"'")
             if clean and clean[0].isupper() and not clean.isupper():
@@ -343,9 +342,9 @@ class HallucinationDetector:
         return entities
 
     @staticmethod
-    def _extract_relations(text: str) -> Set[Tuple[str, str, str]]:
+    def _extract_relations(text: str) -> set[tuple[str, str, str]]:
         """Simple heuristic relation extraction (subject-predicate-object)."""
-        relations: Set[Tuple[str, str, str]] = set()
+        relations: set[tuple[str, str, str]] = set()
         words = text.split()
         for i in range(len(words) - 2):
             subj = words[i].strip(".,!?;:")

@@ -19,7 +19,7 @@ class TestCoreIntegration:
     def test_imports_work(self):
         """Test that all modules can be imported."""
         # Core modules
-        from adapters.base import AdapterFactory, HarnessType
+        from adapters.base import AdapterFactory
         from memory.memory_store import MemoryStore
         from monitoring.token_observatory import TokenObservatory
         from optimization.token_optimizer import TokenOptimizer
@@ -97,7 +97,7 @@ class TestOptimizationIntegration:
 
     def test_optimizer_basic(self):
         """Test basic optimizer functionality."""
-        from optimization.token_optimizer import TokenOptimizer, LLMRequest, TaskType
+        from optimization.token_optimizer import LLMRequest, TaskType, TokenOptimizer
 
         optimizer = TokenOptimizer()
         request = LLMRequest(
@@ -135,8 +135,9 @@ class TestMonitoringIntegration:
 
     def test_activity_classification(self):
         """Test activity classification."""
-        from monitoring.token_observatory import TokenObservatory, Turn, ActivityCategory
         from datetime import datetime
+
+        from monitoring.token_observatory import ActivityCategory, TokenObservatory, Turn
 
         observatory = TokenObservatory()
         turn = Turn(
@@ -165,9 +166,9 @@ class TestMemoryIntegration:
 
     def test_memory_module_available(self):
         """Test memory module is available."""
+        from memory.long_term_memory import LongTermMemory
         from memory.memory_store import MemoryStore
         from memory.short_term_memory import ShortTermMemory
-        from memory.long_term_memory import LongTermMemory
 
         assert MemoryStore is not None
         assert ShortTermMemory is not None
@@ -179,8 +180,8 @@ class TestEndToEndWorkflow:
 
     def test_security_and_optimization(self):
         """Test security with optimization."""
+        from optimization.token_optimizer import LLMRequest, TaskType, TokenOptimizer
         from security.agent_shield import AgentShield
-        from optimization.token_optimizer import TokenOptimizer, LLMRequest, TaskType
 
         shield = AgentShield()
         optimizer = TokenOptimizer()
@@ -203,7 +204,7 @@ class TestEndToEndWorkflow:
     def test_adapter_with_optimizer(self):
         """Test adapter with optimizer."""
         from adapters.base import AdapterFactory, HarnessType, Message
-        from optimization.token_optimizer import TokenOptimizer, LLMRequest, TaskType
+        from optimization.token_optimizer import LLMRequest, TaskType, TokenOptimizer
 
         adapter = AdapterFactory.create_adapter(HarnessType.CLAUDE_CODE)
         optimizer = TokenOptimizer()
@@ -226,9 +227,9 @@ class TestEndToEndWorkflow:
 
     def test_full_pipeline(self):
         """Test full pipeline."""
-        from security.agent_shield import AgentShield
-        from optimization.token_optimizer import TokenOptimizer, LLMRequest, TaskType
         from monitoring.token_observatory import TokenObservatory
+        from optimization.token_optimizer import LLMRequest, TaskType, TokenOptimizer
+        from security.agent_shield import AgentShield
 
         # Components
         shield = AgentShield()
@@ -260,13 +261,14 @@ class TestPerformance:
     def test_memory_performance(self):
         """Test memory performance."""
         import time
+
         from memory.memory_store import MemoryStore
 
-        store = MemoryStore()
+        MemoryStore()
 
         start = time.time()
         # Just test instantiation performance
-        for i in range(100):
+        for _i in range(100):
             _ = MemoryStore()
         duration = time.time() - start
 
@@ -275,7 +277,8 @@ class TestPerformance:
     def test_optimizer_performance(self):
         """Test optimizer performance."""
         import time
-        from optimization.token_optimizer import TokenOptimizer, LLMRequest, TaskType
+
+        from optimization.token_optimizer import LLMRequest, TaskType, TokenOptimizer
 
         optimizer = TokenOptimizer()
 

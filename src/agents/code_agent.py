@@ -3,16 +3,16 @@ Code Agent - specialist for code-related tasks.
 """
 
 import asyncio
-from typing import Dict, Any
+from typing import Any
 
 from src.agents.base import Agent, AgentCapability, AgentStatus
-from src.core.task import Task, TaskType, Result
+from src.core.task import Result, Task, TaskType
 
 
 class CodeAgent(Agent):
     """
     Specialist agent for code-related tasks.
-    
+
     Capabilities:
     - Code analysis
     - Code generation
@@ -65,10 +65,10 @@ class CodeAgent(Agent):
     async def execute(self, task: Task) -> Result:
         """
         Execute a code-related task.
-        
+
         Args:
             task: Task to execute
-            
+
         Returns:
             Execution result
         """
@@ -112,13 +112,13 @@ class CodeAgent(Agent):
         self.record_execution(result)
         return result
 
-    async def analyze_code(self, task: Task) -> Dict[str, Any]:
+    async def analyze_code(self, task: Task) -> dict[str, Any]:
         """
         Analyze code quality and structure.
-        
+
         Args:
             task: Analysis task
-            
+
         Returns:
             Analysis results
         """
@@ -147,13 +147,13 @@ class CodeAgent(Agent):
             ],
         }
 
-    async def generate_code(self, task: Task) -> Dict[str, Any]:
+    async def generate_code(self, task: Task) -> dict[str, Any]:
         """
         Generate new code from specifications.
-        
+
         Args:
             task: Generation task
-            
+
         Returns:
             Generated code and metadata
         """
@@ -175,13 +175,13 @@ class CodeAgent(Agent):
             "lines_generated": 10,
         }
 
-    async def refactor_code(self, task: Task) -> Dict[str, Any]:
+    async def refactor_code(self, task: Task) -> dict[str, Any]:
         """
         Refactor existing code.
-        
+
         Args:
             task: Refactoring task
-            
+
         Returns:
             Refactoring results
         """
@@ -205,13 +205,13 @@ class CodeAgent(Agent):
             "complexity_improvement": "15%",
         }
 
-    async def review_code(self, task: Task) -> Dict[str, Any]:
+    async def review_code(self, task: Task) -> dict[str, Any]:
         """
         Review code for quality and issues.
-        
+
         Args:
             task: Review task
-            
+
         Returns:
             Review results
         """
@@ -241,10 +241,10 @@ class CodeAgent(Agent):
     def can_handle(self, task: Task) -> float:
         """
         Determine if this agent can handle a task.
-        
+
         Args:
             task: Task to evaluate
-            
+
         Returns:
             Confidence score (0-1)
         """

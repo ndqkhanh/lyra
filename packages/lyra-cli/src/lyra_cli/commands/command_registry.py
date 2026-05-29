@@ -57,7 +57,7 @@ class CommandRegistry:
 
     def list_categories(self) -> builtins.list[str]:
         """List all categories"""
-        categories = set(c.category for c in self.commands.values())
+        categories = {c.category for c in self.commands.values()}
         return sorted(categories)
 
     def exists(self, name: str) -> bool:

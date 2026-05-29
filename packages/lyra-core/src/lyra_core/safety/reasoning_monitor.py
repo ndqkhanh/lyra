@@ -342,7 +342,7 @@ class ReasoningMonitor:
         summary = (
             f"Detected {len(flags)} reasoning flags "
             f"({critical} critical, {high} high) across "
-            f"{len(set(f.pattern_type for f in flags))} pattern types."
+            f"{len({f.pattern_type for f in flags})} pattern types."
         )
 
         report = ReasoningReport(

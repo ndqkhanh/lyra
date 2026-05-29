@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from lyra_otel_tracer.exceptions import (
     CostAttributionError,
     DriftIntegrationError,

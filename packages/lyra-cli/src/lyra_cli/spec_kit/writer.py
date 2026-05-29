@@ -45,7 +45,7 @@ class Writer:
 
         # Emit event
         if self.event_bus:
-            event = SpecFilesWritten(feature_id=feature_id, paths=paths)
+            SpecFilesWritten(feature_id=feature_id, paths=paths)
             # Would emit to event bus here
 
         return paths

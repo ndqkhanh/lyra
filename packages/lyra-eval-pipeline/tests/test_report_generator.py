@@ -7,16 +7,17 @@ import os
 import tempfile
 
 import pytest
-
 from lyra_eval_pipeline import (
     DomainEvalReport,
-    EvalReport as EvalReportType,
     EvalResult,
     Leaderboard,
     LeaderboardEntry,
     ReportArtifact,
     ReportConfig,
     ReportGenerator,
+)
+from lyra_eval_pipeline import (
+    EvalReport as EvalReportType,
 )
 from lyra_eval_pipeline.exceptions import ReportError
 
@@ -171,7 +172,7 @@ class TestReportGenerator:
             path = f.name
 
         try:
-            content = await gen.export_markdown(report, path)
+            await gen.export_markdown(report, path)
             assert os.path.exists(path)
             with open(path) as f:
                 saved = f.read()
@@ -204,7 +205,7 @@ class TestReportGenerator:
             path = f.name
 
         try:
-            json_str = await gen.export_json(report, path)
+            await gen.export_json(report, path)
             assert os.path.exists(path)
             with open(path) as f:
                 saved = json.load(f)

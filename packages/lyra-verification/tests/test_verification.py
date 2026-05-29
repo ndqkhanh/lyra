@@ -2,28 +2,22 @@
 
 from __future__ import annotations
 
-import math
-from typing import Dict, List, Set, Tuple
-
 import pytest
-
 from lyra_verification import (
     AgentRegressionTester,
+    BehavioralFingerprint,
     ContinuousMonitor,
     DebiasedJudge,
-    HallucinationDetector,
-    InlineGuardSystem,
-    BehavioralFingerprint,
     DriftReport,
+    HallucinationDetector,
     InlineGuardResult,
+    InlineGuardSystem,
     JudgeEvaluation,
     PAEFFailure,
-    RegressionVerdict,
     SecurityCheck,
     Verdict,
     VerificationResult,
 )
-
 
 # ======================================================================
 # MODELS
@@ -297,7 +291,7 @@ class TestHallucinationDetector:
 
     def test_check_entity_grounding_present(self) -> None:
         hd = HallucinationDetector()
-        kg: Dict[str, List[Tuple[str, str]]] = {
+        kg: dict[str, list[tuple[str, str]]] = {
             "France": [("capital", "Paris")],
             "Paris": [("country", "France")],
         }
@@ -306,7 +300,7 @@ class TestHallucinationDetector:
 
     def test_check_entity_grounding_absent(self) -> None:
         hd = HallucinationDetector()
-        kg: Dict[str, List[Tuple[str, str]]] = {}
+        kg: dict[str, list[tuple[str, str]]] = {}
         results = hd.check_entity_grounding("Atlantis sank.", kg)
         assert any(r.entity == "Atlantis" and not r.present_in_kg for r in results)
 
@@ -324,7 +318,7 @@ class TestHallucinationDetector:
 
     def test_hybrid_score_all_clean(self) -> None:
         hd = HallucinationDetector()
-        kg: Dict[str, List[Tuple[str, str]]] = {}
+        kg: dict[str, list[tuple[str, str]]] = {}
         matrix = [[1.0, 0.5], [0.5, 1.0]]
         signal = hd.detect_all("The sky is blue.", "The sky is blue.", matrix, kg)
         score = hd.hybrid_score(signal)
@@ -352,7 +346,7 @@ class TestHallucinationDetector:
 
     def test_detect_all_full_pipeline(self) -> None:
         hd = HallucinationDetector()
-        kg: Dict[str, List[Tuple[str, str]]] = {"Paris": [("is", "capital")]}
+        kg: dict[str, list[tuple[str, str]]] = {"Paris": [("is", "capital")]}
         matrix = [[0.8, 0.2], [0.3, 0.7]]
         signal = hd.detect_all("Paris is capital.", "Paris is capital.", matrix, kg)
         assert signal.token_uncertainty >= 0.0
@@ -697,7 +691,7 @@ class TestContinuousMonitor:
 
     def test_compute_kg_structural_diff_identical(self) -> None:
         cm = ContinuousMonitor()
-        kg: Dict[str, Set[Tuple[str, str]]] = {
+        kg: dict[str, set[tuple[str, str]]] = {
             "Paris": {("is", "capital"), ("located_in", "France")},
         }
         diff = cm.compute_kg_structural_diff(kg, kg)
@@ -707,10 +701,10 @@ class TestContinuousMonitor:
 
     def test_compute_kg_structural_diff_disjoint(self) -> None:
         cm = ContinuousMonitor()
-        kg_a: Dict[str, Set[Tuple[str, str]]] = {
+        kg_a: dict[str, set[tuple[str, str]]] = {
             "Paris": {("is", "capital")},
         }
-        kg_b: Dict[str, Set[Tuple[str, str]]] = {
+        kg_b: dict[str, set[tuple[str, str]]] = {
             "London": {("is", "capital")},
         }
         diff = cm.compute_kg_structural_diff(kg_a, kg_b)
@@ -721,11 +715,11 @@ class TestContinuousMonitor:
 
     def test_compute_kg_structural_diff_partial(self) -> None:
         cm = ContinuousMonitor()
-        kg_a: Dict[str, Set[Tuple[str, str]]] = {
+        kg_a: dict[str, set[tuple[str, str]]] = {
             "Paris": {("is", "capital")},
             "France": {("has", "president")},
         }
-        kg_b: Dict[str, Set[Tuple[str, str]]] = {
+        kg_b: dict[str, set[tuple[str, str]]] = {
             "Paris": {("is", "capital")},
             "Germany": {("has", "chancellor")},
         }
@@ -804,7 +798,7 @@ class TestIntegration:
     def test_layer2_hallucination_pipeline(self) -> None:
         """Hallucination detector runs all detection methods end-to-end."""
         hd = HallucinationDetector()
-        kg: Dict[str, List[Tuple[str, str]]] = {
+        kg: dict[str, list[tuple[str, str]]] = {
             "Paris": [("is", "capital"), ("located_in", "France")],
             "France": [("has", "capital")],
         }
@@ -868,11 +862,11 @@ class TestIntegration:
     def test_all_layers_importable(self) -> None:
         """Every public symbol is importable and callable."""
         from lyra_verification import (
-            InlineGuardSystem,
-            HallucinationDetector,
-            DebiasedJudge,
             AgentRegressionTester,
             ContinuousMonitor,
+            DebiasedJudge,
+            HallucinationDetector,
+            InlineGuardSystem,
             Verdict,
             VerificationResult,
         )

@@ -11,7 +11,7 @@ import logging
 import time
 from collections import defaultdict
 from collections.abc import Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Any
 from uuid import uuid4
@@ -23,22 +23,16 @@ from .agent_spec import (
     InvalidSpecError,
     LifecycleHooks,
     ResourceLimits,
-    SkillRequirement,
 )
-from .communication import Channel, Message, MessageBus, Protocol
+from .communication import Message, MessageBus
 from .monitoring import (
     AgentStatus,
-    AlertRule,
-    AlertSeverity,
     ColonyMonitor,
-    MonitoringError,
 )
 from .scheduler import (
     ColonyScheduler,
-    NoAvailableAgentError,
     SchedulingStrategy,
     Task,
-    TaskAssignment,
     TaskState,
 )
 

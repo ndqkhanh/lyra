@@ -17,8 +17,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional, Protocol
-
+from typing import Protocol
 
 __all__ = [
     "CurationAction",
@@ -68,7 +67,7 @@ class CurationReward:
     content_quality: float = 0.0        # [0, 1]
     compression_ratio: float = 0.0      # higher = more compressed = better
 
-    def total(self, config: Optional[CurationRewardConfig] = None) -> float:
+    def total(self, config: CurationRewardConfig | None = None) -> float:
         cfg = config or CurationRewardConfig()
         return (
             cfg.task_outcome_weight * self.task_outcome
@@ -111,7 +110,7 @@ class SkillOSCurator:
         print(curator.mean_reward())
     """
 
-    def __init__(self, config: Optional[CurationRewardConfig] = None) -> None:
+    def __init__(self, config: CurationRewardConfig | None = None) -> None:
         self._config = config or CurationRewardConfig()
         self._decisions: list[CurationDecision] = []
         self._rewards: list[tuple[CurationDecision, CurationReward]] = []
@@ -163,5 +162,5 @@ class SkillOSCurator:
     def list_skills(self) -> list[str]:
         return list(self._skill_repo.keys())
 
-    def get_skill(self, skill_id: str) -> Optional[str]:
+    def get_skill(self, skill_id: str) -> str | None:
         return self._skill_repo.get(skill_id)

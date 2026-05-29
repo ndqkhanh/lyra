@@ -9,6 +9,7 @@ This package provides:
 - Task queue for distributed work distribution
 """
 
+from lyra_orchestration.coalition_coordinator import BidBasedScheduler, CoalitionAwareCoordinator
 from lyra_orchestration.consensus import (
     ConsensusProtocol,
     Proposal,
@@ -32,7 +33,6 @@ from lyra_orchestration.event_bus import (
     VulnerabilityDiscovered,
 )
 from lyra_orchestration.task_queue import Task, TaskPriority, TaskQueue, TaskStatus
-from lyra_orchestration.coalition_coordinator import CoalitionAwareCoordinator, BidBasedScheduler
 
 __version__ = "0.1.0"
 

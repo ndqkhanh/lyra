@@ -7,11 +7,10 @@ import random
 from dataclasses import FrozenInstanceError
 
 import pytest
-
 from lyra_arena import (
-    ArenaDomain,
     AgentArena,
     AgentEntry,
+    ArenaDomain,
     LeaderboardEntry,
     MatchOutcome,
     MatchRecord,
@@ -21,7 +20,6 @@ from lyra_arena import (
     TournamentFormat,
     TournamentResult,
 )
-
 
 # =========================================================================
 # Enum tests
@@ -244,7 +242,7 @@ class TestEloComputation:
 
     def test_compute_elo_expected_formula(self) -> None:
         """Verify the exact expected score formula."""
-        arena = AgentArena()
+        AgentArena()
         # Rating difference of 400: expected = 1/(1+10^(400/400)) = 1/11 ≈ 0.0909
         expected = 1.0 / (1.0 + 10.0 ** ((1500.0 - 1100.0) / 400.0))
         expected_approx = 1.0 / 11.0
@@ -678,9 +676,9 @@ class TestLeaderboard:
 
     def test_leaderboard_basic(self) -> None:
         arena = AgentArena()
-        a1 = arena.register_agent("alpha", "Alpha")
-        a2 = arena.register_agent("beta", "Beta")
-        a3 = arena.register_agent("gamma", "Gamma")
+        arena.register_agent("alpha", "Alpha")
+        arena.register_agent("beta", "Beta")
+        arena.register_agent("gamma", "Gamma")
 
         # Manually set different Elos by recording matches
         now = datetime.datetime.now()

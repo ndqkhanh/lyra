@@ -64,7 +64,7 @@ class CoalitionFormer:
         # Filter agents below the threshold
         filtered = [
             (c, a)
-            for c, a in zip(contributions, available_agents)
+            for c, a in zip(contributions, available_agents, strict=False)
             if c.shapley_value >= self._config.min_shapley_threshold
         ]
 

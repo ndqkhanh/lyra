@@ -2,10 +2,8 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_harness_core.cost import CostTracker
 from lyra_harness_core.eval_runner import (
-    DriftAlert,
     DriftMonitor,
     EvalCase,
     EvalResult,
@@ -13,7 +11,6 @@ from lyra_harness_core.eval_runner import (
     EvalRunner,
     EvalSuite,
 )
-
 
 # --- EvalCase / EvalResult / EvalSuite / EvalRun ----------------------
 
@@ -379,7 +376,8 @@ class TestNightlyCIScenario:
             EvalCase(case_id="q3", inputs={"q": "hard"}, expected_output="C"),
         ))
         # Day-1: program is good.
-        good_program = lambda inputs: {"easy": "A", "medium": "B", "hard": "C"}[inputs["q"]]
+        def good_program(inputs):
+            return {"easy": "A", "medium": "B", "hard": "C"}[inputs["q"]]
         runner = EvalRunner(program=good_program, eval_fn=_exact_match_eval)
         day1_run = runner.run(suite)
         assert day1_run.pass_rate == 1.0
@@ -391,9 +389,10 @@ class TestNightlyCIScenario:
             monitor.add_run(runner.run(suite))
 
         # Day-4: program degrades on hard cases.
-        degraded_program = lambda inputs: {
-            "easy": "A", "medium": "B", "hard": "WRONG",
-        }[inputs["q"]]
+        def degraded_program(inputs):
+            return {
+                    "easy": "A", "medium": "B", "hard": "WRONG",
+                }[inputs["q"]]
         bad_runner = EvalRunner(program=degraded_program, eval_fn=_exact_match_eval)
         day4_run = bad_runner.run(suite)
         # 2/3 pass-rate; mean_score = 2/3 ≈ 0.667.

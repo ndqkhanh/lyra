@@ -4,7 +4,6 @@ Skill registry for managing and retrieving skills.
 
 import json
 from pathlib import Path
-from typing import Dict, List, Optional, Set
 
 from .skill import Skill, SkillCategory, SkillSearchResult
 
@@ -18,10 +17,10 @@ class SkillRegistry:
 
     def __init__(self):
         """Initialize skill registry."""
-        self.skills: Dict[str, Skill] = {}
-        self._category_index: Dict[SkillCategory, Set[str]] = {}
-        self._tag_index: Dict[str, Set[str]] = {}
-        self._language_index: Dict[str, Set[str]] = {}
+        self.skills: dict[str, Skill] = {}
+        self._category_index: dict[SkillCategory, set[str]] = {}
+        self._tag_index: dict[str, set[str]] = {}
+        self._language_index: dict[str, set[str]] = {}
 
     def register(self, skill: Skill) -> None:
         """
@@ -80,7 +79,7 @@ class SkillRegistry:
         del self.skills[skill_name]
         return True
 
-    def get(self, skill_name: str) -> Optional[Skill]:
+    def get(self, skill_name: str) -> Skill | None:
         """
         Get a skill by name.
 
@@ -92,7 +91,7 @@ class SkillRegistry:
         """
         return self.skills.get(skill_name)
 
-    def find_by_trigger(self, text: str, limit: int = 10) -> List[SkillSearchResult]:
+    def find_by_trigger(self, text: str, limit: int = 10) -> list[SkillSearchResult]:
         """
         Find skills matching trigger patterns.
 
@@ -119,7 +118,7 @@ class SkillRegistry:
         results.sort(key=lambda r: r.score, reverse=True)
         return results[:limit]
 
-    def find_by_category(self, category: SkillCategory) -> List[Skill]:
+    def find_by_category(self, category: SkillCategory) -> list[Skill]:
         """
         Find skills by category.
 
@@ -132,7 +131,7 @@ class SkillRegistry:
         skill_names = self._category_index.get(category, set())
         return [self.skills[name] for name in skill_names]
 
-    def find_by_tags(self, tags: Set[str], match_all: bool = False) -> List[Skill]:
+    def find_by_tags(self, tags: set[str], match_all: bool = False) -> list[Skill]:
         """
         Find skills by tags.
 
@@ -160,7 +159,7 @@ class SkillRegistry:
 
         return [self.skills[name] for name in matching_names]
 
-    def find_by_language(self, language: str) -> List[Skill]:
+    def find_by_language(self, language: str) -> list[Skill]:
         """
         Find skills by programming language.
 
@@ -176,11 +175,11 @@ class SkillRegistry:
     def search(
         self,
         query: str,
-        category: Optional[SkillCategory] = None,
-        tags: Optional[Set[str]] = None,
-        language: Optional[str] = None,
+        category: SkillCategory | None = None,
+        tags: set[str] | None = None,
+        language: str | None = None,
         limit: int = 10,
-    ) -> List[SkillSearchResult]:
+    ) -> list[SkillSearchResult]:
         """
         Search for skills with multiple filters.
 
@@ -244,7 +243,7 @@ class SkillRegistry:
         results.sort(key=lambda r: r.score, reverse=True)
         return results[:limit]
 
-    def get_statistics(self) -> Dict[str, any]:
+    def get_statistics(self) -> dict[str, any]:
         """
         Get registry statistics.
 
@@ -293,7 +292,7 @@ class SkillRegistry:
         Returns:
             Number of skills loaded
         """
-        with open(path, "r") as f:
+        with open(path) as f:
             data = json.load(f)
 
         count = 0

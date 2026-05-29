@@ -14,13 +14,11 @@ import json
 from pathlib import Path
 
 import pytest
-
 from lyra_mcp.client.config import (
     MCPLoadResult,
     MCPServerConfig,
     add_user_mcp_server,
     default_config_paths,
-    load_mcp_config,
     load_mcp_config_from,
     remove_user_mcp_server,
 )

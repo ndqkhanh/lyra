@@ -4,8 +4,7 @@ Tests for Advanced Metaproductivity Tracking (T102)
 Tests clade diversity, cross-time replay, and diversity preservation.
 """
 
-import pytest
-from lyra_evolution.parallel_exploration import ParallelExplorationEngine, AgentNode
+from lyra_evolution.parallel_exploration import AgentNode, ParallelExplorationEngine
 
 
 class TestCladeDiversity:
@@ -16,7 +15,7 @@ class TestCladeDiversity:
         engine = ParallelExplorationEngine(n_workers=2)
 
         baseline = {"skills": ["skill1", "skill2"]}
-        root_id = engine.initialize(baseline)
+        engine.initialize(baseline)
 
         # Explore one generation to create children
         engine.explore_generation(n_mutations=3)

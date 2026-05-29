@@ -10,10 +10,10 @@ import logging
 import math
 import re
 import time
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Sequence, Set, Tuple
 
-from lyra_verification.models import SecurityCheck, VerificationResult, Verdict
+from lyra_verification.models import SecurityCheck, Verdict, VerificationResult
 
 logger = logging.getLogger(__name__)
 
@@ -31,13 +31,13 @@ _IP_ADDRESS_PATTERN = re.compile(
     r"\b(?:\d{1,3}\.){3}\d{1,3}\b"
 )
 
-_TOXIC_PATTERNS: List[Tuple[re.Pattern, float]] = [
+_TOXIC_PATTERNS: list[tuple[re.Pattern, float]] = [
     (re.compile(r"(?i)\b(hate|stupid|idiot|dumb|moron|trash)\b"), 0.4),
     (re.compile(r"(?i)\b(kill|die|murder|destroy)\b.*?\b(you|everyone|them)\b"), 0.7),
     (re.compile(r"(?i)\b(fuck|shit|asshole|bastard)\b"), 0.5),
 ]
 
-_INJECTION_PATTERNS: List[re.Pattern] = [
+_INJECTION_PATTERNS: list[re.Pattern] = [
     re.compile(r"(?i)\bignore\s+(all\s+)?(previous|prior|above)\s+instructions\b"),
     re.compile(r"(?i)\bdisregard\s+(all\s+)?(previous|prior|above)\b"),
     re.compile(r"(?i)\bforget\s+(everything|all)\b"),
@@ -56,11 +56,11 @@ class InlineGuardResult:
     passed: bool
     pii_redacted: str
     toxicity_score: float
-    toxicity_details: Dict[str, float]
+    toxicity_details: dict[str, float]
     nli_entailment_score: float
     token_entropy: float
     injection_detected: bool
-    injection_details: List[str]
+    injection_details: list[str]
     latency_ms: float
     checks: Sequence[SecurityCheck] = field(default_factory=list)
     num_pii_entities: int = 0
@@ -70,7 +70,7 @@ class InlineGuardSystem:
     """Layer 1 verification — all guards run inline with <200 ms target."""
 
     def __init__(self) -> None:
-        self._nli_vocab: Set[str] = {
+        self._nli_vocab: set[str] = {
             "therefore", "consequently", "thus", "hence", "accordingly",
             "implies", "entails", "follows", "so", "because",
         }
@@ -78,7 +78,7 @@ class InlineGuardSystem:
     # ------------------------------------------------------------------
     # PII detection & redaction
     # ------------------------------------------------------------------
-    def check_pii(self, text: str) -> Tuple[str, List[str], int]:
+    def check_pii(self, text: str) -> tuple[str, list[str], int]:
         """Detect and redact PII from *text*.
 
         Returns
@@ -90,7 +90,7 @@ class InlineGuardSystem:
         count : int
             Number of unique PII entities detected.
         """
-        findings: List[str] = []
+        findings: list[str] = []
         redacted = text
 
         emails = _EMAIL_PATTERN.findall(redacted)
@@ -124,13 +124,13 @@ class InlineGuardSystem:
     # ------------------------------------------------------------------
     # Toxicity
     # ------------------------------------------------------------------
-    def check_toxicity(self, text: str) -> Tuple[float, Dict[str, float]]:
+    def check_toxicity(self, text: str) -> tuple[float, dict[str, float]]:
         """Compute a toxicity score in [0, 1] using keyword pattern matching.
 
         Returns (max_score, breakdown) where *breakdown* maps each matched
         pattern label to its partial score.
         """
-        breakdown: Dict[str, float] = {}
+        breakdown: dict[str, float] = {}
         for pattern, weight in _TOXIC_PATTERNS:
             matches = pattern.findall(text)
             if matches:
@@ -184,7 +184,7 @@ class InlineGuardSystem:
             return 0.0
 
         n = len(tokens)
-        freq: Dict[str, int] = {}
+        freq: dict[str, int] = {}
         for t in tokens:
             freq[t] = freq.get(t, 0) + 1
 
@@ -201,13 +201,13 @@ class InlineGuardSystem:
     # ------------------------------------------------------------------
     # Prompt injection
     # ------------------------------------------------------------------
-    def detect_prompt_injection(self, prompt: str) -> Tuple[bool, List[str]]:
+    def detect_prompt_injection(self, prompt: str) -> tuple[bool, list[str]]:
         """Detect prompt-injection patterns.
 
         Returns (detected, details) where *detected* is True if any
         injection pattern matched, and *details* lists the patterns hit.
         """
-        details: List[str] = []
+        details: list[str] = []
         for pattern in _INJECTION_PATTERNS:
             if pattern.search(prompt):
                 details.append(f"matched: {pattern.pattern}")
@@ -234,7 +234,7 @@ class InlineGuardSystem:
         elapsed_ms = (time.perf_counter() - start) * 1000.0
 
         # Build individual check records
-        checks: List[SecurityCheck] = []
+        checks: list[SecurityCheck] = []
         checks.append(
             SecurityCheck(
                 check_type="pii",

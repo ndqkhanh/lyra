@@ -66,7 +66,7 @@ def _flock(lock_path: Path) -> Iterator[None]:
                     break
                 except BlockingIOError:
                     if time.time() > deadline:
-                        raise TimeoutError(f"could not acquire {lock_path}")
+                        raise TimeoutError(f"could not acquire {lock_path}") from None
                     time.sleep(0.05)
             try:
                 yield
@@ -81,7 +81,7 @@ def _flock(lock_path: Path) -> Iterator[None]:
                     break
                 except OSError:
                     if time.time() > deadline:
-                        raise TimeoutError(f"could not acquire {lock_path}")
+                        raise TimeoutError(f"could not acquire {lock_path}") from None
                     time.sleep(0.05)
             try:
                 yield

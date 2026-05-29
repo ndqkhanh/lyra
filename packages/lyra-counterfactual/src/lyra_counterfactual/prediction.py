@@ -4,12 +4,11 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
-from scipy import stats
-
 from lyra_causal_graph.scm import StructuralCausalModel
+from scipy import stats
 
 from .errors import PredictionError
 
@@ -42,7 +41,7 @@ class PredictionConfig:
     confidence_level: float = 0.95
     compute_full_distribution: bool = True
     uncertainty_methods: list[str] = field(default_factory=lambda: ["std", "entropy", "quantile_range"])
-    random_seed: Optional[int] = None
+    random_seed: int | None = None
 
 
 @dataclass
@@ -87,7 +86,7 @@ class PredictionResult:
     target_var: str
     expected_value: float
     median: float = 0.0
-    samples: Optional[np.ndarray] = None
+    samples: np.ndarray | None = None
     uncertainty: UncertaintyMetrics = field(default_factory=UncertaintyMetrics)
     ci_lower: float = 0.0
     ci_upper: float = 0.0
@@ -127,7 +126,7 @@ class PredictionEngine:
     def __init__(
         self,
         scm: StructuralCausalModel,
-        config: Optional[PredictionConfig] = None,
+        config: PredictionConfig | None = None,
     ) -> None:
         if scm is None:
             raise PredictionError("SCM must not be None.")
@@ -379,7 +378,7 @@ class PredictionEngine:
     def compare_scenarios(
         self,
         results: list[PredictionResult],
-        names: Optional[list[str]] = None,
+        names: list[str] | None = None,
     ) -> dict[str, Any]:
         """Compare multiple prediction scenarios.
 
@@ -406,7 +405,7 @@ class PredictionEngine:
         best_val = -float("inf")
         worst_val = float("inf")
 
-        for i, (result, name) in enumerate(zip(results, names)):
+        for i, (result, name) in enumerate(zip(results, names, strict=False)):
             summary = {
                 "name": name,
                 "target": result.target_var,

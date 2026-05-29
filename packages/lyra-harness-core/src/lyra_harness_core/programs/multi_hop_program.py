@@ -13,8 +13,9 @@ compiled programs are replayable.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field, replace
-from typing import Any, Callable, Iterable, Optional
+from collections.abc import Callable, Iterable
+from dataclasses import dataclass, replace
+from typing import Any
 
 from ..pipeline import MultiHopPipeline, PipelineResult
 
@@ -49,7 +50,7 @@ class Signature:
                 f"output {self.output!r} cannot also be an input field"
             )
 
-    def render(self, *, demonstrations: Iterable["Demonstration"] = ()) -> str:
+    def render(self, *, demonstrations: Iterable[Demonstration] = ()) -> str:
         """Render the prompt header (instruction + demonstrations)."""
         lines = [self.instruction.rstrip(), ""]
         demos = tuple(demonstrations)
@@ -167,14 +168,14 @@ class MultiHopProgram:
     def with_demonstrations(
         self,
         demonstrations: Iterable[Demonstration],
-    ) -> "MultiHopProgram":
+    ) -> MultiHopProgram:
         """Return a new program with the given demonstrations attached.
 
         Immutable update — the original program is unchanged.
         """
         return replace(self, demonstrations=tuple(demonstrations))
 
-    def with_signature(self, signature: Signature) -> "MultiHopProgram":
+    def with_signature(self, signature: Signature) -> MultiHopProgram:
         """Return a new program with a different signature."""
         return replace(self, signature=signature)
 

@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """Test Scrollback Buffer - Phase 3"""
 
-import sys
 import os
+import sys
 import tempfile
-from datetime import datetime, timedelta
 
 # Add to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
@@ -15,7 +14,6 @@ def test_imports():
     print("Testing imports...")
 
     try:
-        from lyra_cli.scrollback import ScrollbackBuffer, ScrollbackLine
         print("✓ ScrollbackBuffer import successful")
         return True
     except Exception as e:

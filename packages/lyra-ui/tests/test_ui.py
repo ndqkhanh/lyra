@@ -1,10 +1,7 @@
 """Tests for Rich console and progress indicators."""
 
-import pytest
-from rich.theme import Theme
-
 from lyra_ui import ProgressManager, RichConsole, Spinner, console
-
+from rich.theme import Theme
 
 # Console Tests
 

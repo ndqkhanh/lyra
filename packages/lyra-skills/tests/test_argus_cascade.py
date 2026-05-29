@@ -10,9 +10,7 @@ import json
 from pathlib import Path
 
 import pytest
-
 from harness_skill_router import SkillSource, TrustTier
-
 from lyra_skills.argus_bridge import (
     argus_skill_to_manifest,
     manifest_to_argus_skill,
@@ -243,6 +241,8 @@ class TestTelemetryBridge:
     def test_mirror_registry_writes_to_argus(self, tmp_path: Path) -> None:
         from lyra_core.skills.registry import (
             Skill as LyraSkill,
+        )
+        from lyra_core.skills.registry import (
             SkillRegistry,
         )
 
@@ -271,6 +271,8 @@ class TestTelemetryBridge:
     def test_restore_detaches_bridge(self, tmp_path: Path) -> None:
         from lyra_core.skills.registry import (
             Skill as LyraSkill,
+        )
+        from lyra_core.skills.registry import (
             SkillRegistry,
         )
 

@@ -259,7 +259,7 @@ class TestSprintPipeline:
     def test_get_active_sprints(self):
         pipeline = SprintPipeline()
         s1 = pipeline.create_sprint(goal="Active", team_agents=["a"])
-        s2 = pipeline.create_sprint(goal="Inactive", team_agents=["a"])
+        pipeline.create_sprint(goal="Inactive", team_agents=["a"])
         pipeline.start(s1.sprint_id)
         active = pipeline.get_active_sprints()
         assert len(active) == 1

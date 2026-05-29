@@ -13,7 +13,6 @@ from lyra_privacy import (
     PrivacyPreservingAgent,
 )
 
-
 # Data class tests
 
 
@@ -175,10 +174,10 @@ def test_agent_init_default():
     """Test agent initialization with default config."""
     agent = PrivacyPreservingAgent()
     assert agent.agent_id.startswith("agent_")
-    assert getattr(agent, "_total_queries") == 0
-    assert getattr(agent, "_total_epsilon_spent") == 0.0
-    assert getattr(agent, "_total_federated_rounds") == 0
-    assert getattr(agent, "_total_attestations") == 0
+    assert agent._total_queries == 0
+    assert agent._total_epsilon_spent == 0.0
+    assert agent._total_federated_rounds == 0
+    assert agent._total_attestations == 0
 
 
 def test_agent_init_custom():
@@ -286,7 +285,7 @@ def test_query_with_dp_budget_depletion():
             agent.query_with_dp("SELECT * FROM users", "dataset-1")
         )
 
-    succeeds = [r for r in results if r.success]
+    [r for r in results if r.success]
     fails = [r for r in results if not r.success]
 
     assert len(fails) >= 1

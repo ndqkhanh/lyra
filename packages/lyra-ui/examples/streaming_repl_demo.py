@@ -9,8 +9,8 @@ import asyncio
 from lyra_ui.streaming_repl import (
     REPLConfig,
     REPLMode,
-    StreamingREPL,
     StatusBar,
+    StreamingREPL,
     ToolProgressDisplay,
 )
 

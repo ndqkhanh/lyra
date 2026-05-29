@@ -6,15 +6,14 @@ streaming verification for long outputs, and inline correction suggestions.
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import re
-import time
-from dataclasses import dataclass, field
+from collections.abc import Callable
+from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Any, Callable, Optional, Pattern
+from typing import Any
 
-from .verification_mesh import VerificationLayer, VerificationStatus, VerificationResult
+from .verification_mesh import VerificationLayer, VerificationResult, VerificationStatus
 
 logger = logging.getLogger(__name__)
 
@@ -45,8 +44,8 @@ class CPLRule:
 
     name: str
     description: str = ""
-    pattern: Optional[str] = None
-    check_fn: Optional[Callable[[str], tuple[bool, str]]] = None
+    pattern: str | None = None
+    check_fn: Callable[[str], tuple[bool, str]] | None = None
     severity: CheckSeverity = CheckSeverity.WARNING
     enabled: bool = True
 
@@ -311,7 +310,7 @@ class CPLVerifier:
 
     # ── Streaming verification ──────────────────────────────────────────
 
-    async def verify_stream(self, token: str) -> Optional[VerificationResult]:
+    async def verify_stream(self, token: str) -> VerificationResult | None:
         """Verify a token as it arrives in a stream.
 
         Accumulates tokens in a buffer and runs light-weight checks

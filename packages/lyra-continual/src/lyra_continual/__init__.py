@@ -135,6 +135,9 @@ class ContinualLearner:
 # New models
 # ═══════════════════════════════════════════════════════════════════════════
 
+# ECC v2 + MetaClaw
+from .instinct import InstinctEngine  # noqa: E402
+from .metaclaw import MetaClaw  # noqa: E402
 from .models import (  # noqa: E402
     ContinualEpisode,
     CrossRunInsight,
@@ -155,10 +158,6 @@ from .molem import MoLEMEngine  # noqa: E402
 
 # SkillPack compression
 from .skill_pack import SkillPackCompressor  # noqa: E402
-
-# ECC v2 + MetaClaw
-from .instinct import InstinctEngine  # noqa: E402
-from .metaclaw import MetaClaw  # noqa: E402
 
 __all__ = [
     # Legacy

@@ -12,9 +12,10 @@ from __future__ import annotations
 
 import logging
 import math
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
+from collections.abc import Callable, Sequence
+from typing import Any
 
-from lyra_verification.models import JudgeEvaluation, Verdict
+from lyra_verification.models import JudgeEvaluation
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +38,7 @@ class DebiasedJudge:
 
     def __init__(
         self,
-        judge_fn: Optional[Callable[..., Any]] = None,
+        judge_fn: Callable[..., Any] | None = None,
     ) -> None:
         """Initialise with an optional external judge callable.
 
@@ -147,7 +148,7 @@ class DebiasedJudge:
         ]
 
         # Score in reversed order
-        reversed_scores = [
+        [
             self._judge_fn(r, "quality")
             for r in reversed(responses)
         ]
@@ -155,7 +156,7 @@ class DebiasedJudge:
         # Compute mean absolute score difference per item
         diffs = [
             abs(orig - rev)
-            for orig, rev in zip(original_scores, reversed(original_scores))
+            for orig, rev in zip(original_scores, reversed(original_scores), strict=False)
         ]
         avg_diff = sum(diffs) / len(diffs)
 
@@ -200,7 +201,7 @@ class DebiasedJudge:
             )
 
         # Each debater scores each response
-        all_scores: List[List[float]] = []
+        all_scores: list[list[float]] = []
         for i in range(n_debaters):
             seed_offset = i * 0.01  # small variance between debaters
             scores = [
@@ -210,7 +211,7 @@ class DebiasedJudge:
             all_scores.append(scores)
 
         # Per-response trimmed mean (discard min and max per debater set)
-        per_response_means: List[float] = []
+        per_response_means: list[float] = []
         for resp_idx in range(len(responses)):
             debater_scores = [s[resp_idx] for s in all_scores]
             debater_scores.sort()
@@ -244,7 +245,7 @@ class DebiasedJudge:
         self,
         judgments: Sequence[JudgeEvaluation],
         ground_truth: Sequence[float],
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """Compute calibration metrics.
 
         Parameters
@@ -268,15 +269,15 @@ class DebiasedJudge:
         n = len(preds)
 
         # MAE
-        mae = sum(abs(p - t) for p, t in zip(preds, truths)) / n
+        mae = sum(abs(p - t) for p, t in zip(preds, truths, strict=False)) / n
 
         # RMSE
-        rmse = math.sqrt(sum((p - t) ** 2 for p, t in zip(preds, truths)) / n)
+        rmse = math.sqrt(sum((p - t) ** 2 for p, t in zip(preds, truths, strict=False)) / n)
 
         # Pearson r
         mean_p = sum(preds) / n
         mean_t = sum(truths) / n
-        num = sum((p - mean_p) * (t - mean_t) for p, t in zip(preds, truths))
+        num = sum((p - mean_p) * (t - mean_t) for p, t in zip(preds, truths, strict=False))
         den = math.sqrt(
             sum((p - mean_p) ** 2 for p in preds)
             * sum((t - mean_t) ** 2 for t in truths)
@@ -286,13 +287,13 @@ class DebiasedJudge:
         # Spearman rho
         rank_p = self._rank(preds)
         rank_t = self._rank(truths)
-        d_sq = sum((rp - rt) ** 2 for rp, rt in zip(rank_p, rank_t))
+        d_sq = sum((rp - rt) ** 2 for rp, rt in zip(rank_p, rank_t, strict=False))
         spearman = 1.0 - (6.0 * d_sq) / (n * (n * n - 1)) if n > 1 else 0.0
 
         # Accuracy: proportion where both are on same side of 0.5
         correct = sum(
             1
-            for p, t in zip(preds, truths)
+            for p, t in zip(preds, truths, strict=False)
             if (p >= 0.5) == (t >= 0.5)
         )
         accuracy = correct / n
@@ -347,10 +348,10 @@ class DebiasedJudge:
     # Utility
     # ------------------------------------------------------------------
     @staticmethod
-    def _rank(values: Sequence[float]) -> List[float]:
+    def _rank(values: Sequence[float]) -> list[float]:
         """Rank values (1 = smallest); ties get average rank."""
         sorted_vals = sorted(values)
-        ranks: Dict[float, float] = {}
+        ranks: dict[float, float] = {}
         for i, v in enumerate(sorted_vals):
             if v not in ranks:
                 # Compute average rank for ties

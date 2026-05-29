@@ -3,17 +3,18 @@
 import sys
 from pathlib import Path
 
+
 def log(msg):
     print(f"[DEBUG] {msg}", file=sys.stderr, flush=True)
 
 log("Starting instrumented test...")
 
-from lyra_cli.tui_v2.transport import LyraTransport
 from harness_tui import ProjectConfig
 from lyra_cli.tui_v2 import lyra_theme
-from lyra_cli.tui_v2.sidebar import build_lyra_sidebar_tabs
-from lyra_cli.tui_v2.commands import register_lyra_commands
 from lyra_cli.tui_v2.app import LyraHarnessApp
+from lyra_cli.tui_v2.commands import register_lyra_commands
+from lyra_cli.tui_v2.sidebar import build_lyra_sidebar_tabs
+from lyra_cli.tui_v2.transport import LyraTransport
 
 # Patch the app to log lifecycle events
 original_run = LyraHarnessApp.run
@@ -22,11 +23,11 @@ def instrumented_run(self, *args, **kwargs):
     log("app.run() called")
     log(f"  args: {args}")
     log(f"  kwargs: {kwargs}")
-    
+
     # Patch the driver to see what's happening
     import textual.app
     original_process_messages = textual.app.App._process_messages
-    
+
     async def logged_process_messages(app_self):
         log("  → _process_messages started")
         try:
@@ -36,9 +37,9 @@ def instrumented_run(self, *args, **kwargs):
         except Exception as e:
             log(f"  → _process_messages raised: {e}")
             raise
-    
+
     textual.app.App._process_messages = logged_process_messages
-    
+
     try:
         result = original_run(self, *args, **kwargs)
         log(f"app.run() returned: {result}")

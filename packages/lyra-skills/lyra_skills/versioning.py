@@ -10,13 +10,12 @@ Tracks skill evolution through git commits, enabling:
 Based on research: Best practices for skill management
 """
 
-from typing import List, Dict, Any, Optional
-from dataclasses import dataclass
-from pathlib import Path
-from datetime import datetime
-import subprocess
-import json
 import hashlib
+import subprocess
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 
 @dataclass
@@ -119,7 +118,7 @@ class SkillVersionManager:
         )
         return result.stdout.strip()
 
-    def get_version_history(self, skill_file: Path) -> List[SkillVersion]:
+    def get_version_history(self, skill_file: Path) -> list[SkillVersion]:
         """
         Get version history for a skill.
 
@@ -245,7 +244,7 @@ class SkillVersionManager:
             author="Lyra Skills System"
         )
 
-    def get_lineage(self, skill_file: Path) -> Dict[str, Any]:
+    def get_lineage(self, skill_file: Path) -> dict[str, Any]:
         """
         Get complete lineage of a skill.
 
@@ -297,7 +296,7 @@ class SkillVersionManager:
             check=True
         )
 
-    def list_tags(self, skill_file: Path) -> List[str]:
+    def list_tags(self, skill_file: Path) -> list[str]:
         """List all tags for a skill."""
         result = subprocess.run(
             ["git", "tag", "--contains", self._get_latest_commit_hash(skill_file)],
@@ -315,7 +314,7 @@ def create_versioned_skill(
     skill_content: str,
     skill_name: str,
     version: str = "1.0.0",
-    commit_message: Optional[str] = None
+    commit_message: str | None = None
 ) -> Path:
     """
     Create a new skill with automatic versioning.

@@ -1,7 +1,6 @@
 """Tests for enhanced commands."""
 
 import pytest
-
 from lyra_cli.commands.enhanced import CommandEnhancer
 
 

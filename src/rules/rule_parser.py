@@ -4,7 +4,6 @@ Rule parser for loading rules from markdown files.
 
 import re
 from pathlib import Path
-from typing import Dict, Optional
 
 import yaml
 
@@ -24,7 +23,7 @@ class RuleParser:
         re.DOTALL
     )
 
-    def parse_file(self, path: Path) -> Optional[Rule]:
+    def parse_file(self, path: Path) -> Rule | None:
         """
         Parse a rule definition file.
 
@@ -35,7 +34,7 @@ class RuleParser:
             Parsed rule or None if parsing fails
         """
         try:
-            with open(path, "r") as f:
+            with open(path) as f:
                 content = f.read()
 
             return self.parse_string(content, source_file=str(path))
@@ -47,8 +46,8 @@ class RuleParser:
     def parse_string(
         self,
         content: str,
-        source_file: Optional[str] = None,
-    ) -> Optional[Rule]:
+        source_file: str | None = None,
+    ) -> Rule | None:
         """
         Parse a rule from string content.
 
@@ -121,7 +120,7 @@ class RuleParser:
         self,
         directory: Path,
         recursive: bool = True,
-    ) -> Dict[str, Rule]:
+    ) -> dict[str, Rule]:
         """
         Parse all rule files in a directory.
 

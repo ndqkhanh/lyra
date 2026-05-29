@@ -24,7 +24,7 @@ class ReasoningStrategy(str, Enum):
 
 class ReasoningDepth(str, Enum):
     """Reasoning depth levels."""
-    
+
     QUICK = "quick"
     STANDARD = "standard"
     COMPREHENSIVE = "comprehensive"
@@ -32,7 +32,7 @@ class ReasoningDepth(str, Enum):
 
 class StepType(str, Enum):
     """Types of reasoning steps."""
-    
+
     HYPOTHESIS = "hypothesis"
     EVIDENCE = "evidence"
     ANALYSIS = "analysis"
@@ -43,7 +43,7 @@ class StepType(str, Enum):
 
 class DifficultyLevel(str, Enum):
     """Task difficulty levels."""
-    
+
     TRIVIAL = "trivial"
     EASY = "easy"
     MEDIUM = "medium"
@@ -54,7 +54,7 @@ class DifficultyLevel(str, Enum):
 @dataclass
 class ReasoningStep:
     """A single step in a reasoning trace."""
-    
+
     content: str
     step_type: StepType
     verification_score: float = 0.0
@@ -66,7 +66,7 @@ class ReasoningStep:
 @dataclass
 class VerificationResult:
     """Result of reasoning verification."""
-    
+
     overall_score: float
     step_scores: List[float]
     trace_score: float
@@ -79,7 +79,7 @@ class VerificationResult:
 @dataclass
 class ReasoningTrace:
     """Complete reasoning trace for a task."""
-    
+
     task: str
     strategy: ReasoningStrategy
     steps: List[ReasoningStep]
@@ -89,11 +89,11 @@ class ReasoningTrace:
     token_count: int = 0
     timestamp: datetime = field(default_factory=datetime.now)
     metadata: Dict[str, Any] = field(default_factory=dict)
-    
+
     def add_step(self, step: ReasoningStep) -> None:
         """Add a reasoning step to the trace."""
         self.steps.append(step)
-    
+
     def get_conclusion(self) -> Optional[str]:
         """Get the final conclusion from the trace."""
         conclusion_steps = [s for s in self.steps if s.step_type == StepType.CONCLUSION]
@@ -102,7 +102,7 @@ class ReasoningTrace:
 
 class ReasoningConfig(BaseModel):
     """Configuration for reasoning execution."""
-    
+
     strategy: ReasoningStrategy = Field(default=ReasoningStrategy.AUTO)
     depth: ReasoningDepth = Field(default=ReasoningDepth.STANDARD)
     max_tokens: int = Field(default=10000, ge=100, le=100000)
@@ -124,7 +124,7 @@ class ComputeBudget:
     tokens_used: int = 0
     time_used: float = 0.0
     steps_used: int = 0
-    
+
     def has_budget(self) -> bool:
         """Check if budget remains."""
         return (
@@ -132,15 +132,15 @@ class ComputeBudget:
             and self.time_used < self.max_time_seconds
             and self.steps_used < self.max_steps
         )
-    
+
     def use_tokens(self, count: int) -> None:
         """Use tokens from budget."""
         self.tokens_used += count
-    
+
     def use_time(self, seconds: float) -> None:
         """Use time from budget."""
         self.time_used += seconds
-    
+
     def use_step(self) -> None:
         """Use a step from budget."""
         self.steps_used += 1
@@ -149,7 +149,7 @@ class ComputeBudget:
 @dataclass
 class DifficultyEstimate:
     """Estimated difficulty of a task."""
-    
+
     level: DifficultyLevel
     confidence: float
     reasoning: str
@@ -159,7 +159,7 @@ class DifficultyEstimate:
 
 class ReasoningResult(BaseModel):
     """Final result of reasoning execution."""
-    
+
     task: str
     conclusion: str
     reasoning_trace: Optional[Dict[str, Any]] = None
@@ -174,7 +174,7 @@ class ReasoningResult(BaseModel):
 @dataclass
 class ReasoningPattern:
     """A learned reasoning pattern."""
-    
+
     name: str
     description: str
     pattern_type: str
@@ -190,7 +190,7 @@ class ReasoningPattern:
 @dataclass
 class StrategyPerformance:
     """Performance metrics for a reasoning strategy."""
-    
+
     strategy: ReasoningStrategy
     total_uses: int
     success_count: int
@@ -198,7 +198,7 @@ class StrategyPerformance:
     avg_tokens: float
     avg_duration: float
     avg_verification_score: float
-    
+
     @property
     def success_rate(self) -> float:
         """Calculate success rate."""

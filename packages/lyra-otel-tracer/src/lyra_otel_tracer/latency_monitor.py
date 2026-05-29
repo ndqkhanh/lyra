@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
-from typing import Dict, List, Tuple
 
 import numpy as np
 
@@ -52,8 +51,8 @@ class LatencyMonitor:
     """Tracks latency statistics with p50/p95/p99 and threshold alerts."""
 
     def __init__(self) -> None:
-        self._samples: List[LatencySample] = []
-        self._thresholds: Dict[str, float] = {}
+        self._samples: list[LatencySample] = []
+        self._thresholds: dict[str, float] = {}
 
     async def record_latency(
         self,
@@ -106,7 +105,7 @@ class LatencyMonitor:
             )
         self._thresholds[stat] = value_ms
 
-    async def check_thresholds(self) -> Tuple[LatencyAlert, ...]:
+    async def check_thresholds(self) -> tuple[LatencyAlert, ...]:
         """Check all latency thresholds and return active alerts."""
         if not self._thresholds:
             return ()
@@ -115,7 +114,7 @@ class LatencyMonitor:
         if all_stats.sample_count == 0:
             return ()
 
-        alerts: List[LatencyAlert] = []
+        alerts: list[LatencyAlert] = []
         now = time.time()
         stat_map = {
             "p50": all_stats.p50_ms,

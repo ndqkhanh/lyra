@@ -8,15 +8,12 @@ import uuid
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Callable, Optional, Protocol
+from typing import Any
 
 import numpy as np
 
 from .exceptions import (
     BeliefNotFoundError,
-    InconsistentBeliefError,
-    UpdateError,
-    RevisionError,
 )
 
 logger = logging.getLogger(__name__)
@@ -184,7 +181,7 @@ class BeliefSystem:
         statement: str,
         confidence: float = 0.5,
         source: BeliefSource = BeliefSource.LEARNED,
-        evidence: Optional[list[str]] = None,
+        evidence: list[str] | None = None,
         source_reliability: float = 0.5,
     ) -> Belief:
         """Create and add a belief (convenience method).
@@ -246,7 +243,7 @@ class BeliefSystem:
         self,
         context: str,
         top_k: int = 5,
-        domain: Optional[str] = None,
+        domain: str | None = None,
     ) -> list[Belief]:
         """Retrieve relevant beliefs for a context via keyword matching.
 
@@ -596,7 +593,7 @@ class BeliefSystem:
         self._sets[bset.set_id] = bset
         return bset
 
-    def get_set(self, set_id: str) -> Optional[BeliefSet]:
+    def get_set(self, set_id: str) -> BeliefSet | None:
         """Get a belief set by ID."""
         return self._sets.get(set_id)
 

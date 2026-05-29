@@ -28,13 +28,13 @@ def test_large_buffer_performance():
 
     assert buffer.get_line_count() == 10000, f"Expected 10000 lines, got {buffer.get_line_count()}"
     print(f"✓ Appended 15,000 lines in {elapsed:.3f}s ({15000/elapsed:.0f} lines/sec)")
-    print(f"✓ Buffer correctly limited to 10,000 lines")
+    print("✓ Buffer correctly limited to 10,000 lines")
 
     # Verify oldest lines were dropped
     lines = buffer.get_lines()
     assert lines[0].content == "Line 5000", f"Expected 'Line 5000', got '{lines[0].content}'"
     assert lines[-1].content == "Line 14999", f"Expected 'Line 14999', got '{lines[-1].content}'"
-    print(f"✓ Oldest 5,000 lines correctly dropped")
+    print("✓ Oldest 5,000 lines correctly dropped")
     print()
 
     # Test 2: Search performance

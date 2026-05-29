@@ -9,10 +9,11 @@ Features:
 """
 
 import asyncio
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 import httpx
 
@@ -34,12 +35,12 @@ class SyncJob:
     id: str
     provider: str
     account_id: str
-    last_sync: Optional[datetime] = None
-    next_sync: Optional[datetime] = None
+    last_sync: datetime | None = None
+    next_sync: datetime | None = None
     status: SyncStatus = SyncStatus.PENDING
-    error: Optional[str] = None
+    error: str | None = None
     items_fetched: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -52,7 +53,7 @@ class SyncResult:
     items_new: int
     items_updated: int
     duration_seconds: float
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class AutoFetchEngine:
@@ -84,10 +85,10 @@ class AutoFetchEngine:
         self.max_workers = max_workers
         self.rate_limit_backoff = rate_limit_backoff
 
-        self.jobs: Dict[str, SyncJob] = {}
-        self.sync_handlers: Dict[str, Callable] = {}
+        self.jobs: dict[str, SyncJob] = {}
+        self.sync_handlers: dict[str, Callable] = {}
         self._running = False
-        self._tasks: List[asyncio.Task] = []
+        self._tasks: list[asyncio.Task] = []
 
     def register_sync_handler(
         self,
@@ -108,7 +109,7 @@ class AutoFetchEngine:
         job_id: str,
         provider: str,
         account_id: str,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> SyncJob:
         """
         Add sync job.
@@ -233,7 +234,7 @@ class AutoFetchEngine:
         """Stop auto-fetch engine."""
         self._running = False
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """
         Get engine statistics.
 
@@ -252,7 +253,7 @@ class AutoFetchEngine:
             "total_items_fetched": sum(j.items_fetched for j in self.jobs.values()),
         }
 
-    def get_job_status(self, job_id: str) -> Optional[SyncJob]:
+    def get_job_status(self, job_id: str) -> SyncJob | None:
         """
         Get job status.
 

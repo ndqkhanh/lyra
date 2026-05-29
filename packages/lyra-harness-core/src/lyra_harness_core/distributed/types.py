@@ -4,7 +4,6 @@ from __future__ import annotations
 import time
 import uuid
 from dataclasses import dataclass, field
-from typing import Optional
 
 
 @dataclass(frozen=True)
@@ -25,8 +24,8 @@ class Envelope:
     payload: dict
     issued_by: str
     timestamp: float
-    reply_to: Optional[str] = None
-    correlation_id: Optional[str] = None
+    reply_to: str | None = None
+    correlation_id: str | None = None
 
     @classmethod
     def create(
@@ -35,11 +34,11 @@ class Envelope:
         topic: str,
         payload: dict,
         issued_by: str,
-        reply_to: Optional[str] = None,
-        correlation_id: Optional[str] = None,
-        envelope_id: Optional[str] = None,
-        timestamp: Optional[float] = None,
-    ) -> "Envelope":
+        reply_to: str | None = None,
+        correlation_id: str | None = None,
+        envelope_id: str | None = None,
+        timestamp: float | None = None,
+    ) -> Envelope:
         if not topic:
             raise ValueError("topic must be non-empty")
         return cls(

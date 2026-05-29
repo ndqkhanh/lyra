@@ -29,7 +29,7 @@ def check_deepseek_config():
         return True
 
     if anthropic_key and "deepseek" in anthropic_url.lower():
-        print(f"✓ DeepSeek via Anthropic bridge detected")
+        print("✓ DeepSeek via Anthropic bridge detected")
         print(f"  Base URL: {anthropic_url}")
         print(f"  Model: {anthropic_model}")
         print(f"  API Key: {anthropic_key[:8]}...{anthropic_key[-4:]}")
@@ -77,8 +77,8 @@ def test_deepseek_research():
         # Test topic
         topic = "Large Language Model reasoning capabilities"
         print(f"\n🔬 Researching: {topic}")
-        print(f"📊 Depth: standard")
-        print(f"🤖 Provider: DeepSeek\n")
+        print("📊 Depth: standard")
+        print("🤖 Provider: DeepSeek\n")
 
         # Run research
         result = orchestrator.research(

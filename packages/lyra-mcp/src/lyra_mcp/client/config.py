@@ -38,10 +38,10 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Iterable, Mapping, Optional
-
+from typing import Any
 
 # ---------------------------------------------------------------------------
 # Records
@@ -70,9 +70,9 @@ class MCPServerConfig:
     name: str
     command: tuple[str, ...]
     env: Mapping[str, str] = field(default_factory=dict)
-    cwd: Optional[Path] = None
+    cwd: Path | None = None
     trust: str = "third-party"
-    source: Optional[Path] = None
+    source: Path | None = None
 
     def is_runnable(self) -> bool:
         """``True`` when the entry has at least an executable."""
@@ -222,7 +222,7 @@ def load_mcp_config_from(paths: Iterable[Path]) -> MCPLoadResult:
             trust = str(entry.get("trust", "third-party"))
             by_name[str(name)] = MCPServerConfig(
                 name=str(name),
-                command=tuple([command, *args]),
+                command=(command, *args),
                 env={str(k): str(v) for k, v in env_block.items()},
                 cwd=cwd,
                 trust=trust,
@@ -269,10 +269,10 @@ def add_user_mcp_server(
     name: str,
     command: str,
     args: Iterable[str] = (),
-    env: Optional[Mapping[str, str]] = None,
-    cwd: Optional[str] = None,
+    env: Mapping[str, str] | None = None,
+    cwd: str | None = None,
     trust: str = "third-party",
-    config_path: Optional[Path] = None,
+    config_path: Path | None = None,
 ) -> Path:
     """Append (or replace) ``name`` in the user-global config.
 
@@ -298,7 +298,7 @@ def add_user_mcp_server(
 def remove_user_mcp_server(
     name: str,
     *,
-    config_path: Optional[Path] = None,
+    config_path: Path | None = None,
 ) -> bool:
     """Delete ``name`` from the user-global config.
 

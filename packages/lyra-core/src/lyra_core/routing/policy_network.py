@@ -70,7 +70,7 @@ def _softmax(logits: list[float]) -> list[float]:
 
 
 def _dot(a: list[float], b: list[float]) -> float:
-    return sum(ai * bi for ai, bi in zip(a, b))
+    return sum(ai * bi for ai, bi in zip(a, b, strict=False))
 
 
 def _vec_scale(s: float, v: list[float]) -> list[float]:

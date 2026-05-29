@@ -1,15 +1,14 @@
 """Tests for filesystem tool implementations — 5 tools."""
 from __future__ import annotations
 
-import pytest
 from pathlib import Path
 
 from lyra_tools.file_ops import (
-    file_delete,
-    file_move,
-    file_copy,
     dir_create,
     dir_list,
+    file_copy,
+    file_delete,
+    file_move,
 )
 
 

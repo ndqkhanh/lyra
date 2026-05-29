@@ -4,8 +4,6 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-from pydantic import BaseModel
-
 from lyra_harness_core.cost import CostTracker, PricingTable
 from lyra_harness_core.evals import BudgetController
 from lyra_harness_core.messages import ToolCall
@@ -24,7 +22,7 @@ from lyra_harness_core.verifier import (
     VerifierAxis,
     VerifierComposer,
 )
-
+from pydantic import BaseModel
 
 # --- Stub tools -------------------------------------------------------
 

@@ -2,12 +2,9 @@
 
 from __future__ import annotations
 
-import math
-import re
 from dataclasses import FrozenInstanceError
 
 import pytest
-
 from lyra_interpretability import (
     AttributionMethod,
     CounterfactualExplanation,
@@ -19,7 +16,6 @@ from lyra_interpretability import (
     InterpretabilityReport,
     SaliencyMap,
 )
-
 
 # ---------------------------------------------------------------------------
 # Enum tests
@@ -363,7 +359,7 @@ class TestInterpretabilityEngineComputeSaliency:
         # "the" is not a domain keyword, "safety" and "performance" are
         safety_idx = sm.tokens.index("safety") if "safety" in sm.tokens else -1
         perf_idx = sm.tokens.index("performance") if "performance" in sm.tokens else -1
-        the_idx = sm.tokens.index("the") if "the" in sm.tokens else -1
+        sm.tokens.index("the") if "the" in sm.tokens else -1
         # Domain keywords should have non-zero scores
         if safety_idx >= 0:
             assert sm.scores[safety_idx] > 0

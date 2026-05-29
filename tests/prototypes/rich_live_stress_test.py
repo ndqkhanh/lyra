@@ -17,16 +17,17 @@ FAIL → pivot to Textual
 """
 
 import asyncio
-import time
-import psutil
 import random
-from rich.live import Live
-from rich.tree import Tree
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
-from rich.layout import Layout
-from rich.panel import Panel
+import time
+
+import psutil
 from rich.console import Console
+from rich.layout import Layout
+from rich.live import Live
+from rich.panel import Panel
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
 from rich.text import Text
+from rich.tree import Tree
 
 console = Console()
 
@@ -315,17 +316,17 @@ def evaluate_results(stats):
     cpu_pass = stats["cpu_avg"] < 10.0
     cpu_status = "[green]✓ PASS[/green]" if cpu_pass else "[red]✗ FAIL[/red]"
     console.print(f"  CPU Usage: {stats['cpu_avg']:.2f}% avg, {stats['cpu_max']:.2f}% max {cpu_status}")
-    console.print(f"    Criteria: < 10%")
+    console.print("    Criteria: < 10%")
 
     # Frame rate
     fps_pass = stats["fps"] >= 30.0
     fps_status = "[green]✓ PASS[/green]" if fps_pass else "[red]✗ FAIL[/red]"
     console.print(f"  Frame Rate: {stats['fps']:.1f} FPS {fps_status}")
-    console.print(f"    Criteria: ≥ 30 FPS")
+    console.print("    Criteria: ≥ 30 FPS")
 
     # Flicker (manual inspection)
-    console.print(f"  Flicker: [yellow]MANUAL INSPECTION REQUIRED[/yellow]")
-    console.print(f"    Criteria: No visible flicker")
+    console.print("  Flicker: [yellow]MANUAL INSPECTION REQUIRED[/yellow]")
+    console.print("    Criteria: No visible flicker")
 
     # Overall verdict
     console.print()

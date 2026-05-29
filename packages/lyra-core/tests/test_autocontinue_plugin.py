@@ -55,10 +55,10 @@ class _Store:
 
 
 def _ctx(**kwargs) -> StopCtx:
-    defaults = dict(
-        session_id="s1", iteration=1, final_text="done",
-        stop_extensions=0, stop_hook_active=False,
-    )
+    defaults = {
+        "session_id": "s1", "iteration": 1, "final_text": "done",
+        "stop_extensions": 0, "stop_hook_active": False,
+    }
     defaults.update(kwargs)
     return StopCtx(**defaults)
 

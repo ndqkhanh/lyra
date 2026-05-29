@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_policy_optimizer.deployment_strategies import (
     DeploymentConfig,
     DeploymentPlan,

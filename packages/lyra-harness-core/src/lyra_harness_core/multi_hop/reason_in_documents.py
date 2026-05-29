@@ -15,7 +15,6 @@ Phase 4 + per-project apply plans ([203], [208], [218], [219], [220]).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
 
 from .operators.protocols import LLMTextGenerator, RetrievedDoc
 

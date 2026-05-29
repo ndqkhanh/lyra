@@ -10,12 +10,13 @@ import asyncio
 import logging
 import time
 from collections import defaultdict
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, AsyncIterator, Callable, Optional, Protocol
+from typing import Any, Protocol
 
-from .importance import ImportanceCalculator
 from .compaction import CompactionEngine
+from .importance import ImportanceCalculator
 from .optimizer import ContextOptimizer
 from .strategies import CompactionStrategy, StrategyRegistry
 
@@ -192,7 +193,7 @@ class ContextProfiler:
         health_warning_pct: float = 75.0,
         health_critical_pct: float = 90.0,
         auto_optimize: bool = False,
-        metrics: Optional[MetricsCollector] = None,
+        metrics: MetricsCollector | None = None,
     ):
         self._budget = TokenBudget(total_limit=token_budget)
         self._health_warning_pct = health_warning_pct
@@ -212,7 +213,7 @@ class ContextProfiler:
 
         self._history: list[ContextDashboard] = []
         self._error_count: int = 0
-        self._last_dashboard: Optional[ContextDashboard] = None
+        self._last_dashboard: ContextDashboard | None = None
 
     # ── Element Management ──────────────────────────────────────────────────
 
@@ -230,7 +231,7 @@ class ContextProfiler:
         if self._auto_optimize and self._budget.utilization_pct > self._health_critical_pct:
             await self.optimize()
 
-    async def remove_element(self, element_id: str) -> Optional[ContextElement]:
+    async def remove_element(self, element_id: str) -> ContextElement | None:
         """Remove an element and clean up indices."""
         element = self._elements.pop(element_id, None)
         if element is None:
@@ -266,7 +267,7 @@ class ContextProfiler:
         element.last_accessed_at = time.time()
         return element
 
-    def get_element(self, element_id: str) -> Optional[ContextElement]:
+    def get_element(self, element_id: str) -> ContextElement | None:
         """Retrieve an element by ID."""
         el = self._elements.get(element_id)
         if el:
@@ -567,7 +568,7 @@ class ContextProfiler:
         return self._budget
 
     @property
-    def last_dashboard(self) -> Optional[ContextDashboard]:
+    def last_dashboard(self) -> ContextDashboard | None:
         return self._last_dashboard
 
     @property
@@ -723,7 +724,7 @@ class ProfileMatcher:
                     expected_set = set(expected_value)
                 else:
                     expected_set = {str(expected_value)}
-                overlap = expected_set & set(str(x) for x in profile_value)
+                overlap = expected_set & {str(x) for x in profile_value}
                 score += len(overlap) / max(len(expected_set), 1)
             elif isinstance(profile_value, dict):
                 # Dict: key overlap

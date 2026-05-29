@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Integration test for Phase 2: Rich UX with Dialogs."""
 
-from lyra_cli.cli.skill_manager import SkillManager
 from lyra_cli.interactive.dialog_skill_picker import run_skill_picker
 
 
@@ -39,8 +38,9 @@ def test_keybinds_has_launch_skill_picker():
 
 def test_launch_skill_picker_signature():
     """Test that launch_skill_picker has correct signature."""
-    from lyra_cli.interactive import keybinds
     import inspect
+
+    from lyra_cli.interactive import keybinds
 
     # Check function signature
     sig = inspect.signature(keybinds.launch_skill_picker)
@@ -56,8 +56,8 @@ def test_launch_skill_picker_signature():
 
 def test_phase2_integration():
     """Test complete Phase 2 integration: dialog + keyboard shortcut + /skill command."""
-    from lyra_cli.interactive import keybinds
     from lyra_cli.commands.registry import COMMAND_REGISTRY
+    from lyra_cli.interactive import keybinds
 
     # Check dialog exists
     assert callable(run_skill_picker), "Dialog should exist"

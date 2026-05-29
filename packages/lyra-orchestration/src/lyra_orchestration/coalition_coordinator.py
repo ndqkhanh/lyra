@@ -6,10 +6,8 @@ Allows agents to self-organize into task-driven coalitions via bidding.
 
 from __future__ import annotations
 
-import asyncio
 import logging
-from dataclasses import dataclass, field
-from typing import Any, Optional
+from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +62,7 @@ class BidBasedScheduler:
 class CoalitionAwareCoordinator:
     """Coordinates agents via emergent coalitions. Integrates with EventBus."""
 
-    def __init__(self, scheduler: Optional[BidBasedScheduler] = None):
+    def __init__(self, scheduler: BidBasedScheduler | None = None):
         self.scheduler = scheduler or BidBasedScheduler()
         self.coalitions: dict[str, Coalition] = {}
         self._coalition_counter = 0
@@ -96,7 +94,7 @@ class CoalitionAwareCoordinator:
             self.coalitions[coalition_id].status = "dissolving"
             del self.coalitions[coalition_id]
 
-    def get_coalition(self, coalition_id: str) -> Optional[Coalition]:
+    def get_coalition(self, coalition_id: str) -> Coalition | None:
         return self.coalitions.get(coalition_id)
 
     @property

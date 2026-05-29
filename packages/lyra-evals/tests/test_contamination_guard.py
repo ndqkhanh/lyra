@@ -22,7 +22,6 @@ from __future__ import annotations
 from datetime import date
 
 import pytest
-
 from lyra_evals.contamination import (
     ContaminationError,
     ContaminationGuard,

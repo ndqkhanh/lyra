@@ -500,7 +500,7 @@ def test_full_agent_workflow():
     fleet.register_agent(agent)
 
     # Create task
-    task = board.create_task("task1", "Test Task", "Description")
+    board.create_task("task1", "Test Task", "Description")
 
     # Assign task to agent
     fleet.assign_task("agent1", "task1")
@@ -537,7 +537,7 @@ def test_multi_agent_task_distribution():
     idle_agents = fleet.get_idle_agents()
     ready_tasks = board.get_ready_tasks()
 
-    for agent, task in zip(idle_agents, ready_tasks):
+    for agent, task in zip(idle_agents, ready_tasks, strict=False):
         fleet.assign_task(agent.id, task.id)
         board.assign_task(task.id, agent.id)
 

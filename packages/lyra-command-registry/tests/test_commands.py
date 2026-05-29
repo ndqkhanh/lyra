@@ -1,5 +1,5 @@
 """Tests for lyra-command-registry."""
-from lyra_command_registry import CommandRegistry, Command
+from lyra_command_registry import Command, CommandRegistry
 
 
 class TestCommandRegistry:
@@ -26,7 +26,7 @@ class TestCommandRegistry:
         r = CommandRegistry()
         try:
             r.execute("nonexistent")
-            assert False
+            raise AssertionError()
         except ValueError:
             assert True
 

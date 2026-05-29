@@ -13,7 +13,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from lyra_evals.adapters.bright import (
     BrightTask,
     load_bright,

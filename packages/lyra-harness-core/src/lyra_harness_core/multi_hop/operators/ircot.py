@@ -13,7 +13,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-from .protocols import LLMTextGenerator, Retriever, RetrievedDoc
+from .protocols import LLMTextGenerator, RetrievedDoc, Retriever
 
 _ANSWER_RE = re.compile(r"Answer\s*:\s*(.+?)(?:\n|$)", re.IGNORECASE)
 _DEFAULT_PROMPT_HEADER = (

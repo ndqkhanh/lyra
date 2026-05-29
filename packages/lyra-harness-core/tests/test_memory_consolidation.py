@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_harness_core.memory_consolidation import (
     ConsolidationPolicy,
     ConsolidationReport,
@@ -13,7 +12,6 @@ from lyra_harness_core.memory_consolidation import (
 )
 from lyra_harness_core.memory_store import MemoryItem, MemoryKind, MemoryStore
 from lyra_harness_core.provenance import WitnessLattice
-
 
 # --- Fixtures ---------------------------------------------------------
 

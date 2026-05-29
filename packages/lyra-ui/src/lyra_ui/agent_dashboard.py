@@ -11,7 +11,6 @@ Features:
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional
 
 
 class AgentStatus(Enum):
@@ -50,7 +49,7 @@ class AgentInfo:
     id: str
     name: str
     status: AgentStatus
-    current_task: Optional[str] = None
+    current_task: str | None = None
     tokens_used: int = 0
     tasks_completed: int = 0
     error_count: int = 0
@@ -67,11 +66,11 @@ class Task:
     description: str
     status: TaskStatus
     priority: TaskPriority
-    assigned_to: Optional[str] = None
-    dependencies: List[str] = field(default_factory=list)
+    assigned_to: str | None = None
+    dependencies: list[str] = field(default_factory=list)
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
-    completed_at: Optional[datetime] = None
+    completed_at: datetime | None = None
 
 
 @dataclass
@@ -99,8 +98,8 @@ class AgentFleetManager:
 
     def __init__(self):
         """Initialize agent fleet manager."""
-        self.agents: Dict[str, AgentInfo] = {}
-        self.metrics: Dict[str, AgentMetrics] = {}
+        self.agents: dict[str, AgentInfo] = {}
+        self.metrics: dict[str, AgentMetrics] = {}
 
     def register_agent(self, agent: AgentInfo):
         """
@@ -174,7 +173,7 @@ class AgentFleetManager:
                         metrics.total_tasks - agent.error_count
                     ) / metrics.total_tasks
 
-    def get_agent(self, agent_id: str) -> Optional[AgentInfo]:
+    def get_agent(self, agent_id: str) -> AgentInfo | None:
         """
         Get agent information.
 
@@ -186,7 +185,7 @@ class AgentFleetManager:
         """
         return self.agents.get(agent_id)
 
-    def list_agents(self, status: Optional[AgentStatus] = None) -> List[AgentInfo]:
+    def list_agents(self, status: AgentStatus | None = None) -> list[AgentInfo]:
         """
         List all agents.
 
@@ -200,7 +199,7 @@ class AgentFleetManager:
             return list(self.agents.values())
         return [a for a in self.agents.values() if a.status == status]
 
-    def get_metrics(self, agent_id: str) -> Optional[AgentMetrics]:
+    def get_metrics(self, agent_id: str) -> AgentMetrics | None:
         """
         Get agent metrics.
 
@@ -212,7 +211,7 @@ class AgentFleetManager:
         """
         return self.metrics.get(agent_id)
 
-    def get_idle_agents(self) -> List[AgentInfo]:
+    def get_idle_agents(self) -> list[AgentInfo]:
         """
         Get all idle agents.
 
@@ -235,7 +234,7 @@ class TaskBoard:
 
     def __init__(self):
         """Initialize task board."""
-        self.tasks: Dict[str, Task] = {}
+        self.tasks: dict[str, Task] = {}
 
     def create_task(
         self,
@@ -319,7 +318,7 @@ class TaskBoard:
             if depends_on in self.tasks[task_id].dependencies:
                 self.tasks[task_id].dependencies.remove(depends_on)
 
-    def get_task(self, task_id: str) -> Optional[Task]:
+    def get_task(self, task_id: str) -> Task | None:
         """
         Get task.
 
@@ -333,10 +332,10 @@ class TaskBoard:
 
     def list_tasks(
         self,
-        status: Optional[TaskStatus] = None,
-        priority: Optional[TaskPriority] = None,
-        assigned_to: Optional[str] = None,
-    ) -> List[Task]:
+        status: TaskStatus | None = None,
+        priority: TaskPriority | None = None,
+        assigned_to: str | None = None,
+    ) -> list[Task]:
         """
         List tasks with filters.
 
@@ -361,7 +360,7 @@ class TaskBoard:
 
         return tasks
 
-    def get_blocked_tasks(self) -> List[Task]:
+    def get_blocked_tasks(self) -> list[Task]:
         """
         Get all blocked tasks.
 
@@ -379,7 +378,7 @@ class TaskBoard:
                         break
         return blocked
 
-    def get_ready_tasks(self) -> List[Task]:
+    def get_ready_tasks(self) -> list[Task]:
         """
         Get tasks ready to be worked on (no blocking dependencies).
 
@@ -430,10 +429,10 @@ class MonitoringPanel:
         Args:
             max_events: Maximum events to keep in history
         """
-        self.events: List[MonitoringEvent] = []
+        self.events: list[MonitoringEvent] = []
         self.max_events = max_events
         self.total_cost: float = 0.0
-        self.alerts: List[MonitoringEvent] = []
+        self.alerts: list[MonitoringEvent] = []
 
     def log_event(
         self,
@@ -469,7 +468,7 @@ class MonitoringPanel:
         if level in ["warning", "error"]:
             self.alerts.append(event)
 
-    def get_recent_events(self, limit: int = 100) -> List[MonitoringEvent]:
+    def get_recent_events(self, limit: int = 100) -> list[MonitoringEvent]:
         """
         Get recent events.
 
@@ -481,7 +480,7 @@ class MonitoringPanel:
         """
         return self.events[-limit:]
 
-    def get_events_by_agent(self, agent_id: str) -> List[MonitoringEvent]:
+    def get_events_by_agent(self, agent_id: str) -> list[MonitoringEvent]:
         """
         Get events for specific agent.
 
@@ -493,7 +492,7 @@ class MonitoringPanel:
         """
         return [e for e in self.events if e.agent_id == agent_id]
 
-    def get_alerts(self, level: Optional[str] = None) -> List[MonitoringEvent]:
+    def get_alerts(self, level: str | None = None) -> list[MonitoringEvent]:
         """
         Get alerts.
 
@@ -537,7 +536,7 @@ class WorkflowTemplate:
     id: str
     name: str
     description: str
-    tasks: List[Dict[str, str]]  # List of task definitions
+    tasks: list[dict[str, str]]  # List of task definitions
     created_at: datetime = field(default_factory=datetime.now)
 
 
@@ -553,15 +552,15 @@ class WorkflowManager:
 
     def __init__(self):
         """Initialize workflow manager."""
-        self.templates: Dict[str, WorkflowTemplate] = {}
-        self.active_workflows: Dict[str, List[str]] = {}  # workflow_id -> task_ids
+        self.templates: dict[str, WorkflowTemplate] = {}
+        self.active_workflows: dict[str, list[str]] = {}  # workflow_id -> task_ids
 
     def create_template(
         self,
         template_id: str,
         name: str,
         description: str,
-        tasks: List[Dict[str, str]],
+        tasks: list[dict[str, str]],
     ) -> WorkflowTemplate:
         """
         Create workflow template.
@@ -584,7 +583,7 @@ class WorkflowManager:
         self.templates[template_id] = template
         return template
 
-    def get_template(self, template_id: str) -> Optional[WorkflowTemplate]:
+    def get_template(self, template_id: str) -> WorkflowTemplate | None:
         """
         Get workflow template.
 
@@ -596,7 +595,7 @@ class WorkflowManager:
         """
         return self.templates.get(template_id)
 
-    def list_templates(self) -> List[WorkflowTemplate]:
+    def list_templates(self) -> list[WorkflowTemplate]:
         """
         List all templates.
 
@@ -620,7 +619,7 @@ class WorkflowManager:
         workflow_id: str,
         template_id: str,
         task_board: TaskBoard,
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Start workflow from template.
 
@@ -650,7 +649,7 @@ class WorkflowManager:
         self.active_workflows[workflow_id] = task_ids
         return task_ids
 
-    def get_workflow_tasks(self, workflow_id: str) -> List[str]:
+    def get_workflow_tasks(self, workflow_id: str) -> list[str]:
         """
         Get tasks for workflow.
 

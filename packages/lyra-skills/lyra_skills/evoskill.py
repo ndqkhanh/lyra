@@ -10,11 +10,11 @@ Based on research: docs/168 (evoskill-coding-agent-skill-discovery.md)
 Impact: +7.3pp OfficeQA, +12.1pp SealQA, +5.3pp zero-shot transfer
 """
 
-from typing import List, Dict, Any, Optional, Tuple
+import hashlib
+import json
 from dataclasses import dataclass
 from pathlib import Path
-import json
-import hashlib
+from typing import Any
 
 
 @dataclass
@@ -22,8 +22,8 @@ class AgentProgram:
     """Agent program on Pareto frontier."""
     id: str
     code: str
-    skills: List[str]  # Skill IDs used by this program
-    metrics: Dict[str, float]  # pass_rate, avg_steps, etc.
+    skills: list[str]  # Skill IDs used by this program
+    metrics: dict[str, float]  # pass_rate, avg_steps, etc.
     generation: int
 
 
@@ -45,8 +45,8 @@ class SkillProposal:
     name: str
     description: str
     code: str
-    keywords: List[str]
-    addresses_failures: List[str]  # Task IDs
+    keywords: list[str]
+    addresses_failures: list[str]  # Task IDs
     confidence: float
 
 
@@ -65,7 +65,7 @@ class ParetoFrontier:
             k: Number of programs to maintain (default: 3)
         """
         self.k = k
-        self.programs: List[AgentProgram] = []
+        self.programs: list[AgentProgram] = []
 
     def add(self, program: AgentProgram) -> bool:
         """
@@ -97,7 +97,7 @@ class ParetoFrontier:
 
         return True
 
-    def _dominates(self, m1: Dict[str, float], m2: Dict[str, float]) -> bool:
+    def _dominates(self, m1: dict[str, float], m2: dict[str, float]) -> bool:
         """
         Check if m1 dominates m2.
 
@@ -114,9 +114,9 @@ class ParetoFrontier:
 
     def _crowding_distance_selection(
         self,
-        programs: List[AgentProgram],
+        programs: list[AgentProgram],
         k: int
-    ) -> List[AgentProgram]:
+    ) -> list[AgentProgram]:
         """
         Select k programs with highest crowding distance.
 
@@ -143,7 +143,7 @@ class ParetoFrontier:
     def _compute_crowding_distance(
         self,
         idx: int,
-        programs: List[AgentProgram]
+        programs: list[AgentProgram]
     ) -> float:
         """Compute crowding distance for program at idx."""
         if len(programs) <= 2:
@@ -175,7 +175,7 @@ class ParetoFrontier:
 
         return distance
 
-    def get_programs(self) -> List[AgentProgram]:
+    def get_programs(self) -> list[AgentProgram]:
         """Get all programs on frontier."""
         return self.programs
 
@@ -216,14 +216,14 @@ class EvoSkillPipeline:
         self.skills_dir.mkdir(parents=True, exist_ok=True)
 
         self.frontier = ParetoFrontier(k=k)
-        self.all_skills: Dict[str, SkillProposal] = {}
-        self.failure_history: List[FailureCase] = []
+        self.all_skills: dict[str, SkillProposal] = {}
+        self.failure_history: list[FailureCase] = []
 
     def run(
         self,
-        tasks: List[Dict[str, Any]],
+        tasks: list[dict[str, Any]],
         generations: int = 10
-    ) -> List[Path]:
+    ) -> list[Path]:
         """
         Run EvoSkill evolutionary loop.
 
@@ -281,8 +281,8 @@ class EvoSkillPipeline:
 
     def _execute_and_collect_failures(
         self,
-        tasks: List[Dict[str, Any]]
-    ) -> List[FailureCase]:
+        tasks: list[dict[str, Any]]
+    ) -> list[FailureCase]:
         """Execute frontier programs on tasks, collect failures."""
         failures = []
 
@@ -308,8 +308,8 @@ class EvoSkillPipeline:
     def _execute_task(
         self,
         program: AgentProgram,
-        task: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        task: dict[str, Any]
+    ) -> dict[str, Any]:
         """Execute a task with an agent program."""
         # Load skills
         skills_text = "\n\n".join([
@@ -348,11 +348,11 @@ Execute and return result."""
 
     def _propose_skills_from_failures(
         self,
-        failures: List[FailureCase]
-    ) -> List[SkillProposal]:
+        failures: list[FailureCase]
+    ) -> list[SkillProposal]:
         """Propose skills to address failures."""
         # Group failures by missing capability
-        capability_groups: Dict[str, List[FailureCase]] = {}
+        capability_groups: dict[str, list[FailureCase]] = {}
         for failure in failures:
             cap = failure.missing_capability
             if cap not in capability_groups:
@@ -456,7 +456,7 @@ This skill activates when keywords match: {", ".join(proposal.keywords)}
         print(f"Built skill: {skill_file}")
         return skill_file
 
-    def _create_programs_with_skills(self, generation: int) -> List[AgentProgram]:
+    def _create_programs_with_skills(self, generation: int) -> list[AgentProgram]:
         """Create new programs by combining skills."""
         new_programs = []
 
@@ -484,8 +484,8 @@ This skill activates when keywords match: {", ".join(proposal.keywords)}
     def _evaluate_program(
         self,
         program: AgentProgram,
-        tasks: List[Dict[str, Any]]
-    ) -> Dict[str, float]:
+        tasks: list[dict[str, Any]]
+    ) -> dict[str, float]:
         """Evaluate program on tasks."""
         successes = 0
         total_steps = 0

@@ -2,8 +2,9 @@
 Comprehensive tests for Chain-of-Thought reasoning engine.
 """
 
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 
 from lyra_reasoning.engines.cot import ChainOfThoughtEngine
 from lyra_reasoning.types import (
@@ -60,7 +61,7 @@ class TestChainOfThoughtEngine:
     def test_initialization_with_api_key(self):
         """Test engine initialization with API key."""
         with patch("lyra_reasoning.engines.cot.Anthropic") as mock:
-            engine = ChainOfThoughtEngine(api_key="test-key")
+            ChainOfThoughtEngine(api_key="test-key")
             mock.assert_called_once_with(api_key="test-key")
 
     def test_reason_basic_flow(self, cot_engine, mock_anthropic_client, basic_config, basic_budget):

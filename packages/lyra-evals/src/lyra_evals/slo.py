@@ -11,11 +11,11 @@ Grounded in:
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, Literal, Optional
+from typing import Literal
 
 from .aer import AgentExecutionRecord
-
 
 __all__ = [
     "SLODefinition",
@@ -44,7 +44,7 @@ class SLODefinition:
     name: SLOName
     description: str
     threshold_label: str          # human-readable e.g. "$0.10/turn"
-    check: Callable[[AgentExecutionRecord, "SLOState"], bool]
+    check: Callable[[AgentExecutionRecord, SLOState], bool]
     # True = SLO is passing; False = breach
 
 
@@ -54,7 +54,7 @@ class SLOState:
 
     session_cost_usd: float = 0.0
     last_turn_latency_ms: int = 0
-    pending_approval_since: Optional[float] = None   # epoch seconds
+    pending_approval_since: float | None = None   # epoch seconds
     max_pending_approval_seconds: float = 600.0      # 10 min default
 
 

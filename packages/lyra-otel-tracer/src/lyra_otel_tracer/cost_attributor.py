@@ -5,7 +5,6 @@ from __future__ import annotations
 import time
 import uuid
 from dataclasses import dataclass
-from typing import Dict, List, Tuple
 
 
 @dataclass(frozen=True)
@@ -27,9 +26,9 @@ class CostBreakdown:
     """Aggregated cost breakdown."""
 
     total_cost: float = 0.0
-    by_agent: Tuple[Tuple[str, float], ...] = ()
-    by_model: Tuple[Tuple[str, float], ...] = ()
-    by_operation: Tuple[Tuple[str, float], ...] = ()
+    by_agent: tuple[tuple[str, float], ...] = ()
+    by_model: tuple[tuple[str, float], ...] = ()
+    by_operation: tuple[tuple[str, float], ...] = ()
     period_hours: float = 24.0
 
 
@@ -50,7 +49,7 @@ class CostAttributor:
         config: CostConfig | None = None,
     ) -> None:
         self._config = config or CostConfig()
-        self._entries: List[CostEntry] = []
+        self._entries: list[CostEntry] = []
 
     async def attribute_cost(
         self,
@@ -95,17 +94,17 @@ class CostAttributor:
         total_cost = sum(e.total_cost for e in recent)
 
         # By agent
-        agent_cost: Dict[str, float] = {}
+        agent_cost: dict[str, float] = {}
         for e in recent:
             agent_cost[e.agent_id] = agent_cost.get(e.agent_id, 0.0) + e.total_cost
 
         # By model
-        model_cost: Dict[str, float] = {}
+        model_cost: dict[str, float] = {}
         for e in recent:
             model_cost[e.model] = model_cost.get(e.model, 0.0) + e.total_cost
 
         # By operation
-        op_cost: Dict[str, float] = {}
+        op_cost: dict[str, float] = {}
         for e in recent:
             op_cost[e.operation] = op_cost.get(e.operation, 0.0) + e.total_cost
 
@@ -125,8 +124,8 @@ class CostAttributor:
 
         total_cost = sum(e.total_cost for e in agent_entries)
 
-        model_cost: Dict[str, float] = {}
-        op_cost: Dict[str, float] = {}
+        model_cost: dict[str, float] = {}
+        op_cost: dict[str, float] = {}
         for e in agent_entries:
             model_cost[e.model] = model_cost.get(e.model, 0.0) + e.total_cost
             op_cost[e.operation] = op_cost.get(e.operation, 0.0) + e.total_cost

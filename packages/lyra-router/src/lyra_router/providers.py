@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Optional
 
 from .models import ModelAssignment, ModelTier, Provider
 
@@ -44,11 +43,11 @@ class ProviderRegistry:
 
     # ── Query ─────────────────────────────────────────────────────
 
-    def get_provider(self, name: str) -> Optional[Provider]:
+    def get_provider(self, name: str) -> Provider | None:
         """Return a provider by name, or None."""
         return self._providers.get(name)
 
-    def get_model(self, model_name: str) -> Optional[ModelAssignment]:
+    def get_model(self, model_name: str) -> ModelAssignment | None:
         """Return a model assignment by name, or None."""
         return self._models.get(model_name)
 
@@ -56,7 +55,7 @@ class ProviderRegistry:
         """Return all registered provider names."""
         return list(self._providers.keys())
 
-    def list_models(self, provider: Optional[str] = None) -> list[str]:
+    def list_models(self, provider: str | None = None) -> list[str]:
         """List model names, optionally filtered by provider."""
         if provider:
             return [
@@ -64,7 +63,7 @@ class ProviderRegistry:
             ]
         return list(self._models.keys())
 
-    def get_api_key(self, provider_name: str) -> Optional[str]:
+    def get_api_key(self, provider_name: str) -> str | None:
         """Read an API key from the environment for the given provider."""
         provider = self._providers.get(provider_name)
         if not provider or not provider.api_key_env:
@@ -83,7 +82,7 @@ class ProviderRegistry:
 
     def get_best_model_for_tier(
         self, tier: ModelTier, require_key: bool = True
-    ) -> Optional[ModelAssignment]:
+    ) -> ModelAssignment | None:
         """
         Return the cheapest available model at a given tier.
 
@@ -103,7 +102,7 @@ class ProviderRegistry:
 
     def get_fallback_model(
         self, tier: ModelTier, _budget_regime: str = "high"
-    ) -> Optional[ModelAssignment]:
+    ) -> ModelAssignment | None:
         """
         Return a model one tier below (cheaper) for budget-constrained routing.
 

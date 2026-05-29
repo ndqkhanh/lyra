@@ -4,7 +4,6 @@ from __future__ import annotations
 import time
 import uuid
 from dataclasses import dataclass, field
-from typing import Optional
 
 
 @dataclass(frozen=True)
@@ -30,7 +29,7 @@ class CostEntry:
     user_id: str
     input_tokens: int = 0
     output_tokens: int = 0
-    active_params: Optional[int] = None  # MoE-aware accounting per active_params module
+    active_params: int | None = None  # MoE-aware accounting per active_params module
     cost_usd: float = 0.0
     tags: frozenset[str] = field(default_factory=frozenset)
     metadata: dict = field(default_factory=dict)
@@ -62,13 +61,13 @@ class CostEntry:
         user_id: str = "anonymous",
         input_tokens: int = 0,
         output_tokens: int = 0,
-        active_params: Optional[int] = None,
+        active_params: int | None = None,
         cost_usd: float = 0.0,
         tags: tuple[str, ...] = (),
-        metadata: Optional[dict] = None,
-        timestamp: Optional[float] = None,
-        entry_id: Optional[str] = None,
-    ) -> "CostEntry":
+        metadata: dict | None = None,
+        timestamp: float | None = None,
+        entry_id: str | None = None,
+    ) -> CostEntry:
         """Construct with auto-generated entry_id + current time."""
         return cls(
             entry_id=entry_id or str(uuid.uuid4()),
@@ -108,7 +107,7 @@ class BillingPeriod:
         return self.start <= timestamp <= self.end
 
     @classmethod
-    def last_n_seconds(cls, n: float, *, now: Optional[float] = None) -> "BillingPeriod":
+    def last_n_seconds(cls, n: float, *, now: float | None = None) -> BillingPeriod:
         ts = now if now is not None else time.time()
         return cls(start=ts - n, end=ts)
 
@@ -118,7 +117,7 @@ class CostReport:
     """Aggregated cost view, grouped by some axis (project/user/operation)."""
 
     grouped_by: str  # the axis
-    period: Optional[BillingPeriod]
+    period: BillingPeriod | None
     rows: tuple[tuple[str, dict], ...]  # ordered (group_key, totals_dict) pairs
     grand_total_usd: float
     grand_total_tokens: int
@@ -128,7 +127,7 @@ class CostReport:
         ordered = sorted(self.rows, key=lambda kv: -kv[1].get("cost_usd", 0))
         return ordered[:n]
 
-    def for_key(self, key: str) -> Optional[dict]:
+    def for_key(self, key: str) -> dict | None:
         for k, v in self.rows:
             if k == key:
                 return v
@@ -143,7 +142,7 @@ class CostThresholdAlert:
     threshold_usd: float
     actual_usd: float
     scope: str  # e.g. "project=polaris" | "user=alice" | "global"
-    period: Optional[BillingPeriod] = None
+    period: BillingPeriod | None = None
     note: str = ""
 
     @property

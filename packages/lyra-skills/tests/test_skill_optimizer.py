@@ -7,10 +7,9 @@ stub maps prompt-prefix → canned JSON response.
 from __future__ import annotations
 
 import json
-from typing import Callable
+from collections.abc import Callable
 
 import pytest
-
 from lyra_skills.optimizer import (
     MutationStrategy,
     OptimizeScenario,
@@ -19,7 +18,6 @@ from lyra_skills.optimizer import (
     _parse_json_obj,
     optimize_skill,
 )
-
 
 # ── Test doubles ─────────────────────────────────────────────────
 
@@ -363,7 +361,7 @@ def test_mutation_record_round_trip_through_log(tmp_path, monkeypatch):
 
 
 def test_mutation_log_skips_malformed_lines(tmp_path):
-    from lyra_skills.ledger import append_mutation, MutationRecord, load_mutations
+    from lyra_skills.ledger import MutationRecord, append_mutation, load_mutations
 
     log = tmp_path / "skill_mutations.jsonl"
     append_mutation(

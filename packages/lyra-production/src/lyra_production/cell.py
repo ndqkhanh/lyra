@@ -11,9 +11,9 @@ from __future__ import annotations
 import logging
 import time
 import uuid
+from collections.abc import Callable
 from datetime import datetime, timezone
 from threading import Lock
-from typing import Callable
 
 from lyra_production.models import (
     CellStatus,

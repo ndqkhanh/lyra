@@ -64,7 +64,7 @@ For more information, visit: https://github.com/ndqkhanh/lyra
 
     # Load configuration
     config_manager = ConfigManager(config_file=args.config)
-    config = config_manager.load()
+    config_manager.load()
 
     # Handle pipeline mode
     if args.pipeline:

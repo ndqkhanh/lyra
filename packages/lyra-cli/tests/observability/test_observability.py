@@ -77,7 +77,7 @@ def test_tracing_nested_spans(tracing_provider):
     """Test nested spans."""
     trace_id = tracing_provider.start_trace("trace_001")
 
-    parent_span = tracing_provider.start_span(
+    tracing_provider.start_span(
         trace_id=trace_id,
         span_id="parent",
         name="parent_operation",
@@ -209,7 +209,7 @@ def test_aer_start_execution(aer_system):
 
 def test_aer_record_action(aer_system):
     """Test recording an action."""
-    record_id = aer_system.start_execution(
+    aer_system.start_execution(
         agent_id="agent_001",
         session_id="session_001",
         task_description="Test task",
@@ -229,7 +229,7 @@ def test_aer_record_action(aer_system):
 
 def test_aer_record_decision(aer_system):
     """Test recording a decision."""
-    record_id = aer_system.start_execution(
+    aer_system.start_execution(
         agent_id="agent_001",
         session_id="session_001",
         task_description="Test task",

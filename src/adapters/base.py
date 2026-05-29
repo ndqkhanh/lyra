@@ -15,7 +15,7 @@ Supports:
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class HarnessType(Enum):
@@ -37,7 +37,7 @@ class Message:
 
     content: str
     role: str = "user"
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -46,8 +46,8 @@ class Response:
 
     content: str
     success: bool = True
-    error: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    error: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -56,8 +56,8 @@ class Tool:
 
     name: str
     description: str
-    parameters: Dict[str, Any]
-    handler: Optional[Any] = None
+    parameters: dict[str, Any]
+    handler: Any | None = None
 
 
 @dataclass
@@ -85,8 +85,8 @@ class HarnessAdapter(ABC):
         """
         self.harness_type = harness_type
         self.connected = False
-        self.tools: List[Tool] = []
-        self.hooks: List[Hook] = []
+        self.tools: list[Tool] = []
+        self.hooks: list[Hook] = []
 
     @abstractmethod
     def initialize(self) -> bool:
@@ -112,7 +112,7 @@ class HarnessAdapter(ABC):
         pass
 
     @abstractmethod
-    def receive_message(self) -> Optional[Message]:
+    def receive_message(self) -> Message | None:
         """
         Receive message from harness.
 
@@ -122,7 +122,7 @@ class HarnessAdapter(ABC):
         pass
 
     @abstractmethod
-    def register_tools(self, tools: List[Tool]) -> bool:
+    def register_tools(self, tools: list[Tool]) -> bool:
         """
         Register Lyra tools with harness.
 
@@ -135,7 +135,7 @@ class HarnessAdapter(ABC):
         pass
 
     @abstractmethod
-    def register_hooks(self, hooks: List[Hook]) -> bool:
+    def register_hooks(self, hooks: list[Hook]) -> bool:
         """
         Register Lyra hooks with harness.
 
@@ -166,7 +166,7 @@ class HarnessAdapter(ABC):
         """
         return self.connected
 
-    def get_capabilities(self) -> Dict[str, bool]:
+    def get_capabilities(self) -> dict[str, bool]:
         """
         Get harness capabilities.
 
@@ -207,22 +207,22 @@ class ClaudeCodeAdapter(HarnessAdapter):
             success=True,
         )
 
-    def receive_message(self) -> Optional[Message]:
+    def receive_message(self) -> Message | None:
         """Receive message from Claude Code."""
         # Native implementation
         return None
 
-    def register_tools(self, tools: List[Tool]) -> bool:
+    def register_tools(self, tools: list[Tool]) -> bool:
         """Register tools with Claude Code."""
         self.tools = tools
         return True
 
-    def register_hooks(self, hooks: List[Hook]) -> bool:
+    def register_hooks(self, hooks: list[Hook]) -> bool:
         """Register hooks with Claude Code."""
         self.hooks = hooks
         return True
 
-    def get_capabilities(self) -> Dict[str, bool]:
+    def get_capabilities(self) -> dict[str, bool]:
         """Get Claude Code capabilities."""
         return {
             "streaming": True,
@@ -273,7 +273,7 @@ class CursorAdapter(HarnessAdapter):
             success=True,
         )
 
-    def receive_message(self) -> Optional[Message]:
+    def receive_message(self) -> Message | None:
         """Receive message from Cursor."""
         if not self.connected:
             return None
@@ -281,23 +281,23 @@ class CursorAdapter(HarnessAdapter):
         # Poll Cursor API for messages
         return None
 
-    def register_tools(self, tools: List[Tool]) -> bool:
+    def register_tools(self, tools: list[Tool]) -> bool:
         """Register tools with Cursor."""
         if not self.connected:
             return False
 
         # Transform Lyra tools to Cursor format
-        cursor_tools = [self._transform_tool(tool) for tool in tools]
+        [self._transform_tool(tool) for tool in tools]
         self.tools = tools
         return True
 
-    def register_hooks(self, hooks: List[Hook]) -> bool:
+    def register_hooks(self, hooks: list[Hook]) -> bool:
         """Register hooks with Cursor."""
         if not self.connected:
             return False
 
         # Map Lyra hooks to Cursor's 15 hook events
-        cursor_hooks = [self._transform_hook(hook) for hook in hooks]
+        [self._transform_hook(hook) for hook in hooks]
         self.hooks = hooks
         return True
 
@@ -305,7 +305,7 @@ class CursorAdapter(HarnessAdapter):
         """Transform Lyra message to Cursor format."""
         return message.content
 
-    def _transform_tool(self, tool: Tool) -> Dict[str, Any]:
+    def _transform_tool(self, tool: Tool) -> dict[str, Any]:
         """Transform Lyra tool to Cursor format."""
         return {
             "name": tool.name,
@@ -313,14 +313,14 @@ class CursorAdapter(HarnessAdapter):
             "parameters": tool.parameters,
         }
 
-    def _transform_hook(self, hook: Hook) -> Dict[str, Any]:
+    def _transform_hook(self, hook: Hook) -> dict[str, Any]:
         """Transform Lyra hook to Cursor format."""
         return {
             "event": hook.event_type,
             "priority": hook.priority,
         }
 
-    def get_capabilities(self) -> Dict[str, bool]:
+    def get_capabilities(self) -> dict[str, bool]:
         """Get Cursor capabilities."""
         return {
             "streaming": True,
@@ -366,21 +366,21 @@ class VSCodeAdapter(HarnessAdapter):
             success=True,
         )
 
-    def receive_message(self) -> Optional[Message]:
+    def receive_message(self) -> Message | None:
         """Receive message from VS Code."""
         return None
 
-    def register_tools(self, tools: List[Tool]) -> bool:
+    def register_tools(self, tools: list[Tool]) -> bool:
         """Register tools with VS Code."""
         self.tools = tools
         return True
 
-    def register_hooks(self, hooks: List[Hook]) -> bool:
+    def register_hooks(self, hooks: list[Hook]) -> bool:
         """Register hooks with VS Code."""
         self.hooks = hooks
         return True
 
-    def get_capabilities(self) -> Dict[str, bool]:
+    def get_capabilities(self) -> dict[str, bool]:
         """Get VS Code capabilities."""
         return {
             "streaming": True,
@@ -426,21 +426,21 @@ class JetBrainsAdapter(HarnessAdapter):
             success=True,
         )
 
-    def receive_message(self) -> Optional[Message]:
+    def receive_message(self) -> Message | None:
         """Receive message from JetBrains."""
         return None
 
-    def register_tools(self, tools: List[Tool]) -> bool:
+    def register_tools(self, tools: list[Tool]) -> bool:
         """Register tools with JetBrains."""
         self.tools = tools
         return True
 
-    def register_hooks(self, hooks: List[Hook]) -> bool:
+    def register_hooks(self, hooks: list[Hook]) -> bool:
         """Register hooks with JetBrains."""
         self.hooks = hooks
         return True
 
-    def get_capabilities(self) -> Dict[str, bool]:
+    def get_capabilities(self) -> dict[str, bool]:
         """Get JetBrains capabilities."""
         return {
             "streaming": False,

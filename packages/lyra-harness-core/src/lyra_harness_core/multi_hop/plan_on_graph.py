@@ -17,10 +17,11 @@ judge while tests use deterministic stubs.
 from __future__ import annotations
 
 import enum
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Iterable, Optional, Protocol
+from typing import Protocol
 
-from .types import Graph, Node
+from .types import Graph
 
 
 class NodeStatus(str, enum.Enum):
@@ -56,7 +57,7 @@ class PathScorer(Protocol):
 class _NodeRecord:
     node_id: str
     status: NodeStatus = NodeStatus.PENDING
-    last_score: Optional[float] = None
+    last_score: float | None = None
     visit_count: int = 0
 
 
@@ -76,7 +77,7 @@ class WalkResult:
 
     query: str
     paths: tuple[WalkPath, ...]
-    best_path: Optional[WalkPath]
+    best_path: WalkPath | None
     visited: dict[str, _NodeRecord] = field(default_factory=dict)
     n_score_calls: int = 0
     n_backtracks: int = 0
@@ -113,7 +114,7 @@ class PlanOnGraphWalker:
 
         visited: dict[str, _NodeRecord] = {}
         paths: list[WalkPath] = []
-        best_path: Optional[WalkPath] = None
+        best_path: WalkPath | None = None
         n_score_calls = 0
         n_backtracks = 0
 

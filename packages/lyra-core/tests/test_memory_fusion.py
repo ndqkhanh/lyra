@@ -58,7 +58,7 @@ def test_rrf_negative_k_rejected() -> None:
 def test_rrf_smaller_k_amplifies_top_advantage() -> None:
     """With k=1 (very aggressive), A's lone #1 should beat B's two #2s."""
     out_default = rrf([["a", "b"], ["b", "c"]], k=60)
-    out_aggressive = rrf([["a", "b"], ["b", "c"]], k=1)
+    rrf([["a", "b"], ["b", "c"]], k=1)
     # Default k=60 → b wins (multiple appearances).
     assert out_default[0][0] == "b"
     # k=1 → a's #1 contribution = 1/2 = 0.5; b's = 1/3 + 1/2 = 0.833; b still wins.

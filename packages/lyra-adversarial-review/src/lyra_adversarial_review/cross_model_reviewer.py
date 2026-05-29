@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 import random
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Sequence
 
-from lyra_adversarial_review.review_config import DEFAULT_RULES, ReviewConfig, ReviewRule, ReviewSeverity
+from lyra_adversarial_review.review_config import (
+    DEFAULT_RULES,
+    ReviewConfig,
+    ReviewRule,
+    ReviewSeverity,
+)
 
 
 class ModelFamily(Enum):

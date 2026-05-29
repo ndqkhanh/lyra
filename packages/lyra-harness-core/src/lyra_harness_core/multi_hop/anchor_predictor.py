@@ -18,8 +18,9 @@ linking is imperfect.
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Iterable, Optional, Protocol
+from typing import Protocol
 
 from .types import Graph
 
@@ -40,7 +41,7 @@ class AnchorCandidate:
     reason: str = ""
 
     @classmethod
-    def make(cls, *, node_id: str, confidence: float, reason: str = "") -> "AnchorCandidate":
+    def make(cls, *, node_id: str, confidence: float, reason: str = "") -> AnchorCandidate:
         if not 0.0 <= confidence <= 1.0:
             raise ValueError(f"confidence must be in [0, 1], got {confidence}")
         return cls(score=-confidence, confidence=confidence, node_id=node_id, reason=reason)
@@ -174,7 +175,7 @@ def merge_predictors(
     query: str,
     graph: Graph,
     top_k: int = 5,
-    weights: Optional[list[float]] = None,
+    weights: list[float] | None = None,
 ) -> list[AnchorCandidate]:
     """Merge multiple predictors; per-node confidence = weighted-max.
 
@@ -188,7 +189,7 @@ def merge_predictors(
         raise ValueError("weights length must match predictors length")
 
     by_node: dict[str, AnchorCandidate] = {}
-    for predictor, weight in zip(pred_list, weights):
+    for predictor, weight in zip(pred_list, weights, strict=False):
         for cand in predictor.predict(query, graph=graph, top_k=top_k * 2):
             adj_conf = min(1.0, cand.confidence * weight)
             existing = by_node.get(cand.node_id)

@@ -25,7 +25,7 @@ class BudgetTier(str, Enum):
 class BudgetStatus:
     """
     Current memory budget status.
-    
+
     Attributes:
         total_memories: Total number of memories
         capacity_limit: Maximum allowed memories
@@ -46,7 +46,7 @@ class BudgetStatus:
 class PruneCandidate:
     """
     A memory candidate for pruning.
-    
+
     Attributes:
         memory_id: Memory identifier
         prune_score: Score for pruning (lower = more likely to prune)
@@ -60,7 +60,7 @@ class PruneCandidate:
 class MemoryBudgetController:
     """
     Controls memory budget and performs autonomous pruning.
-    
+
     Implements tiered budget management:
     - Hot tier (0-70%): Normal operation, no action
     - Warm tier (70-85%): Light consolidation triggered
@@ -78,7 +78,7 @@ class MemoryBudgetController:
     ):
         """
         Initialize budget controller.
-        
+
         Args:
             capacity_limit: Maximum number of memories
             hot_threshold: Threshold for hot tier (0.0-1.0)
@@ -95,10 +95,10 @@ class MemoryBudgetController:
     def check_budget(self, total_memories: int) -> BudgetStatus:
         """
         Check current budget status.
-        
+
         Args:
             total_memories: Current number of memories
-            
+
         Returns:
             BudgetStatus with current state
         """
@@ -144,22 +144,22 @@ class MemoryBudgetController:
     ) -> list[PruneCandidate]:
         """
         Compute pruning scores for all memories.
-        
+
         Pruning score formula:
             P = 0.5·A + 0.3·I + 0.2·min(access_count/10, 1) - 0.1·(age/365)
-        
+
         Where:
             A = activation level
             I = importance score
             access_count = number of retrievals
             age = days since creation
-        
+
         Lower scores are pruned first.
-        
+
         Args:
             memories: List of memories to score
             activation_scores: Optional pre-computed activation scores
-            
+
         Returns:
             List of PruneCandidate sorted by score (lowest first)
         """
@@ -223,12 +223,12 @@ class MemoryBudgetController:
     ) -> list[str]:
         """
         Select memories to prune to reach target count.
-        
+
         Args:
             memories: List of all memories
             target_count: Number of memories to prune
             activation_scores: Optional activation scores
-            
+
         Returns:
             List of memory IDs to prune
         """
@@ -251,17 +251,17 @@ class MemoryBudgetController:
     ) -> list[str]:
         """
         Get memories that should be archived (cold storage).
-        
+
         Archival candidates:
         - Old (> min_age_days)
         - Rarely accessed (< max_access_count)
         - Low importance (< 0.5)
-        
+
         Args:
             memories: List of memories
             min_age_days: Minimum age for archival
             max_access_count: Maximum accesses for archival
-            
+
         Returns:
             List of memory IDs to archive
         """
@@ -293,10 +293,10 @@ class MemoryBudgetController:
     def estimate_storage_bytes(self, memories: list[MemoryRecord]) -> int:
         """
         Estimate total storage bytes for memories.
-        
+
         Args:
             memories: List of memories
-            
+
         Returns:
             Estimated bytes
         """

@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_harness_core.provenance import (
     ProvenanceLedger,
     Witness,
@@ -10,7 +9,6 @@ from lyra_harness_core.provenance import (
     WitnessLattice,
     compute_witness_id,
 )
-
 
 # --- Witness ID computation --------------------------------------------
 
@@ -188,14 +186,14 @@ class TestProvenanceLedger:
     def test_witnesses_for_kind(self):
         ledger = ProvenanceLedger()
         w1 = ledger.append(Witness.create(kind=WitnessKind.RETRIEVAL, issued_by="r"))
-        w2 = ledger.append(Witness.create(kind=WitnessKind.AGENT_DECISION, issued_by="a"))
+        ledger.append(Witness.create(kind=WitnessKind.AGENT_DECISION, issued_by="a"))
         retrievals = ledger.witnesses_for(kind=WitnessKind.RETRIEVAL)
         assert {w.witness_id for w in retrievals} == {w1.witness_id}
 
     def test_witnesses_for_issuer(self):
         ledger = ProvenanceLedger()
         w1 = ledger.append(Witness.create(kind=WitnessKind.RETRIEVAL, issued_by="r1"))
-        w2 = ledger.append(Witness.create(kind=WitnessKind.RETRIEVAL, issued_by="r2"))
+        ledger.append(Witness.create(kind=WitnessKind.RETRIEVAL, issued_by="r2"))
         r1_witnesses = ledger.witnesses_for(issued_by="r1")
         assert {w.witness_id for w in r1_witnesses} == {w1.witness_id}
 

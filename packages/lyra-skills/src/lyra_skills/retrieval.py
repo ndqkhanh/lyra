@@ -17,8 +17,6 @@ import math
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
-
 
 __all__ = [
     "RetrievalResult",
@@ -40,7 +38,7 @@ class RetrievalResult:
     semantic_score: float = 0.0
     matched_lines: list[str] = field(default_factory=list)
 
-    def __lt__(self, other: "RetrievalResult") -> bool:
+    def __lt__(self, other: RetrievalResult) -> bool:
         return self.score < other.score
 
 
@@ -112,7 +110,7 @@ class DCIRetriever:
     compression would filter out (exact terms, negations, rare tokens).
     """
 
-    def __init__(self, skills_root: Optional[Path] = None) -> None:
+    def __init__(self, skills_root: Path | None = None) -> None:
         self._root = skills_root
         self._index: dict[str, str] = {}   # skill_id → full text (in-memory mode)
 
@@ -185,8 +183,8 @@ class HybridRetriever:
 
     def __init__(
         self,
-        bm25: Optional[BM25Retriever] = None,
-        dci: Optional[DCIRetriever] = None,
+        bm25: BM25Retriever | None = None,
+        dci: DCIRetriever | None = None,
         alpha: float = 0.40,   # BM25 weight
         beta: float = 0.40,    # DCI weight
         gamma: float = 0.20,   # semantic weight
@@ -232,7 +230,7 @@ class HybridRetriever:
 class CompetenceAwareRetriever:
     """Competence-aware retrieval that biases toward skills with proven success in similar contexts."""
 
-    def __init__(self, hybrid: Optional[HybridRetriever] = None, 
+    def __init__(self, hybrid: HybridRetriever | None = None,
                  competence_map_path: str = ""):
         self._hybrid = hybrid or HybridRetriever()
         self._context_scores: dict[str, dict[str, float]] = {}

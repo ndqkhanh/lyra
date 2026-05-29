@@ -1,9 +1,10 @@
 """Pytest fixtures for evolution framework tests."""
-import pytest
-import tempfile
 import shutil
+import tempfile
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator
+
+import pytest
 
 
 @pytest.fixture
@@ -78,7 +79,7 @@ def mock_harness(temp_workspace: Path):
 @pytest.fixture
 def mock_cost_meter():
     """Create cost meter with test budget."""
-    from lyra_cli.evolution.cost_meter import CostMeter, BudgetCap
+    from lyra_cli.evolution.cost_meter import BudgetCap, CostMeter
 
     meter = CostMeter()
     budget = BudgetCap(

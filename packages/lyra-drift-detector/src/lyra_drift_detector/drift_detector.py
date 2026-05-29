@@ -1018,7 +1018,7 @@ class DriftOrchestrator:
         ) -> list[DriftSignal]:
             try:
                 result = getattr(detector, method_name)()
-                loop = asyncio.get_running_loop()
+                asyncio.get_running_loop()
                 if asyncio.iscoroutine(result):
                     result = await result
                 if isinstance(result, list):

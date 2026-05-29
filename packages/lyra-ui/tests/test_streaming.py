@@ -3,7 +3,6 @@
 import asyncio
 
 import pytest
-
 from lyra_ui import (
     LiveStreamDisplay,
     MultiTaskProgress,
@@ -13,7 +12,6 @@ from lyra_ui import (
     StreamHandler,
     StreamingProgress,
 )
-
 
 # Streaming Tests
 

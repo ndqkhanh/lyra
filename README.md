@@ -1641,6 +1641,12 @@ make ci
 </tr>
 <tr><td style="color: #e2e8f0;"><a href="docs/architecture/">docs/architecture/</a></td><td style="color: #94a3b8;">Canonical architecture reference with diagrams</td></tr>
 <tr><td style="color: #e2e8f0;"><a href="ARCHITECTURE.md">ARCHITECTURE.md</a></td><td style="color: #94a3b8;">High-level system topology and data flow</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="docs/architecture/system-overview.md">system-overview.md</a></td><td style="color: #94a3b8;">Master system architecture with complete subsystem map</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="docs/architecture/autonomy-system.md">autonomy-system.md</a></td><td style="color: #94a3b8;">8-state FSM, goal decomposition, scheduling, budget</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="docs/architecture/agent-swarm.md">agent-swarm.md</a></td><td style="color: #94a3b8;">Fleet orchestration, consensus protocols, dashboard</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="docs/architecture/research-engine.md">research-engine.md</a></td><td style="color: #94a3b8;">Multi-hop research, knowledge graph, source scoring</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="docs/architecture/voice-system.md">voice-system.md</a></td><td style="color: #94a3b8;">Wake word, VAD, STT/TTS, emotion detection</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="docs/architecture/specialized-skills.md">specialized-skills.md</a></td><td style="color: #94a3b8;">7 domain-specific code analysis skills</td></tr>
 <tr><td style="color: #e2e8f0;"><a href="docs/architecture/safety-architecture.md">safety-architecture.md</a></td><td style="color: #94a3b8;">Parallax-style cognitive-executive separation</td></tr>
 <tr><td style="color: #e2e8f0;"><a href="docs/architecture/memory-consolidation.md">memory-consolidation.md</a></td><td style="color: #94a3b8;">Dream 4-phase consolidation design</td></tr>
 <tr><td style="color: #e2e8f0;"><a href="docs/architecture/harness-evolution.md">harness-evolution.md</a></td><td style="color: #94a3b8;">Meta-optimization loop architecture</td></tr>

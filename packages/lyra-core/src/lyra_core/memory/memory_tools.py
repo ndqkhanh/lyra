@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Any, Union
+from typing import Any
 
 from ..hir.events import emit as hir_emit
 from .auto_memory import AutoMemory, MemoryEntry, MemoryKind
@@ -43,7 +43,7 @@ Scope = str   # "auto" | "skill" | "lesson" | "any"
 # A single returned record can be one of three shapes — the toolset
 # normalises shape via ``RecallResult.payload`` so callers don't need to
 # branch on type.
-SourceRecord = Union[MemoryEntry, SkillRecord, Lesson]
+SourceRecord = MemoryEntry | SkillRecord | Lesson
 
 
 @dataclass(frozen=True)

@@ -3,7 +3,7 @@ Rule execution engine.
 """
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .rule import Rule, RuleCategory, RuleViolation
 from .rule_registry import RuleRegistry
@@ -16,7 +16,7 @@ class RuleEngine:
     Validates code against registered rules and reports violations.
     """
 
-    def __init__(self, registry: Optional[RuleRegistry] = None):
+    def __init__(self, registry: RuleRegistry | None = None):
         """
         Initialize rule engine.
 
@@ -24,14 +24,14 @@ class RuleEngine:
             registry: Rule registry (creates new if not provided)
         """
         self.registry = registry or RuleRegistry()
-        self.violations: List[RuleViolation] = []
+        self.violations: list[RuleViolation] = []
 
     def check_file(
         self,
         file_path: str,
-        content: Optional[str] = None,
-        language: Optional[str] = None,
-    ) -> List[RuleViolation]:
+        content: str | None = None,
+        language: str | None = None,
+    ) -> list[RuleViolation]:
         """
         Check a file against applicable rules.
 
@@ -55,9 +55,9 @@ class RuleEngine:
         # Read content if not provided
         if content is None:
             try:
-                with open(file_path, "r") as f:
+                with open(file_path) as f:
                     content = f.read()
-            except Exception as e:
+            except Exception:
                 # Can't read file, skip checks
                 return violations
 
@@ -76,7 +76,7 @@ class RuleEngine:
         rule: Rule,
         file_path: str,
         content: str,
-    ) -> List[RuleViolation]:
+    ) -> list[RuleViolation]:
         """
         Check a single rule against file content.
 
@@ -105,7 +105,7 @@ class RuleEngine:
         rule: Rule,
         file_path: str,
         content: str,
-    ) -> List[RuleViolation]:
+    ) -> list[RuleViolation]:
         """Check coding style rules."""
         violations = []
 
@@ -116,7 +116,7 @@ class RuleEngine:
                 violations.append(RuleViolation(
                     rule_id=rule.rule_id,
                     severity=rule.severity,
-                    message=f"Found TODO/FIXME comment",
+                    message="Found TODO/FIXME comment",
                     file_path=file_path,
                 ))
 
@@ -127,7 +127,7 @@ class RuleEngine:
         rule: Rule,
         file_path: str,
         content: str,
-    ) -> List[RuleViolation]:
+    ) -> list[RuleViolation]:
         """Check security rules."""
         violations = []
 
@@ -150,7 +150,7 @@ class RuleEngine:
         rule: Rule,
         file_path: str,
         content: str,
-    ) -> List[RuleViolation]:
+    ) -> list[RuleViolation]:
         """Check testing rules."""
         violations = []
 
@@ -161,7 +161,7 @@ class RuleEngine:
 
         return violations
 
-    def _detect_language(self, file_path: str) -> Optional[str]:
+    def _detect_language(self, file_path: str) -> str | None:
         """
         Detect language from file extension.
 
@@ -193,9 +193,9 @@ class RuleEngine:
 
     def get_violations(
         self,
-        severity: Optional[str] = None,
-        file_path: Optional[str] = None,
-    ) -> List[RuleViolation]:
+        severity: str | None = None,
+        file_path: str | None = None,
+    ) -> list[RuleViolation]:
         """
         Get recorded violations.
 
@@ -220,7 +220,7 @@ class RuleEngine:
         """Clear recorded violations."""
         self.violations.clear()
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """
         Get violation statistics.
 

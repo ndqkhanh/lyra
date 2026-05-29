@@ -2,16 +2,13 @@
 
 from __future__ import annotations
 
-import asyncio
 import logging
-import time
-from collections import deque
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 
-from .verification_mesh import VerificationLayer, VerificationStatus, VerificationResult
+from .verification_mesh import VerificationLayer, VerificationResult, VerificationStatus
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +93,7 @@ class RuntimeVerifier:
 
     def __init__(
         self,
-        resource_limits: Optional[ResourceLimits] = None,
+        resource_limits: ResourceLimits | None = None,
         ood_threshold: float = 0.15,
     ) -> None:
         self.resource_limits = resource_limits or ResourceLimits()
@@ -200,7 +197,7 @@ class RuntimeVerifier:
                 layer=VerificationLayer.POST_EXECUTION,
                 verifier="RuntimeVerifier",
                 check_name="trace_start",
-                message=f"Trace does not start with an initialization event",
+                message="Trace does not start with an initialization event",
                 confidence=0.6,
             ))
 
@@ -212,7 +209,7 @@ class RuntimeVerifier:
                 layer=VerificationLayer.POST_EXECUTION,
                 verifier="RuntimeVerifier",
                 check_name="trace_end",
-                message=f"Trace does not end with a completion event",
+                message="Trace does not end with a completion event",
                 confidence=0.6,
             ))
 
@@ -235,7 +232,7 @@ class RuntimeVerifier:
     # ── OOD detection ───────────────────────────────────────────────────
 
     async def check_ood(
-        self, current: dict[str, Any], baseline: Optional[dict[str, float]] = None
+        self, current: dict[str, Any], baseline: dict[str, float] | None = None
     ) -> VerificationResult:
         """Check if current behavior is out-of-distribution.
 
@@ -428,7 +425,7 @@ class RuntimeVerifier:
     async def validate_output(
         self,
         output: dict[str, Any],
-        expected_schema: Optional[dict[str, str]] = None,
+        expected_schema: dict[str, str] | None = None,
     ) -> VerificationResult:
         """Validate output against expected schema.
 
@@ -515,7 +512,7 @@ class RuntimeVerifier:
             "ood_threshold": self.ood_threshold,
             "alerts": self.alert_count,
             "side_effects": self.side_effect_count,
-            "side_effect_types": list(set(e.effect_type for e in self._side_effects)),
+            "side_effect_types": list({e.effect_type for e in self._side_effects}),
             "resource_limits": {
                 "max_memory_mb": self.resource_limits.max_memory_mb,
                 "max_time_seconds": self.resource_limits.max_time_seconds,

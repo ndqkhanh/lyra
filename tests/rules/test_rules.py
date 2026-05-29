@@ -10,11 +10,10 @@ import pytest
 from src.rules import (
     Rule,
     RuleCategory,
-    RuleSeverity,
-    RuleViolation,
-    RuleRegistry,
     RuleEngine,
     RuleParser,
+    RuleRegistry,
+    RuleSeverity,
 )
 
 

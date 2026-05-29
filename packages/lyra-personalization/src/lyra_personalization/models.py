@@ -17,7 +17,7 @@ import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import uuid4
 
 logger = logging.getLogger(__name__)
@@ -68,9 +68,9 @@ class InteractionRecord:
     session_id: str = ""
     type: str = "query"
     content: str = ""
-    outcome: Optional[str] = None
+    outcome: str | None = None
     importance: float = 0.5
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         """Validate fields after initialization."""
@@ -90,11 +90,11 @@ class CompactEmbedding:
     """
 
     user_id: str
-    vector: List[float] = field(default_factory=list)
+    vector: list[float] = field(default_factory=list)
     version: int = 1
     compressed_tokens: str = ""
     created_at: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         """Validate embedding dimension."""
@@ -123,15 +123,15 @@ class RichRepresentation:
     """
 
     user_id: str
-    preferences: Dict[str, Any] = field(default_factory=dict)
-    skill_levels: Dict[str, SkillLevel] = field(default_factory=dict)
+    preferences: dict[str, Any] = field(default_factory=dict)
+    skill_levels: dict[str, SkillLevel] = field(default_factory=dict)
     communication_style: CommunicationStyle = CommunicationStyle.BALANCED
-    goals: List[str] = field(default_factory=list)
-    interaction_history: List[InteractionRecord] = field(default_factory=list)
-    conventions: List[str] = field(default_factory=list)
+    goals: list[str] = field(default_factory=list)
+    interaction_history: list[InteractionRecord] = field(default_factory=list)
+    conventions: list[str] = field(default_factory=list)
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
     def total_interactions(self) -> int:
@@ -149,13 +149,13 @@ class WorkingMemory:
     a configurable TTL.
     """
 
-    entries: Dict[str, str] = field(default_factory=dict)
-    active_task: Optional[str] = None
-    recent_tool_calls: List[str] = field(default_factory=list)
+    entries: dict[str, str] = field(default_factory=dict)
+    active_task: str | None = None
+    recent_tool_calls: list[str] = field(default_factory=list)
     session_id: str = field(default_factory=lambda: str(uuid4()))
     created_at: datetime = field(default_factory=datetime.now)
     ttl: timedelta = field(default_factory=lambda: timedelta(hours=1))
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def is_expired(self) -> bool:
         """Check if this working memory session has exceeded TTL."""
@@ -172,15 +172,15 @@ class EpisodicMemory:
     for pruning decisions.
     """
 
-    records: List[InteractionRecord] = field(default_factory=list)
-    last_consolidated: Optional[datetime] = None
+    records: list[InteractionRecord] = field(default_factory=list)
+    last_consolidated: datetime | None = None
     max_records: int = 1000
     importance_threshold: float = 0.3
     created_at: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
-    def high_importance_records(self) -> List[InteractionRecord]:
+    def high_importance_records(self) -> list[InteractionRecord]:
         """Return records with importance above threshold."""
         return [
             r for r in self.records
@@ -199,13 +199,13 @@ class SemanticMemory:
     """
 
     user_id: str = ""
-    preferences: Dict[str, Any] = field(default_factory=dict)
-    conventions: List[str] = field(default_factory=list)
-    domain_expertise: Dict[str, SkillLevel] = field(default_factory=dict)
-    long_term_goals: List[str] = field(default_factory=list)
-    facts: List[str] = field(default_factory=list)
+    preferences: dict[str, Any] = field(default_factory=dict)
+    conventions: list[str] = field(default_factory=list)
+    domain_expertise: dict[str, SkillLevel] = field(default_factory=dict)
+    long_term_goals: list[str] = field(default_factory=list)
+    facts: list[str] = field(default_factory=list)
     updated_at: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -219,7 +219,7 @@ class UserProfile:
 
     user_id: str
     rich_repr: RichRepresentation = field(default_factory=lambda: RichRepresentation(user_id=""))
-    compact_embedding: Optional[CompactEmbedding] = None
+    compact_embedding: CompactEmbedding | None = None
     working_memory: WorkingMemory = field(default_factory=WorkingMemory)
     episodic_memory: EpisodicMemory = field(default_factory=EpisodicMemory)
     semantic_memory: SemanticMemory = field(default_factory=SemanticMemory)
@@ -227,4 +227,4 @@ class UserProfile:
     trust_score: float = 0.5
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)

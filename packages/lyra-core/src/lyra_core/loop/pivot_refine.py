@@ -244,7 +244,7 @@ class ErrorDatabase:
                 ),
             ).message
             typical_stage = max(
-                set(r.failure_stage for r in group),
+                {r.failure_stage for r in group},
                 key=lambda s: sum(1 for r in group if r.failure_stage == s),
             )
             patterns.append(

@@ -1,7 +1,8 @@
 """Tests for evolution cost meter."""
-import pytest
 import time
-from lyra_cli.evolution.cost_meter import CostMeter, BudgetCap
+
+import pytest
+from lyra_cli.evolution.cost_meter import BudgetCap, CostMeter
 
 
 def test_cost_meter_initialization():

@@ -1,10 +1,8 @@
 """Tests for lyra_context_profiler.optimizer module."""
 
 import asyncio
-import time
 
 import pytest
-
 from lyra_context_profiler.optimizer import (
     CacheWarmingStrategy,
     ClusterConfig,
@@ -12,10 +10,11 @@ from lyra_context_profiler.optimizer import (
     EvictionCandidate,
     EvictionPolicy,
     OptimizationResult,
-    WindowSizeRecommendation,
 )
-from lyra_context_profiler.strategies import CompactionStrategy, StrategyParameters, StrategyRegistry
-
+from lyra_context_profiler.strategies import (
+    CompactionStrategy,
+    StrategyRegistry,
+)
 
 # ── Fixtures ────────────────────────────────────────────────────────────────────
 

@@ -7,17 +7,17 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from src.core.task import Task, TaskType, Result
+from src.core.task import Result, Task, TaskType
 from src.memory import (
-    ShortTermMemory,
-    LongTermMemory,
-    MemoryRetriever,
-    MemoryConsolidator,
-    MemoryType,
     ConsolidationPolicy,
+    LongTermMemory,
+    MemoryConsolidator,
+    MemoryRetriever,
+    MemoryType,
     RetrievalStrategy,
+    ShortTermMemory,
 )
 
 
@@ -46,8 +46,8 @@ class AgentCapability:
 
     name: str
     description: str
-    task_types: List[TaskType]
-    required_tools: List[str] = field(default_factory=list)
+    task_types: list[TaskType]
+    required_tools: list[str] = field(default_factory=list)
     estimated_cost: float = 0.0
     estimated_time: float = 0.0
     confidence: float = 1.0  # 0-1 confidence in this capability
@@ -65,23 +65,23 @@ class Message:
     from_agent: str
     to_agent: str
     message_type: MessageType
-    content: Dict[str, Any]
+    content: dict[str, Any]
     timestamp: datetime = field(default_factory=datetime.now)
-    correlation_id: Optional[str] = None
+    correlation_id: str | None = None
 
 
 class Agent(ABC):
     """
     Base class for all agents in the Lyra system.
-    
+
     Agents are autonomous entities that can execute tasks,
     communicate with other agents, and learn from experience.
     """
 
-    def __init__(self, agent_id: str, capabilities: Optional[List[AgentCapability]] = None):
+    def __init__(self, agent_id: str, capabilities: list[AgentCapability] | None = None):
         """
         Initialize an agent.
-        
+
         Args:
             agent_id: Unique identifier for this agent
             capabilities: List of capabilities this agent can perform
@@ -89,10 +89,10 @@ class Agent(ABC):
         self.agent_id = agent_id
         self.capabilities = capabilities or []
         self.status = AgentStatus.IDLE
-        self.current_task: Optional[Task] = None
+        self.current_task: Task | None = None
         self.message_queue: asyncio.Queue[Message] = asyncio.Queue()
-        self.execution_history: List[Result] = []
-        self.metadata: Dict[str, Any] = {}
+        self.execution_history: list[Result] = []
+        self.metadata: dict[str, Any] = {}
 
         # Memory system
         self.short_term_memory = ShortTermMemory(
@@ -114,10 +114,10 @@ class Agent(ABC):
     async def execute(self, task: Task) -> Result:
         """
         Execute a task and return the result.
-        
+
         Args:
             task: The task to execute
-            
+
         Returns:
             Result of the task execution
         """
@@ -127,27 +127,27 @@ class Agent(ABC):
     def can_handle(self, task: Task) -> float:
         """
         Determine if this agent can handle a task.
-        
+
         Args:
             task: The task to evaluate
-            
+
         Returns:
             Confidence score (0-1) that this agent can handle the task
         """
         pass
 
     async def send_message(
-        self, to_agent: str, message_type: MessageType, content: Dict[str, Any]
+        self, to_agent: str, message_type: MessageType, content: dict[str, Any]
     ) -> None:
         """
         Send a message to another agent.
-        
+
         Args:
             to_agent: ID of the recipient agent
             message_type: Type of message
             content: Message content
         """
-        message = Message(
+        Message(
             from_agent=self.agent_id,
             to_agent=to_agent,
             message_type=message_type,
@@ -157,10 +157,10 @@ class Agent(ABC):
         # For now, we'll just log it
         print(f"[{self.agent_id}] -> [{to_agent}]: {message_type.value}")
 
-    async def receive_message(self) -> Optional[Message]:
+    async def receive_message(self) -> Message | None:
         """
         Receive a message from the queue.
-        
+
         Returns:
             Next message in queue, or None if empty
         """
@@ -172,7 +172,7 @@ class Agent(ABC):
     async def report_progress(self, progress: float, message: str) -> None:
         """
         Report progress on current task.
-        
+
         Args:
             progress: Progress percentage (0-1)
             message: Progress message
@@ -191,10 +191,10 @@ class Agent(ABC):
     async def request_help(self, issue: str) -> Any:
         """
         Request help from the coordinator.
-        
+
         Args:
             issue: Description of the issue
-            
+
         Returns:
             Response from coordinator
         """
@@ -206,13 +206,13 @@ class Agent(ABC):
         # In a real implementation, this would wait for a response
         return None
 
-    def get_capability(self, task_type: TaskType) -> Optional[AgentCapability]:
+    def get_capability(self, task_type: TaskType) -> AgentCapability | None:
         """
         Get capability for a specific task type.
-        
+
         Args:
             task_type: Type of task
-            
+
         Returns:
             Matching capability, or None if not found
         """
@@ -224,7 +224,7 @@ class Agent(ABC):
     def record_execution(self, result: Result) -> None:
         """
         Record a task execution result.
-        
+
         Args:
             result: Execution result to record
         """
@@ -233,13 +233,13 @@ class Agent(ABC):
         if len(self.execution_history) > 100:
             self.execution_history = self.execution_history[-100:]
 
-    def get_success_rate(self, task_type: Optional[TaskType] = None) -> float:
+    def get_success_rate(self, task_type: TaskType | None = None) -> float:
         """
         Calculate success rate for this agent.
-        
+
         Args:
             task_type: Optional task type to filter by
-            
+
         Returns:
             Success rate (0-1)
         """
@@ -261,10 +261,10 @@ class Agent(ABC):
     # Memory-related methods
 
     def remember(self, content: str, memory_type: MemoryType = MemoryType.EPISODIC,
-                 importance: float = 0.5, tags: Optional[List[str]] = None) -> None:
+                 importance: float = 0.5, tags: list[str] | None = None) -> None:
         """
         Store information in long-term memory.
-        
+
         Args:
             content: Content to remember
             memory_type: Type of memory (episodic, semantic, procedural)
@@ -280,17 +280,17 @@ class Agent(ABC):
 
     def recall(self, query: str, limit: int = 5, min_score: float = 0.5,
                strategy: RetrievalStrategy = RetrievalStrategy.HYBRID,
-               filters: Optional[Dict] = None) -> List[Any]:
+               filters: dict | None = None) -> list[Any]:
         """
         Retrieve relevant memories.
-        
+
         Args:
             query: Search query
             limit: Maximum number of results
             min_score: Minimum relevance score
             strategy: Retrieval strategy to use
             filters: Optional filters (type, tags, time_range)
-            
+
         Returns:
             List of retrieval results
         """
@@ -303,10 +303,10 @@ class Agent(ABC):
         )
 
     def add_conversation_turn(self, role: str, content: str,
-                             metadata: Optional[Dict[str, Any]] = None) -> None:
+                             metadata: dict[str, Any] | None = None) -> None:
         """
         Add a conversation turn to short-term memory.
-        
+
         Args:
             role: Role (user, agent, system)
             content: Content of the turn
@@ -321,19 +321,19 @@ class Agent(ABC):
     def get_conversation_context(self, max_turns: int = 5) -> str:
         """
         Get recent conversation context.
-        
+
         Args:
             max_turns: Maximum number of turns to include
-            
+
         Returns:
             Formatted conversation context
         """
         return self.short_term_memory.get_context(max_turns=max_turns)
 
-    def consolidate_memories(self) -> Optional[Any]:
+    def consolidate_memories(self) -> Any | None:
         """
         Manually trigger memory consolidation.
-        
+
         Returns:
             Consolidation result if performed, None otherwise
         """
@@ -344,7 +344,7 @@ class Agent(ABC):
     def set_working_memory(self, key: str, value: Any) -> None:
         """
         Store temporary data in working memory.
-        
+
         Args:
             key: Key to store under
             value: Value to store
@@ -354,11 +354,11 @@ class Agent(ABC):
     def get_working_memory(self, key: str, default: Any = None) -> Any:
         """
         Retrieve temporary data from working memory.
-        
+
         Args:
             key: Key to retrieve
             default: Default value if key not found
-            
+
         Returns:
             Stored value or default
         """
@@ -372,10 +372,10 @@ class Agent(ABC):
         """Load long-term memories from disk."""
         self.long_term_memory.load()
 
-    def get_memory_statistics(self) -> Dict[str, Any]:
+    def get_memory_statistics(self) -> dict[str, Any]:
         """
         Get memory system statistics.
-        
+
         Returns:
             Dictionary with memory statistics
         """

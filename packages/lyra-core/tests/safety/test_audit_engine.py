@@ -283,7 +283,7 @@ class TestAuditLogger:
         """Test verification detects broken chain link."""
         logger = AuditLogger()
 
-        record1 = logger.log(
+        logger.log(
             action_description="Action 1",
             risk_level=RiskLevel.LOW,
             reasoning_flags=[],

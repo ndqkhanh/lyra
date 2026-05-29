@@ -1,13 +1,10 @@
 """Tests for MCP server integration."""
 
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from lyra_skills.mcp_integration import (
     MCPServerManager,
-    install_production_mcp_servers,
 )
 
 

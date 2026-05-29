@@ -19,7 +19,6 @@ from typing import Any
 
 from lyra_domain.models import (
     Capability,
-    ComplexityLevel,
     DomainType,
     ExpertCard,
     KnowledgeCategory,
@@ -525,7 +524,7 @@ class ExpertRegistry:
     def __init__(self, cards: dict[DomainType, ExpertCard] | None = None) -> None:
         self._cards: dict[DomainType, ExpertCard] = {}
         if cards is not None:
-            for domain, card in cards.items():
+            for _domain, card in cards.items():
                 self.register_expert(card)
 
     # ------------------------------------------------------------------

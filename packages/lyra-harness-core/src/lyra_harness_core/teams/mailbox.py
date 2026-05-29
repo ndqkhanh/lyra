@@ -9,7 +9,7 @@ from __future__ import annotations
 import time
 import uuid
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -25,7 +25,7 @@ class Message:
     body: str
     sent_at: float = field(default_factory=time.time)
     payload: dict[str, Any] = field(default_factory=dict)
-    in_reply_to: Optional[str] = None
+    in_reply_to: str | None = None
 
     def __post_init__(self) -> None:
         if not self.msg_id:
@@ -72,13 +72,13 @@ class Mailbox:
             )
         self._inbox.append(message)
 
-    def receive(self) -> Optional[Message]:
+    def receive(self) -> Message | None:
         """Pop the oldest message; FIFO. Returns None if inbox empty."""
         if not self._inbox:
             return None
         return self._inbox.pop(0)
 
-    def peek(self) -> Optional[Message]:
+    def peek(self) -> Message | None:
         """Look at the oldest message without removing it."""
         return self._inbox[0] if self._inbox else None
 
@@ -114,7 +114,7 @@ class MailboxRouter:
             return True
         return False
 
-    def get(self, agent_id: str) -> Optional[Mailbox]:
+    def get(self, agent_id: str) -> Mailbox | None:
         return self._mailboxes.get(agent_id)
 
     def send(
@@ -123,8 +123,8 @@ class MailboxRouter:
         sender: str,
         recipient: str,
         body: str,
-        payload: Optional[dict[str, Any]] = None,
-        in_reply_to: Optional[str] = None,
+        payload: dict[str, Any] | None = None,
+        in_reply_to: str | None = None,
     ) -> Message:
         """Send a message. Returns the constructed :class:`Message`."""
         msg = Message(

@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Test CLI and final integration"""
 
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
 
+from lyra_cli.cli import handle_agents, handle_commands, handle_mcp, handle_skills
 from lyra_cli.config import ConfigManager
-from lyra_cli.cli import handle_commands, handle_skills, handle_agents, handle_mcp
 
 
 def test_cli_integration():

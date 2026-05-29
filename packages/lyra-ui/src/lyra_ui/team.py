@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class UserRole(Enum):
@@ -55,7 +55,7 @@ class PromptTemplate:
     name: str
     description: str
     template: str
-    variables: List[str] = field(default_factory=list)
+    variables: list[str] = field(default_factory=list)
     created_by: str = ""
     created_at: datetime = field(default_factory=datetime.now)
 
@@ -67,9 +67,9 @@ class TeamConfig:
     team_id: str
     team_name: str
     created_at: datetime
-    settings: Dict[str, Any] = field(default_factory=dict)
-    members: List[TeamMember] = field(default_factory=list)
-    quotas: Dict[str, UsageQuota] = field(default_factory=dict)
+    settings: dict[str, Any] = field(default_factory=dict)
+    members: list[TeamMember] = field(default_factory=list)
+    quotas: dict[str, UsageQuota] = field(default_factory=dict)
 
 
 class TeamManager:
@@ -84,7 +84,7 @@ class TeamManager:
     - Role-based access
     """
 
-    def __init__(self, storage_path: Optional[Path] = None):
+    def __init__(self, storage_path: Path | None = None):
         """
         Initialize team manager.
 
@@ -93,14 +93,14 @@ class TeamManager:
         """
         self.storage_path = storage_path or Path.home() / ".lyra" / "teams"
         self.storage_path.mkdir(parents=True, exist_ok=True)
-        self.current_team: Optional[TeamConfig] = None
-        self.templates: List[PromptTemplate] = []
+        self.current_team: TeamConfig | None = None
+        self.templates: list[PromptTemplate] = []
 
     def create_team(
         self,
         team_id: str,
         team_name: str,
-        settings: Optional[Dict[str, Any]] = None,
+        settings: dict[str, Any] | None = None,
     ) -> TeamConfig:
         """
         Create new team.
@@ -246,7 +246,7 @@ class TeamManager:
         name: str,
         description: str,
         template: str,
-        variables: Optional[List[str]] = None,
+        variables: list[str] | None = None,
         created_by: str = "",
     ) -> PromptTemplate:
         """
@@ -274,7 +274,7 @@ class TeamManager:
         self.templates.append(prompt_template)
         return prompt_template
 
-    def get_template(self, template_id: str) -> Optional[PromptTemplate]:
+    def get_template(self, template_id: str) -> PromptTemplate | None:
         """
         Get template by ID.
 
@@ -289,7 +289,7 @@ class TeamManager:
                 return template
         return None
 
-    def list_templates(self) -> List[PromptTemplate]:
+    def list_templates(self) -> list[PromptTemplate]:
         """
         List all templates.
 
@@ -356,7 +356,7 @@ class TeamManager:
         if not team_file.exists():
             raise FileNotFoundError(f"Team not found: {team_id}")
 
-        with open(team_file, "r") as f:
+        with open(team_file) as f:
             team_data = json.load(f)
 
         self.current_team = TeamConfig(
@@ -398,7 +398,7 @@ class TeamManager:
             for t in team_data.get("templates", [])
         ]
 
-    def get_team_analytics(self) -> Dict[str, Any]:
+    def get_team_analytics(self) -> dict[str, Any]:
         """
         Get team analytics.
 

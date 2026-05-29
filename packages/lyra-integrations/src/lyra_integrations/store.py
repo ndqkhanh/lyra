@@ -8,17 +8,15 @@ Features:
 - Secure key management
 """
 
-import asyncio
 import json
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
 
 import aiosqlite
 from cryptography.fernet import Fernet
 
-from lyra_integrations.oauth import OAuthClient, OAuthConfig, OAuthToken
+from lyra_integrations.oauth import OAuthToken
 
 
 @dataclass
@@ -31,7 +29,7 @@ class StoredCredential:
     encrypted_token: bytes
     created_at: datetime
     updated_at: datetime
-    metadata: Dict[str, str]
+    metadata: dict[str, str]
 
 
 class CredentialStore:
@@ -44,7 +42,7 @@ class CredentialStore:
     - Per-provider multi-account support
     """
 
-    def __init__(self, db_path: Path, encryption_key: Optional[bytes] = None):
+    def __init__(self, db_path: Path, encryption_key: bytes | None = None):
         """
         Initialize credential store.
 
@@ -58,7 +56,7 @@ class CredentialStore:
         self.encryption_key = encryption_key or Fernet.generate_key()
         self.cipher = Fernet(self.encryption_key)
 
-        self._db: Optional[aiosqlite.Connection] = None
+        self._db: aiosqlite.Connection | None = None
 
     async def initialize(self):
         """Initialize database schema."""
@@ -95,7 +93,7 @@ class CredentialStore:
         account_id: str,
         account_name: str,
         token: OAuthToken,
-        metadata: Optional[Dict[str, str]] = None,
+        metadata: dict[str, str] | None = None,
     ):
         """
         Store OAuth credential.
@@ -147,7 +145,7 @@ class CredentialStore:
         self,
         provider: str,
         account_id: str,
-    ) -> Optional[OAuthToken]:
+    ) -> OAuthToken | None:
         """
         Retrieve OAuth credential.
 
@@ -184,7 +182,7 @@ class CredentialStore:
             created_at=datetime.fromisoformat(token_dict["created_at"]),
         )
 
-    async def list_credentials(self, provider: Optional[str] = None) -> List[StoredCredential]:
+    async def list_credentials(self, provider: str | None = None) -> list[StoredCredential]:
         """
         List stored credentials.
 

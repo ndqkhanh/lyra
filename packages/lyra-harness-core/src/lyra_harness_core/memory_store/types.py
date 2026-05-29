@@ -5,7 +5,7 @@ import enum
 import time
 import uuid
 from dataclasses import dataclass, field, replace
-from typing import Any, Optional
+from typing import Any
 
 
 class MemoryKind(str, enum.Enum):
@@ -71,10 +71,10 @@ class MemoryItem:
         namespace: str = "default",
         importance: float = 0.5,
         tags: tuple[str, ...] = (),
-        metadata: Optional[dict[str, Any]] = None,
-        item_id: Optional[str] = None,
-        timestamp: Optional[float] = None,
-    ) -> "MemoryItem":
+        metadata: dict[str, Any] | None = None,
+        item_id: str | None = None,
+        timestamp: float | None = None,
+    ) -> MemoryItem:
         """Construct with auto-generated ``item_id`` (UUID4) and current time."""
         ts = timestamp if timestamp is not None else time.time()
         return cls(
@@ -90,7 +90,7 @@ class MemoryItem:
             metadata=dict(metadata or {}),
         )
 
-    def touched(self, *, timestamp: Optional[float] = None) -> "MemoryItem":
+    def touched(self, *, timestamp: float | None = None) -> MemoryItem:
         """Return a copy with ``accessed_at`` updated + ``access_count`` incremented."""
         return replace(
             self,
@@ -98,7 +98,7 @@ class MemoryItem:
             access_count=self.access_count + 1,
         )
 
-    def with_importance(self, importance: float) -> "MemoryItem":
+    def with_importance(self, importance: float) -> MemoryItem:
         """Return a copy with ``importance`` updated; raises on invalid input."""
         if not 0.0 <= importance <= 1.0:
             raise ValueError(f"importance must be in [0, 1], got {importance}")
@@ -115,8 +115,8 @@ class RetrievalSpec:
     """
 
     query: str = ""  # keyword / substring; empty = no text filter
-    kind: Optional[MemoryKind] = None
-    namespace: Optional[str] = None
+    kind: MemoryKind | None = None
+    namespace: str | None = None
     tags: frozenset[str] = field(default_factory=frozenset)
     min_importance: float = 0.0
     top_k: int = 10

@@ -1,17 +1,14 @@
 """Tests for lyra-autoresearch HITL (Human-in-the-Loop) module."""
 from __future__ import annotations
 
-from unittest.mock import Mock
-
 import pytest
-
 from lyra_autoresearch.hitl import (
     ApprovalGate,
     FeedbackLoop,
-    HITLConfig,
-    HITLManager,
     GateResult,
     GateStatus,
+    HITLConfig,
+    HITLManager,
     ReviewCheckpoint,
 )
 

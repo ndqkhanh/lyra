@@ -1,8 +1,6 @@
 """Tests for SandboxVerifier."""
 from __future__ import annotations
 
-import pytest
-
 from lyra_evolution.sandbox_verifier import SafetyRule, SandboxVerifier
 from lyra_evolution.voyager import SkillCandidate
 

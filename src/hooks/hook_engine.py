@@ -3,9 +3,9 @@ Hook execution engine.
 """
 
 import asyncio
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from .hook import Hook, HookType, HookContext, HookResult
+from .hook import Hook, HookContext, HookResult, HookType
 from .hook_registry import HookRegistry
 
 
@@ -16,7 +16,7 @@ class HookEngine:
     Manages hook execution, error handling, and result aggregation.
     """
 
-    def __init__(self, registry: Optional[HookRegistry] = None):
+    def __init__(self, registry: HookRegistry | None = None):
         """
         Initialize hook engine.
 
@@ -24,17 +24,17 @@ class HookEngine:
             registry: Hook registry (creates new if not provided)
         """
         self.registry = registry or HookRegistry()
-        self.execution_history: List[Dict[str, Any]] = []
+        self.execution_history: list[dict[str, Any]] = []
 
     async def fire(
         self,
         hook_type: HookType,
-        tool_name: Optional[str] = None,
-        tool_args: Optional[Dict[str, Any]] = None,
-        tool_result: Optional[Any] = None,
-        session_id: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-    ) -> List[HookResult]:
+        tool_name: str | None = None,
+        tool_args: dict[str, Any] | None = None,
+        tool_result: Any | None = None,
+        session_id: str | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> list[HookResult]:
         """
         Fire hooks for a given event.
 
@@ -119,12 +119,12 @@ class HookEngine:
     def fire_sync(
         self,
         hook_type: HookType,
-        tool_name: Optional[str] = None,
-        tool_args: Optional[Dict[str, Any]] = None,
-        tool_result: Optional[Any] = None,
-        session_id: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-    ) -> List[HookResult]:
+        tool_name: str | None = None,
+        tool_args: dict[str, Any] | None = None,
+        tool_result: Any | None = None,
+        session_id: str | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> list[HookResult]:
         """
         Fire hooks synchronously.
 
@@ -152,9 +152,9 @@ class HookEngine:
 
     def get_execution_history(
         self,
-        hook_type: Optional[HookType] = None,
+        hook_type: HookType | None = None,
         limit: int = 100,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Get hook execution history.
 
@@ -179,7 +179,7 @@ class HookEngine:
         """Clear execution history."""
         self.execution_history.clear()
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """
         Get execution statistics.
 

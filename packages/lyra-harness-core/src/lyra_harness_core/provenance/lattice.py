@@ -6,8 +6,9 @@ kind-aware constructors (``record_decision``, ``record_retrieval``,
 """
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Any, Iterable, Optional
+from typing import Any
 
 from .ledger import ProvenanceLedger
 from .types import Witness, WitnessKind

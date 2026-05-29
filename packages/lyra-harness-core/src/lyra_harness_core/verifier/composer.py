@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import enum
 from dataclasses import dataclass, field
-from typing import Any, Optional, Protocol
+from typing import Any, Protocol
 
 
 class VerifierAxis(str, enum.Enum):
@@ -80,7 +80,7 @@ class CompositeVerdict:
     blocking: bool  # at least one axis returned passed=False at >= blocking_severity
     severity: Severity  # max severity across axes
 
-    def by_axis(self, axis: VerifierAxis) -> Optional[AxisVerdict]:
+    def by_axis(self, axis: VerifierAxis) -> AxisVerdict | None:
         for v in self.axis_verdicts:
             if v.axis == axis:
                 return v

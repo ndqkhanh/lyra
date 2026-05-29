@@ -1,7 +1,6 @@
 """Tests for AEVO core."""
 
 import pytest
-
 from lyra_cli.aevo import AEVOLoop, EvolutionConfig, MetaAgent, ProtectedHarness
 
 

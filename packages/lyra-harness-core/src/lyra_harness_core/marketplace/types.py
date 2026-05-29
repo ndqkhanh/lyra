@@ -4,7 +4,7 @@ from __future__ import annotations
 import enum
 import time
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 
 class TrustTier(str, enum.Enum):
@@ -28,7 +28,7 @@ class TrustVerdict:
     tier: TrustTier
     score: float  # 0.0 .. 1.0 numeric for fine-grained policy
     reasons: tuple[str, ...] = ()
-    expires_at: Optional[float] = None
+    expires_at: float | None = None
 
     def __post_init__(self) -> None:
         if not 0.0 <= self.score <= 1.0:

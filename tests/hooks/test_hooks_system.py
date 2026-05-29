@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Test hook system implementation"""
 
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
 
-from lyra_cli.hooks import HookManager, HookType, HookContext, register_builtin_hooks
+from lyra_cli.hooks import HookContext, HookManager, HookType, register_builtin_hooks
 
 
 def test_hook_system():

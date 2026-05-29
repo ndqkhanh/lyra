@@ -2,7 +2,7 @@
 Advanced usage examples for Deep Reasoning Agent.
 """
 
-from lyra_reasoning import DeepReasoningAgent, ReasoningConfig, ReasoningStrategy, ReasoningDepth
+from lyra_reasoning import DeepReasoningAgent, ReasoningConfig, ReasoningDepth, ReasoningStrategy
 
 
 def example_custom_config():
@@ -10,9 +10,9 @@ def example_custom_config():
     print("=" * 60)
     print("Advanced Example 1: Custom Configuration")
     print("=" * 60)
-    
+
     agent = DeepReasoningAgent()
-    
+
     # Create custom config
     config = ReasoningConfig(
         strategy=ReasoningStrategy.TREE_SEARCH,
@@ -23,12 +23,12 @@ def example_custom_config():
         verification_threshold=0.8,
         enable_backtracking=True,
     )
-    
+
     result = agent.reason(
         task="Design an optimal algorithm for real-time anomaly detection in streaming data",
         config=config,
     )
-    
+
     print(f"\nTask: {result.task}")
     print(f"Strategy: {result.strategy_used.value}")
     print(f"Tokens Used: {result.tokens_used}")
@@ -41,11 +41,11 @@ def example_research_pipeline():
     print("\n" + "=" * 60)
     print("Advanced Example 2: Research Pipeline")
     print("=" * 60)
-    
+
     agent = DeepReasoningAgent()
-    
+
     research_topic = "quantum error correction codes"
-    
+
     # Phase 1: Generate hypotheses
     print("\nPhase 1: Hypothesis Generation")
     hypotheses = agent.reason(
@@ -54,7 +54,7 @@ def example_research_pipeline():
         depth="comprehensive",
     )
     print(f"Generated hypotheses (score: {hypotheses.verification_score:.2f})")
-    
+
     # Phase 2: Analyze feasibility
     print("\nPhase 2: Feasibility Analysis")
     analysis = agent.reason(
@@ -63,7 +63,7 @@ def example_research_pipeline():
         depth="comprehensive",
     )
     print(f"Analysis complete (score: {analysis.verification_score:.2f})")
-    
+
     # Phase 3: Debate approach
     print("\nPhase 3: Approach Debate")
     debate = agent.reason(
@@ -72,7 +72,7 @@ def example_research_pipeline():
         depth="comprehensive",
     )
     print(f"Debate synthesis (score: {debate.verification_score:.2f})")
-    
+
     # Phase 4: Synthesize findings
     print("\nPhase 4: Synthesis")
     synthesis = agent.reason(
@@ -80,9 +80,9 @@ def example_research_pipeline():
         strategy="cot",
         depth="comprehensive",
     )
-    
+
     print(f"\nFinal Research Proposal:\n{synthesis.conclusion}")
-    print(f"\nPipeline Statistics:")
+    print("\nPipeline Statistics:")
     print(f"  Total tokens: {hypotheses.tokens_used + analysis.tokens_used + debate.tokens_used + synthesis.tokens_used}")
     print(f"  Average verification: {(hypotheses.verification_score + analysis.verification_score + debate.verification_score + synthesis.verification_score) / 4:.2f}")
 
@@ -92,11 +92,11 @@ def example_iterative_refinement():
     print("\n" + "=" * 60)
     print("Advanced Example 3: Iterative Refinement")
     print("=" * 60)
-    
+
     agent = DeepReasoningAgent()
-    
+
     problem = "Design a distributed consensus algorithm"
-    
+
     # Iteration 1: Initial solution
     print("\nIteration 1: Initial Solution")
     solution_v1 = agent.reason(
@@ -105,7 +105,7 @@ def example_iterative_refinement():
         depth="standard",
     )
     print(f"V1 Score: {solution_v1.verification_score:.2f}")
-    
+
     # Iteration 2: Refine based on analysis
     print("\nIteration 2: Refinement")
     solution_v2 = agent.reason(
@@ -114,7 +114,7 @@ def example_iterative_refinement():
         depth="comprehensive",
     )
     print(f"V2 Score: {solution_v2.verification_score:.2f}")
-    
+
     # Iteration 3: Final optimization
     print("\nIteration 3: Optimization")
     solution_v3 = agent.reason(
@@ -123,7 +123,7 @@ def example_iterative_refinement():
         depth="comprehensive",
     )
     print(f"V3 Score: {solution_v3.verification_score:.2f}")
-    
+
     print(f"\nFinal Solution:\n{solution_v3.conclusion}")
     print(f"\nImprovement: {solution_v3.verification_score - solution_v1.verification_score:.2f}")
 
@@ -133,21 +133,21 @@ def example_multi_strategy_comparison():
     print("\n" + "=" * 60)
     print("Advanced Example 4: Multi-Strategy Comparison")
     print("=" * 60)
-    
+
     agent = DeepReasoningAgent()
-    
+
     task = "Explain the implications of P vs NP problem"
-    
+
     strategies = [
         ("cot", "Chain of Thought"),
         ("tree_search", "Tree Search"),
         ("debate", "Multi-Agent Debate"),
     ]
-    
+
     results = {}
-    
+
     print(f"\nTask: {task}\n")
-    
+
     for strategy_key, strategy_name in strategies:
         print(f"Running {strategy_name}...")
         result = agent.reason(
@@ -155,18 +155,18 @@ def example_multi_strategy_comparison():
             strategy=strategy_key,
             depth="comprehensive",
         )
-        
+
         results[strategy_name] = {
             "conclusion": result.conclusion,
             "verification": result.verification_score,
             "tokens": result.tokens_used,
             "duration": result.duration,
         }
-    
+
     print("\n" + "=" * 60)
     print("Strategy Comparison Results")
     print("=" * 60)
-    
+
     for strategy_name, metrics in results.items():
         print(f"\n{strategy_name}:")
         print(f"  Verification: {metrics['verification']:.2f}")
@@ -180,25 +180,25 @@ def example_adaptive_reasoning():
     print("\n" + "=" * 60)
     print("Advanced Example 5: Adaptive Reasoning")
     print("=" * 60)
-    
+
     agent = DeepReasoningAgent()
-    
+
     tasks = [
         ("What is 2 + 2?", "trivial"),
         ("Explain photosynthesis", "easy"),
         ("Analyze sorting algorithm complexity", "medium"),
         ("Prove the fundamental theorem of calculus", "hard"),
     ]
-    
+
     print("\nAdaptive reasoning across difficulty levels:\n")
-    
+
     for task, expected_difficulty in tasks:
         result = agent.reason(
             task=task,
             strategy="auto",  # Let agent adapt
             depth="standard",
         )
-        
+
         print(f"Task: {task}")
         print(f"  Expected: {expected_difficulty}")
         print(f"  Strategy: {result.strategy_used.value}")
@@ -212,12 +212,12 @@ def example_knowledge_accumulation():
     print("\n" + "=" * 60)
     print("Advanced Example 6: Knowledge Accumulation")
     print("=" * 60)
-    
+
     agent = DeepReasoningAgent()
-    
+
     # Build knowledge base
     print("\nBuilding knowledge base...")
-    
+
     topics = [
         "neural networks",
         "backpropagation",
@@ -225,14 +225,14 @@ def example_knowledge_accumulation():
         "convolutional neural networks",
         "recurrent neural networks",
     ]
-    
+
     for topic in topics:
         agent.reason(
             task=f"Explain {topic}",
             strategy="cot",
             depth="standard",
         )
-    
+
     # Now ask a related question
     print("\nAsking related question...")
     result = agent.reason(
@@ -240,13 +240,13 @@ def example_knowledge_accumulation():
         strategy="auto",
         depth="comprehensive",
     )
-    
+
     print(f"\nAnswer:\n{result.conclusion}")
-    
+
     # Check memory
     similar = agent.memory.retrieve_similar("transformers", k=5)
     print(f"\nRetrieved {len(similar)} related traces from memory")
-    
+
     # Get strategy recommendation
     recommended = agent.memory.get_best_strategy("deep learning architecture")
     print(f"Recommended strategy for similar tasks: {recommended.value}")
@@ -257,14 +257,14 @@ def example_performance_optimization():
     print("\n" + "=" * 60)
     print("Advanced Example 7: Performance Optimization")
     print("=" * 60)
-    
+
     agent = DeepReasoningAgent()
-    
+
     # Initial performance
     print("\nInitial Performance:")
     initial_stats = agent.get_stats()
     print(f"  Total traces: {initial_stats['total_traces']}")
-    
+
     # Do extensive reasoning
     print("\nPerforming reasoning tasks...")
     for i in range(20):
@@ -273,23 +273,23 @@ def example_performance_optimization():
             strategy="auto",
             depth="standard",
         )
-    
+
     # Check performance
     mid_stats = agent.get_stats()
-    print(f"\nMid-point Statistics:")
+    print("\nMid-point Statistics:")
     print(f"  Total traces: {mid_stats['total_traces']}")
-    
+
     # Run evolution
     print("\nRunning evolution...")
     evolution_report = agent.evolve()
-    
-    print(f"\nEvolution Results:")
+
+    print("\nEvolution Results:")
     print(f"  Insights: {len(evolution_report['insights'])}")
     print(f"  Recommendations: {len(evolution_report['recommendations'])}")
-    
+
     for insight in evolution_report['insights']:
         print(f"    - {insight}")
-    
+
     # Continue reasoning with evolved strategies
     print("\nContinuing with evolved strategies...")
     for i in range(10):
@@ -298,10 +298,10 @@ def example_performance_optimization():
             strategy="auto",
             depth="standard",
         )
-    
+
     # Final performance
     final_stats = agent.get_stats()
-    print(f"\nFinal Statistics:")
+    print("\nFinal Statistics:")
     print(f"  Total traces: {final_stats['total_traces']}")
     print(f"  Patterns learned: {final_stats['patterns_learned']}")
 
@@ -311,7 +311,7 @@ def main():
     print("\n" + "=" * 60)
     print("Deep Reasoning Agent - Advanced Examples")
     print("=" * 60)
-    
+
     examples = [
         example_custom_config,
         example_research_pipeline,
@@ -321,7 +321,7 @@ def main():
         example_knowledge_accumulation,
         example_performance_optimization,
     ]
-    
+
     for example in examples:
         try:
             example()
@@ -329,7 +329,7 @@ def main():
             print(f"\nError in {example.__name__}: {e}")
             import traceback
             traceback.print_exc()
-    
+
     print("\n" + "=" * 60)
     print("Advanced Examples Complete")
     print("=" * 60)

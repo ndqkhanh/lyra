@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, ValidationError
 
@@ -58,13 +58,13 @@ class ToolRegistry:
     def unregister(self, name: str) -> None:
         self._tools.pop(name, None)
 
-    def get(self, name: str) -> Optional[Tool]:
+    def get(self, name: str) -> Tool | None:
         return self._tools.get(name)
 
     def names(self) -> list[str]:
         return sorted(self._tools)
 
-    def schemas(self, allowed: Optional[set[str]] = None) -> list[dict[str, Any]]:
+    def schemas(self, allowed: set[str] | None = None) -> list[dict[str, Any]]:
         """Emit schemas for all tools (or a subset by name)."""
         return [
             t.to_schema()

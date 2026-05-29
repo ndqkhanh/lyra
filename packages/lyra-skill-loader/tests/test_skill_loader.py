@@ -8,12 +8,8 @@ from __future__ import annotations
 from collections.abc import Sequence
 
 import pytest
-
 from lyra_skill_loader import (
     BALANCED,
-    FULL_LOAD,
-    MINIMAL,
-    STRICT_BUDGET,
     BudgetConfig,
     BudgetExceededError,
     CacheConfig,
@@ -28,12 +24,12 @@ from lyra_skill_loader import (
     DependencyResolver,
     EvictionPolicy,
     LoadDecision,
-    LoadPlan,
-    LoadTier,
     LoadedSkill,
     LoaderConfig,
     LoaderError,
     LoaderStats,
+    LoadPlan,
+    LoadTier,
     MatchConfig,
     MatchResult,
     ResolutionResult,
@@ -1145,7 +1141,7 @@ class TestIntegration:
         assert bc.eviction_policy == EvictionPolicy.LFU
 
     def test_skill_compiler_block_filter(self) -> None:
-        from lyra_skill_loader.skill_compiler import _make_bloom_filter, _bloom_might_contain
+        from lyra_skill_loader.skill_compiler import _bloom_might_contain, _make_bloom_filter
 
         bloom = _make_bloom_filter(("hello", "world"))
         assert _bloom_might_contain(bloom, "hello")

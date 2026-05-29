@@ -1,19 +1,13 @@
 """Tests for lyra_harness_core.cost — types + pricing + tracker."""
 from __future__ import annotations
 
-import time
-
 import pytest
-
 from lyra_harness_core.cost import (
     BillingPeriod,
     CostEntry,
-    CostReport,
-    CostThresholdAlert,
     CostTracker,
     PricingTable,
 )
-
 
 # --- CostEntry ---------------------------------------------------------
 

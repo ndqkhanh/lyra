@@ -280,7 +280,7 @@ def test_cross_session_pattern_frequency():
     learner = CrossSessionLearner()
 
     # Add sessions
-    for i in range(3):
+    for _i in range(3):
         learner.add_session({"workflow": "debug"})
 
     patterns = learner.extract_patterns()
@@ -295,7 +295,7 @@ def test_cross_session_get_recommendations():
     learner = CrossSessionLearner()
 
     # Add sessions and extract patterns
-    for i in range(5):
+    for _i in range(5):
         learner.add_session({"workflow": "test"})
 
     learner.extract_patterns()
@@ -311,7 +311,7 @@ def test_cross_session_pattern_confidence():
     learner = CrossSessionLearner()
 
     # Add many sessions
-    for i in range(10):
+    for _i in range(10):
         learner.add_session({"workflow": "deploy"})
 
     patterns = learner.extract_patterns()
@@ -444,7 +444,7 @@ def test_falsification_performance():
     answer = "All users must authenticate. " * 10
 
     start = time.time()
-    results = loop.run_falsification(answer)
+    loop.run_falsification(answer)
     duration = time.time() - start
 
     # Should complete quickly
@@ -462,7 +462,7 @@ def test_cross_session_learning_performance():
         learner.add_session({"workflow": f"workflow_{i % 10}"})
 
     start = time.time()
-    patterns = learner.extract_patterns()
+    learner.extract_patterns()
     duration = time.time() - start
 
     # Should complete quickly

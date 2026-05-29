@@ -3,16 +3,15 @@ Primary agent - orchestrates and coordinates specialist agents.
 """
 
 import asyncio
-from typing import Dict, List, Optional
 
 from src.agents.base import Agent, AgentCapability, AgentStatus
-from src.core.task import Task, TaskType, Result
+from src.core.task import Result, Task, TaskType
 
 
 class PrimaryAgent(Agent):
     """
     Primary orchestrator agent that coordinates specialist agents.
-    
+
     The primary agent:
     - Receives user requests
     - Analyzes and decomposes tasks
@@ -32,13 +31,13 @@ class PrimaryAgent(Agent):
             )
         ]
         super().__init__(agent_id, capabilities)
-        self.specialists: Dict[str, Agent] = {}
+        self.specialists: dict[str, Agent] = {}
         self.task_queue: asyncio.Queue[Task] = asyncio.Queue()
 
     def register_specialist(self, agent: Agent) -> None:
         """
         Register a specialist agent.
-        
+
         Args:
             agent: Specialist agent to register
         """
@@ -48,7 +47,7 @@ class PrimaryAgent(Agent):
     def unregister_specialist(self, agent_id: str) -> None:
         """
         Unregister a specialist agent.
-        
+
         Args:
             agent_id: ID of agent to unregister
         """
@@ -59,10 +58,10 @@ class PrimaryAgent(Agent):
     async def handle_request(self, request: str) -> str:
         """
         Main entry point for user requests.
-        
+
         Args:
             request: User request string
-            
+
         Returns:
             Response string
         """
@@ -83,10 +82,10 @@ class PrimaryAgent(Agent):
     async def analyze_request(self, request: str) -> Task:
         """
         Analyze user request and create a task.
-        
+
         Args:
             request: User request string
-            
+
         Returns:
             Task object
         """
@@ -113,10 +112,10 @@ class PrimaryAgent(Agent):
     async def execute(self, task: Task) -> Result:
         """
         Execute a task by delegating to appropriate specialist.
-        
+
         Args:
             task: Task to execute
-            
+
         Returns:
             Execution result
         """
@@ -155,13 +154,13 @@ class PrimaryAgent(Agent):
             self.status = AgentStatus.IDLE
             self.current_task = None
 
-    async def select_agent(self, task: Task) -> Optional[Agent]:
+    async def select_agent(self, task: Task) -> Agent | None:
         """
         Select the best agent for a task.
-        
+
         Args:
             task: Task to assign
-            
+
         Returns:
             Best agent, or None if no suitable agent found
         """
@@ -186,10 +185,10 @@ class PrimaryAgent(Agent):
     async def execute_directly(self, task: Task) -> Result:
         """
         Execute task directly (fallback when no specialist available).
-        
+
         Args:
             task: Task to execute
-            
+
         Returns:
             Execution result
         """
@@ -208,22 +207,22 @@ class PrimaryAgent(Agent):
     def can_handle(self, task: Task) -> float:
         """
         Primary agent can handle any task (as orchestrator).
-        
+
         Args:
             task: Task to evaluate
-            
+
         Returns:
             Confidence score (always 1.0 for primary agent)
         """
         return 1.0
 
-    async def execute_parallel(self, tasks: List[Task]) -> List[Result]:
+    async def execute_parallel(self, tasks: list[Task]) -> list[Result]:
         """
         Execute multiple tasks in parallel.
-        
+
         Args:
             tasks: List of tasks to execute
-            
+
         Returns:
             List of results
         """
@@ -252,10 +251,10 @@ class PrimaryAgent(Agent):
 
         return final_results
 
-    def get_statistics(self) -> Dict[str, any]:
+    def get_statistics(self) -> dict[str, any]:
         """
         Get orchestration statistics.
-        
+
         Returns:
             Dictionary of statistics
         """

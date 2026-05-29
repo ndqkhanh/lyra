@@ -54,7 +54,6 @@ class DreamCycle:
                     linked.add(pair)
 
         from .graph_builder import EdgeRelation, KnowledgeEdge
-        edge_counter = result.edge_count
 
         for a, b in linked:
             # Check if edge already exists
@@ -161,7 +160,6 @@ class DreamCycle:
         result = graph
         from .graph_builder import EdgeRelation, KnowledgeEdge
 
-        edge_counter = result.edge_count
 
         # Collect transitive edges for extends and depends_on
         transitive_pairs: list[tuple[str, str, str, float]] = []
@@ -234,7 +232,6 @@ class DreamCycle:
                 sim_matrix[(i, j)] = sim
 
         # Merge communities above threshold
-        merged: dict[int, int] = {}
         remaining = set(range(len(communities)))
         new_communities: list[Any] = []
 
@@ -314,8 +311,8 @@ class DreamCycle:
                                        threshold: float) -> float:
         """Compute confidence for a cross-link suggestion."""
         try:
-            neighbors_a = set(n.node_id for n in graph.get_neighbors(node_a))
-            neighbors_b = set(n.node_id for n in graph.get_neighbors(node_b))
+            neighbors_a = {n.node_id for n in graph.get_neighbors(node_a)}
+            neighbors_b = {n.node_id for n in graph.get_neighbors(node_b)}
         except Exception:
             return threshold
 

@@ -6,16 +6,14 @@ import time
 
 import numpy as np
 import pytest
-
 from lyra_memory_stack.decay_manager import DecayConfig, DecayManager
 from lyra_memory_stack.dream_cycle import DreamCycle
 from lyra_memory_stack.dual_trace import DualTraceEncoder
-from lyra_memory_stack.episodic_memory import EpisodicMemory, EpisodicEvent
+from lyra_memory_stack.episodic_memory import EpisodicEvent, EpisodicMemory
 from lyra_memory_stack.exceptions import MemoryStackError
-from lyra_memory_stack.mcp_server import MemoryMCPServer, MCPSearchResult
+from lyra_memory_stack.mcp_server import MCPSearchResult, MemoryMCPServer
 from lyra_memory_stack.privacy_tiers import PrivacyManager, PrivacyTier
 from lyra_memory_stack.procedural_memory import (
-    KnowledgeGraphEntry,
     ProceduralMemory,
     Procedure,
 )
@@ -226,7 +224,7 @@ class TestProceduralMemory:
     @pytest.mark.asyncio
     async def test_register_and_find(self) -> None:
         pm = ProceduralMemory()
-        pid = await pm.register_procedure(
+        await pm.register_procedure(
             "Test Proc",
             "A test procedure",
             ("Step 1", "Step 2"),
@@ -346,7 +344,7 @@ class TestDualTraceEncoder:
     @pytest.mark.asyncio
     async def test_encode_and_search_fact(self) -> None:
         dte = DualTraceEncoder()
-        tid = await dte.encode("Agent", "executed", "task", environment="session-1")
+        await dte.encode("Agent", "executed", "task", environment="session-1")
         facts = await dte.search_by_fact(subject="Agent")
         assert len(facts) == 1
         assert facts[0].predicate == "executed"

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_otel_tracer.exceptions import HallucinationDetectionError
 from lyra_otel_tracer.hallucination_detector import (
     DEFAULT_PATTERNS,

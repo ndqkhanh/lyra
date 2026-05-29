@@ -2,7 +2,6 @@
 """
 from __future__ import annotations
 
-import pytest
 
 def test_context_component_defaults():
     from lyra_cli.tui_v2.widgets.context_viz import ContextComponent

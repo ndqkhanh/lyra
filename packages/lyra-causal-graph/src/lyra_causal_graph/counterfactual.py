@@ -4,12 +4,11 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Callable, Optional
+from typing import Any
 
 import numpy as np
 from scipy import stats
 
-from .causal_graph import CausalGraph
 from .errors import CounterfactualError
 from .scm import StructuralCausalModel
 
@@ -59,7 +58,7 @@ class CounterfactualResult:
 
     query: CounterfactualQuery
     expected_value: float
-    distribution: Optional[np.ndarray] = None
+    distribution: np.ndarray | None = None
     confidence: float = 0.5
     explanation: str = ""
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -85,7 +84,7 @@ class CounterfactualConfig:
 
     n_samples: int = 5000
     confidence_level: float = 0.95
-    random_seed: Optional[int] = None
+    random_seed: int | None = None
     abductive_noise_tolerance: float = 1e-6
     max_iterations: int = 100
 
@@ -120,7 +119,7 @@ class CounterfactualReasoner:
     def __init__(
         self,
         scm: StructuralCausalModel,
-        config: Optional[CounterfactualConfig] = None,
+        config: CounterfactualConfig | None = None,
     ) -> None:
         self._scm = scm
         self._config = config or CounterfactualConfig()

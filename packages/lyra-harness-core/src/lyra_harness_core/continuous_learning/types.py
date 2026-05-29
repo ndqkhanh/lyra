@@ -4,7 +4,7 @@ from __future__ import annotations
 import time
 import uuid
 from dataclasses import dataclass, field
-from typing import Optional, Protocol
+from typing import Protocol
 
 
 @dataclass(frozen=True)
@@ -45,10 +45,10 @@ class EditEvent:
         agent_output: str,
         user_edit: str,
         user_id: str,
-        context: Optional[dict] = None,
-        event_id: Optional[str] = None,
-        timestamp: Optional[float] = None,
-    ) -> "EditEvent":
+        context: dict | None = None,
+        event_id: str | None = None,
+        timestamp: float | None = None,
+    ) -> EditEvent:
         return cls(
             event_id=event_id or str(uuid.uuid4()),
             agent_output=agent_output,
@@ -112,10 +112,10 @@ class LearnedPreference:
         confidence: float,
         n_supporting_edits: int,
         tags: tuple[str, ...] = (),
-        metadata: Optional[dict] = None,
-        preference_id: Optional[str] = None,
-        discovered_at: Optional[float] = None,
-    ) -> "LearnedPreference":
+        metadata: dict | None = None,
+        preference_id: str | None = None,
+        discovered_at: float | None = None,
+    ) -> LearnedPreference:
         return cls(
             preference_id=preference_id or str(uuid.uuid4()),
             rule=rule,

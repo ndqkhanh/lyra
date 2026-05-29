@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Tuple
 
 
 @dataclass(frozen=True)
@@ -11,7 +10,7 @@ class PromMetric:
     """A single Prometheus metric."""
 
     name: str
-    labels: Tuple[Tuple[str, str], ...] = ()
+    labels: tuple[tuple[str, str], ...] = ()
     value: float = 0.0
     metric_type: str = "gauge"
     help_text: str = ""
@@ -32,7 +31,7 @@ class GrafanaDashboard:
     """A generated Grafana dashboard definition."""
 
     title: str
-    panels: Tuple[str, ...] = ()
+    panels: tuple[str, ...] = ()
     datasource: str = "prometheus"
 
 
@@ -42,9 +41,9 @@ class PrometheusExporter:
     def __init__(self) -> None:
         self._export_server_running: bool = False
 
-    async def export_metrics(self, metrics: Tuple[PromMetric, ...]) -> str:
+    async def export_metrics(self, metrics: tuple[PromMetric, ...]) -> str:
         """Format metrics as Prometheus exposition format text."""
-        lines: List[str] = []
+        lines: list[str] = []
 
         for metric in metrics:
             # HELP line
@@ -73,7 +72,7 @@ class PrometheusExporter:
 
     async def push_to_gateway(
         self,
-        metrics: Tuple[PromMetric, ...],
+        metrics: tuple[PromMetric, ...],
         _gateway_url: str,
     ) -> bool:
         """Push metrics to a Prometheus Pushgateway (simulated)."""

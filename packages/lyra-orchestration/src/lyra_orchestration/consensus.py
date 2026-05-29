@@ -10,9 +10,9 @@ Supports multiple voting strategies:
 
 import asyncio
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 from uuid import uuid4
 
 
@@ -40,7 +40,7 @@ class Vote:
     voter_id: str
     choice: VoteChoice
     weight: float = 1.0
-    reason: Optional[str] = None
+    reason: str | None = None
     timestamp: datetime = field(default_factory=datetime.now)
 
 
@@ -51,9 +51,9 @@ class Proposal:
     proposal_id: str
     topic: str
     description: str
-    options: List[str]
+    options: list[str]
     proposer_id: str
-    voters: Set[str]
+    voters: set[str]
     strategy: VotingStrategy
     quorum: float = 0.5  # Minimum participation (0.0-1.0)
     timeout: int = 300  # Seconds
@@ -65,10 +65,10 @@ class ProposalState:
     """Mutable proposal state."""
 
     proposal: Proposal
-    votes: Dict[str, Vote] = field(default_factory=dict)
+    votes: dict[str, Vote] = field(default_factory=dict)
     decided: bool = False
-    decision: Optional[str] = None
-    decided_at: Optional[datetime] = None
+    decision: str | None = None
+    decided_at: datetime | None = None
 
 
 class ConsensusProtocol:
@@ -85,16 +85,16 @@ class ConsensusProtocol:
 
     def __init__(self):
         """Initialize consensus protocol."""
-        self._proposals: Dict[str, ProposalState] = {}
-        self._decision_events: Dict[str, asyncio.Event] = {}
+        self._proposals: dict[str, ProposalState] = {}
+        self._decision_events: dict[str, asyncio.Event] = {}
 
     async def propose(
         self,
         topic: str,
         description: str,
-        options: List[str],
+        options: list[str],
         proposer_id: str,
-        voters: Set[str],
+        voters: set[str],
         strategy: VotingStrategy = VotingStrategy.MAJORITY,
         quorum: float = 0.5,
         timeout: int = 300,
@@ -143,7 +143,7 @@ class ConsensusProtocol:
         voter_id: str,
         choice: VoteChoice,
         weight: float = 1.0,
-        reason: Optional[str] = None,
+        reason: str | None = None,
     ) -> bool:
         """
         Cast a vote on a proposal.
@@ -192,8 +192,8 @@ class ConsensusProtocol:
     async def wait_for_decision(
         self,
         proposal_id: str,
-        timeout: Optional[int] = None,
-    ) -> Optional[str]:
+        timeout: int | None = None,
+    ) -> str | None:
         """
         Wait for proposal decision.
 
@@ -217,7 +217,7 @@ class ConsensusProtocol:
 
             state = self._proposals[proposal_id]
             return state.decision
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return None
 
     async def _check_decision(self, proposal_id: str):
@@ -253,7 +253,7 @@ class ConsensusProtocol:
             state.decided_at = datetime.now()
             self._decision_events[proposal_id].set()
 
-    def _majority_decision(self, state: ProposalState) -> Optional[str]:
+    def _majority_decision(self, state: ProposalState) -> str | None:
         """
         Majority voting: >50% approval required.
 
@@ -279,7 +279,7 @@ class ConsensusProtocol:
 
         return None
 
-    def _unanimous_decision(self, state: ProposalState) -> Optional[str]:
+    def _unanimous_decision(self, state: ProposalState) -> str | None:
         """
         Unanimous voting: 100% approval required.
 
@@ -301,7 +301,7 @@ class ConsensusProtocol:
 
         return None
 
-    def _weighted_decision(self, state: ProposalState) -> Optional[str]:
+    def _weighted_decision(self, state: ProposalState) -> str | None:
         """
         Weighted voting: Votes weighted by expertise.
 
@@ -328,7 +328,7 @@ class ConsensusProtocol:
 
         return None
 
-    def _quorum_decision(self, state: ProposalState) -> Optional[str]:
+    def _quorum_decision(self, state: ProposalState) -> str | None:
         """
         Quorum voting: Minimum participation threshold.
 
@@ -364,7 +364,7 @@ class ConsensusProtocol:
             state.decided_at = datetime.now()
             self._decision_events[proposal_id].set()
 
-    def get_proposal(self, proposal_id: str) -> Optional[Proposal]:
+    def get_proposal(self, proposal_id: str) -> Proposal | None:
         """
         Get proposal by ID.
 
@@ -378,7 +378,7 @@ class ConsensusProtocol:
             return None
         return self._proposals[proposal_id].proposal
 
-    def get_votes(self, proposal_id: str) -> Dict[str, Vote]:
+    def get_votes(self, proposal_id: str) -> dict[str, Vote]:
         """
         Get votes for proposal.
 
@@ -392,7 +392,7 @@ class ConsensusProtocol:
             return {}
         return self._proposals[proposal_id].votes.copy()
 
-    def get_stats(self, proposal_id: str) -> Dict[str, Any]:
+    def get_stats(self, proposal_id: str) -> dict[str, Any]:
         """
         Get proposal statistics.
 

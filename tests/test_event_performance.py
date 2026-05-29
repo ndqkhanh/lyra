@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Performance test for event dispatcher - verify 16ms (60fps) requirement."""
 
-import sys
 import os
+import sys
 import time
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../packages/lyra-cli/src'))
 
 from lyra_cli.events import EventDispatcher, TextDelta
@@ -37,7 +38,7 @@ def test_event_latency():
     print(f"Average latency: {avg_latency:.3f}ms")
     print(f"Min latency: {min_latency:.3f}ms")
     print(f"Max latency: {max_latency:.3f}ms")
-    print(f"Target: <16ms (60fps)")
+    print("Target: <16ms (60fps)")
 
     if avg_latency < 16:
         print(f"✓ PASS - Average latency {avg_latency:.3f}ms < 16ms")
@@ -131,7 +132,7 @@ def test_thread_safety():
     print(f"Time elapsed: {elapsed:.3f}s")
 
     if count == expected:
-        print(f"✓ PASS - All events received")
+        print("✓ PASS - All events received")
     else:
         print(f"✗ FAIL - Missing {expected - count} events")
 

@@ -12,7 +12,7 @@ Based on research: docs/151-153 (MEMTIER papers)
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from lyra_core.memory.cognitive_weight import CognitiveWeightAttributor
 from lyra_core.memory.episodic import EpisodicMemory

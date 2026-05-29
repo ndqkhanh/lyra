@@ -189,7 +189,7 @@ class RelationExtractor:
         relations = []
 
         # Build entity index
-        entity_by_value = {e.value: e for e in entities}
+        {e.value: e for e in entities}
 
         # Extract host→service relations
         # Pattern: "192.168.1.1:80" or "192.168.1.1 port 80"

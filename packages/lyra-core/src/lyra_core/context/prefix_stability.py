@@ -62,7 +62,7 @@ class StabilityReport:
                 f"(breakpoint after message {self.recommended_breakpoint})"
             )
         lines = [f"Cache-busting issues detected ({len(self.issues)}):"]
-        for issue, detail in zip(self.issues, self.details):
+        for issue, detail in zip(self.issues, self.details, strict=False):
             lines.append(f"  [{issue.value}] {detail}")
         return "\n".join(lines)
 

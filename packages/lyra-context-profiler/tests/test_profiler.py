@@ -3,7 +3,6 @@
 import asyncio
 
 import pytest
-
 from lyra_context_profiler.profiler import (
     CompactionRecommendation,
     ContextAnalyzer,
@@ -18,7 +17,6 @@ from lyra_context_profiler.profiler import (
     ProfileMatcher,
     TokenBudget,
 )
-
 
 # ── Fixtures ────────────────────────────────────────────────────────────────────
 

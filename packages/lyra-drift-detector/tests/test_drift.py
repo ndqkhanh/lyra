@@ -53,7 +53,7 @@ class TestPerformanceDriftDetector:
 
     def test_record_and_check_single_metric(self):
         d = PerformanceDriftDetector(window_size=50, min_samples=5)
-        for i in range(20):
+        for _i in range(20):
             d.record("latency_ms", 100.0)
         signal = d.check_drift(metric="latency_ms")
         assert isinstance(signal, DriftSignal)

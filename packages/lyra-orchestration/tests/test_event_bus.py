@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import asyncio
-from unittest.mock import AsyncMock, Mock
 
 import pytest
 
@@ -111,8 +110,8 @@ class TestEventBus:
         assert len(bus._subscriptions.get("test.event", set())) == 0
 
     def test_multiple_subscriptions_same_type(self, bus):
-        s1 = bus.subscribe("test.event", lambda e: None)
-        s2 = bus.subscribe("test.event", lambda e: None)
+        bus.subscribe("test.event", lambda e: None)
+        bus.subscribe("test.event", lambda e: None)
         assert len(bus._subscriptions["test.event"]) == 2
 
     @pytest.mark.asyncio

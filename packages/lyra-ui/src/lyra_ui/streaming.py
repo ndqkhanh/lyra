@@ -9,7 +9,7 @@ Features:
 """
 
 import asyncio
-from typing import AsyncIterator, Callable, Optional
+from collections.abc import AsyncIterator, Callable
 
 from rich.live import Live
 from rich.text import Text
@@ -34,7 +34,7 @@ class StreamHandler:
     async def stream_response(
         self,
         stream: AsyncIterator[str],
-        on_token: Optional[Callable[[str], None]] = None,
+        on_token: Callable[[str], None] | None = None,
     ) -> str:
         """
         Stream response with progressive rendering.
@@ -102,7 +102,7 @@ class LiveStreamDisplay:
     def __init__(self):
         """Initialize live stream display."""
         self.text = Text()
-        self.live: Optional[Live] = None
+        self.live: Live | None = None
 
     def start(self):
         """Start live display."""
@@ -147,8 +147,8 @@ class StreamingProgress:
     def __init__(self):
         """Initialize streaming progress."""
         self.token_count = 0
-        self.start_time: Optional[float] = None
-        self.end_time: Optional[float] = None
+        self.start_time: float | None = None
+        self.end_time: float | None = None
 
     def start(self):
         """Start tracking."""

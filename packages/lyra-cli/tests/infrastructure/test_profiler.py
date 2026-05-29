@@ -205,7 +205,7 @@ class TestPerformanceProfiler:
 
         with profiler.profile("memory_test"):
             # Allocate some memory
-            data = [i for i in range(10000)]
+            list(range(10000))
 
         profile = profiler.get_profile("memory_test")
         assert profile.memory_peak_mb is not None

@@ -1,8 +1,8 @@
 """Tests for HBHC package."""
 
 import asyncio
-import pytest
-from lyra_hbhc import HBHCManager, Verifier, ZombieDetector, CredentialStatus
+
+from lyra_hbhc import CredentialStatus, HBHCManager, Verifier, ZombieDetector
 
 
 class TestHBHCManager:

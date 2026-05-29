@@ -1,7 +1,6 @@
 """Tests for agent loop integration."""
 
 import pytest
-
 from lyra_cli.eager_tools import ToolRegistry, tool
 from lyra_cli.eager_tools.integration import EagerAgentLoop
 from lyra_cli.eager_tools.types import StreamChunk

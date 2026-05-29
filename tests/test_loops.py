@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Test loops system implementation"""
 
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
 
-from lyra_cli.loops import LoopManager, LoopConfig, SequentialPipeline, ContinuousLoop, LoopMonitor
+from lyra_cli.loops import ContinuousLoop, LoopConfig, LoopManager, LoopMonitor, SequentialPipeline
 
 
 def test_loops_system():
@@ -18,14 +19,14 @@ def test_loops_system():
     # Test loop manager
     print("1. Testing loop manager:")
     manager = LoopManager()
-    
+
     config = LoopConfig(
         name="test-pipeline",
         type="sequential",
         steps=["step1", "step2", "step3"],
         max_iterations=5
     )
-    
+
     loop_id = manager.create_loop(config)
     print(f"  ✓ Created loop: {loop_id}")
     print()
@@ -58,33 +59,33 @@ def test_loops_system():
         iteration_count += 1
         print(f"    Task executed (iteration {iteration_count})")
         return True
-    
+
     loop = ContinuousLoop(test_task, interval=1)
     # Run for 3 iterations
     import threading
     def run_loop():
         loop.start(max_iterations=3)
-    
+
     thread = threading.Thread(target=run_loop)
     thread.start()
     thread.join(timeout=5)
-    
+
     print(f"  ✓ Loop completed {iteration_count} iteration(s)")
     print()
 
     # Test loop monitor
     print("5. Testing loop monitor:")
     monitor = LoopMonitor()
-    
+
     # Record some iterations
     monitor.record_iteration("test-loop", 1, True, 1.5)
     monitor.record_iteration("test-loop", 2, True, 1.2)
     monitor.record_iteration("test-loop", 3, False, 2.0)
-    
+
     metrics = monitor.get_metrics("test-loop")
     success_rate = monitor.get_success_rate("test-loop")
     avg_duration = monitor.get_average_duration("test-loop")
-    
+
     print(f"  Total iterations: {metrics['total_iterations']}")
     print(f"  Success rate: {success_rate:.1%}")
     print(f"  Average duration: {avg_duration:.2f}s")

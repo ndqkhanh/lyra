@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_harness_core.forensic import Trajectory, TrajectoryOutcome
 from lyra_harness_core.orchestration import AgentDecision, SideEffectRecord
 from lyra_harness_core.provenance import WitnessLattice
@@ -12,10 +11,8 @@ from lyra_harness_core.replay import (
     Trace,
     TraceBuilder,
     TraceComparator,
-    TraceDelta,
     TraceDeltaKind,
 )
-
 
 # --- ReplayEvent / Trace --------------------------------------------------
 
@@ -145,7 +142,7 @@ class TestTraceBuilder:
         retrieval = lattice.record_retrieval(
             retriever_name="hipporag", query="X", doc_ids=["d1"],
         )
-        inference = lattice.record_inference(
+        lattice.record_inference(
             agent_id="agent", claim="X is true",
             supporting=[retrieval.witness_id],
         )

@@ -6,7 +6,6 @@ import asyncio
 import logging
 import time
 from collections import defaultdict
-from collections.abc import Sequence
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any

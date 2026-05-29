@@ -9,7 +9,7 @@ Supported providers:
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import httpx
 
@@ -60,7 +60,7 @@ class GitHubIntegration:
         """Initialize GitHub integration."""
         self.client = oauth_client
 
-    async def list_repositories(self, org: Optional[str] = None) -> List[Dict[str, Any]]:
+    async def list_repositories(self, org: str | None = None) -> list[dict[str, Any]]:
         """
         List repositories.
 
@@ -79,7 +79,7 @@ class GitHubIntegration:
         response.raise_for_status()
         return response.json()
 
-    async def scan_secrets(self, owner: str, repo: str) -> List[Dict[str, Any]]:
+    async def scan_secrets(self, owner: str, repo: str) -> list[dict[str, Any]]:
         """
         Scan repository for exposed secrets.
 
@@ -96,7 +96,7 @@ class GitHubIntegration:
         response.raise_for_status()
         return response.json()
 
-    async def get_vulnerabilities(self, owner: str, repo: str) -> List[Dict[str, Any]]:
+    async def get_vulnerabilities(self, owner: str, repo: str) -> list[dict[str, Any]]:
         """
         Get dependency vulnerabilities.
 
@@ -113,7 +113,7 @@ class GitHubIntegration:
         response.raise_for_status()
         return response.json()
 
-    async def get_code_scanning_alerts(self, owner: str, repo: str) -> List[Dict[str, Any]]:
+    async def get_code_scanning_alerts(self, owner: str, repo: str) -> list[dict[str, Any]]:
         """
         Get code scanning alerts.
 
@@ -168,7 +168,7 @@ class ShodanIntegration:
         self.api_key = api_key
         self._http_client = httpx.AsyncClient()
 
-    async def search_hosts(self, query: str, limit: int = 100) -> Dict[str, Any]:
+    async def search_hosts(self, query: str, limit: int = 100) -> dict[str, Any]:
         """
         Search for hosts.
 
@@ -186,7 +186,7 @@ class ShodanIntegration:
         response.raise_for_status()
         return response.json()
 
-    async def get_host_info(self, ip: str) -> Dict[str, Any]:
+    async def get_host_info(self, ip: str) -> dict[str, Any]:
         """
         Get detailed host information.
 
@@ -203,7 +203,7 @@ class ShodanIntegration:
         response.raise_for_status()
         return response.json()
 
-    async def search_exploits(self, query: str) -> Dict[str, Any]:
+    async def search_exploits(self, query: str) -> dict[str, Any]:
         """
         Search exploit database.
 
@@ -226,13 +226,13 @@ class ShodanIntegration:
 
 
 # Provider registry
-PROVIDERS: Dict[str, IntegrationProvider] = {
+PROVIDERS: dict[str, IntegrationProvider] = {
     "github": GitHubIntegration.PROVIDER,
     "shodan": ShodanIntegration.PROVIDER,
 }
 
 
-def get_provider(name: str) -> Optional[IntegrationProvider]:
+def get_provider(name: str) -> IntegrationProvider | None:
     """
     Get provider by name.
 
@@ -245,7 +245,7 @@ def get_provider(name: str) -> Optional[IntegrationProvider]:
     return PROVIDERS.get(name)
 
 
-def list_providers(category: Optional[str] = None) -> List[IntegrationProvider]:
+def list_providers(category: str | None = None) -> list[IntegrationProvider]:
     """
     List available providers.
 

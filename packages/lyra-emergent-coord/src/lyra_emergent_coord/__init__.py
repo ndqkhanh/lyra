@@ -34,9 +34,9 @@ from .leadership import (
     LeaderHealthMonitor,
     LeaderManager,
     LeaderRecord,
-    LeaderState,
     LeadershipConflictError,
     LeadershipError,
+    LeaderState,
     NoCandidateError,
 )
 from .negotiation import (

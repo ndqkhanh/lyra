@@ -194,13 +194,13 @@ class SREIncidentResponder:
 
     @staticmethod
     def _serialize_runbook(runbook: Runbook) -> dict:
-        return dict(
-            name=runbook.name,
-            description=runbook.description,
-            steps=[s.__dict__ for s in runbook.steps],
-            prerequisites=list(runbook.prerequisites),
-            owner_team=runbook.owner_team,
-        )
+        return {
+            "name": runbook.name,
+            "description": runbook.description,
+            "steps": [s.__dict__ for s in runbook.steps],
+            "prerequisites": list(runbook.prerequisites),
+            "owner_team": runbook.owner_team,
+        }
 
     @staticmethod
     def _extract_title(description: str) -> str:

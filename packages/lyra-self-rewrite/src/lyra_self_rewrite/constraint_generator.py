@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .exceptions import ConstraintError
 from .hyper_agent import HyperAgent
 
 

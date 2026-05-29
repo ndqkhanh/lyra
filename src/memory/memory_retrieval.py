@@ -3,12 +3,11 @@ Memory Retrieval - Intelligent memory search and retrieval.
 """
 
 import time
-from typing import List, Dict, Optional
-from enum import Enum
 from dataclasses import dataclass
+from enum import Enum
 
-from src.memory.memory_store import Memory
 from src.memory.long_term_memory import LongTermMemory
+from src.memory.memory_store import Memory
 
 
 class RetrievalStrategy(Enum):
@@ -24,7 +23,7 @@ class RetrievalStrategy(Enum):
 class RetrievalResult:
     """
     A memory retrieval result.
-    
+
     Attributes:
         memory: Retrieved memory
         score: Relevance score (0.0 - 1.0)
@@ -34,7 +33,7 @@ class RetrievalResult:
     memory: Memory
     score: float
     strategy: str
-    metadata: Dict = None
+    metadata: dict = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -44,7 +43,7 @@ class RetrievalResult:
 class RelevanceScorer:
     """
     Calculate relevance scores for memories.
-    
+
     Combines multiple signals:
     - Content similarity
     - Importance
@@ -61,7 +60,7 @@ class RelevanceScorer:
     ):
         """
         Initialize relevance scorer.
-        
+
         Args:
             importance_weight: Weight for importance score
             recency_weight: Weight for recency score
@@ -76,17 +75,17 @@ class RelevanceScorer:
     def score(
         self,
         memory: Memory,
-        query: Optional[str] = None,
-        current_time: Optional[float] = None,
+        query: str | None = None,
+        current_time: float | None = None,
     ) -> float:
         """
         Calculate relevance score for a memory.
-        
+
         Args:
             memory: Memory to score
             query: Search query (for content similarity)
             current_time: Current timestamp
-            
+
         Returns:
             Relevance score (0.0 - 1.0)
         """
@@ -121,11 +120,11 @@ class RelevanceScorer:
     def _calculate_content_similarity(self, content: str, query: str) -> float:
         """
         Calculate content similarity (simple keyword matching).
-        
+
         Args:
             content: Memory content
             query: Search query
-            
+
         Returns:
             Similarity score (0.0 - 1.0)
         """
@@ -152,7 +151,7 @@ class RelevanceScorer:
 class MemoryRetriever:
     """
     Intelligent memory retrieval system.
-    
+
     Responsibilities:
     - Search memories using various strategies
     - Rank results by relevance
@@ -166,7 +165,7 @@ class MemoryRetriever:
     ):
         """
         Initialize memory retriever.
-        
+
         Args:
             long_term_memory: Long-term memory store
             default_strategy: Default retrieval strategy
@@ -178,21 +177,21 @@ class MemoryRetriever:
     def retrieve(
         self,
         query: str,
-        strategy: Optional[RetrievalStrategy] = None,
+        strategy: RetrievalStrategy | None = None,
         limit: int = 10,
         min_score: float = 0.0,
-        filters: Optional[Dict] = None,
-    ) -> List[RetrievalResult]:
+        filters: dict | None = None,
+    ) -> list[RetrievalResult]:
         """
         Retrieve relevant memories.
-        
+
         Args:
             query: Search query
             strategy: Retrieval strategy to use
             limit: Maximum results to return
             min_score: Minimum relevance score
             filters: Additional filters (type, tags, time_range)
-            
+
         Returns:
             List of retrieval results
         """
@@ -215,8 +214,8 @@ class MemoryRetriever:
         query: str,
         limit: int,
         min_score: float,
-        filters: Optional[Dict],
-    ) -> List[RetrievalResult]:
+        filters: dict | None,
+    ) -> list[RetrievalResult]:
         """Retrieve using keyword matching."""
         # Get candidate memories
         candidates = self._get_candidates(filters)
@@ -243,8 +242,8 @@ class MemoryRetriever:
         query: str,
         limit: int,
         min_score: float,
-        filters: Optional[Dict],
-    ) -> List[RetrievalResult]:
+        filters: dict | None,
+    ) -> list[RetrievalResult]:
         """Retrieve using temporal ordering."""
         # Get candidate memories (respects all filters)
         candidates = self._get_candidates(filters)
@@ -277,8 +276,8 @@ class MemoryRetriever:
         query: str,
         limit: int,
         min_score: float,
-        filters: Optional[Dict],
-    ) -> List[RetrievalResult]:
+        filters: dict | None,
+    ) -> list[RetrievalResult]:
         """Retrieve using importance weighting."""
         # Get candidate memories (respects all filters)
         candidates = self._get_candidates(filters)
@@ -308,8 +307,8 @@ class MemoryRetriever:
         query: str,
         limit: int,
         min_score: float,
-        filters: Optional[Dict],
-    ) -> List[RetrievalResult]:
+        filters: dict | None,
+    ) -> list[RetrievalResult]:
         """Retrieve using hybrid approach."""
         # Get results from multiple strategies
         keyword_results = self._retrieve_keyword(query, limit, min_score, filters)
@@ -331,13 +330,13 @@ class MemoryRetriever:
 
         return combined[:limit]
 
-    def _get_candidates(self, filters: Optional[Dict]) -> List[Memory]:
+    def _get_candidates(self, filters: dict | None) -> list[Memory]:
         """
         Get candidate memories based on filters.
-        
+
         Args:
             filters: Filter criteria
-            
+
         Returns:
             List of candidate memories
         """
@@ -385,15 +384,15 @@ class MemoryRetriever:
         memory: Memory,
         limit: int = 5,
         min_score: float = 0.5,
-    ) -> List[RetrievalResult]:
+    ) -> list[RetrievalResult]:
         """
         Retrieve memories similar to a given memory.
-        
+
         Args:
             memory: Reference memory
             limit: Maximum results
             min_score: Minimum similarity score
-            
+
         Returns:
             List of similar memories
         """
@@ -420,10 +419,10 @@ class MemoryRetriever:
 
         return results[:limit]
 
-    def get_statistics(self) -> Dict:
+    def get_statistics(self) -> dict:
         """
         Get retrieval statistics.
-        
+
         Returns:
             Statistics dictionary
         """

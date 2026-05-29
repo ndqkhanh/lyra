@@ -45,7 +45,7 @@ def test_single_message_renders_single_cell_proportional_to_tokens() -> None:
 
     lines = out.splitlines()
     # Find the row for the user message.
-    user_rows = [l for l in lines if "user" in l.lower() and ("█" in l or "▓" in l)]
+    user_rows = [line for line in lines if "user" in line.lower() and ("█" in line or "▓" in line)]
     assert user_rows, f"expected a user row with a bar; got:\n{out}"
     bar_chars = sum(user_rows[0].count(c) for c in ("█", "▓", "░"))
     assert bar_chars > 0

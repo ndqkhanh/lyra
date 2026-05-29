@@ -8,8 +8,7 @@ retrieving skills from the ECC framework.
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 __version__ = "1.0.0"
 
@@ -43,13 +42,13 @@ class Skill:
     description: str
     content: str
     category: SkillCategory = SkillCategory.GENERAL
-    trigger_patterns: List[str] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
-    language: Optional[str] = None
-    framework: Optional[str] = None
+    trigger_patterns: list[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
+    language: str | None = None
+    framework: str | None = None
     version: str = "1.0.0"
     source: str = "lyra"  # "lyra" or "ecc"
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     created_at: float = field(default_factory=lambda: datetime.now().timestamp())
     updated_at: float = field(default_factory=lambda: datetime.now().timestamp())
 
@@ -66,7 +65,7 @@ class Skill:
         text_lower = text.lower()
         return any(pattern.lower() in text_lower for pattern in self.trigger_patterns)
 
-    def matches_tags(self, tags: Set[str]) -> bool:
+    def matches_tags(self, tags: set[str]) -> bool:
         """
         Check if this skill matches any of the given tags.
 
@@ -78,7 +77,7 @@ class Skill:
         """
         return bool(set(self.tags) & tags)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert skill to dictionary."""
         return {
             "name": self.name,
@@ -97,7 +96,7 @@ class Skill:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Skill":
+    def from_dict(cls, data: dict[str, Any]) -> "Skill":
         """Create skill from dictionary."""
         return cls(
             name=data["name"],
@@ -124,7 +123,7 @@ class SkillSearchResult:
     score: float
     match_reason: str
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "skill": self.skill.to_dict(),

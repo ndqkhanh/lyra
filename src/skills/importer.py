@@ -4,7 +4,6 @@ Importer for ECC skills into Lyra skill system.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List
 
 from .parser import SkillParser
 from .registry import SkillRegistry
@@ -18,8 +17,8 @@ class ImportResult:
     total_files: int
     parsed_successfully: int
     registered_successfully: int
-    failed: List[str]
-    skills: Dict[str, Skill]
+    failed: list[str]
+    skills: dict[str, Skill]
 
     @property
     def success_rate(self) -> float:

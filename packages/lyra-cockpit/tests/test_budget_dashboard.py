@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_cockpit.budget_dashboard import (
     BudgetConfig,
     BudgetDashboard,

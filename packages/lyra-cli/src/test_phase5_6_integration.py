@@ -70,7 +70,7 @@ def test_integrated_repl():
         print("✓ ScrollbackBuffer created (10,000 line limit)")
 
         # Create keyboard handler
-        keyboard = KeyboardHandler()
+        KeyboardHandler()
         print("✓ KeyboardHandler created")
 
         # Test context tracking
@@ -125,7 +125,7 @@ def test_ui_components():
         print("✓ ResponseFormatter")
 
         # Agent tree
-        tree = AgentTree()
+        AgentTree()
         print("✓ AgentTree")
 
         return True

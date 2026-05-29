@@ -3,8 +3,13 @@
 from __future__ import annotations
 
 import pytest
-
-from lyra_eval_pipeline import AdaptiveRubric, RubricDimension, RubricResult, RubricScore, RubricTemplate
+from lyra_eval_pipeline import (
+    AdaptiveRubric,
+    RubricDimension,
+    RubricResult,
+    RubricScore,
+    RubricTemplate,
+)
 from lyra_eval_pipeline.exceptions import RubricError
 
 
@@ -175,7 +180,7 @@ class TestAdaptiveRubric:
             RubricDimension("rel", 0.5, "d", "keyword_match"),
         ]
         template = rubric.create_template("t", dims)
-        short_response = rubric.create_template("short", [
+        rubric.create_template("short", [
             RubricDimension("acc", 0.5, "d", "exact_match"),
             RubricDimension("rel", 0.5, "d", "keyword_match"),
         ])

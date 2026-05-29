@@ -229,7 +229,7 @@ def _gate3_performance(skill_body: str, skill_triggers: tuple[str, ...]) -> Gate
     issues: list[str] = []
     fixes: list[str] = []
 
-    lines = [l for l in skill_body.split("\n") if l.strip()]
+    lines = [ln for ln in skill_body.split("\n") if ln.strip()]
     line_count = len(lines)
 
     if line_count > 500:
@@ -237,17 +237,17 @@ def _gate3_performance(skill_body: str, skill_triggers: tuple[str, ...]) -> Gate
     if line_count > 1000:
         issues.append("Skill exceeds 1000-line limit — rejected")
 
-    import_count = sum(1 for l in lines if l.strip().startswith("import ") or l.strip().startswith("from "))
+    import_count = sum(1 for ln in lines if ln.strip().startswith("import ") or ln.strip().startswith("from "))
     if import_count > 20:
         issues.append(f"Excessive imports ({import_count}); may increase startup time")
 
-    _loop_count = sum(1 for l in lines if re.search(r'\b(for|while)\b', l))
+    _loop_count = sum(1 for ln in lines if re.search(r'\b(for|while)\b', ln))
     nested_loops = 0
     indent_levels = []
-    for l in lines:
-        stripped = l.lstrip()
+    for ln in lines:
+        stripped = ln.lstrip()
         if stripped:
-            indent = len(l) - len(stripped)
+            indent = len(ln) - len(stripped)
             indent_levels.append(indent // 4)
             if re.search(r'\b(for|while)\b', stripped):
                 if len(indent_levels) >= 2 and indent_levels[-1] > indent_levels[-2]:

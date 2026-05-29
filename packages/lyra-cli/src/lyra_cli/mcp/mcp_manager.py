@@ -43,7 +43,7 @@ class MCPManager:
 
     def list_categories(self) -> list[str]:
         """List all categories"""
-        categories = set(s.category for s in self.servers.values())
+        categories = {s.category for s in self.servers.values()}
         return sorted(categories)
 
     def save_config(self):

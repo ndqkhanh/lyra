@@ -11,7 +11,7 @@ import math
 import random
 import time
 from collections import defaultdict
-from collections.abc import Callable, Sequence
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 from uuid import uuid4
@@ -343,7 +343,7 @@ class AntColonyOptimizer:
 
     def _evaporate_all(self) -> None:
         """Evaporate pheromone across all edges."""
-        for node, edges in self._graph.items():
+        for _node, edges in self._graph.items():
             for neighbor in edges:
                 edges[neighbor][1] *= (1.0 - self._evaporation_rate)
 

@@ -4,12 +4,14 @@ Tests for ECC Integration
 Comprehensive test suite for Lyra × ECC integration.
 """
 
-import pytest
 from pathlib import Path
+
+import pytest
+
 from lyra_ecc.compatibility import ECCCompatibilityLayer
-from lyra_ecc.importer import ECCImporter, ImportResult
-from lyra_ecc.hooks import ECCHooksEngine, HookType, HookContext, HookResult
-from lyra_ecc.rules import RulesEngine, RuleSeverity, RuleViolation
+from lyra_ecc.hooks import ECCHooksEngine, HookContext, HookResult, HookType
+from lyra_ecc.importer import ECCImporter
+from lyra_ecc.rules import RulesEngine
 
 
 class TestECCCompatibility:

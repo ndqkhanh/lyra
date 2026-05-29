@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 """Test UI upgrades with Claude Code style"""
 
-import sys
 import os
+import sys
 
 # Add project to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
 
 def test_welcome_screens():
     """Test different welcome screen styles"""
-    from rich.console import Console
     from lyra_cli.cli.welcome import (
         show_welcome,
+        show_welcome_claude_code_style,
         show_welcome_detailed,
-        show_welcome_claude_code_style
     )
+    from rich.console import Console
 
     console = Console()
 
@@ -39,8 +39,8 @@ def test_welcome_screens():
 
 def test_output_formatter():
     """Test enhanced output formatter"""
-    from rich.console import Console
     from lyra_cli.cli.output import OutputFormatter
+    from rich.console import Console
 
     console = Console()
     formatter = OutputFormatter(console)
@@ -89,8 +89,8 @@ def test_output_formatter():
 
 def test_status_bar():
     """Test status bar"""
-    from rich.console import Console
     from lyra_cli.cli.status import StatusBar, StatusLine
+    from rich.console import Console
 
     console = Console()
 

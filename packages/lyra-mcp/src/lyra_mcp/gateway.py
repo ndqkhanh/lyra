@@ -12,7 +12,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -91,8 +91,8 @@ class ServerRegistration:
     name: str
     url: str
     auth_method: AuthMethod = AuthMethod.NONE
-    policy: Optional[GatewayPolicy] = None
-    health_check_url: Optional[str] = None
+    policy: GatewayPolicy | None = None
+    health_check_url: str | None = None
 
 
 @dataclass(frozen=True)
@@ -199,7 +199,7 @@ class MCPEnterpriseGateway:
     False
     """
 
-    def __init__(self, config: Optional[GatewayConfig] = None) -> None:
+    def __init__(self, config: GatewayConfig | None = None) -> None:
         self._config = config or GatewayConfig()
         self._default_policy: GatewayPolicy = self._config.default_policy
 

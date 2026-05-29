@@ -7,13 +7,12 @@ agents into Lyra's unified agent registry.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Set
 
 import yaml
 
 from src.agents.base import Agent, AgentCapability, AgentStatus
 from src.agents.unified_registry import AgentSource, UnifiedAgentRegistry
-from src.core.task import Task, TaskType, Result
+from src.core.task import Result, Task, TaskType
 
 
 @dataclass
@@ -23,11 +22,11 @@ class ECCAgentDefinition:
     name: str
     description: str
     model: str  # sonnet, opus, haiku
-    capabilities: List[str]
-    task_types: List[str]
-    languages: List[str]
-    frameworks: List[str]
-    tools: List[str]
+    capabilities: list[str]
+    task_types: list[str]
+    languages: list[str]
+    frameworks: list[str]
+    tools: list[str]
     instructions: str
     priority: int = 0
 
@@ -124,7 +123,7 @@ class ECCAgent(Agent):
 class ECCAgentParser:
     """Parser for ECC agent definition files."""
 
-    def parse_file(self, path: Path) -> Optional[ECCAgentDefinition]:
+    def parse_file(self, path: Path) -> ECCAgentDefinition | None:
         """
         Parse an ECC agent definition file.
 
@@ -135,7 +134,7 @@ class ECCAgentParser:
             Parsed agent definition or None if parsing fails
         """
         try:
-            with open(path, "r") as f:
+            with open(path) as f:
                 content = f.read()
 
             # Split frontmatter and instructions
@@ -163,7 +162,7 @@ class ECCAgentParser:
             print(f"Error parsing {path}: {e}")
             return None
 
-    def parse_directory(self, directory: Path) -> Dict[str, ECCAgentDefinition]:
+    def parse_directory(self, directory: Path) -> dict[str, ECCAgentDefinition]:
         """
         Parse all agent definitions in a directory.
 
@@ -190,8 +189,8 @@ class ImportResult:
     total_files: int
     parsed_successfully: int
     registered_successfully: int
-    failed: List[str]
-    agents: Dict[str, ECCAgent]
+    failed: list[str]
+    agents: dict[str, ECCAgent]
 
     @property
     def success_rate(self) -> float:
@@ -222,7 +221,7 @@ class ECCAgentImporter:
     def import_agent(
         self,
         definition: ECCAgentDefinition,
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Import a single agent.
 
@@ -337,7 +336,7 @@ class ECCAgentImporter:
         return self.import_directory(ecc_agents_path)
 
 
-def create_sample_ecc_agents() -> Dict[str, ECCAgentDefinition]:
+def create_sample_ecc_agents() -> dict[str, ECCAgentDefinition]:
     """
     Create sample ECC agent definitions.
 

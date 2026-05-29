@@ -9,9 +9,9 @@ from __future__ import annotations
 import hashlib
 import json
 import uuid
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Sequence
 
 from .audit_logger import AuditEntry, AuditLogger, AuditQuery, AuditStats
 from .governance_engine import GovernanceDecision

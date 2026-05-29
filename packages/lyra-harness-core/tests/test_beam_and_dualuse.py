@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_harness_core.gates import (
     DualUseGate,
     DualUseVerdict,
@@ -17,7 +16,6 @@ from lyra_harness_core.multi_hop import (
     RetrievedDoc,
     StubRetriever,
 )
-
 
 # --- Beam Retrieval ------------------------------------------------------
 

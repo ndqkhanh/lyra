@@ -1,11 +1,9 @@
 from __future__ import annotations
 
 import json
-import re
 from datetime import datetime, timedelta, timezone
 
 import pytest
-
 from lyra_adversarial_review.citation_fencer import (
     Citation,
     CitationFencer,
@@ -18,7 +16,6 @@ from lyra_adversarial_review.claim_verifier import (
     Claim,
     ClaimStatus,
     ClaimVerifier,
-    VerificationReport,
     VerificationResult,
     VerificationStage,
 )
@@ -27,7 +24,6 @@ from lyra_adversarial_review.cross_model_reviewer import (
     ModelFamily,
     ReviewIssue,
     ReviewResult,
-    ReviewerAssignment,
     ReviewSeverity,
     aggregate_reviews,
     assign_reviewer,
@@ -61,7 +57,6 @@ from lyra_adversarial_review.review_config import (
     SeverityThresholds,
     get_ruleset,
 )
-
 
 # =============================================================================
 # Exceptions
@@ -623,7 +618,7 @@ class TestClaimLedger:
     async def test_record_claim_with_reviewer(self) -> None:
         ledger = ClaimLedger()
         claim = Claim("id1", "test", "src")
-        entry_id = await ledger.record_claim(claim, ModelFamily.ANTHROPIC)
+        await ledger.record_claim(claim, ModelFamily.ANTHROPIC)
         entries = await ledger.query(LedgerQuery())
         assert entries[0].reviewer_family == ModelFamily.ANTHROPIC
 

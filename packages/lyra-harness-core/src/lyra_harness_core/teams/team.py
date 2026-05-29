@@ -21,10 +21,10 @@ from __future__ import annotations
 
 import enum
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 from .mailbox import Mailbox, MailboxRouter, Message
-from .task_list import Task, TaskList, TaskStatus
+from .task_list import Task, TaskList
 
 
 class AgentRole(str, enum.Enum):
@@ -86,7 +86,7 @@ class AgentTeam:
         return True
 
     @property
-    def lead_id(self) -> Optional[str]:
+    def lead_id(self) -> str | None:
         for r in self._agents.values():
             if r.role == AgentRole.LEAD:
                 return r.agent_id
@@ -96,7 +96,7 @@ class AgentTeam:
     def spoke_ids(self) -> list[str]:
         return [r.agent_id for r in self._agents.values() if r.role == AgentRole.SPOKE]
 
-    def role_of(self, agent_id: str) -> Optional[AgentRole]:
+    def role_of(self, agent_id: str) -> AgentRole | None:
         reg = self._agents.get(agent_id)
         return reg.role if reg else None
 
@@ -108,7 +108,7 @@ class AgentTeam:
         description: str,
         added_by: str,
         priority: int = 0,
-        parent_task_id: Optional[str] = None,
+        parent_task_id: str | None = None,
     ) -> Task:
         """Lead-only: add a task to the shared list."""
         if self.role_of(added_by) != AgentRole.LEAD:
@@ -121,7 +121,7 @@ class AgentTeam:
             parent_task_id=parent_task_id,
         )
 
-    def claim_next(self, *, agent_id: str) -> Optional[Task]:
+    def claim_next(self, *, agent_id: str) -> Task | None:
         """Spoke-only: claim the next pending task."""
         if self.role_of(agent_id) != AgentRole.SPOKE:
             raise PermissionError(
@@ -157,8 +157,8 @@ class AgentTeam:
         sender: str,
         recipient: str,
         body: str,
-        payload: Optional[dict[str, Any]] = None,
-        in_reply_to: Optional[str] = None,
+        payload: dict[str, Any] | None = None,
+        in_reply_to: str | None = None,
     ) -> Message:
         """Send a peer-to-peer or broadcast message.
 
@@ -176,7 +176,7 @@ class AgentTeam:
             payload=payload, in_reply_to=in_reply_to,
         )
 
-    def receive(self, *, agent_id: str) -> Optional[Message]:
+    def receive(self, *, agent_id: str) -> Message | None:
         """Pop the next message for an agent."""
         mb = self.mailbox_router.get(agent_id)
         if mb is None:

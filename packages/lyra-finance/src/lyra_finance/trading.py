@@ -17,8 +17,8 @@ from __future__ import annotations
 import datetime
 import logging
 import uuid
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Sequence
 
 from lyra_finance.models import (
     AnalystReport,

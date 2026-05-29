@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_eval_pipeline import BenchGuard, BenchGuardConfig, CostEstimate, GuardResult
 from lyra_eval_pipeline.domain_evaluator import EvalSample
 from lyra_eval_pipeline.exceptions import BenchGuardError

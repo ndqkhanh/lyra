@@ -25,7 +25,7 @@ class RichConsole:
     """
 
     _instance: Optional["RichConsole"] = None
-    _console: Optional[Console] = None
+    _console: Console | None = None
 
     def __new__(cls):
         """Ensure singleton instance."""

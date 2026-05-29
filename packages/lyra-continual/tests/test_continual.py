@@ -3,9 +3,18 @@ Comprehensive tests for lyra-continual: models, MoLEM, SkillPack, and legacy com
 """
 
 import math
-import pytest
 from datetime import datetime
 
+import pytest
+
+# Legacy
+from lyra_continual import (
+    AgentExperience,
+    ContinualLearner,
+    ElasticWeightConsolidation,
+    ExperienceReplay,
+    ProgressiveNetwork,
+)
 from lyra_continual.models import (
     ContinualEpisode,
     ExpertStats,
@@ -16,16 +25,6 @@ from lyra_continual.models import (
 )
 from lyra_continual.molem import MoLEMEngine
 from lyra_continual.skill_pack import SkillPackCompressor
-
-# Legacy
-from lyra_continual import (
-    AgentExperience,
-    ContinualLearner,
-    ElasticWeightConsolidation,
-    ExperienceReplay,
-    ProgressiveNetwork,
-)
-
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Model tests
@@ -475,7 +474,7 @@ class TestExperienceReplay:
 
     def test_sample_default_strategy(self):
         r = ExperienceReplay(capacity=50)
-        for i in range(5):
+        for _i in range(5):
             r.store(AgentExperience(task_id="t", state={}, action="a", result="r"))
         samples = r.sample(batch_size=3)
         assert 0 < len(samples) <= 3
@@ -578,7 +577,7 @@ class TestIntegration:
         engine.add_expert("sentiment", "sentiment_analysis")
 
         # Before learning
-        initial_experts = engine.route("Analyze sentiment of this review")
+        engine.route("Analyze sentiment of this review")
 
         # Learn
         engine.learn(ContinualEpisode(task="sentiment", input_distribution="reviews", performance_delta=0.3))
@@ -598,7 +597,7 @@ class TestIntegration:
             engine.learn(ContinualEpisode(task="task_a_domain", input_distribution="d", performance_delta=0.1))
 
         # Compress current state
-        pack_a = compressor.compress(engine.layer.router_weights, "state_after_A")
+        compressor.compress(engine.layer.router_weights, "state_after_A")
 
         # Learn task B
         engine.add_expert("task_b_domain", "B")

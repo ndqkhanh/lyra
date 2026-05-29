@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_policy_optimizer.exceptions import PolicyGradientError
 from lyra_policy_optimizer.policy_gradient import (
     GradientConfig,

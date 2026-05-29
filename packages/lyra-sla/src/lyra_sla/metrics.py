@@ -6,11 +6,11 @@ import logging
 import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from typing import Any, Callable, Optional, Protocol
+from typing import Any
 
 import numpy as np
 
-from .sla_manager import SLIMetric, SLAManager
+from .sla_manager import SLAManager
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +72,7 @@ class MetricsCollector:
 
     def __init__(
         self,
-        sla_manager: Optional[SLAManager] = None,
+        sla_manager: SLAManager | None = None,
         default_window_seconds: float = 300.0,
         max_history: int = 100_000,
     ) -> None:
@@ -95,8 +95,8 @@ class MetricsCollector:
         agent_id: str,
         metric: str,
         value: float,
-        labels: Optional[dict[str, str]] = None,
-        timestamp: Optional[float] = None,
+        labels: dict[str, str] | None = None,
+        timestamp: float | None = None,
     ) -> None:
         """Record a metric observation.
 
@@ -119,8 +119,8 @@ class MetricsCollector:
         self,
         agent_id: str,
         observations: dict[str, float],
-        labels: Optional[dict[str, str]] = None,
-        timestamp: Optional[float] = None,
+        labels: dict[str, str] | None = None,
+        timestamp: float | None = None,
     ) -> None:
         """Record multiple metric observations at once."""
         ts = timestamp or time.time()
@@ -131,7 +131,7 @@ class MetricsCollector:
     def _make_key(
         agent_id: str,
         metric: str,
-        labels: Optional[dict[str, str]] = None,
+        labels: dict[str, str] | None = None,
     ) -> str:
         """Create a storage key from agent, metric, and labels."""
         if labels:
@@ -143,8 +143,8 @@ class MetricsCollector:
         self,
         agent_id: str,
         metric: str,
-        window_seconds: Optional[float] = None,
-        labels: Optional[dict[str, str]] = None,
+        window_seconds: float | None = None,
+        labels: dict[str, str] | None = None,
     ) -> list[float]:
         """Query metric values within a time window.
 
@@ -173,8 +173,8 @@ class MetricsCollector:
         self,
         agent_id: str,
         metric: str,
-        window_seconds: Optional[float] = None,
-        labels: Optional[dict[str, str]] = None,
+        window_seconds: float | None = None,
+        labels: dict[str, str] | None = None,
     ) -> list[tuple[float, float]]:
         """Query metric as a timeseries (timestamp, value).
 
@@ -202,8 +202,8 @@ class MetricsCollector:
         self,
         agent_id: str,
         metric: str,
-        window_seconds: Optional[float] = None,
-        labels: Optional[dict[str, str]] = None,
+        window_seconds: float | None = None,
+        labels: dict[str, str] | None = None,
     ) -> RollingStats:
         """Compute rolling statistics for a metric.
 
@@ -242,7 +242,7 @@ class MetricsCollector:
     def get_all_stats(
         self,
         agent_id: str,
-        window_seconds: Optional[float] = None,
+        window_seconds: float | None = None,
     ) -> dict[str, RollingStats]:
         """Get statistics for all metrics of an agent.
 
@@ -276,8 +276,8 @@ class MetricsCollector:
         agent_id: str,
         metric: str,
         percentile: float,
-        window_seconds: Optional[float] = None,
-        labels: Optional[dict[str, str]] = None,
+        window_seconds: float | None = None,
+        labels: dict[str, str] | None = None,
     ) -> float:
         """Compute a specific percentile for a metric.
 
@@ -302,8 +302,8 @@ class MetricsCollector:
         self,
         agent_id: str,
         metric: str,
-        window_seconds: Optional[float] = None,
-        labels: Optional[dict[str, str]] = None,
+        window_seconds: float | None = None,
+        labels: dict[str, str] | None = None,
     ) -> float:
         """Compute the rate (per second) of a cumulative counter metric.
 
@@ -334,8 +334,8 @@ class MetricsCollector:
         self,
         agent_id: str,
         metric: str,
-        window_seconds: Optional[float] = None,
-        labels: Optional[dict[str, str]] = None,
+        window_seconds: float | None = None,
+        labels: dict[str, str] | None = None,
     ) -> float:
         """Compute the total increase of a counter metric in the window.
 
@@ -364,7 +364,7 @@ class MetricsCollector:
             Prometheus exposition format string.
         """
         lines: list[str] = []
-        now = time.time()
+        time.time()
 
         for agent_id, agent_metrics in self._metrics.items():
             for metric_key, observations in agent_metrics.items():
@@ -402,10 +402,10 @@ class MetricsCollector:
                 if observations:
                     lines.append(f"{metric_prefix}_latest{label_part} {observations[-1][1]:.6f}")
 
-        lines.append(f"# EOF")
+        lines.append("# EOF")
         return "\n".join(lines) + "\n"
 
-    def export_json(self, agent_id: Optional[str] = None) -> dict[str, Any]:
+    def export_json(self, agent_id: str | None = None) -> dict[str, Any]:
         """Export metrics as JSON-serializable dict.
 
         Args:

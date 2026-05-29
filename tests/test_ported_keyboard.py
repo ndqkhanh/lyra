@@ -2,8 +2,6 @@
 """
 from __future__ import annotations
 
-import pytest
-
 
 def test_mode_glyph_map():
     from lyra_cli.tui_v2.widgets.status_bar_enhanced import _MODE_GLYPH

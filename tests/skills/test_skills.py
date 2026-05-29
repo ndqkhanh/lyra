@@ -2,18 +2,17 @@
 Comprehensive tests for the skills system.
 """
 
-import json
 import tempfile
 from pathlib import Path
 
 import pytest
 
 from src.skills import (
+    ECCSkillImporter,
     Skill,
     SkillCategory,
-    SkillRegistry,
     SkillParser,
-    ECCSkillImporter,
+    SkillRegistry,
 )
 
 

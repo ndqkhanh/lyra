@@ -179,7 +179,7 @@ def cmd_handoff(session: Any, args: str) -> CommandResult:
 
     if copy_flag:
         try:
-            proc = subprocess.run(
+            subprocess.run(
                 ["pbcopy"], input=plain, text=True, timeout=5, capture_output=True,
             )
             result_msg += " (copied to clipboard)"

@@ -1,6 +1,5 @@
 """Tests for Phase L — Adaptive compression promotion (the "missing diagonal")."""
 import pytest
-
 from lyra_evolution.compression import (
     CompressedArtifact,
     CompressionConfig,

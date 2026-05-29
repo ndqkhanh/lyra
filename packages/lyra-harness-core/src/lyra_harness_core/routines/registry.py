@@ -10,7 +10,7 @@ from __future__ import annotations
 import time
 import uuid
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 from .cron import next_fire_after, parse_cron
 from .types import Routine, RoutineFire, TriggerKind
@@ -64,7 +64,7 @@ class RoutineRegistry:
             return True
         return False
 
-    def get(self, routine_id: str) -> Optional[Routine]:
+    def get(self, routine_id: str) -> Routine | None:
         return self._routines.get(routine_id)
 
     def list_routines(self, *, enabled_only: bool = False) -> list[Routine]:
@@ -91,7 +91,7 @@ class RoutineRegistry:
                 due.append(r)
         return due
 
-    def next_fire_time(self, routine_id: str, *, after: float) -> Optional[float]:
+    def next_fire_time(self, routine_id: str, *, after: float) -> float | None:
         """When the routine will next fire, given its schedule + last-fire."""
         r = self._routines.get(routine_id)
         if r is None or r.schedule is None:
@@ -106,8 +106,8 @@ class RoutineRegistry:
         routine_id: str,
         triggered_by: TriggerKind,
         token: str,
-        payload: Optional[dict[str, Any]] = None,
-        now: Optional[float] = None,
+        payload: dict[str, Any] | None = None,
+        now: float | None = None,
     ) -> FireResult:
         """Fire a routine.
 
@@ -181,7 +181,7 @@ class RoutineRegistry:
     def history(
         self,
         *,
-        routine_id: Optional[str] = None,
+        routine_id: str | None = None,
         limit: int = 100,
     ) -> list[FireResult]:
         h = self._fire_history

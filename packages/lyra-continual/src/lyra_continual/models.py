@@ -76,7 +76,7 @@ class MoELayer:
         k = k if k is not None else self.active_count
         k = min(k, len(self.experts))
         sorted_pairs = sorted(
-            zip(self.experts, self.router_weights),
+            zip(self.experts, self.router_weights, strict=False),
             key=lambda x: x[1],
             reverse=True,
         )
@@ -255,7 +255,7 @@ class EvolvedSkill:
     created_at: float = field(default_factory=time.time)
     last_used: float = field(default_factory=time.time)
 
-    def record_use(self, success: bool) -> "EvolvedSkill":
+    def record_use(self, success: bool) -> EvolvedSkill:
         new_rate = (self.success_rate * self.usage_count + (1.0 if success else 0.0)) / (self.usage_count + 1)
         return EvolvedSkill(
             id=self.id, name=self.name, description=self.description,

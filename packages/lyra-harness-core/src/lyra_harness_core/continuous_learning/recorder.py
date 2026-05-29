@@ -1,8 +1,8 @@
 """EditRecorder — append-only log of (agent_output, user_edit) pairs."""
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass, field
-from typing import Iterator, Optional
 
 from .types import EditEvent
 
@@ -29,7 +29,7 @@ class EditRecorder:
         agent_output: str,
         user_edit: str,
         user_id: str,
-        context: Optional[dict] = None,
+        context: dict | None = None,
     ) -> EditEvent:
         e = EditEvent.create(
             agent_output=agent_output,
@@ -54,9 +54,9 @@ class EditRecorder:
     def filter(
         self,
         *,
-        user_id: Optional[str] = None,
-        since_timestamp: Optional[float] = None,
-        until_timestamp: Optional[float] = None,
+        user_id: str | None = None,
+        since_timestamp: float | None = None,
+        until_timestamp: float | None = None,
     ) -> list[EditEvent]:
         out: list[EditEvent] = []
         for e in self._edits:

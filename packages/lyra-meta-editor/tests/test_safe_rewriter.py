@@ -6,7 +6,6 @@ import os
 import tempfile
 
 import pytest
-
 from lyra_meta_editor import (
     RewriteConfig,
     RewriteError,

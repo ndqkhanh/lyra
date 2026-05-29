@@ -120,7 +120,7 @@ def test_rank_returns_sorted() -> None:
     assert ranked[0].skill.id == "git-blame"
     # Scores must be monotone non-increasing.
     scores = [m.score for m in ranked]
-    assert all(a >= b for a, b in zip(scores, scores[1:]))
+    assert all(a >= b for a, b in zip(scores, scores[1:], strict=False))
 
 
 def test_invalid_threshold_rejected() -> None:

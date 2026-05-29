@@ -5,7 +5,6 @@ from __future__ import annotations
 import time
 
 import pytest
-
 from lyra_human_interaction import (
     AlignmentDialog,
     ClarificationRequest,
@@ -18,7 +17,6 @@ from lyra_human_interaction import (
     NegotiationState,
     UserFeedback,
 )
-
 
 # ---------------------------------------------------------------------------
 # Enum tests

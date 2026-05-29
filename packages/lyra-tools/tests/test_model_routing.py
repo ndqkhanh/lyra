@@ -1,8 +1,6 @@
 """Tests for model routing tools."""
 from __future__ import annotations
 
-import pytest
-
 from lyra_tools.model_routing import estimate_cost, list_models, route_model
 
 

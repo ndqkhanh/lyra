@@ -4,7 +4,6 @@ Verifies ThemeManager, ThemePreset, ThemeColors, AnimationEffects.
 """
 from __future__ import annotations
 
-import pytest
 
 def test_theme_manager_init():
     from lyra_cli.tui_v2.theme_manager import ThemeManager, ThemePreset

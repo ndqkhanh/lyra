@@ -18,18 +18,15 @@ from __future__ import annotations
 import logging
 import time
 import uuid
-from typing import Any, Optional
+from typing import Any
 
 from .budget import BudgetTracker
 from .models import (
-    BudgetRegime,
     ModelAssignment,
     ModelTier,
-    Provider,
     RoutingDecision,
     TaskComplexity,
     get_cost_estimate,
-    get_tier_for_complexity,
 )
 from .providers import ProviderRegistry
 from .tiers import NeuralTier, RuleTier, SemanticTier, TierResult
@@ -61,8 +58,8 @@ class ModelRouter:
 
     def __init__(
         self,
-        provider_registry: Optional[ProviderRegistry] = None,
-        budget_tracker: Optional[BudgetTracker] = None,
+        provider_registry: ProviderRegistry | None = None,
+        budget_tracker: BudgetTracker | None = None,
         session_budget_usd: float = 5.0,
     ) -> None:
         """
@@ -93,8 +90,8 @@ class ModelRouter:
     def route(
         self,
         task: str,
-        context: Optional[dict[str, Any]] = None,
-        force_tier: Optional[int] = None,
+        context: dict[str, Any] | None = None,
+        force_tier: int | None = None,
     ) -> RoutingDecision:
         """
         Route a task through the 3-tier cascade and return a model decision.
@@ -121,7 +118,7 @@ class ModelRouter:
                 f"Reset the tracker or increase the budget to continue."
             )
 
-        tier_result: Optional[TierResult] = None
+        tier_result: TierResult | None = None
 
         # ---- Tier 1: Rule layer ----
         if force_tier is None or force_tier == 1:

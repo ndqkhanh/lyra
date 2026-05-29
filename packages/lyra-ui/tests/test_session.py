@@ -8,7 +8,6 @@ from lyra_ui import (
     SessionReplay,
 )
 
-
 # SessionManager Tests
 
 

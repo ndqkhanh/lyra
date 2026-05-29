@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_challenge import (
     AgentRanking,
     ChallengeConfig,
@@ -17,7 +16,6 @@ from lyra_challenge import (
     SolutionStatus,
     TestCase,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

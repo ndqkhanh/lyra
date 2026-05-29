@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Test Sequential REPL - Phase 1"""
 
-import sys
 import os
+import sys
 
 # Add to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
@@ -12,19 +12,10 @@ def test_imports():
     print("Testing imports...")
 
     try:
-        from lyra_cli.repl import SequentialREPL, REPLConfig
         print("✓ SequentialREPL import successful")
 
-        from lyra_cli.events import EventDispatcher, StreamingRenderer
         print("✓ Event system imports successful")
 
-        from lyra_cli.ui import (
-            FixedInputBox,
-            StatusLine,
-            ResponseFormatter,
-            AgentTree,
-            print_welcome_banner
-        )
         print("✓ UI components imports successful")
 
         return True
@@ -40,10 +31,10 @@ def test_sequential_repl_creation():
     print("\nTesting SequentialREPL creation...")
 
     try:
-        from lyra_cli.repl import SequentialREPL, REPLConfig
+        from lyra_cli.repl import REPLConfig, SequentialREPL
 
         # Test with default config
-        repl = SequentialREPL()
+        SequentialREPL()
         print("✓ SequentialREPL created with defaults")
 
         # Test with custom config
@@ -74,7 +65,7 @@ def test_context_tracking():
     print("\nTesting context tracking...")
 
     try:
-        from lyra_cli.repl import SequentialREPL, REPLConfig
+        from lyra_cli.repl import REPLConfig, SequentialREPL
 
         config = REPLConfig(context_budget=1000)
         repl = SequentialREPL(config=config)
@@ -182,8 +173,8 @@ def test_event_handlers():
     print("\nTesting event handlers...")
 
     try:
-        from lyra_cli.repl import SequentialREPL
         from lyra_cli.events import TextDelta, TurnFinished
+        from lyra_cli.repl import SequentialREPL
 
         repl = SequentialREPL()
 

@@ -14,9 +14,10 @@ import asyncio
 import inspect
 import time
 from collections import OrderedDict
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Callable, Dict, Generic, List, Optional, TypeVar
+from typing import Any, Generic, TypeVar
 
 T = TypeVar("T")
 
@@ -28,7 +29,7 @@ class CacheEntry:
     key: str
     value: Any
     created_at: datetime
-    ttl: Optional[int] = None  # seconds
+    ttl: int | None = None  # seconds
     access_count: int = 0
     last_accessed: datetime = field(default_factory=datetime.now)
 
@@ -51,7 +52,7 @@ class LRUCache:
     - Hit/miss statistics
     """
 
-    def __init__(self, max_size: int = 1000, default_ttl: Optional[int] = None):
+    def __init__(self, max_size: int = 1000, default_ttl: int | None = None):
         """
         Initialize LRU cache.
 
@@ -65,7 +66,7 @@ class LRUCache:
         self.hits = 0
         self.misses = 0
 
-    def get(self, key: str) -> Optional[Any]:
+    def get(self, key: str) -> Any | None:
         """
         Get value from cache.
 
@@ -97,7 +98,7 @@ class LRUCache:
         self.hits += 1
         return entry.value
 
-    def set(self, key: str, value: Any, ttl: Optional[int] = None):
+    def set(self, key: str, value: Any, ttl: int | None = None):
         """
         Set value in cache.
 
@@ -131,7 +132,7 @@ class LRUCache:
         self.hits = 0
         self.misses = 0
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """
         Get cache statistics.
 
@@ -163,7 +164,7 @@ class LazyLoader(Generic[T]):
 
     def __init__(
         self,
-        loader: Callable[[int, int], List[T]],
+        loader: Callable[[int, int], list[T]],
         page_size: int = 50,
         prefetch: bool = True,
     ):
@@ -178,10 +179,10 @@ class LazyLoader(Generic[T]):
         self.loader = loader
         self.page_size = page_size
         self.prefetch = prefetch
-        self.cache: Dict[int, List[T]] = {}
-        self.total_items: Optional[int] = None
+        self.cache: dict[int, list[T]] = {}
+        self.total_items: int | None = None
 
-    def get_page(self, page: int) -> List[T]:
+    def get_page(self, page: int) -> list[T]:
         """
         Get page of items.
 
@@ -298,7 +299,7 @@ class Debouncer:
             delay: Delay in seconds
         """
         self.delay = delay
-        self.task: Optional[asyncio.Task] = None
+        self.task: asyncio.Task | None = None
 
     async def debounce(self, func: Callable, *args, **kwargs):
         """
@@ -348,7 +349,7 @@ class MemoryMonitor:
             threshold_mb: Alert threshold in MB
         """
         self.threshold_mb = threshold_mb
-        self.samples: List[float] = []
+        self.samples: list[float] = []
         self.max_samples = 100
 
     def get_memory_usage(self) -> float:
@@ -358,8 +359,9 @@ class MemoryMonitor:
         Returns:
             Memory usage in MB
         """
-        import psutil
         import os
+
+        import psutil
 
         process = psutil.Process(os.getpid())
         return process.memory_info().rss / 1024 / 1024
@@ -384,7 +386,7 @@ class MemoryMonitor:
             return False
         return self.samples[-1] > self.threshold_mb
 
-    def get_stats(self) -> Dict[str, float]:
+    def get_stats(self) -> dict[str, float]:
         """
         Get memory statistics.
 
@@ -419,7 +421,7 @@ class PerformanceProfiler:
 
     def __init__(self):
         """Initialize profiler."""
-        self.timings: Dict[str, List[float]] = {}
+        self.timings: dict[str, list[float]] = {}
 
     def measure(self, name: str):
         """
@@ -442,7 +444,7 @@ class PerformanceProfiler:
             self.timings[name] = []
         self.timings[name].append(duration)
 
-    def get_stats(self, name: str) -> Dict[str, float]:
+    def get_stats(self, name: str) -> dict[str, float]:
         """
         Get timing statistics.
 
@@ -470,7 +472,7 @@ class PerformanceProfiler:
             "max": max(timings),
         }
 
-    def get_report(self) -> Dict[str, Dict[str, float]]:
+    def get_report(self) -> dict[str, dict[str, float]]:
         """
         Get full report.
 

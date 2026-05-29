@@ -1,14 +1,13 @@
 """Tests for semantic skill search."""
-import numpy as np
-import pytest
-from pathlib import Path
 from dataclasses import dataclass
 
+import numpy as np
+import pytest
 from lyra_skills.semantic_search import (
-    SkillEmbedder,
     EmbeddingCache,
-    SemanticSkillSearch,
     SearchResult,
+    SemanticSkillSearch,
+    SkillEmbedder,
     is_semantic_search_available,
 )
 

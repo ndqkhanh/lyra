@@ -204,7 +204,7 @@ def index_rows(
     if _has_sqlite_conn(bank):
         return _index_rows_sqlite(bank, limit, now)
     lessons = bank.all_lessons(limit=limit)
-    return tuple(_row_from_lesson(l) for l in lessons)
+    return tuple(_row_from_lesson(lesson) for lesson in lessons)
 
 
 def render_session_index(
@@ -270,7 +270,7 @@ def search_index(
     if not query.strip():
         return index_rows(bank, limit=limit, now=now)
     lessons = bank.recall(query, k=limit, polarity=polarity)
-    return tuple(_row_from_lesson(l) for l in lessons)
+    return tuple(_row_from_lesson(lesson) for lesson in lessons)
 
 
 def timeline_around(
@@ -294,13 +294,13 @@ def timeline_around(
     # all_lessons returns newest-first; reverse to oldest-first for
     # the positional-neighbourhood semantics.
     chrono = list(reversed(lessons))
-    ids = [l.id for l in chrono]
+    ids = [lesson.id for lesson in chrono]
     if anchor_id not in ids:
         return ()
     idx = ids.index(anchor_id)
     lo = max(0, idx - window)
     hi = min(len(chrono), idx + window + 1)
-    return tuple(_row_from_lesson(l) for l in chrono[lo:hi])
+    return tuple(_row_from_lesson(lesson) for lesson in chrono[lo:hi])
 
 
 def _timeline_sqlite(

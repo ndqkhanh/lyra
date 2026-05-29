@@ -2,11 +2,7 @@
 
 from __future__ import annotations
 
-import time
-from typing import Any
-
 import pytest
-
 from lyra_adversarial import (
     AdversarialConfig,
     AdversarialInput,
@@ -19,7 +15,6 @@ from lyra_adversarial import (
     JailbreakProbe,
     RedTeamReport,
 )
-
 
 # ---------------------------------------------------------------------------
 # Enum tests

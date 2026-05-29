@@ -11,7 +11,6 @@ Features:
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 
 from rich.console import Console
 from rich.panel import Panel
@@ -60,7 +59,7 @@ class BannerSystem:
 
     def __init__(
         self,
-        console: Optional[Console] = None,
+        console: Console | None = None,
         style: BannerStyle = BannerStyle.STANDARD,
         theme: BannerTheme = BannerTheme.DEFAULT,
     ):
@@ -79,9 +78,9 @@ class BannerSystem:
     def render(
         self,
         title: str = "Lyra",
-        subtitle: Optional[str] = None,
-        status: Optional[str] = None,
-        stats: Optional[BannerStats] = None,
+        subtitle: str | None = None,
+        status: str | None = None,
+        stats: BannerStats | None = None,
     ) -> Panel:
         """
         Render banner.
@@ -125,8 +124,8 @@ class BannerSystem:
     def _render_standard(
         self,
         title: str,
-        subtitle: Optional[str],
-        status: Optional[str],
+        subtitle: str | None,
+        status: str | None,
     ) -> Text:
         """Render standard banner."""
         text = Text()
@@ -150,9 +149,9 @@ class BannerSystem:
     def _render_full(
         self,
         title: str,
-        subtitle: Optional[str],
-        status: Optional[str],
-        stats: Optional[BannerStats],
+        subtitle: str | None,
+        status: str | None,
+        stats: BannerStats | None,
     ) -> Text:
         """Render full banner."""
         text = Text()
@@ -225,9 +224,9 @@ class BannerSystem:
     def display(
         self,
         title: str = "Lyra",
-        subtitle: Optional[str] = None,
-        status: Optional[str] = None,
-        stats: Optional[BannerStats] = None,
+        subtitle: str | None = None,
+        status: str | None = None,
+        stats: BannerStats | None = None,
     ):
         """
         Display banner.
@@ -252,7 +251,7 @@ class StartupBanner:
     - Loading indicators
     """
 
-    def __init__(self, console: Optional[Console] = None):
+    def __init__(self, console: Console | None = None):
         """
         Initialize startup banner.
 
@@ -304,7 +303,7 @@ class ShutdownBanner:
     - Session summary
     """
 
-    def __init__(self, console: Optional[Console] = None):
+    def __init__(self, console: Console | None = None):
         """
         Initialize shutdown banner.
 

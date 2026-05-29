@@ -3,7 +3,6 @@
 import asyncio
 
 import pytest
-
 from lyra_meta_evolution.fitness import (
     BenchmarkConfig,
     BenchmarkResult,
@@ -15,7 +14,6 @@ from lyra_meta_evolution.fitness import (
     ParetoFrontier,
 )
 from lyra_meta_evolution.meta_evolution import AgentGenome
-
 
 # ── Fixtures ────────────────────────────────────────────────────────────────────
 
@@ -173,7 +171,7 @@ class TestParetoFrontier:
             ObjectiveDimension.QUALITY: 0.6,
         }))
         # better might not dominate old if old has a higher value in some dimension
-        frontier = pf.get_frontier()
+        pf.get_frontier()
 
     def test_get_frontier_ids(self):
         pf = ParetoFrontier()

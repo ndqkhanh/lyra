@@ -3,7 +3,6 @@ Conflict Resolver - Resolve resource conflicts and deadlocks.
 """
 
 import time
-from typing import List, Dict, Optional
 from dataclasses import dataclass
 from enum import Enum
 
@@ -32,19 +31,19 @@ class Conflict:
     """Represents a conflict between tasks."""
     conflict_id: str
     conflict_type: ConflictType
-    tasks: List[str]
-    resource: Optional[str] = None
+    tasks: list[str]
+    resource: str | None = None
     detected_at: float = 0.0
     resolved: bool = False
-    resolution: Optional[str] = None
+    resolution: str | None = None
 
 
 @dataclass
 class Resource:
     """Represents a shared resource."""
     resource_id: str
-    owner: Optional[str] = None
-    waiters: List[str] = None
+    owner: str | None = None
+    waiters: list[str] = None
 
     def __post_init__(self):
         if self.waiters is None:
@@ -54,7 +53,7 @@ class Resource:
 class ConflictResolver:
     """
     Resolve conflicts between tasks and agents.
-    
+
     Responsibilities:
     - Detect resource conflicts
     - Detect deadlocks
@@ -65,19 +64,19 @@ class ConflictResolver:
     def __init__(self, strategy: ResolutionStrategy = ResolutionStrategy.PRIORITY_BASED):
         """
         Initialize conflict resolver.
-        
+
         Args:
             strategy: Resolution strategy to use
         """
         self.strategy = strategy
-        self.conflicts: Dict[str, Conflict] = {}
-        self.resources: Dict[str, Resource] = {}
+        self.conflicts: dict[str, Conflict] = {}
+        self.resources: dict[str, Resource] = {}
         self.conflict_count = 0
 
     def register_resource(self, resource_id: str):
         """
         Register a shared resource.
-        
+
         Args:
             resource_id: Resource identifier
         """
@@ -92,12 +91,12 @@ class ConflictResolver:
     ) -> bool:
         """
         Request access to a resource.
-        
+
         Args:
             task: Task requesting resource
             resource_id: Resource to request
             timeout: Request timeout in seconds
-            
+
         Returns:
             True if resource granted
         """
@@ -132,7 +131,7 @@ class ConflictResolver:
     def release_resource(self, task: Task, resource_id: str):
         """
         Release a resource.
-        
+
         Args:
             task: Task releasing resource
             resource_id: Resource to release
@@ -150,13 +149,13 @@ class ConflictResolver:
                 next_task_id = resource.waiters.pop(0)
                 resource.owner = next_task_id
 
-    def detect_deadlock(self, tasks: List[Task]) -> Optional[List[str]]:
+    def detect_deadlock(self, tasks: list[Task]) -> list[str] | None:
         """
         Detect deadlock in resource allocation.
-        
+
         Args:
             tasks: Tasks to check
-            
+
         Returns:
             List of task IDs in deadlock cycle, or None
         """
@@ -174,7 +173,7 @@ class ConflictResolver:
         visited = set()
         rec_stack = set()
 
-        def has_cycle(task_id: str, path: List[str]) -> Optional[List[str]]:
+        def has_cycle(task_id: str, path: list[str]) -> list[str] | None:
             visited.add(task_id)
             rec_stack.add(task_id)
             path.append(task_id)
@@ -202,14 +201,14 @@ class ConflictResolver:
 
         return None
 
-    def _detect_resource_conflict(self, task: Task, resource_id: str) -> Optional[Conflict]:
+    def _detect_resource_conflict(self, task: Task, resource_id: str) -> Conflict | None:
         """
         Detect resource conflict.
-        
+
         Args:
             task: Task requesting resource
             resource_id: Resource being requested
-            
+
         Returns:
             Conflict if detected
         """
@@ -234,10 +233,10 @@ class ConflictResolver:
     def _resolve_conflict(self, conflict: Conflict) -> bool:
         """
         Resolve a conflict using current strategy.
-        
+
         Args:
             conflict: Conflict to resolve
-            
+
         Returns:
             True if resolved
         """
@@ -292,13 +291,13 @@ class ConflictResolver:
         conflict.resolution = "aborted"
         return False
 
-    def resolve_deadlock(self, cycle: List[str]) -> str:
+    def resolve_deadlock(self, cycle: list[str]) -> str:
         """
         Resolve a deadlock by aborting one task.
-        
+
         Args:
             cycle: Task IDs in deadlock cycle
-            
+
         Returns:
             ID of task to abort
         """
@@ -315,10 +314,10 @@ class ConflictResolver:
 
         return victim
 
-    def get_conflict_statistics(self) -> Dict:
+    def get_conflict_statistics(self) -> dict:
         """
         Get conflict resolution statistics.
-        
+
         Returns:
             Statistics dictionary
         """
@@ -346,10 +345,10 @@ class ConflictResolver:
             "strategy": self.strategy.value,
         }
 
-    def get_resource_status(self) -> Dict:
+    def get_resource_status(self) -> dict:
         """
         Get status of all resources.
-        
+
         Returns:
             Resource status dictionary
         """

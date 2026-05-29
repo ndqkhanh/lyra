@@ -17,9 +17,6 @@ from __future__ import annotations
 
 from typing import Any
 
-import pytest
-from pydantic import BaseModel
-
 from lyra_harness_core.continuous_learning import (
     ContinuousLearner,
     EditRecorder,
@@ -49,6 +46,7 @@ from lyra_harness_core.skill_drift import DriftPolicy, SkillDriftMonitor
 from lyra_harness_core.tool_runtime import ExponentialBackoff, ToolEngine
 from lyra_harness_core.tools import Tool, ToolRegistry
 from lyra_harness_core.verifier import StubPolicyVerifier, VerifierComposer
+from pydantic import BaseModel
 
 
 class _ResearchTool(Tool):

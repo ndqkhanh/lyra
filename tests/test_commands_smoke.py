@@ -6,9 +6,7 @@ Run: ``pytest tests/test_commands_smoke.py -v``
 from __future__ import annotations
 
 import pytest
-
 from lyra_cli.commands.registry import CommandResult
-
 
 # ── Fake session object ────────────────────────────────────────────────
 
@@ -154,7 +152,7 @@ def test_checkpoint_full_cycle(session):
 
 def test_undo_redo_cycle(session):
     """Test /undo and /redo play well together."""
-    from lyra_cli.interactive.undo_cmd import cmd_undo, cmd_redo
+    from lyra_cli.interactive.undo_cmd import cmd_redo, cmd_undo
 
     r = cmd_undo(session, "--list")
     assert r is not None

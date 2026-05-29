@@ -10,7 +10,7 @@ Features:
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from lyra_audio.audio_player import AudioPlayer
 from lyra_audio.sound_pack import SoundPackLoader
@@ -26,7 +26,7 @@ class SoundManager:
     - Sound file management
     """
 
-    def __init__(self, sounds_dir: Optional[str] = None):
+    def __init__(self, sounds_dir: str | None = None):
         """Initialize sound manager."""
         if sounds_dir:
             self.sounds_dir = Path(sounds_dir).expanduser()
@@ -46,19 +46,19 @@ class SoundManager:
         # Load current theme pack
         self._load_current_pack()
 
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> dict[str, Any]:
         """Load audio configuration."""
         config_path = Path("~/.lyra/audio.json").expanduser()
 
         if config_path.exists():
             try:
-                with open(config_path, "r") as f:
+                with open(config_path) as f:
                     return json.load(f)
-            except (json.JSONDecodeError, IOError):
+            except (OSError, json.JSONDecodeError):
                 return self._default_config()
         return self._default_config()
 
-    def _default_config(self) -> Dict[str, Any]:
+    def _default_config(self) -> dict[str, Any]:
         """Get default configuration."""
         return {
             "enabled": True,
@@ -79,7 +79,7 @@ class SoundManager:
         try:
             with open(config_path, "w") as f:
                 json.dump(self.config, f, indent=2)
-        except IOError:
+        except OSError:
             pass
 
     def play_event(self, event: str):
@@ -99,7 +99,7 @@ class SoundManager:
         if sound_file and sound_file.exists():
             self.player.play_async(str(sound_file), volume=self.volume)
 
-    def _get_sound_for_event(self, event: str) -> Optional[Path]:
+    def _get_sound_for_event(self, event: str) -> Path | None:
         """
         Get sound file for event.
 
@@ -147,7 +147,7 @@ class SoundManager:
         """Get current theme."""
         return self.current_theme
 
-    def list_themes(self) -> List[str]:
+    def list_themes(self) -> list[str]:
         """List available themes."""
         return self.pack_loader.list_packs()
 

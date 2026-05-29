@@ -2,10 +2,6 @@
 """
 from __future__ import annotations
 
-import time
-
-import pytest
-
 
 def test_render_timing():
     from lyra_cli.tui_v2.widgets.performance_dashboard import RenderTiming

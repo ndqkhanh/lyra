@@ -134,7 +134,7 @@ class SkillCurator:
         """
         self._skill_index.clear()
 
-        for source, path in self.discovery_paths.items():
+        for _source, path in self.discovery_paths.items():
             if not path.exists():
                 continue
 
@@ -208,7 +208,7 @@ class SkillCurator:
         # Score all skills
         scored_skills: list[tuple[str, float, str]] = []
 
-        for skill_name, (skill_path, metadata) in self._skill_index.items():
+        for skill_name, (_skill_path, metadata) in self._skill_index.items():
             score, reason = self._score_skill(skill_name, metadata, context)
             if score > 0.0:
                 scored_skills.append((skill_name, score, reason))

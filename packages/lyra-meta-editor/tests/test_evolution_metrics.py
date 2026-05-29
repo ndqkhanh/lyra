@@ -8,7 +8,6 @@ import tempfile
 import time
 
 import pytest
-
 from lyra_meta_editor import (
     EvolutionConfig,
     EvolutionCycle,
@@ -295,7 +294,7 @@ class TestEvolutionMetrics:
     def test_custom_data_dir(self) -> None:
         tmpdir = tempfile.mkdtemp()
         cfg = EvolutionConfig(data_dir=tmpdir)
-        m = EvolutionMetrics(cfg)
+        EvolutionMetrics(cfg)
         assert os.path.isdir(tmpdir)
         import shutil
         shutil.rmtree(tmpdir, ignore_errors=True)

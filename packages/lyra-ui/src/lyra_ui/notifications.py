@@ -12,7 +12,6 @@ Features:
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional
 
 from rich.console import Console
 from rich.panel import Panel
@@ -38,7 +37,7 @@ class Notification:
     message: str
     timestamp: datetime = field(default_factory=datetime.now)
     read: bool = False
-    action: Optional[str] = None
+    action: str | None = None
 
 
 class NotificationSystem:
@@ -54,7 +53,7 @@ class NotificationSystem:
 
     def __init__(
         self,
-        console: Optional[Console] = None,
+        console: Console | None = None,
         max_history: int = 100,
         enable_sound: bool = True,
     ):
@@ -67,7 +66,7 @@ class NotificationSystem:
             enable_sound: Enable notification sounds
         """
         self.console = console or Console()
-        self.notifications: List[Notification] = []
+        self.notifications: list[Notification] = []
         self.max_history = max_history
         self.enable_sound = enable_sound
         self._notification_counter = 0
@@ -77,7 +76,7 @@ class NotificationSystem:
         level: NotificationLevel,
         title: str,
         message: str,
-        action: Optional[str] = None,
+        action: str | None = None,
         play_sound: bool = True,
     ) -> Notification:
         """
@@ -116,7 +115,7 @@ class NotificationSystem:
 
         return notification
 
-    def info(self, title: str, message: str, action: Optional[str] = None):
+    def info(self, title: str, message: str, action: str | None = None):
         """
         Create info notification.
 
@@ -127,7 +126,7 @@ class NotificationSystem:
         """
         return self.notify(NotificationLevel.INFO, title, message, action)
 
-    def success(self, title: str, message: str, action: Optional[str] = None):
+    def success(self, title: str, message: str, action: str | None = None):
         """
         Create success notification.
 
@@ -138,7 +137,7 @@ class NotificationSystem:
         """
         return self.notify(NotificationLevel.SUCCESS, title, message, action)
 
-    def warning(self, title: str, message: str, action: Optional[str] = None):
+    def warning(self, title: str, message: str, action: str | None = None):
         """
         Create warning notification.
 
@@ -149,7 +148,7 @@ class NotificationSystem:
         """
         return self.notify(NotificationLevel.WARNING, title, message, action)
 
-    def error(self, title: str, message: str, action: Optional[str] = None):
+    def error(self, title: str, message: str, action: str | None = None):
         """
         Create error notification.
 
@@ -193,10 +192,10 @@ class NotificationSystem:
 
     def get_history(
         self,
-        level: Optional[NotificationLevel] = None,
+        level: NotificationLevel | None = None,
         unread_only: bool = False,
         limit: int = 10,
-    ) -> List[Notification]:
+    ) -> list[Notification]:
         """
         Get notification history.
 
@@ -294,7 +293,7 @@ class ToastNotification:
     - Position control
     """
 
-    def __init__(self, console: Optional[Console] = None):
+    def __init__(self, console: Console | None = None):
         """
         Initialize toast notification.
 
@@ -360,7 +359,7 @@ class NotificationHistory:
     - Search notifications
     """
 
-    def __init__(self, console: Optional[Console] = None):
+    def __init__(self, console: Console | None = None):
         """
         Initialize notification history.
 
@@ -369,7 +368,7 @@ class NotificationHistory:
         """
         self.console = console or Console()
 
-    def display(self, notifications: List[Notification]):
+    def display(self, notifications: list[Notification]):
         """
         Display notification history.
 

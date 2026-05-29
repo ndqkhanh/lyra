@@ -12,7 +12,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from lyra_personalization.models import (
     InteractionRecord,
@@ -32,8 +32,8 @@ class MemoryEntry:
     memory_type: str  # "working", "episodic", or "semantic"
     importance: float = 0.5
     timestamp: datetime = field(default_factory=datetime.now)
-    source_interaction_id: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    source_interaction_id: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class TripartiteMemory:
@@ -53,13 +53,13 @@ class TripartiteMemory:
         importance_threshold: float = DEFAULT_IMPORTANCE_THRESHOLD,
         semantic_cooldown: timedelta = DEFAULT_SEMANTIC_COOLDOWN,
     ) -> None:
-        self._working: Dict[str, MemoryEntry] = {}
-        self._episodic: List[MemoryEntry] = []
-        self._semantic: List[MemoryEntry] = []
+        self._working: dict[str, MemoryEntry] = {}
+        self._episodic: list[MemoryEntry] = []
+        self._semantic: list[MemoryEntry] = []
         self._max_episodic = max_episodic
         self._importance_threshold = importance_threshold
         self._semantic_cooldown = semantic_cooldown
-        self._last_consolidation: Optional[datetime] = None
+        self._last_consolidation: datetime | None = None
 
     @property
     def working_count(self) -> int:
@@ -115,7 +115,7 @@ class TripartiteMemory:
         self._trim_episodic()
         logger.debug("Promoted entry to episodic memory: %s", entry.content[:50])
 
-    def consolidate_to_semantic(self, entries: List[MemoryEntry]) -> None:
+    def consolidate_to_semantic(self, entries: list[MemoryEntry]) -> None:
         """
         Consolidate episodic entries into semantic memory.
 
@@ -163,7 +163,7 @@ class TripartiteMemory:
         self,
         query: str,
         memory_type: str = "all",
-    ) -> List[MemoryEntry]:
+    ) -> list[MemoryEntry]:
         """
         Search across a specific memory tier or all tiers.
 
@@ -177,8 +177,8 @@ class TripartiteMemory:
             List of matching MemoryEntry objects, sorted by importance.
         """
         query_lower = query.lower()
-        results: List[MemoryEntry] = []
-        sources: Dict[str, List[MemoryEntry]] = {
+        results: list[MemoryEntry] = []
+        sources: dict[str, list[MemoryEntry]] = {
             "working": list(self._working.values()),
             "episodic": list(self._episodic),
             "semantic": list(self._semantic),
@@ -282,7 +282,7 @@ class TripartiteMemory:
             self._episodic.append(episodic_entry)
             self._trim_episodic()
 
-    def get_episodic_highlights(self, limit: int = 10) -> List[MemoryEntry]:
+    def get_episodic_highlights(self, limit: int = 10) -> list[MemoryEntry]:
         """
         Get the most important episodic entries.
 
@@ -299,7 +299,7 @@ class TripartiteMemory:
         )
         return sorted_episodic[:limit]
 
-    def get_all_working_entries(self) -> Dict[str, MemoryEntry]:
+    def get_all_working_entries(self) -> dict[str, MemoryEntry]:
         """Get all working memory entries."""
         return dict(self._working)
 

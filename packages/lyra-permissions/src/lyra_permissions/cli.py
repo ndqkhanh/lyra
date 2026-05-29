@@ -10,12 +10,8 @@ Features:
 
 import argparse
 import sys
-from typing import List, Optional
 
-from lyra_permissions.bypass_mode import AuditLogger, BypassMode
-from lyra_permissions.granular_control import GranularController
 from lyra_permissions.permission_manager import PermissionManager
-from lyra_permissions.permission_store import PermissionStore
 
 
 class PermissionCLI:
@@ -29,7 +25,7 @@ class PermissionCLI:
         self.audit_logger = self.manager.audit_logger
         self.store = self.manager.store
 
-    def run(self, args: Optional[List[str]] = None):
+    def run(self, args: list[str] | None = None):
         """Run CLI with arguments."""
         parser = self._create_parser()
         parsed_args = parser.parse_args(args)
@@ -201,10 +197,10 @@ class PermissionCLI:
         """Show current profile."""
         profile = self.granular.get_profile()
         print(f"Current profile: {profile.name}")
-        print(f"\nTool permissions:")
+        print("\nTool permissions:")
         for key, value in profile.config.get("toolPermissions", {}).items():
             print(f"  {key}: {value}")
-        print(f"\nContext rules:")
+        print("\nContext rules:")
         for rule in profile.config.get("contextRules", []):
             print(f"  {rule['name']} (priority: {rule.get('priority', 0)})")
 
@@ -250,7 +246,7 @@ class PermissionCLI:
         if success:
             print(f"✓ Audit log exported to: {args.output}")
         else:
-            print(f"✗ Failed to export audit log", file=sys.stderr)
+            print("✗ Failed to export audit log", file=sys.stderr)
             sys.exit(1)
 
     def cmd_audit_clear(self, args):
@@ -316,7 +312,7 @@ class PermissionCLI:
 
         # Audit stats
         stats = self.audit_logger.get_stats()
-        print(f"\nAudit log:")
+        print("\nAudit log:")
         print(f"  Total entries: {stats['total_entries']}")
         print(f"  Auto-accepted: {stats['auto_accepted']}")
         print(f"  Prompted: {stats['prompted']}")
@@ -325,7 +321,7 @@ class PermissionCLI:
         # Preferences
         allow_list = self.store.get_allow_list()
         deny_list = self.store.get_deny_list()
-        print(f"\nPreferences:")
+        print("\nPreferences:")
         print(f"  Allowed: {len(allow_list)}")
         print(f"  Denied: {len(deny_list)}")
 

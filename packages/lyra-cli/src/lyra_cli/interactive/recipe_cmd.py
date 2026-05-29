@@ -391,7 +391,7 @@ def cmd_recipe(session: Any, args: str) -> CommandResult:
             lines.append("[yellow]⚠ Dry run — no files written. Run without --dry-run to execute.[/]")
 
         return CommandResult(
-            output=f"Recipe '{recipe_name}': {len([f for f in recipe.files])} files, {len(recipe.steps)} steps",
+            output=f"Recipe '{recipe_name}': {len(list(recipe.files))} files, {len(recipe.steps)} steps",
             renderable="\n".join(lines),
         )
 

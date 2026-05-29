@@ -13,7 +13,6 @@ For retrieval-style access (find-by-content), use :class:`MemoryStore` with
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
 
 from .types import MemoryItem, MemoryKind
 
@@ -45,7 +44,7 @@ class WorkingMemory:
         content: str,
         importance: float = 0.5,
         tags: tuple[str, ...] = (),
-        metadata: Optional[dict] = None,
+        metadata: dict | None = None,
     ) -> MemoryItem:
         """Append a new item; oldest evicted when capacity exceeded."""
         item = MemoryItem.create(
@@ -72,7 +71,7 @@ class WorkingMemory:
         """Return all items, oldest first (insertion order)."""
         return list(self._items)
 
-    def peek(self) -> Optional[MemoryItem]:
+    def peek(self) -> MemoryItem | None:
         """Look at the most recent item without removing it."""
         return self._items[-1] if self._items else None
 

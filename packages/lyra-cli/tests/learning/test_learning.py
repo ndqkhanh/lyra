@@ -455,7 +455,7 @@ def test_skill_error_reduction(skill_library):
         ),
     ]
 
-    skill_id = skill_library.add_skill(
+    skill_library.add_skill(
         name="Test skill",
         description="Test",
         category="test",

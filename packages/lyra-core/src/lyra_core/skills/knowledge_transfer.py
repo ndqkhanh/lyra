@@ -107,7 +107,7 @@ def _embed_skill(skill_body: str, skill_triggers: tuple[str, ...]) -> tuple[floa
 
 
 def _cosine_sim(a: tuple[float, ...], b: tuple[float, ...]) -> float:
-    dot = sum(x * y for x, y in zip(a, b))
+    dot = sum(x * y for x, y in zip(a, b, strict=False))
     na = math.sqrt(sum(x * x for x in a))
     nb = math.sqrt(sum(y * y for y in b))
     if na == 0 or nb == 0:

@@ -972,7 +972,7 @@ class OpenEndedLearner:
             ``completed_goals``, ``current_phase``, ``capabilities``,
             ``knowledge_gaps``, and ``outstanding_goals``.
         """
-        completed_count = len(self._completed_ids)
+        len(self._completed_ids)
         total_goals = len(self._goals)
         total_progress = 0.0
         if total_goals > 0:

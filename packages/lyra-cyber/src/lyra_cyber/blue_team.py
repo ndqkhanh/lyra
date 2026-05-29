@@ -11,7 +11,6 @@ Features:
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional
 
 
 class ThreatSeverity(Enum):
@@ -43,7 +42,7 @@ class SecurityAlert:
     severity: ThreatSeverity
     source: str
     timestamp: datetime
-    indicators: List[str]
+    indicators: list[str]
     description: str
     false_positive_score: float = 0.0
 
@@ -56,10 +55,10 @@ class Incident:
     title: str
     severity: ThreatSeverity
     status: IncidentStatus
-    alerts: List[SecurityAlert]
-    affected_systems: List[str]
-    timeline: List[Dict[str, str]] = field(default_factory=list)
-    containment_actions: List[str] = field(default_factory=list)
+    alerts: list[SecurityAlert]
+    affected_systems: list[str]
+    timeline: list[dict[str, str]] = field(default_factory=list)
+    containment_actions: list[str] = field(default_factory=list)
 
 
 class BlueTeamDefense:
@@ -74,10 +73,10 @@ class BlueTeamDefense:
 
     def __init__(self):
         """Initialize blue team defense."""
-        self.alerts: Dict[str, SecurityAlert] = {}
-        self.incidents: Dict[str, Incident] = {}
+        self.alerts: dict[str, SecurityAlert] = {}
+        self.incidents: dict[str, Incident] = {}
 
-    def triage_alert(self, alert: SecurityAlert) -> Dict[str, any]:
+    def triage_alert(self, alert: SecurityAlert) -> dict[str, any]:
         """
         Triage security alert.
 
@@ -155,7 +154,7 @@ class BlueTeamDefense:
         self,
         title: str,
         severity: ThreatSeverity,
-        alert_ids: List[str],
+        alert_ids: list[str],
     ) -> Incident:
         """
         Create security incident.
@@ -196,7 +195,7 @@ class BlueTeamDefense:
         self,
         incident_id: str,
         action: str,
-    ) -> Dict[str, any]:
+    ) -> dict[str, any]:
         """
         Execute incident response action.
 
@@ -237,7 +236,7 @@ class BlueTeamDefense:
             "success": True,
         }
 
-    def get_incident_summary(self, incident_id: str) -> Dict[str, any]:
+    def get_incident_summary(self, incident_id: str) -> dict[str, any]:
         """
         Get incident summary.
 

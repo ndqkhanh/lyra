@@ -4,12 +4,10 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import List, Tuple
 
 from .exceptions import HallucinationDetectionError
 
-
-DEFAULT_PATTERNS: Tuple[str, ...] = (
+DEFAULT_PATTERNS: tuple[str, ...] = (
     r"I (don't|do not) (have|know|understand)",
     r"as an AI (language model|assistant)",
     r"I cannot (provide|confirm|verify|access)",
@@ -45,7 +43,7 @@ class HallucinationReport:
     """Report of hallucination analysis for a response."""
 
     has_hallucinations: bool
-    signals: Tuple[HallucinationSignal, ...] = ()
+    signals: tuple[HallucinationSignal, ...] = ()
     risk_score: float = 0.0
     recommended_action: str = "none"
 
@@ -55,7 +53,7 @@ class DetectorConfig:
     """Configuration for the hallucination detector."""
 
     sensitivity: float = 0.5
-    patterns: Tuple[str, ...] = DEFAULT_PATTERNS
+    patterns: tuple[str, ...] = DEFAULT_PATTERNS
     min_confidence: float = 0.3
 
 
@@ -67,7 +65,7 @@ class HallucinationDetector:
         config: DetectorConfig | None = None,
     ) -> None:
         self._config = config or DetectorConfig()
-        self._custom_patterns: List[str] = []
+        self._custom_patterns: list[str] = []
 
     async def analyze_response(
         self,
@@ -75,7 +73,7 @@ class HallucinationDetector:
         _context: str = "",
     ) -> HallucinationReport:
         """Analyze a single response for hallucination signals."""
-        signals: List[HallucinationSignal] = []
+        signals: list[HallucinationSignal] = []
         all_patterns = list(self._config.patterns) + self._custom_patterns
 
         for pattern in all_patterns:
@@ -116,16 +114,16 @@ class HallucinationDetector:
 
     async def batch_analyze(
         self,
-        responses: List[Tuple[str, str]],
-    ) -> Tuple[HallucinationReport, ...]:
+        responses: list[tuple[str, str]],
+    ) -> tuple[HallucinationReport, ...]:
         """Analyze multiple (text, context) pairs for hallucination signals."""
-        reports: List[HallucinationReport] = []
+        reports: list[HallucinationReport] = []
         for text, context in responses:
             report = await self.analyze_response(text, context)
             reports.append(report)
         return tuple(reports)
 
-    def get_known_patterns(self) -> Tuple[str, ...]:
+    def get_known_patterns(self) -> tuple[str, ...]:
         """Return all known detection patterns."""
         return tuple(self._config.patterns) + tuple(self._custom_patterns)
 

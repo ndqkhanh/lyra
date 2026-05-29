@@ -194,7 +194,7 @@ class PersonalizedPageRank:
                     transition[j, i] = weight / total_weight
 
         # Power iteration
-        for iteration in range(max_iter):
+        for _iteration in range(max_iter):
             old_scores = scores.copy()
 
             # PPR update: (1-α) * transition * scores + α * seed_prob
@@ -391,7 +391,7 @@ def build_entity_graph_from_memory(
             )
 
     # Build co-occurrence edges
-    for entry_id, entities in entry_entities.items():
+    for _entry_id, entities in entry_entities.items():
         # Add edges between entities that co-occur in same entry
         for i, entity1 in enumerate(entities):
             for entity2 in entities[i + 1:]:

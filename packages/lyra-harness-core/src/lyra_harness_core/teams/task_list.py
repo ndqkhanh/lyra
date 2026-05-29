@@ -10,7 +10,7 @@ import enum
 import time
 import uuid
 from dataclasses import dataclass, field, replace
-from typing import Any, Optional
+from typing import Any
 
 
 class TaskStatus(str, enum.Enum):
@@ -31,8 +31,8 @@ class Task:
     task_id: str
     description: str
     status: TaskStatus = TaskStatus.PENDING
-    assigned_to: Optional[str] = None
-    parent_task_id: Optional[str] = None
+    assigned_to: str | None = None
+    parent_task_id: str | None = None
     output: Any = None
     error: str = ""
     priority: int = 0  # higher claims first
@@ -79,8 +79,8 @@ class TaskList:
         *,
         description: str,
         priority: int = 0,
-        parent_task_id: Optional[str] = None,
-        task_id: Optional[str] = None,
+        parent_task_id: str | None = None,
+        task_id: str | None = None,
     ) -> Task:
         """Add a new PENDING task; returns the created Task."""
         tid = task_id or str(uuid.uuid4())
@@ -95,10 +95,10 @@ class TaskList:
         self._tasks[tid] = task
         return task
 
-    def get(self, task_id: str) -> Optional[Task]:
+    def get(self, task_id: str) -> Task | None:
         return self._tasks.get(task_id)
 
-    def list_all(self, *, status: Optional[TaskStatus] = None) -> list[Task]:
+    def list_all(self, *, status: TaskStatus | None = None) -> list[Task]:
         out = list(self._tasks.values())
         if status is not None:
             out = [t for t in out if t.status == status]
@@ -106,7 +106,7 @@ class TaskList:
         out.sort(key=lambda t: (-t.priority, t.created_at))
         return out
 
-    def claim_next(self, *, agent_id: str) -> Optional[Task]:
+    def claim_next(self, *, agent_id: str) -> Task | None:
         """Atomically claim the next PENDING task for an agent.
 
         Returns None if no claimable tasks. Highest-priority + oldest-first.

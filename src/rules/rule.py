@@ -5,7 +5,7 @@ Rule data models and types.
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class RuleCategory(str, Enum):
@@ -43,12 +43,12 @@ class RuleViolation:
     rule_id: str
     severity: RuleSeverity
     message: str
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
-    column: Optional[int] = None
-    context: Optional[str] = None
+    file_path: str | None = None
+    line_number: int | None = None
+    column: int | None = None
+    context: str | None = None
     timestamp: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -64,13 +64,13 @@ class Rule:
     title: str
     description: str
     severity: RuleSeverity = RuleSeverity.WARNING
-    language: Optional[str] = None  # e.g., "python", "typescript"
-    file_patterns: List[str] = field(default_factory=list)  # e.g., ["**/*.py"]
+    language: str | None = None  # e.g., "python", "typescript"
+    file_patterns: list[str] = field(default_factory=list)  # e.g., ["**/*.py"]
     enabled: bool = True
     priority: int = 0  # Higher priority rules checked first
-    examples: Dict[str, str] = field(default_factory=dict)  # good/bad examples
-    references: List[str] = field(default_factory=list)  # Links to docs
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    examples: dict[str, str] = field(default_factory=dict)  # good/bad examples
+    references: list[str] = field(default_factory=list)  # Links to docs
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def matches_file(self, file_path: str) -> bool:
         """

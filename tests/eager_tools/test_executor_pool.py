@@ -3,7 +3,6 @@
 import asyncio
 
 import pytest
-
 from lyra_cli.eager_tools import ToolSeal
 from lyra_cli.eager_tools.executor_pool import EagerExecutorPool
 

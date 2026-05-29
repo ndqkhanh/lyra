@@ -10,11 +10,9 @@ Features:
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional
 
 from rich.console import Console
 from rich.panel import Panel
-from rich.progress import BarColumn, Progress, TextColumn
 from rich.table import Table
 
 
@@ -57,9 +55,7 @@ class ContextTracker:
             total_tokens: Total context window size
         """
         self.total_tokens = total_tokens
-        self.components: Dict[ContextComponent, int] = {
-            component: 0 for component in ContextComponent
-        }
+        self.components: dict[ContextComponent, int] = dict.fromkeys(ContextComponent, 0)
 
     def add_tokens(self, component: ContextComponent, tokens: int):
         """
@@ -126,7 +122,7 @@ class ContextTracker:
         """
         return (self.get_total_used() / self.total_tokens) * 100
 
-    def get_breakdown(self) -> List[ContextUsage]:
+    def get_breakdown(self) -> list[ContextUsage]:
         """
         Get usage breakdown.
 
@@ -172,7 +168,7 @@ class ContextRingVisualizer:
     - Percentage display
     """
 
-    def __init__(self, console: Optional[Console] = None):
+    def __init__(self, console: Console | None = None):
         """Initialize context ring visualizer."""
         self.console = console or Console()
 
@@ -275,7 +271,7 @@ class ContextManager:
         """
         self.tracker = tracker
 
-    def export_context(self) -> Dict[str, int]:
+    def export_context(self) -> dict[str, int]:
         """
         Export context data.
 
@@ -287,7 +283,7 @@ class ContextManager:
             for component in ContextComponent
         }
 
-    def import_context(self, data: Dict[str, int]):
+    def import_context(self, data: dict[str, int]):
         """
         Import context data.
 
@@ -313,7 +309,7 @@ class ContextManager:
         if current > target_tokens:
             self.tracker.set_tokens(component, target_tokens)
 
-    def get_recommendations(self) -> List[str]:
+    def get_recommendations(self) -> list[str]:
         """
         Get optimization recommendations.
 

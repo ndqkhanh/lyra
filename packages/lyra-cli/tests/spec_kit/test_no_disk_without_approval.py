@@ -23,7 +23,7 @@ async def test_rejection_path():
     """Test that rejecting at any phase prevents disk writes."""
     # This would be implemented with user interaction simulation
     # For now, just verify the writer doesn't auto-write
-    writer = Writer()
+    Writer()
 
     feature_id = "999-test-rejection"
     feature_dir = Path("specs") / feature_id

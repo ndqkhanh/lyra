@@ -5,9 +5,6 @@ Our TUI equivalents: git_cmd.py, connect_status.py, auth_cmd.py.
 """
 from __future__ import annotations
 
-import os
-from pathlib import Path
-
 import pytest
 
 

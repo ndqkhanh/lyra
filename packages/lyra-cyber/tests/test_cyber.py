@@ -2,14 +2,12 @@
 
 from datetime import datetime
 
-import pytest
-
 from lyra_cyber import (
+    IOC,
     AttackPhase,
     BlueTeamDefense,
-    IOC,
-    IOCType,
     IncidentStatus,
+    IOCType,
     RedTeamAutomation,
     SecurityAlert,
     ThreatActor,

@@ -14,11 +14,11 @@ from __future__ import annotations
 import json
 import sqlite3
 import time
+from collections.abc import Generator
 from contextlib import contextmanager
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Generator, Literal, Optional
-
+from typing import Literal
 
 __all__ = [
     "AgentExecutionRecord",
@@ -246,7 +246,7 @@ class AERStore:
         )
         return [self._row_to_aer(r) for r in cur.fetchall()]
 
-    def latest(self, session_id: str) -> Optional[AgentExecutionRecord]:
+    def latest(self, session_id: str) -> AgentExecutionRecord | None:
         """Most recent record for a session, or None."""
         cur = self._conn.execute(
             "SELECT * FROM agent_execution_records "

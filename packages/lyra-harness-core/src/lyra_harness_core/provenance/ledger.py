@@ -7,7 +7,6 @@ witness exists.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Iterable, Optional
 
 from .types import Witness, WitnessKind
 
@@ -48,7 +47,7 @@ class ProvenanceLedger:
         # Verify integrity at insert.
         if not witness.verify_integrity():
             raise ValueError(
-                f"witness_id mismatch: stored id doesn't match content SHA256"
+                "witness_id mismatch: stored id doesn't match content SHA256"
             )
         # Verify parent witnesses exist.
         for parent_id in witness.parent_witnesses:
@@ -60,7 +59,7 @@ class ProvenanceLedger:
         self._witnesses[witness.witness_id] = witness
         return witness
 
-    def get(self, witness_id: str) -> Optional[Witness]:
+    def get(self, witness_id: str) -> Witness | None:
         return self._witnesses.get(witness_id)
 
     def __contains__(self, witness_id: object) -> bool:
@@ -72,8 +71,8 @@ class ProvenanceLedger:
     def witnesses_for(
         self,
         *,
-        kind: Optional[WitnessKind] = None,
-        issued_by: Optional[str] = None,
+        kind: WitnessKind | None = None,
+        issued_by: str | None = None,
     ) -> list[Witness]:
         """Filter witnesses by kind and/or issuer."""
         out = list(self._witnesses.values())

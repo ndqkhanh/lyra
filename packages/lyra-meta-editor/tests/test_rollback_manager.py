@@ -6,7 +6,6 @@ import os
 import tempfile
 
 import pytest
-
 from lyra_meta_editor import (
     BackupRecord,
     RollbackError,
@@ -223,7 +222,7 @@ class TestRollbackManager:
         try:
             new_dir = os.path.join(tmpdir, "subdir", "rollbacks")
             RollbackManager.BACKUP_DIR = new_dir
-            m = RollbackManager()
+            RollbackManager()
             assert os.path.isdir(new_dir)
         finally:
             RollbackManager.BACKUP_DIR = old

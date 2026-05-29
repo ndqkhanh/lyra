@@ -6,8 +6,6 @@ import difflib
 import re
 from dataclasses import dataclass
 
-from .exceptions import CodeAnalysisError
-
 
 @dataclass(frozen=True)
 class DiffConfig:
@@ -153,6 +151,6 @@ class DiffGenerator:
         if diff.lines_removed > 0:
             parts.append(f"{diff.lines_removed} line(s) removed")
         if diff.hunks:
-            change_types = sorted(set(h.change_type for h in diff.hunks))
+            change_types = sorted({h.change_type for h in diff.hunks})
             parts.append(f"changes: {', '.join(change_types)}")
         return "; ".join(parts) if parts else "No changes"

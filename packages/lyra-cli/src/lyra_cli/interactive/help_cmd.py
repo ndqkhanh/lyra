@@ -70,7 +70,7 @@ def cmd_help_enhanced(session: Any, args: str) -> CommandResult:
     if parts and parts[0] not in ("--quick", "-q", "--categories", "-c"):
         topic = parts[0]
         by_cat = commands_by_category()
-        for cat, specs in by_cat.items():
+        for _cat, specs in by_cat.items():
             for spec in specs:
                 if spec.name == topic or topic in spec.aliases:
                     emoji = CATEGORY_EMOJI.get(spec.category, "📋")

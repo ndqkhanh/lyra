@@ -9,7 +9,6 @@ budget cap there.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
 
 
 @dataclass(order=True)
@@ -47,7 +46,7 @@ class TTCCurve:
     def sorted_points(self) -> list[TTCPoint]:
         return sorted(self.points)
 
-    def find_inflection(self, *, epsilon: float = 0.01, window: int = 2) -> Optional[TTCPoint]:
+    def find_inflection(self, *, epsilon: float = 0.01, window: int = 2) -> TTCPoint | None:
         """First point where the next ``window`` points add < epsilon accuracy.
 
         Returns None if the curve is still rising at the last sample (no
@@ -65,7 +64,7 @@ class TTCCurve:
                 return pt
         return None
 
-    def find_decline(self) -> Optional[TTCPoint]:
+    def find_decline(self) -> TTCPoint | None:
         """First point where any subsequent sample has lower accuracy.
 
         SealQA-style "more compute makes it worse" detector.

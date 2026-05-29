@@ -288,7 +288,7 @@ Extract only novel, durable facts. Be concise."""
                 semantic_fact = SemanticFact(
                     id=fact_id,
                     fact=fact_data['fact'],
-                    source_sessions=list(set(e.session_id for e in cluster)),
+                    source_sessions=list({e.session_id for e in cluster}),
                     source_entry_ids=[e.id for e in cluster],
                     extracted_at=datetime.now(),
                     cognitive_weight=0.0,

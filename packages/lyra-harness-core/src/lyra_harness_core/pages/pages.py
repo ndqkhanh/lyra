@@ -14,8 +14,7 @@ Design notes:
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field, replace
-from typing import Iterable, Optional
+from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
@@ -32,7 +31,7 @@ class PageSnapshot:
     content: str
     author: str  # "user:<id>" | "agent:<name>"
     version: int
-    parent_version: Optional[int] = None
+    parent_version: int | None = None
     created_at: float = field(default_factory=time.time)
     diff_summary: str = ""
     note: str = ""  # optional human-readable note about the edit
@@ -109,13 +108,13 @@ class PageHistory:
         return snapshot
 
     @property
-    def current(self) -> Optional[PageSnapshot]:
+    def current(self) -> PageSnapshot | None:
         """The latest snapshot by version. None if history is empty."""
         if not self.snapshots:
             return None
         return max(self.snapshots, key=lambda s: s.version)
 
-    def at_version(self, version: int) -> Optional[PageSnapshot]:
+    def at_version(self, version: int) -> PageSnapshot | None:
         for s in self.snapshots:
             if s.version == version:
                 return s
@@ -141,7 +140,7 @@ class PageHistory:
 
     def conflicts(self) -> list[EditConflict]:
         """Detect concurrent edits — multiple snapshots with the same parent."""
-        by_parent: dict[Optional[int], list[int]] = {}
+        by_parent: dict[int | None, list[int]] = {}
         for s in self.snapshots:
             by_parent.setdefault(s.parent_version, []).append(s.version)
         conflicts: list[EditConflict] = []
@@ -238,7 +237,7 @@ class PageEditor:
         *,
         content: str,
         author: str,
-        parent_version: Optional[int] = None,
+        parent_version: int | None = None,
         note: str = "",
     ) -> PageSnapshot:
         """Append a new snapshot.

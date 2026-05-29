@@ -6,14 +6,14 @@ ML-based importance scoring with configurable weight blending.
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import math
 import re
 import time
 from collections import Counter, defaultdict
-from dataclasses import dataclass, field
-from typing import Any, Optional, Protocol, Sequence
+from collections.abc import Sequence
+from dataclasses import dataclass
+from typing import Protocol
 
 logger = logging.getLogger(__name__)
 
@@ -252,9 +252,9 @@ class DependencyScorer:
         self._reverse_graph = defaultdict(set)
 
         for element in elements:
-            self._dependency_graph[element.id] = set(
+            self._dependency_graph[element.id] = {
                 dep for dep in element.dependencies if dep in element_ids
-            )
+            }
             for dep in self._dependency_graph[element.id]:
                 self._reverse_graph[dep].add(element.id)
 
@@ -264,7 +264,7 @@ class DependencyScorer:
         in_degree = len(self._reverse_graph.get(element_id, set()))
 
         # Compute total element count for normalization
-        all_elements = set(self._dependency_graph.keys()) | set(self._reverse_graph.keys())
+        set(self._dependency_graph.keys()) | set(self._reverse_graph.keys())
         max_in_degree = max(
             (len(v) for v in self._reverse_graph.values()),
             default=1,
@@ -318,7 +318,7 @@ class MLImportancePredictor:
         epochs = 100
 
         for _ in range(epochs):
-            for feat_vec, label in zip(features, labels):
+            for feat_vec, label in zip(features, labels, strict=False):
                 prediction = self._predict_raw(feat_vec)
                 error = label - prediction
 
@@ -374,7 +374,7 @@ class ImportanceCalculator:
         scores = await calc.score_batch(elements)
     """
 
-    def __init__(self, weights: Optional[ScoreWeights] = None):
+    def __init__(self, weights: ScoreWeights | None = None):
         self._weights = (weights or ScoreWeights()).normalize()
         self._tfidf = TfidfCalculator()
         self._recency = RecencyScorer()
@@ -473,7 +473,7 @@ class ImportanceCalculator:
     async def score_single(
         self,
         element: ContextElementProtocol,
-        corpus: Optional[list[ContextElementProtocol]] = None,
+        corpus: list[ContextElementProtocol] | None = None,
     ) -> float:
         """Score a single element, optionally against a corpus."""
         if corpus:

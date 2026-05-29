@@ -20,7 +20,6 @@ These tests prove the adapter:
 from __future__ import annotations
 
 import pytest
-
 from lyra_evals.adapters.loco_eval import (
     ConversationDriver,
     LoCoEvalResult,

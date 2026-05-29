@@ -3,16 +3,16 @@ Review Agent - specialist for code review and quality assurance.
 """
 
 import asyncio
-from typing import Dict, Any
+from typing import Any
 
 from src.agents.base import Agent, AgentCapability, AgentStatus
-from src.core.task import Task, TaskType, Result
+from src.core.task import Result, Task, TaskType
 
 
 class ReviewAgent(Agent):
     """
     Specialist agent for code review and quality assurance.
-    
+
     Capabilities:
     - Code review
     - Security scanning
@@ -46,10 +46,10 @@ class ReviewAgent(Agent):
     async def execute(self, task: Task) -> Result:
         """
         Execute a review task.
-        
+
         Args:
             task: Task to execute
-            
+
         Returns:
             Execution result
         """
@@ -89,13 +89,13 @@ class ReviewAgent(Agent):
         self.record_execution(result)
         return result
 
-    async def review_code(self, task: Task) -> Dict[str, Any]:
+    async def review_code(self, task: Task) -> dict[str, Any]:
         """
         Review code for quality and best practices.
-        
+
         Args:
             task: Code review task
-            
+
         Returns:
             Review results
         """
@@ -156,13 +156,13 @@ class ReviewAgent(Agent):
             ],
         }
 
-    async def security_scan(self, task: Task) -> Dict[str, Any]:
+    async def security_scan(self, task: Task) -> dict[str, Any]:
         """
         Scan code for security vulnerabilities.
-        
+
         Args:
             task: Security scan task
-            
+
         Returns:
             Security scan results
         """
@@ -214,13 +214,13 @@ class ReviewAgent(Agent):
             ],
         }
 
-    async def assess_quality(self, task: Task) -> Dict[str, Any]:
+    async def assess_quality(self, task: Task) -> dict[str, Any]:
         """
         Assess overall code quality.
-        
+
         Args:
             task: Quality assessment task
-            
+
         Returns:
             Quality assessment results
         """
@@ -251,10 +251,10 @@ class ReviewAgent(Agent):
     def can_handle(self, task: Task) -> float:
         """
         Determine if this agent can handle a task.
-        
+
         Args:
             task: Task to evaluate
-            
+
         Returns:
             Confidence score (0-1)
         """

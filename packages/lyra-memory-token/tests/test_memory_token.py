@@ -1,5 +1,5 @@
 """Tests for lyra-memory-token."""
-from lyra_memory_token import TokenNativeIndex, MemoryTierRouter, MemoryTier
+from lyra_memory_token import MemoryTier, MemoryTierRouter, TokenNativeIndex
 
 
 class TestTokenNativeIndex:
@@ -25,8 +25,8 @@ class TestTokenNativeIndex:
     def test_remove(self):
         idx = TokenNativeIndex()
         idx.index("doc1", "Test document")
-        assert idx.remove("doc1") == True
-        assert idx.remove("nonexistent") == False
+        assert idx.remove("doc1")
+        assert not idx.remove("nonexistent")
 
     def test_retrieve_empty(self):
         idx = TokenNativeIndex()

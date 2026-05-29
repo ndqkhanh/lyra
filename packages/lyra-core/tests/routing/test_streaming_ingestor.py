@@ -22,7 +22,7 @@ class TestChunkEvent:
             chunk.text = "modified"  # type: ignore[misc]
 
 
-import pytest
+import pytest  # noqa: E402
 
 
 class TestStreamIngestor:

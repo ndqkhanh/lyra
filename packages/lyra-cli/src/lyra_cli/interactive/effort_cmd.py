@@ -134,7 +134,7 @@ def cmd_effort(session: Any, args: str) -> CommandResult:
 
     if subcmd == "list":
         lines = ["[bold]Effort Levels[/]"]
-        for i, level in enumerate(EFFORT_LEVELS, 1):
+        for _i, level in enumerate(EFFORT_LEVELS, 1):
             glyph = EFFORT_GLYPH.get(level, "◆")
             color = EFFORT_COLOR.get(level, "cyan")
             blurb = EFFORT_BLURBS.get(level, "")

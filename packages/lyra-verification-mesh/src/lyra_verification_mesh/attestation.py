@@ -10,9 +10,9 @@ import uuid
 from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Optional
+from typing import Any
 
-from .verification_mesh import VerificationStatus, VerificationResult, MeshReport
+from .verification_mesh import MeshReport
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,7 @@ class Attestation:
     signature: str = ""
     signer: str = ""
     results_summary: dict[str, Any] = field(default_factory=dict)
-    expiration: Optional[float] = None
+    expiration: float | None = None
     revoked: bool = False
 
 
@@ -69,8 +69,8 @@ class ChainLink:
     """
 
     link_id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    parent_attestation_id: Optional[str] = None
-    attestation: Optional[Attestation] = None
+    parent_attestation_id: str | None = None
+    attestation: Attestation | None = None
     created_at: float = field(default_factory=time.time)
 
 
@@ -109,7 +109,7 @@ class AttestationService:
 
     def __init__(
         self,
-        signing_key: Optional[str] = None,
+        signing_key: str | None = None,
         attestation_ttl_seconds: float = 86400.0,
     ) -> None:
         self.signing_key = signing_key or hashlib.sha256(os.urandom(32)).hexdigest()
@@ -118,7 +118,7 @@ class AttestationService:
         self._attestations: deque[Attestation] = deque(maxlen=10000)
         self._audit_trail: deque[AuditEntry] = deque(maxlen=50000)
         self._trust_chains: dict[str, list[ChainLink]] = {}
-        self._last_attestation_id: Optional[str] = None
+        self._last_attestation_id: str | None = None
 
     # ── Attestation creation ───────────────────────────────────────────
 
@@ -265,7 +265,7 @@ class AttestationService:
         return all_valid, statuses
 
     def _add_to_chain(
-        self, attestation: Attestation, parent_id: Optional[str]
+        self, attestation: Attestation, parent_id: str | None
     ) -> None:
         """Add an attestation to the chain of trust."""
         link = ChainLink(
@@ -297,7 +297,7 @@ class AttestationService:
         logger.warning("Attestation revoked: %s (reason: %s)", attestation_id[:8], reason)
         return True
 
-    def get_attestation(self, attestation_id: str) -> Optional[Attestation]:
+    def get_attestation(self, attestation_id: str) -> Attestation | None:
         """Retrieve an attestation by ID."""
         for a in self._attestations:
             if a.attestation_id == attestation_id:
@@ -325,7 +325,7 @@ class AttestationService:
         action: str,
         actor: str,
         target: str,
-        metadata: Optional[dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Record an entry in the tamper-evident audit trail.
 
@@ -358,7 +358,7 @@ class AttestationService:
         }, sort_keys=True, default=str)
         return hashlib.sha256(data.encode()).hexdigest()
 
-    def verify_audit_trail(self) -> tuple[bool, Optional[int]]:
+    def verify_audit_trail(self) -> tuple[bool, int | None]:
         """Verify the integrity of the entire audit trail.
 
         Checks that the hash chain is unbroken.

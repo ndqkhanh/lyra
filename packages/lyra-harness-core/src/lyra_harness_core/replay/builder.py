@@ -14,13 +14,12 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 from ..forensic import Trajectory
 from ..orchestration import AgentDecision, SideEffectRecord
 from ..provenance import ProvenanceLedger, Witness, WitnessKind
 from .types import ReplayEvent, ReplayEventKind, Trace
-
 
 _WITNESS_TO_EVENT_KIND: dict[WitnessKind, ReplayEventKind] = {
     WitnessKind.AGENT_DECISION: ReplayEventKind.AGENT_DECISION,
@@ -94,10 +93,10 @@ class TraceBuilder:
         kind: ReplayEventKind,
         issued_by: str,
         timestamp: float,
-        payload: Optional[dict[str, Any]] = None,
+        payload: dict[str, Any] | None = None,
         parent_event_ids: tuple[str, ...] = (),
         namespace_id: str = "",
-        event_id: Optional[str] = None,
+        event_id: str | None = None,
     ) -> ReplayEvent:
         """Add a custom event (PAGE_EDIT, ROUTINE_FIRE, etc.)."""
         eid = event_id or str(uuid.uuid4())

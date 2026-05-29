@@ -75,7 +75,7 @@ class DocumentationWriterSkill:
             return {"error": "No source code provided", "docstrings": []}
 
         module_name = input_data.get("module_name", "module")
-        output_format = input_data.get("output_format", "docstrings")
+        input_data.get("output_format", "docstrings")
 
         try:
             tree = ast.parse(source)
@@ -223,7 +223,7 @@ class DocumentationWriterSkill:
             )
 
         returns = self._get_return_type(node)
-        raises = [r for r in self._find_raises(node)]
+        raises = list(self._find_raises(node))
 
         return ApiEndpoint(
             function_name=func_name,

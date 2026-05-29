@@ -1,8 +1,9 @@
 """Tests for advanced features - multi-agent orchestration, reasoning, and context optimization."""
-import pytest
-from pathlib import Path
-import tempfile
 import shutil
+import tempfile
+from pathlib import Path
+
+import pytest
 
 
 @pytest.fixture

@@ -7,7 +7,6 @@ import os
 import tempfile
 
 import pytest
-
 from lyra_cockpit.agent_monitor import MonitorConfig
 from lyra_cockpit.budget_dashboard import BudgetConfig
 from lyra_cockpit.cockpit_config import CockpitConfig, CockpitConfigLoader
@@ -62,7 +61,7 @@ class TestCockpitConfigLoader:
         assert config.update_interval == 1.0
 
     def test_save_and_load(self) -> None:
-        config = CockpitConfigLoader.load_default()
+        CockpitConfigLoader.load_default()
         modified = CockpitConfig(
             iaa=IAAConfig(preview_timeout=42.0),
             monitor=MonitorConfig(max_agents=99),
@@ -147,7 +146,7 @@ class TestCockpitConfigLoader:
 
         try:
             CockpitConfigLoader.save_to_file(config, tmp_path)
-            with open(tmp_path, "r") as f:
+            with open(tmp_path) as f:
                 data = json.load(f)
             assert "iaa" in data
             assert "monitor" in data

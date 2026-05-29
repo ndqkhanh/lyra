@@ -12,14 +12,12 @@ from __future__ import annotations
 
 import logging
 import math
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Sequence, Set, Tuple
+from collections.abc import Sequence
 
 from lyra_verification.models import (
     DriftAlert,
     DriftReport,
     PAEFFailure,
-    Verdict,
 )
 
 logger = logging.getLogger(__name__)
@@ -33,7 +31,7 @@ class ContinuousMonitor:
     """
 
     def __init__(self) -> None:
-        self._history: Dict[str, List[float]] = {}
+        self._history: dict[str, list[float]] = {}
 
     def record_metric(self, name: str, value: float) -> None:
         """Record a metric value for later analysis."""
@@ -48,7 +46,7 @@ class ContinuousMonitor:
         self,
         metric: str,
         window: int = 7,
-    ) -> Optional[float]:
+    ) -> float | None:
         """Compute a rolling mean over the last *window* data points.
 
         Returns None if insufficient data is available.
@@ -66,7 +64,7 @@ class ContinuousMonitor:
         metric: str,
         current_value: float,
         threshold: float = 1.5,
-    ) -> Optional[DriftAlert]:
+    ) -> DriftAlert | None:
         """Detect drift via z-score (sigma-based) relative to historical data.
 
         Parameters
@@ -121,7 +119,7 @@ class ContinuousMonitor:
     def check_paef_failures(
         self,
         agent_outputs: Sequence[str],
-    ) -> Dict[PAEFFailure, float]:
+    ) -> dict[PAEFFailure, float]:
         """Score each of the seven PAEF failure modes.
 
         Each failure mode is scored in [0, 1] where higher = more likely
@@ -131,16 +129,16 @@ class ContinuousMonitor:
         -------
         dict mapping PAEFFailure -> float
         """
-        scores: Dict[PAEFFailure, float] = {}
+        scores: dict[PAEFFailure, float] = {}
         all_text = " ".join(agent_outputs) if agent_outputs else ""
         words = all_text.split() if all_text else []
         n_words = len(words)
 
         if n_words == 0:
-            return {m: 0.0 for m in PAEFFailure}
+            return dict.fromkeys(PAEFFailure, 0.0)
 
         # Perplexity: high OOV rate or repetitive tokens
-        unique_ratio = len(set(w.lower() for w in words)) / max(n_words, 1)
+        unique_ratio = len({w.lower() for w in words}) / max(n_words, 1)
         scores[PAEFFailure.PERPLEXITY] = 1.0 - min(unique_ratio * 2, 1.0)
 
         # Accuracy: contradiction ratio (presence of "however", "but", etc.)
@@ -206,9 +204,9 @@ class ContinuousMonitor:
     # ------------------------------------------------------------------
     def compute_kg_structural_diff(
         self,
-        kg_a: Dict[str, Set[Tuple[str, str]]],
-        kg_b: Dict[str, Set[Tuple[str, str]]],
-    ) -> Dict[str, float]:
+        kg_a: dict[str, set[tuple[str, str]]],
+        kg_b: dict[str, set[tuple[str, str]]],
+    ) -> dict[str, float]:
         """Compare two knowledge graphs structurally.
 
         Parameters
@@ -233,12 +231,12 @@ class ContinuousMonitor:
             len(entities_a & entities_b) / max(len(entities_a | entities_b), 1)
         )
 
-        triples_a: Set[Tuple[str, str, str]] = set()
+        triples_a: set[tuple[str, str, str]] = set()
         for entity, rels in kg_a.items():
             for rel, obj in rels:
                 triples_a.add((entity, rel, obj))
 
-        triples_b: Set[Tuple[str, str, str]] = set()
+        triples_b: set[tuple[str, str, str]] = set()
         for entity, rels in kg_b.items():
             for rel, obj in rels:
                 triples_b.add((entity, rel, obj))
@@ -269,7 +267,7 @@ class ContinuousMonitor:
         self,
         feedback: Sequence[float],
         confidence_level: float = 0.95,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """PULSE-style user satisfaction aggregation.
 
         Computes mean, standard deviation, and confidence interval for
@@ -323,11 +321,11 @@ class ContinuousMonitor:
     # ------------------------------------------------------------------
     def generate_drift_report(
         self,
-        current_metrics: Dict[str, float],
+        current_metrics: dict[str, float],
         drift_threshold: float = 1.5,
     ) -> DriftReport:
         """Generate a comprehensive drift report from current metric values."""
-        alerts: List[DriftAlert] = []
+        alerts: list[DriftAlert] = []
 
         for metric, value in current_metrics.items():
             alert = self.detect_drift(metric, value, threshold=drift_threshold)

@@ -106,5 +106,5 @@ class PreferenceAccumulator:
     def stats(self) -> dict:
         return {
             "total_preferences": len(self._preferences),
-            "unique_keys": len(set(p.key for p in self._preferences.values())),
+            "unique_keys": len({p.key for p in self._preferences.values()}),
         }

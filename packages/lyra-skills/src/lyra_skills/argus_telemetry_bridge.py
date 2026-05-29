@@ -17,10 +17,10 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from lyra_core.skills.registry import Skill as LyraSkill, SkillRegistry
+from lyra_core.skills.registry import Skill as LyraSkill
+from lyra_core.skills.registry import SkillRegistry
 
 from .argus_cascade import LyraArgusCascade
-
 
 Restore = Callable[[], None]
 

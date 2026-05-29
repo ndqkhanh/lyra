@@ -1,5 +1,5 @@
 """Tests for lyra-experiment."""
-from lyra_experiment import ExperimentRegistry, ExperimentStatus, AgentConfig, AgentExperiment
+from lyra_experiment import AgentConfig, ExperimentRegistry, ExperimentStatus
 
 
 class TestExperimentRegistry:

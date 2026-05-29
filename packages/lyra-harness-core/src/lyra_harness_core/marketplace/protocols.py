@@ -1,7 +1,7 @@
 """MarketplaceHost + CuratorHost Protocols — the argus consumer interface."""
 from __future__ import annotations
 
-from typing import Any, Optional, Protocol
+from typing import Any, Protocol
 
 from .types import (
     InstallResult,
@@ -25,9 +25,9 @@ class MarketplaceHost(Protocol):
     def list_marketplace(
         self,
         *,
-        filter: Optional[str] = None,
+        filter: str | None = None,
         top_k: int = 50,
-        upstream: Optional[str] = None,
+        upstream: str | None = None,
     ) -> list[MCPServer]:
         """List available MCP servers, optionally filtered.
 
@@ -36,7 +36,7 @@ class MarketplaceHost(Protocol):
         """
         ...
 
-    def get_trust_verdict(self, server_name: str) -> Optional[TrustVerdict]:
+    def get_trust_verdict(self, server_name: str) -> TrustVerdict | None:
         """Return argus's current verdict for a server, or None if unknown."""
         ...
 
@@ -74,7 +74,7 @@ class CuratorHost(Protocol):
         self,
         *,
         user_context: dict[str, Any],
-        source_project: Optional[str] = None,
+        source_project: str | None = None,
         top_k: int = 50,
     ) -> list[PromotedSkill]:
         """Return skills the curator has promoted, filtered to the caller.

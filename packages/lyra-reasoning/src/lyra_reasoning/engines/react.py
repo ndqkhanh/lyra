@@ -13,7 +13,7 @@ Reference: Yao et al. "ReAct: Synergizing Reasoning and Acting in Language Model
 import re
 import time
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from anthropic import Anthropic
 

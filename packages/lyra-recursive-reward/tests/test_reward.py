@@ -1,7 +1,11 @@
 """Tests for Recursive Reward package."""
 
-import pytest
-from lyra_recursive_reward import RecursiveReward, InnerRewardLoop, MiddleRewardLoop, OuterRewardLoop
+from lyra_recursive_reward import (
+    InnerRewardLoop,
+    MiddleRewardLoop,
+    OuterRewardLoop,
+    RecursiveReward,
+)
 
 
 class TestInnerRewardLoop:

@@ -10,8 +10,9 @@ import asyncio
 import logging
 import random
 import time
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
-from typing import Any, Awaitable, Callable, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ class CircuitBreaker:
                 self.state = "closed"
                 self.failures.clear()
             return result
-        except Exception as e:
+        except Exception:
             self.failures.append(time.time())
             self._check_state()
             raise

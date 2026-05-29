@@ -280,7 +280,7 @@ def test_in_memory_bank_has_all_lessons() -> None:
     bank.record_lesson(_lesson("y", title="T2"))
     lessons = bank.all_lessons()
     # Most-recent-first ordering matches SQLite.
-    assert [l.id for l in lessons] == ["y", "x"]
+    assert [lesson.id for lesson in lessons] == ["y", "x"]
 
 
 def test_in_memory_all_lessons_filters_polarity() -> None:
@@ -288,4 +288,4 @@ def test_in_memory_all_lessons_filters_polarity() -> None:
     bank.record_lesson(_lesson("ok", polarity=TrajectoryOutcome.SUCCESS))
     bank.record_lesson(_lesson("err", polarity=TrajectoryOutcome.FAILURE))
     only_fail = bank.all_lessons(polarity=TrajectoryOutcome.FAILURE)
-    assert [l.id for l in only_fail] == ["err"]
+    assert [lesson.id for lesson in only_fail] == ["err"]

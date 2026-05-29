@@ -19,7 +19,6 @@ from lyra_core.tdd.impact_map import tests_for_edit
 from lyra_core.tdd.red_proof import RedProof, validate_red_proof
 from lyra_evals import EvalRunner, Task, TaskResult, golden_tasks
 
-
 HERE = Path(__file__).parent.resolve()
 
 

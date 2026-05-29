@@ -4,8 +4,7 @@ from __future__ import annotations
 
 import time
 import uuid
-from dataclasses import dataclass, field
-from typing import Dict, List, Tuple
+from dataclasses import dataclass
 
 from lyra_otel_tracer.exceptions import SpanError
 
@@ -25,7 +24,7 @@ class SpanEvent:
 
     name: str
     timestamp: float
-    attributes: Tuple[Tuple[str, str], ...] = ()
+    attributes: tuple[tuple[str, str], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -38,8 +37,8 @@ class AgentSpan:
     start_time: float
     end_time: float = 0.0
     status: str = "running"
-    events: Tuple[SpanEvent, ...] = ()
-    metadata: Tuple[Tuple[str, str], ...] = ()
+    events: tuple[SpanEvent, ...] = ()
+    metadata: tuple[tuple[str, str], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -48,7 +47,7 @@ class Trace:
 
     trace_id: str
     root_span: AgentSpan
-    child_spans: Tuple[AgentSpan, ...] = ()
+    child_spans: tuple[AgentSpan, ...] = ()
     duration_ms: float = 0.0
 
 
@@ -56,8 +55,8 @@ class SpanManager:
     """Manages the lifecycle of spans and traces."""
 
     def __init__(self) -> None:
-        self._spans: Dict[str, AgentSpan] = {}
-        self._traces: Dict[str, List[AgentSpan]] = {}
+        self._spans: dict[str, AgentSpan] = {}
+        self._traces: dict[str, list[AgentSpan]] = {}
 
     def _generate_id(self) -> str:
         return uuid.uuid4().hex[:16]
@@ -133,7 +132,7 @@ class SpanManager:
         attributes: dict[str, str] | None = None,
     ) -> AgentSpan:
         """Add an event to a span and return the updated span."""
-        attrs: Tuple[Tuple[str, str], ...] = ()
+        attrs: tuple[tuple[str, str], ...] = ()
         if attributes:
             attrs = tuple(sorted(attributes.items()))
 
@@ -187,7 +186,7 @@ class SpanManager:
             duration_ms=duration_ms,
         )
 
-    async def get_active_spans(self) -> Tuple[AgentSpan, ...]:
+    async def get_active_spans(self) -> tuple[AgentSpan, ...]:
         """Return all spans that are still running."""
         return tuple(
             s for s in self._spans.values() if s.status == "running"

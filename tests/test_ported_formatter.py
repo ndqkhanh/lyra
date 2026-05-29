@@ -2,8 +2,6 @@
 """
 from __future__ import annotations
 
-import pytest
-
 
 def test_formatter_colors():
     from lyra_cli.tui_v2.theme_manager import ThemeColors

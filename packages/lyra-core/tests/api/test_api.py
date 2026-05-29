@@ -62,7 +62,7 @@ class TestLyraAPIResponse:
 
     def test_response_error_format(self) -> None:
         """Error response should have consistent format."""
-        response = APIResponse.error(message="Test error", code="TEST_ERROR")
+        response = APIResponse.error_response(message="Test error", code="TEST_ERROR")
         assert response.success is False
         assert response.data is None
         assert response.error is not None

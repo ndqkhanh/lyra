@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Sequence
 
 from .exceptions import PolicyError
 from .governance_engine import ActionType, Decision, GovernanceLayer

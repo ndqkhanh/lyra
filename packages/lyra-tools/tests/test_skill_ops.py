@@ -1,8 +1,6 @@
 """Tests for skill operations tools."""
 from __future__ import annotations
 
-import pytest
-
 from lyra_tools.skill_ops import (
     skill_execute,
     skill_info,

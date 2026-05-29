@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Optional
 
 from .types import MemoryItem, MemoryKind, RetrievalSpec
 
@@ -41,7 +40,7 @@ class MemoryStore:
         namespace: str = "default",
         importance: float = 0.5,
         tags: tuple[str, ...] = (),
-        metadata: Optional[dict] = None,
+        metadata: dict | None = None,
     ) -> MemoryItem:
         """Insert a new item; returns the created MemoryItem."""
         item = MemoryItem.create(
@@ -62,7 +61,7 @@ class MemoryStore:
         self._items[item.item_id] = item
         return item
 
-    def get(self, item_id: str, *, touch: bool = False) -> Optional[MemoryItem]:
+    def get(self, item_id: str, *, touch: bool = False) -> MemoryItem | None:
         """Retrieve by id. If ``touch=True``, update accessed_at + access_count."""
         item = self._items.get(item_id)
         if item is None:
@@ -83,7 +82,7 @@ class MemoryStore:
         self,
         item_id: str,
         importance: float,
-    ) -> Optional[MemoryItem]:
+    ) -> MemoryItem | None:
         """Update an item's importance; returns updated item or None if missing."""
         item = self._items.get(item_id)
         if item is None:
@@ -187,9 +186,9 @@ class MemoryStore:
     def garbage_collect(
         self,
         *,
-        max_age_seconds: Optional[float] = None,
-        keep_top_k: Optional[int] = None,
-        kind: Optional[MemoryKind] = None,
+        max_age_seconds: float | None = None,
+        keep_top_k: int | None = None,
+        kind: MemoryKind | None = None,
     ) -> int:
         """Drop stale items. Returns count removed.
 

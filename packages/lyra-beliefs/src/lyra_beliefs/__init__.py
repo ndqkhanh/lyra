@@ -15,53 +15,48 @@ Supports:
 from __future__ import annotations
 
 from .belief_system import (
-    BeliefSource,
-    BeliefStatus,
-    UpdateMethod,
     Belief,
     BeliefSet,
-    ConditionalProbability,
+    BeliefSource,
+    BeliefStatus,
     BeliefSystem,
+    ConditionalProbability,
+    UpdateMethod,
 )
-
-from .knowledge_base import (
-    RuleType,
-    Rule,
-    Fact,
-    OntologyConcept,
-    KnowledgeVersion,
-    KnowledgeBase,
-)
-
-from .inference import (
-    InferenceType,
-    InferenceResult,
-    InferenceEngine,
-)
-
 from .consistency import (
+    ConsistencyManager,
     Contradiction,
     InconsistentSubset,
     ResolutionStrategy,
-    ConsistencyManager,
 )
-
-from .updating import (
-    SourceProfile,
-    EvidencePacket,
-    ConsensusResult,
-    BeliefUpdater,
-)
-
 from .exceptions import (
     BeliefError,
     BeliefNotFoundError,
     InconsistentBeliefError,
     InferenceError,
     KnowledgeBaseError,
-    UpdateError,
     RevisionError,
     SourceReliabilityError,
+    UpdateError,
+)
+from .inference import (
+    InferenceEngine,
+    InferenceResult,
+    InferenceType,
+)
+from .knowledge_base import (
+    Fact,
+    KnowledgeBase,
+    KnowledgeVersion,
+    OntologyConcept,
+    Rule,
+    RuleType,
+)
+from .updating import (
+    BeliefUpdater,
+    ConsensusResult,
+    EvidencePacket,
+    SourceProfile,
 )
 
 __all__ = [

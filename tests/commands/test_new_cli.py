@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Test script for new CLI"""
 
-import sys
 import os
+import sys
 
 # Add project to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
 
-from lyra_cli.cli import cli_app, console, OutputFormatter
+from lyra_cli.cli import OutputFormatter, cli_app, console
+
 
 def test_imports():
     """Test that all imports work"""

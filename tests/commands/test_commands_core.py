@@ -1,11 +1,11 @@
 """Tests for commands system."""
-import pytest
-from pathlib import Path
-import tempfile
 import shutil
-from typer.testing import CliRunner
+import tempfile
+from pathlib import Path
 
+import pytest
 from lyra_cli.commands.doctor import doctor_command
+from typer.testing import CliRunner
 
 
 @pytest.fixture
@@ -52,6 +52,7 @@ def test_doctor_command_with_temp_repo(temp_repo):
 def test_doctor_json_output_structure(temp_repo, capsys):
     """Test doctor command JSON output structure."""
     import json
+
     import click
 
     try:
@@ -179,8 +180,8 @@ def test_command_error_handling(temp_repo):
 
 def test_commands_directory_structure():
     """Test commands directory has expected structure."""
+
     from lyra_cli import commands
-    import os
 
     commands_dir = Path(commands.__file__).parent
 

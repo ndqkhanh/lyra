@@ -215,11 +215,11 @@ class MarketplaceFetcher:
                     full = (cache_dir / relative).resolve()
                     try:
                         full.relative_to(cache_dir)
-                    except ValueError:
+                    except ValueError as err:
                         raise FetchScopeError(
                             f"tool {tool.name!r} server escapes cache "
                             f"(LBL-FETCH-SCOPE)"
-                        )
+                        ) from err
 
         # Step 7: SBOM (LBL-FETCH-SBOM).
         entry = SBOMEntry(

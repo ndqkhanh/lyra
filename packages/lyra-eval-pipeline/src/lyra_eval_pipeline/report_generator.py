@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import json
 import time
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from typing import Any
 
-from .domain_evaluator import DomainEvalReport, EvalResult
+from .domain_evaluator import DomainEvalReport
 from .exceptions import ReportError
-from .leaderboard import Leaderboard, LeaderboardEntry
+from .leaderboard import Leaderboard
 
 
 @dataclass(frozen=True)

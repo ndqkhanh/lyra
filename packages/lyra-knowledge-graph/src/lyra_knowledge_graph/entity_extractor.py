@@ -240,7 +240,7 @@ class EntityExtractor:
             for match in re.finditer(
                 r'^(?:async\s+)?(?:def|class)\s+(\w+)', source_code, re.MULTILINE
             ):
-                line = source_code[:match.start()]
+                source_code[:match.start()]
                 if "def " in match.group(0) or "async def " in match.group(0):
                     symbols.append((match.group(1), "function"))
                 else:

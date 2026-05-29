@@ -6,30 +6,26 @@ identifies capability gaps, and imports them into the registry.
 
 from __future__ import annotations
 
-import asyncio
 import importlib
 import importlib.util
-import inspect
 import json
 import logging
-import os
-import pkgutil
 import time
-from collections import defaultdict, deque
+from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Callable, Optional, Protocol
+from typing import Any
 
+from .exceptions import DiscoveryError, ValidationError
 from .skill_weaver import (
     SkillDefinition,
-    SkillMetadata,
     SkillIO,
-    SkillType,
-    SkillStatus,
+    SkillMetadata,
     SkillRegistry,
+    SkillStatus,
+    SkillType,
 )
-from .exceptions import DiscoveryError, ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -187,8 +183,7 @@ class SkillDiscoveryEngine:
         # Heuristic: detect skill definitions via AST-like pattern matching
         # Look for class or function names suggesting skill definitions
         lines = source_code.split("\n")
-        current_class: Optional[str] = None
-        in_docstring = False
+        current_class: str | None = None
 
         for line in lines:
             stripped = line.strip()
@@ -209,7 +204,7 @@ class SkillDiscoveryEngine:
         class_name: str,
         filepath: Path,
         source_code: str,
-    ) -> Optional[SkillDefinition]:
+    ) -> SkillDefinition | None:
         """Create a SkillDefinition from heuristic analysis of a class."""
         skill_id = f"discovered_{class_name.lower()}_{filepath.stem}"
         lines = source_code.split("\n")
@@ -263,7 +258,7 @@ class SkillDiscoveryEngine:
     async def discover_from_package(
         self,
         package_name: str,
-        skill_base_class: Optional[str] = None,
+        skill_base_class: str | None = None,
     ) -> list[SkillDefinition]:
         """Discover skills by importing a Python package.
 
@@ -319,7 +314,7 @@ class SkillDiscoveryEngine:
         """
         try:
             data = json.loads(manifest_path.read_text(encoding="utf-8"))
-        except (json.JSONDecodeError, IOError) as exc:
+        except (OSError, json.JSONDecodeError) as exc:
             raise DiscoveryError(str(manifest_path), f"Failed to read manifest: {exc}")
 
         discovered: list[SkillDefinition] = []

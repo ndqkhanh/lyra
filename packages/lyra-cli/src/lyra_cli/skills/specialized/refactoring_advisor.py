@@ -104,7 +104,7 @@ class RefactoringAdvisorSkill:
             body_lines = node.end_lineno - node.lineno if node.end_lineno else 0
             if body_lines > 30:
                 source_lines = source.splitlines()
-                func_source = "\n".join(
+                "\n".join(
                     source_lines[node.lineno - 1 : node.end_lineno]
                 )
                 suggestions.append(

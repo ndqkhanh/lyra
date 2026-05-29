@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Test agent integration"""
 
-import sys
 import os
+import sys
 
 # Add project to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
@@ -11,7 +11,7 @@ def test_agent_imports():
     """Test agent module imports"""
     print("✓ Testing agent imports...")
 
-    from lyra_cli.agent import AgentOutputCallback, SimpleAgentLoop, AgentLoopFactory
+    from lyra_cli.agent import AgentLoopFactory, AgentOutputCallback, SimpleAgentLoop
     from lyra_cli.cli.agent_handler import CLIAgentHandler
 
     print("  - AgentOutputCallback:", AgentOutputCallback)
@@ -24,8 +24,8 @@ def test_agent_handler():
     """Test CLI agent handler"""
     print("\n✓ Testing CLIAgentHandler...")
 
-    from rich.console import Console
     from lyra_cli.cli.agent_handler import CLIAgentHandler
+    from rich.console import Console
 
     console = Console()
     handler = CLIAgentHandler(console)
@@ -49,16 +49,16 @@ def test_agent_loop_creation():
     """Test agent loop creation (without API key)"""
     print("\n✓ Testing agent loop creation...")
 
-    from rich.console import Console
-    from lyra_cli.cli.agent_handler import CLIAgentHandler
     from lyra_cli.agent import AgentLoopFactory
+    from lyra_cli.cli.agent_handler import CLIAgentHandler
+    from rich.console import Console
 
     console = Console()
     handler = CLIAgentHandler(console)
 
     # This should fail without API key
     try:
-        loop = AgentLoopFactory.create_simple_loop(
+        AgentLoopFactory.create_simple_loop(
             callback=handler,
             model="claude-opus-4-20250514"
         )

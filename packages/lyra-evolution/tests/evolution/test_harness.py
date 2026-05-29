@@ -4,11 +4,12 @@ Tests for Evolution Harness
 Tests the AEVO-inspired harness with OS-level capability boundaries.
 """
 
-import pytest
-from pathlib import Path
-import tempfile
 import shutil
-from lyra_evolution.harness import EvolutionHarness, EvaluationResult, CandidateRecord
+import tempfile
+from pathlib import Path
+
+import pytest
+from lyra_evolution.harness import EvaluationResult, EvolutionHarness
 
 
 @pytest.fixture

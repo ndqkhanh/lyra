@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_otel_tracer.prometheus_export import (
     ExportConfig,
     GrafanaDashboard,
-    PromMetric,
     PrometheusExporter,
+    PromMetric,
 )
 
 

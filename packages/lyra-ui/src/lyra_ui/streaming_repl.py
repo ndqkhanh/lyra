@@ -13,9 +13,10 @@ Features:
 """
 
 import asyncio
+from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, AsyncIterator, Callable, Dict, List, Optional
+from typing import Any
 
 from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import Completer, Completion
@@ -23,16 +24,14 @@ from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.styles import Style
 from rich.console import Console
-from rich.live import Live
 from rich.panel import Panel
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
-from rich.syntax import Syntax
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
 from rich.text import Text
 
-from lyra_ui.banner import BannerSystem, BannerStyle, BannerStats
+from lyra_ui.banner import BannerStats, BannerStyle, BannerSystem
 from lyra_ui.formatter import RichFormatter
 from lyra_ui.keyboard import CommandPalette, QuickActions, VimNavigator
-from lyra_ui.streaming import StreamHandler, LiveStreamDisplay
+from lyra_ui.streaming import LiveStreamDisplay, StreamHandler
 
 
 class REPLMode(Enum):
@@ -85,8 +84,8 @@ class LyraCompleter(Completer):
             "status",
             "config",
         ]
-        self.files: List[str] = []
-        self.skills: List[str] = []
+        self.files: list[str] = []
+        self.skills: list[str] = []
 
     def get_completions(self, document, complete_event):
         """
@@ -135,11 +134,11 @@ class LyraCompleter(Completer):
                         display_meta="skill",
                     )
 
-    def set_files(self, files: List[str]):
+    def set_files(self, files: list[str]):
         """Set available files for completion."""
         self.files = files
 
-    def set_skills(self, skills: List[str]):
+    def set_skills(self, skills: list[str]):
         """Set available skills for completion."""
         self.skills = skills
 
@@ -157,7 +156,7 @@ class StreamingREPL:
     - Multi-line input
     """
 
-    def __init__(self, config: Optional[REPLConfig] = None):
+    def __init__(self, config: REPLConfig | None = None):
         """
         Initialize streaming REPL.
 
@@ -181,8 +180,8 @@ class StreamingREPL:
         self.quick_actions = QuickActions()
 
         # Session
-        self.session: Optional[PromptSession] = None
-        self.history: List[str] = []
+        self.session: PromptSession | None = None
+        self.history: list[str] = []
         self.running = False
 
         # Stats
@@ -423,14 +422,14 @@ class StreamingREPL:
         """Exit REPL."""
         self.running = False
 
-    def _cmd_model(self, model: Optional[str] = None) -> str:
+    def _cmd_model(self, model: str | None = None) -> str:
         """Change model."""
         if model:
             self.config.model = model
             return f"Model changed to: {model}"
         return f"Current model: {self.config.model}"
 
-    def _cmd_mode(self, mode: Optional[str] = None) -> str:
+    def _cmd_mode(self, mode: str | None = None) -> str:
         """Change mode."""
         if mode:
             try:
@@ -489,7 +488,7 @@ class ToolProgressDisplay:
     - Status indicators
     """
 
-    def __init__(self, console: Optional[Console] = None):
+    def __init__(self, console: Console | None = None):
         """
         Initialize tool progress display.
 
@@ -497,8 +496,8 @@ class ToolProgressDisplay:
             console: Rich console
         """
         self.console = console or Console()
-        self.progress: Optional[Progress] = None
-        self.tasks: Dict[str, int] = {}
+        self.progress: Progress | None = None
+        self.tasks: dict[str, int] = {}
 
     def start(self):
         """Start progress display."""
@@ -573,7 +572,7 @@ class StatusBar:
     - Time elapsed
     """
 
-    def __init__(self, console: Optional[Console] = None):
+    def __init__(self, console: Console | None = None):
         """
         Initialize status bar.
 

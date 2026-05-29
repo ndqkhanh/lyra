@@ -16,8 +16,9 @@ Why a gate, not a skill:
 from __future__ import annotations
 
 import enum
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable, Optional, Protocol
+from typing import Protocol
 
 
 class NoteVerdict(str, enum.Enum):

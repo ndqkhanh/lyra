@@ -9,13 +9,11 @@ Implements three safeguards:
 from __future__ import annotations
 
 import logging
-import time
 from typing import Any
 
 from lyra_cost.models import (
     LoopDetectionResult,
     ModelTier,
-    SessionBudget,
 )
 
 logger = logging.getLogger(__name__)

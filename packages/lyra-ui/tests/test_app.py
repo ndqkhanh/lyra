@@ -2,8 +2,6 @@
 
 from datetime import datetime
 
-import pytest
-
 from lyra_ui import (
     AgentStatusIndicator,
     ContextUsageRing,
@@ -14,7 +12,6 @@ from lyra_ui import (
     StatusPanel,
     TokenUsageIndicator,
 )
-
 
 # Widget Tests
 

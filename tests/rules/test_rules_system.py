@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Test rules system implementation"""
 
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
 
-from lyra_cli.rules import RulesManager, RulesLoader, LanguageDetector
 from pathlib import Path
+
+from lyra_cli.rules import LanguageDetector, RulesManager
 
 
 def test_rules_system():
@@ -67,7 +69,7 @@ def test_rules_system():
     print("5. Testing rules text generation:")
     python_text = manager.get_rules_text(language="python")
     print(f"  Python rules text: {len(python_text)} characters")
-    print(f"  Includes: coding-style, git-workflow, testing")
+    print("  Includes: coding-style, git-workflow, testing")
     print()
 
     # Test supported languages

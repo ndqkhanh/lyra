@@ -6,7 +6,6 @@ Format: each line is a JSON object with a flat schema, parseable by Datadog
 from __future__ import annotations
 
 import json
-from typing import Iterable
 
 from ..replay import Trace
 

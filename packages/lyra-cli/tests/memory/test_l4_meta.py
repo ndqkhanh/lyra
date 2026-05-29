@@ -196,7 +196,7 @@ class TestStrategyEvolution:
         s = evo.register("unreliable", "when C, do D")
         for _ in range(11):
             evo.record_outcome(s.strategy_id, success=False)
-        deprecated = [
+        [
             s for s in evo.stats().keys() if s == "total_strategies"
         ]
         assert evo.stats()["total_strategies"] == 1

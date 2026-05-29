@@ -46,7 +46,7 @@ def net_http(
         "url": url,
         "method": method.upper(),
         "status": status,
-        "headers": {k: v for k, v in list(resp_headers.items())[:30]},
+        "headers": dict(list(resp_headers.items())[:30]),
         "body": content[:5000],
         "body_size": len(content),
     }

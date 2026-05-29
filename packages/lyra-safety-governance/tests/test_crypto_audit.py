@@ -12,7 +12,6 @@ from lyra_safety_governance.governance_engine import (
     GovernanceLayer,
 )
 
-
 # ── Helpers ────────────────────────────────────────────────────────────
 
 def _make_decision(
@@ -105,7 +104,7 @@ class TestCryptoAuditEngine:
 
     def test_get_agent_audit_trail(self):
         engine = CryptoAuditEngine()
-        for i in range(3):
+        for _i in range(3):
             engine.log_decision(_make_decision(agent_id="agent-007"))
         trail = engine.get_agent_audit_trail("agent-007")
         assert len(trail) == 3

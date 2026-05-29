@@ -4,10 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Sequence
 from uuid import uuid4
 
-from .exceptions import NetworkError
 
 
 class NetworkDirection(str, Enum):

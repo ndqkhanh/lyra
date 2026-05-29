@@ -11,7 +11,7 @@ Features:
 import json
 from datetime import datetime, time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from lyra_permissions.types import PermissionDecision, PermissionLevel
 
@@ -31,7 +31,7 @@ class ContextRule:
     def __init__(
         self,
         name: str,
-        condition: Dict[str, Any],
+        condition: dict[str, Any],
         decision: PermissionDecision,
         priority: int = 0,
     ):
@@ -41,7 +41,7 @@ class ContextRule:
         self.decision = decision
         self.priority = priority
 
-    def matches(self, context: Dict[str, Any]) -> bool:
+    def matches(self, context: dict[str, Any]) -> bool:
         """Check if context matches rule condition."""
         for key, value in self.condition.items():
             if key not in context:
@@ -72,12 +72,12 @@ class ContextRule:
 class PermissionProfile:
     """Permission profile for different environments."""
 
-    def __init__(self, name: str, config: Dict[str, Any]):
+    def __init__(self, name: str, config: dict[str, Any]):
         """Initialize permission profile."""
         self.name = name
         self.config = config
 
-    def get_tool_permission(self, tool: str, operation: str) -> Optional[str]:
+    def get_tool_permission(self, tool: str, operation: str) -> str | None:
         """Get tool-specific permission."""
         tool_perms = self.config.get("toolPermissions", {})
         tool_key = f"{tool}:{operation}"
@@ -92,7 +92,7 @@ class PermissionProfile:
 
         return None
 
-    def get_context_rules(self) -> List[ContextRule]:
+    def get_context_rules(self) -> list[ContextRule]:
         """Get context rules."""
         rules = []
         for rule_config in self.config.get("contextRules", []):
@@ -120,7 +120,7 @@ class GranularController:
     - Time-based permissions
     """
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: str | None = None):
         """Initialize granular controller."""
         if config_path:
             self.config_path = Path(config_path).expanduser()
@@ -133,17 +133,17 @@ class GranularController:
         self.current_profile = self.config.get("currentProfile", "default")
         self.profiles = self._load_profiles()
 
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> dict[str, Any]:
         """Load configuration."""
         if self.config_path.exists():
             try:
-                with open(self.config_path, "r") as f:
+                with open(self.config_path) as f:
                     return json.load(f)
-            except (json.JSONDecodeError, IOError):
+            except (OSError, json.JSONDecodeError):
                 return self._default_config()
         return self._default_config()
 
-    def _default_config(self) -> Dict[str, Any]:
+    def _default_config(self) -> dict[str, Any]:
         """Get default configuration."""
         return {
             "currentProfile": "default",
@@ -195,10 +195,10 @@ class GranularController:
         try:
             with open(self.config_path, "w") as f:
                 json.dump(self.config, f, indent=2)
-        except IOError:
+        except OSError:
             pass
 
-    def _load_profiles(self) -> Dict[str, PermissionProfile]:
+    def _load_profiles(self) -> dict[str, PermissionProfile]:
         """Load permission profiles."""
         profiles = {}
         for name, config in self.config.get("profiles", {}).items():
@@ -218,7 +218,7 @@ class GranularController:
 
     def check_tool_permission(
         self, tool: str, operation: str, level: PermissionLevel
-    ) -> Optional[PermissionDecision]:
+    ) -> PermissionDecision | None:
         """
         Check tool-specific permission.
 
@@ -250,8 +250,8 @@ class GranularController:
         return None
 
     def check_context_rules(
-        self, context: Dict[str, Any]
-    ) -> Optional[PermissionDecision]:
+        self, context: dict[str, Any]
+    ) -> PermissionDecision | None:
         """
         Check context-aware rules.
 
@@ -287,7 +287,7 @@ class GranularController:
     def add_context_rule(
         self,
         name: str,
-        condition: Dict[str, Any],
+        condition: dict[str, Any],
         decision: str,
         priority: int = 0,
     ):
@@ -313,7 +313,7 @@ class GranularController:
         # Reload profiles
         self.profiles = self._load_profiles()
 
-    def list_profiles(self) -> List[str]:
+    def list_profiles(self) -> list[str]:
         """List available profiles."""
         return list(self.profiles.keys())
 
@@ -323,14 +323,14 @@ class TimeBasedController:
 
     def __init__(self):
         """Initialize time-based controller."""
-        self.rules: List[Dict[str, Any]] = []
+        self.rules: list[dict[str, Any]] = []
 
     def add_time_rule(
         self,
         start_time: time,
         end_time: time,
         decision: PermissionDecision,
-        days: Optional[List[int]] = None,
+        days: list[int] | None = None,
     ):
         """
         Add time-based rule.
@@ -350,7 +350,7 @@ class TimeBasedController:
             }
         )
 
-    def check_time_rules(self) -> Optional[PermissionDecision]:
+    def check_time_rules(self) -> PermissionDecision | None:
         """Check if current time matches any rule."""
         now = datetime.now()
         current_time = now.time()

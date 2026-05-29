@@ -5,42 +5,39 @@ from __future__ import annotations
 import asyncio
 
 import pytest
-
 from lyra_skill_weaver import (
-    # Core
-    SkillType,
+    CircularDependencyError,
+    CompositionError,
+    CompositionOptimizer,
     CompositionPattern,
-    SkillStatus,
-    SkillMetadata,
-    SkillIO,
-    SkillDefinition,
-    SkillEdge,
-    SkillGraph,
-    SkillRegistry,
     CompositionPlan,
-    SkillWeaver,
-    # Composers
-    SequentialComposer,
-    ParallelComposer,
+    CompositionProfiler,
     ConditionalComposer,
+    DiscoveryError,
+    # Discovery
     IterativeComposer,
     MasterComposer,
-    # Discovery
-    DiscoveryMethod,
-    SkillDiscoveryEngine,
+    OptimizationError,
     # Optimizer
-    OptimizationObjective,
-    CompositionProfiler,
+    ParallelComposer,
     PlanCache,
-    CompositionOptimizer,
+    # Composers
+    SequentialComposer,
+    SkillConflictError,
+    SkillDefinition,
+    SkillDiscoveryEngine,
+    SkillEdge,
+    SkillGraph,
+    SkillIO,
+    SkillMetadata,
     # Exceptions
     SkillNotFoundError,
-    SkillConflictError,
-    CompositionError,
-    CircularDependencyError,
+    SkillRegistry,
+    SkillStatus,
+    # Core
+    SkillType,
+    SkillWeaver,
     ValidationError,
-    DiscoveryError,
-    OptimizationError,
 )
 
 
@@ -344,7 +341,6 @@ class TestSkillDiscoveryEngine:
     @pytest.mark.asyncio
     async def test_discover_from_directory_empty(self):
         import tempfile
-        import os
         from pathlib import Path
         reg = SkillRegistry()
         engine = SkillDiscoveryEngine(reg)

@@ -4,7 +4,7 @@ from __future__ import annotations
 import hashlib
 import time
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 
 def _candidate_id(*, name: str, action_template: tuple[str, ...]) -> str:
@@ -59,8 +59,8 @@ class SkillCandidate:
         source_trajectories: tuple[str, ...],
         occurrence_count: int,
         success_rate: float,
-        metadata: Optional[dict[str, Any]] = None,
-    ) -> "SkillCandidate":
+        metadata: dict[str, Any] | None = None,
+    ) -> SkillCandidate:
         """Construct with auto-computed candidate_id."""
         return cls(
             candidate_id=_candidate_id(name=name, action_template=action_template),

@@ -5,9 +5,10 @@ that compile into optimized prompts with tool calls, multi-step reasoning, and r
 """
 
 from __future__ import annotations
+
 import logging
-from dataclasses import dataclass, field
-from typing import Any, Callable, Optional
+from dataclasses import dataclass
+from typing import Any
 
 logger = logging.getLogger(__name__)
 __all__ = ["SkillProgram", "SkillModule", "SkillCompiler"]
@@ -17,9 +18,9 @@ class SkillProgram: name: str; description: str; input_schema: dict; output_sche
 
 class SkillModule:
     """A typed skill program that compiles into an optimized agent behavior."""
-    def __init__(self, name: str, description: str): self.name = name; self.description = description; self.compiled: Optional[SkillProgram] = None
+    def __init__(self, name: str, description: str): self.name = name; self.description = description; self.compiled: SkillProgram | None = None
 
-    def compile(self, input_schema: dict, output_schema: dict, examples: Optional[list[dict]] = None) -> SkillProgram:
+    def compile(self, input_schema: dict, output_schema: dict, examples: list[dict] | None = None) -> SkillProgram:
         fields_str = ", ".join(input_schema.keys())
         prompt = f"You are an expert {self.name} agent.\n\nInput: {fields_str}\n\nOutput: {', '.join(output_schema.keys())}\n\nAnalyze the input carefully and produce the required output."
         self.compiled = SkillProgram(name=self.name, description=self.description, input_schema=input_schema, output_schema=output_schema, prompt_template=prompt, optimized=len(examples or []) > 0)
@@ -36,7 +37,7 @@ class SkillCompiler:
 
     def compile_all(self) -> list[SkillProgram]:
         results = []
-        for name, module in self.modules.items():
+        for _name, module in self.modules.items():
             sp = module.compile({"input": "str"}, {"output": "str"})
             results.append(sp); self._compilations += 1
         logger.info(f"Compiled {len(results)} skills")

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class AGIAwareLoop:
         """Delegate health checks to the AGI orchestrator when available."""
         try:
             import importlib
-            orch = importlib.import_module("lyra_core.agi_orchestrator")
+            importlib.import_module("lyra_core.agi_orchestrator")
             # Non-blocking — just reports availability
             self._state.health_score = 0.8
         except ImportError:

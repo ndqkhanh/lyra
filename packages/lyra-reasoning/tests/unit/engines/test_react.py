@@ -2,8 +2,9 @@
 Comprehensive tests for ReAct (Reasoning + Acting) engine.
 """
 
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock, call
 
 from lyra_reasoning.engines.react import ReActEngine, ToolCall, ToolResult
 from lyra_reasoning.types import (
@@ -133,7 +134,7 @@ class TestReActEngine:
     def test_initialization_with_api_key(self, sample_tools):
         """Test engine initialization with API key."""
         with patch("lyra_reasoning.engines.react.Anthropic") as mock:
-            engine = ReActEngine(api_key="test-key", tools=sample_tools)
+            ReActEngine(api_key="test-key", tools=sample_tools)
             mock.assert_called_once_with(api_key="test-key")
 
     def test_reason_basic_flow(self, react_engine, mock_anthropic_client, basic_config, basic_budget):
@@ -287,7 +288,7 @@ class TestReActEngine:
         mock_response.content = [Mock(text="Thought: Thinking")]
         mock_anthropic_client.messages.create.return_value = mock_response
 
-        trace = react_engine.reason("Test task", limited_budget, basic_config)
+        react_engine.reason("Test task", limited_budget, basic_config)
 
         assert limited_budget.steps_used <= 2
 

@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-import asyncio
 import math
 
 import numpy as np
 import pytest
-
 from lyra_recursive_link import (
     AggregationMethod,
     BusConfig,

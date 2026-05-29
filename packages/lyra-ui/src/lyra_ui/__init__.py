@@ -45,10 +45,14 @@ from lyra_ui.agent_dashboard import (
     MonitoringPanel,
     Task,
     TaskBoard,
-    TaskPriority as AgentTaskPriority,
-    TaskStatus as AgentTaskStatus,
     WorkflowManager,
     WorkflowTemplate,
+)
+from lyra_ui.agent_dashboard import (
+    TaskPriority as AgentTaskPriority,
+)
+from lyra_ui.agent_dashboard import (
+    TaskStatus as AgentTaskStatus,
 )
 from lyra_ui.app import ConversationPane, DualPaneLayout, LyraApp, StatusPanel
 from lyra_ui.async_arch import (

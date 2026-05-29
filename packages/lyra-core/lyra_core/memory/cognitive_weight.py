@@ -89,7 +89,7 @@ class CognitiveWeightAttributor:
 
         tool_calls = cursor.fetchall()
 
-        for turn_id, tool_name, success, retrieved_ids_str in tool_calls:
+        for _turn_id, _tool_name, success, retrieved_ids_str in tool_calls:
             if not retrieved_ids_str:
                 continue
 

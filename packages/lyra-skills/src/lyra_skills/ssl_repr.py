@@ -13,8 +13,6 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Optional
-
 
 __all__ = [
     "SSLScheduling",
@@ -170,7 +168,7 @@ class SSLNormalizer:
         return ""
 
 
-def ssl_matches(skill: SSLSkill, query: str, risk_cap: Optional[str] = None) -> bool:
+def ssl_matches(skill: SSLSkill, query: str, risk_cap: str | None = None) -> bool:
     """Return True if the skill is applicable for the query and within risk cap."""
     if not skill.scheduling.matches_query(query):
         return False

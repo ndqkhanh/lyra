@@ -52,7 +52,7 @@ async def test_publish_subscribe() -> None:
 
     inbox_a = await comm.read_messages("agent_a")
     inbox_b = await comm.read_messages("agent_b")
-    inbox_c = await comm.read_messages("agent_c")
+    await comm.read_messages("agent_c")
 
     assert len(inbox_a) == 1
     assert len(inbox_b) == 1

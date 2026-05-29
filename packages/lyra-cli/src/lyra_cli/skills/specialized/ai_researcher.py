@@ -202,7 +202,7 @@ class AIResearcher:
     def _build_literature_review(
         question_text: str, domain: str
     ) -> list[LiteratureSection]:
-        domain_name = domain.capitalize()
+        domain.capitalize()
         return [
             LiteratureSection(
                 title="Foundational Work",

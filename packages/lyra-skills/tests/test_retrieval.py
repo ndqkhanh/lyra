@@ -1,13 +1,11 @@
 """Tests for Phase J — BM25, DCI, and Hybrid retrieval."""
 import pytest
-
 from lyra_skills.retrieval import (
     BM25Retriever,
     DCIRetriever,
     HybridRetriever,
     RetrievalResult,
 )
-
 
 SKILL_A = "deploy docker image to kubernetes cluster using kubectl apply"
 SKILL_B = "backup postgresql database to s3 bucket with pg_dump"

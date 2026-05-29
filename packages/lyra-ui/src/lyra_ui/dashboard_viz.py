@@ -8,7 +8,6 @@ Features:
 - Performance charts
 """
 
-from typing import List, Optional
 
 from rich.console import Console
 from rich.layout import Layout
@@ -39,7 +38,7 @@ class DashboardVisualizer:
     - Performance metrics
     """
 
-    def __init__(self, console: Optional[Console] = None):
+    def __init__(self, console: Console | None = None):
         """
         Initialize dashboard visualizer.
 
@@ -382,7 +381,7 @@ class AgentStatusWidget:
     - Color-coded status
     """
 
-    def __init__(self, console: Optional[Console] = None):
+    def __init__(self, console: Console | None = None):
         """
         Initialize agent status widget.
 
@@ -391,7 +390,7 @@ class AgentStatusWidget:
         """
         self.console = console or Console()
 
-    def render(self, agents: List[AgentInfo]) -> Panel:
+    def render(self, agents: list[AgentInfo]) -> Panel:
         """
         Render agent status widget.
 
@@ -459,7 +458,7 @@ class TaskSummaryWidget:
     - Priority breakdown
     """
 
-    def __init__(self, console: Optional[Console] = None):
+    def __init__(self, console: Console | None = None):
         """
         Initialize task summary widget.
 

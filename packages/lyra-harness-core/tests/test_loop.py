@@ -141,8 +141,8 @@ def test_default_approval_is_auto_allow():
 
 def test_permission_mode_plan_denies_destructive_in_loop():
     """Plan mode + a write=True tool should result in blocking."""
-    from pydantic import BaseModel
     from lyra_harness_core.tools import Tool
+    from pydantic import BaseModel
 
     class WriteTool(Tool):
         name = "write"

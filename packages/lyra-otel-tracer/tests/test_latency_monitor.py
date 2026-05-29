@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_otel_tracer.exceptions import LatencyMonitorError
-from lyra_otel_tracer.latency_monitor import LatencyAlert, LatencyMonitor, LatencySample, LatencyStats
+from lyra_otel_tracer.latency_monitor import (
+    LatencyAlert,
+    LatencyMonitor,
+    LatencySample,
+    LatencyStats,
+)
 
 
 class TestLatencySample:

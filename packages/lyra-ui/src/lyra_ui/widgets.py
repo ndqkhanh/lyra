@@ -8,9 +8,7 @@ Features:
 """
 
 from datetime import datetime
-from typing import List, Optional
 
-from rich.syntax import Syntax
 from textual.widgets import Static
 
 
@@ -28,7 +26,7 @@ class MessageBubble(Static):
         self,
         role: str,
         content: str,
-        timestamp: Optional[datetime] = None,
+        timestamp: datetime | None = None,
     ):
         """
         Initialize message bubble.

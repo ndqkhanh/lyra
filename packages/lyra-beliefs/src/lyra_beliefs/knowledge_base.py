@@ -8,9 +8,9 @@ import uuid
 from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Optional
+from typing import Any
 
-from .belief_system import Belief, BeliefSource, BeliefStatus, BeliefSystem
+from .belief_system import BeliefSource, BeliefSystem
 
 logger = logging.getLogger(__name__)
 
@@ -104,7 +104,7 @@ class OntologyConcept:
 
     concept_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     name: str = ""
-    parent: Optional[str] = None
+    parent: str | None = None
     children: list[str] = field(default_factory=list)
     synonyms: list[str] = field(default_factory=list)
     domain: str = "general"
@@ -142,7 +142,7 @@ class KnowledgeBase:
     supports versioned snapshots, and provides ontology alignment utilities.
     """
 
-    def __init__(self, belief_system: Optional[BeliefSystem] = None) -> None:
+    def __init__(self, belief_system: BeliefSystem | None = None) -> None:
         self.belief_system = belief_system or BeliefSystem()
 
         self._facts: dict[str, Fact] = {}
@@ -198,7 +198,7 @@ class KnowledgeBase:
         )
         return self.add_fact(fact)
 
-    def get_fact(self, fact_id: str) -> Optional[Fact]:
+    def get_fact(self, fact_id: str) -> Fact | None:
         """Get a fact by ID."""
         return self._facts.get(fact_id)
 
@@ -263,7 +263,7 @@ class KnowledgeBase:
         )
         return self.add_rule(rule)
 
-    def get_rule(self, rule_id: str) -> Optional[Rule]:
+    def get_rule(self, rule_id: str) -> Rule | None:
         """Get a rule by ID."""
         return self._rules.get(rule_id)
 
@@ -316,7 +316,7 @@ class KnowledgeBase:
         logger.debug("Concept added: %s [%s]", concept.name, concept.domain)
         return concept
 
-    def get_concept(self, name_or_synonym: str) -> Optional[OntologyConcept]:
+    def get_concept(self, name_or_synonym: str) -> OntologyConcept | None:
         """Look up a concept by name or synonym."""
         concept_id = self._concept_index.get(name_or_synonym.lower())
         if concept_id:
@@ -409,14 +409,14 @@ class KnowledgeBase:
         logger.info("Knowledge version %d created: %s", self._current_version, description)
         return version
 
-    def get_version(self, version_number: int) -> Optional[KnowledgeVersion]:
+    def get_version(self, version_number: int) -> KnowledgeVersion | None:
         """Get a specific version."""
         for v in self._versions:
             if v.version_number == version_number:
                 return v
         return None
 
-    def get_latest_version(self) -> Optional[KnowledgeVersion]:
+    def get_latest_version(self) -> KnowledgeVersion | None:
         """Get the most recent version."""
         return self._versions[-1] if self._versions else None
 

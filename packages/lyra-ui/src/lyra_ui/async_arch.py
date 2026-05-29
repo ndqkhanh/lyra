@@ -12,11 +12,12 @@ Features:
 
 import asyncio
 import inspect
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 
 class TaskPriority(Enum):
@@ -49,7 +50,7 @@ class BackgroundTask:
     priority: TaskPriority = TaskPriority.NORMAL
     status: TaskStatus = TaskStatus.PENDING
     result: Any = None
-    error: Optional[Exception] = None
+    error: Exception | None = None
 
 
 class BackgroundTaskQueue:
@@ -71,9 +72,9 @@ class BackgroundTaskQueue:
             max_workers: Maximum concurrent workers
         """
         self.max_workers = max_workers
-        self.tasks: Dict[str, BackgroundTask] = {}
+        self.tasks: dict[str, BackgroundTask] = {}
         self.queue: asyncio.PriorityQueue = asyncio.PriorityQueue()
-        self.workers: List[asyncio.Task] = []
+        self.workers: list[asyncio.Task] = []
         self.running = False
 
     async def start(self):
@@ -170,7 +171,7 @@ class BackgroundTaskQueue:
             except asyncio.CancelledError:
                 break
 
-    def get_task(self, task_id: str) -> Optional[BackgroundTask]:
+    def get_task(self, task_id: str) -> BackgroundTask | None:
         """
         Get task by ID.
 
@@ -269,7 +270,7 @@ class AsyncFileIO:
         await loop.run_in_executor(None, path.write_text, content)
 
     @staticmethod
-    async def read_files(paths: List[Path]) -> List[str]:
+    async def read_files(paths: list[Path]) -> list[str]:
         """
         Read multiple files asynchronously.
 
@@ -283,7 +284,7 @@ class AsyncFileIO:
         return await asyncio.gather(*tasks)
 
     @staticmethod
-    async def write_files(files: Dict[Path, str]):
+    async def write_files(files: dict[Path, str]):
         """
         Write multiple files asynchronously.
 
@@ -318,10 +319,10 @@ class RequestBatcher:
         """
         self.batch_size = batch_size
         self.flush_interval = flush_interval
-        self.batch: List[Any] = []
-        self.flush_task: Optional[asyncio.Task] = None
+        self.batch: list[Any] = []
+        self.flush_task: asyncio.Task | None = None
 
-    async def add(self, request: Any) -> List[Any]:
+    async def add(self, request: Any) -> list[Any]:
         """
         Add request to batch.
 
@@ -343,7 +344,7 @@ class RequestBatcher:
 
         return []
 
-    async def flush(self) -> List[Any]:
+    async def flush(self) -> list[Any]:
         """
         Flush batch.
 
@@ -390,7 +391,7 @@ class ConnectionPool:
             max_connections: Maximum connections
         """
         self.max_connections = max_connections
-        self.connections: List[Any] = []
+        self.connections: list[Any] = []
         self.available: asyncio.Queue = asyncio.Queue()
         self.in_use: set = set()
 

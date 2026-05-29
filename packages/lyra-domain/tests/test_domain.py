@@ -11,10 +11,7 @@ Covers all 5 layers:
 
 from __future__ import annotations
 
-import datetime
-
 import pytest
-
 from lyra_domain import (
     Capability,
     ComplexityLevel,
@@ -31,7 +28,6 @@ from lyra_domain import (
     MultiDomainResult,
     ValidationMethod,
 )
-
 
 # ======================================================================
 # LAYER 0 — Models

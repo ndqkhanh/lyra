@@ -2,12 +2,11 @@
 Task Allocator - Intelligent task routing and allocation.
 """
 
-from typing import List, Dict, Optional
 from dataclasses import dataclass
 from enum import Enum
 
-from src.core.task import Task, TaskPriority
 from src.agents.base import Agent
+from src.core.task import Task, TaskPriority
 
 
 class AllocationStrategy(Enum):
@@ -36,7 +35,7 @@ class AllocationScore:
 class TaskAllocator:
     """
     Intelligent task allocator with multiple strategies.
-    
+
     Responsibilities:
     - Analyze task requirements
     - Score available agents
@@ -47,12 +46,12 @@ class TaskAllocator:
     def __init__(self, strategy: AllocationStrategy = AllocationStrategy.CAPABILITY_BASED):
         """
         Initialize task allocator.
-        
+
         Args:
             strategy: Allocation strategy to use
         """
         self.strategy = strategy
-        self.allocation_history: List[Dict] = []
+        self.allocation_history: list[dict] = []
 
         # Strategy weights
         self.weights = {
@@ -81,17 +80,17 @@ class TaskAllocator:
     def allocate(
         self,
         task: Task,
-        agents: List[Agent],
-        exclude: Optional[List[str]] = None,
-    ) -> Optional[Agent]:
+        agents: list[Agent],
+        exclude: list[str] | None = None,
+    ) -> Agent | None:
         """
         Allocate task to best available agent.
-        
+
         Args:
             task: Task to allocate
             agents: Available agents
             exclude: Agent IDs to exclude
-            
+
         Returns:
             Selected agent or None if no suitable agent
         """
@@ -120,14 +119,14 @@ class TaskAllocator:
 
         return selected_agent
 
-    def _score_agents(self, task: Task, agents: List[Agent]) -> List[AllocationScore]:
+    def _score_agents(self, task: Task, agents: list[Agent]) -> list[AllocationScore]:
         """
         Score all agents for a task.
-        
+
         Args:
             task: Task to score for
             agents: Agents to score
-            
+
         Returns:
             List of allocation scores
         """
@@ -165,11 +164,11 @@ class TaskAllocator:
     def _capability_score(self, task: Task, agent: Agent) -> float:
         """
         Score agent's capability for task.
-        
+
         Args:
             task: Task to score for
             agent: Agent to score
-            
+
         Returns:
             Capability score (0-1)
         """
@@ -185,10 +184,10 @@ class TaskAllocator:
     def _load_score(self, agent: Agent) -> float:
         """
         Score agent's current load (inverse - lower load = higher score).
-        
+
         Args:
             agent: Agent to score
-            
+
         Returns:
             Load score (0-1)
         """
@@ -207,10 +206,10 @@ class TaskAllocator:
     def _priority_score(self, task: Task) -> float:
         """
         Score based on task priority.
-        
+
         Args:
             task: Task to score
-            
+
         Returns:
             Priority score (0-1)
         """
@@ -226,7 +225,7 @@ class TaskAllocator:
     def _record_allocation(self, task: Task, agent: Agent, score: AllocationScore):
         """
         Record allocation decision.
-        
+
         Args:
             task: Allocated task
             agent: Selected agent
@@ -247,10 +246,10 @@ class TaskAllocator:
         if len(self.allocation_history) > 100:
             self.allocation_history = self.allocation_history[-100:]
 
-    def get_statistics(self) -> Dict:
+    def get_statistics(self) -> dict:
         """
         Get allocation statistics.
-        
+
         Returns:
             Statistics dictionary
         """
@@ -279,7 +278,7 @@ class TaskAllocator:
     def set_strategy(self, strategy: AllocationStrategy):
         """
         Change allocation strategy.
-        
+
         Args:
             strategy: New strategy to use
         """

@@ -2,19 +2,15 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_harness_core.gates import ChainOfNoteGate, DocVerdict, NoteVerdict
 from lyra_harness_core.multi_hop import (
     AnchorCandidate,
-    DenoisedDoc,
     FixedAnchorPredictor,
     NodeStatus,
     PathScore,
-    PathScorer,
     PlanOnGraphWalker,
     ReasonInDocuments,
     RetrievedDoc,
-    SimpleEdge,
     SimpleGraph,
     SimpleNode,
     StubLLM,
@@ -23,7 +19,6 @@ from lyra_harness_core.multi_hop import (
     compose_with_chain_of_note,
     merge_predictors,
 )
-
 
 # --- Plan-on-Graph -------------------------------------------------------
 

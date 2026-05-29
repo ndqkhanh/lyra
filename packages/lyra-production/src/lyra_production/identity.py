@@ -13,7 +13,6 @@ import logging
 import uuid
 from datetime import datetime, timedelta, timezone
 from threading import Lock
-from typing import Any
 
 from lyra_production.models import (
     AgentIdentity,
@@ -201,7 +200,7 @@ class AgentIdentityManager:
 
         # Verify the signature
         expected = hashlib.sha256(
-            f"{agent_id}:{challenge}:{identity.public_key}".encode("utf-8")
+            f"{agent_id}:{challenge}:{identity.public_key}".encode()
         ).hexdigest()
 
         return signature == expected
@@ -244,7 +243,7 @@ class AgentIdentityManager:
         # Simulated attestation signature
         attestation_sig = hashlib.sha256(
             f"{attested_by}:attests:{capability}:for:{agent_id}:"
-            f"{datetime.now(timezone.utc).isoformat()}".encode("utf-8")
+            f"{datetime.now(timezone.utc).isoformat()}".encode()
         ).hexdigest()
 
         attestation = CapabilityAttestation(

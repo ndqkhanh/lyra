@@ -210,5 +210,5 @@ def test_evolve_best_score_is_monotone_non_decreasing() -> None:
         mutator=_appender,
     )
     scores = [h.best_score for h in report.history]
-    for prev, nxt in zip(scores, scores[1:]):
+    for prev, nxt in zip(scores, scores[1:], strict=False):
         assert nxt >= prev

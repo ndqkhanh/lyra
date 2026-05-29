@@ -315,7 +315,7 @@ def _semantic_hash_similarity(output: str, expected: str) -> float:
     eh = hashlib.sha256(norm_expected.encode()).hexdigest()
 
     # Compare hex digests character by character
-    matches = sum(1 for a, b in zip(oh, eh) if a == b)
+    matches = sum(1 for a, b in zip(oh, eh, strict=False) if a == b)
     return matches / len(oh)
 
 

@@ -1,9 +1,10 @@
 """Tests for optimization and polish - performance, documentation, and production readiness."""
-import pytest
-from pathlib import Path
-import tempfile
 import shutil
+import tempfile
 import time
+from pathlib import Path
+
+import pytest
 
 
 @pytest.fixture
@@ -26,7 +27,7 @@ def test_skill_loading_performance():
 
     start_time = time.time()
     registry = SkillRegistry(skill_dirs=[test_dir])
-    skills = registry.load_skills()
+    registry.load_skills()
     end_time = time.time()
 
     duration = end_time - start_time
@@ -141,7 +142,7 @@ def test_api_documentation_exists():
     ]
 
     # At least some API documentation should exist
-    exists = any(d.exists() for d in api_docs)
+    any(d.exists() for d in api_docs)
     # This is optional, so we just check
     assert True  # Always pass, just checking
 
@@ -185,7 +186,7 @@ def test_license_exists():
         Path("LICENSE.txt"),
     ]
 
-    exists = any(f.exists() for f in license_files)
+    any(f.exists() for f in license_files)
     # License is optional for some projects
     assert True  # Always pass, just checking
 
@@ -324,7 +325,7 @@ def test_dependencies_are_pinned():
     """Test that dependencies have version constraints."""
     pyproject = Path("pyproject.toml")
     if pyproject.exists():
-        content = pyproject.read_text()
+        pyproject.read_text()
         # Should have some version constraints
         # This is a soft check
         assert True  # Always pass, just checking
@@ -333,8 +334,8 @@ def test_dependencies_are_pinned():
 # Integration Tests
 def test_full_system_integration():
     """Test that full system can be initialized."""
-    from lyra_cli.memory import ConversationLog, StructuredFact
     from lyra_cli.core.skill_registry import SkillRegistry
+    from lyra_cli.memory import ConversationLog, StructuredFact
 
     # Should be able to create all components
     log = ConversationLog(
@@ -415,5 +416,5 @@ def test_test_suite_is_comprehensive():
     assert len(test_files) >= 5
 
     # Should have tests in multiple categories
-    test_dirs = set(f.parent.name for f in test_files)
+    test_dirs = {f.parent.name for f in test_files}
     assert len(test_dirs) >= 4

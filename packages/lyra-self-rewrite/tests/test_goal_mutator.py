@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_self_rewrite.exceptions import GoalMutationError
 from lyra_self_rewrite.goal_mutator import (
     GoalMutationResult,
@@ -181,7 +180,7 @@ class TestGoalMutator:
         # With probability=1.0 and non-zero magnitude, value should change
         assert any(
             mo.value != orig.value
-            for mo, orig in zip(result.mutated.genome, agent.genome)
+            for mo, orig in zip(result.mutated.genome, agent.genome, strict=False)
         )
 
     @pytest.mark.asyncio
@@ -241,7 +240,7 @@ class TestGoalMutator:
         # With probability 0, no changes should happen
         assert all(
             mo.value == orig.value
-            for mo, orig in zip(result.mutated.genome, agent.genome)
+            for mo, orig in zip(result.mutated.genome, agent.genome, strict=False)
         )
 
     @pytest.mark.asyncio

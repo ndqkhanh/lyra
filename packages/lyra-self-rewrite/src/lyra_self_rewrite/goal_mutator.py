@@ -130,7 +130,7 @@ class GoalMutator:
 
         success = any(
             mg.value != og.value
-            for mg, og in zip(mutated_genes, agent.genome)
+            for mg, og in zip(mutated_genes, agent.genome, strict=False)
         )
 
         mutated = HyperAgent(

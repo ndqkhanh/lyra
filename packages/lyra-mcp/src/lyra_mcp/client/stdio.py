@@ -66,12 +66,11 @@ import json
 import os
 import subprocess
 import threading
-import time
 from collections import deque
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Mapping, Optional, Sequence
-
+from typing import Any
 
 # ---------------------------------------------------------------------------
 # Errors
@@ -124,9 +123,9 @@ class StdioMCPTransport:
     _pending: dict[int, dict[str, Any]] = field(default_factory=dict, init=False)
     _pending_lock: threading.Lock = field(default_factory=threading.Lock, init=False)
     _events: dict[int, threading.Event] = field(default_factory=dict, init=False)
-    _reader_thread: Optional[threading.Thread] = field(default=None, init=False)
-    _stderr_thread: Optional[threading.Thread] = field(default=None, init=False)
-    _stderr_buffer: "deque[bytes]" = field(
+    _reader_thread: threading.Thread | None = field(default=None, init=False)
+    _stderr_thread: threading.Thread | None = field(default=None, init=False)
+    _stderr_buffer: deque[bytes] = field(
         default_factory=lambda: deque(maxlen=64),
         init=False,
     )
@@ -143,12 +142,12 @@ class StdioMCPTransport:
         cls,
         command: Sequence[str],
         *,
-        env: Optional[Mapping[str, str]] = None,
-        cwd: Optional[Path] = None,
+        env: Mapping[str, str] | None = None,
+        cwd: Path | None = None,
         server_name: str = "mcp-stdio",
         init_timeout_s: float = _DEFAULT_INIT_TIMEOUT_S,
         call_timeout_s: float = _DEFAULT_CALL_TIMEOUT_S,
-    ) -> "StdioMCPTransport":
+    ) -> StdioMCPTransport:
         """Spawn ``command`` and complete the JSON-RPC handshake.
 
         Args:
@@ -231,7 +230,7 @@ class StdioMCPTransport:
         name: str,
         args: Mapping[str, Any],
         *,
-        timeout_s: Optional[float] = None,
+        timeout_s: float | None = None,
     ) -> dict[str, Any]:
         """Invoke ``name`` with ``args`` over JSON-RPC ``tools/call``.
 
@@ -296,7 +295,7 @@ class StdioMCPTransport:
                 if thread is not None and thread.is_alive():
                     thread.join(timeout=self.grace_period_s)
 
-    def __enter__(self) -> "StdioMCPTransport":
+    def __enter__(self) -> StdioMCPTransport:
         return self
 
     def __exit__(self, *_exc: Any) -> None:
@@ -333,7 +332,7 @@ class StdioMCPTransport:
         method: str,
         params: Mapping[str, Any],
         *,
-        timeout_s: Optional[float] = None,
+        timeout_s: float | None = None,
     ) -> Any:
         if self._closed:
             raise MCPTransportError(
@@ -495,8 +494,8 @@ class StdioMCPTransport:
 def stdio_transport_from_command(
     command: Sequence[str],
     *,
-    env: Optional[Mapping[str, str]] = None,
-    cwd: Optional[Path] = None,
+    env: Mapping[str, str] | None = None,
+    cwd: Path | None = None,
     server_name: str = "mcp-stdio",
 ) -> StdioMCPTransport:
     """One-shot helper: spawn + handshake.

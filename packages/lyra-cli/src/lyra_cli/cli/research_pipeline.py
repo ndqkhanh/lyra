@@ -359,7 +359,7 @@ class RealResearchPipeline:
 
     async def _phase_cite(self) -> AsyncIterator[dict]:
         # Find which [N] citations are actually used in the report
-        used_idxs = set(int(m) for m in re.findall(r'\[(\d+)\]', self._report))
+        used_idxs = {int(m) for m in re.findall(r'\[(\d+)\]', self._report)}
 
         sources_section = "\n\n## Sources\n\n"
         cited_sources = [s for s in self._sources if s.source_idx in used_idxs]

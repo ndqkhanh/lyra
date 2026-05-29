@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import datetime as _dt
 from dataclasses import dataclass
-from typing import Optional
 
 
 class CronParseError(ValueError):
@@ -77,7 +76,7 @@ def _parse_field(spec: str, *, lo: int, hi: int) -> frozenset[int]:
     on malformed input.
     """
     if not spec or not spec.strip():
-        raise CronParseError(f"empty field")
+        raise CronParseError("empty field")
 
     out: set[int] = set()
     for part in spec.split(","):
@@ -138,7 +137,7 @@ def parse_cron(expr: str) -> CronExpression:
             f"expected 5 fields (minute hour day month weekday); got {len(parts)}"
         )
     parsed: list[frozenset[int]] = []
-    for part, name, (lo, hi) in zip(parts, _FIELD_NAMES, _FIELD_BOUNDS):
+    for part, name, (lo, hi) in zip(parts, _FIELD_NAMES, _FIELD_BOUNDS, strict=False):
         try:
             parsed.append(_parse_field(part, lo=lo, hi=hi))
         except CronParseError as exc:
@@ -159,7 +158,7 @@ def next_fire_after(
     *,
     after: float,
     horizon_minutes: int = 60 * 24 * 31,
-) -> Optional[float]:
+) -> float | None:
     """Find the next time ``expr`` matches after the given timestamp.
 
     Walks forward minute-by-minute up to ``horizon_minutes`` (default 31 days).

@@ -127,7 +127,7 @@ class Dispatcher:
 
     def dispatch(self, task: TaskTicket) -> DispatchDecision:
         """Select the best agents for a task and return a dispatch decision."""
-        scores = self.classify_task(task)
+        self.classify_task(task)
 
         qualified: list[DisciplineAgent] = []
         for cap in task.required_capabilities:

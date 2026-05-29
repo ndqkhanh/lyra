@@ -1,7 +1,7 @@
 """Tests for network tool implementations — net_http, net_dns, net_ping."""
 from __future__ import annotations
 
-from lyra_tools.network_ops import net_http, net_dns, net_ping
+from lyra_tools.network_ops import net_dns, net_http, net_ping
 
 
 class TestNetHttp:

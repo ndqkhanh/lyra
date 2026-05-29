@@ -509,7 +509,7 @@ class SR2AMPlanner:
         Returns:
             Simulated and adjusted plan steps.
         """
-        text = task.lower()
+        task.lower()
         nodes: List[PlanNode] = []
 
         # ── Build initial plan ─────────────────────────────────────────

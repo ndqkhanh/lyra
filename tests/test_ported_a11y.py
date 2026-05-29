@@ -4,7 +4,6 @@ Verifies AccessibilityBridge, high-contrast toggles, screen reader cues.
 """
 from __future__ import annotations
 
-import pytest
 
 def test_a11y_bridge_init():
     from lyra_cli.tui_v2.widgets.accessibility_bridge import AccessibilityBridge
@@ -34,7 +33,8 @@ def test_a11y_set_focus():
 
 def test_high_contrast_overrides():
     from lyra_cli.tui_v2.widgets.accessibility_bridge import (
-        HIGH_CONTRAST_OVERRIDES, AccessibilityBridge,
+        HIGH_CONTRAST_OVERRIDES,
+        AccessibilityBridge,
     )
     assert "default" in HIGH_CONTRAST_OVERRIDES
     assert "dracula" in HIGH_CONTRAST_OVERRIDES

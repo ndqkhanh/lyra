@@ -122,7 +122,7 @@ class ProgressLog:
             lines.extend(f"  - `{f}`" for f in files_changed)
         if learnings:
             lines.append("- **Learnings for future iterations:**")
-            lines.extend(f"  - {l}" for l in learnings)
+            lines.extend(f"  - {learn}" for learn in learnings)
         lines.append("---\n")
         return "\n".join(lines)
 

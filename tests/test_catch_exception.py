@@ -9,13 +9,14 @@ sys.path.insert(0, 'packages/lyra-ui/src')
 
 # Patch Textual's App.run to catch exceptions
 from textual.app import App
+
 original_run = App.run
 
 def patched_run(self, *args, **kwargs):
     try:
         print(f"[PATCH] App.run() starting for {type(self).__name__}", file=sys.stderr, flush=True)
         result = original_run(self, *args, **kwargs)
-        print(f"[PATCH] App.run() completed normally", file=sys.stderr, flush=True)
+        print("[PATCH] App.run() completed normally", file=sys.stderr, flush=True)
         return result
     except Exception as e:
         print(f"[PATCH] App.run() EXCEPTION: {type(e).__name__}: {e}", file=sys.stderr, flush=True)

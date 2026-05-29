@@ -56,7 +56,7 @@ def test_fixed_bottom_layout():
     assert len(visible) == dims.scrollable_height
     print(f"  Total lines: {len(layout.scroll_buffer)}")
     print(f"  Visible lines: {len(visible)}")
-    print(f"  Auto-scroll: ✓")
+    print("  Auto-scroll: ✓")
     print()
 
     # Test 4: Verify input/status updates
@@ -87,7 +87,7 @@ def test_fixed_bottom_layout():
     new_height = layout.dimensions.terminal_height
     print(f"  Old height: {old_height}")
     print(f"  New height: {new_height}")
-    print(f"  Resize handler: ✓")
+    print("  Resize handler: ✓")
     print()
 
     print("="*80)
@@ -198,7 +198,7 @@ def test_agent_handler_integration():
     }
     handler.on_turn_end("test-turn-1", result)
     assert handler.current_turn is None
-    print(f"  Turn ended successfully")
+    print("  Turn ended successfully")
     print()
 
     # Test 5: Error handling
@@ -206,7 +206,7 @@ def test_agent_handler_integration():
     handler.on_turn_start("test-turn-2")
     handler.on_error(Exception("Test error"))
     assert handler.current_turn is None
-    print(f"  Error handled successfully")
+    print("  Error handled successfully")
     print()
 
     print("="*80)

@@ -3,14 +3,12 @@
 from __future__ import annotations
 
 import json
-import time
 
 import pytest
-
 from lyra_observability.dashboard import Dashboard, DashboardPanel
 from lyra_observability.logger import LogEntry, LogLevel, StructuredLogger
-from lyra_observability.metrics import MetricType, MetricValue, MetricsCollector
-from lyra_observability.tracer import Span, Tracer
+from lyra_observability.metrics import MetricsCollector, MetricType, MetricValue
+from lyra_observability.tracer import Tracer
 
 # ---------------------------------------------------------------------------
 # Tracer tests
@@ -42,7 +40,7 @@ class TestTracer:
     async def test_nested_spans_have_parent_child_relation(self) -> None:
         tracer = Tracer()
         child_id: str | None = None
-        async with tracer.trace("parent") as parent_id:
+        async with tracer.trace("parent"):
             async with tracer.trace("child") as cid:
                 child_id = cid
         spans = tracer.get_recent_spans()

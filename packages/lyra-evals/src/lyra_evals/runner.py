@@ -1,8 +1,9 @@
 """Eval runner: executes a policy over a corpus; reports drift."""
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any
 
 from .corpora import Task
 

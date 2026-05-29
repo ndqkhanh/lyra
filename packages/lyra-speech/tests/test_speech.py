@@ -5,7 +5,6 @@ from __future__ import annotations
 import struct
 
 import pytest
-
 from lyra_speech import (
     AudioFormat,
     Emotion,
@@ -17,7 +16,6 @@ from lyra_speech import (
     TranscriptionResult,
     VoiceGender,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_meta_editor import (
     Mutant,
     MutationConfig,
+    MutationTester,
     MutationTestError,
     MutationTestResult,
-    MutationTester,
 )
 
 

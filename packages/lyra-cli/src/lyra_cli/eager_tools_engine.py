@@ -76,7 +76,7 @@ class ToolChain:
 class ContextAnalyzer:
     """
     Analyzes context to understand what the user is trying to do.
-    
+
     Features:
     - Intent detection
     - Entity extraction
@@ -90,7 +90,7 @@ class ContextAnalyzer:
 
     def _load_patterns(self) -> dict[str, list[str]]:
         """Load context patterns.
-        
+
         Returns:
             Dictionary of patterns by intent
         """
@@ -138,10 +138,10 @@ class ContextAnalyzer:
 
     def analyze(self, context: str) -> dict[str, float]:
         """Analyze context and return intent scores.
-        
+
         Args:
             context: Context text
-            
+
         Returns:
             Dictionary of intent scores (0-1)
         """
@@ -165,10 +165,10 @@ class ContextAnalyzer:
 
     def extract_entities(self, context: str) -> dict[str, list[str]]:
         """Extract entities from context.
-        
+
         Args:
             context: Context text
-            
+
         Returns:
             Dictionary of entities by type
         """
@@ -201,7 +201,7 @@ class ContextAnalyzer:
 class ToolRecommender:
     """
     Recommends tools based on context and history.
-    
+
     Features:
     - Context-based recommendations
     - History-based suggestions
@@ -218,7 +218,7 @@ class ToolRecommender:
 
     def _load_tools(self) -> list[Tool]:
         """Load available tools.
-        
+
         Returns:
             List of tools
         """
@@ -267,7 +267,7 @@ class ToolRecommender:
 
     def _load_chains(self) -> list[ToolChain]:
         """Load tool chains.
-        
+
         Returns:
             List of tool chains
         """
@@ -291,11 +291,11 @@ class ToolRecommender:
 
     def recommend(self, context: str, limit: int = 5) -> list[ToolSuggestion]:
         """Recommend tools based on context.
-        
+
         Args:
             context: Context text
             limit: Maximum suggestions
-            
+
         Returns:
             List of tool suggestions
         """
@@ -331,13 +331,13 @@ class ToolRecommender:
         entities: dict[str, list[str]],
     ) -> float:
         """Score a tool for the given context.
-        
+
         Args:
             tool: Tool to score
             context: Context text
             intent_scores: Intent scores
             entities: Extracted entities
-            
+
         Returns:
             Score (0-1)
         """
@@ -376,12 +376,12 @@ class ToolRecommender:
         entities: dict[str, list[str]],
     ) -> str:
         """Generate reason for suggestion.
-        
+
         Args:
             tool: Tool
             intent_scores: Intent scores
             entities: Extracted entities
-            
+
         Returns:
             Reason string
         """
@@ -406,7 +406,7 @@ class ToolRecommender:
 
     def record_usage(self, tool_name: str) -> None:
         """Record tool usage.
-        
+
         Args:
             tool_name: Name of tool used
         """
@@ -418,10 +418,10 @@ class ToolRecommender:
 
     def suggest_chain(self, current_tool: str) -> ToolChain | None:
         """Suggest a tool chain based on current tool.
-        
+
         Args:
             current_tool: Current tool being used
-            
+
         Returns:
             Suggested chain or None
         """
@@ -435,7 +435,7 @@ class ToolRecommender:
 class EagerToolEngine:
     """
     Main engine for eager tool suggestions.
-    
+
     Combines context analysis, tool recommendation, and learning
     to provide proactive tool suggestions.
     """
@@ -447,11 +447,11 @@ class EagerToolEngine:
 
     def suggest_tools(self, context: str, limit: int = 5) -> list[ToolSuggestion]:
         """Suggest tools for the given context.
-        
+
         Args:
             context: Context text
             limit: Maximum suggestions
-            
+
         Returns:
             List of tool suggestions
         """
@@ -462,7 +462,7 @@ class EagerToolEngine:
 
     def record_tool_usage(self, tool_name: str) -> None:
         """Record that a tool was used.
-        
+
         Args:
             tool_name: Name of tool
         """
@@ -470,10 +470,10 @@ class EagerToolEngine:
 
     def suggest_next_tool(self, current_tool: str) -> ToolSuggestion | None:
         """Suggest next tool in a chain.
-        
+
         Args:
             current_tool: Current tool
-            
+
         Returns:
             Suggestion or None
         """

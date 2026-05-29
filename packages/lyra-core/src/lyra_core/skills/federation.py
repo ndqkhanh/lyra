@@ -185,7 +185,7 @@ class FederatedRegistry:
         skipped: list[str] = []
         for remote in manifest.skills:
             try:
-                local = self.registry.get(remote.id)
+                self.registry.get(remote.id)
             except SkillNotFound:
                 self.registry.register(remote)
                 added.append(remote.id)

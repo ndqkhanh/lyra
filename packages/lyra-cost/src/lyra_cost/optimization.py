@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from lyra_cost.models import ModelTier, TIER_LABELS, TIER_PRICING
+from lyra_cost.models import TIER_LABELS, TIER_PRICING, ModelTier
 from lyra_cost.safeguards import BudgetDegrader, LoopDetector
 
 logger = logging.getLogger(__name__)

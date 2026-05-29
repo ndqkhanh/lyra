@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1779208006123,
+  "lastScanned": 1780037974138,
   "projectRoot": "/Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-research",
   "techStack": {
     "languages": [
@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "cd /Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-research && python -m pytest tests/test_par2_rag.py -q 2>&1 | tail -3",
+    "testCommand": "python -m pytest /Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-research/tests/ -q --tb=line 2>&1 | tail -3",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -44,7 +44,10 @@
       "src",
       "tests"
     ],
-    "gitBranches": null
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
   },
   "customNotes": [],
   "directoryMap": {
@@ -52,7 +55,7 @@
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 1,
-      "lastAccessed": 1779208006114,
+      "lastAccessed": 1780037974132,
       "keyFiles": [
         "PHASE2_COMPLETE.md"
       ]
@@ -61,7 +64,7 @@
       "path": "lyra_research",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1779208006116,
+      "lastAccessed": 1780037974132,
       "keyFiles": [
         "falsification.py",
         "feynman.py"
@@ -71,280 +74,82 @@
       "path": "src",
       "purpose": "Source code",
       "fileCount": 0,
-      "lastAccessed": 1779208006117,
+      "lastAccessed": 1780037974132,
       "keyFiles": []
     },
     "tests": {
       "path": "tests",
       "purpose": "Test files",
-      "fileCount": 38,
-      "lastAccessed": 1779208006122,
+      "fileCount": 59,
+      "lastAccessed": 1780037974133,
       "keyFiles": [
         "test_adaptive_decomposition.py",
+        "test_advanced_sounds.py",
         "test_adversarial_reviewer.py",
         "test_analysis.py",
-        "test_analysis_agents.py",
-        "test_benchmarks.py"
+        "test_analysis_agents.py"
       ]
     }
   },
   "hotPaths": [
     {
-      "path": "src/lyra_research/permissions/bypass_manager.py",
-      "accessCount": 4,
-      "lastAccessed": 1779216660007,
+      "path": "tests/test_phase2_benchmarks.py",
+      "accessCount": 7,
+      "lastAccessed": 1780041457374,
       "type": "file"
     },
     {
-      "path": "src/lyra_research/memory_controller.py",
-      "accessCount": 4,
-      "lastAccessed": 1779293173859,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_memory_controller.py",
-      "accessCount": 4,
-      "lastAccessed": 1779293251102,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_bypass_commands.py",
+      "path": "src/lyra_research/__init__.py",
       "accessCount": 3,
-      "lastAccessed": 1779216622776,
+      "lastAccessed": 1780038163784,
       "type": "file"
     },
     {
-      "path": "tests/test_bypass_integration.py",
+      "path": "tests/test_full_integration.py",
       "accessCount": 3,
-      "lastAccessed": 1779216674825,
+      "lastAccessed": 1780041488561,
       "type": "file"
     },
     {
-      "path": "tests/test_benchmark_adapter.py",
-      "accessCount": 3,
-      "lastAccessed": 1779285921773,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/sounds/__init__.py",
+      "path": "src/lyra_research/orchestrator.py",
       "accessCount": 2,
-      "lastAccessed": 1779216921531,
+      "lastAccessed": 1780041269518,
       "type": "file"
     },
     {
-      "path": "src/lyra_research/hooks/__init__.py",
-      "accessCount": 2,
-      "lastAccessed": 1779217070843,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/cli/__init__.py",
-      "accessCount": 2,
-      "lastAccessed": 1779217179655,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/sounds/context_aware.py",
-      "accessCount": 2,
-      "lastAccessed": 1779217198818,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_sound_commands.py",
-      "accessCount": 2,
-      "lastAccessed": 1779217259841,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/memory.py",
-      "accessCount": 2,
-      "lastAccessed": 1779285943640,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/permissions/__init__.py",
+      "path": "src/lyra_research/checkpoint.py",
       "accessCount": 1,
-      "lastAccessed": 1779216071091,
+      "lastAccessed": 1780038001911,
       "type": "file"
     },
     {
-      "path": "src/lyra_research/permissions/permission_gate.py",
+      "path": "src/lyra_research/research_daemon.py",
       "accessCount": 1,
-      "lastAccessed": 1779216083566,
+      "lastAccessed": 1780038118124,
       "type": "file"
     },
     {
-      "path": "src/lyra_research/permissions/audit_logger.py",
+      "path": "tests/test_checkpoint.py",
       "accessCount": 1,
-      "lastAccessed": 1779216106948,
+      "lastAccessed": 1780038183537,
       "type": "file"
     },
     {
-      "path": "tests/test_permission_gate.py",
+      "path": "tests/test_research_state.py",
       "accessCount": 1,
-      "lastAccessed": 1779216123607,
+      "lastAccessed": 1780038344697,
       "type": "file"
     },
     {
-      "path": "tests/test_bypass_manager.py",
+      "path": "tests/test_research_notebook.py",
       "accessCount": 1,
-      "lastAccessed": 1779216141564,
+      "lastAccessed": 1780038344937,
       "type": "file"
     },
     {
-      "path": "tests/test_audit_logger.py",
+      "path": "tests/test_research_daemon.py",
       "accessCount": 1,
-      "lastAccessed": 1779216158487,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/ui/__init__.py",
-      "accessCount": 1,
-      "lastAccessed": 1779216411478,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/ui/status_line.py",
-      "accessCount": 1,
-      "lastAccessed": 1779216411764,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/ui/indicators.py",
-      "accessCount": 1,
-      "lastAccessed": 1779216412010,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_status_line.py",
-      "accessCount": 1,
-      "lastAccessed": 1779216430253,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_indicators.py",
-      "accessCount": 1,
-      "lastAccessed": 1779216430517,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/hooks/permission_hooks.py",
-      "accessCount": 1,
-      "lastAccessed": 1779216475694,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_permission_hooks.py",
-      "accessCount": 1,
-      "lastAccessed": 1779216498291,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/cli/bypass_commands.py",
-      "accessCount": 1,
-      "lastAccessed": 1779216551100,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/sounds/audio_player.py",
-      "accessCount": 1,
-      "lastAccessed": 1779216752809,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/sounds/theme_manager.py",
-      "accessCount": 1,
-      "lastAccessed": 1779216808228,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/sounds/config.py",
-      "accessCount": 1,
-      "lastAccessed": 1779216808473,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/sounds/sound_manager.py",
-      "accessCount": 1,
-      "lastAccessed": 1779216808714,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_audio_player.py",
-      "accessCount": 1,
-      "lastAccessed": 1779216826070,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_theme_manager.py",
-      "accessCount": 1,
-      "lastAccessed": 1779216854673,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_sound_manager.py",
-      "accessCount": 1,
-      "lastAccessed": 1779216854923,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_sound_config.py",
-      "accessCount": 1,
-      "lastAccessed": 1779216855169,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/sounds/event_mapper.py",
-      "accessCount": 1,
-      "lastAccessed": 1779216878512,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_event_mapper.py",
-      "accessCount": 1,
-      "lastAccessed": 1779216903767,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/hooks/sound_hooks.py",
-      "accessCount": 1,
-      "lastAccessed": 1779217070599,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_sound_hooks.py",
-      "accessCount": 1,
-      "lastAccessed": 1779217088695,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/sounds/adaptive_volume.py",
-      "accessCount": 1,
-      "lastAccessed": 1779217118300,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/sounds/productivity_mode.py",
-      "accessCount": 1,
-      "lastAccessed": 1779217118782,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_advanced_sounds.py",
-      "accessCount": 1,
-      "lastAccessed": 1779217151392,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/cli/sound_commands.py",
-      "accessCount": 1,
-      "lastAccessed": 1779217179410,
-      "type": "file"
-    },
-    {
-      "path": "src/lyra_research/synthesis.py",
-      "accessCount": 1,
-      "lastAccessed": 1779293160517,
+      "lastAccessed": 1780038345429,
       "type": "file"
     }
   ],

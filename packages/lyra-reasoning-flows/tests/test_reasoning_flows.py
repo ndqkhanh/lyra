@@ -4,12 +4,16 @@ from __future__ import annotations
 
 import json
 import math
-import time
 from datetime import datetime, timezone
 
 import pytest
 
-from lyra_reasoning_flows.cot_integration import CoTIntegrator, ReflexionStep, ThoughtNode, ThoughtStrategy
+from lyra_reasoning_flows.cot_integration import (
+    CoTIntegrator,
+    ReflexionStep,
+    ThoughtNode,
+    ThoughtStrategy,
+)
 from lyra_reasoning_flows.exceptions import (
     FlowCompositionError,
     HorizonEstimationError,
@@ -18,7 +22,13 @@ from lyra_reasoning_flows.exceptions import (
     ReasoningError,
     TraceError,
 )
-from lyra_reasoning_flows.flow_engine import FlowDefinition, FlowEngine, FlowPattern, FlowResult, FlowStep
+from lyra_reasoning_flows.flow_engine import (
+    FlowDefinition,
+    FlowEngine,
+    FlowPattern,
+    FlowResult,
+    FlowStep,
+)
 from lyra_reasoning_flows.mcts_planner import (
     MCTSConfig,
     MCTSNode,
@@ -31,12 +41,22 @@ from lyra_reasoning_flows.planning_horizon import (
     HorizonMetrics,
     PlanningHorizonOptimizer,
 )
-from lyra_reasoning_flows.react_loop import AuditResult, EnhancedReActLoop, ReActStep, ReActTrace
-from lyra_reasoning_flows.reasoning_tracer import FullTrace, ReasoningTracer, TraceEvent, TraceEventType
-from lyra_reasoning_flows.system_i import ReasoningTier, ReasoningTrace as S1ReasoningTrace, SystemIReasoner, TaskAssessment, TaskCategory
+from lyra_reasoning_flows.react_loop import EnhancedReActLoop, ReActStep, ReActTrace
+from lyra_reasoning_flows.reasoning_tracer import (
+    FullTrace,
+    ReasoningTracer,
+    TraceEvent,
+    TraceEventType,
+)
+from lyra_reasoning_flows.system_i import (
+    ReasoningTier,
+    SystemIReasoner,
+    TaskAssessment,
+    TaskCategory,
+)
+from lyra_reasoning_flows.system_i import ReasoningTrace as S1ReasoningTrace
 from lyra_reasoning_flows.system_ii import (
     BranchingFactor,
-    CritiqueResult,
     PlanTree,
     SimulationResult,
     SystemIIReasoner,
@@ -48,7 +68,6 @@ from lyra_reasoning_flows.system_iii import (
     RegulationCost,
     SystemIIIMetaRegulator,
 )
-
 
 # =============================================================================
 # Exceptions

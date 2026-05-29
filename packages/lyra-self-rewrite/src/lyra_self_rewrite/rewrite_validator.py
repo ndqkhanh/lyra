@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .exceptions import RewriteValidationError
 from .rewrite_generator import GeneratedRewrite
 
 

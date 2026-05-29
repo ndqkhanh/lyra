@@ -1,11 +1,8 @@
 """Tests for bypass mode functionality."""
 
-import json
 import os
 import tempfile
 from pathlib import Path
-
-import pytest
 
 from lyra_permissions import (
     AuditLogger,
@@ -15,7 +12,6 @@ from lyra_permissions import (
     PermissionManager,
     SafetyGuardrails,
 )
-
 
 # Bypass Mode Tests
 

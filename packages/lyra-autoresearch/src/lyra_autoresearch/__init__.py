@@ -15,35 +15,35 @@ __version__ = "1.0.0"
 
 from lyra_autoresearch.citations import (
     CitationVerifier,
-    VerifyStatus,
     VerificationReport,
+    VerifyStatus,
     verify_citations,
 )
 from lyra_autoresearch.debate import (
     DebatePanel,
-    Perspective,
     DebateRound,
+    Perspective,
     run_debate,
-)
-from lyra_autoresearch.execution import (
-    SelfHealingExecutor,
-    FailureType,
-    ExecutionStrategy,
-    execute_with_healing,
 )
 from lyra_autoresearch.evolution import (
     EvolutionEngine,
     EvolutionStore,
-    LessonEntry,
     LessonCategory,
+    LessonEntry,
     LessonSeverity,
     SkillSynthesizer,
 )
+from lyra_autoresearch.execution import (
+    ExecutionStrategy,
+    FailureType,
+    SelfHealingExecutor,
+    execute_with_healing,
+)
 from lyra_autoresearch.hitl import (
+    GateOrchestrator,
+    GatePoint,
     HITLMode,
     HITLPolicy,
-    GatePoint,
-    GateOrchestrator,
     create_gate_config,
 )
 

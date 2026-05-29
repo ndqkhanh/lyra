@@ -9,7 +9,6 @@ Run: ``pytest tests/test_widgets_smoke.py -v``
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 import pytest
 
@@ -130,7 +129,7 @@ def test_all_widgets_exported():
 
     widget_dir = Path(__file__).parent.parent / "packages/lyra-cli/src/lyra_cli/tui_v2/widgets"
     files = sorted(f.stem for f in widget_dir.glob("*.py") if f.stem != "__init__")
-    for f in files:
+    for _f in files:
         # Check each file has at least one class in __all__
         # (This is a soft check since export names may differ from filenames)
         pass

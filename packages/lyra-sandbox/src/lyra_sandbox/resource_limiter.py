@@ -7,7 +7,6 @@ import platform
 from dataclasses import dataclass, field
 from enum import Enum
 
-from .exceptions import ResourceLimitError
 
 
 class ResourcePolicy(str, Enum):

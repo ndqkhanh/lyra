@@ -20,7 +20,6 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Optional
 
 from ..memory_store import MemoryItem, MemoryKind, MemoryStore
 from ..provenance import WitnessLattice
@@ -54,14 +53,14 @@ class MemoryConsolidator:
     policy: ConsolidationPolicy = field(default_factory=ConsolidationPolicy)
     grouping: GroupingStrategy = field(default_factory=TagGrouping)
     summarizer: Summarizer = field(default_factory=ExtractiveSummarizer)
-    lattice: Optional[WitnessLattice] = None
+    lattice: WitnessLattice | None = None
     agent_id: str = "consolidator"
     _clock_fn: object = field(default_factory=lambda: time.time)
 
     def consolidate(
         self,
         *,
-        namespace: Optional[str] = None,
+        namespace: str | None = None,
     ) -> ConsolidationReport:
         """Run one consolidation pass over the store.
 
@@ -124,7 +123,7 @@ class MemoryConsolidator:
         item: MemoryItem,
         *,
         now: float,
-        namespace: Optional[str],
+        namespace: str | None,
     ) -> bool:
         if namespace is not None and item.namespace != namespace:
             return False

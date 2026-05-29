@@ -201,8 +201,8 @@ class TestBtwQueue:
 
     def test_get_pending(self):
         q = BtwQueue()
-        n1 = q.enqueue("Note 1", BtwPriority.LOW)
-        n2 = q.enqueue("Note 2", BtwPriority.HIGH)
+        q.enqueue("Note 1", BtwPriority.LOW)
+        q.enqueue("Note 2", BtwPriority.HIGH)
         pending = q.get_pending()
         assert len(pending) == 2
 

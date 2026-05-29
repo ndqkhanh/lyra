@@ -5,7 +5,6 @@ from __future__ import annotations
 import time
 
 import pytest
-
 from lyra_skills.compaction import (
     COMPRESSION_TARGET,
     MERGE_SIMILARITY_THRESHOLD,
@@ -16,7 +15,6 @@ from lyra_skills.compaction import (
     CompactionReport,
     MergeCandidate,
     SectionStatus,
-    SectionTrimResult,
     SectionUsage,
     SectionUsageTracker,
     SkillCompactor,

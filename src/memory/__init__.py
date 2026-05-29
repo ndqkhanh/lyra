@@ -9,20 +9,20 @@ This module provides:
 - Memory consolidation (STM → LTM)
 """
 
-from src.memory.memory_store import Memory, MemoryType, MemoryStore
-from src.memory.short_term_memory import ShortTermMemory, ConversationTurn
 from src.memory.long_term_memory import LongTermMemory, MemoryIndex
-from src.memory.memory_retrieval import (
-    MemoryRetriever,
-    RetrievalStrategy,
-    RetrievalResult,
-    RelevanceScorer,
-)
 from src.memory.memory_consolidation import (
-    MemoryConsolidator,
     ConsolidationPolicy,
     ConsolidationResult,
+    MemoryConsolidator,
 )
+from src.memory.memory_retrieval import (
+    MemoryRetriever,
+    RelevanceScorer,
+    RetrievalResult,
+    RetrievalStrategy,
+)
+from src.memory.memory_store import Memory, MemoryStore, MemoryType
+from src.memory.short_term_memory import ConversationTurn, ShortTermMemory
 
 __all__ = [
     # Core

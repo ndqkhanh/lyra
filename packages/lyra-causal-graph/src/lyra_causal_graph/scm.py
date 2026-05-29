@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Optional, Union
+from typing import Any
 
 import numpy as np
 
@@ -233,7 +234,7 @@ class SCMConfig:
     noise_scale: float = 1.0
     default_noise_type: str = "gaussian"
     enable_cache: bool = True
-    random_seed: Optional[int] = None
+    random_seed: int | None = None
 
 
 # ── Structural Causal Model ──────────────────────────────────────────────────
@@ -260,12 +261,12 @@ class StructuralCausalModel:
         intervention = scm.intervene({"X": 1.0}).sample(n=1000)
     """
 
-    def __init__(self, config: Optional[SCMConfig] = None) -> None:
+    def __init__(self, config: SCMConfig | None = None) -> None:
         self._config = config or SCMConfig()
         self._exogenous: dict[str, ExogenousVariable] = {}
         self._endogenous: dict[str, EndogenousVariable] = {}
         self._equations: dict[str, SCMEquation] = {}
-        self._eval_order: Optional[list[str]] = None
+        self._eval_order: list[str] | None = None
         self._rng: np.random.Generator = np.random.default_rng(self._config.random_seed)
 
         if self._config.random_seed is not None:
@@ -289,7 +290,7 @@ class StructuralCausalModel:
     def equations(self) -> dict[str, SCMEquation]:
         return dict(self._equations)
 
-    def add_exogenous(self, name: str, noise: Optional[NoiseModel] = None) -> ExogenousVariable:
+    def add_exogenous(self, name: str, noise: NoiseModel | None = None) -> ExogenousVariable:
         """Register an exogenous variable.
 
         Args:
@@ -306,7 +307,7 @@ class StructuralCausalModel:
         self._invalidate_order()
         return var
 
-    def add_endogenous(self, name: str, parents: Optional[list[str]] = None, description: str = "") -> EndogenousVariable:
+    def add_endogenous(self, name: str, parents: list[str] | None = None, description: str = "") -> EndogenousVariable:
         """Register an endogenous variable.
 
         Args:
@@ -327,7 +328,7 @@ class StructuralCausalModel:
         variable: str,
         function: Callable[[dict[str, np.ndarray]], np.ndarray],
         noise_var: str,
-        metadata: Optional[dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> SCMEquation:
         """Attach a structural equation to an endogenous variable.
 
@@ -412,7 +413,7 @@ class StructuralCausalModel:
         """Draw noise for every exogenous variable."""
         return {name: var.sample_noise(n) for name, var in self._exogenous.items()}
 
-    def _evaluate(self, noise: dict[str, np.ndarray], interventions: Optional[dict[str, np.ndarray]] = None) -> dict[str, np.ndarray]:
+    def _evaluate(self, noise: dict[str, np.ndarray], interventions: dict[str, np.ndarray] | None = None) -> dict[str, np.ndarray]:
         """Evaluate all equations given noise and optional interventions."""
         interventions = interventions or {}
         values: dict[str, np.ndarray] = dict(noise)
@@ -549,7 +550,7 @@ def make_chain_scm(
     noise_std: float = 0.1,
     coef: float = 1.0,
     n_vars: int = 3,
-    seed: Optional[int] = None,
+    seed: int | None = None,
 ) -> StructuralCausalModel:
     """Create a simple chain SCM: ``X0 → X1 → X2 → ...``
 
@@ -590,7 +591,7 @@ def _make_chain_equation(coef: float, parent_name: str) -> Callable:
 
 def make_collider_scm(
     noise_std: float = 0.1,
-    seed: Optional[int] = None,
+    seed: int | None = None,
 ) -> StructuralCausalModel:
     """Create a collider SCM: ``X → Z ← Y``
 

@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 """Test learning system implementation"""
 
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
 
-from lyra_cli.learning import (
-    ObservationCapture,
-    Observation,
-    InstinctExtractor,
-    Instinct,
-    ProjectDetector,
-    EvolutionPipeline,
-)
 from datetime import datetime
+
+from lyra_cli.learning import (
+    EvolutionPipeline,
+    InstinctExtractor,
+    Observation,
+    ObservationCapture,
+    ProjectDetector,
+)
 
 
 def test_learning_system():
@@ -60,7 +61,7 @@ def test_learning_system():
     )
     capture.capture(obs2)
 
-    print(f"  Captured 2 observations")
+    print("  Captured 2 observations")
     print()
 
     # Test observation retrieval

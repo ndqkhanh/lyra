@@ -4,13 +4,13 @@ ECC Hooks Engine
 Implements ECC-compatible hooks system for Lyra.
 """
 
-from pathlib import Path
-from typing import Dict, List, Callable, Any, Optional
-from dataclasses import dataclass
-from enum import Enum
-import logging
 import asyncio
 import inspect
+import logging
+from dataclasses import dataclass
+from enum import Enum
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

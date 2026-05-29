@@ -16,7 +16,7 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 
 class SecuritySeverity(Enum):
@@ -49,10 +49,10 @@ class SecurityIssue:
     category: SecurityCategory
     severity: SecuritySeverity
     message: str
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
-    code_snippet: Optional[str] = None
-    remediation: Optional[str] = None
+    file_path: str | None = None
+    line_number: int | None = None
+    code_snippet: str | None = None
+    remediation: str | None = None
 
 
 @dataclass
@@ -60,7 +60,7 @@ class SecurityReport:
     """Security scan report."""
 
     passed: bool
-    issues: List[SecurityIssue] = field(default_factory=list)
+    issues: list[SecurityIssue] = field(default_factory=list)
     scanned_files: int = 0
     scan_time: float = 0.0
 
@@ -115,7 +115,7 @@ class SecretsScanner:
             ),
         }
 
-    def scan(self, code: str, file_path: Optional[Path] = None) -> List[SecurityIssue]:
+    def scan(self, code: str, file_path: Path | None = None) -> list[SecurityIssue]:
         """
         Scan code for secrets.
 
@@ -172,7 +172,7 @@ class CommandInjectionScanner:
             r"<",  # Redirect
         ]
 
-    def scan_command(self, command: str) -> List[SecurityIssue]:
+    def scan_command(self, command: str) -> list[SecurityIssue]:
         """
         Scan shell command for injection risks.
 
@@ -209,7 +209,7 @@ class PathTraversalScanner:
     - Symbolic link attacks
     """
 
-    def __init__(self, allowed_paths: Optional[Set[Path]] = None):
+    def __init__(self, allowed_paths: set[Path] | None = None):
         """
         Initialize path traversal scanner.
 
@@ -218,7 +218,7 @@ class PathTraversalScanner:
         """
         self.allowed_paths = allowed_paths or set()
 
-    def scan_path(self, file_path: str) -> List[SecurityIssue]:
+    def scan_path(self, file_path: str) -> list[SecurityIssue]:
         """
         Scan file path for traversal risks.
 
@@ -287,7 +287,7 @@ class SQLInjectionScanner:
             "ALTER",
         ]
 
-    def scan(self, code: str) -> List[SecurityIssue]:
+    def scan(self, code: str) -> list[SecurityIssue]:
         """
         Scan code for SQL injection risks.
 
@@ -342,7 +342,7 @@ class XSSScanner:
             "onload=",
         ]
 
-    def scan(self, content: str) -> List[SecurityIssue]:
+    def scan(self, content: str) -> list[SecurityIssue]:
         """
         Scan content for XSS risks.
 
@@ -382,7 +382,7 @@ class AgentShield:
     - Permission auditing
     """
 
-    def __init__(self, allowed_paths: Optional[Set[Path]] = None):
+    def __init__(self, allowed_paths: set[Path] | None = None):
         """
         Initialize AgentShield.
 
@@ -395,7 +395,7 @@ class AgentShield:
         self.sql_scanner = SQLInjectionScanner()
         self.xss_scanner = XSSScanner()
 
-    def scan_code(self, code: str, file_path: Optional[Path] = None) -> SecurityReport:
+    def scan_code(self, code: str, file_path: Path | None = None) -> SecurityReport:
         """
         Scan code for security issues.
 
@@ -426,7 +426,7 @@ class AgentShield:
         )
 
     def scan_tool_call(
-        self, tool_name: str, args: Dict[str, Any]
+        self, tool_name: str, args: dict[str, Any]
     ) -> SecurityReport:
         """
         Scan tool call for security issues.

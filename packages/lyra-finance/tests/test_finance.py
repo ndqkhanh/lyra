@@ -12,43 +12,34 @@ Covers all 5 layers:
 from __future__ import annotations
 
 import datetime
-import math
 
 import pytest
-
 from lyra_finance import (
     AllocationMethod,
-    AllocationResult,
     AllocationStrategy,
     AnalystReport,
     AnalystType,
     Asset,
-    AssetClass,
-    BreakerConfig,
     BullBearDebate,
     CircuitBreaker,
     ComplianceMonitor,
     DCFAssumptions,
     DCFValuation,
-    DebateRound,
     EVEbitdaAssumptions,
     EVEbitdaValuation,
     FinancialStatement,
     FundamentalAnalyst,
-    HybridAssumptions,
     HybridValuation,
     MarketData,
     NewsAnalyst,
     Order,
     OrderSide,
     OrderStatus,
-    OrderType,
     Portfolio,
     PortfolioConfig,
     PortfolioManager,
     PortfolioOptimizer,
     Position,
-    RiskLimits,
     RiskManager,
     RiskMetrics,
     RiskProfile,
@@ -62,7 +53,6 @@ from lyra_finance import (
     TradingAgent,
     TradingDecision,
 )
-
 
 # ======================================================================
 # LAYER 1 — Models

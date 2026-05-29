@@ -4,7 +4,6 @@ import asyncio
 import time
 
 import pytest
-
 from lyra_ui import (
     Debouncer,
     LazyLoader,
@@ -13,7 +12,6 @@ from lyra_ui import (
     PerformanceProfiler,
     VirtualScroller,
 )
-
 
 # LRUCache Tests
 

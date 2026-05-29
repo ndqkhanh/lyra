@@ -5,7 +5,7 @@ Core task and result types for the Lyra agent system.
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import uuid4
 
 
@@ -53,15 +53,15 @@ class Task:
     task_id: str = field(default_factory=lambda: str(uuid4()))
     type: TaskType = TaskType.GENERIC
     description: str = ""
-    params: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
     priority: TaskPriority = TaskPriority.NORMAL
     status: TaskStatus = TaskStatus.PENDING
     created_at: datetime = field(default_factory=datetime.now)
-    assigned_to: Optional[str] = None
-    dependencies: List[str] = field(default_factory=list)
+    assigned_to: str | None = None
+    dependencies: list[str] = field(default_factory=list)
     estimated_cost: float = 0.0
     estimated_time: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         """Validate task after initialization."""
@@ -97,12 +97,12 @@ class Result:
     task_id: str
     success: bool
     data: Any = None
-    error: Optional[str] = None
-    agent_id: Optional[str] = None
+    error: str | None = None
+    agent_id: str | None = None
     duration: float = 0.0
     cost: float = 0.0
     timestamp: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         """Validate result after initialization."""
@@ -120,7 +120,7 @@ class ExecutionMetrics:
     duration: float
     cost: float
     timestamp: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -132,6 +132,6 @@ class AgentPerformance:
     success_rate: float
     avg_duration: float
     avg_cost: float
-    task_type: Optional[TaskType] = None
-    period_start: Optional[datetime] = None
-    period_end: Optional[datetime] = None
+    task_type: TaskType | None = None
+    period_start: datetime | None = None
+    period_end: datetime | None = None

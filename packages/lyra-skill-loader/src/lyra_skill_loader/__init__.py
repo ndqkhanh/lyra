@@ -1,6 +1,20 @@
 """lyra-skill-loader: progressive-disclosure skill loading with trigger matching, context budgeting, compilation, and dependency resolution."""
 from __future__ import annotations
 
+from .context_aware_loader import (
+    BudgetConfig,
+    ContextAwareLoader,
+    ContextBudget,
+    EvictionPolicy,
+    LoadDecision,
+    LoadPlan,
+)
+from .dependency_resolver import (
+    DependencyGraph,
+    DependencyResolver,
+    ResolutionResult,
+    SkillNode,
+)
 from .exceptions import (
     BudgetExceededError,
     CompilationError,
@@ -19,10 +33,15 @@ from .loader_config import (
     TierConfig,
     get_preset,
 )
+from .skill_compiler import (
+    CompiledIndex,
+    CompiledSkill,
+    SkillCompiler,
+)
 from .tiered_loader import (
-    LoadTier,
     LoadedSkill,
     LoaderStats,
+    LoadTier,
     SkillContent,
     SkillMetadata,
     SkillReferences,
@@ -34,25 +53,6 @@ from .trigger_matcher import (
     Trigger,
     TriggerMatcher,
     TriggerType,
-)
-from .context_aware_loader import (
-    BudgetConfig,
-    ContextAwareLoader,
-    ContextBudget,
-    EvictionPolicy,
-    LoadDecision,
-    LoadPlan,
-)
-from .skill_compiler import (
-    CompiledIndex,
-    CompiledSkill,
-    SkillCompiler,
-)
-from .dependency_resolver import (
-    DependencyGraph,
-    DependencyResolver,
-    ResolutionResult,
-    SkillNode,
 )
 
 __all__ = [

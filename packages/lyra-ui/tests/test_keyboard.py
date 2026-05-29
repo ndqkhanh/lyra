@@ -1,6 +1,5 @@
 """Tests for keyboard navigation."""
 
-import pytest
 
 from lyra_ui import (
     CommandPalette,
@@ -9,7 +8,6 @@ from lyra_ui import (
     QuickActions,
     VimNavigator,
 )
-
 
 # Vim Navigator Tests
 
@@ -258,7 +256,7 @@ def test_quick_actions_list_actions():
 
 def test_vim_navigator_with_command_palette():
     """Test Vim navigator with command palette."""
-    nav = VimNavigator()
+    VimNavigator()
     palette = CommandPalette()
 
     # Register command

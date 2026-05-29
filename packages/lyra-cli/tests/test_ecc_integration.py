@@ -75,7 +75,7 @@ from pathlib import Path
 
 class TestClass:
     '''A test class.'''
-    
+
     def test_method(self):
         '''A test method.'''
         pass

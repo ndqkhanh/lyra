@@ -42,7 +42,7 @@ class DualPoolMemory:
         self.explore_pool.append(item)
 
     def promote_to_exploit(self, item_id: str) -> bool:
-        for i, item in enumerate(self.explore_pool):
+        for _i, item in enumerate(self.explore_pool):
             if item.id == item_id:
                 self.exploit_pool.append(item)
                 self.explore_pool.remove(item)

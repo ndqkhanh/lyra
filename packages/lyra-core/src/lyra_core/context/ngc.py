@@ -156,7 +156,7 @@ class NGCCompactor:
             # Nothing to evict.
             return NGCResult(
                 kept=tuple(items),
-                evicted=tuple(),
+                evicted=(),
                 decisions=tuple(
                     NGCDecision(item_id=i.id, kept=True, reason="under budget")
                     for i in items
@@ -228,7 +228,7 @@ class NGCCompactor:
                 NGCDecision(item_id=anchor.id, kept=True, reason="anchor"),
             )
 
-        kept = set(i.id for i in anchors) | set(i.id for i in kept_non_anchor)
+        kept = {i.id for i in anchors} | {i.id for i in kept_non_anchor}
         kept_items = [i for i in items if i.id in kept]  # preserve order
         evicted_items = [i for i in items if i.id not in kept]
         after = sum(i.tokens for i in kept_items)

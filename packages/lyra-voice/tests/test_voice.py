@@ -7,7 +7,6 @@ import struct
 import time
 
 import pytest
-
 from lyra_voice import (
     ParsedCommand,
     VADMode,
@@ -20,7 +19,6 @@ from lyra_voice import (
     WakeWordConfig,
     WakeWordModel,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

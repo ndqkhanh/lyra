@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from lyra_tools.secrets_scan import sec_secrets_scan, _should_skip
+from lyra_tools.secrets_scan import _should_skip, sec_secrets_scan
 
 
 class TestShouldSkip:

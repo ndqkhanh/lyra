@@ -10,7 +10,7 @@ Features:
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 @dataclass
@@ -21,10 +21,10 @@ class SoundPackMetadata:
     version: str
     author: str
     description: str
-    game: Optional[str] = None
-    character: Optional[str] = None
+    game: str | None = None
+    character: str | None = None
     language: str = "en"
-    tags: List[str] = None
+    tags: list[str] = None
 
     def __post_init__(self):
         if self.tags is None:
@@ -39,11 +39,11 @@ class SoundPack:
     version: str
     author: str
     description: str
-    sounds: Dict[str, str]
+    sounds: dict[str, str]
     metadata: SoundPackMetadata
     pack_dir: Path
 
-    def get_sound_path(self, event: str) -> Optional[Path]:
+    def get_sound_path(self, event: str) -> Path | None:
         """
         Get sound file path for event.
 
@@ -62,7 +62,7 @@ class SoundPack:
 
         return None
 
-    def list_events(self) -> List[str]:
+    def list_events(self) -> list[str]:
         """List all events in this pack."""
         return list(self.sounds.keys())
 
@@ -77,7 +77,7 @@ class SoundPackLoader:
     - List available sound packs
     """
 
-    def __init__(self, sounds_dir: Optional[str] = None):
+    def __init__(self, sounds_dir: str | None = None):
         """Initialize sound pack loader."""
         if sounds_dir:
             self.sounds_dir = Path(sounds_dir).expanduser()
@@ -86,7 +86,7 @@ class SoundPackLoader:
 
         self.sounds_dir.mkdir(parents=True, exist_ok=True)
 
-    def load_pack(self, pack_name: str) -> Optional[SoundPack]:
+    def load_pack(self, pack_name: str) -> SoundPack | None:
         """
         Load sound pack.
 
@@ -103,14 +103,14 @@ class SoundPackLoader:
             return None
 
         try:
-            with open(manifest_path, "r") as f:
+            with open(manifest_path) as f:
                 manifest = json.load(f)
 
             return self._parse_manifest(manifest, pack_dir)
-        except (json.JSONDecodeError, IOError, KeyError):
+        except (OSError, json.JSONDecodeError, KeyError):
             return None
 
-    def _parse_manifest(self, manifest: Dict[str, Any], pack_dir: Path) -> SoundPack:
+    def _parse_manifest(self, manifest: dict[str, Any], pack_dir: Path) -> SoundPack:
         """Parse manifest into SoundPack."""
         metadata = SoundPackMetadata(
             name=manifest["name"],
@@ -133,7 +133,7 @@ class SoundPackLoader:
             pack_dir=pack_dir,
         )
 
-    def list_packs(self) -> List[str]:
+    def list_packs(self) -> list[str]:
         """List available sound packs."""
         if not self.sounds_dir.exists():
             return []
@@ -145,7 +145,7 @@ class SoundPackLoader:
 
         return sorted(packs)
 
-    def validate_pack(self, pack_name: str) -> tuple[bool, List[str]]:
+    def validate_pack(self, pack_name: str) -> tuple[bool, list[str]]:
         """
         Validate sound pack.
 
@@ -168,7 +168,7 @@ class SoundPackLoader:
             return False, errors
 
         try:
-            with open(manifest_path, "r") as f:
+            with open(manifest_path) as f:
                 manifest = json.load(f)
 
             # Check required fields
@@ -179,14 +179,14 @@ class SoundPackLoader:
 
             # Check sound files exist
             if "sounds" in manifest:
-                for event, sound_file in manifest["sounds"].items():
+                for _event, sound_file in manifest["sounds"].items():
                     sound_path = pack_dir / sound_file
                     if not sound_path.exists():
                         errors.append(f"Sound file not found: {sound_file}")
 
         except json.JSONDecodeError:
             errors.append("Invalid JSON in manifest.json")
-        except IOError:
+        except OSError:
             errors.append("Could not read manifest.json")
 
         return len(errors) == 0, errors

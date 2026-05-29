@@ -2,10 +2,11 @@
 Comprehensive tests for Tree Search reasoning engine (Tree-of-Thoughts).
 """
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
-from lyra_reasoning.engines.tree_search import TreeSearchEngine, ReasoningNode
+import pytest
+
+from lyra_reasoning.engines.tree_search import ReasoningNode, TreeSearchEngine
 from lyra_reasoning.types import (
     ComputeBudget,
     ReasoningConfig,
@@ -147,7 +148,7 @@ class TestTreeSearchEngine:
     def test_initialization_with_api_key(self):
         """Test engine initialization with API key."""
         with patch("lyra_reasoning.engines.tree_search.Anthropic") as mock:
-            engine = TreeSearchEngine(api_key="test-key")
+            TreeSearchEngine(api_key="test-key")
             mock.assert_called_once_with(api_key="test-key")
 
     def test_reason_basic_flow(self, tree_engine, mock_anthropic_client, basic_config, basic_budget):
@@ -300,7 +301,7 @@ class TestTreeSearchEngine:
         mock_response.content = [Mock(text="Step")]
         mock_anthropic_client.messages.create.return_value = mock_response
 
-        trace = tree_engine.reason("Test task", limited_budget, basic_config)
+        tree_engine.reason("Test task", limited_budget, basic_config)
 
         # Should stop due to budget
         assert limited_budget.steps_used <= 3

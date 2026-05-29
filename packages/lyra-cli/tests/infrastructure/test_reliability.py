@@ -186,7 +186,6 @@ class TestRetryPolicy:
         )
         policy = RetryPolicy(config)
 
-        delays = []
 
         def failing_function():
             raise ValueError("error")
@@ -223,8 +222,10 @@ class TestFallback:
 
     def test_fallback_uses_primary(self):
         """Test fallback uses primary when it succeeds."""
-        primary = lambda: "primary"
-        fallback_func = lambda: "fallback"
+        def primary():
+            return "primary"
+        def fallback_func():
+            return "fallback"
 
         fallback = Fallback(primary, fallback_func)
         result = fallback.execute()
@@ -236,7 +237,8 @@ class TestFallback:
         def primary():
             raise ValueError("primary failed")
 
-        fallback_func = lambda: "fallback"
+        def fallback_func():
+            return "fallback"
 
         fallback = Fallback(primary, fallback_func)
         result = fallback.execute()

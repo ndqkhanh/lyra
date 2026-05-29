@@ -12,7 +12,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from lyra_skills.loader import SkillLoaderError, load_skills
 
 

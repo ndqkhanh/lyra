@@ -4,13 +4,9 @@ Tests for Fast Evolution Engine (T103)
 Tests caching, incremental mutations, and 10-minute cycle performance.
 """
 
-import pytest
 import time
-from lyra_evolution.fast_evolution import (
-    FastEvolutionEngine,
-    EvaluationCache,
-    IncrementalMutator
-)
+
+from lyra_evolution.fast_evolution import EvaluationCache, FastEvolutionEngine, IncrementalMutator
 
 
 class TestEvaluationCache:
@@ -354,7 +350,7 @@ class TestIntegration:
         engine = FastEvolutionEngine(n_workers=4, cache_size=5000)
 
         baseline = {"skills": ["skill1", "skill2", "skill3"]}
-        root_id = engine.initialize(baseline)
+        engine.initialize(baseline)
 
         # Run 10 generations
         for gen in range(10):

@@ -150,12 +150,14 @@ from lyra_agent_swarm.team_messaging import (
 from lyra_agent_swarm.zero_trust_federation import (
     AuthDecision,
     AuthStatus,
-    Capability as FederationCapability,
     FederationConfig,
     FederationIdentity,
     FederationLevel,
     FederationRegistry,
     ZeroTrustFederation,
+)
+from lyra_agent_swarm.zero_trust_federation import (
+    Capability as FederationCapability,
 )
 
 __all__ = [

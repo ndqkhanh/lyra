@@ -2,60 +2,47 @@
 
 from __future__ import annotations
 
-import pytest
 import numpy as np
-
+import pytest
 from lyra_causal_graph import (
+    ActionEdge,
+    AdjustmentMethod,
+    BackdoorAdjuster,
     # Core graph & algorithms
     CausalGraph,
     CausalGraphConfig,
-    EdgeType,
-    GraphNode,
-    GraphEdge,
-    PCAlgorithm,
-    FCIAlgorithm,
     ConditionalIndependenceTest,
-    # Errors
-    CycleDetectedError,
-    InvalidNodeError,
-    InvalidEdgeError,
-    GraphConstructionError,
-    # SCM
-    StructuralCausalModel,
-    SCMConfig,
-    SCMEquation,
-    GaussianNoise,
-    UniformNoise,
-    LaplaceNoise,
-    EndogenousVariable,
-    ExogenousVariable,
-    make_chain_scm,
-    make_collider_scm,
-    # Intervention
-    InterventionModel,
-    InterventionConfig,
-    InterventionResult,
-    TreatmentEffect,
-    AdjustmentMethod,
-    BackdoorAdjuster,
-    FrontdoorAdjuster,
+    CounterfactualConfig,
+    CounterfactualQuery,
     # Counterfactual
     CounterfactualReasoner,
-    CounterfactualQuery,
     CounterfactualResult,
-    CounterfactualConfig,
-    # Root Cause
+    # Errors
+    CycleDetectedError,
+    EdgeType,
+    EntityNode,
+    FCIAlgorithm,
+    FrontdoorAdjuster,
+    GaussianNoise,
+    GraphConstructionError,
+    InterventionConfig,
+    # Intervention
+    InterventionModel,
+    InterventionResult,
+    InvalidNodeError,
+    LaplaceNoise,
+    LatentVariable,
+    OutcomeNode,
+    PCAlgorithm,
     RootCauseAnalyzer,
     RootCauseConfig,
-    RootCause,
-    AttributionScore,
-    # Legacy
-    EntityNode,
-    ActionEdge,
-    OutcomeNode,
-    LatentVariable,
+    SCMConfig,
+    StructuralCausalModel,
+    TreatmentEffect,
+    UniformNoise,
+    make_chain_scm,
+    make_collider_scm,
 )
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Fixtures
@@ -544,7 +531,7 @@ class TestSCM:
 
     def test_intervene(self, scm):
         """Intervening on X0 should break its dependence on U_X0."""
-        natural = scm.sample(n=500)
+        scm.sample(n=500)
         intervened = scm.intervene({"X0": 0.0}).sample(n=500)
         # Under intervention, X0 is fixed
         assert np.all(intervened["X0"] == 0.0)
@@ -629,8 +616,8 @@ class TestIntervention:
         assert effects.ite is not None
 
     def test_estimate_cate(self, sample_data):
-        rng = np.random.default_rng(42)
-        n = len(sample_data["X"])
+        np.random.default_rng(42)
+        len(sample_data["X"])
         group = np.where(sample_data["X"] > 0, "high", "low")
         data = {
             **sample_data,
@@ -668,7 +655,7 @@ class TestBackdoorAdjuster:
         n = 500
         C = rng.normal(0, 1, n)
         X = 0.8 * C + rng.normal(0, 0.3, n)
-        Y = 2.0 * X + 0.5 * C + rng.normal(0, 0.2, n)
+        2.0 * X + 0.5 * C + rng.normal(0, 0.2, n)
 
         g = CausalGraph()
         g.add_node("C", node_type="confounder")
@@ -678,7 +665,6 @@ class TestBackdoorAdjuster:
         g.add_directed_edge("C", "Y", strength=0.5)
         g.add_directed_edge("X", "Y", strength=0.9)
 
-        data = {"C": C, "X": X, "Y": Y}
 
         adjuster = BackdoorAdjuster()
         adj_set = adjuster.find_adjustment_set(g, "X", "Y")

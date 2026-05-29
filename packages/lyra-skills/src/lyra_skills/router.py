@@ -94,7 +94,7 @@ class SkillRouter:
         self,
         skills: Sequence[SkillManifest],
         *,
-        argus_cascade: "LyraArgusCascade | None" = None,
+        argus_cascade: LyraArgusCascade | None = None,
     ) -> None:
         self._skills = list(skills)
         self._cascade = argus_cascade
@@ -104,9 +104,9 @@ class SkillRouter:
         cls,
         skills: Sequence[SkillManifest],
         *,
-        cascade: "LyraArgusCascade | None" = None,
+        cascade: LyraArgusCascade | None = None,
         **cascade_kwargs,
-    ) -> "SkillRouter":
+    ) -> SkillRouter:
         """Build a router whose :meth:`route` delegates to an Argus cascade.
 
         When *cascade* is omitted, a fresh :class:`LyraArgusCascade` is
@@ -122,7 +122,7 @@ class SkillRouter:
         return cls(skills, argus_cascade=cascade)
 
     @property
-    def argus_cascade(self) -> "LyraArgusCascade | None":
+    def argus_cascade(self) -> LyraArgusCascade | None:
         """The wired cascade, or ``None`` for the default token-overlap router."""
         return self._cascade
 
@@ -134,7 +134,7 @@ class SkillRouter:
 
     def route_with_trace(
         self, query: str, *, top_k: int = 3, mode: str = "auto",
-    ) -> "CascadeResult":
+    ) -> CascadeResult:
         """Run the Argus cascade and return the full reasoning trace.
 
         Raises :class:`RuntimeError` when no cascade is wired — call

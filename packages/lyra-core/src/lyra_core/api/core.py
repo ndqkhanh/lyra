@@ -80,14 +80,14 @@ class LyraAPI:
         try:
             # Validate inputs
             if not task or not task.strip():
-                return APIResponse.error(
+                return APIResponse.error_response(
                     message="Task cannot be empty",
                     code="INVALID_TASK",
                 )
 
             valid_modes = ["plan", "auto-edit", "bypass-perms"]
             if mode not in valid_modes:
-                return APIResponse.error(
+                return APIResponse.error_response(
                     message=f"Invalid mode: {mode}. Must be one of {valid_modes}",
                     code="INVALID_MODE",
                 )
@@ -103,7 +103,7 @@ class LyraAPI:
             )
 
         except Exception as e:
-            return APIResponse.error(
+            return APIResponse.error_response(
                 message=str(e),
                 code="AGENT_LOOP_ERROR",
             )
@@ -142,14 +142,14 @@ class LyraAPI:
             # Validate tool exists
             available_tools = [t["name"] for t in self.list_tools()]
             if tool_name not in available_tools:
-                return APIResponse.error(
+                return APIResponse.error_response(
                     message=f"Unknown tool: {tool_name}",
                     code="UNKNOWN_TOOL",
                 )
 
             # Validate required parameters
             if tool_name == "Read" and "file_path" not in parameters:
-                return APIResponse.error(
+                return APIResponse.error_response(
                     message="Missing required parameter: file_path",
                     code="MISSING_PARAMETER",
                 )
@@ -165,7 +165,7 @@ class LyraAPI:
             )
 
         except Exception as e:
-            return APIResponse.error(
+            return APIResponse.error_response(
                 message=str(e),
                 code="TOOL_EXECUTION_ERROR",
             )
@@ -197,7 +197,7 @@ class LyraAPI:
             )
 
         except Exception as e:
-            return APIResponse.error(
+            return APIResponse.error_response(
                 message=str(e),
                 code="MEMORY_STORE_ERROR",
             )
@@ -218,13 +218,13 @@ class LyraAPI:
         """
         try:
             if namespace not in self._memory_store:
-                return APIResponse.error(
+                return APIResponse.error_response(
                     message=f"Namespace not found: {namespace}",
                     code="NAMESPACE_NOT_FOUND",
                 )
 
             if key not in self._memory_store[namespace]:
-                return APIResponse.error(
+                return APIResponse.error_response(
                     message=f"Key not found: {key}",
                     code="KEY_NOT_FOUND",
                 )
@@ -233,7 +233,7 @@ class LyraAPI:
             return APIResponse.success(data=value)
 
         except Exception as e:
-            return APIResponse.error(
+            return APIResponse.error_response(
                 message=str(e),
                 code="MEMORY_RETRIEVE_ERROR",
             )

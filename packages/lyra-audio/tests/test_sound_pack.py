@@ -4,10 +4,7 @@ import json
 import tempfile
 from pathlib import Path
 
-import pytest
-
 from lyra_audio.sound_pack import SoundPack, SoundPackLoader, SoundPackMetadata
-
 
 # Sound Pack Tests
 

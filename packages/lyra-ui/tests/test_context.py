@@ -1,6 +1,5 @@
 """Tests for context visualization."""
 
-import pytest
 
 from lyra_ui import (
     ContextComponent,
@@ -9,7 +8,6 @@ from lyra_ui import (
     ContextTracker,
     ContextUsage,
 )
-
 
 # Context Tracker Tests
 

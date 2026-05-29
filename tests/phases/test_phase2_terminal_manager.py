@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Test Terminal Manager - Phase 2"""
 
-import sys
 import os
+import sys
 import time
 
 # Add to path
@@ -14,7 +14,6 @@ def test_imports():
     print("Testing imports...")
 
     try:
-        from lyra_cli.terminal import TerminalManager, TerminalSize
         print("✓ TerminalManager import successful")
         return True
     except Exception as e:

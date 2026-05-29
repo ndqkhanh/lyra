@@ -12,12 +12,12 @@ sys.path.insert(0, str(Path(__file__).parent / "packages/lyra-cli/src"))
 
 from lyra_cli.tui_v2.app import LyraHarnessApp
 from lyra_cli.tui_v2.widgets import (
-    ProgressSpinner,
     AgentExecutionPanel,
-    MetricsTracker,
     BackgroundTaskPanel,
-    ThinkingIndicator,
+    MetricsTracker,
     PhaseProgress,
+    ProgressSpinner,
+    ThinkingIndicator,
 )
 
 

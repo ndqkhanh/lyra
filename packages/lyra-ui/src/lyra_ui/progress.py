@@ -7,7 +7,6 @@ Features:
 - Multi-task progress tracking
 """
 
-from typing import Optional
 
 from rich.progress import (
     BarColumn,
@@ -32,7 +31,7 @@ class ProgressManager:
 
     def __init__(self):
         """Initialize progress manager."""
-        self.progress: Optional[Progress] = None
+        self.progress: Progress | None = None
         self.tasks: dict[str, TaskID] = {}
 
     def start(self):
@@ -56,7 +55,7 @@ class ProgressManager:
             self.tasks.clear()
 
     def add_task(
-        self, name: str, description: str, total: Optional[float] = None
+        self, name: str, description: str, total: float | None = None
     ) -> str:
         """
         Add progress task.
@@ -76,7 +75,7 @@ class ProgressManager:
         self.tasks[name] = task_id
         return name
 
-    def update_task(self, name: str, advance: float = 1.0, description: Optional[str] = None):
+    def update_task(self, name: str, advance: float = 1.0, description: str | None = None):
         """
         Update task progress.
 
@@ -129,7 +128,7 @@ class Spinner:
             SpinnerColumn(),
             TextColumn("[bold blue]{task.description}"),
         )
-        self.task_id: Optional[TaskID] = None
+        self.task_id: TaskID | None = None
 
     def __enter__(self):
         """Start spinner."""

@@ -121,7 +121,7 @@ class TestMemoryTransplanter:
     def test_filter_by_target(self):
         mt = MemoryTransplanter()
         src, tgt1 = self._make_modules()
-        tgt2 = ModularMemoryModule(name="tgt2")
+        ModularMemoryModule(name="tgt2")
         mt.transplant(src, tgt1, [0])
         mt.transplant(src, tgt1, [1])
 

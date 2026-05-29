@@ -4,7 +4,7 @@ from __future__ import annotations
 import time
 import uuid
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -65,9 +65,9 @@ class EvalResult:
         duration_ms: float = 0.0,
         error: str = "",
         weight: float = 1.0,
-        timestamp: Optional[float] = None,
-        result_id: Optional[str] = None,
-    ) -> "EvalResult":
+        timestamp: float | None = None,
+        result_id: str | None = None,
+    ) -> EvalResult:
         return cls(
             result_id=result_id or str(uuid.uuid4()),
             case_id=case_id,
@@ -185,10 +185,10 @@ class EvalRun:
         *,
         suite_id: str,
         results: tuple[EvalResult, ...] | list[EvalResult],
-        metadata: Optional[dict[str, Any]] = None,
-        run_id: Optional[str] = None,
-        timestamp: Optional[float] = None,
-    ) -> "EvalRun":
+        metadata: dict[str, Any] | None = None,
+        run_id: str | None = None,
+        timestamp: float | None = None,
+    ) -> EvalRun:
         return cls(
             run_id=run_id or str(uuid.uuid4()),
             suite_id=suite_id,

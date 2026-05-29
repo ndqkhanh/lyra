@@ -3,22 +3,17 @@
 from __future__ import annotations
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
 from lyra_agent_lifecycle import (
     AgentAlreadyRetiredError,
     AgentFactory,
     AgentLifecycleManager,
-    AgentNotReadyError,
-    AgentRecord,
     AgentRetirement,
     AgentSpawner,
     CapabilityProfile,
     EvolutionTracker,
     HealthCheck,
-    HealthCheckFailedError,
     HealthCheckResult,
     InvalidTransitionError,
     KnowledgeExtractor,
@@ -27,14 +22,11 @@ from lyra_agent_lifecycle import (
     LifecycleHooks,
     LifecycleState,
     PerformanceSnapshot,
-    ResourceAllocationError,
     RetirementConfig,
     SpawnConfig,
     SpawnError,
     StatePreserver,
-    WarmupTimeoutError,
 )
-
 
 # ============================================================================
 # Lifecycle state machine tests
@@ -526,7 +518,7 @@ class TestEvolutionTracker:
 
     def test_record_task_pruning(self, tracker: EvolutionTracker) -> None:
         tracker.register_agent("busy", ["general"])
-        for i in range(1000):
+        for _i in range(1000):
             tracker.record_task("busy", success=True, latency_ms=10, quality=0.5)
         perf = tracker.get_performance("busy")
         assert perf["task_count"] == 1000

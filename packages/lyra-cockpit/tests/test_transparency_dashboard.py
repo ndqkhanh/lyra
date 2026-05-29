@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-import time
-
 import pytest
-
 from lyra_cockpit.transparency_dashboard import (
     DashboardSnapshot,
     EvidenceGraph,

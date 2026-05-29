@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Test with stdin monitoring."""
 import sys
-import select
 from pathlib import Path
+
 
 def log(msg):
     print(f"[DEBUG] {msg}", file=sys.stderr, flush=True)
@@ -16,18 +16,18 @@ if sys.stdin.isatty():
     import termios
     try:
         attrs = termios.tcgetattr(sys.stdin)
-        log(f"  Terminal attributes OK")
+        log("  Terminal attributes OK")
     except Exception as e:
         log(f"  Cannot get terminal attributes: {e}")
 
 log("Starting app...")
 
-from lyra_cli.tui_v2.transport import LyraTransport
 from harness_tui import ProjectConfig
 from lyra_cli.tui_v2 import lyra_theme
-from lyra_cli.tui_v2.sidebar import build_lyra_sidebar_tabs
-from lyra_cli.tui_v2.commands import register_lyra_commands
 from lyra_cli.tui_v2.app import LyraHarnessApp
+from lyra_cli.tui_v2.commands import register_lyra_commands
+from lyra_cli.tui_v2.sidebar import build_lyra_sidebar_tabs
+from lyra_cli.tui_v2.transport import LyraTransport
 
 transport = LyraTransport(repo_root=Path.cwd(), model='claude-sonnet-4.6', max_steps=20)
 cfg = ProjectConfig(

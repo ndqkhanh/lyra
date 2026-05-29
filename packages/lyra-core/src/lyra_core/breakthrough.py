@@ -127,7 +127,7 @@ class BreakthroughIntegration:
         self._running = False
         self._task: asyncio.Task | None = None
 
-        for name, (domain, phase, pkgs) in self.UPGRADE_REGISTRY.items():
+        for name, (domain, phase, _pkgs) in self.UPGRADE_REGISTRY.items():
             self._upgrades[name] = UpgradeStatus(
                 name=name, domain=domain, phase=phase
             )
@@ -250,7 +250,7 @@ class BreakthroughIntegration:
         phase_scores: dict[int, list[float]] = defaultdict(list)
         ready_count = 0
 
-        for name, status in self._upgrades.items():
+        for _name, status in self._upgrades.items():
             status.last_check = now
             score = self._compute_upgrade_health(status)
             status.health_score = score

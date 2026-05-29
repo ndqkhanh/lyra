@@ -2,44 +2,35 @@
 
 from __future__ import annotations
 
-import asyncio
-
 import pytest
-
 from lyra_verification_mesh import (
-    # Core
-    VerificationLayer,
-    VerificationStatus,
-    VerificationResult,
-    TemporalProperty,
-    VerificationModule,
-    VerificationMesh,
-    ConfidenceAggregator,
-    # CPL
-    CPLVerifier,
-    CPLRule,
-    CheckSeverity,
-    # Formal
-    FormalVerifier,
-    TypeSafetyVerifier,
-    ContractVerifier,
-    PrePostCondition,
-    TypeConstraint,
-    FormalProofResult,
-    # Runtime
-    RuntimeVerifier,
-    ResourceLimits,
-    SandboxMetrics,
-    SideEffect,
+    AttestationLevel,
     # Attestation
     AttestationService,
-    AttestationLevel,
+    ConfidenceAggregator,
+    ContractVerifier,
+    CPLRule,
+    # CPL
+    CPLVerifier,
+    FormalProofResult,
+    # Formal
+    FormalVerifier,
+    MeshConfigurationError,
+    PrePostCondition,
+    RuntimeVerifier,
+    TemporalProperty,
+    TypeConstraint,
+    TypeSafetyVerifier,
     # Exceptions
     VerificationError,
     VerificationFailedError,
-    MeshConfigurationError,
+    # Core
+    VerificationLayer,
+    VerificationMesh,
+    VerificationModule,
+    VerificationResult,
+    VerificationStatus,
 )
-
 
 # ── CPLVerifier ────────────────────────────────────────────────────────
 

@@ -8,9 +8,10 @@ from __future__ import annotations
 
 import logging
 from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +31,7 @@ class MemoryTier(Enum):
 class TokenNativeIndex:
     """Memory index using token overlap scoring — no embeddings needed."""
 
-    def __init__(self, tokenizer: Optional[Callable[[str], list[int]]] = None):
+    def __init__(self, tokenizer: Callable[[str], list[int]] | None = None):
         self.tokenizer = tokenizer or self._simple_tokenize
         self.token_to_docs: dict[int, set[str]] = {}
         self.doc_store: dict[str, str] = {}
@@ -78,7 +79,7 @@ class TokenNativeIndex:
         ranked = sorted(scores.items(), key=lambda x: -x[1])
         return [(doc_id, score) for doc_id, score in ranked[:top_k]]
 
-    def get_document(self, doc_id: str) -> Optional[str]:
+    def get_document(self, doc_id: str) -> str | None:
         return self.doc_store.get(doc_id)
 
     def remove(self, doc_id: str) -> bool:

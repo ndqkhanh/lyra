@@ -12,9 +12,9 @@ import json
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from lyra_permissions.types import PermissionDecision, PermissionLevel, PermissionPolicy
+from lyra_permissions.types import PermissionDecision, PermissionLevel
 
 
 class BypassMode:
@@ -41,10 +41,10 @@ class BypassMode:
         config_path = Path("~/.lyra/config.json").expanduser()
         if config_path.exists():
             try:
-                with open(config_path, "r") as f:
+                with open(config_path) as f:
                     config = json.load(f)
                     return config.get("bypassPermissions", False)
-            except (json.JSONDecodeError, IOError):
+            except (OSError, json.JSONDecodeError):
                 pass
 
         return False
@@ -77,9 +77,9 @@ class BypassMode:
         config = {}
         if config_path.exists():
             try:
-                with open(config_path, "r") as f:
+                with open(config_path) as f:
                     config = json.load(f)
-            except (json.JSONDecodeError, IOError):
+            except (OSError, json.JSONDecodeError):
                 pass
 
         config["bypassPermissions"] = self.enabled
@@ -87,7 +87,7 @@ class BypassMode:
         try:
             with open(config_path, "w") as f:
                 json.dump(config, f, indent=2)
-        except IOError:
+        except OSError:
             pass
 
     def get_status_indicator(self) -> str:
@@ -107,7 +107,7 @@ class AuditLogger:
     - Retention policy
     """
 
-    def __init__(self, log_path: Optional[str] = None):
+    def __init__(self, log_path: str | None = None):
         """Initialize audit logger."""
         if log_path:
             self.log_path = Path(log_path).expanduser()
@@ -122,7 +122,7 @@ class AuditLogger:
         operation: str,
         decision: PermissionDecision,
         level: PermissionLevel,
-        context: Optional[Dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
     ):
         """
         Log permission decision.
@@ -146,10 +146,10 @@ class AuditLogger:
         try:
             with open(self.log_path, "a") as f:
                 f.write(json.dumps(entry) + "\n")
-        except IOError:
+        except OSError:
             pass  # Fail silently
 
-    def get_recent(self, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_recent(self, limit: int = 100) -> list[dict[str, Any]]:
         """
         Get recent audit entries.
 
@@ -164,18 +164,18 @@ class AuditLogger:
 
         entries = []
         try:
-            with open(self.log_path, "r") as f:
+            with open(self.log_path) as f:
                 for line in f:
                     try:
                         entries.append(json.loads(line))
                     except json.JSONDecodeError:
                         continue
-        except IOError:
+        except OSError:
             return []
 
         return entries[-limit:]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """
         Get audit statistics.
 
@@ -210,7 +210,7 @@ class AuditLogger:
         if self.log_path.exists():
             try:
                 self.log_path.unlink()
-            except IOError:
+            except OSError:
                 pass
 
     def export(self, output_path: str, format: str = "json") -> bool:
@@ -245,7 +245,7 @@ class AuditLogger:
                         writer.writeheader()
                         writer.writerows(entries)
             return True
-        except (IOError, ImportError):
+        except (OSError, ImportError):
             return False
 
 
@@ -280,7 +280,7 @@ class SafetyGuardrails:
 
     @staticmethod
     def requires_confirmation(
-        tool: str, operation: str, context: Optional[Dict[str, Any]] = None
+        tool: str, operation: str, context: dict[str, Any] | None = None
     ) -> bool:
         """
         Check if operation requires confirmation even in bypass mode.
@@ -318,7 +318,7 @@ class SafetyGuardrails:
 
     @staticmethod
     def get_warning_message(
-        tool: str, operation: str, context: Optional[Dict[str, Any]] = None
+        tool: str, operation: str, context: dict[str, Any] | None = None
     ) -> str:
         """
         Get warning message for critical operation.

@@ -2,6 +2,12 @@
 
 from __future__ import annotations
 
+from lyra_self_rewrite.constraint_generator import (
+    ConstraintCheck,
+    ConstraintGenerator,
+    ConstraintReport,
+    ConstraintSpec,
+)
 from lyra_self_rewrite.exceptions import (  # type: ignore[import-unused]
     ConstraintError,
     ConvergenceError,
@@ -12,12 +18,6 @@ from lyra_self_rewrite.exceptions import (  # type: ignore[import-unused]
     RecursionError,
     RewriteValidationError,
     SelfRewriteError,
-)
-from lyra_self_rewrite.constraint_generator import (
-    ConstraintCheck,
-    ConstraintGenerator,
-    ConstraintReport,
-    ConstraintSpec,
 )
 from lyra_self_rewrite.fitness_evaluator import (
     FitnessConfig,
@@ -51,10 +51,10 @@ from lyra_self_rewrite.rewrite_generator import (
     RewriteTemplate,
 )
 from lyra_self_rewrite.rewrite_validator import (
+    RewriteValidator,
     ValidationConfig,
     ValidationIssue,
     ValidationResult,
-    RewriteValidator,
 )
 
 __all__ = [

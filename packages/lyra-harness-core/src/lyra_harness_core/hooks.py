@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 import enum
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, Optional
 
 from .messages import ToolCall, ToolResult
 
@@ -23,7 +23,7 @@ class HookDecision:
     annotation: str = ""  # additional text to add to the tool result / transcript
 
 
-Handler = Callable[[ToolCall, Optional[ToolResult]], HookDecision]
+Handler = Callable[[ToolCall, ToolResult | None], HookDecision]
 
 
 @dataclass
@@ -31,7 +31,7 @@ class Hook:
     name: str
     event: HookEvent
     matcher: str = "*"  # fnmatch pattern on tool name
-    handler: Optional[Handler] = None
+    handler: Handler | None = None
 
 
 class HookRegistry:
@@ -47,7 +47,7 @@ class HookRegistry:
         self,
         event: HookEvent,
         call: ToolCall,
-        result: Optional[ToolResult] = None,
+        result: ToolResult | None = None,
     ) -> HookDecision:
         """Run all hooks for an event in registration order. First block wins."""
         import fnmatch

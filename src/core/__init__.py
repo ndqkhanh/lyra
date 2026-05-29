@@ -5,13 +5,13 @@ Provides fundamental data structures and types used across the system.
 """
 
 from src.core.task import (
+    AgentPerformance,
+    ExecutionMetrics,
+    Result,
     Task,
-    TaskType,
     TaskPriority,
     TaskStatus,
-    Result,
-    ExecutionMetrics,
-    AgentPerformance,
+    TaskType,
 )
 
 __all__ = [

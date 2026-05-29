@@ -8,7 +8,6 @@ Features:
 """
 
 import time
-from typing import Optional
 
 
 class AdaptiveVolumeController:

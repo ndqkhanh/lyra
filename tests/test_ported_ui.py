@@ -37,7 +37,7 @@ def test_threshold_colour():
 
 
 def test_hud_model_panel():
-    from lyra_cli.hud import HudState, load_preset, render
+    from lyra_cli.hud import load_preset, render
     from lyra_cli.hud.testing import sample_state
     state = sample_state()
     cfg = load_preset("compact")
@@ -62,7 +62,7 @@ def test_hud_error_state():
 
 
 def test_hud_all_presets():
-    from lyra_cli.hud import HudState, load_preset, render
+    from lyra_cli.hud import load_preset, render
     from lyra_cli.hud.testing import sample_state
     state = sample_state()
     for name in ("minimal", "compact", "full", "wide"):

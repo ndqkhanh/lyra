@@ -6,15 +6,15 @@ import asyncio
 import logging
 import re
 import time
-from dataclasses import dataclass, field
-from typing import Any, Callable, Optional, Protocol
+from dataclasses import dataclass
+from typing import Any, Protocol
 
 from .verification_mesh import (
-    VerificationLayer,
-    VerificationStatus,
-    VerificationResult,
-    VerificationModule,
     TemporalProperty,
+    VerificationLayer,
+    VerificationModule,
+    VerificationResult,
+    VerificationStatus,
 )
 
 logger = logging.getLogger(__name__)
@@ -75,7 +75,7 @@ class FormalProofResult:
 
     property_name: str
     proved: bool = False
-    counterexample: Optional[dict[str, Any]] = None
+    counterexample: dict[str, Any] | None = None
     proof_duration_ms: float = 0.0
     strategy: str = "symbolic"
 
@@ -501,7 +501,7 @@ class FormalVerifier:
 
         # Check for violations in the event log
         property_holds = True
-        counterexample: Optional[dict[str, Any]] = None
+        counterexample: dict[str, Any] | None = None
 
         for event in event_log:
             event_type = str(event.get("type", "")).lower()

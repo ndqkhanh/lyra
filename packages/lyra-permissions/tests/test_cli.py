@@ -3,10 +3,7 @@
 import tempfile
 from pathlib import Path
 
-import pytest
-
 from lyra_permissions.cli import PermissionCLI
-
 
 # CLI Tests
 

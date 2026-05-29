@@ -12,11 +12,12 @@ Features:
 
 import json
 import subprocess
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 
 class IntegrationType(Enum):
@@ -37,7 +38,7 @@ class IntegrationConfig:
 
     type: IntegrationType
     enabled: bool
-    settings: Dict[str, Any] = field(default_factory=dict)
+    settings: dict[str, Any] = field(default_factory=dict)
 
 
 class GitIntegration:
@@ -51,7 +52,7 @@ class GitIntegration:
     - Create pull requests
     """
 
-    def __init__(self, repo_path: Optional[Path] = None):
+    def __init__(self, repo_path: Path | None = None):
         """
         Initialize Git integration.
 
@@ -60,7 +61,7 @@ class GitIntegration:
         """
         self.repo_path = repo_path or Path.cwd()
 
-    def commit(self, message: str, files: Optional[List[str]] = None) -> bool:
+    def commit(self, message: str, files: list[str] | None = None) -> bool:
         """
         Commit changes.
 
@@ -98,7 +99,7 @@ class GitIntegration:
         except subprocess.CalledProcessError:
             return False
 
-    def push(self, branch: Optional[str] = None, remote: str = "origin") -> bool:
+    def push(self, branch: str | None = None, remote: str = "origin") -> bool:
         """
         Push to remote.
 
@@ -145,7 +146,7 @@ class GitIntegration:
         except subprocess.CalledProcessError:
             return False
 
-    def get_current_branch(self) -> Optional[str]:
+    def get_current_branch(self) -> str | None:
         """
         Get current branch name.
 
@@ -175,7 +176,7 @@ class GitHubIntegration:
     - Add comments
     """
 
-    def __init__(self, token: Optional[str] = None):
+    def __init__(self, token: str | None = None):
         """
         Initialize GitHub integration.
 
@@ -191,7 +192,7 @@ class GitHubIntegration:
         body: str,
         head: str,
         base: str = "main",
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Create pull request.
 
@@ -237,8 +238,8 @@ class GitHubIntegration:
         repo: str,
         title: str,
         body: str,
-        labels: Optional[List[str]] = None,
-    ) -> Optional[str]:
+        labels: list[str] | None = None,
+    ) -> str | None:
         """
         Create issue.
 
@@ -288,7 +289,7 @@ class SlackIntegration:
     - Post to channels
     """
 
-    def __init__(self, webhook_url: Optional[str] = None):
+    def __init__(self, webhook_url: str | None = None):
         """
         Initialize Slack integration.
 
@@ -297,7 +298,7 @@ class SlackIntegration:
         """
         self.webhook_url = webhook_url
 
-    def send_message(self, text: str, channel: Optional[str] = None) -> bool:
+    def send_message(self, text: str, channel: str | None = None) -> bool:
         """
         Send message to Slack.
 
@@ -381,7 +382,7 @@ class WebhookIntegration:
 
     def __init__(self):
         """Initialize webhook integration."""
-        self.webhooks: Dict[str, str] = {}
+        self.webhooks: dict[str, str] = {}
 
     def register_webhook(self, event: str, url: str):
         """
@@ -393,7 +394,7 @@ class WebhookIntegration:
         """
         self.webhooks[event] = url
 
-    def trigger_webhook(self, event: str, data: Dict[str, Any]) -> bool:
+    def trigger_webhook(self, event: str, data: dict[str, Any]) -> bool:
         """
         Trigger webhook.
 
@@ -417,7 +418,7 @@ class WebhookIntegration:
         except Exception:
             return False
 
-    def list_webhooks(self) -> Dict[str, str]:
+    def list_webhooks(self) -> dict[str, str]:
         """
         List registered webhooks.
 
@@ -436,7 +437,7 @@ class Plugin:
     version: str
     description: str
     enabled: bool = True
-    settings: Dict[str, Any] = field(default_factory=dict)
+    settings: dict[str, Any] = field(default_factory=dict)
 
 
 class PluginSystem:
@@ -450,7 +451,7 @@ class PluginSystem:
     - Plugin settings
     """
 
-    def __init__(self, plugin_dir: Optional[Path] = None):
+    def __init__(self, plugin_dir: Path | None = None):
         """
         Initialize plugin system.
 
@@ -459,8 +460,8 @@ class PluginSystem:
         """
         self.plugin_dir = plugin_dir or Path.home() / ".lyra" / "plugins"
         self.plugin_dir.mkdir(parents=True, exist_ok=True)
-        self.plugins: Dict[str, Plugin] = {}
-        self.hooks: Dict[str, List[Callable]] = {}
+        self.plugins: dict[str, Plugin] = {}
+        self.hooks: dict[str, list[Callable]] = {}
 
     def register_plugin(self, plugin: Plugin):
         """
@@ -491,7 +492,7 @@ class PluginSystem:
         if plugin_id in self.plugins:
             self.plugins[plugin_id].enabled = False
 
-    def get_plugin(self, plugin_id: str) -> Optional[Plugin]:
+    def get_plugin(self, plugin_id: str) -> Plugin | None:
         """
         Get plugin by ID.
 
@@ -503,7 +504,7 @@ class PluginSystem:
         """
         return self.plugins.get(plugin_id)
 
-    def list_plugins(self) -> List[Plugin]:
+    def list_plugins(self) -> list[Plugin]:
         """
         List all plugins.
 
@@ -548,7 +549,7 @@ class IntegrationManager:
     - Integration status
     """
 
-    def __init__(self, config_path: Optional[Path] = None):
+    def __init__(self, config_path: Path | None = None):
         """
         Initialize integration manager.
 
@@ -556,7 +557,7 @@ class IntegrationManager:
             config_path: Path to config file
         """
         self.config_path = config_path or Path.home() / ".lyra" / "integrations.json"
-        self.integrations: Dict[str, IntegrationConfig] = {}
+        self.integrations: dict[str, IntegrationConfig] = {}
         self.git = GitIntegration()
         self.github = GitHubIntegration()
         self.slack = SlackIntegration()
@@ -567,7 +568,7 @@ class IntegrationManager:
         self,
         integration_type: IntegrationType,
         enabled: bool,
-        settings: Optional[Dict[str, Any]] = None,
+        settings: dict[str, Any] | None = None,
     ):
         """
         Configure integration.
@@ -587,7 +588,7 @@ class IntegrationManager:
     def get_integration(
         self,
         integration_type: IntegrationType,
-    ) -> Optional[IntegrationConfig]:
+    ) -> IntegrationConfig | None:
         """
         Get integration config.
 
@@ -631,7 +632,7 @@ class IntegrationManager:
         if not self.config_path.exists():
             return
 
-        with open(self.config_path, "r") as f:
+        with open(self.config_path) as f:
             config_data = json.load(f)
 
         for key, data in config_data.items():

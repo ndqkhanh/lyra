@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import enum
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -42,26 +42,26 @@ class Message(BaseModel):
     content: str = ""
     tool_calls: list[ToolCall] = Field(default_factory=list)
     tool_results: list[ToolResult] = Field(default_factory=list)
-    stop_reason: Optional[StopReason] = None
+    stop_reason: StopReason | None = None
 
     def has_tool_calls(self) -> bool:
         return bool(self.tool_calls)
 
     @classmethod
-    def system(cls, content: str) -> "Message":
+    def system(cls, content: str) -> Message:
         return cls(role="system", content=content)
 
     @classmethod
-    def user(cls, content: str) -> "Message":
+    def user(cls, content: str) -> Message:
         return cls(role="user", content=content)
 
     @classmethod
     def assistant(
         cls,
         content: str = "",
-        tool_calls: Optional[list[ToolCall]] = None,
-        stop_reason: Optional[StopReason] = None,
-    ) -> "Message":
+        tool_calls: list[ToolCall] | None = None,
+        stop_reason: StopReason | None = None,
+    ) -> Message:
         return cls(
             role="assistant",
             content=content,
@@ -70,5 +70,5 @@ class Message(BaseModel):
         )
 
     @classmethod
-    def tool(cls, results: list[ToolResult]) -> "Message":
+    def tool(cls, results: list[ToolResult]) -> Message:
         return cls(role="tool", tool_results=results)

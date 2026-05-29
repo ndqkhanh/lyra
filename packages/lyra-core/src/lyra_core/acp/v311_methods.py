@@ -118,7 +118,7 @@ class _V311State:
         try:
             lead.spawn(TeammateSpec(name=name, model=model))
         except Exception as e:  # noqa: BLE001
-            raise AcpError(-32602, f"spawn failed: {e}")
+            raise AcpError(-32602, f"spawn failed: {e}") from e
         return {"team": team, "spawned": list(lead.teammates)}
 
     def add_task(self, params: Mapping[str, Any]) -> dict[str, Any]:
@@ -138,7 +138,7 @@ class _V311State:
                 body=body,
             )
         except Exception as e:  # noqa: BLE001
-            raise AcpError(-32602, f"add_task failed: {e}")
+            raise AcpError(-32602, f"add_task failed: {e}") from e
         return {"team": team, "task_id": tid}
 
     def run_until_idle(self, params: Mapping[str, Any]) -> dict[str, Any]:
@@ -189,7 +189,7 @@ class _V311State:
             b = SourceBundle.load(path)
             b.validate()
         except Exception as e:  # noqa: BLE001
-            raise AcpError(-32602, f"bundle.info failed: {e}")
+            raise AcpError(-32602, f"bundle.info failed: {e}") from e
         return b.summary()
 
     def bundle_install(self, params: Mapping[str, Any]) -> dict[str, Any]:
@@ -210,7 +210,7 @@ class _V311State:
                 authorized_by=authorized_by,
             )
         except Exception as e:  # noqa: BLE001
-            raise AcpError(-32602, f"bundle.install failed: {e}")
+            raise AcpError(-32602, f"bundle.install failed: {e}") from e
         return {
             "name": att.bundle_name,
             "version": att.bundle_version,
@@ -234,7 +234,7 @@ class _V311State:
         try:
             secret = bytes.fromhex(secret_hex)
         except ValueError as e:
-            raise AcpError(-32602, f"secret_hex invalid: {e}")
+            raise AcpError(-32602, f"secret_hex invalid: {e}") from e
         self._marketplace().trust(
             marketplace, MarketplaceKey(fingerprint=fingerprint, secret=secret)
         )
@@ -258,7 +258,7 @@ class _V311State:
                 )
             )
         except Exception as e:
-            raise AcpError(-32602, f"fetch failed: {e}")
+            raise AcpError(-32602, f"fetch failed: {e}") from e
         return {
             "bundle_name": fetched.bundle.manifest.name,
             "bundle_version": fetched.bundle.manifest.version,
@@ -302,7 +302,7 @@ class _V311State:
                 verify_attestation_first=verify,
             )
         except Exception as e:
-            raise AcpError(-32602, f"uninstall failed: {e}")
+            raise AcpError(-32602, f"uninstall failed: {e}") from e
         return {
             "removed_name": removed.bundle_name,
             "removed_version": removed.bundle_version,
@@ -326,7 +326,7 @@ class _V311State:
             exporter = resolve_exporter(target)  # type: ignore[arg-type]
             manifest = exporter.export(b, target=Path(target_dir))
         except Exception as e:  # noqa: BLE001
-            raise AcpError(-32602, f"bundle.export failed: {e}")
+            raise AcpError(-32602, f"bundle.export failed: {e}") from e
         return {
             "target": target,
             "target_dir": str(manifest.target_root),

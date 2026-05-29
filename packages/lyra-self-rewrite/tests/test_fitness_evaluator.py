@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_self_rewrite.exceptions import FitnessError
 from lyra_self_rewrite.fitness_evaluator import (
     FitnessConfig,
@@ -256,7 +255,7 @@ class TestFitnessEvaluator:
     @pytest.mark.asyncio
     async def test_compare_agents_tie(self) -> None:
         evaluator = FitnessEvaluator()
-        config = FitnessConfig(
+        FitnessConfig(
             objectives=("correctness",),
             weights=(1.0,),
             thresholds=(0.0,),

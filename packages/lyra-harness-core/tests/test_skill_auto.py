@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_harness_core.forensic import Trajectory, TrajectoryOutcome
 from lyra_harness_core.marketplace import PromotedSkill
 from lyra_harness_core.orchestration import AgentDecision

@@ -11,7 +11,6 @@ Features:
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional
 
 
 class IOCType(Enum):
@@ -35,8 +34,8 @@ class IOC:
     confidence: float  # 0.0-1.0
     first_seen: datetime
     last_seen: datetime
-    threat_actor: Optional[str] = None
-    tags: List[str] = field(default_factory=list)
+    threat_actor: str | None = None
+    tags: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -45,11 +44,11 @@ class ThreatActor:
 
     actor_id: str
     name: str
-    aliases: List[str]
+    aliases: list[str]
     motivation: str  # financial, espionage, hacktivism
     sophistication: str  # low, medium, high, advanced
-    ttps: List[str]  # MITRE ATT&CK technique IDs
-    known_iocs: List[str] = field(default_factory=list)
+    ttps: list[str]  # MITRE ATT&CK technique IDs
+    known_iocs: list[str] = field(default_factory=list)
 
 
 class ThreatIntelligence:
@@ -64,8 +63,8 @@ class ThreatIntelligence:
 
     def __init__(self):
         """Initialize threat intelligence."""
-        self.iocs: Dict[str, IOC] = {}
-        self.threat_actors: Dict[str, ThreatActor] = {}
+        self.iocs: dict[str, IOC] = {}
+        self.threat_actors: dict[str, ThreatActor] = {}
 
     def add_ioc(self, ioc: IOC):
         """
@@ -76,7 +75,7 @@ class ThreatIntelligence:
         """
         self.iocs[ioc.ioc_id] = ioc
 
-    def check_ioc(self, value: str, ioc_type: IOCType) -> Optional[IOC]:
+    def check_ioc(self, value: str, ioc_type: IOCType) -> IOC | None:
         """
         Check if value is a known IOC.
 
@@ -92,7 +91,7 @@ class ThreatIntelligence:
                 return ioc
         return None
 
-    def enrich_ioc(self, ioc_id: str) -> Dict[str, any]:
+    def enrich_ioc(self, ioc_id: str) -> dict[str, any]:
         """
         Enrich IOC with threat intelligence.
 
@@ -133,7 +132,7 @@ class ThreatIntelligence:
         """
         self.threat_actors[actor.actor_id] = actor
 
-    def get_actor_profile(self, actor_id: str) -> Dict[str, any]:
+    def get_actor_profile(self, actor_id: str) -> dict[str, any]:
         """
         Get threat actor profile.
 
@@ -158,7 +157,7 @@ class ThreatIntelligence:
             "known_iocs": len(actor.known_iocs),
         }
 
-    def correlate_iocs(self, ioc_ids: List[str]) -> Dict[str, any]:
+    def correlate_iocs(self, ioc_ids: list[str]) -> dict[str, any]:
         """
         Correlate multiple IOCs.
 
@@ -194,7 +193,7 @@ class ThreatIntelligence:
             else 0,
         }
 
-    def get_stats(self) -> Dict[str, any]:
+    def get_stats(self) -> dict[str, any]:
         """
         Get threat intelligence statistics.
 
@@ -210,7 +209,7 @@ class ThreatIntelligence:
             ),
         }
 
-    def _count_by_type(self) -> Dict[str, int]:
+    def _count_by_type(self) -> dict[str, int]:
         """
         Count IOCs by type.
 

@@ -16,5 +16,6 @@ except Exception as e:
 
 # Check TERM environment variable
 import os
+
 print(f"TERM: {os.environ.get('TERM', 'not set')}")
 print(f"COLORTERM: {os.environ.get('COLORTERM', 'not set')}")

@@ -18,9 +18,9 @@ print("\nStep 2: Creating config...", file=sys.stderr, flush=True)
 try:
     from harness_tui import ProjectConfig
     from lyra_cli.tui_v2 import lyra_theme
-    from lyra_cli.tui_v2.sidebar import build_lyra_sidebar_tabs
     from lyra_cli.tui_v2.commands import register_lyra_commands
-    
+    from lyra_cli.tui_v2.sidebar import build_lyra_sidebar_tabs
+
     cfg = ProjectConfig(
         name='lyra',
         description='Test',

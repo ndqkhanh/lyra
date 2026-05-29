@@ -11,10 +11,8 @@ Features:
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, Optional
 
 from rich.console import Console
-from rich.style import Style
 from rich.table import Table
 from rich.theme import Theme as RichTheme
 
@@ -60,7 +58,7 @@ class ThemeManager:
     - Theme preview
     """
 
-    def __init__(self, console: Optional[Console] = None):
+    def __init__(self, console: Console | None = None):
         """
         Initialize theme manager.
 
@@ -70,9 +68,9 @@ class ThemeManager:
         self.console = console or Console()
         self.current_theme = ThemeName.DEFAULT
         self.themes = self._load_builtin_themes()
-        self.custom_themes: Dict[str, ThemeColors] = {}
+        self.custom_themes: dict[str, ThemeColors] = {}
 
-    def _load_builtin_themes(self) -> Dict[ThemeName, ThemeColors]:
+    def _load_builtin_themes(self) -> dict[ThemeName, ThemeColors]:
         """Load built-in themes."""
         return {
             ThemeName.DEFAULT: ThemeColors(
@@ -225,7 +223,7 @@ class ThemeManager:
         """
         self.custom_themes[name] = colors
 
-    def get_custom_theme(self, name: str) -> Optional[ThemeColors]:
+    def get_custom_theme(self, name: str) -> ThemeColors | None:
         """
         Get custom theme.
 
@@ -274,7 +272,7 @@ class ThemeManager:
 
         self.console.print(table)
 
-    def export_theme(self, name: ThemeName) -> Dict[str, str]:
+    def export_theme(self, name: ThemeName) -> dict[str, str]:
         """
         Export theme to dictionary.
 
@@ -298,7 +296,7 @@ class ThemeManager:
             "bright": theme.bright,
         }
 
-    def import_theme(self, name: str, theme_dict: Dict[str, str]):
+    def import_theme(self, name: str, theme_dict: dict[str, str]):
         """
         Import theme from dictionary.
 
@@ -354,7 +352,7 @@ class AnimationEffects:
     - Loading animations
     """
 
-    def __init__(self, console: Optional[Console] = None):
+    def __init__(self, console: Console | None = None):
         """
         Initialize animation effects.
 

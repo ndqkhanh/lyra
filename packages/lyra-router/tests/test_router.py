@@ -17,7 +17,6 @@ from __future__ import annotations
 import os
 
 import pytest
-
 from lyra_router import (
     BudgetRegime,
     BudgetTracker,
@@ -27,15 +26,14 @@ from lyra_router import (
     NeuralTier,
     Provider,
     ProviderRegistry,
-    RuleTier,
     RoutingDecision,
+    RuleTier,
     SemanticTier,
     TaskComplexity,
     TierResult,
     get_cost_estimate,
     get_tier_for_complexity,
 )
-
 
 # ────────────────────────────────────────────────────────────────────
 # Models tests

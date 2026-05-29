@@ -1,10 +1,9 @@
 """Quality Evaluation — score skills on clarity, completeness, correctness, usefulness, and testability."""
 from __future__ import annotations
 
-import math
+from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum
-from typing import Sequence
 
 
 class QualityCriteria(Enum):

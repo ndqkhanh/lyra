@@ -13,9 +13,8 @@ from __future__ import annotations
 import hashlib
 import logging
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional
 
 from lyra_personalization.models import (
     CompactEmbedding,
@@ -35,7 +34,7 @@ class PrivacyBudget:
     epsilon_spent: float = 0.0
     epsilon_delta: float = 1e-5
     epsilon_budget: float = 10.0
-    reset_date: Optional[datetime] = None
+    reset_date: datetime | None = None
 
     @property
     def remaining(self) -> float:
@@ -225,7 +224,7 @@ class EmbeddingManager:
         """
         return self.privacy_budget
 
-    def _project_rich_repr(self, rich_repr: RichRepresentation) -> List[float]:
+    def _project_rich_repr(self, rich_repr: RichRepresentation) -> list[float]:
         """
         Project a rich representation into a compact vector.
 
@@ -261,7 +260,7 @@ class EmbeddingManager:
 
     def _compress_to_text(
         self,
-        vector: List[float],
+        vector: list[float],
         rich_repr: RichRepresentation,
     ) -> str:
         """
@@ -303,7 +302,7 @@ class EmbeddingManager:
 
         return compressed
 
-    def _compress_vector_to_text(self, vector: List[float]) -> str:
+    def _compress_vector_to_text(self, vector: list[float]) -> str:
         """
         Compress just the vector into text format.
 
@@ -333,7 +332,7 @@ class EmbeddingManager:
             f"[User Context: {embedding.compressed_tokens}]"
         )
 
-    def _generate_noise(self, dimension: int) -> List[float]:
+    def _generate_noise(self, dimension: int) -> list[float]:
         """
         Generate noise for differential privacy.
 

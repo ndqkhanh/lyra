@@ -4,13 +4,13 @@ Tests for unified agent registry.
 
 import pytest
 
-from src.agents.base import Agent, AgentCapability, AgentStatus
+from src.agents.base import Agent, AgentCapability
 from src.agents.unified_registry import (
-    AgentSource,
     AgentMetadata,
+    AgentSource,
     UnifiedAgentRegistry,
 )
-from src.core.task import Task, TaskType, Result
+from src.core.task import Result, Task, TaskType
 
 
 class MockAgent(Agent):

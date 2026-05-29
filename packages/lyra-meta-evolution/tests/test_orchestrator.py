@@ -3,22 +3,17 @@
 import asyncio
 
 import pytest
-
 from lyra_meta_evolution.meta_evolution import (
     AgentGenome,
     EvolutionLevel,
-    EvolutionTrigger,
-    MetaCognitiveStack,
 )
 from lyra_meta_evolution.orchestrator import (
     CycleConfig,
-    CycleInProgressError,
     CycleResult,
     EvolutionOrchestrator,
     OrchestratorSnapshot,
     OrchestratorStatus,
 )
-
 
 # ── Fixtures ────────────────────────────────────────────────────────────────────
 

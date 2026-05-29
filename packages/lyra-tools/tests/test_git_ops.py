@@ -1,7 +1,7 @@
 """Tests for git tool implementations — git_status, git_diff, git_log."""
 from __future__ import annotations
 
-from lyra_tools.git_ops import git_status, git_diff, git_log
+from lyra_tools.git_ops import git_diff, git_log, git_status
 
 
 class TestGitStatus:

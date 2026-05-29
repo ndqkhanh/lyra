@@ -5,10 +5,10 @@ Memory Store - Core storage for agent memories.
 import json
 import time
 import uuid
-from typing import List, Dict, Optional, Any
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 
 class MemoryType(Enum):
@@ -22,7 +22,7 @@ class MemoryType(Enum):
 class Memory:
     """
     A single memory entry.
-    
+
     Attributes:
         memory_id: Unique identifier
         content: Memory content
@@ -39,8 +39,8 @@ class Memory:
     memory_type: MemoryType
     timestamp: float
     importance: float = 0.5
-    tags: List[str] = None
-    context: Dict[str, Any] = None
+    tags: list[str] = None
+    context: dict[str, Any] = None
     access_count: int = 0
     last_accessed: float = 0.0
 
@@ -52,14 +52,14 @@ class Memory:
         if self.last_accessed == 0.0:
             self.last_accessed = self.timestamp
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert memory to dictionary."""
         data = asdict(self)
         data["memory_type"] = self.memory_type.value
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict) -> "Memory":
+    def from_dict(cls, data: dict) -> "Memory":
         """Create memory from dictionary."""
         data = data.copy()
         data["memory_type"] = MemoryType(data["memory_type"])
@@ -73,7 +73,7 @@ class Memory:
     def decay_importance(self, decay_rate: float = 0.01):
         """
         Decay importance over time.
-        
+
         Args:
             decay_rate: Rate of decay per day
         """
@@ -85,7 +85,7 @@ class Memory:
 class MemoryStore:
     """
     Core storage for memories.
-    
+
     Responsibilities:
     - Store and retrieve memories
     - Manage memory lifecycle
@@ -93,14 +93,14 @@ class MemoryStore:
     - Apply importance decay
     """
 
-    def __init__(self, storage_path: Optional[str] = None):
+    def __init__(self, storage_path: str | None = None):
         """
         Initialize memory store.
-        
+
         Args:
             storage_path: Path to persist memories (optional)
         """
-        self.memories: Dict[str, Memory] = {}
+        self.memories: dict[str, Memory] = {}
         self.storage_path = storage_path
 
         if storage_path:
@@ -111,19 +111,19 @@ class MemoryStore:
         content: str,
         memory_type: MemoryType,
         importance: float = 0.5,
-        tags: Optional[List[str]] = None,
-        context: Optional[Dict[str, Any]] = None,
+        tags: list[str] | None = None,
+        context: dict[str, Any] | None = None,
     ) -> Memory:
         """
         Add a new memory.
-        
+
         Args:
             content: Memory content
             memory_type: Type of memory
             importance: Importance score (0.0 - 1.0)
             tags: Associated tags
             context: Additional context
-            
+
         Returns:
             Created memory
         """
@@ -140,13 +140,13 @@ class MemoryStore:
         self.memories[memory.memory_id] = memory
         return memory
 
-    def get(self, memory_id: str) -> Optional[Memory]:
+    def get(self, memory_id: str) -> Memory | None:
         """
         Get a memory by ID.
-        
+
         Args:
             memory_id: Memory identifier
-            
+
         Returns:
             Memory if found, None otherwise
         """
@@ -158,11 +158,11 @@ class MemoryStore:
     def update(self, memory_id: str, **kwargs) -> bool:
         """
         Update a memory.
-        
+
         Args:
             memory_id: Memory identifier
             **kwargs: Fields to update
-            
+
         Returns:
             True if updated, False if not found
         """
@@ -179,10 +179,10 @@ class MemoryStore:
     def delete(self, memory_id: str) -> bool:
         """
         Delete a memory.
-        
+
         Args:
             memory_id: Memory identifier
-            
+
         Returns:
             True if deleted, False if not found
         """
@@ -191,22 +191,22 @@ class MemoryStore:
             return True
         return False
 
-    def get_all(self) -> List[Memory]:
+    def get_all(self) -> list[Memory]:
         """
         Get all memories.
-        
+
         Returns:
             List of all memories
         """
         return list(self.memories.values())
 
-    def get_by_type(self, memory_type: MemoryType) -> List[Memory]:
+    def get_by_type(self, memory_type: MemoryType) -> list[Memory]:
         """
         Get memories by type.
-        
+
         Args:
             memory_type: Type to filter by
-            
+
         Returns:
             List of memories of specified type
         """
@@ -215,14 +215,14 @@ class MemoryStore:
             if m.memory_type == memory_type
         ]
 
-    def get_by_tags(self, tags: List[str], match_all: bool = False) -> List[Memory]:
+    def get_by_tags(self, tags: list[str], match_all: bool = False) -> list[Memory]:
         """
         Get memories by tags.
-        
+
         Args:
             tags: Tags to search for
             match_all: If True, memory must have all tags
-            
+
         Returns:
             List of matching memories
         """
@@ -237,13 +237,13 @@ class MemoryStore:
                 if any(tag in m.tags for tag in tags)
             ]
 
-    def get_recent(self, limit: int = 10) -> List[Memory]:
+    def get_recent(self, limit: int = 10) -> list[Memory]:
         """
         Get most recent memories.
-        
+
         Args:
             limit: Maximum number to return
-            
+
         Returns:
             List of recent memories
         """
@@ -254,14 +254,14 @@ class MemoryStore:
         )
         return sorted_memories[:limit]
 
-    def get_important(self, threshold: float = 0.7, limit: int = 10) -> List[Memory]:
+    def get_important(self, threshold: float = 0.7, limit: int = 10) -> list[Memory]:
         """
         Get most important memories.
-        
+
         Args:
             threshold: Minimum importance score
             limit: Maximum number to return
-            
+
         Returns:
             List of important memories
         """
@@ -279,7 +279,7 @@ class MemoryStore:
     def apply_decay(self, decay_rate: float = 0.01):
         """
         Apply importance decay to all memories.
-        
+
         Args:
             decay_rate: Rate of decay per day
         """
@@ -289,10 +289,10 @@ class MemoryStore:
     def prune(self, min_importance: float = 0.1):
         """
         Remove memories below importance threshold.
-        
+
         Args:
             min_importance: Minimum importance to keep
-            
+
         Returns:
             Number of memories pruned
         """
@@ -330,7 +330,7 @@ class MemoryStore:
         if not path.exists():
             return
 
-        with open(path, 'r') as f:
+        with open(path) as f:
             data = json.load(f)
 
         self.memories = {}
@@ -342,10 +342,10 @@ class MemoryStore:
         """Clear all memories."""
         self.memories.clear()
 
-    def get_statistics(self) -> Dict:
+    def get_statistics(self) -> dict:
         """
         Get memory statistics.
-        
+
         Returns:
             Statistics dictionary
         """

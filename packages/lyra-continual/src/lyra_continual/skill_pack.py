@@ -167,7 +167,7 @@ class SkillPackCompressor:
 
         # Element-wise max preserves the strongest expert per dimension
         fused_weights = tuple(
-            max(aw, bw) for aw, bw in zip(a_padded, b_padded)
+            max(aw, bw) for aw, bw in zip(a_padded, b_padded, strict=False)
         )
 
         fused_domain = f"{pack_a.domain}+{pack_b.domain}"

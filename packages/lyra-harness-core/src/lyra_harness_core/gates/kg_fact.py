@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import enum
 from dataclasses import dataclass, field
-from typing import Any, Optional, Protocol
+from typing import Any, Protocol
 
 from ..verifier import Severity
 
@@ -52,8 +52,8 @@ class FactClaim:
     fact_type: str  # e.g. "binding_affinity", "ic50", "fold_accuracy"
     asserted_value: Any  # numeric or string the claim asserts
     asserted_unit: str = ""  # e.g. "nM", "kcal/mol", "Å"
-    cited_source: Optional[KGSource] = None
-    cited_id: Optional[str] = None  # entry id in the source (UniProt accession, PDB id, etc.)
+    cited_source: KGSource | None = None
+    cited_id: str | None = None  # entry id in the source (UniProt accession, PDB id, etc.)
 
     def __post_init__(self) -> None:
         if not self.claim_id:
@@ -72,8 +72,8 @@ class KGFactVerdict:
     grounded: bool  # claim is supported by the cited source within tolerance
     severity: Severity
     note: str = ""
-    ground_truth_value: Optional[Any] = None
-    deviation: Optional[float] = None  # |asserted - ground_truth| / |ground_truth|
+    ground_truth_value: Any | None = None
+    deviation: float | None = None  # |asserted - ground_truth| / |ground_truth|
 
     @property
     def passed(self) -> bool:
@@ -85,7 +85,7 @@ class KGSourceProtocol(Protocol):
 
     name: KGSource
 
-    def lookup(self, *, fact_type: str, entry_id: str) -> Optional[Any]: ...
+    def lookup(self, *, fact_type: str, entry_id: str) -> Any | None: ...
 
 
 # --- Stub source for tests + cold-start ---------------------------------
@@ -105,7 +105,7 @@ class StaticKGSource:
     def add(self, *, fact_type: str, entry_id: str, value: Any) -> None:
         self.facts[(fact_type, entry_id)] = value
 
-    def lookup(self, *, fact_type: str, entry_id: str) -> Optional[Any]:
+    def lookup(self, *, fact_type: str, entry_id: str) -> Any | None:
         return self.facts.get((fact_type, entry_id))
 
 

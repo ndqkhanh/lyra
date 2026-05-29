@@ -1,12 +1,12 @@
 """Tests for skills system."""
-import pytest
-from pathlib import Path
-import tempfile
 import shutil
+import tempfile
+from pathlib import Path
 
+import pytest
+from lyra_cli.core.skill_loader import SkillLoader
 from lyra_cli.core.skill_metadata import SkillMetadata
 from lyra_cli.core.skill_registry import SkillRegistry
-from lyra_cli.core.skill_loader import SkillLoader
 
 
 @pytest.fixture

@@ -11,15 +11,12 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import pytest
-
 from lyra_skills.state import (
     SkillsState,
     is_active,
     load_state,
     save_state,
 )
-
 
 # ── pure logic ───────────────────────────────────────────────────
 

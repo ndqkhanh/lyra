@@ -8,9 +8,9 @@ Features:
 - Custom keybindings
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import Callable, Dict, List, Optional
 
 
 class NavigationMode(Enum):
@@ -46,7 +46,7 @@ class VimNavigator:
     def __init__(self):
         """Initialize Vim navigator."""
         self.mode = NavigationMode.NORMAL
-        self.bindings: Dict[str, KeyBinding] = {}
+        self.bindings: dict[str, KeyBinding] = {}
         self._setup_default_bindings()
 
     def _setup_default_bindings(self):
@@ -78,7 +78,7 @@ class VimNavigator:
         for binding in default_bindings:
             self.bindings[binding.key] = binding
 
-    def get_binding(self, key: str) -> Optional[KeyBinding]:
+    def get_binding(self, key: str) -> KeyBinding | None:
         """
         Get key binding.
 
@@ -122,7 +122,7 @@ class VimNavigator:
         """Get current mode."""
         return self.mode
 
-    def list_bindings(self, mode: Optional[NavigationMode] = None) -> List[KeyBinding]:
+    def list_bindings(self, mode: NavigationMode | None = None) -> list[KeyBinding]:
         """
         List key bindings.
 
@@ -149,9 +149,9 @@ class CommandPalette:
 
     def __init__(self):
         """Initialize command palette."""
-        self.commands: Dict[str, Callable] = {}
-        self.history: List[str] = []
-        self.categories: Dict[str, List[str]] = {}
+        self.commands: dict[str, Callable] = {}
+        self.history: list[str] = []
+        self.categories: dict[str, list[str]] = {}
 
     def register_command(
         self,
@@ -186,7 +186,7 @@ class CommandPalette:
             self.history.append(name)
             return self.commands[name](*args, **kwargs)
 
-    def search_commands(self, query: str) -> List[str]:
+    def search_commands(self, query: str) -> list[str]:
         """
         Search commands with fuzzy matching.
 
@@ -205,7 +205,7 @@ class CommandPalette:
 
         return sorted(matches)
 
-    def get_recent_commands(self, limit: int = 10) -> List[str]:
+    def get_recent_commands(self, limit: int = 10) -> list[str]:
         """
         Get recent commands.
 
@@ -217,7 +217,7 @@ class CommandPalette:
         """
         return self.history[-limit:]
 
-    def get_category_commands(self, category: str) -> List[str]:
+    def get_category_commands(self, category: str) -> list[str]:
         """
         Get commands by category.
 
@@ -229,7 +229,7 @@ class CommandPalette:
         """
         return self.categories.get(category, [])
 
-    def list_categories(self) -> List[str]:
+    def list_categories(self) -> list[str]:
         """
         List all categories.
 
@@ -251,13 +251,13 @@ class QuickActions:
 
     def __init__(self):
         """Initialize quick actions."""
-        self.actions: Dict[str, str] = {
+        self.actions: dict[str, str] = {
             "@": "file_picker",
             "#": "skill_picker",
             "/": "command_picker",
         }
 
-    def get_action(self, prefix: str) -> Optional[str]:
+    def get_action(self, prefix: str) -> str | None:
         """
         Get action for prefix.
 
@@ -289,7 +289,7 @@ class QuickActions:
         if prefix in self.actions:
             del self.actions[prefix]
 
-    def list_actions(self) -> Dict[str, str]:
+    def list_actions(self) -> dict[str, str]:
         """
         List all quick actions.
 

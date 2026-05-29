@@ -1,5 +1,8 @@
 """Lyra Production — Production Reliability + Agent Containment."""
 
+from .conformal import ConformalRouter
+from .escape_prevention import EscapePrevention
+from .failure_patterns import FailurePatternGuard
 from .models import (
     ConformalPrediction,
     ContainmentEvent,
@@ -12,10 +15,7 @@ from .models import (
     TrajectorySegment,
 )
 from .reliability import ThreeLayerReliability
-from .failure_patterns import FailurePatternGuard
 from .trajectory import TrajectoryOptimizer
-from .conformal import ConformalRouter
-from .escape_prevention import EscapePrevention
 
 __version__ = "0.1.0"
 

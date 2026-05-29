@@ -4,7 +4,6 @@ Parser for ECC skill files (Markdown with YAML frontmatter).
 
 import re
 from pathlib import Path
-from typing import Dict, Any, Optional
 
 import yaml
 
@@ -34,7 +33,7 @@ class SkillParser:
         re.DOTALL
     )
 
-    def parse_file(self, path: Path) -> Optional[Skill]:
+    def parse_file(self, path: Path) -> Skill | None:
         """
         Parse a skill file.
 
@@ -51,7 +50,7 @@ class SkillParser:
             print(f"Error parsing {path}: {e}")
             return None
 
-    def parse_string(self, content: str, source_path: Optional[Path] = None) -> Optional[Skill]:
+    def parse_string(self, content: str, source_path: Path | None = None) -> Skill | None:
         """
         Parse skill from string content.
 
@@ -121,7 +120,7 @@ class SkillParser:
             metadata=metadata,
         )
 
-    def parse_directory(self, directory: Path, recursive: bool = True) -> Dict[str, Skill]:
+    def parse_directory(self, directory: Path, recursive: bool = True) -> dict[str, Skill]:
         """
         Parse all skill files in a directory.
 

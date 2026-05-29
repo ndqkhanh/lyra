@@ -1,11 +1,8 @@
 from __future__ import annotations
 
 import uuid
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from dataclasses import dataclass
 from enum import Enum
-
-from .exceptions import IsolationError
 
 
 class IsolationLevel(Enum):

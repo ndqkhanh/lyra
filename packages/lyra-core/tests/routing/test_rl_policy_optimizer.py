@@ -186,7 +186,7 @@ class TestRLPriorityOptimizer:
 
     def test_multiple_episodes_accumulate(self):
         opt = RLPriorityOptimizer()
-        for ep in range(3):
+        for _ep in range(3):
             opt.start_episode()
             for i in range(3):
                 sv = _make_state(turn_index=i)

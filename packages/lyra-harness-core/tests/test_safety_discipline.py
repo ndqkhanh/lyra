@@ -2,19 +2,16 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_harness_core.forensic import (
     ReplayComparator,
     Trajectory,
     TrajectoryOutcome,
-    TrajectorySimilarity,
     action_jaccard,
     fingerprint_jaccard,
 )
 from lyra_harness_core.gates import (
     RetractionGate,
     RetractionRecord,
-    RetractionVerdict,
     StaticRetractionIndex,
 )
 from lyra_harness_core.isolation import (
@@ -26,7 +23,6 @@ from lyra_harness_core.isolation import (
 )
 from lyra_harness_core.isolation.context_namespace import _clear_grants_for_test
 from lyra_harness_core.orchestration import AgentDecision, SideEffectRecord
-
 
 # --- Forensic / replay comparator ---------------------------------------
 
@@ -43,7 +39,7 @@ def _make_traj(
     fingerprints = fingerprints or [f"fp-{a}-{i}" for i, a in enumerate(actions)]
     decisions = tuple(
         AgentDecision(action=a, fingerprint=fp)
-        for a, fp in zip(actions, fingerprints)
+        for a, fp in zip(actions, fingerprints, strict=False)
     )
     side_effects = tuple(
         SideEffectRecord(call_id=f"c{i}", tool_name=name, args={}, result=None, is_replayable=rep)

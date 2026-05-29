@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 import random
+from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum
-from typing import Sequence
 
 
 class InstinctType(Enum):
@@ -127,7 +127,7 @@ def extract_from_sessions(
     instinct_types = list(InstinctType)
     instincts: list[Instinct] = []
 
-    for i, session_id in enumerate(sessions):
+    for i, _session_id in enumerate(sessions):
         if len(instincts) >= cfg.max_instincts:
             break
 

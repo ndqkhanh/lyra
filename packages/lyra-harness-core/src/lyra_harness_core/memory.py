@@ -11,7 +11,6 @@ import time
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 
 @dataclass
@@ -22,7 +21,7 @@ class MemoryEntry:
     actor: str = "system"
     confidence: float = 1.0
     created_at: float = field(default_factory=time.time)
-    expires_at: Optional[float] = None
+    expires_at: float | None = None
 
     def to_dict(self) -> dict:
         return {
@@ -36,7 +35,7 @@ class MemoryEntry:
         }
 
     @classmethod
-    def from_dict(cls, d: dict) -> "MemoryEntry":
+    def from_dict(cls, d: dict) -> MemoryEntry:
         return cls(**d)
 
 
@@ -57,7 +56,7 @@ class Memory:
         kind: str = "fact",
         actor: str = "system",
         confidence: float = 1.0,
-        expires_at: Optional[float] = None,
+        expires_at: float | None = None,
     ) -> MemoryEntry:
         entry = MemoryEntry(
             id=uuid.uuid4().hex,

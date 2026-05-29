@@ -1,10 +1,7 @@
 """Tests for lyra-watermark package."""
 
-import time
-from typing import Any
 
 import pytest
-
 from lyra_watermark import (
     ContentType,
     ProvenanceChain,
@@ -15,7 +12,6 @@ from lyra_watermark import (
     WatermarkPayload,
     WatermarkResult,
 )
-
 
 # ---------------------------------------------------------------------------
 # Data class instantiation
@@ -104,7 +100,7 @@ def test_watermark_result_instantiation() -> None:
 
 def test_provenance_chain_instantiation() -> None:
     """Test ProvenanceChain creation."""
-    payload = WatermarkPayload(
+    WatermarkPayload(
         method="STATISTICAL",
         agent_id="agent-001",
         content_type="TEXT",

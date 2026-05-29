@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import io
-import sys
 import time
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path

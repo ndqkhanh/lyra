@@ -443,7 +443,7 @@ def _interp_color(
     if stops is None:
         stops = _gradient_stops_from_skin()
     t = max(0.0, min(1.0, t))
-    for (p0, c0), (p1, c1) in zip(stops, stops[1:]):
+    for (p0, c0), (p1, c1) in zip(stops, stops[1:], strict=False):
         if p0 <= t <= p1:
             local = 0.0 if p1 == p0 else (t - p0) / (p1 - p0)
             r = int(c0[0] + (c1[0] - c0[0]) * local)

@@ -173,7 +173,7 @@ def test_contradiction_detection_preference_change(temp_store):
     )
 
     # Changed preference
-    memories2 = extractor.extract_from_turn(
+    extractor.extract_from_turn(
         user_input="Actually, I prefer pytest",
         assistant_response="Updated.",
         turn_number=2,

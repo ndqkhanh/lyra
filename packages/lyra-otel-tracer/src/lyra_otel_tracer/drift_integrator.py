@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, List, Tuple
 
 import numpy as np
 
@@ -16,7 +15,7 @@ class DriftConfig:
 
     window_size: int = 100
     drift_threshold: float = 0.1
-    metrics: Tuple[str, ...] = ("latency", "token_count", "cost")
+    metrics: tuple[str, ...] = ("latency", "token_count", "cost")
 
 
 @dataclass(frozen=True)
@@ -35,10 +34,10 @@ class DriftMeasurement:
 class DriftReport:
     """Complete drift analysis report."""
 
-    measurements: Tuple[DriftMeasurement, ...] = ()
+    measurements: tuple[DriftMeasurement, ...] = ()
     overall_drift_score: float = 0.0
     requires_attention: bool = False
-    recommendations: Tuple[str, ...] = ()
+    recommendations: tuple[str, ...] = ()
 
 
 class DriftIntegrator:
@@ -49,8 +48,8 @@ class DriftIntegrator:
         config: DriftConfig | None = None,
     ) -> None:
         self._config = config or DriftConfig()
-        self._samples: Dict[str, List[float]] = {}
-        self._baseline: Dict[str, float] = {}
+        self._samples: dict[str, list[float]] = {}
+        self._baseline: dict[str, float] = {}
 
     async def feed_sample(self, metric: str, value: float) -> None:
         """Feed a new sample for a given metric."""
@@ -75,7 +74,7 @@ class DriftIntegrator:
 
     async def check_drift(self) -> DriftReport:
         """Check for drift across all metrics and return a report."""
-        measurements: List[DriftMeasurement] = []
+        measurements: list[DriftMeasurement] = []
         total_drift = 0.0
 
         for metric in self._config.metrics:
@@ -139,15 +138,15 @@ class DriftIntegrator:
         """Reset all baselines to be recomputed from current data."""
         self._baseline = {}
 
-    async def get_drift_history(self) -> Tuple[DriftMeasurement, ...]:
+    async def get_drift_history(self) -> tuple[DriftMeasurement, ...]:
         """Get the most recent drift measurements."""
         report = await self.check_drift()
         return report.measurements
 
     @staticmethod
     def _compute_ks_statistic(
-        reference: List[float],
-        current: List[float],
+        reference: list[float],
+        current: list[float],
     ) -> float:
         """Compute an approximate KS statistic using ECDF max difference."""
         if not reference or not current:
@@ -167,10 +166,10 @@ class DriftIntegrator:
 
     def _generate_recommendations(
         self,
-        measurements: List[DriftMeasurement],
-    ) -> List[str]:
+        measurements: list[DriftMeasurement],
+    ) -> list[str]:
         """Generate actionable recommendations based on drift measurements."""
-        recommendations: List[str] = []
+        recommendations: list[str] = []
 
         drifting_metrics = [m for m in measurements if m.is_drifting]
 

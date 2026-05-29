@@ -1,12 +1,11 @@
 """Tests for advanced features."""
 
-from datetime import datetime, timedelta
 import time
+from datetime import datetime, timedelta
 
 from lyra_audio.adaptive_volume import AdaptiveVolumeController
 from lyra_audio.productivity_mode import ProductivityModeController
 from lyra_audio.time_behavior import TimeBehaviorController
-
 
 # Adaptive Volume Tests
 

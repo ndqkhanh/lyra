@@ -1,6 +1,5 @@
 """Tests for Phase F — SLIM skill lifecycle management."""
 import pytest
-
 from lyra_skills.lifecycle import (
     LifecycleConfig,
     LifecycleDecision,

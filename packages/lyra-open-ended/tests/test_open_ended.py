@@ -2,10 +2,8 @@ from __future__ import annotations
 
 import re
 from datetime import datetime
-from typing import Any
 
 import pytest
-
 from lyra_open_ended import (
     CurriculumPhase,
     CurriculumStep,
@@ -16,7 +14,6 @@ from lyra_open_ended import (
     LearningGoal,
     OpenEndedLearner,
 )
-
 
 # ======================================================================
 # Enum tests
@@ -435,7 +432,7 @@ class TestUpdateCurriculum:
 
     def test_returns_curriculum_steps_with_proposed_goals(self) -> None:
         learner = OpenEndedLearner("agent-1")
-        goal = learner.propose_goal()
+        learner.propose_goal()
         steps = learner.update_curriculum()
         assert len(steps) >= 1
         assert all(isinstance(s, CurriculumStep) for s in steps)
@@ -593,7 +590,7 @@ class TestGetStats:
         goal1 = learner.propose_goal()
         learner.self_evaluate(goal1, "Done.")
         learner.record_outcome(goal1, learner.self_evaluate(goal1, "Success."))
-        goal2 = learner.propose_goal()
+        learner.propose_goal()
 
         stats = learner.get_stats()
         assert stats["total_goals"] == 2

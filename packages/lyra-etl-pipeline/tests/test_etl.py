@@ -1,5 +1,6 @@
 """Tests for lyra-etl-pipeline."""
 import asyncio
+
 from lyra_etl_pipeline import ETLPipeline
 
 

@@ -4,11 +4,12 @@ Tests for Skills System
 Tests the 7-tuple skill formalism with verifier-gated admission.
 """
 
-import pytest
-from pathlib import Path
-import tempfile
 import shutil
-from lyra_evolution.skills_system import SkillRegistry, Skill, SkillLineage
+import tempfile
+from pathlib import Path
+
+import pytest
+from lyra_evolution.skills_system import Skill, SkillRegistry
 
 
 @pytest.fixture

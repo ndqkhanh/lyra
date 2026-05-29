@@ -3,12 +3,10 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_tools import (
     ToolCategory,
     ToolDisclosureLevel,
     ToolManifest,
-    ToolRegistry,
     Toolset,
     tool_registry,
 )

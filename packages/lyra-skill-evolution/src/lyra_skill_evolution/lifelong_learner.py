@@ -10,8 +10,8 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
-from .exceptions import EvolutionError, PatchError
-from .skill_benchmark import BenchmarkReport, SkillBenchmark
+from .exceptions import PatchError
+from .skill_benchmark import SkillBenchmark
 from .trajectory_patcher import Skill, TrajectoryPatch, TrajectoryPatcher
 
 

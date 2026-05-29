@@ -7,27 +7,25 @@ integration with the lyra-evolution package.
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import time
-from collections import defaultdict
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, AsyncIterator, Callable, Optional, Protocol
+from typing import Any
 
+from .fitness import BenchmarkConfig, FitnessEvaluator
+from .genetic_optimizer import GeneticOptimizationResult, GeneticOptimizer
 from .meta_evolution import (
     AgentGenome,
     EvolutionLevel,
     EvolutionResult,
-    EvolutionState,
     EvolutionTrigger,
     FitnessFunction,
     MetaCognitiveStack,
     MetaEvolutionError,
 )
-from .genetic_optimizer import GeneticOptimizer, GeneticOptimizationResult
 from .strategy_pool import StrategyEncoding, StrategyPool
-from .fitness import BenchmarkConfig, FitnessEvaluator, FitnessWeights
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +93,7 @@ class CycleConfig:
     promote_threshold: float = 0.05  # Minimum improvement for auto-promotion
     rollback_enabled: bool = True
     max_rollback_depth: int = 3
-    benchmark: Optional[BenchmarkConfig] = None
+    benchmark: BenchmarkConfig | None = None
 
     def get_cycles(self, level: EvolutionLevel) -> int:
         return self.cycles_per_level.get(level, 10)
@@ -128,7 +126,7 @@ class OrchestratorSnapshot:
     status: OrchestratorStatus
     current_cycle: int
     current_level: str
-    best_genome: Optional[dict[str, Any]]
+    best_genome: dict[str, Any] | None
     population_size: int
     pool_size: int
     history_length: int
@@ -161,11 +159,11 @@ class EvolutionOrchestrator:
 
     def __init__(
         self,
-        meta_stack: Optional[MetaCognitiveStack] = None,
-        genetic_optimizer: Optional[GeneticOptimizer] = None,
-        strategy_pool: Optional[StrategyPool] = None,
-        fitness_evaluator: Optional[FitnessEvaluator] = None,
-        config: Optional[CycleConfig] = None,
+        meta_stack: MetaCognitiveStack | None = None,
+        genetic_optimizer: GeneticOptimizer | None = None,
+        strategy_pool: StrategyPool | None = None,
+        fitness_evaluator: FitnessEvaluator | None = None,
+        config: CycleConfig | None = None,
     ):
         self._config = config or CycleConfig()
 
@@ -176,11 +174,11 @@ class EvolutionOrchestrator:
 
         self._status = OrchestratorStatus.IDLE
         self._current_cycle: int = 0
-        self._current_level: Optional[EvolutionLevel] = None
+        self._current_level: EvolutionLevel | None = None
         self._cycle_history: list[CycleResult] = []
         self._checkpoints: list[dict[str, Any]] = []
         self._rollback_stack: list[OrchestratorSnapshot] = []
-        self._best_genome: Optional[AgentGenome] = None
+        self._best_genome: AgentGenome | None = None
         self._best_fitness: float = 0.0
 
         self._is_running: bool = False
@@ -190,8 +188,8 @@ class EvolutionOrchestrator:
 
     async def run_pipeline(
         self,
-        seed_genome: Optional[AgentGenome] = None,
-        fitness_fn: Optional[FitnessFunction] = None,
+        seed_genome: AgentGenome | None = None,
+        fitness_fn: FitnessFunction | None = None,
     ) -> list[CycleResult]:
         """Run the full evolution pipeline across all levels.
 
@@ -256,7 +254,7 @@ class EvolutionOrchestrator:
     async def run_cycle(
         self,
         level: EvolutionLevel,
-        fitness_fn: Optional[FitnessFunction] = None,
+        fitness_fn: FitnessFunction | None = None,
     ) -> CycleResult:
         """Execute one evolution cycle at the specified level."""
         self._current_cycle += 1
@@ -347,7 +345,7 @@ class EvolutionOrchestrator:
     async def run_parallel_cycles(
         self,
         levels: list[EvolutionLevel],
-        genomes: Optional[dict[EvolutionLevel, AgentGenome]] = None,
+        genomes: dict[EvolutionLevel, AgentGenome] | None = None,
     ) -> dict[EvolutionLevel, list[CycleResult]]:
         """Run evolution cycles in parallel across multiple levels.
 
@@ -372,7 +370,7 @@ class EvolutionOrchestrator:
     async def _run_isolated_pipeline(
         self,
         level: EvolutionLevel,
-        seed_genome: Optional[AgentGenome] = None,
+        seed_genome: AgentGenome | None = None,
     ) -> list[CycleResult]:
         """Run an isolated evolution pipeline for a single level."""
         # Create isolated components
@@ -574,7 +572,7 @@ class EvolutionOrchestrator:
         return self._current_cycle
 
     @property
-    def best_genome(self) -> Optional[AgentGenome]:
+    def best_genome(self) -> AgentGenome | None:
         return self._best_genome
 
     @property

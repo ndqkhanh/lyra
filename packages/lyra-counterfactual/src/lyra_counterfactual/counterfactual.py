@@ -4,17 +4,13 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
-from scipy import stats
-
-from lyra_causal_graph import CausalGraph
-from lyra_causal_graph.causal_graph import CausalGraph as NewCausalGraph
 from lyra_causal_graph.scm import StructuralCausalModel
 
 from .abduction import AbductionConfig, AbductionEngine, AbductionResult
-from .action_prediction import ActionConfig, ActionPredictor, ActionPrediction
+from .action_prediction import ActionConfig, ActionPredictor
 from .errors import CounterfactualEngineError
 from .prediction import PredictionConfig, PredictionEngine, PredictionResult
 
@@ -68,8 +64,8 @@ class CounterfactualResult:
     confidence: float
     causal_path: list[str]
     alternative_prob: float = 0.0
-    expected_value: Optional[float] = None
-    distribution: Optional[np.ndarray] = None
+    expected_value: float | None = None
+    distribution: np.ndarray | None = None
     uncertainty: float = 0.0
     explanation: str = ""
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -137,18 +133,18 @@ class CounterfactualEngine:
 
     def __init__(
         self,
-        causal_graph: Optional[Any] = None,  # Legacy CausalGraph or new CausalGraph
-        scm: Optional[StructuralCausalModel] = None,
-        config: Optional[CounterfactualEngineConfig] = None,
+        causal_graph: Any | None = None,  # Legacy CausalGraph or new CausalGraph
+        scm: StructuralCausalModel | None = None,
+        config: CounterfactualEngineConfig | None = None,
     ) -> None:
         self._legacy_graph = causal_graph
         self._scm = scm
         self._config = config or CounterfactualEngineConfig()
 
         # Initialize sub-engines
-        self._abduction_engine: Optional[AbductionEngine] = None
-        self._action_predictor: Optional[ActionPredictor] = None
-        self._prediction_engine: Optional[PredictionEngine] = None
+        self._abduction_engine: AbductionEngine | None = None
+        self._action_predictor: ActionPredictor | None = None
+        self._prediction_engine: PredictionEngine | None = None
 
         if scm is not None:
             self._abduction_engine = AbductionEngine(scm, self._config.abduction)
@@ -160,12 +156,12 @@ class CounterfactualEngine:
         return self._config
 
     @property
-    def graph(self) -> Optional[Any]:
+    def graph(self) -> Any | None:
         """The causal graph (legacy or new)."""
         return self._legacy_graph
 
     @property
-    def scm(self) -> Optional[StructuralCausalModel]:
+    def scm(self) -> StructuralCausalModel | None:
         """The structural causal model (if available)."""
         return self._scm
 
@@ -181,8 +177,8 @@ class CounterfactualEngine:
     def simulate(
         self,
         intervention: Any,
-        target_var: Optional[str] = None,
-        evidence: Optional[dict[str, float]] = None,
+        target_var: str | None = None,
+        evidence: dict[str, float] | None = None,
     ) -> CounterfactualResult:
         """Run a single counterfactual simulation.
 
@@ -220,8 +216,8 @@ class CounterfactualEngine:
     async def simulate_async(
         self,
         intervention: Any,
-        target_var: Optional[str] = None,
-        evidence: Optional[dict[str, float]] = None,
+        target_var: str | None = None,
+        evidence: dict[str, float] | None = None,
     ) -> CounterfactualResult:
         """Async version of ``simulate()``."""
         return self.simulate(intervention, target_var, evidence)
@@ -533,8 +529,8 @@ class CounterfactualEngine:
         self,
         var_name: str,
         values: list[float],
-        target_var: Optional[str] = None,
-        evidence: Optional[dict[str, float]] = None,
+        target_var: str | None = None,
+        evidence: dict[str, float] | None = None,
     ) -> list[CounterfactualResult]:
         """Analyze how sensitive the outcome is to different intervention values.
 

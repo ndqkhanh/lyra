@@ -7,7 +7,7 @@ import uuid
 from dataclasses import dataclass
 from typing import Any
 
-from .domain_evaluator import DomainEvalConfig, DomainEvaluator
+from .domain_evaluator import DomainEvaluator
 from .exceptions import SchedulerError
 
 

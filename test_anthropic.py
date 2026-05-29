@@ -3,11 +3,12 @@
 Test Lyra TUI with Anthropic API
 Tests: SSE streaming, tool calling, theme switching, scrolling
 """
+import json
 import os
 import sys
 import time
+
 import requests
-import json
 
 # Set Anthropic credentials from ~/.claude/settings.json
 os.environ["ANTHROPIC_API_KEY"] = os.environ.get("ANTHROPIC_AUTH_TOKEN", "")

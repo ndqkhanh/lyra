@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 """Test Phase 1: Event Protocol & Streaming"""
 
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
 
 from lyra_cli.events import (
-    TurnStarted,
-    TextDelta,
-    ToolStarted,
-    ToolFinished,
-    TurnFinished,
     EventDispatcher,
     StreamingRenderer,
+    TextDelta,
+    ToolFinished,
+    ToolStarted,
+    TurnFinished,
+    TurnStarted,
 )
 
 

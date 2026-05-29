@@ -5,11 +5,8 @@ import datetime as _dt
 import time
 
 import pytest
-
 from lyra_harness_core.routines import (
-    CronExpression,
     CronParseError,
-    FireResult,
     Routine,
     RoutineFire,
     RoutineRegistry,
@@ -17,7 +14,6 @@ from lyra_harness_core.routines import (
     next_fire_after,
     parse_cron,
 )
-
 
 # --- types --------------------------------------------------------------
 
@@ -366,7 +362,8 @@ class TestListDue:
     def test_cron_routine_due_after_first_minute(self):
         # "* * * * *" matches every minute — should be due.
         registry = RoutineRegistry()
-        h = lambda *, fire: None
+        def h(*, fire):
+            return None
         r = Routine(routine_id="r1", name="x", handler=h, schedule="* * * * *")
         registry.register(r)
         # Current time well past registration "last fired" sentinel.
@@ -376,7 +373,8 @@ class TestListDue:
 
     def test_disabled_routine_not_due(self):
         registry = RoutineRegistry()
-        h = lambda *, fire: None
+        def h(*, fire):
+            return None
         r = Routine(routine_id="r1", name="x", handler=h,
                     schedule="* * * * *", enabled=False)
         registry.register(r)

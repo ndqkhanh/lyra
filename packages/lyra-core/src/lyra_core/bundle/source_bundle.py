@@ -451,7 +451,7 @@ def _parse_block(lines: list[str]) -> Any:
     mapping. List items can span multiple lines, with sibling keys
     indented one level deeper than the leading ``- ``.
     """
-    stripped = [l.rstrip() for l in lines if l.strip() and not l.lstrip().startswith("#")]
+    stripped = [line.rstrip() for line in lines if line.strip() and not line.lstrip().startswith("#")]
     if not stripped:
         return {}
 
@@ -492,8 +492,8 @@ def _parse_block(lines: list[str]) -> Any:
 
     # Mapping block: collect key: value lines at any indent depth.
     out_map: dict[str, Any] = {}
-    for l in stripped:
-        mm = re.match(r"^\s+([a-zA-Z_][\w-]*)\s*:\s*(.*)$", l)
+    for line in stripped:
+        mm = re.match(r"^\s+([a-zA-Z_][\w-]*)\s*:\s*(.*)$", line)
         if mm:
             out_map[mm.group(1)] = _scalar(mm.group(2).strip())
     return out_map

@@ -11,10 +11,9 @@ import hashlib
 import logging
 import re
 import time
-from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Optional, Sequence
+from typing import Any
 
 from .strategies import CompactionStrategy
 
@@ -122,7 +121,7 @@ class DuplicateDetector:
 
         return duplicates
 
-    def is_duplicate(self, content: str) -> Optional[str]:
+    def is_duplicate(self, content: str) -> str | None:
         """Check if content is a duplicate of any known element. Returns the matching ID."""
         h = self._compute_hash(content)
         for eid, known_h in self._known_hashes.items():
@@ -202,7 +201,7 @@ class HierarchicalSummarizer:
         self,
         elements: dict[str, str],
         level: int,
-        element_types: Optional[dict[str, str]] = None,
+        element_types: dict[str, str] | None = None,
     ) -> dict[str, str]:
         """Summarize multiple content strings to the same level."""
         if element_types is None:
@@ -320,7 +319,7 @@ class CompactionEngine:
         strategy: CompactionStrategy = CompactionStrategy.BALANCED,
         target_reduction: int = 0,
         mode: CompactionMode = CompactionMode.LOSSY,
-        element_importance: Optional[dict[str, float]] = None,
+        element_importance: dict[str, float] | None = None,
     ) -> CompactionResult:
         """Run the full compaction pipeline.
 
@@ -435,7 +434,7 @@ class CompactionEngine:
     async def progressive_disclose(
         self,
         elements: dict[str, Any],
-        levels: Optional[dict[str, DisclosureLevel]] = None,
+        levels: dict[str, DisclosureLevel] | None = None,
     ) -> dict[str, Any]:
         """Apply progressive disclosure to context elements.
 
@@ -480,7 +479,7 @@ class CompactionEngine:
         self,
         elements: dict[str, Any],
         strategy: CompactionStrategy,
-        importance: Optional[dict[str, float]],
+        importance: dict[str, float] | None,
     ) -> set[str]:
         """Identify irrelevant elements based on strategy thresholds."""
         irrelevant: set[str] = set()
@@ -565,5 +564,5 @@ class CompactionEngine:
         return list(self._compaction_history)
 
     @property
-    def last_result(self) -> Optional[CompactionResult]:
+    def last_result(self) -> CompactionResult | None:
         return self._compaction_history[-1] if self._compaction_history else None

@@ -526,7 +526,7 @@ def test_context_boundary_isolation_stats_with_child() -> None:
     boundary = ContextBoundary(parent=parent, policy=policy)
 
     # Spawn child
-    child = boundary.spawn_child(task_id="task-1")
+    boundary.spawn_child(task_id="task-1")
 
     # Get stats for this child
     stats = boundary.get_isolation_stats(task_id="task-1")

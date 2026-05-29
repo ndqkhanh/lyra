@@ -35,7 +35,7 @@ from lyra_memory.store import MemoryStore
 class UltraMemoryConfig:
     """
     Configuration for ultra memory system.
-    
+
     Attributes:
         capacity_limit: Maximum number of memories
         decay_rate: ACT-R decay parameter
@@ -58,7 +58,7 @@ class UltraMemoryConfig:
 class MemoryStats:
     """
     Statistics about the memory system.
-    
+
     Attributes:
         total_memories: Total number of memories
         active_memories: Memories above activation threshold
@@ -80,7 +80,7 @@ class MemoryStats:
 class UltraMemorySystem:
     """
     Self-managed cognitive memory system.
-    
+
     Integrates all ultra memory components into a unified system that:
     - Automatically scores importance on write
     - Tracks activation and decay
@@ -96,7 +96,7 @@ class UltraMemorySystem:
     ):
         """
         Initialize ultra memory system.
-        
+
         Args:
             db_path: Path to memory database
             config: Optional configuration
@@ -131,14 +131,14 @@ class UltraMemorySystem:
     ) -> MemoryRecord:
         """
         Write a memory with automatic importance scoring.
-        
+
         Args:
             content: Memory content
             scope: Memory scope
             type: Memory type
             metadata: Optional metadata
             user_flagged: Whether user explicitly flagged as important
-            
+
         Returns:
             Created MemoryRecord with importance score
         """
@@ -194,14 +194,14 @@ class UltraMemorySystem:
     ) -> list[MemoryRecord]:
         """
         Retrieve memories with activation-based ranking.
-        
+
         Args:
             query: Search query
             scope: Optional scope filter
             type: Optional type filter
             top_k: Number of results
             use_graph: Whether to use graph traversal
-            
+
         Returns:
             List of memories ranked by activation
         """
@@ -270,10 +270,10 @@ class UltraMemorySystem:
     def consolidate(self, deep: bool = False) -> ConsolidationResult:
         """
         Run memory consolidation.
-        
+
         Args:
             deep: Whether to run deep consolidation
-            
+
         Returns:
             ConsolidationResult with statistics
         """
@@ -308,7 +308,7 @@ class UltraMemorySystem:
     def get_stats(self) -> MemoryStats:
         """
         Get memory system statistics.
-        
+
         Returns:
             MemoryStats with current state
         """
@@ -357,10 +357,10 @@ class UltraMemorySystem:
     def prune(self, target_count: int | None = None) -> int:
         """
         Prune low-value memories.
-        
+
         Args:
             target_count: Number to prune (auto-calculated if None)
-            
+
         Returns:
             Number of memories pruned
         """

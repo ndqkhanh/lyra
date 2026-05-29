@@ -8,8 +8,8 @@ asserts the canonical trajectory.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Any, Optional
+from dataclasses import dataclass
+from typing import Any
 
 from ..constitution import Constitution, ConstitutionRegistry, Principle
 from ..evals import BudgetController
@@ -20,16 +20,12 @@ from ..multi_hop import (
     RetrievedDoc,
     SelfAskOperator,
     SimpleDocument,
-    SimpleEdge,
     SimpleGraph,
-    SimpleNode,
     StubLLM,
     StubRetriever,
 )
 from ..pipeline import MultiHopPipeline, PipelineResult
 from ..programs import (
-    BootstrapFewShot,
-    Example,
     MultiHopProgram,
     Signature,
 )
@@ -173,7 +169,7 @@ def _build_chain_of_note_gate() -> ChainOfNoteGate:
 
 def build_demo_pipeline(
     *,
-    budget_tokens: Optional[int] = 10_000,
+    budget_tokens: int | None = 10_000,
 ) -> MultiHopPipeline:
     """Compose the canonical pipeline for the demo.
 
@@ -201,8 +197,8 @@ def build_demo_pipeline(
 
 def build_demo_program(
     *,
-    pipeline: Optional[MultiHopPipeline] = None,
-    budget_tokens: Optional[int] = 10_000,
+    pipeline: MultiHopPipeline | None = None,
+    budget_tokens: int | None = 10_000,
 ) -> MultiHopProgram:
     """Wrap the pipeline in a typed program with a Signature."""
     if pipeline is None:
@@ -278,7 +274,7 @@ def main() -> None:
     print("=" * 60)
     print("lyra_harness_core end-to-end demo")
     print("=" * 60)
-    print(f"Question:      who directed Casablanca")
+    print("Question:      who directed Casablanca")
     print(f"Answer:        {out.pipeline_result.answer}")
     print(f"Operator used: {out.pipeline_result.operator_used}")
     print(f"Hops:          {out.pipeline_result.n_hops}")

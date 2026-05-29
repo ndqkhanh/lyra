@@ -2,25 +2,21 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_harness_core.integrations import (
     AdaptedDocument,
     AdaptedEdge,
-    AdaptedGraph,
     AdaptedNode,
     adapt_graph,
     verify_graph_protocol,
 )
 from lyra_harness_core.multi_hop import HippoRAGRetriever, SimpleDocument, SimpleGraph
 from lyra_harness_core.pages import (
-    EditConflict,
     Page,
     PageEditor,
     PageHistory,
     PageSnapshot,
     line_diff_summary,
 )
-
 
 # --- Pages: snapshots, history, editor ----------------------------------
 

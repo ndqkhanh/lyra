@@ -290,7 +290,7 @@ class PrivacyPreservingAgent:
         content_hash = hashlib.sha256(combined.encode("utf-8")).hexdigest()
         timestamp = time.time()
         signature = hashlib.sha256(
-            f"{self._agent_id}:{content_hash}:{timestamp}".encode("utf-8")
+            f"{self._agent_id}:{content_hash}:{timestamp}".encode()
         ).hexdigest()
 
         result: dict[str, Any] = {
@@ -340,7 +340,7 @@ class PrivacyPreservingAgent:
         ).hexdigest()
 
         proof_id = hashlib.sha256(
-            f"{combined_payload}:{time.time()}".encode("utf-8")
+            f"{combined_payload}:{time.time()}".encode()
         ).hexdigest()[:16]
 
         measurements = (
@@ -386,7 +386,7 @@ class PrivacyPreservingAgent:
 
         # Recompute the combined hash and verify it matches
         expected_hash = hashlib.sha256(
-            f"{content_hash}:{signature}:{proof.issuer}".encode("utf-8")
+            f"{content_hash}:{signature}:{proof.issuer}".encode()
         ).hexdigest()
 
         return stored_hash == expected_hash
@@ -442,7 +442,7 @@ class PrivacyPreservingAgent:
 
         # Simulate a DP result by hashing query + dataset_id + noise
         raw_result = hashlib.sha256(
-            f"{query}:{dataset_id}:{noise_scale}".encode("utf-8")
+            f"{query}:{dataset_id}:{noise_scale}".encode()
         ).hexdigest()
 
         budget_remaining = max(0.0, self.config.default_epsilon - new_total)
@@ -618,7 +618,7 @@ class PrivacyPreservingAgent:
 
         round_id = str(uuid.uuid4())
         contributing_agents = tuple(
-            sorted(set(u.source_agent for u in updates))
+            sorted({u.source_agent for u in updates})
         )
         total_epsilon = sum(u.epsilon_spent for u in updates)
 

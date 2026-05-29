@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_harness_core.continuous_learning import (
     ContinuousLearner,
     EditEvent,
@@ -13,7 +12,6 @@ from lyra_harness_core.continuous_learning import (
 )
 from lyra_harness_core.memory_store import MemoryKind, MemoryStore, RetrievalSpec
 from lyra_harness_core.provenance import WitnessLattice
-
 
 # --- EditEvent --------------------------------------------------------
 
@@ -77,7 +75,7 @@ class TestEditRecorder:
     def test_filter_since_timestamp(self):
         r = EditRecorder()
         e1 = r.record(agent_output="a", user_edit="b", user_id="alice")
-        e2 = r.record(agent_output="c", user_edit="d", user_id="alice")
+        r.record(agent_output="c", user_edit="d", user_id="alice")
         # Filter to events after e1's timestamp.
         out = r.filter(since_timestamp=e1.timestamp + 1e-9)
         # e2 might not have a strictly-greater timestamp due to time.time

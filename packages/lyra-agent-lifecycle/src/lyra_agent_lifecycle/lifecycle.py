@@ -6,7 +6,7 @@ import asyncio
 import logging
 import time
 from collections import defaultdict
-from collections.abc import Callable, Awaitable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any
@@ -369,7 +369,7 @@ class AgentLifecycleManager:
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
         outcomes: dict[str, bool] = {}
-        for aid, result in zip(agents, results):
+        for aid, result in zip(agents, results, strict=False):
             outcomes[aid] = result is True
         return outcomes
 

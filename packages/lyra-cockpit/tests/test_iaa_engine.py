@@ -5,13 +5,12 @@ from __future__ import annotations
 import time
 
 import pytest
-
 from lyra_cockpit.exceptions import IAAEngineError
 from lyra_cockpit.iaa_engine import (
-    IAAConfig,
-    IAAEngine,
     AuditRecord,
     AutonomousAction,
+    IAAConfig,
+    IAAEngine,
     IntentPreview,
 )
 

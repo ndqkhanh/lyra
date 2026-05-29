@@ -11,18 +11,12 @@ Features:
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional
 
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import (
-    BarColumn,
     Progress,
-    SpinnerColumn,
     TaskID,
-    TextColumn,
-    TimeElapsedColumn,
-    TimeRemainingColumn,
 )
 from rich.table import Table
 
@@ -46,8 +40,8 @@ class ProgressStep:
     state: ProgressState = ProgressState.PENDING
     progress: float = 0.0
     total: float = 100.0
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
 
 
 class MultiTaskProgress:
@@ -62,9 +56,9 @@ class MultiTaskProgress:
 
     def __init__(self):
         """Initialize multi-task progress."""
-        self.tasks: Dict[str, ProgressStep] = {}
-        self.progress: Optional[Progress] = None
-        self.task_ids: Dict[str, TaskID] = {}
+        self.tasks: dict[str, ProgressStep] = {}
+        self.progress: Progress | None = None
+        self.task_ids: dict[str, TaskID] = {}
 
     def add_task(
         self,
@@ -134,7 +128,7 @@ class MultiTaskProgress:
         if task_id in self.tasks:
             self.tasks[task_id].state = ProgressState.CANCELLED
 
-    def get_task(self, task_id: str) -> Optional[ProgressStep]:
+    def get_task(self, task_id: str) -> ProgressStep | None:
         """
         Get task.
 
@@ -146,7 +140,7 @@ class MultiTaskProgress:
         """
         return self.tasks.get(task_id)
 
-    def get_all_tasks(self) -> List[ProgressStep]:
+    def get_all_tasks(self) -> list[ProgressStep]:
         """
         Get all tasks.
 
@@ -155,7 +149,7 @@ class MultiTaskProgress:
         """
         return list(self.tasks.values())
 
-    def get_summary(self) -> Dict[str, int]:
+    def get_summary(self) -> dict[str, int]:
         """
         Get progress summary.
 
@@ -187,7 +181,7 @@ class ProgressVisualizer:
     - Time estimates
     """
 
-    def __init__(self, console: Optional[Console] = None):
+    def __init__(self, console: Console | None = None):
         """Initialize progress visualizer."""
         self.console = console or Console()
 

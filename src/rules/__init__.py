@@ -6,9 +6,9 @@ best practices, and project-specific guidelines.
 """
 
 from .rule import Rule, RuleCategory, RuleSeverity, RuleViolation
-from .rule_registry import RuleRegistry
 from .rule_engine import RuleEngine
 from .rule_parser import RuleParser
+from .rule_registry import RuleRegistry
 
 __all__ = [
     "Rule",

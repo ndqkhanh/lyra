@@ -13,7 +13,6 @@ from lyra_ui import (
     WebhookIntegration,
 )
 
-
 # GitIntegration Tests
 
 

@@ -108,7 +108,7 @@ async def test_handle_gather_requirements_message(
     pm_agent: ProductManagerAgent, message_bus: InMemoryMessageBus
 ) -> None:
     """Test handling gather requirements message."""
-    request = Message.create(
+    Message.create(
         type=MessageType.REQUEST,
         sender="orchestrator",
         receiver="pm-1",
@@ -157,7 +157,7 @@ async def test_pm_agent_status_transitions(pm_agent: ProductManagerAgent) -> Non
     assert pm_agent.status == AgentStatus.IDLE
 
     # Status should change to BUSY during operation
-    requirements = await pm_agent.gather_requirements("Test", "low")
+    await pm_agent.gather_requirements("Test", "low")
 
     # Status should return to IDLE after operation
     assert pm_agent.status == AgentStatus.IDLE

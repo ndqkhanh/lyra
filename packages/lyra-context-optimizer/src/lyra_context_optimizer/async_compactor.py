@@ -11,12 +11,12 @@ from __future__ import annotations
 
 import asyncio
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Any
 
 from .agent_driven_compaction import CompactionAction, CompactionStrategy
-from .exceptions import CompactionError, FidelityLossError
+from .exceptions import CompactionError
 
 
 class JudgeVerdict(Enum):

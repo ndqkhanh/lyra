@@ -10,7 +10,7 @@ Features:
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 
 class PermissionStore:
@@ -23,7 +23,7 @@ class PermissionStore:
     - JSON storage
     """
 
-    def __init__(self, store_path: Optional[str] = None):
+    def __init__(self, store_path: str | None = None):
         """Initialize permission store."""
         if store_path:
             self.store_path = Path(store_path).expanduser()
@@ -33,22 +33,22 @@ class PermissionStore:
         self.store_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Session cache
-        self.cache: Dict[Tuple[str, str], bool] = {}
+        self.cache: dict[tuple[str, str], bool] = {}
 
         # Load preferences
         self.preferences = self._load_preferences()
 
-    def _load_preferences(self) -> Dict[str, Any]:
+    def _load_preferences(self) -> dict[str, Any]:
         """Load preferences from disk."""
         if self.store_path.exists():
             try:
-                with open(self.store_path, "r") as f:
+                with open(self.store_path) as f:
                     return json.load(f)
-            except (json.JSONDecodeError, IOError):
+            except (OSError, json.JSONDecodeError):
                 return self._default_preferences()
         return self._default_preferences()
 
-    def _default_preferences(self) -> Dict[str, Any]:
+    def _default_preferences(self) -> dict[str, Any]:
         """Get default preferences."""
         return {"policy": "balanced", "allowList": [], "denyList": [], "sessionCache": {}}
 
@@ -57,7 +57,7 @@ class PermissionStore:
         try:
             with open(self.store_path, "w") as f:
                 json.dump(self.preferences, f, indent=2)
-        except IOError:
+        except OSError:
             pass  # Fail silently
 
     def allow(self, tool: str, operation: str):
@@ -167,7 +167,7 @@ class PermissionStore:
         if cache_key in self.cache:
             del self.cache[cache_key]
 
-    def get_all_preferences(self) -> Dict[str, Any]:
+    def get_all_preferences(self) -> dict[str, Any]:
         """Get all preferences."""
         return self.preferences.copy()
 
@@ -177,10 +177,10 @@ class PermissionStore:
         self._save_preferences()
         self.cache.clear()
 
-    def get_allow_list(self) -> List[str]:
+    def get_allow_list(self) -> list[str]:
         """Get allow list."""
         return self.preferences["allowList"].copy()
 
-    def get_deny_list(self) -> List[str]:
+    def get_deny_list(self) -> list[str]:
         """Get deny list."""
         return self.preferences["denyList"].copy()

@@ -12,7 +12,6 @@ from lyra_ui import (
     ScreenReader,
 )
 
-
 # AriaAttributes Tests
 
 

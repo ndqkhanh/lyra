@@ -37,10 +37,10 @@ from __future__ import annotations
 import difflib
 import json
 import re
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Optional, Protocol
-
+from typing import Any, Protocol
 
 # ── Public schema ───────────────────────────────────────────────
 
@@ -122,8 +122,8 @@ class OptimizeRound:
     round_no: int
     pre_score: float
     post_score: float
-    analysis: Optional[FailureAnalysis] = None
-    mutation: Optional[SkillMutation] = None
+    analysis: FailureAnalysis | None = None
+    mutation: SkillMutation | None = None
     accepted: bool = False
     error: str = ""
 
@@ -284,7 +284,7 @@ def optimize_skill(
     llm: LLMRunner,
     max_rounds: int = 20,
     target_pass_rate: float = 1.0,
-    on_round: Optional[MutationCallback] = None,
+    on_round: MutationCallback | None = None,
 ) -> OptimizeResult:
     """Run the Executor/Analyst/Mutator loop and return the trace.
 

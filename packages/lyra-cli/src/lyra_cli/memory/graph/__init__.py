@@ -347,6 +347,6 @@ class GraphMemoryStore:
                 sum(len(rels) for rels in self.outgoing.values()) / len(self.entities)
                 if self.entities else 0
             ),
-            "entity_types": list(set(e.entity_type for e in self.entities.values())),
-            "relation_types": list(set(r.relation_type for r in self.relations.values())),
+            "entity_types": list({e.entity_type for e in self.entities.values()}),
+            "relation_types": list({r.relation_type for r in self.relations.values()}),
         }

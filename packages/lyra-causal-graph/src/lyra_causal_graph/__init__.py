@@ -23,23 +23,42 @@ Key design principles:
 
 from __future__ import annotations
 
-# ── Core Graph ────────────────────────────────────────────────────────────────
+# Re-import dataclass for the legacy compatibility classes
+from dataclasses import dataclass
+from dataclasses import field as _field
+from typing import Any as _Any
+from typing import Optional as _Optional
 
+import numpy as _np
+
+# ── Core Graph ────────────────────────────────────────────────────────────────
 from .causal_graph import (
-    # Data types
-    CausalGraphConfig,
-    EdgeType,
-    GraphEdge,
-    GraphNode,
     # Algorithms
     CausalGraph,
+    # Data types
+    CausalGraphConfig,
     ConditionalIndependenceTest,
+    EdgeType,
     FCIAlgorithm,
+    GraphEdge,
+    GraphNode,
     PCAlgorithm,
 )
 
-# ── Errors ────────────────────────────────────────────────────────────────────
+# ── Re-export legacy aliases (from the original stub) ─────────────────────────
+# These are maintained for backward compatibility with code that imports
+# from the original single-file module.
+from .causal_graph import CausalGraph as _CausalGraph
 
+# ── Counterfactual ────────────────────────────────────────────────────────────
+from .counterfactual import (
+    CounterfactualConfig,
+    CounterfactualQuery,
+    CounterfactualReasoner,
+    CounterfactualResult,
+)
+
+# ── Errors ────────────────────────────────────────────────────────────────────
 from .errors import (
     AdjustmentError,
     CausalGraphError,
@@ -54,27 +73,7 @@ from .errors import (
     SCMError,
 )
 
-# ── Structural Causal Models ─────────────────────────────────────────────────
-
-from .scm import (
-    # Noise models
-    EndogenousVariable,
-    ExogenousVariable,
-    GaussianNoise,
-    LaplaceNoise,
-    NoiseModel,
-    UniformNoise,
-    # SCM
-    SCMConfig,
-    SCMEquation,
-    StructuralCausalModel,
-    # Factory helpers
-    make_chain_scm,
-    make_collider_scm,
-)
-
 # ── Intervention ─────────────────────────────────────────────────────────────
-
 from .intervention import (
     AdjustmentMethod,
     BackdoorAdjuster,
@@ -85,17 +84,7 @@ from .intervention import (
     TreatmentEffect,
 )
 
-# ── Counterfactual ────────────────────────────────────────────────────────────
-
-from .counterfactual import (
-    CounterfactualConfig,
-    CounterfactualQuery,
-    CounterfactualReasoner,
-    CounterfactualResult,
-)
-
 # ── Root Cause ────────────────────────────────────────────────────────────────
-
 from .root_cause import (
     AttributionScore,
     RootCause,
@@ -103,17 +92,23 @@ from .root_cause import (
     RootCauseConfig,
 )
 
-# ── Re-export legacy aliases (from the original stub) ─────────────────────────
-# These are maintained for backward compatibility with code that imports
-# from the original single-file module.
-
-from .causal_graph import CausalGraph as _CausalGraph
-from .causal_graph import GraphNode, GraphEdge
-
-# Re-import dataclass for the legacy compatibility classes
-from dataclasses import dataclass, field as _field
-from typing import Any as _Any, Optional as _Optional
-import numpy as _np
+# ── Structural Causal Models ─────────────────────────────────────────────────
+from .scm import (
+    # Noise models
+    EndogenousVariable,
+    ExogenousVariable,
+    GaussianNoise,
+    LaplaceNoise,
+    NoiseModel,
+    # SCM
+    SCMConfig,
+    SCMEquation,
+    StructuralCausalModel,
+    UniformNoise,
+    # Factory helpers
+    make_chain_scm,
+    make_collider_scm,
+)
 
 
 # Legacy EntityNode — wraps GraphNode with entity_type compatibility
@@ -156,8 +151,8 @@ class ActionEdge:
     metadata: dict[str, Any] = _field(default_factory=dict)
 
 # Legacy OutcomeNode (from original stub)
-from dataclasses import dataclass, field as _field
-from typing import Optional as _Optional
+from dataclasses import dataclass
+from dataclasses import field as _field
 
 
 @dataclass
@@ -171,7 +166,7 @@ class OutcomeNode:
     result: str
     success: bool
     latency: float
-    error: _Optional[str] = None
+    error: str | None = None
     metrics: dict[str, float] = _field(default_factory=dict)
 
 
@@ -228,13 +223,13 @@ class LegacyCausalGraph(_CausalGraph):
         self.latent_vars[var.name] = var
         return var.name
 
-    def query_entity(self, entity_id: str) -> _Optional[EntityNode]:
+    def query_entity(self, entity_id: str) -> EntityNode | None:
         return self.entities.get(entity_id)
 
     def get_actions_for_entity(self, entity_id: str) -> list[ActionEdge]:
         return [a for a in self.actions.values() if a.source_id == entity_id or a.target_id == entity_id]
 
-    def get_outcome_for_action(self, action_id: str) -> _Optional[OutcomeNode]:
+    def get_outcome_for_action(self, action_id: str) -> OutcomeNode | None:
         action = self.actions.get(action_id)
         if action and action.outcome_id:
             return self.outcomes.get(action.outcome_id)

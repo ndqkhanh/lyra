@@ -40,7 +40,7 @@ def _build_fragments(picker: EffortPicker, *, width: int) -> FormattedText:
     # Highlight the cursor on the track and the matching level name.
     cursor_col = picker.cursor
     n = len(picker.levels)
-    target_col = 0 if n <= 1 else round(cursor_col * (width - 1) / (n - 1))
+    0 if n <= 1 else round(cursor_col * (width - 1) / (n - 1))
 
     fragments: list[tuple[str, str]] = []
     fragments.append(("class:header", "  Effort\n\n"))

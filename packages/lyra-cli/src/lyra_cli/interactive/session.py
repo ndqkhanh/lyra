@@ -1510,7 +1510,7 @@ class InteractiveSession:
         # forms users actually type (DeepSeek's flash/pro split, the
         # ``opus`` / ``sonnet`` shorthand, etc.).
         slugs_by_provider: dict[str, list[str]] = {}
-        for alias_name, entry in DEFAULT_ALIASES._aliases.items():
+        for _alias_name, entry in DEFAULT_ALIASES._aliases.items():
             slugs_by_provider.setdefault(entry.provider, []).append(entry.slug)
 
         # Friendly user-facing labels per provider — surface the slot
@@ -5295,7 +5295,7 @@ def _cmd_commands(session: InteractiveSession, args: str) -> CommandResult:
     cmds = session.list_user_commands()
     seen: set[str] = set()
     rows: list[str] = []
-    for key, cmd in cmds.items():
+    for _key, cmd in cmds.items():
         if id(cmd) in seen:
             continue
         seen.add(id(cmd))

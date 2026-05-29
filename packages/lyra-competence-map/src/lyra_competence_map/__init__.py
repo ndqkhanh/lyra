@@ -91,13 +91,13 @@ class CompetenceMap:
             self.contexts[context_signature] += 1
             return entry
 
-    def _find_entry(self, context: str, skill: str) -> Optional[CompetenceEntry]:
+    def _find_entry(self, context: str, skill: str) -> CompetenceEntry | None:
         for e in self.entries:
             if e.context_signature == context and e.skill_name == skill:
                 return e
         return None
 
-    def best_skill_for_context(self, context_signature: str) -> Optional[str]:
+    def best_skill_for_context(self, context_signature: str) -> str | None:
         candidates = [
             e for e in self.entries
             if e.context_signature == context_signature and e.total_attempts >= 3
@@ -118,6 +118,6 @@ class CompetenceMap:
         return {
             "total_entries": len(self.entries),
             "unique_contexts": len(self.contexts),
-            "unique_skills": len(set(e.skill_name for e in self.entries)),
+            "unique_skills": len({e.skill_name for e in self.entries}),
             "regression_events": len(self.regression_detector.regressions),
         }

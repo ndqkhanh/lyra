@@ -9,7 +9,7 @@ Features:
 
 import json
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class ConfigurationManager:
@@ -22,7 +22,7 @@ class ConfigurationManager:
     - Validation
     """
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: str | None = None):
         """Initialize configuration manager."""
         if config_path:
             self.config_path = Path(config_path).expanduser()
@@ -32,17 +32,17 @@ class ConfigurationManager:
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
         self.config = self._load_config()
 
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> dict[str, Any]:
         """Load configuration from file."""
         if self.config_path.exists():
             try:
-                with open(self.config_path, "r") as f:
+                with open(self.config_path) as f:
                     return json.load(f)
-            except (json.JSONDecodeError, IOError):
+            except (OSError, json.JSONDecodeError):
                 return self._default_config()
         return self._default_config()
 
-    def _default_config(self) -> Dict[str, Any]:
+    def _default_config(self) -> dict[str, Any]:
         """Get default configuration."""
         return {
             "enabled": True,
@@ -71,7 +71,7 @@ class ConfigurationManager:
         try:
             with open(self.config_path, "w") as f:
                 json.dump(self.config, f, indent=2)
-        except IOError:
+        except OSError:
             pass
 
     def get(self, key: str, default: Any = None) -> Any:
@@ -111,7 +111,7 @@ class ConfigurationManager:
         try:
             with open(export_path, "w") as f:
                 json.dump(self.config, f, indent=2)
-        except IOError:
+        except OSError:
             pass
 
     def import_config(self, path: str):
@@ -119,8 +119,8 @@ class ConfigurationManager:
         import_path = Path(path).expanduser()
         if import_path.exists():
             try:
-                with open(import_path, "r") as f:
+                with open(import_path) as f:
                     self.config = json.load(f)
                 self.save()
-            except (json.JSONDecodeError, IOError):
+            except (OSError, json.JSONDecodeError):
                 pass

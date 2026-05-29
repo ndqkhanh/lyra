@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Test Phases 4-6: Agent Tree, Selection Menu, Scroll Manager"""
 
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
 
-from lyra_cli.ui import AgentTree, SelectionMenu, ScrollManager
+from lyra_cli.ui import AgentTree, ScrollManager, SelectionMenu
 
 
 def test_agent_tree():

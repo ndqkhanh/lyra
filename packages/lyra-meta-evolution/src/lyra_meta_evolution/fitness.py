@@ -11,10 +11,9 @@ import asyncio
 import logging
 import math
 import time
-from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Callable, Optional, Protocol, Sequence
+from typing import Any
 
 from .meta_evolution import AgentGenome
 
@@ -256,7 +255,7 @@ class ParetoFrontier:
         """Get genome IDs on the frontier."""
         return [fid for fid, _ in self._frontier]
 
-    def hypervolume(self, reference_point: Optional[ObjectiveVector] = None) -> float:
+    def hypervolume(self, reference_point: ObjectiveVector | None = None) -> float:
         """Approximate the hypervolume dominated by the frontier.
 
         Higher hypervolume = better coverage of the objective space.
@@ -266,7 +265,7 @@ class ParetoFrontier:
 
         if reference_point is None:
             reference_point = ObjectiveVector(
-                values={dim: 0.0 for dim in ObjectiveDimension}
+                values=dict.fromkeys(ObjectiveDimension, 0.0)
             )
 
         # Simple approximation: average distance from reference
@@ -319,7 +318,7 @@ class FitnessEvaluator:
 
     def __init__(
         self,
-        weights: Optional[FitnessWeights] = None,
+        weights: FitnessWeights | None = None,
         track_pareto: bool = True,
         dynamic_weights: bool = True,
     ):
@@ -382,7 +381,7 @@ class FitnessEvaluator:
         scores = await asyncio.gather(*tasks, return_exceptions=True)
 
         result: dict[str, float] = {}
-        for genome, score in zip(genomes, scores):
+        for genome, score in zip(genomes, scores, strict=False):
             if isinstance(score, Exception):
                 logger.warning("Evaluation failed for %s: %s", genome.agent_id, score)
                 result[genome.agent_id] = 0.0

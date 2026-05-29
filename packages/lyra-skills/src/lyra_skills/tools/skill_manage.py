@@ -19,9 +19,9 @@ from __future__ import annotations
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Literal
+from typing import Literal
 
-from ..loader import SkillLoaderError, SkillManifest, load_skills
+from ..loader import SkillLoaderError, load_skills
 
 SkillOp = Literal["list", "create", "patch", "delete"]
 

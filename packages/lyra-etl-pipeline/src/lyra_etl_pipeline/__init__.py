@@ -22,7 +22,7 @@ __all__ = [
 @dataclass
 class Schema:
     fields: dict[str, str]
-    primary_key: Optional[str] = None
+    primary_key: str | None = None
 
 
 @dataclass

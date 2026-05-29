@@ -46,7 +46,7 @@ def test_hmac_dev_fallback_when_unset(monkeypatch):
 
 def test_hmac_constant_time_compare():
     backend = HmacBackend(key=b"k")
-    sig = backend.sign(b"payload")
+    backend.sign(b"payload")
     # Wrong-length signature still returns False, no exception.
     assert backend.verify(b"payload", "deadbeef") is False
     assert backend.verify(b"payload", "") is False

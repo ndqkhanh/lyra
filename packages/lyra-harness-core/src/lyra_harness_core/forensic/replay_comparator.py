@@ -9,8 +9,8 @@ trajectory on the same task) are sabotage-detection candidates.
 from __future__ import annotations
 
 import enum
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Iterable, Optional, Sequence
 
 from ..orchestration import AgentDecision, SideEffectRecord
 
@@ -73,7 +73,7 @@ class TrajectorySimilarity:
         fingerprint_overlap: float,
         tool_overlap: float,
         reason: str = "",
-    ) -> "TrajectorySimilarity":
+    ) -> TrajectorySimilarity:
         composite = (
             0.4 * action_overlap + 0.4 * fingerprint_overlap + 0.2 * tool_overlap
         )

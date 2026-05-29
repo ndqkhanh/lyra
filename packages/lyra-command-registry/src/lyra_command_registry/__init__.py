@@ -8,8 +8,9 @@ and skills (formal definitions).
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ class Command:
     name: str
     description: str
     pattern: str
-    source_instinct_id: Optional[str] = None
+    source_instinct_id: str | None = None
     hit_count: int = 0
 
 
@@ -35,7 +36,7 @@ class CommandRegistry:
         self._commands: dict[str, Command] = {}
         self._handlers: dict[str, Callable] = {}
 
-    def register(self, command: Command, handler: Optional[Callable] = None) -> None:
+    def register(self, command: Command, handler: Callable | None = None) -> None:
         self._commands[command.name] = command
         if handler:
             self._handlers[command.name] = handler
@@ -59,7 +60,7 @@ class CommandRegistry:
             cmd.hit_count += 1
         return handler(*args, **kwargs)
 
-    def get_command(self, name: str) -> Optional[Command]:
+    def get_command(self, name: str) -> Command | None:
         return self._commands.get(name)
 
     @property

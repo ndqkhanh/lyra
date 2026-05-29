@@ -2,12 +2,12 @@
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from dataclasses import dataclass
+from typing import Any
 
 from ..cost import CostTracker
 from .types import EvalCase, EvalResult, EvalRun, EvalSuite
-
 
 _ProgramFn = Callable[[dict[str, Any]], Any]
 _EvalFn = Callable[[EvalCase, Any], float]
@@ -42,10 +42,10 @@ class EvalRunner:
 
     program: _ProgramFn
     eval_fn: _EvalFn
-    cost_tracker: Optional[CostTracker] = None
-    cost_fn: Optional[_CostFn] = None
+    cost_tracker: CostTracker | None = None
+    cost_fn: _CostFn | None = None
     pass_threshold: float = 0.5  # score >= threshold → passed
-    max_cases: Optional[int] = None  # cap suite size when set
+    max_cases: int | None = None  # cap suite size when set
 
     def __post_init__(self) -> None:
         if not 0.0 <= self.pass_threshold <= 1.0:
@@ -53,7 +53,7 @@ class EvalRunner:
                 f"pass_threshold must be in [0, 1], got {self.pass_threshold}"
             )
 
-    def run(self, suite: EvalSuite, *, run_metadata: Optional[dict] = None) -> EvalRun:
+    def run(self, suite: EvalSuite, *, run_metadata: dict | None = None) -> EvalRun:
         """Execute the suite; return an :class:`EvalRun` with all results."""
         results: list[EvalResult] = []
         cases = suite.cases

@@ -164,7 +164,7 @@ class HindsightEngine:
         """Get all lessons extracted from trajectories with the same goal."""
         goal_key = _normalize_goal(goal)
         traj_ids = self._goal_index.get(goal_key, [])
-        return [l for l in self._lessons.values() if l.trajectory_id in traj_ids]
+        return [lesson for lesson in self._lessons.values() if lesson.trajectory_id in traj_ids]
 
     @property
     def trajectory_count(self) -> int:

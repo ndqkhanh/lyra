@@ -5,8 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .exceptions import ConstraintOptimizationError
-
-from .policy_search import PolicyCandidate, SearchConfig, SearchResult, PolicySearch
+from .policy_search import PolicyCandidate, PolicySearch, SearchConfig, SearchResult
 
 
 @dataclass(frozen=True)
@@ -135,7 +134,7 @@ class ConstrainedOptimizer:
             )
 
         for name, (lower, upper) in zip(
-            constraints.constraints, constraints.constraint_bounds
+            constraints.constraints, constraints.constraint_bounds, strict=False
         ):
             self._constraints[name] = (lower, upper)
 

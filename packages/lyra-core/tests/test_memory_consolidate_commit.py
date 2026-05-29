@@ -54,7 +54,7 @@ def test_commit_consolidation_writes_lesson(tmp_path: Path) -> None:
     assert lesson.source_trajectory_ids == proposal.member_entry_ids
     # Bank now retrievable via task_signature.
     found = ts.reasoning_bank.recall(task_signature="csv", k=5)
-    assert any(l.id == lesson.id for l in found)
+    assert any(ex.id == lesson.id for ex in found)
 
 
 def test_commit_consolidation_idempotent(tmp_path: Path) -> None:

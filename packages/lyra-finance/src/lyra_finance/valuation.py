@@ -17,7 +17,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
-from lyra_finance.models import Asset, ValuationResult
+from lyra_finance.models import ValuationResult
 
 logger = logging.getLogger(__name__)
 

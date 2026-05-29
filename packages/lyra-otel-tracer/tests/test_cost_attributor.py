@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_otel_tracer.cost_attributor import CostAttributor, CostBreakdown, CostConfig, CostEntry
 
 

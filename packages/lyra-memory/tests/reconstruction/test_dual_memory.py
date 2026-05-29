@@ -106,7 +106,7 @@ class TestDualMemoryGraph:
 
     def test_passive_retrieve_skips_unembedded(self):
         dmg = DualMemoryGraph()
-        node = dmg.add_episodic_memory(
+        dmg.add_episodic_memory(
             content="no embedding here", cues=["test"], tags=["test"],
         )
         # No embedding set — should be skipped

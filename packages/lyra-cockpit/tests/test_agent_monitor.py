@@ -5,7 +5,6 @@ from __future__ import annotations
 import time
 
 import pytest
-
 from lyra_cockpit.agent_monitor import (
     AgentMonitor,
     AgentStatus,

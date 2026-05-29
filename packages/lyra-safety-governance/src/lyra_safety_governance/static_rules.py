@@ -1,13 +1,19 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+from collections.abc import Sequence
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Sequence
 
 from .exceptions import RuleViolationError
-from .governance_engine import ActionRequest, ActionType, Decision, GovernanceDecision, GovernanceLayer
+from .governance_engine import (
+    ActionRequest,
+    ActionType,
+    Decision,
+    GovernanceDecision,
+    GovernanceLayer,
+)
 
 
 class RulePriority(Enum):

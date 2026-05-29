@@ -98,7 +98,7 @@ class RepositoryContext:
 class PythonAnalyzer:
     """
     Analyzes Python code for symbols and dependencies.
-    
+
     Features:
     - AST-based analysis
     - Symbol extraction
@@ -113,10 +113,10 @@ class PythonAnalyzer:
 
     def analyze_file(self, file_path: Path) -> tuple[list[Symbol], list[Dependency]]:
         """Analyze a Python file.
-        
+
         Args:
             file_path: Path to Python file
-            
+
         Returns:
             Tuple of (symbols, dependencies)
         """
@@ -136,11 +136,11 @@ class PythonAnalyzer:
 
     def _extract_symbols(self, tree: ast.AST, file_path: Path) -> list[Symbol]:
         """Extract symbols from AST.
-        
+
         Args:
             tree: AST tree
             file_path: File path
-            
+
         Returns:
             List of symbols
         """
@@ -178,11 +178,11 @@ class PythonAnalyzer:
 
     def _extract_dependencies(self, tree: ast.AST, file_path: Path) -> list[Dependency]:
         """Extract dependencies from AST.
-        
+
         Args:
             tree: AST tree
             file_path: File path
-            
+
         Returns:
             List of dependencies
         """
@@ -231,7 +231,7 @@ class PythonAnalyzer:
 class DependencyGraph:
     """
     Builds and analyzes dependency graphs.
-    
+
     Features:
     - Graph construction
     - Cycle detection
@@ -247,7 +247,7 @@ class DependencyGraph:
 
     def add_dependency(self, source: str, target: str) -> None:
         """Add a dependency edge.
-        
+
         Args:
             source: Source node
             target: Target node
@@ -265,11 +265,11 @@ class DependencyGraph:
 
     def get_dependents(self, node: str, max_depth: int = -1) -> set[str]:
         """Get all nodes that depend on this node.
-        
+
         Args:
             node: Node to analyze
             max_depth: Maximum depth (-1 for unlimited)
-            
+
         Returns:
             Set of dependent nodes
         """
@@ -300,11 +300,11 @@ class DependencyGraph:
 
     def get_dependencies(self, node: str, max_depth: int = -1) -> set[str]:
         """Get all nodes this node depends on.
-        
+
         Args:
             node: Node to analyze
             max_depth: Maximum depth (-1 for unlimited)
-            
+
         Returns:
             Set of dependency nodes
         """
@@ -335,7 +335,7 @@ class DependencyGraph:
 
     def detect_cycles(self) -> list[list[str]]:
         """Detect cycles in the graph.
-        
+
         Returns:
             List of cycles (each cycle is a list of nodes)
         """
@@ -370,13 +370,13 @@ class DependencyGraph:
 class ECCEngine:
     """
     Main engine for External Code Context.
-    
+
     Provides repository analysis, dependency tracking, and impact analysis.
     """
 
     def __init__(self, repo_path: Path):
         """Initialize the ECC engine.
-        
+
         Args:
             repo_path: Path to repository root
         """
@@ -388,7 +388,7 @@ class ECCEngine:
 
     def analyze_repository(self) -> RepositoryContext:
         """Analyze the entire repository.
-        
+
         Returns:
             Repository context
         """
@@ -457,10 +457,10 @@ class ECCEngine:
 
     def analyze_impact(self, file_path: str) -> ImpactAnalysis:
         """Analyze impact of changes to a file.
-        
+
         Args:
             file_path: Path to file
-            
+
         Returns:
             Impact analysis
         """
@@ -501,10 +501,10 @@ class ECCEngine:
 
     def find_symbol(self, name: str) -> list[Symbol]:
         """Find symbols by name.
-        
+
         Args:
             name: Symbol name
-            
+
         Returns:
             List of matching symbols
         """
@@ -515,10 +515,10 @@ class ECCEngine:
 
     def get_symbol_references(self, symbol: Symbol) -> list[tuple[str, int]]:
         """Get all references to a symbol.
-        
+
         Args:
             symbol: Symbol to find references for
-            
+
         Returns:
             List of (file_path, line_number) tuples
         """

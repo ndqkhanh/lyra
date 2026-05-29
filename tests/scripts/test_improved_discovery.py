@@ -16,8 +16,9 @@ def test_improved_discovery():
     print("=" * 80)
 
     try:
-        from lyra_research.discovery import MultiSourceDiscovery
         import os
+
+        from lyra_research.discovery import MultiSourceDiscovery
 
         # Get API keys from environment
         semantic_scholar_key = os.environ.get("SEMANTIC_SCHOLAR_API_KEY")

@@ -7,8 +7,9 @@ default implementations any project can use.
 """
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Iterable, Optional, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 
 @runtime_checkable
@@ -46,7 +47,7 @@ class Document(Protocol):
 
     doc_id: str
     text: str
-    anchor_node_id: Optional[str]
+    anchor_node_id: str | None
 
 
 # --- Simple dataclass implementations (zero-dep defaults) -----------------
@@ -88,7 +89,7 @@ class SimpleGraph:
         return isinstance(node_id, str) and node_id in self.nodes
 
     @classmethod
-    def from_pairs(cls, edges: Iterable[tuple[str, str]], *, titles: Optional[dict[str, str]] = None) -> "SimpleGraph":
+    def from_pairs(cls, edges: Iterable[tuple[str, str]], *, titles: dict[str, str] | None = None) -> SimpleGraph:
         """Build a graph from ``(src, dst)`` edge pairs.
 
         Auto-creates nodes for any id seen on either end of an edge. Optional
@@ -110,4 +111,4 @@ class SimpleGraph:
 class SimpleDocument:
     doc_id: str
     text: str
-    anchor_node_id: Optional[str] = None
+    anchor_node_id: str | None = None

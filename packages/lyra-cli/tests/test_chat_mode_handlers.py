@@ -436,7 +436,7 @@ def test_chat_blocks_when_cap_already_exceeded(session: InteractiveSession) -> N
     fake = FakeLLM()
     with patch(
         "lyra_cli.llm_factory.build_llm", return_value=fake
-    ) as build_llm_mock:
+    ):
         result = session.dispatch("hello")
 
     # ``build_llm`` is called once when caching the provider, but
@@ -674,8 +674,7 @@ class StreamingFakeLLM(FakeLLM):
     ):
         self.stream_calls.append(list(messages))
         self.last_usage = {}
-        for c in self.stream_chunks:
-            yield c
+        yield from self.stream_chunks
         # Real provider records the final ``usage`` event before the
         # iterator finishes — mirror that here.
         self.last_usage = dict(self._final_usage)

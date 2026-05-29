@@ -12,11 +12,9 @@ import time
 from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Optional
+from typing import Any
 
 from .exceptions import (
-    SLANotFoundError,
-    SLAViolationError,
     BudgetExceededError,
     InvalidMetricError,
 )
@@ -237,7 +235,7 @@ class SLAManager:
             return True
         return False
 
-    def get_sla(self, agent_id: str) -> Optional[SLA]:
+    def get_sla(self, agent_id: str) -> SLA | None:
         """Get the SLA for an agent."""
         return self._slas.get(agent_id)
 
@@ -252,7 +250,7 @@ class SLAManager:
         agent_id: str,
         metric: str,
         value: float,
-        timestamp: Optional[float] = None,
+        timestamp: float | None = None,
     ) -> None:
         """Record a metric observation for an agent.
 
@@ -279,7 +277,7 @@ class SLAManager:
         self,
         agent_id: str,
         metrics: dict[str, float],
-        timestamp: Optional[float] = None,
+        timestamp: float | None = None,
     ) -> None:
         """Record multiple metrics at once."""
         ts = timestamp or time.time()
@@ -290,7 +288,7 @@ class SLAManager:
         self,
         agent_id: str,
         metric: str,
-        window_seconds: Optional[float] = None,
+        window_seconds: float | None = None,
     ) -> list[float]:
         """Get metric values, optionally within a time window.
 
@@ -365,7 +363,7 @@ class SLAManager:
         budget = self._budgets[agent_id][budget_type]
         return budget.consume(amount)
 
-    def get_budget(self, agent_id: str, budget_type: BudgetType) -> Optional[Budget]:
+    def get_budget(self, agent_id: str, budget_type: BudgetType) -> Budget | None:
         """Get a specific budget."""
         return self._budgets.get(agent_id, {}).get(budget_type)
 
@@ -532,9 +530,9 @@ class SLAManager:
 
     def get_violations(
         self,
-        agent_id: Optional[str] = None,
-        since: Optional[float] = None,
-        severity: Optional[ViolationSeverity] = None,
+        agent_id: str | None = None,
+        since: float | None = None,
+        severity: ViolationSeverity | None = None,
     ) -> list[SLAViolation]:
         """Query violations with optional filters.
 
@@ -557,7 +555,7 @@ class SLAManager:
 
         return results
 
-    def get_violation_count(self, agent_id: Optional[str] = None) -> int:
+    def get_violation_count(self, agent_id: str | None = None) -> int:
         """Get violation count, optionally filtered by agent."""
         if agent_id:
             return sum(1 for v in self._violations if v.agent_id == agent_id)

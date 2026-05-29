@@ -7,7 +7,6 @@ import time
 import uuid
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Callable
 
 from lyra_recursive_link.exceptions import BusError, MessageDeliveryError
 from lyra_recursive_link.latent_encoder import LatentVector

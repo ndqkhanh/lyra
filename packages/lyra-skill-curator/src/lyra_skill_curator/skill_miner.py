@@ -1,10 +1,9 @@
 """Skill Mining Pipeline — extract skills from repos, traces, and registries."""
 from __future__ import annotations
 
-import random
+from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum
-from typing import Sequence
 
 
 class SourceType(Enum):

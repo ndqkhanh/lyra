@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum, auto
 
 from lyra_skill_loader.exceptions import TriggerError
@@ -178,7 +178,6 @@ class TriggerMatcher:
     ) -> tuple[TriggerType, float, list[str]]:
         """Determine the trigger type, base score, and matched items."""
         lower_ctx = task_context.lower()
-        matched_items: list[str] = []
 
         # Check explicit match (context contains the skill pattern directly)
         if trigger.pattern.lower() in lower_ctx:

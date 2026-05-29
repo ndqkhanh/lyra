@@ -110,7 +110,6 @@ Output JSON only:
         from lyra_memory.routing.store import MultiStoreRegistry
 
         registry: MultiStoreRegistry = self.stores  # type: ignore[assignment]
-        remaining = budget_tokens
         selected: list[tuple[str, float]] = []
 
         for name, store in registry.stores.items():

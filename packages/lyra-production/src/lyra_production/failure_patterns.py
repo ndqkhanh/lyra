@@ -1,6 +1,5 @@
 """FailurePatternGuard — detects 8 recurring failure modes in agent execution."""
 
-from time import time
 
 from .models import FailureMode, FailureSignal
 
@@ -38,7 +37,6 @@ class FailurePatternGuard:
         context: str = "", tool_name: str = "", tool_args: str = "",
     ) -> list[FailureSignal]:
         """Run all 8 failure pattern detectors."""
-        import uuid
         signals: list[FailureSignal] = []
 
         # 1. Context overload

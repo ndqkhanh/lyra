@@ -132,7 +132,7 @@ class TestStateEncoder:
 
 class TestToolCategoryMap:
     def test_all_known_tools_have_category(self):
-        for tool, cat in TOOL_CATEGORY_MAP.items():
+        for _tool, cat in TOOL_CATEGORY_MAP.items():
             assert 0 <= cat <= 3
 
 

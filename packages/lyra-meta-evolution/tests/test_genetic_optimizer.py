@@ -3,7 +3,6 @@
 import asyncio
 
 import pytest
-
 from lyra_meta_evolution.genetic_optimizer import (
     CrossoverOperator,
     GeneticOptimizationResult,
@@ -16,7 +15,6 @@ from lyra_meta_evolution.genetic_optimizer import (
     TournamentSelection,
 )
 from lyra_meta_evolution.meta_evolution import AgentGenome
-
 
 # ── Fixtures ────────────────────────────────────────────────────────────────────
 
@@ -148,7 +146,7 @@ class TestCrossoverOperator:
 class TestMutationOperator:
     def test_mutate_modifies_genome(self, sample_genome):
         mutator = MutationOperator(mutation_rate=1.0, mutation_strength=0.5)
-        original_lr = sample_genome.hyperparameters.get("learning_rate", 0.01)
+        sample_genome.hyperparameters.get("learning_rate", 0.01)
         genome, changes = mutator.mutate(sample_genome)
         # With rate 1.0, hyperparameters should be mutated
         assert len(changes) > 0

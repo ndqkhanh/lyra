@@ -5,7 +5,6 @@ from __future__ import annotations
 import time
 
 import pytest
-
 from lyra_model_router import (
     BudgetLimit,
     CapabilityAnalyzer,
@@ -31,12 +30,10 @@ from lyra_model_router import (
     TaskClassifier,
     TaskRequirements,
     UsageRecord,
-    UsageStats,
     UsageTracker,
     VerificationResult,
     default_config,
 )
-
 
 # ═════════════════════════════════════════════════════════════════════════
 # RouterConfig Tests
@@ -799,7 +796,7 @@ class TestIntegration:
         verifier = CrossModelVerifier()
         tracker = UsageTracker()
 
-        opus = ModelCapability(
+        ModelCapability(
             model_id="claude-opus-4-7", provider="anthropic", tier=0,
             strengths=("reasoning",), cost_per_1k_tokens=0.075,
             max_tokens=200000, supports_thinking=True,

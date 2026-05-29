@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-import math
 import time
 from dataclasses import dataclass
-from typing import Any
 
-from .adaptive_rubric import AdaptiveRubric, RubricDimension, RubricTemplate
+from .adaptive_rubric import AdaptiveRubric, RubricDimension
 from .exceptions import DomainEvalError
 
 

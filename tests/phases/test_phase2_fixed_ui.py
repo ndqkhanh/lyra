@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Test Phase 2: Fixed Bottom UI (Input + Status)"""
 
-import sys
 import os
+import sys
 import time
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
 
 from lyra_cli.ui import FixedInputBox, StatusLine

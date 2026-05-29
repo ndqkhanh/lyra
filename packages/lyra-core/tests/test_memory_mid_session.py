@@ -160,7 +160,7 @@ def test_high_confidence_goes_straight_to_bank():
     assert result.pending == ()
     # The bank now contains the promoted lesson.
     recalled = bank.recall("sig-a")
-    assert any(l.id == "rich" for l in recalled)
+    assert any(ex.id == "rich" for ex in recalled)
 
 
 def test_medium_confidence_lands_in_pending():
@@ -257,7 +257,7 @@ def test_promote_pending_moves_to_bank():
     assert out is not None
     assert out.lesson.id == "p1"
     assert ext.pending() == ()
-    assert any(l.id == "p1" for l in bank.recall("sig-a"))
+    assert any(ex.id == "p1" for ex in bank.recall("sig-a"))
 
 
 def test_promote_unknown_id_returns_none():

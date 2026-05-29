@@ -14,7 +14,6 @@ Returns a :class:`LearningReport` describing what was learned.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
 
 from ..memory_store import MemoryKind, MemoryStore
 from ..provenance import WitnessLattice
@@ -36,15 +35,15 @@ class ContinuousLearner:
 
     recorder: EditRecorder
     extractor: PreferenceExtractor = field(default_factory=HeuristicExtractor)
-    memory: Optional[MemoryStore] = None
-    lattice: Optional[WitnessLattice] = None
+    memory: MemoryStore | None = None
+    lattice: WitnessLattice | None = None
     agent_id: str = "continuous-learner"
 
     def learn(
         self,
         *,
-        user_id: Optional[str] = None,
-        since_timestamp: Optional[float] = None,
+        user_id: str | None = None,
+        since_timestamp: float | None = None,
     ) -> LearningReport:
         """Run extraction over the recorder; record outputs.
 

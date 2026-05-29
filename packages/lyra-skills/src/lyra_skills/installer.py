@@ -12,14 +12,12 @@ without pulling in Typer / Rich. The CLI is just a Typer wrapper.
 """
 from __future__ import annotations
 
-import os
 import re
 import shutil
 import subprocess
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Optional
 
 from .loader import SkillLoaderError, SkillManifest, _parse_skill_md
 
@@ -189,8 +187,8 @@ def install_from_git(
     *,
     target_root: Path | str,
     overwrite: bool = False,
-    subpath: Optional[str] = None,
-    ref: Optional[str] = None,
+    subpath: str | None = None,
+    ref: str | None = None,
 ) -> InstallResult:
     """Clone *repo_url* into a tempdir, then install via :func:`install_from_path`.
 

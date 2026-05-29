@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Final integration test - Completed phases"""
 
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
 
 
@@ -52,9 +53,9 @@ def test_final_integration():
     # Phase 5: Learning
     print("Phase 5: Learning System")
     try:
-        from lyra_cli.learning import ObservationCapture, InstinctExtractor
-        capture = ObservationCapture()
-        extractor = InstinctExtractor()
+        from lyra_cli.learning import InstinctExtractor, ObservationCapture
+        ObservationCapture()
+        InstinctExtractor()
         print("  ✅ Learning system working (Continuous Learning v2.1)")
         phases_complete += 1
     except Exception as e:
@@ -64,7 +65,7 @@ def test_final_integration():
     # Phase 6: Commands
     print("Phase 6: Commands Integration")
     try:
-        from lyra_cli.commands import get_registry, CommandLoader
+        from lyra_cli.commands import CommandLoader, get_registry
         CommandLoader.register_all()
         registry = get_registry()
         commands = registry.list()
@@ -79,7 +80,7 @@ def test_final_integration():
     try:
         from lyra_cli.loops import LoopManager, SequentialPipeline
         manager = LoopManager()
-        pipeline = SequentialPipeline(["test"])
+        SequentialPipeline(["test"])
         print("  ✅ Loops system working")
         phases_complete += 1
     except Exception as e:
@@ -118,8 +119,8 @@ def test_final_integration():
     try:
         from lyra_cli.config import ConfigManager
         config_manager = ConfigManager()
-        config = config_manager.load()
-        print(f"  ✅ CLI & Config working")
+        config_manager.load()
+        print("  ✅ CLI & Config working")
         phases_complete += 1
     except Exception as e:
         print(f"  ❌ Failed: {e}")

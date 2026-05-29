@@ -2,9 +2,6 @@
 """
 from __future__ import annotations
 
-import time
-
-import pytest
 
 def test_resource_snapshot():
     from lyra_cli.tui_v2.widgets.resource_monitor import ResourceSnapshot

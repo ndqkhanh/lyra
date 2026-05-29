@@ -17,14 +17,14 @@ from ..types import (
 
 class DifficultyEstimator:
     """Estimates task difficulty for compute allocation."""
-    
+
     def __init__(self, model: str = "claude-3-5-sonnet-20241022"):
         self.model = model
-    
+
     def estimate(self, task: str) -> DifficultyEstimate:
         """
         Estimate task difficulty.
-        
+
         Uses heuristics based on:
         - Task length
         - Complexity indicators (math, code, reasoning keywords)
@@ -32,29 +32,29 @@ class DifficultyEstimator:
         """
         # Simple heuristic-based estimation
         task_lower = task.lower()
-        
+
         # Count complexity indicators
         complexity_score = 0
-        
+
         # Math indicators
         math_keywords = ["prove", "calculate", "derive", "theorem", "equation"]
         complexity_score += sum(1 for kw in math_keywords if kw in task_lower)
-        
+
         # Reasoning indicators
         reasoning_keywords = ["why", "how", "explain", "analyze", "compare"]
         complexity_score += sum(0.5 for kw in reasoning_keywords if kw in task_lower)
-        
+
         # Multi-step indicators
         if "step" in task_lower or "first" in task_lower or "then" in task_lower:
             complexity_score += 1
-        
+
         # Length factor
         word_count = len(task.split())
         if word_count > 100:
             complexity_score += 2
         elif word_count > 50:
             complexity_score += 1
-        
+
         # Determine difficulty level
         if complexity_score >= 5:
             level = DifficultyLevel.VERY_HARD
@@ -71,7 +71,7 @@ class DifficultyEstimator:
         else:
             level = DifficultyLevel.TRIVIAL
             confidence = 0.6
-        
+
         # Recommend strategy based on difficulty
         if level in [DifficultyLevel.VERY_HARD, DifficultyLevel.HARD]:
             strategy = ReasoningStrategy.TREE_SEARCH
@@ -81,12 +81,12 @@ class DifficultyEstimator:
             strategy = ReasoningStrategy.DEBATE
         else:
             strategy = ReasoningStrategy.CHAIN_OF_THOUGHT
-        
+
         # Recommend budget based on difficulty
         budget = self._create_budget(level)
-        
+
         reasoning = f"Task complexity score: {complexity_score}. Detected {level.value} difficulty."
-        
+
         return DifficultyEstimate(
             level=level,
             confidence=confidence,
@@ -94,7 +94,7 @@ class DifficultyEstimator:
             recommended_strategy=strategy,
             recommended_budget=budget,
         )
-    
+
     def _create_budget(self, level: DifficultyLevel) -> ComputeBudget:
         """Create compute budget based on difficulty."""
         budget_map = {
@@ -104,9 +104,9 @@ class DifficultyEstimator:
             DifficultyLevel.HARD: (10000, 300, 50),
             DifficultyLevel.VERY_HARD: (20000, 600, 100),
         }
-        
+
         max_tokens, max_time, max_steps = budget_map[level]
-        
+
         return ComputeBudget(
             max_tokens=max_tokens,
             max_time_seconds=max_time,
@@ -116,10 +116,10 @@ class DifficultyEstimator:
 
 class StrategySelector:
     """Selects optimal reasoning strategy for a task."""
-    
+
     def __init__(self):
         self.strategy_history = {}
-    
+
     def select(
         self,
         task: str,
@@ -128,7 +128,7 @@ class StrategySelector:
     ) -> ReasoningStrategy:
         """
         Select reasoning strategy.
-        
+
         Priority:
         1. User-specified strategy (if not AUTO)
         2. Difficulty-based recommendation
@@ -137,10 +137,10 @@ class StrategySelector:
         # If user specified a strategy, use it
         if config.strategy != ReasoningStrategy.AUTO:
             return config.strategy
-        
+
         # Use difficulty-based recommendation
         return difficulty.recommended_strategy
-    
+
     def record_performance(
         self,
         strategy: ReasoningStrategy,
@@ -156,7 +156,7 @@ class StrategySelector:
                 "total_tokens": 0,
                 "total_duration": 0.0,
             }
-        
+
         stats = self.strategy_history[strategy]
         stats["uses"] += 1
         if success:
@@ -167,7 +167,7 @@ class StrategySelector:
 
 class ComputeAllocator:
     """Allocates compute budget based on task and depth."""
-    
+
     def allocate(
         self,
         difficulty: DifficultyEstimate,
@@ -175,7 +175,7 @@ class ComputeAllocator:
     ) -> ComputeBudget:
         """
         Allocate compute budget.
-        
+
         Considers:
         - Task difficulty
         - Requested depth
@@ -183,30 +183,30 @@ class ComputeAllocator:
         """
         # Start with difficulty-based budget
         base_budget = difficulty.recommended_budget
-        
+
         # Adjust based on depth
         depth_multipliers = {
             ReasoningDepth.QUICK: 0.5,
             ReasoningDepth.STANDARD: 1.0,
             ReasoningDepth.COMPREHENSIVE: 2.0,
         }
-        
+
         multiplier = depth_multipliers[config.depth]
-        
+
         # Apply user limits
         max_tokens = min(
             int(base_budget.max_tokens * multiplier),
             config.max_tokens,
         )
-        
+
         max_steps = min(
             int(base_budget.max_steps * multiplier),
             config.max_steps,
         )
-        
+
         # Time scales with tokens
         max_time = base_budget.max_time_seconds * multiplier
-        
+
         return ComputeBudget(
             max_tokens=max_tokens,
             max_time_seconds=max_time,
@@ -217,7 +217,7 @@ class ComputeAllocator:
 class ReasoningOrchestrator:
     """
     Orchestrates reasoning execution with adaptive compute allocation.
-    
+
     Responsibilities:
     - Estimate task difficulty
     - Select reasoning strategy
@@ -225,12 +225,12 @@ class ReasoningOrchestrator:
     - Monitor execution
     - Decide when to stop
     """
-    
+
     def __init__(self, model: str = "claude-3-5-sonnet-20241022"):
         self.difficulty_estimator = DifficultyEstimator(model)
         self.strategy_selector = StrategySelector()
         self.compute_allocator = ComputeAllocator()
-    
+
     def prepare(
         self,
         task: str,
@@ -238,24 +238,24 @@ class ReasoningOrchestrator:
     ) -> tuple[ReasoningStrategy, ComputeBudget, DifficultyEstimate]:
         """
         Prepare for reasoning execution.
-        
+
         Returns:
             (strategy, budget, difficulty_estimate)
         """
         if config is None:
             config = ReasoningConfig()
-        
+
         # Estimate difficulty
         difficulty = self.difficulty_estimator.estimate(task)
-        
+
         # Select strategy
         strategy = self.strategy_selector.select(task, difficulty, config)
-        
+
         # Allocate budget
         budget = self.compute_allocator.allocate(difficulty, config)
-        
+
         return strategy, budget, difficulty
-    
+
     def should_stop(
         self,
         budget: ComputeBudget,
@@ -265,7 +265,7 @@ class ReasoningOrchestrator:
     ) -> bool:
         """
         Decide if reasoning should stop early.
-        
+
         Stop if:
         - Budget exhausted
         - High confidence reached
@@ -274,17 +274,17 @@ class ReasoningOrchestrator:
         # Budget exhausted
         if not budget.has_budget():
             return True
-        
+
         # High confidence reached
         if current_score >= threshold and steps_count >= 5:
             return True
-        
+
         # Minimum steps not reached
         if steps_count < 3:
             return False
-        
+
         return False
-    
+
     def record_execution(
         self,
         strategy: ReasoningStrategy,

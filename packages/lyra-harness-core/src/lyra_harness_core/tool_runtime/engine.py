@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 from ..cost import CostTracker
 from ..evals import BudgetController, BudgetExhausted
@@ -52,11 +52,11 @@ class ToolEngine:
     """
 
     registry: ToolRegistry
-    verifier: Optional[VerifierComposer] = None
-    budget: Optional[BudgetController] = None
-    cost_tracker: Optional[CostTracker] = None
-    lattice: Optional[WitnessLattice] = None
-    trace: Optional[TraceBuilder] = None
+    verifier: VerifierComposer | None = None
+    budget: BudgetController | None = None
+    cost_tracker: CostTracker | None = None
+    lattice: WitnessLattice | None = None
+    trace: TraceBuilder | None = None
     retry_policy: RetryPolicy = field(default_factory=NoRetry)
     project: str = "default"
     user_id: str = "anonymous"
@@ -68,9 +68,9 @@ class ToolEngine:
         self,
         call: ToolCall,
         *,
-        action: Optional[dict[str, Any]] = None,
+        action: dict[str, Any] | None = None,
         estimated_tokens: int = 0,
-        cost_usd: Optional[float] = None,
+        cost_usd: float | None = None,
         parent_witnesses: tuple[str, ...] = (),
     ) -> ToolExecution:
         """Run a guarded tool dispatch. See module docstring for the pipeline."""

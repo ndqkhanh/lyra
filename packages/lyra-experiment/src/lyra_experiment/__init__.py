@@ -10,9 +10,10 @@ from __future__ import annotations
 import logging
 import random
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +72,7 @@ class ExperimentRegistry:
 
     def create_experiment(
         self, name: str, control: AgentConfig, variant: AgentConfig,
-        traffic_split: float = 0.1, metrics: Optional[list[Metric]] = None
+        traffic_split: float = 0.1, metrics: list[Metric] | None = None
     ) -> AgentExperiment:
         self._counter += 1
         exp = AgentExperiment(
@@ -112,7 +113,7 @@ class ExperimentRegistry:
         else:
             exp.control_results.append(score)
 
-    def get_results(self, experiment_id: str) -> Optional[dict[str, Any]]:
+    def get_results(self, experiment_id: str) -> dict[str, Any] | None:
         exp = self.experiments.get(experiment_id)
         if not exp:
             return None
@@ -136,7 +137,7 @@ class ExperimentRegistry:
             "winner": "variant" if variant_mean and control_mean and variant_mean > control_mean else "control",
         }
 
-    def promote_variant(self, experiment_id: str) -> Optional[AgentConfig]:
+    def promote_variant(self, experiment_id: str) -> AgentConfig | None:
         exp = self.experiments.get(experiment_id)
         if not exp:
             return None
@@ -146,7 +147,7 @@ class ExperimentRegistry:
             return exp.variant_config
         return exp.control_config
 
-    def _mean(self, values: list[float]) -> Optional[float]:
+    def _mean(self, values: list[float]) -> float | None:
         if not values:
             return None
         return sum(values) / len(values)

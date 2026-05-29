@@ -4,8 +4,6 @@ import math
 from dataclasses import dataclass, field
 from typing import Any
 
-from .exceptions import MCTSSearchError
-
 
 @dataclass(frozen=True)
 class MCTSNode:

@@ -73,11 +73,17 @@ class GovernanceMetrics:
     escalated: int = 0
 
 
-from .static_rules import StaticRuleEngine  # noqa: E402
-from .least_privilege import LeastPrivilegeEngine  # noqa: E402
 from .behavioral_monitor import BehavioralMonitor  # noqa: E402
-from .hardware_isolation import IsolationManager, SandboxConfig, IsolationLevel, NetworkPolicy, ExecutionRequest  # noqa: E402
+from .hardware_isolation import (  # noqa: E402
+    ExecutionRequest,
+    IsolationLevel,
+    IsolationManager,
+    NetworkPolicy,
+    SandboxConfig,
+)
+from .least_privilege import LeastPrivilegeEngine  # noqa: E402
 from .risk_assessor import RiskAssessor  # noqa: E402
+from .static_rules import StaticRuleEngine  # noqa: E402
 
 
 class GovernanceEngine:

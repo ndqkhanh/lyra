@@ -10,7 +10,6 @@ from lyra_ui import (
     ResourceMonitor,
 )
 
-
 # ResourceMonitor Tests
 
 
@@ -99,7 +98,7 @@ def test_memory_leak_detector_detect_leaks():
     detector.take_snapshot()
 
     # Create some objects
-    leak_list = [i for i in range(200)]
+    list(range(200))
 
     # Take second snapshot
     detector.take_snapshot()

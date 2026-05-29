@@ -9,11 +9,10 @@ from __future__ import annotations
 
 import logging
 from collections import Counter
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from lyra_personalization.models import (
     CommunicationStyle,
-    CompactEmbedding,
     InteractionRecord,
     RichRepresentation,
     SkillLevel,
@@ -30,7 +29,7 @@ class UserProfileManager:
     """
 
     def __init__(self) -> None:
-        self._profiles: Dict[str, UserProfile] = {}
+        self._profiles: dict[str, UserProfile] = {}
 
     def create_profile(self, user_id: str) -> UserProfile:
         """
@@ -57,7 +56,7 @@ class UserProfileManager:
         logger.info("Created profile for user: %s", user_id)
         return profile
 
-    def get_profile(self, user_id: str) -> Optional[UserProfile]:
+    def get_profile(self, user_id: str) -> UserProfile | None:
         """Retrieve a user profile by user ID."""
         return self._profiles.get(user_id)
 
@@ -166,8 +165,8 @@ class UserProfileManager:
 
     def extract_preferences(
         self,
-        interactions: List[InteractionRecord],
-    ) -> Dict[str, Any]:
+        interactions: list[InteractionRecord],
+    ) -> dict[str, Any]:
         """
         Infer user preferences from interaction history.
 
@@ -181,7 +180,7 @@ class UserProfileManager:
         Returns:
             Dictionary of inferred preferences.
         """
-        preferences: Dict[str, Any] = {}
+        preferences: dict[str, Any] = {}
         if not interactions:
             return preferences
 
@@ -218,7 +217,7 @@ class UserProfileManager:
 
     def detect_communication_style(
         self,
-        interactions: List[InteractionRecord],
+        interactions: list[InteractionRecord],
     ) -> CommunicationStyle:
         """
         Detect the user's communication style from interactions.
@@ -271,7 +270,7 @@ class UserProfileManager:
     def _rebuild_rich_repr(
         self,
         profile: UserProfile,
-        history: List[InteractionRecord],
+        history: list[InteractionRecord],
     ) -> RichRepresentation:
         """
         Rebuild the rich representation from profile data and new history.

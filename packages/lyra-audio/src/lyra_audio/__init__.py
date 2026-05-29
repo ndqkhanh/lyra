@@ -22,9 +22,9 @@ from lyra_audio.audio_suppression import (
     create_default_suppression,
 )
 from lyra_audio.cesp_engine import (
+    HOOK_TO_CESP,
     CespCategory,
     CespEngine,
-    HOOK_TO_CESP,
     PackSelectionLayer,
     PlaybackRecord,
     SelectionResult,

@@ -18,8 +18,9 @@ from __future__ import annotations
 import hashlib
 import json
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Optional, Protocol
+from typing import Any, Protocol
 
 
 @dataclass
@@ -73,7 +74,7 @@ class SideEffectLog:
     def append(self, record: SideEffectRecord) -> None:
         self.records.append(record)
 
-    def find(self, call_id: str) -> Optional[SideEffectRecord]:
+    def find(self, call_id: str) -> SideEffectRecord | None:
         for r in self.records:
             if r.call_id == call_id:
                 return r
@@ -110,7 +111,7 @@ class PureFunctionAgent:
     fingerprint, manages the side-effect log, and provides ``replay(...)``.
     """
 
-    def __init__(self, *, policy: Optional[_PolicyProtocol] = None) -> None:
+    def __init__(self, *, policy: _PolicyProtocol | None = None) -> None:
         self.log = SideEffectLog()
         self._policy = policy
 
@@ -160,7 +161,7 @@ class TrajectoryReplay:
 
     log: SideEffectLog
 
-    def replay_call(self, *, call_id: str, runner: Optional[Callable[[dict[str, Any]], Any]] = None) -> Any:
+    def replay_call(self, *, call_id: str, runner: Callable[[dict[str, Any]], Any] | None = None) -> Any:
         record = self.log.find(call_id)
         if record is None:
             raise KeyError(f"call_id {call_id!r} not in log")

@@ -14,13 +14,11 @@ via the ``name_generator`` callable.
 """
 from __future__ import annotations
 
-from collections import Counter
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
-from typing import Callable, Iterable, Optional
 
 from ..forensic import Trajectory, TrajectoryOutcome
 from .types import SkillCandidate
-
 
 _NameGenerator = Callable[[str, tuple[str, ...]], str]
 

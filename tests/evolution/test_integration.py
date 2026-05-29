@@ -1,6 +1,6 @@
 """Integration tests for evolution framework."""
+
 import pytest
-import time
 
 
 def test_evolution_round_with_harness_and_cost_tracking(mock_harness, mock_cost_meter):

@@ -67,7 +67,7 @@ class TestInteractionRecord:
 
     def test_full_creation(self):
         """Test creation with all fields."""
-        now = datetime.now()
+        datetime.now()
         record = InteractionRecord(
             content="Show me the code",
             session_id="sess-1",

@@ -1,14 +1,14 @@
 """End-to-end integration tests."""
-import pytest
-from pathlib import Path
-import tempfile
-import shutil
 import json
+import shutil
+import tempfile
+from pathlib import Path
 
-from lyra_cli.memory import ConversationLog, StructuredFact
-from lyra_cli.core.skill_registry import SkillRegistry
-from lyra_cli.core.skill_loader import SkillLoader
+import pytest
 from lyra_cli.commands.doctor import doctor_command
+from lyra_cli.core.skill_loader import SkillLoader
+from lyra_cli.core.skill_registry import SkillRegistry
+from lyra_cli.memory import ConversationLog, StructuredFact
 
 
 @pytest.fixture
@@ -342,7 +342,7 @@ def test_e2e_system_state_consistency(sample_skill_dir):
     initial_count = len(skills1)
 
     # Perform operations
-    log = ConversationLog(
+    ConversationLog(
         session_id="e2e_state_001",
         turn_id=1,
         timestamp="2026-05-17T12:00:00",

@@ -5,7 +5,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from lyra_evals.adapters import (
     TerminalBenchTaskV2,
     TerminalBenchV2Adapter,

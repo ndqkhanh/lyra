@@ -2,13 +2,11 @@
 from __future__ import annotations
 
 import pytest
-
-from lyra_evolution.stability import BudgetViolation, StabilityBudget, StabilityState
 from lyra_evolution.control_record import ControlRecord, new_control_record
-from lyra_evolution.voyager import SkillCandidate, SkillLibrary, VoyagerAccumulator
-from lyra_evolution.reflexion import ReflexionEngine, ReflexionLesson
 from lyra_evolution.controller import ClosedLoopController, ControllerConfig, HaltSignal
-
+from lyra_evolution.reflexion import ReflexionEngine, ReflexionLesson
+from lyra_evolution.stability import BudgetViolation, StabilityBudget, StabilityState
+from lyra_evolution.voyager import SkillCandidate, SkillLibrary, VoyagerAccumulator
 
 # ------------------------------------------------------------------ #
 # StabilityBudget / StabilityState                                     #

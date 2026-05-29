@@ -22,10 +22,9 @@ relying on latent multi-hop reasoning.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
-from typing import Optional
+from dataclasses import dataclass
 
-from .protocols import LLMTextGenerator, Retriever, RetrievedDoc
+from .protocols import LLMTextGenerator, RetrievedDoc, Retriever
 
 _FOLLOW_UP_RE = re.compile(r"Follow\s*up\s*:\s*(.+?)(?:\n|$)", re.IGNORECASE)
 _FINAL_RE = re.compile(r"So\s+the\s+final\s+answer\s+is\s*:\s*(.+?)(?:\n|$)", re.IGNORECASE)
@@ -71,10 +70,10 @@ class SelfAskResult:
 class ParsedResponse:
     """One LLM response parsed into its Self-Ask components."""
 
-    needed_follow_up: Optional[bool]  # None if not present
-    follow_up: Optional[str]
-    intermediate_answer: Optional[str]
-    final_answer: Optional[str]
+    needed_follow_up: bool | None  # None if not present
+    follow_up: str | None
+    intermediate_answer: str | None
+    final_answer: str | None
     raw: str
 
 
@@ -84,7 +83,7 @@ def parse_self_ask_response(text: str) -> ParsedResponse:
     Tolerant: missing fields are ``None``; extra text is ignored.
     """
     needed_match = _NEEDED_RE.search(text)
-    needed: Optional[bool]
+    needed: bool | None
     if needed_match is None:
         needed = None
     else:

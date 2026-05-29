@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
 from .domain_evaluator import EvalSample
 from .exceptions import BenchGuardError
@@ -62,7 +61,7 @@ class BenchGuard:
 
         total_chars = sum(len(s.input_text) + len(s.expected_output) for s in samples)
         estimated_tokens = int(total_chars * _TOKENS_PER_CHAR)
-        estimated_cost = estimated_tokens * _COST_PER_TOKEN
+        estimated_tokens * _COST_PER_TOKEN
 
         # Cap per-sample token usage
         max_total_tokens = min(

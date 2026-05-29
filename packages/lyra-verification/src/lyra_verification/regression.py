@@ -12,13 +12,11 @@ from __future__ import annotations
 
 import logging
 import math
-from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
+from collections.abc import Callable, Sequence
 
 from lyra_verification.models import (
     BehavioralFingerprint,
     RegressionVerdict,
-    Verdict,
 )
 
 logger = logging.getLogger(__name__)
@@ -67,7 +65,7 @@ class AgentRegressionTester:
         avg_response_length = sum(len(o.split()) for o in agent_outputs) / len(agent_outputs)
 
         # Vocabulary diversity
-        unique_words = len(set(w.lower() for w in words))
+        unique_words = len({w.lower() for w in words})
         vocab_diversity = unique_words / max(n_words, 1)
 
         # Average sentence length (split on sentence boundaries)
@@ -142,7 +140,7 @@ class AgentRegressionTester:
         baseline: BehavioralFingerprint,
         current: BehavioralFingerprint,
         threshold: float = 0.85,
-    ) -> Tuple[bool, float, Dict[str, float]]:
+    ) -> tuple[bool, float, dict[str, float]]:
         """Detect regression between two fingerprints.
 
         Parameters
@@ -165,7 +163,7 @@ class AgentRegressionTester:
         """
         similarity = baseline.cosine_similarity(current)
 
-        per_metric_changes: Dict[str, float] = {}
+        per_metric_changes: dict[str, float] = {}
         all_keys = set(baseline.metrics) | set(current.metrics)
         for key in all_keys:
             b = baseline.metrics.get(key, 0.0)
@@ -185,7 +183,7 @@ class AgentRegressionTester:
         alpha: float = 0.05,
         beta: float = 0.20,
         delta: float = 0.1,
-    ) -> Tuple[bool, float, int]:
+    ) -> tuple[bool, float, int]:
         """SPRT (Sequential Probability Ratio Test) for regression.
 
         Parameters
@@ -232,7 +230,7 @@ class AgentRegressionTester:
         # Sequential LLR: paired difference test H0: mu=0 vs H1: mu=delta
         log_likelihood_ratio = 0.0
         n_samples = 0
-        for x_b, x_c in zip(baseline, current):
+        for x_b, x_c in zip(baseline, current, strict=False):
             n_samples += 1
             diff = x_c - x_b
             log_likelihood_ratio += (
@@ -274,8 +272,8 @@ class AgentRegressionTester:
         self,
         agent_fn: Callable[..., str],
         test_cases: Sequence[str],
-        baseline_fingerprint: Optional[BehavioralFingerprint] = None,
-    ) -> Tuple[List[RegressionVerdict], BehavioralFingerprint]:
+        baseline_fingerprint: BehavioralFingerprint | None = None,
+    ) -> tuple[list[RegressionVerdict], BehavioralFingerprint]:
         """Run a full regression test suite.
 
         Parameters
@@ -295,8 +293,8 @@ class AgentRegressionTester:
         current_fingerprint : BehavioralFingerprint
             Fingerprint from the current run.
         """
-        outputs: List[str] = []
-        verdicts: List[RegressionVerdict] = []
+        outputs: list[str] = []
+        verdicts: list[RegressionVerdict] = []
 
         for prompt in test_cases:
             try:

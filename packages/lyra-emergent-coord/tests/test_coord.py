@@ -6,16 +6,15 @@ import asyncio
 import time
 
 import pytest
-
 from lyra_emergent_coord import (
     AntColonyOptimizer,
     BeeAlgorithm,
     Bid,
     Coalition,
-    CoalitionFormationEngine,
     CoalitionError,
-    ConflictResolver,
+    CoalitionFormationEngine,
     ConflictResolutionStrategy,
+    ConflictResolver,
     Contract,
     ContractNetProtocol,
     ElectionAlgorithm,
@@ -35,7 +34,6 @@ from lyra_emergent_coord import (
     StigmergySystem,
     TaskAdvertisement,
 )
-
 
 # ============================================================================
 # Coalition tests
@@ -259,7 +257,7 @@ class TestNegotiation:
         neg = MultiRoundNegotiator(default_max_rounds=2)
         session = asyncio.run(neg.start_negotiation(participants=["a", "b"], topic="test"))
         o1 = neg.make_offer(session.session_id, "a", {}, initial_value=0.8)
-        o2 = neg.counter_offer(session.session_id, o1.offer_id, "b", {}, value=0.7)
+        neg.counter_offer(session.session_id, o1.offer_id, "b", {}, value=0.7)
         # Third offer after 2 counter-offers triggers max rounds
         o3 = neg.make_offer(session.session_id, "a", {}, initial_value=0.6)
         # Counter-offer increments round to 2, now make_offer should raise
@@ -329,7 +327,7 @@ class TestEmergenceDetection:
         assert len(spec) >= 1
 
     def test_novelty_detection(self, detector: EmergenceDetector) -> None:
-        s1 = detector.record_behavior("agent-1", "normal-behavior")
+        detector.record_behavior("agent-1", "normal-behavior")
         s2 = detector.record_behavior("agent-1", "normal-behavior")
         s3 = detector.record_behavior("agent-1", "radically-different")
         assert s3.novelty > s2.novelty
@@ -429,7 +427,7 @@ class TestSwarmIntelligence:
 
     def test_flocking_system(self) -> None:
         flock = FlockingSystem(width=100.0, height=100.0)
-        for i in range(10):
+        for _i in range(10):
             flock.add_boid()
         assert flock.population == 10
         for _ in range(50):
@@ -471,7 +469,7 @@ class TestEmergentIntegration:
 
         cnp = ContractNetProtocol()
         session = await cnp.announce_task("build-api", {"type": "api"}, eligible_agents=list(coalition.member_ids))
-        offer = cnp.submit_bid(session.session_id, coalition.leader_id, {"approach": "rest"}, value=0.9)
+        cnp.submit_bid(session.session_id, coalition.leader_id, {"approach": "rest"}, value=0.9)
         contract = cnp.evaluate_and_award(session.session_id)
         assert contract is not None
 

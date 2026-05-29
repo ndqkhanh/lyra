@@ -10,9 +10,9 @@ Both layers track hit/miss rates for observability.
 
 from __future__ import annotations
 
+import hashlib
 import logging
 import time
-import hashlib
 from collections import OrderedDict
 from typing import Any
 

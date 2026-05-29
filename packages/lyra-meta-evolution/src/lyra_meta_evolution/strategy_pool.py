@@ -15,7 +15,7 @@ import random
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Any, Optional, Sequence
+from typing import Any
 
 from .meta_evolution import AgentGenome
 
@@ -145,7 +145,7 @@ class SimilarityMetrics:
         v1 = vec1 + [0.0] * (max_len - len(vec1))
         v2 = vec2 + [0.0] * (max_len - len(vec2))
 
-        dot = sum(a * b for a, b in zip(v1, v2))
+        dot = sum(a * b for a, b in zip(v1, v2, strict=False))
         norm1 = math.sqrt(sum(a * a for a in v1))
         norm2 = math.sqrt(sum(b * b for b in v2))
 
@@ -164,13 +164,13 @@ class SimilarityMetrics:
         v1 = vec1 + [0.0] * (max_len - len(vec1))
         v2 = vec2 + [0.0] * (max_len - len(vec2))
 
-        return math.sqrt(sum((a - b) ** 2 for a, b in zip(v1, v2)))
+        return math.sqrt(sum((a - b) ** 2 for a, b in zip(v1, v2, strict=False)))
 
     @staticmethod
     def jaccard_signature(sig1: str, sig2: str) -> float:
         """Jaccard similarity of strategy signatures."""
-        s1 = set(sig1[i:i + 2] for i in range(0, len(sig1), 2))
-        s2 = set(sig2[i:i + 2] for i in range(0, len(sig2), 2))
+        s1 = {sig1[i:i + 2] for i in range(0, len(sig1), 2)}
+        s2 = {sig2[i:i + 2] for i in range(0, len(sig2), 2)}
         intersection = len(s1 & s2)
         union = len(s1 | s2)
         return intersection / union if union > 0 else 0.0
@@ -217,8 +217,8 @@ class StrategyPool:
         self,
         encoding: StrategyEncoding,
         fitness: float = 0.0,
-        tags: Optional[set[str]] = None,
-        parent_ids: Optional[list[str]] = None,
+        tags: set[str] | None = None,
+        parent_ids: list[str] | None = None,
     ) -> StrategyRecord:
         """Add a strategy encoding to the pool."""
         if len(self._strategies) >= self._max_size:

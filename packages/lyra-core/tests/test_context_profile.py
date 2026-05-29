@@ -100,16 +100,16 @@ def test_list_profiles_returns_three_in_canonical_order():
 def test_custom_profile_validates_each_field(
     field: str, value: object, err_fragment: str
 ):
-    base: dict[str, Any] = dict(
-        name="custom",
-        autocompact_pct=0.7,
-        keep_last=6,
-        max_summary_tokens=600,
-        reduction_cap_kb=3,
-        mcp_descriptions="full",
-        session_start_context_bytes=4000,
-        reasoning_bank_k=3,
-    )
+    base: dict[str, Any] = {
+        "name": "custom",
+        "autocompact_pct": 0.7,
+        "keep_last": 6,
+        "max_summary_tokens": 600,
+        "reduction_cap_kb": 3,
+        "mcp_descriptions": "full",
+        "session_start_context_bytes": 4000,
+        "reasoning_bank_k": 3,
+    }
     base[field] = value
     with pytest.raises(ValueError) as exc:
         ContextProfile(**base)

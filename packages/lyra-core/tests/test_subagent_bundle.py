@@ -18,20 +18,20 @@ from lyra_core.subagent.orchestrator import SubagentResult
 
 
 def _ok_bundle(**overrides: Any) -> SubagentBundle:
-    base: dict[str, Any] = dict(
-        summary="explored 12 files; found 2 failing tests in tests/test_api.py",
-        findings=(
+    base: dict[str, Any] = {
+        "summary": "explored 12 files; found 2 failing tests in tests/test_api.py",
+        "findings": (
             Finding(
                 claim="test_login_rejects_empty_password fails at line 41",
                 evidence_hash="sha256:abc",
                 confidence=0.9,
             ),
         ),
-        artifacts=("sha256:abc", "sha256:def"),
-        open_questions=("which fixture set up the bogus password?",),
-        tokens_consumed=8120,
-        elapsed_ms=4400,
-    )
+        "artifacts": ("sha256:abc", "sha256:def"),
+        "open_questions": ("which fixture set up the bogus password?",),
+        "tokens_consumed": 8120,
+        "elapsed_ms": 4400,
+    }
     base.update(overrides)
     return SubagentBundle(**base)
 

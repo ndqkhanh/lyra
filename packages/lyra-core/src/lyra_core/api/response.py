@@ -33,7 +33,7 @@ class APIResponse:
         return cls(success=True, data=data, error=None)
 
     @classmethod
-    def error(
+    def error_response(
         cls,
         message: str,
         code: str = "API_ERROR",

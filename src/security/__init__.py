@@ -14,12 +14,12 @@ from src.security.agent_shield import (
     AgentShield,
     CommandInjectionScanner,
     PathTraversalScanner,
-    SQLInjectionScanner,
     SecretsScanner,
     SecurityCategory,
     SecurityIssue,
     SecurityReport,
     SecuritySeverity,
+    SQLInjectionScanner,
     XSSScanner,
 )
 

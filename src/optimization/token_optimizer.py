@@ -11,7 +11,7 @@ Strategies:
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class TaskType(Enum):
@@ -43,9 +43,9 @@ class LLMRequest:
     task_type: TaskType
     context: str = ""
     context_size: int = 0
-    max_tokens: Optional[int] = None
+    max_tokens: int | None = None
     cache_enabled: bool = False
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -59,7 +59,7 @@ class OptimizedRequest:
     cache_enabled: bool
     estimated_cost: float
     savings: float
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -233,7 +233,7 @@ class PromptCacheManager:
         """Initialize prompt cache manager."""
         self.cache_hits = 0
         self.cache_misses = 0
-        self.cached_prompts: Dict[str, str] = {}
+        self.cached_prompts: dict[str, str] = {}
 
     def should_cache(self, request: LLMRequest) -> bool:
         """

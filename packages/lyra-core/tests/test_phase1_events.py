@@ -144,7 +144,7 @@ class TestEventBus:
         async def handler(e: Event) -> None:
             received.append(e)
 
-        sub = bus.subscribe(
+        bus.subscribe(
             categories=(EventCategory.TASK,),
             callback=handler,
         )

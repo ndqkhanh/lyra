@@ -22,7 +22,7 @@ class TestAgentEcology:
         eco.seed(count=10)
         for _ in range(50):
             eco.step()
-        specializations = set(a.specialization for a in eco.agents)
+        specializations = {a.specialization for a in eco.agents}
         assert len(specializations) >= 1
 
 

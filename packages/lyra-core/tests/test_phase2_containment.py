@@ -170,7 +170,7 @@ class TestProject:
         p = Project(id="p1", name="test")
         t1 = Team(id="t1", name="active-team")
         t2 = Team(id="t2", name="inactive-team")
-        m1 = p.add_team(t1)
+        p.add_team(t1)
         m2 = p.add_team(t2)
         m2.active = False
         assert p.active_teams == ["t1"]

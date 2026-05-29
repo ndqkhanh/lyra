@@ -2,39 +2,32 @@
 
 from __future__ import annotations
 
-import asyncio
-
 import pytest
-
 from lyra_beliefs import (
-    # Belief system
-    BeliefSource,
-    BeliefStatus,
     Belief,
-    BeliefSystem,
-    UpdateMethod,
-    # Knowledge base
-    KnowledgeBase,
-    RuleType,
-    Rule,
-    Fact,
-    OntologyConcept,
-    # Inference
-    InferenceEngine,
-    InferenceType,
-    # Consistency
-    ConsistencyManager,
-    # Updating
-    BeliefUpdater,
-    EvidencePacket,
     # Exceptions
     BeliefError,
     BeliefNotFoundError,
+    # Belief system
+    BeliefSource,
+    BeliefStatus,
+    BeliefSystem,
+    # Updating
+    BeliefUpdater,
+    # Consistency
+    ConsistencyManager,
+    EvidencePacket,
     InconsistentBeliefError,
+    # Inference
+    InferenceEngine,
     InferenceError,
+    InferenceType,
+    # Knowledge base
+    KnowledgeBase,
+    OntologyConcept,
+    RuleType,
     UpdateError,
 )
-
 
 # ── BeliefSystem ────────────────────────────────────────────────────────
 
@@ -91,7 +84,7 @@ class TestBeliefSystem:
 
     def test_get_active(self):
         bs = BeliefSystem()
-        b1 = bs.create_belief("python", "Active belief")
+        bs.create_belief("python", "Active belief")
         b2 = bs.create_belief("python", "Retracted belief")
         b2.status = BeliefStatus.RETRACTED
         active = bs.get_active()
@@ -136,7 +129,7 @@ class TestBeliefSystem:
     def test_find_contradictions(self):
         bs = BeliefSystem()
         b1 = bs.create_belief("test", "X is always good", confidence=0.8)
-        b2 = bs.create_belief("test", "X is never good", confidence=0.7)
+        bs.create_belief("test", "X is never good", confidence=0.7)
         contras = bs.find_contradictions(b1.belief_id)
         # May or may not find contradictions depending on keyword overlap
         assert isinstance(contras, list)
@@ -165,7 +158,7 @@ class TestBeliefSystem:
         assert "python" in stats["domains"]
 
     def test_validation(self):
-        bs = BeliefSystem()
+        BeliefSystem()
         with pytest.raises(ValueError):
             Belief(domain="test", statement="test", confidence=1.5)
         with pytest.raises(ValueError):

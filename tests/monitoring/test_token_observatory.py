@@ -6,7 +6,6 @@ import json
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -17,7 +16,6 @@ from monitoring.token_observatory import (
     Activity,
     ActivityCategory,
     ActivityClassifier,
-    BurnReport,
     TokenObservatory,
     Turn,
     WasteAnalyzer,

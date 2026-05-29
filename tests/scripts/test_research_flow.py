@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).parent / "packages/lyra-research/src"))
 from lyra_cli.commands.research import handle_research_command
 from lyra_research.orchestrator import ResearchOrchestrator, ResearchProgress
 
+
 def test_research_command():
     """Test the research command handler."""
     print("=" * 80)
@@ -65,7 +66,7 @@ def test_orchestrator_direct():
             progress_callback=on_progress
         )
 
-        print(f"\n✓ Research completed")
+        print("\n✓ Research completed")
         print(f"✓ Session ID: {result.session_id}")
         print(f"✓ Current step: {result.current_step}/10")
         print(f"✓ Sources found: {result.sources_found}")

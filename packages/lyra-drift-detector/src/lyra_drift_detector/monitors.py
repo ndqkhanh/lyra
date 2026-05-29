@@ -575,7 +575,7 @@ class RewardMonitor(BaseMonitor):
         # Blend in per-context drift
         if self.track_per_context and self._context_rewards:
             context_scores = []
-            for ctx, rewards in self._context_rewards.items():
+            for _ctx, rewards in self._context_rewards.items():
                 if len(rewards) >= 10:
                     ctx_arr = np.array(rewards, dtype=np.float64)
                     ctx_mean = float(np.mean(ctx_arr))
@@ -680,7 +680,7 @@ class MonitorRegistry:
             return await self.check_all()
 
         try:
-            loop = asyncio.get_running_loop()
+            asyncio.get_running_loop()
         except RuntimeError:
             # No running loop, create a new one
             return asyncio.run(self.check_all())

@@ -4,11 +4,11 @@ Tests for RichFormatter
 Comprehensive test suite for the Rich formatter.
 """
 
-import pytest
 from io import StringIO
-from rich.console import Console
 
-from lyra_ui.formatter import RichFormatter, FormatterColors
+import pytest
+from lyra_ui.formatter import FormatterColors, RichFormatter
+from rich.console import Console
 
 
 class TestFormatterColors:

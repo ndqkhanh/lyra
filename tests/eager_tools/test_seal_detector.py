@@ -2,8 +2,6 @@
 
 import time
 
-import pytest
-
 from lyra_cli.eager_tools import SealDetector, StreamChunk
 
 

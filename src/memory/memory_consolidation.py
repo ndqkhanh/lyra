@@ -3,13 +3,12 @@ Memory Consolidation - Move memories from short-term to long-term.
 """
 
 import time
-from typing import List, Dict, Optional
-from enum import Enum
 from dataclasses import dataclass
+from enum import Enum
 
-from src.memory.memory_store import Memory, MemoryType
-from src.memory.short_term_memory import ShortTermMemory, ConversationTurn
 from src.memory.long_term_memory import LongTermMemory
+from src.memory.memory_store import Memory, MemoryType
+from src.memory.short_term_memory import ConversationTurn, ShortTermMemory
 
 
 class ConsolidationPolicy(Enum):
@@ -24,7 +23,7 @@ class ConsolidationPolicy(Enum):
 class ConsolidationResult:
     """
     Result of a consolidation operation.
-    
+
     Attributes:
         memories_created: Number of new long-term memories
         memories_merged: Number of memories merged
@@ -40,7 +39,7 @@ class ConsolidationResult:
 class MemoryConsolidator:
     """
     Consolidate memories from short-term to long-term.
-    
+
     Responsibilities:
     - Move important short-term memories to long-term
     - Merge similar memories
@@ -57,7 +56,7 @@ class MemoryConsolidator:
     ):
         """
         Initialize memory consolidator.
-        
+
         Args:
             short_term: Short-term memory
             long_term: Long-term memory
@@ -73,7 +72,7 @@ class MemoryConsolidator:
     def should_consolidate(self) -> bool:
         """
         Check if consolidation should occur.
-        
+
         Returns:
             True if should consolidate
         """
@@ -96,7 +95,7 @@ class MemoryConsolidator:
     def consolidate(self) -> ConsolidationResult:
         """
         Perform memory consolidation.
-        
+
         Returns:
             Consolidation result
         """
@@ -129,7 +128,7 @@ class MemoryConsolidator:
     def _extract_patterns(self) -> int:
         """
         Extract patterns from recent memories.
-        
+
         Returns:
             Number of patterns extracted
         """
@@ -157,13 +156,13 @@ class MemoryConsolidator:
 
         return patterns_created
 
-    def _find_repeated_patterns(self, memories: List[Memory]) -> List[Dict]:
+    def _find_repeated_patterns(self, memories: list[Memory]) -> list[dict]:
         """
         Find repeated patterns in memories.
-        
+
         Args:
             memories: List of memories to analyze
-            
+
         Returns:
             List of patterns found
         """
@@ -191,16 +190,16 @@ class MemoryConsolidator:
 
     def consolidate_specific(
         self,
-        turns: List[ConversationTurn],
+        turns: list[ConversationTurn],
         memory_type: MemoryType = MemoryType.EPISODIC,
     ) -> int:
         """
         Consolidate specific conversation turns.
-        
+
         Args:
             turns: Turns to consolidate
             memory_type: Type of memory to create
-            
+
         Returns:
             Number of memories created
         """
@@ -228,10 +227,10 @@ class MemoryConsolidator:
     def _calculate_turn_importance(self, turn: ConversationTurn) -> float:
         """
         Calculate importance of a conversation turn.
-        
+
         Args:
             turn: Conversation turn
-            
+
         Returns:
             Importance score (0.0 - 1.0)
         """
@@ -254,13 +253,13 @@ class MemoryConsolidator:
 
         return min(1.0, importance)
 
-    def extract_knowledge(self, topic: str) -> Optional[Memory]:
+    def extract_knowledge(self, topic: str) -> Memory | None:
         """
         Extract knowledge about a topic from recent memories.
-        
+
         Args:
             topic: Topic to extract knowledge about
-            
+
         Returns:
             Semantic memory with extracted knowledge
         """
@@ -293,17 +292,17 @@ class MemoryConsolidator:
     def create_procedure(
         self,
         name: str,
-        steps: List[str],
+        steps: list[str],
         importance: float = 0.6,
     ) -> Memory:
         """
         Create a procedural memory.
-        
+
         Args:
             name: Procedure name
             steps: List of steps
             importance: Importance score
-            
+
         Returns:
             Created procedural memory
         """
@@ -319,10 +318,10 @@ class MemoryConsolidator:
             context={"step_count": len(steps)},
         )
 
-    def auto_consolidate(self) -> Optional[ConsolidationResult]:
+    def auto_consolidate(self) -> ConsolidationResult | None:
         """
         Automatically consolidate if policy allows.
-        
+
         Returns:
             Consolidation result if consolidation occurred
         """
@@ -330,10 +329,10 @@ class MemoryConsolidator:
             return self.consolidate()
         return None
 
-    def get_statistics(self) -> Dict:
+    def get_statistics(self) -> dict:
         """
         Get consolidation statistics.
-        
+
         Returns:
             Statistics dictionary
         """

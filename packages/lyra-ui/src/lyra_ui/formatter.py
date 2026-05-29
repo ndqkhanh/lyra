@@ -5,7 +5,7 @@ Provides beautiful formatting using the Rich library.
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any
 
 from rich.console import Console
 from rich.markdown import Markdown
@@ -63,7 +63,7 @@ class RichFormatter:
         self,
         message: str,
         role: str = "assistant",
-        title: Optional[str] = None,
+        title: str | None = None,
     ) -> None:
         """
         Print a message bubble.
@@ -108,7 +108,7 @@ class RichFormatter:
         self,
         code: str,
         language: str = "python",
-        title: Optional[str] = None,
+        title: str | None = None,
     ) -> None:
         """
         Print syntax-highlighted code.
@@ -134,8 +134,8 @@ class RichFormatter:
 
     def print_table(
         self,
-        data: list[Dict[str, Any]],
-        title: Optional[str] = None,
+        data: list[dict[str, Any]],
+        title: str | None = None,
     ) -> None:
         """
         Print a beautiful table.
@@ -219,7 +219,7 @@ class RichFormatter:
         progress.add_task(description)
         return progress
 
-    def print_header(self, title: str, subtitle: Optional[str] = None) -> None:
+    def print_header(self, title: str, subtitle: str | None = None) -> None:
         """
         Print a beautiful header.
 

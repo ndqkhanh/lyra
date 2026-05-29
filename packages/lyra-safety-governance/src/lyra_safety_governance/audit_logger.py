@@ -3,10 +3,9 @@ from __future__ import annotations
 import json
 import uuid
 from collections import Counter
-from enum import Enum
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Sequence
+from enum import Enum
 
 from .exceptions import AuditError
 from .governance_engine import (

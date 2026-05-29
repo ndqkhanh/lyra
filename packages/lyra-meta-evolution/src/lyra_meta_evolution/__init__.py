@@ -12,6 +12,15 @@ Level 4: Goal evolution (objective function adaptation)
 
 from __future__ import annotations
 
+from .aevo_meta import (
+    AccumulatedState,
+    AEvoMetaEditor,
+    CodeEdit,
+    DriftReport,
+    EditOperation,
+    EditResult,
+    ProcedureTarget,
+)
 from .fitness import (
     BenchmarkConfig,
     BenchmarkResult,
@@ -24,21 +33,6 @@ from .fitness import (
     ObjectiveVector,
     ParetoError,
     ParetoFrontier,
-)
-from .aevo_meta import (
-    AEvoMetaEditor,
-    AccumulatedState,
-    CodeEdit,
-    DriftReport,
-    EditOperation,
-    EditResult,
-    ProcedureTarget,
-)
-from .harness_opt import (
-    CodeCandidate,
-    HarnessComponent,
-    MetaHarnessOptimizer,
-    OptimizationResult,
 )
 from .genetic_optimizer import (
     CrossoverError,
@@ -55,6 +49,12 @@ from .genetic_optimizer import (
     SelectionResult,
     SelectionStrategy,
     TournamentSelection,
+)
+from .harness_opt import (
+    CodeCandidate,
+    HarnessComponent,
+    MetaHarnessOptimizer,
+    OptimizationResult,
 )
 from .meta_evolution import (
     AgentGenome,
@@ -88,6 +88,8 @@ from .orchestrator import (
     OrchestratorError,
     OrchestratorSnapshot,
     OrchestratorStatus,
+)
+from .orchestrator import (
     RollbackError as OrchestratorRollbackError,
 )
 from .strategy_pool import (

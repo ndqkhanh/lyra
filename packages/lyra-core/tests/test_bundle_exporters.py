@@ -190,7 +190,7 @@ def test_gemini_cli_export_layout(tmp_path):
 def test_export_refuses_path_escape(tmp_path, monkeypatch):
     """Exporters must enforce LBL-EXPORT-NO-LEAK against a malicious skill name."""
 
-    b = _bundle(tmp_path)
+    _bundle(tmp_path)
     e = ClaudeCodeExporter()
     target = tmp_path / "out"
     target.mkdir()

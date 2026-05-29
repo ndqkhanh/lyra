@@ -27,14 +27,14 @@ class SignedManifest:
     agent_id: str
     content_hash: str
     signature: str
-    parent_action_id: Optional[str] = None
+    parent_action_id: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class AgentIdentity:
     """Manages agent identity, content-addressing, and output signing."""
 
-    def __init__(self, agent_id: str, private_key: Optional[str] = None):
+    def __init__(self, agent_id: str, private_key: str | None = None):
         self.agent_id = agent_id
         self._private_key = private_key or hashlib.sha256(agent_id.encode()).hexdigest()
         self._public_key = hashlib.sha256(self._private_key.encode()).hexdigest()
@@ -46,7 +46,7 @@ class AgentIdentity:
             json.dumps(data, sort_keys=True, default=str).encode()
         ).hexdigest()
 
-    def sign_action(self, action: dict[str, Any], parent_action_id: Optional[str] = None) -> SignedManifest:
+    def sign_action(self, action: dict[str, Any], parent_action_id: str | None = None) -> SignedManifest:
         self.action_counter += 1
         action_id = f"{self.agent_id}:{self.action_counter}"
         content_hash = self._content_hash(action)

@@ -12,7 +12,6 @@ Features:
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional
 
 
 class AriaRole(Enum):
@@ -48,22 +47,22 @@ class AriaLive(Enum):
 class AriaAttributes:
     """ARIA attributes for accessibility."""
 
-    role: Optional[AriaRole] = None
-    label: Optional[str] = None
-    labelledby: Optional[str] = None
-    describedby: Optional[str] = None
-    live: Optional[AriaLive] = None
+    role: AriaRole | None = None
+    label: str | None = None
+    labelledby: str | None = None
+    describedby: str | None = None
+    live: AriaLive | None = None
     atomic: bool = False
     busy: bool = False
     disabled: bool = False
-    expanded: Optional[bool] = None
+    expanded: bool | None = None
     hidden: bool = False
     invalid: bool = False
-    pressed: Optional[bool] = None
-    selected: Optional[bool] = None
-    checked: Optional[bool] = None
+    pressed: bool | None = None
+    selected: bool | None = None
+    checked: bool | None = None
 
-    def to_dict(self) -> Dict[str, str]:
+    def to_dict(self) -> dict[str, str]:
         """
         Convert to dictionary of ARIA attributes.
 
@@ -117,7 +116,7 @@ class ScreenReader:
 
     def __init__(self):
         """Initialize screen reader."""
-        self.announcements: List[str] = []
+        self.announcements: list[str] = []
         self.max_announcements = 10
 
     def announce(self, message: str, assertive: bool = False):
@@ -134,7 +133,7 @@ class ScreenReader:
         if len(self.announcements) > self.max_announcements:
             self.announcements.pop(0)
 
-    def get_announcements(self) -> List[str]:
+    def get_announcements(self) -> list[str]:
         """
         Get recent announcements.
 
@@ -214,7 +213,7 @@ class KeyboardShortcutManager:
 
     def __init__(self):
         """Initialize shortcut manager."""
-        self.shortcuts: Dict[str, KeyboardShortcut] = {}
+        self.shortcuts: dict[str, KeyboardShortcut] = {}
 
     def register(self, action: str, shortcut: KeyboardShortcut):
         """
@@ -228,7 +227,7 @@ class KeyboardShortcutManager:
 
     def get_action(
         self, key: str, ctrl: bool, alt: bool, shift: bool, meta: bool
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Get action for key combination.
 
@@ -247,7 +246,7 @@ class KeyboardShortcutManager:
                 return action
         return None
 
-    def get_shortcuts(self) -> Dict[str, KeyboardShortcut]:
+    def get_shortcuts(self) -> dict[str, KeyboardShortcut]:
         """
         Get all shortcuts.
 
@@ -256,7 +255,7 @@ class KeyboardShortcutManager:
         """
         return self.shortcuts.copy()
 
-    def get_help(self) -> List[tuple[str, str]]:
+    def get_help(self) -> list[tuple[str, str]]:
         """
         Get shortcut help.
 
@@ -283,7 +282,7 @@ class FocusManager:
 
     def __init__(self):
         """Initialize focus manager."""
-        self.focus_stack: List[str] = []
+        self.focus_stack: list[str] = []
         self.trapped = False
 
     def push(self, element_id: str):
@@ -295,7 +294,7 @@ class FocusManager:
         """
         self.focus_stack.append(element_id)
 
-    def pop(self) -> Optional[str]:
+    def pop(self) -> str | None:
         """
         Pop element from focus stack.
 
@@ -306,7 +305,7 @@ class FocusManager:
             return self.focus_stack.pop()
         return None
 
-    def get_current(self) -> Optional[str]:
+    def get_current(self) -> str | None:
         """
         Get current focused element.
 
@@ -343,7 +342,7 @@ class AccessibilityReport:
     passed: int = 0
     failed: int = 0
     warnings: int = 0
-    issues: List[str] = field(default_factory=list)
+    issues: list[str] = field(default_factory=list)
 
     def add_pass(self):
         """Add passed check."""
@@ -397,7 +396,7 @@ class AccessibilityAuditor:
         """Initialize auditor."""
         self.report = AccessibilityReport()
 
-    def check_aria_labels(self, elements: List[Dict[str, str]]) -> AccessibilityReport:
+    def check_aria_labels(self, elements: list[dict[str, str]]) -> AccessibilityReport:
         """
         Check ARIA labels.
 
@@ -420,7 +419,7 @@ class AccessibilityAuditor:
 
         return self.report
 
-    def check_keyboard_navigation(self, focusable: List[str]) -> AccessibilityReport:
+    def check_keyboard_navigation(self, focusable: list[str]) -> AccessibilityReport:
         """
         Check keyboard navigation.
 

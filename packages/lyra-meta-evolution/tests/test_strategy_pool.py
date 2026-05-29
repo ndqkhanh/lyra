@@ -1,17 +1,14 @@
 """Tests for lyra_meta_evolution.strategy_pool module."""
 
 import pytest
-
 from lyra_meta_evolution.meta_evolution import AgentGenome
 from lyra_meta_evolution.strategy_pool import (
-    PoolCapacityError,
     SimilarityMetrics,
     StrategyEncoding,
     StrategyNotFoundError,
     StrategyPool,
     StrategyRecord,
 )
-
 
 # ── Fixtures ────────────────────────────────────────────────────────────────────
 

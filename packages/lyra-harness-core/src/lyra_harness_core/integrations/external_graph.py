@@ -14,9 +14,9 @@ Use cases:
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Any, Callable, Iterable, Optional
-
+from collections.abc import Iterable
+from dataclasses import dataclass
+from typing import Any
 
 # Default attribute mappings for the most common cases.
 _DEFAULT_NODE_ID_ATTR = "id"
@@ -39,7 +39,7 @@ class AdaptedNode:
         *,
         id_attr: str = _DEFAULT_NODE_ID_ATTR,
         title_attr: str = _DEFAULT_NODE_TITLE_ATTR,
-    ) -> "AdaptedNode":
+    ) -> AdaptedNode:
         node_id = getattr(external, id_attr, None)
         if node_id is None:
             raise AttributeError(
@@ -64,7 +64,7 @@ class AdaptedEdge:
         *,
         src_attr: str = _DEFAULT_EDGE_SRC_ATTR,
         dst_attr: str = _DEFAULT_EDGE_DST_ATTR,
-    ) -> "AdaptedEdge":
+    ) -> AdaptedEdge:
         src = getattr(external, src_attr, None)
         dst = getattr(external, dst_attr, None)
         if src is None or dst is None:
@@ -81,7 +81,7 @@ class AdaptedDocument:
 
     doc_id: str
     text: str
-    anchor_node_id: Optional[str] = None
+    anchor_node_id: str | None = None
 
     @classmethod
     def wrap(
@@ -90,8 +90,8 @@ class AdaptedDocument:
         *,
         id_attr: str = "doc_id",
         text_attr: str = "text",
-        anchor_attr: Optional[str] = "anchor_node_id",
-    ) -> "AdaptedDocument":
+        anchor_attr: str | None = "anchor_node_id",
+    ) -> AdaptedDocument:
         doc_id = getattr(external, id_attr, None) or getattr(external, "id", None)
         if doc_id is None:
             raise AttributeError(

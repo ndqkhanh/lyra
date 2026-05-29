@@ -1,6 +1,5 @@
 """Tests for lyra_context_profiler.strategies module."""
 
-import pytest
 
 from lyra_context_profiler.strategies import (
     CompactionStrategy,
@@ -9,7 +8,6 @@ from lyra_context_profiler.strategies import (
     StrategyRecord,
     StrategyRegistry,
 )
-
 
 # ── StrategyParameters ──────────────────────────────────────────────────────────
 

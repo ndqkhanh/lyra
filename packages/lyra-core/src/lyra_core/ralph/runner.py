@@ -128,7 +128,7 @@ class RalphRunner:
         self._handle_branch_change(prd)
         self.progress.init_if_missing()
 
-        for iteration in range(1, self.max_iterations + 1):
+        for _iteration in range(1, self.max_iterations + 1):
             if self.contract.state.is_terminal():
                 break
 

@@ -4,8 +4,6 @@ import tempfile
 from datetime import time
 from pathlib import Path
 
-import pytest
-
 from lyra_permissions import (
     GranularController,
     PermissionDecision,
@@ -14,7 +12,6 @@ from lyra_permissions import (
     TimeBasedController,
     ToolPermission,
 )
-
 
 # Granular Controller Tests
 
@@ -242,7 +239,7 @@ def test_permission_manager_profile_switching():
 
         # Production profile - more restrictive
         manager.granular_controller.set_profile("production")
-        result2 = manager.check_permission("file_write", "write", {"path": "/var/test.txt"})
+        manager.check_permission("file_write", "write", {"path": "/var/test.txt"})
 
         # Development should be more permissive
         assert result1.allow is True or result1.decision == PermissionDecision.PROMPT

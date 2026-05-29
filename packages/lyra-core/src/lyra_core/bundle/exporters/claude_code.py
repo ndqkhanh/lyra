@@ -41,7 +41,7 @@ class ClaudeCodeExporter(Exporter):
         bundle_slug = _slug(bundle.manifest.name)
 
         # 1. skills/{name}/00-bundle.md — bundle-level persona as skill 00.
-        bundle_skill_dir = target / "skills" / bundle_slug
+        target / "skills" / bundle_slug
         manifest.add(
             self._write(
                 target,

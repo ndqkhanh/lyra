@@ -3,16 +3,16 @@ Test Agent - specialist for testing tasks.
 """
 
 import asyncio
-from typing import Dict, Any
+from typing import Any
 
 from src.agents.base import Agent, AgentCapability, AgentStatus
-from src.core.task import Task, TaskType, Result
+from src.core.task import Result, Task, TaskType
 
 
 class TestAgent(Agent):
     """
     Specialist agent for testing tasks.
-    
+
     Capabilities:
     - Test generation
     - Test execution
@@ -46,10 +46,10 @@ class TestAgent(Agent):
     async def execute(self, task: Task) -> Result:
         """
         Execute a testing task.
-        
+
         Args:
             task: Task to execute
-            
+
         Returns:
             Execution result
         """
@@ -89,13 +89,13 @@ class TestAgent(Agent):
         self.record_execution(result)
         return result
 
-    async def generate_tests(self, task: Task) -> Dict[str, Any]:
+    async def generate_tests(self, task: Task) -> dict[str, Any]:
         """
         Generate test cases for code.
-        
+
         Args:
             task: Test generation task
-            
+
         Returns:
             Generated tests and metadata
         """
@@ -137,17 +137,17 @@ class TestAgent(Agent):
             "coverage_estimate": "85%",
         }
 
-    async def execute_tests(self, task: Task) -> Dict[str, Any]:
+    async def execute_tests(self, task: Task) -> dict[str, Any]:
         """
         Execute tests and report results.
-        
+
         Args:
             task: Test execution task
-            
+
         Returns:
             Test execution results
         """
-        test_path = task.params.get("test_path", "tests/")
+        task.params.get("test_path", "tests/")
 
         await self.report_progress(0.3, "Running tests...")
         await asyncio.sleep(0.8)
@@ -184,13 +184,13 @@ class TestAgent(Agent):
 
         return results
 
-    async def analyze_coverage(self, task: Task) -> Dict[str, Any]:
+    async def analyze_coverage(self, task: Task) -> dict[str, Any]:
         """
         Analyze test coverage.
-        
+
         Args:
             task: Coverage analysis task
-            
+
         Returns:
             Coverage analysis results
         """
@@ -215,10 +215,10 @@ class TestAgent(Agent):
     def can_handle(self, task: Task) -> float:
         """
         Determine if this agent can handle a task.
-        
+
         Args:
             task: Task to evaluate
-            
+
         Returns:
             Confidence score (0-1)
         """

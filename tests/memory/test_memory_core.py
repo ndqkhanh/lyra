@@ -1,9 +1,9 @@
 """Tests for memory systems."""
-import pytest
-from pathlib import Path
-import tempfile
 import shutil
+import tempfile
+from pathlib import Path
 
+import pytest
 from lyra_cli.memory import (
     ConversationLog,
     StructuredFact,
@@ -219,13 +219,13 @@ def test_warmup_scheduler_has_methods():
 def test_memory_system_imports():
     """Test that all memory components can be imported."""
     from lyra_cli.memory import (
-        ConversationStore,
-        ConversationLog,
         AtomStore,
-        StructuredFact,
-        ScenarioStore,
-        ScenarioBlock,
+        ConversationLog,
+        ConversationStore,
         PersonaStore,
+        ScenarioBlock,
+        ScenarioStore,
+        StructuredFact,
         UserPersona,
         WarmupScheduler,
     )

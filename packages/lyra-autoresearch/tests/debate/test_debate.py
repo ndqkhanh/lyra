@@ -4,7 +4,6 @@ from __future__ import annotations
 from unittest.mock import Mock, patch
 
 import pytest
-
 from lyra_autoresearch.debate import (
     DebateAgent,
     DebateMessage,
@@ -78,7 +77,7 @@ class TestDebateAgentCore:
         perspectives = [Perspective.SKEPTIC, Perspective.OPTIMIST, Perspective.METHODOLOGIST,
                         Perspective.DOMAIN_EXPERT, Perspective.PRAGMATIST]
         assert len(perspectives) == 5
-        assert len(set(p.value for p in perspectives)) == 5
+        assert len({p.value for p in perspectives}) == 5
 
     def test_unsupported_client_returns_error(self):
         agent = DebateAgent(Perspective.SKEPTIC, "not_a_client")

@@ -658,7 +658,6 @@ def tasklist_renderable(tasks: list) -> Panel:
 
 def shell_mode_renderable(state: str) -> Text:
     """Status line for /shell toggle."""
-    color = C_GREEN if state == "on" else C_DIM
     return _oneline("shell mode", state, kind="ok" if state == "on" else "dim",
                     hint="plain text runs as shell · /shell off to exit")
 

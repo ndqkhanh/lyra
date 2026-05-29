@@ -10,7 +10,7 @@ Features:
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any
 
 from lyra_permissions.bypass_mode import AuditLogger, BypassMode, SafetyGuardrails
 from lyra_permissions.granular_control import GranularController, TimeBasedController
@@ -53,7 +53,7 @@ class PermissionManager:
         self.time_controller = TimeBasedController()
 
     def check_permission(
-        self, tool: str, operation: str, context: Optional[Dict[str, Any]] = None
+        self, tool: str, operation: str, context: dict[str, Any] | None = None
     ) -> PermissionResult:
         """
         Check if operation is allowed.
@@ -165,7 +165,7 @@ class PermissionManager:
         return result
 
     def assess_risk(
-        self, tool: str, operation: str, context: Optional[Dict[str, Any]] = None
+        self, tool: str, operation: str, context: dict[str, Any] | None = None
     ) -> PermissionLevel:
         """
         Assess risk level of operation.

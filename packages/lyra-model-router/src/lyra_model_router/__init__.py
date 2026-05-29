@@ -16,12 +16,18 @@ from __future__ import annotations
 
 # V1 API
 from .capability_analyzer import CapabilityAnalyzer, TaskRequirements
+from .complexity_estimator import ComplexityEstimate, ComplexityEstimator
+from .confidence_escalation import (
+    ConfidenceEscalator,
+    EscalationReason,
+    EscalationResult,
+    EscalationStep,
+    ProviderHealth,
+)
 from .cost_optimizer import BudgetLimit, CostOptimizer
 from .cross_model_verifier import CrossModelVerifier, VerificationResult
 from .exceptions import ModelRouterError
 from .knowing_doing_gap import GapReport, KnowingDoingGapDetector
-from .router_config import ModelCapability, RouterConfig, default_config
-from .usage_tracker import UsageRecord, UsageStats, UsageTracker
 
 # V2 API — 4-tier intelligent model cascade routing
 from .models_v2 import (
@@ -34,24 +40,18 @@ from .models_v2 import (
     RoutingStrategy,
     TurnContext,
 )
-from .router_v2 import IntelligentModelRouter
-
-# V3 API — Plan 10: 5-layer intelligent router
-from .task_classifier import ClassificationResult, TaskCategory, TaskClassifier
-from .complexity_estimator import ComplexityEstimate, ComplexityEstimator
 from .performance_history import (
     ModelPerformance,
     PerformanceHistory,
     PerformanceRecord,
     Recommendation,
 )
-from .confidence_escalation import (
-    ConfidenceEscalator,
-    EscalationReason,
-    EscalationResult,
-    EscalationStep,
-    ProviderHealth,
-)
+from .router_config import ModelCapability, RouterConfig, default_config
+from .router_v2 import IntelligentModelRouter
+
+# V3 API — Plan 10: 5-layer intelligent router
+from .task_classifier import ClassificationResult, TaskCategory, TaskClassifier
+from .usage_tracker import UsageRecord, UsageStats, UsageTracker
 
 __all__ = [
     # V1 — Capability Analyzer

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Test commands system implementation"""
 
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
 
-from lyra_cli.commands import CommandRegistry, Command, CommandLoader, get_registry
+from lyra_cli.commands import CommandLoader, get_registry
 
 
 def test_commands_system():
@@ -66,7 +67,7 @@ def test_commands_system():
     if cmd:
         print(f"  ✓ Alias 'v' → '{cmd.name}'")
     else:
-        print(f"  ✗ Alias 'v' not found")
+        print("  ✗ Alias 'v' not found")
     print()
 
     print("=" * 80)

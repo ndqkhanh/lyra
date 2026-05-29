@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Optional
 
 from .types import EvalRun
 
@@ -79,7 +78,7 @@ class DriftMonitor:
         *,
         suite_id: str,
         threshold: float = 0.05,
-    ) -> Optional[DriftAlert]:
+    ) -> DriftAlert | None:
         """Compare the most recent run vs the prior ``baseline_window`` mean.
 
         ``threshold`` is the minimum *downward* delta to flag. A run scoring
@@ -119,7 +118,7 @@ class DriftMonitor:
         *,
         suite_id: str,
         threshold: float = 0.05,
-    ) -> Optional[DriftAlert]:
+    ) -> DriftAlert | None:
         """Mirror of :meth:`detect_regression` for upward delta — useful for
         celebrating eval gains in CI."""
         if not 0.0 <= threshold <= 1.0:

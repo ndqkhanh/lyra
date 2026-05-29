@@ -67,7 +67,7 @@ class RewardModel:
         signals: list[RewardSignal] = []
         total = 0.0
 
-        for metric, weight in zip(config.metrics, config.weights):
+        for metric, weight in zip(config.metrics, config.weights, strict=False):
             raw_value = metrics.get(metric)
             if raw_value is None:
                 raise RewardModelError(f"metric '{metric}' not found in input")

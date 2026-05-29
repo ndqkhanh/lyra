@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Test integrated REPL end-to-end"""
 
-import sys
 import os
+import sys
 
 # Add to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
@@ -12,20 +12,10 @@ def test_imports():
     print("Testing imports...")
 
     try:
-        from lyra_cli.repl import IntegratedREPL
         print("✓ IntegratedREPL import successful")
 
-        from lyra_cli.events import EventDispatcher, StreamingRenderer
         print("✓ Event system imports successful")
 
-        from lyra_cli.ui import (
-            FixedInputBox,
-            StatusLine,
-            ResponseFormatter,
-            AgentTree,
-            ScrollManager,
-            print_welcome_banner
-        )
         print("✓ UI components imports successful")
 
         return True
@@ -40,22 +30,22 @@ def test_component_creation():
 
     try:
         from lyra_cli.repl import IntegratedREPL
-        from lyra_cli.ui import ResponseFormatter, AgentTree
+        from lyra_cli.ui import AgentTree, ResponseFormatter
 
         # Test formatter
-        formatter = ResponseFormatter()
+        ResponseFormatter()
         print("✓ ResponseFormatter created")
 
         # Test agent tree
-        tree = AgentTree()
+        AgentTree()
         print("✓ AgentTree created")
 
         # Test REPL (without API key)
         try:
-            repl = IntegratedREPL(api_key="test-key")
+            IntegratedREPL(api_key="test-key")
             print("✓ IntegratedREPL created")
-        except Exception as e:
-            print(f"✓ IntegratedREPL creation (expected to need valid API key)")
+        except Exception:
+            print("✓ IntegratedREPL creation (expected to need valid API key)")
 
         return True
     except Exception as e:

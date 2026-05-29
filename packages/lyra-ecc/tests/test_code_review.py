@@ -4,15 +4,16 @@ Tests for Enhanced Rules Engine and Code Review Integration
 Comprehensive test suite for code review functionality.
 """
 
-import pytest
 from pathlib import Path
+
+import pytest
 
 from lyra_ecc.code_review import (
     CodeReviewResult,
     EnhancedRulesEngine,
     create_code_review_engine,
 )
-from lyra_ecc.rules import Rule, RuleSeverity, RuleViolation
+from lyra_ecc.rules import RuleSeverity, RuleViolation
 
 
 class TestCodeReviewResult:

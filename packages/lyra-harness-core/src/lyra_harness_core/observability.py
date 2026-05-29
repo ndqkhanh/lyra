@@ -9,22 +9,23 @@ import json
 import os
 import time
 import uuid
+from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from typing import Any, Iterator, Optional
+from typing import Any
 
 
 @dataclass
 class Span:
     name: str
     span_id: str = field(default_factory=lambda: uuid.uuid4().hex)
-    parent_id: Optional[str] = None
+    parent_id: str | None = None
     start_ns: int = field(default_factory=time.perf_counter_ns)
-    end_ns: Optional[int] = None
+    end_ns: int | None = None
     attributes: dict[str, Any] = field(default_factory=dict)
 
     @property
-    def duration_ms(self) -> Optional[float]:
+    def duration_ms(self) -> float | None:
         if self.end_ns is None:
             return None
         return (self.end_ns - self.start_ns) / 1e6
@@ -40,7 +41,7 @@ class Span:
 
 
 class Tracer:
-    def __init__(self, trace_file: Optional[str] = None) -> None:
+    def __init__(self, trace_file: str | None = None) -> None:
         self.trace_file = trace_file or os.environ.get("HARNESS_TRACE_FILE")
         self.spans: list[Span] = []
         self._stack: list[str] = []

@@ -8,13 +8,12 @@ Features:
 - Multi-account support
 """
 
-import asyncio
 import secrets
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, Optional
-from urllib.parse import urlencode, urlparse
+from typing import Any
+from urllib.parse import urlencode
 
 import httpx
 from cryptography.fernet import Fernet
@@ -48,8 +47,8 @@ class OAuthToken:
     access_token: str
     token_type: str = "Bearer"
     expires_in: int = 3600
-    refresh_token: Optional[str] = None
-    scope: Optional[str] = None
+    refresh_token: str | None = None
+    scope: str | None = None
     created_at: datetime = field(default_factory=datetime.now)
 
     @property
@@ -72,7 +71,7 @@ class OAuthClient:
     - Secure token storage
     """
 
-    def __init__(self, config: OAuthConfig, encryption_key: Optional[bytes] = None):
+    def __init__(self, config: OAuthConfig, encryption_key: bytes | None = None):
         """
         Initialize OAuth client.
 
@@ -83,10 +82,10 @@ class OAuthClient:
         self.config = config
         self.encryption_key = encryption_key or Fernet.generate_key()
         self.cipher = Fernet(self.encryption_key)
-        self.token: Optional[OAuthToken] = None
+        self.token: OAuthToken | None = None
         self._http_client = httpx.AsyncClient()
 
-    def get_authorization_url(self, state: Optional[str] = None) -> str:
+    def get_authorization_url(self, state: str | None = None) -> str:
         """
         Generate authorization URL.
 

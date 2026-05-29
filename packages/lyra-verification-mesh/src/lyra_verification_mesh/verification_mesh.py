@@ -14,12 +14,10 @@ import asyncio
 import logging
 import time
 import uuid
-from collections import defaultdict, deque
+from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Optional
-
-from .exceptions import VerificationFailedError, MeshConfigurationError
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -152,7 +150,7 @@ class MeshReport:
     layer_reports: dict[VerificationLayer, LayerReport] = field(default_factory=dict)
     overall_status: VerificationStatus = VerificationStatus.PASS
     confidence: float = 0.0
-    attestation_id: Optional[str] = None
+    attestation_id: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
@@ -168,7 +166,7 @@ class ConfidenceAggregator:
 
     def __init__(
         self,
-        layer_weights: Optional[dict[VerificationLayer, float]] = None,
+        layer_weights: dict[VerificationLayer, float] | None = None,
         aggregation_method: str = "weighted_mean",
     ) -> None:
         self.layer_weights = layer_weights or {
@@ -296,9 +294,9 @@ class VerificationMesh:
     async def verify_execution(
         self,
         trace: list[dict[str, Any]],
-        modules: Optional[list[VerificationModule]] = None,
-        baseline: Optional[dict[str, float]] = None,
-        current_state: Optional[dict[str, Any]] = None,
+        modules: list[VerificationModule] | None = None,
+        baseline: dict[str, float] | None = None,
+        current_state: dict[str, Any] | None = None,
         prompt_text: str = "",
         output_text: str = "",
     ) -> MeshReport:
@@ -404,7 +402,7 @@ class VerificationMesh:
         return self._reports[-1].overall_status
 
     @property
-    def latest_report(self) -> Optional[MeshReport]:
+    def latest_report(self) -> MeshReport | None:
         """Get the most recent mesh report."""
         return self._reports[-1] if self._reports else None
 

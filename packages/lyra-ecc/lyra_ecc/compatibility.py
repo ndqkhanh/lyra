@@ -4,9 +4,9 @@ ECC Compatibility Layer
 Provides compatibility between ECC and Lyra architectures.
 """
 
+import logging
 from pathlib import Path
 from typing import Dict, Optional
-import logging
 
 logger = logging.getLogger(__name__)
 

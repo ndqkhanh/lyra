@@ -12,11 +12,11 @@ Based on research: docs/154 (ctx2skill-self-evolving-context-skills.md)
 Impact: +5.4pp on GPT-4.1 with skills
 """
 
-from typing import List, Dict, Any, Optional
+import hashlib
+import json
 from dataclasses import dataclass
 from pathlib import Path
-import json
-import hashlib
+from typing import Any
 
 
 @dataclass
@@ -25,10 +25,10 @@ class SkillProposal:
     id: str
     title: str
     description: str
-    keywords: List[str]
+    keywords: list[str]
     body: str
     confidence: float
-    source_questions: List[str]
+    source_questions: list[str]
 
 
 class Ctx2SkillPipeline:
@@ -67,15 +67,15 @@ class Ctx2SkillPipeline:
         self.skills_dir = Path(skills_dir)
         self.skills_dir.mkdir(parents=True, exist_ok=True)
 
-        self.hard_probe: List[str] = []
-        self.easy_probe: List[str] = []
+        self.hard_probe: list[str] = []
+        self.easy_probe: list[str] = []
 
     def run(
         self,
-        context_docs: List[str],
+        context_docs: list[str],
         iterations: int = 5,
         questions_per_iter: int = 10
-    ) -> List[Path]:
+    ) -> list[Path]:
         """
         Run Ctx2Skill pipeline.
 
@@ -87,8 +87,8 @@ class Ctx2SkillPipeline:
         Returns:
             List of paths to generated skill files
         """
-        skills: List[SkillProposal] = []
-        skill_files: List[Path] = []
+        skills: list[SkillProposal] = []
+        skill_files: list[Path] = []
 
         for iteration in range(iterations):
             print(f"\n=== Ctx2Skill Iteration {iteration + 1}/{iterations} ===")
@@ -108,11 +108,11 @@ class Ctx2SkillPipeline:
 
             # Step 4: Build probe sets
             failures = [
-                q for q, e in zip(questions, evaluations)
+                q for q, e in zip(questions, evaluations, strict=False)
                 if not e['correct']
             ]
             successes = [
-                q for q, e in zip(questions, evaluations)
+                q for q, e in zip(questions, evaluations, strict=False)
                 if e['correct']
             ]
 
@@ -141,10 +141,10 @@ class Ctx2SkillPipeline:
 
     def _generate_questions(
         self,
-        context_docs: List[str],
+        context_docs: list[str],
         difficulty: str,
         k: int
-    ) -> List[str]:
+    ) -> list[str]:
         """Generate questions from context."""
         context_text = "\n\n".join(context_docs[:5])  # Limit context
 
@@ -172,9 +172,9 @@ Output JSON array of questions:
 
     def _answer_questions(
         self,
-        questions: List[str],
-        skills: List[SkillProposal]
-    ) -> List[str]:
+        questions: list[str],
+        skills: list[SkillProposal]
+    ) -> list[str]:
         """Answer questions using current skills."""
         # Format skills for context
         skills_text = "\n\n".join([
@@ -200,13 +200,13 @@ Answer:"""
 
     def _evaluate_answers(
         self,
-        questions: List[str],
-        answers: List[str]
-    ) -> List[Dict[str, Any]]:
+        questions: list[str],
+        answers: list[str]
+    ) -> list[dict[str, Any]]:
         """Evaluate answer quality."""
         evaluations = []
 
-        for question, answer in zip(questions, answers):
+        for question, answer in zip(questions, answers, strict=False):
             prompt = f"""Evaluate this answer.
 
 Question: {question}
@@ -240,10 +240,10 @@ Output JSON:
 
     def _propose_skills(
         self,
-        failures: List[str],
-        current_skills: List[SkillProposal],
-        context: List[str]
-    ) -> List[SkillProposal]:
+        failures: list[str],
+        current_skills: list[SkillProposal],
+        context: list[str]
+    ) -> list[SkillProposal]:
         """Propose new skills based on failures."""
         failures_text = "\n".join(f"- {q}" for q in failures[:5])
         context_text = "\n\n".join(context[:3])
@@ -336,8 +336,8 @@ This skill activates when keywords match: {", ".join(proposal.keywords)}
 
     def _cross_time_replay(
         self,
-        skills: List[SkillProposal]
-    ) -> List[SkillProposal]:
+        skills: list[SkillProposal]
+    ) -> list[SkillProposal]:
         """
         Cross-Time Replay: Select skill set that maximizes ρ_h · ρ_e.
 
@@ -383,11 +383,11 @@ This skill activates when keywords match: {", ".join(proposal.keywords)}
 
 # Factory function
 def run_ctx2skill(
-    context_docs: List[str],
+    context_docs: list[str],
     llm_model: str = "deepseek-v4-pro",
     skills_dir: str = "~/.lyra/skills/ctx2skill",
     iterations: int = 5
-) -> List[Path]:
+) -> list[Path]:
     """
     Run Ctx2Skill pipeline on context documents.
 

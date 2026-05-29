@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import enum
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 
 class NamespacePermission(str, enum.Enum):
@@ -50,7 +50,7 @@ class ContextNamespace:
     """
 
     namespace_id: str
-    parent: Optional[str] = None
+    parent: str | None = None
     inherit_grants: bool = False
 
     def __post_init__(self) -> None:
@@ -74,7 +74,7 @@ def _resolve_grant(
     source_ns: str,
     target_ns: str,
     perm: NamespacePermission,
-) -> Optional[PermissionGrant]:
+) -> PermissionGrant | None:
     grants = _GRANTS.get((source_ns, target_ns), [])
     for g in grants:
         if g.allows(perm):
@@ -125,7 +125,7 @@ class IsolatedContext:
     def cross_read(
         self,
         *,
-        other: "IsolatedContext",
+        other: IsolatedContext,
         key: str,
         default: Any = None,
     ) -> Any:
@@ -153,7 +153,7 @@ class IsolatedContext:
             )
         return other.get(key, default=default)
 
-    def cross_list(self, *, other: "IsolatedContext") -> list[str]:
+    def cross_list(self, *, other: IsolatedContext) -> list[str]:
         """List keys in another namespace; requires LIST grant.
 
         Use case: a supervisor sub-agent enumerates the runbook's known facts
@@ -175,7 +175,7 @@ class IsolatedContext:
             )
         return other.keys()
 
-    def _can_inherit_from(self, other: "IsolatedContext") -> bool:
+    def _can_inherit_from(self, other: IsolatedContext) -> bool:
         """True if this namespace inherits from ``other`` (parent-child)."""
         if not self.namespace.inherit_grants:
             return False

@@ -13,7 +13,6 @@ import logging
 import uuid
 from datetime import datetime, timezone
 from threading import RLock
-from typing import Any
 
 from lyra_production.models import (
     BranchStatus,

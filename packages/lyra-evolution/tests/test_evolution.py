@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-import math
-from datetime import datetime, timezone
-from typing import Any, Callable, Dict, List, Optional, Sequence
-from unittest.mock import MagicMock, patch
+from datetime import datetime
+from typing import Any
 
 import pytest
 
@@ -22,7 +20,6 @@ from lyra_evolution import (
     GEARStrategy,
     SelfImprovement,
 )
-
 
 # ============================================================================
 # Model tests
@@ -187,7 +184,7 @@ class TestEvolutionMetrics:
 
 class TestCouncilMode:
     @pytest.fixture
-    def members(self) -> List[CouncilMember]:
+    def members(self) -> list[CouncilMember]:
         return [
             CouncilMember(agent_id="a", expertise=("math",), weight=1.0),
             CouncilMember(agent_id="b", expertise=("logic",), weight=1.2),
@@ -198,14 +195,14 @@ class TestCouncilMode:
     def council(self) -> CouncilMode:
         return CouncilMode(name="test-council")
 
-    def test_convene(self, council: CouncilMode, members: List[CouncilMember]) -> None:
+    def test_convene(self, council: CouncilMode, members: list[CouncilMember]) -> None:
         result = council.convene(members, "What is 2+2?")
         assert result is council
         assert council.member_count == 3
         assert council.get_member("a") is not None
         assert council.get_member("nonexistent") is None
 
-    def test_vote_single_option(self, council: CouncilMode, members: List[CouncilMember]) -> None:
+    def test_vote_single_option(self, council: CouncilMode, members: list[CouncilMember]) -> None:
         council.convene(members, "test")
         decision = council.vote(members, ["approve"])
         assert decision.final_decision == "approve"
@@ -216,13 +213,13 @@ class TestCouncilMode:
         decision = council.vote([], ["a", "b"])
         assert decision.final_decision == ""
 
-    def test_vote_empty_options(self, council: CouncilMode, members: List[CouncilMember]) -> None:
+    def test_vote_empty_options(self, council: CouncilMode, members: list[CouncilMember]) -> None:
         council.convene(members, "test")
         decision = council.vote(members, [])
         assert decision.final_decision == ""
 
     def test_debate_produces_transcript(
-        self, council: CouncilMode, members: List[CouncilMember]
+        self, council: CouncilMode, members: list[CouncilMember]
     ) -> None:
         council.convene(members, "test problem")
         transcript = council.debate(members, "test problem", rounds=2)
@@ -231,7 +228,7 @@ class TestCouncilMode:
         assert "member_statements" in transcript[0]
 
     def test_debate_minimum_one_round(
-        self, council: CouncilMode, members: List[CouncilMember]
+        self, council: CouncilMode, members: list[CouncilMember]
     ) -> None:
         council.convene(members, "test")
         transcript = council.debate(members, "test", rounds=0)
@@ -293,7 +290,7 @@ class TestCouncilMode:
         assert risks["a"] == 0.5
 
     def test_resolve_conflict_no_disagreement(
-        self, council: CouncilMode, members: List[CouncilMember]
+        self, council: CouncilMode, members: list[CouncilMember]
     ) -> None:
         council.convene(members, "test")
         disagreement = {"a": "yes", "b": "yes"}
@@ -302,7 +299,7 @@ class TestCouncilMode:
         assert result.metadata["resolution"] == "no_conflict"
 
     def test_resolve_conflict_with_disagreement(
-        self, council: CouncilMode, members: List[CouncilMember]
+        self, council: CouncilMode, members: list[CouncilMember]
     ) -> None:
         council.convene(members, "test")
         # All members agree on different options — triggers resolution
@@ -491,7 +488,7 @@ class TestGEAREvolve:
         assert s.total_uses + 1 == updated.total_uses if updated.strategy_id == s.strategy_id else True
 
     def test_execute_search_with_custom_searcher(self, gear: GEAREvolve) -> None:
-        def searcher(strategy: GEARStrategy, problem: str) -> Dict[str, Any]:
+        def searcher(strategy: GEARStrategy, problem: str) -> dict[str, Any]:
             return {"found": True, "strategy": strategy.strategy_id, "problem": problem}
 
         s = gear.list_strategies()[0]
@@ -500,7 +497,6 @@ class TestGEAREvolve:
 
     def test_update_strategy_performance(self, gear: GEAREvolve) -> None:
         s = gear.list_strategies()[0]
-        old_rate = s.success_rate
         gear.update_strategy_performance(s, 1.0)
         updated = gear.get_best_strategy()
         assert updated is not None
@@ -557,7 +553,7 @@ class TestGEAREvolve:
     def test_prune_skips_untested(self, gear: GEAREvolve) -> None:
         fresh = GEARStrategy(strategy_id="fresh", success_rate=0.0, total_uses=2)
         gear.register_strategy(fresh)
-        removed = gear.prune_ineffective_strategies(threshold=0.1)
+        gear.prune_ineffective_strategies(threshold=0.1)
         # fresh has < 5 uses, should survive
         assert "fresh" in {s.strategy_id for s in gear.list_strategies()}
 
@@ -622,7 +618,7 @@ class TestSelfImprovement:
         assert "change_type" in improvements[0]
 
     def test_generate_improvements_with_generator(self, engine: SelfImprovement) -> None:
-        def gen(failure: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        def gen(failure: dict[str, Any]) -> dict[str, Any] | None:
             return {"target_task": failure["task_id"], "custom": True}
 
         failures = [{"task_id": "f1", "count": 3}]
@@ -630,7 +626,7 @@ class TestSelfImprovement:
         assert improvements[0]["custom"] is True
 
     def test_validate_improvement(self, engine: SelfImprovement) -> None:
-        def test_suite(imp: Dict[str, Any]) -> Dict[str, Any]:
+        def test_suite(imp: dict[str, Any]) -> dict[str, Any]:
             return {"passed": True, "score": 0.95, "details": {"tests_run": 5}}
 
         imp = {"target_task": "test"}

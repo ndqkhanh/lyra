@@ -5,8 +5,6 @@ meaningful output for each topic section.
 """
 from __future__ import annotations
 
-import pytest
-
 
 class FakeSession:
     pass

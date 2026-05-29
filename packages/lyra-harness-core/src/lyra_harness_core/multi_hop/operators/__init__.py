@@ -19,8 +19,8 @@ from __future__ import annotations
 from .ircot import IRCoTOperator, IRCoTResult, IRCoTStep
 from .protocols import (
     LLMTextGenerator,
-    Retriever,
     RetrievedDoc,
+    Retriever,
     StubLLM,
     StubRetriever,
 )

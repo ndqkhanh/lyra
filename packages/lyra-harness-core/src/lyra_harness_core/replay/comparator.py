@@ -18,8 +18,7 @@ The delta types capture the canonical differences:
 from __future__ import annotations
 
 import enum
-from dataclasses import dataclass, field
-from typing import Optional
+from dataclasses import dataclass
 
 from .types import ReplayEvent, Trace
 
@@ -38,8 +37,8 @@ class TraceDelta:
 
     kind: TraceDeltaKind
     event_id: str = ""
-    reference_event: Optional[ReplayEvent] = None
-    target_event: Optional[ReplayEvent] = None
+    reference_event: ReplayEvent | None = None
+    target_event: ReplayEvent | None = None
     note: str = ""
 
 
@@ -141,7 +140,7 @@ class TraceComparator:
             if ref_seq != tgt_seq:
                 # First mismatching index.
                 first_diff = next(
-                    (i for i, (a, b) in enumerate(zip(ref_seq, tgt_seq)) if a != b),
+                    (i for i, (a, b) in enumerate(zip(ref_seq, tgt_seq, strict=False)) if a != b),
                     -1,
                 )
                 deltas.append(TraceDelta(

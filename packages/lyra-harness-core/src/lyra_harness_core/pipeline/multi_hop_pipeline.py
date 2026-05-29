@@ -18,8 +18,8 @@ from __future__ import annotations
 
 import enum
 import time
-from dataclasses import dataclass, field
-from typing import Any, Optional
+from dataclasses import dataclass
+from typing import Any
 
 from ..evals import BudgetController, BudgetExhausted
 from ..gates import ChainOfNoteGate
@@ -53,7 +53,7 @@ class PipelineResult:
     query: str
     answer: str
     operator_used: str  # "self_ask" | "ircot" | "single_hop" | "cached"
-    route_decision: Optional[RouteDecision]
+    route_decision: RouteDecision | None
     n_hops: int = 0
     n_llm_calls: int = 0
     n_retrieval_calls: int = 0
@@ -62,7 +62,7 @@ class PipelineResult:
     cache_hit: bool = False
     completed: bool = False
     steps: tuple[PipelineStep, ...] = ()
-    budget_remaining: Optional[int] = None
+    budget_remaining: int | None = None
     elapsed_seconds: float = 0.0
     error: str = ""
 
@@ -94,11 +94,11 @@ class MultiHopPipeline:
     """
 
     router: BELLERouter
-    self_ask: Optional[SelfAskOperator] = None
-    ircot: Optional[IRCoTOperator] = None
-    chain_of_note: Optional[ChainOfNoteGate] = None
-    decomposition_cache: Optional[DecompositionCache] = None
-    budget: Optional[BudgetController] = None
+    self_ask: SelfAskOperator | None = None
+    ircot: IRCoTOperator | None = None
+    chain_of_note: ChainOfNoteGate | None = None
+    decomposition_cache: DecompositionCache | None = None
+    budget: BudgetController | None = None
 
     # Per-call resource estimates for budget enforcement.
     estimated_tokens_per_llm_call: int = 500

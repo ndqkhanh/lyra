@@ -66,7 +66,7 @@ def list_cmd(
     console.print(table)
     formatter.info_message(
         f"Total: {len(manifests)} skills across "
-        f"{len(set(_pack_name(m) for m in manifests))} packs"
+        f"{len({_pack_name(m) for m in manifests})} packs"
     )
 
 

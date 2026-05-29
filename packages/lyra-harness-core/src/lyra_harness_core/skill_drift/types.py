@@ -4,7 +4,6 @@ from __future__ import annotations
 import time
 import uuid
 from dataclasses import dataclass, field
-from typing import Optional
 
 
 @dataclass(frozen=True)
@@ -38,10 +37,10 @@ class SkillInvocation:
         skill_id: str,
         succeeded: bool,
         score: float = 1.0,
-        metadata: Optional[dict] = None,
-        invocation_id: Optional[str] = None,
-        timestamp: Optional[float] = None,
-    ) -> "SkillInvocation":
+        metadata: dict | None = None,
+        invocation_id: str | None = None,
+        timestamp: float | None = None,
+    ) -> SkillInvocation:
         return cls(
             invocation_id=invocation_id or str(uuid.uuid4()),
             skill_id=skill_id,

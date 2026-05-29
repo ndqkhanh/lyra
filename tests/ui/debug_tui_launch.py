@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Debug script to diagnose TUI v2 launch issues."""
-import sys
 import os
+import sys
 import traceback
 from pathlib import Path
 
@@ -33,7 +33,6 @@ log(f"LYRA_TUI: {os.environ.get('LYRA_TUI', 'not set')}")
 log("\n--- Import Phase ---")
 try:
     log("Importing lyra_cli.tui_v2...")
-    from lyra_cli.tui_v2 import launch_tui_v2
     log("✓ Import successful")
 except Exception as e:
     log(f"✗ Import failed: {e}")
@@ -57,11 +56,11 @@ log("\n--- App Creation Phase ---")
 try:
     log("Creating app...")
     from harness_tui import ProjectConfig
-    from lyra_cli.tui_v2.app import LyraHarnessApp
     from lyra_cli.tui_v2 import lyra_theme
-    from lyra_cli.tui_v2.sidebar import build_lyra_sidebar_tabs
+    from lyra_cli.tui_v2.app import LyraHarnessApp
     from lyra_cli.tui_v2.commands import register_lyra_commands
-    
+    from lyra_cli.tui_v2.sidebar import build_lyra_sidebar_tabs
+
     cfg = ProjectConfig(
         name="lyra",
         description="General-purpose, CLI-native agent harness",

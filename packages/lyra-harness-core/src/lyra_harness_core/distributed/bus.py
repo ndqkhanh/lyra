@@ -24,14 +24,14 @@ from __future__ import annotations
 
 import time
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Optional
+from typing import Any
 
 from ..provenance import WitnessKind, WitnessLattice
 from .types import Envelope, Subscription, topic_matches
 
-
-Handler = Callable[[Envelope], Optional[dict]]
+Handler = Callable[[Envelope], dict | None]
 
 
 @dataclass
@@ -47,7 +47,7 @@ class Bus:
     """
 
     namespace: str = ""
-    lattice: Optional[WitnessLattice] = None
+    lattice: WitnessLattice | None = None
     audit_kind: WitnessKind = WitnessKind.CUSTOM
     clock_fn: Any = field(default_factory=lambda: time.time)
     _subs: dict[str, Subscription] = field(default_factory=dict)
@@ -76,8 +76,8 @@ class Bus:
         topic: str,
         payload: dict,
         issued_by: str = "anonymous",
-        reply_to: Optional[str] = None,
-        correlation_id: Optional[str] = None,
+        reply_to: str | None = None,
+        correlation_id: str | None = None,
     ) -> Envelope:
         """Publish a message; invoke every matching subscriber inline."""
         full_topic = self._with_namespace(topic)
@@ -105,7 +105,7 @@ class Bus:
         timeout: float,
         issued_by: str = "anonymous",
         poll_interval: float = 0.0,
-    ) -> Optional[Envelope]:
+    ) -> Envelope | None:
         """Publish a request; return the first reply or None on timeout.
 
         How it works:
@@ -120,7 +120,7 @@ class Bus:
         if timeout < 0:
             raise ValueError(f"timeout must be >= 0, got {timeout}")
         inbox = f"_INBOX.{uuid.uuid4()}"
-        full_inbox = self._with_namespace(inbox)
+        self._with_namespace(inbox)
         replies: list[Envelope] = []
         sub = self.subscribe(inbox, lambda env: replies.append(env) or None)
 
@@ -153,7 +153,7 @@ class Bus:
         to: Envelope,
         payload: dict,
         issued_by: str = "anonymous",
-    ) -> Optional[Envelope]:
+    ) -> Envelope | None:
         """Helper: publish a reply to the ``reply_to`` of an envelope.
 
         Returns the published envelope or None if the request had no reply_to.
@@ -176,7 +176,7 @@ class Bus:
     def history(
         self,
         *,
-        topic_pattern: Optional[str] = None,
+        topic_pattern: str | None = None,
     ) -> list[Envelope]:
         """All envelopes ever published on this bus, optionally filtered."""
         if topic_pattern is None:

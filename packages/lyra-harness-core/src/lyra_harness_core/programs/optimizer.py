@@ -9,8 +9,8 @@ parameter updates) plug in via the same compile interface.
 """
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from typing import Callable, Iterable
 
 from .multi_hop_program import (
     Demonstration,
@@ -18,7 +18,6 @@ from .multi_hop_program import (
     MultiHopProgram,
     ProgramOutput,
 )
-
 
 _EvalFn = Callable[[Example, ProgramOutput], float]
 

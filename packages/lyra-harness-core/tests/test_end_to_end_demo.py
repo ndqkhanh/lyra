@@ -5,8 +5,6 @@ composed together. If this passes, the lyra_harness_core stack works as a stack.
 """
 from __future__ import annotations
 
-import pytest
-
 from lyra_harness_core.examples import (
     DemoOutput,
     build_demo_pipeline,
@@ -18,8 +16,8 @@ from lyra_harness_core.examples.end_to_end_demo import (
     build_demo_graph,
     build_demo_retriever,
 )
-from lyra_harness_core.multi_hop import HippoRAGRetriever, SimpleGraph
-from lyra_harness_core.pipeline import MultiHopPipeline, PipelineStep
+from lyra_harness_core.multi_hop import HippoRAGRetriever
+from lyra_harness_core.pipeline import PipelineStep
 from lyra_harness_core.programs import MultiHopProgram, Signature
 
 

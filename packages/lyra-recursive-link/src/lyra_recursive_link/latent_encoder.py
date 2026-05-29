@@ -6,7 +6,6 @@ import hashlib
 import re
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Any
 
 import numpy as np
 
@@ -123,7 +122,7 @@ class LatentEncoder:
         return (mat @ vector).astype(np.float64)
 
     def _apply_semantic_hash(self, vector: np.ndarray, target_dim: int) -> np.ndarray:
-        vocab_size = len(vector)
+        len(vector)
         result = np.zeros(target_dim, dtype=np.float64)
         non_zero_indices = np.where(vector > 0)[0]
         for idx in non_zero_indices:

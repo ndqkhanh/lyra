@@ -20,7 +20,6 @@ from dataclasses import dataclass
 
 from .types import EditEvent, LearnedPreference
 
-
 _EMOJI_PATTERN = re.compile(
     "["
     "\U0001F600-\U0001F64F"

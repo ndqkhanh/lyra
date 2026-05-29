@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum, auto
 from typing import TYPE_CHECKING
 
@@ -248,7 +248,7 @@ class TieredLoader:
         tokens_saved = 0
         dist: dict[str, int] = {}
 
-        for sid, tier in self._current_tiers.items():
+        for _sid, tier in self._current_tiers.items():
             tier_name = tier.name
             dist[tier_name] = dist.get(tier_name, 0) + 1
             full_cost = LoadTier.TIER3_REFERENCES.estimated_tokens

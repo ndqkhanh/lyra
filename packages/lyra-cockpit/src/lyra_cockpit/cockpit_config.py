@@ -70,7 +70,7 @@ class CockpitConfigLoader:
             ConfigError: If the file cannot be read or parsed.
         """
         try:
-            with open(path, "r") as f:
+            with open(path) as f:
                 data = json.load(f)
         except FileNotFoundError:
             raise ConfigError(f"Configuration file not found: {path}")

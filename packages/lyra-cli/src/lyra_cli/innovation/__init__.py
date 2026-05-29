@@ -56,7 +56,7 @@ class MermaidEdge:
 class MermaidCanvas:
     """
     Interactive Mermaid diagram generator for knowledge visualization.
-    
+
     Features:
     - Knowledge graph visualization
     - Workflow graph visualization
@@ -70,7 +70,7 @@ class MermaidCanvas:
 
     def __init__(self, diagram_type: DiagramType = DiagramType.KNOWLEDGE_GRAPH):
         """Initialize the canvas.
-        
+
         Args:
             diagram_type: Type of diagram to generate
         """
@@ -88,7 +88,7 @@ class MermaidCanvas:
         **metadata,
     ) -> None:
         """Add a node to the diagram.
-        
+
         Args:
             node_id: Unique node identifier
             label: Display label
@@ -113,7 +113,7 @@ class MermaidCanvas:
         weight: float = 1.0,
     ) -> None:
         """Add an edge to the diagram.
-        
+
         Args:
             source: Source node ID
             target: Target node ID
@@ -133,10 +133,10 @@ class MermaidCanvas:
 
     def filter_by_confidence(self, threshold: float) -> MermaidCanvas:
         """Filter nodes by confidence threshold.
-        
+
         Args:
             threshold: Minimum confidence (0-1)
-            
+
         Returns:
             New canvas with filtered nodes
         """
@@ -156,11 +156,11 @@ class MermaidCanvas:
 
     def highlight_path(self, source: str, target: str) -> list[str]:
         """Find and highlight path between nodes.
-        
+
         Args:
             source: Source node ID
             target: Target node ID
-            
+
         Returns:
             List of node IDs in path
         """
@@ -189,7 +189,7 @@ class MermaidCanvas:
 
     def to_mermaid(self) -> str:
         """Generate Mermaid diagram syntax.
-        
+
         Returns:
             Mermaid diagram as string
         """
@@ -240,7 +240,7 @@ class MermaidCanvas:
 
     def to_markdown(self) -> str:
         """Export as Markdown with embedded Mermaid.
-        
+
         Returns:
             Markdown string
         """
@@ -248,7 +248,7 @@ class MermaidCanvas:
 
     def to_dict(self) -> dict[str, Any]:
         """Export as dictionary.
-        
+
         Returns:
             Dictionary representation
         """
@@ -308,7 +308,7 @@ class CounterexampleTest:
 class FalsificationLoop:
     """
     Scientific rigor through falsification.
-    
+
     Features:
     - Extract testable claims from answers
     - Generate counterexamples
@@ -325,10 +325,10 @@ class FalsificationLoop:
 
     def extract_claims(self, answer: str) -> list[Hypothesis]:
         """Extract testable claims from an answer.
-        
+
         Args:
             answer: Answer text
-            
+
         Returns:
             List of hypotheses
         """
@@ -341,7 +341,7 @@ class FalsificationLoop:
         answer = " ".join(answer.split())  # Normalize whitespace
         sentences = answer.split(". ")
 
-        for i, sentence in enumerate(sentences):
+        for _i, sentence in enumerate(sentences):
             sentence = sentence.strip()
             if not sentence:
                 continue
@@ -360,10 +360,10 @@ class FalsificationLoop:
 
     def generate_counterexamples(self, hypothesis: Hypothesis) -> list[CounterexampleTest]:
         """Generate tests to refute a hypothesis.
-        
+
         Args:
             hypothesis: Hypothesis to test
-            
+
         Returns:
             List of counterexample tests
         """
@@ -390,10 +390,10 @@ class FalsificationLoop:
 
     def execute_test(self, test: CounterexampleTest) -> bool:
         """Execute a counterexample test.
-        
+
         Args:
             test: Test to execute
-            
+
         Returns:
             True if test refutes hypothesis
         """
@@ -420,10 +420,10 @@ class FalsificationLoop:
 
     def run_falsification(self, answer: str) -> dict[str, Any]:
         """Run complete falsification loop on an answer.
-        
+
         Args:
             answer: Answer to test
-            
+
         Returns:
             Falsification report
         """
@@ -491,7 +491,7 @@ class SessionPattern:
 class CrossSessionLearner:
     """
     Learn patterns across sessions for continuous improvement.
-    
+
     Features:
     - Pattern extraction from session history
     - Success/failure pattern recognition
@@ -507,7 +507,7 @@ class CrossSessionLearner:
 
     def add_session(self, session_data: dict[str, Any]) -> None:
         """Add a session to history.
-        
+
         Args:
             session_data: Session data
         """
@@ -515,7 +515,7 @@ class CrossSessionLearner:
 
     def extract_patterns(self) -> list[SessionPattern]:
         """Extract patterns from session history.
-        
+
         Returns:
             List of learned patterns
         """
@@ -551,10 +551,10 @@ class CrossSessionLearner:
 
     def get_recommendations(self, current_context: dict[str, Any]) -> list[str]:
         """Get recommendations based on learned patterns.
-        
+
         Args:
             current_context: Current session context
-            
+
         Returns:
             List of recommendations
         """

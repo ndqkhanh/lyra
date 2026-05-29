@@ -28,8 +28,8 @@ def test_complete_response():
     # Initialize renderers
     ui = LyraUIRenderer()
     tree = TreeRenderer()
-    expandable = ExpandableRenderer()
-    tool_fmt = ToolCallFormatter()
+    ExpandableRenderer()
+    ToolCallFormatter()
 
     print("\n" + ui.render_separator(80))
     print()

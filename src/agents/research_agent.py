@@ -3,16 +3,16 @@ Research Agent - specialist for research and information gathering.
 """
 
 import asyncio
-from typing import Dict, Any, List
+from typing import Any
 
 from src.agents.base import Agent, AgentCapability, AgentStatus
-from src.core.task import Task, TaskType, Result
+from src.core.task import Result, Task, TaskType
 
 
 class ResearchAgent(Agent):
     """
     Specialist agent for research and information gathering.
-    
+
     Capabilities:
     - Web search
     - Document analysis
@@ -46,10 +46,10 @@ class ResearchAgent(Agent):
     async def execute(self, task: Task) -> Result:
         """
         Execute a research task.
-        
+
         Args:
             task: Task to execute
-            
+
         Returns:
             Execution result
         """
@@ -89,13 +89,13 @@ class ResearchAgent(Agent):
         self.record_execution(result)
         return result
 
-    async def research(self, task: Task) -> Dict[str, Any]:
+    async def research(self, task: Task) -> dict[str, Any]:
         """
         Conduct research on a topic.
-        
+
         Args:
             task: Research task
-            
+
         Returns:
             Research findings
         """
@@ -127,13 +127,13 @@ class ResearchAgent(Agent):
             "confidence": 0.85,
         }
 
-    async def web_search(self, query: str) -> List[Dict[str, str]]:
+    async def web_search(self, query: str) -> list[dict[str, str]]:
         """
         Simulate web search.
-        
+
         Args:
             query: Search query
-            
+
         Returns:
             List of search results
         """
@@ -158,13 +158,13 @@ class ResearchAgent(Agent):
             },
         ]
 
-    async def analyze_sources(self, sources: List[Dict[str, str]]) -> List[Dict[str, Any]]:
+    async def analyze_sources(self, sources: list[dict[str, str]]) -> list[dict[str, Any]]:
         """
         Analyze search results.
-        
+
         Args:
             sources: List of sources to analyze
-            
+
         Returns:
             List of analyses
         """
@@ -183,13 +183,13 @@ class ResearchAgent(Agent):
             })
         return analyses
 
-    async def synthesize_findings(self, analyses: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def synthesize_findings(self, analyses: list[dict[str, Any]]) -> dict[str, Any]:
         """
         Synthesize findings from multiple sources.
-        
+
         Args:
             analyses: List of source analyses
-            
+
         Returns:
             Synthesized findings
         """
@@ -210,13 +210,13 @@ class ResearchAgent(Agent):
             "sources_cited": len(analyses),
         }
 
-    async def analyze_document(self, task: Task) -> Dict[str, Any]:
+    async def analyze_document(self, task: Task) -> dict[str, Any]:
         """
         Analyze a document.
-        
+
         Args:
             task: Document analysis task
-            
+
         Returns:
             Analysis results
         """
@@ -247,10 +247,10 @@ class ResearchAgent(Agent):
     def can_handle(self, task: Task) -> float:
         """
         Determine if this agent can handle a task.
-        
+
         Args:
             task: Task to evaluate
-            
+
         Returns:
             Confidence score (0-1)
         """

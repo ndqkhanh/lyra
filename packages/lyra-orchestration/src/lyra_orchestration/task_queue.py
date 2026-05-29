@@ -12,7 +12,7 @@ import asyncio
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any
 from uuid import uuid4
 
 
@@ -42,7 +42,7 @@ class Task:
 
     task_id: str
     queue_name: str
-    payload: Dict[str, Any]
+    payload: dict[str, Any]
     priority: TaskPriority = TaskPriority.NORMAL
     max_retries: int = 3
     timeout: int = 300  # Seconds
@@ -55,12 +55,12 @@ class TaskState:
 
     task: Task
     status: TaskStatus = TaskStatus.PENDING
-    assigned_to: Optional[str] = None
-    assigned_at: Optional[datetime] = None
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
-    result: Optional[Dict[str, Any]] = None
-    error: Optional[str] = None
+    assigned_to: str | None = None
+    assigned_at: datetime | None = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    result: dict[str, Any] | None = None
+    error: str | None = None
     retry_count: int = 0
 
 
@@ -69,9 +69,9 @@ class Worker:
     """Worker registration."""
 
     worker_id: str
-    capabilities: Set[str]
+    capabilities: set[str]
     max_concurrent: int = 5
-    active_tasks: Set[str] = field(default_factory=set)
+    active_tasks: set[str] = field(default_factory=set)
     last_heartbeat: datetime = field(default_factory=datetime.now)
 
 
@@ -89,16 +89,16 @@ class TaskQueue:
 
     def __init__(self):
         """Initialize task queue."""
-        self._queues: Dict[str, List[str]] = {}  # queue_name -> [task_ids]
-        self._tasks: Dict[str, TaskState] = {}  # task_id -> TaskState
-        self._workers: Dict[str, Worker] = {}  # worker_id -> Worker
-        self._dead_letter: List[str] = []  # Failed task IDs
-        self._completion_events: Dict[str, asyncio.Event] = {}
+        self._queues: dict[str, list[str]] = {}  # queue_name -> [task_ids]
+        self._tasks: dict[str, TaskState] = {}  # task_id -> TaskState
+        self._workers: dict[str, Worker] = {}  # worker_id -> Worker
+        self._dead_letter: list[str] = []  # Failed task IDs
+        self._completion_events: dict[str, asyncio.Event] = {}
 
     async def enqueue(
         self,
         queue_name: str,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         priority: TaskPriority = TaskPriority.NORMAL,
         max_retries: int = 3,
         timeout: int = 300,
@@ -147,7 +147,7 @@ class TaskQueue:
     async def register_worker(
         self,
         worker_id: str,
-        capabilities: Set[str],
+        capabilities: set[str],
         max_concurrent: int = 5,
     ) -> bool:
         """
@@ -220,7 +220,7 @@ class TaskQueue:
         self,
         task_id: str,
         worker_id: str,
-        result: Dict[str, Any],
+        result: dict[str, Any],
     ) -> bool:
         """
         Mark task as completed.
@@ -321,8 +321,8 @@ class TaskQueue:
     async def wait_for_completion(
         self,
         task_id: str,
-        timeout: Optional[int] = None,
-    ) -> Optional[Dict[str, Any]]:
+        timeout: int | None = None,
+    ) -> dict[str, Any] | None:
         """
         Wait for task completion.
 
@@ -348,7 +348,7 @@ class TaskQueue:
             if state.status == TaskStatus.COMPLETED:
                 return state.result
             return None
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return None
 
     async def _try_assign_tasks(self, queue_name: str):
@@ -469,7 +469,7 @@ class TaskQueue:
             reverse=True,
         )
 
-    def get_task(self, task_id: str) -> Optional[Task]:
+    def get_task(self, task_id: str) -> Task | None:
         """
         Get task by ID.
 
@@ -483,7 +483,7 @@ class TaskQueue:
             return None
         return self._tasks[task_id].task
 
-    def get_task_status(self, task_id: str) -> Optional[TaskStatus]:
+    def get_task_status(self, task_id: str) -> TaskStatus | None:
         """
         Get task status.
 
@@ -497,7 +497,7 @@ class TaskQueue:
             return None
         return self._tasks[task_id].status
 
-    def get_queue_stats(self, queue_name: str) -> Dict[str, Any]:
+    def get_queue_stats(self, queue_name: str) -> dict[str, Any]:
         """
         Get queue statistics.
 
@@ -539,7 +539,7 @@ class TaskQueue:
 
         return stats
 
-    def get_worker_stats(self, worker_id: str) -> Dict[str, Any]:
+    def get_worker_stats(self, worker_id: str) -> dict[str, Any]:
         """
         Get worker statistics.
 
@@ -562,7 +562,7 @@ class TaskQueue:
             "last_heartbeat": worker.last_heartbeat.isoformat(),
         }
 
-    def get_dead_letter_queue(self) -> List[str]:
+    def get_dead_letter_queue(self) -> list[str]:
         """
         Get dead letter queue.
 

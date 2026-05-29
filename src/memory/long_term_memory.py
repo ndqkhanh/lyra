@@ -2,16 +2,15 @@
 Long-Term Memory - Persistent knowledge base.
 """
 
-from typing import List, Dict, Optional, Set
 from collections import defaultdict
 
-from src.memory.memory_store import Memory, MemoryType, MemoryStore
+from src.memory.memory_store import Memory, MemoryStore, MemoryType
 
 
 class MemoryIndex:
     """
     Fast retrieval index for memories.
-    
+
     Maintains indices for:
     - Tags
     - Memory types
@@ -20,14 +19,14 @@ class MemoryIndex:
 
     def __init__(self):
         """Initialize memory index."""
-        self.tag_index: Dict[str, Set[str]] = defaultdict(set)
-        self.type_index: Dict[MemoryType, Set[str]] = defaultdict(set)
-        self.time_index: List[tuple] = []  # (timestamp, memory_id)
+        self.tag_index: dict[str, set[str]] = defaultdict(set)
+        self.type_index: dict[MemoryType, set[str]] = defaultdict(set)
+        self.time_index: list[tuple] = []  # (timestamp, memory_id)
 
     def add_memory(self, memory: Memory):
         """
         Add memory to index.
-        
+
         Args:
             memory: Memory to index
         """
@@ -45,7 +44,7 @@ class MemoryIndex:
     def remove_memory(self, memory: Memory):
         """
         Remove memory from index.
-        
+
         Args:
             memory: Memory to remove
         """
@@ -62,14 +61,14 @@ class MemoryIndex:
             if mid != memory.memory_id
         ]
 
-    def find_by_tags(self, tags: List[str], match_all: bool = False) -> Set[str]:
+    def find_by_tags(self, tags: list[str], match_all: bool = False) -> set[str]:
         """
         Find memory IDs by tags.
-        
+
         Args:
             tags: Tags to search for
             match_all: If True, must have all tags
-            
+
         Returns:
             Set of memory IDs
         """
@@ -89,13 +88,13 @@ class MemoryIndex:
                 result |= self.tag_index[tag]
             return result
 
-    def find_by_type(self, memory_type: MemoryType) -> Set[str]:
+    def find_by_type(self, memory_type: MemoryType) -> set[str]:
         """
         Find memory IDs by type.
-        
+
         Args:
             memory_type: Type to search for
-            
+
         Returns:
             Set of memory IDs
         """
@@ -103,16 +102,16 @@ class MemoryIndex:
 
     def find_by_time_range(
         self,
-        start_time: Optional[float] = None,
-        end_time: Optional[float] = None,
-    ) -> List[str]:
+        start_time: float | None = None,
+        end_time: float | None = None,
+    ) -> list[str]:
         """
         Find memory IDs in time range.
-        
+
         Args:
             start_time: Start timestamp (inclusive)
             end_time: End timestamp (inclusive)
-            
+
         Returns:
             List of memory IDs (sorted by time, most recent first)
         """
@@ -137,7 +136,7 @@ class MemoryIndex:
 class LongTermMemory:
     """
     Long-term persistent memory.
-    
+
     Responsibilities:
     - Store unlimited memories
     - Fast indexed retrieval
@@ -145,10 +144,10 @@ class LongTermMemory:
     - Knowledge consolidation
     """
 
-    def __init__(self, storage_path: Optional[str] = None):
+    def __init__(self, storage_path: str | None = None):
         """
         Initialize long-term memory.
-        
+
         Args:
             storage_path: Path to persist memories
         """
@@ -163,19 +162,19 @@ class LongTermMemory:
         content: str,
         memory_type: MemoryType,
         importance: float = 0.5,
-        tags: Optional[List[str]] = None,
-        context: Optional[Dict] = None,
+        tags: list[str] | None = None,
+        context: dict | None = None,
     ) -> Memory:
         """
         Add a memory to long-term storage.
-        
+
         Args:
             content: Memory content
             memory_type: Type of memory
             importance: Importance score
             tags: Associated tags
             context: Additional context
-            
+
         Returns:
             Created memory
         """
@@ -190,13 +189,13 @@ class LongTermMemory:
         self.index.add_memory(memory)
         return memory
 
-    def get(self, memory_id: str) -> Optional[Memory]:
+    def get(self, memory_id: str) -> Memory | None:
         """
         Get a memory by ID.
-        
+
         Args:
             memory_id: Memory identifier
-            
+
         Returns:
             Memory if found
         """
@@ -204,18 +203,18 @@ class LongTermMemory:
 
     def search_by_tags(
         self,
-        tags: List[str],
+        tags: list[str],
         match_all: bool = False,
-        limit: Optional[int] = None,
-    ) -> List[Memory]:
+        limit: int | None = None,
+    ) -> list[Memory]:
         """
         Search memories by tags.
-        
+
         Args:
             tags: Tags to search for
             match_all: If True, must have all tags
             limit: Maximum results to return
-            
+
         Returns:
             List of matching memories
         """
@@ -238,15 +237,15 @@ class LongTermMemory:
     def search_by_type(
         self,
         memory_type: MemoryType,
-        limit: Optional[int] = None,
-    ) -> List[Memory]:
+        limit: int | None = None,
+    ) -> list[Memory]:
         """
         Search memories by type.
-        
+
         Args:
             memory_type: Type to search for
             limit: Maximum results to return
-            
+
         Returns:
             List of matching memories
         """
@@ -268,18 +267,18 @@ class LongTermMemory:
 
     def search_by_time_range(
         self,
-        start_time: Optional[float] = None,
-        end_time: Optional[float] = None,
-        limit: Optional[int] = None,
-    ) -> List[Memory]:
+        start_time: float | None = None,
+        end_time: float | None = None,
+        limit: int | None = None,
+    ) -> list[Memory]:
         """
         Search memories by time range.
-        
+
         Args:
             start_time: Start timestamp
             end_time: End timestamp
             limit: Maximum results to return
-            
+
         Returns:
             List of matching memories
         """
@@ -299,15 +298,15 @@ class LongTermMemory:
     def search_by_content(
         self,
         query: str,
-        limit: Optional[int] = None,
-    ) -> List[Memory]:
+        limit: int | None = None,
+    ) -> list[Memory]:
         """
         Search memories by content (simple keyword search).
-        
+
         Args:
             query: Search query
             limit: Maximum results to return
-            
+
         Returns:
             List of matching memories
         """
@@ -326,13 +325,13 @@ class LongTermMemory:
 
         return matches
 
-    def get_recent(self, limit: int = 10) -> List[Memory]:
+    def get_recent(self, limit: int = 10) -> list[Memory]:
         """
         Get most recent memories.
-        
+
         Args:
             limit: Maximum number to return
-            
+
         Returns:
             List of recent memories
         """
@@ -342,14 +341,14 @@ class LongTermMemory:
         self,
         threshold: float = 0.7,
         limit: int = 10,
-    ) -> List[Memory]:
+    ) -> list[Memory]:
         """
         Get most important memories.
-        
+
         Args:
             threshold: Minimum importance
             limit: Maximum number to return
-            
+
         Returns:
             List of important memories
         """
@@ -361,21 +360,21 @@ class LongTermMemory:
     ) -> int:
         """
         Merge similar memories.
-        
+
         Args:
             similarity_threshold: Minimum similarity to merge
-            
+
         Returns:
             Number of memories merged
         """
         # Simple implementation: merge memories with same content
-        content_map: Dict[str, List[Memory]] = defaultdict(list)
+        content_map: dict[str, list[Memory]] = defaultdict(list)
 
         for memory in self.store.get_all():
             content_map[memory.content].append(memory)
 
         merged = 0
-        for content, memories in content_map.items():
+        for _content, memories in content_map.items():
             if len(memories) > 1:
                 # Keep most important, merge others
                 memories.sort(key=lambda m: m.importance, reverse=True)
@@ -400,7 +399,7 @@ class LongTermMemory:
     def apply_decay(self, decay_rate: float = 0.01):
         """
         Apply importance decay to all memories.
-        
+
         Args:
             decay_rate: Rate of decay per day
         """
@@ -409,10 +408,10 @@ class LongTermMemory:
     def prune(self, min_importance: float = 0.1) -> int:
         """
         Remove low-importance memories.
-        
+
         Args:
             min_importance: Minimum importance to keep
-            
+
         Returns:
             Number of memories pruned
         """
@@ -447,10 +446,10 @@ class LongTermMemory:
         self.store.clear()
         self.index.clear()
 
-    def get_statistics(self) -> Dict:
+    def get_statistics(self) -> dict:
         """
         Get long-term memory statistics.
-        
+
         Returns:
             Statistics dictionary
         """

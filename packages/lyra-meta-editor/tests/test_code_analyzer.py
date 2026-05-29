@@ -6,13 +6,12 @@ import os
 import tempfile
 
 import pytest
-
 from lyra_meta_editor import (
     AnalysisConfig,
+    CodeAnalysisError,
     CodeAnalyzer,
     CodeMetrics,
     HotspotReport,
-    CodeAnalysisError,
 )
 
 
@@ -228,7 +227,6 @@ class TestCodeAnalyzer:
     @pytest.mark.asyncio
     async def test_hotspot_detection(self, sample_py_file: str) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            import shutil
             dest = os.path.join(tmpdir, "test.py")
             # Create a file with high complexity
             complex_code = (

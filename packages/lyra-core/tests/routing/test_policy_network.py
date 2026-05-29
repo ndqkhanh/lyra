@@ -133,7 +133,7 @@ class TestPolicyNetwork:
 
         # Get initial probability for action 0
         probs_before, _, _ = net.forward(features)
-        prob_before = probs_before[0]
+        probs_before[0]
 
         # Train with negative reward on action 0
         for _ in range(50):

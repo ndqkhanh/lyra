@@ -104,7 +104,7 @@ def _dense_score(fragment: Fragment, query: RecallQuery) -> float:
         # Dot-product normalised to [0,1] — works for unit embeddings
         q_emb = getattr(query, "_embedding", None)
         if q_emb is not None and len(q_emb) == len(fragment.embedding):
-            dot = sum(a * b for a, b in zip(q_emb, fragment.embedding))
+            dot = sum(a * b for a, b in zip(q_emb, fragment.embedding, strict=False))
             return max(0.0, min(1.0, dot))
     # Fallback: token Jaccard
     return _jaccard(_token_set(fragment.content), _token_set(query.text))

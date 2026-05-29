@@ -4,7 +4,6 @@ from __future__ import annotations
 import time
 
 import pytest
-
 from lyra_harness_core.constitution import (
     Constitution,
     ConstitutionRegistry,
@@ -14,14 +13,12 @@ from lyra_harness_core.constitution import (
 from lyra_harness_core.marketplace import (
     InMemoryCuratorHost,
     InMemoryMarketplaceHost,
-    InstallResult,
     MCPServer,
     PromotedSkill,
     TrajectoryRecord,
     TrustTier,
     TrustVerdict,
 )
-
 
 # --- Marketplace types --------------------------------------------------
 

@@ -37,12 +37,12 @@ def compute_fidelity(original: str | list[str], decoded: str | list[str]) -> flo
     if isinstance(original, str):
         orig_tokens = set(original.lower().split())
     else:
-        orig_tokens = set(t.lower() for t in original)
+        orig_tokens = {t.lower() for t in original}
 
     if isinstance(decoded, str):
         dec_tokens = set(decoded.lower().split())
     else:
-        dec_tokens = set(t.lower() for t in decoded)
+        dec_tokens = {t.lower() for t in decoded}
 
     if not orig_tokens and not dec_tokens:
         return 1.0

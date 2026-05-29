@@ -100,7 +100,7 @@ class Witness:
         content: dict[str, Any] | None = None,
         parent_witnesses: tuple[str, ...] | list[str] = (),
         issued_at: float | None = None,
-    ) -> "Witness":
+    ) -> Witness:
         """Construct a Witness with auto-computed witness_id."""
         ts = issued_at if issued_at is not None else time.time()
         body = dict(content or {})

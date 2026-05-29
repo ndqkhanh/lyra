@@ -4,20 +4,19 @@ from __future__ import annotations
 
 import logging
 from collections import defaultdict, deque
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Iterator, Optional, Union
+from typing import Any
 
 import numpy as np
 
 from .errors import (
-    CausalGraphError,
     CycleDetectedError,
     GraphConstructionError,
     InvalidEdgeError,
     InvalidNodeError,
 )
-from .scm import StructuralCausalModel
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +59,7 @@ class GraphNode:
     id: str
     name: str
     node_type: str = "variable"
-    data: Optional[np.ndarray] = None
+    data: np.ndarray | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def __hash__(self) -> int:
@@ -118,7 +117,7 @@ class CausalGraphConfig:
     max_iterations: int = 1000
     allow_latent_confounders: bool = True
     enable_cache: bool = True
-    random_seed: Optional[int] = None
+    random_seed: int | None = None
 
 
 # ── Conditional Independence Test ─────────────────────────────────────────────
@@ -204,7 +203,7 @@ class ConditionalIndependenceTest:
         """Compute p-value from partial correlation using Fisher's z-transform."""
         z_vars = sorted(conditioning_set)
         all_vars = [x, y] + z_vars
-        idxs = [self._var_idx[v] for v in all_vars]
+        [self._var_idx[v] for v in all_vars]
 
         # Build data matrix
         mat = np.column_stack([self._data[v] for v in all_vars])
@@ -275,7 +274,7 @@ class CausalGraph:
         cg.validate()  # raises if invalid
     """
 
-    def __init__(self, config: Optional[CausalGraphConfig] = None) -> None:
+    def __init__(self, config: CausalGraphConfig | None = None) -> None:
         self._config = config or CausalGraphConfig()
         self._nodes: dict[str, GraphNode] = {}
         self._edges: dict[str, GraphEdge] = {}
@@ -314,10 +313,10 @@ class CausalGraph:
     def add_node(
         self,
         node_id: str,
-        name: Optional[str] = None,
+        name: str | None = None,
         node_type: str = "variable",
-        data: Optional[np.ndarray] = None,
-        metadata: Optional[dict[str, Any]] = None,
+        data: np.ndarray | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> GraphNode:
         """Add or overwrite a node.
 
@@ -396,7 +395,7 @@ class CausalGraph:
         edge_type: EdgeType,
         strength: float = 0.5,
         confidence: float = 0.5,
-        metadata: Optional[dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> GraphEdge:
         """Low-level edge addition."""
         # Ensure nodes exist
@@ -440,7 +439,7 @@ class CausalGraph:
         target_id: str,
         strength: float = 0.5,
         confidence: float = 0.5,
-        metadata: Optional[dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> GraphEdge:
         """Add a directed edge ``source → target``.
 
@@ -470,7 +469,7 @@ class CausalGraph:
         target_id: str,
         strength: float = 0.5,
         confidence: float = 0.5,
-        metadata: Optional[dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> GraphEdge:
         """Add a bidirected edge ``source <-> target`` (latent confounder)."""
         if not self._config.allow_latent_confounders:
@@ -487,14 +486,14 @@ class CausalGraph:
         target_id: str,
         strength: float = 0.5,
         confidence: float = 0.5,
-        metadata: Optional[dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> GraphEdge:
         """Add an undirected edge ``source -- target``."""
         return self._add_edge_internal(
             source_id, target_id, EdgeType.UNDIRECTED, strength, confidence, metadata
         )
 
-    def get_edge(self, source_id: str, target_id: str) -> Optional[GraphEdge]:
+    def get_edge(self, source_id: str, target_id: str) -> GraphEdge | None:
         """Return the edge between source and target, if any."""
         key = (source_id, target_id)
         edge_id = self._edge_index.get(key)
@@ -670,7 +669,7 @@ class CausalGraph:
         _dfs(source, [source], {source})
         return all_paths
 
-    def shortest_path(self, source: str, target: str) -> Optional[list[str]]:
+    def shortest_path(self, source: str, target: str) -> list[str] | None:
         """Find the shortest directed path between two nodes (BFS)."""
         if source == target:
             return [source]
@@ -691,7 +690,7 @@ class CausalGraph:
 
     # ── Edge Pruning ─────────────────────────────────────────────────────
 
-    def prune_weak_edges(self, min_strength: Optional[float] = None) -> int:
+    def prune_weak_edges(self, min_strength: float | None = None) -> int:
         """Remove edges with strength below ``min_strength``.
 
         Args:
@@ -869,8 +868,8 @@ class CausalGraph:
         }
 
     def _count_by(self, key_fn: Callable) -> dict:
-        result: dict = defaultdict(int)
-        items = self._nodes.values() if key_fn.__code__.co_varnames[0] != "e" else self._edges.values()
+        defaultdict(int)
+        self._nodes.values() if key_fn.__code__.co_varnames[0] != "e" else self._edges.values()
         # This is fragile; let's just do it properly.
         return {}
 
@@ -915,13 +914,13 @@ class PCAlgorithm:
         alpha: float = 0.05,
         max_cond_set_size: int = 5,
         enable_cache: bool = True,
-        random_seed: Optional[int] = None,
+        random_seed: int | None = None,
     ) -> None:
         self._alpha = alpha
         self._max_cond_set_size = max_cond_set_size
         self._enable_cache = enable_cache
         self._random_seed = random_seed
-        self._graph: Optional[CausalGraph] = None
+        self._graph: CausalGraph | None = None
 
     @property
     def alpha(self) -> float:
@@ -932,7 +931,7 @@ class PCAlgorithm:
         self._alpha = value
 
     @property
-    def graph(self) -> Optional[CausalGraph]:
+    def graph(self) -> CausalGraph | None:
         """The learned causal graph after ``fit()``."""
         return self._graph
 
@@ -1130,17 +1129,17 @@ class FCIAlgorithm:
         max_cond_set_size: int = 5,
         depth: int = -1,
         enable_cache: bool = True,
-        random_seed: Optional[int] = None,
+        random_seed: int | None = None,
     ) -> None:
         self._alpha = alpha
         self._max_cond_set_size = max_cond_set_size
         self._depth = depth  # -1 = unlimited
         self._enable_cache = enable_cache
         self._random_seed = random_seed
-        self._graph: Optional[CausalGraph] = None
+        self._graph: CausalGraph | None = None
 
     @property
-    def graph(self) -> Optional[CausalGraph]:
+    def graph(self) -> CausalGraph | None:
         return self._graph
 
     async def fit(self, data: dict[str, np.ndarray]) -> CausalGraph:

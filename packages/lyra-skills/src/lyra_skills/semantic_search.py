@@ -32,16 +32,16 @@ import os
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 
 logger = logging.getLogger(__name__)
 
 # Global singleton
-_EMBEDDER: Optional["SkillEmbedder"] = None
-_CACHE: Optional["EmbeddingCache"] = None
-_SEARCHER: Optional["SemanticSkillSearch"] = None
+_EMBEDDER: SkillEmbedder | None = None
+_CACHE: EmbeddingCache | None = None
+_SEARCHER: SemanticSkillSearch | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -163,7 +163,7 @@ class EmbeddingCache:
             }
 
         try:
-            with open(self.cache_path, "r") as f:
+            with open(self.cache_path) as f:
                 cache = json.load(f)
 
             # Invalidate if model changed
@@ -211,7 +211,7 @@ class EmbeddingCache:
         except Exception as e:
             logger.error(f"Failed to save embedding cache: {e}")
 
-    def get(self, skill_id: str, text: str) -> Optional[np.ndarray]:
+    def get(self, skill_id: str, text: str) -> np.ndarray | None:
         """Get cached embedding if text hasn't changed.
 
         Args:
@@ -338,8 +338,8 @@ class SemanticSkillSearch:
         self,
         query: str,
         skills: list[Any],
-        utility_scores: Optional[dict[str, float]] = None,
-        recency_boosts: Optional[dict[str, float]] = None
+        utility_scores: dict[str, float] | None = None,
+        recency_boosts: dict[str, float] | None = None
     ) -> list[SearchResult]:
         """Search skills using semantic similarity.
 
@@ -381,7 +381,7 @@ class SemanticSkillSearch:
 
         # 4. Build results with hybrid scoring
         results = []
-        for skill, similarity in zip(skills, similarities):
+        for skill, similarity in zip(skills, similarities, strict=False):
             if similarity < self.threshold:
                 continue
 
@@ -492,7 +492,7 @@ class SemanticSkillSearch:
 
 
 def get_semantic_searcher(
-    cache_path: Optional[Path] = None,
+    cache_path: Path | None = None,
     model_name: str = DEFAULT_MODEL
 ) -> SemanticSkillSearch:
     """Get or create the global semantic searcher singleton.

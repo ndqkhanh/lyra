@@ -5,16 +5,6 @@ from __future__ import annotations
 import time
 
 import pytest
-
-from lyra_audio.cesp_engine import (
-    DEDUP_WINDOW_SECONDS,
-    CespCategory,
-    CespEngine,
-    HOOK_TO_CESP,
-    PackSelectionLayer,
-    PlaybackRecord,
-    SelectionResult,
-)
 from lyra_audio.audio_suppression import (
     AudioSuppression,
     SilentHours,
@@ -23,7 +13,14 @@ from lyra_audio.audio_suppression import (
     SuppressionResult,
     create_default_suppression,
 )
-
+from lyra_audio.cesp_engine import (
+    HOOK_TO_CESP,
+    CespCategory,
+    CespEngine,
+    PackSelectionLayer,
+    PlaybackRecord,
+    SelectionResult,
+)
 
 # ═══════════════════════════════════════════════════════════════════════════
 # CESP Engine Tests

@@ -302,10 +302,10 @@ def _score_safety(output: str, _context: str) -> float:
 def _score_readability(output: str, _context: str) -> float:
     """Heuristic readability: checks structure and formatting."""
     score = 0.75
-    lines = [l for l in output.split("\n") if l.strip()]
+    lines = [line for line in output.split("\n") if line.strip()]
     if len(lines) > 5:
         score += 0.1
-    avg_len = sum(len(l) for l in lines) / max(1, len(lines))
+    avg_len = sum(len(line) for line in lines) / max(1, len(lines))
     if avg_len > 120:
         score -= 0.15
     if avg_len < 80:

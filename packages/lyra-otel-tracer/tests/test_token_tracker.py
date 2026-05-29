@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_otel_tracer.token_tracker import TokenAlert, TokenSummary, TokenTracker, TokenUsage
 
 

@@ -1,7 +1,6 @@
 """Tests for Gossip Memory package."""
 
-import pytest
-from lyra_gossip_memory import GossipProtocol, DualPoolMemory, MemoryItem
+from lyra_gossip_memory import DualPoolMemory, GossipProtocol, MemoryItem
 
 
 class TestDualPoolMemory:
@@ -14,7 +13,7 @@ class TestDualPoolMemory:
     def test_promote_to_exploit(self):
         m = DualPoolMemory()
         m.add_explore(MemoryItem(id="m1", content="test", source_agent="a1", importance=0.5, timestamp=100.0))
-        assert m.promote_to_exploit("m1") == True
+        assert m.promote_to_exploit("m1")
         assert len(m.exploit_pool) == 1
 
 

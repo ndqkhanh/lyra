@@ -418,7 +418,7 @@ class TestResearchKGEvaluationStrategyPipeline:
         self, research_engine,
     ):
         """Verify knowledge graph findings can be evaluated for source credibility."""
-        report = research_engine.deep_research(
+        research_engine.deep_research(
             query="Microservices communication patterns",
             query_type="exploratory",
         )

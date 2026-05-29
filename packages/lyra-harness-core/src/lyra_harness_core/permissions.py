@@ -11,7 +11,6 @@ from __future__ import annotations
 import enum
 import fnmatch
 from dataclasses import dataclass, field
-from typing import Optional
 
 from .messages import ToolCall
 
@@ -33,7 +32,7 @@ class Decision(str, enum.Enum):
 class PermissionDecision:
     decision: Decision
     reason: str = ""
-    matched_rule: Optional[str] = None
+    matched_rule: str | None = None
 
 
 @dataclass
@@ -53,7 +52,7 @@ class PermissionPolicy:
         args = ",".join(f"{k}={v}" for k, v in sorted(call.args.items()))
         return f"{call.name}({args})"
 
-    def _match(self, call: ToolCall, patterns: list[str]) -> Optional[str]:
+    def _match(self, call: ToolCall, patterns: list[str]) -> str | None:
         sig = self._signature(call)
         for pat in patterns:
             if fnmatch.fnmatchcase(sig, pat) or fnmatch.fnmatchcase(call.name, pat):
@@ -65,7 +64,7 @@ def resolve_decision(
     call: ToolCall,
     *,
     mode: PermissionMode,
-    policy: Optional[PermissionPolicy] = None,
+    policy: PermissionPolicy | None = None,
     tool_writes: bool = False,
     tool_risk: str = "low",
 ) -> PermissionDecision:

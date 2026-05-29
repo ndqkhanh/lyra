@@ -6,14 +6,13 @@ from __future__ import annotations
 
 import pytest
 
-
 # ── HUD tests ─────────────────────────────────────────────────────────
 
 class TestHUD:
     def test_hud_imports(self):
         from lyra_cli.hud import (
-            HudConfig, HudState, render, render_inline,
-            load_preset, available_presets,
+            available_presets,
+            load_preset,
         )
         assert available_presets() == ["minimal", "compact", "full", "wide"]
         cfg = load_preset("compact")
@@ -53,7 +52,7 @@ class TestHUD:
             assert len(cfg.sections) > 0
 
     def test_hud_all_sections(self):
-        from lyra_cli.hud import HudState, load_preset, render
+        from lyra_cli.hud import load_preset, render
         from lyra_cli.hud.testing import sample_state
         state = sample_state()
         for name in ("minimal", "compact", "full", "wide"):
@@ -73,7 +72,8 @@ class TestThemeManager:
     def test_theme_manager_imports(self):
         pytest.importorskip("textual", reason="textual not installed")
         from lyra_cli.tui_v2.theme_manager import (
-            ThemeManager, ThemePreset, ThemeColors, get_theme_manager,
+            ThemePreset,
+            get_theme_manager,
         )
         mgr = get_theme_manager()
         assert mgr.current_preset == ThemePreset.DEFAULT
@@ -108,7 +108,7 @@ class TestThemeManager:
 class TestModals:
     def test_session_manager_imports(self):
         pytest.importorskip("textual", reason="textual not installed")
-        from lyra_cli.tui_v2.modals.session_manager import SessionManagerModal, SessionEntry
+        from lyra_cli.tui_v2.modals.session_manager import SessionEntry
         entry = SessionEntry(session_id="s1", title="Test session", model="gpt-4o")
         assert "Test session" in entry.summary
         assert entry.model == "gpt-4o"
@@ -116,7 +116,7 @@ class TestModals:
     def test_notification_drawer_imports(self):
         pytest.importorskip("textual", reason="textual not installed")
         from lyra_cli.tui_v2.modals.notification_drawer import (
-            NotificationDrawer, NotificationEntry,
+            NotificationEntry,
         )
         n = NotificationEntry(level="info", title="Test notification")
         assert "ℹ" in n.glyph
@@ -154,7 +154,8 @@ class TestToolApproval:
 
     def test_approval_panel_renders(self):
         from lyra_cli.interactive.tool_approval_viz import (
-            ApprovalRequest, render_approval_panel,
+            ApprovalRequest,
+            render_approval_panel,
         )
         req = ApprovalRequest(tool_name="Read", risk_level="low")
         panel = render_approval_panel(req)

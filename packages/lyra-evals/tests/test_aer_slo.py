@@ -6,7 +6,6 @@ import time
 from lyra_evals.aer import AERStore, new_aer
 from lyra_evals.slo import DEFAULT_SLOS, SLOBreach, SLOTracker
 
-
 # ------------------------------------------------------------------ #
 # AER                                                                  #
 # ------------------------------------------------------------------ #

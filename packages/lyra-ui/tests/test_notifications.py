@@ -1,13 +1,11 @@
 """Tests for notification system."""
 
 from lyra_ui import (
-    Notification,
     NotificationHistory,
     NotificationLevel,
     NotificationSystem,
     ToastNotification,
 )
-
 
 # Notification System Tests
 
@@ -245,8 +243,8 @@ def test_complete_notification_workflow():
     # Create notifications
     notif1 = system.info("Task Started", "Research task has started")
     notif2 = system.success("Task Completed", "Research task completed successfully")
-    notif3 = system.warning("Low Memory", "Memory usage is high")
-    notif4 = system.error("Task Failed", "Analysis task failed")
+    system.warning("Low Memory", "Memory usage is high")
+    system.error("Task Failed", "Analysis task failed")
 
     # Display toasts
     system.display_toast(notif1)

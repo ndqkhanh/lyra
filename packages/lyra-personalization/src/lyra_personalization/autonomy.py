@@ -9,14 +9,12 @@ escalation decisions.
 from __future__ import annotations
 
 import logging
-import math
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from lyra_personalization.models import (
     AutonomyLevel,
-    InteractionRecord,
     SkillLevel,
     UserProfile,
 )
@@ -43,7 +41,7 @@ class EscalationRecord:
     approved: bool
     timestamp: datetime = field(default_factory=datetime.now)
     task_type: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class AutonomyController:
@@ -58,7 +56,7 @@ class AutonomyController:
     """
 
     def __init__(self) -> None:
-        self._escalations: List[EscalationRecord] = []
+        self._escalations: list[EscalationRecord] = []
 
     def get_autonomy_level(
         self,
@@ -188,7 +186,7 @@ class AutonomyController:
 
         return max(0.0, min(1.0, score))
 
-    def get_escalation_history(self) -> List[EscalationRecord]:
+    def get_escalation_history(self) -> list[EscalationRecord]:
         """Get the full escalation history."""
         return list(self._escalations)
 
@@ -222,7 +220,7 @@ class AutonomyController:
         return False
 
     @staticmethod
-    def _average_skill_level(levels: List[SkillLevel]) -> float:
+    def _average_skill_level(levels: list[SkillLevel]) -> float:
         """Convert skill levels to numeric average."""
         order = ["novice", "beginner", "intermediate", "advanced", "expert"]
         numeric = [

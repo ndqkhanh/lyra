@@ -4,14 +4,12 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-import pytest
-
 from lyra_tools.code_quality import (
-    code_lint,
-    code_format,
+    _cyclomatic_complexity,
     code_complexity,
     code_dead_imports,
-    _cyclomatic_complexity,
+    code_format,
+    code_lint,
 )
 
 

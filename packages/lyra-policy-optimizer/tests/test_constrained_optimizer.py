@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_policy_optimizer.constrained_optimizer import (
     ConstrainedOptimizer,
     ConstrainedResult,

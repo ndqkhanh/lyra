@@ -1,6 +1,27 @@
 """lyra-skills: loader, router, extractor, curator, shipped packs, ledger."""
 from __future__ import annotations
 
+from .compaction import (
+    COMPRESSION_TARGET,
+    MERGE_SIMILARITY_THRESHOLD,
+    MIN_USES_TO_KEEP,
+    STALE_THRESHOLD_DAYS,
+    CompactionAction,
+    CompactionPlan,
+    CompactionReport,
+    MergeCandidate,
+    SectionStatus,
+    SectionTrimResult,
+    SectionUsage,
+    SectionUsageTracker,
+    SkillCompactor,
+    SkillUsageProfile,
+)
+from .compiler import (
+    SkillCompiler,
+    SkillModule,
+    SkillProgram,
+)
 from .curator import (
     TIER_KEEP,
     TIER_PROMOTE,
@@ -12,11 +33,6 @@ from .curator import (
     SkillReport,
     curate,
     render_report_markdown,
-)
-from .compiler import (
-    SkillProgram,
-    SkillModule,
-    SkillCompiler,
 )
 from .extractor import ExtractorInput, ExtractorOutput, extract_candidate
 from .ledger import (
@@ -38,22 +54,6 @@ from .ledger import (
 from .loader import SkillLoaderError, SkillManifest, load_skills
 from .packs import shipped_pack_roots
 from .router import SkillRouter
-from .compaction import (
-    COMPRESSION_TARGET,
-    MERGE_SIMILARITY_THRESHOLD,
-    MIN_USES_TO_KEEP,
-    STALE_THRESHOLD_DAYS,
-    CompactionAction,
-    CompactionPlan,
-    CompactionReport,
-    MergeCandidate,
-    SectionStatus,
-    SectionTrimResult,
-    SectionUsage,
-    SectionUsageTracker,
-    SkillCompactor,
-    SkillUsageProfile,
-)
 
 __version__ = "0.1.0"
 

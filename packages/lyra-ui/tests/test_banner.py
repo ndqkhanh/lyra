@@ -9,7 +9,6 @@ from lyra_ui import (
     StartupBanner,
 )
 
-
 # Banner System Tests
 
 

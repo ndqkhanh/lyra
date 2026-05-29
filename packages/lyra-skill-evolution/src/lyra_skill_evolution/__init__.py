@@ -11,61 +11,55 @@ Supports:
 
 from __future__ import annotations
 
+from .evolution_metrics import (
+    EvolutionMetrics,
+    EvolutionReport,
+    EvolutionTrend,
+    MetricsSnapshot,
+    PeriodComparison,
+    TrendDirection,
+)
 from .exceptions import (
-    EvolutionError,
-    PatchError,
     BenchmarkError,
+    EvolutionError,
+    MetricsError,
+    PatchError,
     RegressionError,
     VersionError,
-    MetricsError,
 )
-
-from .trajectory_patcher import (
-    PatchType,
-    TrajectoryPatch,
-    PatchResult,
-    TrajectoryPatcher,
-)
-
 from .lifelong_learner import (
-    LearningCycle,
     LearningConfig,
+    LearningCycle,
     LearningState,
     LifelongLearner,
 )
-
-from .skill_benchmark import (
-    Difficulty,
-    TaskFamily,
-    BenchmarkTask,
-    BenchmarkResult,
-    BenchmarkReport,
-    SkillBenchmark,
-)
-
 from .regression_tester import (
+    RegressionReport,
+    RegressionResult,
+    RegressionTester,
     TestCase,
     TestSuite,
-    RegressionResult,
-    RegressionReport,
-    RegressionTester,
 )
-
+from .skill_benchmark import (
+    BenchmarkReport,
+    BenchmarkResult,
+    BenchmarkTask,
+    Difficulty,
+    SkillBenchmark,
+    TaskFamily,
+)
+from .trajectory_patcher import (
+    PatchResult,
+    PatchType,
+    TrajectoryPatch,
+    TrajectoryPatcher,
+)
 from .version_manager import (
-    VersionStatus,
     SkillVersion,
     VersionDiff,
     VersionHistory,
     VersionManager,
-)
-
-from .evolution_metrics import (
-    TrendDirection,
-    MetricsSnapshot,
-    EvolutionTrend,
-    PeriodComparison,
-    EvolutionReport,
-    EvolutionMetrics,
+    VersionStatus,
 )
 
 __all__ = [

@@ -5,10 +5,9 @@ in-process dicts. Production wires the real argus.HostAdapter.
 """
 from __future__ import annotations
 
-import time
 import uuid
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 from .types import (
     InstallResult,
@@ -52,9 +51,9 @@ class InMemoryMarketplaceHost:
     def list_marketplace(
         self,
         *,
-        filter: Optional[str] = None,
+        filter: str | None = None,
         top_k: int = 50,
-        upstream: Optional[str] = None,
+        upstream: str | None = None,
     ) -> list[MCPServer]:
         results = list(self.servers.values())
         if filter:
@@ -68,7 +67,7 @@ class InMemoryMarketplaceHost:
         results.sort(key=lambda s: (-s.download_count, s.name))
         return results[:top_k]
 
-    def get_trust_verdict(self, server_name: str) -> Optional[TrustVerdict]:
+    def get_trust_verdict(self, server_name: str) -> TrustVerdict | None:
         return self.verdicts.get(server_name)
 
     def install_mcp(
@@ -169,7 +168,7 @@ class InMemoryCuratorHost:
         self,
         *,
         user_context: dict[str, Any],
-        source_project: Optional[str] = None,
+        source_project: str | None = None,
         top_k: int = 50,
     ) -> list[PromotedSkill]:
         skills = list(self.promoted.values())

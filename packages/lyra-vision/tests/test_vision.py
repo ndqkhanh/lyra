@@ -1,6 +1,5 @@
 """Tests for lyra-vision module."""
 import pytest
-
 from lyra_vision import (
     Diagram,
     ImageFormat,
@@ -11,7 +10,6 @@ from lyra_vision import (
     VisionModule,
     VisualQA,
 )
-
 
 # ---------------------------------------------------------------------------
 # Data class instantiation tests

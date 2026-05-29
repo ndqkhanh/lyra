@@ -1,7 +1,6 @@
 """Tests for Competence Map package."""
 
-import pytest
-from lyra_competence_map import CompetenceMap, RegressionDetector, CompetenceEntry
+from lyra_competence_map import CompetenceMap, RegressionDetector
 
 
 class TestCompetenceMap:

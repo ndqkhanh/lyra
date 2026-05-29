@@ -10,8 +10,6 @@ Features:
 
 import argparse
 import sys
-from pathlib import Path
-from typing import List, Optional
 
 from lyra_audio.sound_manager import SoundManager
 from lyra_audio.sound_pack import SoundPackLoader
@@ -25,7 +23,7 @@ class SoundPackCLI:
         self.manager = SoundManager()
         self.loader = SoundPackLoader()
 
-    def run(self, args: Optional[List[str]] = None):
+    def run(self, args: list[str] | None = None):
         """Run CLI with arguments."""
         parser = self._create_parser()
         parsed_args = parser.parse_args(args)

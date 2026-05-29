@@ -479,7 +479,7 @@ class TestFilesystemIsolation:
     def test_with_mounts(self):
         workspace = FilesystemIsolation.create_workspace()
         mp = MountPoint(source="/tmp", target="/tmp", read_only=True)
-        result = FilesystemIsolation.with_mounts(
+        FilesystemIsolation.with_mounts(
             workspace, mounts=(mp,), read_only_root=True
         )
         assert os.path.isdir(os.path.join(workspace, "mnt"))
@@ -1121,7 +1121,6 @@ class TestSandboxConfig:
 
 class TestSandboxInstance:
     def test_creation(self):
-        import time
         inst = SandboxInstance(
             instance_id="test-1",
             sandbox_type=SandboxType.PROCESS,

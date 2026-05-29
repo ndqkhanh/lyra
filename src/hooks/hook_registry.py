@@ -2,9 +2,9 @@
 Hook registry for managing registered hooks.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from .hook import Hook, HookType, HookContext
+from .hook import Hook, HookContext, HookType
 
 
 class HookRegistry:
@@ -16,8 +16,8 @@ class HookRegistry:
 
     def __init__(self):
         """Initialize hook registry."""
-        self.hooks: Dict[str, Hook] = {}
-        self._hooks_by_type: Dict[HookType, List[Hook]] = {
+        self.hooks: dict[str, Hook] = {}
+        self._hooks_by_type: dict[HookType, list[Hook]] = {
             hook_type: [] for hook_type in HookType
         }
 
@@ -57,7 +57,7 @@ class HookRegistry:
         self._hooks_by_type[hook.hook_type].remove(hook)
         return True
 
-    def get(self, hook_id: str) -> Optional[Hook]:
+    def get(self, hook_id: str) -> Hook | None:
         """
         Get a hook by ID.
 
@@ -69,7 +69,7 @@ class HookRegistry:
         """
         return self.hooks.get(hook_id)
 
-    def find_matching_hooks(self, context: HookContext) -> List[Hook]:
+    def find_matching_hooks(self, context: HookContext) -> list[Hook]:
         """
         Find all hooks that match the given context.
 
@@ -84,9 +84,9 @@ class HookRegistry:
 
     def list_hooks(
         self,
-        hook_type: Optional[HookType] = None,
+        hook_type: HookType | None = None,
         enabled_only: bool = False,
-    ) -> List[Hook]:
+    ) -> list[Hook]:
         """
         List registered hooks.
 
@@ -145,7 +145,7 @@ class HookRegistry:
         for hook_type in HookType:
             self._hooks_by_type[hook_type].clear()
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """
         Get registry statistics.
 

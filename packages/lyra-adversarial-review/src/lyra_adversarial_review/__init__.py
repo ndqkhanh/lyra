@@ -2,13 +2,20 @@ from __future__ import annotations
 
 from .citation_fencer import Citation, CitationFencer, FenceReport, FenceResult, SourceType
 from .claim_ledger import ClaimLedger, LedgerEntry, LedgerQuery, LedgerStats
-from .claim_verifier import Claim, ClaimStatus, ClaimVerifier, VerificationReport, VerificationResult, VerificationStage
+from .claim_verifier import (
+    Claim,
+    ClaimStatus,
+    ClaimVerifier,
+    VerificationReport,
+    VerificationResult,
+    VerificationStage,
+)
 from .cross_model_reviewer import (
     CrossModelReviewer,
     ModelFamily,
+    ReviewerAssignment,
     ReviewIssue,
     ReviewResult,
-    ReviewerAssignment,
     ReviewSeverity,
     aggregate_reviews,
     assign_reviewer,

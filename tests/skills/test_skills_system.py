@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Test skills system implementation"""
 
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
 
-from lyra_cli.skills import SkillManager, SkillLoader, register_builtin_skills
+from lyra_cli.skills import SkillLoader, SkillManager, register_builtin_skills
 
 
 def test_skills_system():
@@ -52,7 +53,7 @@ def test_skills_system():
             print(f"  → Matched: {', '.join(s.name for s in skills)}")
         else:
             print(f"  '{trigger}'")
-            print(f"  → No match")
+            print("  → No match")
     print()
 
     # Test tag search
@@ -70,9 +71,9 @@ def test_skills_system():
     plan_skill = manager.get_skill("plan")
     if plan_skill:
         prompt = manager.invoke_skill("plan", {"task": "Implement OAuth2"})
-        print(f"  Invoked 'plan' skill")
+        print("  Invoked 'plan' skill")
         print(f"  Prompt length: {len(prompt)} characters")
-        print(f"  Includes: skill name, description, instructions")
+        print("  Includes: skill name, description, instructions")
     print()
 
     print("=" * 80)

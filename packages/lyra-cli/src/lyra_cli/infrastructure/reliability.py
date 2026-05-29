@@ -465,13 +465,15 @@ class ReliabilityManager:
         if retry_policy_name:
             retry_policy = self.get_retry_policy(retry_policy_name)
             original_func = func
-            func = lambda *a, **kw: retry_policy.execute(original_func, *a, **kw)
+            def func(*a, **kw):
+                return retry_policy.execute(original_func, *a, **kw)
 
         # Wrap with circuit breaker if provided
         if circuit_breaker_name:
             circuit_breaker = self.get_circuit_breaker(circuit_breaker_name)
             original_func = func
-            func = lambda *a, **kw: circuit_breaker.call(original_func, *a, **kw)
+            def func(*a, **kw):
+                return circuit_breaker.call(original_func, *a, **kw)
 
         # Wrap with fallback if provided (outermost layer)
         if fallback_func:

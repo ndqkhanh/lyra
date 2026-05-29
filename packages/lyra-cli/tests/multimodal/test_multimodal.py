@@ -158,7 +158,7 @@ def test_computer_use_action_sequence(computer_use):
     session_id = computer_use.start_session("Test task")
 
     # Record multiple actions
-    for i in range(3):
+    for _i in range(3):
         computer_use.record_action(
             session_id=session_id,
             action_type=ActionType.CLICK,

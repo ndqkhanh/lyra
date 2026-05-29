@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from lyra_cost import BudgetDegrader, CircuitBreaker, LoopDetector, ModelTier
 
 

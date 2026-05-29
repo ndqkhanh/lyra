@@ -52,8 +52,7 @@ class _FakeClient:
     def stream(self, req: ChatRequest | str):
         if isinstance(req, str):
             req = ChatRequest(prompt=req)
-        for event in self.scripted_stream:
-            yield event
+        yield from self.scripted_stream
 
     def list_models(self) -> list[str]:
         return list(self.models)
@@ -101,7 +100,7 @@ def _request(
     body_iter = app(environ, captured)
     body_bytes = b"".join(body_iter)
     status_code = int(captured.status.split(" ", 1)[0])
-    headers_dict = {k: v for k, v in captured.headers}
+    headers_dict = dict(captured.headers)
     return status_code, headers_dict, body_bytes
 
 

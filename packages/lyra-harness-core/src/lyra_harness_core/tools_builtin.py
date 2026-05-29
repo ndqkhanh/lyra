@@ -15,7 +15,7 @@ class EchoTool(Tool):
     class ArgsModel(BaseModel):
         text: str = Field(..., description="Text to echo")
 
-    def run(self, args: "EchoTool.ArgsModel") -> str:
+    def run(self, args: EchoTool.ArgsModel) -> str:
         return args.text
 
 
@@ -32,7 +32,7 @@ class CalculatorTool(Tool):
 
     _ALLOWED = set("0123456789+-*/(). ")
 
-    def run(self, args: "CalculatorTool.ArgsModel") -> str:
+    def run(self, args: CalculatorTool.ArgsModel) -> str:
         if not args.expression.strip():
             raise ToolError("empty expression")
         bad = set(args.expression) - self._ALLOWED

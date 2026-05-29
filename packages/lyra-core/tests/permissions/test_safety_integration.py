@@ -25,11 +25,8 @@ from lyra_harness_core.messages import ToolCall
 
 try:
     from lyra_core.safety.adversarial_verifier import (
-        AdversarialVerdict,
         AdversarialVerdictType,
         AdversarialVerifier,
-        ModelFamily,
-        ModelVote,
     )
 
     HAS_ADVERSARIAL = True

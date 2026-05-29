@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 from lyra_evolution.analysis.analyzer import CodeAnalyzer
-from lyra_evolution.analysis.models import AnalysisResult, Bottleneck, ComplexityMetrics
+from lyra_evolution.analysis.models import AnalysisResult, ComplexityMetrics
 
 
 @pytest.fixture

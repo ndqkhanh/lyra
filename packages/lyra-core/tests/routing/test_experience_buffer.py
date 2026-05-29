@@ -121,7 +121,7 @@ class TestExperienceBuffer:
 
     def test_update_priorities(self):
         buf = ExperienceBuffer()
-        for i in range(5):
+        for _i in range(5):
             buf.push(_make_exp(priority=0.1))
         buf.update_priorities(indices=[0, 1, 2], td_errors=[0.8, 0.3, 0.9])
         assert abs(buf._buffer[0].priority) == 0.8
@@ -139,7 +139,7 @@ class TestExperienceBuffer:
 
     def test_clear_resets_everything(self):
         buf = ExperienceBuffer()
-        for i in range(5):
+        for _i in range(5):
             buf.push(_make_exp())
         buf.clear()
         assert buf.size == 0
@@ -155,7 +155,7 @@ class TestExperienceBuffer:
     def test_is_full(self):
         buf = ExperienceBuffer(capacity=3)
         assert not buf.is_full
-        for i in range(3):
+        for _i in range(3):
             buf.push(_make_exp())
         assert buf.is_full
 

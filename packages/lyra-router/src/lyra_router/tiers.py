@@ -15,8 +15,8 @@ import logging
 import math
 import re
 from collections import Counter
-from dataclasses import dataclass, field
-from typing import Any, Optional
+from dataclasses import dataclass
+from typing import Any
 
 from .models import ModelTier, TaskComplexity
 
@@ -114,12 +114,12 @@ class RuleTier:
     - Hit rate target: 50-60%
     """
 
-    def __init__(self, custom_rules: Optional[dict[str, ModelTier]] = None) -> None:
+    def __init__(self, custom_rules: dict[str, ModelTier] | None = None) -> None:
         self._domain_rules = dict(_DOMAIN_RULES)
         if custom_rules:
             self._domain_rules.update(custom_rules)
 
-    def route(self, task: str, context: Optional[dict[str, Any]] = None) -> Optional[TierResult]:
+    def route(self, task: str, context: dict[str, Any] | None = None) -> TierResult | None:
         """
         Attempt to classify a task using rule-based pattern matching.
 
@@ -227,7 +227,7 @@ class SemanticTier:
 
     def __init__(self) -> None:
         self._encoder = None
-        self._corpus_embeddings: Optional[list] = None
+        self._corpus_embeddings: list | None = None
         self._corpus_labels: list[str] = []
         self._tfidf_vocab: dict[str, int] = {}
         self._tfidf_idf: dict[str, float] = {}
@@ -317,7 +317,6 @@ class SemanticTier:
 
     def _compute_tfidf(self, text: str) -> dict[int, float]:
         """Compute TF-IDF vector for a text as a sparse dict."""
-        from math import log
 
         tokens = self._tokenize(text)
         if not tokens:
@@ -347,7 +346,7 @@ class SemanticTier:
             return 0.0
         return dot / (norm_a * norm_b)
 
-    def route(self, task: str, context: Optional[dict[str, Any]] = None) -> Optional[TierResult]:
+    def route(self, task: str, context: dict[str, Any] | None = None) -> TierResult | None:
         """
         Classify a task using semantic similarity.
 
@@ -358,7 +357,7 @@ class SemanticTier:
 
         return self._route_with_tfidf(task)
 
-    def _route_with_embeddings(self, task: str) -> Optional[TierResult]:
+    def _route_with_embeddings(self, task: str) -> TierResult | None:
         """Route using sentence-transformers embeddings."""
         try:
             import numpy as np
@@ -389,7 +388,7 @@ class SemanticTier:
             self._encoder = None
             return self._route_with_tfidf(task)
 
-    def _route_with_tfidf(self, task: str) -> Optional[TierResult]:
+    def _route_with_tfidf(self, task: str) -> TierResult | None:
         """Route using TF-IDF cosine similarity (fallback)."""
         task_vec = self._compute_tfidf(task)
         if not task_vec:
@@ -479,7 +478,7 @@ class NeuralTier:
     # ── Feature extraction ─────────────────────────────────────────
 
     @staticmethod
-    def _extract_features(task: str, context: Optional[dict[str, Any]] = None) -> list[float]:
+    def _extract_features(task: str, context: dict[str, Any] | None = None) -> list[float]:
         """
         Extract a fixed-length feature vector from a task string.
 
@@ -532,7 +531,7 @@ class NeuralTier:
 
     # ── Method: route ──────────────────────────────────────────────
 
-    def route(self, task: str, context: Optional[dict[str, Any]] = None) -> Optional[TierResult]:
+    def route(self, task: str, context: dict[str, Any] | None = None) -> TierResult | None:
         """Route using the neural model — always returns a result."""
         if self._use_sklearn and self._fitted:
             return self._route_sklearn(task)
@@ -541,7 +540,7 @@ class NeuralTier:
             return self._route_heuristic(task)
         return self._route_heuristic(task)
 
-    def _route_sklearn(self, task: str) -> Optional[TierResult]:
+    def _route_sklearn(self, task: str) -> TierResult | None:
         """Route using trained sklearn model."""
         try:
             features = self._extract_features(task)
@@ -563,14 +562,14 @@ class NeuralTier:
             logger.warning("Sklearn routing failed: %s", exc)
             return self._route_heuristic(task)
 
-    def _route_heuristic(self, task: str) -> Optional[TierResult]:
+    def _route_heuristic(self, task: str) -> TierResult | None:
         """
         Fallback heuristic when no trained model is available.
 
         Uses feature thresholds to estimate complexity.
         """
         features = self._extract_features(task)
-        char_count, word_count, avg_word_len, question_count, code_indicators = (
+        char_count, word_count, _avg_word_len, question_count, code_indicators = (
             features[0], features[1], features[2], features[3], features[4]
         )
         tech_count, imperative_count = features[7], features[8]

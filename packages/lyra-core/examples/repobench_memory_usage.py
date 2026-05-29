@@ -309,8 +309,8 @@ def example_6_custom_t3_memory():
         def t3_aware_generator(context: str, cross_file_context: list[str]) -> str:
             """Generator that uses T3 memory for context."""
             # Load T3 memory (simplified)
-            user_prefs = user_md.read_text()
-            team_rules = team_md.read_text()
+            user_md.read_text()
+            team_md.read_text()
 
             # In practice, this would incorporate T3 memory into the prompt
             # and generate completions that follow user/team preferences

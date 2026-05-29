@@ -2,7 +2,6 @@
 Dependency Manager - Handle task dependencies and execution ordering.
 """
 
-from typing import List, Dict, Optional
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -29,15 +28,15 @@ class TaskDependency:
 @dataclass
 class DependencyGraph:
     """Dependency graph for tasks."""
-    nodes: Dict[str, Task] = field(default_factory=dict)
-    edges: Dict[str, List[str]] = field(default_factory=dict)
-    reverse_edges: Dict[str, List[str]] = field(default_factory=dict)
+    nodes: dict[str, Task] = field(default_factory=dict)
+    edges: dict[str, list[str]] = field(default_factory=dict)
+    reverse_edges: dict[str, list[str]] = field(default_factory=dict)
 
 
 class DependencyManager:
     """
     Manage task dependencies and execution ordering.
-    
+
     Responsibilities:
     - Track task dependencies
     - Detect circular dependencies
@@ -47,7 +46,7 @@ class DependencyManager:
 
     def __init__(self):
         """Initialize dependency manager."""
-        self.dependencies: Dict[str, List[TaskDependency]] = {}
+        self.dependencies: dict[str, list[TaskDependency]] = {}
         self.graph = DependencyGraph()
 
     def add_dependency(
@@ -59,7 +58,7 @@ class DependencyManager:
     ):
         """
         Add a dependency between tasks.
-        
+
         Args:
             task: Task that has the dependency
             depends_on: Task that must complete first
@@ -90,25 +89,25 @@ class DependencyManager:
             self.graph.reverse_edges[depends_on.task_id] = []
         self.graph.reverse_edges[depends_on.task_id].append(task.task_id)
 
-    def get_dependencies(self, task: Task) -> List[TaskDependency]:
+    def get_dependencies(self, task: Task) -> list[TaskDependency]:
         """
         Get all dependencies for a task.
-        
+
         Args:
             task: Task to get dependencies for
-            
+
         Returns:
             List of dependencies
         """
         return self.dependencies.get(task.task_id, [])
 
-    def get_dependents(self, task: Task) -> List[str]:
+    def get_dependents(self, task: Task) -> list[str]:
         """
         Get tasks that depend on this task.
-        
+
         Args:
             task: Task to get dependents for
-            
+
         Returns:
             List of dependent task IDs
         """
@@ -117,10 +116,10 @@ class DependencyManager:
     def is_ready(self, task: Task) -> bool:
         """
         Check if task is ready to execute (all dependencies met).
-        
+
         Args:
             task: Task to check
-            
+
         Returns:
             True if task is ready
         """
@@ -144,13 +143,13 @@ class DependencyManager:
 
         return True
 
-    def get_ready_tasks(self, tasks: List[Task]) -> List[Task]:
+    def get_ready_tasks(self, tasks: list[Task]) -> list[Task]:
         """
         Get all tasks that are ready to execute.
-        
+
         Args:
             tasks: List of tasks to check
-            
+
         Returns:
             List of ready tasks
         """
@@ -162,13 +161,13 @@ class DependencyManager:
 
         return ready
 
-    def get_execution_order(self, tasks: List[Task]) -> List[List[Task]]:
+    def get_execution_order(self, tasks: list[Task]) -> list[list[Task]]:
         """
         Determine execution order for tasks (topological sort).
-        
+
         Args:
             tasks: Tasks to order
-            
+
         Returns:
             List of task batches (tasks in same batch can run in parallel)
         """
@@ -212,20 +211,20 @@ class DependencyManager:
 
         return batches
 
-    def detect_circular_dependencies(self, tasks: List[Task]) -> Optional[List[str]]:
+    def detect_circular_dependencies(self, tasks: list[Task]) -> list[str] | None:
         """
         Detect circular dependencies in task graph.
-        
+
         Args:
             tasks: Tasks to check
-            
+
         Returns:
             List of task IDs in cycle, or None if no cycle
         """
         visited = set()
         rec_stack = set()
 
-        def has_cycle(task_id: str, path: List[str]) -> Optional[List[str]]:
+        def has_cycle(task_id: str, path: list[str]) -> list[str] | None:
             visited.add(task_id)
             rec_stack.add(task_id)
             path.append(task_id)
@@ -254,13 +253,13 @@ class DependencyManager:
 
         return None
 
-    def get_critical_path(self, tasks: List[Task]) -> List[Task]:
+    def get_critical_path(self, tasks: list[Task]) -> list[Task]:
         """
         Find critical path (longest path through dependency graph).
-        
+
         Args:
             tasks: Tasks to analyze
-            
+
         Returns:
             List of tasks in critical path
         """
@@ -309,10 +308,10 @@ class DependencyManager:
         path.reverse()
         return path
 
-    def get_statistics(self) -> Dict:
+    def get_statistics(self) -> dict:
         """
         Get dependency statistics.
-        
+
         Returns:
             Statistics dictionary
         """

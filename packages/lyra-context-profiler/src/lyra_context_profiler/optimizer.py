@@ -7,13 +7,12 @@ batch loading, and cache warming strategies.
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import time
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Optional
+from typing import Any
 
 from .strategies import CompactionStrategy, StrategyRegistry
 
@@ -173,7 +172,7 @@ class ContextOptimizer:
         reverse_dependencies: dict[str, set[str]],
         budget: Any,
         strategy_registry: StrategyRegistry,
-    ) -> Optional[Any]:
+    ) -> Any | None:
         """Run the optimization pipeline.
 
         Returns a CompactionRecommendation or None if no optimization is needed.
@@ -267,7 +266,7 @@ class ContextOptimizer:
     async def predict_future_context(
         self,
         elements: dict[str, Any],
-        access_history: Optional[list[dict[str, Any]]] = None,
+        access_history: list[dict[str, Any]] | None = None,
         look_ahead: int = 5,
     ) -> list[str]:
         """Predict which elements will be needed next based on access patterns.
@@ -308,7 +307,7 @@ class ContextOptimizer:
     async def cluster_elements(
         self,
         elements: dict[str, Any],
-        config: Optional[ClusterConfig] = None,
+        config: ClusterConfig | None = None,
     ) -> list[list[str]]:
         """Group context elements into clusters for batch loading.
 

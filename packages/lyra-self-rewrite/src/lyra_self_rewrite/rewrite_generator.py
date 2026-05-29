@@ -5,7 +5,6 @@ from __future__ import annotations
 import secrets
 from dataclasses import dataclass
 
-from .exceptions import GenerationError
 from .hyper_agent import HyperAgent
 
 

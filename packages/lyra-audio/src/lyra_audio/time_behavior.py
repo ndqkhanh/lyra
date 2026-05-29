@@ -7,8 +7,7 @@ Features:
 - Ridiculous mode after hours
 """
 
-from datetime import datetime, time
-from typing import Optional
+from datetime import datetime
 
 
 class TimeBehaviorController:

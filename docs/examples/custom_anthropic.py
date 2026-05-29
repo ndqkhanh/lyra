@@ -20,10 +20,8 @@ Usage:
 from __future__ import annotations
 
 import os
-from typing import Any, Optional
 
 from anthropic import Anthropic
-from harness_core.messages import Message
 from lyra_cli.providers.anthropic import LyraAnthropicLLM
 
 
@@ -38,9 +36,9 @@ class CustomAnthropicProvider(LyraAnthropicLLM):
 
     def __init__(
         self,
-        model: Optional[str] = None,
-        api_key: Optional[str] = None,
-        base_url: Optional[str] = None,
+        model: str | None = None,
+        api_key: str | None = None,
+        base_url: str | None = None,
     ) -> None:
         """Initialize with custom base_url support.
 

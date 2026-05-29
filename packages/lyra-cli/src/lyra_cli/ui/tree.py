@@ -104,7 +104,7 @@ class TreeRenderer:
         prefix_parts = []
 
         # Add vertical lines for ancestors
-        for i, has_line in enumerate(context.ancestor_lines):
+        for _i, has_line in enumerate(context.ancestor_lines):
             if has_line:
                 prefix_parts.append(self.symbols.get("│"))
             else:

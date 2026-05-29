@@ -101,7 +101,7 @@ class BridgeMetrics:
 
 def _cosine_similarity(a: tuple[float, ...], b: tuple[float, ...]) -> float:
     """Cosine similarity between two equal-length vectors."""
-    dot = sum(x * y for x, y in zip(a, b))
+    dot = sum(x * y for x, y in zip(a, b, strict=False))
     norm_a = math.sqrt(sum(x * x for x in a))
     norm_b = math.sqrt(sum(y * y for y in b))
     if norm_a == 0 or norm_b == 0:
@@ -121,7 +121,7 @@ def _weighted_average(
     if total_weight == 0:
         return tuple(0.0 for _ in range(dims))
     summed = [0.0] * dims
-    for vec, w in zip(vectors, weights):
+    for vec, w in zip(vectors, weights, strict=False):
         for i, v in enumerate(vec):
             summed[i] += v * w
     return tuple(round(s / total_weight, 6) for s in summed)

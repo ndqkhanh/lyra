@@ -5,7 +5,6 @@ from lyra_ui import (
     UserRole,
 )
 
-
 # TeamManager Tests
 
 
@@ -54,7 +53,7 @@ def test_add_member_no_team(tmp_path):
     manager = TeamManager(storage_path=tmp_path)
     try:
         manager.add_member("user1", "alice", "alice@example.com")
-        assert False, "Should raise ValueError"
+        raise AssertionError("Should raise ValueError")
     except ValueError as e:
         assert "No active team" in str(e)
 

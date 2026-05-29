@@ -4,14 +4,9 @@ Tests for Speed Benchmark Suite (T105)
 Tests benchmark execution, comparison, and reporting.
 """
 
-import pytest
 import json
-from pathlib import Path
-from lyra_evolution.speed_benchmark import (
-    SpeedBenchmarkSuite,
-    BenchmarkResult,
-    BenchmarkComparison
-)
+
+from lyra_evolution.speed_benchmark import BenchmarkComparison, BenchmarkResult, SpeedBenchmarkSuite
 
 
 class TestBenchmarkResult:

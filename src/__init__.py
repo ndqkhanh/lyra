@@ -9,7 +9,7 @@ __version__ = "4.0.0"
 __author__ = "Lyra Team"
 
 from src.agents.base import Agent, AgentCapability, AgentStatus
-from src.core.task import Task, TaskType, TaskPriority, Result
+from src.core.task import Result, Task, TaskPriority, TaskType
 
 __all__ = [
     "Agent",

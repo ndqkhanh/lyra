@@ -17,8 +17,8 @@ from __future__ import annotations
 import datetime
 import logging
 import statistics
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Sequence
 
 from lyra_finance.models import (
     CircuitBreakerEvent,
@@ -478,7 +478,7 @@ class ComplianceMonitor:
         symbol = decision.symbol
         sells = self._recent_sells.get(symbol, [])
         now = datetime.datetime.now()
-        for _sell_id, price, ts in sells:
+        for _sell_id, _price, ts in sells:
             if (now - ts).days < 30:
                 return (False,
                         f"Wash sale risk: {symbol} was sold at a loss on {ts.date()} "

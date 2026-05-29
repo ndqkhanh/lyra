@@ -31,9 +31,9 @@ from __future__ import annotations
 
 from .planner import (
     ExecutionTrace,
-    PlanNode,
     PlanningConfig,
     PlanningStats,
+    PlanNode,
     SR2AMPlanner,
     SystemLevel,
     TaskComplexity,

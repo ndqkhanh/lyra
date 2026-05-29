@@ -1,7 +1,6 @@
 """Tests for MCP integration."""
 
 import pytest
-
 from lyra_cli.mcp_integration import MCPClient, MCPServers
 
 

@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_harness_core.provenance import WitnessLattice
 from lyra_harness_core.skill_drift import (
     DriftAlert,
@@ -10,7 +9,6 @@ from lyra_harness_core.skill_drift import (
     SkillDriftMonitor,
     SkillInvocation,
 )
-
 
 # --- DriftPolicy validation ------------------------------------------
 
@@ -69,7 +67,7 @@ class TestSkillInvocation:
 class TestMonitorRecording:
     def test_record_appends(self):
         mon = SkillDriftMonitor()
-        for i in range(5):
+        for _i in range(5):
             mon.record(skill_id="x", succeeded=True)
         assert len(mon.invocations_for("x")) == 5
         assert mon.known_skills() == ["x"]

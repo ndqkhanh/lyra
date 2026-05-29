@@ -2,12 +2,9 @@
 
 from __future__ import annotations
 
-import math
 import random
 import time
 from dataclasses import dataclass
-
-import numpy as np
 
 from .exceptions import PolicySearchError
 
@@ -107,7 +104,7 @@ class PolicySearch:
         start = time.monotonic()
         refined_candidates = list(previous.candidates)
 
-        for i in range(iterations):
+        for _i in range(iterations):
             idx = len(refined_candidates)
             params = _mutate_parameters(
                 previous.best_policy.parameters, self._rng

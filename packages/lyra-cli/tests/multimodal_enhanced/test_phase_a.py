@@ -126,7 +126,7 @@ def test_mer_start_execution(mer_system):
 
 def test_mer_record_action_with_frames(mer_system):
     """Test recording action with frames."""
-    record_id = mer_system.start_execution(
+    mer_system.start_execution(
         "agent_001", "session_001", "Test task"
     )
 

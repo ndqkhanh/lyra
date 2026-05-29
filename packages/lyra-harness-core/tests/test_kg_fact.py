@@ -2,16 +2,13 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_harness_core.gates import (
     FactClaim,
     KGFactGate,
-    KGFactVerdict,
     KGSource,
     StaticKGSource,
 )
 from lyra_harness_core.verifier import Severity
-
 
 # --- FactClaim ---------------------------------------------------------
 

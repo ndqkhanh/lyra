@@ -21,7 +21,7 @@ from __future__ import annotations
 import enum
 import re
 from dataclasses import dataclass, field
-from typing import Optional, Protocol
+from typing import Protocol
 
 
 class QueryType(str, enum.Enum):
@@ -108,7 +108,7 @@ class RuleBasedClassifier:
             )
 
         # Score each type; pick the highest.
-        scores: dict[QueryType, int] = {qt: 0 for qt in QueryType}
+        scores: dict[QueryType, int] = dict.fromkeys(QueryType, 0)
         for pat in _FAN_OUT_HINTS:
             if pat.search(query):
                 scores[QueryType.FAN_OUT] += 1

@@ -607,7 +607,7 @@ def _gather_skills() -> dict[str, list[str]]:
     try:
         from lyra_cli.skills.registry import get_skills_registry
         registry = get_skills_registry()
-        for skill_id, skill in sorted(registry.skills.items()):
+        for _skill_id, skill in sorted(registry.skills.items()):
             category = skill.category or "General"
             if category not in skills:
                 skills[category] = []
@@ -642,7 +642,7 @@ def _finalize_session(session: dict | None, end_reason: str = "tui_close") -> No
     if stop_event is not None:
         stop_event.set()
 
-    agent = session.get("agent")
+    session.get("agent")
     lock = session.get("history_lock")
     if lock is not None:
         with lock:
@@ -868,7 +868,7 @@ def _session_delete(rid, params: dict) -> dict:
     target = params.get("session_id", "")
     if not target:
         return _err(rid, 4002, "session_id required")
-    for sid, sess in list(_sessions.items()):
+    for _sid, sess in list(_sessions.items()):
         if sess.get("session_key") == target:
             return _err(rid, 4009, "cannot delete active session")
     _delete_session_file(target)
@@ -1603,7 +1603,8 @@ def _cli_exec(rid, params: dict) -> dict:
 
 
 def _get_usage(agent) -> dict:
-    g = lambda k, fb=None: getattr(agent, k, 0) or (getattr(agent, fb, 0) if fb else 0)
+    def g(k, fb=None):
+        return getattr(agent, k, 0) or (getattr(agent, fb, 0) if fb else 0)
     return {
         "model": getattr(agent, "model", "") or "",
         "input": g("session_input_tokens", "session_prompt_tokens"),

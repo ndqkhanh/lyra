@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 """Lyra REPL with Claude Code-style UI - Complete Integration"""
 
-import sys
 import os
+import sys
 import time
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
 
-from lyra_cli.events import EventDispatcher, StreamingRenderer, TurnStarted, TextDelta, ToolStarted, TurnFinished
+from lyra_cli.events import EventDispatcher, StreamingRenderer
 from lyra_cli.ui import (
-    FixedInputBox,
-    StatusLine,
-    ResponseFormatter,
     AgentTree,
+    FixedInputBox,
+    ResponseFormatter,
     ScrollManager,
-    print_welcome_banner
+    StatusLine,
+    print_welcome_banner,
 )
 
 

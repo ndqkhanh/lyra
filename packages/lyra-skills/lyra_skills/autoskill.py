@@ -11,12 +11,12 @@ Based on research: docs/167 (autoskill-experience-driven-lifelong-learning.md)
 Impact: Continuous skill library growth, +35-44pp cross-model transfer
 """
 
-from typing import List, Dict, Any, Optional
-from dataclasses import dataclass
-from pathlib import Path
-import json
 import hashlib
+import json
+from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 
 @dataclass
@@ -37,8 +37,8 @@ class SkillCandidate:
     name: str
     description: str
     code: str
-    source_dialogue: List[int]  # Turn IDs
-    judge_scores: Dict[str, float]  # correctness, efficiency, generalizability, novelty
+    source_dialogue: list[int]  # Turn IDs
+    judge_scores: dict[str, float]  # correctness, efficiency, generalizability, novelty
     overall_score: float
 
 
@@ -65,8 +65,8 @@ class FourAxisJudge:
     def evaluate(
         self,
         skill_candidate: SkillCandidate,
-        existing_skills: List[SkillCandidate]
-    ) -> Dict[str, float]:
+        existing_skills: list[SkillCandidate]
+    ) -> dict[str, float]:
         """
         Evaluate skill on 4 axes.
 
@@ -161,14 +161,14 @@ class AutoSkillPipeline:
         self.skills_dir.mkdir(parents=True, exist_ok=True)
 
         self.acceptance_threshold = acceptance_threshold
-        self.skill_library: List[SkillCandidate] = []
-        self.dialogue_history: List[DialogueTurn] = []
+        self.skill_library: list[SkillCandidate] = []
+        self.dialogue_history: list[DialogueTurn] = []
 
     def run(
         self,
-        dialogues: List[List[DialogueTurn]],
+        dialogues: list[list[DialogueTurn]],
         max_skills: int = 100
-    ) -> List[Path]:
+    ) -> list[Path]:
         """
         Run AutoSkill lifelong learning.
 
@@ -214,8 +214,8 @@ class AutoSkillPipeline:
 
     def _extract_skills_from_dialogue(
         self,
-        dialogue: List[DialogueTurn]
-    ) -> List[SkillCandidate]:
+        dialogue: list[DialogueTurn]
+    ) -> list[SkillCandidate]:
         """Extract skill candidates from dialogue."""
         # Format dialogue
         dialogue_text = "\n".join([
@@ -346,7 +346,7 @@ This skill was learned through lifelong learning from agent-environment interact
             if skill_file.exists():
                 skill_file.unlink()
 
-    def get_library_stats(self) -> Dict[str, Any]:
+    def get_library_stats(self) -> dict[str, Any]:
         """Get statistics about skill library."""
         if not self.skill_library:
             return {

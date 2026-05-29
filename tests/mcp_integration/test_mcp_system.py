@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Test MCP system implementation"""
 
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
 
-from lyra_cli.mcp import MCPManager, MCPServer, register_ecc_servers
+from lyra_cli.mcp import MCPManager, register_ecc_servers
 
 
 def test_mcp_system():

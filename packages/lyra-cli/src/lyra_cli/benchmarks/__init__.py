@@ -16,13 +16,13 @@ Architecture:
 
 Usage:
     runner = BenchmarkRunner()
-    
+
     # Run all benchmarks
     results = runner.run_all()
-    
+
     # Run specific benchmark
     results = runner.run_benchmark("gaia")
-    
+
     # Run ablation study
     results = runner.run_ablation("no_graph_memory")
 """
@@ -190,7 +190,7 @@ class BenchmarkReport:
 class BenchmarkRunner:
     """
     Main benchmark runner for Lyra Ultra Phase 7.
-    
+
     Coordinates execution of all benchmarks, collects results,
     and generates comprehensive reports.
     """
@@ -362,10 +362,10 @@ class BenchmarkRunner:
 
     def run_benchmark(self, config: BenchmarkConfig) -> BenchmarkResult:
         """Run a single benchmark.
-        
+
         Args:
             config: Benchmark configuration
-            
+
         Returns:
             Benchmark result
         """
@@ -409,10 +409,10 @@ class BenchmarkRunner:
         config: BenchmarkConfig,
     ) -> tuple[float, dict[str, Any]]:
         """Run a memory benchmark.
-        
+
         Args:
             config: Benchmark configuration
-            
+
         Returns:
             (score, details)
         """
@@ -468,10 +468,10 @@ class BenchmarkRunner:
         config: BenchmarkConfig,
     ) -> tuple[float, dict[str, Any]]:
         """Run a task completion benchmark.
-        
+
         Args:
             config: Benchmark configuration
-            
+
         Returns:
             (score, details)
         """
@@ -514,10 +514,10 @@ class BenchmarkRunner:
         config: BenchmarkConfig,
     ) -> tuple[float, dict[str, Any]]:
         """Run an ablation study.
-        
+
         Args:
             config: Benchmark configuration
-            
+
         Returns:
             (score, details)
         """
@@ -556,10 +556,10 @@ class BenchmarkRunner:
         config: BenchmarkConfig,
     ) -> tuple[float, dict[str, Any]]:
         """Run a performance benchmark.
-        
+
         Args:
             config: Benchmark configuration
-            
+
         Returns:
             (score, details)
         """
@@ -577,7 +577,7 @@ class BenchmarkRunner:
 
     def export_report(self, report: BenchmarkReport, path: str) -> None:
         """Export report to JSON file.
-        
+
         Args:
             report: Benchmark report
             path: Output file path
@@ -587,7 +587,7 @@ class BenchmarkRunner:
 
     def print_summary(self, report: BenchmarkReport) -> None:
         """Print a human-readable summary.
-        
+
         Args:
             report: Benchmark report
         """

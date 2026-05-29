@@ -2,16 +2,17 @@
 Tests for core task and result types.
 """
 
+
 import pytest
-from datetime import datetime
+
 from src.core.task import (
+    AgentPerformance,
+    ExecutionMetrics,
+    Result,
     Task,
-    TaskType,
     TaskPriority,
     TaskStatus,
-    Result,
-    ExecutionMetrics,
-    AgentPerformance,
+    TaskType,
 )
 
 
@@ -25,7 +26,7 @@ class TestTask:
             description="Generate a function",
             priority=TaskPriority.HIGH,
         )
-        
+
         assert task.task_id is not None
         assert task.type == TaskType.CODE_GENERATION
         assert task.description == "Generate a function"
@@ -40,34 +41,34 @@ class TestTask:
             description="Generate function",
             params=params,
         )
-        
+
         assert task.params == params
         assert task.params["language"] == "python"
 
     def test_task_assignment(self):
         """Test task assignment to agent."""
         task = Task(type=TaskType.GENERIC, description="Test task")
-        
+
         assert task.status == TaskStatus.PENDING
         assert task.assigned_to is None
-        
+
         task.assign_to("agent_1")
-        
+
         assert task.status == TaskStatus.ASSIGNED
         assert task.assigned_to == "agent_1"
 
     def test_task_lifecycle(self):
         """Test task status transitions."""
         task = Task(type=TaskType.GENERIC, description="Test task")
-        
+
         # Pending -> Assigned
         task.assign_to("agent_1")
         assert task.status == TaskStatus.ASSIGNED
-        
+
         # Assigned -> In Progress
         task.start()
         assert task.status == TaskStatus.IN_PROGRESS
-        
+
         # In Progress -> Completed
         task.complete()
         assert task.status == TaskStatus.COMPLETED
@@ -77,14 +78,14 @@ class TestTask:
         task = Task(type=TaskType.GENERIC, description="Test task")
         task.start()
         task.fail()
-        
+
         assert task.status == TaskStatus.FAILED
 
     def test_task_cancellation(self):
         """Test task cancellation."""
         task = Task(type=TaskType.GENERIC, description="Test task")
         task.cancel()
-        
+
         assert task.status == TaskStatus.CANCELLED
 
     def test_task_validation(self):
@@ -104,7 +105,7 @@ class TestResult:
             data={"output": "success"},
             agent_id="agent_1",
         )
-        
+
         assert result.task_id == "task_123"
         assert result.success is True
         assert result.data == {"output": "success"}
@@ -119,7 +120,7 @@ class TestResult:
             error="Something went wrong",
             agent_id="agent_1",
         )
-        
+
         assert result.success is False
         assert result.error == "Something went wrong"
         assert result.data is None
@@ -143,7 +144,7 @@ class TestResult:
             duration=1.5,
             cost=0.05,
         )
-        
+
         assert result.duration == 1.5
         assert result.cost == 0.05
 
@@ -160,7 +161,7 @@ class TestExecutionMetrics:
             duration=2.5,
             cost=0.10,
         )
-        
+
         assert metrics.agent_id == "agent_1"
         assert metrics.task_type == TaskType.CODE_GENERATION
         assert metrics.success is True
@@ -180,7 +181,7 @@ class TestAgentPerformance:
             avg_duration=2.5,
             avg_cost=0.08,
         )
-        
+
         assert perf.agent_id == "agent_1"
         assert perf.total_tasks == 100
         assert perf.success_rate == 0.95

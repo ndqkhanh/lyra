@@ -187,7 +187,7 @@ def test_v311_full_lifecycle(tmp_path, monkeypatch):
         lead.spawn(TeammateSpec(name="alice"))
         lead.spawn(TeammateSpec(name="bob"))
         a_id = lead.add_task("review module A", assign="alice")
-        b_id = lead.add_task(
+        lead.add_task(
             "review module B after A", assign="bob", depends_on=[a_id]
         )
         completed = lead.run_until_idle(timeout_s=2.0)

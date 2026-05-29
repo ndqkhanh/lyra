@@ -21,9 +21,9 @@ from dataclasses import dataclass, field
 class ActivationRecord:
     """
     Activation state for a memory.
-    
+
     Tracks retrieval history and computes ACT-R activation.
-    
+
     Attributes:
         memory_id: ID of the memory this tracks
         importance: Base importance score (0.0-1.0)
@@ -48,17 +48,17 @@ class ActivationRecord:
 class ActivationManager:
     """
     Manages memory activation using ACT-R principles.
-    
+
     ACT-R Base-Level Activation Formula:
         A(t) = ln(Σ t_i^(-d)) + β·I + ε
-    
+
     Where:
         t_i = time since i-th retrieval
         d = decay rate (default 0.5)
         β = importance weight (default 2.0)
         I = importance score
         ε = noise term (default 0.0)
-    
+
     Memories below the retrieval threshold become inaccessible (soft delete).
     """
 
@@ -71,7 +71,7 @@ class ActivationManager:
     ):
         """
         Initialize activation manager.
-        
+
         Args:
             decay_rate: Power law decay parameter (typically 0.5)
             importance_weight: Weight for importance boost
@@ -96,14 +96,14 @@ class ActivationManager:
     ) -> float:
         """
         Compute current activation level for a memory.
-        
+
         Args:
             memory_id: Memory identifier
             importance: Importance score (0.0-1.0)
             retrieval_history: List of retrieval timestamps
             created_at: When memory was created
             current_time: Current timestamp (defaults to now)
-            
+
         Returns:
             Activation level (can be negative)
         """
@@ -146,14 +146,14 @@ class ActivationManager:
     ) -> bool:
         """
         Check if memory is above retrieval threshold.
-        
+
         Args:
             memory_id: Memory identifier
             importance: Importance score
             retrieval_history: List of retrieval timestamps
             created_at: When memory was created
             current_time: Current timestamp
-            
+
         Returns:
             True if memory is accessible (above threshold)
         """
@@ -174,12 +174,12 @@ class ActivationManager:
     ) -> ActivationRecord:
         """
         Update activation state when memory is retrieved.
-        
+
         Args:
             memory_id: Memory identifier
             importance: Current importance score
             retrieval_time: When retrieval occurred (defaults to now)
-            
+
         Returns:
             Updated ActivationRecord
         """
@@ -219,14 +219,14 @@ class ActivationManager:
     ) -> float:
         """
         Compute decay factor for a memory of given age.
-        
+
         Returns value between 0.0 (fully decayed) and 1.0 (no decay).
         High importance memories decay slower.
-        
+
         Args:
             age_seconds: Age of memory in seconds
             importance: Importance score (0.0-1.0)
-            
+
         Returns:
             Decay factor (0.0-1.0)
         """
@@ -252,11 +252,11 @@ class ActivationManager:
     ) -> list[str]:
         """
         Find memories that have fallen below retrieval threshold.
-        
+
         Args:
             memory_records: List of (memory_id, importance, retrieval_history, created_at)
             current_time: Current timestamp
-            
+
         Returns:
             List of memory IDs that are dormant (below threshold)
         """

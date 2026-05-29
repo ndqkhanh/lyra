@@ -20,6 +20,54 @@ __version__ = "1.1.0"
 
 # Existing (legacy) exports — keep backward compatibility
 from .agent import DeepReasoningAgent
+
+# GRPO trainer
+from .grpo import GRPOTrainer
+
+# New models (ReflAct / GRPO / strategies)
+from .models import (
+    AnaloguePair,
+    GRPOTrajectory,
+    ReflActEpisode,
+    SpiralSample,
+    ThoughtNode,
+)
+from .models import (
+    ReasoningStep as ReflActStep,
+)
+from .models import (
+    ReasoningTrace as ReflActTrace,
+)
+
+# Reasoning Graph — structured CoT persistence
+from .reasoning_graph import (
+    EvidenceNode,
+    ReasoningEdge,
+    ReasoningGraph,
+)
+
+# ReflAct reasoner
+from .reflect import ReflActReasoner
+
+# SR2AM — Self-Regulated Simulative Planning
+from .sr2am import (
+    ExecutionTrace,
+    PlanningConfig,
+    PlanningStats,
+    PlanNode,
+    SR2AMPlanner,
+    SystemLevel,
+    TaskComplexity,
+)
+
+# Advanced reasoning strategies
+from .strategies import (
+    AnalogicalReasoning,
+    ChainOfThought,
+    SelfConsistency,
+    StepBack,
+    TreeOfThoughts,
+)
 from .types import (
     ComputeBudget,
     DifficultyEstimate,
@@ -32,50 +80,6 @@ from .types import (
     StepType,
     StrategyPerformance,
     VerificationResult,
-)
-
-# New models (ReflAct / GRPO / strategies)
-from .models import (
-    AnaloguePair,
-    GRPOTrajectory,
-    ReasoningStep as ReflActStep,
-    ReasoningTrace as ReflActTrace,
-    ReflActEpisode,
-    SpiralSample,
-    ThoughtNode,
-)
-
-# ReflAct reasoner
-from .reflect import ReflActReasoner
-
-# GRPO trainer
-from .grpo import GRPOTrainer
-
-# Advanced reasoning strategies
-from .strategies import (
-    AnalogicalReasoning,
-    ChainOfThought,
-    SelfConsistency,
-    StepBack,
-    TreeOfThoughts,
-)
-
-# SR2AM — Self-Regulated Simulative Planning
-from .sr2am import (
-    ExecutionTrace,
-    PlanNode,
-    PlanningConfig,
-    PlanningStats,
-    SR2AMPlanner,
-    SystemLevel,
-    TaskComplexity,
-)
-
-# Reasoning Graph — structured CoT persistence
-from .reasoning_graph import (
-    EvidenceNode,
-    ReasoningEdge,
-    ReasoningGraph,
 )
 
 __all__ = [

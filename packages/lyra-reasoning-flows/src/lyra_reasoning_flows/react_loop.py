@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Protocol
 
+
 @dataclass(frozen=True)
 class ReActStep:
     thought: str

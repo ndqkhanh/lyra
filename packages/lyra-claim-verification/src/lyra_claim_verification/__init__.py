@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import logging
-from enum import Enum, auto
 from dataclasses import dataclass, field
+from enum import Enum, auto
 from typing import Any, Optional
 
-from lyra_attestor import ClaimAttestation, ClaimType, VerificationStatus, AttestationGraph
+from lyra_attestor import AttestationGraph, ClaimAttestation, ClaimType, VerificationStatus
 
 logger = logging.getLogger(__name__)
 

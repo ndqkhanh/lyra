@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
-from typing import Dict, List, Tuple
 
 
 @dataclass(frozen=True)
@@ -26,8 +25,8 @@ class TokenSummary:
     total_prompt: int
     total_completion: int
     total_tokens: int
-    by_model: Tuple[Tuple[str, int], ...] = ()
-    by_agent: Tuple[Tuple[str, int], ...] = ()
+    by_model: tuple[tuple[str, int], ...] = ()
+    by_agent: tuple[tuple[str, int], ...] = ()
     window_seconds: float = 3600.0
 
 
@@ -46,7 +45,7 @@ class TokenTracker:
     """Tracks token usage across agents and models, with alert thresholds."""
 
     def __init__(self) -> None:
-        self._usage_history: List[TokenUsage] = []
+        self._usage_history: list[TokenUsage] = []
         self._alert_threshold: int | None = None
 
     async def record_usage(
@@ -83,12 +82,12 @@ class TokenTracker:
         total_tokens = total_prompt + total_completion
 
         # By model
-        model_totals: Dict[str, int] = {}
+        model_totals: dict[str, int] = {}
         for u in recent:
             model_totals[u.model] = model_totals.get(u.model, 0) + u.total_tokens
 
         # By agent
-        agent_totals: Dict[str, int] = {}
+        agent_totals: dict[str, int] = {}
         for u in recent:
             agent_totals[u.agent_id] = agent_totals.get(u.agent_id, 0) + u.total_tokens
 
@@ -105,13 +104,13 @@ class TokenTracker:
         """Set the alert threshold for token usage within the current window."""
         self._alert_threshold = max_tokens
 
-    async def check_alerts(self) -> Tuple[TokenAlert, ...]:
+    async def check_alerts(self) -> tuple[TokenAlert, ...]:
         """Check if any alert thresholds have been exceeded."""
         if self._alert_threshold is None:
             return ()
 
         now = time.time()
-        alerts: List[TokenAlert] = []
+        alerts: list[TokenAlert] = []
 
         # Check total tokens in the last hour
         window = 3600.0
@@ -136,7 +135,7 @@ class TokenTracker:
         self,
         agent_id: str,
         limit: int = 100,
-    ) -> Tuple[TokenUsage, ...]:
+    ) -> tuple[TokenUsage, ...]:
         """Get recent token usage history for a specific agent."""
         filtered = [u for u in self._usage_history if u.agent_id == agent_id]
         return tuple(filtered[-limit:])

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import enum
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 
 class ReplayEventKind(str, enum.Enum):
@@ -75,7 +75,7 @@ class Trace:
             raise ValueError("trace_id must be non-empty")
 
     @classmethod
-    def create(cls, *, trace_id: str, events: list[ReplayEvent]) -> "Trace":
+    def create(cls, *, trace_id: str, events: list[ReplayEvent]) -> Trace:
         """Construct a Trace with events sorted by timestamp ascending."""
         sorted_events = sorted(events, key=lambda e: e.timestamp)
         return cls(trace_id=trace_id, events=tuple(sorted_events))

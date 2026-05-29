@@ -11,7 +11,6 @@ from dataclasses import dataclass, field, replace
 from enum import Enum
 from typing import Any
 
-
 logger = logging.getLogger(__name__)
 
 __all__ = [
@@ -928,9 +927,8 @@ class AgentArena:
         while len(wb) < power:
             wb.append(None)
 
-        wb_alive: set[str] = set(s for s in seeded)
+        wb_alive: set[str] = set(seeded)
         lb_alive: set[str] = set()
-        lb: list[str | None] = []
 
         total = 0
         match_counter = 0

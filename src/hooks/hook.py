@@ -2,10 +2,11 @@
 Hook data models and types.
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 
 class HookType(str, Enum):
@@ -27,12 +28,12 @@ class HookContext:
     """
 
     hook_type: HookType
-    tool_name: Optional[str] = None
-    tool_args: Optional[Dict[str, Any]] = None
-    tool_result: Optional[Any] = None
-    session_id: Optional[str] = None
+    tool_name: str | None = None
+    tool_args: dict[str, Any] | None = None
+    tool_result: Any | None = None
+    session_id: str | None = None
     timestamp: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -44,12 +45,12 @@ class HookResult:
     """
 
     success: bool
-    modified_args: Optional[Dict[str, Any]] = None
-    error: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    modified_args: dict[str, Any] | None = None
+    error: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     @staticmethod
-    def ok(modified_args: Optional[Dict[str, Any]] = None) -> "HookResult":
+    def ok(modified_args: dict[str, Any] | None = None) -> "HookResult":
         """Create a successful result."""
         return HookResult(success=True, modified_args=modified_args)
 
@@ -71,11 +72,11 @@ class Hook:
     hook_type: HookType
     handler: Callable[[HookContext], HookResult]
     description: str
-    tool_filter: Optional[str] = None  # Tool name pattern (e.g., "Edit", "Write")
-    file_pattern: Optional[str] = None  # File pattern (e.g., "**/*.py")
+    tool_filter: str | None = None  # Tool name pattern (e.g., "Edit", "Write")
+    file_pattern: str | None = None  # File pattern (e.g., "**/*.py")
     priority: int = 0  # Higher priority hooks run first
     enabled: bool = True
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def matches(self, context: HookContext) -> bool:
         """

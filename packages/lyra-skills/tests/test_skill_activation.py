@@ -1,8 +1,6 @@
 """Tests for :mod:`lyra_skills.activation`."""
 from __future__ import annotations
 
-import pytest
-
 from lyra_skills.activation import (
     ActivatedSkill,
     match_explicit_invocations,

@@ -5,6 +5,7 @@ Comprehensive test suite for unified agent registry.
 """
 
 import pytest
+
 from lyra_ecc.agents import (
     AgentCategory,
     AgentDefinition,

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_meta_editor import (
     DiffConfig,
     DiffGenerator,

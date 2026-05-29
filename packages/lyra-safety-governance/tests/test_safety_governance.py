@@ -2,19 +2,16 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timedelta, timezone
-from typing import Any
 
 import pytest
-
 from lyra_safety_governance.audit_logger import AuditLogger, AuditQuery, AuditStats
 from lyra_safety_governance.behavioral_monitor import (
     AnomalyAction,
-    AnomalyScore,
+    BehavioralConfig,
+    BehavioralMonitor,
     BehaviorBaseline,
     BehaviorEvent,
     BehaviorProfile,
-    BehavioralConfig,
-    BehavioralMonitor,
 )
 from lyra_safety_governance.exceptions import (
     AnomalyDetectedError,
@@ -74,7 +71,6 @@ from lyra_safety_governance.static_rules import (
     SafetyRule,
     StaticRuleEngine,
 )
-
 
 # =============================================================================
 # Fixtures
@@ -501,7 +497,7 @@ class TestStaticRuleEngine:
         safe_target = "/home/user/notes.txt"
         for _ in range(2):
             req = ActionRequest(
-                request_id=f"r-i", agent_id="agent-rate",
+                request_id="r-i", agent_id="agent-rate",
                 action_type=ActionType.API_CALL, target=safe_target,
             )
             static_rule_engine.evaluate(req)
@@ -668,7 +664,7 @@ class TestBehaviorEvent:
 
 class TestBehaviorProfile:
     def test_construction(self) -> None:
-        now = datetime.now(timezone.utc)
+        datetime.now(timezone.utc)
         profile = BehaviorProfile(agent_id="a1", normal_patterns=("read", "write"), anomaly_threshold=0.7)
         assert profile.agent_id == "a1"
         assert profile.anomaly_threshold == 0.7
@@ -1702,7 +1698,7 @@ class TestImmutability:
         req = ActionRequest(request_id="r1", agent_id="a1", action_type=ActionType.READ_FILE, target="/tmp")
         dec = GovernanceDecision(action_request=req, decision=Decision.ALLOW, layer=GovernanceLayer.STATIC_RULES, reasoning="ok")
         logger = AuditLogger()
-        entry_id = logger.log_decision(dec)
+        logger.log_decision(dec)
         entries = logger.query_audit_log(AuditQuery(agent_id="a1"))
         assert len(entries) == 1
         #  ----- re-usable construction to satisfy test structure

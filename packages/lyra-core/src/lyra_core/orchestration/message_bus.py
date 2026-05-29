@@ -217,12 +217,12 @@ class InMemoryMessageBus(MessageBus):
         try:
             response = await asyncio.wait_for(future, timeout=timeout)
             return response
-        except asyncio.TimeoutError:
+        except asyncio.TimeoutError as err:
             async with self._lock:
                 self._pending_responses.pop(request.id, None)
             raise TimeoutError(
                 f"No response from {receiver} within {timeout} seconds"
-            )
+            ) from err
 
     async def respond(self, request: Message, payload: dict[str, Any]) -> None:
         """Send a response to a request.

@@ -4,13 +4,12 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 
 from .causal_graph import CausalGraph, EdgeType
 from .errors import RootCauseError
-from .intervention import InterventionModel, InterventionResult
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +83,7 @@ class RootCauseConfig:
     top_k: int = 5
     anomaly_sensitivity: float = 2.0
     use_transfer_entropy: bool = True
-    random_seed: Optional[int] = None
+    random_seed: int | None = None
 
 
 # ── Root Cause Analyzer ──────────────────────────────────────────────────────
@@ -108,7 +107,7 @@ class RootCauseAnalyzer:
             print(f"{cause.node_id}: {cause.score:.3f} — {cause.explanation}")
     """
 
-    def __init__(self, config: Optional[RootCauseConfig] = None) -> None:
+    def __init__(self, config: RootCauseConfig | None = None) -> None:
         self._config = config or RootCauseConfig()
 
     @property
@@ -121,7 +120,7 @@ class RootCauseAnalyzer:
         self,
         graph: CausalGraph,
         effect_node: str,
-        data: Optional[dict[str, np.ndarray]] = None,
+        data: dict[str, np.ndarray] | None = None,
     ) -> list[RootCause]:
         """Identify candidate root causes for an observed effect.
 
@@ -226,7 +225,7 @@ class RootCauseAnalyzer:
         ancestor: str,
         effect: str,
         path: list[str],
-        data: Optional[dict[str, np.ndarray]],
+        data: dict[str, np.ndarray] | None,
     ) -> float:
         """Compute attribution score for a candidate root cause.
 
@@ -288,7 +287,7 @@ class RootCauseAnalyzer:
         self,
         graph: CausalGraph,
         effect_node: str,
-        data: Optional[dict[str, np.ndarray]] = None,
+        data: dict[str, np.ndarray] | None = None,
     ) -> list[AttributionScore]:
         """Compute attribution scores for all causal factors of an effect.
 
@@ -379,7 +378,7 @@ class RootCauseAnalyzer:
                 break  # only suggest the first mediator
 
         # If root_cause is a confounder
-        for edge_id, edge in graph.edges.items():
+        for _edge_id, edge in graph.edges.items():
             if edge.edge_type == EdgeType.BIDIRECTED and root_cause in (edge.source_id, edge.target_id):
                 other = edge.target_id if edge.source_id == root_cause else edge.source_id
                 recommendations.append(
@@ -473,7 +472,7 @@ class RootCauseAnalyzer:
         self,
         graph: CausalGraph,
         effect_nodes: list[str],
-        data: Optional[dict[str, np.ndarray]] = None,
+        data: dict[str, np.ndarray] | None = None,
     ) -> dict[str, list[RootCause]]:
         """Async analysis for multiple effect nodes.
 

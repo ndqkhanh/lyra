@@ -94,7 +94,7 @@ class LatentState:
         """Compute cosine similarity between two latent states."""
         if self.dimension != other.dimension:
             return 0.0
-        dot = sum(a * b for a, b in zip(self.compressed_vector, other.compressed_vector))
+        dot = sum(a * b for a, b in zip(self.compressed_vector, other.compressed_vector, strict=False))
         norm_a = sum(a * a for a in self.compressed_vector) ** 0.5
         norm_b = sum(b * b for b in other.compressed_vector) ** 0.5
         if norm_a == 0.0 or norm_b == 0.0:

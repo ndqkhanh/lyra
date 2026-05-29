@@ -84,7 +84,7 @@ class TestAgentWatchdog:
             crash_loop_threshold=3,
             crash_loop_window_seconds=3600,
         ))
-        for i in range(3):
+        for _i in range(3):
             w.record_crash(exit_code=1)
         assert w.watchdog_status == WatchdogStatus.CRASH_LOOP_UNHEALTHY
 

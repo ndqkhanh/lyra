@@ -11,7 +11,6 @@ Features:
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional
 
 
 class AttackPhase(Enum):
@@ -48,12 +47,12 @@ class AttackChain:
 
     chain_id: str
     target: str
-    phases: List[AttackPhase]
-    techniques: List[AttackTechnique]
+    phases: list[AttackPhase]
+    techniques: list[AttackTechnique]
     current_phase: AttackPhase
-    compromised_hosts: List[str] = field(default_factory=list)
-    credentials: List[Dict[str, str]] = field(default_factory=list)
-    persistence_mechanisms: List[str] = field(default_factory=list)
+    compromised_hosts: list[str] = field(default_factory=list)
+    credentials: list[dict[str, str]] = field(default_factory=list)
+    persistence_mechanisms: list[str] = field(default_factory=list)
 
 
 class RedTeamAutomation:
@@ -68,10 +67,10 @@ class RedTeamAutomation:
 
     def __init__(self):
         """Initialize red team automation."""
-        self.attack_chains: Dict[str, AttackChain] = {}
+        self.attack_chains: dict[str, AttackChain] = {}
         self.technique_library = self._load_techniques()
 
-    def _load_techniques(self) -> Dict[str, AttackTechnique]:
+    def _load_techniques(self) -> dict[str, AttackTechnique]:
         """
         Load MITRE ATT&CK techniques.
 
@@ -167,7 +166,7 @@ class RedTeamAutomation:
         self,
         chain_id: str,
         safe_mode: bool = True,
-    ) -> Dict[str, any]:
+    ) -> dict[str, any]:
         """
         Execute current attack phase.
 
@@ -216,7 +215,7 @@ class RedTeamAutomation:
         if current_idx < len(chain.phases) - 1:
             chain.current_phase = chain.phases[current_idx + 1]
 
-    def get_chain_status(self, chain_id: str) -> Dict[str, any]:
+    def get_chain_status(self, chain_id: str) -> dict[str, any]:
         """
         Get attack chain status.
 

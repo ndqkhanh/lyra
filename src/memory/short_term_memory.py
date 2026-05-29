@@ -3,18 +3,18 @@ Short-Term Memory - Recent conversation context.
 """
 
 import time
-from typing import List, Dict, Optional, Any
-from dataclasses import dataclass
 from collections import deque
+from dataclasses import dataclass
+from typing import Any
 
-from src.memory.memory_store import MemoryType, MemoryStore
+from src.memory.memory_store import MemoryStore, MemoryType
 
 
 @dataclass
 class ConversationTurn:
     """
     A single conversation turn.
-    
+
     Attributes:
         role: Speaker role (user, agent, system)
         content: Turn content
@@ -24,7 +24,7 @@ class ConversationTurn:
     role: str
     content: str
     timestamp: float
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -34,7 +34,7 @@ class ConversationTurn:
 class ShortTermMemory:
     """
     Short-term memory for recent context.
-    
+
     Responsibilities:
     - Store recent conversation turns
     - Maintain fixed-size buffer
@@ -49,7 +49,7 @@ class ShortTermMemory:
     ):
         """
         Initialize short-term memory.
-        
+
         Args:
             capacity: Maximum number of turns to keep
             consolidation_threshold: When to trigger consolidation
@@ -57,22 +57,22 @@ class ShortTermMemory:
         self.capacity = capacity
         self.consolidation_threshold = consolidation_threshold
         self.turns: deque = deque(maxlen=capacity)
-        self.working_memory: Dict[str, Any] = {}
+        self.working_memory: dict[str, Any] = {}
 
     def add_turn(
         self,
         role: str,
         content: str,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> ConversationTurn:
         """
         Add a conversation turn.
-        
+
         Args:
             role: Speaker role
             content: Turn content
             metadata: Additional metadata
-            
+
         Returns:
             Created turn
         """
@@ -86,13 +86,13 @@ class ShortTermMemory:
         self.turns.append(turn)
         return turn
 
-    def get_recent(self, limit: Optional[int] = None) -> List[ConversationTurn]:
+    def get_recent(self, limit: int | None = None) -> list[ConversationTurn]:
         """
         Get recent turns.
-        
+
         Args:
             limit: Maximum number to return (None = all)
-            
+
         Returns:
             List of recent turns
         """
@@ -100,13 +100,13 @@ class ShortTermMemory:
             return list(self.turns)
         return list(self.turns)[-limit:]
 
-    def get_context(self, max_turns: Optional[int] = None) -> str:
+    def get_context(self, max_turns: int | None = None) -> str:
         """
         Get conversation context as string.
-        
+
         Args:
             max_turns: Maximum turns to include
-            
+
         Returns:
             Formatted context string
         """
@@ -118,13 +118,13 @@ class ShortTermMemory:
 
         return "\n".join(lines)
 
-    def get_by_role(self, role: str) -> List[ConversationTurn]:
+    def get_by_role(self, role: str) -> list[ConversationTurn]:
         """
         Get turns by role.
-        
+
         Args:
             role: Role to filter by
-            
+
         Returns:
             List of turns from specified role
         """
@@ -133,7 +133,7 @@ class ShortTermMemory:
     def set_working_memory(self, key: str, value: Any):
         """
         Set working memory value.
-        
+
         Args:
             key: Memory key
             value: Memory value
@@ -143,11 +143,11 @@ class ShortTermMemory:
     def get_working_memory(self, key: str, default: Any = None) -> Any:
         """
         Get working memory value.
-        
+
         Args:
             key: Memory key
             default: Default value if not found
-            
+
         Returns:
             Memory value or default
         """
@@ -160,16 +160,16 @@ class ShortTermMemory:
     def should_consolidate(self) -> bool:
         """
         Check if consolidation should occur.
-        
+
         Returns:
             True if should consolidate
         """
         return len(self.turns) >= self.consolidation_threshold
 
-    def prepare_for_consolidation(self) -> List[ConversationTurn]:
+    def prepare_for_consolidation(self) -> list[ConversationTurn]:
         """
         Get turns ready for consolidation.
-        
+
         Returns:
             List of turns to consolidate
         """
@@ -184,11 +184,11 @@ class ShortTermMemory:
     ) -> int:
         """
         Consolidate turns to long-term memory.
-        
+
         Args:
             long_term_store: Long-term memory store
             importance_threshold: Minimum importance to consolidate
-            
+
         Returns:
             Number of memories consolidated
         """
@@ -221,10 +221,10 @@ class ShortTermMemory:
     def _calculate_importance(self, turn: ConversationTurn) -> float:
         """
         Calculate importance of a turn.
-        
+
         Args:
             turn: Conversation turn
-            
+
         Returns:
             Importance score (0.0 - 1.0)
         """
@@ -253,10 +253,10 @@ class ShortTermMemory:
         self.turns.clear()
         self.working_memory.clear()
 
-    def get_statistics(self) -> Dict:
+    def get_statistics(self) -> dict:
         """
         Get short-term memory statistics.
-        
+
         Returns:
             Statistics dictionary
         """

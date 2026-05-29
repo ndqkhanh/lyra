@@ -281,7 +281,7 @@ class AlignmentMonitor:
 
 def _cosine_distance(a: tuple[float, ...], b: tuple[float, ...]) -> float:
     """1 − cosine_similarity, clamped to [0, 1]."""
-    dot = sum(x * y for x, y in zip(a, b))
+    dot = sum(x * y for x, y in zip(a, b, strict=False))
     norm_a = math.sqrt(sum(x * x for x in a))
     norm_b = math.sqrt(sum(y * y for y in b))
     if norm_a == 0 or norm_b == 0:
@@ -307,7 +307,7 @@ def _linear_trend(x: list[int], y: list[float]) -> float:
         return 0.0
     sum_x = sum(x)
     sum_y = sum(y)
-    sum_xy = sum(xi * yi for xi, yi in zip(x, y))
+    sum_xy = sum(xi * yi for xi, yi in zip(x, y, strict=False))
     sum_x2 = sum(xi * xi for xi in x)
     denom = n * sum_x2 - sum_x * sum_x
     if denom == 0:

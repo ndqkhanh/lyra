@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Comprehensive CLI verification script"""
 
-import sys
 import os
+import sys
 
 # Add project to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))

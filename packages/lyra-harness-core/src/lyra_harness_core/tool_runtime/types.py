@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Optional, Protocol
+from typing import Any, Protocol
 
 from ..messages import ToolResult
 from ..verifier import CompositeVerdict
@@ -39,7 +39,7 @@ class ToolExecution:
     tool_name: str
     args: dict[str, Any]
     result: ToolResult
-    verdict: Optional[CompositeVerdict] = None
+    verdict: CompositeVerdict | None = None
     cost_usd: float = 0.0
     duration_ms: float = 0.0
     n_attempts: int = 1

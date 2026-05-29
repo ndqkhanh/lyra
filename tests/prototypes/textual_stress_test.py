@@ -17,13 +17,14 @@ FAIL → escalate to user for decision
 """
 
 import asyncio
-import time
-import psutil
 import random
+import time
+
+import psutil
 from textual.app import App, ComposeResult
 from textual.containers import Container, Horizontal, Vertical
-from textual.widgets import Static, Label
 from textual.reactive import reactive
+from textual.widgets import Label, Static
 
 
 class PerformanceMonitor:
@@ -308,17 +309,17 @@ def evaluate_results(stats):
     cpu_pass = stats["cpu_avg"] < 10.0
     cpu_status = "✓ PASS" if cpu_pass else "✗ FAIL"
     print(f"  CPU Usage: {stats['cpu_avg']:.2f}% avg, {stats['cpu_max']:.2f}% max {cpu_status}")
-    print(f"    Criteria: < 10%")
+    print("    Criteria: < 10%")
 
     # Frame rate
     fps_pass = stats["fps"] >= 30.0
     fps_status = "✓ PASS" if fps_pass else "✗ FAIL"
     print(f"  Frame Rate: {stats['fps']:.1f} FPS {fps_status}")
-    print(f"    Criteria: ≥ 30 FPS")
+    print("    Criteria: ≥ 30 FPS")
 
     # Flicker (manual inspection)
-    print(f"  Flicker: MANUAL INSPECTION REQUIRED")
-    print(f"    Criteria: No visible flicker")
+    print("  Flicker: MANUAL INSPECTION REQUIRED")
+    print("    Criteria: No visible flicker")
 
     # Overall verdict
     print()

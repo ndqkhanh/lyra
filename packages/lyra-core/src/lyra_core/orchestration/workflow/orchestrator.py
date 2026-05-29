@@ -284,8 +284,8 @@ class WorkflowOrchestrator:
             if workflow_id not in self._workflows:
                 raise ValueError(f"Workflow {workflow_id} does not exist")
 
-            workflow = self._workflows[workflow_id]
-            state_machine = self._state_machines[workflow_id]
+            self._workflows[workflow_id]
+            self._state_machines[workflow_id]
 
             if feedback.approved:
                 # Transition to next phase

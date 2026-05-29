@@ -13,6 +13,20 @@ code analysis tools.
 
 from __future__ import annotations
 
+# Phase 5.4 — Extended Tool Suite
+# US-009 — New Tool Modules
+from . import (
+    code_analysis,
+    code_quality,
+    file_ops,
+    git_ops,
+    memory_ops,
+    model_routing,
+    network_ops,
+    obs_health,
+    secrets_scan,
+    skill_ops,
+)
 from .tool_registry import (
     ToolCategory,
     ToolDisclosureLevel,
@@ -21,20 +35,6 @@ from .tool_registry import (
     Toolset,
     tool_registry,
 )
-
-# Phase 5.4 — Extended Tool Suite
-from . import file_ops
-from . import code_quality
-from . import secrets_scan
-from . import network_ops
-from . import git_ops
-from . import obs_health
-
-# US-009 — New Tool Modules
-from . import memory_ops
-from . import model_routing
-from . import code_analysis
-from . import skill_ops
 
 __all__ = [
     # Registry

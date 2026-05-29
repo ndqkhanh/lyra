@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 from .audit_logger import AuditEntry, AuditLogger, AuditQuery, AuditStats
-from .crypto_audit import ChainVerification, CryptoAuditEngine
 from .behavioral_monitor import (
     AnomalyAction,
     AnomalyScore,
+    BehavioralConfig,
+    BehavioralMonitor,
     BehaviorBaseline,
     BehaviorEvent,
     BehaviorProfile,
-    BehavioralConfig,
-    BehavioralMonitor,
 )
+from .crypto_audit import ChainVerification, CryptoAuditEngine
 from .exceptions import (
     AnomalyDetectedError,
     AuditError,

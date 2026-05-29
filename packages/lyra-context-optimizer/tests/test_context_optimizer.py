@@ -2,54 +2,48 @@
 
 from __future__ import annotations
 
-import asyncio
 import time
 
 import pytest
-
 from lyra_context_optimizer import (
-    # Agent-driven compaction
-    CompactionDecider,
-    CompactionStrategy,
-    CompactionPlanner,
-    CompactionAction,
-    # Verbatim pruner
-    VerbatimPruner,
-    PruneStrategy,
-    PruneResult,
     # Async compactor
     AsyncCompactor,
+    CompactionAction,
+    # Agent-driven compaction
+    CompactionDecider,
+    CompactionError,
     CompactionJudge,
-    JudgeVerdict,
-    # Knowledge blocks
-    KnowledgeBlock,
-    PriorityLevel,
-    KnowledgeBlockRegistry,
-    # Input compressor
-    InputCompressor,
-    CompressionStrategy,
-    CompressionResult,
-    # Output compressor
-    OutputCompressor,
+    CompactionPlanner,
+    CompactionStrategy,
     CompressionConfig,
+    CompressionError,
+    # Compression metrics
+    CompressionMetrics,
+    CompressionResult,
+    CompressionStrategy,
+    # Exceptions
+    ContextOptimizerError,
+    DACSConfigError,
     # DACS switcher
     DACSManager,
     DACSMode,
-    DACSConfig,
-    # Compression metrics
-    CompressionMetrics,
-    MetricsSnapshot,
-    StrategyStats,
-    MetricsReport,
-    # Exceptions
-    ContextOptimizerError,
-    CompactionError,
-    CompressionError,
-    KnowledgeBlockNotFoundError,
-    DACSConfigError,
     FidelityLossError,
+    # Input compressor
+    InputCompressor,
+    JudgeVerdict,
+    # Knowledge blocks
+    KnowledgeBlock,
+    KnowledgeBlockNotFoundError,
+    KnowledgeBlockRegistry,
+    MetricsReport,
+    MetricsSnapshot,
+    # Output compressor
+    OutputCompressor,
+    PriorityLevel,
+    PruneResult,
+    PruneStrategy,
+    VerbatimPruner,
 )
-
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Exceptions
@@ -280,7 +274,7 @@ class TestVerbatimPruner:
 
     def test_min_fidelity_threshold_respected(self):
         pruner = VerbatimPruner(min_fidelity_threshold=0.9)
-        content = "\n".join([f"0123456789" for _ in range(500)])
+        content = "\n".join(["0123456789" for _ in range(500)])
         with pytest.raises(FidelityLossError):
             pruner.prune(content, 0.9)
 

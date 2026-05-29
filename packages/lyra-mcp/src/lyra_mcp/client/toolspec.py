@@ -18,8 +18,9 @@ this when the model proposes a tool call whose name starts with
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
-from typing import Any, Iterable, Mapping, Optional
+from typing import Any
 
 _MCP_PREFIX = "mcp__"
 
@@ -84,7 +85,7 @@ def normalise_mcp_tools(
     return out
 
 
-def parse_lyra_mcp_name(lyra_name: str) -> Optional[tuple[str, str]]:
+def parse_lyra_mcp_name(lyra_name: str) -> tuple[str, str] | None:
     """Split ``mcp__<server>__<tool>`` back into ``(server, tool)``.
 
     Returns ``None`` for any name that doesn't match the convention,
@@ -119,7 +120,7 @@ class MCPToolDispatcher:
         lyra_name: str,
         arguments: Mapping[str, Any],
         *,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
     ) -> dict[str, Any]:
         parsed = parse_lyra_mcp_name(lyra_name)
         if parsed is None:

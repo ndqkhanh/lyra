@@ -26,8 +26,30 @@ Key design principles:
 
 from __future__ import annotations
 
-# ── Errors ────────────────────────────────────────────────────────────────────
+# ── Abduction ─────────────────────────────────────────────────────────────────
+from .abduction import (
+    AbductionConfig,
+    AbductionEngine,
+    AbductionResult,
+    AbductionStrategy,
+)
 
+# ── Action Prediction ─────────────────────────────────────────────────────────
+from .action_prediction import (
+    ActionConfig,
+    ActionPrediction,
+    ActionPredictor,
+)
+
+# ── Main Counterfactual Engine ────────────────────────────────────────────────
+from .counterfactual import (
+    CounterfactualEngine,
+    CounterfactualEngineConfig,
+    CounterfactualResult,
+    Intervention,
+)
+
+# ── Errors ────────────────────────────────────────────────────────────────────
 from .errors import (
     AbductionError,
     ActionPredictionError,
@@ -37,39 +59,12 @@ from .errors import (
     SCMIntegrationError,
 )
 
-# ── Abduction ─────────────────────────────────────────────────────────────────
-
-from .abduction import (
-    AbductionConfig,
-    AbductionEngine,
-    AbductionResult,
-    AbductionStrategy,
-)
-
-# ── Action Prediction ─────────────────────────────────────────────────────────
-
-from .action_prediction import (
-    ActionConfig,
-    ActionPrediction,
-    ActionPredictor,
-)
-
 # ── Prediction ────────────────────────────────────────────────────────────────
-
 from .prediction import (
     PredictionConfig,
     PredictionEngine,
     PredictionResult,
     UncertaintyMetrics,
-)
-
-# ── Main Counterfactual Engine ────────────────────────────────────────────────
-
-from .counterfactual import (
-    CounterfactualEngine,
-    CounterfactualEngineConfig,
-    CounterfactualResult,
-    Intervention,
 )
 
 __all__ = [

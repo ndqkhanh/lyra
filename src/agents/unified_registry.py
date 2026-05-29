@@ -8,7 +8,7 @@ on task requirements.
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 from src.agents.base import Agent, AgentCapability
 from src.core.task import Task, TaskType
@@ -28,9 +28,9 @@ class AgentMetadata:
     agent: Agent
     source: AgentSource
     namespace: str  # e.g., "lyra:code" or "ecc:planner"
-    capabilities: List[AgentCapability]
-    languages: Set[str] = field(default_factory=set)
-    frameworks: Set[str] = field(default_factory=set)
+    capabilities: list[AgentCapability]
+    languages: set[str] = field(default_factory=set)
+    frameworks: set[str] = field(default_factory=set)
     priority: int = 0  # Higher priority agents selected first
     usage_count: int = 0
     success_count: int = 0
@@ -58,18 +58,18 @@ class UnifiedAgentRegistry:
 
     def __init__(self):
         """Initialize unified registry."""
-        self.agents: Dict[str, AgentMetadata] = {}
-        self._capability_index: Dict[TaskType, Set[str]] = {}
-        self._language_index: Dict[str, Set[str]] = {}
-        self._framework_index: Dict[str, Set[str]] = {}
+        self.agents: dict[str, AgentMetadata] = {}
+        self._capability_index: dict[TaskType, set[str]] = {}
+        self._language_index: dict[str, set[str]] = {}
+        self._framework_index: dict[str, set[str]] = {}
 
     def register(
         self,
         agent: Agent,
         source: AgentSource,
-        capabilities: List[AgentCapability],
-        languages: Optional[Set[str]] = None,
-        frameworks: Optional[Set[str]] = None,
+        capabilities: list[AgentCapability],
+        languages: set[str] | None = None,
+        frameworks: set[str] | None = None,
         priority: int = 0,
     ) -> str:
         """
@@ -155,7 +155,7 @@ class UnifiedAgentRegistry:
         del self.agents[qualified_name]
         return True
 
-    def get(self, qualified_name: str) -> Optional[Agent]:
+    def get(self, qualified_name: str) -> Agent | None:
         """
         Get an agent by qualified name.
 
@@ -171,9 +171,9 @@ class UnifiedAgentRegistry:
     def find_candidates(
         self,
         task: Task,
-        language: Optional[str] = None,
-        framework: Optional[str] = None,
-    ) -> List[AgentMetadata]:
+        language: str | None = None,
+        framework: str | None = None,
+    ) -> list[AgentMetadata]:
         """
         Find candidate agents for a task.
 
@@ -208,10 +208,10 @@ class UnifiedAgentRegistry:
     def dispatch(
         self,
         task: Task,
-        language: Optional[str] = None,
-        framework: Optional[str] = None,
-        prefer_source: Optional[AgentSource] = None,
-    ) -> Optional[Agent]:
+        language: str | None = None,
+        framework: str | None = None,
+        prefer_source: AgentSource | None = None,
+    ) -> Agent | None:
         """
         Dispatch a task to the best agent.
 
@@ -248,7 +248,7 @@ class UnifiedAgentRegistry:
         self,
         metadata: AgentMetadata,
         task: Task,
-        prefer_source: Optional[AgentSource],
+        prefer_source: AgentSource | None,
     ) -> float:
         """
         Score an agent for a task.
@@ -299,7 +299,7 @@ class UnifiedAgentRegistry:
         # Usage count already incremented in dispatch
         pass
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """
         Get registry statistics.
 
@@ -329,9 +329,9 @@ class UnifiedAgentRegistry:
 
     def list_agents(
         self,
-        source: Optional[AgentSource] = None,
-        language: Optional[str] = None,
-    ) -> List[AgentMetadata]:
+        source: AgentSource | None = None,
+        language: str | None = None,
+    ) -> list[AgentMetadata]:
         """
         List registered agents.
 

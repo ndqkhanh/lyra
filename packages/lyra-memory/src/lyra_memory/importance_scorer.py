@@ -26,7 +26,7 @@ class ImportanceCategory(str, Enum):
 class ImportanceScore:
     """
     Multi-dimensional importance score for a memory.
-    
+
     Attributes:
         base_score: Base importance (0.0-1.0) from category
         emotional_salience: Boost from emotional content (0.0-0.3)
@@ -55,7 +55,7 @@ class ImportanceScore:
 class ImportanceScorer:
     """
     Scores memory importance using multiple dimensions.
-    
+
     Scoring dimensions:
     1. Semantic importance (category-based)
     2. Emotional salience (frustration, satisfaction)
@@ -157,13 +157,13 @@ class ImportanceScorer:
     ) -> ImportanceScore:
         """
         Score the importance of a memory.
-        
+
         Args:
             content: Memory content text
             memory_type: Type of memory
             metadata: Optional metadata (may contain user_flagged=True)
             created_at: When memory was created (for recency boost)
-            
+
         Returns:
             ImportanceScore with all dimensions calculated
         """

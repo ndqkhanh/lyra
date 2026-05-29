@@ -8,14 +8,14 @@ from pathlib import Path
 import pytest
 
 from src.agents.ecc_importer import (
-    ECCAgentDefinition,
     ECCAgent,
-    ECCAgentParser,
+    ECCAgentDefinition,
     ECCAgentImporter,
+    ECCAgentParser,
     ImportResult,
     create_sample_ecc_agents,
 )
-from src.agents.unified_registry import UnifiedAgentRegistry, AgentSource
+from src.agents.unified_registry import UnifiedAgentRegistry
 from src.core.task import Task, TaskType
 
 

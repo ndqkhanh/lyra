@@ -1,6 +1,5 @@
 """Tests for tool registry."""
 
-import pytest
 
 from lyra_cli.eager_tools.registry import ToolRegistry, tool
 

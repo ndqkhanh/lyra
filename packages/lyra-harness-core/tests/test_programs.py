@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_harness_core.multi_hop import (
     IRCoTOperator,
     SelfAskOperator,

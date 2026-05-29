@@ -10,59 +10,54 @@ Plus signed attestations, chain of trust, and tamper-evident audit trails.
 
 from __future__ import annotations
 
-from .verification_mesh import (
-    VerificationLayer,
-    VerificationStatus,
-    VerificationResult,
-    TemporalProperty,
-    VerificationModule,
-    LayerReport,
-    MeshReport,
-    ConfidenceAggregator,
-    VerificationMesh,
+from .attestation import (
+    Attestation,
+    AttestationLevel,
+    AttestationService,
+    AuditEntry,
+    ChainLink,
 )
-
 from .cpl_verifier import (
     CheckSeverity,
-    CPLRule,
     CPLCorrection,
+    CPLRule,
     CPLVerifier,
 )
-
-from .formal_verifier import (
-    Invariant,
-    PrePostCondition,
-    TypeConstraint,
-    FormalProofResult,
-    InvariantRegistry,
-    TypeSafetyVerifier,
-    ContractVerifier,
-    FormalVerifier,
-)
-
-from .runtime_verifier import (
-    ResourceLimits,
-    SandboxMetrics,
-    SideEffect,
-    RuntimeVerifier,
-)
-
-from .attestation import (
-    AttestationLevel,
-    Attestation,
-    ChainLink,
-    AuditEntry,
-    AttestationService,
-)
-
 from .exceptions import (
-    VerificationError,
-    VerificationFailedError,
+    AttestationError,
     CPLVerificationError,
     FormalVerificationError,
-    RuntimeVerificationError,
-    AttestationError,
     MeshConfigurationError,
+    RuntimeVerificationError,
+    VerificationError,
+    VerificationFailedError,
+)
+from .formal_verifier import (
+    ContractVerifier,
+    FormalProofResult,
+    FormalVerifier,
+    Invariant,
+    InvariantRegistry,
+    PrePostCondition,
+    TypeConstraint,
+    TypeSafetyVerifier,
+)
+from .runtime_verifier import (
+    ResourceLimits,
+    RuntimeVerifier,
+    SandboxMetrics,
+    SideEffect,
+)
+from .verification_mesh import (
+    ConfidenceAggregator,
+    LayerReport,
+    MeshReport,
+    TemporalProperty,
+    VerificationLayer,
+    VerificationMesh,
+    VerificationModule,
+    VerificationResult,
+    VerificationStatus,
 )
 
 __all__ = [

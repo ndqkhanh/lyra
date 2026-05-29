@@ -3,9 +3,8 @@ from __future__ import annotations
 
 import enum
 import secrets
-import time
 from dataclasses import dataclass, field
-from typing import Any, Optional, Protocol
+from typing import Any, Protocol
 
 
 class TriggerKind(str, enum.Enum):
@@ -24,7 +23,7 @@ class RoutineHandler(Protocol):
     policies; tests use deterministic stubs.
     """
 
-    def __call__(self, *, fire: "RoutineFire") -> Any: ...
+    def __call__(self, *, fire: RoutineFire) -> Any: ...
 
 
 def _generate_token(prefix: str = "rt") -> str:
@@ -44,7 +43,7 @@ class Routine:
     routine_id: str
     name: str
     handler: RoutineHandler
-    schedule: Optional[str] = None  # cron expression; None = manual/api/webhook
+    schedule: str | None = None  # cron expression; None = manual/api/webhook
     permissions: frozenset[str] = frozenset()
     bearer_token: str = field(default_factory=_generate_token)
     enabled: bool = True

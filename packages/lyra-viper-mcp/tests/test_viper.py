@@ -1,8 +1,8 @@
 """Tests for VIPER-MCP package."""
 
 import asyncio
-import pytest
-from lyra_viper_mcp import TaintAnalyzer, VulnerabilityScanner, PromptEvolver
+
+from lyra_viper_mcp import PromptEvolver, TaintAnalyzer, VulnerabilityScanner
 
 SIMPLE_MCP_CODE = """
 @mcp.tool()

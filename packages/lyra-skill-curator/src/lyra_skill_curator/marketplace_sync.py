@@ -1,8 +1,8 @@
 """Marketplace Sync — synchronise skills with community skill registries."""
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Sequence
 
 
 @dataclass(frozen=True)

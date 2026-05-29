@@ -6,19 +6,17 @@ checks compatibility, and manages skill versions.
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Optional, Protocol
+from typing import Any
 
 from .exceptions import (
-    SkillNotFoundError,
-    SkillConflictError,
-    CompositionError,
     CircularDependencyError,
+    CompositionError,
+    SkillNotFoundError,
     ValidationError,
 )
 
@@ -251,7 +249,7 @@ class SkillGraph:
         Raises:
             CircularDependencyError: If a cycle is detected.
         """
-        in_degree: dict[str, int] = {sid: 0 for sid in self._nodes}
+        in_degree: dict[str, int] = dict.fromkeys(self._nodes, 0)
         for edges in self._edges.values():
             for e in edges:
                 if e.edge_type == "depends_on":
@@ -304,7 +302,7 @@ class SkillGraph:
 
     def shortest_path(
         self, source_id: str, target_id: str
-    ) -> Optional[list[str]]:
+    ) -> list[str] | None:
         """Find shortest dependency path between two skills (BFS).
 
         Returns:
@@ -341,12 +339,12 @@ class SkillGraph:
         """
         return [
             skill for skill in self._nodes.values()
-            if set(o.name for o in skill.outputs) & required_outputs
+            if {o.name for o in skill.outputs} & required_outputs
         ]
 
     def validate_compatibility(
         self, skill_a: str, skill_b: str
-    ) -> tuple[bool, Optional[str]]:
+    ) -> tuple[bool, str | None]:
         """Check if two skills are compatible for composition.
 
         Args:
@@ -484,18 +482,18 @@ class SkillRegistry:
         logger.info("Skill unregistered: %s (id=%s)", name, skill_id)
         return True
 
-    def get(self, skill_id: str) -> Optional[SkillDefinition]:
+    def get(self, skill_id: str) -> SkillDefinition | None:
         """Get a skill by ID."""
         return self._by_id.get(skill_id)
 
-    def get_latest(self, name: str) -> Optional[SkillDefinition]:
+    def get_latest(self, name: str) -> SkillDefinition | None:
         """Get the latest version of a skill by name."""
         versions = self._skills.get(name, [])
         if not versions:
             return None
         return versions[-1]  # Last registered is latest
 
-    def get_version(self, name: str, version: str) -> Optional[SkillDefinition]:
+    def get_version(self, name: str, version: str) -> SkillDefinition | None:
         """Get a specific version of a skill."""
         for skill in self._skills.get(name, []):
             if skill.metadata.version == version:
@@ -600,7 +598,7 @@ class SkillWeaver:
     (sequential, parallel, conditional, iterative).
     """
 
-    def __init__(self, registry: Optional[SkillRegistry] = None) -> None:
+    def __init__(self, registry: SkillRegistry | None = None) -> None:
         self.registry = registry or SkillRegistry()
         self._active_plans: dict[str, CompositionPlan] = {}
         self._plan_history: deque[CompositionPlan] = deque(maxlen=100)
@@ -622,8 +620,8 @@ class SkillWeaver:
     async def weave(
         self,
         task_type: str,
-        context: Optional[dict[str, float]] = None,
-        pattern: Optional[CompositionPattern] = None,
+        context: dict[str, float] | None = None,
+        pattern: CompositionPattern | None = None,
         max_skills: int = 10,
     ) -> CompositionPlan:
         """Build a skill composition plan for a task.
@@ -664,7 +662,6 @@ class SkillWeaver:
 
         # Heuristic selection
         parallel_tasks = {"analysis", "evaluation", "generation"}
-        sequential_tasks = {"pipeline", "transformation", "processing"}
 
         if task_type in parallel_tasks:
             return CompositionPattern.PARALLEL
@@ -708,7 +705,7 @@ class SkillWeaver:
             )
 
             # Re-score with context matching
-            best_skill: Optional[str] = None
+            best_skill: str | None = None
             best_score = -1.0
 
             for skill in candidates:
@@ -724,7 +721,7 @@ class SkillWeaver:
                 if has_conflict:
                     continue
 
-                output_match = len(set(o.name for o in skill.outputs) & needed)
+                output_match = len({o.name for o in skill.outputs} & needed)
                 dependency_satisfaction = len(set(skill.dependencies) & set(chain))
 
                 context_score = sum(
@@ -794,7 +791,7 @@ class SkillWeaver:
         max_skills: int,
     ) -> CompositionPlan:
         """Build a parallel composition with fan-out/fan-in."""
-        needed = set(required_outputs)
+        set(required_outputs)
         selected: list[str] = []
         used: set[str] = set()
 
@@ -864,7 +861,7 @@ class SkillWeaver:
 
     # ── Plan management ────────────────────────────────────────────────
 
-    def get_plan(self, plan_id: str) -> Optional[CompositionPlan]:
+    def get_plan(self, plan_id: str) -> CompositionPlan | None:
         """Retrieve a composition plan by ID."""
         return self._active_plans.get(plan_id)
 

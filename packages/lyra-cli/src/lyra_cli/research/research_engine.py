@@ -336,7 +336,7 @@ class MultiHopResearchEngine:
         """Add findings from an exploration step into the knowledge graph."""
         prev_finding_id: str | None = None
 
-        for i, text in enumerate(result.findings):
+        for _i, text in enumerate(result.findings):
             self._finding_counter += 1
             fid = f"f_{self._finding_counter}"
             finding = Finding(

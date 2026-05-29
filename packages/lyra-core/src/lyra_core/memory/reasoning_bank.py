@@ -117,7 +117,7 @@ class ReasoningBank:
         any existing lesson with the same ``id``.
         """
         # Replace by id if present so commits are idempotent.
-        self._lessons = [l for l in self._lessons if l.id != lesson.id]
+        self._lessons = [ex for ex in self._lessons if ex.id != lesson.id]
         self._lessons.append(lesson)
         return lesson
 
@@ -208,7 +208,7 @@ class ReasoningBank:
         if polarity is None:
             filtered = list(self._lessons)
         else:
-            filtered = [l for l in self._lessons if l.polarity is polarity]
+            filtered = [ex for ex in self._lessons if ex.polarity is polarity]
         # Most-recent-first ordering matches SQLite store.
         filtered.reverse()
         if limit is not None:

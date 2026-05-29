@@ -35,7 +35,7 @@ class Instinct:
     scope: InstinctScope = InstinctScope.PROJECT
     ttl_days: int = 30
     created_at: float = 0.0
-    promoted_from: Optional[str] = None
+    promoted_from: str | None = None
     hit_count: int = 0
 
     @property
@@ -78,7 +78,7 @@ class InstinctEngine:
 
     # ── Evolution ────────────────────────────────────────────
 
-    def evolve(self, instincts: Optional[list[Instinct]] = None) -> EvolutionResult:
+    def evolve(self, instincts: list[Instinct] | None = None) -> EvolutionResult:
         """Cluster raw instincts into structured skills/commands/agents."""
         targets = instincts or list(self._project_instincts.values())
         skills = []
@@ -111,7 +111,7 @@ class InstinctEngine:
 
     # ── Promotion ────────────────────────────────────────────
 
-    def promote(self, instinct_id: str) -> Optional[Instinct]:
+    def promote(self, instinct_id: str) -> Instinct | None:
         """Promote project instinct to global scope."""
         if instinct_id not in self._project_instincts:
             return None

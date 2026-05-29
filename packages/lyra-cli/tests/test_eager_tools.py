@@ -341,7 +341,7 @@ def test_context_analysis_to_recommendation(analyzer, recommender):
 
     # Analyze context
     scores = analyzer.analyze(context)
-    entities = analyzer.extract_entities(context)
+    analyzer.extract_entities(context)
 
     assert len(scores) > 0
 

@@ -277,7 +277,7 @@ class ContextInspector:
         entries = self._manager.get_layer(layer)
 
         # Collect sources
-        sources = sorted(set(e.source for e in entries))
+        sources = sorted({e.source for e in entries})
 
         # Priority distribution
         priority_dist: dict[int, int] = {}

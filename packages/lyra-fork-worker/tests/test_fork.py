@@ -1,14 +1,14 @@
 """Tests for Fork Worker package."""
 
 import pytest
-from lyra_fork_worker import ForkWorkerOrchestrator, PatchApplier, PatchResult
+from lyra_fork_worker import ForkWorkerOrchestrator, PatchApplier
 
 
 class TestPatchApplier:
     def test_apply(self):
         a = PatchApplier()
         result = a.apply("/tmp/test_repo", "patch content")
-        assert result == True
+        assert result
 
 
 class TestForkWorkerOrchestrator:

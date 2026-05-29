@@ -1,8 +1,8 @@
 """The AgentLoop: think → act → observe, with hooks, permissions, budgets."""
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Callable, Optional
+from collections.abc import Callable
+from dataclasses import dataclass
 
 from .hooks import HookEvent, HookRegistry
 from .messages import Message, StopReason, ToolCall, ToolResult
@@ -42,10 +42,10 @@ class AgentLoop:
         llm: LLMProvider,
         tools: ToolRegistry,
         *,
-        hooks: Optional[HookRegistry] = None,
+        hooks: HookRegistry | None = None,
         permission_mode: PermissionMode = PermissionMode.DEFAULT,
-        policy: Optional[PermissionPolicy] = None,
-        tracer: Optional[Tracer] = None,
+        policy: PermissionPolicy | None = None,
+        tracer: Tracer | None = None,
         approval: ApprovalFn = auto_approve,
         max_steps: int = 20,
         system_prompt: str = "You are a helpful agent. Use tools precisely.",
@@ -60,7 +60,7 @@ class AgentLoop:
         self.max_steps = max_steps
         self.system_prompt = system_prompt
 
-    def run(self, task: str, initial_messages: Optional[list[Message]] = None) -> LoopResult:
+    def run(self, task: str, initial_messages: list[Message] | None = None) -> LoopResult:
         transcript: list[Message] = list(initial_messages or [])
         if not any(m.role == "system" for m in transcript):
             transcript.insert(0, Message.system(self.system_prompt))

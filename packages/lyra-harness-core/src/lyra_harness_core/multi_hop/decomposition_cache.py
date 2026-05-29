@@ -16,7 +16,6 @@ from __future__ import annotations
 import re
 import time
 from dataclasses import dataclass, field
-from typing import Optional
 
 _WS_RE = re.compile(r"\s+")
 _PUNCT_RE = re.compile(r"[^\w\s\-]+")
@@ -72,8 +71,8 @@ class DecompositionCache:
     ('who is the director of Casablanca?',)
     """
 
-    ttl_seconds: Optional[float] = None  # None = no expiry
-    max_entries: Optional[int] = None  # None = unbounded
+    ttl_seconds: float | None = None  # None = no expiry
+    max_entries: int | None = None  # None = unbounded
     _entries: dict[tuple[str, str], DecompositionEntry] = field(default_factory=dict)
 
     def _key(self, question: str, namespace: str) -> tuple[str, str]:
@@ -104,7 +103,7 @@ class DecompositionCache:
         question: str,
         *,
         namespace: str = "default",
-    ) -> Optional[DecompositionEntry]:
+    ) -> DecompositionEntry | None:
         """Look up an entry; returns None on miss or TTL expiry."""
         entry = self._entries.get(self._key(question, namespace))
         if entry is None:

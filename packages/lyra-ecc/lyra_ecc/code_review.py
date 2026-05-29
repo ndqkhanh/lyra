@@ -4,9 +4,9 @@ Enhanced Rules Engine with Code Review Integration
 Comprehensive rules engine with language detection and code review integration.
 """
 
-from pathlib import Path
-from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List, Optional
 
 from lyra_ecc.rules import Rule, RulesEngine, RuleSeverity, RuleViolation
 

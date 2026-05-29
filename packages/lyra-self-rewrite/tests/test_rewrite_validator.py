@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_self_rewrite.rewrite_generator import GeneratedRewrite, RewriteTemplate
 from lyra_self_rewrite.rewrite_validator import (
     RewriteValidator,

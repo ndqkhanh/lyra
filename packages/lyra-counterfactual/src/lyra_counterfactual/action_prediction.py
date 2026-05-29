@@ -4,10 +4,9 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
-
 from lyra_causal_graph.scm import StructuralCausalModel
 
 from .errors import ActionPredictionError
@@ -38,7 +37,7 @@ class ActionConfig:
     n_eval_samples: int = 5000
     rank_by: str = "expected_value"
     default_intervention_strength: float = 1.0
-    random_seed: Optional[int] = None
+    random_seed: int | None = None
 
 
 @dataclass
@@ -65,7 +64,7 @@ class ActionPrediction:
     std: float = 0.0
     ci_lower: float = 0.0
     ci_upper: float = 0.0
-    outcome_samples: Optional[np.ndarray] = None
+    outcome_samples: np.ndarray | None = None
     probability_improvement: float = 0.5
     metadata: dict[str, Any] = field(default_factory=dict)
 
@@ -99,8 +98,8 @@ class ActionPredictor:
     def __init__(
         self,
         scm: StructuralCausalModel,
-        noise_posterior: Optional[dict[str, np.ndarray]] = None,
-        config: Optional[ActionConfig] = None,
+        noise_posterior: dict[str, np.ndarray] | None = None,
+        config: ActionConfig | None = None,
     ) -> None:
         if scm is None:
             raise ActionPredictionError("SCM must not be None.")
@@ -217,7 +216,7 @@ class ActionPredictor:
     def evaluate_actions(
         self,
         action_specs: list[dict[str, Any]],
-        baseline: Optional[dict[str, float]] = None,
+        baseline: dict[str, float] | None = None,
     ) -> list[ActionPrediction]:
         """Evaluate multiple candidate actions.
 
@@ -266,7 +265,7 @@ class ActionPredictor:
     async def evaluate_actions_async(
         self,
         action_specs: list[dict[str, Any]],
-        baseline: Optional[dict[str, float]] = None,
+        baseline: dict[str, float] | None = None,
     ) -> list[ActionPrediction]:
         """Async version of ``evaluate_actions()``."""
         return self.evaluate_actions(action_specs, baseline)
@@ -276,7 +275,7 @@ class ActionPredictor:
     def rank_actions(
         self,
         predictions: list[ActionPrediction],
-        rank_by: Optional[str] = None,
+        rank_by: str | None = None,
     ) -> list[ActionPrediction]:
         """Rank action predictions by the configured metric.
 
@@ -295,7 +294,6 @@ class ActionPredictor:
                 f"Unknown ranking metric '{metric}'. Choose from: {allowed}"
             )
 
-        reverse = metric != "probability_improvement"  # All except prob: higher = worse? No, higher is always better
         # Actually for all metrics, higher is better.
 
         sort_key: Any
@@ -315,7 +313,7 @@ class ActionPredictor:
     def best_action(
         self,
         predictions: list[ActionPrediction],
-    ) -> Optional[ActionPrediction]:
+    ) -> ActionPrediction | None:
         """Return the highest-ranked action prediction.
 
         Args:
@@ -378,7 +376,7 @@ class ActionPredictor:
 
         specs = []
         for combo in itertools.product(*value_lists):
-            intervention = dict(zip(var_names, combo))
+            intervention = dict(zip(var_names, combo, strict=False))
             name = "do(" + ", ".join(f"{k}={v}" for k, v in intervention.items()) + ")"
             specs.append({
                 "name": name,
@@ -395,7 +393,6 @@ class ActionPredictor:
         if not intervention:
             raise ActionPredictionError("At least one intervention variable is required.")
 
-        from lyra_causal_graph.errors import SCMError
 
         for var_name in intervention:
             if var_name not in self._scm.endogenous_vars:

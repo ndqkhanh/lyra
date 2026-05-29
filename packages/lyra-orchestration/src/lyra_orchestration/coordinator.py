@@ -9,16 +9,16 @@ Features:
 """
 
 import asyncio
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 from lyra_orchestration.event_bus import (
     AgentCompleted,
     AgentFailed,
     AgentStarted,
-    Event,
     EventBus,
 )
 
@@ -39,12 +39,12 @@ class AgentTask:
     agent_id: str
     agent_type: str
     handler: Callable
-    dependencies: List[str]
+    dependencies: list[str]
     status: AgentStatus = AgentStatus.PENDING
-    result: Optional[Any] = None
-    error: Optional[str] = None
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
+    result: Any | None = None
+    error: str | None = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
 
 
 class AgentCoordinator:
@@ -65,14 +65,14 @@ class AgentCoordinator:
             event_bus: Event bus instance
         """
         self.event_bus = event_bus
-        self.tasks: Dict[str, AgentTask] = {}
+        self.tasks: dict[str, AgentTask] = {}
 
     def register_agent(
         self,
         agent_id: str,
         agent_type: str,
         handler: Callable,
-        dependencies: Optional[List[str]] = None,
+        dependencies: list[str] | None = None,
     ) -> AgentTask:
         """
         Register agent task.
@@ -96,7 +96,7 @@ class AgentCoordinator:
         self.tasks[agent_id] = task
         return task
 
-    async def execute(self) -> Dict[str, Any]:
+    async def execute(self) -> dict[str, Any]:
         """
         Execute all registered agents.
 
@@ -180,7 +180,7 @@ class AgentCoordinator:
                 )
             )
 
-    def _get_ready_tasks(self) -> List[AgentTask]:
+    def _get_ready_tasks(self) -> list[AgentTask]:
         """
         Get tasks ready to execute.
 
@@ -205,7 +205,7 @@ class AgentCoordinator:
 
         return ready
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """
         Get execution statistics.
 

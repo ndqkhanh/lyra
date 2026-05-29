@@ -7,8 +7,7 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import TYPE_CHECKING
 
-from lyra_skill_loader.exceptions import BudgetExceededError
-from lyra_skill_loader.tiered_loader import LoadTier, LoadedSkill, TieredLoader
+from lyra_skill_loader.tiered_loader import LoadedSkill, LoadTier, TieredLoader
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -161,7 +160,7 @@ class ContextAwareLoader:
         decisions: list[LoadDecision] = []
         running_total = 0
 
-        for skill_id, score, suggested_tier in matches:
+        for skill_id, _score, suggested_tier in matches:
             if running_total >= available:
                 decisions.append(
                     LoadDecision(

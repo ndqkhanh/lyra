@@ -21,7 +21,7 @@ from lyra_memory.schema import MemoryRecord, MemoryType
 class ConsolidationPattern:
     """
     A discovered pattern across multiple memories.
-    
+
     Attributes:
         description: Natural language description of pattern
         source_memory_ids: Memories this pattern was extracted from
@@ -40,7 +40,7 @@ class ConsolidationPattern:
 class ConsolidationResult:
     """
     Result of a consolidation run.
-    
+
     Attributes:
         duplicates_merged: Number of duplicate memories merged
         contradictions_resolved: Number of contradictions resolved
@@ -60,7 +60,7 @@ class ConsolidationResult:
 class ConsolidationEngine:
     """
     Offline memory consolidation engine.
-    
+
     Runs during low-activity periods to:
     - Merge duplicate memories
     - Resolve contradictions
@@ -78,7 +78,7 @@ class ConsolidationEngine:
     ):
         """
         Initialize consolidation engine.
-        
+
         Args:
             similarity_threshold: Threshold for duplicate detection
             compression_min_length: Min length for compression
@@ -96,10 +96,10 @@ class ConsolidationEngine:
     ) -> ConsolidationResult:
         """
         Fast consolidation: cleanup and deduplication.
-        
+
         Args:
             memories: List of memories to consolidate
-            
+
         Returns:
             ConsolidationResult with statistics
         """
@@ -124,11 +124,11 @@ class ConsolidationEngine:
     ) -> tuple[ConsolidationResult, list[ConsolidationPattern]]:
         """
         Deep consolidation: pattern extraction and abstraction.
-        
+
         Args:
             memories: List of memories to consolidate
             session_window_days: Days to look back for patterns
-            
+
         Returns:
             Tuple of (ConsolidationResult, List of patterns)
         """
@@ -166,7 +166,7 @@ class ConsolidationEngine:
     ) -> list[list[str]]:
         """
         Find duplicate or near-duplicate memories.
-        
+
         Returns list of duplicate groups (each group is list of memory IDs).
         """
         duplicates = []
@@ -200,7 +200,7 @@ class ConsolidationEngine:
     ) -> list[tuple[str, str]]:
         """
         Find contradictory memories.
-        
+
         Returns list of (memory_id1, memory_id2) pairs.
         """
         contradictions = []
@@ -227,7 +227,7 @@ class ConsolidationEngine:
     ) -> list[ConsolidationPattern]:
         """
         Extract recurring patterns from memories.
-        
+
         This is a simplified version. In production, would use:
         - LLM-based pattern extraction
         - Sequence mining algorithms
@@ -276,7 +276,7 @@ class ConsolidationEngine:
     def _compute_similarity(self, text1: str, text2: str) -> float:
         """
         Compute similarity between two texts.
-        
+
         Simplified version using Jaccard similarity.
         In production, would use embeddings.
         """
@@ -294,7 +294,7 @@ class ConsolidationEngine:
     def _are_contradictory(self, mem1: MemoryRecord, mem2: MemoryRecord) -> bool:
         """
         Check if two memories contradict each other.
-        
+
         Simplified version. In production, would use:
         - NLI (Natural Language Inference) models
         - Temporal reasoning
@@ -322,7 +322,7 @@ class ConsolidationEngine:
     def _extract_phrases(self, text: str, min_words: int = 3) -> list[str]:
         """
         Extract meaningful phrases from text.
-        
+
         Simplified version. In production, would use:
         - NLP chunking
         - Named entity recognition

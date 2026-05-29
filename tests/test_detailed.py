@@ -3,6 +3,7 @@
 import sys
 from pathlib import Path
 
+
 def log(msg):
     print(f"[TEST] {msg}", file=sys.stderr, flush=True)
 
@@ -10,6 +11,7 @@ log("=== Starting detailed test ===")
 
 log("1. Importing LyraTransport...")
 from lyra_cli.tui_v2.transport import LyraTransport
+
 log("   ✓ Import successful")
 
 log("2. Creating transport instance...")
@@ -19,8 +21,9 @@ log("   ✓ Transport created")
 log("3. Importing config classes...")
 from harness_tui import ProjectConfig
 from lyra_cli.tui_v2 import lyra_theme
-from lyra_cli.tui_v2.sidebar import build_lyra_sidebar_tabs
 from lyra_cli.tui_v2.commands import register_lyra_commands
+from lyra_cli.tui_v2.sidebar import build_lyra_sidebar_tabs
+
 log("   ✓ Imports successful")
 
 log("4. Building sidebar tabs...")
@@ -42,6 +45,7 @@ log("   ✓ Config created")
 
 log("6. Importing LyraHarnessApp...")
 from lyra_cli.tui_v2.app import LyraHarnessApp
+
 log("   ✓ Import successful")
 
 log("7. Creating app instance (this calls __init__)...")

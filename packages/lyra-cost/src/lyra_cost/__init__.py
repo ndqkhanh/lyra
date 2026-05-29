@@ -8,8 +8,8 @@ from __future__ import annotations
 from lyra_cost.cache import PromptCache, SemanticCache
 from lyra_cost.models import (
     TIER_PRICING,
-    CallOutcome,
     CacheStats,
+    CallOutcome,
     CostRecord,
     LoopDetectionResult,
     ModelTier,

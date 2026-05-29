@@ -16,8 +16,9 @@ def test_team_orchestration():
     print("=" * 80)
 
     try:
-        from lyra_cli.cli.team_orchestrator import TeamOrchestrator, AgentRole
         import asyncio
+
+        from lyra_cli.cli.team_orchestrator import TeamOrchestrator
 
         print("✓ TeamOrchestrator imported successfully")
 
@@ -43,7 +44,7 @@ def test_team_orchestration():
                 if event["type"] == "member":
                     print(f"  [{event['member']}] {event['content']}")
                 elif event["type"] == "done":
-                    print(f"\n✓ Team completed!")
+                    print("\n✓ Team completed!")
                     print(f"Result preview: {event['content'][:200]}...")
 
             return events
@@ -60,7 +61,7 @@ def test_team_orchestration():
         print(f"✓ Member updates: {len(member_events)}")
 
         # Check for parallel execution
-        members_seen = set(e["member"] for e in member_events)
+        members_seen = {e["member"] for e in member_events}
         print(f"✓ Team members: {', '.join(members_seen)}")
 
         # Check for expected roles
@@ -85,7 +86,7 @@ def test_team_capabilities():
     print("=" * 80)
 
     try:
-        from lyra_cli.cli.team_orchestrator import TeamOrchestrator, AgentRole, TeamMember
+        from lyra_cli.cli.team_orchestrator import AgentRole
 
         print("\n1. Agent Roles:")
         for role in AgentRole:

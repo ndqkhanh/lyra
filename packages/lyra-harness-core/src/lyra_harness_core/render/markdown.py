@@ -6,17 +6,16 @@ GitHub PR descriptions, and any context where a human reads the report.
 from __future__ import annotations
 
 import datetime as _dt
-from typing import Any, Optional
 
 from ..eval_runner import EvalRun
 from ..provenance import Witness, WitnessKind, WitnessLattice
-from ..replay import ReplayEvent, ReplayEventKind, Trace
+from ..replay import Trace
 
 
 def trace_to_markdown(
     trace: Trace,
     *,
-    title: Optional[str] = None,
+    title: str | None = None,
     show_payloads: bool = True,
     max_payload_chars: int = 200,
 ) -> str:
@@ -61,8 +60,8 @@ def trace_to_markdown(
 def witness_lattice_to_markdown(
     lattice: WitnessLattice,
     *,
-    title: Optional[str] = None,
-    focus_witness_id: Optional[str] = None,
+    title: str | None = None,
+    focus_witness_id: str | None = None,
 ) -> str:
     """Render a :class:`WitnessLattice` (or one witness's chain) as Markdown."""
     lines: list[str] = []
@@ -110,7 +109,7 @@ def witness_lattice_to_markdown(
 def eval_run_to_markdown(
     run: EvalRun,
     *,
-    title: Optional[str] = None,
+    title: str | None = None,
     show_failed_only: bool = False,
 ) -> str:
     """Render an :class:`EvalRun` as a Markdown report."""

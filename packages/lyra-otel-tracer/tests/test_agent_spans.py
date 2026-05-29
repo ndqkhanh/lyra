@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_otel_tracer.agent_spans import AgentSpan, SpanContext, SpanEvent, SpanManager, Trace
 from lyra_otel_tracer.exceptions import SpanError
 

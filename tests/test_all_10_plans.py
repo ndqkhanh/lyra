@@ -1,5 +1,6 @@
 """Integration test: ALL 10 Lyra AGI plans working together."""
-import os, sys
+import os
+import sys
 
 _p = os.path.join(os.path.dirname(__file__), "..", "packages")
 for _d in sorted(os.listdir(_p)):
@@ -13,28 +14,13 @@ class TestAll10Plans:
 
     def test_all_imports(self):
         """Plans 1-5 (AGI)"""
-        from lyra_verification_mesh import VerificationMesh
-        from lyra_causal_graph import CausalGraph
-        from lyra_drift_detector import DriftOrchestrator
-        from lyra_meta_evolution import MetaCognitiveStack
-        from lyra_colony import AgentColony
         """Plans 6-10 (Breakthrough)"""
-        from lyra_instincts import InstinctEngine
-        from lyra_beliefs import BeliefSystem
-        from lyra_memory_token import TokenNativeIndex
-        from lyra_router import AgentRouter
-        from lyra_identity import AgentIdentity
-        from lyra_resilience import CircuitBreaker
-        from lyra_sla import SLAManager
-        from lyra_experiment import ExperimentRegistry
-        from lyra_ecology import AgentEcology
-        from lyra_emergence import EmergenceDetector
         assert True
 
     def test_plan6_plan8_integration(self):
         """Instincts → Commands → Router pipeline."""
         from lyra_instincts import InstinctEngine
-        from lyra_router import AgentRouter, AgentInstance
+        from lyra_router import AgentInstance, AgentRouter
         engine = InstinctEngine()
         inst = engine.collect("code_review", "Always lint before commit")
         engine._project_instincts[inst.id].hit_count = 15
@@ -45,8 +31,8 @@ class TestAll10Plans:
 
     def test_plan7_plan9_integration(self):
         """Token memory → Experiment platform."""
+        from lyra_experiment import AgentConfig, ExperimentRegistry
         from lyra_memory_token import TokenNativeIndex
-        from lyra_experiment import ExperimentRegistry, AgentConfig
         idx = TokenNativeIndex()
         idx.index("doc1", "Experiment results: variant improved by 15%")
         exp = ExperimentRegistry()

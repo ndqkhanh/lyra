@@ -18,9 +18,9 @@ import datetime
 import logging
 import math
 import statistics
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Sequence
 
 from lyra_finance.models import (
     Asset,
@@ -115,7 +115,7 @@ class AllocationStrategy:
                       expected_returns: dict[str, float] | None = None) -> AllocationResult:
         """Equal-weight allocation across all symbols."""
         weight = 1.0 / len(symbols)
-        weights = {s: weight for s in symbols}
+        weights = dict.fromkeys(symbols, weight)
         exp_ret = (statistics.mean(expected_returns.values())
                    if expected_returns and len(expected_returns) > 0 else 0.0)
         return AllocationResult(
@@ -153,7 +153,7 @@ class AllocationStrategy:
         exp_ret = (statistics.mean(expected_returns.values())
                    if expected_returns and len(expected_returns) > 0 else 0.0)
 
-        risk_contrib = {s: w for s, w in weights.items()}
+        risk_contrib = dict(weights.items())
         return AllocationResult(
             method=AllocationMethod.RISK_PARITY,
             weights=weights,
@@ -170,7 +170,7 @@ class AllocationStrategy:
             # Equal weight when no covariance data
             return self._equal_weight(symbols, expected_returns)
 
-        n = len(symbols)
+        len(symbols)
         weights = self._solve_min_variance(symbols, covariances)
 
         # Compute portfolio variance
@@ -191,7 +191,7 @@ class AllocationStrategy:
         if not expected_returns or not covariances:
             return self._equal_weight(symbols, expected_returns)
 
-        n = len(symbols)
+        len(symbols)
         weights = self._solve_max_sharpe(symbols, expected_returns, covariances)
 
         exp_ret = sum(weights[s] * expected_returns.get(s, 0.0) for s in symbols)
@@ -268,7 +268,7 @@ class AllocationStrategy:
             return {}
 
         # Start with equal weights, iterate
-        weights = {s: 1.0 / n for s in symbols}
+        weights = dict.fromkeys(symbols, 1.0 / n)
         for _ in range(100):
             # Compute risk contributions
             portfolio_var = 0.0

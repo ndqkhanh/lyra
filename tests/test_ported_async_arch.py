@@ -2,8 +2,6 @@
 """
 from __future__ import annotations
 
-import pytest
-
 
 def test_task_priority_enum():
     from lyra_cli.tui_v2.widgets.async_bridge import TaskPriority
@@ -39,14 +37,14 @@ def test_task_entry():
 
 
 def test_task_entry_line():
-    from lyra_cli.tui_v2.widgets.async_bridge import TaskEntry, TaskStatus
+    from lyra_cli.tui_v2.widgets.async_bridge import TaskEntry
     entry = TaskEntry(name="Test")
     line = entry.line
     assert "Test" in line
 
 
 def test_task_queue_singleton():
-    from lyra_cli.tui_v2.widgets.async_bridge import get_task_queue, BackgroundTaskQueue
+    from lyra_cli.tui_v2.widgets.async_bridge import get_task_queue
     q1 = get_task_queue()
     q2 = get_task_queue()
     assert q1 is q2

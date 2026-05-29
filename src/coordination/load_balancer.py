@@ -3,7 +3,6 @@ Load Balancer - Distribute workload across agents.
 """
 
 import time
-from typing import List, Dict, Optional
 from dataclasses import dataclass
 
 from src.agents.base import Agent
@@ -28,7 +27,7 @@ class AgentLoad:
 class LoadBalancer:
     """
     Load balancer for distributing tasks across agents.
-    
+
     Responsibilities:
     - Monitor agent workload
     - Prevent agent overload
@@ -39,22 +38,22 @@ class LoadBalancer:
     def __init__(self, max_tasks_per_agent: int = 5):
         """
         Initialize load balancer.
-        
+
         Args:
             max_tasks_per_agent: Maximum concurrent tasks per agent
         """
         self.max_tasks_per_agent = max_tasks_per_agent
-        self.agent_loads: Dict[str, AgentLoad] = {}
-        self.load_history: List[Dict] = []
+        self.agent_loads: dict[str, AgentLoad] = {}
+        self.load_history: list[dict] = []
         self.start_time = time.time()
 
     def get_agent_load(self, agent: Agent) -> AgentLoad:
         """
         Get current load for an agent.
-        
+
         Args:
             agent: Agent to check
-            
+
         Returns:
             Agent load information
         """
@@ -91,13 +90,13 @@ class LoadBalancer:
 
         return load
 
-    def get_least_loaded_agent(self, agents: List[Agent]) -> Optional[Agent]:
+    def get_least_loaded_agent(self, agents: list[Agent]) -> Agent | None:
         """
         Get the least loaded agent.
-        
+
         Args:
             agents: List of agents to check
-            
+
         Returns:
             Least loaded agent or None
         """
@@ -125,35 +124,35 @@ class LoadBalancer:
     def is_agent_available(self, agent: Agent) -> bool:
         """
         Check if agent can accept more tasks.
-        
+
         Args:
             agent: Agent to check
-            
+
         Returns:
             True if agent can accept tasks
         """
         load = self.get_agent_load(agent)
         return load.current_tasks < self.max_tasks_per_agent
 
-    def get_available_agents(self, agents: List[Agent]) -> List[Agent]:
+    def get_available_agents(self, agents: list[Agent]) -> list[Agent]:
         """
         Get all agents that can accept tasks.
-        
+
         Args:
             agents: List of agents to check
-            
+
         Returns:
             List of available agents
         """
         return [agent for agent in agents if self.is_agent_available(agent)]
 
-    def balance_load(self, agents: List[Agent]) -> Dict[str, List[str]]:
+    def balance_load(self, agents: list[Agent]) -> dict[str, list[str]]:
         """
         Analyze load distribution and suggest rebalancing.
-        
+
         Args:
             agents: List of agents
-            
+
         Returns:
             Rebalancing suggestions
         """
@@ -196,10 +195,10 @@ class LoadBalancer:
             "suggestions": suggestions,
         }
 
-    def record_load_snapshot(self, agents: List[Agent]):
+    def record_load_snapshot(self, agents: list[Agent]):
         """
         Record current load state.
-        
+
         Args:
             agents: List of agents to snapshot
         """
@@ -222,10 +221,10 @@ class LoadBalancer:
         if len(self.load_history) > 100:
             self.load_history = self.load_history[-100:]
 
-    def get_statistics(self) -> Dict:
+    def get_statistics(self) -> dict:
         """
         Get load balancing statistics.
-        
+
         Returns:
             Statistics dictionary
         """
@@ -255,10 +254,10 @@ class LoadBalancer:
             },
         }
 
-    def get_load_trends(self) -> Dict:
+    def get_load_trends(self) -> dict:
         """
         Analyze load trends over time.
-        
+
         Returns:
             Trend analysis
         """

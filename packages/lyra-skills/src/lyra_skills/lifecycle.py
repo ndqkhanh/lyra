@@ -16,8 +16,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
-
 
 __all__ = [
     "LifecycleDecision",
@@ -90,7 +88,7 @@ class LifecycleManager:
             library.remove("greet-skill")
     """
 
-    def __init__(self, config: Optional[LifecycleConfig] = None) -> None:
+    def __init__(self, config: LifecycleConfig | None = None) -> None:
         self._config = config or LifecycleConfig()
         self._fitness: dict[str, SkillFitness] = {}
         self._failure_streaks: dict[str, int] = {}
@@ -195,5 +193,5 @@ class LifecycleManager:
             if e.decision == LifecycleDecision.RETIRE
         ]
 
-    def fitness(self, skill_id: str) -> Optional[SkillFitness]:
+    def fitness(self, skill_id: str) -> SkillFitness | None:
         return self._fitness.get(skill_id)

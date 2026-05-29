@@ -12,7 +12,7 @@ Architecture:
 
 Usage:
     integrator = MultimodalMemoryIntegrator(memory_system)
-    
+
     # Store screenshot evidence
     evidence_id = integrator.store_screenshot(
         screenshot_data=base64_image,
@@ -20,7 +20,7 @@ Usage:
         extracted_text="Username Password Login",
         context={"task": "login", "step": 1}
     )
-    
+
     # Retrieve by text query
     results = integrator.search_multimodal("login page")
 """
@@ -67,7 +67,7 @@ class MultimodalReference:
 class MultimodalMemoryIntegrator:
     """
     Integrates multimodal evidence with the memory system.
-    
+
     Features:
     - Stores multimodal evidence in episodic memory
     - Compresses large content (10MB → 2KB)
@@ -83,7 +83,7 @@ class MultimodalMemoryIntegrator:
         compression_level: CompressionLevel = CompressionLevel.AGGRESSIVE,
     ):
         """Initialize the integrator.
-        
+
         Args:
             evidence_chain: Multimodal evidence chain
             computer_use: Computer-use context
@@ -124,7 +124,7 @@ class MultimodalMemoryIntegrator:
         chain_id: str | None = None,
     ) -> str:
         """Store a screenshot with compression.
-        
+
         Args:
             screenshot_data: Base64 encoded screenshot
             description: Human-readable description
@@ -132,7 +132,7 @@ class MultimodalMemoryIntegrator:
             detected_objects: Detected UI elements/objects
             context: Additional context
             chain_id: Evidence chain to add to
-            
+
         Returns:
             Reference ID
         """
@@ -213,14 +213,14 @@ class MultimodalMemoryIntegrator:
         chain_id: str | None = None,
     ) -> str:
         """Store a DOM snapshot with filtering.
-        
+
         Args:
             dom_data: Full DOM HTML
             description: Human-readable description
             relevant_elements: Filtered relevant elements
             context: Additional context
             chain_id: Evidence chain to add to
-            
+
         Returns:
             Reference ID
         """
@@ -267,7 +267,7 @@ class MultimodalMemoryIntegrator:
         chain_id: str | None = None,
     ) -> str:
         """Store terminal command output.
-        
+
         Args:
             command: Command executed
             output: Command output
@@ -275,7 +275,7 @@ class MultimodalMemoryIntegrator:
             description: Human-readable description
             context: Additional context
             chain_id: Evidence chain to add to
-            
+
         Returns:
             Reference ID
         """
@@ -318,12 +318,12 @@ class MultimodalMemoryIntegrator:
         limit: int = 10,
     ) -> list[MultimodalReference]:
         """Search multimodal content by text query.
-        
+
         Args:
             query: Text query
             media_type: Filter by media type
             limit: Max results
-            
+
         Returns:
             List of matching references
         """
@@ -356,10 +356,10 @@ class MultimodalMemoryIntegrator:
 
     def get_full_content(self, ref_id: str) -> bytes | None:
         """Get full content if stored.
-        
+
         Args:
             ref_id: Reference ID
-            
+
         Returns:
             Full content bytes, or None if not stored
         """
@@ -371,10 +371,10 @@ class MultimodalMemoryIntegrator:
 
     def export_reference(self, ref_id: str) -> dict[str, Any] | None:
         """Export a reference in JSON format.
-        
+
         Args:
             ref_id: Reference to export
-            
+
         Returns:
             Reference data
         """
@@ -411,11 +411,11 @@ class MultimodalMemoryIntegrator:
 
     def _create_thumbnail(self, screenshot_data: str, max_size: int = 200) -> str:
         """Create a thumbnail from screenshot.
-        
+
         Args:
             screenshot_data: Base64 screenshot
             max_size: Max dimension in pixels
-            
+
         Returns:
             Base64 thumbnail
         """
@@ -431,11 +431,11 @@ class MultimodalMemoryIntegrator:
         relevant_elements: list[dict[str, Any]] | None = None,
     ) -> str:
         """Filter DOM to relevant elements only.
-        
+
         Args:
             dom_data: Full DOM HTML
             relevant_elements: Elements to keep
-            
+
         Returns:
             Filtered DOM
         """

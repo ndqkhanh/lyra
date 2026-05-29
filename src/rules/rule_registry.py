@@ -2,7 +2,7 @@
 Rule registry for managing rules.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .rule import Rule, RuleCategory, RuleSeverity
 
@@ -16,11 +16,11 @@ class RuleRegistry:
 
     def __init__(self):
         """Initialize rule registry."""
-        self.rules: Dict[str, Rule] = {}
-        self._rules_by_category: Dict[RuleCategory, List[Rule]] = {
+        self.rules: dict[str, Rule] = {}
+        self._rules_by_category: dict[RuleCategory, list[Rule]] = {
             category: [] for category in RuleCategory
         }
-        self._rules_by_language: Dict[str, List[Rule]] = {}
+        self._rules_by_language: dict[str, list[Rule]] = {}
 
     def register(self, rule: Rule) -> None:
         """
@@ -74,7 +74,7 @@ class RuleRegistry:
 
         return True
 
-    def get(self, rule_id: str) -> Optional[Rule]:
+    def get(self, rule_id: str) -> Rule | None:
         """
         Get a rule by ID.
 
@@ -89,9 +89,9 @@ class RuleRegistry:
     def find_rules_for_file(
         self,
         file_path: str,
-        language: Optional[str] = None,
-        category: Optional[RuleCategory] = None,
-    ) -> List[Rule]:
+        language: str | None = None,
+        category: RuleCategory | None = None,
+    ) -> list[Rule]:
         """
         Find all rules that apply to a file.
 
@@ -131,10 +131,10 @@ class RuleRegistry:
 
     def list_rules(
         self,
-        category: Optional[RuleCategory] = None,
-        language: Optional[str] = None,
+        category: RuleCategory | None = None,
+        language: str | None = None,
         enabled_only: bool = False,
-    ) -> List[Rule]:
+    ) -> list[Rule]:
         """
         List registered rules.
 
@@ -197,7 +197,7 @@ class RuleRegistry:
             self._rules_by_category[category].clear()
         self._rules_by_language.clear()
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """
         Get registry statistics.
 

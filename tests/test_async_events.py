@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Test async event handler support."""
 
-import sys
-import os
 import asyncio
+import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../packages/lyra-cli/src'))
 
 from lyra_cli.events import EventDispatcher, TextDelta, TurnStarted
@@ -90,7 +91,7 @@ async def test_mixed_handlers():
     # Sync handlers execute immediately, async handlers execute later
     # So we should see: sync1, sync2, then async1, async2
     if len(order) == 4:
-        print(f"✓ PASS - All 4 handlers executed")
+        print("✓ PASS - All 4 handlers executed")
     else:
         print(f"✗ FAIL - Expected 4 handlers, got {len(order)}")
 
@@ -122,7 +123,7 @@ async def test_async_wildcard():
     print(f"Events captured: {events}")
 
     if len(events) == 2:
-        print(f"✓ PASS - Wildcard handler received all events")
+        print("✓ PASS - Wildcard handler received all events")
     else:
         print(f"✗ FAIL - Expected 2 events, got {len(events)}")
 

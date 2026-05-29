@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
 from lyra_colony import (
     AgentColony,
     AgentNotFoundError,
@@ -14,9 +12,6 @@ from lyra_colony import (
     AgentRoleKind,
     AgentSpec,
     AgentStatus,
-    AlertRule,
-    AlertSeverity,
-    Channel,
     ColonyConfig,
     ColonyHealth,
     ColonyOverCapacityError,
@@ -39,7 +34,6 @@ from lyra_colony import (
     TaskAssignment,
     TaskState,
 )
-
 
 # ============================================================================
 # Agent Spec tests
@@ -433,7 +427,7 @@ class TestMonitoring:
         assert s.health_score == 0.0
 
     def test_alert_acknowledge_and_resolve(self) -> None:
-        from lyra_colony.monitoring import ColonyMonitor, AlertRule
+        from lyra_colony.monitoring import AlertRule, ColonyMonitor
         monitor = ColonyMonitor()
         monitor.register_agent("a")
         rule = AlertRule(name="test_alert", metric="queue_depth", threshold=0.0, comparator="gt", cooldown_seconds=0.0)
@@ -481,7 +475,7 @@ class TestMonitoring:
         assert s.messages_per_second >= 0.0
 
     async def test_background_collection(self) -> None:
-        from lyra_colony.monitoring import ColonyMonitor, AlertRule
+        from lyra_colony.monitoring import AlertRule, ColonyMonitor
         monitor = ColonyMonitor()
         monitor.register_agent("a")
         monitor.add_alert_rule(AlertRule(name="check", metric="queue_depth", threshold=100.0, comparator="gt", cooldown_seconds=0.0))

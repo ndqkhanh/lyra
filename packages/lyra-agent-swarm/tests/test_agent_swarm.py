@@ -342,7 +342,7 @@ class TestDispatcher:
         assert config.load_balance
 
     def test_dispatch_decision_creation(self) -> None:
-        registry = AgentRegistry(prebuilt=True)
+        AgentRegistry(prebuilt=True)
         ticket = TaskTicket("t1", "test", frozenset({Capability.CODE_GEN}))
         decision = DispatchDecision(
             task=ticket,
@@ -687,7 +687,7 @@ class TestSquadManager:
 
     def test_squad_manager_rebalance_single_squad(self) -> None:
         manager = SquadManager()
-        squad = manager.create_squad("lead", ["m1", "m2"], SquadDomain.BACKEND)
+        manager.create_squad("lead", ["m1", "m2"], SquadDomain.BACKEND)
         result = manager.rebalance_squads()
         assert len(result) == 1
         assert result[0].leader == "lead"

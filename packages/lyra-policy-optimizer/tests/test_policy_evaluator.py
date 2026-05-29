@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_policy_optimizer.exceptions import PolicyEvaluationError
 from lyra_policy_optimizer.policy_evaluator import (
-    EvalConfig,
     EpisodeResult,
+    EvalConfig,
     PolicyComparison,
     PolicyEvaluation,
     PolicyEvaluator,

@@ -193,7 +193,6 @@ class SolutionArchitect:
     def _design_components(
         requirements: str, project: str
     ) -> list[SystemComponent]:
-        has_api = True
         has_ui = any(kw in requirements for kw in ["ui", "frontend", "web", "dashboard"])
         has_event = any(
             kw in requirements for kw in

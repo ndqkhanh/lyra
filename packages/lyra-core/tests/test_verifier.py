@@ -27,15 +27,15 @@ from lyra_core.verifier.subjective import (
 
 
 def _evidence(**over) -> ObjectiveEvidence:
-    base = dict(
-        acceptance_tests_run=["tests/test_x.py::test_a"],
-        acceptance_tests_passed=["tests/test_x.py::test_a"],
-        expected_files_touched=["src/x.py"],
-        forbidden_files_touched=[],
-        coverage_before=80.0,
-        coverage_after=82.0,
-        coverage_tolerance_pct=1.0,
-    )
+    base = {
+        "acceptance_tests_run": ["tests/test_x.py::test_a"],
+        "acceptance_tests_passed": ["tests/test_x.py::test_a"],
+        "expected_files_touched": ["src/x.py"],
+        "forbidden_files_touched": [],
+        "coverage_before": 80.0,
+        "coverage_after": 82.0,
+        "coverage_tolerance_pct": 1.0,
+    }
     base.update(over)
     return ObjectiveEvidence(**base)
 

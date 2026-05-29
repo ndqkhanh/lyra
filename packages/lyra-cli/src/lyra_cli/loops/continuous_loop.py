@@ -24,7 +24,7 @@ class ContinuousLoop:
 
             try:
                 # Execute task
-                result = self.task()
+                self.task()
                 print(f"✅ Iteration {self.iteration} completed")
 
                 # Check max iterations

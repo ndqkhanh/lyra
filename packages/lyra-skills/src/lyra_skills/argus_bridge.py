@@ -40,7 +40,6 @@ from harness_skill_router.catalog import default_tier_for_source
 
 from .loader import SkillManifest
 
-
 _LYRA_RESERVED_KEYS = frozenset({
     "display_name",
     "version",

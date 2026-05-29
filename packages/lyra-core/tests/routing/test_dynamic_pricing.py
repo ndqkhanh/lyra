@@ -42,7 +42,7 @@ class TestProviderQuote:
         assert quote.tier == PricingTier.STANDARD
 
 
-import pytest
+import pytest  # noqa: E402
 
 
 class TestDynamicPricingEngine:

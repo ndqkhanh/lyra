@@ -1,6 +1,5 @@
 """Tests for Phase K — EvoSkills co-evolutionary verification."""
 import pytest
-
 from lyra_evolution.evoverifier import (
     CoEvolutionGate,
     IsolatedVerifier,

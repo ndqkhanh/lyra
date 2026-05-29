@@ -1,12 +1,9 @@
 """Tests for the lyra-skill-curator package (80+ tests covering all modules)."""
 from __future__ import annotations
 
-import math
-import random
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
-
 from lyra_skill_curator.confidence_scorer import (
     ConfidenceScore,
     ConfidenceScorer,
@@ -877,7 +874,7 @@ class TestInstinctExtractor:
     def test_extract_varied_instinct_types(self) -> None:
         sessions = tuple(f"session_{i}" for i in range(20))
         instincts = extract_from_sessions(sessions)
-        types_found = {i.pattern_name.split("_")[0] for i in instincts}
+        {i.pattern_name.split("_")[0] for i in instincts}
         assert len(instincts) > 1
 
 

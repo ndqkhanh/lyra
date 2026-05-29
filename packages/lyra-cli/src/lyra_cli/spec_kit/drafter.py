@@ -70,5 +70,5 @@ class Drafter:
     async def _emit_chunk(self, artifact: str, chunk: str) -> None:
         """Emit draft chunk event."""
         if self.event_bus:
-            event = SpecDraftChunk(artifact=artifact, chunk=chunk)
+            SpecDraftChunk(artifact=artifact, chunk=chunk)
             # Would emit to event bus here

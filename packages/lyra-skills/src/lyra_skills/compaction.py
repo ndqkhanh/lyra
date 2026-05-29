@@ -8,10 +8,9 @@ from __future__ import annotations
 
 import time
 from collections import defaultdict
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Iterable
-
 
 # ── Constants ──────────────────────────────────────────────────────────────
 

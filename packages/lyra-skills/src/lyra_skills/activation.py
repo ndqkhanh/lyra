@@ -22,11 +22,10 @@ chat loop (and the system-prompt block) lives in
 from __future__ import annotations
 
 import re
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass
-from typing import Callable, Iterable, Sequence
 
 from .loader import SkillManifest
-
 
 # Phase O.6: optional resolver that maps a skill id → utility score
 # (typically via the on-disk ledger). Returning a higher number

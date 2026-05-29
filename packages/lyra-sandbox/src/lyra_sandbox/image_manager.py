@@ -7,9 +7,7 @@ import json
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Sequence
 
-from .exceptions import ImageError
 
 
 class ImageBuildStatus(str, Enum):

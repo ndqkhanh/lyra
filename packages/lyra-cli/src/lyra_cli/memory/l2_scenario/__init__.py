@@ -318,7 +318,7 @@ class ScenarioStore:
         )
 
         # Get unique sessions
-        sessions = set(s.session_id for s in all_scenes)
+        sessions = {s.session_id for s in all_scenes}
 
         return {
             "total_scenes": len(all_scenes),

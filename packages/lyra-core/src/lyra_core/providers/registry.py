@@ -678,9 +678,9 @@ def providers_by_capability(
 #
 # A value of ``None`` means "use the model's registered default";
 # non-positive values raise to prevent pathological 0-token responses.
-import json as _json
-import os as _os
-from pathlib import Path as _Path
+import json as _json  # noqa: E402
+import os as _os  # noqa: E402
+from pathlib import Path as _Path  # noqa: E402
 
 _PER_MODEL_MAX_OUTPUT: dict[str, int] = {
     "claude-opus-4.5": 32_000,

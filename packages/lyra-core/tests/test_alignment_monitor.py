@@ -174,7 +174,7 @@ class TestDriftReport:
 class TestWindowManagement:
     def test_window_prunes_old_samples(self):
         monitor = AlignmentMonitor(window_size=10)
-        for i in range(15):
+        for _i in range(15):
             monitor.record_action_vector(_nominal_vector())
         assert len(monitor.samples) == 10
 

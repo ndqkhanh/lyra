@@ -155,7 +155,7 @@ def test_e2e_trust_fetch_install_flow(session, temp_home, monkeypatch):
     # 3. Install: Install the fetched bundle
     # The fetch command should have saved the bundle to a temp location
     # For this test, we'll install directly from the fetched location
-    install_dir = temp_home / "installed" / "test-bundle-1"
+    temp_home / "installed" / "test-bundle-1"
 
     # Verify bundle was fetched (it should be in session state)
     assert hasattr(session, "_v311_marketplace")
@@ -267,7 +267,7 @@ def test_e2e_signature_verification_failure(session, temp_home, monkeypatch):
     secret = b"real-secret"
 
     # Sign with correct secret
-    correct_sig = sign_archive(archive, MarketplaceKey(fingerprint="test-fp", secret=secret))
+    sign_archive(archive, MarketplaceKey(fingerprint="test-fp", secret=secret))
 
     # Mock fetch
     monkeypatch.setattr(

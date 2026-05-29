@@ -21,7 +21,7 @@ from __future__ import annotations
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from harness_skill_router import (
     Budget,
@@ -80,7 +80,7 @@ class CascadePick:
         cls,
         ranked: RankedSkill,
         manifest: SkillManifest,
-    ) -> "CascadePick":
+    ) -> CascadePick:
         return cls(manifest=manifest, score=ranked.score, reason=ranked.reason)
 
 
@@ -99,7 +99,7 @@ class CascadeResult:
     decision: RouterDecision
 
     @property
-    def top(self) -> Optional[CascadePick]:
+    def top(self) -> CascadePick | None:
         return self.picks[0] if self.picks else None
 
     @property
@@ -313,7 +313,7 @@ class LyraArgusCascade:
             skills, decisions,
         )
         changed = 0
-        for prior, after in zip(skills, updated):
+        for prior, after in zip(skills, updated, strict=False):
             if after.trust_tier is not prior.trust_tier:
                 self.host.catalog.add(after)
                 self._manifests[after.name] = argus_skill_to_manifest(after)
@@ -433,7 +433,7 @@ class LyraArgusCascade:
     def state_dir(self) -> Path:
         return self._state_dir
 
-    def manifest_for(self, skill_id: str) -> Optional[SkillManifest]:
+    def manifest_for(self, skill_id: str) -> SkillManifest | None:
         """Return the cached manifest, or rebuild it from the Argus skill."""
         cached = self._manifests.get(skill_id)
         if cached is not None:

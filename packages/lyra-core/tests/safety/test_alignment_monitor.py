@@ -91,7 +91,7 @@ class TestAlignmentMonitorBasics:
         ]
         monitor.calibrate(samples)
         expected = tuple(0.8 for _ in range(DEFAULT_DIMENSIONS))
-        for a, b in zip(monitor.baseline, expected):
+        for a, b in zip(monitor.baseline, expected, strict=False):
             assert a == pytest.approx(b, abs=0.01)
 
     def test_calibrate_empty_does_nothing(self) -> None:

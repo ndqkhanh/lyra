@@ -79,7 +79,7 @@ class TestSelfRewriteExceptions:
     def test_exception_with_cause(self) -> None:
         try:
             raise ValueError("inner cause")
-        except ValueError as cause:
+        except ValueError:
             err = HyperAgentError("outer error")
             assert err.args[0] == "outer error"
 

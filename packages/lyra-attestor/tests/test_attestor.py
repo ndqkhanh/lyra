@@ -1,7 +1,7 @@
 """Tests for Attestor package."""
-import pytest
 from datetime import datetime
-from lyra_attestor import Attestor, AttestationGraph, VerificationStatus, MeasurementClaim
+
+from lyra_attestor import AttestationGraph, Attestor, MeasurementClaim, VerificationStatus
 
 
 class TestAttestor:

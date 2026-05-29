@@ -4,16 +4,14 @@ from __future__ import annotations
 
 import logging
 import time
-from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 
 from .belief_system import Belief, BeliefSource, BeliefSystem
 from .knowledge_base import KnowledgeBase, Rule, RuleType
-from .exceptions import InferenceError
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +65,7 @@ class InferenceEngine:
     def __init__(
         self,
         belief_system: BeliefSystem,
-        knowledge_base: Optional[KnowledgeBase] = None,
+        knowledge_base: KnowledgeBase | None = None,
     ) -> None:
         self.belief_system = belief_system
         self.knowledge_base = knowledge_base
@@ -97,7 +95,7 @@ class InferenceEngine:
         rules_applied: list[str] = []
         explanation_parts: list[str] = []
 
-        for step in range(max_steps):
+        for _step in range(max_steps):
             new_found = False
 
             for rule_id, rule in self.knowledge_base._rules.items() if self.knowledge_base else []:
@@ -242,7 +240,7 @@ class InferenceEngine:
     def abduce(
         self,
         observation: str,  # belief_id
-        candidate_explanations: Optional[list[str]] = None,  # belief_ids
+        candidate_explanations: list[str] | None = None,  # belief_ids
         max_explanations: int = 5,
     ) -> InferenceResult:
         """Perform abductive reasoning: find the best explanation.
@@ -279,7 +277,7 @@ class InferenceEngine:
             if self.knowledge_base:
                 for rule in self.knowledge_base.get_rules_applicable_to(obs_belief.statement):
                     # The rule's antecedent is a candidate explanation
-                    for bid, belief in self.belief_system._beliefs.items():
+                    for _bid, belief in self.belief_system._beliefs.items():
                         if rule.antecedent.lower() in belief.statement.lower():
                             candidates.append(belief)
                             break

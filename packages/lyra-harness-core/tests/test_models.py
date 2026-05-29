@@ -1,5 +1,4 @@
 import pytest
-
 from lyra_harness_core.messages import Message, StopReason
 from lyra_harness_core.models import MockLLM, get_default_llm
 

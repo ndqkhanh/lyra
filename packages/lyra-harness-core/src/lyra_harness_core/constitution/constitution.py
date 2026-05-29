@@ -8,8 +8,8 @@ cold-start substrate.
 from __future__ import annotations
 
 import time
+from collections.abc import Iterable
 from dataclasses import dataclass, field, replace
-from typing import Iterable, Optional
 
 
 @dataclass(frozen=True)
@@ -75,8 +75,8 @@ class Constitution:
         self,
         principle: Principle,
         *,
-        replace_text: Optional[str] = None,
-    ) -> "Constitution":
+        replace_text: str | None = None,
+    ) -> Constitution:
         """Add a principle (or replace one matching ``replace_text``).
 
         Returns a new Constitution with version + 1.
@@ -94,7 +94,7 @@ class Constitution:
             updated_at=time.time(),
         )
 
-    def without_principle(self, *, text: str) -> "Constitution":
+    def without_principle(self, *, text: str) -> Constitution:
         """Remove the principle whose text matches; returns new instance."""
         new_principles = tuple(p for p in self.principles if p.text != text)
         if len(new_principles) == len(self.principles):
@@ -106,7 +106,7 @@ class Constitution:
             updated_at=time.time(),
         )
 
-    def bumped(self, *, text: str, delta: float) -> "Constitution":
+    def bumped(self, *, text: str, delta: float) -> Constitution:
         """Adjust the weight of a principle. Used by edit-signal drift updates."""
         new_principles: list[Principle] = []
         changed = False
@@ -146,7 +146,7 @@ def suggest_principle_from_edit(
     original: str,
     edited: str,
     rationale_template: str = "Inferred from user edit on {date}.",
-) -> Optional[Principle]:
+) -> Principle | None:
     """Naive PRELUDE/CIPHER-style principle inference from an edit pair.
 
     Heuristic only — production wires an LM-backed inferer. The default detects
@@ -182,7 +182,7 @@ class ConstitutionRegistry:
 
     _store: dict[str, Constitution] = field(default_factory=dict)
 
-    def get(self, user_id: str) -> Optional[Constitution]:
+    def get(self, user_id: str) -> Constitution | None:
         return self._store.get(user_id)
 
     def get_or_create(self, user_id: str, *, default_principles: Iterable[Principle] = ()) -> Constitution:
@@ -202,7 +202,7 @@ class ConstitutionRegistry:
         user_id: str,
         original: str,
         edited: str,
-    ) -> Optional[Constitution]:
+    ) -> Constitution | None:
         """Infer a principle from an edit pair; append to user's constitution.
 
         Returns the new constitution if a principle was inferred, None otherwise.

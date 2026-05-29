@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_eval_pipeline import HistoricalEntry, Leaderboard, LeaderboardEntry, LeaderboardManager
 from lyra_eval_pipeline.exceptions import LeaderboardError
 

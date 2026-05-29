@@ -1,9 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from enum import Enum
-from typing import Sequence
 
 from .exceptions import RiskAssessmentError
 from .governance_engine import ActionRequest, ActionType

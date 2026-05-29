@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_harness_core.verifier import (
     AxisVerdict,
     CompositeVerdict,
@@ -15,7 +14,6 @@ from lyra_harness_core.verifier import (
     VerifierAxis,
     VerifierComposer,
 )
-
 
 # --- AxisVerdict / CompositeVerdict ------------------------------------
 

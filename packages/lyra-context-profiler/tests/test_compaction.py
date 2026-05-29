@@ -3,7 +3,6 @@
 import asyncio
 
 import pytest
-
 from lyra_context_profiler.compaction import (
     CompactionEngine,
     CompactionMode,
@@ -12,10 +11,8 @@ from lyra_context_profiler.compaction import (
     DuplicateDetector,
     EmptyContextError,
     HierarchicalSummarizer,
-    SummarizationLevel,
 )
 from lyra_context_profiler.strategies import CompactionStrategy
-
 
 # ── Fixtures ────────────────────────────────────────────────────────────────────
 

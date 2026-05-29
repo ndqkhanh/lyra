@@ -102,7 +102,7 @@ class Documentation:
 class CodeAnalyzer:
     """
     Analyzes code to extract specifications.
-    
+
     Features:
     - AST-based analysis
     - Type inference
@@ -116,10 +116,10 @@ class CodeAnalyzer:
 
     def analyze_function(self, code: str) -> Specification:
         """Analyze a function and extract specification.
-        
+
         Args:
             code: Function code
-            
+
         Returns:
             Function specification
         """
@@ -178,10 +178,10 @@ class CodeAnalyzer:
 
     def analyze_class(self, code: str) -> Specification:
         """Analyze a class and extract specification.
-        
+
         Args:
             code: Class code
-            
+
         Returns:
             Class specification
         """
@@ -219,10 +219,10 @@ class CodeAnalyzer:
 
     def _get_type_annotation(self, arg: ast.arg) -> str | None:
         """Get type annotation for argument.
-        
+
         Args:
             arg: AST argument node
-            
+
         Returns:
             Type annotation string or None
         """
@@ -232,10 +232,10 @@ class CodeAnalyzer:
 
     def _parse_docstring(self, docstring: str) -> tuple[str, list[str]]:
         """Parse docstring to extract description and examples.
-        
+
         Args:
             docstring: Docstring text
-            
+
         Returns:
             Tuple of (description, examples)
         """
@@ -265,7 +265,7 @@ class CodeAnalyzer:
 class TestGenerator:
     """
     Generates tests from specifications.
-    
+
     Features:
     - Unit test generation
     - Edge case generation
@@ -279,10 +279,10 @@ class TestGenerator:
 
     def generate_tests(self, spec: Specification) -> list[TestCase]:
         """Generate tests from specification.
-        
+
         Args:
             spec: Specification
-            
+
         Returns:
             List of test cases
         """
@@ -302,10 +302,10 @@ class TestGenerator:
 
     def _generate_basic_test(self, spec: Specification) -> TestCase:
         """Generate basic unit test.
-        
+
         Args:
             spec: Specification
-            
+
         Returns:
             Test case
         """
@@ -333,10 +333,10 @@ class TestGenerator:
 
     def _generate_edge_case_tests(self, spec: Specification) -> list[TestCase]:
         """Generate edge case tests.
-        
+
         Args:
             spec: Specification
-            
+
         Returns:
             List of test cases
         """
@@ -368,10 +368,10 @@ class TestGenerator:
 
     def _generate_property_tests(self, spec: Specification) -> list[TestCase]:
         """Generate property-based tests.
-        
+
         Args:
             spec: Specification
-            
+
         Returns:
             List of test cases
         """
@@ -394,10 +394,10 @@ result2 = {spec.name}(value)
 
     def _generate_sample_value(self, param: Parameter) -> str:
         """Generate sample value for parameter.
-        
+
         Args:
             param: Parameter
-            
+
         Returns:
             Sample value string
         """
@@ -425,7 +425,7 @@ result2 = {spec.name}(value)
 class DocumentationGenerator:
     """
     Generates documentation from specifications.
-    
+
     Features:
     - Markdown generation
     - API reference generation
@@ -439,10 +439,10 @@ class DocumentationGenerator:
 
     def generate_documentation(self, specs: list[Specification]) -> Documentation:
         """Generate documentation from specifications.
-        
+
         Args:
             specs: List of specifications
-            
+
         Returns:
             Generated documentation
         """
@@ -485,10 +485,10 @@ class DocumentationGenerator:
 
     def _generate_functions_section(self, functions: list[Specification]) -> str:
         """Generate functions section.
-        
+
         Args:
             functions: List of function specs
-            
+
         Returns:
             Markdown text
         """
@@ -517,10 +517,10 @@ class DocumentationGenerator:
 
     def _generate_classes_section(self, classes: list[Specification]) -> str:
         """Generate classes section.
-        
+
         Args:
             classes: List of class specs
-            
+
         Returns:
             Markdown text
         """
@@ -536,10 +536,10 @@ class DocumentationGenerator:
 
     def _generate_api_entry(self, spec: Specification) -> str:
         """Generate API reference entry.
-        
+
         Args:
             spec: Specification
-            
+
         Returns:
             API entry text
         """
@@ -553,7 +553,7 @@ class DocumentationGenerator:
 class AutoSpecKit:
     """
     Main auto-spec kit engine.
-    
+
     Combines code analysis, test generation, and documentation generation.
     """
 
@@ -565,11 +565,11 @@ class AutoSpecKit:
 
     def generate_spec(self, code: str, spec_type: SpecType = SpecType.FUNCTION) -> Specification:
         """Generate specification from code.
-        
+
         Args:
             code: Source code
             spec_type: Type of specification
-            
+
         Returns:
             Generated specification
         """
@@ -586,10 +586,10 @@ class AutoSpecKit:
 
     def generate_tests(self, spec: Specification) -> list[TestCase]:
         """Generate tests from specification.
-        
+
         Args:
             spec: Specification
-            
+
         Returns:
             List of test cases
         """
@@ -597,10 +597,10 @@ class AutoSpecKit:
 
     def generate_documentation(self, specs: list[Specification]) -> Documentation:
         """Generate documentation from specifications.
-        
+
         Args:
             specs: List of specifications
-            
+
         Returns:
             Generated documentation
         """
@@ -608,10 +608,10 @@ class AutoSpecKit:
 
     def generate_all(self, code: str) -> tuple[Specification, list[TestCase], Documentation]:
         """Generate spec, tests, and docs from code.
-        
+
         Args:
             code: Source code
-            
+
         Returns:
             Tuple of (spec, tests, documentation)
         """

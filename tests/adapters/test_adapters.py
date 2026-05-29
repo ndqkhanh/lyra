@@ -15,7 +15,6 @@ from adapters.base import (
     AdapterFactory,
     ClaudeCodeAdapter,
     CursorAdapter,
-    HarnessAdapter,
     HarnessType,
     Hook,
     JetBrainsAdapter,

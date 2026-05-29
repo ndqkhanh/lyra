@@ -1,9 +1,7 @@
 """Tests for ANTHROPIC_BASE_URL support."""
 
 import os
-from unittest.mock import MagicMock, patch
-
-import pytest
+from unittest.mock import patch
 
 
 def test_anthropic_base_url_from_env():
@@ -12,7 +10,7 @@ def test_anthropic_base_url_from_env():
         with patch("anthropic.Anthropic") as mock_anthropic:
             from lyra_harness_core.models import AnthropicLLM
 
-            llm = AnthropicLLM(api_key="test-key")
+            AnthropicLLM(api_key="test-key")
 
             # Verify Anthropic client was initialized with custom base_url
             mock_anthropic.assert_called_once()
@@ -26,7 +24,7 @@ def test_anthropic_base_url_parameter():
         with patch("anthropic.Anthropic") as mock_anthropic:
             from lyra_harness_core.models import AnthropicLLM
 
-            llm = AnthropicLLM(
+            AnthropicLLM(
                 api_key="test-key",
                 base_url="https://param.example.com"
             )
@@ -43,7 +41,7 @@ def test_anthropic_default_base_url():
         with patch("anthropic.Anthropic") as mock_anthropic:
             from lyra_harness_core.models import AnthropicLLM
 
-            llm = AnthropicLLM(api_key="test-key")
+            AnthropicLLM(api_key="test-key")
 
             # Verify default base_url is not passed (SDK uses its own default)
             mock_anthropic.assert_called_once()
@@ -57,7 +55,7 @@ def test_lyra_anthropic_base_url():
         with patch("anthropic.Anthropic") as mock_anthropic:
             from lyra_cli.providers.anthropic import LyraAnthropicLLM
 
-            llm = LyraAnthropicLLM(api_key="test-key")
+            LyraAnthropicLLM(api_key="test-key")
 
             # Verify base_url was passed through
             mock_anthropic.assert_called_once()

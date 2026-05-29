@@ -106,7 +106,7 @@ def test_fancy_panel_capped_on_ultrawide(
         mode="plan",
         term_cols=240,
     )
-    width = _max_visible_line_width(banner)
+    _max_visible_line_width(banner)
     # The panel itself ≤ 100; metadata block below the panel may render
     # the absolute repo path, which can exceed 100 cols on long paths.
     # We only constrain the *panel* via panel-border-character count.

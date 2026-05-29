@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """Test OpenClaw-inspired features"""
 
-import sys
 import os
+import sys
 
 # Add project to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
 
 def test_doctor():
     """Test doctor command"""
-    from rich.console import Console
     from lyra_cli.cli.doctor import DoctorCommand
+    from rich.console import Console
 
     print("=" * 80)
     print("TESTING DOCTOR COMMAND (OpenClaw pattern)")
@@ -25,8 +25,8 @@ def test_doctor():
 
 def test_onboarding():
     """Test onboarding wizard structure"""
-    from rich.console import Console
     from lyra_cli.cli.onboarding import OnboardingWizard
+    from rich.console import Console
 
     print("\n" + "=" * 80)
     print("TESTING ONBOARDING WIZARD (OpenClaw pattern)")

@@ -6,10 +6,8 @@ import pytest
 
 from lyra_orchestration import (
     AgentCoordinator,
-    AgentStatus,
     EventBus,
     ScanCompleted,
-    VulnerabilityDiscovered,
 )
 
 

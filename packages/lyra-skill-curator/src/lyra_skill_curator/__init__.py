@@ -1,6 +1,46 @@
 """lyra-skill-curator: RL-trained skill curation, mining, evaluation, promotion, instinct extraction, confidence scoring, and marketplace sync."""
 from __future__ import annotations
 
+from .confidence_scorer import (
+    ConfidenceScore,
+    ConfidenceScorer,
+    EvidenceItem,
+    EvidenceType,
+)
+from .exceptions import (
+    CuratorError,
+    EvaluationError,
+    ExtractionError,
+    MiningError,
+    PromotionError,
+    ScorerError,
+    SyncError,
+)
+from .instinct_extractor import (
+    ExtractionConfig,
+    Instinct,
+    InstinctExtractor,
+    InstinctType,
+)
+from .marketplace_sync import (
+    MarketplaceSync,
+    RegistryEntry,
+    SyncConfig,
+    SyncResult,
+)
+from .promotion_gate import (
+    GateCheck,
+    GateConfig,
+    GateResult,
+    PromotionGate,
+    PromotionStatus,
+)
+from .quality_evaluator import (
+    EvaluationConfig,
+    QualityCriteria,
+    QualityEvaluator,
+    QualityScore,
+)
 from .rl_curator import (
     CuratorAction,
     CuratorConfig,
@@ -16,46 +56,6 @@ from .skill_miner import (
     SkillMiner,
     SkillMiningResult,
     SourceType,
-)
-from .quality_evaluator import (
-    EvaluationConfig,
-    QualityCriteria,
-    QualityEvaluator,
-    QualityScore,
-)
-from .promotion_gate import (
-    GateCheck,
-    GateConfig,
-    GateResult,
-    PromotionGate,
-    PromotionStatus,
-)
-from .instinct_extractor import (
-    ExtractionConfig,
-    Instinct,
-    InstinctExtractor,
-    InstinctType,
-)
-from .confidence_scorer import (
-    ConfidenceScore,
-    ConfidenceScorer,
-    EvidenceItem,
-    EvidenceType,
-)
-from .marketplace_sync import (
-    MarketplaceSync,
-    RegistryEntry,
-    SyncConfig,
-    SyncResult,
-)
-from .exceptions import (
-    CuratorError,
-    EvaluationError,
-    ExtractionError,
-    MiningError,
-    PromotionError,
-    ScorerError,
-    SyncError,
 )
 
 __version__ = "0.1.0"

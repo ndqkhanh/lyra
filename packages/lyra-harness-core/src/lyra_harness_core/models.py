@@ -7,7 +7,8 @@ from __future__ import annotations
 
 import os
 from abc import ABC, abstractmethod
-from typing import Any, Iterable, Optional
+from collections.abc import Iterable
+from typing import Any
 
 from .messages import Message, StopReason, ToolCall
 
@@ -19,7 +20,7 @@ class LLMProvider(ABC):
     def generate(
         self,
         messages: list[Message],
-        tools: Optional[list[dict[str, Any]]] = None,
+        tools: list[dict[str, Any]] | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.0,
     ) -> Message:
@@ -38,7 +39,7 @@ class MockLLM(LLMProvider):
     END_TURN "done" message so tests do not hang.
     """
 
-    def __init__(self, scripted_outputs: Optional[Iterable[Any]] = None) -> None:
+    def __init__(self, scripted_outputs: Iterable[Any] | None = None) -> None:
         self._script: list[Any] = list(scripted_outputs or [])
         self._idx = 0
         self.calls: list[list[Message]] = []
@@ -46,7 +47,7 @@ class MockLLM(LLMProvider):
     def generate(
         self,
         messages: list[Message],
-        tools: Optional[list[dict[str, Any]]] = None,
+        tools: list[dict[str, Any]] | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.0,
     ) -> Message:
@@ -92,9 +93,9 @@ class AnthropicLLM(LLMProvider):  # pragma: no cover - requires external service
 
     def __init__(
         self,
-        model: Optional[str] = None,
-        api_key: Optional[str] = None,
-        base_url: Optional[str] = None,
+        model: str | None = None,
+        api_key: str | None = None,
+        base_url: str | None = None,
     ) -> None:
         try:
             import anthropic  # type: ignore
@@ -125,7 +126,7 @@ class AnthropicLLM(LLMProvider):  # pragma: no cover - requires external service
     def generate(
         self,
         messages: list[Message],
-        tools: Optional[list[dict[str, Any]]] = None,
+        tools: list[dict[str, Any]] | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.0,
     ) -> Message:

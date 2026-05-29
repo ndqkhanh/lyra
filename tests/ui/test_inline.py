@@ -3,17 +3,18 @@
 import sys
 from pathlib import Path
 
+
 def log(msg):
     print(f"[DEBUG] {msg}", file=sys.stderr, flush=True)
 
 log("Starting inline test...")
 
-from lyra_cli.tui_v2.transport import LyraTransport
 from harness_tui import ProjectConfig
 from lyra_cli.tui_v2 import lyra_theme
-from lyra_cli.tui_v2.sidebar import build_lyra_sidebar_tabs
-from lyra_cli.tui_v2.commands import register_lyra_commands
 from lyra_cli.tui_v2.app import LyraHarnessApp
+from lyra_cli.tui_v2.commands import register_lyra_commands
+from lyra_cli.tui_v2.sidebar import build_lyra_sidebar_tabs
+from lyra_cli.tui_v2.transport import LyraTransport
 
 transport = LyraTransport(repo_root=Path.cwd(), model='claude-sonnet-4.6', max_steps=20)
 cfg = ProjectConfig(

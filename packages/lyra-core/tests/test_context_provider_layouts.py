@@ -60,7 +60,7 @@ def test_get_layout_unknown_returns_default():
 
 
 def test_list_layouts_returns_all_registered():
-    names = {l.provider for l in list_layouts()}
+    names = {layout.provider for layout in list_layouts()}
     assert names == {"anthropic", "openai", "gemini", "ollama", "vllm"}
 
 

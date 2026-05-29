@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
-import itertools
 import logging
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 
-from .belief_system import Belief, BeliefSystem, BeliefStatus
+from .belief_system import Belief, BeliefStatus, BeliefSystem
 
 logger = logging.getLogger(__name__)
 
@@ -155,7 +154,7 @@ class ConsistencyManager:
         for bid, b in active_beliefs:
             by_domain[b.domain].append((bid, b))
 
-        for domain, beliefs in by_domain.items():
+        for _domain, beliefs in by_domain.items():
             for i in range(len(beliefs)):
                 for j in range(i + 1, len(beliefs)):
                     bid_a, b_a = beliefs[i]

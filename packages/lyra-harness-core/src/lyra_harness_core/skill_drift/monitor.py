@@ -18,7 +18,6 @@ from __future__ import annotations
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Optional
 
 from ..provenance import WitnessLattice
 from .types import DriftAlert, DriftPolicy, SkillInvocation
@@ -39,7 +38,7 @@ class SkillDriftMonitor:
     """
 
     policy: DriftPolicy = field(default_factory=DriftPolicy)
-    lattice: Optional[WitnessLattice] = None
+    lattice: WitnessLattice | None = None
     _invocations: dict[str, list[SkillInvocation]] = field(
         default_factory=lambda: defaultdict(list),
     )
@@ -52,8 +51,8 @@ class SkillDriftMonitor:
         *,
         skill_id: str,
         succeeded: bool,
-        score: Optional[float] = None,
-        metadata: Optional[dict] = None,
+        score: float | None = None,
+        metadata: dict | None = None,
     ) -> SkillInvocation:
         """Append one invocation.
 
@@ -81,7 +80,7 @@ class SkillDriftMonitor:
     def known_skills(self) -> list[str]:
         return sorted(self._invocations)
 
-    def baseline_rate(self, skill_id: str) -> Optional[float]:
+    def baseline_rate(self, skill_id: str) -> float | None:
         """Mean ``score`` over the first ``min_baseline_invocations``.
 
         Returns None when there is not enough history yet.
@@ -93,7 +92,7 @@ class SkillDriftMonitor:
         baseline = history[:n]
         return sum(i.score for i in baseline) / len(baseline)
 
-    def recent_rate(self, skill_id: str) -> Optional[float]:
+    def recent_rate(self, skill_id: str) -> float | None:
         """Mean ``score`` over the last ``recent_window``.
 
         Returns None when there are fewer invocations than the recent window.
@@ -107,7 +106,7 @@ class SkillDriftMonitor:
 
     # --- Alerting --------------------------------------------------------
 
-    def check(self, skill_id: str) -> Optional[DriftAlert]:
+    def check(self, skill_id: str) -> DriftAlert | None:
         """Compute drift for one skill; emit an alert if above ``info_drift``.
 
         Returns None when there isn't enough history, or when the recent

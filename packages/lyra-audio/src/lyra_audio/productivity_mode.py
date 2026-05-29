@@ -7,8 +7,7 @@ Features:
 - Focus mode
 """
 
-from datetime import datetime, timedelta
-from typing import List, Optional
+from datetime import datetime
 
 
 class ProductivityModeController:
@@ -36,7 +35,7 @@ class ProductivityModeController:
     def __init__(self):
         """Initialize productivity mode controller."""
         self.enabled = False
-        self.deadline: Optional[datetime] = None
+        self.deadline: datetime | None = None
         self.deadline_threshold_hours = 2.0  # 2 hours before deadline
         self.focus_mode = False
 
@@ -124,7 +123,7 @@ class ProductivityModeController:
         """
         self.deadline_threshold_hours = max(0.0, hours)
 
-    def get_time_until_deadline(self) -> Optional[float]:
+    def get_time_until_deadline(self) -> float | None:
         """
         Get time until deadline in hours.
 

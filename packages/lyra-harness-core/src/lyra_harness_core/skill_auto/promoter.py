@@ -9,13 +9,12 @@ sound?). Both must pass for promotion.
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
-from typing import Callable, Optional
+from collections.abc import Callable
+from dataclasses import dataclass
 
 from ..marketplace import PromotedSkill
 from ..provenance import Witness, WitnessKind, WitnessLattice
 from .types import PromotionVerdict, SkillCandidate
-
 
 _HeldOutEvaluator = Callable[[SkillCandidate], float]
 _SurrogateVerifier = Callable[[SkillCandidate], bool]
@@ -54,7 +53,7 @@ class SkillPromoter:
     held_out_evaluator: _HeldOutEvaluator
     surrogate_verifier: _SurrogateVerifier
     min_eval_score: float = 0.7
-    provenance_lattice: Optional[WitnessLattice] = None
+    provenance_lattice: WitnessLattice | None = None
 
     def __post_init__(self) -> None:
         if not 0.0 <= self.min_eval_score <= 1.0:
@@ -126,7 +125,7 @@ class SkillPromoter:
         self._record_witness(verdict)
         return verdict
 
-    def promote(self, candidate: SkillCandidate) -> Optional[PromotedSkill]:
+    def promote(self, candidate: SkillCandidate) -> PromotedSkill | None:
         """Run :meth:`evaluate` and produce a :class:`PromotedSkill` on success."""
         verdict = self.evaluate(candidate)
         if not verdict.promoted:
@@ -145,7 +144,7 @@ class SkillPromoter:
             eval_score=verdict.eval_score,
         )
 
-    def _record_witness(self, verdict: PromotionVerdict) -> Optional[Witness]:
+    def _record_witness(self, verdict: PromotionVerdict) -> Witness | None:
         """If a provenance lattice is wired, record the verdict + cite source
         trajectories. Returns the Witness or None."""
         if self.provenance_lattice is None:

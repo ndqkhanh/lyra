@@ -282,7 +282,7 @@ def cmd_replay(session: Any, args: str) -> CommandResult:
       /replay load <id> — load session by id
     """
     parts = args.strip().split() if args.strip() else []
-    subcmd = parts[0].lower() if parts else "status"
+    parts[0].lower() if parts else "status"
 
     # We can't easily drive the widget from here, so we return text
     # (widget is the visual interface; this is the CLI fallback)

@@ -3,7 +3,6 @@
 import asyncio
 
 import pytest
-
 from lyra_ui import (
     AsyncFileIO,
     BackgroundTaskQueue,
@@ -13,7 +12,6 @@ from lyra_ui import (
     TaskStatus,
     WorkerPool,
 )
-
 
 # BackgroundTaskQueue Tests
 

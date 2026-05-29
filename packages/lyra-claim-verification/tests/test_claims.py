@@ -1,8 +1,7 @@
 """Tests for Claim Verification package."""
 
-import pytest
-from lyra_claim_verification import ClaimDAG, ClaimVerifier, Claim, MeasurementClaim, VerificationStatus
 from lyra_attestor import ClaimType
+from lyra_claim_verification import Claim, ClaimDAG, ClaimVerifier
 
 
 class TestClaimDAG:

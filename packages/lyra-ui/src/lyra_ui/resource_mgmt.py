@@ -16,7 +16,6 @@ import shutil
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
 
 
 @dataclass
@@ -49,7 +48,7 @@ class ResourceMonitor:
             alert_threshold_mb: Memory alert threshold in MB
         """
         self.alert_threshold_mb = alert_threshold_mb
-        self.history: List[ResourceUsage] = []
+        self.history: list[ResourceUsage] = []
         self.max_history = 1000
 
     def get_current_usage(self) -> ResourceUsage:
@@ -107,7 +106,7 @@ class ResourceMonitor:
             return False
         return self.history[-1].memory_mb > self.alert_threshold_mb
 
-    def get_stats(self) -> Dict[str, float]:
+    def get_stats(self) -> dict[str, float]:
         """
         Get resource statistics.
 
@@ -147,13 +146,13 @@ class MemoryLeakDetector:
 
     def __init__(self):
         """Initialize leak detector."""
-        self.snapshots: List[Dict[str, int]] = []
+        self.snapshots: list[dict[str, int]] = []
         self.max_snapshots = 10
 
     def take_snapshot(self):
         """Take memory snapshot."""
         # Count objects by type
-        counts: Dict[str, int] = {}
+        counts: dict[str, int] = {}
         for obj in gc.get_objects():
             obj_type = type(obj).__name__
             counts[obj_type] = counts.get(obj_type, 0) + 1
@@ -164,7 +163,7 @@ class MemoryLeakDetector:
         if len(self.snapshots) > self.max_snapshots:
             self.snapshots.pop(0)
 
-    def detect_leaks(self) -> List[tuple[str, int]]:
+    def detect_leaks(self) -> list[tuple[str, int]]:
         """
         Detect potential memory leaks.
 
@@ -202,7 +201,7 @@ class ResourceCleaner:
     - Cache cleanup
     """
 
-    def __init__(self, temp_dir: Optional[Path] = None):
+    def __init__(self, temp_dir: Path | None = None):
         """
         Initialize resource cleaner.
 
@@ -240,7 +239,7 @@ class ResourceCleaner:
                 except Exception:
                     pass
 
-    def cleanup_cache(self, cache_dir: Optional[Path] = None):
+    def cleanup_cache(self, cache_dir: Path | None = None):
         """
         Clean up cache directory.
 
@@ -273,7 +272,7 @@ class DiskSpaceManager:
     - Space alerts
     """
 
-    def __init__(self, data_dir: Optional[Path] = None, threshold_percent: float = 90.0):
+    def __init__(self, data_dir: Path | None = None, threshold_percent: float = 90.0):
         """
         Initialize disk space manager.
 
@@ -284,7 +283,7 @@ class DiskSpaceManager:
         self.data_dir = data_dir or Path.home() / ".lyra"
         self.threshold_percent = threshold_percent
 
-    def get_disk_usage(self) -> Dict[str, float]:
+    def get_disk_usage(self) -> dict[str, float]:
         """
         Get disk usage statistics.
 
@@ -310,7 +309,7 @@ class DiskSpaceManager:
         usage = self.get_disk_usage()
         return usage["percent"] > self.threshold_percent
 
-    def get_directory_size(self, path: Optional[Path] = None) -> int:
+    def get_directory_size(self, path: Path | None = None) -> int:
         """
         Get directory size in bytes.
 
@@ -375,7 +374,7 @@ class BandwidthOptimizer:
             max_requests_per_second: Maximum requests per second
         """
         self.max_requests_per_second = max_requests_per_second
-        self.request_times: List[float] = []
+        self.request_times: list[float] = []
 
     def can_make_request(self) -> bool:
         """
@@ -400,7 +399,7 @@ class BandwidthOptimizer:
 
         self.request_times.append(time.time())
 
-    def get_stats(self) -> Dict[str, float]:
+    def get_stats(self) -> dict[str, float]:
         """
         Get bandwidth statistics.
 

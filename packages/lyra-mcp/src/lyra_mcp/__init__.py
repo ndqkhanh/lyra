@@ -10,6 +10,6 @@ from lyra_mcp.gateway import (
     RateLimitState,
     ServerRegistration,
 )
-from lyra_mcp.security_scan import MCPTaintAnalyzer, MCPSecurityScanner, MCPVulnerability
+from lyra_mcp.security_scan import MCPSecurityScanner, MCPTaintAnalyzer, MCPVulnerability
 
 __version__ = "0.2.0"

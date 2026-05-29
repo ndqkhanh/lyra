@@ -7,7 +7,6 @@ import copy
 import subprocess  # nosec
 import sys
 import tempfile
-import time
 import uuid
 from dataclasses import dataclass
 from typing import ClassVar

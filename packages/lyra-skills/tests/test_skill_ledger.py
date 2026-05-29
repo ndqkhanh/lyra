@@ -28,7 +28,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from lyra_skills.ledger import (
     MAX_HISTORY,
     OUTCOME_FAILURE,
@@ -44,7 +43,6 @@ from lyra_skills.ledger import (
     top_n,
     utility_score,
 )
-
 
 # ── SkillStats / utility_score ────────────────────────────────────
 

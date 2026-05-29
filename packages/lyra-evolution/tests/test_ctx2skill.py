@@ -1,7 +1,7 @@
 """Tests for Phase H — Ctx2Skill extraction and Cross-Time Replay validation."""
 from lyra_evolution.ctx2skill import (
-    Ctx2SkillExtractor,
     CrossTimeReplayValidator,
+    Ctx2SkillExtractor,
     ExtractionResult,
     SkillDraft,
     TraceRecord,

@@ -5,12 +5,12 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from collections.abc import Callable, Awaitable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any
 from uuid import uuid4
 
-from .lifecycle import AgentLifecycleManager, AgentRecord, LifecycleState
+from .lifecycle import AgentLifecycleManager, AgentRecord
 
 logger = logging.getLogger(__name__)
 
@@ -341,7 +341,7 @@ class AgentSpawner:
 
         # 3. Build via factory
         try:
-            built_id = await self._factory.build(config)
+            await self._factory.build(config)
         except Exception:
             self._release_resources(agent_id)
             self._lifecycle.unregister_agent(agent_id)

@@ -1,5 +1,4 @@
 import pytest
-
 from lyra_harness_core.messages import ToolCall
 from lyra_harness_core.tools import ToolRegistry
 from lyra_harness_core.tools_builtin import CalculatorTool, EchoTool

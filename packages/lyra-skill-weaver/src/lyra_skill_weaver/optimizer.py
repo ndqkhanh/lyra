@@ -5,22 +5,19 @@ Optimizes skill compositions for cost, latency, and quality tradeoffs.
 
 from __future__ import annotations
 
-import asyncio
 import hashlib
 import logging
 import time
 from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Optional
+from typing import Any
 
 from .skill_weaver import (
-    SkillDefinition,
-    SkillRegistry,
-    CompositionPlan,
     CompositionPattern,
+    CompositionPlan,
+    SkillRegistry,
 )
-from .exceptions import OptimizationError
 
 logger = logging.getLogger(__name__)
 
@@ -168,7 +165,7 @@ class CompositionProfiler:
         self._profiles[plan_id] = result
         return result
 
-    def get_profile(self, plan_id: str) -> Optional[ProfilingResult]:
+    def get_profile(self, plan_id: str) -> ProfilingResult | None:
         """Get profiling data for a plan."""
         return self._profiles.get(plan_id)
 
@@ -253,7 +250,7 @@ class PlanCache:
     def compute_key(
         required_outputs: list[str],
         pattern: CompositionPattern,
-        context: Optional[dict[str, float]] = None,
+        context: dict[str, float] | None = None,
     ) -> str:
         """Compute a cache key from composition parameters.
 
@@ -279,7 +276,7 @@ class PlanCache:
         raw_key = "|".join(key_parts)
         return hashlib.sha256(raw_key.encode()).hexdigest()[:16]
 
-    def get(self, cache_key: str) -> Optional[CompositionPlan]:
+    def get(self, cache_key: str) -> CompositionPlan | None:
         """Retrieve a cached plan.
 
         Args:
@@ -316,7 +313,7 @@ class PlanCache:
 
         self._cache[cache_key] = CachedPlan(plan=plan, cache_key=cache_key)
 
-    def _find_oldest(self) -> Optional[str]:
+    def _find_oldest(self) -> str | None:
         """Find the cache key with the oldest last access time."""
         if not self._cache:
             return None
@@ -364,8 +361,8 @@ class CompositionOptimizer:
     def __init__(
         self,
         registry: SkillRegistry,
-        profiler: Optional[CompositionProfiler] = None,
-        cache: Optional[PlanCache] = None,
+        profiler: CompositionProfiler | None = None,
+        cache: PlanCache | None = None,
         max_alternatives: int = 20,
     ) -> None:
         self.registry = registry
@@ -377,7 +374,7 @@ class CompositionOptimizer:
         self,
         plan: CompositionPlan,
         objective: OptimizationObjective = OptimizationObjective.BALANCED,
-        context: Optional[dict[str, float]] = None,
+        context: dict[str, float] | None = None,
     ) -> OptimizationResult:
         """Optimize a composition plan.
 
@@ -423,7 +420,7 @@ class CompositionOptimizer:
     async def _generate_alternatives(
         self,
         plan: CompositionPlan,
-        context: Optional[dict[str, float]] = None,
+        context: dict[str, float] | None = None,
     ) -> list[CompositionPlan]:
         """Generate alternative compositions by swapping skills.
 
@@ -513,7 +510,7 @@ class CompositionOptimizer:
         self,
         plan: CompositionPlan,
         objective: OptimizationObjective = OptimizationObjective.MIN_LATENCY,
-        context: Optional[dict[str, float]] = None,
+        context: dict[str, float] | None = None,
     ) -> OptimizationResult:
         """Optimize using profiling data for more accurate estimates.
 

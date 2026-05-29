@@ -1,10 +1,8 @@
 """Tests for lyra_meta_evolution.meta_evolution module."""
 
 import asyncio
-import time
 
 import pytest
-
 from lyra_meta_evolution.meta_evolution import (
     AgentGenome,
     ArchitectureController,
@@ -16,11 +14,9 @@ from lyra_meta_evolution.meta_evolution import (
     EvolutionTrigger,
     GoalController,
     MetaCognitiveStack,
-    MetaEvolutionError,
     ParameterController,
     StrategyController,
 )
-
 
 # ── Fixtures ────────────────────────────────────────────────────────────────────
 

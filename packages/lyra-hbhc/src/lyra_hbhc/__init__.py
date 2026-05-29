@@ -63,7 +63,7 @@ class HBHCManager:
         self.revoked: set[str] = set()
         self.heartbeat_interval: float = 1.0  # seconds
         self._running = False
-        self._task: Optional[asyncio.Task] = None
+        self._task: asyncio.Task | None = None
 
     async def issue_credential(
         self, agent_id: str, parent_id: str, level: int

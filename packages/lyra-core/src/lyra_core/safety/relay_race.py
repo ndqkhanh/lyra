@@ -204,10 +204,10 @@ class RelayRace:
         return None
 
     def stats(self) -> dict:
-        completed = sum(1 for l in self._legs if l.status == LegStatus.COMPLETED)
-        failed = sum(1 for l in self._legs if l.status == LegStatus.FAILED)
-        total_reward = sum(l.reward for l in self._legs)
-        total_duration = sum(l.duration_sec for l in self._legs)
+        completed = sum(1 for leg in self._legs if leg.status == LegStatus.COMPLETED)
+        failed = sum(1 for leg in self._legs if leg.status == LegStatus.FAILED)
+        total_reward = sum(leg.reward for leg in self._legs)
+        total_duration = sum(leg.duration_sec for leg in self._legs)
 
         return {
             "state": self._state.value,

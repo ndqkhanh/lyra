@@ -106,13 +106,13 @@ def example_team_collaboration():
         auto_push=False,
         auto_pull=True,  # Get team updates
     )
-    git_sync_b = T3GitSync(repo_root, config_b)
+    T3GitSync(repo_root, config_b)
 
     # Both can use the same watcher setup
     def on_reload(fragments: list[Fragment]) -> None:
         print(f"Reloaded {len(fragments)} fragments")
 
-    watcher_a = start_t3_watcher(repo_root, on_reload, git_sync=git_sync_a)
+    start_t3_watcher(repo_root, on_reload, git_sync=git_sync_a)
     # watcher_b = start_t3_watcher(repo_root, on_reload, git_sync=git_sync_b)
 
 

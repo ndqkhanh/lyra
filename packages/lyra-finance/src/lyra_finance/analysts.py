@@ -15,10 +15,9 @@ from __future__ import annotations
 
 import logging
 import statistics
-import math
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
-from typing import Sequence
+from collections.abc import Sequence
+from dataclasses import dataclass
 
 from lyra_finance.models import (
     AnalystReport,
@@ -27,7 +26,6 @@ from lyra_finance.models import (
     MarketData,
     SentimentSignal,
     SignalSource,
-    TradeDirection,
 )
 
 logger = logging.getLogger(__name__)

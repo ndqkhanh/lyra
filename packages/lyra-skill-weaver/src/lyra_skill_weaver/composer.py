@@ -6,28 +6,20 @@ and provides a unified composer interface.
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import time
-from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from typing import Any, Optional, Protocol
+from typing import Any, Protocol
 
-from .skill_weaver import (
-    SkillDefinition,
-    SkillGraph,
-    SkillRegistry,
-    SkillType,
-    SkillStatus,
-    CompositionPlan,
-    CompositionPattern,
-    SkillIO,
-)
 from .exceptions import (
     CompositionError,
     SkillNotFoundError,
-    SkillConflictError,
-    CircularDependencyError,
+)
+from .skill_weaver import (
+    CompositionPattern,
+    CompositionPlan,
+    SkillRegistry,
+    SkillStatus,
 )
 
 logger = logging.getLogger(__name__)
@@ -44,12 +36,12 @@ class CompositionNode:
     """
 
     node_id: str
-    skill_id: Optional[str] = None
+    skill_id: str | None = None
     pattern: CompositionPattern = CompositionPattern.SEQUENTIAL
     children: list[CompositionNode] = field(default_factory=list)
-    condition: Optional[str] = None  # For conditional nodes
+    condition: str | None = None  # For conditional nodes
     loop_max: int = 1  # For iterative nodes
-    convergence_check: Optional[str] = None  # For iterative nodes
+    convergence_check: str | None = None  # For iterative nodes
     metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
@@ -98,8 +90,8 @@ class SequentialComposer:
     def build(
         self,
         required_outputs: list[str],
-        available_inputs: Optional[dict[str, Any]] = None,
-        context: Optional[dict[str, float]] = None,
+        available_inputs: dict[str, Any] | None = None,
+        context: dict[str, float] | None = None,
     ) -> CompositionPlan:
         """Build a sequential composition plan.
 
@@ -224,7 +216,7 @@ class ParallelComposer:
     def build(
         self,
         required_outputs: list[str],
-        context: Optional[dict[str, float]] = None,
+        context: dict[str, float] | None = None,
     ) -> CompositionPlan:
         """Build a parallel composition plan.
 
@@ -286,7 +278,7 @@ class ParallelComposer:
         self,
         source_skill_id: str,
         required_outputs: list[str],
-        context: Optional[dict[str, float]] = None,
+        context: dict[str, float] | None = None,
     ) -> CompositionPlan:
         """Build a fan-out/fan-in pattern: source -> [parallel workers] -> aggregator.
 
@@ -369,7 +361,7 @@ class ConditionalComposer:
         condition: str,
         then_required: list[str],
         else_required: list[str],
-        context: Optional[dict[str, float]] = None,
+        context: dict[str, float] | None = None,
     ) -> CompositionPlan:
         """Build a conditional composition.
 
@@ -426,7 +418,7 @@ class IterativeComposer:
         self,
         transform_skill_id: str,
         convergence_check: str,
-        initial_input: Optional[dict[str, Any]] = None,
+        initial_input: dict[str, Any] | None = None,
     ) -> CompositionPlan:
         """Build an iterative composition.
 
@@ -477,7 +469,7 @@ class HybridComposer:
     def build(
         self,
         output_spec: dict[str, str],  # output_name -> pattern
-        context: Optional[dict[str, float]] = None,
+        context: dict[str, float] | None = None,
     ) -> CompositionPlan:
         """Build a hybrid composition from an output specification.
 
@@ -545,7 +537,7 @@ class MasterComposer:
         self,
         required_outputs: list[str],
         pattern: CompositionPattern = CompositionPattern.SEQUENTIAL,
-        context: Optional[dict[str, float]] = None,
+        context: dict[str, float] | None = None,
         **kwargs: Any,
     ) -> CompositionPlan:
         """Build a composition using the specified pattern.
@@ -578,7 +570,7 @@ class MasterComposer:
                 context=context,
             )
         elif pattern == CompositionPattern.HYBRID:
-            output_spec = kwargs.get("output_spec", {out: "sequential" for out in required_outputs})
+            output_spec = kwargs.get("output_spec", dict.fromkeys(required_outputs, "sequential"))
             return self._hybrid.build(output_spec, context=context)
         else:
             return self._sequential.build(required_outputs, context=context, **kwargs)

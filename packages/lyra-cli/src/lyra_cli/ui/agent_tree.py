@@ -166,14 +166,11 @@ class AgentTree:
 
         # Status symbol
         if agent.status == "running":
-            status_symbol = self.symbols.status("running")
-            status_color = self.colors.yellow
+            self.symbols.status("running")
         elif agent.status == "completed":
-            status_symbol = self.symbols.get("✓")
-            status_color = self.colors.green
+            self.symbols.get("✓")
         else:
-            status_symbol = self.symbols.get("✗")
-            status_color = self.colors.red
+            self.symbols.get("✗")
 
         # Agent line
         line = f"{indent}{connector} {agent.name} · "

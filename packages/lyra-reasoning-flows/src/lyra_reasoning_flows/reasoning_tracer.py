@@ -124,7 +124,7 @@ class ReasoningTracer:
         for i, e in enumerate(trace.events):
             summary = str(e.data.get("summary", e.event_type.value))
             lines.append(f"    {e.system}->>{e.system}: {i}: {summary}")
-        lines.append(f"    User->>User: end")
+        lines.append("    User->>User: end")
         return "\n".join(lines)
 
     def trace_stats(self, trace_id: str) -> dict[str, Any]:

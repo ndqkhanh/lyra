@@ -4,11 +4,12 @@ Tests for Memory System
 Tests the multi-tier memory architecture with SQLite backend.
 """
 
-import pytest
-from pathlib import Path
-import tempfile
 import shutil
-from lyra_evolution.memory_system import MemorySystem, MemoryRecord
+import tempfile
+from pathlib import Path
+
+import pytest
+from lyra_evolution.memory_system import MemoryRecord, MemorySystem
 
 
 @pytest.fixture

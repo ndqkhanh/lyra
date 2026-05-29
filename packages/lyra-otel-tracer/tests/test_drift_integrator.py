@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_otel_tracer.drift_integrator import (
     DriftConfig,
     DriftIntegrator,

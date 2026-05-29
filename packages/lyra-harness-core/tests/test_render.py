@@ -3,12 +3,8 @@ from __future__ import annotations
 
 import json
 
-import pytest
-
 from lyra_harness_core.eval_runner import (
     EvalCase,
-    EvalResult,
-    EvalRun,
     EvalRunner,
     EvalSuite,
 )
@@ -23,7 +19,6 @@ from lyra_harness_core.render import (
     witness_lattice_to_markdown,
 )
 from lyra_harness_core.replay import ReplayEventKind, TraceBuilder
-
 
 # --- Trace renderers ---------------------------------------------------
 

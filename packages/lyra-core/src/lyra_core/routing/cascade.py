@@ -96,7 +96,7 @@ class ConfidenceCascadeRouter:
         if not stages:
             raise ValueError("ConfidenceCascadeRouter requires at least one stage")
         # The cascade only makes sense if cost is monotonically non-decreasing.
-        for prev, curr in zip(stages, stages[1:]):
+        for prev, curr in zip(stages, stages[1:], strict=False):
             if curr.cost_weight < prev.cost_weight:
                 raise ValueError(
                     "cascade stages must be ordered cheap -> expensive "

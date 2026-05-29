@@ -58,7 +58,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-
 LEDGER_VERSION = 1
 
 OUTCOME_SUCCESS = "success"
@@ -124,7 +123,7 @@ class SkillOutcome:
         return d
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "SkillOutcome":
+    def from_dict(cls, data: dict[str, Any]) -> SkillOutcome:
         return cls(
             ts=float(data.get("ts", 0.0)),
             session_id=str(data.get("session_id", "")),
@@ -173,7 +172,7 @@ class SkillStats:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "SkillStats":
+    def from_dict(cls, data: dict[str, Any]) -> SkillStats:
         history_raw = data.get("history") or []
         return cls(
             skill_id=str(data.get("skill_id", "")),
@@ -220,7 +219,7 @@ class SkillLedger:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "SkillLedger":
+    def from_dict(cls, data: dict[str, Any]) -> SkillLedger:
         skills_raw = data.get("skills") or {}
         skills: dict[str, SkillStats] = {}
         for sid, payload in skills_raw.items():
@@ -449,7 +448,7 @@ class MutationRecord:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "MutationRecord":
+    def from_dict(cls, data: dict[str, Any]) -> MutationRecord:
         return cls(
             ts=float(data.get("ts", 0.0)),
             skill_id=str(data.get("skill_id", "")),

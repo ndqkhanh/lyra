@@ -1,7 +1,6 @@
 """Tests for Phase 14: Claims Verification + Tool Execution Integrity."""
 
 import pytest
-
 from lyra_integrity import (
     AdversarialQualityGate,
     AttackPattern,
@@ -18,7 +17,6 @@ from lyra_integrity import (
     SourceMapping,
     ViolationSeverity,
 )
-
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Models

@@ -6,9 +6,10 @@ that govern how agents are spawned, monitored, and retired within a colony.
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Callable, Awaitable
+from typing import Any
 from uuid import uuid4
 
 # ---------------------------------------------------------------------------

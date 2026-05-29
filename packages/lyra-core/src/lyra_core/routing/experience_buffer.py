@@ -118,7 +118,7 @@ class ExperienceBuffer:
         return [(abs(exp.priority) + self.epsilon) ** self.alpha for exp in self._buffer]
 
     def update_priorities(self, indices: Sequence[int], td_errors: Sequence[float]) -> None:
-        for idx, td_error in zip(indices, td_errors):
+        for idx, td_error in zip(indices, td_errors, strict=False):
             if 0 <= idx < len(self._buffer):
                 # Frozen dataclass — replace with new instance
                 old = self._buffer[idx]

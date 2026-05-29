@@ -5,12 +5,12 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional, Union
+from typing import Any
 
 import numpy as np
 from scipy import stats
 
-from .causal_graph import CausalGraph, EdgeType
+from .causal_graph import CausalGraph
 from .errors import AdjustmentError, EstimationError, InterventionError
 from .scm import StructuralCausalModel
 
@@ -59,7 +59,7 @@ class InterventionConfig:
     n_bootstrap: int = 1000
     stabilize_weights: bool = True
     max_propensity_weight: float = 10.0
-    random_seed: Optional[int] = None
+    random_seed: int | None = None
     min_samples: int = 10
 
 
@@ -88,7 +88,7 @@ class InterventionResult:
     ci_upper: float
     method: AdjustmentMethod
     standard_error: float = 0.0
-    adjusted_values: Optional[np.ndarray] = None
+    adjusted_values: np.ndarray | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def __repr__(self) -> str:
@@ -111,10 +111,10 @@ class TreatmentEffect:
     """
 
     ate: float
-    att: Optional[float] = None
-    atu: Optional[float] = None
-    cate: Optional[dict[str, float]] = None
-    ite: Optional[np.ndarray] = None
+    att: float | None = None
+    atu: float | None = None
+    cate: dict[str, float] | None = None
+    ite: np.ndarray | None = None
 
 
 # ── Intervention Model ────────────────────────────────────────────────────────
@@ -137,7 +137,7 @@ class InterventionModel:
         result = model.do(data, "X", value=1.0, outcome="Y", graph=causal_graph)
     """
 
-    def __init__(self, config: Optional[InterventionConfig] = None) -> None:
+    def __init__(self, config: InterventionConfig | None = None) -> None:
         self._config = config or InterventionConfig()
 
     @property
@@ -152,9 +152,9 @@ class InterventionModel:
         treatment: str,
         value: float,
         outcome: str,
-        graph: Optional[CausalGraph] = None,
-        scm: Optional[StructuralCausalModel] = None,
-        method: Optional[AdjustmentMethod] = None,
+        graph: CausalGraph | None = None,
+        scm: StructuralCausalModel | None = None,
+        method: AdjustmentMethod | None = None,
     ) -> InterventionResult:
         """Estimate ``E[outcome | do(treatment=value)]``.
 
@@ -192,9 +192,9 @@ class InterventionModel:
         treatment: str,
         value: float,
         outcome: str,
-        graph: Optional[CausalGraph] = None,
-        scm: Optional[StructuralCausalModel] = None,
-        method: Optional[AdjustmentMethod] = None,
+        graph: CausalGraph | None = None,
+        scm: StructuralCausalModel | None = None,
+        method: AdjustmentMethod | None = None,
     ) -> InterventionResult:
         """Async version of ``do()`` for long-running computations."""
         return self.do(data, treatment, value, outcome, graph, scm, method)
@@ -206,8 +206,8 @@ class InterventionModel:
         data: dict[str, np.ndarray],
         treatment: str,
         outcome: str,
-        graph: Optional[CausalGraph] = None,
-        covariates: Optional[list[str]] = None,
+        graph: CausalGraph | None = None,
+        covariates: list[str] | None = None,
     ) -> float:
         """Estimate the Average Treatment Effect (ATE).
 
@@ -233,7 +233,7 @@ class InterventionModel:
         treatment: str,
         outcome: str,
         group_var: str,
-        graph: Optional[CausalGraph] = None,
+        graph: CausalGraph | None = None,
     ) -> dict[str, float]:
         """Estimate Conditional Average Treatment Effects by subgroup.
 
@@ -270,7 +270,7 @@ class InterventionModel:
         data: dict[str, np.ndarray],
         treatment: str,
         outcome: str,
-        graph: Optional[CausalGraph] = None,
+        graph: CausalGraph | None = None,
     ) -> np.ndarray:
         """Estimate Individual Treatment Effects.
 
@@ -317,8 +317,8 @@ class InterventionModel:
         data: dict[str, np.ndarray],
         treatment: str,
         outcome: str,
-        graph: Optional[CausalGraph] = None,
-        group_var: Optional[str] = None,
+        graph: CausalGraph | None = None,
+        group_var: str | None = None,
     ) -> TreatmentEffect:
         """Compute ATE, ATT, ATU, CATE (if group_var given), and ITE.
 
@@ -333,7 +333,7 @@ class InterventionModel:
             ``TreatmentEffect`` dataclass.
         """
         Treatment = data[treatment]
-        Outcome = data[outcome]
+        data[outcome]
 
         ate = self.estimate_ate(data, treatment, outcome, graph)
 
@@ -592,7 +592,7 @@ class BackdoorAdjuster:
 
         residuals = Outcome - (X @ beta)
         se = float(np.std(residuals) / np.sqrt(n))
-        z = stats.norm.ppf(1 - (1 - config.confidence_level) / 2)
+        stats.norm.ppf(1 - (1 - config.confidence_level) / 2)
 
         # Bootstrap CI
         ci_lower, ci_upper = self._bootstrap_ci(
@@ -699,7 +699,7 @@ class FrontdoorAdjuster:
         # (1) No backdoor path from X to M (or M is a direct child of X)
         #     Check: all parents of X are not connected to M (simplified)
         # (2) All backdoor paths from M to Y are blocked by X
-        parents_of_treatment = graph.parents(treatment)
+        graph.parents(treatment)
         parents_of_mediator = graph.parents(mediator)
         # If M's only parent is X, condition 1 holds
         if not parents_of_mediator or (len(parents_of_mediator) == 1 and treatment in parents_of_mediator):

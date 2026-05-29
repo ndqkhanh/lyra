@@ -78,7 +78,7 @@ class EmergenceDetector:
             "total_transitions": len(self.transitions),
         }
 
-    def _check_specialization(self) -> Optional[PhaseTransition]:
+    def _check_specialization(self) -> PhaseTransition | None:
         """Detect when agents develop distinct specializations."""
         depths = self.history["diversity"]
         if len(depths) < 5:
@@ -98,7 +98,7 @@ class EmergenceDetector:
             return transition
         return None
 
-    def _check_coordination(self) -> Optional[PhaseTransition]:
+    def _check_coordination(self) -> PhaseTransition | None:
         """Detect when agents start coordinating (population vs resources)."""
         pops = self.history["population"]
         if len(pops) < 5:
@@ -120,7 +120,7 @@ class EmergenceDetector:
             return transition
         return None
 
-    def _check_innovation(self) -> Optional[PhaseTransition]:
+    def _check_innovation(self) -> PhaseTransition | None:
         """Detect unexpected fitness jumps (innovation)."""
         fits = self.history["avg_fitness"]
         if len(fits) < 5:
@@ -142,7 +142,7 @@ class EmergenceDetector:
             return transition
         return None
 
-    def _check_symbiosis(self) -> Optional[PhaseTransition]:
+    def _check_symbiosis(self) -> PhaseTransition | None:
         """Detect when resource efficiency improves (agents work together)."""
         if "resources" not in self.history or len(self.history["resources"]) < 5:
             return None

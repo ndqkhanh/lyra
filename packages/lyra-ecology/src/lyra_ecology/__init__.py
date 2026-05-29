@@ -136,7 +136,7 @@ class AgentEcology:
 
         # Update snapshot
         snapshot["avg_fitness"] = sum(a.fitness for a in self.agents) / max(len(self.agents), 1)
-        snapshot["diversity"] = len(set(a.specialization for a in self.agents))
+        snapshot["diversity"] = len({a.specialization for a in self.agents})
         snapshot["total_value"] = total_value
         self.history.append(snapshot)
 
@@ -153,8 +153,8 @@ class AgentEcology:
         return {
             "generation": self.generation,
             "population": len(self.agents),
-            "species_types": list(set(a.agent_type for a in self.agents)),
-            "specializations": list(set(a.specialization for a in self.agents)),
+            "species_types": list({a.agent_type for a in self.agents}),
+            "specializations": list({a.specialization for a in self.agents}),
             "avg_fitness": sum(a.fitness for a in self.agents) / max(len(self.agents), 1),
             "resources": self.resources.available,
         }
@@ -177,7 +177,7 @@ class EmergenceDetector:
             return {"emergence_detected": False, "reason": "Too early"}
 
         # Check for specialization emergence
-        specializations = set(a.specialization for a in ecology.agents)
+        specializations = {a.specialization for a in ecology.agents}
         self.metrics["specialization_depth"] = len(specializations)
 
         # Check for unexpected fitness (sign of emergent capability)

@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Iterable, Optional
 
 from .types import (
     BillingPeriod,
@@ -12,7 +12,6 @@ from .types import (
     CostThresholdAlert,
     PricingTable,
 )
-
 
 _GROUP_BY_AXES = ("project", "user_id", "operation", "tag", "day")
 
@@ -39,7 +38,7 @@ class CostTracker:
     0.105
     """
 
-    pricing: Optional[PricingTable] = None
+    pricing: PricingTable | None = None
     _entries: list[CostEntry] = field(default_factory=list)
 
     # --- Recording -------------------------------------------------------
@@ -52,11 +51,11 @@ class CostTracker:
         user_id: str = "anonymous",
         input_tokens: int = 0,
         output_tokens: int = 0,
-        active_params: Optional[int] = None,
-        cost_usd: Optional[float] = None,
+        active_params: int | None = None,
+        cost_usd: float | None = None,
         tags: tuple[str, ...] = (),
-        metadata: Optional[dict] = None,
-        timestamp: Optional[float] = None,
+        metadata: dict | None = None,
+        timestamp: float | None = None,
     ) -> CostEntry:
         """Record one cost event. If ``cost_usd`` is None, compute from pricing."""
         if cost_usd is None:
@@ -94,10 +93,10 @@ class CostTracker:
     def total(
         self,
         *,
-        project: Optional[str] = None,
-        user_id: Optional[str] = None,
-        operation: Optional[str] = None,
-        period: Optional[BillingPeriod] = None,
+        project: str | None = None,
+        user_id: str | None = None,
+        operation: str | None = None,
+        period: BillingPeriod | None = None,
     ) -> float:
         """Total USD spend across entries matching the filter."""
         return sum(
@@ -113,10 +112,10 @@ class CostTracker:
     def total_tokens(
         self,
         *,
-        project: Optional[str] = None,
-        user_id: Optional[str] = None,
-        operation: Optional[str] = None,
-        period: Optional[BillingPeriod] = None,
+        project: str | None = None,
+        user_id: str | None = None,
+        operation: str | None = None,
+        period: BillingPeriod | None = None,
     ) -> int:
         """Total tokens (input + output) across matching entries."""
         return sum(
@@ -133,7 +132,7 @@ class CostTracker:
         self,
         *,
         group_by: str = "project",
-        period: Optional[BillingPeriod] = None,
+        period: BillingPeriod | None = None,
         sort_by_cost_desc: bool = True,
     ) -> CostReport:
         """Build a grouped CostReport.
@@ -188,10 +187,10 @@ class CostTracker:
         self,
         *,
         threshold_usd: float,
-        project: Optional[str] = None,
-        user_id: Optional[str] = None,
-        period: Optional[BillingPeriod] = None,
-    ) -> Optional[CostThresholdAlert]:
+        project: str | None = None,
+        user_id: str | None = None,
+        period: BillingPeriod | None = None,
+    ) -> CostThresholdAlert | None:
         """Fire an alert if spend over the period exceeds the threshold."""
         if threshold_usd < 0:
             raise ValueError(f"threshold_usd must be >= 0, got {threshold_usd}")
@@ -220,10 +219,10 @@ class CostTracker:
     def _filter(
         self,
         *,
-        project: Optional[str] = None,
-        user_id: Optional[str] = None,
-        operation: Optional[str] = None,
-        period: Optional[BillingPeriod] = None,
+        project: str | None = None,
+        user_id: str | None = None,
+        operation: str | None = None,
+        period: BillingPeriod | None = None,
     ) -> Iterable[CostEntry]:
         for e in self._entries:
             if project is not None and e.project != project:

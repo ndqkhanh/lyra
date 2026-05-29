@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_cockpit.exceptions import VoiceNotifyError
 from lyra_cockpit.voice_notifier import (
     DEFAULT_EVENT_MAPPINGS,
@@ -137,7 +136,7 @@ class TestVoiceNotifier:
         assert "budget_alert" in types
 
     def test_event_timestamps_unique(self) -> None:
-        notifier = VoiceNotifier()
+        VoiceNotifier()
         # Simulate by checking history order
         assert True
 

@@ -164,7 +164,7 @@ async def test_handle_create_test_strategy_message(
 @pytest.mark.asyncio
 async def test_quality_gates_fail_on_low_coverage(qa_agent: QAEngineerAgent) -> None:
     """Test quality gates fail when coverage is low."""
-    tests = [
+    [
         Test.create(
             id="test-1",
             name="test_function",

@@ -2,27 +2,27 @@
 Coordination layer for task allocation and load balancing.
 """
 
-from src.coordination.task_allocator import (
-    TaskAllocator,
-    AllocationStrategy,
-    AllocationScore,
-)
-from src.coordination.load_balancer import (
-    LoadBalancer,
-    AgentLoad,
-)
-from src.coordination.dependency_manager import (
-    DependencyManager,
-    DependencyType,
-    TaskDependency,
-    DependencyGraph,
-)
 from src.coordination.conflict_resolver import (
+    Conflict,
     ConflictResolver,
     ConflictType,
     ResolutionStrategy,
-    Conflict,
     Resource,
+)
+from src.coordination.dependency_manager import (
+    DependencyGraph,
+    DependencyManager,
+    DependencyType,
+    TaskDependency,
+)
+from src.coordination.load_balancer import (
+    AgentLoad,
+    LoadBalancer,
+)
+from src.coordination.task_allocator import (
+    AllocationScore,
+    AllocationStrategy,
+    TaskAllocator,
 )
 
 __all__ = [

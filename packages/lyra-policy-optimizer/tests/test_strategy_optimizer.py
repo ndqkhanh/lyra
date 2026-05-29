@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_policy_optimizer.exceptions import StrategyError
 from lyra_policy_optimizer.strategy_optimizer import (
     StrategyAllocation,

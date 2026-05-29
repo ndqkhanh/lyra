@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from lyra_cockpit.exceptions import (
     BudgetError,
     CockpitError,

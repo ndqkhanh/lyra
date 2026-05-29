@@ -46,8 +46,8 @@ from lyra_otel_tracer.latency_monitor import (
 from lyra_otel_tracer.prometheus_export import (
     ExportConfig,
     GrafanaDashboard,
-    PromMetric,
     PrometheusExporter,
+    PromMetric,
 )
 from lyra_otel_tracer.token_tracker import (
     TokenAlert,

@@ -2,19 +2,17 @@
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import time
 from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 
-from .sla_manager import SLAManager, SLIMetric, BudgetType, Budget
 from .metrics import MetricsCollector, RollingStats
-from .exceptions import AutoScalerError
+from .sla_manager import SLAManager
 
 logger = logging.getLogger(__name__)
 
@@ -193,7 +191,7 @@ class ReactiveScaler:
                 from_replicas=config.current_replicas,
                 to_replicas=new_count,
                 confidence=0.7,
-                reason=f"Scale up: P95 latency or error rate exceeded thresholds",
+                reason="Scale up: P95 latency or error rate exceeded thresholds",
                 strategy=ScalingStrategy.REACTIVE,
             )
 
@@ -363,7 +361,7 @@ class PredictiveScaler:
                     from_replicas=config.current_replicas,
                     to_replicas=new_count,
                     confidence=0.5,
-                    reason=f"Predictive scale down: latency trending down",
+                    reason="Predictive scale down: latency trending down",
                     strategy=ScalingStrategy.PREDICTIVE,
                 )
 
@@ -474,7 +472,7 @@ class AutoScaler:
         return decision
 
     async def apply_scaling(
-        self, agent_id: str, decision: Optional[ScalingDecision] = None
+        self, agent_id: str, decision: ScalingDecision | None = None
     ) -> ScalingDecision:
         """Evaluate and apply scaling for an agent.
 
@@ -511,7 +509,7 @@ class AutoScaler:
         projected_cost = (config.current_replicas + 1) * config.cost_per_replica_hour
 
         # Estimate quality gain from one more replica
-        current_quality = stats.get("quality_score", RollingStats()).mean if "quality_score" in stats else 0.7
+        stats.get("quality_score", RollingStats()).mean if "quality_score" in stats else 0.7
         # Rough heuristic: each additional replica improves quality by some fraction
         quality_gain = 0.05 / max(config.current_replicas, 1)
 

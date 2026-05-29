@@ -55,11 +55,11 @@ class BGE_M3_Embedder:
                 use_fp16=self.use_fp16,
                 device=self.device
             )
-        except ImportError:
+        except ImportError as err:
             raise ImportError(
                 "FlagEmbedding not installed. Install with: "
                 "pip install FlagEmbedding"
-            )
+            ) from err
 
     def encode(
         self,
@@ -220,11 +220,11 @@ class SentenceTransformerEmbedder:
             from sentence_transformers import SentenceTransformer
 
             self._model = SentenceTransformer(self.model_name, device=self.device)
-        except ImportError:
+        except ImportError as err:
             raise ImportError(
                 "sentence-transformers not installed. Install with: "
                 "pip install sentence-transformers"
-            )
+            ) from err
 
     def encode(
         self,

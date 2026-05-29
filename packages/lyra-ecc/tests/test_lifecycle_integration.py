@@ -4,12 +4,13 @@ Tests for ECC Lifecycle Integration
 Tests for bridging ECC hooks with Lyra's lifecycle system.
 """
 
-import pytest
-from unittest.mock import Mock, AsyncMock
 from pathlib import Path
+from unittest.mock import Mock
 
+import pytest
+
+from lyra_ecc.hooks import HookContext, HookResult, HookType
 from lyra_ecc.lifecycle_integration import ECCLifecycleIntegration, setup_ecc_hooks
-from lyra_ecc.hooks import HookType, HookContext, HookResult
 
 
 class TestECCLifecycleIntegration:

@@ -1,7 +1,6 @@
 """Tests for priority skills."""
 
 import pytest
-
 from lyra_cli.skills_integration import PrioritySkills, SkillMatcher
 
 

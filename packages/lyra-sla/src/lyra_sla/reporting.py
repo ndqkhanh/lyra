@@ -5,15 +5,14 @@ from __future__ import annotations
 import json
 import logging
 import time
-from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 
-from .sla_manager import SLAManager, SLAViolation, ViolationSeverity, SLIMetric
 from .metrics import MetricsCollector, RollingStats
+from .sla_manager import SLAManager, SLAViolation
 
 logger = logging.getLogger(__name__)
 
@@ -299,14 +298,14 @@ class ComplianceReporter:
                 period_end=period_end,
             )
 
-        window = period_end - period_start
+        period_end - period_start
         slo_details: list[dict[str, Any]] = []
         total_checks = 0
         violations = 0
         recommendations: list[str] = []
 
         for slo in sla.slos:
-            values = self.metrics.query(
+            self.metrics.query(
                 agent_id, slo.metric.value
             )
             # Filter to period
@@ -633,16 +632,16 @@ class ReportExporter:
         """Format as Markdown."""
         lines = [
             f"# SLA Compliance Report: {report.agent_id}",
-            f"",
+            "",
             f"**Period**: {report.period_start} - {report.period_end}",
             f"**Overall Compliance**: {report.compliance_pct:.1f}%",
             f"**Total Checks**: {report.total_checks}",
             f"**Violations**: {report.violations}",
-            f"",
-            f"## SLO Details",
-            f"",
-            f"| Metric | Target | Compliance % | Avg Value | P95 Value |",
-            f"|--------|--------|-------------|-----------|-----------|",
+            "",
+            "## SLO Details",
+            "",
+            "| Metric | Target | Compliance % | Avg Value | P95 Value |",
+            "|--------|--------|-------------|-----------|-----------|",
         ]
 
         for slo in report.slo_details:

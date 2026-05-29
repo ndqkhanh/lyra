@@ -1,8 +1,6 @@
 """Tests for lyra_harness_core.pipeline.MultiHopPipeline — end-to-end composition."""
 from __future__ import annotations
 
-import pytest
-
 from lyra_harness_core.evals import BudgetController
 from lyra_harness_core.gates import ChainOfNoteGate, DocVerdict, NoteVerdict
 from lyra_harness_core.multi_hop import (
@@ -13,7 +11,7 @@ from lyra_harness_core.multi_hop import (
     StubLLM,
     StubRetriever,
 )
-from lyra_harness_core.pipeline import MultiHopPipeline, PipelineResult, PipelineStep
+from lyra_harness_core.pipeline import MultiHopPipeline, PipelineStep
 from lyra_harness_core.routing import BELLERouter, QueryType
 
 

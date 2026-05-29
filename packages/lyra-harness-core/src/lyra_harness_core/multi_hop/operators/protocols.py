@@ -6,8 +6,9 @@ through a thin adapter; tests use the stubs.
 """
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable, Optional, Protocol
+from typing import Protocol
 
 
 @dataclass(frozen=True)
@@ -29,7 +30,7 @@ class LLMTextGenerator(Protocol):
 
     name: str
 
-    def generate(self, prompt: str, *, max_tokens: int = 512, stop: Optional[list[str]] = None) -> str: ...
+    def generate(self, prompt: str, *, max_tokens: int = 512, stop: list[str] | None = None) -> str: ...
 
 
 class Retriever(Protocol):
@@ -59,7 +60,7 @@ class StubLLM:
     name: str = "stub-llm-v1"
     _call_count: int = 0
 
-    def generate(self, prompt: str, *, max_tokens: int = 512, stop: Optional[list[str]] = None) -> str:
+    def generate(self, prompt: str, *, max_tokens: int = 512, stop: list[str] | None = None) -> str:
         if self._call_count >= len(self.responses):
             raise RuntimeError(
                 f"StubLLM exhausted: {self._call_count} calls made, only "
@@ -79,7 +80,7 @@ class StubRetriever:
     """Scripted retriever: returns docs by lookup or a fallback callable."""
 
     fixtures: dict[str, list[RetrievedDoc]] = field(default_factory=dict)
-    fallback: Optional[Callable[[str, int], list[RetrievedDoc]]] = None
+    fallback: Callable[[str, int], list[RetrievedDoc]] | None = None
     name: str = "stub-retriever-v1"
     _calls: list[tuple[str, int]] = field(default_factory=list)
 

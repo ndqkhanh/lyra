@@ -53,7 +53,7 @@ class TestInstinctSystem:
             instinct.observe(Observation(ObservationType.TOOL_CALL, "s1", 0.0, {"tool_name": "Read"}))
             instinct.observe(Observation(ObservationType.TOOL_CALL, "s1", 0.1, {"tool_name": "Write"}))
 
-        report = instinct.process_cycle()
+        instinct.process_cycle()
         ready = instinct.ready_patterns()
         assert all(p.confidence >= 0.7 for p in ready)
 

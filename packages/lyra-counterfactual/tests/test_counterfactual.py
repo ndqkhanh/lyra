@@ -6,45 +6,40 @@ import asyncio
 
 import numpy as np
 import pytest
-
-from lyra_counterfactual import (
-    # Main engine
-    CounterfactualEngine,
-    CounterfactualEngineConfig,
-    CounterfactualResult,
-    Intervention,
-    # Errors
-    CounterfactualEngineError,
-    AbductionError,
-    ActionPredictionError,
-    PredictionError,
-    # Abduction
-    AbductionEngine,
-    AbductionConfig,
-    AbductionResult,
-    AbductionStrategy,
-    # Action
-    ActionPredictor,
-    ActionConfig,
-    ActionPrediction,
-    # Prediction
-    PredictionEngine,
-    PredictionConfig,
-    PredictionResult,
-    UncertaintyMetrics,
-)
 from lyra_causal_graph import (
+    ActionEdge,
     CausalGraph,
     EntityNode,
-    ActionEdge,
-    OutcomeNode,
-    StructuralCausalModel,
-    SCMConfig,
     GaussianNoise,
+    OutcomeNode,
+    SCMConfig,
+    StructuralCausalModel,
     make_chain_scm,
     make_collider_scm,
 )
-
+from lyra_counterfactual import (
+    AbductionConfig,
+    # Abduction
+    AbductionEngine,
+    AbductionError,
+    AbductionResult,
+    ActionPrediction,
+    ActionPredictionError,
+    # Action
+    ActionPredictor,
+    # Main engine
+    CounterfactualEngine,
+    CounterfactualEngineConfig,
+    # Errors
+    CounterfactualEngineError,
+    CounterfactualResult,
+    Intervention,
+    PredictionConfig,
+    # Prediction
+    PredictionEngine,
+    PredictionError,
+    PredictionResult,
+)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Fixtures

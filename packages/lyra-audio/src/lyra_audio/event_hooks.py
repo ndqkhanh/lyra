@@ -7,8 +7,9 @@ Features:
 - Custom callbacks
 """
 
+from collections.abc import Callable
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 
 class LyraEvent(Enum):
@@ -63,7 +64,7 @@ class EventHookSystem:
 
     def __init__(self):
         """Initialize event hook system."""
-        self.hooks: Dict[str, List[Callable]] = {}
+        self.hooks: dict[str, list[Callable]] = {}
         self.sound_manager = None  # Will be set by SoundManager
 
     def register_hook(self, event: str, callback: Callable):
@@ -89,7 +90,7 @@ class EventHookSystem:
         if event in self.hooks and callback in self.hooks[event]:
             self.hooks[event].remove(callback)
 
-    def trigger(self, event: str, context: Optional[Dict[str, Any]] = None):
+    def trigger(self, event: str, context: dict[str, Any] | None = None):
         """
         Trigger event.
 
@@ -111,7 +112,7 @@ class EventHookSystem:
                 except Exception:
                     pass  # Fail silently
 
-    def clear_hooks(self, event: Optional[str] = None):
+    def clear_hooks(self, event: str | None = None):
         """
         Clear hooks.
 
@@ -123,6 +124,6 @@ class EventHookSystem:
         else:
             self.hooks.clear()
 
-    def list_events(self) -> List[str]:
+    def list_events(self) -> list[str]:
         """List all registered events."""
         return list(self.hooks.keys())

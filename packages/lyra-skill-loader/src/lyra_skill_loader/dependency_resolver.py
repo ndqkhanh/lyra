@@ -1,10 +1,8 @@
 """Skill Dependency Resolution — graph-based dependency resolution with circular detection (Tarjan's algorithm)."""
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
-
-from lyra_skill_loader.exceptions import DependencyError
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -265,7 +263,7 @@ class DependencyResolver:
                     queue.append(dep)
 
         # Build adjacency and in-degree for all involved nodes
-        in_degree: dict[str, int] = {sid: 0 for sid in all_consider}
+        in_degree: dict[str, int] = dict.fromkeys(all_consider, 0)
         adjacency: dict[str, list[str]] = {sid: [] for sid in all_consider}
 
         for sid in all_consider:

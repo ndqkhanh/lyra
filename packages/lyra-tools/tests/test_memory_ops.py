@@ -1,8 +1,6 @@
 """Tests for memory operations tools."""
 from __future__ import annotations
 
-import pytest
-
 from lyra_tools.memory_ops import (
     memory_delete,
     memory_list,

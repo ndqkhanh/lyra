@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Test Phase 3: Response Format Patterns"""
 
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
 
 from lyra_cli.ui import ResponseFormatter

@@ -4,7 +4,6 @@ Verifies AgentDashboardWidget, AgentInfo, TaskItem, MonitorEvent.
 """
 from __future__ import annotations
 
-import pytest
 
 def test_agent_info():
     from lyra_cli.tui_v2.widgets.agent_dashboard import AgentInfo, AgentStatus
@@ -47,7 +46,8 @@ def test_dashboard_register_agent():
 
 def test_dashboard_update_agent():
     from lyra_cli.tui_v2.widgets.agent_dashboard import (
-        AgentDashboardWidget, AgentStatus,
+        AgentDashboardWidget,
+        AgentStatus,
     )
     dash = AgentDashboardWidget()
     dash.register_agent("a1", "Worker-1")
@@ -63,7 +63,8 @@ def test_dashboard_log_event():
 
 def test_dashboard_add_task():
     from lyra_cli.tui_v2.widgets.agent_dashboard import (
-        AgentDashboardWidget, TaskStatus,
+        AgentDashboardWidget,
+        TaskStatus,
     )
     dash = AgentDashboardWidget()
     dash.add_task("t1", "Fix bug", status=TaskStatus.TODO)
@@ -72,7 +73,8 @@ def test_dashboard_add_task():
 
 def test_dashboard_update_task():
     from lyra_cli.tui_v2.widgets.agent_dashboard import (
-        AgentDashboardWidget, TaskStatus,
+        AgentDashboardWidget,
+        TaskStatus,
     )
     dash = AgentDashboardWidget()
     dash.add_task("t1", "Fix bug")

@@ -1,9 +1,8 @@
 """Integration tests for production resource installation."""
 
-import pytest
-from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
+import pytest
 from lyra_skills.mcp_integration import install_production_mcp_servers
 from lyra_skills.production_installer import install_production_skills
 

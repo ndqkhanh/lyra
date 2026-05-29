@@ -13,58 +13,54 @@ composition optimization, profiling, and caching.
 
 from __future__ import annotations
 
+from .composer import (
+    CompositionCallback,
+    CompositionNode,
+    CompositionResult,
+    ConditionalComposer,
+    HybridComposer,
+    IterativeComposer,
+    MasterComposer,
+    ParallelComposer,
+    SequentialComposer,
+)
+from .discovery import (
+    DiscoveryMethod,
+    GapAnalysis,
+    QualityReport,
+    QualityTier,
+    SkillDiscoveryEngine,
+)
+from .exceptions import (
+    CircularDependencyError,
+    CompositionError,
+    DiscoveryError,
+    OptimizationError,
+    SkillConflictError,
+    SkillNotFoundError,
+    SkillWeaverError,
+    ValidationError,
+)
+from .optimizer import (
+    CompositionOptimizer,
+    CompositionProfiler,
+    OptimizationObjective,
+    OptimizationResult,
+    PlanCache,
+    ProfilingResult,
+)
 from .skill_weaver import (
-    SkillType,
     CompositionPattern,
-    SkillStatus,
-    SkillMetadata,
-    SkillIO,
+    CompositionPlan,
     SkillDefinition,
     SkillEdge,
     SkillGraph,
+    SkillIO,
+    SkillMetadata,
     SkillRegistry,
-    CompositionPlan,
+    SkillStatus,
+    SkillType,
     SkillWeaver,
-)
-
-from .composer import (
-    CompositionNode,
-    CompositionResult,
-    CompositionCallback,
-    SequentialComposer,
-    ParallelComposer,
-    ConditionalComposer,
-    IterativeComposer,
-    HybridComposer,
-    MasterComposer,
-)
-
-from .discovery import (
-    DiscoveryMethod,
-    QualityTier,
-    QualityReport,
-    GapAnalysis,
-    SkillDiscoveryEngine,
-)
-
-from .optimizer import (
-    OptimizationObjective,
-    ProfilingResult,
-    OptimizationResult,
-    CompositionProfiler,
-    PlanCache,
-    CompositionOptimizer,
-)
-
-from .exceptions import (
-    SkillWeaverError,
-    SkillNotFoundError,
-    SkillConflictError,
-    CompositionError,
-    CircularDependencyError,
-    DiscoveryError,
-    OptimizationError,
-    ValidationError,
 )
 
 __all__ = [

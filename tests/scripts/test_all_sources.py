@@ -16,8 +16,9 @@ def test_all_sources():
     print("=" * 80)
 
     try:
-        from lyra_research.discovery import MultiSourceDiscovery
         import os
+
+        from lyra_research.discovery import MultiSourceDiscovery
 
         # Get API keys from environment
         semantic_scholar_key = os.environ.get("SEMANTIC_SCHOLAR_API_KEY")
@@ -91,18 +92,18 @@ def test_all_sources():
         working_sources = sum(1 for count in results_summary.values() if count > 0)
         total_count = sum(results_summary.values())
 
-        print(f"\n📊 Sources Status:")
+        print("\n📊 Sources Status:")
         for source_name, count in results_summary.items():
             status = "✅" if count > 0 else "❌"
             print(f"  {status} {source_name}: {count} results")
 
-        print(f"\n📈 Overall Statistics:")
+        print("\n📈 Overall Statistics:")
         print(f"  Working sources: {working_sources}/7 ({working_sources/7*100:.0f}%)")
         print(f"  Total results: {total_count}")
         print(f"  Average per source: {total_count/7:.1f}")
 
         # Recommendations
-        print(f"\n💡 Recommendations:")
+        print("\n💡 Recommendations:")
         if semantic_scholar_key:
             print("  ✓ Semantic Scholar API key configured")
         else:
@@ -119,13 +120,13 @@ def test_all_sources():
         print("TESTING FULL DISCOVERY (ALL SOURCES)")
         print("=" * 80)
 
-        print(f"\nRunning full discovery with all 7 sources...")
+        print("\nRunning full discovery with all 7 sources...")
         full_results = discovery.discover(query, max_per_source=10)
 
         total_full = sum(len(sources) for sources in full_results.values())
-        print(f"\n✓ Full discovery completed!")
+        print("\n✓ Full discovery completed!")
         print(f"  Total sources found: {total_full}")
-        print(f"  Breakdown: {dict((k, len(v)) for k, v in full_results.items())}")
+        print(f"  Breakdown: { {k: len(v) for k, v in full_results.items()} }")
 
         return working_sources >= 5  # Success if at least 5/7 sources work
 

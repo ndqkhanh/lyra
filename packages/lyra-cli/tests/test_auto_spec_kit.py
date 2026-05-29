@@ -86,11 +86,11 @@ def test_analyzer_analyze_function(analyzer):
     code = """
 def add(a: int, b: int) -> int:
     '''Add two numbers.
-    
+
     Args:
         a: First number
         b: Second number
-        
+
     Returns:
         Sum of a and b
     '''
@@ -122,7 +122,7 @@ def test_analyzer_analyze_class(analyzer):
     code = """
 class Calculator:
     '''A simple calculator.'''
-    
+
     def add(self, a, b):
         return a + b
 """
@@ -137,7 +137,7 @@ def test_analyzer_parse_docstring(analyzer):
     """Test parsing docstring."""
     docstring = """
     A test function.
-    
+
     Example:
         result = test()
     """
@@ -423,13 +423,13 @@ def test_full_workflow(kit):
     code = """
 def factorial(n: int) -> int:
     '''Calculate factorial.
-    
+
     Args:
         n: Input number
-        
+
     Returns:
         Factorial of n
-        
+
     Example:
         factorial(5) == 120
     '''
@@ -456,10 +456,10 @@ def test_class_workflow(kit):
     code = """
 class Stack:
     '''A simple stack implementation.'''
-    
+
     def __init__(self):
         self.items = []
-    
+
     def push(self, item):
         self.items.append(item)
 """

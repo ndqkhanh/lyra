@@ -60,7 +60,7 @@ class EntityRelation(str, Enum):
 class GraphEdge:
     """
     An edge in a knowledge graph.
-    
+
     Attributes:
         source_id: Source memory ID
         target_id: Target memory ID
@@ -82,7 +82,7 @@ class GraphEdge:
 class MultiGraphStore:
     """
     Multi-graph knowledge store for memory relationships.
-    
+
     Maintains four separate graphs for different relationship types.
     Supports graph traversal and query-adaptive retrieval.
     """
@@ -112,7 +112,7 @@ class MultiGraphStore:
     ) -> GraphEdge:
         """
         Add an edge to a graph.
-        
+
         Args:
             graph_type: Which graph to add to
             source_id: Source memory ID
@@ -120,7 +120,7 @@ class MultiGraphStore:
             relation: Relationship type
             weight: Edge weight
             metadata: Additional data
-            
+
         Returns:
             Created GraphEdge
         """
@@ -156,13 +156,13 @@ class MultiGraphStore:
     ) -> list[GraphEdge]:
         """
         Get neighboring edges for a memory.
-        
+
         Args:
             memory_id: Memory to get neighbors for
             graph_type: Which graph to query
             direction: "outbound", "inbound", or "both"
             relation_filter: Optional relation type filter
-            
+
         Returns:
             List of edges
         """
@@ -193,13 +193,13 @@ class MultiGraphStore:
     ) -> list[str]:
         """
         Traverse graph from a starting memory.
-        
+
         Args:
             start_id: Starting memory ID
             graph_type: Which graph to traverse
             max_depth: Maximum traversal depth
             relation_filter: Optional relation type filter
-            
+
         Returns:
             List of reachable memory IDs
         """
@@ -241,13 +241,13 @@ class MultiGraphStore:
     ) -> list[str] | None:
         """
         Find shortest path between two memories.
-        
+
         Args:
             start_id: Starting memory ID
             end_id: Target memory ID
             graph_type: Which graph to search
             max_depth: Maximum path length
-            
+
         Returns:
             List of memory IDs forming path, or None if no path
         """
@@ -291,13 +291,13 @@ class MultiGraphStore:
     ) -> list[tuple[str, float]]:
         """
         Get related memories across all graphs.
-        
+
         Combines results from all four graphs with weighted scoring.
-        
+
         Args:
             memory_id: Memory to find relations for
             max_results: Maximum results to return
-            
+
         Returns:
             List of (memory_id, relevance_score) tuples
         """

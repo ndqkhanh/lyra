@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 """Test Lyra startup without hanging"""
 
-import sys
 import os
+import sys
 
 # Add lyra-cli to path
 sys.path.insert(0, '/Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-cli/src')
 
 # Test imports
 try:
-    from lyra_cli.repl import SequentialREPL, REPLConfig
+    from lyra_cli.repl import REPLConfig, SequentialREPL
     print("✓ SequentialREPL imported successfully")
 
-    from lyra_cli.cli.commands.chat import interactive_chat
     print("✓ interactive_chat imported successfully")
 
     # Test config creation

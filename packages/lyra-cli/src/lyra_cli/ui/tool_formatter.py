@@ -251,7 +251,7 @@ class ToolCallFormatter:
     def _render_diff_hunk(self, hunk: DiffHunk, indent: int) -> list[str]:
         """Render a single diff hunk"""
         lines = []
-        indent_str = " " * indent
+        " " * indent
 
         # Context before
         for line_num, content in hunk.context_before:

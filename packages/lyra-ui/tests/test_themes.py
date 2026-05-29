@@ -7,7 +7,6 @@ from lyra_ui import (
     ThemeName,
 )
 
-
 # Theme Manager Tests
 
 

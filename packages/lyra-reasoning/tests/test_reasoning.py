@@ -2,9 +2,9 @@
 Comprehensive tests for lyra-reasoning: models, ReflAct, GRPO, and strategies.
 """
 
-import math
 import pytest
 
+from lyra_reasoning.grpo import GRPOTrainer
 from lyra_reasoning.models import (
     AnaloguePair,
     GRPOTrajectory,
@@ -15,7 +15,6 @@ from lyra_reasoning.models import (
     ThoughtNode,
 )
 from lyra_reasoning.reflect import ReflActReasoner
-from lyra_reasoning.grpo import GRPOTrainer
 from lyra_reasoning.strategies import (
     AnalogicalReasoning,
     ChainOfThought,
@@ -23,7 +22,6 @@ from lyra_reasoning.strategies import (
     StepBack,
     TreeOfThoughts,
 )
-
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Model tests
