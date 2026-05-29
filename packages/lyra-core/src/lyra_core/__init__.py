@@ -77,6 +77,19 @@ from lyra_core.containment import (
     get_project_registry,
 )
 
+# ── Phase 3: Command Queue & Three-Surface Protocol ─────────────────────
+from lyra_core.command_queue import (
+    Command,
+    CommandGroup,
+    CommandGroupStatus,
+    CommandPriority,
+    CommandQueue,
+    CommandStatus,
+    SurfaceKind,
+    SurfaceMessage,
+    ThreeSurfaceProtocol,
+)
+
 # ── Existing exports ───────────────────────────────────────────────────
 from lyra_core.agent.agi_plugin import AGILoopPlugin
 from lyra_core.agent.event_sourced_loop import (
@@ -106,7 +119,7 @@ from lyra_core.two_circuit import (
     TwoCircuitBridge,
 )
 
-__version__ = "0.5.0"  # Phase 2: containment hierarchy (Project/Team/TopologyTree/ConfigTree/ModeStack)
+__version__ = "0.6.0"  # Phase 3: command queue (CMD_RETURN_WAIT) + three-surface protocol
 
 __all__ = [
     "__version__",
@@ -155,6 +168,16 @@ __all__ = [
     "ConfigNode",
     "ModeStack",
     "get_project_registry",
+    # Phase 3: Command Queue
+    "CommandQueue",
+    "Command",
+    "CommandStatus",
+    "CommandPriority",
+    "CommandGroup",
+    "CommandGroupStatus",
+    "ThreeSurfaceProtocol",
+    "SurfaceMessage",
+    "SurfaceKind",
     # Existing
     "EventSourcedAgentLoop",
     "EventLog",
