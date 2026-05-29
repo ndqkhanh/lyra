@@ -1,8 +1,7 @@
-"""L312-6 — cron sleep-mode + after-event triggers tests."""
+"""L312-6 — cron sleep-mode tests."""
+
 from __future__ import annotations
 
-import os
-import signal
 import threading
 import time
 from datetime import datetime, timedelta, timezone
@@ -11,11 +10,6 @@ from pathlib import Path
 import pytest
 from lyra_core.cron.daemon import CronDaemon
 from lyra_core.cron.store import CronJob, CronStore
-from lyra_core.cron.triggers import (
-    AfterSessionTrigger,
-    GitPushTrigger,
-    SignalTrigger,
-)
 
 UTC = timezone.utc
 
@@ -121,78 +115,7 @@ def test_run_event_loop_idles_when_no_jobs(store: CronStore):
     assert not th.is_alive()
 
 
-# --- 6. SignalTrigger.fired() is self-clearing ----------------------- #
-
-
-@pytest.mark.skipif(not hasattr(signal, "SIGUSR1"), reason="POSIX-only")
-def test_signal_trigger_self_clearing():
-    trig = SignalTrigger(signum=signal.SIGUSR1)
-    trig.arm()
-    try:
-        os.kill(os.getpid(), signal.SIGUSR1)
-        time.sleep(0.05)
-        assert trig.fired() is True
-        # Self-clearing.
-        assert trig.fired() is False
-    finally:
-        trig.disarm()
-
-
-# --- 7. SignalTrigger inactive when signum=0 ------------------------- #
-
-
-def test_signal_trigger_disabled_with_signum_zero():
-    trig = SignalTrigger(signum=0)
-    trig.arm()
-    assert trig.fired() is False
-
-
-# --- 8. GitPushTrigger fires on ref mtime advance --------------------- #
-
-
-def test_git_push_trigger_fires_on_mtime_advance(tmp_path: Path):
-    repo = tmp_path
-    ref_dir = repo / ".git" / "refs" / "heads"
-    ref_dir.mkdir(parents=True)
-    ref_file = ref_dir / "main"
-    ref_file.write_text("0" * 40)
-
-    trig = GitPushTrigger(repo=repo, ref="heads/main")
-    trig.arm()
-    assert trig.fired() is False
-
-    # Bump mtime explicitly (some filesystems are second-resolution).
-    new_mtime = ref_file.stat().st_mtime + 5.0
-    os.utime(ref_file, (new_mtime, new_mtime))
-    assert trig.fired() is True
-    # Self-clearing: once consumed, future calls return False until next bump.
-    assert trig.fired() is False
-
-
-# --- 9. GitPushTrigger missing ref → no fire, no crash --------------- #
-
-
-def test_git_push_trigger_missing_ref_returns_false(tmp_path: Path):
-    trig = GitPushTrigger(repo=tmp_path, ref="heads/main")
-    trig.arm()
-    assert trig.fired() is False
-
-
-# --- 10. AfterSessionTrigger fires on matching session id ------------ #
-
-
-def test_after_session_trigger_matches_id():
-    trig = AfterSessionTrigger(session_id="sess-7")
-    assert trig.fired() is False
-    trig.notify_session_end("sess-other")
-    assert trig.fired() is False
-    trig.notify_session_end("sess-7")
-    assert trig.fired() is True
-    # Self-clearing.
-    assert trig.fired() is False
-
-
-# --- 11. min-sleep floor — sleep-deprivation defence ----------------- #
+# --- 6. min-sleep floor — sleep-deprivation defence ------------------ #
 
 
 def test_min_sleep_floor_prevents_busy_loop(store: CronStore):
@@ -217,7 +140,7 @@ def test_min_sleep_floor_prevents_busy_loop(store: CronStore):
     assert not fired_log
 
 
-# --- 12. Stop without start — daemon does not error ------------------ #
+# --- 7. Stop without start — daemon does not error ------------------- #
 
 
 def test_daemon_stop_without_start_is_safe(store: CronStore):

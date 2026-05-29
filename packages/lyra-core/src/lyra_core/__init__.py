@@ -241,7 +241,7 @@ from lyra_core.watchdog import (
     WatchdogStatus,
 )
 
-__version__ = "0.17.0"  # Phase 14: sonar audit — remove terminal stubs, fix stale docstrings
+__version__ = "0.18.0"  # Phase 15: remove dead cron/triggers.py (zero production usage)
 
 __all__ = [
     "__version__",
