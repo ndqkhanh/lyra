@@ -241,7 +241,7 @@ from lyra_core.watchdog import (
     WatchdogStatus,
 )
 
-__version__ = "0.15.0"  # Phase 12: checkpoint & settings test hardening
+__version__ = "0.16.0"  # Phase 13: AGI pipeline test hardening (orchestrator + plugin)
 
 __all__ = [
     "__version__",
