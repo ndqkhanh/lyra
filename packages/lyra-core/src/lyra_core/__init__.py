@@ -128,6 +128,20 @@ from lyra_core.containment import (
     get_project_registry,
 )
 
+# ── Phase 9: Continuous Evaluation ──────────────────────────────────────
+from lyra_core.evaluation import (
+    AgentScore,
+    BenchmarkRecord,
+    BenchmarkStore,
+    EvalPipeline,
+    EvalTrigger,
+    LeaderboardEngine,
+    PipelineConfig,
+    PipelineRun,
+    RankingView,
+    RunComparison,
+)
+
 # ── Phase 1: Unified Event Bus ─────────────────────────────────────────
 from lyra_core.events import (
     Event,
@@ -201,7 +215,7 @@ from lyra_core.watchdog import (
     WatchdogStatus,
 )
 
-__version__ = "0.11.0"  # Phase 8: safety governance + policy engine + compliance mapper + override workflow
+__version__ = "0.12.0"  # Phase 9: continuous evaluation pipeline + benchmark store + leaderboard engine
 
 __all__ = [
     "__version__",
@@ -302,6 +316,17 @@ __all__ = [
     "ThrottleConfig",
     "TokenBucket",
     "Watermark",
+    # Phase 9: Continuous Evaluation
+    "AgentScore",
+    "BenchmarkRecord",
+    "BenchmarkStore",
+    "EvalPipeline",
+    "EvalTrigger",
+    "LeaderboardEngine",
+    "PipelineConfig",
+    "PipelineRun",
+    "RankingView",
+    "RunComparison",
     # Phase 8: Safety Governance
     "ComplianceFramework",
     "ComplianceMapper",
