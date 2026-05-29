@@ -172,6 +172,18 @@ from lyra_core.protocol import (
     TaskResult,
     WorkstreamItem,
 )
+
+# ── Phase 8: Safety Governance ───────────────────────────────────────────
+from lyra_core.safety import (
+    ComplianceFramework,
+    ComplianceMapper,
+    OverrideRequest,
+    OverrideWorkflow,
+    PolicyEngine,
+    PolicyRule,
+    PolicyVerdict,
+    SafetyPolicy,
+)
 from lyra_core.stagnation import StagnationDetector, StagnationResult
 from lyra_core.two_circuit import (
     CircuitMode,
@@ -189,7 +201,7 @@ from lyra_core.watchdog import (
     WatchdogStatus,
 )
 
-__version__ = "0.10.0"  # Phase 7: experience extraction + learning loop + anti-patterns + skill distillation
+__version__ = "0.11.0"  # Phase 8: safety governance + policy engine + compliance mapper + override workflow
 
 __all__ = [
     "__version__",
@@ -290,6 +302,15 @@ __all__ = [
     "ThrottleConfig",
     "TokenBucket",
     "Watermark",
+    # Phase 8: Safety Governance
+    "ComplianceFramework",
+    "ComplianceMapper",
+    "OverrideRequest",
+    "OverrideWorkflow",
+    "PolicyEngine",
+    "PolicyRule",
+    "PolicyVerdict",
+    "SafetyPolicy",
     # Phase 7: Experience
     "AntiPattern",
     "AntiPatternRegistry",
