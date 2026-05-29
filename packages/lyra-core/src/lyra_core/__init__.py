@@ -62,6 +62,21 @@ from lyra_core.adapters.agent_adapters import (
     get_adapter_registry,
 )
 
+# ── Phase 2: Containment Hierarchy ─────────────────────────────────────
+from lyra_core.containment import (
+    ConfigNode,
+    ConfigTree,
+    ModeStack,
+    Project,
+    ProjectRegistry,
+    ProjectStatus,
+    Team,
+    TeamMembership,
+    TopologyKind,
+    TopologyTree,
+    get_project_registry,
+)
+
 # ── Existing exports ───────────────────────────────────────────────────
 from lyra_core.agent.agi_plugin import AGILoopPlugin
 from lyra_core.agent.event_sourced_loop import (
@@ -91,7 +106,7 @@ from lyra_core.two_circuit import (
     TwoCircuitBridge,
 )
 
-__version__ = "0.4.0"  # Phase 1: unified agent protocol + event bus
+__version__ = "0.5.0"  # Phase 2: containment hierarchy (Project/Team/TopologyTree/ConfigTree/ModeStack)
 
 __all__ = [
     "__version__",
@@ -128,6 +143,18 @@ __all__ = [
     "SwarmAgentAdapter",
     "PentestAgentAdapter",
     "get_adapter_registry",
+    # Phase 2: Containment
+    "Project",
+    "ProjectStatus",
+    "ProjectRegistry",
+    "Team",
+    "TeamMembership",
+    "TopologyTree",
+    "TopologyKind",
+    "ConfigTree",
+    "ConfigNode",
+    "ModeStack",
+    "get_project_registry",
     # Existing
     "EventSourcedAgentLoop",
     "EventLog",
