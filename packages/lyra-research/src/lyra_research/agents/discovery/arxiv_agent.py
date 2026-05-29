@@ -1,8 +1,6 @@
 """ArXiv discovery agent."""
 from __future__ import annotations
 
-from typing import List
-
 from lyra_research.agents.discovery.discovery_base import DiscoveryAgent
 from lyra_research.discovery import ArXivDiscovery, ResearchSource
 
@@ -15,7 +13,7 @@ class ArxivAgent(DiscoveryAgent):
         super().__init__(source_name="arxiv", model=model)
         self.arxiv = ArXivDiscovery()
 
-    async def discover(self, query: str, max_results: int = 50) -> List[ResearchSource]:
+    async def discover(self, query: str, max_results: int = 50) -> list[ResearchSource]:
         """
         Discover papers from ArXiv.
 

@@ -6,17 +6,15 @@ checkpoint management, and rollback capabilities.
 
 from __future__ import annotations
 
-import asyncio
-import json
 import logging
 import time
 import uuid
 from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Callable, Optional, Protocol
+from typing import Any, Protocol
 
-from .drift_detector import DriftType, DriftSeverity, DriftSignal, DriftReport
+from .drift_detector import DriftSeverity, DriftSignal, DriftType
 
 logger = logging.getLogger(__name__)
 
@@ -84,11 +82,11 @@ class AdaptationRecord:
 
     record_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     action: AdaptationAction = AdaptationAction.NO_ACTION
-    trigger_signal: Optional[DriftSignal] = None
+    trigger_signal: DriftSignal | None = None
     status: AdaptationStatus = AdaptationStatus.PENDING
     started_at: float = field(default_factory=time.time)
-    completed_at: Optional[float] = None
-    checkpoint_before: Optional[AdaptationCheckpoint] = None
+    completed_at: float | None = None
+    checkpoint_before: AdaptationCheckpoint | None = None
     success: bool = False
     notes: str = ""
 
@@ -252,7 +250,7 @@ class StrategySwitchStrategy:
 
     def __init__(self) -> None:
         self._strategy_registry: dict[str, Any] = {}
-        self._active_strategy: Optional[str] = None
+        self._active_strategy: str | None = None
 
     def register_strategy(self, name: str, strategy_impl: Any) -> None:
         """Register an available strategy."""
@@ -379,7 +377,7 @@ class AdaptationEngine:
     # ── Checkpoint management ──────────────────────────────────────────
 
     def create_checkpoint(
-        self, component: str, state: dict[str, Any], metadata: Optional[dict[str, Any]] = None
+        self, component: str, state: dict[str, Any], metadata: dict[str, Any] | None = None
     ) -> AdaptationCheckpoint:
         """Create a state checkpoint for rollback.
 
@@ -403,21 +401,21 @@ class AdaptationEngine:
         )
         return checkpoint
 
-    def get_checkpoint(self, checkpoint_id: str) -> Optional[AdaptationCheckpoint]:
+    def get_checkpoint(self, checkpoint_id: str) -> AdaptationCheckpoint | None:
         """Retrieve a specific checkpoint by ID."""
         for cp in self._checkpoints:
             if cp.checkpoint_id == checkpoint_id:
                 return cp
         return None
 
-    def get_latest_checkpoint(self, component: str) -> Optional[AdaptationCheckpoint]:
+    def get_latest_checkpoint(self, component: str) -> AdaptationCheckpoint | None:
         """Get the most recent checkpoint for a component."""
         for cp in reversed(self._checkpoints):
             if cp.component == component:
                 return cp
         return None
 
-    def list_checkpoints(self, component: Optional[str] = None) -> list[AdaptationCheckpoint]:
+    def list_checkpoints(self, component: str | None = None) -> list[AdaptationCheckpoint]:
         """List checkpoints, optionally filtered by component."""
         if component:
             return [cp for cp in self._checkpoints if cp.component == component]
@@ -426,8 +424,8 @@ class AdaptationEngine:
     # ── Adaptation execution ──────────────────────────────────────────
 
     async def evaluate_and_adapt(
-        self, signal: DriftSignal, context: Optional[dict[str, Any]] = None
-    ) -> Optional[AdaptationRecord]:
+        self, signal: DriftSignal, context: dict[str, Any] | None = None
+    ) -> AdaptationRecord | None:
         """Evaluate drift signal and execute adaptation if warranted.
 
         Args:
@@ -443,7 +441,7 @@ class AdaptationEngine:
         # Evaluate all strategies
         best_action = AdaptationAction.NO_ACTION
         best_confidence = 0.0
-        best_strategy: Optional[AdaptationStrategy] = None
+        best_strategy: AdaptationStrategy | None = None
 
         for strategy in self._strategies.values():
             try:
@@ -485,7 +483,7 @@ class AdaptationEngine:
         return record
 
     async def execute_record(
-        self, record: AdaptationRecord, strategy: Optional[AdaptationStrategy] = None
+        self, record: AdaptationRecord, strategy: AdaptationStrategy | None = None
     ) -> AdaptationRecord:
         """Execute a pending adaptation record.
 

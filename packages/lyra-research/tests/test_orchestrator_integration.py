@@ -3,29 +3,20 @@ from __future__ import annotations
 
 import time
 from pathlib import Path
-from typing import Any, Dict, List
-from unittest.mock import MagicMock, patch
+from typing import Any
+from unittest.mock import patch
 
 import pytest
-
-from lyra_research.orchestrator import (
-    ResearchOrchestrator,
-    ResearchProgress,
-    AgentType,
-    AgentConfig,
-)
-from lyra_research.coordination import (
-    CoordinationManager,
-    Task,
-    TaskState,
-    FailureType,
-    CircuitBreaker,
-    RetryPolicy,
-    TimeoutEnforcer,
-    HealthChecker,
-)
-from lyra_research.capacity_manager import CapacityManager, CapacityLimits
 from lyra_research.adversarial_reviewer import AdversarialReviewer
+from lyra_research.capacity_manager import CapacityLimits, CapacityManager
+from lyra_research.coordination import (
+    CircuitBreaker,
+    CoordinationManager,
+    HealthChecker,
+    RetryPolicy,
+    TaskState,
+    TimeoutEnforcer,
+)
 from lyra_research.discovery import ResearchSource, SourceType
 from lyra_research.memory import (
     LocalCorpus,
@@ -33,7 +24,12 @@ from lyra_research.memory import (
     ResearchStrategyMemory,
     SessionCaseBank,
 )
-
+from lyra_research.orchestrator import (
+    AgentConfig,
+    AgentType,
+    ResearchOrchestrator,
+    ResearchProgress,
+)
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -123,12 +119,12 @@ def _make_source(
     )
 
 
-def _empty_discover(*args: Any, **kwargs: Any) -> Dict[str, List[ResearchSource]]:
+def _empty_discover(*args: Any, **kwargs: Any) -> dict[str, list[ResearchSource]]:
     """Stub for empty discovery."""
     return {}
 
 
-def _two_source_discover(*args: Any, **kwargs: Any) -> Dict[str, List[ResearchSource]]:
+def _two_source_discover(*args: Any, **kwargs: Any) -> dict[str, list[ResearchSource]]:
     """Stub returning one paper and one repo."""
     return {
         "arxiv": [_make_source("p1", "Paper One", "https://arxiv.org/p1", SourceType.PAPER)],
@@ -226,7 +222,7 @@ def test_orchestrator_retry_on_transient_failure(orchestrator: ResearchOrchestra
     """Transient failures trigger retry."""
     call_count = 0
 
-    def failing_discover(*args: Any, **kwargs: Any) -> Dict[str, List[ResearchSource]]:
+    def failing_discover(*args: Any, **kwargs: Any) -> dict[str, list[ResearchSource]]:
         nonlocal call_count
         call_count += 1
         if call_count == 1:
@@ -247,7 +243,7 @@ def test_orchestrator_circuit_breaker_triggers(orchestrator: ResearchOrchestrato
     # Set low success rate threshold
     orchestrator.coordination.circuit_breaker.min_success_rate = 0.9
 
-    def always_fail(*args: Any, **kwargs: Any) -> Dict[str, List[ResearchSource]]:
+    def always_fail(*args: Any, **kwargs: Any) -> dict[str, list[ResearchSource]]:
         raise RuntimeError("Persistent failure")
 
     with patch.object(orchestrator.discovery, "discover", side_effect=always_fail):
@@ -263,7 +259,7 @@ def test_orchestrator_timeout_enforcement(orchestrator: ResearchOrchestrator) ->
     # Set very short timeout
     orchestrator.coordination.timeout_enforcer.task_timeout = 0.1
 
-    def slow_discover(*args: Any, **kwargs: Any) -> Dict[str, List[ResearchSource]]:
+    def slow_discover(*args: Any, **kwargs: Any) -> dict[str, list[ResearchSource]]:
         time.sleep(0.5)  # Exceed timeout
         return _empty_discover(*args, **kwargs)
 
@@ -426,7 +422,7 @@ def test_orchestrator_agent_retry_configuration(orchestrator: ResearchOrchestrat
 
 def test_orchestrator_handles_discovery_failure(orchestrator: ResearchOrchestrator) -> None:
     """Discovery failure is handled gracefully."""
-    def failing_discover(*args: Any, **kwargs: Any) -> Dict[str, List[ResearchSource]]:
+    def failing_discover(*args: Any, **kwargs: Any) -> dict[str, list[ResearchSource]]:
         raise RuntimeError("Discovery failed")
 
     with patch.object(orchestrator.discovery, "discover", side_effect=failing_discover):
@@ -496,7 +492,7 @@ def test_orchestrator_persists_to_corpus(orchestrator: ResearchOrchestrator) -> 
 
 def test_orchestrator_progress_callback_receives_updates(orchestrator: ResearchOrchestrator) -> None:
     """Progress callback receives updates at each step."""
-    updates: List[ResearchProgress] = []
+    updates: list[ResearchProgress] = []
 
     def callback(progress: ResearchProgress) -> None:
         updates.append(progress)
@@ -510,7 +506,7 @@ def test_orchestrator_progress_callback_receives_updates(orchestrator: ResearchO
 
 def test_orchestrator_progress_step_names_populated(orchestrator: ResearchOrchestrator) -> None:
     """Progress step names are populated."""
-    updates: List[ResearchProgress] = []
+    updates: list[ResearchProgress] = []
 
     def callback(progress: ResearchProgress) -> None:
         updates.append(progress)
@@ -524,7 +520,7 @@ def test_orchestrator_progress_step_names_populated(orchestrator: ResearchOrches
 
 def test_orchestrator_progress_monotonic_steps(orchestrator: ResearchOrchestrator) -> None:
     """Progress steps are monotonically increasing."""
-    updates: List[ResearchProgress] = []
+    updates: list[ResearchProgress] = []
 
     def callback(progress: ResearchProgress) -> None:
         updates.append(progress)
@@ -586,7 +582,7 @@ def test_orchestrator_deduplicates_sources_by_url(orchestrator: ResearchOrchestr
     """Sources with duplicate URLs are deduplicated."""
     dup_source = _make_source("p1", "Paper One", "https://arxiv.org/p1")
 
-    def discover_with_dups(*args: Any, **kwargs: Any) -> Dict[str, List[ResearchSource]]:
+    def discover_with_dups(*args: Any, **kwargs: Any) -> dict[str, list[ResearchSource]]:
         return {
             "arxiv": [dup_source, dup_source],
             "semantic_scholar": [dup_source],

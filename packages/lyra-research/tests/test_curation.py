@@ -2,11 +2,9 @@
 from __future__ import annotations
 
 import tempfile
-from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
-
 from lyra_research.curation.curation_workflow import (
     CurationDecision,
     CurationWorkflow,
@@ -16,10 +14,8 @@ from lyra_research.curation.curator_metrics import CuratorMetrics
 from lyra_research.curation.knowledge_entry import EntryStatus, KnowledgeEntry
 from lyra_research.curation.knowledge_store import KnowledgeStore
 from lyra_research.curation.knowledge_versioning import (
-    KnowledgeVersion,
     VersionManager,
 )
-
 
 # ============================================================================
 # Knowledge Entry Tests (3 tests)

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List
+from typing import Any
 
 from lyra_research.curation.curation_workflow import CurationDecision, DecisionType
 
@@ -22,8 +22,8 @@ class CuratorMetrics:
     revised: int = 0
     avg_quality_score: float = 0.0
     acceptance_rate: float = 0.0
-    quality_scores: List[float] = field(default_factory=list)
-    decisions: List[CurationDecision] = field(default_factory=list)
+    quality_scores: list[float] = field(default_factory=list)
+    decisions: list[CurationDecision] = field(default_factory=list)
 
     def record_decision(self, decision: CurationDecision, quality_score: float) -> None:
         """
@@ -62,7 +62,7 @@ class CuratorMetrics:
         else:
             self.acceptance_rate = 0.0
 
-    def get_metrics(self) -> Dict[str, Any]:
+    def get_metrics(self) -> dict[str, Any]:
         """
         Get curator performance metrics.
 
@@ -86,7 +86,7 @@ class CuratorMetrics:
             ),
         }
 
-    def get_decision_breakdown(self) -> Dict[str, int]:
+    def get_decision_breakdown(self) -> dict[str, int]:
         """
         Get breakdown of decisions by type.
 
@@ -99,7 +99,7 @@ class CuratorMetrics:
             "revised": self.revised,
         }
 
-    def get_quality_stats(self) -> Dict[str, float]:
+    def get_quality_stats(self) -> dict[str, float]:
         """
         Get quality score statistics.
 

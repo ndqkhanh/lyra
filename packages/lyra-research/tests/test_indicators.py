@@ -5,7 +5,7 @@ Tests visual feedback components.
 """
 
 import pytest
-from lyra_research.ui.indicators import VisualIndicator, IndicatorStyle
+from lyra_research.ui.indicators import IndicatorStyle, VisualIndicator
 
 
 class TestVisualIndicator:

@@ -1,10 +1,10 @@
 """Base quality gate for role transitions."""
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from abc import ABC
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, List
+from typing import Any
 
 from lyra_research.quality.quality_criterion import CriterionResult, QualityCriterion
 
@@ -15,7 +15,7 @@ class GateResult:
 
     gate_name: str
     passed: bool
-    criteria_results: List[CriterionResult]
+    criteria_results: list[CriterionResult]
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     retry_count: int = 0
 
@@ -31,7 +31,7 @@ class GateResult:
             not r.passed and r.severity == "high" for r in self.criteria_results
         )
 
-    def get_failed_criteria(self) -> List[CriterionResult]:
+    def get_failed_criteria(self) -> list[CriterionResult]:
         """Get list of failed criteria."""
         return [r for r in self.criteria_results if not r.passed]
 
@@ -54,7 +54,7 @@ class QualityGate(ABC):
     - Tracks historical pass rates
     """
 
-    def __init__(self, name: str, criteria: List[QualityCriterion]) -> None:
+    def __init__(self, name: str, criteria: list[QualityCriterion]) -> None:
         """
         Initialize quality gate.
 
@@ -64,7 +64,7 @@ class QualityGate(ABC):
         """
         self.name = name
         self.criteria = criteria
-        self.history: List[GateResult] = []
+        self.history: list[GateResult] = []
 
     def check(self, data: Any, retry_count: int = 0) -> GateResult:
         """

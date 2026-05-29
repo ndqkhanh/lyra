@@ -1,8 +1,6 @@
 """Analysis Gate — Quality gate between Analysis → Synthesis."""
 from __future__ import annotations
 
-from typing import Any, List
-
 from lyra_research.agents.analysis import Analysis
 from lyra_research.quality.quality_criterion import QualityCriterion
 from lyra_research.quality.quality_gate import QualityGate
@@ -21,11 +19,11 @@ class AnalysisGate(QualityGate):
     def __init__(self) -> None:
         """Initialize analysis gate with criteria."""
 
-        def check_min_analyses(analyses: List[Analysis]) -> float:
+        def check_min_analyses(analyses: list[Analysis]) -> float:
             """Check minimum number of analyses."""
             return float(len(analyses))
 
-        def check_avg_quality(analyses: List[Analysis]) -> float:
+        def check_avg_quality(analyses: list[Analysis]) -> float:
             """Check average quality score."""
             if not analyses:
                 return 0.0
@@ -34,7 +32,7 @@ class AnalysisGate(QualityGate):
                 return 0.0
             return sum(quality_scores) / len(quality_scores)
 
-        def check_quality_coverage(analyses: List[Analysis]) -> float:
+        def check_quality_coverage(analyses: list[Analysis]) -> float:
             """Check percentage of analyses with quality scores."""
             if not analyses:
                 return 0.0

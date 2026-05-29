@@ -5,7 +5,7 @@ Synthesizes findings across multiple sources into a coherent taxonomy.
 """
 from __future__ import annotations
 
-from typing import Any, Dict, List, Set
+from typing import Any
 
 from lyra_research.agents.analysis.analysis_base import Analysis
 from lyra_research.agents.synthesis.synthesis_base import SynthesisAgent, SynthesisResult
@@ -21,7 +21,7 @@ class CrossSourceSynthesizerAgent(SynthesisAgent):
     def __init__(self, model: str = "claude-opus-4-7") -> None:
         super().__init__(synthesis_type="cross_source", model=model)
 
-    async def synthesize(self, analyses: List[Analysis]) -> SynthesisResult:
+    async def synthesize(self, analyses: list[Analysis]) -> SynthesisResult:
         """
         Synthesize findings across sources.
 
@@ -59,10 +59,10 @@ class CrossSourceSynthesizerAgent(SynthesisAgent):
             confidence=confidence,
         )
 
-    def _extract_themes(self, findings: List[str]) -> List[str]:
+    def _extract_themes(self, findings: list[str]) -> list[str]:
         """Extract recurring themes from findings."""
         # Simple keyword extraction
-        word_counts: Dict[str, int] = {}
+        word_counts: dict[str, int] = {}
         stopwords = {
             "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for",
             "of", "with", "by", "from", "as", "is", "was", "are", "were", "be",
@@ -90,10 +90,10 @@ class CrossSourceSynthesizerAgent(SynthesisAgent):
         return themes
 
     def _group_by_theme(
-        self, findings: List[str], themes: List[str]
-    ) -> Dict[str, List[str]]:
+        self, findings: list[str], themes: list[str]
+    ) -> dict[str, list[str]]:
         """Group findings by theme."""
-        grouped: Dict[str, List[str]] = {theme: [] for theme in themes}
+        grouped: dict[str, list[str]] = {theme: [] for theme in themes}
         grouped["other"] = []
 
         for finding in findings:
@@ -112,7 +112,7 @@ class CrossSourceSynthesizerAgent(SynthesisAgent):
         # Remove empty groups
         return {k: v for k, v in grouped.items() if v}
 
-    def _build_taxonomy(self, grouped_findings: Dict[str, List[str]]) -> Dict[str, Any]:
+    def _build_taxonomy(self, grouped_findings: dict[str, list[str]]) -> dict[str, Any]:
         """Build hierarchical taxonomy from grouped findings."""
         taxonomy = {
             "categories": list(grouped_findings.keys()),

@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 
 from lyra_research.curation.knowledge_entry import EntryStatus, KnowledgeEntry
 
@@ -27,7 +26,7 @@ class CurationDecision:
     decision_type: DecisionType
     entry_id: str
     reason: str
-    feedback: Optional[str] = None
+    feedback: str | None = None
     quality_threshold: float = 0.7
 
     def __post_init__(self) -> None:

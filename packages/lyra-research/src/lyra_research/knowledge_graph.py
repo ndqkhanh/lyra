@@ -10,8 +10,6 @@ from __future__ import annotations
 import logging
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Set, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -36,8 +34,8 @@ class ResearchEntity:
     id: str
     name: str
     entity_type: str  # person, organization, concept, event, technology
-    aliases: Tuple[str, ...] = ()
-    metadata: Dict[str, str] = field(default_factory=dict)
+    aliases: tuple[str, ...] = ()
+    metadata: dict[str, str] = field(default_factory=dict)
 
     def matches_name(self, query: str) -> bool:
         """Check whether *query* matches this entity by name or alias."""
@@ -88,10 +86,10 @@ class ResearchKG:
             name: Optional human-readable label for the graph.
         """
         self.name = name
-        self._entities: Dict[str, ResearchEntity] = {}
-        self._relations: List[EntityRelation] = []
+        self._entities: dict[str, ResearchEntity] = {}
+        self._relations: list[EntityRelation] = []
         # Adjacency index: entity_id -> list of relation indices
-        self._adj: Dict[str, List[int]] = defaultdict(list)
+        self._adj: dict[str, list[int]] = defaultdict(list)
 
     # -- entity management ---------------------------------------------------
 
@@ -100,15 +98,15 @@ class ResearchKG:
         self._entities[entity.id] = entity
         logger.debug("KG[%s] added entity %s (%s)", self.name, entity.id, entity.entity_type)
 
-    def get_entity(self, entity_id: str) -> Optional[ResearchEntity]:
+    def get_entity(self, entity_id: str) -> ResearchEntity | None:
         """Return the entity with *entity_id* or ``None``."""
         return self._entities.get(entity_id)
 
-    def list_entities(self) -> List[ResearchEntity]:
+    def list_entities(self) -> list[ResearchEntity]:
         """Return all entities stored in the graph."""
         return list(self._entities.values())
 
-    def find_entity_by_name(self, name: str) -> Optional[ResearchEntity]:
+    def find_entity_by_name(self, name: str) -> ResearchEntity | None:
         """Look up an entity by its canonical name or an alias."""
         lowered = name.lower().strip()
         for entity in self._entities.values():
@@ -128,7 +126,7 @@ class ResearchKG:
         weight: float = 1.0,
         evidence: str = "",
         source_citation: str = "",
-    ) -> Optional[EntityRelation]:
+    ) -> EntityRelation | None:
         """Create a typed relation between two entities.
 
         Returns ``None`` if either entity does not exist in the graph.
@@ -166,7 +164,7 @@ class ResearchKG:
         relation_type: str,
         weight: float = 1.0,
         evidence: str = "",
-    ) -> Optional[EntityRelation]:
+    ) -> EntityRelation | None:
         """Convenience wrapper around ``add_relation`` that accepts entity objects."""
         return self.add_relation(
             entity_a.id,
@@ -176,18 +174,18 @@ class ResearchKG:
             evidence=evidence,
         )
 
-    def list_relations(self) -> List[EntityRelation]:
+    def list_relations(self) -> list[EntityRelation]:
         """Return all relations in the graph."""
         return list(self._relations)
 
-    def get_relations_for(self, entity_id: str) -> List[EntityRelation]:
+    def get_relations_for(self, entity_id: str) -> list[EntityRelation]:
         """Return every relation incident to *entity_id*."""
         indices = self._adj.get(entity_id, [])
         return [self._relations[i] for i in indices]
 
     # -- extraction ----------------------------------------------------------
 
-    def extract_entities(self, text: str) -> List[ResearchEntity]:
+    def extract_entities(self, text: str) -> list[ResearchEntity]:
         """Extract entities from research text using simple heuristics.
 
         This is a lightweight rule-based extractor that identifies capitalized
@@ -203,11 +201,11 @@ class ResearchKG:
         """
         import re
 
-        entities: List[ResearchEntity] = []
+        entities: list[ResearchEntity] = []
 
         # Heuristic: capitalized multi-word phrases (2-4 words)
         pattern = r"\b([A-Z][a-zA-Z]*(?:\s+[A-Z][a-zA-Z]*){1,3})\b"
-        seen: Set[str] = set()
+        seen: set[str] = set()
         for match in re.finditer(pattern, text):
             phrase = match.group(1).strip()
             lowered = phrase.lower()
@@ -232,7 +230,7 @@ class ResearchKG:
 
     # -- traversal -----------------------------------------------------------
 
-    def traverse(self, entity_id: str, depth: int = 1) -> List[ResearchEntity]:
+    def traverse(self, entity_id: str, depth: int = 1) -> list[ResearchEntity]:
         """Return all entities within *depth* hops of *entity_id* (BFS).
 
         Args:
@@ -247,8 +245,8 @@ class ResearchKG:
         if entity_id not in self._entities:
             return []
 
-        visited: Set[str] = {entity_id}
-        result: List[ResearchEntity] = []
+        visited: set[str] = {entity_id}
+        result: list[ResearchEntity] = []
         queue: deque = deque([(entity_id, 0)])
 
         while queue:
@@ -276,7 +274,7 @@ class ResearchKG:
 
     def find_path(
         self, source_id: str, target_id: str, max_depth: int = 6
-    ) -> Optional[List[str]]:
+    ) -> list[str] | None:
         """Return the shortest path (by edges) between *source* and *target*.
 
         Args:
@@ -293,7 +291,7 @@ class ResearchKG:
             return [source_id]
 
         queue: deque = deque([(source_id, [source_id])])
-        visited: Set[str] = {source_id}
+        visited: set[str] = {source_id}
 
         while queue:
             current, path = queue.popleft()
@@ -320,13 +318,13 @@ class ResearchKG:
 
     # -- contradiction detection ---------------------------------------------
 
-    def detect_contradictions(self) -> List[Tuple[str, str, str]]:
+    def detect_contradictions(self) -> list[tuple[str, str, str]]:
         """Find pairs of entities connected by "contradicts" relations.
 
         Returns:
             List of (entity_a_name, entity_b_name, evidence) tuples.
         """
-        contradictions: List[Tuple[str, str, str]] = []
+        contradictions: list[tuple[str, str, str]] = []
         for rel in self._relations:
             if rel.relation_type == "contradicts":
                 a = self._entities.get(rel.source_id)
@@ -340,7 +338,7 @@ class ResearchKG:
 
     # -- merging -------------------------------------------------------------
 
-    def merge_knowledge(self, other: "ResearchKG") -> int:
+    def merge_knowledge(self, other: ResearchKG) -> int:
         """Merge entities and relations from *other* into this graph.
 
         Entities are matched by ID; relations are appended.
@@ -389,7 +387,7 @@ class ResearchKG:
 # Helpers
 # ---------------------------------------------------------------------------
 
-_ENTITY_CLASSIFICATION_PATTERNS: List[Tuple[str, List[str]]] = [
+_ENTITY_CLASSIFICATION_PATTERNS: list[tuple[str, list[str]]] = [
     ("person", ["University", "Institute", "Lab", "Professor", "Dr.", "Research"]),
     ("organization", ["Inc", "Corp", "Corporation", "LLC", "Labs", "AI", "OpenAI", "Google", "Meta", "Microsoft"]),
     ("technology", ["Model", "Framework", "Algorithm", "Architecture", "Transformer", "Neural", "BERT", "GPT"]),

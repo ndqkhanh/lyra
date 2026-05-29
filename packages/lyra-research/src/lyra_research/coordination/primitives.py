@@ -10,7 +10,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
 if TYPE_CHECKING:
@@ -51,13 +51,13 @@ class Task:
     retry_count: int = 0
     max_retries: int = 2
     timeout_seconds: int = 300  # 5 minutes
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
-    error: Optional[str] = None
-    failure_type: Optional[FailureType] = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    error: str | None = None
+    failure_type: FailureType | None = None
     agent_type: str = "generic"  # For circuit breaker tracking
     memory_mb: float = 0.0  # Current memory usage
-    context_boundary: Optional[ContextBoundary] = None  # For child-task isolation
+    context_boundary: ContextBoundary | None = None  # For child-task isolation
 
     def start(self) -> None:
         """Transition to RUNNING state."""
@@ -171,7 +171,7 @@ class CircuitBreaker:
                              Default 0.5 means ≥50% must succeed.
         """
         self.min_success_rate = min_success_rate
-        self.stats: Dict[str, CircuitBreakerStats] = {}
+        self.stats: dict[str, CircuitBreakerStats] = {}
 
     def record_success(self, agent_type: str) -> None:
         """Record a successful task completion."""
@@ -214,11 +214,11 @@ class CircuitBreaker:
         )
         return False, error
 
-    def get_stats(self, agent_type: str) -> Optional[CircuitBreakerStats]:
+    def get_stats(self, agent_type: str) -> CircuitBreakerStats | None:
         """Get statistics for an agent type."""
         return self.stats.get(agent_type)
 
-    def reset(self, agent_type: Optional[str] = None) -> None:
+    def reset(self, agent_type: str | None = None) -> None:
         """Reset statistics for one or all agent types."""
         if agent_type:
             self.stats.pop(agent_type, None)
@@ -306,8 +306,8 @@ class HealthMetrics:
     completed: int = 0
     hanging: int = 0
     memory_exceeded: int = 0
-    last_spawn_time: Optional[datetime] = None
-    last_completion_time: Optional[datetime] = None
+    last_spawn_time: datetime | None = None
+    last_completion_time: datetime | None = None
 
     def spawn_rate_per_minute(self) -> float:
         """Calculate agent spawn rate (agents/minute)."""
@@ -335,7 +335,7 @@ class HealthChecker:
         self.max_memory_mb = max_memory_mb
         self.min_spawn_rate = min_spawn_rate
         self.hang_timeout = hang_timeout
-        self.metrics: Dict[str, HealthMetrics] = {}
+        self.metrics: dict[str, HealthMetrics] = {}
 
     def record_spawn(self, agent_type: str) -> None:
         """Record agent spawn event."""
@@ -361,8 +361,8 @@ class HealthChecker:
 class BatchedResult:
     """Result of batched parallel task execution."""
 
-    completed: List[Task] = field(default_factory=list)
-    failed: List[Task] = field(default_factory=list)
+    completed: list[Task] = field(default_factory=list)
+    failed: list[Task] = field(default_factory=list)
     total_time: float = 0.0
 
 
@@ -378,9 +378,9 @@ class TaskGraph:
 
     def __init__(self) -> None:
         """Initialize task graph."""
-        self.tasks: List[Task] = []
+        self.tasks: list[Task] = []
 
-    def add_parallel_tasks(self, tasks: List[Task]) -> None:
+    def add_parallel_tasks(self, tasks: list[Task]) -> None:
         """
         Add tasks that can be executed in parallel.
 
@@ -390,8 +390,8 @@ class TaskGraph:
         self.tasks.extend(tasks)
 
     async def execute_parallel(
-        self, tasks: List[Task], max_concurrent: int = 10
-    ) -> List[Any]:
+        self, tasks: list[Task], max_concurrent: int = 10
+    ) -> list[Any]:
         """
         Execute tasks in parallel with concurrency limit.
 
@@ -421,7 +421,7 @@ class TaskGraph:
 
         return results
 
-    def batch_results(self, results: List[Any]) -> BatchedResult:
+    def batch_results(self, results: list[Any]) -> BatchedResult:
         """
         Batch results for serialization to shared memory.
 
@@ -461,16 +461,16 @@ class CoordinationManager:
 
     def __init__(
         self,
-        retry_policy: Optional[RetryPolicy] = None,
-        circuit_breaker: Optional[CircuitBreaker] = None,
-        timeout_enforcer: Optional[TimeoutEnforcer] = None,
-        health_checker: Optional[HealthChecker] = None,
+        retry_policy: RetryPolicy | None = None,
+        circuit_breaker: CircuitBreaker | None = None,
+        timeout_enforcer: TimeoutEnforcer | None = None,
+        health_checker: HealthChecker | None = None,
     ) -> None:
         self.retry_policy = retry_policy or RetryPolicy()
         self.circuit_breaker = circuit_breaker or CircuitBreaker()
         self.timeout_enforcer = timeout_enforcer or TimeoutEnforcer()
         self.health_checker = health_checker or HealthChecker()
-        self.tasks: Dict[str, Task] = {}
+        self.tasks: dict[str, Task] = {}
 
     def create_task(
         self,
@@ -525,11 +525,11 @@ class CoordinationManager:
 
         return True
 
-    def get_task(self, task_id: str) -> Optional[Task]:
+    def get_task(self, task_id: str) -> Task | None:
         """Retrieve a task by ID."""
         return self.tasks.get(task_id)
 
-    def get_all_tasks(self) -> List[Task]:
+    def get_all_tasks(self) -> list[Task]:
         """Get all registered tasks."""
         return list(self.tasks.values())
 

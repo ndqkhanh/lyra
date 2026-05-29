@@ -15,21 +15,19 @@ Additional benchmarks:
 """
 import asyncio
 import time
-import pytest
-from unittest.mock import Mock, AsyncMock, patch
-from typing import List
 from datetime import datetime, timezone
+from unittest.mock import AsyncMock, Mock, patch
 
-from lyra_research.full_orchestrator import Phase2Orchestrator
+import pytest
 from lyra_research.coordination.role_coordinator import CoordinatedPipelineResult
-from lyra_research.roles.discovery_role import DiscoveryResult
-from lyra_research.roles.analysis_role import AnalysisResult
-from lyra_research.roles.synthesis_role import SynthesisResult
-from lyra_research.roles.review_role import ReviewResult, ReviewIssue
-from lyra_research.roles.curator_role import CurationResult, KnowledgeEntry
-from lyra_research.roles.role_base import RoleStatus
+from lyra_research.full_orchestrator import Phase2Orchestrator
 from lyra_research.reporter import ResearchReport
-
+from lyra_research.roles.analysis_role import AnalysisResult
+from lyra_research.roles.curator_role import CurationResult, KnowledgeEntry
+from lyra_research.roles.discovery_role import DiscoveryResult
+from lyra_research.roles.review_role import ReviewIssue, ReviewResult
+from lyra_research.roles.role_base import RoleStatus
+from lyra_research.roles.synthesis_role import SynthesisResult
 
 # ---------------------------------------------------------------------------
 # Benchmark Fixtures
@@ -343,7 +341,7 @@ async def test_benchmark_full_pipeline_integration(orchestrator):
         assert progress.review_complete
         assert progress.curation_complete
 
-        print(f"\n✓ Benchmark 6 - Full Pipeline Integration: All 5 roles completed")
+        print("\n✓ Benchmark 6 - Full Pipeline Integration: All 5 roles completed")
 
 
 # Benchmark 7: Heterogeneous Model Usage
@@ -532,11 +530,11 @@ def test_benchmark_context_reduction_100_sources(orchestrator):
     assert optimized_size_kb < 20, f"Optimized context too large: {optimized_size_kb:.2f}KB"
     assert reduction_percent >= 80, f"Reduction {reduction_percent:.1f}% < 80% target"
 
-    print(f"\n✓ Context Reduction Benchmark:")
+    print("\n✓ Context Reduction Benchmark:")
     print(f"  Raw context: {raw_size_kb:.2f}KB")
     print(f"  Optimized context: {optimized_size_kb:.2f}KB")
     print(f"  Reduction: {reduction_percent:.1f}%")
-    print(f"  Target: 80% ✓")
+    print("  Target: 80% ✓")
 
 
 @pytest.mark.benchmark
@@ -577,7 +575,7 @@ def test_benchmark_context_reduction_scaling():
             f"{result['sources']} sources: {result['reduction_percent']:.1f}% < 70%"
         )
 
-    print(f"\n✓ Context Reduction Scaling:")
+    print("\n✓ Context Reduction Scaling:")
     for result in results:
         print(f"  {result['sources']:3d} sources: "
               f"{result['raw_kb']:6.2f}KB → {result['optimized_kb']:5.2f}KB "
@@ -632,11 +630,11 @@ async def test_benchmark_speedup_100_sources(orchestrator):
     phase1_estimated_time = phase2_time * 5  # 5x slower
     speedup = phase1_estimated_time / phase2_time
 
-    print(f"\n✓ Speedup Benchmark (100 sources):")
+    print("\n✓ Speedup Benchmark (100 sources):")
     print(f"  Phase 2 time: {phase2_time:.2f}s")
     print(f"  Phase 1 estimated: {phase1_estimated_time:.2f}s")
     print(f"  Speedup: {speedup:.1f}x")
-    print(f"  Target: 5x ✓")
+    print("  Target: 5x ✓")
 
     # Verify reasonable execution time
     assert phase2_time < 5.0, f"Phase 2 too slow: {phase2_time:.2f}s"
@@ -668,7 +666,7 @@ async def test_benchmark_parallel_vs_sequential():
 
     speedup = sequential_time / parallel_time
 
-    print(f"\n✓ Parallel vs Sequential:")
+    print("\n✓ Parallel vs Sequential:")
     print(f"  Sequential: {sequential_time:.2f}s")
     print(f"  Parallel: {parallel_time:.2f}s")
     print(f"  Speedup: {speedup:.1f}x")
@@ -712,12 +710,12 @@ def test_benchmark_verification_rate():
     claims_verified = len(claims) - issues_found
     verification_rate = (claims_verified / len(claims)) * 100
 
-    print(f"\n✓ Verification Rate Benchmark:")
+    print("\n✓ Verification Rate Benchmark:")
     print(f"  Total claims: {len(claims)}")
     print(f"  Claims verified: {claims_verified}")
     print(f"  Issues found: {issues_found}")
     print(f"  Verification rate: {verification_rate:.1f}%")
-    print(f"  Target: 95% (Phase 1: 90%)")
+    print("  Target: 95% (Phase 1: 90%)")
 
     # Phase 2 should have higher verification rate than Phase 1
     assert verification_rate >= 25, f"Verification rate {verification_rate:.1f}% too low"
@@ -733,8 +731,8 @@ def test_benchmark_claim_modification_rate():
     from lyra_research.adversarial_reviewer import (
         AdversarialReviewer,
         Claim,
-        ReviewIssue,
         DisagreementResolution,
+        ReviewIssue,
     )
 
     reviewer = AdversarialReviewer()
@@ -775,7 +773,7 @@ def test_benchmark_claim_modification_rate():
 
     modification_rate = (modified_count / len(claims_with_issues)) * 100
 
-    print(f"\n✓ Claim Modification Rate:")
+    print("\n✓ Claim Modification Rate:")
     print(f"  Total claims: {len(claims_with_issues)}")
     print(f"  Claims modified: {modified_count}")
     print(f"  Modification rate: {modification_rate:.1f}%")
@@ -825,7 +823,7 @@ async def test_benchmark_scalability(orchestrator):
             "quality": 0.85,  # Simulated
         })
 
-    print(f"\n✓ Scalability Benchmark:")
+    print("\n✓ Scalability Benchmark:")
     print(f"  {'Sources':<10} {'Time (s)':<12} {'Context (KB)':<15} {'Quality':<10}")
     for result in results:
         print(f"  {result['sources']:<10} "
@@ -872,7 +870,7 @@ def test_benchmark_memory_usage():
 
     memory_reduction = ((raw_size - optimized_size) / raw_size) * 100
 
-    print(f"\n✓ Memory Usage Benchmark (1000 sources):")
+    print("\n✓ Memory Usage Benchmark (1000 sources):")
     print(f"  Raw memory: {raw_size / 1024:.2f}KB")
     print(f"  Optimized memory: {optimized_size / 1024:.2f}KB")
     print(f"  Reduction: {memory_reduction:.1f}%")
@@ -930,7 +928,7 @@ def test_benchmark_cost_phase1_vs_phase2():
 
     cost_reduction = ((phase1_total - phase2_total) / phase1_total) * 100
 
-    print(f"\n✓ Cost Analysis (100 sources):")
+    print("\n✓ Cost Analysis (100 sources):")
     print(f"  Phase 1 total: ${phase1_total:.4f}")
     print(f"    - Discovery (Haiku): ${phase1_discovery:.4f}")
     print(f"    - Analysis (Sonnet): ${phase1_analysis:.4f}")
@@ -975,7 +973,7 @@ def test_benchmark_cost_per_source():
             "cost_per_source": cost_per_source,
         })
 
-    print(f"\n✓ Cost Per Source Scaling:")
+    print("\n✓ Cost Per Source Scaling:")
     print(f"  {'Sources':<10} {'Total Cost':<15} {'Cost/Source':<15}")
     for result in costs:
         print(f"  {result['sources']:<10} "

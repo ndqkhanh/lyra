@@ -1,8 +1,6 @@
 """Discovery Gate — Quality gate between Discovery → Analysis."""
 from __future__ import annotations
 
-from typing import Any, List
-
 from lyra_research.discovery import ResearchSource
 from lyra_research.quality.quality_criterion import QualityCriterion
 from lyra_research.quality.quality_gate import QualityGate
@@ -21,18 +19,18 @@ class DiscoveryGate(QualityGate):
     def __init__(self) -> None:
         """Initialize discovery gate with criteria."""
 
-        def check_min_sources(sources: List[ResearchSource]) -> float:
+        def check_min_sources(sources: list[ResearchSource]) -> float:
             """Check minimum number of sources."""
             return float(len(sources))
 
-        def check_source_diversity(sources: List[ResearchSource]) -> float:
+        def check_source_diversity(sources: list[ResearchSource]) -> float:
             """Check diversity of source types."""
             if not sources:
                 return 0.0
             unique_types = len(set(s.source_type.value for s in sources))
             return float(unique_types)
 
-        def check_avg_quality(sources: List[ResearchSource]) -> float:
+        def check_avg_quality(sources: list[ResearchSource]) -> float:
             """Check average quality score from metadata."""
             if not sources:
                 return 0.0

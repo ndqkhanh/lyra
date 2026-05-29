@@ -10,8 +10,8 @@ Implements 5-pass editing pipeline for report quality:
 """
 
 from dataclasses import dataclass
-from typing import Dict, Any, List
 from enum import Enum
+from typing import Any
 
 
 class EditPass(Enum):
@@ -28,8 +28,8 @@ class EditResult:
     """Result from editing pass"""
     pass_type: EditPass
     changes_made: int
-    issues_found: List[str]
-    suggestions: List[str]
+    issues_found: list[str]
+    suggestions: list[str]
     edited_text: str
 
 
@@ -40,7 +40,7 @@ class FivePassEditor:
     Each pass focuses on a specific aspect of quality.
     """
 
-    def edit_report(self, report: Dict[str, Any]) -> Dict[str, Any]:
+    def edit_report(self, report: dict[str, Any]) -> dict[str, Any]:
         """
         Apply 5 editing passes
 
@@ -67,7 +67,7 @@ class FivePassEditor:
 
         return report
 
-    def edit_structure(self, report: Dict[str, Any]) -> Dict[str, Any]:
+    def edit_structure(self, report: dict[str, Any]) -> dict[str, Any]:
         """
         Pass 1: Edit structure and flow
 
@@ -84,7 +84,7 @@ class FivePassEditor:
         # For now, return as-is (would implement actual editing logic)
         return report
 
-    def edit_clarity(self, report: Dict[str, Any]) -> Dict[str, Any]:
+    def edit_clarity(self, report: dict[str, Any]) -> dict[str, Any]:
         """
         Pass 2: Edit for clarity and conciseness
 
@@ -115,7 +115,7 @@ class FivePassEditor:
         report["content"] = text
         return report
 
-    def edit_accuracy(self, report: Dict[str, Any]) -> Dict[str, Any]:
+    def edit_accuracy(self, report: dict[str, Any]) -> dict[str, Any]:
         """
         Pass 3: Edit for technical accuracy
 
@@ -132,7 +132,7 @@ class FivePassEditor:
         # For now, return as-is (would implement actual verification)
         return report
 
-    def edit_citations(self, report: Dict[str, Any]) -> Dict[str, Any]:
+    def edit_citations(self, report: dict[str, Any]) -> dict[str, Any]:
         """
         Pass 4: Edit citation formatting
 
@@ -149,7 +149,7 @@ class FivePassEditor:
         # For now, return as-is (would implement actual formatting)
         return report
 
-    def edit_polish(self, report: Dict[str, Any]) -> Dict[str, Any]:
+    def edit_polish(self, report: dict[str, Any]) -> dict[str, Any]:
         """
         Pass 5: Final polish
 

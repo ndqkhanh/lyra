@@ -4,11 +4,11 @@ Content fetching and parsing for research sources.
 Handles PDF extraction, README parsing, and web scraping.
 """
 
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+
 import requests
-import tempfile
 
 
 @dataclass
@@ -22,7 +22,7 @@ class ParsedContent:
 class PDFExtractor:
     """Extract text from PDF files."""
 
-    def extract_from_url(self, pdf_url: str) -> Optional[ParsedContent]:
+    def extract_from_url(self, pdf_url: str) -> ParsedContent | None:
         """
         Extract text from PDF URL.
 
@@ -55,7 +55,7 @@ class PDFExtractor:
             print(f"PDF extraction error: {e}")
             return None
 
-    def extract_from_file(self, pdf_path: Path) -> Optional[ParsedContent]:
+    def extract_from_file(self, pdf_path: Path) -> ParsedContent | None:
         """
         Extract text from PDF file.
 
@@ -97,7 +97,7 @@ class PDFExtractor:
 class READMEParser:
     """Parse README files from repositories."""
 
-    def fetch_readme(self, repo_url: str, github_token: Optional[str] = None) -> Optional[ParsedContent]:
+    def fetch_readme(self, repo_url: str, github_token: str | None = None) -> ParsedContent | None:
         """
         Fetch and parse README from GitHub repository.
 
@@ -140,7 +140,7 @@ class READMEParser:
 class WebScraper:
     """Scrape content from web pages."""
 
-    def scrape(self, url: str) -> Optional[ParsedContent]:
+    def scrape(self, url: str) -> ParsedContent | None:
         """
         Scrape content from web page.
 
@@ -193,7 +193,7 @@ class ContentFetcher:
     Handles PDFs, READMEs, and web pages.
     """
 
-    def __init__(self, github_token: Optional[str] = None):
+    def __init__(self, github_token: str | None = None):
         """
         Initialize content fetcher.
 
@@ -205,7 +205,7 @@ class ContentFetcher:
         self.web_scraper = WebScraper()
         self.github_token = github_token
 
-    def fetch(self, url: str, content_type: str = "auto") -> Optional[ParsedContent]:
+    def fetch(self, url: str, content_type: str = "auto") -> ParsedContent | None:
         """
         Fetch and parse content from URL.
 

@@ -4,14 +4,12 @@ Tests for Bypass CLI Commands (Bypass Permissions Phase 3)
 Tests command-line interface for bypass management.
 """
 
+
 import pytest
 from click.testing import CliRunner
-from pathlib import Path
-import tempfile
 from lyra_research.cli.bypass_commands import bypass
-from lyra_research.permissions.bypass_manager import BypassManager
 from lyra_research.permissions.audit_logger import AuditLogger
-from lyra_research.permissions.permission_gate import PermissionRequest, PermissionLevel
+from lyra_research.permissions.permission_gate import PermissionLevel, PermissionRequest
 
 
 class TestBypassCLI:

@@ -10,8 +10,8 @@ import time
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
 from threading import Thread
+from typing import Any
 
 
 @dataclass
@@ -27,24 +27,24 @@ class ResearchState:
     last_checkpoint_at: datetime
 
     # Progress data
-    sources_found: Dict[str, int] = field(default_factory=dict)
+    sources_found: dict[str, int] = field(default_factory=dict)
     papers_analyzed: int = 0
     repos_analyzed: int = 0
     gaps_found: int = 0
 
     # Intermediate results
-    raw_results: Dict[str, List[Dict]] = field(default_factory=dict)
-    ranked_sources: List[Dict] = field(default_factory=list)
-    paper_analyses: List[Dict] = field(default_factory=list)
-    repo_analyses: List[Dict] = field(default_factory=list)
-    synthesis_result: Optional[Dict] = None
-    report_data: Optional[Dict] = None
+    raw_results: dict[str, list[dict]] = field(default_factory=dict)
+    ranked_sources: list[dict] = field(default_factory=list)
+    paper_analyses: list[dict] = field(default_factory=list)
+    repo_analyses: list[dict] = field(default_factory=list)
+    synthesis_result: dict | None = None
+    report_data: dict | None = None
 
     # Metadata
     completed: bool = False
-    error: Optional[str] = None
+    error: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to JSON-serializable dict."""
         data = asdict(self)
         # Convert datetime to ISO string
@@ -53,7 +53,7 @@ class ResearchState:
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> ResearchState:
+    def from_dict(cls, data: dict[str, Any]) -> ResearchState:
         """Create from dict."""
         # Convert ISO string to datetime
         data["started_at"] = datetime.fromisoformat(data["started_at"])
@@ -71,7 +71,7 @@ class ResearchCheckpoint:
     - Resume from checkpoint
     """
 
-    def __init__(self, checkpoint_dir: Optional[Path] = None) -> None:
+    def __init__(self, checkpoint_dir: Path | None = None) -> None:
         """
         Initialize checkpoint manager.
 
@@ -80,7 +80,7 @@ class ResearchCheckpoint:
         """
         self.checkpoint_dir = checkpoint_dir or (Path.home() / ".lyra" / "checkpoints")
         self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
-        self._auto_checkpoint_thread: Optional[Thread] = None
+        self._auto_checkpoint_thread: Thread | None = None
         self._auto_checkpoint_active = False
 
     def save_checkpoint(self, session_id: str, state: ResearchState) -> None:
@@ -97,7 +97,7 @@ class ResearchCheckpoint:
         with open(checkpoint_file, "w") as f:
             json.dump(state.to_dict(), f, indent=2)
 
-    def load_checkpoint(self, session_id: str) -> Optional[ResearchState]:
+    def load_checkpoint(self, session_id: str) -> ResearchState | None:
         """
         Load checkpoint for a session.
 
@@ -112,12 +112,12 @@ class ResearchCheckpoint:
         if not checkpoint_file.exists():
             return None
 
-        with open(checkpoint_file, "r") as f:
+        with open(checkpoint_file) as f:
             data = json.load(f)
 
         return ResearchState.from_dict(data)
 
-    def resume_research(self, session_id: str) -> Optional[ResearchState]:
+    def resume_research(self, session_id: str) -> ResearchState | None:
         """
         Resume research from checkpoint.
 
@@ -173,7 +173,7 @@ class ResearchCheckpoint:
         if self._auto_checkpoint_thread:
             self._auto_checkpoint_thread.join(timeout=1.0)
 
-    def list_checkpoints(self) -> List[str]:
+    def list_checkpoints(self) -> list[str]:
         """
         List all checkpoint session IDs.
 

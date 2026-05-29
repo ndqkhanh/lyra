@@ -6,7 +6,6 @@ All file I/O uses tmp_path pytest fixture. Never writes to ~/.lyra.
 
 from datetime import datetime
 
-
 from lyra_research.memory import (
     CorpusEntry,
     LocalCorpus,
@@ -17,7 +16,6 @@ from lyra_research.memory import (
     ResearchStrategyMemory,
     SessionCaseBank,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers

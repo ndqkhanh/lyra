@@ -9,20 +9,16 @@ Tests cover:
 - Integration with research pipeline
 """
 
-import pytest
 from dataclasses import dataclass
-from typing import List
-from unittest.mock import Mock, MagicMock
 
 from lyra_research.adversarial_reviewer import (
-    ReviewerContextBudget,
-    DisagreementResolution,
+    AdversarialReviewer,
     Claim,
+    DisagreementResolution,
+    ReviewerContextBudget,
     ReviewIssue,
     ReviewResult,
-    AdversarialReviewer,
 )
-
 
 # ---------------------------------------------------------------------------
 # Mock Data Models

@@ -13,82 +13,82 @@ adaptation triggers for detected drift.
 
 from __future__ import annotations
 
-# ── Core drift detection ──────────────────────────────────────────────
-from .drift_detector import (
-    # Enums
-    DriftType,
-    DetectionMethod,
-    DriftSeverity,
-    # Data classes
-    DriftSignal,
-    DriftReport,
-    # Statistical utilities
-    _ks_test,
-    _kl_divergence,
-    _mmd,
-    _compute_severity,
-    # Detectors
-    BaseDriftDetector,
-    PerformanceDriftDetector,
-    ContextDriftDetector,
-    DistributionDriftDetector,
-    RewardDriftDetector,
-    ConceptDriftDetector,
-    # Orchestrator
-    DriftOrchestrator,
-)
-
-# ── Signal monitors ───────────────────────────────────────────────────
-from .monitors import (
-    MonitorConfig,
-    MonitorState,
-    SignalCallback,
-    BaseMonitor,
-    PerformanceMonitor,
-    ContextMonitor,
-    DistributionMonitor,
-    RewardMonitor,
-    MonitorRegistry,
+# ── Automatic adaptation ──────────────────────────────────────────────
+from .adaptation import (
+    AdaptationAction,
+    AdaptationCheckpoint,
+    AdaptationEngine,
+    AdaptationRecord,
+    AdaptationStatus,
+    AdaptationStrategy,
+    ModelRetrainStrategy,
+    ResourceScaleStrategy,
+    StrategySwitchStrategy,
+    ThresholdRecalibrationStrategy,
 )
 
 # ── Alert management ──────────────────────────────────────────────────
 from .alerts import (
+    Alert,
+    AlertManager,
+    AlertRule,
     AlertSeverity,
     AlertState,
-    EscalationLevel,
-    AlertRule,
-    Alert,
     AlertThrottleState,
-    AlertManager,
-    NotificationHandler,
-    LogNotificationHandler,
     CallbackNotificationHandler,
+    EscalationLevel,
     EscalationPolicy,
+    LogNotificationHandler,
+    NotificationHandler,
 )
 
-# ── Automatic adaptation ──────────────────────────────────────────────
-from .adaptation import (
-    AdaptationAction,
-    AdaptationStatus,
-    AdaptationCheckpoint,
-    AdaptationRecord,
-    AdaptationStrategy,
-    ThresholdRecalibrationStrategy,
-    ModelRetrainStrategy,
-    StrategySwitchStrategy,
-    ResourceScaleStrategy,
-    AdaptationEngine,
+# ── Core drift detection ──────────────────────────────────────────────
+from .drift_detector import (
+    # Detectors
+    BaseDriftDetector,
+    ConceptDriftDetector,
+    ContextDriftDetector,
+    DetectionMethod,
+    DistributionDriftDetector,
+    # Orchestrator
+    DriftOrchestrator,
+    DriftReport,
+    DriftSeverity,
+    # Data classes
+    DriftSignal,
+    # Enums
+    DriftType,
+    PerformanceDriftDetector,
+    RewardDriftDetector,
+    _compute_severity,
+    _kl_divergence,
+    # Statistical utilities
+    _ks_test,
+    _mmd,
 )
 
 # ── Exceptions ────────────────────────────────────────────────────────
 from .exceptions import (
-    DriftDetectorError,
-    MonitorNotInitializedError,
-    AlertThrottledError,
-    InsufficientDataError,
     AdaptationError,
-    RollbackError,
+    AlertThrottledError,
+    DriftDetectorError,
+    InsufficientDataError,
     InvalidConfigurationError,
+    MonitorNotInitializedError,
+    RollbackError,
+)
+
+# ── Signal monitors ───────────────────────────────────────────────────
+from .monitors import (
+    BaseMonitor,
+    ContextMonitor,
+    DistributionMonitor,
+    MonitorConfig,
+    MonitorRegistry,
+    MonitorState,
+    PerformanceMonitor,
+    RewardMonitor,
+    SignalCallback,
 )
 
 __all__ = [

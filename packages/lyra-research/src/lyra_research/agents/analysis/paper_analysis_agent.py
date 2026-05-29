@@ -1,8 +1,6 @@
 """Paper analysis agent for extracting findings from papers."""
 from __future__ import annotations
 
-from typing import List
-
 from lyra_research.agents.analysis.analysis_base import Analysis, AnalysisAgent
 from lyra_research.discovery import ResearchSource, SourceType
 
@@ -14,7 +12,7 @@ class PaperAnalysisAgent(AnalysisAgent):
         """Initialize paper analysis agent."""
         super().__init__(analysis_type="paper", model=model)
 
-    async def analyze(self, sources: List[ResearchSource]) -> List[Analysis]:
+    async def analyze(self, sources: list[ResearchSource]) -> list[Analysis]:
         """
         Extract findings from papers.
 
@@ -50,7 +48,7 @@ class PaperAnalysisAgent(AnalysisAgent):
 
         return analyses
 
-    def _extract_findings(self, source: ResearchSource) -> List[str]:
+    def _extract_findings(self, source: ResearchSource) -> list[str]:
         """
         Extract key findings from paper abstract and metadata.
 

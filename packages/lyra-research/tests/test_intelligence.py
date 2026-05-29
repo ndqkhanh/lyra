@@ -7,19 +7,15 @@ All tests run offline — no network calls.
 
 from lyra_research.intelligence import (
     AuditReport,
-    ChecklistItem,
-    ClaimEvidence,
     Contradiction,
     ContradictionDetector,
     EvidenceAudit,
     FalsificationChecker,
     FalsificationNote,
     GapAnalyzer,
-    ResearchChecklist,
     ResearchGap,
     VerifiableChecklistGenerator,
 )
-
 
 # ---------------------------------------------------------------------------
 # VerifiableChecklistGenerator tests

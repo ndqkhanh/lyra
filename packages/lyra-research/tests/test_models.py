@@ -7,12 +7,11 @@ cost optimization, and performance tracking.
 
 import pytest
 from lyra_research.models import (
-    ModelRouter,
-    CrossModelVerifier,
-    PromptOptimizer,
     CostOptimizer,
+    CrossModelVerifier,
     ModelPerformanceTracker,
-    ModelStats,
+    ModelRouter,
+    PromptOptimizer,
     VerificationResult,
 )
 

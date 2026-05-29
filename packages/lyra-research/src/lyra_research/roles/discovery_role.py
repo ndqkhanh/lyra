@@ -12,26 +12,27 @@ Discovers sources across 7+ discovery sources:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, List
+from typing import Any
 
 from lyra_core.context.layered_context import LayeredContextManager
-from lyra_research.discovery import ResearchSource
-from lyra_research.roles.role_base import Role, RoleResult, RoleStatus
+
 from lyra_research.agents.discovery import (
     ArxivAgent,
-    SemanticScholarAgent,
     GithubAgent,
-    WebAgent,
-    OpenReviewAgent,
     HuggingFaceAgent,
+    OpenReviewAgent,
+    SemanticScholarAgent,
+    WebAgent,
 )
+from lyra_research.discovery import ResearchSource
+from lyra_research.roles.role_base import Role, RoleResult, RoleStatus
 
 
 @dataclass
 class DiscoveryResult(RoleResult):
     """Result from discovery role."""
 
-    sources: List[ResearchSource] = field(default_factory=list)
+    sources: list[ResearchSource] = field(default_factory=list)
     sources_by_type: dict[str, int] = field(default_factory=dict)
     total_sources: int = 0
 
@@ -89,7 +90,7 @@ class DiscoveryRole(Role[DiscoveryResult]):
             results = await asyncio.gather(*tasks, return_exceptions=True)
 
             # Collect all sources
-            all_sources: List[ResearchSource] = []
+            all_sources: list[ResearchSource] = []
             for agent_result in results:
                 if isinstance(agent_result, Exception):
                     # Log error but continue

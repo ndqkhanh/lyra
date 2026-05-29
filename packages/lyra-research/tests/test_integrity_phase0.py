@@ -6,22 +6,21 @@ and temporal verification.
 """
 
 import pytest
-from lyra_research.integrity.integrity_gate import IntegrityGate, Severity
-from lyra_research.integrity.validators import (
-    MinimumSourceCountValidator,
-    SourceDiversityValidator,
-    CitationFidelityValidator,
-    ClaimVerificationValidator,
-    TemporalConsistencyValidator,
-)
 from lyra_research.integrity.citation_verifier import (
-    MultiLayerCitationVerifier,
     Citation,
-    VerificationLayer,
+    MultiLayerCitationVerifier,
 )
+from lyra_research.integrity.integrity_gate import IntegrityGate, Severity
 from lyra_research.integrity.temporal_verifier import (
     TemporalVerifier,
     TemporalViolationType,
+)
+from lyra_research.integrity.validators import (
+    CitationFidelityValidator,
+    ClaimVerificationValidator,
+    MinimumSourceCountValidator,
+    SourceDiversityValidator,
+    TemporalConsistencyValidator,
 )
 
 

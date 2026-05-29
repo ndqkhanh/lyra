@@ -17,14 +17,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Dict, List
 
 from lyra_core.context.layered_context import LayeredContextManager
-from lyra_research.roles.discovery_role import DiscoveryRole, DiscoveryResult
-from lyra_research.roles.analysis_role import AnalysisRole, AnalysisResult
-from lyra_research.roles.synthesis_role import SynthesisRole, SynthesisResult
-from lyra_research.roles.review_role import ReviewRole, ReviewResult
-from lyra_research.roles.curator_role import CuratorRole, CurationResult
+
+from lyra_research.roles.analysis_role import AnalysisResult, AnalysisRole
+from lyra_research.roles.curator_role import CurationResult, CuratorRole
+from lyra_research.roles.discovery_role import DiscoveryResult, DiscoveryRole
+from lyra_research.roles.review_role import ReviewResult, ReviewRole
+from lyra_research.roles.synthesis_role import SynthesisResult, SynthesisRole
 
 
 @dataclass
@@ -40,7 +40,7 @@ class PipelineResult:
     started_at: datetime
     completed_at: datetime
     total_duration_seconds: float
-    metadata: Dict[str, any] = field(default_factory=dict)
+    metadata: dict[str, any] = field(default_factory=dict)
 
 
 class RoleOrchestrator:
@@ -172,7 +172,7 @@ class RoleOrchestrator:
 
     async def execute_partial_pipeline(
         self, query: str, stop_at: str
-    ) -> Dict[str, any]:
+    ) -> dict[str, any]:
         """
         Execute partial pipeline for testing/debugging.
 
@@ -216,7 +216,7 @@ class RoleOrchestrator:
 
         return results
 
-    def get_pipeline_stats(self, result: PipelineResult) -> Dict[str, any]:
+    def get_pipeline_stats(self, result: PipelineResult) -> dict[str, any]:
         """
         Get statistics from pipeline execution.
 

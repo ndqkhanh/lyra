@@ -9,25 +9,26 @@ Parallel analysis across:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, List
+from typing import Any
 
 from lyra_core.context.layered_context import LayeredContextManager
-from lyra_research.discovery import ResearchSource
-from lyra_research.roles.role_base import Role, RoleResult, RoleStatus
+
 from lyra_research.agents.analysis import (
     Analysis,
-    PaperAnalysisAgent,
-    RepoAnalysisAgent,
     CitationAnalysisAgent,
+    PaperAnalysisAgent,
     QualityScoreAgent,
+    RepoAnalysisAgent,
 )
+from lyra_research.discovery import ResearchSource
+from lyra_research.roles.role_base import Role, RoleResult, RoleStatus
 
 
 @dataclass
 class AnalysisResult(RoleResult):
     """Result from analysis role."""
 
-    analyses: List[Analysis] = field(default_factory=list)
+    analyses: list[Analysis] = field(default_factory=list)
     total_analyzed: int = 0
     average_quality_score: float = 0.0
 
@@ -56,7 +57,7 @@ class AnalysisRole(Role[AnalysisResult]):
             QualityScoreAgent(),
         ]
 
-    async def execute(self, sources: List[ResearchSource]) -> AnalysisResult:
+    async def execute(self, sources: list[ResearchSource]) -> AnalysisResult:
         """
         Execute parallel analysis of all sources.
 
@@ -81,7 +82,7 @@ class AnalysisRole(Role[AnalysisResult]):
         try:
             # Parallel analysis across all sources
             # Each source is analyzed by all relevant agents
-            all_analyses: List[Analysis] = []
+            all_analyses: list[Analysis] = []
 
             for source in sources:
                 # Determine which agents to use based on source type
@@ -120,7 +121,7 @@ class AnalysisRole(Role[AnalysisResult]):
             result.error = str(e)
             return result
 
-    def _select_agents_for_source(self, source: ResearchSource) -> List[Any]:
+    def _select_agents_for_source(self, source: ResearchSource) -> list[Any]:
         """
         Select relevant analysis agents based on source type.
 

@@ -6,14 +6,13 @@ OpenReview, HuggingFace Papers, Papers with Code, ACL Anthology, citation
 traversal, GitHub activity scoring, and multi-signal source quality ranking.
 """
 
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple
 import os
+from datetime import datetime, timezone
+from typing import Any
 
 import requests
 
 from lyra_research.discovery import ResearchSource, SourceType
-
 
 # ---------------------------------------------------------------------------
 # OpenReview
@@ -25,7 +24,7 @@ class OpenReviewDiscovery:
     BASE_URL = "https://api.openreview.net"
     SUPPORTED_VENUES = ["ICLR.cc", "NeurIPS.cc", "ICML.cc", "COLM"]
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         """
         Initialize OpenReview discovery.
 
@@ -38,8 +37,8 @@ class OpenReviewDiscovery:
         self,
         query: str,
         max_results: int = 50,
-        venue: Optional[str] = None,
-    ) -> List[ResearchSource]:
+        venue: str | None = None,
+    ) -> list[ResearchSource]:
         """
         Search OpenReview for papers with exponential backoff retry.
 
@@ -58,7 +57,7 @@ class OpenReviewDiscovery:
 
         for attempt in range(max_retries):
             try:
-                params: Dict[str, Any] = {"term": query, "limit": min(max_results, 100)}
+                params: dict[str, Any] = {"term": query, "limit": min(max_results, 100)}
                 if venue:
                     params["content.venueid"] = venue
 
@@ -96,14 +95,14 @@ class OpenReviewDiscovery:
 
         return []
 
-    def _to_source(self, note: Dict[str, Any]) -> ResearchSource:
+    def _to_source(self, note: dict[str, Any]) -> ResearchSource:
         """Convert an OpenReview note dict to a ResearchSource."""
         content = note.get("content", {})
         note_id = note.get("id", "")
         venue = content.get("venue", "") or content.get("venueid", "")
 
         # Try to parse year from cdate (ms epoch) or venueid string
-        year: Optional[int] = None
+        year: int | None = None
         cdate = note.get("cdate")
         if cdate:
             try:
@@ -141,7 +140,7 @@ class HuggingFacePapersDiscovery:
     SEARCH_URL = "https://huggingface.co/api/papers"
     DAILY_URL = "https://huggingface.co/api/daily_papers"
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         """
         Initialize HuggingFace papers discovery.
 
@@ -150,7 +149,7 @@ class HuggingFacePapersDiscovery:
         """
         self.api_key = api_key or os.environ.get("HF_API_KEY")
 
-    def search(self, query: str, max_results: int = 50) -> List[ResearchSource]:
+    def search(self, query: str, max_results: int = 50) -> list[ResearchSource]:
         """
         Search HuggingFace for papers.
 
@@ -162,7 +161,7 @@ class HuggingFacePapersDiscovery:
             List of discovered papers.
         """
         try:
-            headers: Dict[str, str] = {}
+            headers: dict[str, str] = {}
             if self.api_key:
                 headers["Authorization"] = f"Bearer {self.api_key}"
 
@@ -186,7 +185,7 @@ class HuggingFacePapersDiscovery:
             print(f"HuggingFace search error: {e}")
             return []
 
-    def get_daily_papers(self) -> List[ResearchSource]:
+    def get_daily_papers(self) -> list[ResearchSource]:
         """
         Fetch today's trending papers from HuggingFace.
 
@@ -208,11 +207,11 @@ class HuggingFacePapersDiscovery:
             print(f"HuggingFace daily papers error: {e}")
             return []
 
-    def _to_source(self, paper: Dict[str, Any]) -> ResearchSource:
+    def _to_source(self, paper: dict[str, Any]) -> ResearchSource:
         """Convert a HuggingFace paper dict to a ResearchSource."""
         paper_id = paper.get("id", "")
         published_at = paper.get("publishedAt") or paper.get("published_at")
-        published_date: Optional[datetime] = None
+        published_date: datetime | None = None
         if published_at:
             try:
                 published_date = datetime.fromisoformat(
@@ -251,7 +250,7 @@ class PapersWithCodeDiscovery:
 
     BASE_URL = "https://paperswithcode.com/api/v1"
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         """
         Initialize Papers with Code discovery.
 
@@ -260,7 +259,7 @@ class PapersWithCodeDiscovery:
         """
         self.api_key = api_key or os.environ.get("PWC_API_KEY")
 
-    def search(self, query: str, max_results: int = 50) -> List[ResearchSource]:
+    def search(self, query: str, max_results: int = 50) -> list[ResearchSource]:
         """
         Search Papers with Code for papers with exponential backoff retry.
 
@@ -278,7 +277,7 @@ class PapersWithCodeDiscovery:
 
         for attempt in range(max_retries):
             try:
-                headers: Dict[str, str] = {}
+                headers: dict[str, str] = {}
                 if self.api_key:
                     headers["Authorization"] = f"Token {self.api_key}"
 
@@ -320,11 +319,11 @@ class PapersWithCodeDiscovery:
 
         return []
 
-    def _to_source(self, paper: Dict[str, Any]) -> ResearchSource:
+    def _to_source(self, paper: dict[str, Any]) -> ResearchSource:
         """Convert a PwC paper dict to a ResearchSource."""
         paper_id = paper.get("id", "")
         published_str = paper.get("published", "")
-        published_date: Optional[datetime] = None
+        published_date: datetime | None = None
         if published_str:
             try:
                 published_date = datetime.fromisoformat(
@@ -366,7 +365,7 @@ class ACLAnthologyDiscovery:
     ACL_VENUES = ["ACL", "EMNLP", "NAACL", "EACL", "COLING", "TACL", "CL"]
     SS_URL = "https://api.semanticscholar.org/graph/v1"
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         """
         Initialize ACL Anthology discovery.
 
@@ -375,7 +374,7 @@ class ACLAnthologyDiscovery:
         """
         self.api_key = api_key or os.environ.get("SEMANTIC_SCHOLAR_API_KEY")
 
-    def search(self, query: str, max_results: int = 50) -> List[ResearchSource]:
+    def search(self, query: str, max_results: int = 50) -> list[ResearchSource]:
         """
         Search for ACL Anthology papers.
 
@@ -387,7 +386,7 @@ class ACLAnthologyDiscovery:
             List of discovered papers.
         """
         try:
-            headers: Dict[str, str] = {}
+            headers: dict[str, str] = {}
             if self.api_key:
                 headers["x-api-key"] = self.api_key
 
@@ -427,7 +426,7 @@ class ACLAnthologyDiscovery:
         venue_upper = venue.upper()
         return any(v in venue_upper for v in self.ACL_VENUES)
 
-    def _to_source(self, paper: Dict[str, Any]) -> ResearchSource:
+    def _to_source(self, paper: dict[str, Any]) -> ResearchSource:
         """Convert a Semantic Scholar paper dict to a ResearchSource."""
         year = paper.get("year")
         external_ids = paper.get("externalIds", {})
@@ -464,7 +463,7 @@ class CitationTraversal:
     BASE_URL = "https://api.semanticscholar.org/graph/v1"
     PAPER_FIELDS = "paperId,title,abstract,authors,year,citationCount,url,venue"
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         """
         Initialize citation traversal.
 
@@ -473,13 +472,13 @@ class CitationTraversal:
         """
         self.api_key = api_key or os.environ.get("SEMANTIC_SCHOLAR_API_KEY")
 
-    def _headers(self) -> Dict[str, str]:
-        h: Dict[str, str] = {}
+    def _headers(self) -> dict[str, str]:
+        h: dict[str, str] = {}
         if self.api_key:
             h["x-api-key"] = self.api_key
         return h
 
-    def get_citations(self, paper_id: str, max_results: int = 20) -> List[ResearchSource]:
+    def get_citations(self, paper_id: str, max_results: int = 20) -> list[ResearchSource]:
         """
         Return papers that CITE this paper (forward citation).
 
@@ -514,7 +513,7 @@ class CitationTraversal:
             print(f"CitationTraversal.get_citations error: {e}")
             return []
 
-    def get_references(self, paper_id: str, max_results: int = 20) -> List[ResearchSource]:
+    def get_references(self, paper_id: str, max_results: int = 20) -> list[ResearchSource]:
         """
         Return papers that this paper CITES (backward references).
 
@@ -554,7 +553,7 @@ class CitationTraversal:
         seed_paper_id: str,
         depth: int = 2,
         max_per_hop: int = 10,
-    ) -> List[ResearchSource]:
+    ) -> list[ResearchSource]:
         """
         BFS citation traversal up to `depth` hops from the seed paper.
 
@@ -570,10 +569,10 @@ class CitationTraversal:
         """
         seen_ids: set = {seed_paper_id}
         frontier = [seed_paper_id]
-        all_sources: List[ResearchSource] = []
+        all_sources: list[ResearchSource] = []
 
         for _ in range(depth):
-            next_frontier: List[str] = []
+            next_frontier: list[str] = []
             for pid in frontier:
                 citations = self.get_citations(pid, max_per_hop)
                 references = self.get_references(pid, max_per_hop)
@@ -588,7 +587,7 @@ class CitationTraversal:
 
         return all_sources
 
-    def _to_source(self, paper: Dict[str, Any]) -> ResearchSource:
+    def _to_source(self, paper: dict[str, Any]) -> ResearchSource:
         """Convert a Semantic Scholar paper dict to a ResearchSource."""
         year = paper.get("year")
         return ResearchSource(
@@ -617,7 +616,7 @@ class GitHubActivityScorer:
 
     GH_API = "https://api.github.com"
 
-    def __init__(self, github_token: Optional[str] = None):
+    def __init__(self, github_token: str | None = None):
         """
         Initialize the scorer.
 
@@ -626,13 +625,13 @@ class GitHubActivityScorer:
         """
         self.github_token = github_token or os.environ.get("GITHUB_TOKEN")
 
-    def _headers(self) -> Dict[str, str]:
+    def _headers(self) -> dict[str, str]:
         h = {"Accept": "application/vnd.github.v3+json"}
         if self.github_token:
             h["Authorization"] = f"token {self.github_token}"
         return h
 
-    def score(self, repo_metadata: Dict[str, Any]) -> float:
+    def score(self, repo_metadata: dict[str, Any]) -> float:
         """
         Compute an activity score from already-fetched repo metadata.
 
@@ -664,7 +663,7 @@ class GitHubActivityScorer:
     def enrich_source(
         self,
         source: ResearchSource,
-        github_token: Optional[str] = None,
+        github_token: str | None = None,
     ) -> ResearchSource:
         """
         Fetch additional GitHub stats and attach an activity_score to metadata.
@@ -689,7 +688,7 @@ class GitHubActivityScorer:
             return source
         owner, repo = parts[-2], parts[-1]
 
-        extra: Dict[str, Any] = {}
+        extra: dict[str, Any] = {}
         try:
             extra["commits_per_month"] = self._fetch_commits_per_month(owner, repo, headers)
             extra["contributors"] = self._fetch_contributor_count(owner, repo, headers)
@@ -717,7 +716,7 @@ class GitHubActivityScorer:
         )
 
     def _fetch_commits_per_month(
-        self, owner: str, repo: str, headers: Dict[str, str]
+        self, owner: str, repo: str, headers: dict[str, str]
     ) -> float:
         """Return approximate commits per month over the last 4 weeks."""
         response = requests.get(
@@ -731,7 +730,7 @@ class GitHubActivityScorer:
         return 0.0
 
     def _fetch_contributor_count(
-        self, owner: str, repo: str, headers: Dict[str, str]
+        self, owner: str, repo: str, headers: dict[str, str]
     ) -> int:
         """Return the number of contributors (capped at first page)."""
         response = requests.get(
@@ -745,7 +744,7 @@ class GitHubActivityScorer:
         return 0
 
     def _fetch_closed_issues_ratio(
-        self, owner: str, repo: str, headers: Dict[str, str]
+        self, owner: str, repo: str, headers: dict[str, str]
     ) -> float:
         """Return ratio closed / (closed + open) issues."""
         open_resp = requests.get(
@@ -798,7 +797,7 @@ class SourceQualityScorer:
     Score = citations×0.25 + recency×0.25 + venue_tier×0.25 + relevance×0.25
     """
 
-    VENUE_TIERS: Dict[str, float] = {
+    VENUE_TIERS: dict[str, float] = {
         "NeurIPS": 1.0,
         "ICML": 1.0,
         "ICLR": 1.0,
@@ -839,8 +838,8 @@ class SourceQualityScorer:
         )
 
     def rank(
-        self, sources: List[ResearchSource], query: str
-    ) -> List[Tuple[ResearchSource, float]]:
+        self, sources: list[ResearchSource], query: str
+    ) -> list[tuple[ResearchSource, float]]:
         """
         Rank sources by quality score descending.
 

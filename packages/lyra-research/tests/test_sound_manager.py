@@ -4,12 +4,13 @@ Tests for Sound Manager (Funny Sounds Phase 0)
 Tests main sound management system.
 """
 
-import pytest
-from unittest.mock import Mock, patch
-from pathlib import Path
 import tempfile
-from lyra_research.sounds.sound_manager import SoundManager
+from pathlib import Path
+from unittest.mock import patch
+
+import pytest
 from lyra_research.sounds.config import SoundConfig
+from lyra_research.sounds.sound_manager import SoundManager
 
 
 class TestSoundManager:

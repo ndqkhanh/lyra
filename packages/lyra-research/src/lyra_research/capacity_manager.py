@@ -15,10 +15,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 import numpy as np
-
 
 # ---------------------------------------------------------------------------
 # Capacity Limits
@@ -74,7 +72,7 @@ class CapacityStatus:
     db_size_mb: float
     level: CapacityLevel
     blocked: bool = False
-    warnings: List[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
 
     @property
     def sources_utilization(self) -> float:
@@ -140,7 +138,7 @@ class LatencyStats:
     """Latency statistics for a query type."""
 
     query_type: str
-    samples: List[float] = field(default_factory=list)
+    samples: list[float] = field(default_factory=list)
     max_samples: int = 1000  # Keep last 1000 samples
 
     def record(self, latency_ms: float) -> None:
@@ -187,11 +185,11 @@ class CapacityReport:
     """Comprehensive capacity and performance report."""
 
     status: CapacityStatus
-    latency_stats: Dict[str, LatencyStats]
-    slo_violations: List[str] = field(default_factory=list)
+    latency_stats: dict[str, LatencyStats]
+    slo_violations: list[str] = field(default_factory=list)
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary for serialization."""
         return {
             "timestamp": self.timestamp.isoformat(),
@@ -249,9 +247,9 @@ class CapacityManager:
     def __init__(
         self,
         db_path: Path,
-        cold_storage_path: Optional[Path] = None,
-        limits: Optional[CapacityLimits] = None,
-        slos: Optional[QuerySLOs] = None,
+        cold_storage_path: Path | None = None,
+        limits: CapacityLimits | None = None,
+        slos: QuerySLOs | None = None,
     ):
         """
         Initialize capacity manager.
@@ -270,7 +268,7 @@ class CapacityManager:
         self.slos = slos or QuerySLOs()
 
         # Latency tracking
-        self.latency_stats: Dict[str, LatencyStats] = {
+        self.latency_stats: dict[str, LatencyStats] = {
             "fts5_search": LatencyStats("fts5_search"),
             "embedding_search": LatencyStats("embedding_search"),
             "reranking": LatencyStats("reranking"),
@@ -480,7 +478,7 @@ class CapacityManager:
 
         self.latency_stats[query_type].record(latency_ms)
 
-    def get_slo_violations(self) -> List[str]:
+    def get_slo_violations(self) -> list[str]:
         """
         Check for SLO violations based on p95 latency.
 

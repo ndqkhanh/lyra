@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, List
+from typing import Any
 
 from lyra_research.discovery import ResearchSource
 from lyra_research.reporter import ResearchReport
@@ -15,7 +15,7 @@ class VerificationResult:
     check_name: str
     passed: bool
     score: float  # 0.0 to 1.0
-    issues: List[str] = field(default_factory=list)
+    issues: list[str] = field(default_factory=list)
     details: dict[str, Any] = field(default_factory=dict)
 
 
@@ -46,7 +46,7 @@ class Verifier:
         Returns:
             VerificationResult with completeness check
         """
-        issues: List[str] = []
+        issues: list[str] = []
         checks = {}
 
         # Check executive summary
@@ -101,7 +101,7 @@ class Verifier:
         )
 
     def verify_accuracy(
-        self, report: ResearchReport, sources: List[ResearchSource]
+        self, report: ResearchReport, sources: list[ResearchSource]
     ) -> VerificationResult:
         """
         Verify report accuracy against sources.
@@ -119,7 +119,7 @@ class Verifier:
         Returns:
             VerificationResult with accuracy check
         """
-        issues: List[str] = []
+        issues: list[str] = []
         checks = {}
 
         # Check source count matches
@@ -208,7 +208,7 @@ class Verifier:
         Returns:
             VerificationResult with consistency check
         """
-        issues: List[str] = []
+        issues: list[str] = []
         checks = {}
 
         # Check contested claims section
@@ -259,8 +259,8 @@ class Verifier:
         )
 
     def verify_all(
-        self, report: ResearchReport, sources: List[ResearchSource]
-    ) -> List[VerificationResult]:
+        self, report: ResearchReport, sources: list[ResearchSource]
+    ) -> list[VerificationResult]:
         """
         Run all verification checks.
 
@@ -278,7 +278,7 @@ class Verifier:
         ]
         return results
 
-    def get_overall_score(self, results: List[VerificationResult]) -> float:
+    def get_overall_score(self, results: list[VerificationResult]) -> float:
         """
         Calculate overall verification score.
 
@@ -292,7 +292,7 @@ class Verifier:
             return 0.0
         return sum(r.score for r in results) / len(results)
 
-    def all_passed(self, results: List[VerificationResult]) -> bool:
+    def all_passed(self, results: list[VerificationResult]) -> bool:
         """
         Check if all verification checks passed.
 

@@ -4,10 +4,9 @@ Research strategies for intelligent search and filtering.
 Implements search strategies, query expansion, and intelligent filtering.
 """
 
+import re
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Set
-import re
 
 
 class SearchStrategy(str, Enum):
@@ -26,8 +25,8 @@ class SearchPlan:
     query: str
     strategy: SearchStrategy
     max_results: int = 100
-    filters: Dict = field(default_factory=dict)
-    expansion_terms: List[str] = field(default_factory=list)
+    filters: dict = field(default_factory=dict)
+    expansion_terms: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -66,7 +65,7 @@ class QueryExpander:
             'GPT': 'generative pre-trained transformer',
         }
 
-    def expand(self, query: str, max_expansions: int = 5) -> List[str]:
+    def expand(self, query: str, max_expansions: int = 5) -> list[str]:
         """
         Expand query with related terms.
 
@@ -96,7 +95,7 @@ class QueryExpander:
 
         return list(set(expansions))[:max_expansions]
 
-    def _find_related_terms(self, query: str) -> List[str]:
+    def _find_related_terms(self, query: str) -> list[str]:
         """Find related terms (simplified)."""
         related = []
 
@@ -120,9 +119,9 @@ class ResultFilter:
 
     def filter_by_quality(
         self,
-        results: List[Dict],
+        results: list[dict],
         min_quality: float = 0.5,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         Filter results by quality score.
 
@@ -140,9 +139,9 @@ class ResultFilter:
 
     def filter_by_recency(
         self,
-        results: List[Dict],
+        results: list[dict],
         max_age_years: int = 5,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         Filter results by recency.
 
@@ -170,9 +169,9 @@ class ResultFilter:
 
     def filter_by_citations(
         self,
-        results: List[Dict],
+        results: list[dict],
         min_citations: int = 10,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         Filter results by citation count.
 
@@ -188,7 +187,7 @@ class ResultFilter:
             if r.get('citations', 0) >= min_citations
         ]
 
-    def deduplicate(self, results: List[Dict]) -> List[Dict]:
+    def deduplicate(self, results: list[dict]) -> list[dict]:
         """
         Remove duplicate results.
 
@@ -226,9 +225,9 @@ class ResultRanker:
 
     def rank(
         self,
-        results: List[Dict],
-        weights: Optional[Dict[str, float]] = None,
-    ) -> List[RankedResult]:
+        results: list[dict],
+        weights: dict[str, float] | None = None,
+    ) -> list[RankedResult]:
         """
         Rank results by weighted criteria.
 
@@ -282,7 +281,7 @@ class ResultRanker:
 
         return ranked
 
-    def _calculate_novelty(self, result: Dict) -> float:
+    def _calculate_novelty(self, result: dict) -> float:
         """Calculate novelty score."""
         # Simplified - would use citation patterns in production
         citations = result.get('citations', 0)
@@ -295,7 +294,7 @@ class ResultRanker:
         else:
             return 0.8  # Newer work is potentially more novel
 
-    def _calculate_recency(self, result: Dict) -> float:
+    def _calculate_recency(self, result: dict) -> float:
         """Calculate recency score."""
         from datetime import datetime
 
@@ -368,7 +367,7 @@ class ResearchPlanner:
             expansion_terms=expansion_terms,
         )
 
-    def decompose_query(self, query: str) -> List[str]:
+    def decompose_query(self, query: str) -> list[str]:
         """
         Decompose complex query into sub-queries.
 
@@ -397,7 +396,7 @@ class ResearchPlanner:
 
         return list(set(sub_queries))
 
-    def estimate_time(self, plan: SearchPlan) -> Dict[str, float]:
+    def estimate_time(self, plan: SearchPlan) -> dict[str, float]:
         """
         Estimate time required for research plan.
 
@@ -470,8 +469,8 @@ class StoppingCriteria:
 
     def calculate_saturation(
         self,
-        new_results: List[Dict],
-        existing_results: List[Dict],
+        new_results: list[dict],
+        existing_results: list[dict],
     ) -> float:
         """
         Calculate result saturation (diminishing returns).

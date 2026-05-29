@@ -6,7 +6,7 @@ Audits evidence quality and citation accuracy.
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 from lyra_research.agents.analysis.analysis_base import Analysis
 from lyra_research.agents.synthesis.synthesis_base import SynthesisAgent, SynthesisResult
@@ -26,7 +26,7 @@ class EvidenceAuditorAgent(SynthesisAgent):
     def __init__(self, model: str = "claude-opus-4-7") -> None:
         super().__init__(synthesis_type="evidence", model=model)
 
-    async def synthesize(self, analyses: List[Analysis]) -> SynthesisResult:
+    async def synthesize(self, analyses: list[Analysis]) -> SynthesisResult:
         """
         Audit evidence quality.
 
@@ -66,14 +66,14 @@ class EvidenceAuditorAgent(SynthesisAgent):
         )
 
     def _audit_evidence(
-        self, findings: List[str], contradictions: List[Tuple[str, str]]
-    ) -> List[Dict[str, Any]]:
+        self, findings: list[str], contradictions: list[tuple[str, str]]
+    ) -> list[dict[str, Any]]:
         """
         Audit evidence quality for all findings.
 
         Returns list of evidence issues.
         """
-        issues: List[Dict[str, Any]] = []
+        issues: list[dict[str, Any]] = []
 
         # Check each finding for evidence quality
         for finding in findings:
@@ -109,7 +109,7 @@ class EvidenceAuditorAgent(SynthesisAgent):
                 "finding": f"{finding1[:50]} vs {finding2[:50]}",
                 "issue_type": "contradiction",
                 "severity": "high",
-                "description": f"Contradictory claims need resolution",
+                "description": "Contradictory claims need resolution",
             })
 
         return issues[:20]  # Limit to top 20 issues

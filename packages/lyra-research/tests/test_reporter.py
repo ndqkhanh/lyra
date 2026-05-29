@@ -4,22 +4,17 @@ Tests for the Research Synthesis & Report Engine (reporter.py).
 All tests run offline — no network calls, no LLM calls.
 """
 
-from pathlib import Path
 
 import pytest
-
 from lyra_research.reporter import (
     BoundCitation,
     CitationBinder,
     CrossSourceSynthesizer,
     FieldTaxonomy,
-    QualityReport,
     ReportQualityChecker,
     ResearchReport,
     ResearchReportGenerator,
-    SynthesisResult,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -461,7 +456,6 @@ def test_report_has_report_id(sample_report):
 
 def test_report_generated_at_is_utc(sample_report):
     """generated_at is timezone-aware UTC."""
-    from datetime import timezone
     assert sample_report.generated_at.tzinfo is not None
 
 

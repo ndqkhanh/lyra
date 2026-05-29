@@ -9,12 +9,12 @@ from lyra_research.writing.ai_detector import (
     AIContentDetector,
     AIPattern,
 )
-from lyra_research.writing.five_pass_editor import (
-    FivePassEditor,
-    EditPass,
-)
 from lyra_research.writing.burstiness_analyzer import (
     BurstinessAnalyzer,
+)
+from lyra_research.writing.five_pass_editor import (
+    EditPass,
+    FivePassEditor,
 )
 
 

@@ -9,11 +9,12 @@ Uses a different model (GPT-4o-mini) for adversarial review to:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, List
+from typing import Any
 
 from lyra_core.context.layered_context import LayeredContextManager
-from lyra_research.roles.role_base import Role, RoleResult, RoleStatus
+
 from lyra_research.reporter import ResearchReport
+from lyra_research.roles.role_base import Role, RoleResult, RoleStatus
 
 
 @dataclass
@@ -31,8 +32,8 @@ class ReviewResult(RoleResult):
     """Result from review role."""
 
     approved: bool = False
-    issues: List[ReviewIssue] = field(default_factory=list)
-    suggestions: List[str] = field(default_factory=list)
+    issues: list[ReviewIssue] = field(default_factory=list)
+    suggestions: list[str] = field(default_factory=list)
     overall_quality_score: float = 0.0
 
 
@@ -70,7 +71,7 @@ class ReviewRole(Role[ReviewResult]):
 
         try:
             # Perform multi-dimensional review
-            issues: List[ReviewIssue] = []
+            issues: list[ReviewIssue] = []
 
             # 1. Accuracy review
             accuracy_issues = await self._review_accuracy(report)
@@ -133,9 +134,9 @@ class ReviewRole(Role[ReviewResult]):
             result.error = str(e)
             return result
 
-    async def _review_accuracy(self, report: ResearchReport) -> List[ReviewIssue]:
+    async def _review_accuracy(self, report: ResearchReport) -> list[ReviewIssue]:
         """Review report accuracy."""
-        issues: List[ReviewIssue] = []
+        issues: list[ReviewIssue] = []
 
         # Check for unsupported claims
         if not report.references_section or len(report.references_section.strip()) == 0:
@@ -161,9 +162,9 @@ class ReviewRole(Role[ReviewResult]):
 
         return issues
 
-    async def _review_completeness(self, report: ResearchReport) -> List[ReviewIssue]:
+    async def _review_completeness(self, report: ResearchReport) -> list[ReviewIssue]:
         """Review report completeness."""
-        issues: List[ReviewIssue] = []
+        issues: list[ReviewIssue] = []
 
         # Check for missing sections
         if not report.best_papers_section or len(report.best_papers_section.strip()) == 0:
@@ -199,9 +200,9 @@ class ReviewRole(Role[ReviewResult]):
 
         return issues
 
-    async def _review_clarity(self, report: ResearchReport) -> List[ReviewIssue]:
+    async def _review_clarity(self, report: ResearchReport) -> list[ReviewIssue]:
         """Review report clarity."""
-        issues: List[ReviewIssue] = []
+        issues: list[ReviewIssue] = []
 
         # Check summary length
         if len(report.executive_summary) < 100:
@@ -226,9 +227,9 @@ class ReviewRole(Role[ReviewResult]):
 
         return issues
 
-    async def _review_methodology(self, report: ResearchReport) -> List[ReviewIssue]:
+    async def _review_methodology(self, report: ResearchReport) -> list[ReviewIssue]:
         """Review research methodology."""
-        issues: List[ReviewIssue] = []
+        issues: list[ReviewIssue] = []
 
         # Check gaps analysis
         if not report.gaps_section or len(report.gaps_section.strip()) == 0:
@@ -243,7 +244,7 @@ class ReviewRole(Role[ReviewResult]):
 
         return issues
 
-    def _generate_suggestions(self, issues: List[ReviewIssue]) -> List[str]:
+    def _generate_suggestions(self, issues: list[ReviewIssue]) -> list[str]:
         """Generate actionable suggestions from issues."""
         suggestions = []
 

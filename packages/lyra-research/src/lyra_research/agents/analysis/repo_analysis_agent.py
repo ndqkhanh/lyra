@@ -1,8 +1,6 @@
 """Repository analysis agent for analyzing GitHub repositories."""
 from __future__ import annotations
 
-from typing import List
-
 from lyra_research.agents.analysis.analysis_base import Analysis, AnalysisAgent
 from lyra_research.discovery import ResearchSource, SourceType
 
@@ -14,7 +12,7 @@ class RepoAnalysisAgent(AnalysisAgent):
         """Initialize repository analysis agent."""
         super().__init__(analysis_type="repo", model=model)
 
-    async def analyze(self, sources: List[ResearchSource]) -> List[Analysis]:
+    async def analyze(self, sources: list[ResearchSource]) -> list[Analysis]:
         """
         Analyze GitHub repositories.
 
@@ -50,7 +48,7 @@ class RepoAnalysisAgent(AnalysisAgent):
 
         return analyses
 
-    def _extract_repo_insights(self, source: ResearchSource) -> List[str]:
+    def _extract_repo_insights(self, source: ResearchSource) -> list[str]:
         """
         Extract insights from repository metadata.
 

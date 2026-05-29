@@ -11,33 +11,31 @@ Tests:
 
 Total: 35 tests
 """
-import pytest
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock
 
+import pytest
 from lyra_core.context.layered_context import LayeredContextManager
-from lyra_research.discovery import ResearchSource, SourceType
 from lyra_research.agents.analysis import Analysis
+from lyra_research.discovery import ResearchSource, SourceType
 from lyra_research.reporter import ResearchReport
 from lyra_research.roles import (
+    AnalysisResult,
+    AnalysisRole,
+    CurationResult,
+    CuratorRole,
+    DiscoveryResult,
+    DiscoveryRole,
+    ReviewIssue,
+    ReviewResult,
+    ReviewRole,
     Role,
+    RoleOrchestrator,
     RoleResult,
     RoleStatus,
-    DiscoveryRole,
-    DiscoveryResult,
-    AnalysisRole,
-    AnalysisResult,
-    SynthesisRole,
     SynthesisResult,
-    ReviewRole,
-    ReviewResult,
-    ReviewIssue,
-    CuratorRole,
-    CurationResult,
-    KnowledgeEntry,
-    RoleOrchestrator,
+    SynthesisRole,
 )
-
 
 # ============================================================================
 # Fixtures

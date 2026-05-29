@@ -8,10 +8,9 @@ Detects AI-generated content patterns including:
 - Burstiness (sentence length variation)
 """
 
-from dataclasses import dataclass
-from typing import List, Dict
-from enum import Enum
 import re
+from dataclasses import dataclass
+from enum import Enum
 
 
 class AIPattern(Enum):
@@ -27,8 +26,8 @@ class AIDetectionResult:
     """Result from AI content detection"""
     is_ai_generated: bool
     confidence: float  # 0.0 to 1.0
-    issues: List[str]
-    patterns_detected: Dict[AIPattern, int]
+    issues: list[str]
+    patterns_detected: dict[AIPattern, int]
 
 
 class AIContentDetector:
@@ -201,7 +200,7 @@ class AIContentDetector:
 
         return False
 
-    def get_high_freq_terms_found(self, text: str) -> List[str]:
+    def get_high_freq_terms_found(self, text: str) -> list[str]:
         """
         Get list of high-frequency terms found in text
 
@@ -215,7 +214,7 @@ class AIContentDetector:
         found = [term for term in self.AI_HIGH_FREQ_TERMS if term in text_lower]
         return found
 
-    def get_throat_clearing_found(self, text: str) -> List[str]:
+    def get_throat_clearing_found(self, text: str) -> list[str]:
         """
         Get list of throat-clearing openers found in text
 

@@ -4,9 +4,8 @@ Sound Hooks
 Hook integration for sound system with lifecycle events.
 """
 
-from typing import Dict, Any
+from ..sounds.event_mapper import EventMapper, SoundEvent
 from ..sounds.sound_manager import SoundManager
-from ..sounds.event_mapper import SoundEvent, EventMapper
 
 
 class SoundHooks:

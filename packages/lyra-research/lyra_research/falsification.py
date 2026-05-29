@@ -15,10 +15,8 @@ Based on research: Doc 317 (AI Research Agents), Baby-AIGS
 Impact: Converts discovery into science
 """
 
-from typing import List, Dict, Any, Optional
-from dataclasses import dataclass
-from pathlib import Path
 import json
+from dataclasses import dataclass
 
 
 @dataclass
@@ -29,21 +27,21 @@ class FalsificationTest:
     test_type: str  # "counterexample", "stress_test", "negative_control", "boundary"
     test_description: str
     expected_outcome: str
-    actual_outcome: Optional[str] = None
-    passed: Optional[bool] = None
-    evidence: Optional[str] = None
+    actual_outcome: str | None = None
+    passed: bool | None = None
+    evidence: str | None = None
 
 
 @dataclass
 class FalsificationResult:
     """Result of falsification attempt."""
     claim: str
-    tests: List[FalsificationTest]
+    tests: list[FalsificationTest]
     survived: bool
     confidence_before: float
     confidence_after: float
-    qualified_claim: Optional[str] = None  # Revised claim if needed
-    rejection_reason: Optional[str] = None
+    qualified_claim: str | None = None  # Revised claim if needed
+    rejection_reason: str | None = None
 
 
 class FalsificationEngine:
@@ -70,7 +68,7 @@ class FalsificationEngine:
         claim: str,
         evidence: str,
         num_tests: int = 5
-    ) -> List[FalsificationTest]:
+    ) -> list[FalsificationTest]:
         """
         Generate tests that could falsify the claim.
 
@@ -287,7 +285,7 @@ Output JSON:
     def _generate_qualified_claim(
         self,
         original_claim: str,
-        tests: List[FalsificationTest]
+        tests: list[FalsificationTest]
     ) -> str:
         """
         Generate a qualified/revised claim based on test failures.
@@ -354,7 +352,7 @@ def add_falsification_to_feynman(
     # Extract claims from findings
     claims = []
     for findings_path in feynman_pipeline.findings_paths:
-        with open(findings_path, 'r') as f:
+        with open(findings_path) as f:
             findings = json.load(f)
             claims.append({
                 'claim': findings['answer'],

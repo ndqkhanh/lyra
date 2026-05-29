@@ -9,11 +9,9 @@ import json
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Optional
 from uuid import uuid4
 
 from lyra_research.strategies import SearchStrategy
-
 
 # ---------------------------------------------------------------------------
 # ResearchSkill (7-tuple skill formalism)
@@ -32,9 +30,9 @@ class ResearchSkill:
     description: str = ""          # When to use this skill
 
     # Policy: what the skill does
-    preferred_sources: List[str] = field(default_factory=list)  # ["arxiv", "openreview", "semantic_scholar"]
-    preferred_venues: List[str] = field(default_factory=list)   # ["NeurIPS", "ICLR", "ICML"]
-    query_expansions: List[str] = field(default_factory=list)   # Extra terms to add
+    preferred_sources: list[str] = field(default_factory=list)  # ["arxiv", "openreview", "semantic_scholar"]
+    preferred_venues: list[str] = field(default_factory=list)   # ["NeurIPS", "ICLR", "ICML"]
+    query_expansions: list[str] = field(default_factory=list)   # Extra terms to add
     max_results_per_source: int = 30
     recency_bias: float = 0.5       # 0.0=all-time, 1.0=very-recent-only
 
@@ -47,8 +45,8 @@ class ResearchSkill:
 
     # Lineage
     version: int = 1
-    parent_skill_id: Optional[str] = None
-    performance_history: List[float] = field(default_factory=list)  # outcome scores
+    parent_skill_id: str | None = None
+    performance_history: list[float] = field(default_factory=list)  # outcome scores
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
     def average_performance(self) -> float:
@@ -130,13 +128,13 @@ class ResearchSkillStore:
         ),
     ]
 
-    def __init__(self, store_path: Optional[Path] = None):
+    def __init__(self, store_path: Path | None = None):
         self.store_path = store_path or Path.home() / ".lyra" / "research_skills.json"
-        self._skills: Dict[str, ResearchSkill] = {}
+        self._skills: dict[str, ResearchSkill] = {}
         self._load()
         self._ensure_builtins()
 
-    def get_for_domain(self, domain: str) -> Optional[ResearchSkill]:
+    def get_for_domain(self, domain: str) -> ResearchSkill | None:
         """Get the best skill for a domain (highest average_performance)."""
         candidates = [
             s for s in self._skills.values()
@@ -146,14 +144,14 @@ class ResearchSkillStore:
             return None
         return max(candidates, key=lambda s: s.average_performance())
 
-    def get_by_name(self, name: str) -> Optional[ResearchSkill]:
+    def get_by_name(self, name: str) -> ResearchSkill | None:
         """Get a skill by its name."""
         for skill in self._skills.values():
             if skill.name == name:
                 return skill
         return None
 
-    def list_all(self) -> List[ResearchSkill]:
+    def list_all(self) -> list[ResearchSkill]:
         """List all stored skills."""
         return list(self._skills.values())
 
@@ -309,7 +307,7 @@ class StrategyAdaptationSkill:
     """
 
     # Strategy selection rules
-    STRATEGY_RULES: Dict[str, SearchStrategy] = {
+    STRATEGY_RULES: dict[str, SearchStrategy] = {
         "survey": SearchStrategy.BREADTH_FIRST,
         "overview": SearchStrategy.BREADTH_FIRST,
         "review": SearchStrategy.BREADTH_FIRST,
@@ -342,8 +340,8 @@ class StrategyAdaptationSkill:
         current_strategy: SearchStrategy,
         papers_found: int,
         repos_found: int,
-        quality_scores: List[float],
-    ) -> Optional[SearchStrategy]:
+        quality_scores: list[float],
+    ) -> SearchStrategy | None:
         """Decide if strategy should switch mid-research.
 
         Returns new strategy if switch needed, None to continue current.
@@ -407,9 +405,9 @@ class SkillEvolutionTracker:
     MIN_SESSIONS_FOR_PROPOSAL = 3  # Need at least 3 data points
     IMPROVEMENT_THRESHOLD = 0.1    # Must improve by 10% to accept
 
-    def __init__(self, store_path: Optional[Path] = None):
+    def __init__(self, store_path: Path | None = None):
         self.store_path = store_path or Path.home() / ".lyra" / "skill_evolution.json"
-        self._records: List[SkillEvolutionRecord] = []
+        self._records: list[SkillEvolutionRecord] = []
         self._load()
 
     def record(self, skill_name: str, topic: str, score: float, notes: str = "") -> None:
@@ -423,7 +421,7 @@ class SkillEvolutionTracker:
         self._records.append(rec)
         self._save()
 
-    def get_trend(self, skill_name: str, last_n: int = 5) -> List[float]:
+    def get_trend(self, skill_name: str, last_n: int = 5) -> list[float]:
         """Get last N outcome scores for a skill (most recent last)."""
         skill_records = [
             r for r in self._records
@@ -431,7 +429,7 @@ class SkillEvolutionTracker:
         ]
         return [r.outcome_score for r in skill_records[-last_n:]]
 
-    def propose_refinements(self, skill_name: str) -> List[str]:
+    def propose_refinements(self, skill_name: str) -> list[str]:
         """Propose skill refinements based on performance history.
 
         Returns list of human-readable suggestions.

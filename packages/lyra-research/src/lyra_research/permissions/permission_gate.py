@@ -4,9 +4,9 @@ Permission Gate
 Permission checkpoint for operations with bypass support.
 """
 
-from enum import Enum
 from dataclasses import dataclass
-from typing import Optional, Dict, Any
+from enum import Enum
+from typing import Any
 
 
 class PermissionLevel(Enum):
@@ -23,7 +23,7 @@ class PermissionRequest:
     operation: str
     level: PermissionLevel
     description: str
-    context: Dict[str, Any]
+    context: dict[str, Any]
     can_bypass: bool = True  # Some operations cannot be bypassed
 
 

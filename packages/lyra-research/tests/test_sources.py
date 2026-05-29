@@ -8,7 +8,6 @@ from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from lyra_research.discovery import ResearchSource, SourceType
 from lyra_research.sources import (
     ACLAnthologyDiscovery,
@@ -19,7 +18,6 @@ from lyra_research.sources import (
     PapersWithCodeDiscovery,
     SourceQualityScorer,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers

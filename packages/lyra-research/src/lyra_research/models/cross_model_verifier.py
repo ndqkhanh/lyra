@@ -6,7 +6,7 @@ and improving reliability through diverse perspectives.
 """
 
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -17,7 +17,7 @@ class VerificationResult:
     confidence: float
     verification_model: str
     discrepancies: list[str]
-    verification_output: Optional[str] = None
+    verification_output: str | None = None
 
 
 class CrossModelVerifier:

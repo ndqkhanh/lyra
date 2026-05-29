@@ -4,18 +4,19 @@ Integration Tests for Bypass Permissions (Phase 4)
 Tests complete bypass workflow with security boundaries.
 """
 
-import pytest
+import tempfile
 import time
 from pathlib import Path
-import tempfile
+
+import pytest
+from lyra_research.permissions.audit_logger import AuditLogger
 from lyra_research.permissions.bypass_manager import BypassManager
 from lyra_research.permissions.permission_gate import (
-    PermissionGate,
-    PermissionRequest,
-    PermissionLevel,
     CRITICAL_OPERATIONS,
+    PermissionGate,
+    PermissionLevel,
+    PermissionRequest,
 )
-from lyra_research.permissions.audit_logger import AuditLogger
 
 
 class TestBypassIntegration:

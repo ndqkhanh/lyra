@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import os
-from typing import List
 
 from lyra_research.agents.discovery.discovery_base import DiscoveryAgent
 from lyra_research.discovery import ResearchSource
@@ -24,7 +23,7 @@ class OpenReviewAgent(DiscoveryAgent):
         self.api_key = api_key or os.environ.get("OPENREVIEW_API_KEY")
         self.openreview = OpenReviewDiscovery(self.api_key)
 
-    async def discover(self, query: str, max_results: int = 50) -> List[ResearchSource]:
+    async def discover(self, query: str, max_results: int = 50) -> list[ResearchSource]:
         """
         Discover papers from OpenReview with rate limit handling.
 

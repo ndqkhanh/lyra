@@ -8,19 +8,20 @@ Sequential synthesis pipeline:
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Any, List
+from dataclasses import dataclass
+from typing import Any
 
 from lyra_core.context.layered_context import LayeredContextManager
-from lyra_research.roles.role_base import Role, RoleResult, RoleStatus
+
 from lyra_research.agents.analysis import Analysis
 from lyra_research.agents.synthesis import (
-    CrossSourceSynthesizerAgent,
     ContradictionDetectorAgent,
+    CrossSourceSynthesizerAgent,
     EvidenceAuditorAgent,
     FalsificationCheckerAgent,
 )
 from lyra_research.reporter import ResearchReport
+from lyra_research.roles.role_base import Role, RoleResult, RoleStatus
 
 
 @dataclass
@@ -55,7 +56,7 @@ class SynthesisRole(Role[SynthesisResult]):
         self.evidence_auditor = EvidenceAuditorAgent()
         self.falsification_checker = FalsificationCheckerAgent()
 
-    async def execute(self, analyses: List[Analysis]) -> SynthesisResult:
+    async def execute(self, analyses: list[Analysis]) -> SynthesisResult:
         """
         Execute sequential synthesis pipeline.
 

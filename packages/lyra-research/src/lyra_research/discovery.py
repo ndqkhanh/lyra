@@ -4,11 +4,12 @@ Multi-source research discovery engine.
 Discovers papers, GitHub repos, and web content for research queries.
 """
 
+import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
-import time
+from typing import Any
+
 import requests
 
 
@@ -28,12 +29,12 @@ class ResearchSource:
     title: str
     source_type: SourceType
     url: str
-    authors: List[str] = field(default_factory=list)
-    published_date: Optional[datetime] = None
+    authors: list[str] = field(default_factory=list)
+    published_date: datetime | None = None
     abstract: str = ""
     citations: int = 0
     stars: int = 0  # For repos
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     discovered_at: datetime = field(default_factory=datetime.now)
 
 
@@ -43,7 +44,7 @@ class ArXivDiscovery:
     def __init__(self):
         self.base_url = "http://export.arxiv.org/api/query"
 
-    def search(self, query: str, max_results: int = 50) -> List[ResearchSource]:
+    def search(self, query: str, max_results: int = 50) -> list[ResearchSource]:
         """
         Search ArXiv for papers.
 
@@ -92,11 +93,11 @@ class ArXivDiscovery:
 class SemanticScholarDiscovery:
     """Discover papers from Semantic Scholar."""
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         self.base_url = "https://api.semanticscholar.org/graph/v1"
         self.api_key = api_key
 
-    def search(self, query: str, max_results: int = 50) -> List[ResearchSource]:
+    def search(self, query: str, max_results: int = 50) -> list[ResearchSource]:
         """
         Search Semantic Scholar for papers with exponential backoff retry.
 
@@ -184,11 +185,11 @@ class SemanticScholarDiscovery:
 class GitHubDiscovery:
     """Discover repositories from GitHub."""
 
-    def __init__(self, api_token: Optional[str] = None):
+    def __init__(self, api_token: str | None = None):
         self.base_url = "https://api.github.com"
         self.api_token = api_token
 
-    def search(self, query: str, max_results: int = 50) -> List[ResearchSource]:
+    def search(self, query: str, max_results: int = 50) -> list[ResearchSource]:
         """
         Search GitHub for repositories.
 
@@ -268,8 +269,8 @@ class MultiSourceDiscovery:
 
     def __init__(
         self,
-        semantic_scholar_key: Optional[str] = None,
-        github_token: Optional[str] = None,
+        semantic_scholar_key: str | None = None,
+        github_token: str | None = None,
     ):
         """
         Initialize multi-source discovery.
@@ -299,13 +300,13 @@ class MultiSourceDiscovery:
     def discover(
         self,
         query: str,
-        sources: List[str] = [
+        sources: list[str] = [
             "arxiv",
             "github",
             "huggingface",
         ],
         max_per_source: int = 50,
-    ) -> Dict[str, List[ResearchSource]]:
+    ) -> dict[str, list[ResearchSource]]:
         """
         Discover research sources across multiple platforms.
 
@@ -358,7 +359,7 @@ class MultiSourceDiscovery:
 
         return results
 
-    def discover_all(self, query: str, max_per_source: int = 50) -> List[ResearchSource]:
+    def discover_all(self, query: str, max_per_source: int = 50) -> list[ResearchSource]:
         """
         Discover from all sources and return combined list.
 

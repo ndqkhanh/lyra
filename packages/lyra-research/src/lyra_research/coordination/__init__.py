@@ -11,6 +11,11 @@ Also re-exports coordination primitives for backward compatibility.
 """
 
 # Import old coordination primitives (backward compatibility)
+from lyra_research.coordination.handoff_protocol import (
+    HandoffData,
+    HandoffProtocol,
+)
+from lyra_research.coordination.parallel_executor import ParallelExecutor
 from lyra_research.coordination.primitives import (
     CircuitBreaker,
     CircuitBreakerStats,
@@ -23,20 +28,15 @@ from lyra_research.coordination.primitives import (
     TaskState,
     TimeoutEnforcer,
 )
+from lyra_research.coordination.progress_tracker import ProgressTracker
+from lyra_research.coordination.role_coordinator import RoleCoordinator
 
 # Import new role coordination components
 from lyra_research.coordination.role_state_machine import (
     RoleState,
-    RoleTransition,
     RoleStateMachine,
+    RoleTransition,
 )
-from lyra_research.coordination.handoff_protocol import (
-    HandoffData,
-    HandoffProtocol,
-)
-from lyra_research.coordination.role_coordinator import RoleCoordinator
-from lyra_research.coordination.parallel_executor import ParallelExecutor
-from lyra_research.coordination.progress_tracker import ProgressTracker
 
 __all__ = [
     # Old coordination primitives (backward compatibility)

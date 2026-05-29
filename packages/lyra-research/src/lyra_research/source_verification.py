@@ -10,9 +10,8 @@ from __future__ import annotations
 import hashlib
 import logging
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +37,7 @@ class SourceRecord:
     url: str
     title: str = ""
     author: str = ""
-    date: Optional[str] = None
+    date: str | None = None
     credibility_score: float = 0.5
     content_hash: str = ""
 
@@ -83,7 +82,7 @@ class AuditReport:
     verified_count: int = 0
     unsupported_count: int = 0
     faithfulness_score: float = 1.0
-    details: Tuple[CitationCheck, ...] = ()
+    details: tuple[CitationCheck, ...] = ()
 
     @property
     def verification_rate(self) -> float:
@@ -115,11 +114,11 @@ class SourceVerifier:
 
     def __init__(self) -> None:
         """Initialize source verifier."""
-        self._sources: Dict[str, SourceRecord] = {}
+        self._sources: dict[str, SourceRecord] = {}
 
     # -- claim extraction ----------------------------------------------------
 
-    def extract_claims(self, text: str) -> List[str]:
+    def extract_claims(self, text: str) -> list[str]:
         """Identify factual claims in *text* using pattern heuristics.
 
         This is a lightweight extractor suitable for research documents.
@@ -131,7 +130,7 @@ class SourceVerifier:
         Returns:
             List of candidate claim strings.
         """
-        claims: List[str] = []
+        claims: list[str] = []
         sentences = _split_sentences(text)
 
         for sentence in sentences:
@@ -248,7 +247,7 @@ class SourceVerifier:
         self,
         url: str = "",
         author: str = "",
-        date: Optional[str] = None,
+        date: str | None = None,
     ) -> float:
         """Compute a composite credibility score for a source.
 
@@ -306,7 +305,7 @@ class SourceVerifier:
     def audit_document(
         self,
         text: str,
-        citations: Optional[Dict[str, str]] = None,
+        citations: dict[str, str] | None = None,
     ) -> AuditReport:
         """Run a full citation audit on a research document.
 
@@ -321,7 +320,7 @@ class SourceVerifier:
         if not claims:
             return AuditReport()
 
-        details: List[CitationCheck] = []
+        details: list[CitationCheck] = []
         verified = 0
         unsupported = 0
 
@@ -374,7 +373,7 @@ class SourceVerifier:
         """Add a source to the internal registry for later lookup."""
         self._sources[source.url] = source
 
-    def get_source(self, url: str) -> Optional[SourceRecord]:
+    def get_source(self, url: str) -> SourceRecord | None:
         """Retrieve a previously registered source."""
         return self._sources.get(url)
 
@@ -384,12 +383,12 @@ class SourceVerifier:
 # ---------------------------------------------------------------------------
 
 
-def _split_sentences(text: str) -> List[str]:
+def _split_sentences(text: str) -> list[str]:
     """Naive sentence splitter."""
     return re.split(r"(?<=[.!?])\s+", text)
 
 
-def _extract_keywords(text: str) -> List[str]:
+def _extract_keywords(text: str) -> list[str]:
     """Extract candidate keywords from text (nouns, named entities)."""
     # Heuristic: words with 4+ chars, ignoring common stop words
     stop = {
@@ -401,7 +400,7 @@ def _extract_keywords(text: str) -> List[str]:
     return [w for w in words if w.lower() not in stop]
 
 
-def _parse_date(date_str: str) -> Optional[datetime]:
+def _parse_date(date_str: str) -> datetime | None:
     """Try to parse a date string into a timezone-aware datetime."""
     formats = [
         "%Y-%m-%d",

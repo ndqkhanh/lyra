@@ -5,9 +5,8 @@ Tracks latency, quality, and cost metrics across different models
 to enable data-driven model selection.
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List
 import statistics
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -21,9 +20,9 @@ class ModelStats:
     avg_quality_score: float = 0.0
     avg_cost: float = 0.0
     total_cost: float = 0.0
-    latencies: List[float] = field(default_factory=list)
-    quality_scores: List[float] = field(default_factory=list)
-    costs: List[float] = field(default_factory=list)
+    latencies: list[float] = field(default_factory=list)
+    quality_scores: list[float] = field(default_factory=list)
+    costs: list[float] = field(default_factory=list)
 
 
 class ModelPerformanceTracker:
@@ -32,7 +31,7 @@ class ModelPerformanceTracker:
     def __init__(self):
         """Initialize performance tracker."""
         # Key: (model, role) -> ModelStats
-        self.stats: Dict[tuple[str, str], ModelStats] = {}
+        self.stats: dict[tuple[str, str], ModelStats] = {}
 
     def record_execution(
         self,
@@ -108,7 +107,7 @@ class ModelPerformanceTracker:
         best_stats = max(role_stats, key=composite_score)
         return best_stats.model
 
-    def compare_models(self, role: str) -> Dict[str, ModelStats]:
+    def compare_models(self, role: str) -> dict[str, ModelStats]:
         """
         Compare all models for a specific role.
 
@@ -144,7 +143,7 @@ class ModelPerformanceTracker:
 
         return self.stats[key]
 
-    def get_all_stats(self) -> Dict[tuple[str, str], ModelStats]:
+    def get_all_stats(self) -> dict[tuple[str, str], ModelStats]:
         """
         Get all tracked statistics.
 

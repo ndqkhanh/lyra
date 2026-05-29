@@ -6,8 +6,8 @@ Based on PRISMA 2020 guidelines and Academic Research Skills repository.
 """
 
 from dataclasses import dataclass
-from typing import Dict, Any, List
 from enum import Enum
+from typing import Any
 
 
 class PRISMAItem(Enum):
@@ -44,9 +44,9 @@ class PRISMAItemResult:
 class PRISMAResult:
     """Overall PRISMA compliance result"""
     compliance_rate: float
-    items: Dict[PRISMAItem, PRISMAItemResult]
+    items: dict[PRISMAItem, PRISMAItemResult]
     passed: bool
-    missing_items: List[PRISMAItem]
+    missing_items: list[PRISMAItem]
 
 
 class PRISMAComplianceChecker:
@@ -65,7 +65,7 @@ class PRISMAComplianceChecker:
         """
         self.min_compliance = min_compliance
 
-    def check_compliance(self, report: Dict[str, Any]) -> PRISMAResult:
+    def check_compliance(self, report: dict[str, Any]) -> PRISMAResult:
         """
         Check all 17 PRISMA items
 
@@ -96,7 +96,7 @@ class PRISMAComplianceChecker:
             missing_items=missing_items
         )
 
-    def check_title_identification(self, report: Dict[str, Any]) -> PRISMAItemResult:
+    def check_title_identification(self, report: dict[str, Any]) -> PRISMAItemResult:
         """Check if title identifies the report as a systematic review"""
         title = report.get("title", "").lower()
         keywords = ["systematic review", "meta-analysis", "systematic literature review"]
@@ -110,7 +110,7 @@ class PRISMAComplianceChecker:
             evidence=report.get("title", "")
         )
 
-    def check_abstract_structured(self, report: Dict[str, Any]) -> PRISMAItemResult:
+    def check_abstract_structured(self, report: dict[str, Any]) -> PRISMAItemResult:
         """Check if abstract is structured with required sections"""
         abstract = report.get("abstract", {})
         required_sections = ["background", "methods", "results", "conclusions"]
@@ -128,7 +128,7 @@ class PRISMAComplianceChecker:
             reason="Abstract has all required sections" if passed else f"Abstract missing sections: {[s for s in required_sections if s not in str(abstract).lower()]}"
         )
 
-    def check_rationale(self, report: Dict[str, Any]) -> PRISMAItemResult:
+    def check_rationale(self, report: dict[str, Any]) -> PRISMAItemResult:
         """Check if rationale for the review is provided"""
         rationale = report.get("rationale", "")
         passed = len(rationale) > 50  # At least 50 characters
@@ -139,7 +139,7 @@ class PRISMAComplianceChecker:
             reason="Rationale provided" if passed else "Rationale missing or too short"
         )
 
-    def check_objectives(self, report: Dict[str, Any]) -> PRISMAItemResult:
+    def check_objectives(self, report: dict[str, Any]) -> PRISMAItemResult:
         """Check if explicit objectives are stated"""
         objectives = report.get("objectives", "")
         passed = len(objectives) > 30
@@ -150,7 +150,7 @@ class PRISMAComplianceChecker:
             reason="Objectives stated" if passed else "Objectives missing or unclear"
         )
 
-    def check_eligibility_criteria(self, report: Dict[str, Any]) -> PRISMAItemResult:
+    def check_eligibility_criteria(self, report: dict[str, Any]) -> PRISMAItemResult:
         """Check if eligibility criteria are specified"""
         criteria = report.get("eligibility_criteria", {})
         required = ["inclusion", "exclusion"]
@@ -166,7 +166,7 @@ class PRISMAComplianceChecker:
             reason="Eligibility criteria specified" if passed else "Eligibility criteria missing"
         )
 
-    def check_information_sources(self, report: Dict[str, Any]) -> PRISMAItemResult:
+    def check_information_sources(self, report: dict[str, Any]) -> PRISMAItemResult:
         """Check if information sources are described"""
         sources = report.get("information_sources", [])
         passed = len(sources) >= 3  # At least 3 sources
@@ -177,7 +177,7 @@ class PRISMAComplianceChecker:
             reason=f"{len(sources)} information sources described" if passed else "Insufficient information sources"
         )
 
-    def check_search_strategy(self, report: Dict[str, Any]) -> PRISMAItemResult:
+    def check_search_strategy(self, report: dict[str, Any]) -> PRISMAItemResult:
         """Check if search strategy is documented"""
         strategy = report.get("search_strategy", "")
         passed = len(strategy) > 100  # Detailed strategy
@@ -188,7 +188,7 @@ class PRISMAComplianceChecker:
             reason="Search strategy documented" if passed else "Search strategy missing or incomplete"
         )
 
-    def check_selection_process(self, report: Dict[str, Any]) -> PRISMAItemResult:
+    def check_selection_process(self, report: dict[str, Any]) -> PRISMAItemResult:
         """Check if selection process is described"""
         process = report.get("selection_process", "")
         passed = len(process) > 50
@@ -199,7 +199,7 @@ class PRISMAComplianceChecker:
             reason="Selection process described" if passed else "Selection process missing"
         )
 
-    def check_data_collection(self, report: Dict[str, Any]) -> PRISMAItemResult:
+    def check_data_collection(self, report: dict[str, Any]) -> PRISMAItemResult:
         """Check if data collection process is described"""
         collection = report.get("data_collection", "")
         passed = len(collection) > 50
@@ -210,7 +210,7 @@ class PRISMAComplianceChecker:
             reason="Data collection described" if passed else "Data collection missing"
         )
 
-    def check_data_items(self, report: Dict[str, Any]) -> PRISMAItemResult:
+    def check_data_items(self, report: dict[str, Any]) -> PRISMAItemResult:
         """Check if data items are defined"""
         items = report.get("data_items", [])
         passed = len(items) >= 3
@@ -221,7 +221,7 @@ class PRISMAComplianceChecker:
             reason=f"{len(items)} data items defined" if passed else "Insufficient data items"
         )
 
-    def check_risk_of_bias(self, report: Dict[str, Any]) -> PRISMAItemResult:
+    def check_risk_of_bias(self, report: dict[str, Any]) -> PRISMAItemResult:
         """Check if risk of bias assessment is included"""
         bias_assessment = report.get("risk_of_bias", {})
         passed = len(bias_assessment) > 0
@@ -232,7 +232,7 @@ class PRISMAComplianceChecker:
             reason="Risk of bias assessed" if passed else "Risk of bias assessment missing"
         )
 
-    def check_effect_measures(self, report: Dict[str, Any]) -> PRISMAItemResult:
+    def check_effect_measures(self, report: dict[str, Any]) -> PRISMAItemResult:
         """Check if effect measures are specified"""
         measures = report.get("effect_measures", "")
         passed = len(measures) > 30
@@ -243,7 +243,7 @@ class PRISMAComplianceChecker:
             reason="Effect measures specified" if passed else "Effect measures missing"
         )
 
-    def check_synthesis_methods(self, report: Dict[str, Any]) -> PRISMAItemResult:
+    def check_synthesis_methods(self, report: dict[str, Any]) -> PRISMAItemResult:
         """Check if synthesis methods are described"""
         methods = report.get("synthesis_methods", "")
         passed = len(methods) > 50
@@ -254,7 +254,7 @@ class PRISMAComplianceChecker:
             reason="Synthesis methods described" if passed else "Synthesis methods missing"
         )
 
-    def check_reporting_bias(self, report: Dict[str, Any]) -> PRISMAItemResult:
+    def check_reporting_bias(self, report: dict[str, Any]) -> PRISMAItemResult:
         """Check if reporting bias is assessed"""
         bias = report.get("reporting_bias", "")
         passed = len(bias) > 30
@@ -265,7 +265,7 @@ class PRISMAComplianceChecker:
             reason="Reporting bias assessed" if passed else "Reporting bias assessment missing"
         )
 
-    def check_certainty_assessment(self, report: Dict[str, Any]) -> PRISMAItemResult:
+    def check_certainty_assessment(self, report: dict[str, Any]) -> PRISMAItemResult:
         """Check if certainty of evidence is assessed"""
         certainty = report.get("certainty_assessment", "")
         passed = len(certainty) > 30
@@ -276,7 +276,7 @@ class PRISMAComplianceChecker:
             reason="Certainty assessed" if passed else "Certainty assessment missing"
         )
 
-    def check_study_characteristics(self, report: Dict[str, Any]) -> PRISMAItemResult:
+    def check_study_characteristics(self, report: dict[str, Any]) -> PRISMAItemResult:
         """Check if study characteristics are presented"""
         characteristics = report.get("study_characteristics", [])
         passed = len(characteristics) > 0
@@ -287,7 +287,7 @@ class PRISMAComplianceChecker:
             reason="Study characteristics presented" if passed else "Study characteristics missing"
         )
 
-    def check_results_synthesis(self, report: Dict[str, Any]) -> PRISMAItemResult:
+    def check_results_synthesis(self, report: dict[str, Any]) -> PRISMAItemResult:
         """Check if results of synthesis are presented"""
         synthesis = report.get("results_synthesis", "")
         passed = len(synthesis) > 100

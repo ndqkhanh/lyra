@@ -5,14 +5,13 @@ Tests PRISMA-trAIce 17-item compliance checker and risk-of-bias assessor.
 """
 
 import pytest
-from lyra_research.prisma.prisma_checker import (
-    PRISMAComplianceChecker,
-    PRISMAItem,
-)
 from lyra_research.prisma.bias_assessor import (
-    RiskOfBiasAssessor,
     BiasDomain,
     RiskLevel,
+    RiskOfBiasAssessor,
+)
+from lyra_research.prisma.prisma_checker import (
+    PRISMAComplianceChecker,
 )
 
 

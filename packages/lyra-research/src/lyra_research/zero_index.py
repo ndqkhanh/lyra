@@ -18,7 +18,6 @@ import subprocess
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
 
 __all__ = [
     "ContextLevel",
@@ -28,7 +27,7 @@ __all__ = [
     "CorpusStats",
 ]
 
-_CONTEXT_LINES: Dict["ContextLevel", int] = {}
+_CONTEXT_LINES: dict[ContextLevel, int] = {}
 
 
 @dataclass(frozen=True)
@@ -97,7 +96,7 @@ class ZeroIndexConfig:
     max_context_chars: int = 50000
     default_level: ContextLevel = ContextLevel.COMPACTION
     grep_timeout_ms: int = 5000
-    allowed_extensions: Tuple[str, ...] = (
+    allowed_extensions: tuple[str, ...] = (
         ".py", ".ts", ".tsx", ".js", ".md", ".json", ".yaml", ".toml",
     )
 
@@ -110,7 +109,7 @@ class ZeroIndexRetriever:
     """
 
     def __init__(self: ZeroIndexRetriever) -> None:
-        self._search_times: List[float] = []
+        self._search_times: list[float] = []
 
     # ------------------------------------------------------------------
     # Core search
@@ -120,8 +119,8 @@ class ZeroIndexRetriever:
         self: ZeroIndexRetriever,
         query: str,
         corpus_path: str,
-        config: Optional[ZeroIndexConfig] = None,
-    ) -> List[SearchResult]:
+        config: ZeroIndexConfig | None = None,
+    ) -> list[SearchResult]:
         """Search the corpus for the given query.
 
         Uses ripgrep (``rg``) when available, falling back to ``grep -r``.
@@ -210,14 +209,14 @@ class ZeroIndexRetriever:
     def _parse_output(
         raw: str,
         config: ZeroIndexConfig,
-    ) -> List[SearchResult]:
+    ) -> list[SearchResult]:
         """Parse ripgrep/grep output into ``SearchResult`` instances.
 
         Handles the standard format::
 
             /path/to/file.py:42:content here
         """
-        results: List[SearchResult] = []
+        results: list[SearchResult] = []
         # Regex: <filepath>:<lineno>:<content>
         pattern = re.compile(r"^(.+?):(\d+):(.+)$")
 
@@ -245,9 +244,9 @@ class ZeroIndexRetriever:
 
     @staticmethod
     def _filter_by_extension(
-        results: List[SearchResult],
+        results: list[SearchResult],
         config: ZeroIndexConfig,
-    ) -> List[SearchResult]:
+    ) -> list[SearchResult]:
         """Remove results whose file extension is not allowed."""
         if not config.allowed_extensions:
             return results
@@ -259,9 +258,9 @@ class ZeroIndexRetriever:
 
     @staticmethod
     def _score_and_sort(
-        results: List[SearchResult],
+        results: list[SearchResult],
         query: str,
-    ) -> List[SearchResult]:
+    ) -> list[SearchResult]:
         """Assign relevance scores and sort by descending score.
 
         Heuristic scoring considers:
@@ -271,7 +270,7 @@ class ZeroIndexRetriever:
         query_lower = query.lower()
         query_words = set(query_lower.split())
 
-        scored: List[SearchResult] = []
+        scored: list[SearchResult] = []
         for r in results:
             content_lower = r.content.lower()
             score = 0.0
@@ -304,7 +303,7 @@ class ZeroIndexRetriever:
     def get_context(
         self: ZeroIndexRetriever,
         result: SearchResult,
-        level: Optional[ContextLevel] = None,
+        level: ContextLevel | None = None,
     ) -> str:
         """Fetch surrounding context for a search result.
 
@@ -323,15 +322,15 @@ class ZeroIndexRetriever:
         end_line = result.line_number + half_window // 2
 
         try:
-            with open(result.file_path, "r", encoding="utf-8", errors="replace") as fh:
+            with open(result.file_path, encoding="utf-8", errors="replace") as fh:
                 lines = fh.readlines()
-        except (OSError, IOError):
+        except OSError:
             return f"# Unable to read {result.file_path}"
 
         total_lines = len(lines)
         end_line = min(end_line, total_lines)
 
-        context_parts: List[str] = []
+        context_parts: list[str] = []
 
         if ctx_level == ContextLevel.SUMMARIZATION:
             context_parts.append("# --- Context block start ---")
@@ -352,10 +351,10 @@ class ZeroIndexRetriever:
 
     def batch_search(
         self: ZeroIndexRetriever,
-        queries: List[str],
+        queries: list[str],
         corpus_path: str,
-        config: Optional[ZeroIndexConfig] = None,
-    ) -> Dict[str, List[SearchResult]]:
+        config: ZeroIndexConfig | None = None,
+    ) -> dict[str, list[SearchResult]]:
         """Run multiple queries against the same corpus.
 
         Results are deduplicated: if the same ``(file_path, line_number)``
@@ -371,7 +370,7 @@ class ZeroIndexRetriever:
             A dict mapping each query to its list of results.
         """
         cfg = config or ZeroIndexConfig()
-        output: Dict[str, List[SearchResult]] = {}
+        output: dict[str, list[SearchResult]] = {}
 
         for q in queries:
             output[q] = self.search(q, corpus_path, cfg)
@@ -379,7 +378,7 @@ class ZeroIndexRetriever:
         # Deduplicate within each bucket
         for q in queries:
             seen: set[tuple[str, int]] = set()
-            deduped: List[SearchResult] = []
+            deduped: list[SearchResult] = []
             for r in output[q]:
                 key = (r.file_path, r.line_number)
                 if key not in seen:
@@ -394,7 +393,7 @@ class ZeroIndexRetriever:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def estimate_tokens(results: List[SearchResult]) -> int:
+    def estimate_tokens(results: list[SearchResult]) -> int:
         """Estimate the token count of a list of results.
 
         Uses the rough heuristic of ``len(content) / 4`` per result,
@@ -410,9 +409,9 @@ class ZeroIndexRetriever:
 
     @staticmethod
     def fit_to_budget(
-        results: List[SearchResult],
+        results: list[SearchResult],
         max_tokens: int,
-    ) -> List[SearchResult]:
+    ) -> list[SearchResult]:
         """Trim results to fit a token budget, keeping highest relevance.
 
         Assumes the input list is already sorted by descending relevance.
@@ -426,7 +425,7 @@ class ZeroIndexRetriever:
         Returns:
             A prefix of the input list that fits within the budget.
         """
-        fitted: List[SearchResult] = []
+        fitted: list[SearchResult] = []
         running_tokens = 0
 
         for r in results:
@@ -445,7 +444,7 @@ class ZeroIndexRetriever:
     def corpus_stats(
         self: ZeroIndexRetriever,
         corpus_path: str,
-        config: Optional[ZeroIndexConfig] = None,
+        config: ZeroIndexConfig | None = None,
     ) -> CorpusStats:
         """Gather statistics about the corpus.
 
@@ -499,7 +498,7 @@ class CorpusStats:
 
     total_files: int = 0
     total_lines: int = 0
-    searchable_extensions: Tuple[str, ...] = field(
+    searchable_extensions: tuple[str, ...] = field(
         default_factory=lambda: (".py", ".ts", ".tsx", ".js", ".md", ".json", ".yaml", ".toml")
     )
     avg_search_time_ms: float = 0.0

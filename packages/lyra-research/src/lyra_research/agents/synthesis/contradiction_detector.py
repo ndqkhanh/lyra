@@ -6,7 +6,6 @@ Detects contradictions between sources.
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, List, Tuple
 
 from lyra_research.agents.analysis.analysis_base import Analysis
 from lyra_research.agents.synthesis.synthesis_base import SynthesisAgent, SynthesisResult
@@ -22,7 +21,7 @@ class ContradictionDetectorAgent(SynthesisAgent):
     def __init__(self, model: str = "claude-opus-4-7") -> None:
         super().__init__(synthesis_type="contradiction", model=model)
 
-    async def synthesize(self, analyses: List[Analysis]) -> SynthesisResult:
+    async def synthesize(self, analyses: list[Analysis]) -> SynthesisResult:
         """
         Detect contradictions in analyses.
 
@@ -60,14 +59,14 @@ class ContradictionDetectorAgent(SynthesisAgent):
         )
 
     def _detect_contradictions(
-        self, findings: List[str]
-    ) -> List[Tuple[str, str]]:
+        self, findings: list[str]
+    ) -> list[tuple[str, str]]:
         """
         Detect contradictions between findings.
 
         Uses pattern matching to find opposing claims.
         """
-        contradictions: List[Tuple[str, str]] = []
+        contradictions: list[tuple[str, str]] = []
 
         # Patterns for contradictory statements
         positive_patterns = [
@@ -96,8 +95,8 @@ class ContradictionDetectorAgent(SynthesisAgent):
         self,
         finding1: str,
         finding2: str,
-        positive_patterns: List[str],
-        negative_patterns: List[str],
+        positive_patterns: list[str],
+        negative_patterns: list[str],
     ) -> bool:
         """Check if two findings are contradictory."""
         finding1_lower = finding1.lower()

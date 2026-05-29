@@ -9,22 +9,21 @@ Tests full pipeline execution with:
 - Context layering
 - Error handling and recovery
 """
-import pytest
 from datetime import datetime, timezone
-from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from lyra_core.context.layered_context import LayeredContextManager, ContextLayer
-from lyra_research.full_orchestrator import Phase2Orchestrator, Phase2ResearchProgress
+import pytest
+from lyra_core.context.layered_context import LayeredContextManager
 from lyra_research.coordination.role_coordinator import CoordinatedPipelineResult
+from lyra_research.full_orchestrator import Phase2Orchestrator
 from lyra_research.models.model_router import ModelRouter
-from lyra_research.roles.discovery_role import DiscoveryResult
-from lyra_research.roles.analysis_role import AnalysisResult
-from lyra_research.roles.synthesis_role import SynthesisResult
-from lyra_research.roles.review_role import ReviewResult
-from lyra_research.roles.curator_role import CurationResult, KnowledgeEntry
-from lyra_research.roles.role_base import RoleStatus
 from lyra_research.reporter import ResearchReport
+from lyra_research.roles.analysis_role import AnalysisResult
+from lyra_research.roles.curator_role import CurationResult, KnowledgeEntry
+from lyra_research.roles.discovery_role import DiscoveryResult
+from lyra_research.roles.review_role import ReviewResult
+from lyra_research.roles.role_base import RoleStatus
+from lyra_research.roles.synthesis_role import SynthesisResult
 
 
 @pytest.fixture

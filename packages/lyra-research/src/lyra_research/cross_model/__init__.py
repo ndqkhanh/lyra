@@ -7,11 +7,11 @@ Based on Academic Research Skills repository best practices.
 
 from .cross_model_reviewer import (
     CrossModelReviewer,
-    ExecutionResult,
-    ReviewResult,
     DisagreementResolution,
+    ExecutionResult,
     ModelType,
     ReviewDecision,
+    ReviewResult,
 )
 
 __all__ = [

@@ -10,19 +10,16 @@ Validates the key performance claims:
 from __future__ import annotations
 
 import time
-import pytest
-from typing import List
 
-from lyra_core.context.layered_context import (
-    LayeredContextManager,
-    ContextLayer,
-    LayerBudget,
-)
+import pytest
 from lyra_core.context.isolation import (
     ContextBoundary,
     IsolationPolicy,
 )
-
+from lyra_core.context.layered_context import (
+    ContextLayer,
+    LayeredContextManager,
+)
 
 # ============================================================================
 # Benchmark 1: Context Reduction
@@ -144,7 +141,7 @@ class TestContextGrowth:
         avg_rate = sum(growth_rates) / len(growth_rates)
         assert avg_rate < 2.5, f"Growth rate {avg_rate:.2f} suggests quadratic growth"
 
-    def _measure_growth(self, source_counts: List[int]) -> List[int]:
+    def _measure_growth(self, source_counts: list[int]) -> list[int]:
         """Measure context size for different source counts.
 
         Returns:
@@ -174,7 +171,7 @@ class TestContextGrowth:
 
         return sizes
 
-    def _assert_linear_growth(self, sizes: List[int]) -> None:
+    def _assert_linear_growth(self, sizes: list[int]) -> None:
         """Assert growth is approximately linear."""
         # Calculate growth rates
         growth_rates = []

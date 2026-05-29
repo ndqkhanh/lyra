@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import time
 from abc import ABC, abstractmethod
-from typing import List, Optional
 
 from lyra_research.discovery import ResearchSource
 
@@ -84,7 +83,7 @@ class DiscoveryAgent(ABC):
         self.rate_limiter = RateLimiter(max_retries=max_retries)
 
     @abstractmethod
-    async def discover(self, query: str, max_results: int = 50) -> List[ResearchSource]:
+    async def discover(self, query: str, max_results: int = 50) -> list[ResearchSource]:
         """
         Discover sources for the given query.
 

@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import os
-from typing import List
 
 from lyra_research.agents.discovery.discovery_base import DiscoveryAgent
 from lyra_research.discovery import GitHubDiscovery, ResearchSource
@@ -23,7 +22,7 @@ class GithubAgent(DiscoveryAgent):
         self.api_token = api_token or os.environ.get("GITHUB_TOKEN")
         self.github = GitHubDiscovery(self.api_token)
 
-    async def discover(self, query: str, max_results: int = 50) -> List[ResearchSource]:
+    async def discover(self, query: str, max_results: int = 50) -> list[ResearchSource]:
         """
         Discover repositories from GitHub with rate limit handling.
 

@@ -11,7 +11,7 @@ import json
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from lyra_research.orchestrator import ResearchProgress
@@ -58,11 +58,11 @@ class ResearchQualityMetrics:
     # Overall (weighted)
     overall_score: float = 0.0
     passed: bool = False
-    issues: List[str] = field(default_factory=list)
+    issues: list[str] = field(default_factory=list)
     measured_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
     # Weights
-    WEIGHTS: Dict[str, float] = field(default_factory=lambda: {
+    WEIGHTS: dict[str, float] = field(default_factory=lambda: {
         "coverage": 0.25,
         "citation": 0.30,     # Highest: no hallucinations
         "breadth": 0.15,
@@ -83,7 +83,7 @@ class ResearchQualityMetrics:
             + w["contradiction"] * self.contradiction_coverage
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Serialize to dict for JSON persistence."""
         return {
             "session_id": self.session_id,
@@ -181,7 +181,7 @@ class ResearchQualityEvaluator:
         metrics.overall_score = metrics.compute_overall()
 
         # Gates
-        issues: List[str] = []
+        issues: list[str] = []
         if metrics.citation_fidelity < self.MIN_CITATION_FIDELITY:
             issues.append(
                 f"Citation fidelity {metrics.citation_fidelity:.0%} below required 100%"
@@ -199,7 +199,7 @@ class ResearchQualityEvaluator:
         metrics.passed = len([i for i in issues if "required" in i]) == 0
         return metrics
 
-    def _score_insight_depth(self, report: Optional[Any]) -> float:
+    def _score_insight_depth(self, report: Any | None) -> float:
         """Heuristic: report sections that indicate depth."""
         if report is None:
             return 0.0
@@ -233,9 +233,9 @@ class QualityTrendTracker:
     Persistence: JSON at ~/.lyra/quality_trends.json
     """
 
-    def __init__(self, store_path: Optional[Path] = None) -> None:
+    def __init__(self, store_path: Path | None = None) -> None:
         self.store_path = store_path or Path.home() / ".lyra" / "quality_trends.json"
-        self._records: List[Dict[str, Any]] = []
+        self._records: list[dict[str, Any]] = []
         self._load()
 
     def record(self, metrics: ResearchQualityMetrics) -> None:
@@ -243,7 +243,7 @@ class QualityTrendTracker:
         self._records.append(metrics.to_dict())
         self._save()
 
-    def get_trend(self, axis: str = "overall_score", last_n: int = 10) -> List[float]:
+    def get_trend(self, axis: str = "overall_score", last_n: int = 10) -> list[float]:
         """Get the last N values for a quality axis.
 
         Args:
@@ -265,7 +265,7 @@ class QualityTrendTracker:
         vals = [r.get(axis, 0.0) for r in self._records]
         return sum(vals) / len(vals) if vals else 0.0
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         """Return a summary dict of averages and trends for all axes."""
         axes = [
             "overall_score",
@@ -304,7 +304,7 @@ class SelfEvaluationAgent:
     Stores results to QualityTrendTracker.
     """
 
-    def __init__(self, trend_tracker: Optional[QualityTrendTracker] = None) -> None:
+    def __init__(self, trend_tracker: QualityTrendTracker | None = None) -> None:
         self.evaluator = ResearchQualityEvaluator()
         self.tracker = trend_tracker or QualityTrendTracker()
 

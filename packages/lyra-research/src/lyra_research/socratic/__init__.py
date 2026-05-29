@@ -5,21 +5,21 @@ Implements State-Challenge-Reflect protocol for exploratory research.
 Based on Academic Research Skills repository best practices.
 """
 
-from .socratic_agent import (
-    SocraticQuestioningAgent,
-    SocraticDialogue,
-    IntentType,
-    UserState,
-    Challenge,
-)
 from .devils_advocate import (
-    DevilsAdvocateProtocol,
     AdvocateResult,
     ConcessionThreshold,
+    DevilsAdvocateProtocol,
 )
 from .intent_detector import (
-    IntentDetector,
     Intent,
+    IntentDetector,
+)
+from .socratic_agent import (
+    Challenge,
+    IntentType,
+    SocraticDialogue,
+    SocraticQuestioningAgent,
+    UserState,
 )
 
 __all__ = [

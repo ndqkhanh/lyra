@@ -10,9 +10,9 @@ Detects 5 temporal failure modes:
 """
 
 from dataclasses import dataclass
-from typing import List, Dict, Any
 from datetime import datetime
 from enum import Enum
+from typing import Any
 
 
 class TemporalViolationType(Enum):
@@ -37,7 +37,7 @@ class TemporalViolation:
 class TemporalVerifier:
     """Detect 5 temporal failure modes"""
 
-    def verify_temporal_consistency(self, report: Dict[str, Any]) -> List[TemporalViolation]:
+    def verify_temporal_consistency(self, report: dict[str, Any]) -> list[TemporalViolation]:
         """
         Verify temporal consistency across all claims
 
@@ -66,7 +66,7 @@ class TemporalVerifier:
 
         return violations
 
-    def detect_retrospective_arithmetic(self, report: Dict[str, Any]) -> List[TemporalViolation]:
+    def detect_retrospective_arithmetic(self, report: dict[str, Any]) -> list[TemporalViolation]:
         """
         Detect retrospective arithmetic (comparing past to future)
 
@@ -89,7 +89,7 @@ class TemporalVerifier:
 
         return violations
 
-    def detect_anachronistic_citations(self, report: Dict[str, Any]) -> List[TemporalViolation]:
+    def detect_anachronistic_citations(self, report: dict[str, Any]) -> list[TemporalViolation]:
         """
         Detect citations to papers published after the claim date
 
@@ -124,7 +124,7 @@ class TemporalVerifier:
 
         return violations
 
-    def detect_unmaterialized_comparators(self, report: Dict[str, Any]) -> List[TemporalViolation]:
+    def detect_unmaterialized_comparators(self, report: dict[str, Any]) -> list[TemporalViolation]:
         """
         Detect comparisons to non-existent baselines
 
@@ -143,7 +143,7 @@ class TemporalVerifier:
 
         return violations
 
-    def detect_causal_inversions(self, report: Dict[str, Any]) -> List[TemporalViolation]:
+    def detect_causal_inversions(self, report: dict[str, Any]) -> list[TemporalViolation]:
         """
         Detect effect before cause
 
@@ -155,7 +155,7 @@ class TemporalVerifier:
         # Would be implemented with NLP in production
         return violations
 
-    def detect_deictic_present(self, report: Dict[str, Any]) -> List[TemporalViolation]:
+    def detect_deictic_present(self, report: dict[str, Any]) -> list[TemporalViolation]:
         """
         Detect ambiguous "now" references
 

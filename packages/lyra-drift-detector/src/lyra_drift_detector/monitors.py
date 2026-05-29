@@ -9,18 +9,18 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
+from abc import ABC, abstractmethod
 from collections import deque
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from enum import Enum, auto
-from typing import Any, Callable, Optional, Protocol, Sequence
+from typing import Any, Protocol
 
 import numpy as np
 
 from .drift_detector import (
-    DriftSeverity,
+    DetectionMethod,
     DriftSignal,
     DriftType,
-    DetectionMethod,
     _compute_severity,
 )
 from .exceptions import InsufficientDataError, MonitorNotInitializedError
@@ -76,13 +76,13 @@ class MonitorState:
     observation_count: int = 0
     last_check_time: float = field(default_factory=time.time)
     drift_count: int = 0
-    last_signal: Optional[DriftSignal] = None
+    last_signal: DriftSignal | None = None
 
 
 # ── Base Monitor ───────────────────────────────────────────────────────
 
 
-class BaseMonitor:
+class BaseMonitor(ABC):
     """Abstract base for all signal monitors.
 
     Provides common functionality: sliding windows, baseline management,
@@ -95,9 +95,9 @@ class BaseMonitor:
         self._callbacks: list[SignalCallback] = []
         self._data: deque[float] = deque(maxlen=config.window_size)
         self._timestamps: deque[float] = deque(maxlen=config.window_size)
-        self._baseline_data: Optional[np.ndarray] = None
+        self._baseline_data: np.ndarray | None = None
         self._running: bool = False
-        self._check_task: Optional[asyncio.Task[None]] = None
+        self._check_task: asyncio.Task[None] | None = None
 
     @property
     def name(self) -> str:
@@ -105,9 +105,9 @@ class BaseMonitor:
         return self.config.name
 
     @property
+    @abstractmethod
     def drift_type(self) -> DriftType:
         """Override in subclasses."""
-        raise NotImplementedError
 
     def register_callback(self, callback: SignalCallback) -> None:
         """Register an async callback for drift signals."""
@@ -126,7 +126,7 @@ class BaseMonitor:
             except Exception as exc:
                 logger.error("Callback %s failed: %s", cb, exc)
 
-    def observe(self, value: float, timestamp: Optional[float] = None) -> None:
+    def observe(self, value: float, timestamp: float | None = None) -> None:
         """Record an observation.
 
         Args:
@@ -158,13 +158,13 @@ class BaseMonitor:
                 self.name, self.config.min_samples, len(self._data)
             )
 
+    @abstractmethod
     def compute_drift_score(self) -> float:
-        """Compute the raw drift score. Override in subclasses.
+        """Compute the raw drift score.
 
         Returns:
             Drift score in [0, inf).
         """
-        raise NotImplementedError
 
     async def check(self) -> DriftSignal:
         """Perform a drift check and produce a signal.
@@ -304,7 +304,7 @@ class PerformanceMonitor(BaseMonitor):
 
     def __init__(
         self,
-        config: Optional[MonitorConfig] = None,
+        config: MonitorConfig | None = None,
         metric: str = "latency_ms",
     ) -> None:
         super().__init__(
@@ -323,7 +323,7 @@ class PerformanceMonitor(BaseMonitor):
     def drift_type(self) -> DriftType:
         return DriftType.PERFORMANCE
 
-    def observe(self, value: float, timestamp: Optional[float] = None) -> None:
+    def observe(self, value: float, timestamp: float | None = None) -> None:
         """Record a performance metric observation with EWMA update."""
         super().observe(value, timestamp)
         self._ewma = (
@@ -358,8 +358,8 @@ class ContextMonitor(BaseMonitor):
 
     def __init__(
         self,
-        config: Optional[MonitorConfig] = None,
-        feature_keys: Optional[list[str]] = None,
+        config: MonitorConfig | None = None,
+        feature_keys: list[str] | None = None,
     ) -> None:
         super().__init__(
             config or MonitorConfig(
@@ -451,7 +451,7 @@ class DistributionMonitor(BaseMonitor):
 
     def __init__(
         self,
-        config: Optional[MonitorConfig] = None,
+        config: MonitorConfig | None = None,
         num_bins: int = 50,
     ) -> None:
         super().__init__(
@@ -521,7 +521,7 @@ class RewardMonitor(BaseMonitor):
 
     def __init__(
         self,
-        config: Optional[MonitorConfig] = None,
+        config: MonitorConfig | None = None,
         track_per_context: bool = True,
     ) -> None:
         super().__init__(
@@ -644,7 +644,7 @@ class MonitorRegistry:
         self._by_type[dt].append(monitor.name)
         logger.info("Registered monitor '%s' (type=%s)", monitor.name, dt.name)
 
-    def unregister(self, name: str) -> Optional[BaseMonitor]:
+    def unregister(self, name: str) -> BaseMonitor | None:
         """Remove a monitor by name."""
         monitor = self._monitors.pop(name, None)
         if monitor:
@@ -653,7 +653,7 @@ class MonitorRegistry:
                 self._by_type[dt] = [n for n in self._by_type[dt] if n != name]
         return monitor
 
-    def get(self, name: str) -> Optional[BaseMonitor]:
+    def get(self, name: str) -> BaseMonitor | None:
         """Get a monitor by name."""
         return self._monitors.get(name)
 

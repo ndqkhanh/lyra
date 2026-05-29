@@ -3,10 +3,8 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
-import pytest
-
 from lyra_research.memory import ResearchNote
-from lyra_research.memory_controller import MemoryDecision, ResearchMemoryController
+from lyra_research.memory_controller import ResearchMemoryController
 
 
 class _FakeNoteStore:

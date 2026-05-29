@@ -6,19 +6,16 @@ and devil's advocate protocol.
 """
 
 import pytest
-from lyra_research.socratic.socratic_agent import (
-    SocraticQuestioningAgent,
-    IntentType,
-    UserState,
-    Challenge,
+from lyra_research.socratic.devils_advocate import (
+    DevilsAdvocateProtocol,
 )
 from lyra_research.socratic.intent_detector import (
     IntentDetector,
-    Intent,
 )
-from lyra_research.socratic.devils_advocate import (
-    DevilsAdvocateProtocol,
-    ConcessionThreshold,
+from lyra_research.socratic.socratic_agent import (
+    IntentType,
+    SocraticQuestioningAgent,
+    UserState,
 )
 
 

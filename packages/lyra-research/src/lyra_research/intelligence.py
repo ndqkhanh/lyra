@@ -5,11 +5,10 @@ Provides verifiable checklists, evidence auditing, contradiction detection,
 gap analysis, and falsification checking for deep research workflows.
 """
 
+import re
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional
-import re
-
+from typing import Any
 
 # ---------------------------------------------------------------------------
 # VerifiableChecklistGenerator
@@ -22,14 +21,14 @@ class ChecklistItem:
     category: str   # "definition", "sota", "comparison", "gap", "application"
     priority: int   # 1=critical, 2=important, 3=nice-to-have
     answered: bool = False
-    answer_source_ids: List[str] = field(default_factory=list)
+    answer_source_ids: list[str] = field(default_factory=list)
 
 
 @dataclass
 class ResearchChecklist:
     """A verifiable research checklist for a topic."""
     topic: str
-    items: List[ChecklistItem]
+    items: list[ChecklistItem]
     created_at: datetime = field(default_factory=datetime.now)
 
     def completion_rate(self) -> float:
@@ -104,7 +103,7 @@ class VerifiableChecklistGenerator:
         self,
         checklist: ResearchChecklist,
         item_idx: int,
-        source_ids: List[str],
+        source_ids: list[str],
     ) -> ResearchChecklist:
         """Mark a checklist item as answered with source evidence.
 
@@ -135,7 +134,7 @@ class VerifiableChecklistGenerator:
             created_at=checklist.created_at,
         )
 
-    def unanswered_questions(self, checklist: ResearchChecklist) -> List[ChecklistItem]:
+    def unanswered_questions(self, checklist: ResearchChecklist) -> list[ChecklistItem]:
         """Return items not yet answered."""
         return [item for item in checklist.items if not item.answered]
 
@@ -148,7 +147,7 @@ class VerifiableChecklistGenerator:
 class ClaimEvidence:
     """A claim extracted from a research text with its evidence status."""
     claim: str
-    source_ids: List[str]
+    source_ids: list[str]
     verified: bool
     confidence: float  # 0.0-1.0
 
@@ -160,7 +159,7 @@ class AuditReport:
     verified_claims: int
     unverified_claims: int
     verification_rate: float  # verified / total
-    flagged_claims: List[ClaimEvidence]  # unverified ones
+    flagged_claims: list[ClaimEvidence]  # unverified ones
 
     def is_acceptable(self, threshold: float = 0.95) -> bool:
         """Return True if verification_rate meets the threshold."""
@@ -181,7 +180,7 @@ class EvidenceAudit:
         r"(?:according to|as shown in|as reported by)\s+.+?(?=\.|;|\n)",
     ]
 
-    def audit(self, text: str, available_source_ids: List[str]) -> AuditReport:
+    def audit(self, text: str, available_source_ids: list[str]) -> AuditReport:
         """Extract claims from text, check each has a source citation.
 
         Args:
@@ -192,7 +191,7 @@ class EvidenceAudit:
             AuditReport with verification statistics
         """
         claims = self.extract_claims(text)
-        flagged: List[ClaimEvidence] = []
+        flagged: list[ClaimEvidence] = []
         verified_count = 0
 
         for claim in claims:
@@ -219,7 +218,7 @@ class EvidenceAudit:
             flagged_claims=flagged,
         )
 
-    def extract_claims(self, text: str) -> List[str]:
+    def extract_claims(self, text: str) -> list[str]:
         """Extract claim sentences from text."""
         claims = []
         for pattern in self.CLAIM_PATTERNS:
@@ -234,7 +233,7 @@ class EvidenceAudit:
                 unique.append(c)
         return unique
 
-    def has_citation(self, claim: str, context: str, source_ids: List[str]) -> bool:
+    def has_citation(self, claim: str, context: str, source_ids: list[str]) -> bool:
         """Check if a claim has a nearby citation in the context.
 
         Searches within 200 characters before and after the claim in context.
@@ -296,7 +295,7 @@ class ContradictionDetector:
         re.IGNORECASE,
     )
 
-    def detect(self, analyses: List[Dict[str, Any]]) -> List[Contradiction]:
+    def detect(self, analyses: list[dict[str, Any]]) -> list[Contradiction]:
         """Detect contradictions across a list of source analysis dicts.
 
         Args:
@@ -305,7 +304,7 @@ class ContradictionDetector:
         Returns:
             List of detected Contradiction objects
         """
-        contradictions: List[Contradiction] = []
+        contradictions: list[Contradiction] = []
 
         # Check each pair of sources
         for i in range(len(analyses)):
@@ -331,9 +330,9 @@ class ContradictionDetector:
         text_b: str,
         sid_a: str,
         sid_b: str,
-    ) -> List[Contradiction]:
+    ) -> list[Contradiction]:
         """Compare two source texts for mutual outperformance claims."""
-        found: List[Contradiction] = []
+        found: list[Contradiction] = []
 
         matches_a = self._OUTPERFORMS_PATTERN.findall(text_a)
         matches_b = self._OUTPERFORMS_PATTERN.findall(text_b)
@@ -364,7 +363,7 @@ class ContradictionDetector:
 
         return found
 
-    def detect_numerical_conflicts(self, analyses: List[Dict]) -> List[Contradiction]:
+    def detect_numerical_conflicts(self, analyses: list[dict]) -> list[Contradiction]:
         """Find sources reporting conflicting numbers for same metric.
 
         Args:
@@ -374,7 +373,7 @@ class ContradictionDetector:
             List of numerical Contradiction objects
         """
         # Collect (metric_keyword, value) per source
-        metric_values: Dict[str, List[tuple]] = {}
+        metric_values: dict[str, list[tuple]] = {}
 
         for analysis in analyses:
             sid = analysis.get('source_id', '')
@@ -385,7 +384,7 @@ class ContradictionDetector:
                 metric_key = claim_text.split()[0].lower()  # e.g. "accuracy"
                 metric_values.setdefault(metric_key, []).append((sid, value, claim_text))
 
-        contradictions: List[Contradiction] = []
+        contradictions: list[Contradiction] = []
         for metric, entries in metric_values.items():
             if len(entries) < 2:
                 continue
@@ -439,7 +438,7 @@ class GapAnalyzer:
         r"(?:to the best of our knowledge, no|first to|novel in that)",
     ]
 
-    def analyze(self, sources: List[Dict[str, Any]], topic: str) -> List[ResearchGap]:
+    def analyze(self, sources: list[dict[str, Any]], topic: str) -> list[ResearchGap]:
         """Identify gaps from source abstracts/findings.
 
         Args:
@@ -449,7 +448,7 @@ class GapAnalyzer:
         Returns:
             Deduplicated list of ResearchGap objects
         """
-        gaps: List[ResearchGap] = []
+        gaps: list[ResearchGap] = []
 
         for source in sources:
             text = f"{source.get('abstract', '')} {' '.join(source.get('findings', []))}"
@@ -458,7 +457,7 @@ class GapAnalyzer:
 
         # Deduplicate by area
         seen_areas: set = set()
-        unique_gaps: List[ResearchGap] = []
+        unique_gaps: list[ResearchGap] = []
         for gap in gaps:
             area_key = gap.area[:60].lower()
             if area_key not in seen_areas:
@@ -467,9 +466,9 @@ class GapAnalyzer:
 
         return unique_gaps
 
-    def _extract_gap_sentences(self, text: str, source_id: str) -> List[ResearchGap]:
+    def _extract_gap_sentences(self, text: str, source_id: str) -> list[ResearchGap]:
         """Extract sentences containing gap signals."""
-        gaps: List[ResearchGap] = []
+        gaps: list[ResearchGap] = []
 
         # Split into sentences (rough)
         sentences = re.split(r'(?<=[.!?])\s+', text)
@@ -490,9 +489,9 @@ class GapAnalyzer:
 
     def coverage_gaps(
         self,
-        sources: List[Dict],
+        sources: list[dict],
         checklist: ResearchChecklist,
-    ) -> List[ResearchGap]:
+    ) -> list[ResearchGap]:
         """Find checklist questions with no source coverage.
 
         Args:
@@ -508,7 +507,7 @@ class GapAnalyzer:
             for s in sources
         ).lower()
 
-        gaps: List[ResearchGap] = []
+        gaps: list[ResearchGap] = []
         for item in checklist.items:
             if item.answered:
                 continue
@@ -540,7 +539,7 @@ class GapAnalyzer:
 class FalsificationNote:
     """Result of checking a claim against counter-evidence."""
     claim: str
-    counter_sources: List[str]
+    counter_sources: list[str]
     counter_evidence: str
     verdict: str  # "supported", "contested", "refuted", "insufficient_evidence"
 
@@ -561,9 +560,9 @@ class FalsificationChecker:
 
     def check(
         self,
-        claims: List[str],
-        sources: List[Dict[str, Any]],
-    ) -> List[FalsificationNote]:
+        claims: list[str],
+        sources: list[dict[str, Any]],
+    ) -> list[FalsificationNote]:
         """For each claim, search sources for counter-evidence.
 
         Args:
@@ -573,12 +572,12 @@ class FalsificationChecker:
         Returns:
             List of FalsificationNote with verdicts
         """
-        notes: List[FalsificationNote] = []
+        notes: list[FalsificationNote] = []
 
         for claim in claims:
             claim_keywords = self._extract_keywords(claim)
-            counter_sources: List[str] = []
-            counter_snippets: List[str] = []
+            counter_sources: list[str] = []
+            counter_snippets: list[str] = []
 
             for source in sources:
                 sid = source.get('source_id', '')
@@ -608,9 +607,9 @@ class FalsificationChecker:
 
     def check_consensus(
         self,
-        claims: List[str],
-        sources: List[Dict],
-    ) -> Dict[str, str]:
+        claims: list[str],
+        sources: list[dict],
+    ) -> dict[str, str]:
         """Return consensus verdict for each claim.
 
         Args:
@@ -621,7 +620,7 @@ class FalsificationChecker:
             Dict mapping claim -> "consensus" | "contested" | "minority_view"
         """
         notes = self.check(claims, sources)
-        consensus: Dict[str, str] = {}
+        consensus: dict[str, str] = {}
 
         for note in notes:
             if note.verdict == "supported":
@@ -633,7 +632,7 @@ class FalsificationChecker:
 
         return consensus
 
-    def _extract_keywords(self, claim: str) -> List[str]:
+    def _extract_keywords(self, claim: str) -> list[str]:
         """Extract significant keywords from a claim."""
         stop_words = {
             "the", "a", "an", "is", "are", "was", "were", "be", "been",
@@ -645,12 +644,12 @@ class FalsificationChecker:
         words = re.findall(r'\b[a-zA-Z]{4,}\b', claim.lower())
         return [w for w in words if w not in stop_words]
 
-    def _find_refutations(self, text: str, keywords: List[str]) -> List[str]:
+    def _find_refutations(self, text: str, keywords: list[str]) -> list[str]:
         """Find refutation snippets in text that mention claim keywords."""
         if not keywords:
             return []
 
-        refutations: List[str] = []
+        refutations: list[str] = []
         for pattern in self.REFUTATION_SIGNALS:
             matches = re.findall(pattern, text, re.IGNORECASE)
             for match in matches:

@@ -5,8 +5,7 @@ Context-aware sound selection based on file type and time.
 """
 
 from pathlib import Path
-from typing import Optional, Dict, Any
-from datetime import datetime
+from typing import Any
 
 
 class ContextAwareSounds:
@@ -19,7 +18,7 @@ class ContextAwareSounds:
     def __init__(self, theme_manager):
         self.theme_manager = theme_manager
 
-    def get_context_sound(self, event: str, context: Dict[str, Any]) -> Optional[str]:
+    def get_context_sound(self, event: str, context: dict[str, Any]) -> str | None:
         """
         Get context-specific sound
 

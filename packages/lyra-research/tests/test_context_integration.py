@@ -10,23 +10,18 @@ Tests the integration of:
 from __future__ import annotations
 
 import pytest
-from pathlib import Path
-from unittest.mock import Mock, patch
-
-from lyra_core.context.layered_context import (
-    LayeredContextManager,
-    ContextLayer,
-    LayerBudget,
-)
-from lyra_core.context.provenance import ContextAuditTrail
 from lyra_core.context.isolation import (
     ContextBoundary,
     IsolationPolicy,
-    MergeStrategy,
 )
-from lyra_research.orchestrator import ResearchOrchestrator
+from lyra_core.context.layered_context import (
+    ContextLayer,
+    LayerBudget,
+    LayeredContextManager,
+)
+from lyra_core.context.provenance import ContextAuditTrail
 from lyra_research.discovery import ResearchSource, SourceType
-
+from lyra_research.orchestrator import ResearchOrchestrator
 
 # ============================================================================
 # Fixtures

@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Any, cast
 
 import pytest
-
 from lyra_research.benchmark_adapter import BenchmarkAdapter
 
 

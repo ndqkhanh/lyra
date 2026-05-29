@@ -4,15 +4,14 @@ Lyra Research - Deep Research Agent
 Multi-source research discovery, analysis, and synthesis.
 """
 
-from lyra_research.discovery import (
-    ArXivDiscovery,
-    GitHubDiscovery,
-    MultiSourceDiscovery,
-    ResearchSource,
-    SemanticScholarDiscovery,
-    SourceType,
+from lyra_research.adversarial_reviewer import (
+    AdversarialReviewer,
+    Claim,
+    DisagreementResolution,
+    ReviewerContextBudget,
+    ReviewIssue,
+    ReviewResult,
 )
-from lyra_research.fetchers import ContentFetcher, ParsedContent, PDFExtractor, READMEParser, WebScraper
 from lyra_research.analysis import (
     PaperAnalysis,
     PaperAnalyzer,
@@ -21,55 +20,38 @@ from lyra_research.analysis import (
     RepositoryAnalysis,
     RepositoryAnalyzer,
 )
-from lyra_research.synthesis import (
-    CitationNetworkBuilder,
-    Concept,
-    ConceptExtractor,
-    KnowledgeEdge,
-    KnowledgeGraph,
-    KnowledgeNode,
-    Relationship,
-    RelationshipDiscovery,
+from lyra_research.coordination import (
+    CircuitBreaker,
+    CircuitBreakerStats,
+    CoordinationManager,
+    FailureType,
+    HealthChecker,
+    HealthMetrics,
+    RetryPolicy,
+    Task,
+    TaskState,
+    TimeoutEnforcer,
 )
-from lyra_research.strategies import (
-    QueryExpander,
-    RankedResult,
-    ResearchPlanner,
-    ResultFilter,
-    ResultRanker,
-    SearchPlan,
-    SearchStrategy,
-    StoppingCriteria,
+from lyra_research.discovery import (
+    ArXivDiscovery,
+    GitHubDiscovery,
+    MultiSourceDiscovery,
+    ResearchSource,
+    SemanticScholarDiscovery,
+    SourceType,
 )
-from lyra_research.sources import (
-    ACLAnthologyDiscovery,
-    CitationTraversal,
-    GitHubActivityScorer,
-    HuggingFacePapersDiscovery,
-    OpenReviewDiscovery,
-    PapersWithCodeDiscovery,
-    SourceQualityScorer,
+from lyra_research.evaluation import (
+    QualityTrendTracker,
+    ResearchQualityEvaluator,
+    ResearchQualityMetrics,
+    SelfEvaluationAgent,
 )
-from lyra_research.memory import (
-    CorpusEntry,
-    LocalCorpus,
-    ResearchCase,
-    ResearchNote,
-    ResearchNoteStore,
-    ResearchStrategy,
-    ResearchStrategyMemory,
-    SessionCaseBank,
-)
-from lyra_research.reporter import (
-    BoundCitation,
-    CitationBinder,
-    CrossSourceSynthesizer,
-    FieldTaxonomy,
-    QualityReport,
-    ReportQualityChecker,
-    ResearchReport,
-    ResearchReportGenerator,
-    SynthesisResult,
+from lyra_research.fetchers import (
+    ContentFetcher,
+    ParsedContent,
+    PDFExtractor,
+    READMEParser,
+    WebScraper,
 )
 from lyra_research.intelligence import (
     AuditReport,
@@ -85,13 +67,47 @@ from lyra_research.intelligence import (
     ResearchGap,
     VerifiableChecklistGenerator,
 )
-from lyra_research.adversarial_reviewer import (
-    AdversarialReviewer,
-    Claim,
-    DisagreementResolution,
-    ReviewerContextBudget,
-    ReviewIssue,
-    ReviewResult,
+from lyra_research.learning import (
+    CaseMatch,
+    CaseSelectionPolicy,
+    DomainExpertiseAccumulator,
+    DomainModel,
+    ExtractedStrategy,
+    GateDecision,
+    ResearchStrategyExtractor,
+    ResearchWorkflowOptimizer,
+    SelfImprovementGate,
+    WorkflowInsight,
+)
+from lyra_research.memory import (
+    CorpusEntry,
+    LocalCorpus,
+    ResearchCase,
+    ResearchNote,
+    ResearchNoteStore,
+    ResearchStrategy,
+    ResearchStrategyMemory,
+    SessionCaseBank,
+)
+from lyra_research.orchestrator import ResearchOrchestrator, ResearchProgress
+from lyra_research.reporter import (
+    BoundCitation,
+    CitationBinder,
+    CrossSourceSynthesizer,
+    FieldTaxonomy,
+    QualityReport,
+    ReportQualityChecker,
+    ResearchReport,
+    ResearchReportGenerator,
+    SynthesisResult,
+)
+from lyra_research.sibyl_harness import (
+    ExperimentStatus,
+    ExperimentTrial,
+    SibylPipeline,
+    TrialConfig,
+    TrialFailure,
+    TrialHarness,
 )
 from lyra_research.skills import (
     QueryRefinementSkill,
@@ -102,54 +118,43 @@ from lyra_research.skills import (
     SkillEvolutionTracker,
     StrategyAdaptationSkill,
 )
-
-from lyra_research.orchestrator import ResearchOrchestrator, ResearchProgress
-from lyra_research.evaluation import (
-    ResearchQualityMetrics,
-    ResearchQualityEvaluator,
-    QualityTrendTracker,
-    SelfEvaluationAgent,
+from lyra_research.sources import (
+    ACLAnthologyDiscovery,
+    CitationTraversal,
+    GitHubActivityScorer,
+    HuggingFacePapersDiscovery,
+    OpenReviewDiscovery,
+    PapersWithCodeDiscovery,
+    SourceQualityScorer,
 )
-from lyra_research.learning import (
-    ExtractedStrategy,
-    ResearchStrategyExtractor,
-    CaseMatch,
-    CaseSelectionPolicy,
-    DomainModel,
-    DomainExpertiseAccumulator,
-    WorkflowInsight,
-    ResearchWorkflowOptimizer,
-    GateDecision,
-    SelfImprovementGate,
+from lyra_research.strategies import (
+    QueryExpander,
+    RankedResult,
+    ResearchPlanner,
+    ResultFilter,
+    ResultRanker,
+    SearchPlan,
+    SearchStrategy,
+    StoppingCriteria,
 )
-from lyra_research.coordination import (
-    CircuitBreaker,
-    CircuitBreakerStats,
-    CoordinationManager,
-    FailureType,
-    HealthChecker,
-    HealthMetrics,
-    RetryPolicy,
-    Task,
-    TaskState,
-    TimeoutEnforcer,
-)
-from lyra_research.sibyl_harness import (
-    TrialHarness,
-    TrialConfig,
-    ExperimentTrial,
-    TrialFailure,
-    ExperimentStatus,
-    SibylPipeline,
+from lyra_research.synthesis import (
+    CitationNetworkBuilder,
+    Concept,
+    ConceptExtractor,
+    KnowledgeEdge,
+    KnowledgeGraph,
+    KnowledgeNode,
+    Relationship,
+    RelationshipDiscovery,
 )
 
 # Zero-Index Retrieval — direct corpus search without pre-built indexes
 from lyra_research.zero_index import (
     ContextLevel,
+    CorpusStats,
     SearchResult,
     ZeroIndexConfig,
     ZeroIndexRetriever,
-    CorpusStats,
 )
 
 __version__ = "0.2.0"

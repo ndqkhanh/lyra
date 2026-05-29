@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Dict, List, Optional
 
 from lyra_research.curation.knowledge_entry import KnowledgeEntry
 
@@ -24,7 +23,7 @@ class KnowledgeVersion:
     change_reason: str
     timestamp: datetime
     quality_score: float
-    metadata: Dict[str, str] | None = None
+    metadata: dict[str, str] | None = None
 
     def __post_init__(self) -> None:
         """Validate version after initialization."""
@@ -53,7 +52,7 @@ class VersionManager:
     def __init__(self) -> None:
         """Initialize version manager."""
         # Store versions: entry_id -> list of versions
-        self._versions: Dict[str, List[KnowledgeVersion]] = {}
+        self._versions: dict[str, list[KnowledgeVersion]] = {}
 
     def create_version(
         self, entry: KnowledgeEntry, changed_by: str, reason: str
@@ -96,7 +95,7 @@ class VersionManager:
 
         return version
 
-    def get_version_history(self, entry_id: str) -> List[KnowledgeVersion]:
+    def get_version_history(self, entry_id: str) -> list[KnowledgeVersion]:
         """
         Get all versions of entry.
 
@@ -112,7 +111,7 @@ class VersionManager:
         # Return sorted by version (ascending)
         return sorted(self._versions[entry_id], key=lambda v: v.version)
 
-    def get_version(self, entry_id: str, version: int) -> Optional[KnowledgeVersion]:
+    def get_version(self, entry_id: str, version: int) -> KnowledgeVersion | None:
         """
         Get specific version of entry.
 
@@ -132,7 +131,7 @@ class VersionManager:
 
         return None
 
-    def get_latest_version(self, entry_id: str) -> Optional[KnowledgeVersion]:
+    def get_latest_version(self, entry_id: str) -> KnowledgeVersion | None:
         """
         Get latest version of entry.
 

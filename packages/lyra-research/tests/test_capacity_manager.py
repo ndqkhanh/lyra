@@ -11,13 +11,10 @@ import gzip
 import json
 import sqlite3
 import tempfile
-import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-import numpy as np
 import pytest
-
 from lyra_research.capacity_manager import (
     CapacityLevel,
     CapacityLimits,
@@ -28,7 +25,6 @@ from lyra_research.capacity_manager import (
     LatencyStats,
     QuerySLOs,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

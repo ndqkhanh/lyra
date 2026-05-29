@@ -10,15 +10,13 @@ from __future__ import annotations
 
 import time
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 from unittest.mock import patch
 
 import pytest
-
-from lyra_research.orchestrator import ResearchOrchestrator, AgentType
-from lyra_research.coordination import CoordinationManager
-from lyra_research.capacity_manager import CapacityManager
 from lyra_research.adversarial_reviewer import AdversarialReviewer
+from lyra_research.capacity_manager import CapacityManager
+from lyra_research.coordination import CoordinationManager
 from lyra_research.discovery import ResearchSource, SourceType
 from lyra_research.memory import (
     LocalCorpus,
@@ -26,7 +24,7 @@ from lyra_research.memory import (
     ResearchStrategyMemory,
     SessionCaseBank,
 )
-
+from lyra_research.orchestrator import ResearchOrchestrator
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -65,7 +63,7 @@ def orchestrator_without_coordination(tmp_path: Path) -> ResearchOrchestrator:
     )
 
 
-def _make_sources(count: int) -> Dict[str, List[ResearchSource]]:
+def _make_sources(count: int) -> dict[str, list[ResearchSource]]:
     """Create test sources."""
     sources = []
     for i in range(count):
@@ -379,7 +377,7 @@ def test_benchmark_retry_overhead(
     sources = _make_sources(10)
     call_count = 0
 
-    def failing_once(*args: Any, **kwargs: Any) -> Dict[str, List[ResearchSource]]:
+    def failing_once(*args: Any, **kwargs: Any) -> dict[str, list[ResearchSource]]:
         nonlocal call_count
         call_count += 1
         if call_count == 1:

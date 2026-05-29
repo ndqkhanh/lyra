@@ -4,12 +4,10 @@ Tests for Sound CLI Commands (Funny Sounds Phase 4)
 Tests command-line interface for sound management.
 """
 
+
 import pytest
 from click.testing import CliRunner
-from pathlib import Path
-import tempfile
 from lyra_research.cli.sound_commands import sounds
-from lyra_research.sounds.config import SoundConfig
 
 
 class TestSoundCLI:

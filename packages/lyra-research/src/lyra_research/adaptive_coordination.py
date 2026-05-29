@@ -5,7 +5,7 @@ Adjusts task graph based on intermediate results.
 """
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Any
 
 from lyra_research.coordination import Task, TaskGraph
 
@@ -22,9 +22,9 @@ class AdaptiveTaskGraph(TaskGraph):
 
     def __init__(self) -> None:
         super().__init__()
-        self.adaptation_history: List[Dict[str, Any]] = []
+        self.adaptation_history: list[dict[str, Any]] = []
 
-    def adapt_graph(self, results: List[Any]) -> List[Task]:
+    def adapt_graph(self, results: list[Any]) -> list[Task]:
         """
         Adjust task graph based on intermediate results.
 
@@ -34,7 +34,7 @@ class AdaptiveTaskGraph(TaskGraph):
         Returns:
             List of new tasks to add
         """
-        new_tasks: List[Task] = []
+        new_tasks: list[Task] = []
 
         # Check if discovery found insufficient sources
         if self._insufficient_sources(results):
@@ -65,7 +65,7 @@ class AdaptiveTaskGraph(TaskGraph):
 
         return new_tasks
 
-    def _insufficient_sources(self, results: List[Any]) -> bool:
+    def _insufficient_sources(self, results: list[Any]) -> bool:
         """
         Check if discovery found insufficient sources.
 
@@ -87,7 +87,7 @@ class AdaptiveTaskGraph(TaskGraph):
 
         return source_count < 10
 
-    def _contradictions_detected(self, results: List[Any]) -> bool:
+    def _contradictions_detected(self, results: list[Any]) -> bool:
         """
         Check if contradictions were detected.
 
@@ -106,7 +106,7 @@ class AdaptiveTaskGraph(TaskGraph):
 
         return False
 
-    def _needs_deeper_analysis(self, results: List[Any]) -> bool:
+    def _needs_deeper_analysis(self, results: list[Any]) -> bool:
         """
         Check if sources need deeper analysis.
 
@@ -125,7 +125,7 @@ class AdaptiveTaskGraph(TaskGraph):
 
         return False
 
-    def _create_additional_discovery_tasks(self) -> List[Task]:
+    def _create_additional_discovery_tasks(self) -> list[Task]:
         """
         Create additional discovery tasks.
 
@@ -145,7 +145,7 @@ class AdaptiveTaskGraph(TaskGraph):
 
         return tasks
 
-    def _create_falsification_tasks(self, results: List[Any]) -> List[Task]:
+    def _create_falsification_tasks(self, results: list[Any]) -> list[Task]:
         """
         Create falsification tasks for contradictions.
 
@@ -179,7 +179,7 @@ class AdaptiveTaskGraph(TaskGraph):
 
         return tasks
 
-    def _create_deeper_analysis_tasks(self, results: List[Any]) -> List[Task]:
+    def _create_deeper_analysis_tasks(self, results: list[Any]) -> list[Task]:
         """
         Create deeper analysis tasks for low-quality sources.
 
@@ -202,7 +202,7 @@ class AdaptiveTaskGraph(TaskGraph):
 
         return tasks
 
-    def get_adaptation_history(self) -> List[Dict[str, Any]]:
+    def get_adaptation_history(self) -> list[dict[str, Any]]:
         """
         Get history of adaptations.
 

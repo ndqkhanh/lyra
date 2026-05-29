@@ -12,14 +12,13 @@ import json
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from lyra_research.memory import ResearchCase, ResearchStrategyMemory, SessionCaseBank
     from lyra_research.orchestrator import ResearchProgress
-    from lyra_research.memory import ResearchCase, SessionCaseBank, ResearchStrategyMemory
 
 from lyra_research.evaluation import QualityTrendTracker
-
 
 # ---------------------------------------------------------------------------
 # ExtractedStrategy
@@ -31,11 +30,11 @@ class ExtractedStrategy:
     topic: str
     domain: str
     topic_type: str          # "paper_search", "repo_search", "mixed_search"
-    strategy_steps: List[str]
+    strategy_steps: list[str]
     outcome_score: float
     lessons_learned: str
-    key_sources_used: List[str]
-    query_patterns: List[str]
+    key_sources_used: list[str]
+    query_patterns: list[str]
 
 
 # ---------------------------------------------------------------------------
@@ -51,7 +50,7 @@ class ResearchStrategyExtractor:
     Saves extracted strategies to ResearchStrategyMemory.
     """
 
-    DOMAIN_KEYWORDS: Dict[str, List[str]] = {
+    DOMAIN_KEYWORDS: dict[str, list[str]] = {
         "ml": ["machine learning", "deep learning", "neural", "model", "training", "inference"],
         "nlp": ["language model", "nlp", "text", "transformer", "llm", "tokenization"],
         "systems": ["distributed", "system", "infrastructure", "scalable", "latency", "throughput"],
@@ -61,7 +60,7 @@ class ResearchStrategyExtractor:
 
     def extract(
         self,
-        progress: "ResearchProgress",
+        progress: ResearchProgress,
         quality_score: float,
     ) -> ExtractedStrategy:
         """Extract a strategy from a completed research session."""
@@ -69,7 +68,7 @@ class ResearchStrategyExtractor:
         topic_type = self.detect_topic_type(progress.sources_found)
         key_sources = list(progress.sources_found.keys())
 
-        steps: List[str] = []
+        steps: list[str] = []
         if progress.papers_analyzed > 0:
             steps.append(f"Analyzed {progress.papers_analyzed} papers")
         if progress.repos_analyzed > 0:
@@ -104,9 +103,9 @@ class ResearchStrategyExtractor:
 
     def extract_and_save(
         self,
-        progress: "ResearchProgress",
+        progress: ResearchProgress,
         quality_score: float,
-        strategy_memory: "ResearchStrategyMemory",
+        strategy_memory: ResearchStrategyMemory,
     ) -> ExtractedStrategy:
         """Extract strategy and save to ResearchStrategyMemory."""
         from lyra_research.memory import ResearchStrategy
@@ -132,7 +131,7 @@ class ResearchStrategyExtractor:
         best = max(scores, key=lambda d: scores.get(d, 0))
         return best if scores[best] > 0 else "general"
 
-    def detect_topic_type(self, sources_found: Dict[str, int]) -> str:
+    def detect_topic_type(self, sources_found: dict[str, int]) -> str:
         """Detect whether this was primarily a paper or repo search."""
         paper_sources = sum(
             v for k, v in sources_found.items()
@@ -148,7 +147,7 @@ class ResearchStrategyExtractor:
 
     def _lessons_from_success(
         self,
-        progress: "ResearchProgress",
+        progress: ResearchProgress,
         strategy: ExtractedStrategy,
     ) -> str:
         """Generate lesson text from a successful session."""
@@ -161,7 +160,7 @@ class ResearchStrategyExtractor:
 
     def _lessons_from_failure(
         self,
-        progress: "ResearchProgress",
+        progress: ResearchProgress,
         strategy: ExtractedStrategy,
     ) -> str:
         """Generate lesson text from a failed/low-quality session."""
@@ -179,9 +178,9 @@ class ResearchStrategyExtractor:
 @dataclass
 class CaseMatch:
     """A matched past case with similarity score."""
-    case: "ResearchCase"
+    case: ResearchCase
     similarity_score: float
-    overlap_terms: List[str]
+    overlap_terms: list[str]
 
 
 class CaseSelectionPolicy:
@@ -198,18 +197,18 @@ class CaseSelectionPolicy:
         "and", "or", "is", "are",
     })
 
-    def __init__(self, case_bank: Optional["SessionCaseBank"] = None) -> None:
+    def __init__(self, case_bank: SessionCaseBank | None = None) -> None:
         from lyra_research.memory import SessionCaseBank as _SessionCaseBank
         self.case_bank = case_bank or _SessionCaseBank()
-        self._usefulness_scores: Dict[str, float] = {}
+        self._usefulness_scores: dict[str, float] = {}
 
-    def select(self, topic: str, top_k: int = 3) -> List[CaseMatch]:
+    def select(self, topic: str, top_k: int = 3) -> list[CaseMatch]:
         """Select top-k most relevant past cases for a new research topic."""
         all_cases = self.case_bank.get_all()
         if not all_cases:
             return []
 
-        matches: List[CaseMatch] = []
+        matches: list[CaseMatch] = []
         for case in all_cases:
             sim, terms = self._compute_similarity(topic, case)
             if sim > 0:
@@ -232,8 +231,8 @@ class CaseSelectionPolicy:
     def _compute_similarity(
         self,
         topic: str,
-        case: "ResearchCase",
-    ) -> Tuple[float, List[str]]:
+        case: ResearchCase,
+    ) -> tuple[float, list[str]]:
         """Compute keyword overlap between topic and case.topic."""
         topic_terms = set(topic.lower().split()) - self._STOPWORDS
         case_terms = set(case.topic.lower().split()) - self._STOPWORDS
@@ -252,21 +251,21 @@ class CaseSelectionPolicy:
 class DomainModel:
     """Accumulated expertise model for a research domain."""
     domain: str
-    key_venues: List[str] = field(default_factory=list)
-    landmark_papers: List[str] = field(default_factory=list)
-    key_methods: List[str] = field(default_factory=list)
-    preferred_sources: List[str] = field(default_factory=list)
+    key_venues: list[str] = field(default_factory=list)
+    landmark_papers: list[str] = field(default_factory=list)
+    key_methods: list[str] = field(default_factory=list)
+    preferred_sources: list[str] = field(default_factory=list)
     total_sessions: int = 0
     avg_quality: float = 0.0
     updated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         d = asdict(self)
         d["updated_at"] = self.updated_at.isoformat()
         return d
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> "DomainModel":
+    def from_dict(cls, d: dict[str, Any]) -> DomainModel:
         d = dict(d)
         d["updated_at"] = datetime.fromisoformat(d["updated_at"])
         return cls(**d)
@@ -284,15 +283,15 @@ class DomainExpertiseAccumulator:
     Persistence: JSON at ~/.lyra/domain_expertise.json
     """
 
-    def __init__(self, store_path: Optional[Path] = None) -> None:
+    def __init__(self, store_path: Path | None = None) -> None:
         self.store_path = store_path or Path.home() / ".lyra" / "domain_expertise.json"
-        self._models: Dict[str, DomainModel] = {}
+        self._models: dict[str, DomainModel] = {}
         self._load()
 
     def update(
         self,
         domain: str,
-        progress: "ResearchProgress",
+        progress: ResearchProgress,
         quality_score: float,
     ) -> DomainModel:
         """Update domain model from a completed research session."""
@@ -313,7 +312,7 @@ class DomainExpertiseAccumulator:
         self._save()
         return model
 
-    def get_model(self, domain: str) -> Optional[DomainModel]:
+    def get_model(self, domain: str) -> DomainModel | None:
         return self._models.get(domain)
 
     def add_landmark_paper(self, domain: str, paper_title: str) -> None:
@@ -334,7 +333,7 @@ class DomainExpertiseAccumulator:
             model.key_venues.append(venue)
         self._save()
 
-    def list_domains(self) -> List[str]:
+    def list_domains(self) -> list[str]:
         return list(self._models.keys())
 
     def _save(self) -> None:
@@ -379,10 +378,10 @@ class ResearchWorkflowOptimizer:
     def analyze(
         self,
         trend_tracker: QualityTrendTracker,
-        domain_models: Dict[str, DomainModel],
-    ) -> List[WorkflowInsight]:
+        domain_models: dict[str, DomainModel],
+    ) -> list[WorkflowInsight]:
         """Derive optimization insights from quality trends and domain models."""
-        insights: List[WorkflowInsight] = []
+        insights: list[WorkflowInsight] = []
 
         if trend_tracker.is_improving("overall_score"):
             insights.append(WorkflowInsight(
@@ -418,7 +417,7 @@ class ResearchWorkflowOptimizer:
     def recommend_depth(
         self,
         domain: str,
-        domain_models: Dict[str, DomainModel],
+        domain_models: dict[str, DomainModel],
     ) -> str:
         """Recommend research depth for a domain based on past sessions."""
         model = domain_models.get(domain)
@@ -459,8 +458,8 @@ class SelfImprovementGate:
 
     def evaluate(
         self,
-        before_scores: List[float],
-        after_scores: List[float],
+        before_scores: list[float],
+        after_scores: list[float],
     ) -> GateDecision:
         """Evaluate whether an update should be applied.
 

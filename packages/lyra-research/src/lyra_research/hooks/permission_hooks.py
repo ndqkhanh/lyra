@@ -4,9 +4,10 @@ Permission Hooks
 Hook integration for permission system with bypass support.
 """
 
-from typing import Dict, Any
+from typing import Any
+
 from ..permissions.bypass_manager import BypassManager
-from ..permissions.permission_gate import PermissionGate, PermissionRequest, PermissionLevel
+from ..permissions.permission_gate import PermissionGate, PermissionLevel, PermissionRequest
 
 
 class PermissionHooks:
@@ -24,7 +25,7 @@ class PermissionHooks:
         self.permission_gate = PermissionGate(self.bypass_manager)
 
     def pre_operation_hook(self, operation: str, level: PermissionLevel,
-                          description: str, context: Dict[str, Any]) -> bool:
+                          description: str, context: dict[str, Any]) -> bool:
         """
         Hook called before operation execution
 

@@ -6,8 +6,8 @@ Based on Cochrane Risk of Bias tool and PRISMA guidelines.
 """
 
 from dataclasses import dataclass
-from typing import Dict, Any, List
 from enum import Enum
+from typing import Any
 
 
 class BiasDomain(Enum):
@@ -40,7 +40,7 @@ class DomainAssessment:
 class BiasAssessment:
     """Complete bias assessment for a study"""
     study_id: str
-    domain_assessments: Dict[BiasDomain, DomainAssessment]
+    domain_assessments: dict[BiasDomain, DomainAssessment]
     overall_risk: RiskLevel
     summary: str
 
@@ -52,7 +52,7 @@ class RiskOfBiasAssessor:
     Implements Cochrane Risk of Bias tool across 5 domains.
     """
 
-    def assess_study(self, study: Dict[str, Any]) -> BiasAssessment:
+    def assess_study(self, study: dict[str, Any]) -> BiasAssessment:
         """
         Assess risk of bias across 5 domains
 
@@ -82,7 +82,7 @@ class RiskOfBiasAssessor:
             summary=summary
         )
 
-    def assess_selection_bias(self, study: Dict[str, Any]) -> DomainAssessment:
+    def assess_selection_bias(self, study: dict[str, Any]) -> DomainAssessment:
         """
         Assess selection bias (random sequence generation, allocation concealment)
 
@@ -116,7 +116,7 @@ class RiskOfBiasAssessor:
             evidence=methods[:200]
         )
 
-    def assess_performance_bias(self, study: Dict[str, Any]) -> DomainAssessment:
+    def assess_performance_bias(self, study: dict[str, Any]) -> DomainAssessment:
         """
         Assess performance bias (blinding of participants and personnel)
 
@@ -145,7 +145,7 @@ class RiskOfBiasAssessor:
             reason=reason
         )
 
-    def assess_detection_bias(self, study: Dict[str, Any]) -> DomainAssessment:
+    def assess_detection_bias(self, study: dict[str, Any]) -> DomainAssessment:
         """
         Assess detection bias (blinding of outcome assessment)
 
@@ -171,7 +171,7 @@ class RiskOfBiasAssessor:
             reason=reason
         )
 
-    def assess_attrition_bias(self, study: Dict[str, Any]) -> DomainAssessment:
+    def assess_attrition_bias(self, study: dict[str, Any]) -> DomainAssessment:
         """
         Assess attrition bias (incomplete outcome data)
 
@@ -200,7 +200,7 @@ class RiskOfBiasAssessor:
             reason=reason
         )
 
-    def assess_reporting_bias(self, study: Dict[str, Any]) -> DomainAssessment:
+    def assess_reporting_bias(self, study: dict[str, Any]) -> DomainAssessment:
         """
         Assess reporting bias (selective reporting)
 
@@ -230,7 +230,7 @@ class RiskOfBiasAssessor:
             reason=reason
         )
 
-    def calculate_overall_risk(self, assessments: Dict[BiasDomain, DomainAssessment]) -> RiskLevel:
+    def calculate_overall_risk(self, assessments: dict[BiasDomain, DomainAssessment]) -> RiskLevel:
         """
         Calculate overall risk from domain assessments
 
@@ -258,7 +258,7 @@ class RiskOfBiasAssessor:
         # Otherwise, MODERATE
         return RiskLevel.MODERATE
 
-    def generate_summary(self, assessments: Dict[BiasDomain, DomainAssessment], overall_risk: RiskLevel) -> str:
+    def generate_summary(self, assessments: dict[BiasDomain, DomainAssessment], overall_risk: RiskLevel) -> str:
         """
         Generate summary of bias assessment
 

@@ -1,8 +1,6 @@
 """Quality scoring agent for ranking source quality."""
 from __future__ import annotations
 
-from typing import List
-
 from lyra_research.agents.analysis.analysis_base import Analysis, AnalysisAgent
 from lyra_research.discovery import ResearchSource
 from lyra_research.sources import SourceQualityScorer
@@ -53,7 +51,7 @@ class QualityScoreAgent(AnalysisAgent):
 
     def _generate_quality_insights(
         self, source: ResearchSource, quality_score: float
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Generate quality insights based on score.
 

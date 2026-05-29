@@ -3,20 +3,18 @@ Tests for the Research Skills Library (skills.py).
 """
 
 
-import pytest
 from datetime import datetime, timezone
 
+import pytest
 from lyra_research.skills import (
+    QueryRefinementSkill,
+    RefinementSuggestion,
     ResearchSkill,
     ResearchSkillStore,
-    RefinementSuggestion,
-    QueryRefinementSkill,
-    StrategyAdaptationSkill,
-    SkillEvolutionRecord,
     SkillEvolutionTracker,
+    StrategyAdaptationSkill,
 )
 from lyra_research.strategies import SearchStrategy
-
 
 # ---------------------------------------------------------------------------
 # ResearchSkill tests

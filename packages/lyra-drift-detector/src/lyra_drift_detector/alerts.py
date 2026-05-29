@@ -12,11 +12,12 @@ import logging
 import time
 import uuid
 from collections import defaultdict, deque
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Callable, Optional, Protocol
+from typing import Any, Protocol
 
-from .drift_detector import DriftSeverity, DriftType, DriftSignal
+from .drift_detector import DriftSeverity, DriftSignal, DriftType
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +70,7 @@ class AlertRule:
 
     rule_id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
     name: str = ""
-    drift_type: Optional[DriftType] = None
+    drift_type: DriftType | None = None
     min_severity: DriftSeverity = DriftSeverity.LOW
     cooldown_seconds: float = 300.0  # 5 minutes
     max_alerts_per_hour: int = 12
@@ -97,12 +98,12 @@ class Alert:
 
     alert_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     rule_id: str = ""
-    signal: Optional[DriftSignal] = None
+    signal: DriftSignal | None = None
     severity: AlertSeverity = AlertSeverity.INFO
     state: AlertState = AlertState.FIRED
     created_at: float = field(default_factory=time.time)
-    acknowledged_at: Optional[float] = None
-    resolved_at: Optional[float] = None
+    acknowledged_at: float | None = None
+    resolved_at: float | None = None
     message: str = ""
     metadata: dict[str, Any] = field(default_factory=dict)
 
@@ -163,7 +164,7 @@ class AlertManager:
             return True
         return False
 
-    def get_rule(self, rule_id: str) -> Optional[AlertRule]:
+    def get_rule(self, rule_id: str) -> AlertRule | None:
         """Get a rule by ID."""
         return self._rules.get(rule_id)
 
@@ -232,7 +233,7 @@ class AlertManager:
         }
         return mapping.get(drift_severity, AlertSeverity.INFO)
 
-    async def process_signal(self, signal: DriftSignal) -> Optional[Alert]:
+    async def process_signal(self, signal: DriftSignal) -> Alert | None:
         """Process a drift signal and potentially create an alert.
 
         Handles deduplication, throttling, and routing to appropriate rules.
@@ -410,7 +411,7 @@ class AlertManager:
         """Get all alerts created after a given timestamp."""
         return [a for a in self._alerts if a.created_at > timestamp]
 
-    def get_alert_count(self, state: Optional[AlertState] = None) -> int:
+    def get_alert_count(self, state: AlertState | None = None) -> int:
         """Get count of alerts, optionally filtered by state."""
         if state is None:
             return len(self._alerts)

@@ -1,8 +1,6 @@
 """Citation analysis agent for building citation networks."""
 from __future__ import annotations
 
-from typing import Dict, List
-
 from lyra_research.agents.analysis.analysis_base import Analysis, AnalysisAgent
 from lyra_research.discovery import ResearchSource, SourceType
 
@@ -14,7 +12,7 @@ class CitationAnalysisAgent(AnalysisAgent):
         """Initialize citation analysis agent."""
         super().__init__(analysis_type="citation", model=model)
 
-    async def analyze(self, sources: List[ResearchSource]) -> List[Analysis]:
+    async def analyze(self, sources: list[ResearchSource]) -> list[Analysis]:
         """
         Build citation network from papers.
 
@@ -27,7 +25,7 @@ class CitationAnalysisAgent(AnalysisAgent):
         analyses = []
 
         # Build citation graph
-        citation_counts: Dict[str, int] = {}
+        citation_counts: dict[str, int] = {}
         for source in sources:
             if source.source_type == SourceType.PAPER:
                 citation_counts[source.id] = source.citations
@@ -55,8 +53,8 @@ class CitationAnalysisAgent(AnalysisAgent):
         return analyses
 
     def _analyze_citation_position(
-        self, source: ResearchSource, citation_counts: Dict[str, int]
-    ) -> List[str]:
+        self, source: ResearchSource, citation_counts: dict[str, int]
+    ) -> list[str]:
         """
         Analyze paper's position in citation network.
 
@@ -91,7 +89,7 @@ class CitationAnalysisAgent(AnalysisAgent):
 
         return findings
 
-    def _calculate_rank(self, paper_id: str, citation_counts: Dict[str, int]) -> int:
+    def _calculate_rank(self, paper_id: str, citation_counts: dict[str, int]) -> int:
         """
         Calculate paper's rank by citation count (1 = most cited).
 

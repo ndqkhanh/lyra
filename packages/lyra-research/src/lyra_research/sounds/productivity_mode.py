@@ -4,8 +4,7 @@ Productivity Mode
 Reduces sounds near deadlines or during focus time.
 """
 
-from datetime import datetime, date
-from typing import List, Tuple
+from datetime import date
 
 
 class ProductivityMode:
@@ -16,7 +15,7 @@ class ProductivityMode:
     """
 
     def __init__(self):
-        self.deadlines: List[Tuple[date, str]] = []
+        self.deadlines: list[tuple[date, str]] = []
         self.focus_mode = False
 
     def add_deadline(self, deadline_date: date, description: str):

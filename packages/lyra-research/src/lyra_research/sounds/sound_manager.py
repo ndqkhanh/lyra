@@ -4,11 +4,9 @@ Sound Manager
 Main sound management system with theme switching and volume control.
 """
 
-from pathlib import Path
-from typing import Optional
 from .audio_player import AudioPlayer
-from .theme_manager import ThemeManager
 from .config import SoundConfig
+from .theme_manager import ThemeManager
 
 
 class SoundManager:
@@ -22,13 +20,13 @@ class SoundManager:
     - Mute/unmute
     """
 
-    def __init__(self, config: Optional[SoundConfig] = None):
+    def __init__(self, config: SoundConfig | None = None):
         self.config = config or SoundConfig()
         self.player = AudioPlayer()
         self.theme_manager = ThemeManager()
         self.muted = False
 
-    def play_event(self, event: str, volume: Optional[float] = None):
+    def play_event(self, event: str, volume: float | None = None):
         """
         Play sound for event
 

@@ -5,7 +5,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List
+from typing import Any
 
 
 class EntryStatus(Enum):
@@ -30,13 +30,13 @@ class KnowledgeEntry:
     source: str
     quality_score: float
     category: str
-    tags: List[str]
+    tags: list[str]
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     version: int = 1
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     status: EntryStatus = EntryStatus.PENDING
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         """Validate entry after initialization."""
@@ -122,7 +122,7 @@ class KnowledgeEntry:
             metadata=self.metadata,
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert entry to dictionary.
 
@@ -144,7 +144,7 @@ class KnowledgeEntry:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> KnowledgeEntry:
+    def from_dict(cls, data: dict[str, Any]) -> KnowledgeEntry:
         """
         Create entry from dictionary.
 

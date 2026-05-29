@@ -2,23 +2,22 @@
 Tests for the Continual Research Learning System (learning.py).
 """
 
-import pytest
 from unittest.mock import MagicMock
 
+import pytest
+from lyra_research.evaluation import QualityTrendTracker, ResearchQualityMetrics
 from lyra_research.learning import (
-    ExtractedStrategy,
-    ResearchStrategyExtractor,
     CaseMatch,
     CaseSelectionPolicy,
-    DomainModel,
     DomainExpertiseAccumulator,
-    ResearchWorkflowOptimizer,
+    DomainModel,
+    ExtractedStrategy,
     GateDecision,
+    ResearchStrategyExtractor,
+    ResearchWorkflowOptimizer,
     SelfImprovementGate,
 )
-from lyra_research.memory import ResearchCase, SessionCaseBank, ResearchStrategyMemory
-from lyra_research.evaluation import QualityTrendTracker, ResearchQualityMetrics
-
+from lyra_research.memory import ResearchCase, ResearchStrategyMemory, SessionCaseBank
 
 # ---------------------------------------------------------------------------
 # Helpers

@@ -18,7 +18,7 @@ import json
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from lyra_research.orchestrator import ResearchProgress
@@ -194,8 +194,8 @@ class BenchmarkAdapter:
 
     def __init__(
         self,
-        questions: Optional[tuple[BenchmarkQuestion, ...]] = None,
-        results_path: Optional[Path] = None,
+        questions: tuple[BenchmarkQuestion, ...] | None = None,
+        results_path: Path | None = None,
     ) -> None:
         self.questions = questions if questions is not None else _DEFAULT_QUESTIONS
         self.results_path = results_path or self.DEFAULT_PATH
@@ -204,7 +204,7 @@ class BenchmarkAdapter:
     # Question selection
     # ------------------------------------------------------------------
 
-    def get(self, question_id: str) -> Optional[BenchmarkQuestion]:
+    def get(self, question_id: str) -> BenchmarkQuestion | None:
         return next((q for q in self.questions if q.id == question_id), None)
 
     def by_domain(self, domain: str) -> list[BenchmarkQuestion]:
@@ -220,7 +220,7 @@ class BenchmarkAdapter:
     def score(
         self,
         question: BenchmarkQuestion,
-        progress: "ResearchProgress",
+        progress: ResearchProgress,
         verified_citations: int = 0,
         total_claims: int = 0,
     ) -> BenchmarkResult:

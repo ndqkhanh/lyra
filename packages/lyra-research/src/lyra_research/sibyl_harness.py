@@ -11,7 +11,7 @@ import logging
 import uuid
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -51,14 +51,14 @@ class ExperimentTrial:
     status: ExperimentStatus = ExperimentStatus.PLANNED
     trace: list[dict[str, Any]] = field(default_factory=list)
     failures: list[TrialFailure] = field(default_factory=list)
-    result: Optional[str] = None
-    evolved_approach: Optional[str] = None
+    result: str | None = None
+    evolved_approach: str | None = None
 
 
 class TrialHarness:
     """Bounded sandbox for safe experimentation with automatic failure capture."""
 
-    def __init__(self, config: Optional[TrialConfig] = None):
+    def __init__(self, config: TrialConfig | None = None):
         self.config = config or TrialConfig()
         self.trials: dict[str, ExperimentTrial] = {}
 

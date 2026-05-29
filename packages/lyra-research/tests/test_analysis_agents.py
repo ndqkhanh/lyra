@@ -13,7 +13,6 @@ import pytest
 pytest_plugins = ('pytest_asyncio',)
 
 from lyra_research.agents.analysis import (
-    AnalysisAgent,
     CitationAnalysisAgent,
     PaperAnalysisAgent,
     QualityScoreAgent,
@@ -21,7 +20,6 @@ from lyra_research.agents.analysis import (
 )
 from lyra_research.agents.analysis.analysis_base import Analysis
 from lyra_research.discovery import ResearchSource, SourceType
-
 
 # ---------------------------------------------------------------------------
 # Test Fixtures

@@ -2,14 +2,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any
 
-from lyra_research.quality.quality_gate import GateResult, QualityGate
-from lyra_research.quality.discovery_gate import DiscoveryGate
 from lyra_research.quality.analysis_gate import AnalysisGate
-from lyra_research.quality.synthesis_gate import SynthesisGate
-from lyra_research.quality.review_gate import ReviewGate
 from lyra_research.quality.curation_gate import CurationGate
+from lyra_research.quality.discovery_gate import DiscoveryGate
+from lyra_research.quality.quality_gate import GateResult, QualityGate
+from lyra_research.quality.review_gate import ReviewGate
+from lyra_research.quality.synthesis_gate import SynthesisGate
 
 
 @dataclass
@@ -35,7 +35,7 @@ class GateEnforcer:
 
     def __init__(self) -> None:
         """Initialize gate enforcer with all gates."""
-        self.gates: Dict[str, QualityGate] = {
+        self.gates: dict[str, QualityGate] = {
             "discovery": DiscoveryGate(),
             "analysis": AnalysisGate(),
             "synthesis": SynthesisGate(),
@@ -132,7 +132,7 @@ class GateEnforcer:
                 count += 1
         return count
 
-    def get_gate_stats(self, gate_name: str) -> Dict[str, Any]:
+    def get_gate_stats(self, gate_name: str) -> dict[str, Any]:
         """
         Get statistics for a specific gate.
 
@@ -178,7 +178,7 @@ class GateEnforcer:
             "criterion_stats": gate.get_criterion_stats(),
         }
 
-    def get_all_stats(self) -> Dict[str, Dict[str, Any]]:
+    def get_all_stats(self) -> dict[str, dict[str, Any]]:
         """
         Get statistics for all gates.
 

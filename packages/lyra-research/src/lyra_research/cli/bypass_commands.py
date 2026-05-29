@@ -5,8 +5,9 @@ Command-line interface for bypass permissions management.
 """
 
 import click
-from ..permissions.bypass_manager import BypassManager
+
 from ..permissions.audit_logger import AuditLogger
+from ..permissions.bypass_manager import BypassManager
 
 
 @click.group()

@@ -4,10 +4,9 @@ Bypass Manager
 Manages bypass permissions mode with configuration and audit logging.
 """
 
+import json
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional
-import json
 from pathlib import Path
 
 
@@ -15,8 +14,8 @@ from pathlib import Path
 class BypassConfig:
     """Configuration for bypass mode"""
     enabled: bool = False
-    auto_disable_after_minutes: Optional[int] = 30  # Auto-disable after 30 min
-    allowed_operations: Optional[List[str]] = None  # None = all, or specific list
+    auto_disable_after_minutes: int | None = 30  # Auto-disable after 30 min
+    allowed_operations: list[str] | None = None  # None = all, or specific list
 
     def __post_init__(self):
         if self.allowed_operations is None:
@@ -34,10 +33,10 @@ class BypassManager:
     - Audit logging
     """
 
-    def __init__(self, config_path: Optional[Path] = None, audit_logger=None):
+    def __init__(self, config_path: Path | None = None, audit_logger=None):
         self.config_path = config_path or Path.home() / ".lyra" / "bypass_config.json"
         self.config = self._load_config()
-        self.enabled_at: Optional[datetime] = None
+        self.enabled_at: datetime | None = None
         self.audit_logger = audit_logger  # Allow injecting audit logger for testing
 
     def _load_config(self) -> BypassConfig:

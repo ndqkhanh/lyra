@@ -10,14 +10,14 @@ from .ai_detector import (
     AIDetectionResult,
     AIPattern,
 )
-from .five_pass_editor import (
-    FivePassEditor,
-    EditPass,
-    EditResult,
-)
 from .burstiness_analyzer import (
     BurstinessAnalyzer,
     BurstinessResult,
+)
+from .five_pass_editor import (
+    EditPass,
+    EditResult,
+    FivePassEditor,
 )
 
 __all__ = [

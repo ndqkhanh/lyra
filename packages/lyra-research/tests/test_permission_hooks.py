@@ -4,12 +4,13 @@ Tests for Permission Hooks (Bypass Permissions Phase 2)
 Tests hook integration for permission system.
 """
 
-import pytest
-from pathlib import Path
 import tempfile
+from pathlib import Path
+
+import pytest
 from lyra_research.hooks.permission_hooks import PermissionHooks
-from lyra_research.permissions.permission_gate import PermissionLevel
 from lyra_research.permissions.bypass_manager import BypassManager
+from lyra_research.permissions.permission_gate import PermissionLevel
 
 
 class TestPermissionHooks:

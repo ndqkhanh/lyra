@@ -5,18 +5,18 @@ Implements PRISMA-trAIce compliance checking and risk-of-bias assessment
 for systematic reviews.
 """
 
-from .prisma_checker import (
-    PRISMAComplianceChecker,
-    PRISMAResult,
-    PRISMAItem,
-    PRISMAItemResult,
-)
 from .bias_assessor import (
-    RiskOfBiasAssessor,
     BiasAssessment,
     BiasDomain,
-    RiskLevel,
     DomainAssessment,
+    RiskLevel,
+    RiskOfBiasAssessor,
+)
+from .prisma_checker import (
+    PRISMAComplianceChecker,
+    PRISMAItem,
+    PRISMAItemResult,
+    PRISMAResult,
 )
 
 __all__ = [

@@ -8,9 +8,9 @@ and selective review.
 import pytest
 from lyra_research.cross_model.cross_model_reviewer import (
     CrossModelReviewer,
+    ExecutionResult,
     ModelType,
     ReviewDecision,
-    ExecutionResult,
     ReviewResult,
 )
 

@@ -9,14 +9,12 @@ from dataclasses import dataclass, field
 from uuid import uuid4
 
 import pytest
-
 from lyra_research.evaluation import (
     QualityTrendTracker,
     ResearchQualityEvaluator,
     ResearchQualityMetrics,
     SelfEvaluationAgent,
 )
-
 
 # ---------------------------------------------------------------------------
 # Minimal stub for ResearchProgress and ResearchReport (avoids network deps)

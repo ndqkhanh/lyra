@@ -5,13 +5,13 @@ Tests permission checkpoint with bypass support.
 """
 
 import pytest
-from lyra_research.permissions.permission_gate import (
-    PermissionGate,
-    PermissionRequest,
-    PermissionLevel,
-    CRITICAL_OPERATIONS,
-)
 from lyra_research.permissions.bypass_manager import BypassManager
+from lyra_research.permissions.permission_gate import (
+    CRITICAL_OPERATIONS,
+    PermissionGate,
+    PermissionLevel,
+    PermissionRequest,
+)
 
 
 class TestPermissionGate:

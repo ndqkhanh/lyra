@@ -5,10 +5,9 @@ Analyzes sentence length variation (burstiness) in text.
 Low burstiness indicates AI-like uniformity.
 """
 
-from dataclasses import dataclass
-from typing import List
 import re
 import statistics
+from dataclasses import dataclass
 
 
 @dataclass
@@ -18,7 +17,7 @@ class BurstinessResult:
     mean_sentence_length: float
     std_dev: float
     coefficient_of_variation: float
-    sentence_lengths: List[int]
+    sentence_lengths: list[int]
     is_uniform: bool  # True if burstiness < 0.3
 
 
@@ -88,7 +87,7 @@ class BurstinessAnalyzer:
             is_uniform=is_uniform
         )
 
-    def split_sentences(self, text: str) -> List[str]:
+    def split_sentences(self, text: str) -> list[str]:
         """
         Split text into sentences
 

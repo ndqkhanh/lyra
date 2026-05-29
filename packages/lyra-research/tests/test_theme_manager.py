@@ -4,9 +4,9 @@ Tests for Theme Manager (Funny Sounds Phase 0)
 Tests sound theme management.
 """
 
+
 import pytest
-from pathlib import Path
-from lyra_research.sounds.theme_manager import ThemeManager, SoundTheme
+from lyra_research.sounds.theme_manager import ThemeManager
 
 
 class TestThemeManager:

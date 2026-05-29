@@ -5,12 +5,10 @@ Provides cost-controlled adversarial review with selective claim verification,
 disagreement resolution, and context budget enforcement.
 """
 
+import re
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
-import re
-import sys
-
+from typing import Any
 
 # ---------------------------------------------------------------------------
 # Context Budget
@@ -65,8 +63,8 @@ class Claim:
     """A verifiable claim extracted from a research report."""
     text: str
     confidence: float  # 0.0-1.0
-    citations: List[str] = field(default_factory=list)  # Citation keys like "[1]", "[2]"
-    source_ids: List[str] = field(default_factory=list)  # Actual source IDs
+    citations: list[str] = field(default_factory=list)  # Citation keys like "[1]", "[2]"
+    source_ids: list[str] = field(default_factory=list)  # Actual source IDs
     location: str = ""  # Section or paragraph identifier
 
     def citation_count(self) -> int:
@@ -89,7 +87,7 @@ class ReviewResult:
     """Result of adversarial review."""
     original_report: str
     revised_report: str
-    issues_found: List[ReviewIssue]
+    issues_found: list[ReviewIssue]
     issues_resolved: int
     review_cost_usd: float
     context_size_kb: float
@@ -128,7 +126,7 @@ class AdversarialReviewer:
     def review(
         self,
         report: Any,  # ResearchReport from reporter.py
-        sources: List[Any],  # List[ResearchSource] from discovery.py
+        sources: list[Any],  # List[ResearchSource] from discovery.py
         depth: str = "standard",
     ) -> ReviewResult:
         """
@@ -168,7 +166,7 @@ class AdversarialReviewer:
         claims = self.filter_low_confidence_claims(report)
 
         # Verify each claim
-        issues: List[ReviewIssue] = []
+        issues: list[ReviewIssue] = []
         for claim in claims:
             issue = self.verify_claim(claim, claim_mapping)
             if issue:
@@ -204,8 +202,8 @@ class AdversarialReviewer:
     def extract_cited_sources(
         self,
         report: Any,
-        sources: List[Any],
-    ) -> List[Any]:
+        sources: list[Any],
+    ) -> list[Any]:
         """
         Extract top 10 most-cited sources from the report.
 
@@ -222,7 +220,7 @@ class AdversarialReviewer:
         citations = re.findall(citation_pattern, report_text)
 
         # Count citation frequency
-        citation_counts: Dict[str, int] = {}
+        citation_counts: dict[str, int] = {}
         for cite in citations:
             citation_counts[cite] = citation_counts.get(cite, 0) + 1
 
@@ -254,8 +252,8 @@ class AdversarialReviewer:
     def build_claim_mapping(
         self,
         report: Any,
-        sources: List[Any],
-    ) -> Dict[str, List[str]]:
+        sources: list[Any],
+    ) -> dict[str, list[str]]:
         """
         Build mapping from claims to source IDs.
 
@@ -266,7 +264,7 @@ class AdversarialReviewer:
         Returns:
             Dict mapping claim text to list of source IDs
         """
-        claim_mapping: Dict[str, List[str]] = {}
+        claim_mapping: dict[str, list[str]] = {}
         report_text = report.to_markdown()
 
         # Extract claims with citations
@@ -296,7 +294,7 @@ class AdversarialReviewer:
 
         return claim_mapping
 
-    def filter_low_confidence_claims(self, report: Any) -> List[Claim]:
+    def filter_low_confidence_claims(self, report: Any) -> list[Claim]:
         """
         Extract claims with confidence <0.8 for selective review.
 
@@ -306,7 +304,7 @@ class AdversarialReviewer:
         Returns:
             List of Claim objects with confidence <0.8
         """
-        claims: List[Claim] = []
+        claims: list[Claim] = []
         report_text = report.to_markdown()
 
         # Patterns for claims that need verification
@@ -363,8 +361,8 @@ class AdversarialReviewer:
     def verify_claim(
         self,
         claim: Claim,
-        claim_mapping: Dict[str, List[str]],
-    ) -> Optional[ReviewIssue]:
+        claim_mapping: dict[str, list[str]],
+    ) -> ReviewIssue | None:
         """
         Verify a single claim against available sources.
 
@@ -503,8 +501,8 @@ class AdversarialReviewer:
     def _calculate_context_size(
         self,
         report_text: str,
-        cited_sources: List[Any],
-        claim_mapping: Dict[str, List[str]],
+        cited_sources: list[Any],
+        claim_mapping: dict[str, list[str]],
     ) -> float:
         """
         Calculate total context size in KB.

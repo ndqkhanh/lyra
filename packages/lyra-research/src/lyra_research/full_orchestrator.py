@@ -16,20 +16,19 @@ Architecture:
 """
 from __future__ import annotations
 
-import asyncio
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import uuid4
 
 from lyra_core.context.layered_context import LayeredContextManager
+
 from lyra_research.coordination.role_coordinator import (
     CoordinatedPipelineResult,
     RoleCoordinator,
 )
 from lyra_research.models.model_router import ModelRouter
-from lyra_research.quality.quality_gate import QualityGate
 from lyra_research.reporter import ResearchReport
 
 
@@ -40,7 +39,7 @@ class Phase2ResearchProgress:
     session_id: str
     query: str
     started_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    completed_at: Optional[datetime] = None
+    completed_at: datetime | None = None
 
     # Role execution
     discovery_complete: bool = False
@@ -61,12 +60,12 @@ class Phase2ResearchProgress:
 
     # Knowledge curation
     knowledge_accepted: bool = False
-    knowledge_entry_id: Optional[str] = None
+    knowledge_entry_id: str | None = None
 
     # Results
-    report: Optional[ResearchReport] = None
-    pipeline_result: Optional[CoordinatedPipelineResult] = None
-    error: Optional[str] = None
+    report: ResearchReport | None = None
+    pipeline_result: CoordinatedPipelineResult | None = None
+    error: str | None = None
 
     @property
     def is_complete(self) -> bool:
@@ -91,9 +90,9 @@ class Phase2Orchestrator:
 
     def __init__(
         self,
-        context_manager: Optional[LayeredContextManager] = None,
-        model_router: Optional[ModelRouter] = None,
-        output_dir: Optional[Path] = None,
+        context_manager: LayeredContextManager | None = None,
+        model_router: ModelRouter | None = None,
+        output_dir: Path | None = None,
     ) -> None:
         """
         Initialize Phase 2 orchestrator.
@@ -278,7 +277,7 @@ class Phase2Orchestrator:
         # Build contested claims section
         contested_claims_section = ""
         if synthesis.contradictions_found > 0:
-            contested_claims_section = f"## Contradictions Found\n\n"
+            contested_claims_section = "## Contradictions Found\n\n"
             contested_claims_section += f"Detected {synthesis.contradictions_found} contradictions across sources.\n"
 
         # Build references section
@@ -333,7 +332,7 @@ class Phase2Orchestrator:
         }
         return sum(costs.values())
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """
         Get orchestrator statistics.
 

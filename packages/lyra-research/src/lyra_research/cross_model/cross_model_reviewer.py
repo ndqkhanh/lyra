@@ -9,8 +9,8 @@ Implements heterogeneous model verification:
 """
 
 from dataclasses import dataclass
-from typing import Dict, Any, List, Optional
 from enum import Enum
+from typing import Any
 
 
 class ModelType(Enum):
@@ -33,7 +33,7 @@ class ExecutionResult:
     content: str
     confidence: float  # 0.0 to 1.0
     model: ModelType
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -41,8 +41,8 @@ class ReviewResult:
     """Result from reviewer model"""
     decision: ReviewDecision
     confidence: float
-    issues: List[str]
-    suggestions: List[str]
+    issues: list[str]
+    suggestions: list[str]
     model: ModelType
 
 
@@ -74,7 +74,7 @@ class CrossModelReviewer:
         self.executor_model = ModelType.CLAUDE_OPUS
         self.reviewer_model = ModelType.GPT4O
 
-    def execute_and_review(self, task: Dict[str, Any]) -> Dict[str, Any]:
+    def execute_and_review(self, task: dict[str, Any]) -> dict[str, Any]:
         """
         Execute task with Claude Opus and review with GPT-4o
 
@@ -125,7 +125,7 @@ class CrossModelReviewer:
             "reviewer": review.model.value
         }
 
-    def execute_task(self, task: Dict[str, Any]) -> ExecutionResult:
+    def execute_task(self, task: dict[str, Any]) -> ExecutionResult:
         """
         Execute task with Claude Opus
 
@@ -147,7 +147,7 @@ class CrossModelReviewer:
             metadata={"task_id": task.get("id", "unknown")}
         )
 
-    def review_execution(self, execution: ExecutionResult, task: Dict[str, Any]) -> ReviewResult:
+    def review_execution(self, execution: ExecutionResult, task: dict[str, Any]) -> ReviewResult:
         """
         Review execution with GPT-4o
 
@@ -219,7 +219,7 @@ class CrossModelReviewer:
         self,
         execution: ExecutionResult,
         review: ReviewResult,
-        task: Dict[str, Any]
+        task: dict[str, Any]
     ) -> DisagreementResolution:
         """
         Resolve disagreement between models

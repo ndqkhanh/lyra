@@ -6,7 +6,7 @@ Checks for falsification attempts and verifies claims.
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, List
+from typing import Any
 
 from lyra_research.agents.analysis.analysis_base import Analysis
 from lyra_research.agents.synthesis.synthesis_base import SynthesisAgent, SynthesisResult
@@ -26,7 +26,7 @@ class FalsificationCheckerAgent(SynthesisAgent):
     def __init__(self, model: str = "claude-opus-4-7") -> None:
         super().__init__(synthesis_type="falsification", model=model)
 
-    async def synthesize(self, analyses: List[Analysis]) -> SynthesisResult:
+    async def synthesize(self, analyses: list[Analysis]) -> SynthesisResult:
         """
         Check for falsification attempts.
 
@@ -63,14 +63,14 @@ class FalsificationCheckerAgent(SynthesisAgent):
         )
 
     def _check_falsification(
-        self, findings: List[str], evidence_issues: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+        self, findings: list[str], evidence_issues: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
         """
         Check for falsification risks.
 
         Returns list of falsification risks.
         """
-        risks: List[Dict[str, Any]] = []
+        risks: list[dict[str, Any]] = []
 
         # Patterns for overstated claims
         overstatement_patterns = [

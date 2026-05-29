@@ -1,10 +1,8 @@
 """
 Tests for adaptive task decomposition.
 """
-import pytest
 
 from lyra_research.adaptive_coordination import AdaptiveTaskGraph
-from lyra_research.coordination import Task
 
 
 def test_adaptive_task_graph_initialization():

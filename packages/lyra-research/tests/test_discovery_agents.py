@@ -5,8 +5,7 @@ Tests 6 discovery agents with parallel execution and rate limiting.
 """
 import asyncio
 import time
-from datetime import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -24,7 +23,6 @@ from lyra_research.agents.discovery import (
 )
 from lyra_research.agents.discovery.discovery_base import RateLimiter
 from lyra_research.discovery import ResearchSource, SourceType
-
 
 # ---------------------------------------------------------------------------
 # RateLimiter Tests

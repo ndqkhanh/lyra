@@ -4,18 +4,18 @@ Permissions Module
 Implements bypass permissions system with security gates and audit logging.
 """
 
-from .permission_gate import (
-    PermissionGate,
-    PermissionRequest,
-    PermissionLevel,
+from .audit_logger import (
+    AuditEntry,
+    AuditLogger,
 )
 from .bypass_manager import (
-    BypassManager,
     BypassConfig,
+    BypassManager,
 )
-from .audit_logger import (
-    AuditLogger,
-    AuditEntry,
+from .permission_gate import (
+    PermissionGate,
+    PermissionLevel,
+    PermissionRequest,
 )
 
 __all__ = [

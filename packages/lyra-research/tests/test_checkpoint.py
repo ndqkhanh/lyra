@@ -1,12 +1,8 @@
 """
 Tests for checkpoint system.
 """
-import json
 import time
 from datetime import datetime, timezone
-from pathlib import Path
-
-import pytest
 
 from lyra_research.checkpoint import ResearchCheckpoint, ResearchState
 

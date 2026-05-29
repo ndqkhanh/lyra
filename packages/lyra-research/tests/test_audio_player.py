@@ -4,11 +4,12 @@ Tests for Audio Player (Funny Sounds Phase 0)
 Tests cross-platform audio playback.
 """
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
-from pathlib import Path
 import tempfile
-from lyra_research.sounds.audio_player import AudioPlayer, AudioBackend
+from pathlib import Path
+from unittest.mock import patch
+
+import pytest
+from lyra_research.sounds.audio_player import AudioBackend, AudioPlayer
 
 
 class TestAudioPlayer:

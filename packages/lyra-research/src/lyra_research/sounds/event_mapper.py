@@ -5,7 +5,6 @@ Maps Lyra events to sound events with intelligent detection.
 """
 
 from enum import Enum
-from typing import Optional
 
 
 class SoundEvent(Enum):
@@ -55,7 +54,7 @@ class EventMapper:
         # Generic error
         return SoundEvent.ERROR
 
-    def detect_milestone(self, task_count: int) -> Optional[SoundEvent]:
+    def detect_milestone(self, task_count: int) -> SoundEvent | None:
         """
         Detect milestone achievements
 

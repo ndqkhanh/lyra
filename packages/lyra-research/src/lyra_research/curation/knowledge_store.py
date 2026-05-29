@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Dict, List, Optional
 
 from lyra_research.curation.knowledge_entry import EntryStatus, KnowledgeEntry
 
@@ -27,7 +26,7 @@ class KnowledgeStore:
         self.storage_path.mkdir(parents=True, exist_ok=True)
 
         # In-memory cache
-        self.entries: Dict[str, KnowledgeEntry] = {}
+        self.entries: dict[str, KnowledgeEntry] = {}
 
         # Load existing entries
         self._load_entries()
@@ -36,7 +35,7 @@ class KnowledgeStore:
         """Load entries from disk into memory."""
         for entry_file in self.storage_path.glob("*.json"):
             try:
-                with open(entry_file, "r") as f:
+                with open(entry_file) as f:
                     data = json.load(f)
                     entry = KnowledgeEntry.from_dict(data)
                     self.entries[entry.id] = entry
@@ -77,7 +76,7 @@ class KnowledgeStore:
         with open(entry_path, "w") as f:
             json.dump(entry.to_dict(), f, indent=2)
 
-    def retrieve(self, entry_id: str) -> Optional[KnowledgeEntry]:
+    def retrieve(self, entry_id: str) -> KnowledgeEntry | None:
         """
         Retrieve entry by ID.
 
@@ -90,8 +89,8 @@ class KnowledgeStore:
         return self.entries.get(entry_id)
 
     def search(
-        self, query: str, category: Optional[str] = None
-    ) -> List[KnowledgeEntry]:
+        self, query: str, category: str | None = None
+    ) -> list[KnowledgeEntry]:
         """
         Search entries by query and optional category.
 
@@ -121,7 +120,7 @@ class KnowledgeStore:
         # Sort by quality score (descending)
         return sorted(results, key=lambda e: e.quality_score, reverse=True)
 
-    def get_by_category(self, category: str) -> List[KnowledgeEntry]:
+    def get_by_category(self, category: str) -> list[KnowledgeEntry]:
         """
         Get all entries in category.
 
@@ -136,7 +135,7 @@ class KnowledgeStore:
         # Sort by quality score (descending)
         return sorted(results, key=lambda e: e.quality_score, reverse=True)
 
-    def get_by_tag(self, tag: str) -> List[KnowledgeEntry]:
+    def get_by_tag(self, tag: str) -> list[KnowledgeEntry]:
         """
         Get all entries with tag.
 
@@ -151,7 +150,7 @@ class KnowledgeStore:
         # Sort by quality score (descending)
         return sorted(results, key=lambda e: e.quality_score, reverse=True)
 
-    def get_all(self) -> List[KnowledgeEntry]:
+    def get_all(self) -> list[KnowledgeEntry]:
         """
         Get all entries.
 
@@ -192,7 +191,7 @@ class KnowledgeStore:
         """
         return len(self.entries)
 
-    def get_categories(self) -> List[str]:
+    def get_categories(self) -> list[str]:
         """
         Get all unique categories.
 
@@ -201,7 +200,7 @@ class KnowledgeStore:
         """
         return sorted(set(e.category for e in self.entries.values()))
 
-    def get_tags(self) -> List[str]:
+    def get_tags(self) -> list[str]:
         """
         Get all unique tags.
 

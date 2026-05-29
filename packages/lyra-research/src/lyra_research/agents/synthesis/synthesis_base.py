@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, List
+from typing import Any
 
 from lyra_research.agents.analysis.analysis_base import Analysis
 
@@ -15,8 +15,8 @@ class SynthesisResult:
     """Result of synthesis operation."""
 
     synthesis_type: str  # "cross_source", "contradiction", "evidence", "falsification"
-    findings: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    findings: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
     confidence: float = 1.0
     issues_found: int = 0
     issues_resolved: int = 0
@@ -45,7 +45,7 @@ class SynthesisAgent(ABC):
         self.model = model
 
     @abstractmethod
-    async def synthesize(self, analyses: List[Analysis]) -> SynthesisResult:
+    async def synthesize(self, analyses: list[Analysis]) -> SynthesisResult:
         """
         Perform synthesis on the given analyses.
 

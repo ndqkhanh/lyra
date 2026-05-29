@@ -2,7 +2,6 @@
 Tests for research discovery engines.
 """
 
-import pytest
 from lyra_research.discovery import (
     ArXivDiscovery,
     GitHubDiscovery,

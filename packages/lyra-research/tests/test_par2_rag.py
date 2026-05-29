@@ -8,9 +8,7 @@ All tests run offline — no network calls.
 from dataclasses import FrozenInstanceError
 
 import pytest
-
 from lyra_research.knowledge_graph import (
-    EntityRelation,
     ResearchEntity,
     ResearchKG,
 )
@@ -38,7 +36,6 @@ from lyra_research.source_verification import (
     SourceRecord,
     SourceVerifier,
 )
-
 
 # ===========================================================================
 # knowledge_graph

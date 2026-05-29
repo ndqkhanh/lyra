@@ -11,23 +11,19 @@ Tests:
 - Adversarial review integration
 """
 import asyncio
-import pytest
-from pathlib import Path
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import AsyncMock, Mock
 
-from lyra_research.full_orchestrator import (
-    FullResearchOrchestrator,
-    FullResearchProgress,
-    SynthesisPipeline,
-)
+import pytest
+from lyra_research.agents.analysis import Analysis, AnalysisAgent
 from lyra_research.agents.discovery import DiscoveryAgent
-from lyra_research.agents.analysis import AnalysisAgent, Analysis
 from lyra_research.agents.synthesis import SynthesisAgent, SynthesisResult
-from lyra_research.coordination import CoordinationManager
 from lyra_research.capacity_manager import CapacityManager
 from lyra_research.checkpoint import ResearchCheckpoint
-from lyra_research.reporter import ResearchReport
-
+from lyra_research.coordination import CoordinationManager
+from lyra_research.full_orchestrator import (
+    FullResearchOrchestrator,
+    SynthesisPipeline,
+)
 
 # ---------------------------------------------------------------------------
 # Fixtures

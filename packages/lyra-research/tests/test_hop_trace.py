@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_research.hop_trace import GreedySearchPolicy, HopTrace, MultiHopResult
 
 

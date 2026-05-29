@@ -5,6 +5,7 @@ Command-line interface for sound system management.
 """
 
 import click
+
 from ..sounds.sound_manager import SoundManager
 from ..sounds.theme_manager import ThemeManager
 

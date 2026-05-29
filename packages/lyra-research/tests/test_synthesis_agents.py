@@ -2,11 +2,10 @@
 Tests for synthesis agents.
 """
 import pytest
-
 from lyra_research.agents.analysis.analysis_base import Analysis
 from lyra_research.agents.synthesis import (
-    CrossSourceSynthesizerAgent,
     ContradictionDetectorAgent,
+    CrossSourceSynthesizerAgent,
     EvidenceAuditorAgent,
     FalsificationCheckerAgent,
 )

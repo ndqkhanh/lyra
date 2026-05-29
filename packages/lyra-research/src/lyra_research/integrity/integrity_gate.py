@@ -6,8 +6,8 @@ Implements stages 2.5 (post-discovery) and 4.5 (pre-report).
 """
 
 from dataclasses import dataclass
-from typing import List, Protocol
 from enum import Enum
+from typing import Protocol
 
 
 class Severity(Enum):
@@ -32,8 +32,8 @@ class GateResult:
     """Result from integrity gate validation"""
     passed: bool
     stage: str
-    issues: List[ValidationResult]
-    blocking_issues: List[ValidationResult]
+    issues: list[ValidationResult]
+    blocking_issues: list[ValidationResult]
     message: str = ""
 
 
@@ -53,7 +53,7 @@ class IntegrityGate:
     These gates CANNOT be skipped or bypassed.
     """
 
-    def __init__(self, stage: str, validators: List[Validator]):
+    def __init__(self, stage: str, validators: list[Validator]):
         """
         Initialize integrity gate
 

@@ -13,7 +13,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, Generic, List, Optional, TypeVar
+from typing import Any, Generic, TypeVar
 
 from lyra_core.context.layered_context import LayeredContextManager
 
@@ -35,10 +35,10 @@ class RoleResult:
     role_name: str
     status: RoleStatus
     data: Any
-    error: Optional[str] = None
+    error: str | None = None
     started_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    completed_at: Optional[datetime] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    completed_at: datetime | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def mark_complete(self) -> None:
         """Mark result as complete."""

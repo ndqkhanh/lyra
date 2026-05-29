@@ -5,7 +5,6 @@ Implements Concession Threshold Protocol with frame-lock detection.
 """
 
 from dataclasses import dataclass
-from typing import Optional
 
 
 class ConcessionThreshold:
@@ -23,7 +22,7 @@ class AdvocateResult:
     concede: bool
     score: int  # 1-5
     reason: str
-    counter_rebuttal: Optional[str] = None
+    counter_rebuttal: str | None = None
 
 
 class DevilsAdvocateProtocol:
@@ -143,7 +142,7 @@ class DevilsAdvocateProtocol:
         """
         # In production, this would use LLM to generate sophisticated counter-arguments
         # For now, return a template
-        return f"While your rebuttal addresses some aspects, consider: What evidence supports the alternative view? Have you accounted for potential confounding factors?"
+        return "While your rebuttal addresses some aspects, consider: What evidence supports the alternative view? Have you accounted for potential confounding factors?"
 
     def detect_frame_lock(self) -> bool:
         """

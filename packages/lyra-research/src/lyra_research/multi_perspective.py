@@ -9,9 +9,8 @@ from __future__ import annotations
 
 import logging
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +30,7 @@ class PerspectiveType(Enum):
     HISTORIAN = "historian"      # Contextualizes with prior work and historical patterns
 
 
-PERSPECTIVE_DESCRIPTIONS: Dict[PerspectiveType, str] = {
+PERSPECTIVE_DESCRIPTIONS: dict[PerspectiveType, str] = {
     PerspectiveType.OPTIMIST: (
         "Sees potential breakthroughs, positive applications, and best-case "
         "outcomes. Highlights what could go right and why this matters."
@@ -74,11 +73,11 @@ class PerspectiveAnalysis:
     """
 
     perspective: PerspectiveType
-    key_insights: Tuple[str, ...] = ()
-    strengths: Tuple[str, ...] = ()
-    weaknesses: Tuple[str, ...] = ()
+    key_insights: tuple[str, ...] = ()
+    strengths: tuple[str, ...] = ()
+    weaknesses: tuple[str, ...] = ()
     score: float = 0.5
-    novel_ideas: Tuple[str, ...] = ()
+    novel_ideas: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -92,8 +91,8 @@ class DebateRound:
     """
 
     round_number: int
-    analyses: Tuple[PerspectiveAnalysis, ...] = ()
-    critiques: Tuple[Tuple[str, str, str], ...] = ()  # (from_p, to_p, text)
+    analyses: tuple[PerspectiveAnalysis, ...] = ()
+    critiques: tuple[tuple[str, str, str], ...] = ()  # (from_p, to_p, text)
 
 
 @dataclass(frozen=True)
@@ -109,8 +108,8 @@ class SynthesisResult:
     """
 
     topic: str
-    consensus_points: Tuple[str, ...] = ()
-    dissent_points: Tuple[str, ...] = ()
+    consensus_points: tuple[str, ...] = ()
+    dissent_points: tuple[str, ...] = ()
     balanced_report: str = ""
     confidence: float = 0.5
 
@@ -153,10 +152,10 @@ class PerspectiveAgent:
         """
         lowered = findings.lower()
 
-        insights: List[str] = []
-        strengths: List[str] = []
-        weaknesses: List[str] = []
-        novel: List[str] = []
+        insights: list[str] = []
+        strengths: list[str] = []
+        weaknesses: list[str] = []
+        novel: list[str] = []
 
         # Score: how well findings align with this perspective's criteria
         matches = 0
@@ -203,7 +202,7 @@ class PerspectiveAgent:
 
     # -- critique ------------------------------------------------------------
 
-    def critique(self, other_analysis: PerspectiveAnalysis) -> List[str]:
+    def critique(self, other_analysis: PerspectiveAnalysis) -> list[str]:
         """Challenge another perspective's analysis.
 
         Args:
@@ -212,7 +211,7 @@ class PerspectiveAgent:
         Returns:
             List of critique points.
         """
-        critiques: List[str] = []
+        critiques: list[str] = []
 
         # Each perspective has natural criticisms of others
         blindspots = _blindspots(self.perspective, other_analysis.perspective)
@@ -239,7 +238,7 @@ class PerspectiveAgent:
 
     # -- synthesis -----------------------------------------------------------
 
-    def synthesize(self, all_analyses: List[PerspectiveAnalysis]) -> PerspectiveAnalysis:
+    def synthesize(self, all_analyses: list[PerspectiveAnalysis]) -> PerspectiveAnalysis:
         """Incorporate other perspectives' views into this agent's synthesis.
 
         Args:
@@ -248,7 +247,7 @@ class PerspectiveAgent:
         Returns:
             Updated analysis incorporating cross-perspective insights.
         """
-        other_insights: List[str] = []
+        other_insights: list[str] = []
         for analysis in all_analyses:
             if analysis.perspective != self.perspective:
                 for insight in analysis.key_insights[:2]:
@@ -271,7 +270,7 @@ class PerspectiveAgent:
 
     # -- helpers -------------------------------------------------------------
 
-    def _generate_novel_ideas(self, _findings: str) -> List[str]:
+    def _generate_novel_ideas(self, _findings: str) -> list[str]:
         """Propose novel research directions from this perspective."""
         prompts = {
             PerspectiveType.OPTIMIST: "Explore scaling to larger datasets and broader domains.",
@@ -293,7 +292,7 @@ class MultiPerspectiveSynthesizer:
 
     def __init__(self) -> None:
         """Create synthesizer with all five perspective agents."""
-        self._agents: Dict[PerspectiveType, PerspectiveAgent] = {
+        self._agents: dict[PerspectiveType, PerspectiveAgent] = {
             pt: PerspectiveAgent(pt) for pt in PerspectiveType
         }
 
@@ -304,7 +303,7 @@ class MultiPerspectiveSynthesizer:
         topic: str,
         findings: str,
         rounds: int = 2,
-    ) -> List[DebateRound]:
+    ) -> list[DebateRound]:
         """Run a structured multi-perspective debate on *topic*.
 
         Args:
@@ -315,7 +314,7 @@ class MultiPerspectiveSynthesizer:
         Returns:
             List of ``DebateRound`` results.
         """
-        debate_rounds: List[DebateRound] = []
+        debate_rounds: list[DebateRound] = []
 
         for r in range(rounds):
             # Each agent analyses independently
@@ -325,7 +324,7 @@ class MultiPerspectiveSynthesizer:
             )
 
             # Cross-perspective critiques
-            critiques: List[Tuple[str, str, str]] = []
+            critiques: list[tuple[str, str, str]] = []
             for agent in self._agents.values():
                 for other_analysis in analyses:
                     if other_analysis.perspective != agent.perspective:
@@ -355,7 +354,7 @@ class MultiPerspectiveSynthesizer:
 
     # -- synthesis -----------------------------------------------------------
 
-    def synthesize_perspectives(self, debate_rounds: List[DebateRound]) -> SynthesisResult:
+    def synthesize_perspectives(self, debate_rounds: list[DebateRound]) -> SynthesisResult:
         """Combine debate rounds into a balanced report.
 
         Args:
@@ -384,14 +383,14 @@ class MultiPerspectiveSynthesizer:
         )
 
         # Identify dissent (weaknesses / critiques unique to 1-2 perspectives)
-        dissent: List[str] = []
+        dissent: list[str] = []
         for analysis in last_round.analyses:
             for weakness in analysis.weaknesses:
                 dissent.append(f"[{analysis.perspective.value}] {weakness}")
 
         # Build balanced report
-        report_parts: List[str] = [
-            f"=== Multi-Perspective Synthesis Report ===\n",
+        report_parts: list[str] = [
+            "=== Multi-Perspective Synthesis Report ===\n",
             f"Confidence: {avg_confidence:.2f}\n",
         ]
 
@@ -430,7 +429,7 @@ class MultiPerspectiveSynthesizer:
 
     # -- consensus / dissent -------------------------------------------------
 
-    def identify_consensus(self, debate_rounds: List[DebateRound]) -> List[str]:
+    def identify_consensus(self, debate_rounds: list[DebateRound]) -> list[str]:
         """Extract areas of agreement across perspectives.
 
         Args:
@@ -454,7 +453,7 @@ class MultiPerspectiveSynthesizer:
             word for word, count in all_keywords.items() if count >= 4
         )
 
-    def highlight_dissent(self, debate_rounds: List[DebateRound]) -> List[str]:
+    def highlight_dissent(self, debate_rounds: list[DebateRound]) -> list[str]:
         """Extract areas of productive disagreement.
 
         Args:
@@ -466,7 +465,7 @@ class MultiPerspectiveSynthesizer:
         if not debate_rounds:
             return []
         last = debate_rounds[-1]
-        dissent: List[str] = []
+        dissent: list[str] = []
         for _, _, text in last.critiques:
             dissent.append(text)
         return dissent
@@ -534,12 +533,12 @@ def _build_criteria(perspective: PerspectiveType) -> dict:
     return criteria_map[perspective]
 
 
-def _blindspots(from_p: PerspectiveType, to_p: PerspectiveType) -> List[str]:
+def _blindspots(from_p: PerspectiveType, to_p: PerspectiveType) -> list[str]:
     """Return natural blind-spot critiques from one perspective on another."""
     if from_p == to_p:
         return []
 
-    pairs: Dict[Tuple[PerspectiveType, PerspectiveType], List[str]] = {
+    pairs: dict[tuple[PerspectiveType, PerspectiveType], list[str]] = {
         (PerspectiveType.SKEPTIC, PerspectiveType.OPTIMIST): [
             "Optimistic framing may overstate significance.",
             "Positive results should be tempered with failure analysis.",

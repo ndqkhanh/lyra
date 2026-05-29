@@ -4,13 +4,14 @@ Tests for Bypass Manager (Bypass Permissions Phase 0)
 Tests bypass mode management with configuration and timeout.
 """
 
-import pytest
+import tempfile
 import time
 from pathlib import Path
-import tempfile
+
+import pytest
 from lyra_research.permissions.bypass_manager import (
-    BypassManager,
     BypassConfig,
+    BypassManager,
 )
 
 

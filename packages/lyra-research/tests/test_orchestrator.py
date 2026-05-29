@@ -1,9 +1,8 @@
 """Tests for ResearchOrchestrator (Phase 6)."""
 from __future__ import annotations
 
-from typing import Any, Dict, List
-from unittest.mock import MagicMock, patch
-
+from typing import Any
+from unittest.mock import patch
 
 from lyra_research.discovery import ResearchSource, SourceType
 from lyra_research.memory import (
@@ -13,7 +12,6 @@ from lyra_research.memory import (
     SessionCaseBank,
 )
 from lyra_research.orchestrator import ResearchOrchestrator, ResearchProgress
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -48,12 +46,12 @@ def _make_orchestrator(tmp_path: Path) -> ResearchOrchestrator:
     )
 
 
-def _empty_discover(*args: Any, **kwargs: Any) -> Dict[str, List[ResearchSource]]:
+def _empty_discover(*args: Any, **kwargs: Any) -> dict[str, list[ResearchSource]]:
     """Stub for MultiSourceDiscovery.discover that returns nothing."""
     return {}
 
 
-def _two_source_discover(*args: Any, **kwargs: Any) -> Dict[str, List[ResearchSource]]:
+def _two_source_discover(*args: Any, **kwargs: Any) -> dict[str, list[ResearchSource]]:
     """Stub returning one paper and one repo."""
     return {
         "arxiv": [_make_source("p1", "Paper One", "https://arxiv.org/p1", SourceType.PAPER)],
@@ -147,7 +145,7 @@ def test_orchestrator_deep_depth_accepted(tmp_path: Path) -> None:
 
 def test_orchestrator_progress_callback_called(tmp_path: Path) -> None:
     """Callback is invoked at least once per step."""
-    calls: List[ResearchProgress] = []
+    calls: list[ResearchProgress] = []
 
     def cb(p: ResearchProgress) -> None:
         calls.append(p)
@@ -161,7 +159,7 @@ def test_orchestrator_progress_callback_called(tmp_path: Path) -> None:
 
 def test_orchestrator_progress_step_numbers_monotonic(tmp_path: Path) -> None:
     """Step numbers in callbacks should be monotonically increasing."""
-    steps: List[int] = []
+    steps: list[int] = []
 
     def cb(p: ResearchProgress) -> None:
         steps.append(p.current_step)
@@ -174,7 +172,7 @@ def test_orchestrator_progress_step_numbers_monotonic(tmp_path: Path) -> None:
 
 def test_orchestrator_progress_callback_has_step_name(tmp_path: Path) -> None:
     """Each callback delivers a non-empty step name."""
-    names: List[str] = []
+    names: list[str] = []
 
     def cb(p: ResearchProgress) -> None:
         names.append(p.current_step_name)
@@ -227,7 +225,7 @@ def test_orchestrator_deduplicates_sources(tmp_path: Path) -> None:
     """Sources with the same URL are counted only once."""
     dup_source = _make_source("p1", "Paper One", "https://arxiv.org/p1")
 
-    def discover_with_dups(*a: Any, **kw: Any) -> Dict[str, List[ResearchSource]]:
+    def discover_with_dups(*a: Any, **kw: Any) -> dict[str, list[ResearchSource]]:
         return {
             "arxiv": [dup_source, dup_source],  # same URL twice
             "semantic_scholar": [dup_source],

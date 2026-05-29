@@ -1,11 +1,9 @@
 """Curation Gate — Final quality gate before knowledge storage."""
 from __future__ import annotations
 
-from typing import Any
-
-from lyra_research.roles.curator_role import KnowledgeEntry
 from lyra_research.quality.quality_criterion import QualityCriterion
 from lyra_research.quality.quality_gate import QualityGate
+from lyra_research.roles.curator_role import KnowledgeEntry
 
 
 class CurationGate(QualityGate):

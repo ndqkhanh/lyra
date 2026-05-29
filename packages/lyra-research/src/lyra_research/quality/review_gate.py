@@ -1,11 +1,9 @@
 """Review Gate — Quality gate between Review → Curator."""
 from __future__ import annotations
 
-from typing import Any
-
-from lyra_research.roles.review_role import ReviewResult
 from lyra_research.quality.quality_criterion import QualityCriterion
 from lyra_research.quality.quality_gate import QualityGate
+from lyra_research.roles.review_role import ReviewResult
 
 
 class ReviewGate(QualityGate):

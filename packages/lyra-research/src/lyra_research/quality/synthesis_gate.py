@@ -1,11 +1,9 @@
 """Synthesis Gate — Quality gate between Synthesis → Review."""
 from __future__ import annotations
 
-from typing import Any
-
-from lyra_research.reporter import ResearchReport
 from lyra_research.quality.quality_criterion import QualityCriterion
 from lyra_research.quality.quality_gate import QualityGate
+from lyra_research.reporter import ResearchReport
 
 
 class SynthesisGate(QualityGate):

@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from lyra_research.memory import (
@@ -70,11 +70,11 @@ class ResearchMemoryController:
 
     def __init__(
         self,
-        note_store: Optional["ResearchNoteStore"] = None,
-        case_bank: Optional["SessionCaseBank"] = None,
-        kg: Optional["KnowledgeGraph"] = None,
-        strategy_memory: Optional["ResearchStrategyMemory"] = None,
-        corpus: Optional["LocalCorpus"] = None,
+        note_store: ResearchNoteStore | None = None,
+        case_bank: SessionCaseBank | None = None,
+        kg: KnowledgeGraph | None = None,
+        strategy_memory: ResearchStrategyMemory | None = None,
+        corpus: LocalCorpus | None = None,
         promote_confidence: float = PROMOTE_CONFIDENCE,
     ) -> None:
         self.note_store = note_store
@@ -88,7 +88,7 @@ class ResearchMemoryController:
     # Notes
     # ------------------------------------------------------------------
 
-    def write_note(self, note: "ResearchNote") -> list[MemoryDecision]:
+    def write_note(self, note: ResearchNote) -> list[MemoryDecision]:
         """Decide what to do with an incoming note.
 
         Returns a list of decisions (one per affected subsystem).
@@ -155,7 +155,7 @@ class ResearchMemoryController:
     # Cases
     # ------------------------------------------------------------------
 
-    def write_case(self, case: "ResearchCase") -> MemoryDecision:
+    def write_case(self, case: ResearchCase) -> MemoryDecision:
         """Save a completed research case to the bank."""
         if self.case_bank is None:
             return MemoryDecision("REJECT", "case", reason="no case bank configured")
@@ -166,7 +166,7 @@ class ResearchMemoryController:
     # Strategies
     # ------------------------------------------------------------------
 
-    def write_strategy(self, strategy: "ResearchStrategy") -> MemoryDecision:
+    def write_strategy(self, strategy: ResearchStrategy) -> MemoryDecision:
         """Record a research strategy outcome."""
         if self.strategy_memory is None:
             return MemoryDecision("REJECT", "strategy", reason="no strategy memory configured")
@@ -221,7 +221,7 @@ class ResearchMemoryController:
     # Helpers
     # ------------------------------------------------------------------
 
-    def _find_duplicate_note(self, note: "ResearchNote") -> Optional["ResearchNote"]:
+    def _find_duplicate_note(self, note: ResearchNote) -> ResearchNote | None:
         if self.note_store is None:
             return None
         existing = list(getattr(self.note_store, "_notes", {}).values())
@@ -238,7 +238,7 @@ class ResearchMemoryController:
                 return other
         return None
 
-    def _find_contradicting_notes(self, note: "ResearchNote") -> list["ResearchNote"]:
+    def _find_contradicting_notes(self, note: ResearchNote) -> list[ResearchNote]:
         """Detect contradictions by simple negation marker overlap.
 
         Conservative: only flags notes with same topic where one contains
@@ -253,7 +253,7 @@ class ResearchMemoryController:
         ]
         markers = ("does not", "cannot", "no longer", "never", "not")
         new_has_neg = any(m in note.content.lower() for m in markers)
-        out: list["ResearchNote"] = []
+        out: list[ResearchNote] = []
         for other in existing:
             other_has_neg = any(m in other.content.lower() for m in markers)
             if new_has_neg != other_has_neg:
@@ -263,7 +263,7 @@ class ResearchMemoryController:
                     out.append(other)
         return out
 
-    def _promote_to_kg(self, note: "ResearchNote") -> None:
+    def _promote_to_kg(self, note: ResearchNote) -> None:
         """Add a high-confidence note's concepts to the knowledge graph."""
         if self.kg is None:
             return

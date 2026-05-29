@@ -11,12 +11,12 @@ Based on research: docs/155 (feynman-multi-agent-research-harness.md)
 Impact: >95% citation coverage, <5% unsourced claims
 """
 
-from typing import List, Dict, Any, Optional
-from dataclasses import dataclass
-from pathlib import Path
-from datetime import datetime
-import json
 import hashlib
+import json
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 
 @dataclass
@@ -27,7 +27,7 @@ class ResearchArtifact:
     content: str
     artifact_type: str  # plan, findings, verification, synthesis
     created_at: datetime
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 class FeynmanPipeline:
@@ -72,7 +72,7 @@ class FeynmanPipeline:
     def run(
         self,
         research_question: str,
-        context_docs: Optional[List[str]] = None
+        context_docs: list[str] | None = None
     ) -> Path:
         """
         Run complete Feynman pipeline.
@@ -125,7 +125,7 @@ class FeynmanPipeline:
         self,
         slug: str,
         research_question: str,
-        context_docs: Optional[List[str]]
+        context_docs: list[str] | None
     ) -> Path:
         """Stage 1: Create research plan."""
         print("\n[Stage 1: Planning]")
@@ -173,12 +173,12 @@ Output JSON:
         self,
         slug: str,
         plan_path: Path
-    ) -> List[Path]:
+    ) -> list[Path]:
         """Stage 2: Execute research, write findings."""
         print("\n[Stage 2: Research]")
 
         # Load plan
-        with open(plan_path, 'r') as f:
+        with open(plan_path) as f:
             plan = json.load(f)
 
         findings_paths = []
@@ -224,7 +224,7 @@ Output JSON:
     def _stage_3_verification(
         self,
         slug: str,
-        findings_paths: List[Path]
+        findings_paths: list[Path]
     ) -> Path:
         """Stage 3: Verify findings and citations."""
         print("\n[Stage 3: Verification]")
@@ -232,7 +232,7 @@ Output JSON:
         # Load all findings
         all_findings = []
         for path in findings_paths:
-            with open(path, 'r') as f:
+            with open(path) as f:
                 all_findings.append(json.load(f))
 
         # Format for verification
@@ -274,22 +274,22 @@ Output JSON:
         self,
         slug: str,
         plan_path: Path,
-        findings_paths: List[Path],
+        findings_paths: list[Path],
         verification_path: Path
     ) -> Path:
         """Stage 4: Synthesize final report."""
         print("\n[Stage 4: Synthesis]")
 
         # Load all artifacts
-        with open(plan_path, 'r') as f:
+        with open(plan_path) as f:
             plan = json.load(f)
 
         findings = []
         for path in findings_paths:
-            with open(path, 'r') as f:
+            with open(path) as f:
                 findings.append(json.load(f))
 
-        with open(verification_path, 'r') as f:
+        with open(verification_path) as f:
             verification = json.load(f)
 
         # Format for synthesis
@@ -317,10 +317,10 @@ Output markdown format.
         with open(synthesis_path, 'w') as f:
             f.write(synthesis_content)
 
-        print(f"✓ Synthesis complete")
+        print("✓ Synthesis complete")
         return synthesis_path
 
-    def get_artifacts(self, slug: str) -> Dict[str, List[Path]]:
+    def get_artifacts(self, slug: str) -> dict[str, list[Path]]:
         """Get all artifacts for a research session."""
         artifacts = {
             'plan': [],
@@ -359,11 +359,11 @@ class VerificationPrimitive:
     @staticmethod
     def add_verification_metadata(
         artifact_path: Path,
-        verification_data: Dict[str, Any]
+        verification_data: dict[str, Any]
     ) -> None:
         """Add verification metadata to artifact."""
         # Load artifact
-        with open(artifact_path, 'r') as f:
+        with open(artifact_path) as f:
             if artifact_path.suffix == '.json':
                 artifact = json.load(f)
             else:

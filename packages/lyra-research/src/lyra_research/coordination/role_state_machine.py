@@ -10,9 +10,9 @@ States:
 """
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import Callable, Dict, List, Optional
 
 
 class RoleState(str, Enum):
@@ -40,7 +40,7 @@ class RoleTransition:
     from_state: RoleState
     to_state: RoleState
     condition: Callable[[], bool]
-    action: Optional[Callable[[], None]] = None
+    action: Callable[[], None] | None = None
 
     def can_transition(self) -> bool:
         """Check if transition is allowed."""
@@ -60,8 +60,8 @@ class RoleStateMachine:
 
     def __init__(self) -> None:
         """Initialize state machine with default transitions."""
-        self._transitions: Dict[tuple[RoleState, str], RoleTransition] = {}
-        self._current_state: Dict[str, RoleState] = {}
+        self._transitions: dict[tuple[RoleState, str], RoleTransition] = {}
+        self._current_state: dict[str, RoleState] = {}
         self._setup_default_transitions()
 
     def _setup_default_transitions(self) -> None:
@@ -170,7 +170,7 @@ class RoleStateMachine:
 
     def transition(
         self, role_name: str, event: str
-    ) -> tuple[bool, Optional[str]]:
+    ) -> tuple[bool, str | None]:
         """Execute state transition for a role.
 
         Args:
@@ -219,7 +219,7 @@ class RoleStateMachine:
 
         return self._transitions[key].can_transition()
 
-    def get_available_events(self, role_name: str) -> List[str]:
+    def get_available_events(self, role_name: str) -> list[str]:
         """Get available events for a role in its current state.
 
         Args:

@@ -5,8 +5,8 @@ Implements State-Challenge-Reflect (SCR) protocol for deep exploration.
 """
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional
 from enum import Enum
+from typing import Any
 
 
 class IntentType(Enum):
@@ -20,9 +20,9 @@ class UserState:
     """Current user understanding state"""
     query: str
     certainty: float  # 0.0 to 1.0
-    assumptions: List[str] = field(default_factory=list)
-    knowledge_gaps: List[str] = field(default_factory=list)
-    context: Dict[str, Any] = field(default_factory=dict)
+    assumptions: list[str] = field(default_factory=list)
+    knowledge_gaps: list[str] = field(default_factory=list)
+    context: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -37,9 +37,9 @@ class Challenge:
 @dataclass
 class SocraticDialogue:
     """Dialogue session tracking"""
-    turns: List[Dict[str, Any]] = field(default_factory=list)
-    current_state: Optional[UserState] = None
-    intent: Optional[IntentType] = None
+    turns: list[dict[str, Any]] = field(default_factory=list)
+    current_state: UserState | None = None
+    intent: IntentType | None = None
 
     def add_turn(self, turn_type: str, content: Any):
         """Add a turn to the dialogue"""
@@ -63,7 +63,7 @@ class SocraticQuestioningAgent:
         self.challenge_generator = None  # Would be ChallengeGenerator()
         self.reflection_analyzer = None  # Would be ReflectionAnalyzer()
 
-    def engage(self, query: str, context: Dict[str, Any]) -> SocraticDialogue:
+    def engage(self, query: str, context: dict[str, Any]) -> SocraticDialogue:
         """
         Engage in Socratic dialogue
 
@@ -99,7 +99,7 @@ class SocraticQuestioningAgent:
 
         return dialogue
 
-    def detect_intent(self, query: str, context: Dict[str, Any]) -> IntentType:
+    def detect_intent(self, query: str, context: dict[str, Any]) -> IntentType:
         """
         Detect user intent: exploratory vs goal-oriented
 
@@ -132,7 +132,7 @@ class SocraticQuestioningAgent:
         else:
             return IntentType.GOAL_ORIENTED
 
-    def extract_state(self, query: str, context: Dict[str, Any]) -> UserState:
+    def extract_state(self, query: str, context: dict[str, Any]) -> UserState:
         """
         Extract user's current understanding state
 
@@ -185,7 +185,7 @@ class SocraticQuestioningAgent:
         else:
             return 0.5  # Medium certainty
 
-    def extract_assumptions(self, query: str) -> List[str]:
+    def extract_assumptions(self, query: str) -> list[str]:
         """
         Extract implicit assumptions from query
 
@@ -211,7 +211,7 @@ class SocraticQuestioningAgent:
 
         return assumptions
 
-    def identify_gaps(self, query: str, context: Dict[str, Any]) -> List[str]:
+    def identify_gaps(self, query: str, context: dict[str, Any]) -> list[str]:
         """
         Identify knowledge gaps from query
 
@@ -314,7 +314,7 @@ class SocraticQuestioningAgent:
             expected_response_type="alternatives"
         )
 
-    def direct_research(self, query: str, context: Dict[str, Any]) -> SocraticDialogue:
+    def direct_research(self, query: str, context: dict[str, Any]) -> SocraticDialogue:
         """
         Handle goal-oriented queries with direct research
 

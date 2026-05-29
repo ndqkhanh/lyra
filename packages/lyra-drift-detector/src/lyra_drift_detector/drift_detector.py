@@ -14,12 +14,12 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import math
 import time
 from collections import deque
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Callable, Optional, Sequence
+from typing import Any
 
 import numpy as np
 
@@ -172,7 +172,7 @@ def _mmd(
     x: np.ndarray,
     y: np.ndarray,
     kernel: str = "rbf",
-    sigma: Optional[float] = None,
+    sigma: float | None = None,
 ) -> float:
     """Maximum Mean Discrepancy between two samples.
 
@@ -272,7 +272,7 @@ class BaseDriftDetector:
         self.threshold = threshold
         self.min_samples = min_samples
         self.detection_method = detection_method
-        self._baseline: Optional[np.ndarray] = None
+        self._baseline: np.ndarray | None = None
         self._drift_history: deque[DriftSignal] = deque(maxlen=1000)
 
     @property
@@ -323,14 +323,14 @@ class PerformanceDriftDetector(BaseDriftDetector):
         threshold: float = 0.15,
         min_samples: int = 30,
         detection_method: DetectionMethod = DetectionMethod.EWMA,
-        metrics: Optional[list[str]] = None,
+        metrics: list[str] | None = None,
     ) -> None:
         super().__init__(window_size, threshold, min_samples, detection_method)
         self.metrics = metrics or ["latency_ms", "error_rate", "throughput", "tokens_per_second"]
         self._metric_buffers: dict[str, deque[float]] = {
             m: deque(maxlen=window_size) for m in self.metrics
         }
-        self._ewma: dict[str, float] = {m: 0.0 for m in self.metrics}
+        self._ewma: dict[str, float] = dict.fromkeys(self.metrics, 0.0)
         self._ewma_alpha: float = 0.1  # Smoothing factor
         self._baselines: dict[str, np.ndarray] = {}
 
@@ -359,7 +359,7 @@ class PerformanceDriftDetector(BaseDriftDetector):
         """Set baseline data for a specific metric."""
         self._baselines[metric] = np.asarray(data, dtype=np.float64)
 
-    def check_drift(self, metric: Optional[str] = None) -> DriftSignal | list[DriftSignal]:
+    def check_drift(self, metric: str | None = None) -> DriftSignal | list[DriftSignal]:
         """Check for performance drift on one or all metrics.
 
         Args:
@@ -597,7 +597,7 @@ class DistributionDriftDetector(BaseDriftDetector):
         self._reference_samples = deque(samples[-self.window_size:], maxlen=self.window_size)
         self._baseline = np.array(samples, dtype=np.float64)
 
-    def record(self, value: float, task_type: str = "", features: Optional[dict[str, float]] = None) -> None:
+    def record(self, value: float, task_type: str = "", features: dict[str, float] | None = None) -> None:
         """Record a new sample for distribution tracking.
 
         Args:
@@ -857,7 +857,7 @@ class ConceptDriftDetector(BaseDriftDetector):
         concept_id: str,
         features: dict[str, float],
         label: str,
-        embedding: Optional[Sequence[float]] = None,
+        embedding: Sequence[float] | None = None,
     ) -> None:
         """Record a concept instance for tracking.
 
@@ -883,7 +883,7 @@ class ConceptDriftDetector(BaseDriftDetector):
         """Record a prediction error for concept drift tracking."""
         self._prediction_errors.append(error)
 
-    def check_drift(self, concept_id: Optional[str] = None) -> DriftSignal:
+    def check_drift(self, concept_id: str | None = None) -> DriftSignal:
         """Check for concept drift.
 
         Args:
@@ -977,7 +977,7 @@ class DriftOrchestrator:
         self,
         global_threshold: float = 0.15,
         aggregation: str = "weighted_max",
-        detector_weights: Optional[dict[DriftType, float]] = None,
+        detector_weights: dict[DriftType, float] | None = None,
     ) -> None:
         """Initialize the drift orchestrator.
 
@@ -1152,7 +1152,7 @@ class DriftOrchestrator:
         }
 
     @property
-    def latest_report(self) -> Optional[DriftReport]:
+    def latest_report(self) -> DriftReport | None:
         """Get the most recent drift report."""
         return self._reports[-1] if self._reports else None
 

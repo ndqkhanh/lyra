@@ -5,7 +5,6 @@ Tracks pricing, estimates costs, and recommends models based on
 budget constraints and quality requirements.
 """
 
-from typing import Dict
 
 
 class CostOptimizer:
@@ -14,7 +13,7 @@ class CostOptimizer:
     def __init__(self):
         """Initialize cost optimizer with pricing data."""
         # Pricing per 1M tokens (USD)
-        self.pricing: Dict[str, Dict[str, float]] = {
+        self.pricing: dict[str, dict[str, float]] = {
             "claude-haiku-4-5": {"input": 0.25, "output": 1.25},
             "claude-sonnet-4-6": {"input": 3.0, "output": 15.0},
             "claude-opus-4-7": {"input": 15.0, "output": 75.0},
@@ -23,7 +22,7 @@ class CostOptimizer:
         }
 
         # Quality scores (0.0-1.0) based on benchmarks
-        self.quality_scores: Dict[str, float] = {
+        self.quality_scores: dict[str, float] = {
             "claude-haiku-4-5": 0.75,
             "claude-sonnet-4-6": 0.90,
             "claude-opus-4-7": 0.98,
@@ -114,7 +113,7 @@ class CostOptimizer:
         models: list[str],
         input_tokens: int,
         output_tokens: int
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """
         Compare costs across multiple models.
 

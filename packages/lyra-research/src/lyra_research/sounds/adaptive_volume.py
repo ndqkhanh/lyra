@@ -5,7 +5,6 @@ Adaptive volume adjustment based on user response.
 """
 
 from datetime import datetime, timedelta
-from typing import Optional
 
 
 class AdaptiveVolume:
@@ -17,7 +16,7 @@ class AdaptiveVolume:
 
     def __init__(self, base_volume: float = 0.5):
         self.base_volume = base_volume
-        self.last_completion: Optional[datetime] = None
+        self.last_completion: datetime | None = None
         self.no_response_threshold = timedelta(seconds=30)
 
     def get_volume(self, event: str) -> float:

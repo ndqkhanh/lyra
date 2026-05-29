@@ -8,24 +8,22 @@ Tests:
 - Progress tracking (3 tests)
 """
 import asyncio
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any
 
 import pytest
-
 from lyra_core.context.layered_context import LayeredContextManager
-from lyra_research.coordination.role_state_machine import (
-    RoleState,
-    RoleStateMachine,
-    RoleTransition,
-)
 from lyra_research.coordination.handoff_protocol import (
     HandoffData,
     HandoffProtocol,
 )
-from lyra_research.coordination.role_coordinator import RoleCoordinator
 from lyra_research.coordination.parallel_executor import ParallelExecutor
 from lyra_research.coordination.progress_tracker import ProgressTracker
+from lyra_research.coordination.role_coordinator import RoleCoordinator
+from lyra_research.coordination.role_state_machine import (
+    RoleState,
+    RoleStateMachine,
+)
 from lyra_research.roles.role_base import Role, RoleResult, RoleStatus
 
 

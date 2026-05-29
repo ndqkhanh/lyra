@@ -3,6 +3,7 @@ Tests for research strategies.
 """
 
 from datetime import datetime, timedelta
+
 from lyra_research.strategies import (
     QueryExpander,
     ResearchPlanner,

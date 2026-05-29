@@ -5,7 +5,7 @@ Routes tasks to appropriate models based on role and complexity,
 with fallback support for reliability.
 """
 
-from typing import Dict, Literal
+from typing import Literal
 
 RoleType = Literal["discovery", "analysis", "synthesis", "review", "curator"]
 ComplexityType = Literal["low", "medium", "high"]
@@ -16,7 +16,7 @@ class ModelRouter:
 
     def __init__(self):
         """Initialize model router with default configurations."""
-        self.model_configs: Dict[str, Dict[str, str]] = {
+        self.model_configs: dict[str, dict[str, str]] = {
             "discovery": {
                 "primary": "claude-haiku-4-5",
                 "fallback": "gpt-4o-mini"
@@ -40,7 +40,7 @@ class ModelRouter:
         }
 
         # Complexity-based overrides
-        self.complexity_overrides: Dict[ComplexityType, Dict[str, str]] = {
+        self.complexity_overrides: dict[ComplexityType, dict[str, str]] = {
             "low": {
                 "analysis": "claude-haiku-4-5",
                 "synthesis": "claude-sonnet-4-6"

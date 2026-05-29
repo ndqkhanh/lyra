@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, List
+from typing import Any
 
 from lyra_research.discovery import ResearchSource
 
@@ -16,8 +16,8 @@ class Analysis:
 
     source_id: str
     analysis_type: str  # "paper", "repo", "citation", "quality"
-    findings: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    findings: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
     confidence: float = 1.0
     quality_score: float = 0.0  # Overall quality score (0.0-1.0)
 

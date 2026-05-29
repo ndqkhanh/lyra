@@ -6,7 +6,6 @@ Manages sound themes for different event types.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
 
 
 @dataclass
@@ -14,7 +13,7 @@ class SoundTheme:
     """Sound theme definition"""
     name: str
     description: str
-    sounds: Dict[str, str]  # event -> sound_file mapping
+    sounds: dict[str, str]  # event -> sound_file mapping
 
 
 class ThemeManager:
@@ -32,7 +31,7 @@ class ThemeManager:
         self.sounds_dir = sounds_dir or Path(__file__).parent / "assets"
         self.themes = self._load_builtin_themes()
 
-    def _load_builtin_themes(self) -> Dict[str, SoundTheme]:
+    def _load_builtin_themes(self) -> dict[str, SoundTheme]:
         """Load built-in sound themes"""
         return {
             "warcraft": SoundTheme(
@@ -89,15 +88,15 @@ class ThemeManager:
             )
         }
 
-    def get_theme(self, theme_name: str) -> Optional[SoundTheme]:
+    def get_theme(self, theme_name: str) -> SoundTheme | None:
         """Get theme by name"""
         return self.themes.get(theme_name)
 
-    def list_themes(self) -> List[str]:
+    def list_themes(self) -> list[str]:
         """List available theme names"""
         return list(self.themes.keys())
 
-    def get_sound_path(self, theme_name: str, event: str) -> Optional[Path]:
+    def get_sound_path(self, theme_name: str, event: str) -> Path | None:
         """
         Get full path to sound file for event
 

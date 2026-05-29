@@ -6,18 +6,19 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from lyra_core.context.layered_context import LayeredContextManager
-from lyra_research.coordination.handoff_protocol import HandoffData, HandoffProtocol
+
+from lyra_research.coordination.handoff_protocol import HandoffProtocol
 from lyra_research.coordination.progress_tracker import ProgressTracker
 from lyra_research.coordination.role_state_machine import RoleState, RoleStateMachine
-from lyra_research.roles.analysis_role import AnalysisRole, AnalysisResult
-from lyra_research.roles.curator_role import CuratorRole, CurationResult
-from lyra_research.roles.discovery_role import DiscoveryRole, DiscoveryResult
-from lyra_research.roles.review_role import ReviewRole, ReviewResult
+from lyra_research.roles.analysis_role import AnalysisResult, AnalysisRole
+from lyra_research.roles.curator_role import CurationResult, CuratorRole
+from lyra_research.roles.discovery_role import DiscoveryResult, DiscoveryRole
+from lyra_research.roles.review_role import ReviewResult, ReviewRole
 from lyra_research.roles.role_base import Role, RoleResult, RoleStatus
-from lyra_research.roles.synthesis_role import SynthesisRole, SynthesisResult
+from lyra_research.roles.synthesis_role import SynthesisResult, SynthesisRole
 
 
 @dataclass
@@ -48,9 +49,9 @@ class CoordinatedPipelineResult:
     started_at: datetime
     completed_at: datetime
     total_duration_seconds: float
-    handoff_stats: Dict[str, Any]
-    progress_stats: Dict[str, Any]
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    handoff_stats: dict[str, Any]
+    progress_stats: dict[str, Any]
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class RoleCoordinator:
@@ -82,7 +83,7 @@ class RoleCoordinator:
         self.curator = CuratorRole(context_manager)
 
         # Role mapping
-        self._roles: Dict[str, Role] = {
+        self._roles: dict[str, Role] = {
             "Discovery": self.discovery,
             "Analysis": self.analysis,
             "Synthesis": self.synthesis,
@@ -277,7 +278,7 @@ class RoleCoordinator:
         """
         return self.progress_tracker.get_pipeline_progress()
 
-    def get_coordination_stats(self) -> Dict[str, Any]:
+    def get_coordination_stats(self) -> dict[str, Any]:
         """Get coordination statistics.
 
         Returns:

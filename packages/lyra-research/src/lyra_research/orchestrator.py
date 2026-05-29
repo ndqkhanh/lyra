@@ -8,54 +8,55 @@ Integrates:
 """
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 from uuid import uuid4
 
-from lyra_research.discovery import MultiSourceDiscovery, ResearchSource
-from lyra_research.sources import SourceQualityScorer
-from lyra_research.intelligence import (
-    VerifiableChecklistGenerator,
-    GapAnalyzer,
-    FalsificationChecker,
-)
-from lyra_research.memory import (
-    ResearchNoteStore,
-    LocalCorpus,
-    ResearchStrategyMemory,
-    SessionCaseBank,
-    ResearchNote,
-    ResearchCase,
-    CorpusEntry,
-)
-from lyra_research.reporter import (
-    CrossSourceSynthesizer,
-    ResearchReportGenerator,
-    ReportQualityChecker,
-    ResearchReport,
-)
-from lyra_research.skills import ResearchSkillStore, StrategyAdaptationSkill
-from lyra_research.coordination import (
-    CoordinationManager,
-    Task,
-    TaskState,
-    FailureType,
-)
-from lyra_research.capacity_manager import CapacityManager, CapacityLimits
-from lyra_research.adversarial_reviewer import AdversarialReviewer, ReviewResult
-from lyra_core.context.layered_context import (
-    LayeredContextManager,
-    ContextLayer,
-)
-from lyra_core.context.provenance import ContextAuditTrail
 from lyra_core.context.isolation import (
     ContextBoundary,
     IsolationPolicy,
 )
+from lyra_core.context.layered_context import (
+    ContextLayer,
+    LayeredContextManager,
+)
+from lyra_core.context.provenance import ContextAuditTrail
 
+from lyra_research.adversarial_reviewer import AdversarialReviewer
+from lyra_research.capacity_manager import CapacityManager
+from lyra_research.coordination import (
+    CoordinationManager,
+    FailureType,
+    Task,
+    TaskState,
+)
+from lyra_research.discovery import MultiSourceDiscovery, ResearchSource
+from lyra_research.intelligence import (
+    FalsificationChecker,
+    GapAnalyzer,
+    VerifiableChecklistGenerator,
+)
+from lyra_research.memory import (
+    CorpusEntry,
+    LocalCorpus,
+    ResearchCase,
+    ResearchNote,
+    ResearchNoteStore,
+    ResearchStrategyMemory,
+    SessionCaseBank,
+)
+from lyra_research.reporter import (
+    CrossSourceSynthesizer,
+    ReportQualityChecker,
+    ResearchReport,
+    ResearchReportGenerator,
+)
+from lyra_research.skills import ResearchSkillStore, StrategyAdaptationSkill
+from lyra_research.sources import SourceQualityScorer
 
 # ---------------------------------------------------------------------------
 # Agent Types
@@ -119,14 +120,14 @@ class ResearchProgress:
     topic: str
     current_step: int = 0
     current_step_name: str = ""
-    sources_found: Dict[str, int] = field(default_factory=dict)
+    sources_found: dict[str, int] = field(default_factory=dict)
     papers_analyzed: int = 0
     repos_analyzed: int = 0
     gaps_found: int = 0
-    report: Optional[Any] = None
-    error: Optional[str] = None
+    report: Any | None = None
+    error: str | None = None
     started_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    completed_at: Optional[datetime] = None
+    completed_at: datetime | None = None
 
     # Telemetry
     context_size_kb: float = 0.0
@@ -181,15 +182,15 @@ class ResearchOrchestrator:
 
     def __init__(
         self,
-        output_dir: Optional[Path] = None,
-        note_store: Optional[ResearchNoteStore] = None,
-        corpus: Optional[LocalCorpus] = None,
-        strategy_memory: Optional[ResearchStrategyMemory] = None,
-        case_bank: Optional[SessionCaseBank] = None,
-        coordination_manager: Optional[CoordinationManager] = None,
-        capacity_manager: Optional[CapacityManager] = None,
-        adversarial_reviewer: Optional[AdversarialReviewer] = None,
-        agent_configs: Optional[Dict[AgentType, AgentConfig]] = None,
+        output_dir: Path | None = None,
+        note_store: ResearchNoteStore | None = None,
+        corpus: LocalCorpus | None = None,
+        strategy_memory: ResearchStrategyMemory | None = None,
+        case_bank: SessionCaseBank | None = None,
+        coordination_manager: CoordinationManager | None = None,
+        capacity_manager: CapacityManager | None = None,
+        adversarial_reviewer: AdversarialReviewer | None = None,
+        agent_configs: dict[AgentType, AgentConfig] | None = None,
     ) -> None:
         self.output_dir = output_dir or Path.home() / ".lyra" / "research_reports"
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -254,8 +255,8 @@ class ResearchOrchestrator:
         self,
         topic: str,
         depth: str = "standard",
-        sources: Optional[List[str]] = None,
-        progress_callback: Optional[ProgressCallback] = None,
+        sources: list[str] | None = None,
+        progress_callback: ProgressCallback | None = None,
     ) -> ResearchProgress:
         """Execute the full research pipeline with 3-agent hybrid architecture.
 
@@ -450,8 +451,8 @@ class ResearchOrchestrator:
         task: Task,
         topic: str,
         depth: str,
-        sources: Optional[List[str]],
-    ) -> Dict[str, List[ResearchSource]]:
+        sources: list[str] | None,
+    ) -> dict[str, list[ResearchSource]]:
         """Execute discovery phase with coordination."""
         self.coordination.start_task(task)
 
@@ -498,8 +499,8 @@ class ResearchOrchestrator:
     def _execute_analysis(
         self,
         task: Task,
-        sources: List[ResearchSource],
-    ) -> tuple[List[Dict], List[Dict]]:
+        sources: list[ResearchSource],
+    ) -> tuple[list[dict], list[dict]]:
         """Execute analysis phase with coordination."""
         self.coordination.start_task(task)
 
@@ -529,9 +530,9 @@ class ResearchOrchestrator:
         self,
         task: Task,
         topic: str,
-        paper_analyses: List[Dict],
-        repo_analyses: List[Dict],
-        gaps: List[str],
+        paper_analyses: list[dict],
+        repo_analyses: list[dict],
+        gaps: list[str],
     ) -> Any:
         """Execute synthesis phase with coordination."""
         self.coordination.start_task(task)
@@ -564,8 +565,8 @@ class ResearchOrchestrator:
         task: Task,
         topic: str,
         synthesis: Any,
-        sources: List[Dict],
-        gaps: List[str],
+        sources: list[dict],
+        gaps: list[str],
         checklist: Any,
     ) -> ResearchReport:
         """Execute report generation with coordination."""
@@ -608,11 +609,11 @@ class ResearchOrchestrator:
         return topic, depth
 
     def _rank_and_deduplicate(
-        self, sources: List[ResearchSource], query: str
-    ) -> List[ResearchSource]:
+        self, sources: list[ResearchSource], query: str
+    ) -> list[ResearchSource]:
         """Rank by quality score, deduplicate by URL."""
         seen_urls: set = set()
-        unique: List[ResearchSource] = []
+        unique: list[ResearchSource] = []
         for s in sources:
             if s.url not in seen_urls:
                 seen_urls.add(s.url)
@@ -620,9 +621,9 @@ class ResearchOrchestrator:
         ranked = self.quality_scorer.rank(unique, query)
         return [s for s, _ in ranked]
 
-    def _store_to_corpus(self, sources: List[ResearchSource]) -> List[CorpusEntry]:
+    def _store_to_corpus(self, sources: list[ResearchSource]) -> list[CorpusEntry]:
         """Store sources to LocalCorpus."""
-        entries: List[CorpusEntry] = []
+        entries: list[CorpusEntry] = []
         for s in sources:
             entry = CorpusEntry(
                 id=s.id,
@@ -639,11 +640,11 @@ class ResearchOrchestrator:
         return entries
 
     def _analyze_sources(
-        self, sources: List[ResearchSource]
-    ) -> tuple[List[Dict], List[Dict]]:
+        self, sources: list[ResearchSource]
+    ) -> tuple[list[dict], list[dict]]:
         """Convert sources to paper/repo analysis dicts."""
-        papers: List[Dict] = []
-        repos: List[Dict] = []
+        papers: list[dict] = []
+        repos: list[dict] = []
         for s in sources:
             if s.source_type.value == "paper":
                 papers.append(
@@ -670,7 +671,7 @@ class ResearchOrchestrator:
                 )
         return papers, repos
 
-    def _source_to_dict(self, s: ResearchSource) -> Dict:
+    def _source_to_dict(self, s: ResearchSource) -> dict:
         return {
             "source_id": s.id,
             "title": s.title,
@@ -682,7 +683,7 @@ class ResearchOrchestrator:
         self,
         topic: str,
         report: ResearchReport,
-        sources: List[ResearchSource],
+        sources: list[ResearchSource],
         quality: float,
         report_path: str,
     ) -> None:

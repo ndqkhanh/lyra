@@ -4,10 +4,9 @@ Deep analysis engine for research sources.
 Analyzes papers, repositories, and provides quality scoring.
 """
 
+import re
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, List, Optional
-import re
 
 
 @dataclass
@@ -18,12 +17,12 @@ class PaperAnalysis:
 
     # Methodology
     methodology: str = ""
-    datasets_used: List[str] = field(default_factory=list)
-    evaluation_metrics: List[str] = field(default_factory=list)
+    datasets_used: list[str] = field(default_factory=list)
+    evaluation_metrics: list[str] = field(default_factory=list)
 
     # Results
-    key_findings: List[str] = field(default_factory=list)
-    performance_claims: List[str] = field(default_factory=list)
+    key_findings: list[str] = field(default_factory=list)
+    performance_claims: list[str] = field(default_factory=list)
 
     # Quality indicators
     citation_count: int = 0
@@ -32,9 +31,9 @@ class PaperAnalysis:
     reproducibility_score: float = 0.0
 
     # Critical evaluation
-    strengths: List[str] = field(default_factory=list)
-    limitations: List[str] = field(default_factory=list)
-    potential_biases: List[str] = field(default_factory=list)
+    strengths: list[str] = field(default_factory=list)
+    limitations: list[str] = field(default_factory=list)
+    potential_biases: list[str] = field(default_factory=list)
 
     # Metadata
     analyzed_at: datetime = field(default_factory=datetime.now)
@@ -69,8 +68,8 @@ class RepositoryAnalysis:
     has_license: bool = False
 
     # Critical evaluation
-    strengths: List[str] = field(default_factory=list)
-    limitations: List[str] = field(default_factory=list)
+    strengths: list[str] = field(default_factory=list)
+    limitations: list[str] = field(default_factory=list)
 
     # Metadata
     analyzed_at: datetime = field(default_factory=datetime.now)
@@ -97,7 +96,7 @@ class QualityScore:
 class PaperAnalyzer:
     """Analyze research papers."""
 
-    def analyze(self, paper_content: str, metadata: Dict) -> PaperAnalysis:
+    def analyze(self, paper_content: str, metadata: dict) -> PaperAnalysis:
         """
         Analyze a research paper.
 
@@ -151,7 +150,7 @@ class PaperAnalyzer:
 
         return ""
 
-    def _extract_datasets(self, content: str) -> List[str]:
+    def _extract_datasets(self, content: str) -> list[str]:
         """Extract dataset names."""
         # Common dataset patterns
         datasets = []
@@ -168,7 +167,7 @@ class PaperAnalyzer:
 
         return list(set(datasets))[:10]  # Top 10 unique
 
-    def _extract_metrics(self, content: str) -> List[str]:
+    def _extract_metrics(self, content: str) -> list[str]:
         """Extract evaluation metrics."""
         metrics = []
 
@@ -184,7 +183,7 @@ class PaperAnalyzer:
 
         return list(set(metrics))[:10]
 
-    def _extract_findings(self, content: str) -> List[str]:
+    def _extract_findings(self, content: str) -> list[str]:
         """Extract key findings."""
         findings = []
 
@@ -222,7 +221,7 @@ class PaperAnalyzer:
 
         return min(score, 1.0)
 
-    def _identify_strengths(self, content: str, metadata: Dict) -> List[str]:
+    def _identify_strengths(self, content: str, metadata: dict) -> list[str]:
         """Identify paper strengths."""
         strengths = []
 
@@ -244,7 +243,7 @@ class PaperAnalyzer:
 
         return strengths[:5]
 
-    def _identify_limitations(self, content: str) -> List[str]:
+    def _identify_limitations(self, content: str) -> list[str]:
         """Identify paper limitations."""
         limitations = []
 
@@ -270,7 +269,7 @@ class PaperAnalyzer:
 
         return limitations[:5]
 
-    def _detect_biases(self, content: str) -> List[str]:
+    def _detect_biases(self, content: str) -> list[str]:
         """Detect potential biases."""
         biases = []
 
@@ -292,7 +291,7 @@ class PaperAnalyzer:
 class RepositoryAnalyzer:
     """Analyze code repositories."""
 
-    def analyze(self, repo_metadata: Dict, readme_content: Optional[str] = None) -> RepositoryAnalysis:
+    def analyze(self, repo_metadata: dict, readme_content: str | None = None) -> RepositoryAnalysis:
         """
         Analyze a code repository.
 
@@ -329,26 +328,26 @@ class RepositoryAnalyzer:
 
         return analysis
 
-    def _has_documentation(self, metadata: Dict, readme: Optional[str]) -> bool:
+    def _has_documentation(self, metadata: dict, readme: str | None) -> bool:
         """Check if repo has documentation."""
         if readme and len(readme) > 500:
             return True
         return metadata.get('has_wiki', False) or metadata.get('has_pages', False)
 
-    def _has_tests(self, metadata: Dict) -> bool:
+    def _has_tests(self, metadata: dict) -> bool:
         """Check if repo has tests (heuristic)."""
         # Would need to fetch repo contents for accurate check
         # For now, use language as proxy
         language = metadata.get('language', '').lower()
         return language in ['python', 'javascript', 'typescript', 'java', 'go', 'rust']
 
-    def _has_ci(self, metadata: Dict) -> bool:
+    def _has_ci(self, metadata: dict) -> bool:
         """Check if repo has CI (heuristic)."""
         # Would need to check for .github/workflows or similar
         # For now, assume popular repos have CI
         return metadata.get('stars', 0) > 100
 
-    def _calculate_code_quality(self, metadata: Dict, readme: Optional[str]) -> float:
+    def _calculate_code_quality(self, metadata: dict, readme: str | None) -> float:
         """Calculate code quality score."""
         score = 0.0
 
@@ -375,7 +374,7 @@ class RepositoryAnalyzer:
 
         return min(score, 1.0)
 
-    def _calculate_doc_score(self, readme: Optional[str]) -> float:
+    def _calculate_doc_score(self, readme: str | None) -> float:
         """Calculate documentation score."""
         if not readme:
             return 0.0
@@ -406,7 +405,7 @@ class RepositoryAnalyzer:
 
         return min(score, 1.0)
 
-    def _calculate_maintenance_score(self, metadata: Dict) -> float:
+    def _calculate_maintenance_score(self, metadata: dict) -> float:
         """Calculate maintenance score."""
         score = 0.0
 
@@ -442,7 +441,7 @@ class RepositoryAnalyzer:
 
         return min(score, 1.0)
 
-    def _identify_repo_strengths(self, analysis: RepositoryAnalysis, metadata: Dict) -> List[str]:
+    def _identify_repo_strengths(self, analysis: RepositoryAnalysis, metadata: dict) -> list[str]:
         """Identify repository strengths."""
         strengths = []
 
@@ -463,7 +462,7 @@ class RepositoryAnalyzer:
 
         return strengths
 
-    def _identify_repo_limitations(self, analysis: RepositoryAnalysis, metadata: Dict) -> List[str]:
+    def _identify_repo_limitations(self, analysis: RepositoryAnalysis, metadata: dict) -> list[str]:
         """Identify repository limitations."""
         limitations = []
 

@@ -4,13 +4,13 @@ Tests for Advanced Sound Features (Funny Sounds Phase 3)
 Tests adaptive volume, productivity mode, and context-aware sounds.
 """
 
-import pytest
 import time
 from datetime import date, timedelta
-from pathlib import Path
+
+import pytest
 from lyra_research.sounds.adaptive_volume import AdaptiveVolume
-from lyra_research.sounds.productivity_mode import ProductivityMode
 from lyra_research.sounds.context_aware import ContextAwareSounds
+from lyra_research.sounds.productivity_mode import ProductivityMode
 from lyra_research.sounds.theme_manager import ThemeManager
 
 

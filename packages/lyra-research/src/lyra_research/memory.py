@@ -10,9 +10,8 @@ import sqlite3
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import uuid4
-
 
 # ---------------------------------------------------------------------------
 # ResearchNote (Zettelkasten / A-Mem style)
@@ -25,23 +24,23 @@ class ResearchNote:
     topic: str = ""
     title: str = ""
     content: str = ""
-    source_ids: List[str] = field(default_factory=list)
-    links: List[str] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
+    source_ids: list[str] = field(default_factory=list)
+    links: list[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     note_type: str = "finding"  # "finding", "gap", "strategy", "contradiction", "question"
     confidence: float = 1.0
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
-def _note_to_dict(note: ResearchNote) -> Dict[str, Any]:
+def _note_to_dict(note: ResearchNote) -> dict[str, Any]:
     d = asdict(note)
     d["created_at"] = note.created_at.isoformat()
     d["updated_at"] = note.updated_at.isoformat()
     return d
 
 
-def _dict_to_note(d: Dict[str, Any]) -> ResearchNote:
+def _dict_to_note(d: dict[str, Any]) -> ResearchNote:
     d = dict(d)
     d["created_at"] = datetime.fromisoformat(d["created_at"])
     d["updated_at"] = datetime.fromisoformat(d["updated_at"])
@@ -58,9 +57,9 @@ class ResearchNoteStore:
     Persistence: stores as JSON at self.store_path (default: ~/.lyra/research_notes.json)
     """
 
-    def __init__(self, store_path: Optional[Path] = None):
+    def __init__(self, store_path: Path | None = None):
         self.store_path = store_path or Path.home() / ".lyra" / "research_notes.json"
-        self._notes: Dict[str, ResearchNote] = {}
+        self._notes: dict[str, ResearchNote] = {}
         self._load()
 
     def add(self, note: ResearchNote) -> ResearchNote:
@@ -101,10 +100,10 @@ class ResearchNoteStore:
         self._save()
         return note
 
-    def get(self, note_id: str) -> Optional[ResearchNote]:
+    def get(self, note_id: str) -> ResearchNote | None:
         return self._notes.get(note_id)
 
-    def search(self, query: str, top_k: int = 10) -> List[ResearchNote]:
+    def search(self, query: str, top_k: int = 10) -> list[ResearchNote]:
         """Keyword search over title + content + tags."""
         query_lower = query.lower()
         results = []
@@ -114,19 +113,19 @@ class ResearchNoteStore:
                 results.append(note)
         return results[:top_k]
 
-    def get_linked(self, note_id: str) -> List[ResearchNote]:
+    def get_linked(self, note_id: str) -> list[ResearchNote]:
         """Get all notes linked to this note."""
         note = self._notes.get(note_id)
         if not note:
             return []
         return [self._notes[lid] for lid in note.links if lid in self._notes]
 
-    def find_by_topic(self, topic: str) -> List[ResearchNote]:
+    def find_by_topic(self, topic: str) -> list[ResearchNote]:
         """Get all notes for a given topic (substring match)."""
         topic_lower = topic.lower()
         return [n for n in self._notes.values() if topic_lower in n.topic.lower()]
 
-    def update(self, note_id: str, **kwargs) -> Optional[ResearchNote]:
+    def update(self, note_id: str, **kwargs) -> ResearchNote | None:
         """Update a note's fields and set updated_at."""
         note = self._notes.get(note_id)
         if not note:
@@ -146,7 +145,7 @@ class ResearchNoteStore:
         self._save()
         return True
 
-    def _auto_link(self, note: ResearchNote) -> List[str]:
+    def _auto_link(self, note: ResearchNote) -> list[str]:
         """Find existing notes with >=2 overlapping tags or same topic."""
         linked = []
         note_tags = set(note.tags)
@@ -195,7 +194,7 @@ class CorpusEntry:
     full_text: str
     source_type: str
     stored_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class LocalCorpus:
@@ -205,7 +204,7 @@ class LocalCorpus:
     DB path default: ~/.lyra/research_corpus.db
     """
 
-    def __init__(self, db_path: Optional[Path] = None):
+    def __init__(self, db_path: Path | None = None):
         self.db_path = db_path or Path.home() / ".lyra" / "research_corpus.db"
         self._init_db()
 
@@ -237,7 +236,7 @@ class LocalCorpus:
             )
         return True
 
-    def get(self, source_id: str) -> Optional[CorpusEntry]:
+    def get(self, source_id: str) -> CorpusEntry | None:
         """Retrieve by original source_id."""
         with sqlite3.connect(self.db_path) as conn:
             row = conn.execute(
@@ -247,7 +246,7 @@ class LocalCorpus:
             return None
         return self._row_to_entry(row)
 
-    def search(self, query: str, top_k: int = 10) -> List[CorpusEntry]:
+    def search(self, query: str, top_k: int = 10) -> list[CorpusEntry]:
         """Full-text search over title + abstract + full_text using LIKE."""
         pattern = f"%{query}%"
         with sqlite3.connect(self.db_path) as conn:
@@ -261,7 +260,7 @@ class LocalCorpus:
             ).fetchall()
         return [self._row_to_entry(r) for r in rows]
 
-    def list_all(self, source_type: Optional[str] = None) -> List[CorpusEntry]:
+    def list_all(self, source_type: str | None = None) -> list[CorpusEntry]:
         """List all stored entries, optionally filtered by source_type."""
         with sqlite3.connect(self.db_path) as conn:
             if source_type:
@@ -329,20 +328,20 @@ class ResearchStrategy:
     id: str = field(default_factory=lambda: str(uuid4()))
     topic_type: str = ""
     domain: str = ""
-    strategy_steps: List[str] = field(default_factory=list)
+    strategy_steps: list[str] = field(default_factory=list)
     outcome_score: float = 0.0
     lessons_learned: str = ""
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     use_count: int = 0
 
 
-def _strategy_to_dict(s: ResearchStrategy) -> Dict[str, Any]:
+def _strategy_to_dict(s: ResearchStrategy) -> dict[str, Any]:
     d = asdict(s)
     d["created_at"] = s.created_at.isoformat()
     return d
 
 
-def _dict_to_strategy(d: Dict[str, Any]) -> ResearchStrategy:
+def _dict_to_strategy(d: dict[str, Any]) -> ResearchStrategy:
     d = dict(d)
     d["created_at"] = datetime.fromisoformat(d["created_at"])
     return ResearchStrategy(**d)
@@ -354,9 +353,9 @@ class ResearchStrategyMemory:
     Persistence: JSON at ~/.lyra/research_strategies.json
     """
 
-    def __init__(self, store_path: Optional[Path] = None):
+    def __init__(self, store_path: Path | None = None):
         self.store_path = store_path or Path.home() / ".lyra" / "research_strategies.json"
-        self._strategies: Dict[str, ResearchStrategy] = {}
+        self._strategies: dict[str, ResearchStrategy] = {}
         self._load()
 
     def save_strategy(self, strategy: ResearchStrategy) -> ResearchStrategy:
@@ -364,7 +363,7 @@ class ResearchStrategyMemory:
         self._save()
         return strategy
 
-    def get_best_for_domain(self, domain: str, top_k: int = 3) -> List[ResearchStrategy]:
+    def get_best_for_domain(self, domain: str, top_k: int = 3) -> list[ResearchStrategy]:
         """Get top-k strategies for a domain, sorted by outcome_score desc."""
         matching = [
             s for s in self._strategies.values()
@@ -373,7 +372,7 @@ class ResearchStrategyMemory:
         matching.sort(key=lambda s: s.outcome_score, reverse=True)
         return matching[:top_k]
 
-    def get_for_topic_type(self, topic_type: str) -> List[ResearchStrategy]:
+    def get_for_topic_type(self, topic_type: str) -> list[ResearchStrategy]:
         return [
             s for s in self._strategies.values()
             if s.topic_type.lower() == topic_type.lower()
@@ -426,19 +425,19 @@ class ResearchCase:
     sources_found: int = 0
     quality_score: float = 0.0
     duration_seconds: float = 0.0
-    top_sources: List[str] = field(default_factory=list)
-    key_findings: List[str] = field(default_factory=list)
-    gaps_found: List[str] = field(default_factory=list)
+    top_sources: list[str] = field(default_factory=list)
+    key_findings: list[str] = field(default_factory=list)
+    gaps_found: list[str] = field(default_factory=list)
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
-def _case_to_dict(c: ResearchCase) -> Dict[str, Any]:
+def _case_to_dict(c: ResearchCase) -> dict[str, Any]:
     d = asdict(c)
     d["created_at"] = c.created_at.isoformat()
     return d
 
 
-def _dict_to_case(d: Dict[str, Any]) -> ResearchCase:
+def _dict_to_case(d: dict[str, Any]) -> ResearchCase:
     d = dict(d)
     d["created_at"] = datetime.fromisoformat(d["created_at"])
     return ResearchCase(**d)
@@ -450,9 +449,9 @@ class SessionCaseBank:
     Persistence: JSON at ~/.lyra/research_cases.json
     """
 
-    def __init__(self, store_path: Optional[Path] = None):
+    def __init__(self, store_path: Path | None = None):
         self.store_path = store_path or Path.home() / ".lyra" / "research_cases.json"
-        self._cases: Dict[str, ResearchCase] = {}
+        self._cases: dict[str, ResearchCase] = {}
         self._load()
 
     def save_case(self, case: ResearchCase) -> ResearchCase:
@@ -460,7 +459,7 @@ class SessionCaseBank:
         self._save()
         return case
 
-    def find_related(self, topic: str, top_k: int = 3) -> List[ResearchCase]:
+    def find_related(self, topic: str, top_k: int = 3) -> list[ResearchCase]:
         """Find cases with overlapping topic keywords, sorted by quality_score desc."""
         topic_words = set(w.lower() for w in topic.split() if len(w) > 3)
         scored = []
@@ -472,13 +471,13 @@ class SessionCaseBank:
         scored.sort(key=lambda x: (x[0], x[1].quality_score), reverse=True)
         return [c for _, c in scored[:top_k]]
 
-    def get_all(self, domain: Optional[str] = None) -> List[ResearchCase]:
+    def get_all(self, domain: str | None = None) -> list[ResearchCase]:
         """List all cases, optionally filtered by domain."""
         if domain:
             return [c for c in self._cases.values() if c.domain.lower() == domain.lower()]
         return list(self._cases.values())
 
-    def get_best(self, n: int = 5) -> List[ResearchCase]:
+    def get_best(self, n: int = 5) -> list[ResearchCase]:
         """Get top-n cases by quality_score."""
         sorted_cases = sorted(self._cases.values(), key=lambda c: c.quality_score, reverse=True)
         return sorted_cases[:n]

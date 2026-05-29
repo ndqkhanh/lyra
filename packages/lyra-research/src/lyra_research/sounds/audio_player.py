@@ -6,9 +6,8 @@ Cross-platform audio playback for sound notifications.
 
 import platform
 import subprocess
-from pathlib import Path
-from typing import Optional
 from enum import Enum
+from pathlib import Path
 
 
 class AudioBackend(Enum):
@@ -56,7 +55,7 @@ class AudioPlayer:
             return False
 
     def play(self, sound_path: Path, volume: float = 1.0,
-             background: bool = True) -> Optional[subprocess.Popen]:
+             background: bool = True) -> subprocess.Popen | None:
         """
         Play sound file
 

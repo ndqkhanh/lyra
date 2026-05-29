@@ -6,7 +6,6 @@ Based on Academic Research Skills repository best practices.
 """
 
 from dataclasses import dataclass
-from typing import List, Optional
 from enum import Enum
 
 
@@ -22,11 +21,11 @@ class Citation:
     """Citation data structure"""
     id: str
     title: str
-    authors: List[str]
+    authors: list[str]
     year: int
-    url: Optional[str] = None
-    doi: Optional[str] = None
-    arxiv_id: Optional[str] = None
+    url: str | None = None
+    doi: str | None = None
+    arxiv_id: str | None = None
 
 
 @dataclass
@@ -209,7 +208,7 @@ class MultiLayerCitationVerifier:
         # Placeholder - would make actual API call
         return citation.arxiv_id is not None
 
-    def _fetch_paper_content(self, citation: Citation) -> Optional[str]:
+    def _fetch_paper_content(self, citation: Citation) -> str | None:
         """Fetch paper content for faithfulness audit"""
         # Placeholder - would fetch actual paper content
         return f"Abstract for {citation.title}"

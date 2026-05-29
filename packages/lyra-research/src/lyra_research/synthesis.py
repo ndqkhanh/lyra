@@ -4,10 +4,9 @@ Knowledge synthesis engine for research.
 Builds citation networks, extracts concepts, and creates knowledge graphs.
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set, Tuple
 import re
 from collections import defaultdict
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -16,8 +15,8 @@ class Concept:
     name: str
     category: str  # method, dataset, metric, problem, etc.
     mentions: int = 0
-    sources: List[str] = field(default_factory=list)
-    related_concepts: List[str] = field(default_factory=list)
+    sources: list[str] = field(default_factory=list)
+    related_concepts: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -36,7 +35,7 @@ class KnowledgeNode:
     id: str
     type: str  # paper, repo, concept, author, etc.
     label: str
-    properties: Dict = field(default_factory=dict)
+    properties: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -67,7 +66,7 @@ class ConceptExtractor:
             r'\b(?:accuracy|precision|recall|F1|BLEU|ROUGE|perplexity)\b',
         ]
 
-    def extract(self, content: str, source_id: str) -> List[Concept]:
+    def extract(self, content: str, source_id: str) -> list[Concept]:
         """
         Extract concepts from content.
 
@@ -121,10 +120,10 @@ class CitationNetworkBuilder:
 
     def __init__(self):
         """Initialize citation network builder."""
-        self.nodes: Dict[str, KnowledgeNode] = {}
-        self.edges: List[KnowledgeEdge] = []
+        self.nodes: dict[str, KnowledgeNode] = {}
+        self.edges: list[KnowledgeEdge] = []
 
-    def add_paper(self, paper_id: str, title: str, metadata: Dict) -> None:
+    def add_paper(self, paper_id: str, title: str, metadata: dict) -> None:
         """
         Add a paper to the network.
 
@@ -159,7 +158,7 @@ class CitationNetworkBuilder:
             weight=1.0,
         ))
 
-    def get_influential_papers(self, top_k: int = 10) -> List[Tuple[str, int]]:
+    def get_influential_papers(self, top_k: int = 10) -> list[tuple[str, int]]:
         """
         Get most influential papers by citation count.
 
@@ -184,7 +183,7 @@ class CitationNetworkBuilder:
 
         return sorted_papers[:top_k]
 
-    def get_citation_chain(self, paper_id: str, max_depth: int = 3) -> List[str]:
+    def get_citation_chain(self, paper_id: str, max_depth: int = 3) -> list[str]:
         """
         Get citation chain (papers that cite this paper).
 
@@ -222,9 +221,9 @@ class RelationshipDiscovery:
 
     def discover_paper_relationships(
         self,
-        papers: List[Dict],
-        concepts: Dict[str, List[Concept]],
-    ) -> List[Relationship]:
+        papers: list[dict],
+        concepts: dict[str, list[Concept]],
+    ) -> list[Relationship]:
         """
         Discover relationships between papers.
 
@@ -264,9 +263,9 @@ class RelationshipDiscovery:
 
     def detect_contradictions(
         self,
-        papers: List[Dict],
-        analyses: Dict[str, any],
-    ) -> List[Relationship]:
+        papers: list[dict],
+        analyses: dict[str, any],
+    ) -> list[Relationship]:
         """
         Detect contradictions between papers.
 
@@ -319,9 +318,9 @@ class RelationshipDiscovery:
 
     def identify_consensus(
         self,
-        papers: List[Dict],
-        concepts: Dict[str, List[Concept]],
-    ) -> Dict[str, List[str]]:
+        papers: list[dict],
+        concepts: dict[str, list[Concept]],
+    ) -> dict[str, list[str]]:
         """
         Identify consensus on concepts.
 
@@ -358,9 +357,9 @@ class KnowledgeGraph:
 
     def __init__(self):
         """Initialize knowledge graph."""
-        self.nodes: Dict[str, KnowledgeNode] = {}
-        self.edges: List[KnowledgeEdge] = []
-        self.concepts: Dict[str, Concept] = {}
+        self.nodes: dict[str, KnowledgeNode] = {}
+        self.edges: list[KnowledgeEdge] = []
+        self.concepts: dict[str, Concept] = {}
 
     def add_node(self, node: KnowledgeNode) -> None:
         """Add a node to the graph."""
@@ -381,7 +380,7 @@ class KnowledgeGraph:
         else:
             self.concepts[concept.name] = concept
 
-    def get_neighbors(self, node_id: str, edge_type: Optional[str] = None) -> List[str]:
+    def get_neighbors(self, node_id: str, edge_type: str | None = None) -> list[str]:
         """
         Get neighboring nodes.
 
@@ -405,7 +404,7 @@ class KnowledgeGraph:
 
         return list(set(neighbors))
 
-    def get_subgraph(self, node_ids: List[str], max_hops: int = 2) -> 'KnowledgeGraph':
+    def get_subgraph(self, node_ids: list[str], max_hops: int = 2) -> 'KnowledgeGraph':
         """
         Extract a subgraph around given nodes.
 
@@ -447,7 +446,7 @@ class KnowledgeGraph:
 
         return subgraph
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         """Get graph statistics."""
         return {
             'num_nodes': len(self.nodes),
@@ -457,14 +456,14 @@ class KnowledgeGraph:
             'edge_types': self._count_edge_types(),
         }
 
-    def _count_node_types(self) -> Dict[str, int]:
+    def _count_node_types(self) -> dict[str, int]:
         """Count nodes by type."""
         counts = defaultdict(int)
         for node in self.nodes.values():
             counts[node.type] += 1
         return dict(counts)
 
-    def _count_edge_types(self) -> Dict[str, int]:
+    def _count_edge_types(self) -> dict[str, int]:
         """Count edges by type."""
         counts = defaultdict(int)
         for edge in self.edges:

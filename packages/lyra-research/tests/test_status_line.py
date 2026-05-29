@@ -4,11 +4,12 @@ Tests for Status Line (Bypass Permissions Phase 1)
 Tests status line display with bypass mode indicators.
 """
 
-import pytest
-from pathlib import Path
 import tempfile
-from lyra_research.ui.status_line import StatusLine
+from pathlib import Path
+
+import pytest
 from lyra_research.permissions.bypass_manager import BypassManager
+from lyra_research.ui.status_line import StatusLine
 
 
 class TestStatusLine:

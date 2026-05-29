@@ -11,20 +11,23 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 from lyra_core.context.layered_context import LayeredContextManager
+
 from lyra_research.curation.curation_workflow import CurationWorkflow, DecisionType
 from lyra_research.curation.curator_metrics import CuratorMetrics
 from lyra_research.curation.knowledge_entry import (
     EntryStatus,
+)
+from lyra_research.curation.knowledge_entry import (
     KnowledgeEntry as CurationKnowledgeEntry,
 )
 from lyra_research.curation.knowledge_store import KnowledgeStore
 from lyra_research.curation.knowledge_versioning import VersionManager
-from lyra_research.roles.role_base import Role, RoleResult, RoleStatus
-from lyra_research.roles.review_role import ReviewResult
 from lyra_research.reporter import ResearchReport
+from lyra_research.roles.review_role import ReviewResult
+from lyra_research.roles.role_base import Role, RoleResult, RoleStatus
 
 
 @dataclass
@@ -37,7 +40,7 @@ class KnowledgeEntry:
     version: int
     accepted: bool
     created_at: datetime
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -209,7 +212,7 @@ class CuratorRole(Role[CurationResult]):
 
     def _run_quality_gates(
         self, report: ResearchReport, review: ReviewResult
-    ) -> Dict[str, bool]:
+    ) -> dict[str, bool]:
         """
         Run quality gate checks.
 

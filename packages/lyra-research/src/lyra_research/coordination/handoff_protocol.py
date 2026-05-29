@@ -6,9 +6,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from typing import Any
 
-from lyra_research.roles.role_base import Role, RoleResult
+from lyra_research.roles.role_base import Role
 
 
 @dataclass
@@ -28,7 +28,7 @@ class HandoffData:
     role_from: str
     role_to: str
     data: Any
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     validated: bool = False
     validation_errors: list[str] = field(default_factory=list)
@@ -90,7 +90,7 @@ class HandoffProtocol:
         self._failed_handoffs: list[HandoffData] = []
 
     def prepare_handoff(
-        self, from_role: Role, to_role: Role, data: Any, metadata: Optional[Dict[str, Any]] = None
+        self, from_role: Role, to_role: Role, data: Any, metadata: dict[str, Any] | None = None
     ) -> HandoffData:
         """Prepare data for handoff.
 
@@ -145,7 +145,7 @@ class HandoffProtocol:
 
     def execute_handoff(
         self, handoff: HandoffData, from_role: Role, to_role: Role
-    ) -> tuple[bool, Optional[str]]:
+    ) -> tuple[bool, str | None]:
         """Execute handoff with validation.
 
         Args:
@@ -218,7 +218,7 @@ class HandoffProtocol:
         self._handoff_history.clear()
         self._failed_handoffs.clear()
 
-    def get_handoff_stats(self) -> Dict[str, Any]:
+    def get_handoff_stats(self) -> dict[str, Any]:
         """Get handoff statistics.
 
         Returns:

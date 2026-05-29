@@ -3,10 +3,8 @@ from __future__ import annotations
 
 import time
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
 
 import pytest
-
 from lyra_research.coordination import (
     CircuitBreaker,
     CircuitBreakerStats,
@@ -19,7 +17,6 @@ from lyra_research.coordination import (
     TaskState,
     TimeoutEnforcer,
 )
-
 
 # ---------------------------------------------------------------------------
 # Task State Machine Tests

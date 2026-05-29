@@ -5,7 +5,7 @@ Supports parallel execution with timeout and error handling.
 from __future__ import annotations
 
 import asyncio
-from typing import Any, List
+from typing import Any
 
 from lyra_research.roles.role_base import Role, RoleResult
 
@@ -21,8 +21,8 @@ class ParallelExecutor:
         pass
 
     async def execute_parallel_roles(
-        self, roles: List[Role], input_data: Any
-    ) -> List[RoleResult]:
+        self, roles: list[Role], input_data: Any
+    ) -> list[RoleResult]:
         """Execute multiple roles in parallel.
 
         Args:
@@ -143,8 +143,8 @@ class ParallelExecutor:
         return last_result  # type: ignore
 
     async def execute_sequential(
-        self, roles: List[Role], initial_input: Any
-    ) -> List[RoleResult]:
+        self, roles: list[Role], initial_input: Any
+    ) -> list[RoleResult]:
         """Execute roles sequentially, passing output to next role.
 
         Args:
@@ -173,7 +173,7 @@ class ParallelExecutor:
         return results
 
     async def execute_with_dependencies(
-        self, role_graph: dict[str, tuple[Role, List[str]]], input_data: Any
+        self, role_graph: dict[str, tuple[Role, list[str]]], input_data: Any
     ) -> dict[str, RoleResult]:
         """Execute roles respecting dependencies.
 

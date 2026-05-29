@@ -5,13 +5,12 @@ Provides cross-source synthesis, citation binding, report generation,
 and quality checking for deep research workflows.
 """
 
+import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 from uuid import uuid4
-import re
-
 
 # ---------------------------------------------------------------------------
 # CrossSourceSynthesizer
@@ -21,11 +20,11 @@ import re
 class FieldTaxonomy:
     """Structured taxonomy of a research field."""
     topic: str
-    categories: List[str]                      # Main sub-areas
-    subcategories: Dict[str, List[str]]        # {category: [sub-area, ...]}
-    key_methods: List[str]
-    key_datasets: List[str]
-    key_metrics: List[str]
+    categories: list[str]                      # Main sub-areas
+    subcategories: dict[str, list[str]]        # {category: [sub-area, ...]}
+    key_methods: list[str]
+    key_datasets: list[str]
+    key_metrics: list[str]
 
 
 @dataclass
@@ -33,11 +32,11 @@ class SynthesisResult:
     """Result of cross-source synthesis."""
     topic: str
     taxonomy: FieldTaxonomy
-    best_papers: Dict[str, List[str]]          # {category: [paper_titles]}
-    best_repos: Dict[str, List[str]]           # {use_case: [repo_names]}
-    relationships: List[str]                   # ["Paper A extends Paper B", ...]
-    contradictions: List[str]                  # ["Paper A claims X, Paper B claims Y"]
-    gaps: List[str]                            # Gap descriptions
+    best_papers: dict[str, list[str]]          # {category: [paper_titles]}
+    best_repos: dict[str, list[str]]           # {use_case: [repo_names]}
+    relationships: list[str]                   # ["Paper A extends Paper B", ...]
+    contradictions: list[str]                  # ["Paper A claims X, Paper B claims Y"]
+    gaps: list[str]                            # Gap descriptions
     synthesis_quality: float                   # 0.0-1.0
     source_count: int
 
@@ -81,10 +80,10 @@ class CrossSourceSynthesizer:
     def synthesize(
         self,
         topic: str,
-        paper_analyses: List[Dict[str, Any]],
-        repo_analyses: List[Dict[str, Any]],
-        gaps: List[str],
-        contradictions: List[str],
+        paper_analyses: list[dict[str, Any]],
+        repo_analyses: list[dict[str, Any]],
+        gaps: list[str],
+        contradictions: list[str],
     ) -> SynthesisResult:
         """Produce a structured synthesis from analyzed sources."""
         all_analyses = paper_analyses + repo_analyses
@@ -111,7 +110,7 @@ class CrossSourceSynthesizer:
             source_count=source_count,
         )
 
-    def _build_taxonomy(self, topic: str, analyses: List[Dict]) -> FieldTaxonomy:
+    def _build_taxonomy(self, topic: str, analyses: list[dict]) -> FieldTaxonomy:
         """Extract taxonomy from source titles/abstracts using keyword clustering."""
         combined_text = " ".join(
             f"{a.get('title', '')} {a.get('abstract', '')} {a.get('description', '')}"
@@ -119,7 +118,7 @@ class CrossSourceSynthesizer:
         ).lower()
 
         # Detect categories from recurring noun phrases in titles
-        title_words: Dict[str, int] = {}
+        title_words: dict[str, int] = {}
         for a in analyses:
             tokens = re.findall(r'\b[a-z]{4,}\b', (a.get('title', '') + ' ' + a.get('abstract', '')).lower())
             for tok in tokens:
@@ -147,7 +146,7 @@ class CrossSourceSynthesizer:
         key_metrics = [kw for kw in _METRIC_KEYWORDS if kw in combined_text][:6]
 
         # Build subcategories: each category gets up to 3 related words
-        subcategories: Dict[str, List[str]] = {}
+        subcategories: dict[str, list[str]] = {}
         for cat in category_candidates:
             subs = [
                 w for w in category_candidates
@@ -165,17 +164,17 @@ class CrossSourceSynthesizer:
         )
 
     def _group_papers_by_category(
-        self, analyses: List[Dict], taxonomy: FieldTaxonomy
-    ) -> Dict[str, List[str]]:
+        self, analyses: list[dict], taxonomy: FieldTaxonomy
+    ) -> dict[str, list[str]]:
         """Assign each paper to its most relevant taxonomy category."""
-        grouped: Dict[str, List[str]] = {cat: [] for cat in taxonomy.categories}
-        ungrouped: List[str] = []
+        grouped: dict[str, list[str]] = {cat: [] for cat in taxonomy.categories}
+        ungrouped: list[str] = []
 
         for paper in analyses:
             title = paper.get('title', '')
             abstract = paper.get('abstract', '').lower()
             text = f"{title} {abstract}".lower()
-            best_cat: Optional[str] = None
+            best_cat: str | None = None
             best_count = 0
 
             for cat in taxonomy.categories:
@@ -196,7 +195,7 @@ class CrossSourceSynthesizer:
         # Remove empty categories
         return {k: v for k, v in grouped.items() if v}
 
-    def _group_repos_by_use_case(self, repos: List[Dict]) -> Dict[str, List[str]]:
+    def _group_repos_by_use_case(self, repos: list[dict]) -> dict[str, list[str]]:
         """Group repos by detected use case from description."""
         use_case_keywords = {
             "training": ["train", "finetune", "fine-tune", "pretrain", "pre-train"],
@@ -205,8 +204,8 @@ class CrossSourceSynthesizer:
             "data": ["dataset", "data", "corpus", "preprocess", "pipeline"],
             "visualization": ["visual", "plot", "dashboard", "monitor", "analyze"],
         }
-        grouped: Dict[str, List[str]] = {}
-        ungrouped: List[str] = []
+        grouped: dict[str, list[str]] = {}
+        ungrouped: list[str] = []
 
         for repo in repos:
             name = repo.get('title', repo.get('name', ''))
@@ -227,9 +226,9 @@ class CrossSourceSynthesizer:
 
         return {k: v for k, v in grouped.items() if v}
 
-    def _extract_relationships(self, analyses: List[Dict]) -> List[str]:
+    def _extract_relationships(self, analyses: list[dict]) -> list[str]:
         """Extract relationship statements from abstracts using regex."""
-        relationships: List[str] = []
+        relationships: list[str] = []
 
         for analysis in analyses:
             title = analysis.get('title', '')
@@ -246,7 +245,7 @@ class CrossSourceSynthesizer:
 
         # Deduplicate
         seen: set = set()
-        unique: List[str] = []
+        unique: list[str] = []
         for rel in relationships:
             key = rel[:80].lower()
             if key not in seen:
@@ -289,8 +288,8 @@ class CitationBinder:
     def bind(
         self,
         report_text: str,
-        sources: List[Dict[str, Any]],
-    ) -> Tuple[str, List[BoundCitation], List[str]]:
+        sources: list[dict[str, Any]],
+    ) -> tuple[str, list[BoundCitation], list[str]]:
         """
         Returns:
             - report_text with [N] citation keys inserted
@@ -298,8 +297,8 @@ class CitationBinder:
             - list of unbound claim strings (no source found)
         """
         claims = self._extract_claims(report_text)
-        bound_citations: List[BoundCitation] = []
-        unbound: List[str] = []
+        bound_citations: list[BoundCitation] = []
+        unbound: list[str] = []
         modified_text = report_text
 
         for claim in claims:
@@ -327,16 +326,16 @@ class CitationBinder:
 
         return modified_text, bound_citations, unbound
 
-    def _extract_claims(self, text: str) -> List[str]:
+    def _extract_claims(self, text: str) -> list[str]:
         """Extract verifiable claim sentences from report text."""
-        claims: List[str] = []
+        claims: list[str] = []
         for pattern in _CLAIM_SENTENCE_PATTERNS:
             matches = re.findall(pattern, text)
             claims.extend(m.strip() for m in matches if m.strip())
 
         # Deduplicate preserving order
         seen: set = set()
-        unique: List[str] = []
+        unique: list[str] = []
         for c in claims:
             key = c[:60].lower()
             if key not in seen:
@@ -345,14 +344,14 @@ class CitationBinder:
         return unique
 
     def _find_source_for_claim(
-        self, claim: str, sources: List[Dict]
-    ) -> Optional[Dict]:
+        self, claim: str, sources: list[dict]
+    ) -> dict | None:
         """Find the best matching source for a claim via keyword overlap."""
         if not sources:
             return None
 
         claim_words = set(re.findall(r'\b[a-zA-Z]{4,}\b', claim.lower()))
-        best_source: Optional[Dict] = None
+        best_source: dict | None = None
         best_overlap = 0
 
         for source in sources:
@@ -368,7 +367,7 @@ class CitationBinder:
         # Require at least 3 matching words for a valid binding
         return best_source if best_overlap >= 3 else None
 
-    def _build_references_section(self, citations: List[BoundCitation]) -> str:
+    def _build_references_section(self, citations: list[BoundCitation]) -> str:
         """Build a ## References section with numbered citations."""
         if not citations:
             return ""
@@ -387,7 +386,7 @@ class CitationBinder:
 
         return "\n".join(lines)
 
-    def citation_fidelity(self, bound: List[BoundCitation], unbound: List[str]) -> float:
+    def citation_fidelity(self, bound: list[BoundCitation], unbound: list[str]) -> float:
         """Returns bound/(bound+unbound). 1.0 = all claims sourced."""
         total = len(bound) + len(unbound)
         if total == 0:
@@ -477,9 +476,9 @@ class ResearchReportGenerator:
         self,
         topic: str,
         synthesis: SynthesisResult,
-        sources: List[Dict[str, Any]],
-        gaps: List[str],
-        contradictions: List[str],
+        sources: list[dict[str, Any]],
+        gaps: list[str],
+        contradictions: list[str],
         checklist_completion: float = 0.0,
     ) -> ResearchReport:
         """Generate a complete ResearchReport from synthesis components."""
@@ -564,7 +563,7 @@ class ResearchReportGenerator:
         return "\n".join(lines)
 
     def _generate_papers_section(
-        self, best_papers: Dict[str, List[str]], sources: List[Dict]
+        self, best_papers: dict[str, list[str]], sources: list[dict]
     ) -> str:
         """Render best papers as Markdown table per category."""
         if not best_papers:
@@ -588,7 +587,7 @@ class ResearchReportGenerator:
         return "\n".join(lines)
 
     def _generate_repos_section(
-        self, best_repos: Dict[str, List[str]], sources: List[Dict]
+        self, best_repos: dict[str, list[str]], sources: list[dict]
     ) -> str:
         """Render best repos as Markdown table with stars/description."""
         if not best_repos:
@@ -614,7 +613,7 @@ class ResearchReportGenerator:
 
         return "\n".join(lines)
 
-    def _generate_gaps_section(self, gaps: List[str]) -> str:
+    def _generate_gaps_section(self, gaps: list[str]) -> str:
         """Render gaps as numbered list."""
         if not gaps:
             return "*No research gaps identified.*"
@@ -623,7 +622,7 @@ class ResearchReportGenerator:
             lines.append(f"{i}. {gap}")
         return "\n".join(lines)
 
-    def _generate_contested_section(self, contradictions: List[str]) -> str:
+    def _generate_contested_section(self, contradictions: list[str]) -> str:
         """Render contradictions/contested claims as a list."""
         if not contradictions:
             return "*No contested claims detected.*"
@@ -632,7 +631,7 @@ class ResearchReportGenerator:
             lines.append(f"{i}. {contradiction}")
         return "\n".join(lines)
 
-    def _generate_next_steps(self, synthesis: SynthesisResult, gaps: List[str]) -> str:
+    def _generate_next_steps(self, synthesis: SynthesisResult, gaps: list[str]) -> str:
         """Generate actionable next steps for researcher and practitioner."""
         lines = ["**For Researchers:**"]
 
@@ -680,7 +679,7 @@ class QualityReport:
     gap_detection: float            # gaps_found / expected_gaps (heuristic)
     overall_score: float            # weighted average
     passed: bool                    # overall_score >= threshold
-    issues: List[str]               # Specific quality issues found
+    issues: list[str]               # Specific quality issues found
 
 
 class ReportQualityChecker:
@@ -707,7 +706,7 @@ class ReportQualityChecker:
         gaps_expected: int = 3,
     ) -> QualityReport:
         """Evaluate report quality. Returns QualityReport with passed flag."""
-        issues: List[str] = []
+        issues: list[str] = []
 
         # Coverage score
         if checklist_total > 0:

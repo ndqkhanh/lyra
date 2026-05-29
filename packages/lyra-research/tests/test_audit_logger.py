@@ -4,16 +4,17 @@ Tests for Audit Logger (Bypass Permissions Phase 0)
 Tests audit logging for bypassed operations.
 """
 
-import pytest
-from pathlib import Path
 import tempfile
+from pathlib import Path
+
+import pytest
 from lyra_research.permissions.audit_logger import (
-    AuditLogger,
     AuditEntry,
+    AuditLogger,
 )
 from lyra_research.permissions.permission_gate import (
-    PermissionRequest,
     PermissionLevel,
+    PermissionRequest,
 )
 
 

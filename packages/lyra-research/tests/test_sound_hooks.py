@@ -4,10 +4,10 @@ Tests for Sound Hooks (Funny Sounds Phase 2)
 Tests hook integration for sound system.
 """
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 from lyra_research.hooks.sound_hooks import SoundHooks
-from lyra_research.sounds.sound_manager import SoundManager
 from lyra_research.sounds.event_mapper import SoundEvent
 
 

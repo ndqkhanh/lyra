@@ -4,8 +4,9 @@ Validators for Integrity Gates
 Implements validation logic for stages 2.5 and 4.5.
 """
 
-from typing import Dict, Any
-from .integrity_gate import ValidationResult, Severity
+from typing import Any
+
+from .integrity_gate import Severity, ValidationResult
 
 
 class MinimumSourceCountValidator:
@@ -14,7 +15,7 @@ class MinimumSourceCountValidator:
     def __init__(self, min_sources: int = 10):
         self.min_sources = min_sources
 
-    def validate(self, research_state: Dict[str, Any]) -> ValidationResult:
+    def validate(self, research_state: dict[str, Any]) -> ValidationResult:
         """Validate source count"""
         sources = research_state.get("sources", [])
         count = len(sources)
@@ -41,7 +42,7 @@ class SourceDiversityValidator:
     def __init__(self, min_source_types: int = 3):
         self.min_source_types = min_source_types
 
-    def validate(self, research_state: Dict[str, Any]) -> ValidationResult:
+    def validate(self, research_state: dict[str, Any]) -> ValidationResult:
         """Validate source type diversity"""
         sources = research_state.get("sources", [])
         source_types = set(s.get("source_type") for s in sources if s.get("source_type"))
@@ -66,7 +67,7 @@ class SourceDiversityValidator:
 class CitationAccessibilityValidator:
     """Validate all sources are accessible"""
 
-    def validate(self, research_state: Dict[str, Any]) -> ValidationResult:
+    def validate(self, research_state: dict[str, Any]) -> ValidationResult:
         """Validate source accessibility"""
         sources = research_state.get("sources", [])
         inaccessible = [s for s in sources if not s.get("accessible", True)]
@@ -93,7 +94,7 @@ class DuplicationDetector:
     def __init__(self, max_duplicate_ratio: float = 0.3):
         self.max_duplicate_ratio = max_duplicate_ratio
 
-    def validate(self, research_state: Dict[str, Any]) -> ValidationResult:
+    def validate(self, research_state: dict[str, Any]) -> ValidationResult:
         """Detect duplicates"""
         sources = research_state.get("sources", [])
         if not sources:
@@ -132,7 +133,7 @@ class CitationFidelityValidator:
     def __init__(self, min_fidelity: float = 1.0):
         self.min_fidelity = min_fidelity
 
-    def validate(self, research_state: Dict[str, Any]) -> ValidationResult:
+    def validate(self, research_state: dict[str, Any]) -> ValidationResult:
         """Validate citation fidelity"""
         report = research_state.get("report", {})
         citations = report.get("citations", [])
@@ -171,7 +172,7 @@ class ClaimVerificationValidator:
     def __init__(self, min_verification: float = 0.95):
         self.min_verification = min_verification
 
-    def validate(self, research_state: Dict[str, Any]) -> ValidationResult:
+    def validate(self, research_state: dict[str, Any]) -> ValidationResult:
         """Validate claim verification rate"""
         report = research_state.get("report", {})
         claims = report.get("claims", [])
@@ -207,7 +208,7 @@ class ClaimVerificationValidator:
 class TemporalConsistencyValidator:
     """Validate temporal consistency (no anachronistic citations)"""
 
-    def validate(self, research_state: Dict[str, Any]) -> ValidationResult:
+    def validate(self, research_state: dict[str, Any]) -> ValidationResult:
         """Validate temporal consistency"""
         report = research_state.get("report", {})
         violations = report.get("temporal_violations", [])
@@ -234,7 +235,7 @@ class CompletenessValidator:
     def __init__(self, min_completion: float = 0.90):
         self.min_completion = min_completion
 
-    def validate(self, research_state: Dict[str, Any]) -> ValidationResult:
+    def validate(self, research_state: dict[str, Any]) -> ValidationResult:
         """Validate checklist completion"""
         checklist = research_state.get("checklist", {})
         items = checklist.get("items", [])

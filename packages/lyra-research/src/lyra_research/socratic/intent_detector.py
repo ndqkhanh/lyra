@@ -5,8 +5,8 @@ Detects user intent: exploratory vs goal-oriented.
 """
 
 from dataclasses import dataclass
-from typing import Dict, Any
 from enum import Enum
+from typing import Any
 
 
 class IntentType(Enum):
@@ -20,7 +20,7 @@ class Intent:
     """Detected intent with confidence"""
     type: IntentType
     confidence: float  # 0.0 to 1.0
-    indicators: Dict[str, int]  # Keyword counts
+    indicators: dict[str, int]  # Keyword counts
 
 
 class IntentDetector:
@@ -49,7 +49,7 @@ class IntentDetector:
             "get", "obtain", "achieve"
         ]
 
-    def detect(self, query: str, context: Dict[str, Any] = None) -> Intent:
+    def detect(self, query: str, context: dict[str, Any] = None) -> Intent:
         """
         Detect intent from query
 

@@ -4,9 +4,10 @@ Tests for Sound Config (Funny Sounds Phase 0)
 Tests sound configuration management.
 """
 
-import pytest
-from pathlib import Path
 import tempfile
+from pathlib import Path
+
+import pytest
 from lyra_research.sounds.config import SoundConfig
 
 

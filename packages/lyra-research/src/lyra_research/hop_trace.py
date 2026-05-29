@@ -11,9 +11,8 @@ Grounded in:
 """
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Optional
-
 
 __all__ = [
     "HopTrace",
@@ -54,7 +53,7 @@ class MultiHopResult:
             return 0.0
         return sum(h.support_score for h in self.hops) / len(self.hops)
 
-    def weakest_hop(self) -> Optional[HopTrace]:
+    def weakest_hop(self) -> HopTrace | None:
         if not self.hops:
             return None
         return min(self.hops, key=lambda h: h.support_score)
@@ -64,14 +63,14 @@ class MultiHopResult:
 # Search policy                                                        #
 # ------------------------------------------------------------------ #
 
-class SearchPolicy:
+class SearchPolicy(ABC):
     """Abstract base — controls query generation and early stopping."""
 
-    def next_query(self, _question: str, _traces: list[HopTrace]) -> str:
-        raise NotImplementedError
+    @abstractmethod
+    def next_query(self, _question: str, _traces: list[HopTrace]) -> str: ...
 
-    def should_stop(self, _traces: list[HopTrace]) -> bool:
-        raise NotImplementedError
+    @abstractmethod
+    def should_stop(self, _traces: list[HopTrace]) -> bool: ...
 
 
 class GreedySearchPolicy(SearchPolicy):

@@ -15,12 +15,11 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
-from lyra_research.knowledge_graph import ResearchEntity, ResearchKG
+from lyra_research.knowledge_graph import ResearchKG
 from lyra_research.multi_perspective import (
     MultiPerspectiveSynthesizer,
-    PerspectiveType,
 )
 from lyra_research.source_verification import AuditReport, SourceVerifier
 
@@ -89,9 +88,9 @@ class ResearchPlan:
     id: str
     query: str
     depth: int
-    subtopics: Tuple[Subtopic, ...]
+    subtopics: tuple[Subtopic, ...]
     created_at: str = ""
-    metadata: Dict[str, str] = field(default_factory=dict)
+    metadata: dict[str, str] = field(default_factory=dict)
 
     def __post_init__(self):
         if not self.created_at:
@@ -125,9 +124,9 @@ class ResearchAction:
     action_type: ActionType
     description: str
     target: str = ""
-    subtopic_ids: Tuple[str, ...] = ()
+    subtopic_ids: tuple[str, ...] = ()
     status: ActionStatus = ActionStatus.PENDING
-    parameters: Dict[str, str] = field(default_factory=dict)
+    parameters: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -147,9 +146,9 @@ class Finding:
     id: str
     action_id: str
     content: str
-    sources: Tuple[str, ...] = ()
+    sources: tuple[str, ...] = ()
     confidence: float = 0.5
-    subtopic_ids: Tuple[str, ...] = ()
+    subtopic_ids: tuple[str, ...] = ()
     timestamp: str = ""
 
     def __post_init__(self):
@@ -196,9 +195,9 @@ class ResearchReport:
     plan_id: str
     query: str
     summary: str = ""
-    findings: Tuple[Finding, ...] = ()
-    coverage: Tuple[CoverageMap, ...] = ()
-    audit: Optional[AuditReport] = None
+    findings: tuple[Finding, ...] = ()
+    coverage: tuple[CoverageMap, ...] = ()
+    audit: AuditReport | None = None
     multi_perspective_report: str = ""
     generated_at: str = ""
 
@@ -224,14 +223,14 @@ class CoverageTracker:
     the idea that early findings contribute more than later ones.
     """
 
-    def __init__(self, subtopics: Tuple[Subtopic, ...]) -> None:
+    def __init__(self, subtopics: tuple[Subtopic, ...]) -> None:
         """Initialize tracker for the given subtopics.
 
         Args:
             subtopics: The subtopics from a research plan.
         """
-        self._maps: Dict[str, CoverageMap] = {}
-        self._evidence: Dict[str, int] = {}  # subtopic_id -> evidence count
+        self._maps: dict[str, CoverageMap] = {}
+        self._evidence: dict[str, int] = {}  # subtopic_id -> evidence count
         for st in subtopics:
             self._maps[st.id] = CoverageMap(subtopic_id=st.id)
             self._evidence[st.id] = 0
@@ -286,11 +285,11 @@ class CoverageTracker:
             return 0.0
         return sum(m.coverage for m in self._maps.values()) / len(self._maps)
 
-    def all_maps(self) -> Tuple[CoverageMap, ...]:
+    def all_maps(self) -> tuple[CoverageMap, ...]:
         """Return all current coverage maps."""
         return tuple(self._maps.values())
 
-    def lowest_coverage_subtopic(self) -> Optional[str]:
+    def lowest_coverage_subtopic(self) -> str | None:
         """Return the subtopic ID with the lowest coverage."""
         if not self._maps:
             return None
@@ -343,12 +342,12 @@ class PAR2RAGEngine:
         self._multi_perspective = MultiPerspectiveSynthesizer()
 
         # State (reset each run)
-        self._plan: Optional[ResearchPlan] = None
-        self._tracker: Optional[CoverageTracker] = None
-        self._findings: List[Finding] = []
+        self._plan: ResearchPlan | None = None
+        self._tracker: CoverageTracker | None = None
+        self._findings: list[Finding] = []
         self._kg = ResearchKG(name="par2rag")
         self._iteration: int = 0
-        self._action_history: List[ResearchAction] = []
+        self._action_history: list[ResearchAction] = []
 
     # ------------------------------------------------------------------
     # Phase 1: Plan
@@ -428,7 +427,7 @@ class PAR2RAGEngine:
 
         content = ""
         confidence = 0.5
-        sources: List[str] = []
+        sources: list[str] = []
 
         if action.action_type == ActionType.SEARCH:
             content = (
@@ -497,7 +496,7 @@ class PAR2RAGEngine:
     # Phase 3: Reflect
     # ------------------------------------------------------------------
 
-    def reflect_on_findings(self, findings: List[Finding]) -> Dict[str, Any]:
+    def reflect_on_findings(self, findings: list[Finding]) -> dict[str, Any]:
         """Analyze findings to identify gaps, inconsistencies, and new directions.
 
         Args:
@@ -515,7 +514,7 @@ class PAR2RAGEngine:
             }
 
         # Identify gaps: which subtopics have low coverage?
-        gaps: List[str] = []
+        gaps: list[str] = []
         if self._tracker:
             for cmap in self._tracker.all_maps():
                 if cmap.coverage < 0.5:
@@ -524,8 +523,8 @@ class PAR2RAGEngine:
                     )
 
         # Identify inconsistencies: findings with conflicting signals
-        inconsistencies: List[str] = []
-        sources_seen: Dict[str, str] = {}
+        inconsistencies: list[str] = []
+        sources_seen: dict[str, str] = {}
         for f in findings:
             for src in f.sources:
                 if src in sources_seen and sources_seen[src] != f.content[:50]:
@@ -536,7 +535,7 @@ class PAR2RAGEngine:
                 sources_seen[src] = f.content[:50]
 
         # Identify new directions from the knowledge graph
-        new_directions: List[str] = []
+        new_directions: list[str] = []
         if self._kg.entity_count > 2:
             entities = self._kg.list_entities()
             for i, e1 in enumerate(entities[:5]):
@@ -574,7 +573,7 @@ class PAR2RAGEngine:
     # Coverage tracking
     # ------------------------------------------------------------------
 
-    def update_coverage(self, subtopic_id: str, evidence_count: int = 1) -> Optional[CoverageMap]:
+    def update_coverage(self, subtopic_id: str, evidence_count: int = 1) -> CoverageMap | None:
         """Update the coverage map for a subtopic.
 
         Args:
@@ -592,7 +591,7 @@ class PAR2RAGEngine:
     # Decision: should we continue?
     # ------------------------------------------------------------------
 
-    def should_continue(self) -> Tuple[bool, str]:
+    def should_continue(self) -> tuple[bool, str]:
         """Decide whether the research loop should continue.
 
         Checks coverage threshold, confidence threshold, and iteration cap.
@@ -633,7 +632,7 @@ class PAR2RAGEngine:
     def synthesize_report(
         self,
         plan: ResearchPlan,
-        findings: List[Finding],
+        findings: list[Finding],
     ) -> ResearchReport:
         """Compile a final research report from the plan and findings.
 
@@ -652,7 +651,7 @@ class PAR2RAGEngine:
             )
 
         # Build summary from findings
-        summary_parts: List[str] = [
+        summary_parts: list[str] = [
             f"Research completed for query: '{plan.query}'",
             f"Depth: {plan.depth}, Subtopics: {plan.topic_count}",
             f"Findings collected: {len(findings)}",
@@ -667,7 +666,7 @@ class PAR2RAGEngine:
                 summary_parts.append(f"  - {cmap.subtopic_id}: {cmap.coverage:.0%} ({cmap.evidence_count} items)")
 
         # Run source verification audit on combined findings
-        audit: Optional[AuditReport] = None
+        audit: AuditReport | None = None
         combined_text = " ".join(f.content for f in findings)
         if combined_text:
             audit = self._source_verifier.audit_document(combined_text)
@@ -789,10 +788,10 @@ class PAR2RAGEngine:
 # ---------------------------------------------------------------------------
 
 
-def _generate_subtopic_templates(query: str, depth: int) -> List[Tuple[str, str]]:
+def _generate_subtopic_templates(query: str, depth: int) -> list[tuple[str, str]]:
     """Generate subtopic (title, description) pairs for a query."""
 
-    universal: List[Tuple[str, str]] = [
+    universal: list[tuple[str, str]] = [
         (
             f"Definition & fundamentals of {query}",
             f"Core concepts, terminology, and problem framing for {query}.",

@@ -4,11 +4,10 @@ Audit Logger
 Logs all bypassed operations for security audit.
 """
 
+import json
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-import json
-from typing import List
 
 
 @dataclass
@@ -51,7 +50,7 @@ class AuditLogger:
         with open(self.log_path, 'a') as f:
             f.write(json.dumps(entry.__dict__) + '\n')
 
-    def get_recent_bypasses(self, limit: int = 100) -> List[AuditEntry]:
+    def get_recent_bypasses(self, limit: int = 100) -> list[AuditEntry]:
         """Get recent bypassed operations"""
         if not self.log_path.exists():
             return []

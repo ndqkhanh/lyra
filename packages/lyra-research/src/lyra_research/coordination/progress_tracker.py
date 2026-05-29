@@ -6,7 +6,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Dict, Optional
 
 from lyra_research.coordination.role_state_machine import RoleState
 
@@ -28,10 +27,10 @@ class RoleProgress:
     role_name: str
     state: RoleState = RoleState.PENDING
     progress: float = 0.0
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
-    error: Optional[str] = None
-    metadata: Dict[str, any] = field(default_factory=dict)
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    error: str | None = None
+    metadata: dict[str, any] = field(default_factory=dict)
 
     def duration_seconds(self) -> float:
         """Calculate execution duration in seconds.
@@ -66,11 +65,11 @@ class ProgressTracker:
             role_names: List of role names in pipeline order
         """
         self._role_names = role_names
-        self._progress: Dict[str, RoleProgress] = {
+        self._progress: dict[str, RoleProgress] = {
             name: RoleProgress(role_name=name) for name in role_names
         }
-        self._pipeline_started_at: Optional[datetime] = None
-        self._pipeline_completed_at: Optional[datetime] = None
+        self._pipeline_started_at: datetime | None = None
+        self._pipeline_completed_at: datetime | None = None
 
     def start_pipeline(self) -> None:
         """Mark pipeline as started."""
@@ -94,7 +93,7 @@ class ProgressTracker:
         progress.started_at = datetime.now(timezone.utc)
         progress.progress = 0.0
 
-    def complete_role(self, role_name: str, error: Optional[str] = None) -> None:
+    def complete_role(self, role_name: str, error: str | None = None) -> None:
         """Mark role as completed.
 
         Args:
@@ -168,7 +167,7 @@ class ProgressTracker:
 
         return self._progress[role_name].progress
 
-    def get_role_status(self, role_name: str) -> Dict[str, any]:
+    def get_role_status(self, role_name: str) -> dict[str, any]:
         """Get detailed status of a role.
 
         Args:
@@ -204,7 +203,7 @@ class ProgressTracker:
         total_progress = sum(p.progress for p in self._progress.values())
         return total_progress / len(self._progress)
 
-    def get_pipeline_status(self) -> Dict[str, any]:
+    def get_pipeline_status(self) -> dict[str, any]:
         """Get overall pipeline status.
 
         Returns:
