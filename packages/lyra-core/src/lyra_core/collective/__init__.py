@@ -782,13 +782,33 @@ class SelfReorganization:
 
 
 # Late import to avoid circular dependency (embedding_registry imports from this module)
+from lyra_core.collective.champion_tracker import (  # noqa: E402
+    ChampionRecord,
+    ChampionState,
+    ChampionStatus,
+    ChampionTracker,
+)
 from lyra_core.collective.embedding_registry import (  # noqa: E402
     EmbeddingDeadEndEntry,
     EmbeddingDeadEndRegistry,
     TFIDFVectorizer,
 )
+from lyra_core.collective.heartbeat_orchestrator import (  # noqa: E402
+    AgentExecutor,
+    HeartbeatOrchestrator,
+    HeartbeatPhase,
+    HeartbeatResult,
+    WorkItem,
+    WorkKind,
+    WorkPriority,
+)
 
 __all__ = [
+    "AgentExecutor",
+    "ChampionRecord",
+    "ChampionState",
+    "ChampionStatus",
+    "ChampionTracker",
     "CollectiveState",
     "ConsensusLevel",
     "DeadEndEntry",
@@ -798,6 +818,9 @@ __all__ = [
     "EmbeddingDeadEndEntry",
     "EmbeddingDeadEndRegistry",
     "ForumPost",
+    "HeartbeatOrchestrator",
+    "HeartbeatPhase",
+    "HeartbeatResult",
     "Hypothesis",
     "HypothesisTeam",
     "MetaImprovementLoop",
@@ -808,4 +831,7 @@ __all__ = [
     "SelfReorganization",
     "TeamFormationReason",
     "TFIDFVectorizer",
+    "WorkItem",
+    "WorkKind",
+    "WorkPriority",
 ]
