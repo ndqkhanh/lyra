@@ -90,6 +90,26 @@ from lyra_core.command_queue import (
     ThreeSurfaceProtocol,
 )
 
+# ── Phase 4: Collective Intelligence ───────────────────────────────────
+from lyra_core.collective import (
+    CollectiveState,
+    ConsensusLevel,
+    DeadEndEntry,
+    DeadEndRegistry,
+    DiscussionForum,
+    DiscussionThread,
+    ForumPost,
+    Hypothesis,
+    HypothesisTeam,
+    MetaImprovementLoop,
+    NoiseGate,
+    PostKind,
+    ReorganizationPlan,
+    ReorganizationTrigger,
+    SelfReorganization,
+    TeamFormationReason,
+)
+
 # ── Existing exports ───────────────────────────────────────────────────
 from lyra_core.agent.agi_plugin import AGILoopPlugin
 from lyra_core.agent.event_sourced_loop import (
@@ -119,7 +139,7 @@ from lyra_core.two_circuit import (
     TwoCircuitBridge,
 )
 
-__version__ = "0.6.0"  # Phase 3: command queue (CMD_RETURN_WAIT) + three-surface protocol
+__version__ = "0.7.0"  # Phase 4: collective intelligence (AutoScientists-inspired decentralized teams)
 
 __all__ = [
     "__version__",
@@ -178,6 +198,23 @@ __all__ = [
     "ThreeSurfaceProtocol",
     "SurfaceMessage",
     "SurfaceKind",
+    # Phase 4: Collective
+    "CollectiveState",
+    "DiscussionForum",
+    "DiscussionThread",
+    "ForumPost",
+    "PostKind",
+    "ConsensusLevel",
+    "Hypothesis",
+    "HypothesisTeam",
+    "TeamFormationReason",
+    "DeadEndRegistry",
+    "DeadEndEntry",
+    "NoiseGate",
+    "MetaImprovementLoop",
+    "SelfReorganization",
+    "ReorganizationPlan",
+    "ReorganizationTrigger",
     # Existing
     "EventSourcedAgentLoop",
     "EventLog",
