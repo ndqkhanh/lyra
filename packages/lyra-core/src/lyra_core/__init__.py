@@ -66,6 +66,22 @@ from lyra_core.agent.integrated import (
     HaltResumeController,
     IntegratedAgent,
 )
+from lyra_core.agent.health import (
+    AgentHealthMonitor,
+    AnomalyDetector,
+    AnomalyRecord,
+    AnomalyType,
+    HealthSignal,
+    HealthStatus,
+    HealthTrend,
+    MonitorConfig,
+    PlaybookStatus,
+    PlaybookStep,
+    RecoveryPlaybook,
+    RecoveryResult,
+    SignalSeverity,
+    SignalSource,
+)
 from lyra_core.agent.safety_hooks import SafetyHookPlugin
 from lyra_core.agi_orchestrator import (
     AGIOrchestrator,
@@ -225,7 +241,7 @@ from lyra_core.watchdog import (
     WatchdogStatus,
 )
 
-__version__ = "0.13.0"  # Phase 10: integrated agent with governance / learning / eval hooks + halt/resume
+__version__ = "0.14.0"  # Phase 11: agent health monitoring + anomaly detection + recovery playbooks
 
 __all__ = [
     "__version__",
@@ -333,6 +349,21 @@ __all__ = [
     "HaltReason",
     "HaltResumeController",
     "IntegratedAgent",
+    # Phase 11: Agent Health
+    "AgentHealthMonitor",
+    "AnomalyDetector",
+    "AnomalyRecord",
+    "AnomalyType",
+    "HealthSignal",
+    "HealthStatus",
+    "HealthTrend",
+    "MonitorConfig",
+    "PlaybookStatus",
+    "PlaybookStep",
+    "RecoveryPlaybook",
+    "RecoveryResult",
+    "SignalSeverity",
+    "SignalSource",
     # Phase 9: Continuous Evaluation
     "AgentScore",
     "BenchmarkRecord",
