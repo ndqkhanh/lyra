@@ -225,7 +225,7 @@ class BaseAgent(ABC):
             error: Exception that occurred
             message: Message being processed when error occurred (if any)
         """
-        pass
+        return None
 
     async def send_message(self, message: Message) -> None:
         """Send a message via the message bus.

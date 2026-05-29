@@ -289,7 +289,7 @@ class OpenAICompatibleLLM(LLMProvider):
             try:
                 from ..debug_logger import log_info
                 log_info(f"Debug logging error: {e}")
-            except:
+            except ImportError:
                 pass
 
         # Token limit: reasoning models reject ``max_tokens`` and need

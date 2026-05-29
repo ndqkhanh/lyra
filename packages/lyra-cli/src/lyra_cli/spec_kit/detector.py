@@ -5,7 +5,6 @@ from __future__ import annotations
 import os
 import re
 import time
-from functools import lru_cache
 from typing import Any
 
 from .models import Verdict
@@ -79,10 +78,15 @@ class Detector:
         # Default: not spec-worthy
         return Verdict(False, confidence, "below threshold", "insufficient signals", latency)
 
-    @lru_cache(maxsize=128)
     def _rule_based_score_cached(self, prompt: str) -> float:
-        """Cached version of rule-based scoring."""
-        return self._rule_based_score(prompt)
+        """Cached version of rule-based scoring (manual cache avoids lru_cache memory leak on methods)."""
+        if not hasattr(self, "_score_cache"):
+            self._score_cache: dict[str, float] = {}
+        if prompt not in self._score_cache:
+            if len(self._score_cache) >= 128:
+                self._score_cache.pop(next(iter(self._score_cache)))
+            self._score_cache[prompt] = self._rule_based_score(prompt)
+        return self._score_cache[prompt]
 
     def _rule_based_score(self, prompt: str) -> float:
         """Calculate confidence score using heuristics."""

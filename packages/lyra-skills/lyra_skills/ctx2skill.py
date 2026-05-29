@@ -167,7 +167,7 @@ Output JSON array of questions:
         try:
             questions = json.loads(response)
             return questions[:k]
-        except:
+        except (json.JSONDecodeError, TypeError):
             return []
 
     def _answer_questions(
@@ -229,7 +229,7 @@ Output JSON:
             try:
                 evaluation = json.loads(response)
                 evaluations.append(evaluation)
-            except:
+            except (json.JSONDecodeError, TypeError):
                 evaluations.append({
                     'correct': False,
                     'reasoning': 'Parse error',
@@ -290,7 +290,7 @@ Output JSON array:
                 ))
 
             return proposals
-        except:
+        except (json.JSONDecodeError, TypeError, KeyError):
             return []
 
     def _generate_skill_file(self, proposal: SkillProposal) -> Path:

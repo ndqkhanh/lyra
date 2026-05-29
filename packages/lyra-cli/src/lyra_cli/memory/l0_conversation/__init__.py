@@ -250,7 +250,7 @@ class ConversationStore:
                     date_str = shard.stem
                     shard_date = datetime.strptime(date_str, "%Y-%m-%d")
                     shard_dates.append(shard_date)
-                except:
+                except ValueError:
                     pass
 
             if shard_dates:

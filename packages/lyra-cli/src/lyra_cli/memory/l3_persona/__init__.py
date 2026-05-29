@@ -96,7 +96,7 @@ atom_count: {self.atom_count}
                 if key == "atom_count":
                     try:
                         value = int(value)
-                    except:
+                    except ValueError:
                         value = 0
 
                 frontmatter[key] = value

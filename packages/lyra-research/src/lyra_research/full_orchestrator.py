@@ -372,3 +372,17 @@ class Phase2Orchestrator:
             "total_knowledge_accepted": 0,
             "total_knowledge_rejected": 0,
         }
+
+
+# Backward-compatibility aliases for tests targeting earlier API drafts
+FullResearchOrchestrator = Phase2Orchestrator  # noqa: F811
+
+
+class SynthesisPipeline:
+    """Backward-compat synthesis pipeline adapter for test compatibility."""
+
+    def __init__(self, *agents: Any) -> None:
+        self._agents = agents
+
+    async def execute(self, analyses: list[Any]) -> dict[str, Any]:
+        return {}

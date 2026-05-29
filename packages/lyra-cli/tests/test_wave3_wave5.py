@@ -64,7 +64,7 @@ def _capture_spinner_line(message="Thinking", tokens=5000, elapsed_override=10.0
     sp._wings = []
 
     # Drive one frame manually.
-    sp._animate.__func__  # just verify it exists
+    assert sp._animate.__func__ is not None  # verify it exists
     # Call internal method directly for unit testing.
     # We replicate the logic from _animate without the loop.
     import lyra_cli.interactive.spinner as _mod

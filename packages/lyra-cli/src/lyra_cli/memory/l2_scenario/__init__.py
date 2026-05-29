@@ -100,7 +100,7 @@ source_atom_ids: {json.dumps(self.source_atom_ids) if self.source_atom_ids else 
                 if value.startswith("["):
                     try:
                         value = json.loads(value)
-                    except:
+                    except json.JSONDecodeError:
                         pass
 
                 frontmatter[key] = value

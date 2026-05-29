@@ -25,6 +25,7 @@ from lyra_research.coordination.primitives import (
     HealthMetrics,
     RetryPolicy,
     Task,
+    TaskGraph,
     TaskState,
     TimeoutEnforcer,
 )
@@ -48,6 +49,7 @@ __all__ = [
     "HealthMetrics",
     "RetryPolicy",
     "Task",
+    "TaskGraph",
     "TaskState",
     "TimeoutEnforcer",
     # New role coordination components
