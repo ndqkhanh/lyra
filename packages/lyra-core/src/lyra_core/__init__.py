@@ -241,7 +241,7 @@ from lyra_core.watchdog import (
     WatchdogStatus,
 )
 
-__version__ = "0.16.0"  # Phase 13: AGI pipeline test hardening (orchestrator + plugin)
+__version__ = "0.17.0"  # Phase 14: sonar audit — remove terminal stubs, fix stale docstrings
 
 __all__ = [
     "__version__",

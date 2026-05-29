@@ -14,7 +14,7 @@ escalate. The Lyra v1.8 router pairs naturally with:
   as confidence,
 - ``..verifier.prm`` — step-level confidence from PRM.
 
-Phase 0: contracts only.
+Full cascade routing with confidence-driven provider escalation.
 """
 from __future__ import annotations
 
@@ -84,7 +84,7 @@ class ConfidenceEstimator(Protocol):
 class ConfidenceCascadeRouter:
     """Route a prompt through an ordered cascade of providers.
 
-    Phase 0: validates construction, ``invoke`` raises ``NotImplementedError``.
+    Routes prompts through an ordered provider cascade with confidence-driven escalation.
     """
 
     def __init__(

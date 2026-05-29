@@ -1,4 +1,5 @@
 """Contract tests for the pluggable terminal backends."""
+
 from __future__ import annotations
 
 import sys
@@ -9,13 +10,6 @@ from lyra_core.terminal import (
     LocalBackend,
     TerminalBackend,
     TerminalError,
-)
-from lyra_core.terminal.stubs import (
-    DaytonaBackend,
-    DockerBackend,
-    ModalBackend,
-    SingularityBackend,
-    SSHBackend,
 )
 
 
@@ -52,17 +46,36 @@ def test_local_backend_missing_binary_raises_terminal_error() -> None:
         LocalBackend().run(["definitely-not-a-real-command-lyra-42"])
 
 
-@pytest.mark.parametrize(
-    "backend,name",
-    [
-        (DockerBackend(), "docker"),
-        (ModalBackend(), "modal"),
-        (SSHBackend(host="x"), "ssh"),
-        (DaytonaBackend(), "daytona"),
-        (SingularityBackend(), "singularity"),
-    ],
-)
-def test_remote_stubs_raise_scaffold_error(backend, name) -> None:
-    with pytest.raises(TerminalError, match="scaffold"):
-        backend.run(["echo", "hi"])
-    assert backend.name == name
+def test_docker_backend_satisfies_protocol() -> None:
+    """DockerBackend satisfies TerminalBackend protocol."""
+    pytest.importorskip("docker", reason="docker package not available")
+    from lyra_core.terminal.docker import DockerBackend
+
+    try:
+        backend = DockerBackend(image="python:3.12-slim")
+    except Exception:
+        pytest.skip("docker daemon not available")
+    assert isinstance(backend, TerminalBackend)
+    assert backend.name == "docker"
+
+
+def test_modal_backend_satisfies_protocol() -> None:
+    """ModalBackend satisfies TerminalBackend protocol."""
+    from lyra_core.terminal.modal import ModalBackend
+
+    try:
+        backend = ModalBackend(image="python:3.12-slim")
+    except Exception:
+        pytest.skip("modal sandbox not available")
+    assert isinstance(backend, TerminalBackend)
+    assert backend.name == "modal"
+
+
+def test_ssh_backend_satisfies_protocol() -> None:
+    """SSHBackend satisfies TerminalBackend protocol."""
+    pytest.importorskip("paramiko", reason="paramiko package not available")
+    from lyra_core.terminal.ssh import SSHBackend
+
+    backend = SSHBackend(host="testhost")
+    assert isinstance(backend, TerminalBackend)
+    assert backend.name == "ssh"

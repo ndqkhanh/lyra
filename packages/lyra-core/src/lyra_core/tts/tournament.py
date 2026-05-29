@@ -133,10 +133,7 @@ class _BankPrefixProvider(Protocol):
 class TournamentTts:
     """Two-stage Tournament-TTS policy.
 
-    Phase 0: contract only. ``run`` raises ``NotImplementedError`` so the
-    Phase-1 implementation has a clear target shape.
-
-    Phase 2 (this revision) wires the MaTTS prefix from
+    Phase 2 wires the MaTTS prefix from
     :class:`lyra_core.memory.reasoning_bank.ReasoningBank`. When a
     bank is supplied via ``reasoning_bank=...`` the generator is asked
     to produce its attempt against ``task_description`` *prefixed by*
