@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
-import time
-
 import pytest
-
 from lyra_agent_swarm import (
+    HEPHAESTUS,
+    HERMES,
+    LIBRARIAN,
+    ORACLE,
+    PROMETHEUS,
+    SENTINEL,
+    SISYPHUS,
     AgentContribution,
     AgentMessage,
     AgentRegistry,
@@ -27,20 +31,13 @@ from lyra_agent_swarm import (
     ConsensusResult,
     DispatchConfig,
     DispatchDecision,
-    DispatchStrategy,
     Dispatcher,
-    HEPHAESTUS,
-    HERMES,
-    LIBRARIAN,
+    DispatchStrategy,
     MessagePriority,
     MessageThread,
     MessagingConfig,
-    ORACLE,
-    PROMETHEUS,
     Proposal,
     RunStatus,
-    SENTINEL,
-    SISYPHUS,
     Schedule,
     Sprint,
     SprintConfig,

@@ -181,7 +181,7 @@ class RiskOfBiasAssessor:
         Returns:
             DomainAssessment for attrition bias
         """
-        results = study.get("results", "").lower()
+        study.get("results", "").lower()
         dropout_rate = study.get("dropout_rate", 0)
 
         if dropout_rate < 0.10:  # Less than 10% dropout

@@ -15,9 +15,10 @@ import asyncio
 import logging
 import time
 from collections import deque
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable
+from typing import Any
 
 from lyra_core.events import EventBus, EventCategory
 
@@ -74,7 +75,7 @@ class Command:
     # Compensating action for rollback on atomic group failure
     compensator: Callable[[], Any] | None = field(default=None, repr=False)
     # Callback on completion
-    on_complete: Callable[["Command"], None] | None = field(default=None, repr=False)
+    on_complete: Callable[[Command], None] | None = field(default=None, repr=False)
 
     @property
     def is_terminal(self) -> bool:

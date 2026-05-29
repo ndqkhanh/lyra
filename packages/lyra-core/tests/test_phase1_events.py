@@ -6,7 +6,6 @@ import tempfile
 from pathlib import Path
 
 import pytest
-
 from lyra_core.events import (
     Event,
     EventBus,

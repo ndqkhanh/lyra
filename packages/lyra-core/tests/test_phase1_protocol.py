@@ -6,7 +6,6 @@ import time
 from collections.abc import AsyncIterator
 
 import pytest
-
 from lyra_core.protocol import (
     AgentHealth,
     AgentIdentity,
@@ -20,7 +19,6 @@ from lyra_core.protocol import (
     TaskResult,
     WorkstreamItem,
 )
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # AgentIdentity

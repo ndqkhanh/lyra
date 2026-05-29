@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.adversarial import (
     AdversarialReview,
     ConvergenceCheck,
@@ -18,7 +17,6 @@ from lyra_core.adversarial import (
     WorkflowStatus,
     WorkflowStep,
 )
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # ReviewFinding

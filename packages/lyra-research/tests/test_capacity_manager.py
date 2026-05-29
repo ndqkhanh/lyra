@@ -552,7 +552,7 @@ def test_compact_creates_archive_file(temp_db):
     conn.close()
 
     manager = CapacityManager(temp_db)
-    result = manager.compact(age_days=90)
+    manager.compact(age_days=90)
 
     # Check archive file exists
     archive_files = list(manager.cold_storage_path.glob("archive_*.json.gz"))

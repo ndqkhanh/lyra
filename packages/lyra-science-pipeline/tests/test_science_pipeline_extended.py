@@ -5,7 +5,6 @@ from __future__ import annotations
 import pytest
 from lyra_science_pipeline import Hypothesis, SciencePipeline, TrialHarness
 
-
 # ── Helpers ────────────────────────────────────────────────────────────
 
 

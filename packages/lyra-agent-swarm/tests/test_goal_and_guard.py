@@ -5,7 +5,6 @@ from __future__ import annotations
 import time
 
 import pytest
-
 from lyra_agent_swarm.continuous_guard import (
     DESTRUCTIVE_PATTERNS,
     MAX_CONSECUTIVE_FAILURES,
@@ -32,7 +31,6 @@ from lyra_agent_swarm.goal_system import (
     GoalPriority,
     GoalStatus,
 )
-
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Goal System Tests

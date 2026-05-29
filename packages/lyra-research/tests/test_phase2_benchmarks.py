@@ -193,7 +193,7 @@ async def test_benchmark_verification_rate(orchestrator):
     ) as mock_execute:
         mock_execute.return_value = mock_result
 
-        progress = await orchestrator.research("Benchmark Query")
+        await orchestrator.research("Benchmark Query")
 
         # Calculate verification rate
         claims_reviewed = mock_result.review.claims_reviewed
@@ -243,7 +243,7 @@ async def test_benchmark_model_cost_optimization(orchestrator):
     ) as mock_execute:
         mock_execute.return_value = mock_result
 
-        progress = await orchestrator.research("Benchmark Query")
+        await orchestrator.research("Benchmark Query")
 
         # Calculate costs
         # Heterogeneous: Haiku + Sonnet + Opus + GPT-mini + Opus
@@ -309,7 +309,7 @@ async def test_benchmark_end_to_end_latency(orchestrator):
         mock_execute.return_value = mock_result
 
         start_time = time.time()
-        progress = await orchestrator.research("Benchmark Query")
+        await orchestrator.research("Benchmark Query")
         elapsed_time = time.time() - start_time
 
         # Assert target met (with mocks, should be very fast)
@@ -598,14 +598,14 @@ async def test_benchmark_speedup_100_sources(orchestrator):
     sources = create_mock_sources(100)
 
     # Mock agents for controlled timing
-    for name in orchestrator.coordinator.discovery.agents if hasattr(orchestrator.coordinator.discovery, 'agents') else {}:
+    for _name in orchestrator.coordinator.discovery.agents if hasattr(orchestrator.coordinator.discovery, 'agents') else {}:
         agent = Mock()
         async def mock_discover(query, max_results=10):
             await asyncio.sleep(0.01)  # Simulate 10ms per agent
             return sources[:max_results]
         agent.discover = mock_discover
 
-    for name in orchestrator.coordinator.analysis.agents if hasattr(orchestrator.coordinator.analysis, 'agents') else {}:
+    for _name in orchestrator.coordinator.analysis.agents if hasattr(orchestrator.coordinator.analysis, 'agents') else {}:
         agent = Mock()
         async def mock_analyze(sources):
             await asyncio.sleep(0.02)  # Simulate 20ms per agent
@@ -614,7 +614,7 @@ async def test_benchmark_speedup_100_sources(orchestrator):
 
     # Measure Phase 2 execution time (parallel)
     start = time.time()
-    progress = await orchestrator.research("test query")
+    await orchestrator.research("test query")
     phase2_time = time.time() - start
 
     # Estimate Phase 1 sequential time
@@ -681,7 +681,7 @@ async def test_benchmark_parallel_vs_sequential():
 
 
 @pytest.mark.benchmark
-def test_benchmark_verification_rate():
+def test_benchmark_verification_rate_target():
     """
     Benchmark: Claim verification rate.
 
@@ -799,7 +799,7 @@ async def test_benchmark_scalability(orchestrator):
     results = []
 
     for count in source_counts:
-        sources = create_mock_sources(count)
+        create_mock_sources(count)
 
         # Mock the pipeline execution
         with patch.object(

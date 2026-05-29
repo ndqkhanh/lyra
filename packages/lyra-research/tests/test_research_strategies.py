@@ -15,7 +15,6 @@ from lyra_research.strategies import (
     StoppingCriteria,
 )
 
-
 # ── SearchStrategy / SearchPlan ─────────────────────────────────────────
 
 

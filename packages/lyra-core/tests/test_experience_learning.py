@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.experience import (
     AntiPattern,
     AntiPatternRegistry,
@@ -21,7 +20,6 @@ from lyra_core.experience import (
     SkillCandidate,
     SkillDistiller,
 )
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # ExperienceRecord

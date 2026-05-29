@@ -198,7 +198,7 @@ class KnowledgeStore:
         Returns:
             List of category names
         """
-        return sorted(set(e.category for e in self.entries.values()))
+        return sorted({e.category for e in self.entries.values()})
 
     def get_tags(self) -> list[str]:
         """

@@ -529,6 +529,8 @@ class TestAuditLogger:
         """Test that UUIDv7 generation is time-ordered."""
         logger = AuditLogger()
 
+        import time
+
         record1 = logger.log(
             action_description="Action 1",
             risk_level=RiskLevel.LOW,
@@ -536,6 +538,8 @@ class TestAuditLogger:
             adversarial_verdict=Verdict.NOT_PERFORMED,
             final_decision=Decision.APPROVED,
         )
+
+        time.sleep(0.002)
 
         record2 = logger.log(
             action_description="Action 2",

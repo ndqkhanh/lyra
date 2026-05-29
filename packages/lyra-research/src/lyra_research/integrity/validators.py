@@ -45,7 +45,7 @@ class SourceDiversityValidator:
     def validate(self, research_state: dict[str, Any]) -> ValidationResult:
         """Validate source type diversity"""
         sources = research_state.get("sources", [])
-        source_types = set(s.get("source_type") for s in sources if s.get("source_type"))
+        source_types = {s.get("source_type") for s in sources if s.get("source_type")}
         count = len(source_types)
 
         if count < self.min_source_types:

@@ -43,7 +43,7 @@ class GateResult:
         return passed / len(self.criteria_results)
 
 
-class QualityGate(ABC):
+class QualityGate(ABC):  # noqa: B024
     """
     Base quality gate for role transitions.
 

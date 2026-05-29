@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-import asyncio
 import time
 
 import pytest
-
 from lyra_core.adversarial import (
     AdversarialReview,
     ConvergenceCheck,
@@ -24,9 +22,8 @@ from lyra_core.collective import (
 from lyra_core.command_queue import Command, CommandQueue, CommandStatus
 from lyra_core.containment import Project, ProjectRegistry, Team, TopologyTree
 from lyra_core.events import EventBus
-from lyra_core.protocol import AgentProtocol, AgentState, Task
+from lyra_core.protocol import AgentState, Task
 from lyra_core.watchdog import AgentWatchdog
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Helper
@@ -212,7 +209,7 @@ class TestCollectiveHypothesisFlow:
         assert len(state.hypotheses) == 1
 
         # Discuss in forum
-        thread = state.forum.get_thread(f"thread_h1")
+        thread = state.forum.get_thread("thread_h1")
         assert thread is not None
 
         # Verify

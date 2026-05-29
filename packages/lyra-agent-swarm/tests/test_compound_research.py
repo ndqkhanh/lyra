@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
-
 import pytest
 from lyra_agent_swarm.compound_agent import (
     CompoundAgent,
@@ -13,7 +11,6 @@ from lyra_agent_swarm.compound_agent import (
     SlotOutput,
     SlotRole,
 )
-
 
 # ── Helpers ────────────────────────────────────────────────────────────
 

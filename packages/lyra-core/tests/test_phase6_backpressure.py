@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_core.backpressure import (
     AdaptiveThrottler,
     BackpressureConfig,
@@ -16,7 +15,6 @@ from lyra_core.backpressure import (
     TokenBucket,
     Watermark,
 )
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Watermark

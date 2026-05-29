@@ -383,8 +383,8 @@ class TestAdversarialReviewerInit:
     def test_reviewer_budget_initialization(self):
         """Test reviewer budget is initialized."""
         reviewer = AdversarialReviewer()
-        assert reviewer.budget.MAX_CONTEXT_KB == 30
-        assert reviewer.budget.REPORT_KB == 10
+        assert reviewer.budget.MAX_CONTEXT_KB == 40
+        assert reviewer.budget.REPORT_KB == 12
 
     def test_reviewer_multiple_instances(self):
         """Test creating multiple reviewer instances."""

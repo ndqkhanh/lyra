@@ -5,7 +5,6 @@ from __future__ import annotations
 import time
 
 import pytest
-
 from lyra_core.containment import (
     ConfigNode,
     ConfigTree,
@@ -20,7 +19,6 @@ from lyra_core.containment import (
     get_project_registry,
 )
 from lyra_core.protocol import AgentMode, AgentProtocol, Task
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Helpers

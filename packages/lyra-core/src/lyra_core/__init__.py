@@ -56,16 +56,6 @@ from lyra_core.agent.event_sourced_loop import (
     SpeculativePlanner,
     StepEvent,
 )
-
-# ── Phase 10: Integrated Agent ──────────────────────────────────────────
-from lyra_core.agent.integrated import (
-    AgentConfig,
-    AgentSafetyContext,
-    AgentStatus,
-    HaltReason,
-    HaltResumeController,
-    IntegratedAgent,
-)
 from lyra_core.agent.health import (
     AgentHealthMonitor,
     AnomalyDetector,
@@ -81,6 +71,16 @@ from lyra_core.agent.health import (
     RecoveryResult,
     SignalSeverity,
     SignalSource,
+)
+
+# ── Phase 10: Integrated Agent ──────────────────────────────────────────
+from lyra_core.agent.integrated import (
+    AgentConfig,
+    AgentSafetyContext,
+    AgentStatus,
+    HaltReason,
+    HaltResumeController,
+    IntegratedAgent,
 )
 from lyra_core.agent.safety_hooks import SafetyHookPlugin
 from lyra_core.agi_orchestrator import (

@@ -409,7 +409,7 @@ class CapacityManager:
                     columns = [col[1] for col in cursor.fetchall()]
 
                     # Convert rows to dicts
-                    archived_data = [dict(zip(columns, row)) for row in old_notes]
+                    archived_data = [dict(zip(columns, row, strict=False)) for row in old_notes]
                     json.dump(archived_data, f, indent=2)
 
                 # Delete from main database
@@ -432,7 +432,7 @@ class CapacityManager:
             duplicates = cursor.fetchall()
 
             # Delete all but the first occurrence
-            for content, keep_id, all_ids in duplicates:
+            for _content, keep_id, all_ids in duplicates:
                 ids_to_delete = [id for id in all_ids.split(',') if id != keep_id]
                 for row_id in ids_to_delete:
                     cursor.execute("DELETE FROM memories WHERE id = ?", (row_id,))

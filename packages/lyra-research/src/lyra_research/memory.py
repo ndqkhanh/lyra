@@ -461,10 +461,10 @@ class SessionCaseBank:
 
     def find_related(self, topic: str, top_k: int = 3) -> list[ResearchCase]:
         """Find cases with overlapping topic keywords, sorted by quality_score desc."""
-        topic_words = set(w.lower() for w in topic.split() if len(w) > 3)
+        topic_words = {w.lower() for w in topic.split() if len(w) > 3}
         scored = []
         for case in self._cases.values():
-            case_words = set(w.lower() for w in case.topic.split() if len(w) > 3)
+            case_words = {w.lower() for w in case.topic.split() if len(w) > 3}
             overlap = len(topic_words & case_words)
             if overlap > 0:
                 scored.append((overlap, case))

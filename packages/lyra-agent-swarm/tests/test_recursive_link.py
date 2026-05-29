@@ -1,7 +1,6 @@
 """Tests for RecursiveLink — latent-space inter-agent communication."""
 
 import pytest
-
 from lyra_agent_swarm.recursive_link import (
     LatentMessage,
     LatentState,

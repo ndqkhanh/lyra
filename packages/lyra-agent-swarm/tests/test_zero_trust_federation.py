@@ -3,7 +3,6 @@
 import time
 
 import pytest
-
 from lyra_agent_swarm.zero_trust_federation import (
     AuthDecision,
     AuthStatus,

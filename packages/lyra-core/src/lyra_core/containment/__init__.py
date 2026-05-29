@@ -13,9 +13,10 @@ from __future__ import annotations
 
 import asyncio
 import time
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Sequence
+from typing import Any
 
 from lyra_core.events import EventBus, EventCategory, ProjectEventBus
 from lyra_core.protocol import AgentMode, AgentProtocol, Task

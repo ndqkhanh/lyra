@@ -1,6 +1,5 @@
 """Tests for Science Pipeline package."""
 
-import pytest
 from lyra_science_pipeline import SciencePipeline
 
 

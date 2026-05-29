@@ -767,7 +767,7 @@ class PAR2RAGEngine:
             self._action_history.append(action)
 
             # Act
-            finding = self.execute_action(action)
+            self.execute_action(action)
 
             # Reflect periodically (every 3 iterations or after SEARCH complete)
             if self._iteration % 3 == 0:

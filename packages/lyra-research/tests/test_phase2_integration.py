@@ -472,7 +472,7 @@ async def test_report_persistence(orchestrator, mock_pipeline_result, tmp_path):
     ) as mock_execute:
         mock_execute.return_value = mock_pipeline_result
 
-        progress = await orchestrator.research("Test Query")
+        await orchestrator.research("Test Query")
 
         # Verify report was saved (as markdown)
         report_files = list(orchestrator.output_dir.glob("*.md"))

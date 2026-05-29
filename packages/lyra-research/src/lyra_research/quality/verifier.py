@@ -170,7 +170,7 @@ class Verifier:
 
         # Check for source diversity
         if sources:
-            unique_types = len(set(s.source_type.value for s in sources))
+            unique_types = len({s.source_type.value for s in sources})
             if unique_types < 2:
                 issues.append(f"Low source diversity ({unique_types} types)")
                 checks["source_diversity"] = False

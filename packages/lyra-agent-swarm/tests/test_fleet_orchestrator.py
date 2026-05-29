@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from lyra_agent_swarm.fleet_orchestrator import (
     ExecutionPattern,
     FanOutBatch,

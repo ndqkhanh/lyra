@@ -11,8 +11,7 @@ import time
 from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Pattern
-
+from re import Pattern
 
 # ── Safety Constants ──────────────────────────────────────────────────────
 

@@ -12,7 +12,7 @@ import pytest
 # Configure pytest-asyncio
 pytest_plugins = ('pytest_asyncio',)
 
-from lyra_research.agents.discovery import (
+from lyra_research.agents.discovery import (  # noqa: E402
     ArxivAgent,
     DiscoveryAgent,
     GithubAgent,
@@ -21,8 +21,8 @@ from lyra_research.agents.discovery import (
     SemanticScholarAgent,
     WebAgent,
 )
-from lyra_research.agents.discovery.discovery_base import RateLimiter
-from lyra_research.discovery import ResearchSource, SourceType
+from lyra_research.agents.discovery.discovery_base import RateLimiter  # noqa: E402
+from lyra_research.discovery import ResearchSource, SourceType  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # RateLimiter Tests
@@ -216,7 +216,7 @@ async def test_github_agent_rate_limit_handling():
         return []
 
     with patch.object(agent.github, "search", side_effect=mock_search):
-        sources = await agent.discover("test", max_results=10)
+        await agent.discover("test", max_results=10)
 
     assert call_count == 2  # Retried after rate limit
 
@@ -304,7 +304,7 @@ async def test_huggingface_agent_rate_limit_retry():
         return []
 
     with patch.object(agent.huggingface, "search", side_effect=mock_search):
-        sources = await agent.discover("test", max_results=10)
+        await agent.discover("test", max_results=10)
 
     assert call_count == 2
 

@@ -6,7 +6,6 @@ import asyncio
 import time
 
 import pytest
-
 from lyra_core.command_queue import (
     Command,
     CommandGroup,
@@ -18,7 +17,6 @@ from lyra_core.command_queue import (
     SurfaceMessage,
     ThreeSurfaceProtocol,
 )
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Command

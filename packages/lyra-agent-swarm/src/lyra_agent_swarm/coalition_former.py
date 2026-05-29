@@ -6,7 +6,6 @@ import itertools
 import math
 import time
 from dataclasses import dataclass, field
-from typing import Any
 
 from lyra_agent_swarm.discipline_agents import Capability, DisciplineAgent
 from lyra_agent_swarm.dispatcher import TaskTicket

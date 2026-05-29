@@ -6,6 +6,7 @@ All tests run offline — no network calls, no LLM calls.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any
 from uuid import uuid4
 
 import pytest
@@ -37,7 +38,7 @@ class _StubProgress:
     papers_analyzed: int = 0
     repos_analyzed: int = 0
     gaps_found: int = 0
-    report: Optional[Any] = None
+    report: Any | None = None
 
 
 def _make_full_report() -> _StubReport:
@@ -57,7 +58,7 @@ def _make_progress(
     papers: int = 0,
     repos: int = 0,
     gaps: int = 0,
-    report: Optional[Any] = None,
+    report: Any | None = None,
     topic: str = "test topic",
 ) -> _StubProgress:
     return _StubProgress(

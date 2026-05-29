@@ -174,7 +174,7 @@ def test_orchestrator_telemetry_tracking(orchestrator: ResearchOrchestrator) -> 
 def test_orchestrator_uses_coordination_for_discovery(orchestrator: ResearchOrchestrator) -> None:
     """Discovery phase uses coordination manager."""
     with patch.object(orchestrator.discovery, "discover", side_effect=_empty_discover):
-        progress = orchestrator.research("llm")
+        orchestrator.research("llm")
 
     # Check that tasks were created
     tasks = orchestrator.coordination.get_all_tasks()
@@ -188,7 +188,7 @@ def test_orchestrator_uses_coordination_for_discovery(orchestrator: ResearchOrch
 def test_orchestrator_uses_coordination_for_analysis(orchestrator: ResearchOrchestrator) -> None:
     """Analysis phase uses coordination manager."""
     with patch.object(orchestrator.discovery, "discover", side_effect=_two_source_discover):
-        progress = orchestrator.research("bert")
+        orchestrator.research("bert")
 
     tasks = orchestrator.coordination.get_all_tasks()
     analysis_tasks = [t for t in tasks if t.agent_type == AgentType.ANALYSIS.value]
@@ -198,7 +198,7 @@ def test_orchestrator_uses_coordination_for_analysis(orchestrator: ResearchOrche
 def test_orchestrator_uses_coordination_for_synthesis(orchestrator: ResearchOrchestrator) -> None:
     """Synthesis phase uses coordination manager."""
     with patch.object(orchestrator.discovery, "discover", side_effect=_empty_discover):
-        progress = orchestrator.research("gpt")
+        orchestrator.research("gpt")
 
     tasks = orchestrator.coordination.get_all_tasks()
     synthesis_tasks = [t for t in tasks if t.agent_type == AgentType.SYNTHESIS.value]
@@ -264,11 +264,11 @@ def test_orchestrator_timeout_enforcement(orchestrator: ResearchOrchestrator) ->
         return _empty_discover(*args, **kwargs)
 
     with patch.object(orchestrator.discovery, "discover", side_effect=slow_discover):
-        progress = orchestrator.research("transformers")
+        orchestrator.research("transformers")
 
     # Should timeout
     tasks = orchestrator.coordination.get_all_tasks()
-    timeout_tasks = [t for t in tasks if t.state == TaskState.TIMEOUT]
+    [t for t in tasks if t.state == TaskState.TIMEOUT]
     # Note: May not timeout in test due to mock, but structure is correct
     assert len(tasks) > 0
 
@@ -313,7 +313,7 @@ def test_orchestrator_capacity_checked_multiple_times(orchestrator: ResearchOrch
 
     with patch.object(orchestrator.capacity, "enforce_limits", side_effect=counting_enforce):
         with patch.object(orchestrator.discovery, "discover", side_effect=_empty_discover):
-            progress = orchestrator.research("transformers")
+            orchestrator.research("transformers")
 
     # Should check capacity at: start, fetch, memorize (3 times minimum)
     assert check_count >= 3
@@ -459,7 +459,7 @@ def test_orchestrator_handles_empty_topic(orchestrator: ResearchOrchestrator) ->
 def test_orchestrator_persists_to_note_store(orchestrator: ResearchOrchestrator) -> None:
     """Research is persisted to note store."""
     with patch.object(orchestrator.discovery, "discover", side_effect=_empty_discover):
-        progress = orchestrator.research("transformers")
+        orchestrator.research("transformers")
 
     notes = list(orchestrator.note_store._notes.values())
     assert len(notes) >= 1
@@ -468,7 +468,7 @@ def test_orchestrator_persists_to_note_store(orchestrator: ResearchOrchestrator)
 def test_orchestrator_persists_to_case_bank(orchestrator: ResearchOrchestrator) -> None:
     """Research is persisted to case bank."""
     with patch.object(orchestrator.discovery, "discover", side_effect=_empty_discover):
-        progress = orchestrator.research("transformers")
+        orchestrator.research("transformers")
 
     cases = orchestrator.case_bank.get_all()
     assert len(cases) == 1
@@ -478,7 +478,7 @@ def test_orchestrator_persists_to_case_bank(orchestrator: ResearchOrchestrator) 
 def test_orchestrator_persists_to_corpus(orchestrator: ResearchOrchestrator) -> None:
     """Sources are persisted to corpus."""
     with patch.object(orchestrator.discovery, "discover", side_effect=_two_source_discover):
-        progress = orchestrator.research("transformers")
+        orchestrator.research("transformers")
 
     # Check corpus has entries
     entries = orchestrator.corpus.search("Paper One")

@@ -12,14 +12,14 @@ import pytest
 # Configure pytest-asyncio
 pytest_plugins = ('pytest_asyncio',)
 
-from lyra_research.agents.analysis import (
+from lyra_research.agents.analysis import (  # noqa: E402
     CitationAnalysisAgent,
     PaperAnalysisAgent,
     QualityScoreAgent,
     RepoAnalysisAgent,
 )
-from lyra_research.agents.analysis.analysis_base import Analysis
-from lyra_research.discovery import ResearchSource, SourceType
+from lyra_research.agents.analysis.analysis_base import Analysis  # noqa: E402
+from lyra_research.discovery import ResearchSource, SourceType  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Test Fixtures

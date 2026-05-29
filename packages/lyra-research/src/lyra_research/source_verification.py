@@ -171,7 +171,7 @@ class SourceVerifier:
             A ``CitationCheck`` with the result.
         """
         content_lowered = source_content.lower() if source_content else source.title.lower()
-        claim_lowered = claim.lower()
+        claim.lower()
 
         # Extract keywords from claim (nouns, named entities)
         keywords = _extract_keywords(claim)

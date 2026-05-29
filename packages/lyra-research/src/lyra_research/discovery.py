@@ -300,11 +300,7 @@ class MultiSourceDiscovery:
     def discover(
         self,
         query: str,
-        sources: list[str] = [
-            "arxiv",
-            "github",
-            "huggingface",
-        ],
+        sources: list[str] = None,
         max_per_source: int = 50,
     ) -> dict[str, list[ResearchSource]]:
         """
@@ -320,6 +316,8 @@ class MultiSourceDiscovery:
         Returns:
             Dictionary mapping source name to list of results
         """
+        if sources is None:
+            sources = ["arxiv", "github", "huggingface"]
         results = {}
 
         if "arxiv" in sources:

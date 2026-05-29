@@ -100,7 +100,7 @@ class TestContextReduction:
             )
 
         # Assemble triggers budget enforcement
-        context = manager.assemble()
+        manager.assemble()
         layered_tokens = manager.current_tokens
 
         # Calculate reduction
@@ -166,7 +166,7 @@ class TestContextGrowth:
                 )
 
             # Measure after assembly (with budget enforcement)
-            context = manager.assemble()
+            manager.assemble()
             sizes.append(manager.current_tokens)
 
         return sizes
@@ -317,7 +317,7 @@ class TestPerformanceOverhead:
             )
 
         start = time.perf_counter()
-        context = manager.assemble()
+        manager.assemble()
         elapsed = time.perf_counter() - start
 
         # Should assemble in < 0.1 seconds
@@ -405,7 +405,7 @@ class TestMemoryUsage:
         initial_objects = len(gc.get_objects())
 
         # Perform many operations
-        for cycle in range(10):
+        for _cycle in range(10):
             # Add entries
             for i in range(100):
                 manager.add(
@@ -487,7 +487,7 @@ def test_benchmark_summary(capsys):
             source=f"source_{i}",
             priority=7,
         )
-    context = manager.assemble()
+    manager.assemble()
     reduction = ((100 * 200 * 4 - manager.current_tokens) / (100 * 200 * 4)) * 100
     print(f"   - 100 sources: {reduction:.1f}% reduction")
 
@@ -503,7 +503,7 @@ def test_benchmark_summary(capsys):
         ("Synthesis", IsolationPolicy.for_synthesis_agent()),
     ]:
         boundary = ContextBoundary(parent, policy)
-        child = boundary.spawn_child("test")
+        boundary.spawn_child("test")
         stats = boundary.get_isolation_stats("test")
         print(f"   - {agent_type}: {stats.reduction_percent:.1f}% savings")
 

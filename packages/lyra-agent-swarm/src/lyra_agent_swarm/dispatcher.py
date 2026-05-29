@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from heapq import heappush, heappop
+from heapq import heappop, heappush
 from typing import Any
 
 from lyra_agent_swarm.discipline_agents import AgentRegistry, Capability, DisciplineAgent
@@ -123,7 +123,7 @@ class Dispatcher:
 
     def classify_task(self, task: TaskTicket) -> dict[Capability, float]:
         """Score each required capability for the given task (1.0 = required)."""
-        return {cap: 1.0 for cap in task.required_capabilities}
+        return dict.fromkeys(task.required_capabilities, 1.0)
 
     def dispatch(self, task: TaskTicket) -> DispatchDecision:
         """Select the best agents for a task and return a dispatch decision."""

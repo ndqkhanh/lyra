@@ -1,6 +1,7 @@
 """Response format patterns - Claude Code-style response formatting"""
 
-from lyra_cli.ui import ColorEngine, SymbolRegistry
+from .colors import ColorEngine
+from .symbols import SymbolRegistry
 
 
 class ResponseFormatter:

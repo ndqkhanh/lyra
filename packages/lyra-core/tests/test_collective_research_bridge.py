@@ -25,7 +25,6 @@ from lyra_core.collective import (
     TeamFormationReason,
 )
 
-
 # ── Helpers ────────────────────────────────────────────────────────────
 
 

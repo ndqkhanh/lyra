@@ -22,57 +22,57 @@ from lyra_research.memory import (
 # ---------------------------------------------------------------------------
 
 def make_note(**kwargs) -> ResearchNote:
-    defaults = dict(
-        topic="attention mechanisms",
-        title="Attention is All You Need",
-        content="Transformers use self-attention to capture dependencies.",
-        tags=["nlp", "transformers", "attention"],
-        note_type="finding",
-        confidence=0.9,
-    )
+    defaults = {
+        "topic": "attention mechanisms",
+        "title": "Attention is All You Need",
+        "content": "Transformers use self-attention to capture dependencies.",
+        "tags": ["nlp", "transformers", "attention"],
+        "note_type": "finding",
+        "confidence": 0.9,
+    }
     defaults.update(kwargs)
     return ResearchNote(**defaults)
 
 
 def make_corpus_entry(**kwargs) -> CorpusEntry:
     from uuid import uuid4
-    defaults = dict(
-        id=str(uuid4()),
-        source_id="arxiv:1234.5678",
-        title="Attention is All You Need",
-        url="https://arxiv.org/abs/1706.03762",
-        abstract="We propose a new network architecture, the Transformer.",
-        full_text="The Transformer model relies entirely on self-attention.",
-        source_type="paper",
-    )
+    defaults = {
+        "id": str(uuid4()),
+        "source_id": "arxiv:1234.5678",
+        "title": "Attention is All You Need",
+        "url": "https://arxiv.org/abs/1706.03762",
+        "abstract": "We propose a new network architecture, the Transformer.",
+        "full_text": "The Transformer model relies entirely on self-attention.",
+        "source_type": "paper",
+    }
     defaults.update(kwargs)
     return CorpusEntry(**defaults)
 
 
 def make_strategy(**kwargs) -> ResearchStrategy:
-    defaults = dict(
-        topic_type="ml_paper_search",
-        domain="nlp",
-        strategy_steps=["Search arxiv", "Filter by citations", "Read abstracts"],
-        outcome_score=0.8,
-        lessons_learned="Start broad, then narrow by citation count.",
-    )
+    defaults = {
+        "topic_type": "ml_paper_search",
+        "domain": "nlp",
+        "strategy_steps": ["Search arxiv", "Filter by citations", "Read abstracts"],
+        "outcome_score": 0.8,
+        "lessons_learned": "Start broad, then narrow by citation count.",
+    }
     defaults.update(kwargs)
     return ResearchStrategy(**defaults)
 
 
 def make_case(**kwargs) -> ResearchCase:
-    defaults = dict(
-        topic="attention mechanisms in NLP",
-        domain="nlp",
-        report_summary="Attention mechanisms enable transformers to excel at NLP.",
-        sources_found=10,
-        quality_score=0.85,
-        duration_seconds=120.0,
-        top_sources=["https://arxiv.org/abs/1706.03762"],
-        key_findings=["Self-attention is key to transformers"],
-        gaps_found=["Efficient attention at scale"],
-    )
+    defaults = {
+        "topic": "attention mechanisms in NLP",
+        "domain": "nlp",
+        "report_summary": "Attention mechanisms enable transformers to excel at NLP.",
+        "sources_found": 10,
+        "quality_score": 0.85,
+        "duration_seconds": 120.0,
+        "top_sources": ["https://arxiv.org/abs/1706.03762"],
+        "key_findings": ["Self-attention is key to transformers"],
+        "gaps_found": ["Efficient attention at scale"],
+    }
     defaults.update(kwargs)
     return ResearchCase(**defaults)
 

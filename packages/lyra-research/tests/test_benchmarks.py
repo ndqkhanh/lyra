@@ -404,7 +404,7 @@ def test_benchmark_memory_capacity_tracking(
     sources = _make_sources(10)
 
     with patch.object(orchestrator_with_coordination.discovery, "discover", return_value=sources):
-        progress = orchestrator_with_coordination.research("transformers")
+        orchestrator_with_coordination.research("transformers")
 
     # Check capacity status
     status = orchestrator_with_coordination.capacity.check_capacity()
@@ -419,7 +419,7 @@ def test_benchmark_memory_compaction_not_needed(
     sources = _make_sources(10)
 
     with patch.object(orchestrator_with_coordination.discovery, "discover", return_value=sources):
-        progress = orchestrator_with_coordination.research("transformers")
+        orchestrator_with_coordination.research("transformers")
 
     # Check capacity level
     status = orchestrator_with_coordination.capacity.check_capacity()

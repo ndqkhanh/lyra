@@ -170,7 +170,7 @@ class RaftNode:
         if votes >= quorum:
             self._state = NodeState.LEADER
             self._next_index = {p: len(self._log) for p in self.peer_ids}
-            self._match_index = {p: -1 for p in self.peer_ids}
+            self._match_index = dict.fromkeys(self.peer_ids, -1)
             self._last_heartbeat = time.time()
             return [f"elected_leader_term_{self._current_term}"]
         self._state = NodeState.FOLLOWER

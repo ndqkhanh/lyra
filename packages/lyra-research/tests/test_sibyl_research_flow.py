@@ -16,7 +16,6 @@ from lyra_research.sibyl_harness import (
     TrialHarness,
 )
 
-
 # ── TrialConfig ─────────────────────────────────────────────────────────
 
 

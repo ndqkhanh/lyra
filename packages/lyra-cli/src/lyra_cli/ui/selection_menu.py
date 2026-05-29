@@ -2,7 +2,8 @@
 
 from dataclasses import dataclass
 
-from lyra_cli.ui import ColorEngine, SymbolRegistry
+from .colors import ColorEngine
+from .symbols import SymbolRegistry
 
 
 @dataclass

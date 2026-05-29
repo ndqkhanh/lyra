@@ -1,7 +1,6 @@
 """Tests for Compound Agent — 5-slot compound architecture for multi-perspective reasoning."""
 
 import pytest
-
 from lyra_agent_swarm.compound_agent import (
     CompoundAgent,
     CompoundConfig,
@@ -150,7 +149,7 @@ class TestCompoundAgent:
 
     def test_execute_sync_increments_count(self):
         agent = CompoundAgent()
-        outputs = {r: "ok" for r in SlotRole}
+        outputs = dict.fromkeys(SlotRole, "ok")
         agent.execute_sync("task1", outputs)
         agent.execute_sync("task2", outputs)
         assert agent.execution_count == 2

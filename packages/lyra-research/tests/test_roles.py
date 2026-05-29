@@ -26,6 +26,7 @@ from lyra_research.roles import (
     CuratorRole,
     DiscoveryResult,
     DiscoveryRole,
+    PipelineResult,
     ReviewIssue,
     ReviewResult,
     ReviewRole,

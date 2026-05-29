@@ -44,7 +44,7 @@ class CrossSourceSynthesizerAgent(SynthesisAgent):
         taxonomy = self._build_taxonomy(grouped_findings)
 
         # Calculate confidence based on source diversity
-        source_types = set(a.analysis_type for a in analyses)
+        source_types = {a.analysis_type for a in analyses}
         confidence = min(len(source_types) / 4.0, 1.0)  # 4 analysis types
 
         return SynthesisResult(

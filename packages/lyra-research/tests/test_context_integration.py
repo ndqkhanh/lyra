@@ -106,7 +106,7 @@ def test_orchestrator_budget_enforcement(context_manager):
         )
 
     # Assemble should trigger budget enforcement
-    context = context_manager.assemble()
+    context_manager.assemble()
 
     # Verify budget is enforced
     usage = context_manager.get_budget_usage()
@@ -275,7 +275,6 @@ def test_analysis_agent_isolation(context_manager):
     context_manager.add(ContextLayer.SESSION, "Session", "session", priority=6)
     context_manager.add(ContextLayer.TASK, "Task", "task", priority=7)
 
-    parent_tokens = context_manager.current_tokens
 
     # Create analysis boundary
     boundary = ContextBoundary(
@@ -285,7 +284,6 @@ def test_analysis_agent_isolation(context_manager):
 
     # Spawn analysis child
     child = boundary.spawn_child("analysis_1")
-    child_tokens = child.current_tokens
 
     # Analysis agents inherit more than discovery
     # They get SYSTEM, USER, PROJECT, TASK
@@ -348,7 +346,6 @@ def test_synthesis_agent_full_context(context_manager):
             priority=7,
         )
 
-    parent_tokens = context_manager.current_tokens
 
     # Create synthesis boundary
     boundary = ContextBoundary(
@@ -358,7 +355,6 @@ def test_synthesis_agent_full_context(context_manager):
 
     # Spawn synthesis child
     child = boundary.spawn_child("synthesis_1")
-    child_tokens = child.current_tokens
 
     # Synthesis agents inherit most layers
     policy = IsolationPolicy.for_synthesis_agent()
@@ -514,7 +510,7 @@ def test_context_budget_across_pipeline(context_manager):
         discovery_boundary.merge_child(child, f"discovery_{i}")
 
     # Assemble should enforce budget
-    context = context_manager.assemble()
+    context_manager.assemble()
 
     # Verify budget is enforced
     assert context_manager.current_tokens <= context_manager.max_tokens
@@ -596,7 +592,7 @@ def test_isolation_statistics_aggregation(context_manager):
     )
 
     for i in range(5):
-        child = boundary.spawn_child(f"child_{i}")
+        boundary.spawn_child(f"child_{i}")
 
     # Get aggregate stats
     stats = boundary.get_isolation_stats()

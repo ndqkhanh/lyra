@@ -135,7 +135,7 @@ class AdaptiveTaskGraph(TaskGraph):
         tasks = []
 
         # Add 2 more discovery tasks with different sources
-        for i in range(2):
+        for _i in range(2):
             task = Task(
                 agent_type="discovery",
                 timeout_seconds=300,
@@ -169,7 +169,7 @@ class AdaptiveTaskGraph(TaskGraph):
         # Create 1 falsification task per 2 contradictions
         task_count = max(1, contradiction_count // 2)
 
-        for i in range(task_count):
+        for _i in range(task_count):
             task = Task(
                 agent_type="falsification",
                 timeout_seconds=600,
@@ -192,7 +192,7 @@ class AdaptiveTaskGraph(TaskGraph):
         tasks = []
 
         # Add 2 more analysis tasks
-        for i in range(2):
+        for _i in range(2):
             task = Task(
                 agent_type="analysis",
                 timeout_seconds=600,

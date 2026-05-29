@@ -27,7 +27,7 @@ class DiscoveryGate(QualityGate):
             """Check diversity of source types."""
             if not sources:
                 return 0.0
-            unique_types = len(set(s.source_type.value for s in sources))
+            unique_types = len({s.source_type.value for s in sources})
             return float(unique_types)
 
         def check_avg_quality(sources: list[ResearchSource]) -> float:

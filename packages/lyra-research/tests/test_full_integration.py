@@ -61,7 +61,7 @@ def mock_analysis_agent():
 
     async def mock_analyze(sources):
         analyses = []
-        for i, source in enumerate(sources[:10]):
+        for _i, source in enumerate(sources[:10]):
             analysis = Analysis(
                 source_id=source.id,
                 analysis_type="paper",
@@ -201,7 +201,7 @@ async def test_parallel_discovery_execution(orchestrator, mock_discovery_agent):
     })
 
     # Execute
-    progress = await orchestrator.research("test query", depth="standard")
+    await orchestrator.research("test query", depth="standard")
 
     # Verify parallel execution (all agents should have similar execution times)
     assert len(execution_times) > 0
@@ -657,7 +657,7 @@ async def test_progress_callbacks(orchestrator, mock_discovery_agent, mock_analy
         callback_phases.append(progress.current_phase)
 
     # Execute with callback
-    progress = await orchestrator.research(
+    await orchestrator.research(
         "test query",
         depth="standard",
         progress_callback=progress_callback,

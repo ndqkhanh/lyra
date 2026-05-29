@@ -173,13 +173,6 @@ class MultiLayerCitationVerifier:
 
         # Use LLM to verify claim support
         # This would call an LLM API in production
-        prompt = f"""
-        Claim: {claim}
-
-        Paper Content: {paper_content}
-
-        Does the paper content support the claim? Answer YES or NO with reasoning.
-        """
 
         # Placeholder for LLM call
         # response = self.llm.generate(prompt)

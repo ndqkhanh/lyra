@@ -125,7 +125,7 @@ def test_adapt_graph_multiple_adaptations():
 
     # First adaptation: insufficient sources
     results1 = [{"sources": ["s1", "s2"]}]
-    new_tasks1 = graph.adapt_graph(results1)
+    graph.adapt_graph(results1)
 
     # Second adaptation: contradictions
     results2 = [
@@ -134,7 +134,7 @@ def test_adapt_graph_multiple_adaptations():
             "contradictions": [("c1", "c2")],
         }
     ]
-    new_tasks2 = graph.adapt_graph(results2)
+    graph.adapt_graph(results2)
 
     assert len(graph.adaptation_history) == 2
     assert graph.adaptation_history[0]["reason"] == "insufficient_sources"
