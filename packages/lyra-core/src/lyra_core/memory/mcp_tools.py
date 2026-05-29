@@ -14,6 +14,7 @@ Tools:
   - digest: Write a SubAgentDigest
   - recall_digests: Retrieve digests for peer agents in a task
 """
+
 from __future__ import annotations
 
 import threading
@@ -99,10 +100,7 @@ class _FragmentStore:
                     continue
                 if fragment_type is not None and f.type != fragment_type:
                     continue
-                if q and not (
-                    q in f.content.lower()
-                    or any(q in e.lower() for e in f.entities)
-                ):
+                if q and not (q in f.content.lower() or any(q in e.lower() for e in f.entities)):
                     continue
                 results.append(f)
             results.sort(key=lambda f: f.confidence, reverse=True)
@@ -185,7 +183,10 @@ def mcp_recall(
         return {"fragments": [], "count": 0, "error": f"Invalid tier: {tier}"}
 
     fragments = store.search(
-        query=query, tier=mem_tier, fragment_type=frag_type, limit=limit,
+        query=query,
+        tier=mem_tier,
+        fragment_type=frag_type,
+        limit=limit,
     )
 
     return {
@@ -217,14 +218,20 @@ def mcp_write(
         mem_tier = MemoryTier(tier)
     except ValueError:
         return {
-            "error": f"Invalid tier: {tier}. Must be one of: t0_working, t1_session, t2_semantic, t2_procedural, t3_user, t3_team"
+            "error": (
+                f"Invalid tier: {tier}. Must be one of: "
+                f"t0_working, t1_session, t2_semantic, t2_procedural, t3_user, t3_team"
+            ),
         }
 
     try:
         frag_type = FragmentType(fragment_type)
     except ValueError:
         return {
-            "error": f"Invalid fragment_type: {fragment_type}. Must be one of: fact, decision, preference, skill, observation"
+            "error":(
+                f"Invalid fragment_type: {fragment_type}"
+                f". Must be one of: fact, decision, preference, skill, observation"
+            )
         }
 
     subject = Subject.agent(agent_id) if agent_id != "system" else Subject.user(user_id)
@@ -233,7 +240,10 @@ def mcp_write(
 
     if not policy_graph.check_access(subject, resource, Permission.WRITE):
         return {
-            "error": f"Access denied: {subject.type}:{subject.id} does not have WRITE permission for tier {tier}"
+            "error":(
+                f"Access denied: {subject.type}:{subject.id}"
+                f" does not have WRITE permission for tier {tier}"
+            )
         }
 
     now = datetime.now(timezone.utc)
@@ -281,7 +291,10 @@ def mcp_pin(
 
     if not policy_graph.check_access(subject, resource, Permission.WRITE):
         return {
-            "error": f"Access denied: user {user_id} does not have WRITE permission for fragment {fragment_id}"
+            "error":(
+                f"Access denied: user {user_id} does not have WRITE permission for fragment "
+                f"{fragment_id}"
+            )
         }
 
     store = _get_store()
@@ -309,7 +322,10 @@ def mcp_forget(
 
     if not policy_graph.check_access(subject, resource, Permission.DELETE):
         return {
-            "error": f"Access denied: user {user_id} does not have DELETE permission for fragment {fragment_id}"
+            "error":(
+                f"Access denied: user {user_id} does not have DELETE permission for fragment "
+                f"{fragment_id}"
+            )
         }
 
     store = _get_store()

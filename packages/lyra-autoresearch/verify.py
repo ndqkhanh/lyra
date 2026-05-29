@@ -14,31 +14,31 @@ def check_imports():
     print("Checking imports...")
 
     try:
-        import lyra_autoresearch
+        import lyra_autoresearch  # noqa: F401
         print("  ✓ Main package")
 
         from lyra_autoresearch import (
             # Citations
-            CitationVerifier,
+            CitationVerifier,  # noqa: F401
             # Debate
-            DebatePanel,
+            DebatePanel,  # noqa: F401
             # Evolution
-            EvolutionEngine,
-            ExecutionStrategy,
-            FailureType,
+            EvolutionEngine,  # noqa: F401
+            ExecutionStrategy,  # noqa: F401
+            FailureType,  # noqa: F401
             # HITL
-            GateOrchestrator,
-            HITLMode,
-            LessonCategory,
-            LessonSeverity,
-            Perspective,
+            GateOrchestrator,  # noqa: F401
+            HITLMode,  # noqa: F401
+            LessonCategory,  # noqa: F401
+            LessonSeverity,  # noqa: F401
+            Perspective,  # noqa: F401
             # Execution
-            SelfHealingExecutor,
-            VerifyStatus,
-            create_gate_config,
-            execute_with_healing,
-            run_debate,
-            verify_citations,
+            SelfHealingExecutor,  # noqa: F401
+            VerifyStatus,  # noqa: F401
+            create_gate_config,  # noqa: F401
+            execute_with_healing,  # noqa: F401
+            run_debate,  # noqa: F401
+            verify_citations,  # noqa: F401
         )
         print("  ✓ All exports available")
 

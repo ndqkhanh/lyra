@@ -11,11 +11,20 @@ trajectories + :mod:`lyra_harness_core.orchestration` decisions into one typed
     4. **Deterministic re-execution** — replay agent decisions through pure-
        function policies to confirm the trace reproduces.
 
-Per [docs/188-witness-provenance-memory-techniques-synthesis.md](../../../../../../research/harness-engineering/docs/188-witness-provenance-memory-techniques-synthesis.md)
-+ [docs/186-mnema-witness-lattice.md](../../../../../../research/harness-engineering/docs/186-mnema-witness-lattice.md)
-+ [docs/220-orion-code-multi-hop-collaborative-apply-plan.md](../../../../../../research/harness-engineering/docs/220-orion-code-multi-hop-collaborative-apply-plan.md) §4.9
-+ [docs/221-aegis-ops-multi-hop-collaborative-apply-plan.md](../../../../../../research/harness-engineering/docs/221-aegis-ops-multi-hop-collaborative-apply-plan.md) §3.5.
+Per
+[docs/188-witness-provenance-memory-techniques-synthesis.md](../../../../../../research/harness-engineering/docs/188-witness-provenance-memory-techniques-synthesis.md)
++
+[docs/186-mnema-witness-lattice.md](../../../../../../research/harness-engineering/docs/186-mnema-witness-lattice.md)
++
+[docs/220-orion-code-multi-hop-collaborative-apply-plan.md]
+(../../../../../../research/harness-engineering/
+docs/220-orion-code-multi-hop-collaborative-apply-plan.md) §4.9
++
+[docs/221-aegis-ops-multi-hop-collaborative-apply-plan.md]
+(../../../../../../research/harness-engineering/
+docs/221-aegis-ops-multi-hop-collaborative-apply-plan.md) §3.5.
 """
+
 from __future__ import annotations
 
 from .builder import TraceBuilder

@@ -1,4 +1,5 @@
 """Red tests for the retrospective artifact."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -35,8 +36,16 @@ def test_retro_markdown_has_required_sections(tmp_path: Path) -> None:
 
 def test_retro_lists_tool_calls(tmp_path: Path) -> None:
     events = [
-        {"kind": "tool.call", "session_id": "s", "payload": {"name": "Read", "args": {"path": "x"}}},
-        {"kind": "tool.call", "session_id": "s", "payload": {"name": "Write", "args": {"path": "y"}}},
+        {
+            "kind": "tool.call",
+            "session_id": "s",
+            "payload": {"name": "Read", "args": {"path": "x"}},
+        },
+        {
+            "kind": "tool.call",
+            "session_id": "s",
+            "payload": {"name": "Write", "args": {"path": "y"}},
+        },
     ]
     md = build_retro_artifact(
         session_id="s",

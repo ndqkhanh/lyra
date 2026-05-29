@@ -203,52 +203,75 @@ class ContinuousGuard:
 
     # ── Core Check ────────────────────────────────────────────────────────
 
-    def check(self, command: str, cost_estimate: float = 0.0, files_estimate: int = 0) -> GuardVerdict:
+    def check(
+        self, command: str, cost_estimate: float = 0.0, files_estimate: int = 0
+    ) -> GuardVerdict:
         """Evaluate whether an operation should be allowed to proceed.
 
         Checks run in priority order: pause state → destructive patterns →
         rate limits → cost quota → file quota → failure streak.
         """
         if self._state.is_paused:
-            return self._emit(GuardVerdict(
-                action=GuardAction.PAUSE,
-                reason=GuardReason.CONSECUTIVE_FAILURES,
-                detail=f"Guard is paused: {self._state.pause_reason}",
-            ))
+            return self._emit(
+                GuardVerdict(
+                    action=GuardAction.PAUSE,
+                    reason=GuardReason.CONSECUTIVE_FAILURES,
+                    detail=f"Guard is paused: {self._state.pause_reason}",
+                )
+            )
 
         # 1. Destructive pattern check
         for pattern in self._compiled_patterns:
             if pattern.search(command):
-                return self._emit(GuardVerdict(
-                    action=GuardAction.BLOCK,
-                    reason=GuardReason.DESTRUCTIVE_PATTERN,
-                    detail=f"Command matches destructive pattern: {pattern.pattern}",
-                ))
+                return self._emit(
+                    GuardVerdict(
+                        action=GuardAction.BLOCK,
+                        reason=GuardReason.DESTRUCTIVE_PATTERN,
+                        detail=f"Command matches destructive pattern: {pattern.pattern}",
+                    )
+                )
 
         # 2. Rate limit check
         self._rotate_windows()
         if self._state.operations_this_minute >= self._max_ops_per_minute:
-            return self._emit(GuardVerdict(
-                action=GuardAction.WARN,
-                reason=GuardReason.RATE_LIMIT,
-                detail=f"Rate limit reached: {self._state.operations_this_minute}/{self._max_ops_per_minute} ops/min",
-            ))
+            return self._emit(
+                GuardVerdict(
+                    action=GuardAction.WARN,
+                    reason=GuardReason.RATE_LIMIT,
+                    detail=(
+                        f"Rate limit reached: {self._state.operations_this_minute}/"
+                        f"{self._max_ops_per_minute} ops/min"
+                    ),
+                )
+            )
 
         # 3. Cost quota check
         if self._state.total_cost_usd + cost_estimate > self._max_cost_per_hour:
-            return self._emit(GuardVerdict(
-                action=GuardAction.BLOCK,
-                reason=GuardReason.COST_LIMIT,
-                detail=f"Cost limit would be exceeded: ${self._state.total_cost_usd + cost_estimate:.2f} > ${self._max_cost_per_hour:.2f}",
-            ))
+            return self._emit(
+                GuardVerdict(
+                    action=GuardAction.BLOCK,
+                    reason=GuardReason.COST_LIMIT,
+                    detail=(
+                        f"Cost limit would be exceeded: $"
+                        f"{self._state.total_cost_usd + cost_estimate:.2f} > $"
+                        f"{self._max_cost_per_hour:.2f}"
+                    ),
+                )
+            )
 
         # 4. File quota check
         if self._state.files_modified + files_estimate > self._max_files_per_hour:
-            return self._emit(GuardVerdict(
-                action=GuardAction.BLOCK,
-                reason=GuardReason.FILE_LIMIT,
-                detail=f"File limit would be exceeded: {self._state.files_modified + files_estimate} > {self._max_files_per_hour}",
-            ))
+            return self._emit(
+                GuardVerdict(
+                    action=GuardAction.BLOCK,
+                    reason=GuardReason.FILE_LIMIT,
+                    detail=(
+                        f"File limit would be exceeded: "
+                        f"{self._state.files_modified + files_estimate} > "
+                        f"{self._max_files_per_hour}"
+                    ),
+                )
+            )
 
         # 5. Consecutive failure check
         if self._state.consecutive_failures >= self._max_consecutive_failures:
@@ -261,17 +284,23 @@ class ContinuousGuard:
                 pause_reason=f"Reached {self._max_consecutive_failures} consecutive failures",
                 window_start=self._state.window_start,
             )
-            return self._emit(GuardVerdict(
-                action=GuardAction.PAUSE,
-                reason=GuardReason.CONSECUTIVE_FAILURES,
-                detail=f"Auto-paused after {self._max_consecutive_failures} consecutive failures",
-            ))
+            return self._emit(
+                GuardVerdict(
+                    action=GuardAction.PAUSE,
+                    reason=GuardReason.CONSECUTIVE_FAILURES,
+                    detail=(
+                        f"Auto-paused after {self._max_consecutive_failures} consecutive failures"
+                    ),
+                )
+            )
 
-        return self._emit(GuardVerdict(
-            action=GuardAction.ALLOW,
-            reason=GuardReason.OK,
-            detail="All safety checks passed",
-        ))
+        return self._emit(
+            GuardVerdict(
+                action=GuardAction.ALLOW,
+                reason=GuardReason.OK,
+                detail="All safety checks passed",
+            )
+        )
 
     def is_destructive(self, command: str) -> bool:
         """Quick check if a command matches any destructive pattern."""
@@ -445,7 +474,8 @@ def create_strict_guard(workspace: str = "") -> ContinuousGuard:
         max_cost_per_hour=0.50,
         max_files_per_hour=10,
         max_ops_per_minute=10,
-        destructive_patterns=DESTRUCTIVE_PATTERNS + (
+        destructive_patterns=DESTRUCTIVE_PATTERNS
+        + (
             r"git\s+push",
             r"kubectl\s+delete",
             r"terraform\s+destroy",

@@ -68,8 +68,14 @@ def sample_skill() -> Skill:
         version="1.0.0",
         content={
             "capabilities": [
-                "binary_search", "merge_sort", "greeting", "spam_detect",
-                "news_summary", "sql_optimize", "flatten_list", "fact_recall",
+                "binary_search",
+                "merge_sort",
+                "greeting",
+                "spam_detect",
+                "news_summary",
+                "sql_optimize",
+                "flatten_list",
+                "fact_recall",
                 "outlier_detection",
             ],
             "steps": [
@@ -217,9 +223,7 @@ class TestTrajectoryPatcher:
         error_patches = [p for p in patches if "Fix" in p.change_description]
         assert len(error_patches) >= 1
 
-    def test_extract_patches_detects_repeats(
-        self, patcher: TrajectoryPatcher
-    ) -> None:
+    def test_extract_patches_detects_repeats(self, patcher: TrajectoryPatcher) -> None:
         trajectories = [
             {
                 "trajectory_id": "t1",
@@ -317,19 +321,27 @@ class TestTrajectoryPatcher:
         result = patcher.batch_apply(sample_skill, patches)
         assert result.version_number == 7
 
-    def test_validate_patch_same_skill(self, patcher: TrajectoryPatcher, sample_skill: Skill) -> None:
+    def test_validate_patch_same_skill(
+        self, patcher: TrajectoryPatcher, sample_skill: Skill
+    ) -> None:
         patch = TrajectoryPatch("p1", "test_skill", "t1", "desc", "", "")
         assert patcher.validate_patch(sample_skill, patch, [])
 
-    def test_validate_patch_wrong_skill(self, patcher: TrajectoryPatcher, sample_skill: Skill) -> None:
+    def test_validate_patch_wrong_skill(
+        self, patcher: TrajectoryPatcher, sample_skill: Skill
+    ) -> None:
         patch = TrajectoryPatch("p1", "other", "t1", "desc", "", "")
         assert not patcher.validate_patch(sample_skill, patch, [])
 
-    def test_patch_history_updated(self, patcher: TrajectoryPatcher, sample_trajectories: list[dict[str, Any]]) -> None:
+    def test_patch_history_updated(
+        self, patcher: TrajectoryPatcher, sample_trajectories: list[dict[str, Any]]
+    ) -> None:
         _ = patcher.extract_patches(sample_trajectories)
         assert len(patcher.patch_history) >= 1
 
-    def test_clear_history(self, patcher: TrajectoryPatcher, sample_trajectories: list[dict[str, Any]]) -> None:
+    def test_clear_history(
+        self, patcher: TrajectoryPatcher, sample_trajectories: list[dict[str, Any]]
+    ) -> None:
         _ = patcher.extract_patches(sample_trajectories)
         patcher.clear_history()
         assert patcher.patch_history == []
@@ -360,9 +372,11 @@ class TestTrajectoryPatcher:
         assert PatchType.FIX_PATTERN.name == "FIX_PATTERN"
 
     def test_extract_patches_from_empty_events(self, patcher: TrajectoryPatcher) -> None:
-        patches = patcher.extract_patches([
-            {"trajectory_id": "t1", "skill_id": "s1", "events": []},
-        ])
+        patches = patcher.extract_patches(
+            [
+                {"trajectory_id": "t1", "skill_id": "s1", "events": []},
+            ]
+        )
         assert patches == []
 
     def test_bump_version_format(self, patcher: TrajectoryPatcher) -> None:
@@ -408,7 +422,10 @@ class TestSkillBenchmark:
     def test_compare_versions(self, skill_bm: SkillBenchmark, sample_skill: Skill) -> None:
         v2 = Skill(
             skill_id="test_skill",
-            content={**sample_skill.content, "capabilities": [*sample_skill.content.get("capabilities", []), "new_cap"]},
+            content={
+                **sample_skill.content,
+                "capabilities": [*sample_skill.content.get("capabilities", []), "new_cap"],
+            },
         )
         comparison = skill_bm.compare_versions([sample_skill], [v2])
         assert "overall_delta" in comparison
@@ -427,7 +444,9 @@ class TestSkillBenchmark:
             assert t.family == TaskFamily.CODING
 
     def test_benchmark_task_defaults(self) -> None:
-        task = BenchmarkTask(task_id="t1", family=TaskFamily.CODING, description="desc", expected_capability="cap")
+        task = BenchmarkTask(
+            task_id="t1", family=TaskFamily.CODING, description="desc", expected_capability="cap"
+        )
         assert task.difficulty == Difficulty.MEDIUM
         assert task.ground_truth == ""
 
@@ -437,7 +456,9 @@ class TestSkillBenchmark:
         assert result.attempt_count == 1
         assert result.latency_ms == 0.0
 
-    def test_benchmark_report_aggregation(self, skill_bm: SkillBenchmark, sample_skill: Skill) -> None:
+    def test_benchmark_report_aggregation(
+        self, skill_bm: SkillBenchmark, sample_skill: Skill
+    ) -> None:
         report = skill_bm.run_benchmark([sample_skill])
         # Verify that results match overall
         if report.results:
@@ -494,19 +515,27 @@ class TestLifelongLearner:
         assert isinstance(cycle, LearningCycle)
 
     def test_run_learning_cycle_with_traces(
-        self, learner: LifelongLearner, sample_skill: Skill, sample_trajectories: list[dict[str, Any]]
+        self,
+        learner: LifelongLearner,
+        sample_skill: Skill,
+        sample_trajectories: list[dict[str, Any]],
     ) -> None:
         cycle = learner.run_learning_cycle(sample_trajectories, [sample_skill])
         assert cycle.cycle_id.startswith("cycle_")
         assert isinstance(cycle.score_delta, float)
 
     def test_run_learning_cycle_updates_state(
-        self, learner: LifelongLearner, sample_skill: Skill, sample_trajectories: list[dict[str, Any]]
+        self,
+        learner: LifelongLearner,
+        sample_skill: Skill,
+        sample_trajectories: list[dict[str, Any]],
     ) -> None:
         _ = learner.run_learning_cycle(sample_trajectories, [sample_skill])
         assert len(learner.state.history) == 1
 
-    def test_externalize_lessons(self, learner: LifelongLearner, sample_trajectories: list[dict[str, Any]]) -> None:
+    def test_externalize_lessons(
+        self, learner: LifelongLearner, sample_trajectories: list[dict[str, Any]]
+    ) -> None:
         patches = learner.externalize_lessons(sample_trajectories)
         assert isinstance(patches, list)
         if patches:
@@ -527,7 +556,10 @@ class TestLifelongLearner:
             state.current_version = "0.2.0  # type: ignore[misc]"
 
     def test_multiple_cycles_accumulate(
-        self, learner: LifelongLearner, sample_skill: Skill, sample_trajectories: list[dict[str, Any]]
+        self,
+        learner: LifelongLearner,
+        sample_skill: Skill,
+        sample_trajectories: list[dict[str, Any]],
     ) -> None:
         _ = learner.run_learning_cycle(sample_trajectories, [sample_skill])
         _ = learner.run_learning_cycle(sample_trajectories, [sample_skill])
@@ -545,13 +577,21 @@ class TestLifelongLearner:
         assert learner.config.rollback_on_regression is False
 
     def test_run_cycle_with_task_filter(
-        self, learner: LifelongLearner, sample_skill: Skill, sample_trajectories: list[dict[str, Any]]
+        self,
+        learner: LifelongLearner,
+        sample_skill: Skill,
+        sample_trajectories: list[dict[str, Any]],
     ) -> None:
-        cycle = learner.run_learning_cycle(sample_trajectories, [sample_skill], task_filter="coding")
+        cycle = learner.run_learning_cycle(
+            sample_trajectories, [sample_skill], task_filter="coding"
+        )
         assert isinstance(cycle, LearningCycle)
 
     def test_version_bump_in_state(
-        self, learner: LifelongLearner, sample_skill: Skill, sample_trajectories: list[dict[str, Any]]
+        self,
+        learner: LifelongLearner,
+        sample_skill: Skill,
+        sample_trajectories: list[dict[str, Any]],
     ) -> None:
         # The score delta might be negative causing no bump.
         # Just verify the cycle records something.
@@ -642,9 +682,7 @@ class TestRegressionTester:
         # Use _compute_match via quick_smoke_test or test structure
         assert True  # Property testing covered by other tests
 
-    def test_run_suite_with_regression(
-        self, regression_tester: RegressionTester
-    ) -> None:
+    def test_run_suite_with_regression(self, regression_tester: RegressionTester) -> None:
         test = TestCase("t1", "advanced_cap", "input", "expected output")
         skill_before = Skill(
             skill_id="s1",
@@ -674,7 +712,9 @@ class TestVersionManager:
         assert sv.changelog == "initial version"
         assert sv.status == VersionStatus.ACTIVE
 
-    def test_create_version_increments(self, version_manager: VersionManager, sample_skill: Skill) -> None:
+    def test_create_version_increments(
+        self, version_manager: VersionManager, sample_skill: Skill
+    ) -> None:
         version_manager.create_version(sample_skill, "v1")
         v2 = version_manager.create_version(sample_skill, "v2")
         assert v2.version_number == 2
@@ -707,7 +747,9 @@ class TestVersionManager:
         active = version_manager.get_active_version("test_skill")
         assert active.version_number == 3
 
-    def test_rollback_nonexistent_target(self, version_manager: VersionManager, sample_skill: Skill) -> None:
+    def test_rollback_nonexistent_target(
+        self, version_manager: VersionManager, sample_skill: Skill
+    ) -> None:
         version_manager.create_version(sample_skill, "v1")
         with pytest.raises(VersionError):
             version_manager.rollback("test_skill", 99)
@@ -721,7 +763,9 @@ class TestVersionManager:
         version_manager.pin_version("test_skill", 1)
         assert version_manager.is_pinned("test_skill")
 
-    def test_pin_prevents_new_versions(self, version_manager: VersionManager, sample_skill: Skill) -> None:
+    def test_pin_prevents_new_versions(
+        self, version_manager: VersionManager, sample_skill: Skill
+    ) -> None:
         version_manager.create_version(sample_skill, "v1")
         version_manager.pin_version("test_skill", 1)
         with pytest.raises(VersionError):
@@ -740,12 +784,16 @@ class TestVersionManager:
         v2 = version_manager.create_version(sample_skill, "v2")
         assert v2.version_number == 2
 
-    def test_diff_versions_nonexistent(self, version_manager: VersionManager, sample_skill: Skill) -> None:
+    def test_diff_versions_nonexistent(
+        self, version_manager: VersionManager, sample_skill: Skill
+    ) -> None:
         version_manager.create_version(sample_skill, "v1")
         with pytest.raises(VersionError):
             version_manager.diff_versions(1, 99, "test_skill")
 
-    def test_pin_prevents_rollback(self, version_manager: VersionManager, sample_skill: Skill) -> None:
+    def test_pin_prevents_rollback(
+        self, version_manager: VersionManager, sample_skill: Skill
+    ) -> None:
         version_manager.create_version(sample_skill, "v1")
         version_manager.pin_version("test_skill", 1)
         with pytest.raises(VersionError):
@@ -768,7 +816,9 @@ class TestVersionManager:
         assert vd.removed == []
         assert vd.modified == []
 
-    def test_version_deprecation(self, version_manager: VersionManager, sample_skill: Skill) -> None:
+    def test_version_deprecation(
+        self, version_manager: VersionManager, sample_skill: Skill
+    ) -> None:
         version_manager.create_version(sample_skill, "v1")
         # Rollback marks v2 as ROLLED_BACK
         _ = version_manager.create_version(sample_skill, "v2")
@@ -810,8 +860,12 @@ class TestEvolutionMetrics:
             evolution_metrics.get_trends()
 
     def test_get_trends_with_data(self, evolution_metrics: EvolutionMetrics) -> None:
-        state1 = LearningState(total_improvement=0.0, history=[LearningCycle("c1", "0.1.0", "0.1.0", 1, 0.0)])
-        state2 = LearningState(total_improvement=0.1, history=[LearningCycle("c2", "0.1.0", "0.1.1", 2, 0.1)])
+        state1 = LearningState(
+            total_improvement=0.0, history=[LearningCycle("c1", "0.1.0", "0.1.0", 1, 0.0)]
+        )
+        state2 = LearningState(
+            total_improvement=0.1, history=[LearningCycle("c2", "0.1.0", "0.1.1", 2, 0.1)]
+        )
         evolution_metrics.record_snapshot(state1)
         evolution_metrics.record_snapshot(state2)
         trends = evolution_metrics.get_trends()
@@ -823,7 +877,9 @@ class TestEvolutionMetrics:
             assert isinstance(trend.confidence, float)
 
     def test_compare_periods(self, evolution_metrics: EvolutionMetrics) -> None:
-        start = MetricsSnapshot(timestamp=100.0, total_skills=1, avg_quality=0.5, benchmark_score=0.5)
+        start = MetricsSnapshot(
+            timestamp=100.0, total_skills=1, avg_quality=0.5, benchmark_score=0.5
+        )
         end = MetricsSnapshot(timestamp=200.0, total_skills=2, avg_quality=0.7, benchmark_score=0.8)
         comparison = evolution_metrics.compare_periods(start, end)
         assert comparison.quality_delta == pytest.approx(0.2)
@@ -835,8 +891,12 @@ class TestEvolutionMetrics:
             evolution_metrics.generate_evolution_report()
 
     def test_generate_evolution_report_with_data(self, evolution_metrics: EvolutionMetrics) -> None:
-        state1 = LearningState(total_improvement=0.0, history=[LearningCycle("c1", "0.1.0", "0.1.0", 1, 0.0)])
-        state2 = LearningState(total_improvement=0.1, history=[LearningCycle("c2", "0.1.0", "0.1.1", 2, 0.1)])
+        state1 = LearningState(
+            total_improvement=0.0, history=[LearningCycle("c1", "0.1.0", "0.1.0", 1, 0.0)]
+        )
+        state2 = LearningState(
+            total_improvement=0.1, history=[LearningCycle("c2", "0.1.0", "0.1.1", 2, 0.1)]
+        )
         evolution_metrics.record_snapshot(state1)
         evolution_metrics.record_snapshot(state2)
         report = evolution_metrics.generate_evolution_report()
@@ -867,9 +927,15 @@ class TestEvolutionMetrics:
         with pytest.raises(FrozenInstanceError):
             comp.quality_delta = 0.5  # type: ignore[misc]
 
-    def test_declining_trend_generates_recommendation(self, evolution_metrics: EvolutionMetrics) -> None:
-        s1 = LearningState(total_improvement=0.0, history=[LearningCycle("c1", "0.1.0", "0.1.0", 1, 0.0)])
-        s2 = LearningState(total_improvement=-0.2, history=[LearningCycle("c2", "0.1.0", "0.1.0", 2, -0.2)])
+    def test_declining_trend_generates_recommendation(
+        self, evolution_metrics: EvolutionMetrics
+    ) -> None:
+        s1 = LearningState(
+            total_improvement=0.0, history=[LearningCycle("c1", "0.1.0", "0.1.0", 1, 0.0)]
+        )
+        s2 = LearningState(
+            total_improvement=-0.2, history=[LearningCycle("c2", "0.1.0", "0.1.0", 2, -0.2)]
+        )
         evolution_metrics.record_snapshot(s1)
         evolution_metrics.record_snapshot(s2)
         report = evolution_metrics.generate_evolution_report()
@@ -937,7 +1003,11 @@ class TestDataclassConsistency:
 class TestEdgeCases:
     def test_trajectory_patcher_no_events_detection(self, patcher: TrajectoryPatcher) -> None:
         trajectories = [
-            {"trajectory_id": "t1", "skill_id": "s1", "events": [{"event_type": "unknown", "data": "test"}]},
+            {
+                "trajectory_id": "t1",
+                "skill_id": "s1",
+                "events": [{"event_type": "unknown", "data": "test"}],
+            },
         ]
         patches = patcher.extract_patches(trajectories)
         assert patches == []  # Should not crash
@@ -951,7 +1021,9 @@ class TestEdgeCases:
         task_ids = {t.task_id for t in skill_bm.tasks}
         assert len(task_ids) == 166
 
-    def test_version_manager_pin_then_unpin_then_create(self, version_manager: VersionManager, sample_skill: Skill) -> None:
+    def test_version_manager_pin_then_unpin_then_create(
+        self, version_manager: VersionManager, sample_skill: Skill
+    ) -> None:
         version_manager.create_version(sample_skill, "v1")
         version_manager.pin_version("test_skill", 1)
         version_manager.unpin_skill("test_skill")
@@ -964,7 +1036,9 @@ class TestEdgeCases:
         assert report.new_failures == []
 
     def test_metrics_no_negative_avg_quality(self, evolution_metrics: EvolutionMetrics) -> None:
-        state = LearningState(total_improvement=-0.5, history=[LearningCycle("c1", "0.1.0", "0.1.0", 0, -0.5)])
+        state = LearningState(
+            total_improvement=-0.5, history=[LearningCycle("c1", "0.1.0", "0.1.0", 0, -0.5)]
+        )
         snap = evolution_metrics.record_snapshot(state)
         assert snap.avg_quality >= 0.0
         assert snap.benchmark_score >= 0.0
@@ -992,8 +1066,16 @@ class TestEdgeCases:
             Skill(skill_id="s2", content={"capabilities": ["sorting"]}),
         ]
         traces = [
-            {"trajectory_id": "t1", "skill_id": "s1", "events": [{"event_type": "error", "data": "bug"}]},
-            {"trajectory_id": "t2", "skill_id": "s2", "events": [{"event_type": "error", "data": "crash"}]},
+            {
+                "trajectory_id": "t1",
+                "skill_id": "s1",
+                "events": [{"event_type": "error", "data": "bug"}],
+            },
+            {
+                "trajectory_id": "t2",
+                "skill_id": "s2",
+                "events": [{"event_type": "error", "data": "crash"}],
+            },
         ]
         cycle = learner.run_learning_cycle(traces, skills)
         assert cycle.patches_applied >= 0
@@ -1004,8 +1086,12 @@ class TestEdgeCases:
         assert vh.count == 0
 
     def test_evolution_report_no_highlights(self, evolution_metrics: EvolutionMetrics) -> None:
-        s1 = LearningState(total_improvement=0.0, history=[LearningCycle("c1", "0.1.0", "0.1.0", 0, 0.0)])
-        s2 = LearningState(total_improvement=0.0, history=[LearningCycle("c2", "0.1.0", "0.1.0", 0, 0.0)])
+        s1 = LearningState(
+            total_improvement=0.0, history=[LearningCycle("c1", "0.1.0", "0.1.0", 0, 0.0)]
+        )
+        s2 = LearningState(
+            total_improvement=0.0, history=[LearningCycle("c2", "0.1.0", "0.1.0", 0, 0.0)]
+        )
         evolution_metrics.record_snapshot(s1)
         evolution_metrics.record_snapshot(s2)
         report = evolution_metrics.generate_evolution_report()

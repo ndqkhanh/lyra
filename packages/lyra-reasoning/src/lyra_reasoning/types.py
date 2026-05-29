@@ -5,7 +5,7 @@ Core data models for the Deep Reasoning Research Agent.
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -58,9 +58,9 @@ class ReasoningStep:
     content: str
     step_type: StepType
     verification_score: float = 0.0
-    alternatives_considered: List[str] = field(default_factory=list)
+    alternatives_considered: list[str] = field(default_factory=list)
     timestamp: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -68,12 +68,12 @@ class VerificationResult:
     """Result of reasoning verification."""
 
     overall_score: float
-    step_scores: List[float]
+    step_scores: list[float]
     trace_score: float
-    external_scores: List[float]
-    cross_agent_scores: List[float]
+    external_scores: list[float]
+    cross_agent_scores: list[float]
     passed: bool
-    details: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -82,19 +82,19 @@ class ReasoningTrace:
 
     task: str
     strategy: ReasoningStrategy
-    steps: List[ReasoningStep]
-    verification: Optional[VerificationResult] = None
+    steps: list[ReasoningStep]
+    verification: VerificationResult | None = None
     outcome: str = "pending"  # success/failure/pending
     duration: float = 0.0
     token_count: int = 0
     timestamp: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def add_step(self, step: ReasoningStep) -> None:
         """Add a reasoning step to the trace."""
         self.steps.append(step)
 
-    def get_conclusion(self) -> Optional[str]:
+    def get_conclusion(self) -> str | None:
         """Get the final conclusion from the trace."""
         conclusion_steps = [s for s in self.steps if s.step_type == StepType.CONCLUSION]
         return conclusion_steps[-1].content if conclusion_steps else None
@@ -162,13 +162,13 @@ class ReasoningResult(BaseModel):
 
     task: str
     conclusion: str
-    reasoning_trace: Optional[Dict[str, Any]] = None
+    reasoning_trace: dict[str, Any] | None = None
     verification_score: float
     strategy_used: ReasoningStrategy
     tokens_used: int
     duration: float
     success: bool
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 @dataclass
@@ -182,9 +182,9 @@ class ReasoningPattern:
     usage_count: int
     avg_tokens: float
     avg_duration: float
-    applicable_tasks: List[str]
-    steps_template: List[StepType]
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    applicable_tasks: list[str]
+    steps_template: list[StepType]
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass

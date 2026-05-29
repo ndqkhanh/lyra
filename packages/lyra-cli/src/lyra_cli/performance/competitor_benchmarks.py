@@ -75,9 +75,7 @@ class BenchmarkComparison:
         """
         return sorted(self.results, key=lambda r: r.value)
 
-    def advantage_vs(
-        self, competitor: CompetitorName
-    ) -> dict[str, float]:
+    def advantage_vs(self, competitor: CompetitorName) -> dict[str, float]:
         """Calculate Lyra's advantage percentage over a competitor."""
         lyra_result = next(
             (r for r in self.results if r.competitor == CompetitorName.LYRA),
@@ -90,9 +88,7 @@ class BenchmarkComparison:
         if lyra_result is None or comp_result is None or comp_result.value == 0:
             return {"advantage_pct": 0.0}
 
-        advantage = (
-            (comp_result.value - lyra_result.value) / comp_result.value * 100
-        )
+        advantage = (comp_result.value - lyra_result.value) / comp_result.value * 100
         return {"advantage_pct": advantage}
 
 
@@ -296,7 +292,9 @@ class CompetitorBenchmark:
 
         return results
 
-    def _run_scenarios(self, scenarios: dict[str, dict[str, dict[str, float]]]) -> list[BenchmarkComparison]:
+    def _run_scenarios(
+        self, scenarios: dict[str, dict[str, dict[str, float]]]
+    ) -> list[BenchmarkComparison]:
         """Run benchmarks from provided scenario data."""
         results: list[BenchmarkComparison] = []
         dimension_map = {
@@ -326,7 +324,9 @@ class CompetitorBenchmark:
             claude_val = data.get("claude_code", data.get("claude", 0.0))
             hermes_val = data.get("hermes_agent", data.get("hermes", 0.0))
 
-            comparison = bench_fn(f"{dim_key}_scenario", lyra_val, claude_val, hermes_val)  # type: ignore[operator]
+            comparison = bench_fn(
+                f"{dim_key}_scenario", lyra_val, claude_val, hermes_val
+            )  # type: ignore[operator]
             results.append(comparison)
 
         return results

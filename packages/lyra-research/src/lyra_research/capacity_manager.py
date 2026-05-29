@@ -4,6 +4,7 @@ Memory Capacity Management for Lyra Deep Research.
 Implements capacity limits, compaction strategies, query latency monitoring,
 and automated alerts for memory system health.
 """
+
 from __future__ import annotations
 
 import gzip
@@ -256,7 +257,8 @@ class CapacityManager:
 
         Args:
             db_path: Path to main SQLite database
-            cold_storage_path: Path to cold storage directory (default: db_path.parent / "cold_storage")
+            cold_storage_path: Path to cold storage directory (default: db_path.parent /
+            "cold_storage")
             limits: Custom capacity limits (default: CapacityLimits)
             slos: Custom query SLOs (default: QuerySLOs)
         """
@@ -300,7 +302,12 @@ class CapacityManager:
 
         # Count sessions (assuming a sessions table exists)
         try:
-            cursor.execute("SELECT COUNT(DISTINCT metadata->>'session_id') FROM memories WHERE metadata IS NOT NULL")
+            cursor.execute(
+
+                    "SELECT COUNT(DISTINCT metadata->>'session_id') FROM memories WHERE metadata"
+                    "IS NOT NULL"
+
+            )
             sessions_count = cursor.fetchone()[0] or 0
         except (sqlite3.OperationalError, TypeError):
             sessions_count = 0
@@ -336,7 +343,10 @@ class CapacityManager:
         # Specific warnings
         if status.sources_utilization >= self.limits.ALERT_THRESHOLD:
             status.warnings.append(
-                f"Sources: {status.sources_count}/{status.sources_limit} ({status.sources_utilization:.1%})"
+
+                    f"Sources: {status.sources_count}/{status.sources_limit} ("
+                    f"{status.sources_utilization:.1%})"
+
             )
         if status.notes_utilization >= self.limits.ALERT_THRESHOLD:
             status.warnings.append(
@@ -344,7 +354,10 @@ class CapacityManager:
             )
         if status.sessions_utilization >= self.limits.ALERT_THRESHOLD:
             status.warnings.append(
-                f"Sessions: {status.sessions_count}/{status.sessions_limit} ({status.sessions_utilization:.1%})"
+
+                    f"Sessions: {status.sessions_count}/{status.sessions_limit} ("
+                    f"{status.sessions_utilization:.1%})"
+
             )
 
         return status
@@ -393,16 +406,16 @@ class CapacityManager:
 
         try:
             # Get old notes
-            cursor.execute(
-                "SELECT * FROM memories WHERE created_at < ?",
-                (cutoff_date,)
-            )
+            cursor.execute("SELECT * FROM memories WHERE created_at < ?", (cutoff_date,))
             old_notes = cursor.fetchall()
             result.archived_notes = len(old_notes)
 
             if old_notes:
                 # Save to cold storage
-                archive_file = self.cold_storage_path / f"archive_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json.gz"
+                archive_file = (
+                    self.cold_storage_path
+                    / f"archive_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json.gz"
+                )
                 with gzip.open(archive_file, "wt", encoding="utf-8") as f:
                     # Get column names
                     cursor.execute("PRAGMA table_info(memories)")
@@ -433,7 +446,7 @@ class CapacityManager:
 
             # Delete all but the first occurrence
             for _content, keep_id, all_ids in duplicates:
-                ids_to_delete = [id for id in all_ids.split(',') if id != keep_id]
+                ids_to_delete = [id for id in all_ids.split(",") if id != keep_id]
                 for row_id in ids_to_delete:
                     cursor.execute("DELETE FROM memories WHERE id = ?", (row_id,))
                     result.deduplicated_embeddings += 1
@@ -502,7 +515,10 @@ class CapacityManager:
             p95 = embedding_stats.p95()
             if p95 > self.slos.EMBEDDING_SEARCH_MS:
                 violations.append(
-                    f"Embedding search p95 latency: {p95:.1f}ms (SLO: {self.slos.EMBEDDING_SEARCH_MS}ms)"
+
+                        f"Embedding search p95 latency: {p95:.1f}ms (SLO: "
+                        f"{self.slos.EMBEDDING_SEARCH_MS}ms)"
+
                 )
 
         # Check reranking
@@ -536,4 +552,3 @@ class CapacityManager:
         """Reset all latency statistics."""
         for stats in self.latency_stats.values():
             stats.samples.clear()
-

@@ -147,19 +147,24 @@ class TrajectoryPatcher:
         # Simple heuristic: find the most common event type
         if len(event_types) >= 3:
             from collections import Counter
+
             counter = Counter(event_types)
             most_common_type, count = counter.most_common(1)[0]
             if count >= 3:
                 patch_id = f"patch_{skill_id}_{trajectory_id}_repeat_{int(time.time())}"
-                patches.append(TrajectoryPatch(
-                    patch_id=patch_id,
-                    skill_id=skill_id,
-                    trajectory_ref=trajectory_id,
-                    change_description=f"Add automated step for frequently repeated '{most_common_type}'",
-                    before_snippet="",
-                    after_snippet=f"auto_{most_common_type}()",
-                    confidence=min(1.0, count / 5),
-                ))
+                patches.append(
+                    TrajectoryPatch(
+                        patch_id=patch_id,
+                        skill_id=skill_id,
+                        trajectory_ref=trajectory_id,
+                        change_description=(
+                            f"Add automated step for frequently repeated '{most_common_type}'"
+                        ),
+                        before_snippet="",
+                        after_snippet=f"auto_{most_common_type}()",
+                        confidence=min(1.0, count / 5),
+                    )
+                )
 
         return patches
 
@@ -187,16 +192,21 @@ class TrajectoryPatcher:
             if not error_data:
                 continue
 
-            patch_id = f"patch_{skill_id}_{trajectory_id}_fix_{hash(error_data) % 10000}_{int(time.time())}"
-            patches.append(TrajectoryPatch(
-                patch_id=patch_id,
-                skill_id=skill_id,
-                trajectory_ref=trajectory_id,
-                change_description=f"Fix pattern: {error_data[:80]}",
-                before_snippet=error_data,
-                after_snippet=f"# FIXED: {error_data[:80]}",
-                confidence=0.7,
-            ))
+            patch_id =(
+                f"patch_{skill_id}_{trajectory_id}_fix_{hash(error_data) % 10000}_"
+                f"{int(time.time())}"
+            )
+            patches.append(
+                TrajectoryPatch(
+                    patch_id=patch_id,
+                    skill_id=skill_id,
+                    trajectory_ref=trajectory_id,
+                    change_description=f"Fix pattern: {error_data[:80]}",
+                    before_snippet=error_data,
+                    after_snippet=f"# FIXED: {error_data[:80]}",
+                    confidence=0.7,
+                )
+            )
 
         return patches
 
@@ -225,15 +235,17 @@ class TrajectoryPatcher:
             trigger_name = trigger.get("context_trigger", "unknown")
 
             patch_id = f"patch_{skill_id}_{trajectory_id}_trigger_{trigger_name}_{int(time.time())}"
-            patches.append(TrajectoryPatch(
-                patch_id=patch_id,
-                skill_id=skill_id,
-                trajectory_ref=trajectory_id,
-                change_description=f"Add trigger: {trigger_name}",
-                before_snippet="",
-                after_snippet=f"trigger on {trigger_name}",
-                confidence=0.6,
-            ))
+            patches.append(
+                TrajectoryPatch(
+                    patch_id=patch_id,
+                    skill_id=skill_id,
+                    trajectory_ref=trajectory_id,
+                    change_description=f"Add trigger: {trigger_name}",
+                    before_snippet="",
+                    after_snippet=f"trigger on {trigger_name}",
+                    confidence=0.6,
+                )
+            )
 
         return patches
 
@@ -261,16 +273,25 @@ class TrajectoryPatcher:
 
         if patch_type == PatchType.ADD_STEP:
             steps = new_content.get("steps", [])
-            new_content["steps"] = [*steps, {"name": patch.change_description, "code": patch.after_snippet}]
+            new_content["steps"] = [
+                *steps,
+                {"name": patch.change_description, "code": patch.after_snippet},
+            ]
         elif patch_type == PatchType.FIX_PATTERN:
             fixes = new_content.get("fixes", [])
-            new_content["fixes"] = [*fixes, {"pattern": patch.before_snippet, "replacement": patch.after_snippet}]
+            new_content["fixes"] = [
+                *fixes,
+                {"pattern": patch.before_snippet, "replacement": patch.after_snippet},
+            ]
         elif patch_type == PatchType.ADD_TRIGGER:
             triggers = new_content.get("triggers", [])
             new_content["triggers"] = [*triggers, patch.after_snippet]
         elif patch_type == PatchType.ADD_EXAMPLE:
             examples = new_content.get("examples", [])
-            new_content["examples"] = [*examples, {"description": patch.change_description, "code": patch.after_snippet}]
+            new_content["examples"] = [
+                *examples,
+                {"description": patch.change_description, "code": patch.after_snippet},
+            ]
 
         return Skill(
             skill_id=skill.skill_id,

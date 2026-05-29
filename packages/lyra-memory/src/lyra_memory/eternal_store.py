@@ -28,6 +28,7 @@ from pathlib import Path
 try:
     from cryptography.hazmat.primitives import serialization as _serialization
     from cryptography.hazmat.primitives.asymmetric import ed25519 as _ed25519
+
     _CRYPTO_AVAILABLE = True
 except ImportError:
     _CRYPTO_AVAILABLE = False
@@ -36,10 +37,10 @@ except ImportError:
 
 
 class RetentionTier(Enum):
-    PERMANENT = "permanent"    # never pruned
-    LONG_TERM = "long_term"    # pruned after 365 days
-    STANDARD = "standard"      # pruned after 90 days
-    EPHEMERAL = "ephemeral"    # pruned after 7 days
+    PERMANENT = "permanent"  # never pruned
+    LONG_TERM = "long_term"  # pruned after 365 days
+    STANDARD = "standard"  # pruned after 90 days
+    EPHEMERAL = "ephemeral"  # pruned after 7 days
 
 
 class MemoryStatus(Enum):
@@ -54,12 +55,12 @@ class EternalRecord:
     """A single immutable memory record in the eternal store."""
 
     record_id: str
-    content_hash: str             # SHA-256 of content
-    content: str                  # the memory content
+    content_hash: str  # SHA-256 of content
+    content: str  # the memory content
     retention: RetentionTier
     status: MemoryStatus
-    parent_hash: str | None       # previous record hash (chain)
-    signature: str | None         # Ed25519 signature (hex)
+    parent_hash: str | None  # previous record hash (chain)
+    signature: str | None  # Ed25519 signature (hex)
     metadata: tuple[tuple[str, str], ...]
     created_at: float
     expires_at: float | None
@@ -132,19 +133,22 @@ class EternalRecord:
         return data.encode("utf-8")
 
     def to_json(self) -> str:
-        return json.dumps({
-            "record_id": self.record_id,
-            "content_hash": self.content_hash,
-            "content": self.content,
-            "retention": self.retention.value,
-            "status": self.status.value,
-            "parent_hash": self.parent_hash,
-            "signature": self.signature,
-            "metadata": dict(self.metadata),
-            "created_at": self.created_at,
-            "expires_at": self.expires_at,
-            "version": self.version,
-        }, ensure_ascii=False)
+        return json.dumps(
+            {
+                "record_id": self.record_id,
+                "content_hash": self.content_hash,
+                "content": self.content,
+                "retention": self.retention.value,
+                "status": self.status.value,
+                "parent_hash": self.parent_hash,
+                "signature": self.signature,
+                "metadata": dict(self.metadata),
+                "created_at": self.created_at,
+                "expires_at": self.expires_at,
+                "version": self.version,
+            },
+            ensure_ascii=False,
+        )
 
     @classmethod
     def from_json(cls, data: str) -> EternalRecord:
@@ -220,9 +224,7 @@ class EternalStore:
         if key_path.exists():
             self.private_key_bytes = key_path.read_bytes()
             if _CRYPTO_AVAILABLE:
-                private_key = _ed25519.Ed25519PrivateKey.from_private_bytes(
-                    self.private_key_bytes
-                )
+                private_key = _ed25519.Ed25519PrivateKey.from_private_bytes(self.private_key_bytes)
                 self.public_key_bytes = private_key.public_key().public_bytes(
                     encoding=_serialization.Encoding.Raw,
                     format=_serialization.PublicFormat.Raw,
@@ -362,6 +364,7 @@ class EternalStore:
 
 # ── Helpers ──────────────────────────────────────────────────────────────
 
+
 def _sha256(content: str) -> str:
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
@@ -369,8 +372,9 @@ def _sha256(content: str) -> str:
 def _uuid7() -> str:
     """UUIDv7: time-ordered with random suffix."""
     import random as _random
+
     timestamp_ms = int(time.time() * 1000)
-    # Build UUIDv7 manually: 48-bit timestamp, 4-bit version, 12-bit rand_a, 2-bit variant, 62-bit rand_b
+    # Build UUIDv7 manually: 48-bit timestamp, 4-bit version, 12-bit rand_a, 2-bit variant,
     timestamp_hex = f"{timestamp_ms:012x}"
     rand_a = f"{_random.getrandbits(12):03x}"
     rand_b = f"{_random.getrandbits(62):016x}"

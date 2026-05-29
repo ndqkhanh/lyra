@@ -1,4 +1,5 @@
 """Tests for HITL callback integration between ClosedLoopController and FleetView."""
+
 from __future__ import annotations
 
 from lyra_core.transparency.agent_view import AttentionPriority, FleetView
@@ -14,7 +15,9 @@ def test_hitl_callback_escalates_priority() -> None:
     controller = ClosedLoopController("sess-1", "run-1", hitl_callback=callback)
 
     # Trigger HITL pending
-    rec, halt = controller.on_turn(turn_index=0, hitl_pending=True, fleet_alert="Manual approval needed")
+    rec, halt = controller.on_turn(
+        turn_index=0, hitl_pending=True, fleet_alert="Manual approval needed"
+    )
 
     # Check FleetView was updated
     agent = fleet.peek("sess-1")

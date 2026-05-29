@@ -53,8 +53,8 @@ class DiffGenerator:
         mod_lines = modified.splitlines(keepends=True)
 
         if config.ignore_whitespace:
-            orig_compare = [re.sub(r"\s+", "", l) for l in orig_lines]
-            mod_compare = [re.sub(r"\s+", "", l) for l in mod_lines]
+            orig_compare = [re.sub(r"\s+", "", line) for line in orig_lines]
+            mod_compare = [re.sub(r"\s+", "", line) for line in mod_lines]
         else:
             orig_compare = orig_lines
             mod_compare = mod_lines
@@ -83,21 +83,21 @@ class DiffGenerator:
             hunk_lines: list[str] = []
             if context_start < i1:
                 hunk_lines.extend(
-                    f" {l}" if not l.endswith("\n") else f" {l}"
-                    for l in orig_lines[context_start:i1]
+                    f" {line}" if not line.endswith("\n") else f" {line}"
+                    for line in orig_lines[context_start:i1]
                 )
-            for l in orig_lines[i1:i2]:
+            for line in orig_lines[i1:i2]:
                 hunk_lines.append(
-                    f"-{l}" if l.endswith("\n") else f"-{l}\n"
+                    f"-{line}" if line.endswith("\n") else f"-{line}\n"
                 )
-            for l in mod_lines[j1:j2]:
+            for line in mod_lines[j1:j2]:
                 hunk_lines.append(
-                    f"+{l}" if l.endswith("\n") else f"+{l}\n"
+                    f"+{line}" if line.endswith("\n") else f"+{line}\n"
                 )
             if j2 < context_end:
                 hunk_lines.extend(
-                    f" {l}" if not l.endswith("\n") else f" {l}"
-                    for l in mod_lines[j2:context_end]
+                    f" {line}" if not line.endswith("\n") else f" {line}"
+                    for line in mod_lines[j2:context_end]
                 )
 
             change_type = tag

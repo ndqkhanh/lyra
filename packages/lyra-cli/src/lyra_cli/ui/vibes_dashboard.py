@@ -55,9 +55,7 @@ class VibesDashboard:
 
     def __init__(self, history_size: int = 100) -> None:
         self.history_size = history_size
-        self._history: dict[VibeDimension, list[VibeReading]] = {
-            d: [] for d in VibeDimension
-        }
+        self._history: dict[VibeDimension, list[VibeReading]] = {d: [] for d in VibeDimension}
         self._alerts: list[str] = []
 
     def record(self, dimension: VibeDimension, score: float) -> VibeReading:
@@ -79,16 +77,15 @@ class VibesDashboard:
         return reading
 
     def snapshot(self) -> VibeSnapshot:
-        readings = [
-            self._history[d][-1]
-            for d in VibeDimension
-            if self._history[d]
-        ]
+        readings = [self._history[d][-1] for d in VibeDimension if self._history[d]]
         latest = readings[-1].timestamp if readings else time.time()
 
         if not readings:
             return VibeSnapshot(
-                readings=[], overall_vibe="neutral", alert_count=len(self._alerts), captured_at=latest
+                readings=[],
+                overall_vibe="neutral",
+                alert_count=len(self._alerts),
+                captured_at=latest,
             )
 
         avg = sum(r.score for r in readings) / len(readings)

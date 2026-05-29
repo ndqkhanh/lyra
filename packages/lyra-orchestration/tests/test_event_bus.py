@@ -1,4 +1,5 @@
 """Tests for lyra-orchestration event_bus module."""
+
 from __future__ import annotations
 
 import asyncio
@@ -61,8 +62,11 @@ class TestDomainEvents:
 
     def test_vulnerability_discovered(self):
         e = VulnerabilityDiscovered(
-            cve="CVE-2024-1234", severity="HIGH", exploitable=True,
-            affected_asset="api-server", affected_service="auth",
+            cve="CVE-2024-1234",
+            severity="HIGH",
+            exploitable=True,
+            affected_asset="api-server",
+            affected_service="auth",
         )
         assert e.cve == "CVE-2024-1234"
         assert e.severity == "HIGH"
@@ -190,7 +194,8 @@ class TestEventBus:
 
     def test_get_stats(self, bus):
         bus._event_history = [
-            Event(event_type="a"), Event(event_type="a"),
+            Event(event_type="a"),
+            Event(event_type="a"),
             Event(event_type="b"),
         ]
         stats = bus.get_stats()
@@ -201,9 +206,13 @@ class TestEventBus:
     def test_priority_ordering(self, bus):
         call_order = []
 
-        bus.subscribe("test.event", lambda e: call_order.append("critical"), priority=EventPriority.CRITICAL)
+        bus.subscribe(
+            "test.event", lambda e: call_order.append("critical"), priority=EventPriority.CRITICAL
+        )
         bus.subscribe("test.event", lambda e: call_order.append("low"), priority=EventPriority.LOW)
-        bus.subscribe("test.event", lambda e: call_order.append("normal"), priority=EventPriority.NORMAL)
+        bus.subscribe(
+            "test.event", lambda e: call_order.append("normal"), priority=EventPriority.NORMAL
+        )
 
         asyncio.run(bus.publish(Event(event_type="test.event")))
         # Highest priority (CRITICAL=4) delivered first

@@ -134,7 +134,9 @@ class TestCheckpointStats:
         assert stats.oldest_timestamp == 100.0
 
     def test_is_frozen(self):
-        stats = CheckpointStats(total_checkpoints=0, total_size_bytes=0, oldest_timestamp=0.0, newest_timestamp=0.0)
+        stats = CheckpointStats(
+            total_checkpoints=0, total_size_bytes=0, oldest_timestamp=0.0, newest_timestamp=0.0
+        )
         with pytest.raises(Exception):  # noqa: B017
             stats.total_checkpoints = 10  # type: ignore[misc]
 
@@ -207,7 +209,8 @@ class TestCheckpointManager:
 
     def test_restore_conversation(self, mgr):
         cp = mgr.create_checkpoint(
-            "f.py", "data",
+            "f.py",
+            "data",
             conversation_state={"turn": 7, "notes": "important"},
         )
         state = mgr.restore_conversation(cp.checkpoint_id)
@@ -215,7 +218,8 @@ class TestCheckpointManager:
 
     def test_restore_conversation_returns_copy(self, mgr):
         cp = mgr.create_checkpoint(
-            "f.py", "data",
+            "f.py",
+            "data",
             conversation_state={"x": 1},
         )
         state = mgr.restore_conversation(cp.checkpoint_id)

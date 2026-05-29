@@ -21,6 +21,7 @@ from typing import Any
 
 class SkillType(str, Enum):
     """Type of skill."""
+
     CODE = "code"  # Executable Python code
     WORKFLOW = "workflow"  # Multi-step procedure
     TOOL = "tool"  # MCP server wrapper
@@ -29,6 +30,7 @@ class SkillType(str, Enum):
 
 class SkillStatus(str, Enum):
     """Skill verification status."""
+
     UNVERIFIED = "unverified"
     VERIFIED = "verified"
     REJECTED = "rejected"
@@ -38,6 +40,7 @@ class SkillStatus(str, Enum):
 @dataclass
 class SkillLineage:
     """Provenance tracking for skills."""
+
     parent_id: str | None = None
     created_from: str = "manual"  # "manual", "trajectory", "merge", "split"
     created_at: datetime = field(default_factory=datetime.now)
@@ -123,8 +126,16 @@ class Skill:
         lineage = SkillLineage(
             parent_id=lineage_data.get("parent_id"),
             created_from=lineage_data.get("created_from", "manual"),
-            created_at=datetime.fromisoformat(lineage_data["created_at"]) if "created_at" in lineage_data else datetime.now(),
-            modified_at=datetime.fromisoformat(lineage_data["modified_at"]) if "modified_at" in lineage_data else datetime.now(),
+            created_at=(
+                datetime.fromisoformat(lineage_data["created_at"])
+                if "created_at" in lineage_data
+                else datetime.now()
+            ),
+            modified_at=(
+                datetime.fromisoformat(lineage_data["modified_at"])
+                if "modified_at" in lineage_data
+                else datetime.now()
+            ),
             version=lineage_data.get("version", 1),
         )
 
@@ -258,11 +269,13 @@ class SkillLibrary:
         skill.lineage.modified_at = datetime.now()
 
         # Add failure as test case
-        skill.test_cases.append({
-            "type": "failure",
-            "input": failure_info.get("input"),
-            "expected_error": failure_info.get("error"),
-        })
+        skill.test_cases.append(
+            {
+                "type": "failure",
+                "input": failure_info.get("input"),
+                "expected_error": failure_info.get("error"),
+            }
+        )
 
         self._save()
         return skill
@@ -377,11 +390,9 @@ class SkillLibrary:
 
     def _most_used(self, limit: int) -> list[dict[str, Any]]:
         """Get most used skills."""
-        sorted_skills = sorted(
-            self.skills.values(),
-            key=lambda s: s.use_count,
-            reverse=True
-        )[:limit]
+        sorted_skills = sorted(self.skills.values(), key=lambda s: s.use_count, reverse=True)[
+            :limit
+        ]
 
         return [
             {

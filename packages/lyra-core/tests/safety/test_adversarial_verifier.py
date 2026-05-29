@@ -42,7 +42,9 @@ class MockModelProvider:
     ) -> str:
         """Return predefined response for the model."""
         self.call_count += 1
-        return self.responses.get(model_name, "VERDICT: UNCERTAIN\nCONFIDENCE: 0.5\nREASONING: Unknown")
+        return self.responses.get(
+            model_name, "VERDICT: UNCERTAIN\nCONFIDENCE: 0.5\nREASONING: Unknown"
+        )
 
 
 # ── Test Fixtures ──────────────────────────────────────────────────────
@@ -254,11 +256,13 @@ def test_adversarial_verdict_validation():
 @pytest.mark.asyncio
 async def test_adversarial_verifier_unanimous_approve(verification_request: VerificationRequest):
     """Test verifier with unanimous APPROVE votes."""
-    mock_provider = MockModelProvider({
-        "claude-opus-4": "VERDICT: APPROVE\nCONFIDENCE: 0.9\nREASONING: Safe operation",
-        "claude-sonnet-4": "VERDICT: APPROVE\nCONFIDENCE: 0.85\nREASONING: Acceptable risk",
-        "claude-haiku-4": "VERDICT: APPROVE\nCONFIDENCE: 0.8\nREASONING: Within bounds",
-    })
+    mock_provider = MockModelProvider(
+        {
+            "claude-opus-4": "VERDICT: APPROVE\nCONFIDENCE: 0.9\nREASONING: Safe operation",
+            "claude-sonnet-4": "VERDICT: APPROVE\nCONFIDENCE: 0.85\nREASONING: Acceptable risk",
+            "claude-haiku-4": "VERDICT: APPROVE\nCONFIDENCE: 0.8\nREASONING: Within bounds",
+        }
+    )
 
     verifier = AdversarialVerifier(model_provider=mock_provider)
     verdict = await verifier.verify(verification_request)
@@ -273,11 +277,13 @@ async def test_adversarial_verifier_unanimous_approve(verification_request: Veri
 @pytest.mark.asyncio
 async def test_adversarial_verifier_majority_deny(verification_request: VerificationRequest):
     """Test verifier with 2/3 DENY majority."""
-    mock_provider = MockModelProvider({
-        "claude-opus-4": "VERDICT: DENY\nCONFIDENCE: 0.95\nREASONING: Too risky",
-        "claude-sonnet-4": "VERDICT: DENY\nCONFIDENCE: 0.9\nREASONING: Dangerous operation",
-        "claude-haiku-4": "VERDICT: APPROVE\nCONFIDENCE: 0.6\nREASONING: Seems okay",
-    })
+    mock_provider = MockModelProvider(
+        {
+            "claude-opus-4": "VERDICT: DENY\nCONFIDENCE: 0.95\nREASONING: Too risky",
+            "claude-sonnet-4": "VERDICT: DENY\nCONFIDENCE: 0.9\nREASONING: Dangerous operation",
+            "claude-haiku-4": "VERDICT: APPROVE\nCONFIDENCE: 0.6\nREASONING: Seems okay",
+        }
+    )
 
     verifier = AdversarialVerifier(model_provider=mock_provider)
     verdict = await verifier.verify(verification_request)
@@ -288,13 +294,17 @@ async def test_adversarial_verifier_majority_deny(verification_request: Verifica
 
 
 @pytest.mark.asyncio
-async def test_adversarial_verifier_escalation_low_confidence(verification_request: VerificationRequest):
+async def test_adversarial_verifier_escalation_low_confidence(
+    verification_request: VerificationRequest,
+):
     """Test that low confidence triggers escalation."""
-    mock_provider = MockModelProvider({
-        "claude-opus-4": "VERDICT: APPROVE\nCONFIDENCE: 0.5\nREASONING: Uncertain",
-        "claude-sonnet-4": "VERDICT: APPROVE\nCONFIDENCE: 0.4\nREASONING: Not sure",
-        "claude-haiku-4": "VERDICT: APPROVE\nCONFIDENCE: 0.45\nREASONING: Maybe okay",
-    })
+    mock_provider = MockModelProvider(
+        {
+            "claude-opus-4": "VERDICT: APPROVE\nCONFIDENCE: 0.5\nREASONING: Uncertain",
+            "claude-sonnet-4": "VERDICT: APPROVE\nCONFIDENCE: 0.4\nREASONING: Not sure",
+            "claude-haiku-4": "VERDICT: APPROVE\nCONFIDENCE: 0.45\nREASONING: Maybe okay",
+        }
+    )
 
     verifier = AdversarialVerifier(
         model_provider=mock_provider,
@@ -306,13 +316,17 @@ async def test_adversarial_verifier_escalation_low_confidence(verification_reque
 
 
 @pytest.mark.asyncio
-async def test_adversarial_verifier_escalation_low_consensus(verification_request: VerificationRequest):
+async def test_adversarial_verifier_escalation_low_consensus(
+    verification_request: VerificationRequest,
+):
     """Test that low consensus triggers escalation."""
-    mock_provider = MockModelProvider({
-        "claude-opus-4": "VERDICT: APPROVE\nCONFIDENCE: 0.9\nREASONING: Safe",
-        "claude-sonnet-4": "VERDICT: DENY\nCONFIDENCE: 0.85\nREASONING: Risky",
-        "claude-haiku-4": "VERDICT: UNCERTAIN\nCONFIDENCE: 0.5\nREASONING: Unknown",
-    })
+    mock_provider = MockModelProvider(
+        {
+            "claude-opus-4": "VERDICT: APPROVE\nCONFIDENCE: 0.9\nREASONING: Safe",
+            "claude-sonnet-4": "VERDICT: DENY\nCONFIDENCE: 0.85\nREASONING: Risky",
+            "claude-haiku-4": "VERDICT: UNCERTAIN\nCONFIDENCE: 0.5\nREASONING: Unknown",
+        }
+    )
 
     verifier = AdversarialVerifier(
         model_provider=mock_provider,
@@ -327,11 +341,13 @@ async def test_adversarial_verifier_escalation_low_consensus(verification_reques
 @pytest.mark.asyncio
 async def test_adversarial_verifier_history(verification_request: VerificationRequest):
     """Test that verifier maintains history."""
-    mock_provider = MockModelProvider({
-        "claude-opus-4": "VERDICT: APPROVE\nCONFIDENCE: 0.9\nREASONING: Safe",
-        "claude-sonnet-4": "VERDICT: APPROVE\nCONFIDENCE: 0.85\nREASONING: Okay",
-        "claude-haiku-4": "VERDICT: APPROVE\nCONFIDENCE: 0.8\nREASONING: Good",
-    })
+    mock_provider = MockModelProvider(
+        {
+            "claude-opus-4": "VERDICT: APPROVE\nCONFIDENCE: 0.9\nREASONING: Safe",
+            "claude-sonnet-4": "VERDICT: APPROVE\nCONFIDENCE: 0.85\nREASONING: Okay",
+            "claude-haiku-4": "VERDICT: APPROVE\nCONFIDENCE: 0.8\nREASONING: Good",
+        }
+    )
 
     verifier = AdversarialVerifier(model_provider=mock_provider)
 
@@ -350,11 +366,13 @@ async def test_adversarial_verifier_history(verification_request: VerificationRe
 @pytest.mark.asyncio
 async def test_adversarial_verifier_accuracy_metrics(verification_request: VerificationRequest):
     """Test accuracy metrics calculation."""
-    mock_provider = MockModelProvider({
-        "claude-opus-4": "VERDICT: APPROVE\nCONFIDENCE: 0.9\nREASONING: Safe",
-        "claude-sonnet-4": "VERDICT: APPROVE\nCONFIDENCE: 0.85\nREASONING: Okay",
-        "claude-haiku-4": "VERDICT: APPROVE\nCONFIDENCE: 0.8\nREASONING: Good",
-    })
+    mock_provider = MockModelProvider(
+        {
+            "claude-opus-4": "VERDICT: APPROVE\nCONFIDENCE: 0.9\nREASONING: Safe",
+            "claude-sonnet-4": "VERDICT: APPROVE\nCONFIDENCE: 0.85\nREASONING: Okay",
+            "claude-haiku-4": "VERDICT: APPROVE\nCONFIDENCE: 0.8\nREASONING: Good",
+        }
+    )
 
     verifier = AdversarialVerifier(model_provider=mock_provider)
 
@@ -375,11 +393,13 @@ async def test_adversarial_verifier_accuracy_metrics(verification_request: Verif
 
 def test_adversarial_verifier_sync_wrapper(verification_request: VerificationRequest):
     """Test synchronous wrapper for verify()."""
-    mock_provider = MockModelProvider({
-        "claude-opus-4": "VERDICT: APPROVE\nCONFIDENCE: 0.9\nREASONING: Safe",
-        "claude-sonnet-4": "VERDICT: APPROVE\nCONFIDENCE: 0.85\nREASONING: Okay",
-        "claude-haiku-4": "VERDICT: APPROVE\nCONFIDENCE: 0.8\nREASONING: Good",
-    })
+    mock_provider = MockModelProvider(
+        {
+            "claude-opus-4": "VERDICT: APPROVE\nCONFIDENCE: 0.9\nREASONING: Safe",
+            "claude-sonnet-4": "VERDICT: APPROVE\nCONFIDENCE: 0.85\nREASONING: Okay",
+            "claude-haiku-4": "VERDICT: APPROVE\nCONFIDENCE: 0.8\nREASONING: Good",
+        }
+    )
 
     verifier = AdversarialVerifier(model_provider=mock_provider)
     verdict = verifier.verify_sync(verification_request)

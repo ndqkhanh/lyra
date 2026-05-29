@@ -137,7 +137,9 @@ class TestReActEngine:
             ReActEngine(api_key="test-key", tools=sample_tools)
             mock.assert_called_once_with(api_key="test-key")
 
-    def test_reason_basic_flow(self, react_engine, mock_anthropic_client, basic_config, basic_budget):
+    def test_reason_basic_flow(
+        self, react_engine, mock_anthropic_client, basic_config, basic_budget
+    ):
         """Test basic ReAct reasoning flow."""
         # Mock responses: thought -> action -> observation -> conclusion
         responses = [
@@ -251,12 +253,23 @@ class TestReActEngine:
 
         assert thought == text
 
-    def test_reasoning_action_loop(self, react_engine, mock_anthropic_client, basic_config, basic_budget):
+    def test_reasoning_action_loop(
+        self, react_engine, mock_anthropic_client, basic_config, basic_budget
+    ):
         """Test complete reasoning-action loop."""
         # Simulate: thought -> action -> observation -> thought -> answer
         responses = [
             Mock(content=[Mock(text="Thought: Need to search\nAction: search(query='AI')")]),
-            Mock(content=[Mock(text="Thought: Got results, now calculate\nAction: calculate(expression='2+2')")]),
+            Mock(
+                content=[
+                    Mock(
+                        text=(
+                            "Thought: Got results, now calculate\nAction:"
+                            "calculate(expression='2+2')"
+                        )
+                    )
+                ]
+            ),
             Mock(content=[Mock(text="Answer: Based on search and calculation, the answer is 4")]),
         ]
         mock_anthropic_client.messages.create.side_effect = responses
@@ -266,9 +279,13 @@ class TestReActEngine:
         # Should have multiple steps including actions and observations
         step_types = [step.step_type for step in trace.steps]
         assert StepType.HYPOTHESIS in step_types or StepType.ANALYSIS in step_types
-        assert any("Action" in step.content or "Observation" in step.content for step in trace.steps)
+        assert any(
+            "Action" in step.content or "Observation" in step.content for step in trace.steps
+        )
 
-    def test_max_iterations_limit(self, react_engine, mock_anthropic_client, basic_config, basic_budget):
+    def test_max_iterations_limit(
+        self, react_engine, mock_anthropic_client, basic_config, basic_budget
+    ):
         """Test that reasoning respects max iterations."""
         # Always return thought (never final answer)
         mock_response = Mock()

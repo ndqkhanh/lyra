@@ -182,11 +182,7 @@ Hypothesis:"""
         surprise_score = self._assess_surprise(hypothesis, task)
 
         # Calculate overall score
-        overall_score = (
-            novelty_score * 0.4 +
-            feasibility_score * 0.3 +
-            surprise_score * 0.3
-        )
+        overall_score = novelty_score * 0.4 + feasibility_score * 0.3 + surprise_score * 0.3
 
         # Generate reasoning
         reasoning = self._generate_reasoning(
@@ -208,8 +204,15 @@ Hypothesis:"""
 
         # Check for creative indicators
         creative_words = [
-            "novel", "new", "innovative", "unique", "unconventional",
-            "alternative", "different", "creative", "original"
+            "novel",
+            "new",
+            "innovative",
+            "unique",
+            "unconventional",
+            "alternative",
+            "different",
+            "creative",
+            "original",
         ]
         score += 0.05 * sum(1 for word in creative_words if word in hypothesis.lower())
 
@@ -232,8 +235,16 @@ Hypothesis:"""
 
         # Check for concrete details
         concrete_indicators = [
-            "by", "using", "through", "via", "with", "implement",
-            "measure", "test", "validate", "experiment"
+            "by",
+            "using",
+            "through",
+            "via",
+            "with",
+            "implement",
+            "measure",
+            "test",
+            "validate",
+            "experiment",
         ]
         score += 0.05 * sum(1 for ind in concrete_indicators if ind in hypothesis.lower())
 
@@ -261,8 +272,14 @@ Hypothesis:"""
 
         # Check for interdisciplinary elements
         interdisciplinary_words = [
-            "biology", "physics", "psychology", "economics", "sociology",
-            "mathematics", "computer science", "philosophy"
+            "biology",
+            "physics",
+            "psychology",
+            "economics",
+            "sociology",
+            "mathematics",
+            "computer science",
+            "philosophy",
         ]
         score += 0.05 * sum(1 for word in interdisciplinary_words if word in hypothesis.lower())
 
@@ -280,26 +297,47 @@ Hypothesis:"""
 
         # Novelty assessment
         if novelty > 0.7:
-            reasoning.append(f"High novelty ({novelty:.2f}): This hypothesis presents a fresh perspective.")
+            reasoning.append(
+                f"High novelty ({novelty:.2f}): This hypothesis presents a fresh perspective."
+            )
         elif novelty < 0.4:
-            reasoning.append(f"Low novelty ({novelty:.2f}): This hypothesis is relatively conventional.")
+            reasoning.append(
+                f"Low novelty ({novelty:.2f}): This hypothesis is relatively conventional."
+            )
         else:
-            reasoning.append(f"Moderate novelty ({novelty:.2f}): This hypothesis has some novel elements.")
+            reasoning.append(
+                f"Moderate novelty ({novelty:.2f}): This hypothesis has some novel elements."
+            )
 
         # Feasibility assessment
         if feasibility > 0.7:
-            reasoning.append(f"High feasibility ({feasibility:.2f}): This hypothesis is actionable and testable.")
+            reasoning.append(
+                f"High feasibility ({feasibility:.2f}): This hypothesis is actionable and testable."
+            )
         elif feasibility < 0.4:
-            reasoning.append(f"Low feasibility ({feasibility:.2f}): This hypothesis may be difficult to implement.")
+            reasoning.append(
+(
+                    f"Low feasibility ({feasibility:.2f}"
+                    f"): This hypothesis may be difficult to implement."
+                )
+            )
         else:
-            reasoning.append(f"Moderate feasibility ({feasibility:.2f}): This hypothesis is somewhat actionable.")
+            reasoning.append(
+                f"Moderate feasibility ({feasibility:.2f}): This hypothesis is somewhat actionable."
+            )
 
         # Surprise assessment
         if surprise > 0.7:
-            reasoning.append(f"High surprise ({surprise:.2f}): This hypothesis is unexpected and creative.")
+            reasoning.append(
+                f"High surprise ({surprise:.2f}): This hypothesis is unexpected and creative."
+            )
         elif surprise < 0.4:
-            reasoning.append(f"Low surprise ({surprise:.2f}): This hypothesis is relatively predictable.")
+            reasoning.append(
+                f"Low surprise ({surprise:.2f}): This hypothesis is relatively predictable."
+            )
         else:
-            reasoning.append(f"Moderate surprise ({surprise:.2f}): This hypothesis has some surprising elements.")
+            reasoning.append(
+                f"Moderate surprise ({surprise:.2f}): This hypothesis has some surprising elements."
+            )
 
         return " ".join(reasoning)

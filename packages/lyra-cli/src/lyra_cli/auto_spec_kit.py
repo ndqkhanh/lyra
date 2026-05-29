@@ -239,7 +239,7 @@ class CodeAnalyzer:
         Returns:
             Tuple of (description, examples)
         """
-        lines = docstring.split('\n')
+        lines = docstring.split("\n")
         description_lines = []
         examples = []
         in_examples = False
@@ -247,7 +247,7 @@ class CodeAnalyzer:
         for line in lines:
             line = line.strip()
 
-            if line.lower().startswith('example'):
+            if line.lower().startswith("example"):
                 in_examples = True
                 continue
 
@@ -255,10 +255,10 @@ class CodeAnalyzer:
                 if line:
                     examples.append(line)
             else:
-                if line and not line.startswith(('Args:', 'Returns:', 'Raises:')):
+                if line and not line.startswith(("Args:", "Returns:", "Raises:")):
                     description_lines.append(line)
 
-        description = ' '.join(description_lines)
+        description = " ".join(description_lines)
         return description, examples
 
 
@@ -315,10 +315,7 @@ class TestGenerator:
         # Generate test code
         if spec.type == SpecType.FUNCTION:
             # Create sample call
-            params = ", ".join(
-                self._generate_sample_value(p)
-                for p in spec.parameters
-            )
+            params = ", ".join(self._generate_sample_value(p) for p in spec.parameters)
             code = f"result = {spec.name}({params})"
         else:
             code = f"obj = {spec.name}()"
@@ -406,17 +403,17 @@ result2 = {spec.name}(value)
 
         if param.type_hint:
             type_lower = param.type_hint.lower()
-            if 'str' in type_lower:
+            if "str" in type_lower:
                 return "'test'"
-            elif 'int' in type_lower:
+            elif "int" in type_lower:
                 return "42"
-            elif 'float' in type_lower:
+            elif "float" in type_lower:
                 return "3.14"
-            elif 'bool' in type_lower:
+            elif "bool" in type_lower:
                 return "True"
-            elif 'list' in type_lower:
+            elif "list" in type_lower:
                 return "[]"
-            elif 'dict' in type_lower:
+            elif "dict" in type_lower:
                 return "{}"
 
         return "None"
@@ -509,7 +506,9 @@ class DocumentationGenerator:
 
             if func.return_value:
                 lines.append("**Returns:**")
-                type_str = f" ({func.return_value.type_hint})" if func.return_value.type_hint else ""
+                type_str = (
+                    f" ({func.return_value.type_hint})" if func.return_value.type_hint else ""
+                )
                 lines.append(f"{type_str}: {func.return_value.description}")
                 lines.append("")
 

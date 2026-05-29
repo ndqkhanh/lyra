@@ -14,6 +14,7 @@ Architecture:
 - Model router optimizes cost/performance
 - Curator validates and stores knowledge
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -173,6 +174,7 @@ class Phase2Orchestrator:
         try:
             # Add session context
             from lyra_core.context.layered_context import ContextLayer
+
             self.context_manager.add(
                 ContextLayer.SESSION,
                 f"Research query: {query}",
@@ -216,9 +218,7 @@ class Phase2Orchestrator:
             if enable_curation and pipeline_result.curation.accepted:
                 progress.knowledge_accepted = True
                 if pipeline_result.curation.knowledge_entry:
-                    progress.knowledge_entry_id = (
-                        pipeline_result.curation.knowledge_entry.entry_id
-                    )
+                    progress.knowledge_entry_id = pipeline_result.curation.knowledge_entry.entry_id
                 self.stats["total_knowledge_accepted"] += 1
             else:
                 self.stats["total_knowledge_rejected"] += 1
@@ -236,7 +236,9 @@ class Phase2Orchestrator:
             progress.completed_at = datetime.now(timezone.utc)
             self.stats["successful_sessions"] += 1
 
-            print(f"[Phase2Orchestrator] Research complete in {progress.get_elapsed_seconds():.2f}s")
+            print(
+                f"[Phase2Orchestrator] Research complete in {progress.get_elapsed_seconds():.2f}s"
+            )
             print(f"[Phase2Orchestrator] Quality gate pass rate: {progress.gate_pass_rate:.1%}")
             print(f"[Phase2Orchestrator] Knowledge accepted: {progress.knowledge_accepted}")
 
@@ -269,7 +271,9 @@ class Phase2Orchestrator:
         executive_summary = synthesis.report.executive_summary
         # ReviewResult doesn't have revised_summary field, use suggestions if available
         if review.suggestions:
-            executive_summary += "\n\n**Review Suggestions:**\n" + "\n".join(f"- {s}" for s in review.suggestions)
+            executive_summary += "\n\n**Review Suggestions:**\n" + "\n".join(
+                f"- {s}" for s in review.suggestions
+            )
 
         # Build best papers section
         best_papers_section = synthesis.report.best_papers_section or ""
@@ -278,7 +282,9 @@ class Phase2Orchestrator:
         contested_claims_section = ""
         if synthesis.contradictions_found > 0:
             contested_claims_section = "## Contradictions Found\n\n"
-            contested_claims_section += f"Detected {synthesis.contradictions_found} contradictions across sources.\n"
+            contested_claims_section += (
+                f"Detected {synthesis.contradictions_found} contradictions across sources.\n"
+            )
 
         # Build references section
         references_section = synthesis.report.references_section or ""
@@ -343,21 +349,15 @@ class Phase2Orchestrator:
 
         # Calculate derived metrics
         if stats["total_sessions"] > 0:
-            stats["success_rate"] = (
-                stats["successful_sessions"] / stats["total_sessions"]
-            )
+            stats["success_rate"] = stats["successful_sessions"] / stats["total_sessions"]
 
         total_gates = stats["total_gates_passed"] + stats["total_gates_failed"]
         if total_gates > 0:
             stats["overall_gate_pass_rate"] = stats["total_gates_passed"] / total_gates
 
-        total_curation = (
-            stats["total_knowledge_accepted"] + stats["total_knowledge_rejected"]
-        )
+        total_curation = stats["total_knowledge_accepted"] + stats["total_knowledge_rejected"]
         if total_curation > 0:
-            stats["curation_acceptance_rate"] = (
-                stats["total_knowledge_accepted"] / total_curation
-            )
+            stats["curation_acceptance_rate"] = stats["total_knowledge_accepted"] / total_curation
 
         return stats
 

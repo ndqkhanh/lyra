@@ -12,6 +12,7 @@ from datetime import datetime
 @dataclass
 class PaperAnalysis:
     """Analysis of a research paper."""
+
     paper_id: str
     title: str
 
@@ -42,6 +43,7 @@ class PaperAnalysis:
 @dataclass
 class RepositoryAnalysis:
     """Analysis of a code repository."""
+
     repo_id: str
     full_name: str
 
@@ -78,6 +80,7 @@ class RepositoryAnalysis:
 @dataclass
 class QualityScore:
     """Quality score for a research source."""
+
     overall: float  # 0.0-1.0
     relevance: float  # 0.0-1.0
     authority: float  # 0.0-1.0
@@ -87,7 +90,7 @@ class QualityScore:
 
     def __post_init__(self):
         """Ensure scores are in valid range."""
-        for field_name in ['overall', 'relevance', 'authority', 'recency', 'impact', 'credibility']:
+        for field_name in ["overall", "relevance", "authority", "recency", "impact", "credibility"]:
             value = getattr(self, field_name)
             if not 0.0 <= value <= 1.0:
                 setattr(self, field_name, max(0.0, min(1.0, value)))
@@ -108,9 +111,9 @@ class PaperAnalyzer:
             Paper analysis
         """
         analysis = PaperAnalysis(
-            paper_id=metadata.get('id', ''),
-            title=metadata.get('title', ''),
-            citation_count=metadata.get('citations', 0),
+            paper_id=metadata.get("id", ""),
+            title=metadata.get("title", ""),
+            citation_count=metadata.get("citations", 0),
         )
 
         # Extract methodology
@@ -139,8 +142,8 @@ class PaperAnalyzer:
         """Extract methodology section."""
         # Look for methodology section
         patterns = [
-            r'(?:methodology|method|approach).*?(?=\n\n|\Z)',
-            r'(?:we propose|we present|we introduce).*?(?=\.|;)',
+            r"(?:methodology|method|approach).*?(?=\n\n|\Z)",
+            r"(?:we propose|we present|we introduce).*?(?=\.|;)",
         ]
 
         for pattern in patterns:
@@ -157,8 +160,8 @@ class PaperAnalyzer:
 
         # Look for explicit dataset mentions
         dataset_patterns = [
-            r'(?:ImageNet|COCO|MNIST|CIFAR|SQuAD|GLUE|SuperGLUE)',
-            r'(?:dataset|corpus):\s*([A-Z][A-Za-z0-9\-]+)',
+            r"(?:ImageNet|COCO|MNIST|CIFAR|SQuAD|GLUE|SuperGLUE)",
+            r"(?:dataset|corpus):\s*([A-Z][A-Za-z0-9\-]+)",
         ]
 
         for pattern in dataset_patterns:
@@ -173,8 +176,8 @@ class PaperAnalyzer:
 
         # Common metrics
         metric_patterns = [
-            r'(?:accuracy|precision|recall|F1|BLEU|ROUGE|perplexity|AUC)',
-            r'(?:top-[0-9]|mAP|IoU|PSNR|SSIM)',
+            r"(?:accuracy|precision|recall|F1|BLEU|ROUGE|perplexity|AUC)",
+            r"(?:top-[0-9]|mAP|IoU|PSNR|SSIM)",
         ]
 
         for pattern in metric_patterns:
@@ -189,8 +192,8 @@ class PaperAnalyzer:
 
         # Look for result statements
         result_patterns = [
-            r'(?:we find|we show|we demonstrate|results show).*?(?=\.|;)',
-            r'(?:achieves?|outperforms?|improves?).*?(?=\.|;)',
+            r"(?:we find|we show|we demonstrate|results show).*?(?=\.|;)",
+            r"(?:achieves?|outperforms?|improves?).*?(?=\.|;)",
         ]
 
         for pattern in result_patterns:
@@ -204,19 +207,27 @@ class PaperAnalyzer:
         score = 0.0
 
         # Check for code availability
-        if re.search(r'(?:code|implementation).*?(?:available|github|repository)', content, re.IGNORECASE):
+        if re.search(
+            r"(?:code|implementation).*?(?:available|github|repository)", content, re.IGNORECASE
+        ):
             score += 0.3
 
         # Check for hyperparameters
-        if re.search(r'(?:hyperparameter|learning rate|batch size)', content, re.IGNORECASE):
+        if re.search(r"(?:hyperparameter|learning rate|batch size)", content, re.IGNORECASE):
             score += 0.2
 
         # Check for dataset details
-        if re.search(r'(?:dataset|training set|test set).*?(?:split|size|samples)', content, re.IGNORECASE):
+        if re.search(
+            r"(?:dataset|training set|test set).*?(?:split|size|samples)", content, re.IGNORECASE
+        ):
             score += 0.2
 
         # Check for experimental setup
-        if re.search(r'(?:experimental setup|implementation details|training procedure)', content, re.IGNORECASE):
+        if re.search(
+            r"(?:experimental setup|implementation details|training procedure)",
+            content,
+            re.IGNORECASE,
+        ):
             score += 0.3
 
         return min(score, 1.0)
@@ -226,19 +237,23 @@ class PaperAnalyzer:
         strengths = []
 
         # High citation count
-        if metadata.get('citations', 0) > 100:
+        if metadata.get("citations", 0) > 100:
             strengths.append(f"Highly cited ({metadata['citations']} citations)")
 
         # Novel approach
-        if re.search(r'(?:novel|new|first|original)', content, re.IGNORECASE):
+        if re.search(r"(?:novel|new|first|original)", content, re.IGNORECASE):
             strengths.append("Claims novelty")
 
         # Strong results
-        if re.search(r'(?:state-of-the-art|SOTA|outperform|best)', content, re.IGNORECASE):
+        if re.search(r"(?:state-of-the-art|SOTA|outperform|best)", content, re.IGNORECASE):
             strengths.append("Claims strong performance")
 
         # Comprehensive evaluation
-        if re.search(r'(?:extensive|comprehensive|thorough).*?(?:evaluation|experiments)', content, re.IGNORECASE):
+        if re.search(
+            r"(?:extensive|comprehensive|thorough).*?(?:evaluation|experiments)",
+            content,
+            re.IGNORECASE,
+        ):
             strengths.append("Comprehensive evaluation")
 
         return strengths[:5]
@@ -249,9 +264,7 @@ class PaperAnalyzer:
 
         # Look for limitation section
         limitation_match = re.search(
-            r'(?:limitation|weakness|drawback).*?(?=\n\n|\Z)',
-            content,
-            re.IGNORECASE | re.DOTALL
+            r"(?:limitation|weakness|drawback).*?(?=\n\n|\Z)", content, re.IGNORECASE | re.DOTALL
         )
 
         if limitation_match:
@@ -259,8 +272,8 @@ class PaperAnalyzer:
 
         # Look for caveats
         caveat_patterns = [
-            r'(?:however|but|although).*?(?=\.|;)',
-            r'(?:does not|cannot|unable to).*?(?=\.|;)',
+            r"(?:however|but|although).*?(?=\.|;)",
+            r"(?:does not|cannot|unable to).*?(?=\.|;)",
         ]
 
         for pattern in caveat_patterns:
@@ -274,15 +287,17 @@ class PaperAnalyzer:
         biases = []
 
         # Dataset bias
-        if re.search(r'(?:English|Western|WEIRD)', content, re.IGNORECASE):
+        if re.search(r"(?:English|Western|WEIRD)", content, re.IGNORECASE):
             biases.append("Potential dataset bias (English/Western-centric)")
 
         # Evaluation bias
-        if not re.search(r'(?:baseline|comparison|prior work)', content, re.IGNORECASE):
+        if not re.search(r"(?:baseline|comparison|prior work)", content, re.IGNORECASE):
             biases.append("Limited baseline comparisons")
 
         # Generalization concerns
-        if re.search(r'(?:specific|particular|limited).*?(?:domain|dataset|setting)', content, re.IGNORECASE):
+        if re.search(
+            r"(?:specific|particular|limited).*?(?:domain|dataset|setting)", content, re.IGNORECASE
+        ):
             biases.append("Limited generalization claims")
 
         return biases[:3]
@@ -303,15 +318,15 @@ class RepositoryAnalyzer:
             Repository analysis
         """
         analysis = RepositoryAnalysis(
-            repo_id=str(repo_metadata.get('id', '')),
-            full_name=repo_metadata.get('full_name', ''),
-            stars=repo_metadata.get('stars', 0),
-            forks=repo_metadata.get('forks', 0),
-            open_issues=repo_metadata.get('open_issues', 0),
+            repo_id=str(repo_metadata.get("id", "")),
+            full_name=repo_metadata.get("full_name", ""),
+            stars=repo_metadata.get("stars", 0),
+            forks=repo_metadata.get("forks", 0),
+            open_issues=repo_metadata.get("open_issues", 0),
         )
 
         # Analyze features
-        analysis.has_license = bool(repo_metadata.get('license'))
+        analysis.has_license = bool(repo_metadata.get("license"))
         analysis.has_docs = self._has_documentation(repo_metadata, readme_content)
         analysis.has_tests = self._has_tests(repo_metadata)
         analysis.has_ci = self._has_ci(repo_metadata)
@@ -332,27 +347,27 @@ class RepositoryAnalyzer:
         """Check if repo has documentation."""
         if readme and len(readme) > 500:
             return True
-        return metadata.get('has_wiki', False) or metadata.get('has_pages', False)
+        return metadata.get("has_wiki", False) or metadata.get("has_pages", False)
 
     def _has_tests(self, metadata: dict) -> bool:
         """Check if repo has tests (heuristic)."""
         # Would need to fetch repo contents for accurate check
         # For now, use language as proxy
-        language = metadata.get('language', '').lower()
-        return language in ['python', 'javascript', 'typescript', 'java', 'go', 'rust']
+        language = metadata.get("language", "").lower()
+        return language in ["python", "javascript", "typescript", "java", "go", "rust"]
 
     def _has_ci(self, metadata: dict) -> bool:
         """Check if repo has CI (heuristic)."""
         # Would need to check for .github/workflows or similar
         # For now, assume popular repos have CI
-        return metadata.get('stars', 0) > 100
+        return metadata.get("stars", 0) > 100
 
     def _calculate_code_quality(self, metadata: dict, readme: str | None) -> float:
         """Calculate code quality score."""
         score = 0.0
 
         # Stars indicate quality
-        stars = metadata.get('stars', 0)
+        stars = metadata.get("stars", 0)
         if stars > 1000:
             score += 0.3
         elif stars > 100:
@@ -361,7 +376,7 @@ class RepositoryAnalyzer:
             score += 0.1
 
         # License
-        if metadata.get('license'):
+        if metadata.get("license"):
             score += 0.2
 
         # README quality
@@ -369,7 +384,7 @@ class RepositoryAnalyzer:
             score += 0.2
 
         # Recent activity
-        if metadata.get('last_commit_days', 365) < 30:
+        if metadata.get("last_commit_days", 365) < 30:
             score += 0.3
 
         return min(score, 1.0)
@@ -388,19 +403,19 @@ class RepositoryAnalyzer:
             score += 0.2
 
         # Installation instructions
-        if re.search(r'(?:install|setup|getting started)', readme, re.IGNORECASE):
+        if re.search(r"(?:install|setup|getting started)", readme, re.IGNORECASE):
             score += 0.2
 
         # Usage examples
-        if re.search(r'(?:usage|example|quickstart)', readme, re.IGNORECASE):
+        if re.search(r"(?:usage|example|quickstart)", readme, re.IGNORECASE):
             score += 0.2
 
         # API documentation
-        if re.search(r'(?:API|documentation|reference)', readme, re.IGNORECASE):
+        if re.search(r"(?:API|documentation|reference)", readme, re.IGNORECASE):
             score += 0.2
 
         # Code blocks
-        if '```' in readme or '    ' in readme:
+        if "```" in readme or "    " in readme:
             score += 0.1
 
         return min(score, 1.0)
@@ -410,7 +425,7 @@ class RepositoryAnalyzer:
         score = 0.0
 
         # Recent commits
-        last_commit_days = metadata.get('last_commit_days', 365)
+        last_commit_days = metadata.get("last_commit_days", 365)
         if last_commit_days < 30:
             score += 0.4
         elif last_commit_days < 90:
@@ -421,8 +436,8 @@ class RepositoryAnalyzer:
             score += 0.1
 
         # Low open issues
-        open_issues = metadata.get('open_issues', 0)
-        stars = metadata.get('stars', 1)
+        open_issues = metadata.get("open_issues", 0)
+        stars = metadata.get("stars", 1)
         issue_ratio = open_issues / max(stars, 1)
         if issue_ratio < 0.1:
             score += 0.3
@@ -432,11 +447,11 @@ class RepositoryAnalyzer:
             score += 0.1
 
         # Active contributors
-        if metadata.get('contributors', 0) > 10:
+        if metadata.get("contributors", 0) > 10:
             score += 0.3
-        elif metadata.get('contributors', 0) > 5:
+        elif metadata.get("contributors", 0) > 5:
             score += 0.2
-        elif metadata.get('contributors', 0) > 1:
+        elif metadata.get("contributors", 0) > 1:
             score += 0.1
 
         return min(score, 1.0)
@@ -512,11 +527,7 @@ class QualityScorer:
 
         # Overall (weighted average)
         overall = (
-            0.3 * relevance +
-            0.2 * authority +
-            0.1 * recency +
-            0.2 * impact +
-            0.2 * credibility
+            0.3 * relevance + 0.2 * authority + 0.1 * recency + 0.2 * impact + 0.2 * credibility
         )
 
         return QualityScore(
@@ -556,11 +567,7 @@ class QualityScorer:
 
         # Overall
         overall = (
-            0.3 * relevance +
-            0.2 * authority +
-            0.1 * recency +
-            0.2 * impact +
-            0.2 * credibility
+            0.3 * relevance + 0.2 * authority + 0.1 * recency + 0.2 * impact + 0.2 * credibility
         )
 
         return QualityScore(

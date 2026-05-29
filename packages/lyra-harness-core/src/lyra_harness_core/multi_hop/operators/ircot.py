@@ -8,6 +8,7 @@ is reached.
 Headline numbers: up to **+21 retrieval / +15 QA points** over single-shot
 retrieve-then-read on HotpotQA / 2WikiMultiHopQA / MuSiQue / IIRC.
 """
+
 from __future__ import annotations
 
 import re
@@ -106,7 +107,9 @@ class IRCoTOperator:
     ) -> str:
         evidence_block = ""
         if evidence:
-            evidence_block = "Evidence so far:\n" + "\n".join(f"- {d.text}" for d in evidence) + "\n\n"
+            evidence_block = (
+                "Evidence so far:\n" + "\n".join(f"- {d.text}" for d in evidence) + "\n\n"
+            )
         cot_block = ""
         if steps:
             cot_block = "Chain of thought:\n" + "\n".join(s.sentence for s in steps) + "\n"

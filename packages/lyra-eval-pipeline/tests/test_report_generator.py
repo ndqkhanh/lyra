@@ -47,7 +47,9 @@ class TestEvalReport:
             title="Test Report",
             generated_at=1000.0,
             summary="Evaluation complete",
-            leaderboard=Leaderboard(entries=(), category="overall", updated_at=0.0, total_entries=0),
+            leaderboard=Leaderboard(
+                entries=(), category="overall", updated_at=0.0, total_entries=0
+            ),
             domain_breakdown=(),
             recommendations=("Improve accuracy",),
         )
@@ -89,9 +91,7 @@ class TestReportGenerator:
         )
         r2 = DomainEvalReport(
             domain="code",
-            results=(
-                EvalResult("c1", "code", (("acc", 0.4),), 0.4, False, 15.0),
-            ),
+            results=(EvalResult("c1", "code", (("acc", 0.4),), 0.4, False, 15.0),),
             pass_rate=0.0,
             avg_score=0.4,
             avg_latency_ms=15.0,
@@ -229,9 +229,7 @@ class TestReportGenerator:
         good_results = [
             DomainEvalReport(
                 domain="math",
-                results=(
-                    EvalResult("s1", "math", (("acc", 0.95),), 0.95, True, 5.0),
-                ),
+                results=(EvalResult("s1", "math", (("acc", 0.95),), 0.95, True, 5.0),),
                 pass_rate=1.0,
                 avg_score=0.95,
                 avg_latency_ms=5.0,
@@ -332,9 +330,7 @@ class TestReportGenerator:
         slow_results = [
             DomainEvalReport(
                 domain="slow-domain",
-                results=(
-                    EvalResult("s1", "slow-domain", (("acc", 0.8),), 0.8, True, 600.0),
-                ),
+                results=(EvalResult("s1", "slow-domain", (("acc", 0.8),), 0.8, True, 600.0),),
                 pass_rate=1.0,
                 avg_score=0.8,
                 avg_latency_ms=600.0,

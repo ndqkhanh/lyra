@@ -29,26 +29,26 @@ logger = logging.getLogger(__name__)
 class SkillType(Enum):
     """Classification of skill types."""
 
-    PRIMITIVE = auto()      # Single-step, atomic operation
-    COMPOSITE = auto()      # Built from other skills
-    ADAPTIVE = auto()       # Behavior changes based on context
-    GENERATIVE = auto()     # Produces new skills or code
-    VALIDATOR = auto()      # Checks or verifies outputs
-    TRANSFORMER = auto()    # Transforms input to output
-    ORCHESTRATOR = auto()   # Coordinates other skills
+    PRIMITIVE = auto()  # Single-step, atomic operation
+    COMPOSITE = auto()  # Built from other skills
+    ADAPTIVE = auto()  # Behavior changes based on context
+    GENERATIVE = auto()  # Produces new skills or code
+    VALIDATOR = auto()  # Checks or verifies outputs
+    TRANSFORMER = auto()  # Transforms input to output
+    ORCHESTRATOR = auto()  # Coordinates other skills
 
 
 class CompositionPattern(Enum):
     """Known composition patterns for chaining skills."""
 
-    SEQUENTIAL = auto()     # A -> B -> C
-    PARALLEL = auto()       # A, B, C run concurrently
-    CONDITIONAL = auto()    # if X then A else B
-    ITERATIVE = auto()      # Repeat until convergence
-    HYBRID = auto()         # Mix of patterns
-    FANOUT = auto()         # One-to-many
-    FANIN = auto()          # Many-to-one
-    PIPELINE = auto()       # Staged pipeline with queuing
+    SEQUENTIAL = auto()  # A -> B -> C
+    PARALLEL = auto()  # A, B, C run concurrently
+    CONDITIONAL = auto()  # if X then A else B
+    ITERATIVE = auto()  # Repeat until convergence
+    HYBRID = auto()  # Mix of patterns
+    FANOUT = auto()  # One-to-many
+    FANIN = auto()  # Many-to-one
+    PIPELINE = auto()  # Staged pipeline with queuing
 
 
 class SkillStatus(Enum):
@@ -230,13 +230,21 @@ class SkillGraph:
 
     def get_dependents(self, skill_id: str) -> list[str]:
         """Get skills that depend on the given skill."""
-        return [e.source_id for e in self._reverse_edges.get(skill_id, []) if e.edge_type == "depends_on"]
+        return [
+            e.source_id
+            for e in self._reverse_edges.get(skill_id, [])
+            if e.edge_type == "depends_on"
+        ]
 
     def get_conflicts(self, skill_id: str) -> list[str]:
         """Get skills that conflict with the given skill."""
-        conflicts = [e.target_id for e in self._edges.get(skill_id, []) if e.edge_type == "conflicts_with"]
+        conflicts = [
+            e.target_id for e in self._edges.get(skill_id, []) if e.edge_type == "conflicts_with"
+        ]
         conflicts.extend(
-            e.source_id for e in self._reverse_edges.get(skill_id, []) if e.edge_type == "conflicts_with"
+            e.source_id
+            for e in self._reverse_edges.get(skill_id, [])
+            if e.edge_type == "conflicts_with"
         )
         return list(set(conflicts))
 
@@ -282,7 +290,7 @@ class SkillGraph:
 
         def dfs(node: str) -> bool:
             if node in stack:
-                cycle_path.extend(stack[stack.index(node):] + [node])
+                cycle_path.extend(stack[stack.index(node) :] + [node])
                 return True
             if node in visited:
                 return False
@@ -300,9 +308,7 @@ class SkillGraph:
 
         return cycle_path if cycle_path else list(nodes)[:2]
 
-    def shortest_path(
-        self, source_id: str, target_id: str
-    ) -> list[str] | None:
+    def shortest_path(self, source_id: str, target_id: str) -> list[str] | None:
         """Find shortest dependency path between two skills (BFS).
 
         Returns:
@@ -326,9 +332,7 @@ class SkillGraph:
 
         return None
 
-    def find_skills_by_output(
-        self, required_outputs: set[str]
-    ) -> list[SkillDefinition]:
+    def find_skills_by_output(self, required_outputs: set[str]) -> list[SkillDefinition]:
         """Find skills that produce the given outputs.
 
         Args:
@@ -338,13 +342,12 @@ class SkillGraph:
             Skills that produce at least one of the required outputs.
         """
         return [
-            skill for skill in self._nodes.values()
+            skill
+            for skill in self._nodes.values()
             if {o.name for o in skill.outputs} & required_outputs
         ]
 
-    def validate_compatibility(
-        self, skill_a: str, skill_b: str
-    ) -> tuple[bool, str | None]:
+    def validate_compatibility(self, skill_a: str, skill_b: str) -> tuple[bool, str | None]:
         """Check if two skills are compatible for composition.
 
         Args:
@@ -432,19 +435,25 @@ class SkillRegistry:
         # Add to graph
         self._graph.add_node(skill)
         for dep_id in skill.dependencies:
-            self._graph.add_edge(SkillEdge(
-                source_id=skill.skill_id,
-                target_id=dep_id,
-                edge_type="depends_on",
-            ))
+            self._graph.add_edge(
+                SkillEdge(
+                    source_id=skill.skill_id,
+                    target_id=dep_id,
+                    edge_type="depends_on",
+                )
+            )
         for conflict_id in skill.conflicts:
-            self._graph.add_edge(SkillEdge(
-                source_id=skill.skill_id,
-                target_id=conflict_id,
-                edge_type="conflicts_with",
-            ))
+            self._graph.add_edge(
+                SkillEdge(
+                    source_id=skill.skill_id,
+                    target_id=conflict_id,
+                    edge_type="conflicts_with",
+                )
+            )
 
-        logger.info("Skill registered: %s v%s (id=%s)", name, skill.metadata.version, skill.skill_id)
+        logger.info(
+            "Skill registered: %s v%s (id=%s)", name, skill.metadata.version, skill.skill_id
+        )
 
     def _validate_skill(self, skill: SkillDefinition) -> None:
         """Validate a skill before registration."""
@@ -456,7 +465,10 @@ class SkillRegistry:
             existing = self._by_id[skill.metadata.skill_id]
             raise ValidationError(
                 skill.metadata.skill_id,
-                f"Skill ID already registered (existing: {existing.name} v{existing.metadata.version})",
+(
+                    f"Skill ID already registered (existing: {existing.name} v"
+                    f"{existing.metadata.version})"
+                ),
             )
 
     def unregister(self, skill_id: str) -> bool:
@@ -476,7 +488,9 @@ class SkillRegistry:
             self._by_tag[tag] = [sid for sid in self._by_tag[tag] if sid != skill_id]
 
         for output in skill.outputs:
-            self._by_output[output.name] = [sid for sid in self._by_output[output.name] if sid != skill_id]
+            self._by_output[output.name] = [
+                sid for sid in self._by_output[output.name] if sid != skill_id
+            ]
 
         self._graph.remove_node(skill_id)
         logger.info("Skill unregistered: %s (id=%s)", name, skill_id)
@@ -510,9 +524,13 @@ class SkillRegistry:
 
     def find_by_output(self, output_name: str) -> list[SkillDefinition]:
         """Find skills that produce a specific output."""
-        return [self._by_id[sid] for sid in self._by_output.get(output_name, []) if sid in self._by_id]
+        return [
+            self._by_id[sid] for sid in self._by_output.get(output_name, []) if sid in self._by_id
+        ]
 
-    def find_by_capability(self, required_inputs: set[str], required_outputs: set[str]) -> list[SkillDefinition]:
+    def find_by_capability(
+        self, required_inputs: set[str], required_outputs: set[str]
+    ) -> list[SkillDefinition]:
         """Find skills that match input/output requirements."""
         candidates = set()
         for output_name in required_outputs:
@@ -715,19 +733,23 @@ class SkillWeaver:
                     continue
 
                 # Check conflicts with already selected skills
-                has_conflict = any(
-                    c in used for c in skill.conflicts
-                )
+                has_conflict = any(c in used for c in skill.conflicts)
                 if has_conflict:
                     continue
 
                 output_match = len({o.name for o in skill.outputs} & needed)
                 dependency_satisfaction = len(set(skill.dependencies) & set(chain))
 
-                context_score = sum(
-                    1 for k, v in context.items()
-                    if skill.context_requirements.get(k, 0) <= v + 0.1
-                ) / max(len(skill.context_requirements), 1) if skill.context_requirements else 0.5
+                context_score = (
+                    sum(
+                        1
+                        for k, v in context.items()
+                        if skill.context_requirements.get(k, 0) <= v + 0.1
+                    )
+                    / max(len(skill.context_requirements), 1)
+                    if skill.context_requirements
+                    else 0.5
+                )
 
                 # Weighted scoring
                 score = (
@@ -746,9 +768,7 @@ class SkillWeaver:
             if best_skill is None:
                 # Could not find a suitable next skill
                 if not chain:
-                    raise CompositionError(
-                        f"No skills found for outputs: {needed}"
-                    )
+                    raise CompositionError(f"No skills found for outputs: {needed}")
                 break
 
             skill = self.registry.get(best_skill)
@@ -761,16 +781,13 @@ class SkillWeaver:
             needed -= satisfied
 
         total_cost = sum(
-            self.registry.get(sid).estimated_cost
-            for sid in chain if self.registry.get(sid)
+            self.registry.get(sid).estimated_cost for sid in chain if self.registry.get(sid)
         )
         total_latency = sum(
-            self.registry.get(sid).avg_latency_ms
-            for sid in chain if self.registry.get(sid)
+            self.registry.get(sid).avg_latency_ms for sid in chain if self.registry.get(sid)
         )
         avg_quality = sum(
-            self.registry.get(sid).quality_score
-            for sid in chain if self.registry.get(sid)
+            self.registry.get(sid).quality_score for sid in chain if self.registry.get(sid)
         ) / max(len(chain), 1)
 
         return CompositionPlan(
@@ -806,16 +823,14 @@ class SkillWeaver:
                     break
 
         total_cost = sum(
-            self.registry.get(sid).estimated_cost
-            for sid in selected if self.registry.get(sid)
+            self.registry.get(sid).estimated_cost for sid in selected if self.registry.get(sid)
         )
         max_latency = max(
             (self.registry.get(sid).avg_latency_ms for sid in selected if self.registry.get(sid)),
             default=0,
         )
         avg_quality = sum(
-            self.registry.get(sid).quality_score
-            for sid in selected if self.registry.get(sid)
+            self.registry.get(sid).quality_score for sid in selected if self.registry.get(sid)
         ) / max(len(selected), 1)
 
         return CompositionPlan(
@@ -887,9 +902,7 @@ class SkillWeaver:
                 if i >= j:
                     continue
                 other = self.registry.get(other_sid)
-                if other and (
-                    sid in other.conflicts or other_sid in skill.conflicts
-                ):
+                if other and (sid in other.conflicts or other_sid in skill.conflicts):
                     issues.append(f"Conflict: {sid} <-> {other_sid}")
 
         return len(issues) == 0, issues

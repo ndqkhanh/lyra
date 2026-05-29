@@ -154,7 +154,9 @@ class SwarmOrchestrator:
                         error=f"Task {task_id} not found",
                     )
                 if task.status in ("completed", "failed", "cancelled"):
-                    duration = (datetime.now() - datetime.fromisoformat(task.created_at)).total_seconds()
+                    duration = (
+                        datetime.now() - datetime.fromisoformat(task.created_at)
+                    ).total_seconds()
                     return TaskResult(
                         task_id=task_id,
                         success=task.status == "completed",

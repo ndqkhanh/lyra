@@ -31,7 +31,10 @@ class StubLLM:
             resp = self._responses[self._idx]
             self._idx += 1
             return resp
-        return '{"match_difficulty": 0.5, "required_coverage": 0.5, "urgency": 0.5, "domain": "general"}'
+        return(
+            '{"match_difficulty": 0.5, "required_coverage": 0.5, "urgency": 0.5, "domain":'
+            '"general"}'
+        )
 
 
 class TestQueryProfile:
@@ -155,7 +158,9 @@ class TestCostSensitiveRouter:
 
     def test_parse_profile_valid_json(self):
         router = self._make_router()
-        json_str = '{"match_difficulty": 0.7, "required_coverage": 0.8, "urgency": 0.9, "domain": "math"}'
+        json_str = (
+            '{"match_difficulty": 0.7, "required_coverage": 0.8, "urgency": 0.9, "domain": "math"}'
+        )
         profile = router._parse_profile(json_str, "math question")
         assert profile.match_difficulty == 0.7
         assert profile.required_coverage == 0.8

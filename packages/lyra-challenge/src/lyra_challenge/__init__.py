@@ -301,6 +301,7 @@ def _semantic_hash_similarity(output: str, expected: str) -> float:
     Strips variable names and whitespace then compares a hash-derived
     fingerprint to estimate semantic equivalence.
     """
+
     def _normalise(text: str) -> str:
         # Collapse whitespace and normalise punctuation
         norm = re.sub(r"\s+", " ", text)
@@ -353,7 +354,9 @@ class ChallengeEngine:
             The suite to register.
         """
         self._suites[suite.suite_id] = suite
-        logger.debug("Registered challenge suite '%s' (%d problems)", suite.name, len(suite.problems))
+        logger.debug(
+            "Registered challenge suite '%s' (%d problems)", suite.name, len(suite.problems)
+        )
 
     def list_suites(self) -> list[dict[str, Any]]:
         """List all registered challenge suites.
@@ -598,9 +601,7 @@ class ChallengeEngine:
             return []
 
         # Sort by total_score descending
-        sorted_agents = sorted(
-            agent_scores.items(), key=lambda x: -x[1]["total_score"]
-        )
+        sorted_agents = sorted(agent_scores.items(), key=lambda x: -x[1]["total_score"])
         total_agents = len(sorted_agents)
 
         rankings: list[AgentRanking] = []
@@ -702,9 +703,7 @@ class ChallengeEngine:
             Suite count, attempt count, average score, ranking count.
         """
         attempts = list(self._attempts.values())
-        avg_score = (
-            sum(a.score for a in attempts) / len(attempts) if attempts else 0.0
-        )
+        avg_score = sum(a.score for a in attempts) / len(attempts) if attempts else 0.0
         return {
             "suites_registered": len(self._suites),
             "total_problems": sum(len(s.problems) for s in self._suites.values()),

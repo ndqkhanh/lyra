@@ -11,6 +11,7 @@ inside :attr:`workspace`, and an attempt to escape via ``..`` or an
 absolute path raises :class:`SandboxError` instead of touching the
 real filesystem.
 """
+
 from __future__ import annotations
 
 import os
@@ -96,8 +97,16 @@ class LocalSandbox:
         except subprocess.TimeoutExpired as e:
             timed_out = True
             exit_code = 124
-            stdout = e.stdout if isinstance(e.stdout, str) else (e.stdout or b"").decode("utf-8", "replace")
-            stderr = e.stderr if isinstance(e.stderr, str) else (e.stderr or b"").decode("utf-8", "replace")
+            stdout = (
+                e.stdout
+                if isinstance(e.stdout, str)
+                else (e.stdout or b"").decode("utf-8", "replace")
+            )
+            stderr = (
+                e.stderr
+                if isinstance(e.stderr, str)
+                else (e.stderr or b"").decode("utf-8", "replace")
+            )
         duration_ms = (time.time() - start) * 1000.0
 
         return CommandResult(
@@ -141,17 +150,13 @@ class LocalSandbox:
             try:
                 candidate.resolve().relative_to(self._workspace.resolve())
             except ValueError as e:
-                raise SandboxError(
-                    f"absolute path {relpath!r} escapes sandbox"
-                ) from e
+                raise SandboxError(f"absolute path {relpath!r} escapes sandbox") from e
             return candidate
         merged = (self._workspace / candidate).resolve()
         try:
             merged.relative_to(self._workspace.resolve())
         except ValueError as e:
-            raise SandboxError(
-                f"relative path {relpath!r} escapes sandbox"
-            ) from e
+            raise SandboxError(f"relative path {relpath!r} escapes sandbox") from e
         return merged
 
 

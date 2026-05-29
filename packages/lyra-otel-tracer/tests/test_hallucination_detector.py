@@ -27,7 +27,11 @@ class TestHallucinationSignal:
 
     def test_hallucination_signal_frozen(self) -> None:
         signal = HallucinationSignal(
-            signal_type="test", description="d", confidence=0.5, source_text="t", pattern_matched="p"
+            signal_type="test",
+            description="d",
+            confidence=0.5,
+            source_text="t",
+            pattern_matched="p",
         )
         with pytest.raises(AttributeError):
             signal.signal_type = "changed"  # type: ignore[misc]
@@ -79,7 +83,10 @@ class TestHallucinationDetector:
     async def test_analyze_response_multiple_signals(self) -> None:
         detector = HallucinationDetector()
         report = await detector.analyze_response(
-            "I think it's possible that I don't know the answer. Based on my training, I believe this might work."
+
+                "I think it's possible that I don't know the answer. Based on my training, I"
+                "believe this might work."
+
         )
         assert report.has_hallucinations
         assert len(report.signals) >= 1
@@ -94,13 +101,17 @@ class TestHallucinationDetector:
     @pytest.mark.asyncio
     async def test_analyze_response_ai_language_model(self) -> None:
         detector = HallucinationDetector()
-        report = await detector.analyze_response("As an AI language model, I cannot provide medical advice.")
+        report = await detector.analyze_response(
+            "As an AI language model, I cannot provide medical advice."
+        )
         assert report.has_hallucinations
 
     @pytest.mark.asyncio
     async def test_analyze_response_with_context(self) -> None:
         detector = HallucinationDetector()
-        report = await detector.analyze_response("I don't have access to that data.", _context="user query")
+        report = await detector.analyze_response(
+            "I don't have access to that data.", _context="user query"
+        )
         assert report.has_hallucinations
 
     @pytest.mark.asyncio
@@ -160,7 +171,11 @@ class TestHallucinationDetector:
         # risk_score 0.2-0.5 should give "review_manually"
         detector = HallucinationDetector(DetectorConfig(sensitivity=0.9, min_confidence=0.1))
         report = await detector.analyze_response("I think")
-        assert report.recommended_action in ("review_manually", "request_clarification", "reject_and_retry")
+        assert report.recommended_action in (
+            "review_manually",
+            "request_clarification",
+            "reject_and_retry",
+        )
 
     @pytest.mark.asyncio
     async def test_sensitivity_affects_confidence(self) -> None:

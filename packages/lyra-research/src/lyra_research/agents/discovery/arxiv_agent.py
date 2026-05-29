@@ -1,4 +1,5 @@
 """ArXiv discovery agent."""
+
 from __future__ import annotations
 
 from lyra_research.agents.discovery.discovery_base import DiscoveryAgent
@@ -33,6 +34,11 @@ class ArxivAgent(DiscoveryAgent):
                 if attempt < self.rate_limiter.max_retries - 1:
                     self._handle_rate_limit(attempt)
                 else:
-                    print(f"ArXiv discovery failed after {self.rate_limiter.max_retries} attempts: {e}")
+                    print(
+
+                            f"ArXiv discovery failed after {self.rate_limiter.max_retries}"
+                            f" attempts: {e}"
+
+                    )
                     return []
         return []

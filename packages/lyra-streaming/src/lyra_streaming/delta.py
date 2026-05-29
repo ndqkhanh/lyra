@@ -187,7 +187,7 @@ class JSONPatch:
                 try:
                     idx = int(seg)
                 except ValueError:
-                    raise PatchError(f"Invalid list index '{seg}' in path '{path}'")
+                    raise PatchError(f"Invalid list index '{seg}' in path '{path}'") from None
                 if idx < 0 or idx >= len(current):
                     raise PatchError(f"Index {idx} out of range in path '{path}'")
                 current = current[idx]
@@ -202,7 +202,7 @@ class JSONPatch:
             raise PatchError("Cannot ADD to root")
 
         current = obj
-        for i, seg in enumerate(segments[:-1]):
+        for _i, seg in enumerate(segments[:-1]):
             if isinstance(current, dict):
                 current = current.setdefault(seg, {})
             elif isinstance(current, list):

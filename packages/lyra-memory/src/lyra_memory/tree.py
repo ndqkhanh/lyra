@@ -297,4 +297,4 @@ class MemoryTree:
 
 
 # Helper function for datetime import
-from datetime import timedelta
+from datetime import timedelta  # noqa: E402

@@ -14,12 +14,14 @@ from typing import Any
 # VerifiableChecklistGenerator
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ChecklistItem:
     """A single verifiable sub-question in a research checklist."""
+
     question: str
-    category: str   # "definition", "sota", "comparison", "gap", "application"
-    priority: int   # 1=critical, 2=important, 3=nice-to-have
+    category: str  # "definition", "sota", "comparison", "gap", "application"
+    priority: int  # 1=critical, 2=important, 3=nice-to-have
     answered: bool = False
     answer_source_ids: list[str] = field(default_factory=list)
 
@@ -27,6 +29,7 @@ class ChecklistItem:
 @dataclass
 class ResearchChecklist:
     """A verifiable research checklist for a topic."""
+
     topic: str
     items: list[ChecklistItem]
     created_at: datetime = field(default_factory=datetime.now)
@@ -118,13 +121,15 @@ class VerifiableChecklistGenerator:
         new_items = []
         for i, item in enumerate(checklist.items):
             if i == item_idx:
-                new_items.append(ChecklistItem(
-                    question=item.question,
-                    category=item.category,
-                    priority=item.priority,
-                    answered=True,
-                    answer_source_ids=list(source_ids),
-                ))
+                new_items.append(
+                    ChecklistItem(
+                        question=item.question,
+                        category=item.category,
+                        priority=item.priority,
+                        answered=True,
+                        answer_source_ids=list(source_ids),
+                    )
+                )
             else:
                 new_items.append(item)
 
@@ -143,9 +148,11 @@ class VerifiableChecklistGenerator:
 # EvidenceAudit
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ClaimEvidence:
     """A claim extracted from a research text with its evidence status."""
+
     claim: str
     source_ids: list[str]
     verified: bool
@@ -155,6 +162,7 @@ class ClaimEvidence:
 @dataclass
 class AuditReport:
     """Result of an evidence audit."""
+
     total_claims: int
     verified_claims: int
     unverified_claims: int
@@ -265,14 +273,16 @@ class EvidenceAudit:
 # ContradictionDetector
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class Contradiction:
     """A detected contradiction between two research sources."""
+
     claim_a: str
     claim_b: str
     source_a_id: str
     source_b_id: str
-    severity: str       # "direct", "partial", "methodological"
+    severity: str  # "direct", "partial", "methodological"
     description: str
 
 
@@ -315,7 +325,7 @@ class ContradictionDetector:
                 text_b = f"{b.get('abstract', '')} {' '.join(b.get('findings', []))}"
 
                 pair_contradictions = self._compare_pair(
-                    text_a, text_b, a.get('source_id', ''), b.get('source_id', '')
+                    text_a, text_b, a.get("source_id", ""), b.get("source_id", "")
                 )
                 contradictions.extend(pair_contradictions)
 
@@ -344,22 +354,22 @@ class ContradictionDetector:
                 subj_b_clean = subj_b.strip().lower()
                 obj_b_clean = obj_b.strip().lower()
                 # Contradiction: A says X outperforms Y, B says Y outperforms X
-                if (
-                    subj_a_clean in obj_b_clean or obj_b_clean in subj_a_clean
-                ) and (
+                if (subj_a_clean in obj_b_clean or obj_b_clean in subj_a_clean) and (
                     obj_a_clean in subj_b_clean or subj_b_clean in obj_a_clean
                 ):
-                    found.append(Contradiction(
-                        claim_a=f"{subj_a} outperforms {obj_a}",
-                        claim_b=f"{subj_b} outperforms {obj_b}",
-                        source_a_id=sid_a,
-                        source_b_id=sid_b,
-                        severity="direct",
-                        description=(
-                            f"Source {sid_a} claims '{subj_a} outperforms {obj_a}' "
-                            f"while source {sid_b} claims the opposite."
-                        ),
-                    ))
+                    found.append(
+                        Contradiction(
+                            claim_a=f"{subj_a} outperforms {obj_a}",
+                            claim_b=f"{subj_b} outperforms {obj_b}",
+                            source_a_id=sid_a,
+                            source_b_id=sid_b,
+                            severity="direct",
+                            description=(
+                                f"Source {sid_a} claims '{subj_a} outperforms {obj_a}' "
+                                f"while source {sid_b} claims the opposite."
+                            ),
+                        )
+                    )
 
         return found
 
@@ -376,7 +386,7 @@ class ContradictionDetector:
         metric_values: dict[str, list[tuple]] = {}
 
         for analysis in analyses:
-            sid = analysis.get('source_id', '')
+            sid = analysis.get("source_id", "")
             text = f"{analysis.get('abstract', '')} {' '.join(analysis.get('findings', []))}"
             for match in self._NUM_CLAIM_PATTERN.finditer(text):
                 claim_text = match.group(1)
@@ -396,17 +406,19 @@ class ContradictionDetector:
                         sid_a, val_a, claim_a = entries[i]
                         sid_b, val_b, claim_b = entries[j]
                         if abs(val_a - val_b) > 10:
-                            contradictions.append(Contradiction(
-                                claim_a=claim_a,
-                                claim_b=claim_b,
-                                source_a_id=sid_a,
-                                source_b_id=sid_b,
-                                severity="methodological",
-                                description=(
-                                    f"Conflicting {metric} values: "
-                                    f"{val_a} (source {sid_a}) vs {val_b} (source {sid_b})"
-                                ),
-                            ))
+                            contradictions.append(
+                                Contradiction(
+                                    claim_a=claim_a,
+                                    claim_b=claim_b,
+                                    source_a_id=sid_a,
+                                    source_b_id=sid_b,
+                                    severity="methodological",
+                                    description=(
+                                        f"Conflicting {metric} values: "
+                                        f"{val_a} (source {sid_a}) vs {val_b} (source {sid_b})"
+                                    ),
+                                )
+                            )
 
         return contradictions
 
@@ -415,12 +427,14 @@ class ContradictionDetector:
 # GapAnalyzer
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ResearchGap:
     """An identified gap in the research literature."""
+
     area: str
     evidence: str
-    severity: str           # "critical", "important", "minor"
+    severity: str  # "critical", "important", "minor"
     suggested_direction: str
 
 
@@ -452,7 +466,7 @@ class GapAnalyzer:
 
         for source in sources:
             text = f"{source.get('abstract', '')} {' '.join(source.get('findings', []))}"
-            source_gaps = self._extract_gap_sentences(text, source.get('source_id', ''))
+            source_gaps = self._extract_gap_sentences(text, source.get("source_id", ""))
             gaps.extend(source_gaps)
 
         # Deduplicate by area
@@ -471,18 +485,20 @@ class GapAnalyzer:
         gaps: list[ResearchGap] = []
 
         # Split into sentences (rough)
-        sentences = re.split(r'(?<=[.!?])\s+', text)
+        sentences = re.split(r"(?<=[.!?])\s+", text)
 
         for sentence in sentences:
             for pattern in self.GAP_SIGNALS:
                 if re.search(pattern, sentence, re.IGNORECASE):
                     area = sentence.strip()[:120]
-                    gaps.append(ResearchGap(
-                        area=area,
-                        evidence=f"Source {source_id}: {sentence.strip()[:200]}",
-                        severity="important",
-                        suggested_direction=f"Further research needed on: {area[:80]}",
-                    ))
+                    gaps.append(
+                        ResearchGap(
+                            area=area,
+                            evidence=f"Source {source_id}: {sentence.strip()[:200]}",
+                            severity="important",
+                            suggested_direction=f"Further research needed on: {area[:80]}",
+                        )
+                    )
                     break  # One gap per sentence
 
         return gaps
@@ -503,8 +519,7 @@ class GapAnalyzer:
         """
         # Build combined corpus
         corpus = " ".join(
-            f"{s.get('abstract', '')} {' '.join(s.get('findings', []))}"
-            for s in sources
+            f"{s.get('abstract', '')} {' '.join(s.get('findings', []))}" for s in sources
         ).lower()
 
         gaps: list[ResearchGap] = []
@@ -513,20 +528,27 @@ class GapAnalyzer:
                 continue
             # Check if key words from the question appear in the corpus
             keywords = [
-                w for w in item.question.lower().split()
+                w
+                for w in item.question.lower().split()
                 if len(w) > 4 and w not in {"what", "which", "where", "when", "that", "with"}
             ]
             coverage = sum(1 for kw in keywords if kw in corpus)
             coverage_rate = coverage / len(keywords) if keywords else 1.0
 
             if coverage_rate < 0.3:
-                severity = "critical" if item.priority == 1 else "important" if item.priority == 2 else "minor"
-                gaps.append(ResearchGap(
-                    area=item.question,
-                    evidence=f"No sources adequately cover: {item.question}",
-                    severity=severity,
-                    suggested_direction=f"Search specifically for: {item.question}",
-                ))
+                severity = (
+                    "critical"
+                    if item.priority == 1
+                    else "important" if item.priority == 2 else "minor"
+                )
+                gaps.append(
+                    ResearchGap(
+                        area=item.question,
+                        evidence=f"No sources adequately cover: {item.question}",
+                        severity=severity,
+                        suggested_direction=f"Search specifically for: {item.question}",
+                    )
+                )
 
         return gaps
 
@@ -535,9 +557,11 @@ class GapAnalyzer:
 # FalsificationChecker
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class FalsificationNote:
     """Result of checking a claim against counter-evidence."""
+
     claim: str
     counter_sources: list[str]
     counter_evidence: str
@@ -580,7 +604,7 @@ class FalsificationChecker:
             counter_snippets: list[str] = []
 
             for source in sources:
-                sid = source.get('source_id', '')
+                sid = source.get("source_id", "")
                 text = f"{source.get('abstract', '')} {' '.join(source.get('findings', []))}"
                 refutations = self._find_refutations(text, claim_keywords)
                 if refutations:
@@ -596,12 +620,14 @@ class FalsificationChecker:
             else:
                 verdict = "contested"
 
-            notes.append(FalsificationNote(
-                claim=claim,
-                counter_sources=counter_sources,
-                counter_evidence="; ".join(counter_snippets) if counter_snippets else "",
-                verdict=verdict,
-            ))
+            notes.append(
+                FalsificationNote(
+                    claim=claim,
+                    counter_sources=counter_sources,
+                    counter_evidence="; ".join(counter_snippets) if counter_snippets else "",
+                    verdict=verdict,
+                )
+            )
 
         return notes
 
@@ -635,13 +661,46 @@ class FalsificationChecker:
     def _extract_keywords(self, claim: str) -> list[str]:
         """Extract significant keywords from a claim."""
         stop_words = {
-            "the", "a", "an", "is", "are", "was", "were", "be", "been",
-            "has", "have", "had", "do", "does", "did", "will", "would",
-            "could", "should", "may", "might", "that", "this", "these",
-            "those", "and", "or", "but", "in", "on", "at", "to", "for",
-            "of", "with", "by", "from", "as",
+            "the",
+            "a",
+            "an",
+            "is",
+            "are",
+            "was",
+            "were",
+            "be",
+            "been",
+            "has",
+            "have",
+            "had",
+            "do",
+            "does",
+            "did",
+            "will",
+            "would",
+            "could",
+            "should",
+            "may",
+            "might",
+            "that",
+            "this",
+            "these",
+            "those",
+            "and",
+            "or",
+            "but",
+            "in",
+            "on",
+            "at",
+            "to",
+            "for",
+            "of",
+            "with",
+            "by",
+            "from",
+            "as",
         }
-        words = re.findall(r'\b[a-zA-Z]{4,}\b', claim.lower())
+        words = re.findall(r"\b[a-zA-Z]{4,}\b", claim.lower())
         return [w for w in words if w not in stop_words]
 
     def _find_refutations(self, text: str, keywords: list[str]) -> list[str]:

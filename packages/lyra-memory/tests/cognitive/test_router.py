@@ -174,7 +174,9 @@ class TestSystem12MemoryRouter:
             confidence: float = 0.0
             path_depth: int = 0
 
-        e1 = Evidence(content=Content(id="n1", content="reconstructed"), confidence=0.85, path_depth=2)
+        e1 = Evidence(
+            content=Content(id="n1", content="reconstructed"), confidence=0.85, path_depth=2
+        )
 
         engine = StubActiveEngine(evidence=[e1])
         router = self._make_router(active_engine=engine)

@@ -116,7 +116,9 @@ def test_replay_controller_next_prev_reset(tmp_path: Path) -> None:
     assert rc.current() is None
 
     # Walk to end then off the edge → None.
-    rc.next(); rc.next(); rc.next()
+    rc.next()
+    rc.next()
+    rc.next()
     assert rc.next() is None
 
 

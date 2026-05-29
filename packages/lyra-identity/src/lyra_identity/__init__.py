@@ -42,17 +42,15 @@ class AgentIdentity:
         self.provenance_graph: dict[str, list[str]] = {}
 
     def _content_hash(self, data: dict[str, Any]) -> str:
-        return hashlib.sha256(
-            json.dumps(data, sort_keys=True, default=str).encode()
-        ).hexdigest()
+        return hashlib.sha256(json.dumps(data, sort_keys=True, default=str).encode()).hexdigest()
 
-    def sign_action(self, action: dict[str, Any], parent_action_id: str | None = None) -> SignedManifest:
+    def sign_action(
+        self, action: dict[str, Any], parent_action_id: str | None = None
+    ) -> SignedManifest:
         self.action_counter += 1
         action_id = f"{self.agent_id}:{self.action_counter}"
         content_hash = self._content_hash(action)
-        signature = hashlib.sha256(
-            f"{content_hash}:{self._private_key}".encode()
-        ).hexdigest()
+        signature = hashlib.sha256(f"{content_hash}:{self._private_key}".encode()).hexdigest()
 
         manifest = SignedManifest(
             action_id=action_id,

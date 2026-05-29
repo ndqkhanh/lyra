@@ -1,4 +1,5 @@
-"""Core belief management: representation, update (Bayesian, Jeffrey, AGM), revision, contraction, expansion, consistency."""
+"""Core belief management: representation, update (Bayesian, Jeffrey, AGM), revision, contraction,
+expansion, consistency."""
 
 from __future__ import annotations
 
@@ -25,12 +26,12 @@ logger = logging.getLogger(__name__)
 class BeliefSource(Enum):
     """How a belief was acquired."""
 
-    LEARNED = auto()         # Learned from experience
+    LEARNED = auto()  # Learned from experience
     EXPERT_ENCODED = auto()  # Encoded by domain expert
-    EXTRACTED = auto()       # Extracted from data
-    INFERRED = auto()        # Derived via inference
-    OBSERVED = auto()        # Direct observation
-    IMPORTED = auto()        # Imported from external source
+    EXTRACTED = auto()  # Extracted from data
+    INFERRED = auto()  # Derived via inference
+    OBSERVED = auto()  # Direct observation
+    IMPORTED = auto()  # Imported from external source
 
 
 class BeliefStatus(Enum):
@@ -46,11 +47,11 @@ class BeliefStatus(Enum):
 class UpdateMethod(Enum):
     """Methods for updating beliefs."""
 
-    BAYESIAN = auto()            # Bayes' rule
-    JEFFREYS = auto()            # Jeffrey's rule (uncertain evidence)
-    AGM_EXPANSION = auto()       # AGM expansion
-    AGM_REVISION = auto()        # AGM revision
-    AGM_CONTRACTION = auto()     # AGM contraction
+    BAYESIAN = auto()  # Bayes' rule
+    JEFFREYS = auto()  # Jeffrey's rule (uncertain evidence)
+    AGM_EXPANSION = auto()  # AGM expansion
+    AGM_REVISION = auto()  # AGM revision
+    AGM_CONTRACTION = auto()  # AGM contraction
     EVIDENCE_WEIGHTING = auto()  # Weighted evidence
 
 
@@ -171,8 +172,12 @@ class BeliefSystem:
         self._beliefs[belief.belief_id] = belief
         self._domains[belief.domain].append(belief.belief_id)
 
-        logger.debug("Belief added: %s [%s] confidence=%.2f",
-                     belief.belief_id[:8], belief.domain, belief.confidence)
+        logger.debug(
+            "Belief added: %s [%s] confidence=%.2f",
+            belief.belief_id[:8],
+            belief.domain,
+            belief.confidence,
+        )
         return belief
 
     def create_belief(
@@ -330,12 +335,20 @@ class BeliefSystem:
         belief.confidence = new_confidence
         belief.last_updated = time.time()
 
-        self._record_update(belief_id, UpdateMethod.BAYESIAN, old_confidence, new_confidence, {
-            "evidence_strength": evidence_strength,
-            "likelihood_ratio": likelihood_ratio,
-        })
+        self._record_update(
+            belief_id,
+            UpdateMethod.BAYESIAN,
+            old_confidence,
+            new_confidence,
+            {
+                "evidence_strength": evidence_strength,
+                "likelihood_ratio": likelihood_ratio,
+            },
+        )
 
-        logger.debug("Bayesian update: %s %.3f -> %.3f", belief_id[:8], old_confidence, new_confidence)
+        logger.debug(
+            "Bayesian update: %s %.3f -> %.3f", belief_id[:8], old_confidence, new_confidence
+        )
         return belief
 
     def update_jeffreys(
@@ -358,16 +371,24 @@ class BeliefSystem:
         old_confidence = belief.confidence
 
         # Weighted average with prior
-        updated = evidence_reliability * new_confidence + (1.0 - evidence_reliability) * old_confidence
+        updated = (
+            evidence_reliability * new_confidence + (1.0 - evidence_reliability) * old_confidence
+        )
         updated = max(0.0, min(1.0, updated))
 
         belief.confidence = updated
         belief.last_updated = time.time()
 
-        self._record_update(belief_id, UpdateMethod.JEFFREYS, old_confidence, updated, {
-            "evidence_reliability": evidence_reliability,
-            "target_confidence": new_confidence,
-        })
+        self._record_update(
+            belief_id,
+            UpdateMethod.JEFFREYS,
+            old_confidence,
+            updated,
+            {
+                "evidence_reliability": evidence_reliability,
+                "target_confidence": new_confidence,
+            },
+        )
 
         return belief
 
@@ -439,9 +460,15 @@ class BeliefSystem:
             contra.confidence = max(0.0, min(1.0, contra.confidence - shift))
             contra.status = BeliefStatus.DISPUTED
 
-        self._record_update(belief_id, UpdateMethod.AGM_REVISION, old_confidence, new_confidence, {
-            "resolved_contradictions": len(contradictions),
-        })
+        self._record_update(
+            belief_id,
+            UpdateMethod.AGM_REVISION,
+            old_confidence,
+            new_confidence,
+            {
+                "resolved_contradictions": len(contradictions),
+            },
+        )
 
         return belief
 
@@ -459,8 +486,9 @@ class BeliefSystem:
         belief.confidence = max(0.0, belief.confidence - 0.3)
         belief.last_updated = time.time()
 
-        self._record_update(belief_id, UpdateMethod.AGM_CONTRACTION,
-                          belief.confidence + 0.3, belief.confidence, {})
+        self._record_update(
+            belief_id, UpdateMethod.AGM_CONTRACTION, belief.confidence + 0.3, belief.confidence, {}
+        )
 
         return belief
 
@@ -545,9 +573,7 @@ class BeliefSystem:
 
     # ── Conditional probabilities ──────────────────────────────────────
 
-    def set_conditional(
-        self, cause: str, effect: str, probability: float
-    ) -> None:
+    def set_conditional(self, cause: str, effect: str, probability: float) -> None:
         """Set a conditional probability P(effect | cause).
 
         Args:
@@ -608,23 +634,20 @@ class BeliefSystem:
         details: dict[str, Any],
     ) -> None:
         """Record an update in the history."""
-        self._update_history.append({
-            "belief_id": belief_id,
-            "method": method.name,
-            "old_confidence": old_confidence,
-            "new_confidence": new_confidence,
-            "timestamp": time.time(),
-            "details": details,
-        })
+        self._update_history.append(
+            {
+                "belief_id": belief_id,
+                "method": method.name,
+                "old_confidence": old_confidence,
+                "new_confidence": new_confidence,
+                "timestamp": time.time(),
+                "details": details,
+            }
+        )
 
-    def get_update_history(
-        self, belief_id: str, limit: int = 50
-    ) -> list[dict[str, Any]]:
+    def get_update_history(self, belief_id: str, limit: int = 50) -> list[dict[str, Any]]:
         """Get update history for a specific belief."""
-        return [
-            entry for entry in self._update_history
-            if entry["belief_id"] == belief_id
-        ][-limit:]
+        return [entry for entry in self._update_history if entry["belief_id"] == belief_id][-limit:]
 
     # ── Statistics ─────────────────────────────────────────────────────
 

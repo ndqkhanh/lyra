@@ -56,12 +56,9 @@ def _list_skills(roots: list[Path]) -> SkillManageResult:
     try:
         skills = load_skills(roots)
     except SkillLoaderError as exc:
-        return SkillManageResult(
-            op="list", ok=False, detail=f"load failed: {exc}", items=[]
-        )
+        return SkillManageResult(op="list", ok=False, detail=f"load failed: {exc}", items=[])
     items = [
-        {"id": s.id, "name": s.name, "description": s.description, "path": s.path}
-        for s in skills
+        {"id": s.id, "name": s.name, "description": s.description, "path": s.path} for s in skills
     ]
     return SkillManageResult(
         op="list",
@@ -71,7 +68,9 @@ def _list_skills(roots: list[Path]) -> SkillManageResult:
     )
 
 
-def _create_skill(root: Path, *, skill_id: str, name: str, description: str, body: str) -> SkillManageResult:
+def _create_skill(
+    root: Path, *, skill_id: str, name: str, description: str, body: str
+) -> SkillManageResult:
     skill_dir = root / skill_id
     skill_dir.mkdir(parents=True, exist_ok=True)
     skill_md = skill_dir / "SKILL.md"

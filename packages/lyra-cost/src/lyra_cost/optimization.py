@@ -36,11 +36,13 @@ _DEFAULT_TIER_MAP: dict[str, ModelTier] = {
 
 # Task types that require TIER_3 reasoning — these should never be degraded below
 # the minimum specified tier, even under budget pressure, except at the hard cap.
-_HARD_TASK_TYPES: frozenset[str] = frozenset({
-    "architecture",
-    "hard_reasoning",
-    "planning",
-})
+_HARD_TASK_TYPES: frozenset[str] = frozenset(
+    {
+        "architecture",
+        "hard_reasoning",
+        "planning",
+    }
+)
 
 
 class NoTierAvailableError(Exception):
@@ -158,13 +160,14 @@ class CostOptimizer:
 
         # 5. Estimate cost
         input_price, output_price = TIER_PRICING[degraded_tier]
-        cost_estimate = (
-            (estimated_input_tokens / 1_000_000) * input_price
-            + (estimated_output_tokens / 1_000_000) * output_price
-        )
+        cost_estimate = (estimated_input_tokens / 1_000_000) * input_price + (
+            estimated_output_tokens / 1_000_000
+        ) * output_price
 
         # 6. Check affordability — skip for hard tasks at their enforced floor
-        if not hard_task_floor_used and not self._degrader.can_afford(degraded_tier, total_session_spend):
+        if not hard_task_floor_used and not self._degrader.can_afford(
+            degraded_tier, total_session_spend
+        ):
             raise NoTierAvailableError(
                 f"No affordable tier for '{task_type}' at spend ${total_session_spend:.2f}"
             )

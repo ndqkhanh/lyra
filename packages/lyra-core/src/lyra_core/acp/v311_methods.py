@@ -27,6 +27,7 @@ Bind into an existing :class:`AcpServer` with::
     server = AcpServer()
     register_v311_methods(server)
 """
+
 from __future__ import annotations
 
 from collections.abc import Mapping
@@ -38,7 +39,9 @@ from .server import AcpError, AcpServer
 # ---- registry --------------------------------------------------------
 
 
-def register_v311_methods(server: AcpServer, *, team_dir_root: Path | str | None = None) -> AcpServer:
+def register_v311_methods(
+    server: AcpServer, *, team_dir_root: Path | str | None = None
+) -> AcpServer:
     """Register every v3.11 method on the supplied ``server``.
 
     The ``team_dir_root`` controls where ``LeadSession`` instances
@@ -77,6 +80,7 @@ class _V311State:
 
     def _marketplace(self):
         from lyra_core.bundle import MarketplaceRegistry
+
         if self._marketplace_registry is None:
             self._marketplace_registry = MarketplaceRegistry()
         return self._marketplace_registry
@@ -94,6 +98,7 @@ class _V311State:
         # Default executor — deterministic stub. Real-LLM wiring is
         # the CLI's job; ACP clients can override by setting their
         # own executor before the first spawn (post-MVP feature).
+
         def _default_exec(spec, body):
             return f"<{spec.name}>{body[:80]}</{spec.name}>"
 
@@ -228,9 +233,7 @@ class _V311State:
         fingerprint = str(params.get("fingerprint") or "").strip()
         secret_hex = str(params.get("secret_hex") or "").strip()
         if not marketplace or not fingerprint or not secret_hex:
-            raise AcpError(
-                -32602, "trust requires marketplace + fingerprint + secret_hex"
-            )
+            raise AcpError(-32602, "trust requires marketplace + fingerprint + secret_hex")
         try:
             secret = bytes.fromhex(secret_hex)
         except ValueError as e:
@@ -253,8 +256,10 @@ class _V311State:
         try:
             fetched = fetcher.fetch(
                 FetchSpec(
-                    url=url, expected_signature=signature,
-                    marketplace=marketplace, expected_hash=expected_hash,
+                    url=url,
+                    expected_signature=signature,
+                    marketplace=marketplace,
+                    expected_hash=expected_hash,
                 )
             )
         except Exception as e:
@@ -314,13 +319,9 @@ class _V311State:
 
         path = self._require_path(params, "path")
         target = str(params.get("target", "")).strip()
-        target_dir = params.get("target_dir") or str(
-            Path.home() / f".lyra-export-{target}"
-        )
+        target_dir = params.get("target_dir") or str(Path.home() / f".lyra-export-{target}")
         if target not in list_exporters():
-            raise AcpError(
-                -32602, f"unknown target {target!r}; one of {sorted(list_exporters())}"
-            )
+            raise AcpError(-32602, f"unknown target {target!r}; one of {sorted(list_exporters())}")
         try:
             b = SourceBundle.load(path)
             exporter = resolve_exporter(target)  # type: ignore[arg-type]
@@ -388,15 +389,17 @@ class _V311State:
         idx = global_index()
         rows = []
         for c in idx.all():
-            rows.append({
-                "domain": c.domain,
-                "verifier_count": c.verifier_count,
-                "verifier_ids": list(c.verifier_ids),
-                "eval_count": c.eval_count,
-                "pass_rate_30d": c.pass_rate_30d,
-                "coverage_score": c.coverage_score,
-                "admit_recommendation": c.admit_recommendation,
-            })
+            rows.append(
+                {
+                    "domain": c.domain,
+                    "verifier_count": c.verifier_count,
+                    "verifier_ids": list(c.verifier_ids),
+                    "eval_count": c.eval_count,
+                    "pass_rate_30d": c.pass_rate_30d,
+                    "coverage_score": c.coverage_score,
+                    "admit_recommendation": c.admit_recommendation,
+                }
+            )
         return {"domains": rows}
 
     # ---- helpers ------------------------------------------------

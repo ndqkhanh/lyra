@@ -48,6 +48,7 @@ memory keep working without manual migration. The dedicated
 discipline survives as a regular skill (see
 ``docs/howto/debug-mode.md``) that the user invokes manually.
 """
+
 from __future__ import annotations
 
 import json
@@ -66,6 +67,15 @@ from .config_store import apply_to_session as _apply_config_to_session
 from .cron import CronCommandError, handle_cron
 from .status_source import StatusSource as _StatusSource
 from .status_source import TaskItem
+from .v311_commands import (
+    cmd_coverage as _cmd_coverage_v311,
+)
+from .v311_commands import (
+    cmd_scaling as _cmd_scaling_v311,
+)
+from .v311_commands import (
+    cmd_team as _cmd_team_v311,
+)
 
 _VALID_MODES: tuple[str, ...] = (
     "edit_automatically",
@@ -81,20 +91,20 @@ _VALID_MODES: tuple[str, ...] = (
 # so the REPL doesn't read like database column names.
 _MODE_DISPLAY: dict[str, str] = {
     "edit_automatically": "agent",
-    "plan_mode":          "plan",
-    "ask_before_edits":   "ask",
-    "auto_mode":          "auto",
+    "plan_mode": "plan",
+    "ask_before_edits": "ask",
+    "auto_mode": "auto",
 }
 
 
 def display_mode(mode: str) -> str:
     """Return the short display label for *mode*.
 
-    Falls through to the input when the mode isn't in the canonical
-    table, so unknown / future / test-only modes still print rather
-    than vanishing.
+    Falls through to the input when the mode isn't in the canonical table, so unknown / future /
+    test-only modes still print rather than vanishing.
     """
     return _MODE_DISPLAY.get(mode, mode)
+
 
 # Legacy mode names from every prior taxonomy → canonical v3.6 mode.
 # We honour them everywhere the user can supply a string (CLI flags,
@@ -159,12 +169,13 @@ _SHIPPED_SKILL_PACKS: tuple[tuple[str, str], ...] = (
     ("safety", "policy guards, secret triage, dangerous-command detection"),
 )
 
+
 def _valid_themes() -> tuple[str, ...]:
     """Lazy-resolve from the skin engine so a YAML user-skin auto-extends /theme.
 
-    Resolved at command time (not import time) so the user can drop a new
-    skin into ``~/.lyra/skins/`` and it shows up on the next
-    ``/theme`` invocation without restarting the REPL.
+    Resolved at command time (not import time) so the user can drop a new skin into
+    ``~/.lyra/skins/`` and it shows up on the next ``/theme`` invocation without restarting the
+    REPL.
     """
     from . import themes as _t  # local: keep cold-start cheap
 
@@ -258,10 +269,9 @@ SlashHandler = Callable[["InteractiveSession", str], CommandResult]
 def _default_session_id() -> str:
     """Time-ordered, sortable session id (no extra deps).
 
-    Mirrors claw-code's "session-YYYYMMDDHHMMSS-XXXX" shape so the
-    on-disk listing of ``~/.lyra/sessions/`` sorts chronologically
-    without metadata. The 4-char suffix is process-id (mod 10000) so
-    two parallel REPLs in the same second still get distinct ids.
+    Mirrors claw-code's "session-YYYYMMDDHHMMSS-XXXX" shape so the on-disk listing of
+    ``~/.lyra/sessions/`` sorts chronologically without metadata. The 4-char suffix is process-id
+    (mod 10000) so two parallel REPLs in the same second still get distinct ids.
     """
     import datetime as _dt
     import os as _os
@@ -666,11 +676,11 @@ class InteractiveSession:
     def _sync_active_provider(self) -> None:
         """Sync active_provider from LYRA_ACTIVE_PROVIDER env var.
 
-        Called during __post_init__ and whenever the provider changes.
-        This ensures the session knows which provider is active for
-        single-provider model routing.
+        Called during __post_init__ and whenever the provider changes. This ensures the session
+        knows which provider is active for single-provider model routing.
         """
         import os
+
         self.active_provider = os.environ.get("LYRA_ACTIVE_PROVIDER")
 
     def route_model_for_task(self, prompt: str) -> str | None:
@@ -695,6 +705,7 @@ class InteractiveSession:
 
         try:
             from lyra_cli.llm_router import route_model_for_task
+
             return route_model_for_task(prompt, self.active_provider)
         except Exception:
             # If routing fails, return None and let caller use default
@@ -769,19 +780,15 @@ class InteractiveSession:
             return self._dispatch_plain(rendered)
 
         return CommandResult(
-            output=(
-                f"unknown command /{name}. "
-                f"Type /help for the full list."
-            ),
+            output=(f"unknown command /{name}. " f"Type /help for the full list."),
             renderable=_out.bad_command_renderable(name),
         )
 
     def _lookup_user_command(self, name: str):
         """Resolve ``name`` against ``.lyra/commands/*.md`` (Phase I).
 
-        Lazily populates :attr:`_user_commands` on first miss so cold
-        starts pay nothing. Reload via :meth:`reload_user_commands`
-        (e.g. after the user edits a markdown file mid-session).
+        Lazily populates :attr:`_user_commands` on first miss so cold starts pay nothing. Reload via
+        :meth:`reload_user_commands` (e.g. after the user edits a markdown file mid-session).
         """
         if self._user_commands is None:
             self._user_commands = self._load_user_commands_for_repo()
@@ -866,9 +873,8 @@ class InteractiveSession:
     def _dispatch_shell(self, cmd: str) -> CommandResult:
         """Execute a shell command directly (``!cmd`` prefix).
 
-        Runs via ``subprocess`` with a 30s timeout. Captures stdout and
-        stderr, returns both in a dim-styled panel so shell output is
-        visually distinct from LLM replies.
+        Runs via ``subprocess`` with a 30s timeout. Captures stdout and stderr, returns both in a
+        dim-styled panel so shell output is visually distinct from LLM replies.
         """
         if not cmd:
             return CommandResult(output="usage: !<command>")
@@ -910,11 +916,12 @@ class InteractiveSession:
     def _execute_skill(self, skill_name: str, args: str) -> CommandResult:
         """Execute a skill by name with given arguments.
 
-        This method is called by dynamically-registered skill command handlers.
-        It loads the skill definition and executes it according to its execution type.
+        This method is called by dynamically-registered skill command handlers. It loads the skill
+        definition and executes it according to its execution type.
         """
         if self._skill_manager is None:
             from lyra_cli.cli.skill_manager import SkillManager
+
             self._skill_manager = SkillManager()
 
         skill = self._skill_manager.get_skill(skill_name)
@@ -937,9 +944,7 @@ class InteractiveSession:
 
             prompt_path = skill_dir / prompt_file
             if not prompt_path.exists():
-                return CommandResult(
-                    output=f"Skill prompt file not found: {prompt_path}"
-                )
+                return CommandResult(output=f"Skill prompt file not found: {prompt_path}")
 
             try:
                 prompt_template = prompt_path.read_text(encoding="utf-8")
@@ -962,6 +967,7 @@ class InteractiveSession:
 
             try:
                 import subprocess
+
                 result = subprocess.run(
                     command,
                     shell=True,
@@ -970,7 +976,9 @@ class InteractiveSession:
                     timeout=30,
                 )
                 output = result.stdout if result.returncode == 0 else result.stderr
-                return CommandResult(output=output or f"Command completed with exit code {result.returncode}")
+                return CommandResult(
+                    output=output or f"Command completed with exit code {result.returncode}"
+                )
             except Exception as e:
                 return CommandResult(output=f"Error executing skill command: {e}")
 
@@ -1021,14 +1029,12 @@ class InteractiveSession:
     def redo_one(self) -> _TurnSnapshot | None:
         """Re-apply the most recent ``/rewind``.
 
-        Symmetric counterpart to :meth:`rewind_one`. Pops the top of
-        ``_redo_log`` (the snapshot that ``/rewind`` last popped),
-        appends it back onto ``_turns_log``, advances ``self.turn``
-        past it, and re-persists the JSONL line so ``/resume`` lands
-        on the post-redo state.
+        Symmetric counterpart to :meth:`rewind_one`. Pops the top of ``_redo_log`` (the snapshot
+        that ``/rewind`` last popped), appends it back onto ``_turns_log``, advances ``self.turn``
+        past it, and re-persists the JSONL line so ``/resume`` lands on the post-redo state.
 
-        Returns ``None`` when there is nothing to redo (either the
-        stack is empty or it was drained by a fresh plain-text turn).
+        Returns ``None`` when there is nothing to redo (either the stack is empty or it was drained
+        by a fresh plain-text turn).
         """
         if not self._redo_log:
             return None
@@ -1075,10 +1081,10 @@ class InteractiveSession:
         return None if d is None else d / "turns.jsonl"
 
     def _persist_turn(self, snap: _TurnSnapshot) -> None:
-        """Append one JSONL line for *snap*. No-op when persistence is off.
+        """Append one JSONL line for *snap*.
 
-        Persistence failures must never break the live session — we
-        log nothing and swallow the exception. The on-disk file is a
+        No-op when persistence is off.         Persistence failures must never break the live
+        session — we         log nothing and swallow the exception. The on-disk file is a
         recovery aid, not a hard dependency.
         """
         path = self._turns_log_path()
@@ -1100,9 +1106,7 @@ class InteractiveSession:
 
                     meta_payload = {
                         "session_id": self.session_id,
-                        "created_at": _dt.datetime.now().isoformat(
-                            timespec="seconds"
-                        ),
+                        "created_at": _dt.datetime.now().isoformat(timespec="seconds"),
                     }
                     meta_path.write_text(
                         _json.dumps(meta_payload, indent=2),
@@ -1238,17 +1242,14 @@ class InteractiveSession:
     def _truncate_persisted_log_by_one(self) -> None:
         """Drop the trailing turn (and any chat extension) after :meth:`rewind_one`.
 
-        Uses the same atomic temp-file + rename dance as
-        :class:`SessionsStore` so a crash mid-rewind can never leave a
-        partially truncated turns.jsonl.
+        Uses the same atomic temp-file + rename dance as :class:`SessionsStore` so a crash mid-
+        rewind can never leave a partially truncated turns.jsonl.
 
-        v2.3.0: handles the new mixed-record format where each
-        plain-text turn may be followed by zero or more
-        ``{"kind": "chat"}`` lines persisting the LLM exchange. We
-        peel off all trailing ``"chat"`` records first, then the
-        terminating turn snapshot, so the file stays in lockstep
-        with ``self._turns_log``. Older single-record sessions still
-        truncate exactly one line, matching the pre-v2.3.0 behaviour.
+        v2.3.0: handles the new mixed-record format where each plain-text turn may be followed by
+        zero or more ``{"kind": "chat"}`` lines persisting the LLM exchange. We peel off all
+        trailing ``"chat"`` records first, then the terminating turn snapshot, so the file stays in
+        lockstep with ``self._turns_log``. Older single-record sessions still truncate exactly one
+        line, matching the pre-v2.3.0 behaviour.
         """
         path = self._turns_log_path()
         if path is None or not path.is_file():
@@ -1292,16 +1293,13 @@ class InteractiveSession:
     ) -> InteractiveSession | None:
         """Re-build a session from its on-disk ``turns.jsonl``.
 
-        Returns ``None`` when the directory or log is missing — callers
-        surface a friendly "no such session" message rather than a
-        traceback. State is restored to the *last recorded* turn (i.e.
-        ``mode``, ``turn``, ``pending_task``, ``cost_usd``,
-        ``tokens_used`` of the most recent line) so the user picks up
-        exactly where they left off.
+        Returns ``None`` when the directory or log is missing — callers surface a friendly "no such
+        session" message rather than a traceback. State is restored to the *last recorded* turn
+        (i.e. ``mode``, ``turn``, ``pending_task``, ``cost_usd``, ``tokens_used`` of the most recent
+        line) so the user picks up exactly where they left off.
 
-        The ``InteractiveSession`` returned has persistence already
-        enabled (``sessions_root`` and ``session_id`` set), so any
-        further dispatch keeps appending to the same JSONL.
+        The ``InteractiveSession`` returned has persistence already enabled (``sessions_root`` and
+        ``session_id`` set), so any further dispatch keeps appending to the same JSONL.
         """
         from .sessions_store import _validate_session_id  # local: keep cold-start cheap
 
@@ -1338,6 +1336,7 @@ class InteractiveSession:
                 # when the on-disk record carries it. Old (<= v3.1)
                 # lines just omit the keys, so ``.get`` returns ``None``
                 # and the snapshot keeps the dataclass defaults.
+
                 def _maybe_int(v: Any) -> int | None:
                     return int(v) if isinstance(v, (int, float)) else None
 
@@ -1407,9 +1406,7 @@ class InteractiveSession:
                     if hasattr(_Msg, "assistant"):
                         rebuilt.append(_Msg.assistant(assistant_text))
                     else:
-                        rebuilt.append(
-                            _Msg(role="assistant", content=assistant_text)
-                        )
+                        rebuilt.append(_Msg(role="assistant", content=assistant_text))
                 s._chat_history = rebuilt
             except Exception:
                 # ``lyra_harness_core`` should always be importable; we keep
@@ -1429,15 +1426,13 @@ class InteractiveSession:
     ) -> InteractiveSession:
         """Boot a session honouring the user's persisted ``/config`` keys.
 
-        ``config_path`` defaults to ``None`` — callers that want the
-        canonical ``~/.lyra/config.yaml`` should compute and pass it
-        explicitly so this factory stays pure (no implicit env reads).
+        ``config_path`` defaults to ``None`` — callers that want the canonical
+        ``~/.lyra/config.yaml`` should compute and pass it explicitly so this factory stays pure (no
+        implicit env reads).
 
-        The known keys (``theme``, ``vim``, ``permission_mode``,
-        ``tdd_gate``, ``effort``, ``budget_cap_usd``, ``model``,
-        ``mode``) are applied after construction so explicit
-        ``overrides`` always win — letting the driver still pin the
-        repo / model from CLI flags.
+        The known keys (``theme``, ``vim``, ``permission_mode``, ``tdd_gate``, ``effort``,
+        ``budget_cap_usd``, ``model``, ``mode``) are applied after construction so explicit
+        ``overrides`` always win — letting the driver still pin the repo / model from CLI flags.
         """
         cfg = _ConfigT.load(config_path)
         session = cls(
@@ -1451,6 +1446,7 @@ class InteractiveSession:
         # keys are available immediately without a restart.
         try:
             from .key_store import KeyStore as _KeyStore
+
             _KeyStore().hydrate_env()
         except Exception:
             pass
@@ -1472,7 +1468,6 @@ class InteractiveSession:
           local endpoint reachable)
         * ``—`` — provider not configured
         """
-
         from lyra_core.providers.aliases import (
             DEFAULT_ALIASES,
             resolve_alias,
@@ -1487,21 +1482,21 @@ class InteractiveSession:
         # Display names + ordering. Local backends sit at the bottom so
         # the cloud catalog dominates the picker.
         provider_meta: list[tuple[str, str]] = [
-            ("anthropic",        "Anthropic Claude"),
-            ("openai",           "OpenAI GPT"),
+            ("anthropic", "Anthropic Claude"),
+            ("openai", "OpenAI GPT"),
             ("openai-reasoning", "OpenAI o-series (reasoning)"),
-            ("gemini",           "Google Gemini"),
-            ("deepseek",         "DeepSeek"),
-            ("xai",              "xAI Grok"),
-            ("dashscope",        "Alibaba Qwen / Moonshot Kimi"),
-            ("groq",             "Groq (Llama hosted)"),
-            ("cerebras",         "Cerebras"),
-            ("mistral",          "Mistral"),
-            ("openrouter",       "OpenRouter (meta)"),
-            ("vllm",             "vLLM (local)"),
-            ("lmstudio",         "LM Studio (local)"),
-            ("ollama",           "Ollama (local)"),
-            ("mock",             "mock (offline)"),
+            ("gemini", "Google Gemini"),
+            ("deepseek", "DeepSeek"),
+            ("xai", "xAI Grok"),
+            ("dashscope", "Alibaba Qwen / Moonshot Kimi"),
+            ("groq", "Groq (Llama hosted)"),
+            ("cerebras", "Cerebras"),
+            ("mistral", "Mistral"),
+            ("openrouter", "OpenRouter (meta)"),
+            ("vllm", "vLLM (local)"),
+            ("lmstudio", "LM Studio (local)"),
+            ("ollama", "Ollama (local)"),
+            ("mock", "mock (offline)"),
         ]
 
         # Group every canonical slug from the alias registry by provider.
@@ -1557,6 +1552,7 @@ class InteractiveSession:
             if prov == "ollama":
                 try:
                     from lyra_cli.providers.ollama import ollama_reachable
+
                     return ollama_reachable()
                 except Exception:
                     return False
@@ -1592,9 +1588,7 @@ class InteractiveSession:
             # so the picker still shows a stable handle the user can
             # type into ``/model``.
             env_tail = f"  ({env_name})" if env_name else f"  ({provider})"
-            header = (
-                f"\n{chevron} {status}  {display_name:<32}{env_tail}"
-            )
+            header = f"\n{chevron} {status}  {display_name:<32}{env_tail}"
             lines.append(header)
 
             if not slugs:
@@ -1615,10 +1609,7 @@ class InteractiveSession:
 
         lines.append("")
         lines.append("─" * 72)
-        lines.append(
-            " ●=current   ✓=configured   —=needs key   "
-            "▶=active provider"
-        )
+        lines.append(" ●=current   ✓=configured   —=needs key   " "▶=active provider")
         return "\n".join(lines)
 
     def _cmd_models(self, rest: str) -> str:
@@ -1671,10 +1662,7 @@ class InteractiveSession:
             return "/diff: working tree clean - no changes since HEAD"
 
         if len(body) > 20_000:
-            body = (
-                body[:20_000]
-                + "\n...\n(truncated; run `git diff` in shell for full output)"
-            )
+            body = body[:20_000] + "\n...\n(truncated; run `git diff` in shell for full output)"
         return f"{stat}\n{body}" if stat else body
 
     # ---- v1.7.5: /blame, /trace, /self (Wave-C Task 4) ----------------
@@ -1682,18 +1670,15 @@ class InteractiveSession:
     def _cmd_blame_text(self, rest: str) -> str:
         """Run ``git blame`` on *rest* (or fall back to a friendly message).
 
-        Skip-on-no-git mirrors :meth:`_cmd_diff_text` so the slash
-        always returns *something* even outside a git checkout. The
-        body is truncated at 20k chars for the same flood-protection
+        Skip-on-no-git mirrors :meth:`_cmd_diff_text` so the slash always returns *something* even
+        outside a git checkout. The body is truncated at 20k chars for the same flood-protection
         reason as ``/diff``.
         """
         import subprocess
 
         target = rest.strip() or "(unspecified)"
         if target == "(unspecified)":
-            return (
-                "/blame: pass a path, e.g. `/blame src/lyra/runtime/agent.py`."
-            )
+            return "/blame: pass a path, e.g. `/blame src/lyra/runtime/agent.py`."
 
         try:
             toplevel = subprocess.run(
@@ -1724,8 +1709,8 @@ class InteractiveSession:
     def _cmd_trace_text(self, rest: str) -> str:
         """Render the last N events from the global HIR ring buffer.
 
-        ``rest`` accepts ``--last=N`` to override the default of 25 so
-        the user can drill in further when investigating a cascade.
+        ``rest`` accepts ``--last=N`` to override the default of 25 so the user can drill in further
+        when investigating a cascade.
         """
         from lyra_core.hir import events as _ev
 
@@ -1749,9 +1734,8 @@ class InteractiveSession:
     def _cmd_self_text(self, _rest: str) -> str:
         """Render the live :class:`InteractiveSession` state as YAML-ish text.
 
-        We avoid PyYAML to keep the dep surface minimal. The history
-        is truncated to 5 most-recent entries (with a "+N more" tail)
-        so a long REPL doesn't make the slash unreadable.
+        We avoid PyYAML to keep the dep surface minimal. The history is truncated to 5 most-recent
+        entries (with a "+N more" tail) so a long REPL doesn't make the slash unreadable.
         """
         truncated_history = self.history[-5:]
         more_history = max(0, len(self.history) - len(truncated_history))
@@ -1787,14 +1771,12 @@ class InteractiveSession:
     def _cmd_map_text(self, rest: str) -> str:
         """Render an indented ASCII tree of every ``*.py`` under ``repo_root``.
 
-        ``rest`` accepts a single ``--max-depth=N`` flag (default 4) so
-        deep monorepos can be summarised without flooding the REPL.
-        Directories whose contents are clipped by the depth cap render
-        as ``…`` so the user knows there's more to drill into.
+        ``rest`` accepts a single ``--max-depth=N`` flag (default 4) so deep monorepos can be
+        summarised without flooding the REPL. Directories whose contents are clipped by the depth
+        cap render as ``…`` so the user knows there's more to drill into.
 
-        Stdlib-only by design — no graphviz / tree-sitter dep. The
-        Phase-F /map upgrade (true import-graph) supersedes this body
-        without changing the slash signature.
+        Stdlib-only by design — no graphviz / tree-sitter dep. The Phase-F /map upgrade (true
+        import-graph) supersedes this body without changing the slash signature.
         """
         max_depth = 4
         rest = (rest or "").strip()
@@ -1827,9 +1809,7 @@ class InteractiveSession:
             cursor.setdefault("__files__", set()).add(parts[-1])
 
         lines: list[str] = [f"/map: Repository map for {root}"]
-        self._render_tree_recursive(
-            tree, lines=lines, prefix="", depth=0, max_depth=max_depth
-        )
+        self._render_tree_recursive(tree, lines=lines, prefix="", depth=0, max_depth=max_depth)
         return "\n".join(lines)
 
     def _render_tree_recursive(
@@ -1843,9 +1823,8 @@ class InteractiveSession:
     ) -> None:
         """Walk *node* and append rendered tree lines.
 
-        Uses claw-code-style box-drawing characters (``├──`` / ``└──``)
-        with a depth gutter so the output reads cleanly in any terminal
-        font.
+        Uses claw-code-style box-drawing characters (``├──`` / ``└──``) with a depth gutter so the
+        output reads cleanly in any terminal font.
         """
         if depth > max_depth:
             return
@@ -2012,9 +1991,9 @@ _AUTO_MODE_SYSTEM_PROMPT = (
 
 _MODE_SYSTEM_PROMPTS: dict[str, str] = {
     "edit_automatically": _EDIT_AUTOMATICALLY_SYSTEM_PROMPT,
-    "ask_before_edits":   _ASK_BEFORE_EDITS_SYSTEM_PROMPT,
-    "plan_mode":          _PLAN_MODE_SYSTEM_PROMPT,
-    "auto_mode":          _AUTO_MODE_SYSTEM_PROMPT,
+    "ask_before_edits": _ASK_BEFORE_EDITS_SYSTEM_PROMPT,
+    "plan_mode": _PLAN_MODE_SYSTEM_PROMPT,
+    "auto_mode": _AUTO_MODE_SYSTEM_PROMPT,
 }
 
 # Rolling window for ``_chat_history``. 20 turns ≈ 40 messages, which
@@ -2045,11 +2024,10 @@ def _ensure_llm(session: InteractiveSession):
 
 
 def _ensure_lifecycle_bus(session: InteractiveSession) -> Any:
-    """Lazy-init the per-session :class:`LifecycleBus`. Idempotent.
+    """Lazy-init the per-session :class:`LifecycleBus`.
 
-    Returns ``None`` if ``lyra_core`` isn't importable (degraded mode):
-    callers must already tolerate ``None`` from
-    :func:`_emit_lifecycle`.
+    Idempotent.     Returns ``None`` if ``lyra_core`` isn't importable (degraded mode):     callers
+    must already tolerate ``None`` from     :func:`_emit_lifecycle`.
     """
     bus = getattr(session, "lifecycle_bus", None)
     if bus is not None:
@@ -2066,8 +2044,8 @@ def _ensure_lifecycle_bus(session: InteractiveSession) -> Any:
 def _lifecycle_event(name: str) -> Any:
     """Resolve a :class:`LifecycleEvent` constant by lowercase name.
 
-    Returns ``None`` when the import fails — :func:`_emit_lifecycle`
-    no-ops on ``None`` so this stays safe.
+    Returns ``None`` when the import fails — :func:`_emit_lifecycle` no-ops on ``None`` so this
+    stays safe.
     """
     try:
         from lyra_core.hooks.lifecycle import LifecycleEvent as _Event
@@ -2084,8 +2062,8 @@ def _emit_lifecycle(
     """Best-effort lifecycle emit.
 
     Plugins (Phase D.4) subscribe to the bus on REPL boot via
-    :func:`driver._wire_plugins_to_lifecycle`; emitting an event with
-    no subscribers is a no-op and free.
+    :func:`driver._wire_plugins_to_lifecycle`; emitting an event with no subscribers is a no-op and
+    free.
     """
     bus = _ensure_lifecycle_bus(session)
     if bus is None:
@@ -2136,7 +2114,8 @@ def _ensure_default_search_fn(session: InteractiveSession) -> Any:
         return None
 
     session._session_store = store  # type: ignore[attr-defined]
-    session.search_fn = lambda query, *, k=10: store.search_messages(query, k=k)  # type: ignore[attr-defined]
+    # type: ignore[attr-defined]
+    session.search_fn = lambda query, *, k=10: store.search_messages(query, k=k)
 
     try:
         _import_existing_turns_into_store(session, store)
@@ -2147,9 +2126,7 @@ def _ensure_default_search_fn(session: InteractiveSession) -> Any:
     return session.search_fn
 
 
-def _import_existing_turns_into_store(
-    session: InteractiveSession, store: Any
-) -> None:
+def _import_existing_turns_into_store(session: InteractiveSession, store: Any) -> None:
     """Backfill ``store`` with chat exchanges from existing ``turns.jsonl``.
 
     Walks ``sessions_root`` (when set) and the current session's log,
@@ -2169,8 +2146,11 @@ def _import_existing_turns_into_store(
             log = child / "turns.jsonl"
             if log.is_file():
                 candidates.append((child.name, log))
-    elif session._turns_log_path() is not None and session._turns_log_path().is_file():  # type: ignore[union-attr]
-        candidates.append((str(session.session_id), session._turns_log_path()))  # type: ignore[arg-type]
+    # type: ignore[union-attr]
+    elif session._turns_log_path() is not None and session._turns_log_path().is_file():
+        candidates.append(
+            (str(session.session_id), session._turns_log_path())
+        )  # type: ignore[arg-type]
 
     for sid, log in candidates:
         try:
@@ -2207,11 +2187,9 @@ def _index_exchange_in_store(
 ) -> None:
     """Live-index a freshly-completed exchange in the FTS5 store.
 
-    Called from :meth:`InteractiveSession._persist_chat_exchange` so
-    that ``/search`` finds the latest turn without forcing a REPL
-    restart. The call is best-effort: any failure (store missing,
-    SQLite locked, etc.) is silently dropped — the JSONL on disk is
-    still the authoritative log.
+    Called from :meth:`InteractiveSession._persist_chat_exchange` so that ``/search`` finds the
+    latest turn without forcing a REPL restart. The call is best-effort: any failure (store missing,
+    SQLite locked, etc.) is silently dropped — the JSONL on disk is still the authoritative log.
     """
     store = getattr(session, "_session_store", None)
     if store is None:
@@ -2235,16 +2213,13 @@ def _chat_with_llm(
 ) -> tuple[bool, str]:
     """Send ``line`` through the provider and return ``(ok, text)``.
 
-    On success ``ok=True`` and ``text`` is the assistant reply. On
-    failure ``ok=False`` and ``text`` is a single-line diagnostic safe
-    to show in :func:`output.chat_error_renderable`.
+    On success ``ok=True`` and ``text`` is the assistant reply. On failure ``ok=False`` and ``text``
+    is a single-line diagnostic safe to show in :func:`output.chat_error_renderable`.
 
-    The function never raises — callers always render *something* and
-    keep the REPL alive.
+    The function never raises — callers always render *something* and keep the REPL alive.
 
-    Phase D.3: emits :class:`LifecycleEvent` notifications around the
-    LLM call so plugins (Phase D.4) can observe and decorate turns
-    without monkey-patching the chat handler.
+    Phase D.3: emits :class:`LifecycleEvent` notifications around the LLM call so plugins (Phase
+    D.4) can observe and decorate turns without monkey-patching the chat handler.
     """
     try:
         from lyra_harness_core.messages import Message
@@ -2311,16 +2286,12 @@ def _chat_with_llm(
     # We detect actual augmentation by comparing lengths; that's cheap and
     # never wrong — an empty skill block doesn't add characters.
     _completed_phases: list[tuple[str, str]] = []
-    effective_system = _augment_system_prompt_with_skills(
-        session, system_prompt, line=line
-    )
+    effective_system = _augment_system_prompt_with_skills(session, system_prompt, line=line)
     if len(effective_system) > len(system_prompt):
         _completed_phases.append(("Skills loaded", "done"))
 
     _before_memory = effective_system
-    effective_system = _augment_system_prompt_with_memory(
-        session, effective_system, line
-    )
+    effective_system = _augment_system_prompt_with_memory(session, effective_system, line)
     if len(effective_system) > len(_before_memory):
         _completed_phases.append(("Memory loaded", "done"))
 
@@ -2329,6 +2300,7 @@ def _chat_with_llm(
     # Debug: Log message construction
     try:
         from ..debug_logger import log_info
+
         log_info(f"📝 Message construction | Total: {len(messages)} | History: {len(history)}")
         log_info(f"System prompt length: {len(effective_system)} chars")
         log_info(f"System prompt preview: {effective_system[:500]}...")
@@ -2361,13 +2333,11 @@ def _chat_with_llm(
     def _persist_with_metrics(text: str, *, branch: str) -> None:
         """Persist the chat exchange with per-turn metadata (best-effort).
 
-        Reads ``provider.last_usage`` for ``tokens_in / tokens_out``
-        (last hop's split; for tool-loop turns this is just the final
-        hop, which is fine because the *total* is captured by the
-        ``tokens_used`` delta we also store on the snapshot). The
-        cost delta and total-token delta come from session counters
-        which ``_bill_turn`` keeps current. Failures are swallowed —
-        the JSONL is best-effort observability, not a hard dependency.
+        Reads ``provider.last_usage`` for ``tokens_in / tokens_out`` (last hop's split; for tool-
+        loop turns this is just the final hop, which is fine because the *total* is captured by the
+        ``tokens_used`` delta we also store on the snapshot). The cost delta and total-token delta
+        come from session counters which ``_bill_turn`` keeps current. Failures are swallowed — the
+        JSONL is best-effort observability, not a hard dependency.
         """
         usage = getattr(provider, "last_usage", None) or {}
         tin = usage.get("prompt_tokens")
@@ -2393,15 +2363,9 @@ def _chat_with_llm(
         if session._turns_log:
             tail = session._turns_log[-1]
             if tail.line == line:
-                tail.tokens_in = (
-                    int(tin) if isinstance(tin, (int, float)) else tail.tokens_in
-                )
-                tail.tokens_out = (
-                    int(tout) if isinstance(tout, (int, float)) else tail.tokens_out
-                )
-                tail.cost_delta_usd = (
-                    cost_delta if cost_delta > 0 else tail.cost_delta_usd
-                )
+                tail.tokens_in = int(tin) if isinstance(tin, (int, float)) else tail.tokens_in
+                tail.tokens_out = int(tout) if isinstance(tout, (int, float)) else tail.tokens_out
+                tail.cost_delta_usd = cost_delta if cost_delta > 0 else tail.cost_delta_usd
                 tail.latency_ms = latency_ms
 
     # Tool-loop branch (v2.4.0, Phase B). Engaged when:
@@ -2519,7 +2483,9 @@ def _chat_with_llm(
     _bill_turn(session, provider)
 
     session._chat_history.append(Message.user(line))
-    session._chat_history.append(Message.assistant(text) if hasattr(Message, "assistant") else reply)
+    session._chat_history.append(
+        Message.assistant(text) if hasattr(Message, "assistant") else reply
+    )
     _persist_with_metrics(text, branch="generate")
     _emit_lifecycle(
         session,
@@ -2589,9 +2555,7 @@ def _augment_system_prompt_with_skills(
             return system_prompt
         return system_prompt.rstrip() + "\n\n" + block
 
-    block, activated_ids, reasons = _render_skill_block_live(
-        session=session, line=line
-    )
+    block, activated_ids, reasons = _render_skill_block_live(session=session, line=line)
     if activated_ids:
         sid = str(getattr(session, "session_id", None) or "lyra")
         recorder = getattr(session, "_skill_activation_recorder", None)
@@ -2652,11 +2616,9 @@ def _render_skill_block_live(
 ) -> tuple[str, list[str], dict[str, str]]:
     """Return ``(text, activated_ids, reasons)`` for the current turn.
 
-    Always recomputes — no caching — because the active-skills block
-    legitimately changes per-turn even if the advertised list is
-    stable. The cost is one walk of the skills directory, which is
-    cheap (dozens of files) and dominated by the LLM hop that
-    follows.
+    Always recomputes — no caching — because the active-skills block legitimately changes per-turn
+    even if the advertised list is stable. The cost is one walk of the skills directory, which is
+    cheap (dozens of files) and dominated by the LLM hop that follows.
     """
     try:
         from .skills_inject import render_skill_block_with_activations
@@ -2673,20 +2635,15 @@ def _render_skill_block_live(
     return result.text, list(result.activated_ids), dict(result.activation_reasons)
 
 
-def _cache_active_skill_allowlist(
-    session: InteractiveSession, activated_ids: list[str]
-) -> None:
+def _cache_active_skill_allowlist(session: InteractiveSession, activated_ids: list[str]) -> None:
     """Compute the union of ``allowed_tools`` across activated skills.
 
-    Stores the result on ``session._active_skill_tool_allowlist`` so
-    ``_approve`` can enforce per-skill tool restrictions without
-    re-walking the skills directory on every tool call.
+    Stores the result on ``session._active_skill_tool_allowlist`` so ``_approve`` can enforce per-
+    skill tool restrictions without re-walking the skills directory on every tool call.
 
-    When the allowlist is ``None`` (no activated skill declared
-    ``allowed_tools``) the approval flow does no extra checking.
-    An empty set means *at least one* skill declared restrictions
-    but none of its tools overlap — every tool call will be denied
-    until the active skill set changes.
+    When the allowlist is ``None`` (no activated skill declared ``allowed_tools``) the approval flow
+    does no extra checking. An empty set means *at least one* skill declared restrictions but none
+    of its tools overlap — every tool call will be denied until the active skill set changes.
     """
     if not activated_ids:
         session._active_skill_tool_allowlist = None  # type: ignore[attr-defined]
@@ -2746,9 +2703,8 @@ def _stdin_is_tty() -> bool:
 def _launch_skills_picker(session: InteractiveSession) -> CommandResult:
     """Run the full-screen picker and persist the result.
 
-    Falls back to a friendly error CommandResult if prompt_toolkit is
-    not available or the dialog implodes — the picker is a UX
-    convenience, not load-bearing infrastructure.
+    Falls back to a friendly error CommandResult if prompt_toolkit is not available or the dialog
+    implodes — the picker is a UX convenience, not load-bearing infrastructure.
     """
     try:
         from lyra_skills.state import SkillsState, load_state, save_state
@@ -2800,9 +2756,7 @@ def _print_skills_state(session: InteractiveSession) -> CommandResult:
         return CommandResult(output=f"skills state unavailable: {exc}")
 
     if state == SkillsState():
-        return CommandResult(
-            output="no skill overrides — every discovered skill is on by default."
-        )
+        return CommandResult(output="no skill overrides — every discovered skill is on by default.")
     lines = []
     if state.disabled:
         lines.append(f"disabled ({len(state.disabled)}):")
@@ -2818,9 +2772,8 @@ def _print_skills_state(session: InteractiveSession) -> CommandResult:
 def _launch_sessions_picker(sessions_root: Path) -> str | None:
     """Open the full-screen sessions picker and return the chosen id.
 
-    Returns ``None`` when the user cancels or the picker is otherwise
-    unavailable (no dialog module, no entries). The caller (``/resume``
-    or ``/sessions``) treats ``None`` as a clean cancel.
+    Returns ``None`` when the user cancels or the picker is otherwise unavailable (no dialog module,
+    no entries). The caller (``/resume`` or ``/sessions``) treats ``None`` as a clean cancel.
     """
     try:
         from .dialog_sessions import run_sessions_dialog
@@ -2906,8 +2859,7 @@ def _toggle_skill_id(
 ) -> CommandResult:
     """Programmatic equivalent of pressing Space on *skill_id* in the picker.
 
-    Refuses to disable locked skills (packaged packs) — same invariant
-    the picker enforces.
+    Refuses to disable locked skills (packaged packs) — same invariant the picker enforces.
     """
     try:
         from lyra_skills.state import SkillsState, load_state, save_state
@@ -3054,11 +3006,13 @@ def _should_run_chat_tools(session: InteractiveSession, provider: Any) -> bool:
             stdin_is_tty = False
             try:
                 import sys as _sys
+
                 stdin_is_tty = bool(_sys.stdin and _sys.stdin.isatty())
             except (ValueError, AttributeError):
                 stdin_is_tty = False
             if console is not None and stdin_is_tty:
                 from .ask_user_prompter import make_prompter
+
                 ask_prompter = make_prompter(console)
 
             session._chat_tool_registry = build_chat_tool_registry(
@@ -3067,9 +3021,7 @@ def _should_run_chat_tools(session: InteractiveSession, provider: Any) -> bool:
             session._chat_tool_registry_error = None
         except Exception as exc:
             session._chat_tool_registry = None
-            session._chat_tool_registry_error = (
-                f"{type(exc).__name__}: {exc}"
-            )
+            session._chat_tool_registry_error = f"{type(exc).__name__}: {exc}"
             console = getattr(session, "_console", None)
             if console is not None:
                 console.print(
@@ -3080,13 +3032,14 @@ def _should_run_chat_tools(session: InteractiveSession, provider: Any) -> bool:
                 )
             else:
                 import sys
+
                 print(
-                    f"[lyra] chat tools disabled: "
-                    f"{type(exc).__name__}: {exc}",
+                    f"[lyra] chat tools disabled: " f"{type(exc).__name__}: {exc}",
                     file=sys.stderr,
                 )
             if os.environ.get("LYRA_DEBUG"):
                 import traceback
+
                 traceback.print_exc()
         session._chat_tools_loaded = True
     return session._chat_tool_registry is not None
@@ -3294,9 +3247,7 @@ def _chat_with_tool_loop(
                     is_error=bool(event.is_error),
                 )
             else:
-                paint, full = paint_result(
-                    event.output, is_error=bool(event.is_error)
-                )
+                paint, full = paint_result(event.output, is_error=bool(event.is_error))
             session._last_tool_output = full
             _emit(paint)
             _emit_lifecycle(
@@ -3355,11 +3306,9 @@ def _chat_with_tool_loop(
 def _short_arg_preview(args: dict[str, Any], *, limit: int = 80) -> str:
     """Render a short, single-line preview of tool arguments for the card.
 
-    Uses the first identifiable value (``path`` / ``pattern`` /
-    ``query``) so the user sees *what the tool is acting on* rather
-    than a JSON blob. Falls back to a truncated ``json.dumps`` for
-    tools whose key set we don't recognise (third-party MCP tools,
-    primarily — Phase C).
+    Uses the first identifiable value (``path`` / ``pattern`` / ``query``) so the user sees *what
+    the tool is acting on* rather than a JSON blob. Falls back to a truncated ``json.dumps`` for
+    tools whose key set we don't recognise (third-party MCP tools, primarily — Phase C).
     """
     import json as _json
 
@@ -3388,7 +3337,9 @@ def _truncate(text: str, limit: int) -> str:
     return flat[: max(limit - 1, 1)] + "…"
 
 
-def _format_tool_output(output: str, *, max_lines: int = 3, max_line_width: int = 200) -> tuple[str, str]:
+def _format_tool_output(
+    output: str, *, max_lines: int = 3, max_line_width: int = 200
+) -> tuple[str, str]:
     """Claude-Code-style collapsed view of tool output.
 
     Returns ``(collapsed, full)``:
@@ -3418,17 +3369,14 @@ def _format_tool_output(output: str, *, max_lines: int = 3, max_line_width: int 
 def _bill_turn(session: InteractiveSession, provider: Any) -> None:
     """Update ``session.tokens_used`` / ``session.cost_usd`` from a turn.
 
-    Reads ``provider.last_usage`` (populated by every OpenAI-compat
-    ``generate`` via ``_record_usage``) and rolls the cost via
-    :func:`lyra_cli.interactive.budget.price_for`. Providers that
-    don't surface ``last_usage`` (Ollama, mocks) silently no-op so the
-    REPL keeps running.
+    Reads ``provider.last_usage`` (populated by every OpenAI-compat ``generate`` via
+    ``_record_usage``) and rolls the cost via :func:`lyra_cli.interactive.budget.price_for`.
+    Providers that don't surface ``last_usage`` (Ollama, mocks) silently no-op so the REPL keeps
+    running.
 
-    Also ticks ``session.budget_meter`` when one is wired so the
-    ``/budget`` slash and the alert chip light up correctly. The meter
-    holds its own accumulator; we update *both* so the simple
-    ``$session.cost_usd`` field stays the source of truth for the
-    bye-screen and ``/status``.
+    Also ticks ``session.budget_meter`` when one is wired so the ``/budget`` slash and the alert
+    chip light up correctly. The meter holds its own accumulator; we update *both* so the simple
+    ``$session.cost_usd`` field stays the source of truth for the bye-screen and ``/status``.
     """
     usage = getattr(provider, "last_usage", None) or {}
     if not usage:
@@ -3453,10 +3401,9 @@ def _bill_turn(session: InteractiveSession, provider: Any) -> None:
         or session.model
     )
     prompt_per, completion_per = price_for(str(model_id))
-    delta = (
-        (max(prompt, 0) / 1_000_000) * prompt_per
-        + (max(completion, 0) / 1_000_000) * completion_per
-    )
+    delta = (max(prompt, 0) / 1_000_000) * prompt_per + (
+        max(completion, 0) / 1_000_000
+    ) * completion_per
     if delta > 0:
         session.cost_usd += delta
         meter = getattr(session, "budget_meter", None)
@@ -3476,10 +3423,9 @@ def _bill_turn(session: InteractiveSession, provider: Any) -> None:
 def _mode_for_system_prompt(system_prompt: str) -> str:
     """Reverse-lookup the mode label that owns ``system_prompt``.
 
-    Used by the streaming path so the live panel can be coloured
-    correctly. Falls back to ``"agent"`` (the default colour) when
-    we can't tell — the panel will still render, just in the default
-    chat colour.
+    Used by the streaming path so the live panel can be coloured correctly. Falls back to
+    ``"agent"`` (the default colour) when we can't tell — the panel will still render, just in the
+    default chat colour.
     """
     for mode_name, prompt in _MODE_SYSTEM_PROMPTS.items():
         if prompt is system_prompt:
@@ -3523,16 +3469,18 @@ def _stream_chat_to_console(
     import time as _time_mod
 
     buffer: list[str] = []
-    display_buffer: list[str] = []   # fence-safe content, drives the live panel
+    display_buffer: list[str] = []  # fence-safe content, drives the live panel
     _tick = 0
     _t0 = _time_mod.monotonic()
 
     from .stream import MarkdownStreamState
+
     _mss = MarkdownStreamState()
 
     # Try to import the progress header; degrade gracefully if missing.
     try:
         from .live_progress import TurnProgressHeader
+
         _phases = list(completed_phases or [])
         _use_header = True
     except Exception:
@@ -3543,20 +3491,18 @@ def _stream_chat_to_console(
         return {
             "agent": "Thinking",
             "edit_automatically": "Thinking",
-            "plan":  "Planning",
+            "plan": "Planning",
             "plan_mode": "Planning",
-            "ask":   "Reasoning",
+            "ask": "Reasoning",
             "ask_before_edits": "Reasoning",
-            "auto":  "Thinking",
+            "auto": "Thinking",
             "auto_mode": "Thinking",
         }.get(m, "Thinking")
 
     _verb = _verb_for_mode(mode_for_panel)
 
     def render_panel() -> Any:
-        return _out.chat_renderable(
-            "".join(display_buffer), mode=mode_for_panel, streaming=False
-        )
+        return _out.chat_renderable("".join(display_buffer), mode=mode_for_panel, streaming=False)
 
     def render_with_header() -> Any:
         nonlocal _tick
@@ -3594,11 +3540,7 @@ def _stream_chat_to_console(
                 # Render whatever we've got plus a small error tail
                 # before tearing down Live, so the user sees the
                 # partial reply *and* knows it was interrupted.
-                err_line = (
-                    str(exc).strip().splitlines()[0]
-                    if str(exc)
-                    else exc.__class__.__name__
-                )
+                err_line = str(exc).strip().splitlines()[0] if str(exc) else exc.__class__.__name__
                 buffer.append(f"\n\n[stream interrupted: {err_line}]")
                 live.update(render_panel())
                 return False, err_line
@@ -3612,11 +3554,7 @@ def _stream_chat_to_console(
             # reply panel stays on screen after the turn completes.
             final_text = "".join(buffer)
             if final_text.strip():
-                live.update(
-                    _out.chat_renderable(
-                        final_text, mode=mode_for_panel, streaming=False
-                    )
-                )
+                live.update(_out.chat_renderable(final_text, mode=mode_for_panel, streaming=False))
     except Exception as exc:  # pragma: no cover — Live setup failure
         return False, f"streaming render failed: {exc}"
 
@@ -3664,6 +3602,7 @@ def _verify_goal(session: InteractiveSession) -> str | None:
     except Exception:
         return None
     from lyra_harness_core.messages import Message
+
     prompt = f"Does the following condition now hold: {session.pending_goal}?\nAnswer YES or NO."
     try:
         reply = provider.generate([Message.user(prompt)], max_tokens=32)
@@ -3745,9 +3684,8 @@ _RISKY_KEYWORDS: tuple[str, ...] = (
 def _classify_for_auto_mode(line: str) -> str:
     """Return the sub-mode name auto_mode should dispatch this turn to.
 
-    Pure function so it's directly unit-testable. The keyword tables
-    above are the contract — adding a token here is a UX change that
-    a test in ``test_modes_taxonomy_v36.py`` will cover.
+    Pure function so it's directly unit-testable. The keyword tables above are the contract — adding
+    a token here is a UX change that a test in ``test_modes_taxonomy_v36.py`` will cover.
     """
     text = line.lower().strip()
     if not text:
@@ -3805,15 +3743,15 @@ def _handle_auto_mode_text(session: InteractiveSession, line: str) -> CommandRes
 
 
 _handle_edit_automatically_text = _build_chat_handler("edit_automatically")
-_handle_ask_before_edits_text   = _build_chat_handler("ask_before_edits")
-_handle_plan_mode_text          = _build_chat_handler("plan_mode")
+_handle_ask_before_edits_text = _build_chat_handler("ask_before_edits")
+_handle_plan_mode_text = _build_chat_handler("plan_mode")
 
 
 _MODE_HANDLERS: dict[str, Callable[[InteractiveSession, str], CommandResult]] = {
     "edit_automatically": _handle_edit_automatically_text,
-    "ask_before_edits":   _handle_ask_before_edits_text,
-    "plan_mode":          _handle_plan_mode_text,
-    "auto_mode":          _handle_auto_mode_text,
+    "ask_before_edits": _handle_ask_before_edits_text,
+    "plan_mode": _handle_plan_mode_text,
+    "auto_mode": _handle_auto_mode_text,
 }
 
 
@@ -3877,9 +3815,8 @@ def _cmd_skip_onboarding(_session: InteractiveSession, _args: str) -> CommandRes
 def _cmd_palette(_session: InteractiveSession, args: str) -> CommandResult:
     """``/palette [query]`` — fuzzy-searchable command palette.
 
-    Substring + initials match against name, aliases, and description.
-    The plain-text output is what tests assert on; the Rich renderable
-    is what end-users see in the REPL footer.
+    Substring + initials match against name, aliases, and description. The plain-text output is what
+    tests assert on; the Rich renderable is what end-users see in the REPL footer.
     """
     from .command_palette import fuzzy_filter, render_palette
 
@@ -3918,9 +3855,7 @@ def _cmd_status(session: InteractiveSession, _args: str) -> CommandResult:
             f"theme:       {session.theme}",
             "budget:      "
             + (
-                f"${session.budget_cap_usd:.2f}"
-                if session.budget_cap_usd is not None
-                else "(none)"
+                f"${session.budget_cap_usd:.2f}" if session.budget_cap_usd is not None else "(none)"
             ),
         ]
     )
@@ -3945,10 +3880,16 @@ def _cmd_status(session: InteractiveSession, _args: str) -> CommandResult:
 
 
 _MODE_BLURBS: tuple[tuple[str, str], ...] = (
-    ("edit_automatically", "default; full-access execution. Edits land without per-write confirmation."),
-    ("ask_before_edits",   "full-access execution; pauses for confirmation before each write or destructive call."),
-    ("plan_mode",          "read-only collaborative design. Plain text proposes a plan."),
-    ("auto_mode",          "router; picks plan_mode / ask_before_edits / edit_automatically per turn."),
+    (
+        "edit_automatically",
+        "default; full-access execution. Edits land without per-write confirmation.",
+    ),
+    (
+        "ask_before_edits",
+        "full-access execution; pauses for confirmation before each write or destructive call.",
+    ),
+    ("plan_mode", "read-only collaborative design. Plain text proposes a plan."),
+    ("auto_mode", "router; picks plan_mode / ask_before_edits / edit_automatically per turn."),
 )
 
 
@@ -3974,10 +3915,7 @@ def _cmd_mode(session: InteractiveSession, args: str) -> CommandResult:
     raw = args.strip().lower()
     if not raw:
         return CommandResult(
-            output=(
-                f"current mode: {display_mode(session.mode)} "
-                f"({session.mode})"
-            )
+            output=(f"current mode: {display_mode(session.mode)} " f"({session.mode})")
         )
 
     if raw == "list":
@@ -4003,18 +3941,12 @@ def _cmd_mode(session: InteractiveSession, args: str) -> CommandResult:
 
     if target not in _VALID_MODES:
         return CommandResult(
-            output=(
-                f"unknown mode {raw!r}; "
-                f"valid: {', '.join(_VALID_MODES)}"
-            ),
+            output=(f"unknown mode {raw!r}; " f"valid: {', '.join(_VALID_MODES)}"),
             renderable=_out.bad_mode_renderable(raw, _VALID_MODES),
         )
 
     extra = ""
-    if (
-        target == "edit_automatically"
-        and getattr(session, "permission_mode", "normal") == "yolo"
-    ):
+    if target == "edit_automatically" and getattr(session, "permission_mode", "normal") == "yolo":
         # Switching into edit_automatically while permissions are off
         # is the single most footgun-y combination — call it out so
         # the user has one chance to back out before they run a
@@ -4047,10 +3979,7 @@ def _cmd_mode(session: InteractiveSession, args: str) -> CommandResult:
             posture_note = " [permission mode → strict]"
 
     return CommandResult(
-        output=(
-            f"mode: {display_mode(target)} ({target})"
-            f"{extra}{posture_note}"
-        ),
+        output=(f"mode: {display_mode(target)} ({target})" f"{extra}{posture_note}"),
         new_mode=target,
     )
 
@@ -4058,11 +3987,10 @@ def _cmd_mode(session: InteractiveSession, args: str) -> CommandResult:
 def _propagate_permission_mode(session: InteractiveSession, perm: str) -> None:
     """Sync permission_mode to the per-call substrate (stack + cache).
 
-    Mirrors the same propagation ``toggle_permission_mode`` does for
-    Alt+M so a ``/mode`` switch is fully consistent with a manual
-    permission-mode flip. Best-effort — any propagation error is
-    swallowed because failing here would crash the slash dispatcher
-    and the user would lose the REPL.
+    Mirrors the same propagation ``toggle_permission_mode`` does for Alt+M so a ``/mode`` switch is
+    fully consistent with a manual permission-mode flip. Best-effort — any propagation error is
+    swallowed because failing here would crash the slash dispatcher and the user would lose the
+    REPL.
     """
     stack = getattr(session, "permission_stack", None)
     if stack is not None and hasattr(stack, "set_mode"):
@@ -4166,12 +4094,11 @@ def _cmd_model(session: InteractiveSession, args: str) -> CommandResult:
 
 
 def _ensure_provider_credentials_or_prompt(provider: str) -> str:
-    """If *provider* has no key in env / credentials.json and we're in a
-    TTY, prompt the user to paste one and persist it via KeyStore.
+    """If *provider* has no key in env / credentials.json and we're in a TTY, prompt the user to
+    paste one and persist it via KeyStore.
 
-    Returns a one-line annotation to append to the ``/model`` output:
-    ``" [saved deepseek key]"`` on success, ``" [warning: …]"`` when
-    the user skipped, ``""`` when nothing needed to happen.
+    Returns a one-line annotation to append to the ``/model`` output: ``" [saved deepseek key]"`` on
+    success, ``" [warning: …]"`` when the user skipped, ``""`` when nothing needed to happen.
     """
     import sys
 
@@ -4205,19 +4132,15 @@ def _ensure_provider_credentials_or_prompt(provider: str) -> str:
         return f" [saved {provider} key → ~/.lyra/credentials.json]"
     if status == "kept":
         return f" [using stored {provider} key]"
-    return (
-        f" [skipped — set {env_name} or run "
-        f"`lyra connect {provider}` later]"
-    )
+    return f" [skipped — set {env_name} or run " f"`lyra connect {provider}` later]"
 
 
 def _cmd_models(session: InteractiveSession, args: str) -> CommandResult:
     """List known model providers + identifiers.
 
-    Live in v1.7.4: enumerates ``known_llm_names`` + the OpenAI-compatible
-    preset registry, marking configured/selected status. Falls back to the
-    legacy static catalog for the renderable so the rich UI still gets a
-    pre-formatted block to display alongside the live text.
+    Live in v1.7.4: enumerates ``known_llm_names`` + the OpenAI-compatible preset registry, marking
+    configured/selected status. Falls back to the legacy static catalog for the renderable so the
+    rich UI still gets a pre-formatted block to display alongside the live text.
     """
     plain = session._cmd_model_list(args)
     catalog: list[tuple[str, list[tuple[str, str]]]] = [
@@ -4307,14 +4230,12 @@ def _cmd_new(session: InteractiveSession, _args: str) -> CommandResult:
 def _cmd_history(session: InteractiveSession, args: str) -> CommandResult:
     """``/history`` — recent inputs (concise) or per-turn metadata.
 
-    v3.2.0 (Phase L): added ``--verbose`` so the user can see *which
-    model* answered each turn, how many tokens each side used, what
-    each turn cost, how long it took, and when it ran. The plain
-    ``/history`` output stays a numbered list of inputs (so muscle
-    memory and the existing tests aren't affected); ``--verbose``
-    walks ``session._turns_log`` (the in-memory snapshots that
-    :class:`_TurnSnapshot` v3.2 carries model/cost/latency on) so it
-    works without reading the on-disk JSONL.
+    v3.2.0 (Phase L): added ``--verbose`` so the user can see *which model* answered each turn, how
+    many tokens each side used, what each turn cost, how long it took, and when it ran. The plain
+    ``/history`` output stays a numbered list of inputs (so muscle memory and the existing tests
+    aren't affected); ``--verbose`` walks ``session._turns_log`` (the in-memory snapshots that
+    :class:`_TurnSnapshot` v3.2 carries model/cost/latency on) so it works without reading the on-
+    disk JSONL.
     """
     flags = args.strip().split() if args else []
     verbose = "--verbose" in flags or "-v" in flags
@@ -4326,9 +4247,7 @@ def _cmd_history(session: InteractiveSession, args: str) -> CommandResult:
         )
 
     if not verbose:
-        plain = "\n".join(
-            f"  {i+1:>3}  {entry}" for i, entry in enumerate(session.history)
-        )
+        plain = "\n".join(f"  {i+1:>3}  {entry}" for i, entry in enumerate(session.history))
         return CommandResult(
             output=plain or "(no history yet)",
             renderable=_out.history_renderable(list(session.history)),
@@ -4376,16 +4295,8 @@ def _cmd_history(session: InteractiveSession, args: str) -> CommandResult:
                     (getattr(snap, "model", None) or "—")[:18].ljust(18),
                     f"in={tin if tin is not None else '—'}",
                     f"out={tout if tout is not None else '—'}",
-                    (
-                        f"cost=${cd:.6f}"
-                        if isinstance(cd, (int, float))
-                        else "cost=—"
-                    ),
-                    (
-                        f"ms={ms:.0f}"
-                        if isinstance(ms, (int, float))
-                        else "ms=—"
-                    ),
+                    (f"cost=${cd:.6f}" if isinstance(cd, (int, float)) else "cost=—"),
+                    (f"ms={ms:.0f}" if isinstance(ms, (int, float)) else "ms=—"),
                     ts_str or "—",
                     (preview or "")[:60],
                 ]
@@ -4400,8 +4311,8 @@ def _cmd_history(session: InteractiveSession, args: str) -> CommandResult:
 def _parse_search_args(raw: str) -> tuple[str, int]:
     """Split ``/search`` args into ``(query, k)``.
 
-    Supports ``--k=<n>`` *before* or *after* the query, with ``k``
-    clamped to ``[1, 50]`` and defaulted to 5.
+    Supports ``--k=<n>`` *before* or *after* the query, with ``k`` clamped to ``[1, 50]`` and
+    defaulted to 5.
     """
     k = 5
     tokens: list[str] = []
@@ -4467,20 +4378,15 @@ def _cmd_search(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_approve(session: InteractiveSession, _args: str) -> CommandResult:
     """Approve the pending plan and hand off to the execution mode.
 
-    v3.6.0: ``agent`` was renamed to ``edit_automatically`` in the
-    permission-flavoured taxonomy, so an approved plan now lands the
-    user in ``edit_automatically`` — the single full-access execution
-    surface that applies edits without per-write confirmation. The
-    ``__post_init__`` logic also flips ``permission_mode`` to
-    ``normal`` to match (unless the user is in ``yolo``, which is
+    v3.6.0: ``agent`` was renamed to ``edit_automatically`` in the permission-flavoured taxonomy, so
+    an approved plan now lands the user in ``edit_automatically`` — the single full-access execution
+    surface that applies edits without per-write confirmation. The ``__post_init__`` logic also
+    flips ``permission_mode`` to ``normal`` to match (unless the user is in ``yolo``, which is
     preserved across mode changes).
     """
     if session.pending_task is None:
         return CommandResult(
-            output=(
-                "no plan to approve; type a task first "
-                "(e.g. 'add CSV export')."
-            )
+            output=("no plan to approve; type a task first " "(e.g. 'add CSV export').")
         )
     session.mode = "edit_automatically"
     # Mirror /mode's posture-alignment so the post-approve session
@@ -4490,10 +4396,7 @@ def _cmd_approve(session: InteractiveSession, _args: str) -> CommandResult:
         _propagate_permission_mode(session, "normal")
     task = session.pending_task
     return CommandResult(
-        output=(
-            f"approved plan for: {task}\n"
-            "switching to edit_automatically mode."
-        ),
+        output=(f"approved plan for: {task}\n" "switching to edit_automatically mode."),
         renderable=_out.approve_renderable(task),
         new_mode="edit_automatically",
     )
@@ -4533,10 +4436,7 @@ def _cmd_policy(session: InteractiveSession, _args: str) -> CommandResult:
     policy = session.repo_root / ".lyra" / "policy.yaml"
     if not policy.exists():
         return CommandResult(
-            output=(
-                f"policy.yaml not found at {policy}. "
-                f"Run `lyra init` to scaffold."
-            ),
+            output=(f"policy.yaml not found at {policy}. " f"Run `lyra init` to scaffold."),
             renderable=_out.missing_file_renderable(
                 "policy.yaml",
                 policy,
@@ -4570,9 +4470,7 @@ def _cmd_doctor(session: InteractiveSession, _args: str) -> CommandResult:
         (
             "policy.yaml",
             policy_ok,
-            str(policy_path)
-            if policy_ok
-            else "run `lyra init` to scaffold .lyra/policy.yaml",
+            str(policy_path) if policy_ok else "run `lyra init` to scaffold .lyra/policy.yaml",
         ),
     ]
     return CommandResult(
@@ -4592,13 +4490,11 @@ def _cmd_auth(_session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_evals(_session: InteractiveSession, args: str) -> CommandResult:
     """Run a bundled evals corpus inline (Phase E.1 promotion).
 
-    Pre-v2.7 this slash only printed a hint to run ``lyra evals`` in a
-    second shell. The hint was technically correct but useless inside
-    the REPL — by the time a user typed ``/evals`` they wanted the
-    answer, not a TODO. We now invoke the same machinery
-    (:func:`lyra_cli.commands.evals._run_bundled`) directly and render
-    the result as a one-line summary, with a ``--full`` flag for the
-    entire JSON dump.
+    Pre-v2.7 this slash only printed a hint to run ``lyra evals`` in a second shell. The hint was
+    technically correct but useless inside the REPL — by the time a user typed ``/evals`` they
+    wanted the answer, not a TODO. We now invoke the same machinery
+    (:func:`lyra_cli.commands.evals._run_bundled`) directly and render the result as a one-line
+    summary, with a ``--full`` flag for the entire JSON dump.
     """
     parts = args.strip().split()
     full_dump = False
@@ -4635,13 +4531,10 @@ def _cmd_evals(_session: InteractiveSession, args: str) -> CommandResult:
     tripped = bool(report.get("drift_gate_tripped", False))
     drift_tag = " [drift gate tripped]" if tripped else ""
     headline = (
-        f"/evals: corpus={corpus!r} → "
-        f"{pass_count}/{total} passed (rate={rate:.3f}){drift_tag}"
+        f"/evals: corpus={corpus!r} → " f"{pass_count}/{total} passed (rate={rate:.3f}){drift_tag}"
     )
     if full_dump:
-        return CommandResult(
-            output=headline + "\n" + json.dumps(report, indent=2, sort_keys=True)
-        )
+        return CommandResult(output=headline + "\n" + json.dumps(report, indent=2, sort_keys=True))
     return CommandResult(output=headline)
 
 
@@ -4684,12 +4577,10 @@ def _cmd_compact(session: InteractiveSession, _args: str) -> CommandResult:
                 f"[compact] no compactable history yet — token estimate "
                 f"halved {before_tokens:,} → {after_tokens:,}."
             ),
-            renderable=_out.compact_renderable(
-                before=before_tokens, after=after_tokens
-            ),
+            renderable=_out.compact_renderable(before=before_tokens, after=after_tokens),
         )
 
-    head = history_attr[: -KEEP_RECENT]
+    head = history_attr[:-KEEP_RECENT]
     tail = history_attr[-KEEP_RECENT:]
     summary_lines: list[str] = []
     for msg in head:
@@ -4704,17 +4595,12 @@ def _cmd_compact(session: InteractiveSession, _args: str) -> CommandResult:
 
     digest_message = {
         "role": "system",
-        "content": (
-            f"[/compact digest of {len(head)} earlier turn(s)]\n"
-            f"{summary_block}"
-        ),
+        "content": (f"[/compact digest of {len(head)} earlier turn(s)]\n" f"{summary_block}"),
     }
     session._chat_history = [digest_message, *tail]
 
     new_chars = sum(
-        len(str(m.get("content", "")))
-        for m in session._chat_history
-        if isinstance(m, dict)
+        len(str(m.get("content", ""))) for m in session._chat_history if isinstance(m, dict)
     )
     after_tokens = max(new_chars // 4, 1)
     session.tokens_used = after_tokens
@@ -4725,9 +4611,7 @@ def _cmd_compact(session: InteractiveSession, _args: str) -> CommandResult:
             f"token estimate {before_tokens:,} → {after_tokens:,} "
             f"(pruned {len(head)} older turn(s))."
         ),
-        renderable=_out.compact_renderable(
-            before=before_tokens, after=after_tokens
-        ),
+        renderable=_out.compact_renderable(before=before_tokens, after=after_tokens),
     )
 
 
@@ -4742,6 +4626,7 @@ def _cmd_context(session: InteractiveSession, _args: str) -> CommandResult:
     _verb = (_args or "").strip().split()[0].lower() if (_args or "").strip() else ""
     if _verb in _ce_verbs:
         from .context_engineering import cmd_context_extended
+
         return cmd_context_extended(session, _args)
     expanded = _verb == "all"
 
@@ -4778,12 +4663,12 @@ def _cmd_context(session: InteractiveSession, _args: str) -> CommandResult:
     overhead = max(budget - soul_tok - skills_tok - conv_tok - tool_tok - sys_tok, 0)
 
     buckets: list[tuple[str, int]] = [
-        ("system",       sys_tok),
-        ("SOUL.md",      soul_tok),
-        ("skills",       skills_tok),
+        ("system", sys_tok),
+        ("SOUL.md", soul_tok),
+        ("skills", skills_tok),
         ("conversation", conv_tok),
-        ("tool output",  tool_tok),
-        ("overhead",     overhead),
+        ("tool output", tool_tok),
+        ("overhead", overhead),
     ]
 
     plain_lines = ["Context breakdown:"]
@@ -4796,7 +4681,9 @@ def _cmd_context(session: InteractiveSession, _args: str) -> CommandResult:
     return CommandResult(
         output="\n".join(plain_lines),
         renderable=_out.context_renderable(
-            buckets=buckets, budget=budget, expanded=expanded,
+            buckets=buckets,
+            budget=budget,
+            expanded=expanded,
         ),
     )
 
@@ -4850,11 +4737,7 @@ def _cmd_cost(session: InteractiveSession, _args: str) -> CommandResult:
         f"turns:         {session.turn}",
     ]
     if session.budget_cap_usd is not None:
-        pct = (
-            session.cost_usd / session.budget_cap_usd * 100
-            if session.budget_cap_usd
-            else 0
-        )
+        pct = session.cost_usd / session.budget_cap_usd * 100 if session.budget_cap_usd else 0
         lines.append(f"budget cap:    ${session.budget_cap_usd:.2f}")
         lines.append(f"used:          {pct:.1f}% of budget")
     return CommandResult(
@@ -4872,12 +4755,9 @@ def _cmd_stats(session: InteractiveSession, _args: str) -> CommandResult:
     plain = "\n".join(
         [
             f"turns:            {session.turn}",
-            "slash commands:   "
-            + str(sum(1 for h in session.history if h.startswith("/"))),
-            "bash invocations: "
-            + str(sum(1 for h in session.history if h.startswith("!"))),
-            "file mentions:    "
-            + str(sum(1 for h in session.history if h.startswith("@"))),
+            "slash commands:   " + str(sum(1 for h in session.history if h.startswith("/"))),
+            "bash invocations: " + str(sum(1 for h in session.history if h.startswith("!"))),
+            "file mentions:    " + str(sum(1 for h in session.history if h.startswith("@"))),
             f"cost:             ${session.cost_usd:.4f}",
             f"tokens:           {session.tokens_used:,}",
             f"mode dwell:       {session.mode}",
@@ -4912,6 +4792,7 @@ def _cmd_diff(session: InteractiveSession, args: str) -> CommandResult:
     if not args_stripped or args_stripped in ("-i", "--interactive"):
         try:
             from .diff_viewer import run_diff_viewer
+
             run_diff_viewer(session, session.repo_root)
             return CommandResult(output="diff viewer closed.")
         except ImportError:
@@ -4987,10 +4868,9 @@ def _rewind_summarize(session: InteractiveSession) -> CommandResult:
 def _cmd_redo(session: InteractiveSession, _args: str) -> CommandResult:
     """Re-apply the most recent ``/rewind`` (Phase I, v3.0.0).
 
-    Mirrors opencode's ``unrevert`` and complements
-    :func:`_cmd_rewind`. The redo stack is drained automatically the
-    moment the user types a new plain-text turn, so this command
-    only succeeds against a clean rewind sequence.
+    Mirrors opencode's ``unrevert`` and complements :func:`_cmd_rewind`. The redo stack is drained
+    automatically the moment the user types a new plain-text turn, so this command only succeeds
+    against a clean rewind sequence.
     """
     snap = session.redo_one()
     if snap is None:
@@ -5015,11 +4895,9 @@ def _cmd_redo(session: InteractiveSession, _args: str) -> CommandResult:
 def _resolve_sessions_root(session: InteractiveSession) -> Path:
     """Return the live ``sessions_root`` or the conventional default.
 
-    The dispatch layer treats persistence as optional (Wave-B sessions
-    without ``sessions_root`` still work); the slash commands fall
-    back to ``<repo_root>/.lyra/sessions`` for read-only operations
-    (``/sessions``, ``/export``) so the user always has a stable
-    location to inspect.
+    The dispatch layer treats persistence as optional (Wave-B sessions without ``sessions_root``
+    still work); the slash commands fall back to ``<repo_root>/.lyra/sessions`` for read-only
+    operations (``/sessions``, ``/export``) so the user always has a stable location to inspect.
     """
     return session.sessions_root or (session.repo_root / ".lyra" / "sessions")
 
@@ -5027,8 +4905,8 @@ def _resolve_sessions_root(session: InteractiveSession) -> Path:
 def _list_session_ids(sessions_root: Path) -> list[tuple[str, float]]:
     """Return ``(session_id, mtime)`` for every session with a ``turns.jsonl``.
 
-    Empty list when ``sessions_root`` is missing — callers treat that
-    as "no sessions on disk" and surface a friendly message.
+    Empty list when ``sessions_root`` is missing — callers treat that as "no sessions on disk" and
+    surface a friendly message.
     """
     if not sessions_root.is_dir():
         return []
@@ -5115,9 +4993,7 @@ def _cmd_resume(session: InteractiveSession, args: str) -> CommandResult:
             return CommandResult(output="resume: cancelled.")
         raw = chosen  # fall through to the resolve+restore path below
 
-    target = _resolve_session_reference(
-        raw or "latest", sessions_root, fallback=session.session_id
-    )
+    target = _resolve_session_reference(raw or "latest", sessions_root, fallback=session.session_id)
     restored = InteractiveSession.resume_session(
         session_id=target,
         sessions_root=sessions_root,
@@ -5126,13 +5002,13 @@ def _cmd_resume(session: InteractiveSession, args: str) -> CommandResult:
     if restored is None:
         # Helpful follow-up: list what *is* on disk so the user can pick.
         try:
-            available = ", ".join(m.session_id for m in SessionsStore(sessions_root).list()) or "(none)"
+            available = (
+                ", ".join(m.session_id for m in SessionsStore(sessions_root).list()) or "(none)"
+            )
         except Exception:
             available = "(unavailable)"
         return CommandResult(
-            output=(
-                f"no saved session named {target!r}. available: {available}."
-            ),
+            output=(f"no saved session named {target!r}. available: {available}."),
             renderable=_out.resume_renderable(session.repo_root),
         )
     # Warp the live session's salient state to the restored snapshot
@@ -5208,10 +5084,9 @@ def _cmd_fork(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_sessions(session: InteractiveSession, _args: str) -> CommandResult:
     """``/sessions`` — list (or pick) saved sessions on disk.
 
-    On a TTY the bare command opens the same Claude-Code-style picker
-    ``/resume`` uses; arrow-key to a row and Enter to resume. On a
-    non-TTY (piped / CI) we keep the legacy plaintext list so scripts
-    that grep the output continue to work.
+    On a TTY the bare command opens the same Claude-Code-style picker ``/resume`` uses; arrow-key to
+    a row and Enter to resume. On a non-TTY (piped / CI) we keep the legacy plaintext list so
+    scripts that grep the output continue to work.
     """
     from .sessions_store import SessionsStore
 
@@ -5264,9 +5139,7 @@ def _cmd_rename(session: InteractiveSession, args: str) -> CommandResult:
         # dispatch (which creates the dir) picks it up via meta.json.
         session.session_name = name
         return CommandResult(
-            output=(
-                f"session display name set to {name!r} (will persist on next prompt)."
-            ),
+            output=(f"session display name set to {name!r} (will persist on next prompt)."),
             renderable=_out.rename_renderable(name),
         )
     session.session_name = name
@@ -5289,9 +5162,7 @@ def _cmd_commands(session: InteractiveSession, args: str) -> CommandResult:
     sub = args.strip().lower()
     if sub == "reload":
         n = session.reload_user_commands()
-        return CommandResult(
-            output=f"reloaded user commands: {n} entries from .lyra/commands/."
-        )
+        return CommandResult(output=f"reloaded user commands: {n} entries from .lyra/commands/.")
     cmds = session.list_user_commands()
     seen: set[str] = set()
     rows: list[str] = []
@@ -5304,8 +5175,7 @@ def _cmd_commands(session: InteractiveSession, args: str) -> CommandResult:
             alias_label = f"  (aliases: {', '.join('/' + a for a in cmd.aliases)})"
         hint = f" {cmd.args_hint}" if cmd.args_hint else ""
         rows.append(
-            f"  /{cmd.name}{hint} — {cmd.description}{alias_label}\n"
-            f"    source: {cmd.source}"
+            f"  /{cmd.name}{hint} — {cmd.description}{alias_label}\n" f"    source: {cmd.source}"
         )
     if not rows:
         return CommandResult(
@@ -5374,9 +5244,7 @@ def _cmd_init(session: InteractiveSession, args: str) -> CommandResult:
     lines.append(f"  state dir: {layout.state_dir} (ensured)")
     lines.append(f"  plans dir: {layout.plans_dir} (ensured)")
     lines.append(f"  sessions dir: {layout.sessions_dir} (ensured)")
-    lines.append(
-        "next: /policy review · /soul · /tdd-gate on (optional) · /toolsets"
-    )
+    lines.append("next: /policy review · /soul · /tdd-gate on (optional) · /toolsets")
 
     return CommandResult(output="\n".join(lines))
 
@@ -5384,10 +5252,9 @@ def _cmd_init(session: InteractiveSession, args: str) -> CommandResult:
 def _reflexion_memory_for(session: InteractiveSession):
     """Lazy accessor for the session's :class:`ReflectionMemory`.
 
-    Defers the import + JSON load until the first /reflect call so
-    the cold start path pays no Reflexion cost. The on-disk snapshot
-    lives at ``<repo>/.lyra/reflexion.json`` and round-trips via the
-    standard :class:`ReflectionMemory` constructor.
+    Defers the import + JSON load until the first /reflect call so the cold start path pays no
+    Reflexion cost. The on-disk snapshot lives at ``<repo>/.lyra/reflexion.json`` and round-trips
+    via the standard :class:`ReflectionMemory` constructor.
     """
     if session._reflexion_memory is None:
         from lyra_core.loop import ReflectionMemory
@@ -5428,9 +5295,7 @@ def _cmd_reflect(session: InteractiveSession, args: str) -> CommandResult:
         else:
             for r in recent:
                 tag_label = f" [{','.join(r.tags)}]" if r.tags else ""
-                rows.append(
-                    f"  • [{r.verdict}]{tag_label} {r.lesson[:160]}"
-                )
+                rows.append(f"  • [{r.verdict}]{tag_label} {r.lesson[:160]}")
         rows.append("")
         rows.append(
             "usage: /reflect on|off · /reflect add <verdict> :: <lesson> · "
@@ -5466,18 +5331,13 @@ def _cmd_reflect(session: InteractiveSession, args: str) -> CommandResult:
         if sub == "tag":
             tag_parts = body.split(None, 1)
             if len(tag_parts) < 2:
-                return CommandResult(
-                    output="usage: /reflect tag <t1,t2> <verdict> :: <lesson>"
-                )
+                return CommandResult(output="usage: /reflect tag <t1,t2> <verdict> :: <lesson>")
             tags = tuple(t for t in tag_parts[0].split(",") if t)
             body = tag_parts[1]
 
         if "::" not in body:
             return CommandResult(
-                output=(
-                    "usage: /reflect add <verdict> :: <lesson> "
-                    "(missing '::' separator)"
-                )
+                output=("usage: /reflect add <verdict> :: <lesson> " "(missing '::' separator)")
             )
         verdict_raw, lesson_raw = body.split("::", 1)
         verdict = verdict_raw.strip() or "fail"
@@ -5497,8 +5357,7 @@ def _cmd_reflect(session: InteractiveSession, args: str) -> CommandResult:
         return CommandResult(
             output=(
                 f"reflexion: added lesson #{len(memory)} "
-                f"[{verdict}]"
-                + (f" tags={','.join(tags)}" if tags else "")
+                f"[{verdict}]" + (f" tags={','.join(tags)}" if tags else "")
             )
         )
 
@@ -5546,14 +5405,9 @@ def _cmd_team(session: InteractiveSession, args: str) -> CommandResult:
             role = reg.get(name)
             if role is None:
                 continue
-            rows.append(
-                f"  • {role.name:<10} {role.title} "
-                f"[toolset: {role.toolset}]"
-            )
+            rows.append(f"  • {role.name:<10} {role.title} " f"[toolset: {role.toolset}]")
         rows.append("")
-        rows.append(
-            "usage: /team show <name> · /team plan · /team run <task>"
-        )
+        rows.append("usage: /team show <name> · /team plan · /team run <task>")
         return CommandResult(output="\n".join(rows))
 
     sub = parts[0].lower()
@@ -5627,10 +5481,7 @@ def _cmd_team(session: InteractiveSession, args: str) -> CommandResult:
         return CommandResult(output="\n".join(sections))
 
     return CommandResult(
-        output=(
-            "usage: /team · /team show <name> · /team plan · "
-            "/team run <task>"
-        )
+        output=("usage: /team · /team show <name> · /team plan · " "/team run <task>")
     )
 
 
@@ -5701,20 +5552,16 @@ def _cmd_toolsets(session: InteractiveSession, args: str) -> CommandResult:
         )
 
     return CommandResult(
-        output=(
-            "usage: /toolsets · /toolsets show <name> · /toolsets apply <name>"
-        )
+        output=("usage: /toolsets · /toolsets show <name> · /toolsets apply <name>")
     )
 
 
 def _session_available_tools(session: InteractiveSession) -> list[str]:
     """Best-effort enumeration of tool names visible to ``session``.
 
-    Looks at every common-shape attribute Lyra has used to expose
-    its tool catalogue across versions (``tool_registry``,
-    ``tools``, ``tool_kernel``). Falls back to the union of every
-    built-in toolset so ``/toolsets`` still produces a useful diff
-    even on bare sessions.
+    Looks at every common-shape attribute Lyra has used to expose its tool catalogue across versions
+    (``tool_registry``, ``tools``, ``tool_kernel``). Falls back to the union of every built-in
+    toolset so ``/toolsets`` still produces a useful diff even on bare sessions.
     """
     candidates: list[str] = []
     for attr in ("tool_registry", "tools", "tool_kernel"):
@@ -5751,9 +5598,7 @@ def _cmd_export(session: InteractiveSession, args: str) -> CommandResult:
 
     fmt = (args.strip() or "md").lower()
     sessions_root = _resolve_sessions_root(session)
-    out_path = (
-        session.repo_root / ".lyra" / "exports" / f"{session.session_id}.{fmt}"
-    )
+    out_path = session.repo_root / ".lyra" / "exports" / f"{session.session_id}.{fmt}"
     try:
         SessionsStore(sessions_root).export_to(
             session.session_id, path=out_path, fmt=fmt  # type: ignore[arg-type]
@@ -5780,17 +5625,14 @@ def _cmd_export(session: InteractiveSession, args: str) -> CommandResult:
 def _last_assistant_text(session: InteractiveSession) -> str | None:
     """Return the most recent assistant message body, or None if absent.
 
-    Reads the in-memory ``_chat_history`` rather than the on-disk JSONL
-    so ``/copy`` reflects what the user just saw on screen, even if the
-    sessions store hasn't flushed yet. Walks from the tail because the
-    history is append-only and the assistant turn we care about is
-    always the last one with role ``assistant``.
+    Reads the in-memory ``_chat_history`` rather than the on-disk JSONL so ``/copy`` reflects what
+    the user just saw on screen, even if the sessions store hasn't flushed yet. Walks from the tail
+    because the history is append-only and the assistant turn we care about is always the last one
+    with role ``assistant``.
     """
     history = list(getattr(session, "_chat_history", []) or [])
     for msg in reversed(history):
-        role = getattr(msg, "role", None) or (
-            isinstance(msg, dict) and msg.get("role")
-        )
+        role = getattr(msg, "role", None) or (isinstance(msg, dict) and msg.get("role"))
         if role != "assistant":
             continue
         content = getattr(msg, "content", None)
@@ -5808,9 +5650,7 @@ def _nth_assistant_text(session: InteractiveSession, n: int) -> str | None:
     history = list(getattr(session, "_chat_history", []) or [])
     seen = 0
     for msg in reversed(history):
-        role = getattr(msg, "role", None) or (
-            isinstance(msg, dict) and msg.get("role")
-        )
+        role = getattr(msg, "role", None) or (isinstance(msg, dict) and msg.get("role"))
         if role != "assistant":
             continue
         seen += 1
@@ -5855,10 +5695,14 @@ def _cmd_copy(session: InteractiveSession, args: str) -> CommandResult:
 
     text = _nth_assistant_text(session, n)
     if not text:
+        num_assistant = sum(
+            1 for m in session._chat_history
+            if getattr(m, 'role', None) == 'assistant'
+        )
         return CommandResult(
             output=(
                 f"/copy: no assistant reply at position {n} "
-                f"(history has {sum(1 for m in session._chat_history if getattr(m, 'role', None) == 'assistant')} replies)."
+                f"(history has {num_assistant} replies)."
             )
         )
 
@@ -5868,17 +5712,12 @@ def _cmd_copy(session: InteractiveSession, args: str) -> CommandResult:
             write_path.write_text(text, encoding="utf-8")
         except OSError as exc:
             return CommandResult(output=f"/copy: write failed: {exc}")
-        return CommandResult(
-            output=f"wrote {len(text)} chars to {write_path}"
-        )
+        return CommandResult(output=f"wrote {len(text)} chars to {write_path}")
 
     result = copy_to_clipboard(text)
     if result.ok:
         return CommandResult(
-            output=(
-                f"copied {len(text)} chars via {result.backend} "
-                f"(reply #{n})."
-            )
+            output=(f"copied {len(text)} chars via {result.backend} " f"(reply #{n}).")
         )
     return CommandResult(
         output=(
@@ -5891,12 +5730,11 @@ def _cmd_copy(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_usage(session: InteractiveSession, _args: str) -> CommandResult:
     """``/usage`` — consolidated cost + session-stats panel.
 
-    Mirrors Claude Code's v2.1.x consolidation: instead of asking users
-    to remember which of ``/cost``, ``/stats``, ``/insights`` shows the
-    field they want, ``/usage`` renders both cost (dollars / tokens /
-    budget cap) and session-shape metrics (turns, slash count, mode,
-    deep-think) in one panel. The two underlying commands stay around
-    so existing scripts and habits don't break.
+    Mirrors Claude Code's v2.1.x consolidation: instead of asking users to remember which of
+    ``/cost``, ``/stats``, ``/insights`` shows the field they want, ``/usage`` renders both cost
+    (dollars / tokens / budget cap) and session-shape metrics (turns, slash count, mode, deep-think)
+    in one panel. The two underlying commands stay around so existing scripts and habits don't
+    break.
     """
     cost_result = _cmd_cost(session, "")
     stats_result = _cmd_stats(session, "")
@@ -5920,11 +5758,10 @@ def _cmd_usage(session: InteractiveSession, _args: str) -> CommandResult:
 def _cmd_hooks(session: InteractiveSession, _args: str) -> CommandResult:
     """``/hooks`` — show every configured user hook + master enable flag.
 
-    Surfaces what :mod:`lyra_cli.policy_loader` would dispatch on the
-    next tool call. The output is intentionally read-only — editing
-    happens via ``$EDITOR <repo>/.lyra/settings.json`` because hook
-    bodies are shell commands and a Rich form would be a footgun for
-    arguments containing quotes / pipes.
+    Surfaces what :mod:`lyra_cli.policy_loader` would dispatch on the next tool call. The output is
+    intentionally read-only — editing happens via ``$EDITOR <repo>/.lyra/settings.json`` because
+    hook bodies are shell commands and a Rich form would be a footgun for arguments containing
+    quotes / pipes.
     """
     try:
         from ..policy_loader import load_hooks
@@ -5943,14 +5780,9 @@ def _cmd_hooks(session: InteractiveSession, _args: str) -> CommandResult:
         )
     lines = [f"hooks (master: {'on' if enabled else 'OFF'})"]
     for spec in specs:
-        lines.append(
-            f"  [{spec.event:<14}] {spec.matcher:<30} → {spec.command}"
-        )
+        lines.append(f"  [{spec.event:<14}] {spec.matcher:<30} → {spec.command}")
     if not enabled:
-        lines.append(
-            "  (hooks parsed but enable_hooks is false — set it to true "
-            "to activate)"
-        )
+        lines.append("  (hooks parsed but enable_hooks is false — set it to true " "to activate)")
     return CommandResult(output="\n".join(lines))
 
 
@@ -5987,25 +5819,18 @@ def _cmd_permissions(session: InteractiveSession, args: str) -> CommandResult:
         try:
             _subprocess.call([editor, str(settings_path)])
         except (FileNotFoundError, OSError) as exc:
-            return CommandResult(
-                output=f"/permissions edit: launch failed ({exc})"
-            )
+            return CommandResult(output=f"/permissions edit: launch failed ({exc})")
         # Drop cache so next tool call re-reads.
         if hasattr(session, "_policy_hooks_cache"):
             session._policy_hooks_cache = None
         return CommandResult(
-            output=(
-                f"opened {settings_path}; "
-                f"changes apply on the next tool call."
-            )
+            output=(f"opened {settings_path}; " f"changes apply on the next tool call.")
         )
 
     if sub == "reload":
         if hasattr(session, "_policy_hooks_cache"):
             session._policy_hooks_cache = None
-        return CommandResult(
-            output="permission cache dropped; settings re-read on next tool call."
-        )
+        return CommandResult(output="permission cache dropped; settings re-read on next tool call.")
 
     try:
         from ..policy_loader import load_policy
@@ -6024,7 +5849,7 @@ def _cmd_permissions(session: InteractiveSession, args: str) -> CommandResult:
     lines = ["declarative permission policy:"]
     for label, bucket in (
         ("DENY", policy.deny),
-        ("ASK",  policy.ask),
+        ("ASK", policy.ask),
         ("ALLOW", policy.allow),
     ):
         if not bucket:
@@ -6039,9 +5864,8 @@ def _cmd_permissions(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_plan(session: InteractiveSession, _args: str) -> CommandResult:
     """``/plan`` — one-shot enter plan mode.
 
-    Equivalent to ``/mode plan`` but matches Claude Code's muscle
-    memory. Idempotent: calling it from inside plan mode is a no-op
-    (no warning, just a confirmation toast).
+    Equivalent to ``/mode plan`` but matches Claude Code's muscle memory. Idempotent: calling it
+    from inside plan mode is a no-op (no warning, just a confirmation toast).
     """
     if session.mode == "plan_mode":
         return CommandResult(output="already in plan mode.", new_mode="plan_mode")
@@ -6055,17 +5879,14 @@ def _cmd_plan(session: InteractiveSession, _args: str) -> CommandResult:
 def _cmd_recap(session: InteractiveSession, _args: str) -> CommandResult:
     """``/recap`` — terse summary of recent activity for re-orientation.
 
-    Walks the last few user turns from ``_turns_log`` so a session
-    resumed after a break (or a user staring at a 200-line scrollback)
-    can re-anchor in two seconds. Doesn't make an LLM call — that
-    would be a recap with a token bill, defeating the point. For the
-    LLM-summary form, fall through to ``/compact`` instead.
+    Walks the last few user turns from ``_turns_log`` so a session resumed after a break (or a user
+    staring at a 200-line scrollback) can re-anchor in two seconds. Doesn't make an LLM call — that
+    would be a recap with a token bill, defeating the point. For the LLM-summary form, fall through
+    to ``/compact`` instead.
     """
     turns = list(getattr(session, "_turns_log", []) or [])[-5:]
     if not turns:
-        return CommandResult(
-            output="no turns logged yet — recap is empty."
-        )
+        return CommandResult(output="no turns logged yet — recap is empty.")
     lines = [
         f"recap · last {len(turns)} turn{'s' if len(turns) != 1 else ''}:",
     ]
@@ -6083,15 +5904,13 @@ def _cmd_recap(session: InteractiveSession, _args: str) -> CommandResult:
 def _cmd_add_dir(session: InteractiveSession, args: str) -> CommandResult:
     """``/add-dir <path>`` — widen the session's filesystem sandbox.
 
-    By default Lyra sandboxes file tools under ``session.repo_root``.
-    For multi-repo work (frontend + backend monorepos, library +
-    consumer pairs) the agent needs to see siblings. ``/add-dir``
-    appends to ``session.aux_repo_roots``; the chat-tools layer reads
-    that list and widens its allowed-path check accordingly.
+    By default Lyra sandboxes file tools under ``session.repo_root``. For multi-repo work (frontend
+    + backend monorepos, library + consumer pairs) the agent needs to see siblings. ``/add-dir``
+    appends to ``session.aux_repo_roots``; the chat-tools layer reads that list and widens its
+    allowed-path check accordingly.
 
-    Paths are resolved at registration time so ``cd`` in the user's
-    shell after they typed the command can't change which directory
-    is allowed.
+    Paths are resolved at registration time so ``cd`` in the user's shell after they typed the
+    command can't change which directory is allowed.
     """
     raw = args.strip()
     if not raw:
@@ -6099,8 +5918,7 @@ def _cmd_add_dir(session: InteractiveSession, args: str) -> CommandResult:
         if not existing:
             return CommandResult(
                 output=(
-                    "no auxiliary directories. Usage: "
-                    "/add-dir <path-to-extra-repo-or-folder>"
+                    "no auxiliary directories. Usage: " "/add-dir <path-to-extra-repo-or-folder>"
                 )
             )
         lines = [f"aux directories ({len(existing)}):"]
@@ -6110,14 +5928,10 @@ def _cmd_add_dir(session: InteractiveSession, args: str) -> CommandResult:
 
     target = Path(raw).expanduser().resolve()
     if not target.is_dir():
-        return CommandResult(
-            output=f"/add-dir: not a directory: {target}"
-        )
+        return CommandResult(output=f"/add-dir: not a directory: {target}")
     aux = list(getattr(session, "aux_repo_roots", []) or [])
     if target in aux:
-        return CommandResult(
-            output=f"/add-dir: {target} already registered."
-        )
+        return CommandResult(output=f"/add-dir: {target} already registered.")
     aux.append(target)
     session.aux_repo_roots = aux  # type: ignore[attr-defined]
     return CommandResult(
@@ -6152,10 +5966,9 @@ def _cmd_security_review(session: InteractiveSession, args: str) -> CommandResul
 def _cmd_feedback(session: InteractiveSession, args: str) -> CommandResult:
     """``/feedback`` (alias ``/bug``) — print the issue URL + recent context.
 
-    Doesn't open a browser (Lyra runs over SSH and headless terminals
-    routinely) — instead prints the URL the user can copy. When
-    ``--copy`` is passed, also drops the last 3 turns to the clipboard
-    so the bug report has reproducible context attached.
+    Doesn't open a browser (Lyra runs over SSH and headless terminals routinely) — instead prints
+    the URL the user can copy. When ``--copy`` is passed, also drops the last 3 turns to the
+    clipboard so the bug report has reproducible context attached.
     """
     body = args.strip().lower()
     url = "https://github.com/lyra-research/lyra/issues/new"
@@ -6168,13 +5981,9 @@ def _cmd_feedback(session: InteractiveSession, args: str) -> CommandResult:
         try:
             from .clipboard import copy_to_clipboard
         except Exception:
-            return CommandResult(
-                output="\n".join(lines + ["(clipboard module unavailable)"])
-            )
+            return CommandResult(output="\n".join(lines + ["(clipboard module unavailable)"]))
         recent = list(getattr(session, "_turns_log", []) or [])[-3:]
-        payload = "\n".join(
-            f"#{snap.turn} [{snap.mode}] {snap.line or ''}" for snap in recent
-        )
+        payload = "\n".join(f"#{snap.turn} [{snap.mode}] {snap.line or ''}" for snap in recent)
         result = copy_to_clipboard(payload or "(no recent turns)")
         if result.ok:
             lines.append(f"  copied {len(payload)} chars of recent context.")
@@ -6213,8 +6022,17 @@ def _cmd_statusline(session: InteractiveSession, args: str) -> CommandResult:
 
 
 _PROMPT_COLOURS = {
-    "red", "blue", "green", "yellow", "purple", "orange", "pink", "cyan",
-    "white", "magenta", "default",
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple",
+    "orange",
+    "pink",
+    "cyan",
+    "white",
+    "magenta",
+    "default",
 }
 
 
@@ -6234,10 +6052,7 @@ def _cmd_color(session: InteractiveSession, args: str) -> CommandResult:
         raw = choices[seed]
     if raw not in _PROMPT_COLOURS:
         return CommandResult(
-            output=(
-                f"unknown colour {raw!r}; "
-                f"valid: {', '.join(sorted(_PROMPT_COLOURS))}"
-            )
+            output=(f"unknown colour {raw!r}; " f"valid: {', '.join(sorted(_PROMPT_COLOURS))}")
         )
     if raw == "default":
         session.prompt_color = None  # type: ignore[attr-defined]
@@ -6249,11 +6064,9 @@ def _cmd_color(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_fast(session: InteractiveSession, args: str) -> CommandResult:
     """``/fast [on|off]`` — toggle the "fast Opus" posture.
 
-    Lyra doesn't ship a separate model variant for "fast"; we map it
-    to ``effort=low`` against the active provider, which is the
-    closest behavioural analogue (less internal deliberation, faster
-    end-to-end latency). Persists for the rest of the session unless
-    the user switches it off.
+    Lyra doesn't ship a separate model variant for "fast"; we map it to ``effort=low`` against the
+    active provider, which is the closest behavioural analogue (less internal deliberation, faster
+    end-to-end latency). Persists for the rest of the session unless the user switches it off.
     """
     raw = args.strip().lower()
     current = getattr(session, "fast_mode", False)
@@ -6269,17 +6082,15 @@ def _cmd_fast(session: InteractiveSession, args: str) -> CommandResult:
     if new:
         session.effort = "low"  # type: ignore[attr-defined]
     return CommandResult(
-        output=f"fast mode: {'on' if new else 'off'}"
-        + (" (effort=low)" if new else "")
+        output=f"fast mode: {'on' if new else 'off'}" + (" (effort=low)" if new else "")
     )
 
 
 def _cmd_focus(session: InteractiveSession, args: str) -> CommandResult:
     """``/focus [on|off]`` — hide side panels, show only the chat.
 
-    Toggles ``session.focus_mode``; the renderer reads this flag and
-    skips the bottom toolbar / task panel / status bar when it's on.
-    Useful for screenshots, demos, and screen recordings where the
+    Toggles ``session.focus_mode``; the renderer reads this flag and skips the bottom toolbar / task
+    panel / status bar when it's on. Useful for screenshots, demos, and screen recordings where the
     chrome is just visual noise.
     """
     raw = args.strip().lower()
@@ -6299,16 +6110,14 @@ def _cmd_focus(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_tui(session: InteractiveSession, args: str) -> CommandResult:
     """``/tui [classic|smooth|fullscreen|inline]`` — switch the rendering mode.
 
-    ``classic`` is the historical "redraw the whole panel each frame"
-    approach; ``smooth`` (default) uses prompt_toolkit's diff-based
-    repaint. Some terminals (older Windows consoles, certain SSH
-    multiplexers) flicker under smooth mode; ``classic`` trades a
-    little visual judder for guaranteed correct output.
+    ``classic`` is the historical "redraw the whole panel each frame" approach; ``smooth`` (default)
+    uses prompt_toolkit's diff-based repaint. Some terminals (older Windows consoles, certain SSH
+    multiplexers) flicker under smooth mode; ``classic`` trades a little visual judder for
+    guaranteed correct output.
 
-    ``fullscreen`` enables the alternate screen buffer so the REPL
-    occupies the full terminal without scrollback from prior commands
-    bleeding through. ``inline`` returns to the default inline mode.
-    Persists on the session field so the next ``/save`` captures it.
+    ``fullscreen`` enables the alternate screen buffer so the REPL occupies the full terminal
+    without scrollback from prior commands bleeding through. ``inline`` returns to the default
+    inline mode. Persists on the session field so the next ``/save`` captures it.
     """
     raw = args.strip().lower() or "toggle"
     valid = {"classic", "smooth", "fullscreen", "inline", "toggle"}
@@ -6319,6 +6128,7 @@ def _cmd_tui(session: InteractiveSession, args: str) -> CommandResult:
         session.tui_mode = "fullscreen"  # type: ignore[attr-defined]
         try:
             from ..terminal.terminal_manager import TerminalManager
+
             tm = TerminalManager()
             tm.enable_alternate_screen()
         except Exception:
@@ -6328,6 +6138,7 @@ def _cmd_tui(session: InteractiveSession, args: str) -> CommandResult:
         session.tui_mode = "inline"  # type: ignore[attr-defined]
         try:
             from ..terminal.terminal_manager import TerminalManager
+
             tm = TerminalManager()
             tm.disable_alternate_screen()
         except Exception:
@@ -6346,10 +6157,9 @@ def _cmd_tui(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_pr_comments(session: InteractiveSession, args: str) -> CommandResult:
     """``/pr-comments [PR-number-or-URL]`` — fetch GitHub PR comments.
 
-    Auto-detects the PR for the current branch when called bare, by
-    asking ``gh pr view --json number``. Prints the comment list as a
-    readable table rather than dumping the JSON payload — operators
-    skim ``author: body`` faster than ``[object]``.
+    Auto-detects the PR for the current branch when called bare, by asking ``gh pr view --json
+    number``. Prints the comment list as a readable table rather than dumping the JSON payload —
+    operators skim ``author: body`` faster than ``[object]``.
     """
     import subprocess as _sp
 
@@ -6362,7 +6172,9 @@ def _cmd_pr_comments(session: InteractiveSession, args: str) -> CommandResult:
         try:
             view = _sp.run(
                 ["gh", "pr", "view", "--json", "number"],
-                capture_output=True, text=True, timeout=10,
+                capture_output=True,
+                text=True,
+                timeout=10,
                 cwd=str(session.repo_root),
             )
             if view.returncode != 0:
@@ -6381,7 +6193,9 @@ def _cmd_pr_comments(session: InteractiveSession, args: str) -> CommandResult:
     try:
         proc = _sp.run(
             ["gh", "pr", "view", target, "--json", "comments,reviews"],
-            capture_output=True, text=True, timeout=15,
+            capture_output=True,
+            text=True,
+            timeout=15,
             cwd=str(session.repo_root),
         )
     except OSError as exc:
@@ -6394,22 +6208,19 @@ def _cmd_pr_comments(session: InteractiveSession, args: str) -> CommandResult:
     except json.JSONDecodeError:
         return CommandResult(output="/pr-comments: gh returned non-JSON output")
     lines = [f"PR #{target} comments:"]
-    for c in (data.get("comments") or []):
+    for c in data.get("comments") or []:
         body = (c.get("body") or "").strip().splitlines()
         first = body[0] if body else ""
         if len(first) > 120:
             first = first[:117] + "…"
         lines.append(f"  💬  {c.get('author', {}).get('login', '?')}: {first}")
-    for r in (data.get("reviews") or []):
+    for r in data.get("reviews") or []:
         body = (r.get("body") or "").strip().splitlines()
         first = body[0] if body else "(no body)"
         if len(first) > 120:
             first = first[:117] + "…"
         state = r.get("state", "?")
-        lines.append(
-            f"  🔍 [{state}] "
-            f"{r.get('author', {}).get('login', '?')}: {first}"
-        )
+        lines.append(f"  🔍 [{state}] " f"{r.get('author', {}).get('login', '?')}: {first}")
     if len(lines) == 1:
         lines.append("  (no comments or reviews)")
     return CommandResult(output="\n".join(lines))
@@ -6418,10 +6229,9 @@ def _cmd_pr_comments(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_schedule(session: InteractiveSession, args: str) -> CommandResult:
     """``/schedule`` — Claude-Code-style alias for the cron registry.
 
-    Lyra already has ``/cron`` for scheduled-prompt management; this
-    is the CC-canonical name that delegates to the same handler so
-    muscle-memory transfers without us re-implementing scheduling. Both
-    surfaces stay in sync because they call the same code path.
+    Lyra already has ``/cron`` for scheduled-prompt management; this is the CC-canonical name that
+    delegates to the same handler so muscle-memory transfers without us re-implementing scheduling.
+    Both surfaces stay in sync because they call the same code path.
     """
     return _cmd_cron(session, args)
 
@@ -6449,6 +6259,7 @@ def _cmd_sandbox(session: InteractiveSession, args: str) -> CommandResult:
     bl = getattr(session, "_bash_blocklist", None)
     if bl is None:
         from lyra_core.sandbox import BashBlocklist
+
         bl = BashBlocklist()
         session._bash_blocklist = bl  # type: ignore[attr-defined]
 
@@ -6469,12 +6280,12 @@ def _cmd_sandbox(session: InteractiveSession, args: str) -> CommandResult:
         if not cmds:
             return CommandResult(output="sandbox blocklist: (empty — all commands allowed)")
         return CommandResult(
-            output=f"sandbox blocklist ({len(cmds)} commands blocked):\n  "
-            + "\n  ".join(cmds)
+            output=f"sandbox blocklist ({len(cmds)} commands blocked):\n  " + "\n  ".join(cmds)
         )
     if raw == "status":
         strict = getattr(session, "sandbox_strict", False)
         from lyra_core.sandbox import sandbox_mode as _sandbox_mode
+
         mode = _sandbox_mode()
         return CommandResult(
             output=(
@@ -6497,19 +6308,15 @@ def _cmd_sandbox(session: InteractiveSession, args: str) -> CommandResult:
             output="/sandbox: expected on|off|toggle|blocklist|block|unblock|status"
         )
     session.sandbox_strict = new  # type: ignore[attr-defined]
-    return CommandResult(
-        output=f"sandbox: {'strict' if new else 'normal'}"
-    )
+    return CommandResult(output=f"sandbox: {'strict' if new else 'normal'}")
 
 
 def _cmd_plugin(_session: InteractiveSession, args: str) -> CommandResult:
     """``/plugin`` — point at the OMC plugin layer (Lyra's de-facto plugin host).
 
-    Lyra doesn't ship its own marketplace; the oh-my-claudecode
-    plugin system is what the community uses to share commands,
-    skills, and agents that ride alongside Lyra. Rather than build a
-    second marketplace surface, this command points users at the
-    canonical install / list / remove flow.
+    Lyra doesn't ship its own marketplace; the oh-my-claudecode plugin system is what the community
+    uses to share commands, skills, and agents that ride alongside Lyra. Rather than build a second
+    marketplace surface, this command points users at the canonical install / list / remove flow.
     """
     sub = args.strip().lower()
     base = (
@@ -6525,16 +6332,17 @@ def _cmd_plugin(_session: InteractiveSession, args: str) -> CommandResult:
     if sub in ("list", "ls"):
         # Defer to OMC's list command so we don't drift from upstream.
         import subprocess as _sp
+
         if not _which("omc"):
             return CommandResult(output=base + "\n\n(omc not installed)")
         try:
             proc = _sp.run(
                 ["omc", "plugin", "list"],
-                capture_output=True, text=True, timeout=10,
+                capture_output=True,
+                text=True,
+                timeout=10,
             )
-            return CommandResult(
-                output=(proc.stdout or "(no plugins)").strip()
-            )
+            return CommandResult(output=(proc.stdout or "(no plugins)").strip())
         except OSError as exc:
             return CommandResult(output=f"/plugin list: omc launch failed: {exc}")
     return CommandResult(output=base)
@@ -6543,9 +6351,8 @@ def _cmd_plugin(_session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_reload_plugins(session: InteractiveSession, _args: str) -> CommandResult:
     """``/reload-plugins`` — re-walk skill / hook / user-command discovery.
 
-    Reloads what discovery surfaces would naturally pick up on a
-    fresh REPL boot — without making the user actually restart. The
-    permission/hooks cache is dropped too because a plugin that ships
+    Reloads what discovery surfaces would naturally pick up on a fresh REPL boot — without making
+    the user actually restart. The permission/hooks cache is dropped too because a plugin that ships
     new hooks is otherwise invisible until the next cache miss.
     """
     reloaded = {"user_commands": 0, "policy_cache": False, "skills": 0}
@@ -6561,6 +6368,7 @@ def _cmd_reload_plugins(session: InteractiveSession, _args: str) -> CommandResul
     # call even when no skills are installed.
     try:
         from . import skills_inject as _si
+
         if hasattr(_si, "reload_skills"):
             reloaded["skills"] = _si.reload_skills(session.repo_root)
     except Exception:
@@ -6577,12 +6385,12 @@ def _cmd_reload_plugins(session: InteractiveSession, _args: str) -> CommandResul
 def _cmd_release_notes(_session: InteractiveSession, _args: str) -> CommandResult:
     """``/release-notes`` — print the bundled CHANGELOG (or fallback).
 
-    Walks up from this module to find the lyra-cli package root, then
-    prints ``CHANGELOG.md`` if it exists. Bundled-changelog beats
-    fetching from GitHub because Lyra runs offline and a network
+    Walks up from this module to find the lyra-cli package root, then prints ``CHANGELOG.md`` if it
+    exists. Bundled-changelog beats fetching from GitHub because Lyra runs offline and a network
     timeout on a release-notes command would feel ridiculous.
     """
     from importlib.resources import files
+
     try:
         package_root = Path(str(files("lyra_cli"))).parent.parent.parent
         changelog = package_root / "CHANGELOG.md"
@@ -6593,6 +6401,7 @@ def _cmd_release_notes(_session: InteractiveSession, _args: str) -> CommandResul
     except Exception:
         pass
     from lyra_cli import __version__
+
     return CommandResult(
         output=(
             f"lyra v{__version__}\n"
@@ -6605,10 +6414,9 @@ def _cmd_release_notes(_session: InteractiveSession, _args: str) -> CommandResul
 def _cmd_logout(session: InteractiveSession, _args: str) -> CommandResult:
     """``/logout`` — revoke every stored provider credential.
 
-    Walks ``auth.store.list_providers()`` and revokes each so the next
-    LLM call re-prompts. Doesn't kill the live session — the user can
-    still type ``/connect`` to re-auth without restarting; until then
-    any new dispatch lands on the credentials-prompt path.
+    Walks ``auth.store.list_providers()`` and revokes each so the next LLM call re-prompts. Doesn't
+    kill the live session — the user can still type ``/connect`` to re-auth without restarting;
+    until then any new dispatch lands on the credentials-prompt path.
     """
     try:
         from lyra_core.auth.store import list_providers, revoke
@@ -6676,17 +6484,23 @@ def _cmd_connect(session: InteractiveSession, args: str) -> CommandResult:
             return CommandResult(output="usage: /connect remove <provider>")
         provider = parts[1]
         removed = store.remove(provider)
-        msg = f"removed credentials for {provider}" if removed else f"no credentials found for {provider}"
+        msg = (
+            f"removed credentials for {provider}"
+            if removed
+            else f"no credentials found for {provider}"
+        )
         return CommandResult(output=msg)
 
     provider = parts[0]
 
     if len(parts) < 2:
         import sys
+
         if sys.stdin.isatty() and sys.stdout.isatty():
             # Interactive: run the full prompt → validate → save flow.
             try:
                 from .dialog_apikey import request_api_key
+
                 _key, status = request_api_key(provider, store=store)
             except Exception as exc:
                 return CommandResult(output=f"error: {exc}")
@@ -6720,15 +6534,15 @@ def _cmd_connect(session: InteractiveSession, args: str) -> CommandResult:
 def _which(cmd: str) -> bool:
     """Lightweight PATH lookup so tests and slash handlers stay tiny."""
     import shutil as _shutil
+
     return _shutil.which(cmd) is not None
 
 
 def _resolve_session_run_dir(session: InteractiveSession) -> Path:
     """Resolve the per-session run directory under LYRA_HOME.
 
-    Used by the v3.13 autonomy slashes (/directive, /autopilot) to
-    park per-session artefacts in a stable location that the
-    long-running autopilot supervisor can also reach.
+    Used by the v3.13 autonomy slashes (/directive, /autopilot) to park per-session artefacts in a
+    stable location that the long-running autopilot supervisor can also reach.
     """
     home = os.environ.get("LYRA_HOME") or str(Path.home() / ".lyra")
     sid = (session.session_id or "default").replace("/", "_")
@@ -6752,14 +6566,10 @@ def _cmd_directive(session: InteractiveSession, args: str) -> CommandResult:
     text = args.strip()
     if not text:
         if not archive.exists():
-            return CommandResult(
-                output=f"no archived directives under {archive}"
-            )
+            return CommandResult(output=f"no archived directives under {archive}")
         entries = sorted(archive.glob("*.md"))[-5:]
         if not entries:
-            return CommandResult(
-                output=f"no archived directives under {archive}"
-            )
+            return CommandResult(output=f"no archived directives under {archive}")
         lines = [f"recent directives ({len(entries)} shown):"]
         for p in entries:
             head = p.read_text(encoding="utf-8").splitlines()[:1]
@@ -6775,19 +6585,16 @@ def _cmd_directive(session: InteractiveSession, args: str) -> CommandResult:
     except OSError as exc:
         return CommandResult(output=f"/directive: write failed: {exc}")
 
-    return CommandResult(
-        output=f"directive appended to {live} ({len(text)} chars)"
-    )
+    return CommandResult(output=f"directive appended to {live} ({len(text)} chars)")
 
 
 def _cmd_contract(session: InteractiveSession, args: str) -> CommandResult:
     """``/contract [show|set <key>=<value>]`` — inspect or configure budget.
 
-    Surfaces the v3.12 AgentContract envelope for the active session.
-    Supported keys for ``set``: ``max_usd``, ``max_iterations``,
-    ``max_wall_clock_s``. The contract object is parked on the session
-    under ``_agent_contract`` and re-used by subsequent /contract calls
-    so successive sets compose. Anchor: ``lyra_core.contracts``.
+    Surfaces the v3.12 AgentContract envelope for the active session. Supported keys for ``set``:
+    ``max_usd``, ``max_iterations``, ``max_wall_clock_s``. The contract object is parked on the
+    session under ``_agent_contract`` and re-used by subsequent /contract calls so successive sets
+    compose. Anchor: ``lyra_core.contracts``.
     """
     raw = args.strip()
     sub = raw.split(maxsplit=1)
@@ -6798,7 +6605,7 @@ def _cmd_contract(session: InteractiveSession, args: str) -> CommandResult:
         from lyra_core.contracts import (
             AgentContract,
             BudgetEnvelope,
-            ContractState,
+            ContractState,  # noqa: F401
         )
     except ImportError as exc:
         return CommandResult(output=f"/contract: backend missing ({exc})")
@@ -6815,16 +6622,20 @@ def _cmd_contract(session: InteractiveSession, args: str) -> CommandResult:
             f"cumulative USD:   ${contract.cum_usd:.4f}",
             f"iterations:       {contract.iter_count}",
             f"budget.max_usd:   {b.max_usd if b.max_usd is not None else '(unbounded)'}",
-            f"budget.max_iter:  {b.max_iterations if b.max_iterations is not None else '(unbounded)'}",
-            f"budget.max_wall:  {b.max_wall_clock_s if b.max_wall_clock_s is not None else '(unbounded)'}s",
+(
+                f"budget.max_iter:  "
+                f"{b.max_iterations if b.max_iterations is not None else '(unbounded)'}"
+            ),
+(
+                f"budget.max_wall:  "
+                f"{b.max_wall_clock_s if b.max_wall_clock_s is not None else '(unbounded)'}s"
+            ),
         ]
         return CommandResult(output="\n".join(lines))
 
     if verb == "set":
         if "=" not in rest:
-            return CommandResult(
-                output="usage: /contract set <key>=<value>"
-            )
+            return CommandResult(output="usage: /contract set <key>=<value>")
         key, _, value = rest.partition("=")
         key = key.strip().lower()
         value = value.strip()
@@ -6836,11 +6647,13 @@ def _cmd_contract(session: InteractiveSession, args: str) -> CommandResult:
                 )
             )
         try:
-            num: Any = float(value) if key == "max_usd" else int(value) if key == "max_iterations" else float(value)
-        except ValueError:
-            return CommandResult(
-                output=f"/contract set: {value!r} is not a number"
+            num: Any = (
+                float(value)
+                if key == "max_usd"
+                else int(value) if key == "max_iterations" else float(value)
             )
+        except ValueError:
+            return CommandResult(output=f"/contract set: {value!r} is not a number")
         b = contract.budget
         # BudgetEnvelope is frozen — rebuild then re-wrap the contract.
         new_budget = BudgetEnvelope(
@@ -6853,17 +6666,14 @@ def _cmd_contract(session: InteractiveSession, args: str) -> CommandResult:
         contract.budget = new_budget
         return CommandResult(output=f"contract.budget.{key} = {num}")
 
-    return CommandResult(
-        output="usage: /contract [show|set <key>=<value>]"
-    )
+    return CommandResult(output="usage: /contract [show|set <key>=<value>]")
 
 
 def _cmd_autopilot(session: InteractiveSession, args: str) -> CommandResult:
     """``/autopilot [status|list]`` — read the LoopStore SQLite checkpoint.
 
-    Reports loops the v3.12 autopilot supervisor has registered, with
-    their state, cumulative USD, and iteration counts. Anchor:
-    ``lyra_core.loops.store.LoopStore``.
+    Reports loops the v3.12 autopilot supervisor has registered, with their state, cumulative USD,
+    and iteration counts. Anchor: ``lyra_core.loops.store.LoopStore``.
     """
     raw = args.strip().lower() or "status"
 
@@ -6875,9 +6685,7 @@ def _cmd_autopilot(session: InteractiveSession, args: str) -> CommandResult:
     home = os.environ.get("LYRA_HOME") or str(Path.home() / ".lyra")
     db_path = Path(home) / "loops" / "loops.sqlite"
     if not db_path.exists():
-        return CommandResult(
-            output=f"no autopilot store at {db_path} (no loops registered yet)"
-        )
+        return CommandResult(output=f"no autopilot store at {db_path} (no loops registered yet)")
 
     store = LoopStore(db_path=db_path)
     if raw == "status":
@@ -6886,23 +6694,17 @@ def _cmd_autopilot(session: InteractiveSession, args: str) -> CommandResult:
             return CommandResult(output="autopilot: no running loops")
         lines = [f"autopilot: {len(running)} running loop(s)"]
         for rec in running:
-            lines.append(
-                f"  {rec.id} [{rec.kind}] "
-                f"iter={rec.iter_count} ${rec.cum_usd:.4f}"
-            )
+            lines.append(f"  {rec.id} [{rec.kind}] " f"iter={rec.iter_count} ${rec.cum_usd:.4f}")
         return CommandResult(output="\n".join(lines))
 
     if raw == "list":
-        records = store.list_state(
-            "running", "pending_resume", "completed", "terminated"
-        )
+        records = store.list_state("running", "pending_resume", "completed", "terminated")
         if not records:
             return CommandResult(output="autopilot: store empty")
         lines = [f"autopilot: {len(records)} loop(s)"]
         for rec in records:
             lines.append(
-                f"  {rec.id} [{rec.kind}] {rec.state} "
-                f"iter={rec.iter_count} ${rec.cum_usd:.4f}"
+                f"  {rec.id} [{rec.kind}] {rec.state} " f"iter={rec.iter_count} ${rec.cum_usd:.4f}"
             )
         return CommandResult(output="\n".join(lines))
 
@@ -6924,14 +6726,10 @@ def _cmd_continue(session: InteractiveSession, args: str) -> CommandResult:
     already queued.
     """
     if getattr(session, "pending_task", None):
-        return CommandResult(
-            output="/continue: a pending task is already queued"
-        )
+        return CommandResult(output="/continue: a pending task is already queued")
     text = args.strip() or "continue"
     session.pending_task = text
-    return CommandResult(
-        output=f"queued: {text!r} (next turn will dispatch)"
-    )
+    return CommandResult(output=f"queued: {text!r} (next turn will dispatch)")
 
 
 # v3.13 P0-6 — imperative→declarative task sharpener.
@@ -6960,13 +6758,11 @@ _SHARPEN_META_PROMPT = (
 def _cmd_sharpen(session: InteractiveSession, args: str) -> CommandResult:
     """``/sharpen <task>`` — rewrite a task as verifiable goals.
 
-    Implements the Karpathy P4 / Claude-Code-context P0-6 primitive:
-    convert an imperative task ("Add input validation") into a
-    declarative one with tests-then-implementation as the path.
+    Implements the Karpathy P4 / Claude-Code-context P0-6 primitive: convert an imperative task
+    ("Add input validation") into a declarative one with tests-then-implementation as the path.
 
-    Queueing model matches :func:`_cmd_continue` — drops a one-shot
-    rewrite meta-prompt onto ``session.pending_task`` so the next
-    REPL tick dispatches it. Refuses to overwrite an existing
+    Queueing model matches :func:`_cmd_continue` — drops a one-shot rewrite meta-prompt onto
+    ``session.pending_task`` so the next REPL tick dispatches it. Refuses to overwrite an existing
     queued task.
     """
     text = args.strip()
@@ -6982,22 +6778,18 @@ def _cmd_sharpen(session: InteractiveSession, args: str) -> CommandResult:
     if getattr(session, "pending_task", None):
         return CommandResult(
             output=(
-                "/sharpen: a pending task is already queued; "
-                "clear it before queueing a rewrite"
+                "/sharpen: a pending task is already queued; " "clear it before queueing a rewrite"
             )
         )
     session.pending_task = _SHARPEN_META_PROMPT.format(task=text)
-    return CommandResult(
-        output=f"queued /sharpen rewrite for: {text!r}"
-    )
+    return CommandResult(output=f"queued /sharpen rewrite for: {text!r}")
 
 
 def _cmd_loop(session: InteractiveSession, args: str) -> CommandResult:
     """``/loop [interval] <prompt>`` — schedule a recurring prompt.
 
-    Thin wrapper around ``/cron`` with the Claude-Code calling shape
-    (``/loop 5m <prompt>``). Parses the leading interval token if it
-    matches the ``Nm|Nh|Nd`` pattern; otherwise treats the entire
+    Thin wrapper around ``/cron`` with the Claude-Code calling shape (``/loop 5m <prompt>``). Parses
+    the leading interval token if it matches the ``Nm|Nh|Nd`` pattern; otherwise treats the entire
     payload as the prompt and lets ``/cron`` apply its default cadence.
     """
     import re as _re  # local — keeps top-level imports unchanged
@@ -7016,11 +6808,10 @@ def _cmd_loop(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_debug(session: InteractiveSession, args: str) -> CommandResult:
     """``/debug [on|off|toggle]`` — toggle the session debug-log flag.
 
-    Lyra writes structured events through ``HIRLogger`` regardless;
-    ``/debug on`` flips the *verbose* level so background telemetry
-    surfaces in the REPL alongside chat output. ``/debug`` bare
-    toggles. Distinct from ``/trace`` (HIR file path / on-off) — this
-    is the user-facing rendering toggle.
+    Lyra writes structured events through ``HIRLogger`` regardless; ``/debug on`` flips the
+    *verbose* level so background telemetry surfaces in the REPL alongside chat output. ``/debug``
+    bare toggles. Distinct from ``/trace`` (HIR file path / on-off) — this is the user-facing
+    rendering toggle.
     """
     raw = args.strip().lower()
     current = getattr(session, "debug_mode", False)
@@ -7039,12 +6830,10 @@ def _cmd_debug(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_simplify(session: InteractiveSession, args: str) -> CommandResult:
     """``/simplify [focus]`` — fan-out 3 review agents (quality / reuse / efficiency).
 
-    Mirrors Claude Code's bundled skill: dispatch three subagents in
-    parallel to the same target, each looking through a different
-    lens, then collect the findings. Implemented as a single
-    ``/spawn`` invocation with a ``--type=review`` hint and a prompt
-    that asks the agent to internally fan out — keeps the surface
-    small while the underlying agent does the orchestration.
+    Mirrors Claude Code's bundled skill: dispatch three subagents in parallel to the same target,
+    each looking through a different lens, then collect the findings. Implemented as a single
+    ``/spawn`` invocation with a ``--type=review`` hint and a prompt that asks the agent to
+    internally fan out — keeps the surface small while the underlying agent does the orchestration.
     """
     focus = args.strip() or "general code-quality, reuse, and efficiency"
     framed = (
@@ -7063,9 +6852,8 @@ def _cmd_batch(_session: InteractiveSession, args: str) -> CommandResult:
     """``/batch <instruction>`` — point at the OMC fan-out pipeline.
 
     Implementing ``/batch`` natively requires worktree-aware tools
-    (``EnterWorktree``/``ExitWorktree``) that Lyra doesn't yet expose
-    to the agent, so this command points at the OMC equivalent that
-    already does the orchestration. When Lyra grows worktree tools
+    (``EnterWorktree``/``ExitWorktree``) that Lyra doesn't yet expose to the agent, so this command
+    points at the OMC equivalent that already does the orchestration. When Lyra grows worktree tools
     this can flip to a native handler.
     """
     payload = args.strip()
@@ -7073,13 +6861,13 @@ def _cmd_batch(_session: InteractiveSession, args: str) -> CommandResult:
         return CommandResult(
             output=(
                 "usage: /batch <instruction>. Lyra delegates fan-out to "
-                "oh-my-claudecode for now: omc batch \"<instruction>\""
+                'oh-my-claudecode for now: omc batch "<instruction>"'
             )
         )
     return CommandResult(
         output=(
             f"/batch is delegated to OMC until Lyra ships native worktree "
-            f"tools. Run: omc batch \"{payload}\""
+            f'tools. Run: omc batch "{payload}"'
         )
     )
 
@@ -7119,7 +6907,7 @@ def _cmd_research(session: InteractiveSession, args: str) -> CommandResult:
     verb = args.strip().split()[0] if args.strip() else ""
 
     if verb == "plan":
-        topic = args.strip()[len("plan"):].strip()
+        topic = args.strip()[len("plan") :].strip()
         if not topic:
             return CommandResult(output="usage: /research plan <topic>")
         sections = [
@@ -7143,9 +6931,7 @@ def _cmd_research(session: InteractiveSession, args: str) -> CommandResult:
         if not last_assistant:
             return CommandResult(output="/research verify: no assistant output to audit")
         sentences = [
-            s.strip()
-            for s in last_assistant.replace("\n", " ").split(".")
-            if len(s.strip()) > 20
+            s.strip() for s in last_assistant.replace("\n", " ").split(".") if len(s.strip()) > 20
         ]
         lines = ["/research verify — claim audit:", ""]
         for i, s in enumerate(sentences[:15], 1):
@@ -7155,7 +6941,7 @@ def _cmd_research(session: InteractiveSession, args: str) -> CommandResult:
         return CommandResult(output="\n".join(lines))
 
     elif verb == "falsify":
-        hypothesis = args.strip()[len("falsify"):].strip()
+        hypothesis = args.strip()[len("falsify") :].strip()
         if not hypothesis:
             return CommandResult(output="usage: /research falsify <hypothesis>")
         lines = [
@@ -7176,7 +6962,7 @@ def _cmd_research(session: InteractiveSession, args: str) -> CommandResult:
         return CommandResult(output="\n".join(lines))
 
     elif verb == "sandbox":
-        task = args.strip()[len("sandbox"):].strip()
+        task = args.strip()[len("sandbox") :].strip()
         if not task:
             return CommandResult(output="usage: /research sandbox <task>")
         import time as _time
@@ -7296,9 +7082,8 @@ def _cmd_claude_api(_session: InteractiveSession, _args: str) -> CommandResult:
     """``/claude-api`` — print the Anthropic API quick-reference card.
 
     Replaces the Claude Code skill (which loads SDK reference for
-    Python/TypeScript/Java/Go/Ruby/C#/PHP/cURL). Lyra ships with the
-    text inline rather than fetching it — same offline-first
-    rationale as ``/release-notes``.
+    Python/TypeScript/Java/Go/Ruby/C#/PHP/cURL). Lyra ships with the text inline rather than
+    fetching it — same offline-first rationale as ``/release-notes``.
     """
     body = (
         "Anthropic Claude API quick reference\n"
@@ -7322,20 +7107,12 @@ def _cmd_theme(session: InteractiveSession, args: str) -> CommandResult:
     target = args.strip().lower()
     if not target:
         return CommandResult(
-            output=(
-                f"current theme: {session.theme}. "
-                f"available: {', '.join(available)}."
-            ),
-            renderable=_out.theme_list_renderable(
-                current=session.theme, themes=available
-            ),
+            output=(f"current theme: {session.theme}. " f"available: {', '.join(available)}."),
+            renderable=_out.theme_list_renderable(current=session.theme, themes=available),
         )
     if target not in available:
         return CommandResult(
-            output=(
-                f"unknown theme {target!r}; "
-                f"valid: {', '.join(available)}."
-            ),
+            output=(f"unknown theme {target!r}; " f"valid: {', '.join(available)}."),
             renderable=_out.bad_theme_renderable(target, available),
         )
     session.theme = target
@@ -7373,11 +7150,7 @@ def _cmd_vim(session: InteractiveSession, args: str) -> CommandResult:
     elif target == "":
         session.vim_mode = not session.vim_mode
     else:
-        return CommandResult(
-            output=(
-                f"usage: /vim on|off|status (got {target!r})"
-            )
-        )
+        return CommandResult(output=(f"usage: /vim on|off|status (got {target!r})"))
     cfg = getattr(session, "config", None)
     if cfg is not None:
         cfg.set("vim", "on" if session.vim_mode else "off")
@@ -7408,9 +7181,7 @@ def _cmd_keybindings(_session: InteractiveSession, _args: str) -> CommandResult:
         ("!cmd", "run cmd in a subshell and render the output panel"),
         ("@path", "insert a file reference with path completion"),
     ]
-    plain = "Key bindings:\n" + "\n".join(
-        f"  {k:<12}  {d}" for k, d in rows
-    )
+    plain = "Key bindings:\n" + "\n".join(f"  {k:<12}  {d}" for k, d in rows)
     return CommandResult(
         output=plain,
         renderable=_out.keybindings_renderable(rows),
@@ -7462,22 +7233,18 @@ def _cmd_tools(session: InteractiveSession, args: str) -> CommandResult:
         return CommandResult(output="\n".join(lines))
 
     if raw.lower().startswith("approve "):
-        name = raw[len("approve "):].strip()
+        name = raw[len("approve ") :].strip()
         if not name:
             return CommandResult(output="usage: /tools approve <Name>")
         cache.approve(name)
-        return CommandResult(
-            output=f"tool {name!r} approved for this session."
-        )
+        return CommandResult(output=f"tool {name!r} approved for this session.")
 
     if raw.lower().startswith("deny "):
-        name = raw[len("deny "):].strip()
+        name = raw[len("deny ") :].strip()
         if not name:
             return CommandResult(output="usage: /tools deny <Name>")
         cache.deny(name)
-        return CommandResult(
-            output=f"tool {name!r} denied for this session."
-        )
+        return CommandResult(output=f"tool {name!r} denied for this session.")
 
     if not raw:
         tools = registered_tools()
@@ -7497,19 +7264,12 @@ def _cmd_tools(session: InteractiveSession, args: str) -> CommandResult:
     if raw.lower().startswith("risk="):
         level = raw.split("=", 1)[1].strip().lower()
         if level not in {"low", "medium", "high"}:
-            return CommandResult(
-                output=(
-                    f"unknown risk level {level!r}; use low|medium|high."
-                )
-            )
+            return CommandResult(output=(f"unknown risk level {level!r}; use low|medium|high."))
         filtered = tools_of_risk([level])  # type: ignore[arg-type]
         if not filtered:
             return CommandResult(output=f"no tools registered at risk={level}.")
-        plain = (
-            f"Tools at risk={level}:\n"
-            + "\n".join(
-                f"  {t['name']:<14} {t['summary']}" for t in filtered
-            )
+        plain = f"Tools at risk={level}:\n" + "\n".join(
+            f"  {t['name']:<14} {t['summary']}" for t in filtered
         )
         return CommandResult(
             output=plain,
@@ -7518,12 +7278,7 @@ def _cmd_tools(session: InteractiveSession, args: str) -> CommandResult:
 
     detail = tool_by_name(raw)
     if detail is None:
-        return CommandResult(
-            output=(
-                f"no such tool {raw!r}. "
-                f"Try /tools to see the full list."
-            )
-        )
+        return CommandResult(output=(f"no such tool {raw!r}. " f"Try /tools to see the full list."))
     approval = cache.snapshot().get(detail["name"], "—")
     plain = (
         f"Tool: {detail['name']}\n"
@@ -7542,16 +7297,14 @@ def _cmd_tools(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_tool_search(session: InteractiveSession, _args: str) -> CommandResult:
     """``/tool-search`` — show dynamic tool-search status.
 
-    ``LYRA_ENABLE_TOOL_SEARCH`` controls whether tool definitions are
-    lazy-loaded on demand (``true``, ``auto``, ``auto:N``) or all at
-    once (``false``, the default).
+    ``LYRA_ENABLE_TOOL_SEARCH`` controls whether tool definitions are lazy-loaded on demand
+    (``true``, ``auto``, ``auto:N``) or all at once (``false``, the default).
     """
     reg = session._tool_registry
     if reg is None:
         return CommandResult(
             output=(
-                "tool search:  disabled (set LYRA_ENABLE_TOOL_SEARCH=true"
-                "|auto|auto:N to enable)"
+                "tool search:  disabled (set LYRA_ENABLE_TOOL_SEARCH=true" "|auto|auto:N to enable)"
             )
         )
     env_val = os.environ.get("LYRA_ENABLE_TOOL_SEARCH", "")
@@ -7622,18 +7375,11 @@ def _cmd_agents(session: InteractiveSession, args: str) -> CommandResult:
         records = reg.list_all()
         if not records:
             return CommandResult(
-                output=(
-                    "no subagents spawned yet. "
-                    "Use /spawn to dispatch one."
-                ),
+                output=("no subagents spawned yet. " "Use /spawn to dispatch one."),
             )
-        rows = [
-            (rec.id, rec.state, rec.description)
-            for rec in records
-        ]
+        rows = [(rec.id, rec.state, rec.description) for rec in records]
         plain_lines = ["Subagents (live):"] + [
-            f"  {rid:<10} {rstate:<10} {rdesc}"
-            for rid, rstate, rdesc in rows
+            f"  {rid:<10} {rstate:<10} {rdesc}" for rid, rstate, rdesc in rows
         ]
         return CommandResult(
             output="\n".join(plain_lines),
@@ -7649,9 +7395,7 @@ def _cmd_agents(session: InteractiveSession, args: str) -> CommandResult:
         ("general", "opus", "multi-step specialist (v1.7)"),
         ("safety", "haiku", "secrets + injection triage (v1.7)"),
     ]
-    plain = "Subagents (planned):\n" + "\n".join(
-        f"  {n:<10} {m:<8} {d}" for n, m, d in agents
-    )
+    plain = "Subagents (planned):\n" + "\n".join(f"  {n:<10} {m:<8} {d}" for n, m, d in agents)
     return CommandResult(
         output=plain,
         renderable=_out.agents_renderable(agents),
@@ -7701,9 +7445,7 @@ def _cmd_spawn(session: InteractiveSession, args: str) -> CommandResult:
     reg = _ensure_subagent_registry(session)
     if reg is None:
         return CommandResult(
-            output=(
-                "subagent runtime unavailable — install lyra-core to enable /spawn."
-            ),
+            output=("subagent runtime unavailable — install lyra-core to enable /spawn."),
             renderable=_out.spawn_renderable(description),
         )
 
@@ -7790,9 +7532,7 @@ class _LyraCoreLLMAdapter:
             return {
                 "content": message.content or "",
                 "tool_calls": tool_calls,
-                "stop_reason": (
-                    str(message.stop_reason) if message.stop_reason else "end_turn"
-                ),
+                "stop_reason": (str(message.stop_reason) if message.stop_reason else "end_turn"),
             }
         if isinstance(message, dict):
             return dict(message)
@@ -7807,18 +7547,15 @@ class _LyraCoreLLMAdapter:
 def _ensure_subagent_registry(session: InteractiveSession) -> Any | None:
     """Return ``session.subagent_registry``, lazily building one if absent.
 
-    The default factory wraps :class:`SubagentRunner` so subagents
-    actually run an :class:`AgentLoop`. Return ``None`` when
-    lyra-core isn't installed (tests on a stripped tree).
+    The default factory wraps :class:`SubagentRunner` so subagents actually run an
+    :class:`AgentLoop`. Return ``None`` when lyra-core isn't installed (tests on a stripped tree).
 
-    Phase E.5 fixes the legacy bug where the factory passed
-    ``AgentLoop(provider=...)`` (the lyra_harness_core kwarg) to the
-    lyra_core dataclass, which expects ``llm=``. The new factory
-    materialises a proper lyra_core loop with the LLM provider
-    adapted via :class:`_LyraCoreLLMAdapter`, an empty tool registry
-    (subagents inherit the parent's chat tools via plugin hooks in a
-    later phase), and a no-op store so spawned scopes can't trample
-    parent-session state.
+    Phase E.5 fixes the legacy bug where the factory passed ``AgentLoop(provider=...)`` (the
+    lyra_harness_core kwarg) to the lyra_core dataclass, which expects ``llm=``. The new factory
+    materialises a proper lyra_core loop with the LLM provider adapted via
+    :class:`_LyraCoreLLMAdapter`, an empty tool registry (subagents inherit the parent's chat tools
+    via plugin hooks in a later phase), and a no-op store so spawned scopes can't trample parent-
+    session state.
     """
     reg = getattr(session, "subagent_registry", None)
     if reg is not None:
@@ -7946,9 +7683,7 @@ def _cmd_mcp(session: InteractiveSession, args: str) -> CommandResult:
             banners: list[str] = []
             for srv in servers:
                 tools = ", ".join(srv.tools) if srv.tools else "(no tools advertised)"
-                lines.append(
-                    f"  {srv.name:<14} {srv.trust:<10} {srv.url}  [{tools}]"
-                )
+                lines.append(f"  {srv.name:<14} {srv.trust:<10} {srv.url}  [{tools}]")
                 banner = trust_banner_for(srv)
                 if banner:
                     banners.append(banner)
@@ -7961,9 +7696,7 @@ def _cmd_mcp(session: InteractiveSession, args: str) -> CommandResult:
             lines.append("MCP (stdio, autoloaded):")
             for cfg in autoload:
                 state = "[connected]" if cfg.name in live else "[idle]"
-                lines.append(
-                    f"  {cfg.name:<14} {cfg.trust:<10} {' '.join(cfg.command)}  {state}"
-                )
+                lines.append(f"  {cfg.name:<14} {cfg.trust:<10} {' '.join(cfg.command)}  {state}")
         if getattr(session, "_mcp_load_issues", None):
             lines.append("")
             lines.append("issues:")
@@ -7978,9 +7711,7 @@ def _cmd_mcp(session: InteractiveSession, args: str) -> CommandResult:
 
         name = parts[1]
         if find_mcp_server(session, name) is None:
-            return CommandResult(
-                output=f"no MCP server named {name!r} in mcp.json"
-            )
+            return CommandResult(output=f"no MCP server named {name!r} in mcp.json")
         client = ensure_mcp_client_started(session, name)
         if client is None:
             return CommandResult(
@@ -7989,13 +7720,9 @@ def _cmd_mcp(session: InteractiveSession, args: str) -> CommandResult:
         try:
             tools = client.list_tools()
         except Exception as exc:  # pragma: no cover — defensive
-            return CommandResult(
-                output=f"connected to {name!r} but tools/list failed: {exc}"
-            )
+            return CommandResult(output=f"connected to {name!r} but tools/list failed: {exc}")
         names = ", ".join(t.get("name", "?") for t in tools) or "(none)"
-        return CommandResult(
-            output=f"connected to MCP server {name!r}; tools: {names}"
-        )
+        return CommandResult(output=f"connected to MCP server {name!r}; tools: {names}")
 
     if sub == "disconnect":
         if len(parts) < 2:
@@ -8018,20 +7745,14 @@ def _cmd_mcp(session: InteractiveSession, args: str) -> CommandResult:
 
         name = parts[1]
         if find_mcp_server(session, name) is None:
-            return CommandResult(
-                output=f"no MCP server named {name!r} in mcp.json"
-            )
+            return CommandResult(output=f"no MCP server named {name!r} in mcp.json")
         client = ensure_mcp_client_started(session, name)
         if client is None:
-            return CommandResult(
-                output=f"failed to start MCP server {name!r}"
-            )
+            return CommandResult(output=f"failed to start MCP server {name!r}")
         try:
             tools = client.list_tools()
         except Exception as exc:
-            return CommandResult(
-                output=f"tools/list failed for {name!r}: {exc}"
-            )
+            return CommandResult(output=f"tools/list failed for {name!r}: {exc}")
         if not tools:
             return CommandResult(output=f"{name!r} advertises no tools")
         lines = [f"tools advertised by {name!r}:"]
@@ -8047,18 +7768,14 @@ def _cmd_mcp(session: InteractiveSession, args: str) -> CommandResult:
 
         autoload_mcp_servers(session)
         n = len(getattr(session, "mcp_servers", []) or [])
-        return CommandResult(
-            output=f"reloaded MCP config: {n} stdio server(s) discovered"
-        )
+        return CommandResult(output=f"reloaded MCP config: {n} stdio server(s) discovered")
 
     if sub == "register":
         if len(parts) < 3:
             return CommandResult(output="usage: /mcp register <name> <url>")
         name, url = parts[1], parts[2]
         reg.register(name=name, url=url)
-        return CommandResult(
-            output=f"registered MCP server {name!r} → {url} (untrusted)"
-        )
+        return CommandResult(output=f"registered MCP server {name!r} → {url} (untrusted)")
 
     if sub in ("trust", "untrust"):
         if len(parts) < 2:
@@ -8089,10 +7806,9 @@ def _cmd_mcp(session: InteractiveSession, args: str) -> CommandResult:
 def _cron_store_for(session: InteractiveSession):
     """Resolve the :class:`~lyra_core.cron.store.CronStore` for this session.
 
-    Jobs live under ``<repo>/.lyra/cron/jobs.json`` by default, which
-    matches hermes's ``~/.hermes/cron/jobs.json`` shape but keeps them
-    scoped to the project so parallel checkouts do not clobber each
-    other.
+    Jobs live under ``<repo>/.lyra/cron/jobs.json`` by default, which matches hermes's
+    ``~/.hermes/cron/jobs.json`` shape but keeps them scoped to the project so parallel checkouts do
+    not clobber each other.
     """
     from lyra_core.cron.store import CronStore
 
@@ -8104,13 +7820,10 @@ def _cron_store_for(session: InteractiveSession):
 def _cmd_cron(session: InteractiveSession, args: str) -> CommandResult:
     """`/cron` — manage scheduled automations (hermes parity).
 
-    Phase D.2 wires the ``run`` subcommand to a real in-process
-    runner — when the user invokes ``/cron run <id>`` we now route
-    the job through the session's subagent registry so the prompt
-    actually executes inside an :class:`AgentLoop`. Without a
-    registry attached we fall back to the legacy "flag for next
-    tick" message so older tests (which never built a runner) keep
-    passing.
+    Phase D.2 wires the ``run`` subcommand to a real in-process runner — when the user invokes
+    ``/cron run <id>`` we now route the job through the session's subagent registry so the prompt
+    actually executes inside an :class:`AgentLoop`. Without a registry attached we fall back to the
+    legacy "flag for next tick" message so older tests (which never built a runner) keep passing.
     """
     try:
         argv = shlex.split(args) if args.strip() else []
@@ -8128,9 +7841,7 @@ def _cmd_cron(session: InteractiveSession, args: str) -> CommandResult:
         return rec
 
     try:
-        output = handle_cron(
-            argv, store=_cron_store_for(session), runner=_runner
-        )
+        output = handle_cron(argv, store=_cron_store_for(session), runner=_runner)
     except CronCommandError as exc:
         return CommandResult(output=f"cron: {exc}")
     return CommandResult(output=output)
@@ -8165,9 +7876,7 @@ def _cmd_trace(session: InteractiveSession, args: str) -> CommandResult:
     path = session.repo_root / ".lyra" / "sessions" / "events.jsonl"
     return CommandResult(
         output=session._cmd_trace_text(args),
-        renderable=_out.trace_renderable(
-            path=path, verbose=session.verbose
-        ),
+        renderable=_out.trace_renderable(path=path, verbose=session.verbose),
     )
 
 
@@ -8197,11 +7906,9 @@ def _cmd_self(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_badges(session: InteractiveSession, _args: str) -> CommandResult:
     """Render earned achievement chips (Wave-C) plus slash-usage tail.
 
-    Wave-C surfaces ``~/.lyra/badges.json`` (or
-    ``<repo_root>/.lyra/badges.json``) so achievement chips earned by
-    the agent loop persist across REPLs. The legacy "slash usage"
-    tally stays as a secondary block so the original v1 output
-    contract isn't broken.
+    Wave-C surfaces ``~/.lyra/badges.json`` (or ``<repo_root>/.lyra/badges.json``) so achievement
+    chips earned by the agent loop persist across REPLs. The legacy "slash usage" tally stays as a
+    secondary block so the original v1 output contract isn't broken.
     """
     import json as _json
 
@@ -8247,14 +7954,12 @@ def _cmd_badges(session: InteractiveSession, _args: str) -> CommandResult:
 def _cmd_budget(session: InteractiveSession, args: str) -> CommandResult:
     """``/budget [set|status|record|reset] [...]`` — per-session cost meter.
 
-    Accepts both the bare form (``/budget 5``) and the verbose form
-    (``/budget set 5``) so muscle memory from claw-code / opencode
-    works. ``/budget status`` reports current spend vs. cap via the
-    Wave-D :class:`BudgetMeter` (live deduction, falls back to the
-    Wave-C ``enforce`` classifier when no meter is attached yet).
-    ``/budget record <model> <p_tok> <c_tok>`` is the manual-deduction
-    surface that integrations can call from a provider callback;
-    ``/budget reset`` zeros the meter.
+    Accepts both the bare form (``/budget 5``) and the verbose form (``/budget set 5``) so muscle
+    memory from claw-code / opencode works. ``/budget status`` reports current spend vs. cap via the
+    Wave-D :class:`BudgetMeter` (live deduction, falls back to the Wave-C ``enforce`` classifier
+    when no meter is attached yet). ``/budget record <model> <p_tok> <c_tok>`` is the manual-
+    deduction surface that integrations can call from a provider callback; ``/budget reset`` zeros
+    the meter.
     """
     from .budget import BudgetCap, BudgetMeter
 
@@ -8276,7 +7981,7 @@ def _cmd_budget(session: InteractiveSession, args: str) -> CommandResult:
         return meter
 
     if lower.startswith("record "):
-        rest = target[len("record "):].strip().split()
+        rest = target[len("record ") :].strip().split()
         if len(rest) != 3:
             return CommandResult(
                 output="usage: /budget record <model> <prompt_tokens> <completion_tokens>"
@@ -8287,9 +7992,7 @@ def _cmd_budget(session: InteractiveSession, args: str) -> CommandResult:
         except ValueError:
             return CommandResult(output="prompt/completion token counts must be integers")
         meter = _ensure_meter()
-        delta = meter.record_usage(
-            model=model, prompt_tokens=p, completion_tokens=c
-        )
+        delta = meter.record_usage(model=model, prompt_tokens=p, completion_tokens=c)
         session.cost_usd += delta
         rep = meter.report()
         return CommandResult(
@@ -8337,10 +8040,7 @@ def _cmd_budget(session: InteractiveSession, args: str) -> CommandResult:
         # ``/budget save`` (no arg) — persist the *current* session cap.
         if session.budget_cap_usd is None:
             return CommandResult(
-                output=(
-                    "no cap to save; set one first "
-                    "(e.g. /budget save 5.00)."
-                ),
+                output=("no cap to save; set one first " "(e.g. /budget save 5.00)."),
             )
         try:
             from lyra_core.auth.store import save_budget
@@ -8358,13 +8058,11 @@ def _cmd_budget(session: InteractiveSession, args: str) -> CommandResult:
             return CommandResult(output=f"could not save budget default: {exc}")
     if lower.startswith("save "):
         # ``/budget save 5`` — set the session cap *and* persist it.
-        rest = target[len("save "):].strip()
+        rest = target[len("save ") :].strip()
         try:
             usd = float(rest.lstrip("$"))
         except ValueError:
-            return CommandResult(
-                output=f"bad budget value {rest!r}; use /budget save <usd>."
-            )
+            return CommandResult(output=f"bad budget value {rest!r}; use /budget save <usd>.")
         session.budget_cap_usd = max(usd, 0.0)
         if getattr(session, "budget_meter", None) is not None:
             from .budget import BudgetCap
@@ -8412,8 +8110,7 @@ def _cmd_budget(session: InteractiveSession, args: str) -> CommandResult:
             spend = meter.current_usd if meter is not None else session.cost_usd
             return CommandResult(
                 output=(
-                    f"no budget cap set; current spend ${spend:.4f}. "
-                    f"use /budget set <usd>."
+                    f"no budget cap set; current spend ${spend:.4f}. " f"use /budget set <usd>."
                 ),
                 renderable=_out.budget_renderable(None),
             )
@@ -8441,9 +8138,7 @@ def _cmd_budget(session: InteractiveSession, args: str) -> CommandResult:
     try:
         usd = float(target.lstrip("$"))
     except ValueError:
-        return CommandResult(
-            output=f"bad budget value {target!r}; use /budget set <usd>."
-        )
+        return CommandResult(output=f"bad budget value {target!r}; use /budget set <usd>.")
     session.budget_cap_usd = max(usd, 0.0)
     return CommandResult(
         output=f"budget cap set to ${session.budget_cap_usd:.2f}",
@@ -8454,23 +8149,19 @@ def _cmd_budget(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_stream(session: InteractiveSession, args: str) -> CommandResult:
     """``/stream [on|off|status]`` — toggle live streaming chat output.
 
-    v2.2.4. By default the REPL streams DeepSeek / OpenAI / Qwen / etc.
-    replies token-by-token via Rich Live. Some terminals (older Windows
-    consoles, certain SSH multiplexers) repaint poorly under Live; the
-    toggle flips ``session._streaming_enabled`` so those users can run
-    Lyra in classic blocking-print mode without restarting.
+    v2.2.4. By default the REPL streams DeepSeek / OpenAI / Qwen / etc. replies token-by-token via
+    Rich Live. Some terminals (older Windows consoles, certain SSH multiplexers) repaint poorly
+    under Live; the toggle flips ``session._streaming_enabled`` so those users can run Lyra in
+    classic blocking-print mode without restarting.
 
-    Persistence isn't on disk yet — set ``LYRA_NO_STREAM=1`` in your
-    shell rc to keep streaming off across sessions.
+    Persistence isn't on disk yet — set ``LYRA_NO_STREAM=1`` in your shell rc to keep streaming off
+    across sessions.
     """
     target = (args or "").strip().lower()
 
     def _state_message() -> str:
         if session._console is None:
-            return (
-                "streaming is off (no TTY console attached — "
-                "running in plain / piped mode)."
-            )
+            return "streaming is off (no TTY console attached — " "running in plain / piped mode)."
         if session._streaming_enabled:
             return "streaming is on. /stream off to disable."
         return "streaming is off. /stream on to enable."
@@ -8524,6 +8215,7 @@ def _cmd_skills(session: InteractiveSession, args: str) -> CommandResult:
     _sl_verbs = {"create", "admit", "audit", "distill", "compose", "merge", "prune"}
     if (target.split()[0] if target else "") in _sl_verbs:
         from .skills_lifecycle import cmd_skills_lifecycle
+
         return cmd_skills_lifecycle(session, args)
 
     def _state_message() -> str:
@@ -8532,10 +8224,7 @@ def _cmd_skills(session: InteractiveSession, args: str) -> CommandResult:
         return "skill injection is off. /skills on to enable."
 
     def _packs_lines() -> list[str]:
-        return [
-            f"  - {pack}: {description}"
-            for pack, description in _SHIPPED_SKILL_PACKS
-        ]
+        return [f"  - {pack}: {description}" for pack, description in _SHIPPED_SKILL_PACKS]
 
     if target == "":
         # If a TTY is available, launch the interactive picker
@@ -8555,8 +8244,7 @@ def _cmd_skills(session: InteractiveSession, args: str) -> CommandResult:
         except Exception:
             roots, skills = [], []
         lines = [
-            f"{_state_message()} "
-            f"({len(skills)} skill(s) across {len(roots)} root(s))",
+            f"{_state_message()} " f"({len(skills)} skill(s) across {len(roots)} root(s))",
             "",
             "Installed skill packs:",
             *_packs_lines(),
@@ -8584,16 +8272,11 @@ def _cmd_skills(session: InteractiveSession, args: str) -> CommandResult:
         except Exception:
             roots, skills = [], []
         return CommandResult(
-            output=(
-                f"{_state_message()} "
-                f"({len(skills)} skill(s) across {len(roots)} root(s))"
-            )
+            output=(f"{_state_message()} " f"({len(skills)} skill(s) across {len(roots)} root(s))")
         )
 
     if target == "packs":
-        return CommandResult(
-            output="\n".join(["Installed skill packs:", *_packs_lines()])
-        )
+        return CommandResult(output="\n".join(["Installed skill packs:", *_packs_lines()]))
 
     if target in ("on", "true", "1", "yes", "enable"):
         session.skills_inject_enabled = True
@@ -8605,10 +8288,7 @@ def _cmd_skills(session: InteractiveSession, args: str) -> CommandResult:
     if target == "reload":
         session._cached_skill_block = None
         return CommandResult(
-            output=(
-                "skill cache cleared. the next chat turn will re-walk "
-                "the skill roots."
-            )
+            output=("skill cache cleared. the next chat turn will re-walk " "the skill roots.")
         )
 
     if target == "list":
@@ -8623,10 +8303,7 @@ def _cmd_skills(session: InteractiveSession, args: str) -> CommandResult:
                 output="no skills discovered. drop a SKILL.md under .lyra/skills/."
             )
         skills.sort(key=lambda s: s.id)
-        lines = [
-            f"- {s.id}: {(s.description or '').strip() or '(no description)'}"
-            for s in skills
-        ]
+        lines = [f"- {s.id}: {(s.description or '').strip() or '(no description)'}" for s in skills]
         return CommandResult(output="\n".join(lines))
 
     if target == "pick":
@@ -8639,9 +8316,7 @@ def _cmd_skills(session: InteractiveSession, args: str) -> CommandResult:
         verb, _, sid = target.partition(" ")
         sid = sid.strip()
         if not sid:
-            return CommandResult(
-                output=f"usage: /skills {verb} <skill-id>"
-            )
+            return CommandResult(output=f"usage: /skills {verb} <skill-id>")
         return _toggle_skill_id(session, sid, enable=(verb == "enable"))
 
     return CommandResult(
@@ -8682,6 +8357,7 @@ def _cmd_memory(session: InteractiveSession, args: str) -> CommandResult:
     _lifecycle_verbs = {"consolidate", "distill", "audit", "evolve", "promote"}
     if (target_lc.split()[0] if target_lc else "") in _lifecycle_verbs:
         from .memory_lifecycle import cmd_memory_lifecycle
+
         return cmd_memory_lifecycle(session, args)
 
     def _state_message() -> str:
@@ -8721,17 +8397,14 @@ def _cmd_memory(session: InteractiveSession, args: str) -> CommandResult:
         session._procedural_memory_loaded = False
         return CommandResult(
             output=(
-                "procedural-memory handle dropped. "
-                "the next chat turn will re-open the store."
+                "procedural-memory handle dropped. " "the next chat turn will re-open the store."
             )
         )
 
     if target_lc.startswith("search"):
-        query = target[len("search"):].strip()
+        query = target[len("search") :].strip()
         if not query:
-            return CommandResult(
-                output="usage: /memory search <query>"
-            )
+            return CommandResult(output="usage: /memory search <query>")
         try:
             from .memory_inject import render_memory_block
         except Exception as exc:
@@ -8760,8 +8433,7 @@ def _cmd_memory(session: InteractiveSession, args: str) -> CommandResult:
 
 
 def _cmd_btw(session: InteractiveSession, args: str) -> CommandResult:
-    """`/btw <topic>` — record a side-question without polluting the
-    main agent context.
+    """`/btw <topic>` — record a side-question without polluting the main agent context.
 
     Wave-C Task 14: questions land in ``session._btw_log`` (FIFO),
     NOT in ``session.history``. This mirrors Claude Code's "by the
@@ -8770,9 +8442,7 @@ def _cmd_btw(session: InteractiveSession, args: str) -> CommandResult:
     """
     topic = args.strip()
     if not topic:
-        return CommandResult(
-            output="usage: /btw <topic>  (records a side-question)"
-        )
+        return CommandResult(output="usage: /btw <topic>  (records a side-question)")
     session._btw_log.append(topic)
     count = len(session._btw_log)
     return CommandResult(
@@ -8813,13 +8483,11 @@ def _cmd_handoff(session: InteractiveSession, _args: str) -> CommandResult:
 def _cmd_pair(session: InteractiveSession, args: str) -> CommandResult:
     """``/pair [on|off]`` — toggle pair-programming presentation mode.
 
-    Wave-D Task 15 wires the live-streaming substrate. When pair
-    mode is on, a :class:`PairStream` subscribes to the session's
-    :class:`LifecycleBus` and pipes one line per event into
-    ``session._pair_sink`` (defaults to a list the REPL drains
-    onto the console). Toggling off mutes the stream without
-    losing the subscriptions, so a quick re-toggle resumes the
-    live view immediately.
+    Wave-D Task 15 wires the live-streaming substrate. When pair mode is on, a :class:`PairStream`
+    subscribes to the session's :class:`LifecycleBus` and pipes one line per event into
+    ``session._pair_sink`` (defaults to a list the REPL drains onto the console). Toggling off mutes
+    the stream without losing the subscriptions, so a quick re-toggle resumes the live view
+    immediately.
     """
     from lyra_core.hooks.lifecycle import LifecycleBus
 
@@ -8833,9 +8501,7 @@ def _cmd_pair(session: InteractiveSession, args: str) -> CommandResult:
     elif target == "":
         session.pair_mode = not session.pair_mode
     else:
-        return CommandResult(
-            output=f"usage: /pair [on|off] (got {target!r})"
-        )
+        return CommandResult(output=f"usage: /pair [on|off] (got {target!r})")
 
     bus = getattr(session, "lifecycle_bus", None)
     if bus is None:
@@ -8886,9 +8552,8 @@ def _cmd_pair(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_wiki(session: InteractiveSession, args: str) -> CommandResult:
     """``/wiki [generate|preview]`` — Wave-E repo wiki.
 
-    Without an argument (or ``preview``) the index is rendered to
-    the REPL but not written to disk. ``generate`` writes the full
-    bundle under ``<repo>/.lyra/wiki/`` and reports the path.
+    Without an argument (or ``preview``) the index is rendered to the REPL but not written to disk.
+    ``generate`` writes the full bundle under ``<repo>/.lyra/wiki/`` and reports the path.
     """
     from lyra_core.wiki import generate_wiki
 
@@ -8908,17 +8573,14 @@ def _cmd_wiki(session: InteractiveSession, args: str) -> CommandResult:
         index = next((p for p in bundle.pages if p.relative_path == "index.md"), None)
         body = index.render() if index else "(no index page generated)"
         return CommandResult(output=body, renderable=_out.wiki_renderable(target_dir))
-    return CommandResult(
-        output=f"usage: /wiki [generate|preview] (got {target!r})"
-    )
+    return CommandResult(output=f"usage: /wiki [generate|preview] (got {target!r})")
 
 
 def _cmd_team_onboarding(session: InteractiveSession, args: str) -> CommandResult:
     """``/team-onboarding [role]`` — Wave-E onboarding briefing.
 
-    ``role`` is free-form but pre-baked plans exist for ``engineer``,
-    ``designer``, and ``pm``. Anything else falls back to the
-    ``engineer`` template so a fresh teammate always gets a useful
+    ``role`` is free-form but pre-baked plans exist for ``engineer``, ``designer``, and ``pm``.
+    Anything else falls back to the ``engineer`` template so a fresh teammate always gets a useful
     starting plan.
     """
     from lyra_core.wiki import generate_onboarding
@@ -8946,9 +8608,7 @@ def _cmd_voice(session: InteractiveSession, args: str) -> CommandResult:
     elif target in ("off", "false", "0"):
         session.voice_mode = False
     else:
-        return CommandResult(
-            output=f"usage: /voice [on|off|status] (got {target!r})"
-        )
+        return CommandResult(output=f"usage: /voice [on|off|status] (got {target!r})")
     state = "on" if session.voice_mode else "off"
     return CommandResult(
         output=(
@@ -8965,10 +8625,9 @@ def _cmd_voice(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_split(session: InteractiveSession, args: str) -> CommandResult:
     """``/split <task>`` — Wave-F subagent fan-out planner.
 
-    Records a split directive on the session's side-channel so
-    downstream agent-loop drivers can farm out the sub-tasks.
-    The command itself is intentionally lightweight — the
-    scheduling lives in the driver, not in the slash dispatcher.
+    Records a split directive on the session's side-channel so downstream agent-loop drivers can
+    farm out the sub-tasks. The command itself is intentionally lightweight — the scheduling lives
+    in the driver, not in the slash dispatcher.
     """
     task = args.strip()
     if not task:
@@ -8984,20 +8643,15 @@ def _cmd_split(session: InteractiveSession, args: str) -> CommandResult:
         bucket = []
         session.split_queue = bucket  # type: ignore[attr-defined]
     bucket.append(task)
-    return CommandResult(
-        output=(
-            f"split: queued task ({len(bucket)} pending).\n"
-            f"  {task}"
-        )
-    )
+    return CommandResult(output=(f"split: queued task ({len(bucket)} pending).\n" f"  {task}"))
 
 
 def _cmd_vote(session: InteractiveSession, args: str) -> CommandResult:
-    """``/vote <candidate>`` — record a ranked-choice preference
-    for the current refute-or-promote round.
+    """``/vote <candidate>`` — record a ranked-choice preference for the current refute-or-promote
+    round.
 
-    Votes accumulate in ``session.vote_ledger`` (a ``dict[str, int]``).
-    ``/vote results`` prints the tally. ``/vote clear`` resets it.
+    Votes accumulate in ``session.vote_ledger`` (a ``dict[str, int]``). ``/vote results`` prints the
+    tally. ``/vote clear`` resets it.
     """
     ledger = getattr(session, "vote_ledger", None)
     if ledger is None:
@@ -9006,34 +8660,27 @@ def _cmd_vote(session: InteractiveSession, args: str) -> CommandResult:
 
     cmd = args.strip()
     if not cmd:
-        return CommandResult(
-            output=(
-                "usage: /vote <candidate> | /vote results | /vote clear"
-            )
-        )
+        return CommandResult(output=("usage: /vote <candidate> | /vote results | /vote clear"))
     if cmd.lower() == "results":
         if not ledger:
             return CommandResult(output="vote: no votes yet.")
         ranked = sorted(ledger.items(), key=lambda kv: kv[1], reverse=True)
         lines = ["vote results:"] + [
-            f"  {i + 1}. {name} — {count}"
-            for i, (name, count) in enumerate(ranked)
+            f"  {i + 1}. {name} — {count}" for i, (name, count) in enumerate(ranked)
         ]
         return CommandResult(output="\n".join(lines))
     if cmd.lower() == "clear":
         ledger.clear()
         return CommandResult(output="vote: ledger cleared.")
     ledger[cmd] = ledger.get(cmd, 0) + 1
-    return CommandResult(
-        output=f"vote: +1 for {cmd!r} (total {ledger[cmd]})"
-    )
+    return CommandResult(output=f"vote: +1 for {cmd!r} (total {ledger[cmd]})")
 
 
 def _cmd_observe(session: InteractiveSession, args: str) -> CommandResult:
-    """``/observe [on|off|status|tail]`` — toggle the ambient
-    observation channel. When ``on``, every agent turn also emits
-    a short observation note to ``session.observation_log`` which
-    ``/observe tail`` can surface as a passive status stream.
+    """``/observe [on|off|status|tail]`` — toggle the ambient observation channel.
+
+    When ``on``, every agent turn also emits a short observation note to ``session.observation_log``
+    which ``/observe tail`` can surface as a passive status stream.
     """
     arg = args.strip().lower()
     log = getattr(session, "observation_log", None)
@@ -9042,9 +8689,7 @@ def _cmd_observe(session: InteractiveSession, args: str) -> CommandResult:
         session.observation_log = log  # type: ignore[attr-defined]
     if arg in ("", "status"):
         state = "on" if getattr(session, "observe_mode", False) else "off"
-        return CommandResult(
-            output=f"observe: {state} ({len(log)} notes logged)"
-        )
+        return CommandResult(output=f"observe: {state} ({len(log)} notes logged)")
     if arg == "on":
         session.observe_mode = True  # type: ignore[attr-defined]
         return CommandResult(output="observe: on")
@@ -9056,14 +8701,12 @@ def _cmd_observe(session: InteractiveSession, args: str) -> CommandResult:
             return CommandResult(output="observe: no notes yet.")
         tail = log[-10:]
         return CommandResult(output="observe tail:\n" + "\n".join(tail))
-    return CommandResult(
-        output=f"usage: /observe [on|off|status|tail] (got {arg!r})"
-    )
+    return CommandResult(output=f"usage: /observe [on|off|status|tail] (got {arg!r})")
 
 
 def _cmd_ide(session: InteractiveSession, args: str) -> CommandResult:
-    """``/ide [list|set <name>|open <path>[:line[:col]]]`` — Wave-F
-    IDE bridge for jumping from the REPL into an editor."""
+    """``/ide [list|set <name>|open <path>[:line[:col]]]`` — Wave-F IDE bridge for jumping from the
+    REPL into an editor."""
     from lyra_core.ide import (
         IDEError,
         IDETarget,
@@ -9075,9 +8718,7 @@ def _cmd_ide(session: InteractiveSession, args: str) -> CommandResult:
     if not arg or arg.lower() == "list":
         names = ", ".join(b.id for b in available_bridges())
         current = getattr(session, "ide_bridge", "vscode")
-        return CommandResult(
-            output=f"available IDE bridges: {names}\ncurrent: {current}"
-        )
+        return CommandResult(output=f"available IDE bridges: {names}\ncurrent: {current}")
     if arg.lower().startswith("set"):
         choice = arg[3:].strip()
         if not choice:
@@ -9098,9 +8739,7 @@ def _cmd_ide(session: InteractiveSession, args: str) -> CommandResult:
             line = int(rest[0]) if len(rest) >= 1 and rest[0] else None
             column = int(rest[1]) if len(rest) >= 2 and rest[1] else None
         except ValueError:
-            return CommandResult(
-                output=f"ide: could not parse line/column from {spec!r}"
-            )
+            return CommandResult(output=f"ide: could not parse line/column from {spec!r}")
         path = (session.repo_root / path_s).resolve()
         try:
             target = IDETarget(path=path, line=line, column=column)
@@ -9116,20 +8755,15 @@ def _cmd_ide(session: InteractiveSession, args: str) -> CommandResult:
                 "(pass ide_bridge_executor=True to actually spawn)"
             )
         )
-    return CommandResult(
-        output=(
-            "usage: /ide [list|set <name>|open <path>[:line[:col]]]"
-        )
-    )
+    return CommandResult(output=("usage: /ide [list|set <name>|open <path>[:line[:col]]]"))
 
 
 def _cmd_catchup(session: InteractiveSession, args: str) -> CommandResult:
     """``/catch-up`` — Wave-F session catch-up briefing.
 
-    Summarises the session so far (last 10 turns, open TDD phase,
-    any queued ``/split`` tasks) into a short status block. Handy
-    when the user returns to a session after a break and wants a
-    one-screen refresher without replaying everything.
+    Summarises the session so far (last 10 turns, open TDD phase, any queued ``/split`` tasks) into
+    a short status block. Handy when the user returns to a session after a break and wants a one-
+    screen refresher without replaying everything.
     """
     turns = session.history[-10:] if session.history else []
     phase = getattr(session, "tdd_state", None)
@@ -9152,10 +8786,9 @@ def _cmd_catchup(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_phase(session: InteractiveSession, args: str) -> CommandResult:
     """``/phase [status|next-legal|set <phase>]`` — Wave-F TDD state.
 
-    Renders the session's live TDD phase. With ``set <phase>`` it
-    attempts a transition; strict mode raises, lenient mode warns.
-    Evidence is *not* accepted via the REPL (it has to come from
-    the loop) — the slash command is the read + reset surface.
+    Renders the session's live TDD phase. With ``set <phase>`` it attempts a transition; strict mode
+    raises, lenient mode warns. Evidence is *not* accepted via the REPL (it has to come from the
+    loop) — the slash command is the read + reset surface.
     """
     from lyra_core.tdd import TDDPhase, TDDStateMachine, TransitionError
 
@@ -9174,9 +8807,7 @@ def _cmd_phase(session: InteractiveSession, args: str) -> CommandResult:
             )
         )
     if cmd == "next-legal":
-        return CommandResult(
-            output=" ".join(p.value for p in sm.legal_next())
-        )
+        return CommandResult(output=" ".join(p.value for p in sm.legal_next()))
     if cmd == "reset":
         sm.reset()
         return CommandResult(output=f"tdd phase: {sm.phase.value} (reset)")
@@ -9202,10 +8833,9 @@ def _cmd_phase(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_replay(session: InteractiveSession, args: str) -> CommandResult:
     """``/replay [next|prev|reset|status|all]`` — Wave-E session replay.
 
-    Walks ``turns.jsonl`` of the *current* session one event at a
-    time, with a unified diff between adjacent turns. The cursor
-    lives on :class:`InteractiveSession` so successive ``/replay
-    next`` calls advance through the recording.
+    Walks ``turns.jsonl`` of the *current* session one event at a time, with a unified diff between
+    adjacent turns. The cursor lives on :class:`InteractiveSession` so successive ``/replay next``
+    calls advance through the recording.
 
     No persistence side-effects — the replay only reads on disk.
     """
@@ -9228,15 +8858,11 @@ def _cmd_replay(session: InteractiveSession, args: str) -> CommandResult:
 
     if target == "reset":
         controller.reset()
-        return CommandResult(
-            output=f"replay: reset (0 / {len(controller)})"
-        )
+        return CommandResult(output=f"replay: reset (0 / {len(controller)})")
     if target == "status":
         cur = controller.current()
         idx = -1 if cur is None else cur.index
-        return CommandResult(
-            output=f"replay: cursor={idx + 1} total={len(controller)}"
-        )
+        return CommandResult(output=f"replay: cursor={idx + 1} total={len(controller)}")
     if target == "all":
         if not len(controller):
             return CommandResult(output="replay: no recorded turns")
@@ -9258,17 +8884,14 @@ def _cmd_replay(session: InteractiveSession, args: str) -> CommandResult:
     elif target == "next":
         evt = controller.next()
     else:
-        return CommandResult(
-            output=f"usage: /replay [next|prev|reset|status|all] (got {target!r})"
-        )
+        return CommandResult(output=f"usage: /replay [next|prev|reset|status|all] (got {target!r})")
 
     if evt is None:
         edge = "start" if target == "prev" else "end"
         return CommandResult(output=f"replay: at {edge}")
 
-    head = (
-        f"replay turn {evt.index + 1} / {len(controller)}\n"
-        + json.dumps(evt.payload, ensure_ascii=False, sort_keys=True)
+    head = f"replay turn {evt.index + 1} / {len(controller)}\n" + json.dumps(
+        evt.payload, ensure_ascii=False, sort_keys=True
     )
     if evt.diff:
         return CommandResult(output=f"{head}\n{evt.diff}")
@@ -9292,13 +8915,13 @@ def _cmd_effort(session: InteractiveSession, args: str) -> CommandResult:
     from .effort import EffortPicker, apply_effort
 
     levels = {
-        "low":    "fastest single-turn attempt; cheapest model",
+        "low": "fastest single-turn attempt; cheapest model",
         "medium": "default — Plan + Build with standard verification",
-        "high":   "+ extra review passes (/review, /ultrareview)",
-        "xhigh":  "deep reasoning + multi-pass verifier",
-        "max":    "full refute-or-promote loop + cross-channel verifier",
+        "high": "+ extra review passes (/review, /ultrareview)",
+        "xhigh": "deep reasoning + multi-pass verifier",
+        "max": "full refute-or-promote loop + cross-channel verifier",
         # Back-compat: accept the legacy "ultra" alias from v0.x.
-        "ultra":  "alias for max",
+        "ultra": "alias for max",
     }
     valid_canonical: tuple[str, ...] = ("low", "medium", "high", "xhigh", "max")
     choice = args.strip().lower()
@@ -9311,6 +8934,7 @@ def _cmd_effort(session: InteractiveSession, args: str) -> CommandResult:
         if sys.stdin.isatty() and sys.stdout.isatty():
             try:
                 from .effort_app import run_effort_picker
+
                 picked = run_effort_picker(initial="medium")
             except Exception:
                 picked = None
@@ -9329,19 +8953,14 @@ def _cmd_effort(session: InteractiveSession, args: str) -> CommandResult:
 
     if choice not in levels:
         return CommandResult(
-            output=(
-                f"unknown effort level {choice!r}; "
-                f"valid: {', '.join(valid_canonical)}."
-            ),
+            output=(f"unknown effort level {choice!r}; " f"valid: {', '.join(valid_canonical)}."),
             renderable=_out.bad_effort_renderable(choice, valid_canonical),
         )
     typed = choice
     if choice == "ultra":
         choice = "max"
     canonical = apply_effort(choice)
-    label = (
-        f"{typed} (canonical: {canonical})" if typed != canonical else canonical
-    )
+    label = f"{typed} (canonical: {canonical})" if typed != canonical else canonical
     return CommandResult(
         output=f"effort: {label} — {levels[canonical]}",
         renderable=_out.effort_renderable(canonical, levels),
@@ -9367,9 +8986,7 @@ def _cmd_goal(session: InteractiveSession, args: str) -> CommandResult:
     session.pending_goal = choice
     session.goal_turn_start = session.turn
     max_goal_turns = session.max_turns or 20
-    return CommandResult(
-        output=f"goal set: {choice} (auto-stop at {max_goal_turns} turns)"
-    )
+    return CommandResult(output=f"goal set: {choice} (auto-stop at {max_goal_turns} turns)")
 
 
 _DEFAULT_REVIEWER_VOICES: tuple[str, ...] = (
@@ -9385,23 +9002,18 @@ _TDD_REVIEWER_VOICES: tuple[str, ...] = (
 )
 
 
-def _cmd_ultrareview(
-    session: InteractiveSession, _args: str
-) -> CommandResult:
+def _cmd_ultrareview(session: InteractiveSession, _args: str) -> CommandResult:
     """Fan out to three reviewer voices, return one verdict block.
 
-    v3.0.0 (Phase G) — the middle voice's rubric depends on whether
-    the user has opted into TDD. With ``session.tdd_gate_enabled``
-    set the rubric reads "did each Edit follow a RED test?", matching
-    the legacy Wave-C behaviour. With TDD off (the new default,
-    matching claw-code / opencode / hermes-agent posture) the rubric
-    becomes the gentler "are the new behaviours covered by tests?"
-    so a general coding session still gets useful feedback without
-    the kernel-level RED requirement.
+    v3.0.0 (Phase G) — the middle voice's rubric depends on whether the user has opted into TDD.
+    With ``session.tdd_gate_enabled`` set the rubric reads "did each Edit follow a RED test?",
+    matching the legacy Wave-C behaviour. With TDD off (the new default, matching claw-code /
+    opencode / hermes-agent posture) the rubric becomes the gentler "are the new behaviours covered
+    by tests?" so a general coding session still gets useful feedback without the kernel-level RED
+    requirement.
 
-    The real subagent fan-out runs through the SubagentRunner in
-    v2.6.0+; this slash ships the verifier-rendered shape so the
-    output is testable offline.
+    The real subagent fan-out runs through the SubagentRunner in v2.6.0+; this slash ships the
+    verifier-rendered shape so the output is testable offline.
     """
     tdd_on = bool(getattr(session, "tdd_gate_enabled", False))
     if tdd_on:
@@ -9425,11 +9037,7 @@ def _cmd_ultrareview(
         ok = _local_verifier_passes(session)
         verdict_count += 1 if ok else 0
         status = "approve" if ok else "needs-revision"
-        blocks.append(
-            f"--- {voice} ---\n"
-            f"rubric: {rubric}\n"
-            f"status: {status}\n"
-        )
+        blocks.append(f"--- {voice} ---\n" f"rubric: {rubric}\n" f"status: {status}\n")
     final = "approve" if verdict_count == len(voices) else "needs-revision"
     body = "\n".join(blocks) + f"\nverdict: {final}"
     return CommandResult(
@@ -9466,16 +9074,14 @@ def _local_verifier_passes(session: InteractiveSession) -> bool:
 def _cmd_review(session: InteractiveSession, args: str) -> CommandResult:
     """Wave-C baseline + Wave-F auto-review.
 
-    ``/review``           — run the verifier once and print the summary.
-    ``/review --auto on`` — install a post-turn hook that runs the
-        verifier automatically after every agent turn. Reports the
-        verdict on the next line.
-    ``/review --auto off``— remove the hook.
-    ``/review --auto status`` — show whether the hook is armed.
+    ``/review``           — run the verifier once and print the summary. ``/review --auto on`` —
+    install a post-turn hook that runs the     verifier automatically after every agent turn.
+    Reports the     verdict on the next line. ``/review --auto off``— remove the hook. ``/review
+    --auto status`` — show whether the hook is armed.
     """
     arg = args.strip().lower()
     if arg.startswith("--auto"):
-        sub = arg[len("--auto"):].strip() or "status"
+        sub = arg[len("--auto") :].strip() or "status"
         if sub == "status":
             state = "on" if getattr(session, "auto_review", False) else "off"
             return CommandResult(output=f"auto-review: {state}")
@@ -9490,9 +9096,7 @@ def _cmd_review(session: InteractiveSession, args: str) -> CommandResult:
         if sub == "off":
             session.auto_review = False  # type: ignore[attr-defined]
             return CommandResult(output="auto-review: off")
-        return CommandResult(
-            output=f"usage: /review --auto [on|off|status] (got {sub!r})"
-        )
+        return CommandResult(output=f"usage: /review --auto [on|off|status] (got {sub!r})")
 
     if getattr(session, "tdd_gate_enabled", False):
         tdd = "on"
@@ -9515,9 +9119,8 @@ def _cmd_review(session: InteractiveSession, args: str) -> CommandResult:
 def run_auto_review(session: InteractiveSession) -> str | None:
     """Run ``/review`` silently when ``session.auto_review`` is set.
 
-    Returns the review output so callers can render it as a
-    post-turn banner (or log it). Returns ``None`` when auto-review
-    is disabled. Never raises — telemetry never blocks the turn.
+    Returns the review output so callers can render it as a post-turn banner (or log it). Returns
+    ``None`` when auto-review is disabled. Never raises — telemetry never blocks the turn.
     """
     if not getattr(session, "auto_review", False):
         return None
@@ -9530,10 +9133,9 @@ def run_auto_review(session: InteractiveSession) -> str | None:
 def _cmd_tdd_gate(session: InteractiveSession, args: str) -> CommandResult:
     """`/tdd-gate on|off|status` — toggle the opt-in TDD plugin.
 
-    v3.0.0 (Phase G) — TDD became opt-in. By default Lyra behaves like
-    a general coding agent (claw-code / opencode / hermes-agent posture);
-    flipping the gate on activates the legacy kernel-level TDD discipline
-    so writes to ``src/**`` need a preceding failing test on disk.
+    v3.0.0 (Phase G) — TDD became opt-in. By default Lyra behaves like a general coding agent (claw-
+    code / opencode / hermes-agent posture); flipping the gate on activates the legacy kernel-level
+    TDD discipline so writes to ``src/**`` need a preceding failing test on disk.
     """
     choice = args.strip().lower()
     if choice == "status":
@@ -9563,9 +9165,7 @@ def _cmd_tdd_gate(session: InteractiveSession, args: str) -> CommandResult:
             output=f"tdd-gate: {state} (use /tdd-gate on|off|status)",
             renderable=_out.tdd_gate_renderable(state),
         )
-    return CommandResult(
-        output=f"usage: /tdd-gate on|off|status  (got {choice!r})."
-    )
+    return CommandResult(output=f"usage: /tdd-gate on|off|status  (got {choice!r}).")
 
 
 # ---------------------------------------------------------------------------
@@ -9596,9 +9196,8 @@ _CONFIG_KNOWN_KEYS: tuple[str, ...] = (
 def _persist_config(session: InteractiveSession) -> None:
     """Write ``session.config`` to disk, swallowing IO errors.
 
-    Writes are best-effort so a read-only ``$HOME`` (CI sandbox, demo
-    mode) doesn't break the live REPL. The next user action still sees
-    the in-memory mutation.
+    Writes are best-effort so a read-only ``$HOME`` (CI sandbox, demo mode) doesn't break the live
+    REPL. The next user action still sees the in-memory mutation.
     """
     cfg = getattr(session, "config", None)
     if cfg is None:
@@ -9609,13 +9208,11 @@ def _persist_config(session: InteractiveSession) -> None:
         pass
 
 
-def _apply_config_key_to_session(
-    session: InteractiveSession, key: str, value: str
-) -> str | None:
+def _apply_config_key_to_session(session: InteractiveSession, key: str, value: str) -> str | None:
     """Side-effect: push one key onto the live session.
 
-    Returns ``None`` on success, or an error string the dispatcher
-    should surface to the user (e.g. unknown theme name).
+    Returns ``None`` on success, or an error string the dispatcher should surface to the user (e.g.
+    unknown theme name).
     """
     from . import themes as _t  # local: avoid import-order cycles
     from .config_store import to_bool
@@ -9670,9 +9267,8 @@ def _apply_config_key_to_session(
 def _cmd_red_proof(session: InteractiveSession, args: str) -> CommandResult:
     """`/red-proof <pytest target>` — prove you went RED.
 
-    Wave-C Task 13. Real pytest invocation; no parsing — exit code
-    is the only signal we trust here. The full TDD state machine
-    (correlate the failing test with the next Edit) lands in Wave F.
+    Wave-C Task 13. Real pytest invocation; no parsing — exit code is the only signal we trust here.
+    The full TDD state machine (correlate the failing test with the next Edit) lands in Wave F.
     """
     target = args.strip()
     if not target:
@@ -9691,8 +9287,8 @@ def _cmd_red_proof(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_config(session: InteractiveSession, args: str) -> CommandResult:
     """`/config list|get <key>|set <key>=<value>`.
 
-    Persists every successful ``set`` to ``session.config_path`` so a
-    user's preferred theme / mode survives a REPL restart.
+    Persists every successful ``set`` to ``session.config_path`` so a user's preferred theme / mode
+    survives a REPL restart.
     """
     parts = args.strip().split(maxsplit=1)
     verb = (parts[0] if parts else "list").lower()
@@ -9733,10 +9329,7 @@ def _cmd_config(session: InteractiveSession, args: str) -> CommandResult:
         value = value.strip()
         if key not in _CONFIG_KNOWN_KEYS:
             return CommandResult(
-                output=(
-                    f"unknown config key {key!r}; "
-                    f"valid: {', '.join(_CONFIG_KNOWN_KEYS)}."
-                )
+                output=(f"unknown config key {key!r}; " f"valid: {', '.join(_CONFIG_KNOWN_KEYS)}.")
             )
         err = _apply_config_key_to_session(session, key, value)
         if err is not None:
@@ -9748,10 +9341,7 @@ def _cmd_config(session: InteractiveSession, args: str) -> CommandResult:
         return CommandResult(output=f"config: {key} = {value}")
 
     return CommandResult(
-        output=(
-            f"usage: /config list|get <key>|set <key>=<value>  "
-            f"(got {verb!r})"
-        )
+        output=(f"usage: /config list|get <key>|set <key>=<value>  " f"(got {verb!r})")
     )
 
 
@@ -9768,6 +9358,7 @@ def _cmd_deepsearch(session: InteractiveSession, args: str) -> CommandResult:
     Emits a per-hop trace (subgoal, sources, support score, contradiction score).
     """
     from .deepsearch import cmd_deepsearch
+
     return cmd_deepsearch(session, args)
 
 
@@ -9779,10 +9370,11 @@ def _cmd_deepsearch(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_specify(session: InteractiveSession, args: str) -> CommandResult:
     """``/specify [topic]`` — generate a structured spec with hidden-question detection.
 
-    Outputs ``spec-<slug>.md`` with acceptance criteria, ambiguity questions,
-    and out-of-scope section. Human gate before plan generation (doc 321).
+    Outputs ``spec-<slug>.md`` with acceptance criteria, ambiguity questions, and out-of-scope
+    section. Human gate before plan generation (doc 321).
     """
     from .spec_driven import cmd_specify
+
     return cmd_specify(session, args)
 
 
@@ -9794,16 +9386,18 @@ def _cmd_bmad(session: InteractiveSession, args: str) -> CommandResult:
     implementation checklist / acceptance criteria / doc outline).
     """
     from .spec_driven import cmd_bmad
+
     return cmd_bmad(session, args)
 
 
 def _cmd_tasks(session: InteractiveSession, args: str) -> CommandResult:
     """``/tasks [--from-spec <file>]`` — split plan/spec into testable task chunks.
 
-    Each task gets an ID, description, acceptance criteria, size estimate (S/M/L),
-    and dependency list. Writes ``.lyra/tasks-<date>.md``.
+    Each task gets an ID, description, acceptance criteria, size estimate (S/M/L), and dependency
+    list. Writes ``.lyra/tasks-<date>.md``.
     """
     from .spec_driven import cmd_tasks
+
     return cmd_tasks(session, args)
 
 
@@ -9826,9 +9420,7 @@ def _cmd_tasklist(session: InteractiveSession, args: str) -> CommandResult:
         item = TaskItem(id=task_id, description=desc, state="pending")
         session.persistent_tasks.append(item)
         session.status_source.update(
-            persistent_task_count=sum(
-                1 for t in session.persistent_tasks if t.state != "done"
-            )
+            persistent_task_count=sum(1 for t in session.persistent_tasks if t.state != "done")
         )
         return CommandResult(
             output=f"added task {task_id}: {desc}",
@@ -9844,8 +9436,7 @@ def _cmd_tasklist(session: InteractiveSession, args: str) -> CommandResult:
                 t.state = "done"
                 session.status_source.update(
                     persistent_task_count=sum(
-                        1 for t2 in session.persistent_tasks
-                        if t2.state != "done"
+                        1 for t2 in session.persistent_tasks if t2.state != "done"
                     )
                 )
                 return CommandResult(
@@ -9859,14 +9450,10 @@ def _cmd_tasklist(session: InteractiveSession, args: str) -> CommandResult:
 
     if subcmd == "clear":
         before = len(session.persistent_tasks)
-        session.persistent_tasks = [
-            t for t in session.persistent_tasks if t.state != "done"
-        ]
+        session.persistent_tasks = [t for t in session.persistent_tasks if t.state != "done"]
         removed = before - len(session.persistent_tasks)
         session.status_source.update(
-            persistent_task_count=sum(
-                1 for t in session.persistent_tasks if t.state != "done"
-            )
+            persistent_task_count=sum(1 for t in session.persistent_tasks if t.state != "done")
         )
         return CommandResult(
             output=f"cleared {removed} completed task(s)",
@@ -9883,9 +9470,9 @@ def _cmd_tasklist(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_shell(session: InteractiveSession, args: str) -> CommandResult:
     """``/shell [on|off]`` — toggle dedicated shell sub-mode.
 
-    When shell mode is on, plain-text input (lines that don't start with
-    ``/`` or ``!``) is executed as a shell command instead of being sent
-    to the LLM. Use ``/shell off`` or ``/shell`` (toggle) to exit.
+    When shell mode is on, plain-text input (lines that don't start with ``/`` or ``!``) is executed
+    as a shell command instead of being sent to the LLM. Use ``/shell off`` or ``/shell`` (toggle)
+    to exit.
     """
     sub = args.strip().lower()
     if sub in ("", "toggle"):
@@ -9926,16 +9513,18 @@ def _cmd_verify(session: InteractiveSession, args: str) -> CommandResult:
     against explicit goals. Surfaces gap between output and threshold (doc 326).
     """
     from .checkpoints import cmd_verify
+
     return cmd_verify(session, args)
 
 
 def _cmd_checkpoint(session: InteractiveSession, args: str) -> CommandResult:
     """``/checkpoint [label]`` — save current agent state.
 
-    Persists turn, model, mode, cost, last message to
-    ``~/.lyra/checkpoints/<session-id>/<label>.json``.
+    Persists turn, model, mode, cost, last message to ``~/.lyra/checkpoints/<session-
+    id>/<label>.json``.
     """
     from .checkpoints import cmd_checkpoint
+
     return cmd_checkpoint(session, args)
 
 
@@ -9946,6 +9535,7 @@ def _cmd_rollback(session: InteractiveSession, args: str) -> CommandResult:
     With label: restore model/mode/pending_task from that checkpoint.
     """
     from .checkpoints import cmd_rollback
+
     return cmd_rollback(session, args)
 
 
@@ -9957,11 +9547,12 @@ def _cmd_rollback(session: InteractiveSession, args: str) -> CommandResult:
 def _cmd_route(session: InteractiveSession, args: str) -> CommandResult:
     """``/route [status|set <slot> <tier>|reset]`` — model routing policy.
 
-    Shows or configures the 8-slot routing table (intent / search / planning /
-    execution / synthesis / verification / review / final). Tiers: fast · mid ·
-    strong · advisor. Persisted to ``~/.lyra/route-policy.json`` (doc 323).
+    Shows or configures the 8-slot routing table (intent / search / planning / execution / synthesis
+    / verification / review / final). Tiers: fast · mid · strong · advisor. Persisted to
+    ``~/.lyra/route-policy.json`` (doc 323).
     """
     from .model_router import cmd_route
+
     return cmd_route(session, args)
 
 
@@ -9972,6 +9563,7 @@ def _cmd_monitor(session: InteractiveSession, args: str) -> CommandResult:
     Working · Completed. Space=peek, Enter=attach (doc 325 Agent View).
     """
     from .monitor import cmd_monitor
+
     return cmd_monitor(session, args)
 
 
@@ -9982,6 +9574,7 @@ def _cmd_aer(session: InteractiveSession, args: str) -> CommandResult:
     ``/aer timeline`` — flat event list in chronological order (doc 322).
     """
     from .monitor import cmd_aer
+
     return cmd_aer(session, args)
 
 
@@ -10034,21 +9627,13 @@ from lyra_cli.commands.registry import (  # noqa: E402
 from .v311_commands import (  # noqa: E402
     cmd_bundle as _cmd_bundle_v311,
 )
-from .v311_commands import (
-    cmd_coverage as _cmd_coverage_v311,
-)
-from .v311_commands import (
-    cmd_scaling as _cmd_scaling_v311,
-)
-from .v311_commands import (
-    cmd_team as _cmd_team_v311,
-)
 
 # --- Skill System Handlers (Phase 1) -----------------------------------------
 
 
 def _cmd_skill(session: InteractiveSession, args: str) -> CommandResult:
-    """``/skill [list|search|reload|info|browse|install|update|uninstall]`` — manage skills or launch interactive picker."""
+    """``/skill [list|search|reload|info|browse|install|update|uninstall]`` — manage skills or
+    launch interactive picker."""
     import sys
 
     from lyra_cli.cli.skill_manager import SkillManager
@@ -10117,7 +9702,10 @@ def _cmd_skill(session: InteractiveSession, args: str) -> CommandResult:
         return _cmd_skill_uninstall(session, rest)
     else:
         return CommandResult(
-            output=f"Unknown subcommand '{sub}'. Use: /skill [list|search|reload|info|browse|install|update|uninstall]"
+            output=(
+                f"Unknown subcommand '{sub}"
+                f"'. Use: /skill [list|search|reload|info|browse|install|update|uninstall]"
+            )
         )
 
 
@@ -10374,12 +9962,12 @@ def _cmd_skill_update(session: InteractiveSession, args: str) -> CommandResult:
 
     # Perform updates
     lines = ["Checking for updates...", "", "Updates available:"]
-    for name, (current, latest) in updates.items():
-        lines.append(f"  {name}: {current} → {latest}")
+    for name, (_current, latest) in updates.items():
+        lines.append(f"  {name}: {_current} → {latest}")
 
     lines.append("")
 
-    for name, (current, latest) in updates.items():
+    for name, (_current, latest) in updates.items():
         lines.append(f"Updating {name}...")
         try:
             skill_package = client.download_skill(name, latest)
@@ -10459,9 +10047,7 @@ COMMAND_REGISTRY: tuple[CommandSpec, ...] = (
         "session",
         aliases=("providers",),
     ),
-    CommandSpec(
-        "status", _cmd_status, "print session status (mode, model, turn, cost)", "session"
-    ),
+    CommandSpec("status", _cmd_status, "print session status (mode, model, turn, cost)", "session"),
     CommandSpec(
         "history",
         _cmd_history,
@@ -10580,7 +10166,8 @@ COMMAND_REGISTRY: tuple[CommandSpec, ...] = (
         args_hint="[low|medium|high|ultra]",
     ),
     CommandSpec(
-        "goal", _cmd_goal,
+        "goal",
+        _cmd_goal,
         "set a completion condition and auto-iterate until met",
         "plan-build-run",
         args_hint="[<condition>|status|clear]",
@@ -11005,7 +10592,10 @@ COMMAND_REGISTRY: tuple[CommandSpec, ...] = (
     CommandSpec(
         "bundle",
         _cmd_bundle_v311,
-        "Software 3.0 bundle pipeline — info, install, export to {claude-code,cursor,codex,gemini-cli}",
+(
+            "Software 3.0 bundle pipeline — info, install, export to"
+            "{claude-code,cursor,codex,gemini-cli}"
+        ),
         "config-theme",
         args_hint="[info <path>|install <path>|export <path> <target>|help]",
     ),
@@ -11038,9 +10628,7 @@ COMMAND_REGISTRY: tuple[CommandSpec, ...] = (
     # ``test_registry_names_are_unique`` to fail and could shadow the
     # ``keys`` alias depending on iteration order. Single source of truth.
     CommandSpec("policy", _cmd_policy, "print .lyra/policy.yaml", "config-theme"),
-    CommandSpec(
-        "doctor", _cmd_doctor, "quick health check for this repo", "config-theme"
-    ),
+    CommandSpec("doctor", _cmd_doctor, "quick health check for this repo", "config-theme"),
     CommandSpec(
         "auth",
         _cmd_auth,
@@ -11239,9 +10827,7 @@ COMMAND_REGISTRY: tuple[CommandSpec, ...] = (
 )
 
 
-def _build_lookup() -> tuple[
-    dict[str, CommandSpec], dict[str, SlashHandler], dict[str, str]
-]:
+def _build_lookup() -> tuple[dict[str, CommandSpec], dict[str, SlashHandler], dict[str, str]]:
     by_name: dict[str, CommandSpec] = {}
     handlers: dict[str, SlashHandler] = {}
     docs: dict[str, str] = {}
@@ -11275,21 +10861,25 @@ def command_spec(name: str) -> CommandSpec | None:
 
 
 def subcommands_for(name: str) -> tuple[str, ...]:
-    """Subcommand stems for ``name`` (or its alias). Empty tuple if none."""
+    """Subcommand stems for ``name`` (or its alias).
+
+    Empty tuple if none.
+    """
     spec = _BY_NAME.get(name)
     return spec.subcommands if spec else ()
 
 
 def aliases_for(name: str) -> tuple[str, ...]:
-    """Alternative names for the canonical command ``name``. Empty if none."""
+    """Alternative names for the canonical command ``name``.
+
+    Empty if none.
+    """
     spec = _BY_NAME.get(name)
     if spec is None:
         return ()
     # Don't echo back the alias the caller asked with — only return the
     # *other* names registered under the same canonical spec.
-    return tuple(a for a in spec.aliases if a != name) + (
-        (spec.name,) if name != spec.name else ()
-    )
+    return tuple(a for a in spec.aliases if a != name) + ((spec.name,) if name != spec.name else ())
 
 
 def commands_by_category() -> dict[str, list[CommandSpec]]:

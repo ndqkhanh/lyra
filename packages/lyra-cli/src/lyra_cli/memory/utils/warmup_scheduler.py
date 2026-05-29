@@ -108,9 +108,7 @@ class WarmupScheduler:
 
         return should_extract
 
-    def get_extraction_window(
-        self, session_id: str, current_turn: int
-    ) -> int | None:
+    def get_extraction_window(self, session_id: str, current_turn: int) -> int | None:
         """
         Get the number of recent turns to extract from.
 
@@ -137,7 +135,9 @@ class WarmupScheduler:
             else:
                 # This is tricky - we need to track previous extraction
                 # For now, use a simple heuristic
-                window = current_turn - (last_extraction - 1) if last_extraction > 1 else current_turn
+                window = (
+                    current_turn - (last_extraction - 1) if last_extraction > 1 else current_turn
+                )
         else:
             window = current_turn - last_extraction
 

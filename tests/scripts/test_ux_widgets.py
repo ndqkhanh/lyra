@@ -4,11 +4,9 @@
 This script verifies that all UX improvement widgets are properly
 integrated and functional.
 """
+
 import sys
 from pathlib import Path
-
-# Add src to path
-sys.path.insert(0, str(Path(__file__).parent / "packages/lyra-cli/src"))
 
 from lyra_cli.tui_v2.app import LyraHarnessApp
 from lyra_cli.tui_v2.widgets import (
@@ -20,6 +18,9 @@ from lyra_cli.tui_v2.widgets import (
     ThinkingIndicator,
 )
 
+# Add src to path
+sys.path.insert(0, str(Path(__file__).parent / "packages/lyra-cli/src"))
+
 
 def test_widget_initialization():
     """Test that all widgets are initialized in LyraHarnessApp."""
@@ -27,6 +28,7 @@ def test_widget_initialization():
 
     # Create a minimal config
     from harness_tui.app import ProjectConfig
+
     cfg = ProjectConfig(
         name="test-project",
         working_dir=Path.cwd(),
@@ -37,22 +39,24 @@ def test_widget_initialization():
     app = LyraHarnessApp(cfg)
 
     # Verify all widgets are initialized
-    assert hasattr(app, 'progress_spinner'), "ProgressSpinner not initialized"
+    assert hasattr(app, "progress_spinner"), "ProgressSpinner not initialized"
     assert isinstance(app.progress_spinner, ProgressSpinner), "Wrong type for progress_spinner"
 
-    assert hasattr(app, 'agent_panel'), "AgentExecutionPanel not initialized"
+    assert hasattr(app, "agent_panel"), "AgentExecutionPanel not initialized"
     assert isinstance(app.agent_panel, AgentExecutionPanel), "Wrong type for agent_panel"
 
-    assert hasattr(app, 'metrics_tracker'), "MetricsTracker not initialized"
+    assert hasattr(app, "metrics_tracker"), "MetricsTracker not initialized"
     assert isinstance(app.metrics_tracker, MetricsTracker), "Wrong type for metrics_tracker"
 
-    assert hasattr(app, 'bg_panel'), "BackgroundTaskPanel not initialized"
+    assert hasattr(app, "bg_panel"), "BackgroundTaskPanel not initialized"
     assert isinstance(app.bg_panel, BackgroundTaskPanel), "Wrong type for bg_panel"
 
-    assert hasattr(app, 'thinking_indicator'), "ThinkingIndicator not initialized"
-    assert isinstance(app.thinking_indicator, ThinkingIndicator), "Wrong type for thinking_indicator"
+    assert hasattr(app, "thinking_indicator"), "ThinkingIndicator not initialized"
+    assert isinstance(
+        app.thinking_indicator, ThinkingIndicator
+    ), "Wrong type for thinking_indicator"
 
-    assert hasattr(app, 'phase_progress'), "PhaseProgress not initialized"
+    assert hasattr(app, "phase_progress"), "PhaseProgress not initialized"
     assert isinstance(app.phase_progress, PhaseProgress), "Wrong type for phase_progress"
 
     print("✓ All widgets initialized correctly")
@@ -158,6 +162,7 @@ def test_thinking_indicator():
 
     # End thinking
     import time
+
     time.sleep(0.1)
     indicator.end_thinking()
     elapsed = indicator.get_duration()
@@ -189,6 +194,7 @@ def main():
     except Exception as e:
         print(f"\n✗ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
         return 1
 

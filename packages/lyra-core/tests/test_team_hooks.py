@@ -1,4 +1,5 @@
 """Tests for L311-1/3 — shell-script hook gates for team events."""
+
 from __future__ import annotations
 
 import stat
@@ -111,7 +112,7 @@ def test_gate_no_hooks_returns_empty():
 def test_gate_passes_payload_via_env_and_stdin():
     reg = TeamHookRegistry()
     # The shell script reads stdin and asserts payload contents are present.
-    script = "read -r line && echo \"$line\" | grep -q '\"team\":' || exit 1"
+    script = 'read -r line && echo "$line" | grep -q \'"team":\' || exit 1'
     reg.register(HookSpec(event="team.task_created", script=script))
     result = reg.gate("team.task_created", {"team": "auth-refactor"})
     assert not result.blocked
@@ -122,7 +123,10 @@ def test_gate_env_vars_set():
     reg.register(
         HookSpec(
             event="team.task_completed",
-            script='[ "$LYRA_HOOK_EVENT" = "team.task_completed" ] && [ "$LYRA_HOOK_TEAM" = "auth-refactor" ] || exit 1',
+            script=(
+                '[ "$LYRA_HOOK_EVENT" = "team.task_completed" ] && [ "$LYRA_HOOK_TEAM" ='
+                '"auth-refactor" ] || exit 1'
+            ),
         )
     )
     result = reg.gate(
@@ -165,12 +169,8 @@ def test_gate_executes_real_path(tmp_path):
 
 
 def test_lead_add_task_blocked_by_hook(tmp_path):
-    global_registry().register(
-        HookSpec(event="team.task_created", script="exit 2")
-    )
-    lead = LeadSession.create(
-        team_name="t", team_dir=tmp_path / "t", executor=_stub_executor
-    )
+    global_registry().register(HookSpec(event="team.task_created", script="exit 2"))
+    lead = LeadSession.create(team_name="t", team_dir=tmp_path / "t", executor=_stub_executor)
     lead.spawn(TeammateSpec(name="alice"))
     with pytest.raises(HookBlockedError):
         lead.add_task("blocked task", assign="alice")
@@ -180,12 +180,8 @@ def test_lead_add_task_blocked_by_hook(tmp_path):
 
 
 def test_lead_task_completed_hook_block_reverts(tmp_path):
-    global_registry().register(
-        HookSpec(event="team.task_completed", script="exit 2")
-    )
-    lead = LeadSession.create(
-        team_name="t", team_dir=tmp_path / "t", executor=_stub_executor
-    )
+    global_registry().register(HookSpec(event="team.task_completed", script="exit 2"))
+    lead = LeadSession.create(team_name="t", team_dir=tmp_path / "t", executor=_stub_executor)
     lead.spawn(TeammateSpec(name="alice"))
     lead.add_task("x", assign="alice")
     lead.run_until_idle(timeout_s=2.0)
@@ -201,9 +197,7 @@ def test_lead_task_completed_hook_block_reverts(tmp_path):
 
 
 def test_lead_passes_when_no_hooks(tmp_path):
-    lead = LeadSession.create(
-        team_name="t", team_dir=tmp_path / "t", executor=_stub_executor
-    )
+    lead = LeadSession.create(team_name="t", team_dir=tmp_path / "t", executor=_stub_executor)
     lead.spawn(TeammateSpec(name="alice"))
     lead.add_task("x", assign="alice")
     lead.run_until_idle(timeout_s=2.0)
@@ -213,12 +207,8 @@ def test_lead_passes_when_no_hooks(tmp_path):
 def test_lead_idle_hook_advisory_only(tmp_path):
     """`team.teammate_idle` hooks fire but cannot block — the task is
     already done."""
-    global_registry().register(
-        HookSpec(event="team.teammate_idle", script="exit 2")
-    )
-    lead = LeadSession.create(
-        team_name="t", team_dir=tmp_path / "t", executor=_stub_executor
-    )
+    global_registry().register(HookSpec(event="team.teammate_idle", script="exit 2"))
+    lead = LeadSession.create(team_name="t", team_dir=tmp_path / "t", executor=_stub_executor)
     lead.spawn(TeammateSpec(name="alice"))
     lead.add_task("x", assign="alice")
     lead.run_until_idle(timeout_s=2.0)
@@ -271,6 +261,6 @@ def test_load_hooks_yaml_skips_invalid_entries(tmp_path):
 
 
 def test_hookable_events_set():
-    assert HOOKABLE_EVENTS == frozenset({
-        "team.task_created", "team.task_completed", "team.teammate_idle"
-    })
+    assert HOOKABLE_EVENTS == frozenset(
+        {"team.task_created", "team.task_completed", "team.teammate_idle"}
+    )

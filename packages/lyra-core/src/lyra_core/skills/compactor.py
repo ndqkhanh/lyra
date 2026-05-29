@@ -1,6 +1,7 @@
 """Skill Compactor — auto-compaction of skill documents to reduce token usage.
 
-Part of the 6-phase skill lifecycle (Plan 31): Curate → Load → Invoke → Learn → Evolve → **COMPACT**.
+Part of the 6-phase skill lifecycle (Plan 31): Curate → Load → Invoke → Learn → Evolve →
+**COMPACT**.
 
 When a skill document exceeds the token budget, the compactor preserves the
 essential instruction structure while removing redundant examples and verbose
@@ -46,19 +47,32 @@ class SkillCompactor:
             save(report.compacted_text)
     """
 
-    _SECTION_RE: ClassVar[re.Pattern] = re.compile(
-        r"^#{1,3}\s+(.+)$", re.MULTILINE
-    )
+    _SECTION_RE: ClassVar[re.Pattern] = re.compile(r"^#{1,3}\s+(.+)$", re.MULTILINE)
     _PRESERVE_SECTIONS: ClassVar[set[str]] = {
-        "purpose", "overview", "description", "procedure", "steps",
-        "allowed-tools", "allowed-context", "prerequisites",
+        "purpose",
+        "overview",
+        "description",
+        "procedure",
+        "steps",
+        "allowed-tools",
+        "allowed-context",
+        "prerequisites",
     }
     _COMPACT_SECTIONS: ClassVar[set[str]] = {
-        "examples", "example", "notes", "background", "details",
-        "appendix", "faq", "troubleshooting",
+        "examples",
+        "example",
+        "notes",
+        "background",
+        "details",
+        "appendix",
+        "faq",
+        "troubleshooting",
     }
     _SKIP_SECTIONS: ClassVar[set[str]] = {
-        "changelog", "history", "version-history", "deprecated",
+        "changelog",
+        "history",
+        "version-history",
+        "deprecated",
     }
 
     def __init__(self, max_tokens: int = 2000):

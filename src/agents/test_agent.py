@@ -125,7 +125,10 @@ class TestAgent(Agent):
             {
                 "name": "test_error_handling",
                 "description": "Test error handling",
-                "code": "def test_error_handling():\n    with pytest.raises(Exception):\n        example(invalid_input)",
+                "code":(
+                    "def test_error_handling():\n    with pytest.raises(Exception):\n       "
+                    "example(invalid_input)"
+                ),
             },
         ]
 

@@ -95,7 +95,7 @@ def test_model_list_highlights_selected_model(
     s.current_llm_name = "anthropic"
     out = s._cmd_model_list("")
     anthropic_line = next(
-        (l for l in out.splitlines() if "anthropic" in l.lower()), ""
+        (line for line in out.splitlines() if "anthropic" in line.lower()), ""
     )
     assert any(
         marker in anthropic_line

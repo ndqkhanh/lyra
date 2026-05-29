@@ -1,8 +1,10 @@
 """lyra_harness_core.multi_hop — multi-hop reasoning substrate.
 
-Per [docs/199-multi-hop-reasoning-techniques-arc.md](../../../../../../research/harness-engineering/docs/199-multi-hop-reasoning-techniques-arc.md),
+Per
+[docs/199-multi-hop-reasoning-techniques-arc.md](../../../../../../research/harness-engineering/docs/199-multi-hop-reasoning-techniques-arc.md),
 [docs/200-graph-grounded-multi-hop-retrieval.md](../../../../../../research/harness-engineering/docs/200-graph-grounded-multi-hop-retrieval.md),
-and [docs/211-cross-project-power-up-plan-with-tradeoffs.md](../../../../../../research/harness-engineering/docs/211-cross-project-power-up-plan-with-tradeoffs.md)
+and
+[docs/211-cross-project-power-up-plan-with-tradeoffs.md](../../../../../../research/harness-engineering/docs/211-cross-project-power-up-plan-with-tradeoffs.md)
 §9 milestone M3.
 
 Promoted from ``polaris-core/memory/ppr_fusion.py`` (HippoRAG-2 over Polaris's
@@ -16,6 +18,7 @@ Modules:
     - ``decomposition_cache`` — sub-question decomposition memo (per [docs/199]
       and Tier-0 of [docs/203]/[docs/208]/[docs/220]).
 """
+
 from __future__ import annotations
 
 from .anchor_predictor import (

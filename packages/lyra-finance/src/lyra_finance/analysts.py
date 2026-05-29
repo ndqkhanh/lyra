@@ -44,9 +44,13 @@ class BaseAnalyst(ABC):
         self.logger = logging.getLogger(f"{__name__}.{self.name}")
 
     @abstractmethod
-    def analyze(self, symbol: str, asset: Asset | None = None,
-                market_data: Sequence[MarketData] | None = None,
-                signals: Sequence[SentimentSignal] | None = None) -> AnalystReport:
+    def analyze(
+        self,
+        symbol: str,
+        asset: Asset | None = None,
+        market_data: Sequence[MarketData] | None = None,
+        signals: Sequence[SentimentSignal] | None = None,
+    ) -> AnalystReport:
         """Produce an AnalystReport for the given symbol."""
         ...
 
@@ -59,6 +63,7 @@ class BaseAnalyst(ABC):
 @dataclass
 class FinancialStatement:
     """Simplified financial statement for fundamental analysis."""
+
     revenue: float = 0.0
     cost_of_goods_sold: float = 0.0
     operating_expenses: float = 0.0
@@ -82,8 +87,11 @@ class FundamentalAnalyst(BaseAnalyst):
     - Growth trajectory assessment
     """
 
-    def __init__(self, name: str = "FundamentalAnalyst",
-                 statements: dict[str, FinancialStatement] | None = None) -> None:
+    def __init__(
+        self,
+        name: str = "FundamentalAnalyst",
+        statements: dict[str, FinancialStatement] | None = None,
+    ) -> None:
         super().__init__(name)
         self._statements: dict[str, FinancialStatement] = statements or {}
 
@@ -91,9 +99,13 @@ class FundamentalAnalyst(BaseAnalyst):
         """Register a financial statement for a symbol."""
         self._statements[symbol] = statement
 
-    def analyze(self, symbol: str, asset: Asset | None = None,
-                market_data: Sequence[MarketData] | None = None,
-                signals: Sequence[SentimentSignal] | None = None) -> AnalystReport:
+    def analyze(
+        self,
+        symbol: str,
+        asset: Asset | None = None,
+        market_data: Sequence[MarketData] | None = None,
+        signals: Sequence[SentimentSignal] | None = None,
+    ) -> AnalystReport:
         statement = self._statements.get(symbol)
         if statement is None:
             return AnalystReport(
@@ -141,8 +153,9 @@ class FundamentalAnalyst(BaseAnalyst):
             metadata=metadata,
         )
 
-    def _compute_ratios(self, statement: FinancialStatement,
-                        asset: Asset | None) -> dict[str, float | None]:
+    def _compute_ratios(
+        self, statement: FinancialStatement, asset: Asset | None
+    ) -> dict[str, float | None]:
         """Compute key financial ratios."""
         ratios: dict[str, float | None] = {}
 
@@ -156,26 +169,31 @@ class FundamentalAnalyst(BaseAnalyst):
         # P/B ratio
         if asset and statement.total_equity > 0 and statement.shares_outstanding > 0:
             book_value_per_share = statement.total_equity / statement.shares_outstanding
-            ratios["pb_ratio"] = asset.current_price / book_value_per_share if book_value_per_share > 0 else None
+            ratios["pb_ratio"] = (
+                asset.current_price / book_value_per_share if book_value_per_share > 0 else None
+            )
         else:
             ratios["pb_ratio"] = None
 
         # D/E ratio
         ratios["de_ratio"] = (
             statement.total_liabilities / statement.total_equity
-            if statement.total_equity > 0 else None
+            if statement.total_equity > 0
+            else None
         )
 
         # ROE
         ratios["roe_pct"] = (
             (statement.net_income / statement.total_equity) * 100.0
-            if statement.total_equity > 0 else None
+            if statement.total_equity > 0
+            else None
         )
 
         # ROA
         ratios["roa_pct"] = (
             (statement.net_income / statement.total_assets) * 100.0
-            if statement.total_assets > 0 else None
+            if statement.total_assets > 0
+            else None
         )
 
         # Gross margin
@@ -187,12 +205,16 @@ class FundamentalAnalyst(BaseAnalyst):
 
         # Net margin
         ratios["net_margin_pct"] = (
-            (statement.net_income / statement.revenue) * 100.0
-            if statement.revenue > 0 else None
+            (statement.net_income / statement.revenue) * 100.0 if statement.revenue > 0 else None
         )
 
         # FCF yield
-        if asset and statement.free_cash_flow > 0 and asset.current_price > 0 and statement.shares_outstanding > 0:
+        if (
+            asset
+            and statement.free_cash_flow > 0
+            and asset.current_price > 0
+            and statement.shares_outstanding > 0
+        ):
             fcf_per_share = statement.free_cash_flow / statement.shares_outstanding
             ratios["fcf_yield"] = (fcf_per_share / asset.current_price) * 100.0
         else:
@@ -200,8 +222,9 @@ class FundamentalAnalyst(BaseAnalyst):
 
         return ratios
 
-    def _compute_fundamental_score(self, ratios: dict[str, float | None],
-                                   statement: FinancialStatement) -> float:
+    def _compute_fundamental_score(
+        self, ratios: dict[str, float | None], statement: FinancialStatement
+    ) -> float:
         """Score from 0-100 based on fundamental health."""
         score = 50.0  # neutral baseline
 
@@ -249,9 +272,9 @@ class FundamentalAnalyst(BaseAnalyst):
 
         return max(0.0, min(100.0, score))
 
-    def _estimate_target_price(self, asset: Asset | None,
-                                statement: FinancialStatement,
-                                ratios: dict[str, float | None]) -> float | None:
+    def _estimate_target_price(
+        self, asset: Asset | None, statement: FinancialStatement, ratios: dict[str, float | None]
+    ) -> float | None:
         """Estimate target price from P/E multiple approach."""
         if not asset or asset.current_price <= 0:
             return None
@@ -259,7 +282,11 @@ class FundamentalAnalyst(BaseAnalyst):
         if pe is not None and pe > 0:
             # Apply industry-average P/E expansion/contraction
             target_pe = pe * 1.1  # 10% expansion for quality
-            eps = statement.net_income / statement.shares_outstanding if statement.shares_outstanding > 0 else 0
+            eps = (
+                statement.net_income / statement.shares_outstanding
+                if statement.shares_outstanding > 0
+                else 0
+            )
             if eps > 0:
                 return target_pe * eps
         return None
@@ -289,8 +316,9 @@ class SentimentAnalyst(BaseAnalyst):
     confidence-weighted averaging.
     """
 
-    def __init__(self, name: str = "SentimentAnalyst",
-                 weights: dict[str, float] | None = None) -> None:
+    def __init__(
+        self, name: str = "SentimentAnalyst", weights: dict[str, float] | None = None
+    ) -> None:
         super().__init__(name)
         self._weights = weights or {
             SignalSource.NEWS_ARTICLE.value: 1.0,
@@ -302,9 +330,13 @@ class SentimentAnalyst(BaseAnalyst):
             SignalSource.INSIDER_TRADING.value: 1.3,
         }
 
-    def analyze(self, symbol: str, asset: Asset | None = None,
-                market_data: Sequence[MarketData] | None = None,
-                signals: Sequence[SentimentSignal] | None = None) -> AnalystReport:
+    def analyze(
+        self,
+        symbol: str,
+        asset: Asset | None = None,
+        market_data: Sequence[MarketData] | None = None,
+        signals: Sequence[SentimentSignal] | None = None,
+    ) -> AnalystReport:
         if not signals:
             return AnalystReport(
                 analyst_type=AnalystType.SENTIMENT,
@@ -356,8 +388,7 @@ class SentimentAnalyst(BaseAnalyst):
             },
         )
 
-    def _aggregate_sentiment(self, signals: Sequence[SentimentSignal]
-                             ) -> tuple[float, float]:
+    def _aggregate_sentiment(self, signals: Sequence[SentimentSignal]) -> tuple[float, float]:
         """Confidence-weighted average of sentiment signals."""
         total_weighted = 0.0
         total_confidence = 0.0
@@ -398,9 +429,13 @@ class TechnicalAnalyst(BaseAnalyst):
     - Support/resistance level detection
     """
 
-    def analyze(self, symbol: str, asset: Asset | None = None,
-                market_data: Sequence[MarketData] | None = None,
-                signals: Sequence[SentimentSignal] | None = None) -> AnalystReport:
+    def analyze(
+        self,
+        symbol: str,
+        asset: Asset | None = None,
+        market_data: Sequence[MarketData] | None = None,
+        signals: Sequence[SentimentSignal] | None = None,
+    ) -> AnalystReport:
         if not market_data:
             return AnalystReport(
                 analyst_type=AnalystType.TECHNICAL,
@@ -460,20 +495,28 @@ class TechnicalAnalyst(BaseAnalyst):
         # RSI
         rsi = self._rsi(closes, 14)
         rsi_signal = SentimentSignal(
-            symbol=symbol, score=0.0, source=SignalSource.NEWS_ARTICLE,
+            symbol=symbol,
+            score=0.0,
+            source=SignalSource.NEWS_ARTICLE,
             headline=f"RSI-14: {rsi:.1f}",
         )
         if rsi < 30:
             scores += 10  # oversold — bullish
             rsi_signal = SentimentSignal(
-                symbol=symbol, score=0.7, source=SignalSource.NEWS_ARTICLE,
-                confidence=0.6, headline=f"RSI oversold ({rsi:.1f})",
+                symbol=symbol,
+                score=0.7,
+                source=SignalSource.NEWS_ARTICLE,
+                confidence=0.6,
+                headline=f"RSI oversold ({rsi:.1f})",
             )
         elif rsi > 70:
             scores -= 10  # overbought — bearish
             rsi_signal = SentimentSignal(
-                symbol=symbol, score=-0.7, source=SignalSource.NEWS_ARTICLE,
-                confidence=0.6, headline=f"RSI overbought ({rsi:.1f})",
+                symbol=symbol,
+                score=-0.7,
+                source=SignalSource.NEWS_ARTICLE,
+                confidence=0.6,
+                headline=f"RSI overbought ({rsi:.1f})",
             )
         signals_list.append(rsi_signal)
 
@@ -481,7 +524,9 @@ class TechnicalAnalyst(BaseAnalyst):
         macd_line, signal_line = self._macd(closes)
         macd_histogram = macd_line[-1] - signal_line[-1]
         macd_signal = SentimentSignal(
-            symbol=symbol, score=0.0, source=SignalSource.NEWS_ARTICLE,
+            symbol=symbol,
+            score=0.0,
+            source=SignalSource.NEWS_ARTICLE,
             headline=f"MACD histogram: {macd_histogram:.3f}",
         )
         if macd_histogram > 0 and len(macd_line) > 1:
@@ -489,16 +534,22 @@ class TechnicalAnalyst(BaseAnalyst):
             if macd_histogram > prev_histogram:
                 scores += 8  # bullish MACD momentum
                 macd_signal = SentimentSignal(
-                    symbol=symbol, score=0.6, source=SignalSource.NEWS_ARTICLE,
-                    confidence=0.55, headline=f"MACD bullish ({macd_histogram:+.3f})",
+                    symbol=symbol,
+                    score=0.6,
+                    source=SignalSource.NEWS_ARTICLE,
+                    confidence=0.55,
+                    headline=f"MACD bullish ({macd_histogram:+.3f})",
                 )
         elif macd_histogram < 0:
             prev_histogram = macd_line[-2] - signal_line[-2] if len(macd_line) > 1 else 0
             if macd_histogram < prev_histogram:
                 scores -= 8  # bearish MACD momentum
                 macd_signal = SentimentSignal(
-                    symbol=symbol, score=-0.6, source=SignalSource.NEWS_ARTICLE,
-                    confidence=0.55, headline=f"MACD bearish ({macd_histogram:+.3f})",
+                    symbol=symbol,
+                    score=-0.6,
+                    source=SignalSource.NEWS_ARTICLE,
+                    confidence=0.55,
+                    headline=f"MACD bearish ({macd_histogram:+.3f})",
                 )
         signals_list.append(macd_signal)
 
@@ -582,9 +633,9 @@ class TechnicalAnalyst(BaseAnalyst):
         rs = avg_gain / avg_loss
         return 100.0 - (100.0 / (1.0 + rs))
 
-    def _macd(self, closes: Sequence[float],
-              fast: int = 12, slow: int = 26, signal_period: int = 9
-              ) -> tuple[list[float], list[float]]:
+    def _macd(
+        self, closes: Sequence[float], fast: int = 12, slow: int = 26, signal_period: int = 9
+    ) -> tuple[list[float], list[float]]:
         """Compute MACD line and signal line from closing prices.
 
         Proper forward computation: MACD line = EMA(fast) - EMA(slow),
@@ -625,8 +676,8 @@ class TechnicalAnalyst(BaseAnalyst):
             signal_values.append(signal_ema)
 
         # Return last few values for recent analysis
-        recent_macd = macd_values[-signal_period - 1:]
-        recent_signal = signal_values[-signal_period - 1:]
+        recent_macd = macd_values[-signal_period - 1 :]
+        recent_signal = signal_values[-signal_period - 1 :]
         return recent_macd, recent_signal
 
     @staticmethod
@@ -694,9 +745,13 @@ class NewsAnalyst(BaseAnalyst):
             "legal_settlement": -5.0,
         }
 
-    def analyze(self, symbol: str, asset: Asset | None = None,
-                market_data: Sequence[MarketData] | None = None,
-                signals: Sequence[SentimentSignal] | None = None) -> AnalystReport:
+    def analyze(
+        self,
+        symbol: str,
+        asset: Asset | None = None,
+        market_data: Sequence[MarketData] | None = None,
+        signals: Sequence[SentimentSignal] | None = None,
+    ) -> AnalystReport:
         if not signals:
             return AnalystReport(
                 analyst_type=AnalystType.NEWS,

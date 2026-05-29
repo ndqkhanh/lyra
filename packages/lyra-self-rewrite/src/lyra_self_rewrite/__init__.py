@@ -1,4 +1,6 @@
-"""Lyra Self-Rewrite — DGM (Differentiable Goal Model) HyperAgent engine for recursive self-improvement through goal-driven mutation, multi-objective fitness, and constraint-guided code rewrite generation."""
+"""Lyra Self-Rewrite — DGM (Differentiable Goal Model) HyperAgent engine for recursive self-
+improvement through goal-driven mutation, multi-objective fitness, and constraint-guided code
+rewrite generation."""
 
 from __future__ import annotations
 

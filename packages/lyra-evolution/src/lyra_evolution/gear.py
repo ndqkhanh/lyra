@@ -279,7 +279,9 @@ class GEAREvolve:
             if sum(recent) / len(recent) < 0.3:
                 boost = 0.15
                 self._global_exploration = min(0.8, self._global_exploration + boost)
-                logger.debug("Performance low, boosting exploration to %.3f", self._global_exploration)
+                logger.debug(
+                    "Performance low, boosting exploration to %.3f", self._global_exploration
+                )
 
         self._global_exploration = max(self._min_exploration, self._global_exploration)
 

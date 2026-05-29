@@ -14,7 +14,9 @@ class TestAutoFanoutCompressor:
     async def test_no_compression_below_threshold(self):
         comp = AutoFanoutCompressor()
         output = "Short output"
-        result = await comp.compress(output, context_window=10000, subagent_summarize=self._fake_summarize)
+        result = await comp.compress(
+            output, context_window=10000, subagent_summarize=self._fake_summarize
+        )
 
         assert not result.was_compressed
         assert result.compressed_text == output
@@ -24,7 +26,9 @@ class TestAutoFanoutCompressor:
         comp = AutoFanoutCompressor(chunk_tokens=100)
         large_output = "\n\n".join([f"Paragraph {i}. " * 30 for i in range(10)])
 
-        result = await comp.compress(large_output, context_window=1000, subagent_summarize=self._fake_summarize)
+        result = await comp.compress(
+            large_output, context_window=1000, subagent_summarize=self._fake_summarize
+        )
 
         assert result.was_compressed
         assert result.chunks_processed > 1
@@ -35,7 +39,9 @@ class TestAutoFanoutCompressor:
         comp = AutoFanoutCompressor(chunk_tokens=5000)
         output = "One paragraph.\n\nAnother paragraph."
 
-        result = await comp.compress(output, context_window=1000, subagent_summarize=self._fake_summarize)
+        result = await comp.compress(
+            output, context_window=1000, subagent_summarize=self._fake_summarize
+        )
 
         assert not result.was_compressed
 
@@ -50,7 +56,13 @@ class TestAutoFanoutCompressor:
         assert r.savings_pct == 70.0
 
     def test_zero_tokens_savings_pct(self):
-        r = FanoutResult(compressed_text="", original_tokens=0, compressed_tokens=0, chunks_processed=0, was_compressed=False)
+        r = FanoutResult(
+            compressed_text="",
+            original_tokens=0,
+            compressed_tokens=0,
+            chunks_processed=0,
+            was_compressed=False,
+        )
         assert r.savings_pct == 0.0
 
     def test_code_blocks_preserved(self):
@@ -100,7 +112,9 @@ class TestAutoFanoutCompressor:
         comp = AutoFanoutCompressor(chunk_tokens=50)
         large_output = "\n\n".join([f"Para {i}. " * 30 for i in range(10)])
 
-        result = await comp.compress(large_output, context_window=500, subagent_summarize=self._fake_summarize)
+        result = await comp.compress(
+            large_output, context_window=500, subagent_summarize=self._fake_summarize
+        )
         assert isinstance(result, FanoutResult)
         assert result.original_tokens > 0
 

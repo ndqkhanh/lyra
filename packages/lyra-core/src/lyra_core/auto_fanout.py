@@ -37,7 +37,9 @@ class AutoFanoutCompressor:
 
     _CODE_BLOCK_RE: re.Pattern = re.compile(r"```[\s\S]*?```", re.MULTILINE)
 
-    def __init__(self, max_fanout: int = 5, chunk_tokens: int = 3000, overlap_tokens: int = 200) -> None:
+    def __init__(
+        self, max_fanout: int = 5, chunk_tokens: int = 3000, overlap_tokens: int = 200
+    ) -> None:
         self.max_fanout = max_fanout
         self.chunk_tokens = chunk_tokens
         self.overlap = overlap_tokens

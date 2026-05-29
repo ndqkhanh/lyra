@@ -268,8 +268,12 @@ class DataEngineer:
             mode=mode,
             sources=tuple(sources),
             steps=tuple(steps),
-            orchestration_tool="Apache Airflow" if not is_streaming else "Apache Flink / Kafka Streams",
-            total_estimated_duration="2-6 hours (full batch)" if not is_streaming else "< 5 min end-to-end latency",
+            orchestration_tool=(
+                "Apache Airflow" if not is_streaming else "Apache Flink / Kafka Streams"
+            ),
+            total_estimated_duration=(
+                "2-6 hours (full batch)" if not is_streaming else "< 5 min end-to-end latency"
+            ),
         )
 
     @staticmethod
@@ -393,7 +397,10 @@ class DataEngineer:
                 severity="HIGH",
                 frequency="Every batch",
                 action_on_failure="Quarantine orphaned records",
-                sql_template="SELECT COUNT(*) FROM {fact_table} f LEFT JOIN {dim_table} d ON f.{fk}=d.{pk} WHERE d.{pk} IS NULL",
+                sql_template=(
+                    "SELECT COUNT(*) FROM {fact_table} f LEFT JOIN {dim_table} d ON f.{fk}=d.{pk}"
+                    "WHERE d.{pk} IS NULL"
+                ),
             ),
             DataQualityCheck(
                 check_name="Volume Anomaly",
@@ -409,7 +416,10 @@ class DataEngineer:
                 severity="MEDIUM",
                 frequency="Every batch",
                 action_on_failure="Flag out-of-range records, alert team",
-                sql_template="SELECT {column}, COUNT(*) FROM {table} WHERE {column} < {min} OR {column} > {max}",
+                sql_template=(
+                    "SELECT {column}, COUNT(*) FROM {table} WHERE {column} < {min} OR {column} >"
+                    "{max}"
+                ),
             ),
         ]
 
@@ -456,22 +466,46 @@ class DataEngineer:
     @staticmethod
     def _recommend_technology(requirements: str) -> list[dict[str, str]]:
         return [
-            {"layer": "Orchestration", "recommended": "Apache Airflow",
-             "alternatives": "Prefect / Dagster / AWS Step Functions"},
-            {"layer": "Processing (Batch)", "recommended": "Apache Spark / dbt",
-             "alternatives": "Pandas / DuckDB / AWS Glue"},
-            {"layer": "Processing (Stream)", "recommended": "Apache Flink / Kafka Streams",
-             "alternatives": "Spark Streaming / AWS Kinesis Analytics"},
-            {"layer": "Storage (Warehouse)", "recommended": "Snowflake / BigQuery / Redshift",
-             "alternatives": "ClickHouse / DuckDB / PostgreSQL"},
-            {"layer": "Storage (Lake)", "recommended": "AWS S3 / GCP Cloud Storage / ADLS",
-             "alternatives": "MinIO (self-hosted) / HDFS"},
-            {"layer": "Data Quality", "recommended": "Great Expectations",
-             "alternatives": "dbt tests / Deequ / Soda"},
-            {"layer": "Monitoring", "recommended": "Grafana + Prometheus",
-             "alternatives": "DataDog / Databand / Monte Carlo"},
-            {"layer": "Schema Registry", "recommended": "Confluent Schema Registry",
-             "alternatives": "JSON Schema / Protobuf / Avro"},
+            {
+                "layer": "Orchestration",
+                "recommended": "Apache Airflow",
+                "alternatives": "Prefect / Dagster / AWS Step Functions",
+            },
+            {
+                "layer": "Processing (Batch)",
+                "recommended": "Apache Spark / dbt",
+                "alternatives": "Pandas / DuckDB / AWS Glue",
+            },
+            {
+                "layer": "Processing (Stream)",
+                "recommended": "Apache Flink / Kafka Streams",
+                "alternatives": "Spark Streaming / AWS Kinesis Analytics",
+            },
+            {
+                "layer": "Storage (Warehouse)",
+                "recommended": "Snowflake / BigQuery / Redshift",
+                "alternatives": "ClickHouse / DuckDB / PostgreSQL",
+            },
+            {
+                "layer": "Storage (Lake)",
+                "recommended": "AWS S3 / GCP Cloud Storage / ADLS",
+                "alternatives": "MinIO (self-hosted) / HDFS",
+            },
+            {
+                "layer": "Data Quality",
+                "recommended": "Great Expectations",
+                "alternatives": "dbt tests / Deequ / Soda",
+            },
+            {
+                "layer": "Monitoring",
+                "recommended": "Grafana + Prometheus",
+                "alternatives": "DataDog / Databand / Monte Carlo",
+            },
+            {
+                "layer": "Schema Registry",
+                "recommended": "Confluent Schema Registry",
+                "alternatives": "JSON Schema / Protobuf / Avro",
+            },
         ]
 
     @staticmethod

@@ -8,6 +8,7 @@ Each adapter is verified to:
 Per-vendor wire quirks (auth header shape, endpoint URL, payload
 fields) are exercised in smoke tier with live tokens.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -31,7 +32,9 @@ from lyra_cli.channels.whatsapp import WhatsAppAdapter
 def _stub_http_factory():
     posted: list[dict[str, Any]] = []
 
-    async def http(*, method: str, url: str, headers: dict[str, str], json: dict[str, Any]) -> dict[str, Any]:
+    async def http(
+        *, method: str, url: str, headers: dict[str, str], json: dict[str, Any]
+    ) -> dict[str, Any]:
         posted.append({"url": url, "json": dict(json)})
         return {"id": f"id-{len(posted)}"}
 

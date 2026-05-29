@@ -62,9 +62,7 @@ def encoder() -> LatentEncoder:
 
 @pytest.fixture
 def encoder_pca() -> LatentEncoder:
-    cfg = EncodingConfig(
-        target_dimension=8, compression_method=CompressionMethod.PCA
-    )
+    cfg = EncodingConfig(target_dimension=8, compression_method=CompressionMethod.PCA)
     enc = LatentEncoder(default_config=cfg)
     enc.encode("this is the first document for pca fitting")
     enc.encode("the second document has different content entirely")
@@ -75,9 +73,7 @@ def encoder_pca() -> LatentEncoder:
 
 @pytest.fixture
 def encoder_rp() -> LatentEncoder:
-    cfg = EncodingConfig(
-        target_dimension=8, compression_method=CompressionMethod.RANDOM_PROJECTION
-    )
+    cfg = EncodingConfig(target_dimension=8, compression_method=CompressionMethod.RANDOM_PROJECTION)
     return LatentEncoder(default_config=cfg)
 
 
@@ -220,18 +216,14 @@ class TestLatentEncoder:
         assert isinstance(result, LatentVector)
 
     def test_encode_semantic_hash(self) -> None:
-        cfg = EncodingConfig(
-            target_dimension=8, compression_method=CompressionMethod.SEMANTIC_HASH
-        )
+        cfg = EncodingConfig(target_dimension=8, compression_method=CompressionMethod.SEMANTIC_HASH)
         enc = LatentEncoder(default_config=cfg)
         result = enc.encode("semantic hashing test message")
         assert isinstance(result, LatentVector)
         assert len(result.vector) == 8
 
     def test_encode_quantized(self) -> None:
-        cfg = EncodingConfig(
-            target_dimension=8, compression_method=CompressionMethod.QUANTIZED
-        )
+        cfg = EncodingConfig(target_dimension=8, compression_method=CompressionMethod.QUANTIZED)
         enc = LatentEncoder(default_config=cfg)
         result = enc.encode("quantized compression test")
         assert isinstance(result, LatentVector)
@@ -267,13 +259,17 @@ class TestLatentEncoder:
     def test_similarity_orthogonal(self) -> None:
         a = LatentVector(
             vector=np.array([1.0, 0.0, 0.0], dtype=np.float64),
-            original_length=10, compressed_length=3,
-            compression_ratio=0.7, semantic_hash="a",
+            original_length=10,
+            compressed_length=3,
+            compression_ratio=0.7,
+            semantic_hash="a",
         )
         b = LatentVector(
             vector=np.array([0.0, 1.0, 0.0], dtype=np.float64),
-            original_length=10, compressed_length=3,
-            compression_ratio=0.7, semantic_hash="b",
+            original_length=10,
+            compressed_length=3,
+            compression_ratio=0.7,
+            semantic_hash="b",
         )
         sim = similarity(a, b)
         assert math.isclose(sim, 0.0, abs_tol=0.01)
@@ -281,13 +277,17 @@ class TestLatentEncoder:
     def test_similarity_zero_vector(self) -> None:
         a = LatentVector(
             vector=np.array([0.0, 0.0, 0.0], dtype=np.float64),
-            original_length=10, compressed_length=3,
-            compression_ratio=0.7, semantic_hash="a",
+            original_length=10,
+            compressed_length=3,
+            compression_ratio=0.7,
+            semantic_hash="a",
         )
         b = LatentVector(
             vector=np.array([1.0, 0.0, 0.0], dtype=np.float64),
-            original_length=10, compressed_length=3,
-            compression_ratio=0.7, semantic_hash="b",
+            original_length=10,
+            compressed_length=3,
+            compression_ratio=0.7,
+            semantic_hash="b",
         )
         sim = similarity(a, b)
         assert sim == 0.0
@@ -295,20 +295,22 @@ class TestLatentEncoder:
     def test_similarity_dimension_mismatch(self) -> None:
         a = LatentVector(
             vector=np.array([1.0, 0.0], dtype=np.float64),
-            original_length=10, compressed_length=2,
-            compression_ratio=0.8, semantic_hash="a",
+            original_length=10,
+            compressed_length=2,
+            compression_ratio=0.8,
+            semantic_hash="a",
         )
         b = LatentVector(
             vector=np.array([1.0, 0.0, 0.0], dtype=np.float64),
-            original_length=10, compressed_length=3,
-            compression_ratio=0.7, semantic_hash="b",
+            original_length=10,
+            compressed_length=3,
+            compression_ratio=0.7,
+            semantic_hash="b",
         )
         with pytest.raises(ValueError, match="different dimensions"):
             similarity(a, b)
 
-    def test_similarity_different_vectors(
-        self, sample_vectors: list[LatentVector]
-    ) -> None:
+    def test_similarity_different_vectors(self, sample_vectors: list[LatentVector]) -> None:
         sim = similarity(sample_vectors[0], sample_vectors[1])
         assert -1.0 <= sim <= 1.0
 
@@ -360,35 +362,29 @@ class TestLatentDecoder:
         assert isinstance(result.semantic_fidelity, float)
         assert isinstance(result.key_terms, tuple)
 
-    def test_decode_default_config(
-        self, encoder: LatentEncoder, decoder: LatentDecoder
-    ) -> None:
+    def test_decode_default_config(self, encoder: LatentEncoder, decoder: LatentDecoder) -> None:
         vec = encoder.encode("test decoding")
         result = decoder.decode(vec)
         assert 0.0 <= result.confidence <= 1.0
 
-    def test_decode_custom_config(
-        self, encoder: LatentEncoder, decoder: LatentDecoder
-    ) -> None:
+    def test_decode_custom_config(self, encoder: LatentEncoder, decoder: LatentDecoder) -> None:
         vec = encoder.encode("test decoding with custom config")
         cfg = DecodingConfig(fidelity_threshold=0.8, max_tokens=10)
         result = decoder.decode(vec, cfg)
         assert isinstance(result, DecodedMessage)
 
-    def test_decode_empty_vector(
-        self, encoder: LatentEncoder, decoder: LatentDecoder
-    ) -> None:
+    def test_decode_empty_vector(self, encoder: LatentEncoder, decoder: LatentDecoder) -> None:
         empty_vec = LatentVector(
             vector=np.array([], dtype=np.float64),
-            original_length=0, compressed_length=0,
-            compression_ratio=0.0, semantic_hash="empty",
+            original_length=0,
+            compressed_length=0,
+            compression_ratio=0.0,
+            semantic_hash="empty",
         )
         with pytest.raises(DecodingError):
             decoder.decode(empty_vec)
 
-    def test_batch_decode(
-        self, encoder: LatentEncoder, decoder: LatentDecoder
-    ) -> None:
+    def test_batch_decode(self, encoder: LatentEncoder, decoder: LatentDecoder) -> None:
         vectors = encoder.batch_encode(["first", "second", "third"])
         results = decoder.batch_decode(vectors)
         assert len(results) == 3
@@ -422,18 +418,14 @@ class TestLatentDecoder:
         fid = compute_fidelity(["hello", "world"], ["hello", "there"])
         assert 0.0 < fid < 1.0
 
-    def test_recover_key_terms(
-        self, encoder: LatentEncoder, decoder: LatentDecoder
-    ) -> None:
+    def test_recover_key_terms(self, encoder: LatentEncoder, decoder: LatentDecoder) -> None:
         encoder.encode("machine learning deep neural network")
         encoder.encode("artificial intelligence neural network")
         vec = encoder.encode("deep learning neural network")
         terms = decoder.recover_key_terms(vec)
         assert isinstance(terms, list)
 
-    def test_confidence_is_bounded(
-        self, encoder: LatentEncoder, decoder: LatentDecoder
-    ) -> None:
+    def test_confidence_is_bounded(self, encoder: LatentEncoder, decoder: LatentDecoder) -> None:
         vec = encoder.encode("test message for confidence")
         result = decoder.decode(vec)
         assert 0.0 <= result.confidence <= 1.0
@@ -454,22 +446,16 @@ class TestLatentDecoder:
 
 
 class TestRecursiveLink:
-    def test_forward_mean(
-        self, link: RecursiveLink, sample_vectors: list[LatentVector]
-    ) -> None:
+    def test_forward_mean(self, link: RecursiveLink, sample_vectors: list[LatentVector]) -> None:
         result = link.forward(sample_vectors)
         assert isinstance(result, LatentVector)
         assert len(result.vector) == 3
 
-    def test_forward_single_message(
-        self, link: RecursiveLink, sample_vector: LatentVector
-    ) -> None:
+    def test_forward_single_message(self, link: RecursiveLink, sample_vector: LatentVector) -> None:
         result = link.forward([sample_vector])
         assert result == sample_vector
 
-    def test_forward_max(
-        self, link: RecursiveLink, sample_vectors: list[LatentVector]
-    ) -> None:
+    def test_forward_max(self, link: RecursiveLink, sample_vectors: list[LatentVector]) -> None:
         cfg = LinkConfig(aggregation_method=AggregationMethod.MAX)
         result = link.forward(sample_vectors, cfg)
         assert isinstance(result, LatentVector)
@@ -500,21 +486,19 @@ class TestRecursiveLink:
     ) -> None:
         bad = LatentVector(
             vector=np.array([1.0, 2.0], dtype=np.float64),
-            original_length=10, compressed_length=2,
-            compression_ratio=0.8, semantic_hash="bad",
+            original_length=10,
+            compressed_length=2,
+            compression_ratio=0.8,
+            semantic_hash="bad",
         )
         with pytest.raises(LinkError, match="same latent dimension"):
             link.forward([sample_vector, bad])
 
-    def test_call_magic(
-        self, link: RecursiveLink, sample_vectors: list[LatentVector]
-    ) -> None:
+    def test_call_magic(self, link: RecursiveLink, sample_vectors: list[LatentVector]) -> None:
         result = link(sample_vectors)
         assert isinstance(result, LatentVector)
 
-    def test_residual_link(
-        self, link: RecursiveLink, sample_vectors: list[LatentVector]
-    ) -> None:
+    def test_residual_link(self, link: RecursiveLink, sample_vectors: list[LatentVector]) -> None:
         original = sample_vectors[0]
         result = link.residual_link(original, sample_vectors[1].vector)
         assert isinstance(result, LatentVector)
@@ -527,9 +511,7 @@ class TestRecursiveLink:
         result = link.residual_link(original, sample_vectors[1])
         assert isinstance(result, LatentVector)
 
-    def test_multi_hop(
-        self, link: RecursiveLink, sample_vectors: list[LatentVector]
-    ) -> None:
+    def test_multi_hop(self, link: RecursiveLink, sample_vectors: list[LatentVector]) -> None:
         agents = [[v] for v in sample_vectors]
         results = link.multi_hop(agents, hops=2)
         assert len(results) == 3
@@ -546,9 +528,7 @@ class TestRecursiveLink:
         with pytest.raises(LinkError, match="empty agents"):
             link.multi_hop([], hops=2)
 
-    def test_compute_metrics(
-        self, link: RecursiveLink, sample_vectors: list[LatentVector]
-    ) -> None:
+    def test_compute_metrics(self, link: RecursiveLink, sample_vectors: list[LatentVector]) -> None:
         aggregated = link.forward(sample_vectors)
         metrics = link.compute_metrics(sample_vectors, aggregated, hop_count=2)
         assert isinstance(metrics, LinkMetrics)
@@ -559,8 +539,10 @@ class TestRecursiveLink:
     def test_compute_metrics_empty(self, link: RecursiveLink) -> None:
         vec = LatentVector(
             vector=np.array([1.0], dtype=np.float64),
-            original_length=5, compressed_length=1,
-            compression_ratio=0.8, semantic_hash="x",
+            original_length=5,
+            compressed_length=1,
+            compression_ratio=0.8,
+            semantic_hash="x",
         )
         metrics = link.compute_metrics([], vec, hop_count=0)
         assert metrics.num_messages == 0
@@ -569,9 +551,7 @@ class TestRecursiveLink:
     def test_forward_residual_disabled(
         self, link: RecursiveLink, sample_vectors: list[LatentVector]
     ) -> None:
-        cfg = LinkConfig(
-            aggregation_method=AggregationMethod.MEAN, residual_connection=False
-        )
+        cfg = LinkConfig(aggregation_method=AggregationMethod.MEAN, residual_connection=False)
         result = link.forward(sample_vectors, cfg)
         assert isinstance(result, LatentVector)
 
@@ -619,8 +599,10 @@ class TestCreditAssignment:
     def test_assign_credit_empty(self, credit_engine: CreditAssignmentEngine) -> None:
         vec = LatentVector(
             vector=np.array([1.0], dtype=np.float64),
-            original_length=5, compressed_length=1,
-            compression_ratio=0.8, semantic_hash="x",
+            original_length=5,
+            compressed_length=1,
+            compression_ratio=0.8,
+            semantic_hash="x",
         )
         with pytest.raises(CreditAssignmentError):
             credit_engine.assign_credit([], vec)
@@ -663,8 +645,10 @@ class TestCreditAssignment:
     def test_inner_loop_empty(self, credit_engine: CreditAssignmentEngine) -> None:
         vec = LatentVector(
             vector=np.array([1.0], dtype=np.float64),
-            original_length=5, compressed_length=1,
-            compression_ratio=0.8, semantic_hash="x",
+            original_length=5,
+            compressed_length=1,
+            compression_ratio=0.8,
+            semantic_hash="x",
         )
         with pytest.raises(CreditAssignmentError):
             credit_engine.inner_loop([], vec)
@@ -676,9 +660,7 @@ class TestCreditAssignment:
         assert cfg.decay == 0.95
 
     def test_credit_config_custom(self) -> None:
-        cfg = CreditConfig(
-            inner_iterations=5, outer_iterations=2, learning_rate=0.01, decay=0.9
-        )
+        cfg = CreditConfig(inner_iterations=5, outer_iterations=2, learning_rate=0.01, decay=0.9)
         assert cfg.inner_iterations == 5
         assert cfg.outer_iterations == 2
         assert cfg.learning_rate == 0.01
@@ -712,9 +694,7 @@ class TestCreditAssignment:
 
 
 class TestCreditLedger:
-    def test_record_and_get_history(
-        self, ledger: CreditLedger
-    ) -> None:
+    def test_record_and_get_history(self, ledger: CreditLedger) -> None:
         scores = [
             CreditScore("agent_a", 0.9, 0.95, ("ev1",)),
             CreditScore("agent_b", 0.7, 0.80, ("ev2",)),
@@ -728,9 +708,7 @@ class TestCreditLedger:
         with pytest.raises(CreditAssignmentError):
             ledger.record("ep_1", [])
 
-    def test_get_top_contributors(
-        self, ledger: CreditLedger
-    ) -> None:
+    def test_get_top_contributors(self, ledger: CreditLedger) -> None:
         scores = [
             CreditScore("agent_a", 0.5, 0.6, ("ev1",)),
             CreditScore("agent_b", 0.9, 0.95, ("ev2",)),
@@ -741,9 +719,7 @@ class TestCreditLedger:
         assert len(top) == 2
         assert top[0].agent_id == "agent_b"
 
-    def test_get_top_contributors_nonexistent(
-        self, ledger: CreditLedger
-    ) -> None:
+    def test_get_top_contributors_nonexistent(self, ledger: CreditLedger) -> None:
         top = ledger.get_top_contributors("fake_ep", top_k=3)
         assert top == []
 
@@ -751,17 +727,13 @@ class TestCreditLedger:
         history = ledger.get_agent_history("nonexistent")
         assert history == []
 
-    def test_multiple_episodes(
-        self, ledger: CreditLedger
-    ) -> None:
+    def test_multiple_episodes(self, ledger: CreditLedger) -> None:
         ledger.record("ep_1", [CreditScore("agent_a", 0.9, 0.95, ("ev1",))])
         ledger.record("ep_2", [CreditScore("agent_a", 0.8, 0.85, ("ev2",))])
         history = ledger.get_agent_history("agent_a")
         assert len(history) == 2
 
-    def test_get_all_episodes(
-        self, ledger: CreditLedger
-    ) -> None:
+    def test_get_all_episodes(self, ledger: CreditLedger) -> None:
         ledger.record("ep_1", [CreditScore("agent_a", 0.9, 0.95, ("ev1",))])
         ledger.record("ep_2", [CreditScore("agent_b", 0.7, 0.80, ("ev2",))])
         episodes = ledger.get_all_episodes()
@@ -805,9 +777,7 @@ class TestCollaborationPatterns:
     def test_mixture_single_agent(
         self, collab_engine: CollaborationEngine, sample_vector: LatentVector
     ) -> None:
-        config = CollaborationConfig(
-            pattern=CollaborationPattern.MIXTURE, agents=("only_agent",)
-        )
+        config = CollaborationConfig(pattern=CollaborationPattern.MIXTURE, agents=("only_agent",))
         latents = {"only_agent": sample_vector}
         result = collab_engine.execute_pattern(config, latents)
         assert isinstance(result, MixtureResult)
@@ -835,8 +805,10 @@ class TestCollaborationPatterns:
     ) -> None:
         vec = LatentVector(
             vector=np.array([0.1, 0.2, 0.3], dtype=np.float64),
-            original_length=20, compressed_length=3,
-            compression_ratio=0.85, semantic_hash="h",
+            original_length=20,
+            compressed_length=3,
+            compression_ratio=0.85,
+            semantic_hash="h",
         )
         config = CollaborationConfig(
             pattern=CollaborationPattern.DELIBERATION,
@@ -886,9 +858,7 @@ class TestCollaborationPatterns:
         collab_engine: CollaborationEngine,
         sample_vector: LatentVector,
     ) -> None:
-        config = CollaborationConfig(
-            pattern=CollaborationPattern.SEQUENTIAL, agents=("planner",)
-        )
+        config = CollaborationConfig(pattern=CollaborationPattern.SEQUENTIAL, agents=("planner",))
         latents = {"planner": sample_vector}
         result = collab_engine.execute_pattern(config, latents)
         assert isinstance(result, SequentialResult)
@@ -897,21 +867,23 @@ class TestCollaborationPatterns:
     def test_convergence_check_true(self, sample_vector: LatentVector) -> None:
         assert convergence_check(sample_vector, sample_vector) is True
 
-    def test_convergence_check_false(
-        self, sample_vectors: list[LatentVector]
-    ) -> None:
+    def test_convergence_check_false(self, sample_vectors: list[LatentVector]) -> None:
         assert convergence_check(sample_vectors[0], sample_vectors[1]) is False
 
     def test_convergence_check_dim_mismatch(self) -> None:
         a = LatentVector(
             vector=np.array([1.0, 0.0], dtype=np.float64),
-            original_length=5, compressed_length=2,
-            compression_ratio=0.6, semantic_hash="a",
+            original_length=5,
+            compressed_length=2,
+            compression_ratio=0.6,
+            semantic_hash="a",
         )
         b = LatentVector(
             vector=np.array([1.0, 0.0, 0.0], dtype=np.float64),
-            original_length=5, compressed_length=3,
-            compression_ratio=0.4, semantic_hash="b",
+            original_length=5,
+            compressed_length=3,
+            compression_ratio=0.4,
+            semantic_hash="b",
         )
         assert convergence_check(a, b) is False
 
@@ -976,9 +948,7 @@ class TestCommunicationBus:
         assert len(messages) == 1
 
     @pytest.mark.asyncio
-    async def test_broadcast(
-        self, bus: CommunicationBus, sample_vector: LatentVector
-    ) -> None:
+    async def test_broadcast(self, bus: CommunicationBus, sample_vector: LatentVector) -> None:
         bus.subscribe("agent_a")
         bus.subscribe("agent_b")
         bus.subscribe("agent_c")
@@ -991,16 +961,12 @@ class TestCommunicationBus:
     ) -> None:
         bus.subscribe("agent_a")
         bus.subscribe("agent_b")
-        recipients = await bus.broadcast(
-            sample_vector, exclude_senders={"agent_a"}
-        )
+        recipients = await bus.broadcast(sample_vector, exclude_senders={"agent_a"})
         assert "agent_a" not in recipients
         assert "agent_b" in recipients
 
     @pytest.mark.asyncio
-    async def test_acknowledge(
-        self, bus: CommunicationBus, sample_vector: LatentVector
-    ) -> None:
+    async def test_acknowledge(self, bus: CommunicationBus, sample_vector: LatentVector) -> None:
         bus.subscribe("agent_b")
         msg_id = await bus.publish("agent_a", sample_vector)
         await bus.acknowledge(msg_id, "agent_b")
@@ -1008,16 +974,12 @@ class TestCommunicationBus:
         assert len(pending) == 0
 
     @pytest.mark.asyncio
-    async def test_acknowledge_invalid(
-        self, bus: CommunicationBus
-    ) -> None:
+    async def test_acknowledge_invalid(self, bus: CommunicationBus) -> None:
         with pytest.raises(MessageDeliveryError):
             await bus.acknowledge("nonexistent_id", "agent_a")
 
     @pytest.mark.asyncio
-    async def test_stats(
-        self, bus: CommunicationBus, sample_vector: LatentVector
-    ) -> None:
+    async def test_stats(self, bus: CommunicationBus, sample_vector: LatentVector) -> None:
         bus.subscribe("agent_b")
         await bus.publish("agent_a", sample_vector)
         stats = bus.get_stats()
@@ -1025,9 +987,7 @@ class TestCommunicationBus:
         assert stats.messages_sent >= 1
 
     @pytest.mark.asyncio
-    async def test_stats_pending(
-        self, bus: CommunicationBus, sample_vector: LatentVector
-    ) -> None:
+    async def test_stats_pending(self, bus: CommunicationBus, sample_vector: LatentVector) -> None:
         bus.subscribe("agent_b")
         await bus.publish("agent_a", sample_vector)
         stats = bus.get_stats()
@@ -1056,24 +1016,18 @@ class TestCommunicationBus:
     async def test_message_priority(
         self, bus: CommunicationBus, sample_vector: LatentVector
     ) -> None:
-        msg_id = await bus.publish(
-            "agent_a", sample_vector, priority=MessagePriority.HIGH
-        )
+        msg_id = await bus.publish("agent_a", sample_vector, priority=MessagePriority.HIGH)
         assert msg_id is not None
 
     @pytest.mark.asyncio
-    async def test_bus_disabled_broadcast(
-        self, sample_vector: LatentVector
-    ) -> None:
+    async def test_bus_disabled_broadcast(self, sample_vector: LatentVector) -> None:
         cfg = BusConfig(broadcast_enabled=False)
         restricted_bus = CommunicationBus(config=cfg)
         with pytest.raises(BusError, match="Broadcast is disabled"):
             await restricted_bus.broadcast(sample_vector)
 
     @pytest.mark.asyncio
-    async def test_full_queue(
-        self, bus: CommunicationBus, sample_vector: LatentVector
-    ) -> None:
+    async def test_full_queue(self, bus: CommunicationBus, sample_vector: LatentVector) -> None:
         tiny_bus = CommunicationBus(BusConfig(max_queue_size=1))
         await tiny_bus.publish("a", sample_vector)
         with pytest.raises(BusError, match="queue is full"):
@@ -1085,9 +1039,7 @@ class TestCommunicationBus:
             bus.subscribe("")
 
     @pytest.mark.asyncio
-    async def test_unsubscribe(
-        self, bus: CommunicationBus, sample_vector: LatentVector
-    ) -> None:
+    async def test_unsubscribe(self, bus: CommunicationBus, sample_vector: LatentVector) -> None:
         bus.subscribe("agent_b")
         await bus.publish("agent_a", sample_vector)
         bus.unsubscribe("agent_b")
@@ -1124,9 +1076,7 @@ class TestCommunicationBus:
 
     @pytest.mark.asyncio
     async def test_bus_config_custom(self) -> None:
-        cfg = BusConfig(
-            max_queue_size=500, broadcast_enabled=False, persistence_enabled=False
-        )
+        cfg = BusConfig(max_queue_size=500, broadcast_enabled=False, persistence_enabled=False)
         assert cfg.max_queue_size == 500
         assert cfg.broadcast_enabled is False
         assert cfg.persistence_enabled is False
@@ -1187,7 +1137,9 @@ class TestDataClasses:
             msg.text = "new text"  # type: ignore[misc]
 
     def test_bus_stats_frozen(self) -> None:
-        stats = BusStats(messages_sent=10, pending=2, active_subscribers=3, compression_saved_tokens=50)
+        stats = BusStats(
+            messages_sent=10, pending=2, active_subscribers=3, compression_saved_tokens=50
+        )
         with pytest.raises(AttributeError):
             stats.messages_sent = 20  # type: ignore[misc]
 

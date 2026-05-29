@@ -17,18 +17,18 @@ from uuid import uuid4
 class SystemMode(str, Enum):
     """Operating mode of the cognitive system."""
 
-    SYSTEM1 = "system1"          # Fast, pattern-matched execution (<500ms)
-    SYSTEM2 = "system2"          # Slow, deliberate reasoning (5-30s)
-    META_COGNITIVE = "meta"      # Evaluating which mode to use
-    IDLE = "idle"                # No active task
+    SYSTEM1 = "system1"  # Fast, pattern-matched execution (<500ms)
+    SYSTEM2 = "system2"  # Slow, deliberate reasoning (5-30s)
+    META_COGNITIVE = "meta"  # Evaluating which mode to use
+    IDLE = "idle"  # No active task
 
 
 class ConfidenceLevel(str, Enum):
     """Confidence level for a thought, plan, or decision."""
 
-    HIGH = "high"        # >0.8 confidence
-    MEDIUM = "medium"    # 0.5-0.8 confidence
-    LOW = "low"          # 0.2-0.5 confidence
+    HIGH = "high"  # >0.8 confidence
+    MEDIUM = "medium"  # 0.5-0.8 confidence
+    LOW = "low"  # 0.2-0.5 confidence
     UNKNOWN = "unknown"  # <0.2 or not yet assessed
 
     @classmethod
@@ -72,9 +72,7 @@ class AttentionSignal:
         for field_name in ("urgency", "relevance", "novelty"):
             value = getattr(self, field_name)
             if not 0.0 <= value <= 1.0:
-                raise ValueError(
-                    f"{field_name} must be between 0.0 and 1.0, got {value}"
-                )
+                raise ValueError(f"{field_name} must be between 0.0 and 1.0, got {value}")
 
     @property
     def priority(self) -> float:
@@ -182,7 +180,8 @@ class CognitiveState:
 @dataclass(frozen=True)
 class CognitiveTick:
     """
-    One complete cycle of the cognitive loop: perceive -> attend -> reason -> decide -> act -> observe.
+    One complete cycle of the cognitive loop: perceive -> attend -> reason -> decide -> act ->
+    observe.
 
     Attributes:
         index: Tick sequence number.

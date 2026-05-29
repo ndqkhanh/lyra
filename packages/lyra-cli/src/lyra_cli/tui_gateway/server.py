@@ -43,23 +43,21 @@ _cfg_lock = threading.Lock()
 _cfg_cache: dict | None = None
 _cfg_mtime: float | None = None
 _cfg_path: Path | None = None
-_SLASH_WORKER_TIMEOUT_S = max(
-    5.0, float(os.environ.get("LYRA_TUI_SLASH_TIMEOUT_S", "45") or 45)
-)
+_SLASH_WORKER_TIMEOUT_S = max(5.0, float(os.environ.get("LYRA_TUI_SLASH_TIMEOUT_S", "45") or 45))
 
 # ── Thread pool for long handlers ───────────────────────────────────
-_LONG_HANDLERS = frozenset({
-    "session.resume",
-    "session.compress",
-    "session.branch",
-    "slash.exec",
-    "cli.exec",
-})
+_LONG_HANDLERS = frozenset(
+    {
+        "session.resume",
+        "session.compress",
+        "session.branch",
+        "slash.exec",
+        "cli.exec",
+    }
+)
 
 try:
-    _rpc_pool_workers = max(
-        2, int(os.environ.get("LYRA_TUI_RPC_POOL_WORKERS") or "4")
-    )
+    _rpc_pool_workers = max(2, int(os.environ.get("LYRA_TUI_RPC_POOL_WORKERS") or "4"))
 except (ValueError, TypeError):
     _rpc_pool_workers = 4
 _pool = concurrent.futures.ThreadPoolExecutor(
@@ -135,7 +133,7 @@ class _SlashWorker:
                 try:
                     msg = self.stdout_queue.get(timeout=_SLASH_WORKER_TIMEOUT_S)
                 except queue.Empty:
-                    raise RuntimeError("slash worker timed out")
+                    raise RuntimeError("slash worker timed out") from None
                 if msg is None:
                     break
                 if msg.get("id") != rid:
@@ -208,14 +206,16 @@ def _list_sessions(limit: int = 200) -> list[dict]:
             with open(fpath, encoding="utf-8") as f:
                 data = json.load(f)
             sid = fpath.stem
-            results.append({
-                "id": sid,
-                "title": data.get("title", ""),
-                "preview": data.get("preview", ""),
-                "started_at": data.get("started_at", 0),
-                "message_count": data.get("message_count", 0),
-                "source": data.get("source", "tui"),
-            })
+            results.append(
+                {
+                    "id": sid,
+                    "title": data.get("title", ""),
+                    "preview": data.get("preview", ""),
+                    "started_at": data.get("started_at", 0),
+                    "message_count": data.get("message_count", 0),
+                    "source": data.get("source", "tui"),
+                }
+            )
             if len(results) >= limit:
                 break
         except Exception:
@@ -332,6 +332,7 @@ def method(name: str):
     def dec(fn):
         _methods[name] = fn
         return fn
+
     return dec
 
 
@@ -464,7 +465,8 @@ class _StubAgent:
             for char in response:
                 stream_callback(char)
         return {
-            "messages": (conversation_history or []) + [
+            "messages": (conversation_history or [])
+            + [
                 {"role": "user", "content": text},
                 {"role": "assistant", "content": response},
             ],
@@ -552,10 +554,7 @@ def resolve_skin() -> dict:
 
 
 def _resolve_model() -> str:
-    env = (
-        os.environ.get("LYRA_MODEL", "")
-        or os.environ.get("ANTHROPIC_MODEL", "")
-    ).strip()
+    env = (os.environ.get("LYRA_MODEL", "") or os.environ.get("ANTHROPIC_MODEL", "")).strip()
     if env:
         return env
     try:
@@ -592,8 +591,17 @@ def _session_info(agent) -> dict:
 def _gather_tools() -> dict[str, list[str]]:
     tools: dict[str, list[str]] = {
         "CLI Commands": [
-            "bash", "read", "write", "edit", "glob", "grep",
-            "task", "skill", "agent", "web_search", "web_fetch",
+            "bash",
+            "read",
+            "write",
+            "edit",
+            "glob",
+            "grep",
+            "task",
+            "skill",
+            "agent",
+            "web_search",
+            "web_fetch",
         ],
         "File Operations": ["read_file", "write_file", "edit_file", "list_directory"],
         "Code Actions": ["run_tests", "lint", "typecheck", "format"],
@@ -606,6 +614,7 @@ def _gather_skills() -> dict[str, list[str]]:
     skills: dict[str, list[str]] = {}
     try:
         from lyra_cli.skills.registry import get_skills_registry
+
         registry = get_skills_registry()
         for _skill_id, skill in sorted(registry.skills.items()):
             category = skill.category or "General"
@@ -652,12 +661,15 @@ def _finalize_session(session: dict | None, end_reason: str = "tui_close") -> No
 
     session_key = session.get("session_key")
     if session_key:
-        _save_session_file(session_key, {
-            "title": session.get("pending_title") or session.get("title", ""),
-            "messages": history,
-            "ended_at": time.time(),
-            "message_count": len(history),
-        })
+        _save_session_file(
+            session_key,
+            {
+                "title": session.get("pending_title") or session.get("title", ""),
+                "messages": history,
+                "ended_at": time.time(),
+                "message_count": len(history),
+            },
+        )
 
 
 def _shutdown_sessions() -> None:
@@ -681,11 +693,15 @@ def _on_tool_start(sid: str, tool_call_id: str, name: str, args: dict):
     session = _sessions.get(sid)
     if session is not None:
         session.setdefault("tool_started_at", {})[tool_call_id] = time.time()
-    _emit("tool.start", sid, {
-        "tool_id": tool_call_id,
-        "name": name,
-        "context": "",
-    })
+    _emit(
+        "tool.start",
+        sid,
+        {
+            "tool_id": tool_call_id,
+            "name": name,
+            "context": "",
+        },
+    )
 
 
 def _on_tool_complete(sid: str, tool_call_id: str, name: str, args: dict, result: str):
@@ -699,7 +715,9 @@ def _on_tool_complete(sid: str, tool_call_id: str, name: str, args: dict, result
     _emit("tool.complete", sid, payload)
 
 
-def _on_tool_progress(sid: str, event_type: str, name: str | None = None, preview: str | None = None, **kwargs):
+def _on_tool_progress(
+    sid: str, event_type: str, name: str | None = None, preview: str | None = None, **kwargs
+):
     if event_type == "tool.started" and name:
         _emit("tool.progress", sid, {"name": name, "preview": preview or ""})
 
@@ -707,11 +725,19 @@ def _on_tool_progress(sid: str, event_type: str, name: str | None = None, previe
 def _agent_cbs(sid: str) -> dict:
     return {
         "tool_start_callback": lambda tc_id, name, args: _on_tool_start(sid, tc_id, name, args),
-        "tool_complete_callback": lambda tc_id, name, args, result: _on_tool_complete(sid, tc_id, name, args, result),
-        "tool_progress_callback": lambda event_type, name=None, preview=None, **kw: _on_tool_progress(sid, event_type, name, preview, **kw),
+        "tool_complete_callback": lambda tc_id, name, args, result: _on_tool_complete(
+            sid, tc_id, name, args, result
+        ),
+        "tool_progress_callback": lambda event_type, name=None, preview=None, **kw: _on_tool_progress(  # noqa: E501
+            sid, event_type, name, preview, **kw
+        ),
         "thinking_callback": lambda text: _emit("thinking.delta", sid, {"text": text}),
-        "status_callback": lambda kind, text=None: _status_update(sid, str(kind), None if text is None else str(text)),
-        "clarify_callback": lambda q, c: _block("clarify.request", sid, {"question": q, "choices": c}),
+        "status_callback": lambda kind, text=None: _status_update(
+            sid, str(kind), None if text is None else str(text)
+        ),
+        "clarify_callback": lambda q, c: _block(
+            "clarify.request", sid, {"question": q, "choices": c}
+        ),
     }
 
 
@@ -943,10 +969,12 @@ def _session_steer(rid, params: dict) -> dict:
     instruction = params.get("instruction", "")
     if instruction:
         with session.get("history_lock", threading.Lock()):
-            session.setdefault("history", []).append({
-                "role": "user",
-                "content": f"[Steering instruction: {instruction}]",
-            })
+            session.setdefault("history", []).append(
+                {
+                    "role": "user",
+                    "content": f"[Steering instruction: {instruction}]",
+                }
+            )
             session["history_version"] = int(session.get("history_version", 0)) + 1
     return _ok(rid, {"status": "ok"})
 
@@ -1008,10 +1036,13 @@ def _session_compress(rid, params: dict) -> dict:
         session["history"] = compressed
         session["history_version"] = history_version + 1
 
-    return _ok(rid, {
-        "removed": len(history) - len(compressed),
-        "usage": _get_usage(agent),
-    })
+    return _ok(
+        rid,
+        {
+            "removed": len(history) - len(compressed),
+            "usage": _get_usage(agent),
+        },
+    )
 
 
 @method("session.branch")
@@ -1069,13 +1100,16 @@ def _session_save(rid, params: dict) -> dict:
     if key:
         with session.get("history_lock", threading.Lock()):
             history = list(session.get("history", []))
-        _save_session_file(key, {
-            "title": session.get("pending_title") or "",
-            "messages": history,
-            "message_count": len(history),
-            "started_at": time.time(),
-            "source": "tui",
-        })
+        _save_session_file(
+            key,
+            {
+                "title": session.get("pending_title") or "",
+                "messages": history,
+                "message_count": len(history),
+                "started_at": time.time(),
+                "source": "tui",
+            },
+        )
     return _ok(rid, {"status": "saved"})
 
 
@@ -1111,7 +1145,8 @@ def _prompt_submit(rid, params: dict) -> dict:
         err_check = _wait_agent(session, rid)
         if err_check:
             _emit(
-                "error", sid,
+                "error",
+                sid,
                 {"message": err_check.get("error", {}).get("message", "agent init failed")},
             )
             with session["history_lock"]:
@@ -1132,18 +1167,23 @@ def _run_prompt_submit(rid, sid: str, session: dict, text: str) -> None:
     if agent is None:
         _emit("message.start", sid)
         _emit(
-            "message.delta", sid,
+            "message.delta",
+            sid,
             {"text": f"[Lyra TUI] Agent not yet connected. Your message was received:\n\n{text}"},
         )
         with session["history_lock"]:
             session["history"] = history + [{"role": "user", "content": text}]
             session["history_version"] = history_version + 1
             session["running"] = False
-        _emit("message.complete", sid, {
-            "text": "",
-            "usage": {},
-            "status": "complete",
-        })
+        _emit(
+            "message.complete",
+            sid,
+            {
+                "text": "",
+                "usage": {},
+                "status": "complete",
+            },
+        )
         return
 
     _emit("message.start", sid)
@@ -1177,7 +1217,11 @@ def _run_prompt_submit(rid, sid: str, session: dict, text: str) -> None:
                     session["history"] = result["messages"]
                     session["history_version"] = history_version + 1
         raw = result.get("final_response", "")
-        status = "interrupted" if result.get("interrupted") else "error" if result.get("error") else "complete"
+        status = (
+            "interrupted"
+            if result.get("interrupted")
+            else "error" if result.get("error") else "complete"
+        )
     else:
         raw = str(result)
 
@@ -1198,10 +1242,12 @@ def _prompt_background(rid, params: dict) -> dict:
         return err
     text = params.get("text", "")
     with session["history_lock"]:
-        session.setdefault("history", []).append({
-            "role": "user",
-            "content": f"[Background task: {text}]",
-        })
+        session.setdefault("history", []).append(
+            {
+                "role": "user",
+                "content": f"[Background task: {text}]",
+            }
+        )
         session["history_version"] = int(session.get("history_version", 0)) + 1
     return _ok(rid, {"status": "queued"})
 
@@ -1334,16 +1380,21 @@ def _reload_env(rid, params: dict) -> dict:
 
 @method("commands.catalog")
 def _commands_catalog(rid, params: dict) -> dict:
-    return _ok(rid, {"commands": [
-        {"name": "model", "help": "Switch the active model"},
-        {"name": "clear", "help": "Clear the current conversation"},
-        {"name": "help", "help": "Show available commands"},
-        {"name": "compress", "help": "Compress conversation history"},
-        {"name": "copy", "help": "Copy last response to clipboard"},
-        {"name": "save", "help": "Save the current session"},
-        {"name": "load", "help": "Load a session from history"},
-        {"name": "stats", "help": "Show usage statistics"},
-    ]})
+    return _ok(
+        rid,
+        {
+            "commands": [
+                {"name": "model", "help": "Switch the active model"},
+                {"name": "clear", "help": "Clear the current conversation"},
+                {"name": "help", "help": "Show available commands"},
+                {"name": "compress", "help": "Compress conversation history"},
+                {"name": "copy", "help": "Copy last response to clipboard"},
+                {"name": "save", "help": "Save the current session"},
+                {"name": "load", "help": "Load a session from history"},
+                {"name": "stats", "help": "Show usage statistics"},
+            ]
+        },
+    )
 
 
 @method("command.resolve")
@@ -1369,14 +1420,25 @@ def _command_resolve(rid, params: dict) -> dict:
 
 @method("model.options")
 def _model_options(rid, params: dict) -> dict:
-    return _ok(rid, {
-        "options": [
-            {"id": "claude-sonnet-4-20250514", "name": "Claude Sonnet 4", "provider": "anthropic"},
-            {"id": "claude-opus-4-20250514", "name": "Claude Opus 4", "provider": "anthropic"},
-            {"id": "claude-haiku-3-5-20241022", "name": "Claude Haiku 3.5", "provider": "anthropic"},
-        ],
-        "current": _resolve_model(),
-    })
+    return _ok(
+        rid,
+        {
+            "options": [
+                {
+                    "id": "claude-sonnet-4-20250514",
+                    "name": "Claude Sonnet 4",
+                    "provider": "anthropic",
+                },
+                {"id": "claude-opus-4-20250514", "name": "Claude Opus 4", "provider": "anthropic"},
+                {
+                    "id": "claude-haiku-3-5-20241022",
+                    "name": "Claude Haiku 3.5",
+                    "provider": "anthropic",
+                },
+            ],
+            "current": _resolve_model(),
+        },
+    )
 
 
 @method("model.save_key")
@@ -1397,18 +1459,18 @@ def _complete_path(rid, params: dict) -> dict:
     prefix = p.name.lower()
 
     try:
-        candidates = sorted(
-            str(e) for e in parent.iterdir()
-            if e.name.lower().startswith(prefix)
-        )
+        candidates = sorted(str(e) for e in parent.iterdir() if e.name.lower().startswith(prefix))
     except (OSError, PermissionError):
         candidates = []
 
-    return _ok(rid, {
-        "candidates": candidates[:50],
-        "prefix": prefix,
-        "directory": str(parent),
-    })
+    return _ok(
+        rid,
+        {
+            "candidates": candidates[:50],
+            "prefix": prefix,
+            "directory": str(parent),
+        },
+    )
 
 
 @method("complete.slash")
@@ -1605,6 +1667,7 @@ def _cli_exec(rid, params: dict) -> dict:
 def _get_usage(agent) -> dict:
     def g(k, fb=None):
         return getattr(agent, k, 0) or (getattr(agent, fb, 0) if fb else 0)
+
     return {
         "model": getattr(agent, "model", "") or "",
         "input": g("session_input_tokens", "session_prompt_tokens"),

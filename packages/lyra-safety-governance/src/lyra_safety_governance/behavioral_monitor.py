@@ -103,7 +103,9 @@ class BehavioralMonitor:
     def config(self) -> BehavioralConfig:
         return self._config
 
-    def observe_event(self, agent_id: str, event_type: str, details: str = "", severity: float = 0.5) -> BehaviorEvent:
+    def observe_event(
+        self, agent_id: str, event_type: str, details: str = "", severity: float = 0.5
+    ) -> BehaviorEvent:
         """Record a behavior event for an agent and update baselines."""
         event_id = f"evt-{agent_id}-{self._next_event_id}"
         self._next_event_id += 1
@@ -166,7 +168,10 @@ class BehavioralMonitor:
         return tuple(scores)
 
     def _check_unusual_hour(
-        self, agent_id: str, recent: list[BehaviorEvent], baseline: BehaviorBaseline,
+        self,
+        agent_id: str,
+        recent: list[BehaviorEvent],
+        baseline: BehaviorBaseline,
     ) -> AnomalyScore | None:
         """Detect activity during hours the agent is not typically active."""
         dominant = baseline.dominant_hours
@@ -189,7 +194,10 @@ class BehavioralMonitor:
         )
 
     def _check_excessive_rate(
-        self, agent_id: str, recent: list[BehaviorEvent], baseline: BehaviorBaseline,
+        self,
+        agent_id: str,
+        recent: list[BehaviorEvent],
+        baseline: BehaviorBaseline,
     ) -> AnomalyScore | None:
         """Detect an unusually high rate of events in a short time window."""
         if len(recent) < 3:
@@ -209,14 +217,17 @@ class BehavioralMonitor:
             score=min(ratio / 10, 0.95),
             contributing_events=tuple(recent),
             recommendation=(
-                AnomalyAction.THROTTLE if ratio > 20
-                else AnomalyAction.NOTIFY if ratio > 10
-                else AnomalyAction.LOG
+                AnomalyAction.THROTTLE
+                if ratio > 20
+                else AnomalyAction.NOTIFY if ratio > 10 else AnomalyAction.LOG
             ),
         )
 
     def _check_new_action_types(
-        self, agent_id: str, recent: list[BehaviorEvent], baseline: BehaviorBaseline,
+        self,
+        agent_id: str,
+        recent: list[BehaviorEvent],
+        baseline: BehaviorBaseline,
     ) -> AnomalyScore | None:
         """Detect event types the agent has rarely or never performed before."""
         known = baseline.known_event_types
@@ -240,7 +251,10 @@ class BehavioralMonitor:
         )
 
     def _check_access_pattern_deviation(
-        self, agent_id: str, recent: list[BehaviorEvent], baseline: BehaviorBaseline,
+        self,
+        agent_id: str,
+        recent: list[BehaviorEvent],
+        baseline: BehaviorBaseline,
     ) -> AnomalyScore | None:
         """Detect deviations from learned access patterns."""
         if baseline.total_events < 5:
@@ -261,7 +275,6 @@ class BehavioralMonitor:
             score=deviation_ratio * 0.7,
             contributing_events=tuple(e for e in recent if e.event_type not in expected),
             recommendation=(
-                AnomalyAction.ESCALATE if deviation_ratio > 0.7
-                else AnomalyAction.NOTIFY
+                AnomalyAction.ESCALATE if deviation_ratio > 0.7 else AnomalyAction.NOTIFY
             ),
         )

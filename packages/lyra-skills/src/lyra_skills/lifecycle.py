@@ -12,6 +12,7 @@ Key insight: skills should be retired when their marginal external contribution
 policy has already internalized the skill.  Monotonic accumulation degrades
 library signal-to-noise over time.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -27,9 +28,10 @@ __all__ = [
 
 class LifecycleDecision(str, Enum):
     """Three SLIM lifecycle operations."""
-    RETAIN = "retain"      # positive marginal value — keep
-    RETIRE = "retire"      # marginal value ≈ 0 — remove
-    EXPAND = "expand"      # persistent failures — coverage gap, add new skill
+
+    RETAIN = "retain"  # positive marginal value — keep
+    RETIRE = "retire"  # marginal value ≈ 0 — remove
+    EXPAND = "expand"  # persistent failures — coverage gap, add new skill
 
 
 @dataclass
@@ -40,7 +42,7 @@ class SkillFitness:
     use_count: int = 0
     success_count: int = 0
     failure_count: int = 0
-    marginal_contribution: float = 0.0   # Δ(s) = Perf(lib) − Perf(lib \ {s})
+    marginal_contribution: float = 0.0  # Δ(s) = Perf(lib) − Perf(lib \ {s})
     contexts_applied: list[str] = field(default_factory=list)
 
     @property
@@ -57,11 +59,11 @@ class SkillFitness:
 class LifecycleConfig:
     """Tunable thresholds for lifecycle decisions."""
 
-    min_uses_before_evaluation: int = 5        # skip decision until sufficiently exercised
-    retire_marginal_threshold: float = 0.02    # Δ(s) < this → retire
-    retire_success_rate_floor: float = 0.20    # also retire if success_rate too low
-    expand_failure_streak: int = 3             # N consecutive failures → expand
-    retain_min_success_rate: float = 0.50      # must exceed this to retain confidently
+    min_uses_before_evaluation: int = 5  # skip decision until sufficiently exercised
+    retire_marginal_threshold: float = 0.02  # Δ(s) < this → retire
+    retire_success_rate_floor: float = 0.20  # also retire if success_rate too low
+    expand_failure_streak: int = 3  # N consecutive failures → expand
+    retain_min_success_rate: float = 0.50  # must exceed this to retain confidently
 
 
 @dataclass(frozen=True)
@@ -146,7 +148,10 @@ class LifecycleManager:
             return LifecycleEvaluation(
                 skill_id=skill_id,
                 decision=LifecycleDecision.RETAIN,
-                reason=f"only {f.use_count} uses; need {cfg.min_uses_before_evaluation} before evaluation",
+                reason=(
+                    f"only {f.use_count} uses; need {cfg.min_uses_before_evaluation}"
+                    f" before evaluation"
+                ),
                 marginal_contribution=f.marginal_contribution,
                 success_rate=f.success_rate,
             )
@@ -188,10 +193,7 @@ class LifecycleManager:
         return [self.evaluate(sid) for sid in self._fitness]
 
     def skills_to_retire(self) -> list[str]:
-        return [
-            e.skill_id for e in self.evaluate_all()
-            if e.decision == LifecycleDecision.RETIRE
-        ]
+        return [e.skill_id for e in self.evaluate_all() if e.decision == LifecycleDecision.RETIRE]
 
     def fitness(self, skill_id: str) -> SkillFitness | None:
         return self._fitness.get(skill_id)

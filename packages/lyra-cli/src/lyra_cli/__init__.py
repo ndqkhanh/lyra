@@ -1,4 +1,5 @@
 """🧬 Lyra CLI — one command to run the AGI platform."""
+
 from __future__ import annotations
 
 import argparse
@@ -16,6 +17,7 @@ BANNER = """
 ╚══════════════════════════════════════════════╝
 """
 
+
 def main():
     parser = argparse.ArgumentParser(description="🧬 Lyra — AGI Platform", prog="lyra")
     parser.add_argument("--version", "-v", action="store_true", help="Show version")
@@ -32,6 +34,7 @@ def main():
         print(BANNER)
         try:
             from lyra_core import BreakthroughIntegration, breakthrough_available
+
             bt = BreakthroughIntegration()
             status = bt.initialize()
             avail = sum(1 for v in status.values() if v)
@@ -65,13 +68,19 @@ def main():
     print(BANNER)
     try:
         from lyra_core import BreakthroughIntegration
+
         bt = BreakthroughIntegration()
         bt.initialize()
-        print(f"  🧬 Lyra Ready — {len([k for k,v in bt.available.items() if v])} subsystems active")
+        print(
+            f"  🧬 Lyra Ready — {len([k for k,v in bt.available.items() if v])} subsystems active"
+        )
         print("  💡 Run 'lyra --help' for options")
     except ImportError:
         print("  Installing Lyra...")
-        os.system("curl -fsSL https://raw.githubusercontent.com/ndqkhanh/lyra/main/install.sh | bash")
+        os.system(
+            "curl -fsSL https://raw.githubusercontent.com/ndqkhanh/lyra/main/install.sh | bash"
+        )
+
 
 if __name__ == "__main__":
     main()

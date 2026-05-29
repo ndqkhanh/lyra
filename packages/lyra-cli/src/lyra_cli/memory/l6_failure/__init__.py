@@ -9,7 +9,7 @@ import json
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 @dataclass
@@ -75,10 +75,7 @@ class FailureMemoryStore:
 
     def _save_failures(self):
         """Save failures to disk."""
-        data = {
-            fail_id: fail.to_dict()
-            for fail_id, fail in self.failures.items()
-        }
+        data = {fail_id: fail.to_dict() for fail_id, fail in self.failures.items()}
         with open(self.failures_file, "w") as f:
             json.dump(data, f, indent=2)
 
@@ -93,9 +90,7 @@ class FailureMemoryStore:
         return self.failures.get(failure_id)
 
     def check_triggers(
-        self,
-        current_context: dict[str, Any],
-        min_severity: str = "low"
+        self, current_context: dict[str, Any], min_severity: str = "low"
     ) -> list[FailureRecord]:
         """
         Check if current context matches any failure trigger conditions.
@@ -114,28 +109,18 @@ class FailureMemoryStore:
                 continue
 
             # Check if trigger conditions match
-            if self._matches_conditions(
-                current_context,
-                failure.trigger_conditions
-            ):
+            if self._matches_conditions(current_context, failure.trigger_conditions):
                 triggered.append(failure)
 
         # Sort by severity and trigger count
         triggered.sort(
-            key=lambda f: (
-                severity_order.get(f.severity, 0),
-                f.trigger_count
-            ),
-            reverse=True
+            key=lambda f: (severity_order.get(f.severity, 0), f.trigger_count), reverse=True
         )
 
         return triggered
 
     def _matches_conditions(
-        self,
-        context: dict[str, Any],
-        conditions: dict[str, Any],
-        threshold: float = 0.8
+        self, context: dict[str, Any], conditions: dict[str, Any], threshold: float = 0.8
     ) -> bool:
         """
         Check if context matches trigger conditions.
@@ -162,7 +147,11 @@ class FailureMemoryStore:
                         matching += 1
                 # Range match for numbers
                 elif isinstance(expected_value, dict) and "min" in expected_value:
-                    if expected_value["min"] <= actual_value <= expected_value.get("max", float("inf")):
+                    if (
+                        expected_value["min"]
+                        <= actual_value
+                        <= expected_value.get("max", float("inf"))
+                    ):
                         matching += 1
 
         return (matching / total) >= threshold if total > 0 else False
@@ -188,10 +177,7 @@ class FailureMemoryStore:
 
     def get_critical_failures(self) -> list[FailureRecord]:
         """Get all critical failures."""
-        return [
-            f for f in self.failures.values()
-            if f.severity == "critical"
-        ]
+        return [f for f in self.failures.values() if f.severity == "critical"]
 
     def get_frequent_failures(self, limit: int = 10) -> list[FailureRecord]:
         """Get most frequently triggered failures."""

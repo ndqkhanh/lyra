@@ -11,6 +11,7 @@ Exposes two entry points:
 ECC reference: everything-claude-code's command/feature-development.md +
 database-migration.md + add-language-rules.md structured command docs.
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -74,7 +75,9 @@ def cmd_help_enhanced(session: Any, args: str) -> CommandResult:
             for spec in specs:
                 if spec.name == topic or topic in spec.aliases:
                     emoji = CATEGORY_EMOJI.get(spec.category, "📋")
-                    alias_str = f" [dim](aliases: {', '.join(spec.aliases)})[/]" if spec.aliases else ""
+                    alias_str = (
+                        f" [dim](aliases: {', '.join(spec.aliases)})[/]" if spec.aliases else ""
+                    )
                     hint = f" [dim]{spec.args_hint}[/]" if spec.args_hint else ""
                     return CommandResult(
                         output=f"{spec.name}: {spec.description}",
@@ -94,15 +97,31 @@ def cmd_help_enhanced(session: Any, args: str) -> CommandResult:
             hint_col = f"[dim]{args_hint:<20}[/]" if args_hint else " " * 20
             lines.append(f"  {emoji}  {cmd_col} {hint_col} {desc}")
         return CommandResult(
-            output="Lyra quick reference (" + ", ".join(cmd for _, cmd, _, _ in QUICK_REFERENCE[:8]) + ")",
+            output="Lyra quick reference ("
+            + ", ".join(cmd for _, cmd, _, _ in QUICK_REFERENCE[:8])
+            + ")",
             renderable="\n".join(lines),
         )
 
     # ── Categorized overview ───────────────────────────────────────────
     by_cat = commands_by_category()
     # Sort by predefined category order
-    cat_order = ["session", "mode", "model", "workflow", "research", "memory",
-                  "skills", "tools", "debug", "admin", "mcp", "system", "output", "help"]
+    cat_order = [
+        "session",
+        "mode",
+        "model",
+        "workflow",
+        "research",
+        "memory",
+        "skills",
+        "tools",
+        "debug",
+        "admin",
+        "mcp",
+        "system",
+        "output",
+        "help",
+    ]
     lines = ["[bold]Lyra Commands[/]  [dim]— categorized reference[/]\n"]
 
     for cat_name in cat_order:
@@ -128,10 +147,15 @@ def cmd_help_enhanced(session: Any, args: str) -> CommandResult:
             lines.append(f"  [accent]/{spec.name:<12}[/]{hint:<22}{spec.description}")
         lines.append("")
 
-    lines.append("[dim]Tip: /help <command> for detail · /help --quick for compact · Tab to autocomplete[/]")
+    lines.append(
+        "[dim]Tip: /help <command> for detail · /help --quick for compact · Tab to autocomplete[/]"
+    )
 
     return CommandResult(
-        output=f"Lyra commands: {sum(len(v) for v in by_cat.values())} commands in {len(by_cat)} categories",
+        output=(
+            f"Lyra commands: {sum(len(v) for v in by_cat.values())} commands in {len(by_cat)}"
+            f" categories"
+        ),
         renderable="\n".join(lines),
     )
 

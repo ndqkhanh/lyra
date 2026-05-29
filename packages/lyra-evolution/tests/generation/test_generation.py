@@ -40,7 +40,9 @@ class TestCodeGenerator:
         patch = generator.generate_optimization_patch(sample_bottleneck)
         assert isinstance(patch, GeneratedPatch)
         assert patch.target_function == "calculate_fibonacci"
-        assert "memoization" in patch.description.lower() or "iterative" in patch.description.lower()
+        assert (
+            "memoization" in patch.description.lower() or "iterative" in patch.description.lower()
+        )
         assert len(patch.new_code) > 0
 
     def test_generate_memoization_patch(self, generator: CodeGenerator):
@@ -153,9 +155,7 @@ def add(a, b):
 class TestCodeGeneratorIntegration:
     """Integration tests for CodeGenerator."""
 
-    def test_full_optimization_workflow(
-        self, generator: CodeGenerator, tmp_path: Path
-    ):
+    def test_full_optimization_workflow(self, generator: CodeGenerator, tmp_path: Path):
         """Test complete optimization workflow."""
         # Create a file with inefficient code
         test_file = tmp_path / "inefficient.py"

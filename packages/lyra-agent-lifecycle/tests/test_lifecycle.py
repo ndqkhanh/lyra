@@ -231,7 +231,9 @@ class TestAgentSpawner:
             return f"worker-{id(config)}"
 
         factory.register_constructor("worker", build_worker)
-        factory.register_template("default-worker", SpawnConfig(agent_type="worker", capabilities=["general"]))
+        factory.register_template(
+            "default-worker", SpawnConfig(agent_type="worker", capabilities=["general"])
+        )
 
         return AgentSpawner(lifecycle, health_check=hc, factory=factory)
 
@@ -259,7 +261,9 @@ class TestAgentSpawner:
         hc.register_check("always_fail", fail_check)
         spawner._health_check = hc
 
-        config = SpawnConfig(agent_type="worker", capabilities=["general"], warmup_timeout=5.0, max_retries=0)
+        config = SpawnConfig(
+            agent_type="worker", capabilities=["general"], warmup_timeout=5.0, max_retries=0
+        )
         with pytest.raises(SpawnError):
             await spawner.spawn(config)
 
@@ -287,7 +291,9 @@ class TestAgentSpawner:
             await asyncio.sleep(2.0)
 
         spawner.register_warmup("worker", slow_warmup)
-        config = SpawnConfig(agent_type="worker", capabilities=["general"], warmup_timeout=0.01, max_retries=0)
+        config = SpawnConfig(
+            agent_type="worker", capabilities=["general"], warmup_timeout=0.01, max_retries=0
+        )
         with pytest.raises(SpawnError):
             await spawner.spawn(config)
 
@@ -551,7 +557,9 @@ class TestLifecycleIntegration:
             return f"integrated-{id(config)}"
 
         factory.register_constructor("test", make_agent)
-        factory.register_template("test-template", SpawnConfig(agent_type="test", capabilities=["general"]))
+        factory.register_template(
+            "test-template", SpawnConfig(agent_type="test", capabilities=["general"])
+        )
 
         spawner = AgentSpawner(lm, health_check=hc, factory=factory)
         ke = KnowledgeExtractor()
@@ -560,7 +568,9 @@ class TestLifecycleIntegration:
         tracker = EvolutionTracker()
 
         # Spawn
-        record = await spawner.spawn(SpawnConfig(agent_type="test", capabilities=["general"], warmup_timeout=5.0))
+        record = await spawner.spawn(
+            SpawnConfig(agent_type="test", capabilities=["general"], warmup_timeout=5.0)
+        )
         aid = record.agent_id
         assert lm.get_state(aid) == LifecycleState.ACTIVE
 
@@ -592,7 +602,10 @@ class TestLifecycleIntegration:
         assert landscape["active_agents"] == 1000
 
         # Retire all in parallel
-        tasks = [lm.transition(f"sim-agent-{i}", LifecycleState.RETIRED, reason="sim-end") for i in range(1000)]
+        tasks = [
+            lm.transition(f"sim-agent-{i}", LifecycleState.RETIRED, reason="sim-end")
+            for i in range(1000)
+        ]
         await asyncio.gather(*tasks)
 
         retired = lm.get_agents_by_state(LifecycleState.RETIRED)

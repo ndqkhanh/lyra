@@ -58,7 +58,9 @@ class TestStageResult:
         assert len(result.suggestions) == 1
 
     def test_result_immutable(self):
-        r = StageResult("s", StageStatus.APPROVED, ValidationDecision.PROCEED, "m", "ok", 0.9, (), ())
+        r = StageResult(
+            "s", StageStatus.APPROVED, ValidationDecision.PROCEED, "m", "ok", 0.9, (), ()
+        )
         with pytest.raises(Exception):
             r.confidence = 0.5
 
@@ -80,20 +82,62 @@ class TestValidatorConfig:
 class TestPipelineResult:
     def test_passed(self):
         stages = (
-            StageResult("executor", StageStatus.APPROVED, ValidationDecision.PROCEED, "m1", "ok", 0.9, (), ()),
-            StageResult("validator", StageStatus.APPROVED, ValidationDecision.PROCEED, "m2", "ok", 0.85, (), ()),
-            StageResult("critic", StageStatus.APPROVED, ValidationDecision.PROCEED, "m3", "ok", 0.88, (), ()),
+            StageResult(
+                "executor",
+                StageStatus.APPROVED,
+                ValidationDecision.PROCEED,
+                "m1",
+                "ok",
+                0.9,
+                (),
+                (),
+            ),
+            StageResult(
+                "validator",
+                StageStatus.APPROVED,
+                ValidationDecision.PROCEED,
+                "m2",
+                "ok",
+                0.85,
+                (),
+                (),
+            ),
+            StageResult(
+                "critic", StageStatus.APPROVED, ValidationDecision.PROCEED, "m3", "ok", 0.88, (), ()
+            ),
         )
-        result = PipelineResult("p1", "action", "claude-sonnet", stages, ValidationDecision.PROCEED, 0.88, 0, 0.0)
+        result = PipelineResult(
+            "p1", "action", "claude-sonnet", stages, ValidationDecision.PROCEED, 0.88, 0, 0.0
+        )
         assert result.passed is True
         assert result.blocked is False
 
     def test_blocked(self):
         stages = (
-            StageResult("executor", StageStatus.APPROVED, ValidationDecision.PROCEED, "m1", "ok", 0.9, (), ()),
-            StageResult("validator", StageStatus.REJECTED, ValidationDecision.BLOCK, "m2", "DANGER", 0.2, ("risk",), ()),
+            StageResult(
+                "executor",
+                StageStatus.APPROVED,
+                ValidationDecision.PROCEED,
+                "m1",
+                "ok",
+                0.9,
+                (),
+                (),
+            ),
+            StageResult(
+                "validator",
+                StageStatus.REJECTED,
+                ValidationDecision.BLOCK,
+                "m2",
+                "DANGER",
+                0.2,
+                ("risk",),
+                (),
+            ),
         )
-        result = PipelineResult("p2", "delete db", "claude-sonnet", stages, ValidationDecision.BLOCK, 0.55, 0, 0.0)
+        result = PipelineResult(
+            "p2", "delete db", "claude-sonnet", stages, ValidationDecision.BLOCK, 0.55, 0, 0.0
+        )
         assert result.blocked is True
         assert result.passed is False
 
@@ -221,9 +265,14 @@ class TestValidatePipeline:
 
         def my_validator(stage, context):
             return StageResult(
-                stage=stage, status=StageStatus.APPROVED,
+                stage=stage,
+                status=StageStatus.APPROVED,
                 decision=ValidationDecision.PROCEED,
-                reviewer_model="v", reasoning="Comprehensive validation passed all checks", confidence=0.95, issues_found=(), suggestions=(),
+                reviewer_model="v",
+                reasoning="Comprehensive validation passed all checks",
+                confidence=0.95,
+                issues_found=(),
+                suggestions=(),
             )
 
         result = pipeline.validate_with_rewrite(

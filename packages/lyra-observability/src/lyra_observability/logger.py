@@ -66,9 +66,7 @@ class StructuredLogger:
     def _log(self, level: LogLevel, msg: str, **context: Any) -> None:
         """Internal log method. Only records if level meets the threshold."""
         if level.value >= self._level.value:
-            self._entries.append(
-                LogEntry(level=level, message=msg, context=context)
-            )
+            self._entries.append(LogEntry(level=level, message=msg, context=context))
 
     def debug(self, msg: str, **context: Any) -> None:
         """Log a DEBUG-level message."""
@@ -109,7 +107,11 @@ class StructuredLogger:
                 {
                     "level": entry.level.name,
                     "message": entry.message,
-                    "context": dict(entry.context.items()) if isinstance(entry.context, Mapping) else entry.context,
+                    "context": (
+                        dict(entry.context.items())
+                        if isinstance(entry.context, Mapping)
+                        else entry.context
+                    ),
                     "timestamp": entry.timestamp,
                 }
             )

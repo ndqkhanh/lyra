@@ -1,4 +1,6 @@
-"""Lyra safety monitor (Phase 9 + Wave-E red-team corpus + Phase 13.3 modules + Phase 1 AGI Safety + Wave 2-3)."""
+"""Lyra safety monitor (Phase 9 + Wave-E red-team corpus + Phase 13.3 modules + Phase 1 AGI Safety +
+Wave 2-3)."""
+
 from __future__ import annotations
 
 from .adversarial_verifier import (

@@ -36,12 +36,14 @@ from typing import Any, Literal
 
 try:
     from datasets import load_dataset
+
     HAS_DATASETS = True
 except ImportError:
     HAS_DATASETS = False
 
 try:
     from codebleu import calc_codebleu
+
     HAS_CODEBLEU = True
 except ImportError:
     HAS_CODEBLEU = False
@@ -49,6 +51,7 @@ except ImportError:
 
 class EvalContext(str, Enum):
     """Evaluation context types for RepoBench."""
+
     CROSS_FILE_FIRST = "cross_file_first"
     CROSS_FILE_RANDOM = "cross_file_random"
     IN_FILE = "in_file"
@@ -56,6 +59,7 @@ class EvalContext(str, Enum):
 
 class EvalTask(str, Enum):
     """Evaluation task types for RepoBench."""
+
     RETRIEVAL = "retrieval"  # RepoBench-R
     COMPLETION = "completion"  # RepoBench-C
     PIPELINE = "pipeline"  # RepoBench-P
@@ -64,17 +68,20 @@ class EvalTask(str, Enum):
 @dataclass
 class RepoBenchSample:
     """A single sample from RepoBench dataset."""
+
     repo_name: str
     file_path: str
     context: str  # Code context before the target line
     target: str  # Ground truth completion
-    cross_file_context: list[str] = field(default_factory=list)  # Relevant snippets from other files
+    # Relevant snippets from other files
+    cross_file_context: list[str] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class EvalMetrics:
     """Evaluation metrics for a single sample or dataset."""
+
     exact_match: float = 0.0
     edit_similarity: float = 0.0
     codebleu: float = 0.0
@@ -87,6 +94,7 @@ class EvalMetrics:
 @dataclass
 class EvalResult:
     """Complete evaluation result for a task."""
+
     task: EvalTask
     context: EvalContext
     language: Literal["python", "java"]
@@ -116,7 +124,9 @@ class RepoBenchMemoryEval:
             cache_dir: Directory for caching datasets and results
         """
         self.t3_memory_dir = Path(t3_memory_dir) if t3_memory_dir else None
-        self.cache_dir = Path(cache_dir) if cache_dir else Path.home() / ".cache" / "lyra" / "repobench"
+        self.cache_dir = (
+            Path(cache_dir) if cache_dir else Path.home() / ".cache" / "lyra" / "repobench"
+        )
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
         if not HAS_DATASETS:
@@ -338,15 +348,17 @@ class RepoBenchMemoryEval:
             total_es += es
             total_cb += cb
 
-            per_sample_results.append({
-                "repo_name": sample.repo_name,
-                "file_path": sample.file_path,
-                "prediction": prediction,
-                "target": sample.target,
-                "exact_match": em,
-                "edit_similarity": es,
-                "codebleu": cb,
-            })
+            per_sample_results.append(
+                {
+                    "repo_name": sample.repo_name,
+                    "file_path": sample.file_path,
+                    "prediction": prediction,
+                    "target": sample.target,
+                    "exact_match": em,
+                    "edit_similarity": es,
+                    "codebleu": cb,
+                }
+            )
 
         n = len(samples)
         metrics = EvalMetrics(
@@ -400,15 +412,17 @@ class RepoBenchMemoryEval:
             total_acc3 += acc3
             total_acc5 += acc5
 
-            per_sample_results.append({
-                "repo_name": sample.repo_name,
-                "file_path": sample.file_path,
-                "retrieved": retrieved[:5],  # Top-5 for inspection
-                "relevant": relevant,
-                "accuracy_at_1": acc1,
-                "accuracy_at_3": acc3,
-                "accuracy_at_5": acc5,
-            })
+            per_sample_results.append(
+                {
+                    "repo_name": sample.repo_name,
+                    "file_path": sample.file_path,
+                    "retrieved": retrieved[:5],  # Top-5 for inspection
+                    "relevant": relevant,
+                    "accuracy_at_1": acc1,
+                    "accuracy_at_3": acc3,
+                    "accuracy_at_5": acc5,
+                }
+            )
 
         n = len(samples)
         metrics = EvalMetrics(

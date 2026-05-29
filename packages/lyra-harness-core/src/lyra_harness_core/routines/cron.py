@@ -91,7 +91,7 @@ def _parse_field(spec: str, *, lo: int, hi: int) -> frozenset[int]:
             try:
                 step = int(step_str)
             except ValueError:
-                raise CronParseError(f"invalid step {step_str!r} in {part!r}")
+                raise CronParseError(f"invalid step {step_str!r} in {part!r}") from None
             if step <= 0:
                 raise CronParseError(f"step must be > 0, got {step}")
             part = base or "*"
@@ -104,12 +104,12 @@ def _parse_field(spec: str, *, lo: int, hi: int) -> frozenset[int]:
                 start = int(start_str)
                 end = int(end_str)
             except ValueError:
-                raise CronParseError(f"invalid range {part!r}")
+                raise CronParseError(f"invalid range {part!r}") from None
         else:
             try:
                 start = end = int(part)
             except ValueError:
-                raise CronParseError(f"invalid literal {part!r}")
+                raise CronParseError(f"invalid literal {part!r}") from None
 
         if start < lo or end > hi or start > end:
             raise CronParseError(

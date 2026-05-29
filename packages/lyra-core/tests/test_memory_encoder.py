@@ -1,4 +1,5 @@
 """Tests for memory/encoder.py (Phase M2 — Encoder)."""
+
 from __future__ import annotations
 
 import pytest
@@ -27,7 +28,10 @@ def test_rule_encoder_decision_detected():
     enc = RuleEncoder()
     t = _turn(
         user="what db should we use?",
-        assistant="We decided to use Clickhouse instead of Postgres because OLAP queries needed columnar storage.",
+        assistant=(
+            "We decided to use Clickhouse instead of Postgres because OLAP queries needed columnar"
+            "storage."
+        ),
     )
     frags = enc.encode(t)
     assert len(frags) >= 1
@@ -144,15 +148,17 @@ def test_llm_encoder_with_valid_json_output():
     import json
 
     def fake_llm(prompt: str) -> str:
-        return json.dumps([
-            {
-                "type": "decision",
-                "content": "use httpx over requests",
-                "entities": ["httpx", "requests"],
-                "confidence": 0.9,
-                "structured": {"rationale": "async support"},
-            }
-        ])
+        return json.dumps(
+            [
+                {
+                    "type": "decision",
+                    "content": "use httpx over requests",
+                    "entities": ["httpx", "requests"],
+                    "confidence": 0.9,
+                    "structured": {"rationale": "async support"},
+                }
+            ]
+        )
 
     enc = LLMEncoder(llm_fn=fake_llm)
     t = _turn(user="which http client?", assistant="httpx is better")
@@ -169,13 +175,15 @@ def test_llm_encoder_decision_missing_rationale_gets_patched():
     import json
 
     def fake_llm(prompt: str) -> str:
-        return json.dumps([
-            {
-                "type": "decision",
-                "content": "use postgres",
-                "structured": {},  # no rationale
-            }
-        ])
+        return json.dumps(
+            [
+                {
+                    "type": "decision",
+                    "content": "use postgres",
+                    "structured": {},  # no rationale
+                }
+            ]
+        )
 
     enc = LLMEncoder(llm_fn=fake_llm)
     t = _turn(assistant="postgres is better")

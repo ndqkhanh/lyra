@@ -31,7 +31,6 @@ import math
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -138,7 +137,7 @@ class PlanNode:
     step_id: str
     action: str
     expected_outcome: str
-    dependencies: Tuple[str, ...] = ()
+    dependencies: tuple[str, ...] = ()
     confidence: float = 0.9
     system_used: SystemLevel = SystemLevel.REACTIVE
 
@@ -162,9 +161,9 @@ class ExecutionTrace:
         success: Whether the overall plan succeeded.
     """
 
-    plan_nodes: Tuple[PlanNode, ...] = ()
-    actual_outcomes: Tuple[str, ...] = ()
-    deviations: Tuple[str, ...] = ()
+    plan_nodes: tuple[PlanNode, ...] = ()
+    actual_outcomes: tuple[str, ...] = ()
+    deviations: tuple[str, ...] = ()
     tokens_used: int = 0
     success: bool = False
 
@@ -198,36 +197,36 @@ class PlanningStats:
 
 # Keyword maps used by the complexity classifier.  Defined at module level for
 # readability and to avoid re-allocation on every invocation.
-_HIGH_COMPLEXITY_KWS: Dict[str, int] = {
+_HIGH_COMPLEXITY_KWS: dict[str, int] = {
     "refactor": 3,
     "architecture": 3,
     "redesign": 3,
 }
-_MED_COMPLEXITY_KWS: Dict[str, int] = {
+_MED_COMPLEXITY_KWS: dict[str, int] = {
     "design": 2,
     "implement": 2,
     "migrate": 2,
     "optimise": 2,
 }
-_LOW_COMPLEXITY_KWS: Dict[str, int] = {
+_LOW_COMPLEXITY_KWS: dict[str, int] = {
     "debug": 1,
     "update": 1,
     "add": 1,
 }
-_NEGATIVE_COMPLEXITY_KWS: Dict[str, int] = {
+_NEGATIVE_COMPLEXITY_KWS: dict[str, int] = {
     "fix typo": -2,
     "rename": -2,
     "typo": -2,
     "cosmetic": -2,
 }
-_MULTI_STEP_KWS: Tuple[str, ...] = (
+_MULTI_STEP_KWS: tuple[str, ...] = (
     "first",
     "then",
     "after",
     "before",
     "finally",
 )
-_DOMAIN_SIGNALS: Dict[str, Tuple[str, ...]] = {
+_DOMAIN_SIGNALS: dict[str, tuple[str, ...]] = {
     "backend": ("api", "endpoint", "route", "server", "database", "query", "schema"),
     "frontend": ("ui", "component", "page", "view", "template", "css", "html"),
     "data": ("database", "query", "schema", "pipeline", "etl", "dataset"),
@@ -241,7 +240,7 @@ _LOW_COMPLEXITY_MAX: float = 3.0
 _MED_COMPLEXITY_MAX: float = 6.0
 
 # Simulation step actions and outcomes used by plan_simulative.
-_SIM_STEP_ACTIONS: Tuple[str, ...] = (
+_SIM_STEP_ACTIONS: tuple[str, ...] = (
     "decompose_task",
     "analyze_dependencies",
     "design_solution",
@@ -251,7 +250,7 @@ _SIM_STEP_ACTIONS: Tuple[str, ...] = (
     "refine_approach",
     "finalize",
 )
-_SIM_STEP_OUTCOMES: Tuple[str, ...] = (
+_SIM_STEP_OUTCOMES: tuple[str, ...] = (
     "Requirements decomposed into actionable sub-tasks",
     "Dependencies mapped and ordered",
     "Solution design completed with causal validation",
@@ -424,7 +423,7 @@ class SR2AMPlanner:
             allow_fast_path=False,
         )
 
-    def plan_reactive(self, task: str) -> List[PlanNode]:
+    def plan_reactive(self, task: str) -> list[PlanNode]:
         """System I — fast template-based plan for simple tasks.
 
         Returns 2-3 ``PlanNode``\\ s with high confidence (≥0.90).  The plan
@@ -437,7 +436,7 @@ class SR2AMPlanner:
             Ordered list of plan steps.
         """
         text = task.lower()
-        steps: List[PlanNode] = []
+        steps: list[PlanNode] = []
 
         # Step 1 — always analyse.
         steps.append(
@@ -494,7 +493,7 @@ class SR2AMPlanner:
         self,
         task: str,
         config: PlanningConfig,
-    ) -> List[PlanNode]:
+    ) -> list[PlanNode]:
         """System II — world-model simulation with causal CoT reasoning.
 
         Generates a plan up to ``config.max_depth`` steps.  After building
@@ -510,7 +509,7 @@ class SR2AMPlanner:
             Simulated and adjusted plan steps.
         """
         task.lower()
-        nodes: List[PlanNode] = []
+        nodes: list[PlanNode] = []
 
         # ── Build initial plan ─────────────────────────────────────────
         # Step 1: Parse requirements (always the root when max_depth >= 1).
@@ -582,7 +581,7 @@ class SR2AMPlanner:
         self,
         task: str,
         budget: int = 8000,
-    ) -> Tuple[List[PlanNode], PlanningConfig]:
+    ) -> tuple[list[PlanNode], PlanningConfig]:
         """Main entry point — classify, configure, and generate a plan.
 
         Workflow:
@@ -678,7 +677,7 @@ class SR2AMPlanner:
             self._threshold_offset,
         )
 
-    def get_stats(self) -> Dict[str, float | int]:
+    def get_stats(self) -> dict[str, float | int]:
         """Return aggregate performance statistics.
 
         Returns:
@@ -743,10 +742,10 @@ class SR2AMPlanner:
 
     @staticmethod
     def _simulate_round(
-        nodes: List[PlanNode],
+        nodes: list[PlanNode],
         round_num: int,
         max_depth: int,
-    ) -> List[PlanNode]:
+    ) -> list[PlanNode]:
         """Run one round of world-model simulation over *nodes*.
 
         For each node, examines dependency confidences and adjusts the
@@ -755,7 +754,7 @@ class SR2AMPlanner:
         equilibrium.
         """
         node_map = {n.step_id: n for n in nodes}
-        updated: List[PlanNode] = []
+        updated: list[PlanNode] = []
 
         for node in nodes:
             # Check dependency health.

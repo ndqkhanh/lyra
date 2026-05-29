@@ -145,7 +145,9 @@ class DashboardGenerator:
         # Per-agent panels
         for sla in self.sla_manager.list_slas():
             agent_data = self._agent_panel(sla.agent_id)
-            panels.append({"id": f"agent_{sla.agent_id}", "type": "agent_detail", "data": agent_data})
+            panels.append(
+                {"id": f"agent_{sla.agent_id}", "type": "agent_detail", "data": agent_data}
+            )
 
         # Budget utilization panel
         budget_data = self._budget_panel()
@@ -230,7 +232,11 @@ class DashboardGenerator:
                 bt.name: {
                     "limit": b.limit,
                     "utilization": b.utilization_pct,
-                    "status": "danger" if b.utilization_pct > 90 else ("warning" if b.utilization_pct > 70 else "ok"),
+                    "status": (
+                        "danger"
+                        if b.utilization_pct > 90
+                        else ("warning" if b.utilization_pct > 70 else "ok")
+                    ),
                 }
                 for bt, b in budgets.items()
             }
@@ -305,17 +311,10 @@ class ComplianceReporter:
         recommendations: list[str] = []
 
         for slo in sla.slos:
-            self.metrics.query(
-                agent_id, slo.metric.value
-            )
+            self.metrics.query(agent_id, slo.metric.value)
             # Filter to period
-            timeseries = self.metrics.query_timeseries(
-                agent_id, slo.metric.value
-            )
-            period_values = [
-                v for ts, v in timeseries
-                if period_start <= ts <= period_end
-            ]
+            timeseries = self.metrics.query_timeseries(agent_id, slo.metric.value)
+            period_values = [v for ts, v in timeseries if period_start <= ts <= period_end]
 
             if not period_values:
                 continue
@@ -330,9 +329,7 @@ class ComplianceReporter:
                 "comparator": slo.comparator,
                 "checks": len(period_values),
                 "failures": failures,
-                "compliance_pct": (
-                    (1 - failures / len(period_values)) * 100
-                ),
+                "compliance_pct": ((1 - failures / len(period_values)) * 100),
                 "avg_value": float(np.mean(period_values)),
                 "p95_value": float(np.percentile(period_values, 95)),
             }
@@ -344,9 +341,7 @@ class ComplianceReporter:
                     f"checks failed (target: {slo.comparator} {slo.target})"
                 )
 
-        overall_compliance = (
-            (1 - violations / total_checks) * 100 if total_checks > 0 else 100.0
-        )
+        overall_compliance = (1 - violations / total_checks) * 100 if total_checks > 0 else 100.0
 
         return ComplianceReport(
             report_id=f"rpt_{agent_id}_{int(period_start)}",
@@ -367,8 +362,7 @@ class ComplianceReporter:
     ) -> list[ComplianceReport]:
         """Generate reports for all agents."""
         return [
-            self.generate_report(aid, period_start, period_end)
-            for aid in self.sla_manager._slas
+            self.generate_report(aid, period_start, period_end) for aid in self.sla_manager._slas
         ]
 
 
@@ -405,7 +399,8 @@ class TrendAnalyzer:
 
         if len(timeseries) < 10:
             return TrendAnalysis(
-                agent_id=agent_id, metric=metric,
+                agent_id=agent_id,
+                metric=metric,
                 trend_direction="stable",
             )
 
@@ -509,7 +504,8 @@ class PostMortemGenerator:
 
         # Get metric data before the breach
         timeseries = self.metrics.query_timeseries(
-            violation.agent_id, violation.metric,
+            violation.agent_id,
+            violation.metric,
             window_seconds=preceding_seconds,
         )
 
@@ -564,7 +560,7 @@ class PostMortemGenerator:
             duration_seconds=time.time() - breach_time,
             root_cause=root_cause,
             impact=f"Metric {violation.metric} exceeded SLO target of "
-                   f"{violation.slo_target} (actual: {violation.actual:.2f})",
+            f"{violation.slo_target} (actual: {violation.actual:.2f})",
             contributing_factors=factors,
             action_items=action_items,
             severity=breach_severity,
@@ -614,19 +610,23 @@ class ReportExporter:
 
     def _to_json(self, report: ComplianceReport) -> str:
         """Format as JSON."""
-        return json.dumps({
-            "report_id": report.report_id,
-            "agent_id": report.agent_id,
-            "period": {
-                "start": report.period_start,
-                "end": report.period_end,
+        return json.dumps(
+            {
+                "report_id": report.report_id,
+                "agent_id": report.agent_id,
+                "period": {
+                    "start": report.period_start,
+                    "end": report.period_end,
+                },
+                "compliance_pct": report.compliance_pct,
+                "total_checks": report.total_checks,
+                "violations": report.violations,
+                "slo_details": report.slo_details,
+                "recommendations": report.recommendations,
             },
-            "compliance_pct": report.compliance_pct,
-            "total_checks": report.total_checks,
-            "violations": report.violations,
-            "slo_details": report.slo_details,
-            "recommendations": report.recommendations,
-        }, indent=2, default=str)
+            indent=2,
+            default=str,
+        )
 
     def _to_markdown(self, report: ComplianceReport) -> str:
         """Format as Markdown."""

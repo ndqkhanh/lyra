@@ -1,4 +1,5 @@
-"""Belief consistency management: contradiction detection, resolution, minimal inconsistent subset finding, paraconsistent reasoning."""
+"""Belief consistency management: contradiction detection, resolution, minimal inconsistent subset
+finding, paraconsistent reasoning."""
 
 from __future__ import annotations
 
@@ -70,10 +71,8 @@ class ResolutionStrategy:
 
 
 class ConsistencyManager:
-    """Manages belief consistency: detects contradictions, finds minimal
-    inconsistent subsets, and provides resolution strategies including
-    paraconsistent reasoning support.
-    """
+    """Manages belief consistency: detects contradictions, finds minimal inconsistent subsets, and
+    provides resolution strategies including paraconsistent reasoning support."""
 
     # Negation/opposition word pairs for contradiction detection
     OPPOSITION_PAIRS: list[tuple[set[str], set[str]]] = [
@@ -142,10 +141,12 @@ class ConsistencyManager:
             List of detected contradictions.
         """
         import time as _time
+
         contradictions: list[Contradiction] = []
 
         active_beliefs = [
-            (bid, b) for bid, b in self.belief_system._beliefs.items()
+            (bid, b)
+            for bid, b in self.belief_system._beliefs.items()
             if b.status == BeliefStatus.ACTIVE
         ]
 
@@ -162,19 +163,19 @@ class ConsistencyManager:
 
                     reason, severity = self._check_contradiction(b_a, b_b)
                     if reason:
-                        contradictions.append(Contradiction(
-                            belief_ids=[bid_a, bid_b],
-                            reason=reason,
-                            severity=severity,
-                            detected_at=_time.time(),
-                        ))
+                        contradictions.append(
+                            Contradiction(
+                                belief_ids=[bid_a, bid_b],
+                                reason=reason,
+                                severity=severity,
+                                detected_at=_time.time(),
+                            )
+                        )
 
         self._contradictions.extend(contradictions)
         return contradictions
 
-    def _check_contradiction(
-        self, belief_a: Belief, belief_b: Belief
-    ) -> tuple[str, float]:
+    def _check_contradiction(self, belief_a: Belief, belief_b: Belief) -> tuple[str, float]:
         """Check if two beliefs contradict each other.
 
         Returns:
@@ -209,9 +210,7 @@ class ConsistencyManager:
 
     # ── Minimal inconsistent subset ─────────────────────────────────────
 
-    def find_minimal_inconsistent_subsets(
-        self, max_size: int = 5
-    ) -> list[InconsistentSubset]:
+    def find_minimal_inconsistent_subsets(self, max_size: int = 5) -> list[InconsistentSubset]:
         """Find minimal (or near-minimal) inconsistent subsets of beliefs.
 
         Uses a heuristic approach to find small sets of beliefs that
@@ -229,11 +228,13 @@ class ConsistencyManager:
         # Start from detected contradictions (size 2)
         for contra in contradictions:
             if not any(set(contra.belief_ids) == set(s.belief_ids) for s in subsets):
-                subsets.append(InconsistentSubset(
-                    belief_ids=contra.belief_ids,
-                    size=len(contra.belief_ids),
-                    contradiction_type="pairwise",
-                ))
+                subsets.append(
+                    InconsistentSubset(
+                        belief_ids=contra.belief_ids,
+                        size=len(contra.belief_ids),
+                        contradiction_type="pairwise",
+                    )
+                )
 
         # For larger subsets, check transitive contradictions
         # If A contradicts B and B contradicts C, then {A, B, C} might be inconsistent
@@ -255,17 +256,20 @@ class ConsistencyManager:
                 visited.update(component)
                 if len(component) >= size:
                     subset = list(component)[:size]
-                    subsets.append(InconsistentSubset(
-                        belief_ids=subset,
-                        size=size,
-                        contradiction_type="transitive",
-                    ))
+                    subsets.append(
+                        InconsistentSubset(
+                            belief_ids=subset,
+                            size=size,
+                            contradiction_type="transitive",
+                        )
+                    )
 
         return subsets
 
     def _bfs_component(self, graph: dict[str, set[str]], start: str) -> set[str]:
         """BFS to find connected component in contradiction graph."""
         from collections import deque
+
         queue = deque([start])
         visited: set[str] = {start}
         while queue:
@@ -374,8 +378,12 @@ class ConsistencyManager:
                 kept, retracted = bid_b, bid_a
 
         contradiction.resolved = True
-        logger.info("Contradiction resolved with '%s': kept=%s, retracted=%s",
-                    strategy_name, kept[:8], retracted[:8])
+        logger.info(
+            "Contradiction resolved with '%s': kept=%s, retracted=%s",
+            strategy_name,
+            kept[:8],
+            retracted[:8],
+        )
 
         return {
             "resolved": True,
@@ -384,9 +392,7 @@ class ConsistencyManager:
             "retracted": retracted,
         }
 
-    def resolve_all(
-        self, strategy_name: str = "confidence_comparison"
-    ) -> dict[str, Any]:
+    def resolve_all(self, strategy_name: str = "confidence_comparison") -> dict[str, Any]:
         """Detect and resolve all contradictions.
 
         Args:
@@ -411,11 +417,9 @@ class ConsistencyManager:
 
     # ── Paraconsistent reasoning support ───────────────────────────────
 
-    def paraconsistent_query(
-        self, domain: str
-    ) -> dict[str, Any]:
-        """Support paraconsistent reasoning: query a domain while
-        accepting that contradictions may exist.
+    def paraconsistent_query(self, domain: str) -> dict[str, Any]:
+        """Support paraconsistent reasoning: query a domain while accepting that contradictions may
+        exist.
 
         In paraconsistent logic, contradictions do not imply everything.
         This returns both sides of detected contradictions for the domain.
@@ -466,12 +470,14 @@ class ConsistencyManager:
                 topic: {
                     "supporting_count": len(sides["supporting"]),
                     "opposing_count": len(sides["opposing"]),
-                    "supporting_confidence": float(np.mean(
-                        [b.confidence for b in sides["supporting"]]
-                    )),
-                    "opposing_confidence": float(np.mean(
-                        [b.confidence for b in sides["opposing"]]
-                    )) if sides["opposing"] else 0.0,
+                    "supporting_confidence": float(
+                        np.mean([b.confidence for b in sides["supporting"]])
+                    ),
+                    "opposing_confidence": (
+                        float(np.mean([b.confidence for b in sides["opposing"]]))
+                        if sides["opposing"]
+                        else 0.0
+                    ),
                 }
                 for topic, sides in disputed_topics.items()
             },

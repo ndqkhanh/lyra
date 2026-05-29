@@ -210,12 +210,24 @@ def test_save_is_atomic_no_temp_litter(tmp_path: Path) -> None:
 
 def test_top_n_orders_by_utility_descending(tmp_path: Path) -> None:
     p = tmp_path / "l.json"
-    record_outcome("hot", SkillOutcome(ts=1.0, session_id="s", turn=1, kind=OUTCOME_SUCCESS), path=p)
-    record_outcome("hot", SkillOutcome(ts=2.0, session_id="s", turn=2, kind=OUTCOME_SUCCESS), path=p)
-    record_outcome("cold", SkillOutcome(ts=3.0, session_id="s", turn=3, kind=OUTCOME_FAILURE), path=p)
-    record_outcome("cold", SkillOutcome(ts=4.0, session_id="s", turn=4, kind=OUTCOME_FAILURE), path=p)
-    record_outcome("mixed", SkillOutcome(ts=5.0, session_id="s", turn=5, kind=OUTCOME_SUCCESS), path=p)
-    record_outcome("mixed", SkillOutcome(ts=6.0, session_id="s", turn=6, kind=OUTCOME_FAILURE), path=p)
+    record_outcome(
+        "hot", SkillOutcome(ts=1.0, session_id="s", turn=1, kind=OUTCOME_SUCCESS), path=p
+    )
+    record_outcome(
+        "hot", SkillOutcome(ts=2.0, session_id="s", turn=2, kind=OUTCOME_SUCCESS), path=p
+    )
+    record_outcome(
+        "cold", SkillOutcome(ts=3.0, session_id="s", turn=3, kind=OUTCOME_FAILURE), path=p
+    )
+    record_outcome(
+        "cold", SkillOutcome(ts=4.0, session_id="s", turn=4, kind=OUTCOME_FAILURE), path=p
+    )
+    record_outcome(
+        "mixed", SkillOutcome(ts=5.0, session_id="s", turn=5, kind=OUTCOME_SUCCESS), path=p
+    )
+    record_outcome(
+        "mixed", SkillOutcome(ts=6.0, session_id="s", turn=6, kind=OUTCOME_FAILURE), path=p
+    )
 
     led = load_ledger(p)
     ids = [s.skill_id for s in top_n(led, n=10)]

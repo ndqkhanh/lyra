@@ -252,7 +252,8 @@ class InputCompressor:
             raise CompressionError(command, 0, "empty output")
         if not 0.0 <= target_ratio <= 1.0:
             raise CompressionError(
-                command, _estimate_tokens(output),
+                command,
+                _estimate_tokens(output),
                 f"invalid target_ratio: {target_ratio}",
             )
 
@@ -272,7 +273,9 @@ class InputCompressor:
             compressed = output
 
         compressed_tokens = _estimate_tokens(compressed)
-        compression_ratio = 1.0 - (compressed_tokens / original_tokens) if original_tokens > 0 else 0.0
+        compression_ratio = (
+            1.0 - (compressed_tokens / original_tokens) if original_tokens > 0 else 0.0
+        )
 
         elapsed = (time.time() - start_time) * 1000
 
@@ -299,7 +302,7 @@ class InputCompressor:
         max_lines = config["max_lines"]
 
         lines = output.splitlines()
-        filtered = [l for l in lines if re.match(filter_pattern, l)]
+        filtered = [line for line in lines if re.match(filter_pattern, line)]
 
         if len(filtered) <= max_lines:
             return "\n".join(filtered)

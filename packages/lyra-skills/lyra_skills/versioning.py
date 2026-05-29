@@ -21,6 +21,7 @@ from typing import Any
 @dataclass
 class SkillVersion:
     """Single version of a skill."""
+
     version: str
     commit_hash: str
     timestamp: datetime
@@ -57,22 +58,15 @@ class SkillVersionManager:
                 ["git", "rev-parse", "--git-dir"],
                 cwd=self.skills_dir,
                 check=True,
-                capture_output=True
+                capture_output=True,
             )
         except subprocess.CalledProcessError:
             # Initialize git repo
-            subprocess.run(
-                ["git", "init"],
-                cwd=self.skills_dir,
-                check=True
-            )
+            subprocess.run(["git", "init"], cwd=self.skills_dir, check=True)
             print(f"Initialized git repository in {self.skills_dir}")
 
     def commit_skill(
-        self,
-        skill_file: Path,
-        message: str,
-        author: str = "Lyra Skills System"
+        self, skill_file: Path, message: str, author: str = "Lyra Skills System"
     ) -> str:
         """
         Commit a skill file to git.
@@ -86,18 +80,14 @@ class SkillVersionManager:
             Commit hash
         """
         # Stage file
-        subprocess.run(
-            ["git", "add", str(skill_file)],
-            cwd=self.skills_dir,
-            check=True
-        )
+        subprocess.run(["git", "add", str(skill_file)], cwd=self.skills_dir, check=True)
 
         # Commit
         result = subprocess.run(
             ["git", "commit", "-m", message, f"--author={author} <noreply@lyra.ai>"],
             cwd=self.skills_dir,
             capture_output=True,
-            text=True
+            text=True,
         )
 
         if result.returncode != 0:
@@ -114,7 +104,7 @@ class SkillVersionManager:
             cwd=self.skills_dir,
             capture_output=True,
             text=True,
-            check=True
+            check=True,
         )
         return result.stdout.strip()
 
@@ -133,27 +123,29 @@ class SkillVersionManager:
             cwd=self.skills_dir,
             capture_output=True,
             text=True,
-            check=True
+            check=True,
         )
 
         versions = []
-        for line in result.stdout.strip().split('\n'):
+        for line in result.stdout.strip().split("\n"):
             if not line:
                 continue
 
-            commit_hash, timestamp, author, message = line.split('|', 3)
+            commit_hash, timestamp, author, message = line.split("|", 3)
 
             # Extract version from commit message or generate
             version = self._extract_version_from_message(message)
 
-            versions.append(SkillVersion(
-                version=version,
-                commit_hash=commit_hash,
-                timestamp=datetime.fromtimestamp(int(timestamp)),
-                author=author,
-                message=message,
-                file_path=skill_file
-            ))
+            versions.append(
+                SkillVersion(
+                    version=version,
+                    commit_hash=commit_hash,
+                    timestamp=datetime.fromtimestamp(int(timestamp)),
+                    author=author,
+                    message=message,
+                    file_path=skill_file,
+                )
+            )
 
         return versions
 
@@ -161,18 +153,15 @@ class SkillVersionManager:
         """Extract version from commit message."""
         # Look for version pattern like "v1.2.3" or "version 1.2.3"
         import re
-        match = re.search(r'v?(\d+\.\d+\.\d+)', message)
+
+        match = re.search(r"v?(\d+\.\d+\.\d+)", message)
         if match:
             return match.group(1)
 
         # Generate version from timestamp
         return f"auto-{datetime.now().strftime('%Y%m%d%H%M%S')}"
 
-    def get_skill_at_version(
-        self,
-        skill_file: Path,
-        commit_hash: str
-    ) -> str:
+    def get_skill_at_version(self, skill_file: Path, commit_hash: str) -> str:
         """
         Get skill content at a specific version.
 
@@ -188,16 +177,11 @@ class SkillVersionManager:
             cwd=self.skills_dir,
             capture_output=True,
             text=True,
-            check=True
+            check=True,
         )
         return result.stdout
 
-    def diff_versions(
-        self,
-        skill_file: Path,
-        version1: str,
-        version2: str
-    ) -> str:
+    def diff_versions(self, skill_file: Path, version1: str, version2: str) -> str:
         """
         Get diff between two versions.
 
@@ -214,15 +198,11 @@ class SkillVersionManager:
             cwd=self.skills_dir,
             capture_output=True,
             text=True,
-            check=True
+            check=True,
         )
         return result.stdout
 
-    def rollback_to_version(
-        self,
-        skill_file: Path,
-        commit_hash: str
-    ) -> None:
+    def rollback_to_version(self, skill_file: Path, commit_hash: str) -> None:
         """
         Rollback skill to a previous version.
 
@@ -234,14 +214,12 @@ class SkillVersionManager:
         content = self.get_skill_at_version(skill_file, commit_hash)
 
         # Write to file
-        with open(self.skills_dir / skill_file, 'w') as f:
+        with open(self.skills_dir / skill_file, "w") as f:
             f.write(content)
 
         # Commit rollback
         self.commit_skill(
-            skill_file,
-            f"Rollback to version {commit_hash[:8]}",
-            author="Lyra Skills System"
+            skill_file, f"Rollback to version {commit_hash[:8]}", author="Lyra Skills System"
         )
 
     def get_lineage(self, skill_file: Path) -> dict[str, Any]:
@@ -257,29 +235,24 @@ class SkillVersionManager:
         versions = self.get_version_history(skill_file)
 
         return {
-            'skill_file': str(skill_file),
-            'total_versions': len(versions),
-            'current_version': versions[0] if versions else None,
-            'created_at': versions[-1].timestamp if versions else None,
-            'last_modified': versions[0].timestamp if versions else None,
-            'versions': [
+            "skill_file": str(skill_file),
+            "total_versions": len(versions),
+            "current_version": versions[0] if versions else None,
+            "created_at": versions[-1].timestamp if versions else None,
+            "last_modified": versions[0].timestamp if versions else None,
+            "versions": [
                 {
-                    'version': v.version,
-                    'commit_hash': v.commit_hash[:8],
-                    'timestamp': v.timestamp.isoformat(),
-                    'author': v.author,
-                    'message': v.message
+                    "version": v.version,
+                    "commit_hash": v.commit_hash[:8],
+                    "timestamp": v.timestamp.isoformat(),
+                    "author": v.author,
+                    "message": v.message,
                 }
                 for v in versions
-            ]
+            ],
         }
 
-    def tag_version(
-        self,
-        skill_file: Path,
-        tag: str,
-        message: str = ""
-    ) -> None:
+    def tag_version(self, skill_file: Path, tag: str, message: str = "") -> None:
         """
         Tag a specific version.
 
@@ -293,7 +266,7 @@ class SkillVersionManager:
         subprocess.run(
             ["git", "tag", "-a", tag, commit_hash, "-m", message or tag],
             cwd=self.skills_dir,
-            check=True
+            check=True,
         )
 
     def list_tags(self, skill_file: Path) -> list[str]:
@@ -303,9 +276,9 @@ class SkillVersionManager:
             cwd=self.skills_dir,
             capture_output=True,
             text=True,
-            check=True
+            check=True,
         )
-        return [tag for tag in result.stdout.strip().split('\n') if tag]
+        return [tag for tag in result.stdout.strip().split("\n") if tag]
 
 
 # Integration with skill generation
@@ -314,7 +287,7 @@ def create_versioned_skill(
     skill_content: str,
     skill_name: str,
     version: str = "1.0.0",
-    commit_message: str | None = None
+    commit_message: str | None = None,
 ) -> Path:
     """
     Create a new skill with automatic versioning.
@@ -330,18 +303,18 @@ def create_versioned_skill(
         Path to created skill file
     """
     # Create skill file
-    skill_id = f"{skill_name.lower().replace(' ', '-')}_{hashlib.md5(skill_name.encode()).hexdigest()[:8]}"
+    skill_id = (
+        f"{skill_name.lower().replace(' ', '-')}_{hashlib.md5(skill_name.encode()).hexdigest()[:8]}"
+    )
     skill_file = skills_dir / f"{skill_id}.md"
 
-    with open(skill_file, 'w') as f:
+    with open(skill_file, "w") as f:
         f.write(skill_content)
 
     # Version it
     version_manager = SkillVersionManager(skills_dir)
     version_manager.commit_skill(
-        skill_file,
-        commit_message or f"Create {skill_name} v{version}",
-        author="Lyra Skills System"
+        skill_file, commit_message or f"Create {skill_name} v{version}", author="Lyra Skills System"
     )
 
     # Tag version

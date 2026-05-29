@@ -17,6 +17,7 @@ import numpy as np
 @dataclass
 class Entity:
     """Entity in the knowledge graph."""
+
     name: str
     entity_type: str  # person, organization, concept, etc.
     mentions: list[str]  # Memory entry IDs where this entity appears
@@ -25,6 +26,7 @@ class Entity:
 @dataclass
 class EntityRelation:
     """Relation between two entities."""
+
     source: str
     target: str
     relation_type: str
@@ -54,21 +56,13 @@ class EntityGraph:
             mention_id: Memory entry ID where entity appears
         """
         if name not in self.entities:
-            self.entities[name] = Entity(
-                name=name,
-                entity_type=entity_type,
-                mentions=[mention_id]
-            )
+            self.entities[name] = Entity(name=name, entity_type=entity_type, mentions=[mention_id])
         else:
             if mention_id not in self.entities[name].mentions:
                 self.entities[name].mentions.append(mention_id)
 
     def add_relation(
-        self,
-        source: str,
-        target: str,
-        relation_type: str = "co-occurs",
-        weight: float = 1.0
+        self, source: str, target: str, relation_type: str = "co-occurs", weight: float = 1.0
     ) -> None:
         """
         Add a relation between entities.
@@ -79,12 +73,9 @@ class EntityGraph:
             relation_type: Type of relation
             weight: Relation weight
         """
-        self.relations.append(EntityRelation(
-            source=source,
-            target=target,
-            relation_type=relation_type,
-            weight=weight
-        ))
+        self.relations.append(
+            EntityRelation(source=source, target=target, relation_type=relation_type, weight=weight)
+        )
 
         # Update adjacency matrix
         self.adjacency[source][target] = weight
@@ -123,9 +114,13 @@ class EntityGraph:
     def get_stats(self) -> dict[str, Any]:
         """Get graph statistics."""
         return {
-            'num_entities': len(self.entities),
-            'num_relations': len(self.relations),
-            'avg_degree': sum(len(neighbors) for neighbors in self.adjacency.values()) / len(self.adjacency) if self.adjacency else 0
+            "num_entities": len(self.entities),
+            "num_relations": len(self.relations),
+            "avg_degree": (
+                sum(len(neighbors) for neighbors in self.adjacency.values()) / len(self.adjacency)
+                if self.adjacency
+                else 0
+            ),
         }
 
 
@@ -149,10 +144,7 @@ class PersonalizedPageRank:
         self.alpha = alpha
 
     def compute_ppr(
-        self,
-        seed_entities: list[str],
-        max_iter: int = 100,
-        tol: float = 1e-6
+        self, seed_entities: list[str], max_iter: int = 100, tol: float = 1e-6
     ) -> dict[str, float]:
         """
         Compute Personalized PageRank scores.
@@ -221,11 +213,7 @@ class HippoRAG2Retriever:
     """
 
     def __init__(
-        self,
-        entity_graph: EntityGraph,
-        embedder,
-        alpha: float = 0.6,
-        ppr_alpha: float = 0.15
+        self, entity_graph: EntityGraph, embedder, alpha: float = 0.6, ppr_alpha: float = 0.15
     ):
         """
         Initialize HippoRAG 2 retriever.
@@ -265,10 +253,7 @@ class HippoRAG2Retriever:
         return entities
 
     def retrieve(
-        self,
-        query: str,
-        memory_entries: list[dict[str, Any]],
-        k: int = 10
+        self, query: str, memory_entries: list[dict[str, Any]], k: int = 10
     ) -> list[dict[str, Any]]:
         """
         Retrieve using HippoRAG 2: PPR + embedding fusion.
@@ -298,59 +283,52 @@ class HippoRAG2Retriever:
         results = []
         for entry in memory_entries:
             # Get PPR score for this entry
-            entry_entities = self.extract_entities(entry['content'])
-            ppr_score = max(
-                [ppr_scores.get(e, 0.0) for e in entry_entities],
-                default=0.0
-            )
+            entry_entities = self.extract_entities(entry["content"])
+            ppr_score = max([ppr_scores.get(e, 0.0) for e in entry_entities], default=0.0)
 
             # Get embedding score
-            entry_embedding = entry.get('embedding')
+            entry_embedding = entry.get("embedding")
             if entry_embedding is None:
-                entry_embedding = self.embedder.encode(entry['content'])
+                entry_embedding = self.embedder.encode(entry["content"])
 
             embedding_score = self._cosine_similarity(query_embedding, entry_embedding)
 
             # Fusion: α·PPR + (1-α)·embedding
             fusion_score = self.alpha * ppr_score + (1 - self.alpha) * embedding_score
 
-            results.append({
-                **entry,
-                'ppr_score': ppr_score,
-                'embedding_score': embedding_score,
-                'fusion_score': fusion_score
-            })
+            results.append(
+                {
+                    **entry,
+                    "ppr_score": ppr_score,
+                    "embedding_score": embedding_score,
+                    "fusion_score": fusion_score,
+                }
+            )
 
         # Sort by fusion score
-        results.sort(key=lambda x: x['fusion_score'], reverse=True)
+        results.sort(key=lambda x: x["fusion_score"], reverse=True)
 
         return results[:k]
 
     def _embedding_only_retrieval(
-        self,
-        query: str,
-        memory_entries: list[dict[str, Any]],
-        k: int
+        self, query: str, memory_entries: list[dict[str, Any]], k: int
     ) -> list[dict[str, Any]]:
         """Fallback to pure embedding similarity."""
         query_embedding = self.embedder.encode(query)
 
         results = []
         for entry in memory_entries:
-            entry_embedding = entry.get('embedding')
+            entry_embedding = entry.get("embedding")
             if entry_embedding is None:
-                entry_embedding = self.embedder.encode(entry['content'])
+                entry_embedding = self.embedder.encode(entry["content"])
 
             score = self._cosine_similarity(query_embedding, entry_embedding)
 
-            results.append({
-                **entry,
-                'ppr_score': 0.0,
-                'embedding_score': score,
-                'fusion_score': score
-            })
+            results.append(
+                {**entry, "ppr_score": 0.0, "embedding_score": score, "fusion_score": score}
+            )
 
-        results.sort(key=lambda x: x['fusion_score'], reverse=True)
+        results.sort(key=lambda x: x["fusion_score"], reverse=True)
         return results[:k]
 
     def _cosine_similarity(self, vec1: np.ndarray, vec2: np.ndarray) -> float:
@@ -360,8 +338,7 @@ class HippoRAG2Retriever:
 
 # Entity graph builder
 def build_entity_graph_from_memory(
-    memory_entries: list[dict[str, Any]],
-    entity_extractor
+    memory_entries: list[dict[str, Any]], entity_extractor
 ) -> EntityGraph:
     """
     Build entity knowledge graph from memory entries.
@@ -379,22 +356,22 @@ def build_entity_graph_from_memory(
     entry_entities: dict[str, list[str]] = {}
 
     for entry in memory_entries:
-        entities = entity_extractor(entry['content'])
-        entry_entities[entry['id']] = entities
+        entities = entity_extractor(entry["content"])
+        entry_entities[entry["id"]] = entities
 
         # Add entities to graph
         for entity in entities:
             graph.add_entity(
                 name=entity,
                 entity_type="unknown",  # TODO: Add entity typing
-                mention_id=entry['id']
+                mention_id=entry["id"],
             )
 
     # Build co-occurrence edges
     for _entry_id, entities in entry_entities.items():
         # Add edges between entities that co-occur in same entry
         for i, entity1 in enumerate(entities):
-            for entity2 in entities[i + 1:]:
+            for entity2 in entities[i + 1 :]:
                 graph.add_relation(entity1, entity2, "co-occurs", weight=1.0)
 
     return graph

@@ -24,21 +24,27 @@ from lyra_research.adversarial_reviewer import (
 # Mock Data Models
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class MockResearchReport:
     """Mock ResearchReport for testing."""
+
     executive_summary: str = "Test summary"
     taxonomy_section: str = "Test taxonomy"
     best_papers_section: str = "Test papers"
     references_section: str = ""
 
     def to_markdown(self) -> str:
-        return f"{self.executive_summary}\n{self.taxonomy_section}\n{self.best_papers_section}\n{self.references_section}"
+        return(
+            f"{self.executive_summary}\n{self.taxonomy_section}\n{self.best_papers_section}\n"
+            f"{self.references_section}"
+        )
 
 
 @dataclass
 class MockResearchSource:
     """Mock ResearchSource for testing."""
+
     id: str
     title: str
     abstract: str = "Test abstract"
@@ -47,6 +53,7 @@ class MockResearchSource:
 # ---------------------------------------------------------------------------
 # Context Budget Tests (15 tests)
 # ---------------------------------------------------------------------------
+
 
 class TestReviewerContextBudget:
     """Test context budget enforcement."""
@@ -166,6 +173,7 @@ class TestReviewerContextBudget:
 # Claim Model Tests (10 tests)
 # ---------------------------------------------------------------------------
 
+
 class TestClaim:
     """Test Claim data model."""
 
@@ -241,6 +249,7 @@ class TestClaim:
 # ---------------------------------------------------------------------------
 # ReviewIssue Tests (5 tests)
 # ---------------------------------------------------------------------------
+
 
 class TestReviewIssue:
     """Test ReviewIssue data model."""
@@ -324,6 +333,7 @@ class TestReviewIssue:
 # DisagreementResolution Tests (5 tests)
 # ---------------------------------------------------------------------------
 
+
 class TestDisagreementResolution:
     """Test DisagreementResolution enum."""
 
@@ -360,6 +370,7 @@ class TestDisagreementResolution:
 # ---------------------------------------------------------------------------
 # AdversarialReviewer Initialization Tests (5 tests)
 # ---------------------------------------------------------------------------
+
 
 class TestAdversarialReviewerInit:
     """Test AdversarialReviewer initialization."""
@@ -403,6 +414,7 @@ class TestAdversarialReviewerInit:
 # ---------------------------------------------------------------------------
 # Extract Cited Sources Tests (8 tests)
 # ---------------------------------------------------------------------------
+
 
 class TestExtractCitedSources:
     """Test extract_cited_sources method."""
@@ -512,6 +524,7 @@ class TestExtractCitedSources:
 # Build Claim Mapping Tests (7 tests)
 # ---------------------------------------------------------------------------
 
+
 class TestBuildClaimMapping:
     """Test build_claim_mapping method."""
 
@@ -608,6 +621,7 @@ class TestBuildClaimMapping:
 # Filter Low Confidence Claims Tests (10 tests)
 # ---------------------------------------------------------------------------
 
+
 class TestFilterLowConfidenceClaims:
     """Test filter_low_confidence_claims method."""
 
@@ -621,9 +635,7 @@ class TestFilterLowConfidenceClaims:
     def test_filter_numerical_claims(self):
         """Test filtering numerical claims."""
         reviewer = AdversarialReviewer()
-        report = MockResearchReport(
-            executive_summary="Model achieves 95.5% accuracy."
-        )
+        report = MockResearchReport(executive_summary="Model achieves 95.5% accuracy.")
         claims = reviewer.filter_low_confidence_claims(report)
         assert len(claims) > 0
         assert any("95.5%" in claim.text for claim in claims)
@@ -631,9 +643,7 @@ class TestFilterLowConfidenceClaims:
     def test_filter_outperformance_claims(self):
         """Test filtering outperformance claims."""
         reviewer = AdversarialReviewer()
-        report = MockResearchReport(
-            executive_summary="Our model outperforms baseline."
-        )
+        report = MockResearchReport(executive_summary="Our model outperforms baseline.")
         claims = reviewer.filter_low_confidence_claims(report)
         assert len(claims) > 0
         assert any("outperform" in claim.text.lower() for claim in claims)
@@ -641,9 +651,7 @@ class TestFilterLowConfidenceClaims:
     def test_filter_causal_claims(self):
         """Test filtering causal claims."""
         reviewer = AdversarialReviewer()
-        report = MockResearchReport(
-            executive_summary="Increased data leads to better performance."
-        )
+        report = MockResearchReport(executive_summary="Increased data leads to better performance.")
         claims = reviewer.filter_low_confidence_claims(report)
         assert len(claims) > 0
         assert any("leads to" in claim.text.lower() for claim in claims)
@@ -651,9 +659,7 @@ class TestFilterLowConfidenceClaims:
     def test_filter_sota_claims(self):
         """Test filtering state-of-the-art claims."""
         reviewer = AdversarialReviewer()
-        report = MockResearchReport(
-            executive_summary="We achieve state-of-the-art results."
-        )
+        report = MockResearchReport(executive_summary="We achieve state-of-the-art results.")
         claims = reviewer.filter_low_confidence_claims(report)
         assert len(claims) > 0
         assert any("state-of-the-art" in claim.text.lower() for claim in claims)
@@ -661,9 +667,7 @@ class TestFilterLowConfidenceClaims:
     def test_filter_confidence_no_citations(self):
         """Test confidence scoring with no citations."""
         reviewer = AdversarialReviewer()
-        report = MockResearchReport(
-            executive_summary="Model achieves 95% accuracy."
-        )
+        report = MockResearchReport(executive_summary="Model achieves 95% accuracy.")
         claims = reviewer.filter_low_confidence_claims(report)
         assert len(claims) > 0
         assert all(claim.confidence == 0.0 for claim in claims)
@@ -671,9 +675,7 @@ class TestFilterLowConfidenceClaims:
     def test_filter_confidence_one_citation(self):
         """Test confidence scoring with one citation."""
         reviewer = AdversarialReviewer()
-        report = MockResearchReport(
-            executive_summary="Model achieves 95% accuracy[1]."
-        )
+        report = MockResearchReport(executive_summary="Model achieves 95% accuracy[1].")
         claims = reviewer.filter_low_confidence_claims(report)
         assert len(claims) > 0
         assert all(claim.confidence == 0.5 for claim in claims)
@@ -681,9 +683,7 @@ class TestFilterLowConfidenceClaims:
     def test_filter_confidence_two_citations(self):
         """Test confidence scoring with two citations."""
         reviewer = AdversarialReviewer()
-        report = MockResearchReport(
-            executive_summary="Model achieves 95% accuracy[1][2]."
-        )
+        report = MockResearchReport(executive_summary="Model achieves 95% accuracy[1][2].")
         claims = reviewer.filter_low_confidence_claims(report)
         assert len(claims) > 0
         assert all(claim.confidence == 0.7 for claim in claims)
@@ -691,9 +691,7 @@ class TestFilterLowConfidenceClaims:
     def test_filter_excludes_high_confidence(self):
         """Test filtering excludes claims with 3+ citations (confidence >= 0.8)."""
         reviewer = AdversarialReviewer()
-        report = MockResearchReport(
-            executive_summary="Model achieves 95% accuracy[1][2][3]."
-        )
+        report = MockResearchReport(executive_summary="Model achieves 95% accuracy[1][2][3].")
         claims = reviewer.filter_low_confidence_claims(report)
         # Should be empty because confidence is 0.9 (>= 0.8)
         assert len(claims) == 0
@@ -701,9 +699,7 @@ class TestFilterLowConfidenceClaims:
     def test_filter_deduplication(self):
         """Test filtering deduplicates claims."""
         reviewer = AdversarialReviewer()
-        report = MockResearchReport(
-            executive_summary="95% accuracy. 95% accuracy. 95% accuracy."
-        )
+        report = MockResearchReport(executive_summary="95% accuracy. 95% accuracy. 95% accuracy.")
         claims = reviewer.filter_low_confidence_claims(report)
         # Should deduplicate based on first 100 chars
         assert len(claims) <= 1
@@ -712,6 +708,7 @@ class TestFilterLowConfidenceClaims:
 # ---------------------------------------------------------------------------
 # Verify Claim Tests (8 tests)
 # ---------------------------------------------------------------------------
+
 
 class TestVerifyClaim:
     """Test verify_claim method."""
@@ -805,6 +802,7 @@ class TestVerifyClaim:
 # ---------------------------------------------------------------------------
 # Resolve Issue Tests (10 tests)
 # ---------------------------------------------------------------------------
+
 
 class TestResolveIssue:
     """Test resolve_issue method."""
@@ -957,6 +955,7 @@ class TestResolveIssue:
 # Calculate Review Cost Tests (5 tests)
 # ---------------------------------------------------------------------------
 
+
 class TestCalculateReviewCost:
     """Test calculate_review_cost method."""
 
@@ -1004,6 +1003,7 @@ class TestCalculateReviewCost:
 # ---------------------------------------------------------------------------
 # Calculate Context Size Tests (6 tests)
 # ---------------------------------------------------------------------------
+
 
 class TestCalculateContextSize:
     """Test _calculate_context_size method."""
@@ -1067,6 +1067,7 @@ class TestCalculateContextSize:
 # ---------------------------------------------------------------------------
 # Review Method Integration Tests (15 tests)
 # ---------------------------------------------------------------------------
+
 
 class TestReviewMethod:
     """Test the main review method."""
@@ -1251,6 +1252,7 @@ class TestReviewMethod:
 # Edge Cases and Error Handling Tests (5 tests)
 # ---------------------------------------------------------------------------
 
+
 class TestEdgeCases:
     """Test edge cases and error handling."""
 
@@ -1302,4 +1304,3 @@ class TestEdgeCases:
         sources = []
         result = reviewer.review(report, sources, depth="deep")
         assert isinstance(result, ReviewResult)
-

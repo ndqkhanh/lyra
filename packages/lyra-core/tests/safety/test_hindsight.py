@@ -145,7 +145,9 @@ class TestHindsightEngine:
             TrajectoryStep(0, "action", "observation", -0.3, 1.0),
             TrajectoryStep(1, "better_action", "good result", 0.9, 2.0),
         )
-        traj = Trajectory("t-fail", "deploy app", steps, OutcomeType.FAILURE, -1.2, "s1", 0.0, 1.0, ())
+        traj = Trajectory(
+            "t-fail", "deploy app", steps, OutcomeType.FAILURE, -1.2, "s1", 0.0, 1.0, ()
+        )
         engine.store(traj)
         lessons = engine.extract_lessons("t-fail")
         assert isinstance(lessons, list)
@@ -161,7 +163,9 @@ class TestHindsightEngine:
             TrajectoryStep(0, "bad", "oops", -0.5, 0.0),
             TrajectoryStep(1, "good", "yay", 0.9, 1.0),
         )
-        traj = Trajectory("t-g", "install package", steps, OutcomeType.FAILURE, -0.5, "s1", 0.0, 1.0, ())
+        traj = Trajectory(
+            "t-g", "install package", steps, OutcomeType.FAILURE, -0.5, "s1", 0.0, 1.0, ()
+        )
         engine.store(traj)
         engine.extract_lessons("t-g")
         lessons = engine.get_lessons_for_goal("install package")
@@ -171,7 +175,9 @@ class TestHindsightEngine:
         engine = HindsightEngine()
         for i in range(5):
             steps = (TrajectoryStep(0, f"action_{i}", "obs", 0.5, float(i)),)
-            traj = Trajectory(f"t-{i}", "goal", steps, OutcomeType.SUCCESS, 0.5, f"s{i}", 0.0, 1.0, ())
+            traj = Trajectory(
+                f"t-{i}", "goal", steps, OutcomeType.SUCCESS, 0.5, f"s{i}", 0.0, 1.0, ()
+            )
             engine.store(traj)
         assert engine.trajectory_count == 5
 
@@ -195,7 +201,9 @@ class TestHindsightEngine:
             TrajectoryStep(0, "bad", "err", -0.5, 0.0),
             TrajectoryStep(1, "good", "ok", 0.8, 1.0),
         )
-        traj = Trajectory("t-query", "deploy to production", steps, OutcomeType.FAILURE, -0.3, "s1", 0.0, 1.0, ())
+        traj = Trajectory(
+            "t-query", "deploy to production", steps, OutcomeType.FAILURE, -0.3, "s1", 0.0, 1.0, ()
+        )
         engine.store(traj)
         engine.extract_lessons("t-query")
         lessons = engine.query_lessons("deploy production")

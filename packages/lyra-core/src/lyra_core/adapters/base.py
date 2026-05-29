@@ -1,4 +1,5 @@
 """Harness plugin boundary: pluggable orchestration strategies."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -28,4 +29,6 @@ def get_harness(name: str) -> HarnessPlugin:
 # ---------------------------------------------------------------------------
 register_harness(HarnessPlugin(name="single-agent", description="one agent, one loop"))
 register_harness(HarnessPlugin(name="three-agent", description="planner / executor / verifier"))
-register_harness(HarnessPlugin(name="dag-teams", description="dynamic DAG + deterministic scheduler"))
+register_harness(
+    HarnessPlugin(name="dag-teams", description="dynamic DAG + deterministic scheduler")
+)

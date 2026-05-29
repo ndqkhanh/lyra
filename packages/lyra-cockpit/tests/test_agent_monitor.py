@@ -78,7 +78,9 @@ class TestResourceUsage:
         assert usage.cost_estimate == 0.015
 
     def test_zero_values(self) -> None:
-        usage = ResourceUsage(agent_id="agent-002", token_count=0, latency_ms=0.0, cost_estimate=0.0)
+        usage = ResourceUsage(
+            agent_id="agent-002", token_count=0, latency_ms=0.0, cost_estimate=0.0
+        )
         assert usage.token_count == 0
 
     def test_frozen(self) -> None:
@@ -170,9 +172,7 @@ class TestAgentMonitor:
             alerts.append(status)
 
         monitor.subscribe_alerts(callback)
-        monitor.update_status(
-            AgentStatus("a1", "busy", 95.0, 512.0, 2, time.time())
-        )
+        monitor.update_status(AgentStatus("a1", "busy", 95.0, 512.0, 2, time.time()))
         assert len(alerts) == 1
         assert alerts[0].agent_id == "a1"
 
@@ -184,9 +184,7 @@ class TestAgentMonitor:
             alerts.append(status)
 
         monitor.subscribe_alerts(callback)
-        monitor.update_status(
-            AgentStatus("a1", "idle", 30.0, 256.0, 1, time.time())
-        )
+        monitor.update_status(AgentStatus("a1", "idle", 30.0, 256.0, 1, time.time()))
         assert len(alerts) == 0
 
     def test_update_status(self) -> None:
@@ -204,8 +202,6 @@ class TestAgentMonitor:
         monitor.subscribe_alerts(lambda s: alerts_1.append(s))
         monitor.subscribe_alerts(lambda s: alerts_2.append(s))
 
-        monitor.update_status(
-            AgentStatus("a1", "busy", 95.0, 512.0, 2, time.time())
-        )
+        monitor.update_status(AgentStatus("a1", "busy", 95.0, 512.0, 2, time.time()))
         assert len(alerts_1) == 1
         assert len(alerts_2) == 1

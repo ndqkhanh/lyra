@@ -6,7 +6,6 @@ Comprehensive rules engine with language detection and code review integration.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
 
 from lyra_ecc.rules import Rule, RulesEngine, RuleSeverity, RuleViolation
 
@@ -16,14 +15,14 @@ class CodeReviewResult:
     """Result of code review with rule violations."""
 
     file_path: Path
-    violations: List[RuleViolation]
-    severity_counts: Dict[str, int]
+    violations: list[RuleViolation]
+    severity_counts: dict[str, int]
     passed: bool
     summary: str
 
     @classmethod
     def from_violations(
-        cls, file_path: Path, violations: List[RuleViolation]
+        cls, file_path: Path, violations: list[RuleViolation]
     ) -> "CodeReviewResult":
         """Create review result from violations."""
         severity_counts = {
@@ -50,7 +49,7 @@ class CodeReviewResult:
         )
 
     @staticmethod
-    def _build_summary(severity_counts: Dict[str, int], passed: bool) -> str:
+    def _build_summary(severity_counts: dict[str, int], passed: bool) -> str:
         """Build summary message."""
         if passed and sum(severity_counts.values()) == 0:
             return "✅ No violations found"
@@ -80,7 +79,7 @@ class EnhancedRulesEngine(RulesEngine):
     - Severity-based filtering
     """
 
-    def __init__(self, rules_path: Optional[Path] = None):
+    def __init__(self, rules_path: Path | None = None):
         """Initialize enhanced rules engine."""
         super().__init__(rules_path)
         self._load_enhanced_rules()
@@ -128,7 +127,7 @@ class EnhancedRulesEngine(RulesEngine):
             if rule not in self.common_rules:
                 self.common_rules.append(rule)
 
-    def detect_language(self, file_path: Path) -> Optional[str]:
+    def detect_language(self, file_path: Path) -> str | None:
         """
         Detect programming language from file extension.
 
@@ -177,8 +176,8 @@ class EnhancedRulesEngine(RulesEngine):
         return CodeReviewResult.from_violations(file_path, violations)
 
     def review_files(
-        self, files: List[tuple[Path, str]]
-    ) -> List[CodeReviewResult]:
+        self, files: list[tuple[Path, str]]
+    ) -> list[CodeReviewResult]:
         """
         Review multiple files for rule violations.
 
@@ -195,8 +194,8 @@ class EnhancedRulesEngine(RulesEngine):
         return results
 
     def get_violations_by_severity(
-        self, violations: List[RuleViolation], severity: RuleSeverity
-    ) -> List[RuleViolation]:
+        self, violations: list[RuleViolation], severity: RuleSeverity
+    ) -> list[RuleViolation]:
         """
         Filter violations by severity.
 
@@ -210,8 +209,8 @@ class EnhancedRulesEngine(RulesEngine):
         return [v for v in violations if v.severity == severity]
 
     def get_blocking_violations(
-        self, violations: List[RuleViolation]
-    ) -> List[RuleViolation]:
+        self, violations: list[RuleViolation]
+    ) -> list[RuleViolation]:
         """
         Get violations that should block code merge.
 
@@ -227,7 +226,7 @@ class EnhancedRulesEngine(RulesEngine):
             if v.severity in [RuleSeverity.CRITICAL, RuleSeverity.HIGH]
         ]
 
-    def should_block_merge(self, violations: List[RuleViolation]) -> bool:
+    def should_block_merge(self, violations: list[RuleViolation]) -> bool:
         """
         Determine if violations should block code merge.
 
@@ -240,8 +239,8 @@ class EnhancedRulesEngine(RulesEngine):
         return len(self.get_blocking_violations(violations)) > 0
 
     def get_review_summary(
-        self, results: List[CodeReviewResult]
-    ) -> Dict[str, any]:
+        self, results: list[CodeReviewResult]
+    ) -> dict[str, any]:
         """
         Get summary of code review results.
 
@@ -280,7 +279,7 @@ class EnhancedRulesEngine(RulesEngine):
         }
 
 
-def create_code_review_engine(rules_path: Optional[Path] = None) -> EnhancedRulesEngine:
+def create_code_review_engine(rules_path: Path | None = None) -> EnhancedRulesEngine:
     """
     Create enhanced rules engine for code review.
 

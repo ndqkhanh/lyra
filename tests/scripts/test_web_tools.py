@@ -13,7 +13,7 @@ def test_imports():
     """Test that web tool classes can be imported."""
     print("Testing imports...")
     try:
-        from lyra_core.tools import WebFetchTool, WebSearchTool
+        from lyra_core.tools import WebFetchTool, WebSearchTool  # noqa: F401
         print("✅ WebFetchTool and WebSearchTool imported successfully")
         return True
     except ImportError as e:
@@ -24,7 +24,7 @@ def test_tool_creation():
     """Test that tool instances can be created."""
     print("\nTesting tool creation...")
     try:
-        from lyra_core.tools import WebFetchTool, WebSearchTool
+        from lyra_core.tools import WebFetchTool, WebSearchTool  # noqa: F401
 
         fetch_tool = WebFetchTool()
         print(f"✅ WebFetchTool created: {fetch_tool.name}")
@@ -41,7 +41,7 @@ def test_tool_schemas():
     """Test that tools have valid schemas."""
     print("\nTesting tool schemas...")
     try:
-        from lyra_core.tools import WebFetchTool, WebSearchTool
+        from lyra_core.tools import WebFetchTool, WebSearchTool  # noqa: F401
 
         fetch_tool = WebFetchTool()
         fetch_schema = fetch_tool.to_schema()

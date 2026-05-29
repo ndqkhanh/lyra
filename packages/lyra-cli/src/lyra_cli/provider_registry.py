@@ -24,6 +24,7 @@ This file owns the *parsing* and *resolution*; integration with the
 existing ``build_llm`` cascade lives at
 :func:`lyra_cli.llm_factory._maybe_build_custom_provider`.
 """
+
 from __future__ import annotations
 
 import importlib
@@ -106,7 +107,8 @@ def parse_providers(settings: Mapping[str, Any]) -> list[CustomProviderEntry]:
         if not isinstance(ref, str):
             _log.warning(
                 "provider %r: import string must be a string; skipping (got %s)",
-                slug, type(ref).__name__,
+                slug,
+                type(ref).__name__,
             )
             continue
         try:
@@ -162,7 +164,9 @@ def build_provider(entry: CustomProviderEntry, **kwargs: Any) -> Any:
         ) from exc
 
 
-def load_registered_providers(settings_path: Path | str | None = None) -> dict[str, CustomProviderEntry]:
+def load_registered_providers(
+    settings_path: Path | str | None = None,
+) -> dict[str, CustomProviderEntry]:
     """Read ``settings.json`` and return a slug → entry mapping.
 
     Used by :func:`build_llm` to discover whether a ``--llm <slug>``

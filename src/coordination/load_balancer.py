@@ -163,16 +163,16 @@ class LoadBalancer:
         loads = [self.get_agent_load(agent) for agent in agents]
 
         # Calculate statistics
-        avg_load = sum(l.load_percentage for l in loads) / len(loads)
-        max_load = max(l.load_percentage for l in loads)
-        min_load = min(l.load_percentage for l in loads)
+        avg_load = sum(load.load_percentage for load in loads) / len(loads)
+        max_load = max(load.load_percentage for load in loads)
+        min_load = min(load.load_percentage for load in loads)
 
         suggestions = []
 
         # Check for imbalance
         if max_load - min_load > 50:  # More than 50% difference
-            overloaded = [l for l in loads if l.load_percentage > avg_load + 20]
-            underloaded = [l for l in loads if l.load_percentage < avg_load - 20]
+            overloaded = [load for load in loads if load.load_percentage > avg_load + 20]
+            underloaded = [load for load in loads if load.load_percentage < avg_load - 20]
 
             if overloaded and underloaded:
                 suggestions.append(
@@ -181,7 +181,7 @@ class LoadBalancer:
                 )
 
         # Check for overload
-        overloaded_agents = [l for l in loads if l.load_percentage >= 100]
+        overloaded_agents = [load for load in loads if load.load_percentage >= 100]
         if overloaded_agents:
             suggestions.append(
                 f"Warning: {len(overloaded_agents)} agent(s) at capacity"
@@ -236,8 +236,8 @@ class LoadBalancer:
 
         loads = list(self.agent_loads.values())
 
-        total_tasks = sum(l.current_tasks for l in loads)
-        avg_load = sum(l.load_percentage for l in loads) / len(loads)
+        total_tasks = sum(load.current_tasks for load in loads)
+        avg_load = sum(load.load_percentage for load in loads) / len(loads)
 
         return {
             "total_agents": len(loads),

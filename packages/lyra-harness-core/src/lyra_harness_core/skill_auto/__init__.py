@@ -1,6 +1,7 @@
 """lyra_harness_core.skill_auto — Voyager-line skill self-evolution from trajectories.
 
-Per [docs/167-autoskill-experience-driven-lifelong-learning.md](../../../../../../research/harness-engineering/docs/167-autoskill-experience-driven-lifelong-learning.md),
+Per
+[docs/167-autoskill-experience-driven-lifelong-learning.md](../../../../../../research/harness-engineering/docs/167-autoskill-experience-driven-lifelong-learning.md),
 [docs/168-evoskill-coding-agent-skill-discovery.md](../../../../../../research/harness-engineering/docs/168-evoskill-coding-agent-skill-discovery.md),
 [docs/169-coevoskills-co-evolutionary-verification.md](../../../../../../research/harness-engineering/docs/169-coevoskills-co-evolutionary-verification.md),
 [docs/170-skillrl-recursive-skill-augmented-rl.md](../../../../../../research/harness-engineering/docs/170-skillrl-recursive-skill-augmented-rl.md),
@@ -27,6 +28,7 @@ Composes with:
 Used by Mentat-Learn ([docs/210] Tier-0), Lyra V3.9 ([docs/208] Tier-1),
 Polaris auto_creator ([docs/172] §2), Argus curator ([docs/197]).
 """
+
 from __future__ import annotations
 
 from .extractor import SkillExtractor

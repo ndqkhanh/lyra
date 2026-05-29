@@ -47,7 +47,12 @@ def test_skill_command_registered():
 
     assert skill_cmd is not None, "/skill command should be registered"
     assert skill_cmd.handler.__name__ == "_cmd_skill", "Handler should be _cmd_skill dispatcher"
-    assert skill_cmd.subcommands == ("list", "search", "reload", "info"), "Should have correct subcommands"
+    assert skill_cmd.subcommands == (
+        "list",
+        "search",
+        "reload",
+        "info",
+    ), "Should have correct subcommands"
     print("✓ /skill command registered with correct handler and subcommands")
 
 
@@ -111,5 +116,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n✗ Unexpected error: {e}")
         import traceback
+
         traceback.print_exc()
         exit(1)

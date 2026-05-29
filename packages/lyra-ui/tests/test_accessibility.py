@@ -402,7 +402,9 @@ def test_keyboard_shortcuts_with_focus():
 
     # Register shortcuts
     manager.register("next", KeyboardShortcut(key="Tab", description="Next element"))
-    manager.register("prev", KeyboardShortcut(key="Tab", shift=True, description="Previous element"))
+    manager.register(
+        "prev", KeyboardShortcut(key="Tab", shift=True, description="Previous element")
+    )
 
     # Simulate navigation
     focus.push("button1")

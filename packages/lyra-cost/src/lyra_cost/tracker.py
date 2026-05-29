@@ -197,7 +197,11 @@ class CostTracker:
             return None
 
         successful = [c for c in calls if c.outcome == CallOutcome.SUCCESS]
-        cached = [c for c in calls if c.outcome in (CallOutcome.CACHED_PROMPT, CallOutcome.CACHED_SEMANTIC)]
+        cached = [
+            c
+            for c in calls
+            if c.outcome in (CallOutcome.CACHED_PROMPT, CallOutcome.CACHED_SEMANTIC)
+        ]
         cached_savings = sum(c.total_cost for c in cached)
 
         end_time = calls[-1].timestamp if calls else None

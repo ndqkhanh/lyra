@@ -1,4 +1,5 @@
-"""Lyra Cockpit — Intent-Action-Audit (IAA) engine, transparency dashboard, agent monitoring, claim tracking, budget management, and voice notifications for the Lyra AI research agent cockpit."""
+"""Lyra Cockpit — Intent-Action-Audit (IAA) engine, transparency dashboard, agent monitoring, claim
+tracking, budget management, and voice notifications for the Lyra AI research agent cockpit."""
 
 from __future__ import annotations
 

@@ -60,7 +60,11 @@ class ConsolidationGate:
         if self._cycles - self._last_consolidation < self.config.cooldown_cycles:
             return []
 
-        batch = self._pool[-self.config.max_batch:] if len(self._pool) > self.config.max_batch else self._pool
+        batch = (
+            self._pool[-self.config.max_batch :]
+            if len(self._pool) > self.config.max_batch
+            else self._pool
+        )
         passed: list[GatedMemory] = []
 
         for mem in batch:

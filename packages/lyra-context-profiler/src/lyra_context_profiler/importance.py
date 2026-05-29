@@ -143,8 +143,7 @@ class TfidfCalculator:
         total = sum(tf.values())
 
         score = sum(
-            (count / total) * self._idf_cache.get(token, 0.0)
-            for token, count in tf.items()
+            (count / total) * self._idf_cache.get(token, 0.0) for token, count in tf.items()
         )
 
         return min(score, 1.0)  # Cap at 1.0
@@ -202,9 +201,7 @@ class TaskRelevanceScorer:
         tokens = re.findall(r"\b[a-z]{3,}\b", task_description.lower())
         tf = Counter(tokens)
         max_freq = max(tf.values(), default=1)
-        self._keyword_weights = {
-            token: count / max_freq for token, count in tf.items()
-        }
+        self._keyword_weights = {token: count / max_freq for token, count in tf.items()}
         self._current_task_keywords = set(tf.keys())
 
     def score(self, content: str) -> float:
@@ -220,9 +217,7 @@ class TaskRelevanceScorer:
         if not overlap:
             return 0.0
 
-        weighted_score = sum(
-            self._keyword_weights.get(token, 0.0) for token in overlap
-        )
+        weighted_score = sum(self._keyword_weights.get(token, 0.0) for token in overlap)
         # Normalize by content size and max possible score
         max_possible = len(content_tokens)
         return min(weighted_score / max(max_possible, 1), 1.0)
@@ -335,10 +330,7 @@ class MLImportancePredictor:
         return max(0.0, min(raw, 1.0))  # Clamp to [0, 1]
 
     def _predict_raw(self, features: dict[str, float]) -> float:
-        return sum(
-            self._weights.get(key, 0.0) * value
-            for key, value in features.items()
-        )
+        return sum(self._weights.get(key, 0.0) * value for key, value in features.items())
 
     @staticmethod
     def extract_features(element: ContextElementProtocol) -> dict[str, float]:
@@ -410,40 +402,24 @@ class ImportanceCalculator:
         # 1. TF-IDF scores
         documents = [el.content for el in elements_list]
         self._tfidf.fit(documents)
-        tfidf_scores = {
-            el.id: self._tfidf.score(el.content) for el in elements_list
-        }
+        tfidf_scores = {el.id: self._tfidf.score(el.content) for el in elements_list}
 
         # 2. Recency scores
-        recency_scores = {
-            el.id: self._recency.score(el)
-            for el in elements_list
-        }
+        recency_scores = {el.id: self._recency.score(el) for el in elements_list}
 
         # 3. Task relevance scores
-        task_scores = {
-            el.id: self._task.score(el.content)
-            for el in elements_list
-        }
+        task_scores = {el.id: self._task.score(el.content) for el in elements_list}
 
         # 4. Dependency scores
         self._dependency.build_graph(elements_list)
-        dep_scores = self._dependency.score_batch(
-            [el.id for el in elements_list]
-        )
+        dep_scores = self._dependency.score_batch([el.id for el in elements_list])
 
         # 5. Usage scores (based on access count)
         max_access = max(max((el.access_count for el in elements_list), default=1), 1)
-        usage_scores = {
-            el.id: min(el.access_count / max_access, 1.0)
-            for el in elements_list
-        }
+        usage_scores = {el.id: min(el.access_count / max_access, 1.0) for el in elements_list}
 
         # 6. ML scores
-        ml_scores = {
-            el.id: self._ml.predict(self._ml.extract_features(el))
-            for el in elements_list
-        }
+        ml_scores = {el.id: self._ml.predict(self._ml.extract_features(el)) for el in elements_list}
 
         # Combine using configured weights
         final_scores: dict[str, float] = {}
@@ -460,13 +436,15 @@ class ImportanceCalculator:
 
         # Record component scores for analysis
         if len(elements_list) <= 100:  # Don't bloat history with huge batches
-            self._score_history.append({
-                "batch": self._compute_count,
-                "avg_tfidf": sum(tfidf_scores.values()) / max(len(tfidf_scores), 1),
-                "avg_recency": sum(recency_scores.values()) / max(len(recency_scores), 1),
-                "avg_task": sum(task_scores.values()) / max(len(task_scores), 1),
-                "avg_combined": sum(final_scores.values()) / max(len(final_scores), 1),
-            })
+            self._score_history.append(
+                {
+                    "batch": self._compute_count,
+                    "avg_tfidf": sum(tfidf_scores.values()) / max(len(tfidf_scores), 1),
+                    "avg_recency": sum(recency_scores.values()) / max(len(recency_scores), 1),
+                    "avg_task": sum(task_scores.values()) / max(len(task_scores), 1),
+                    "avg_combined": sum(final_scores.values()) / max(len(final_scores), 1),
+                }
+            )
 
         return final_scores
 
@@ -528,8 +506,12 @@ class ImportanceCalculator:
 
         new_weights = ScoreWeights(
             tfidf_weight=(1.0 / max(variances.get("avg_tfidf", 1.0), 1e-6)) / total_inv_var * 0.6,
-            recency_weight=(1.0 / max(variances.get("avg_recency", 1.0), 1e-6)) / total_inv_var * 0.4,
-            task_relevance_weight=(1.0 / max(variances.get("avg_task", 1.0), 1e-6)) / total_inv_var * 0.5,
+            recency_weight=(1.0 / max(variances.get("avg_recency", 1.0), 1e-6))
+            / total_inv_var
+            * 0.4,
+            task_relevance_weight=(1.0 / max(variances.get("avg_task", 1.0), 1e-6))
+            / total_inv_var
+            * 0.5,
             dependency_weight=0.15,
             usage_weight=0.10,
             ml_weight=0.05,

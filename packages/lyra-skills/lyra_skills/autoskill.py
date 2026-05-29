@@ -22,6 +22,7 @@ from typing import Any
 @dataclass
 class DialogueTurn:
     """Single turn in agent-environment dialogue."""
+
     turn_id: int
     user_input: str
     agent_action: str
@@ -33,6 +34,7 @@ class DialogueTurn:
 @dataclass
 class SkillCandidate:
     """Candidate skill extracted from dialogue."""
+
     id: str
     name: str
     description: str
@@ -63,9 +65,7 @@ class FourAxisJudge:
         self.llm = llm
 
     def evaluate(
-        self,
-        skill_candidate: SkillCandidate,
-        existing_skills: list[SkillCandidate]
+        self, skill_candidate: SkillCandidate, existing_skills: list[SkillCandidate]
     ) -> dict[str, float]:
         """
         Evaluate skill on 4 axes.
@@ -109,22 +109,22 @@ Output JSON:
 
             # Compute overall score (weighted average)
             overall = (
-                0.4 * scores['correctness'] +
-                0.2 * scores['efficiency'] +
-                0.3 * scores['generalizability'] +
-                0.1 * scores['novelty']
+                0.4 * scores["correctness"]
+                + 0.2 * scores["efficiency"]
+                + 0.3 * scores["generalizability"]
+                + 0.1 * scores["novelty"]
             )
 
-            scores['overall'] = overall
+            scores["overall"] = overall
             return scores
         except Exception as e:
             print(f"Error evaluating skill: {e}")
             return {
-                'correctness': 0.5,
-                'efficiency': 0.5,
-                'generalizability': 0.5,
-                'novelty': 0.5,
-                'overall': 0.5
+                "correctness": 0.5,
+                "efficiency": 0.5,
+                "generalizability": 0.5,
+                "novelty": 0.5,
+                "overall": 0.5,
             }
 
 
@@ -140,11 +140,7 @@ class AutoSkillPipeline:
     """
 
     def __init__(
-        self,
-        llm_extractor,
-        llm_judge,
-        skills_dir: Path,
-        acceptance_threshold: float = 0.7
+        self, llm_extractor, llm_judge, skills_dir: Path, acceptance_threshold: float = 0.7
     ):
         """
         Initialize AutoSkill pipeline.
@@ -164,11 +160,7 @@ class AutoSkillPipeline:
         self.skill_library: list[SkillCandidate] = []
         self.dialogue_history: list[DialogueTurn] = []
 
-    def run(
-        self,
-        dialogues: list[list[DialogueTurn]],
-        max_skills: int = 100
-    ) -> list[Path]:
+    def run(self, dialogues: list[list[DialogueTurn]], max_skills: int = 100) -> list[Path]:
         """
         Run AutoSkill lifelong learning.
 
@@ -194,7 +186,7 @@ class AutoSkillPipeline:
             for candidate in candidates:
                 scores = self.judge.evaluate(candidate, self.skill_library)
                 candidate.judge_scores = scores
-                candidate.overall_score = scores['overall']
+                candidate.overall_score = scores["overall"]
 
                 # Accept if above threshold
                 if candidate.overall_score >= self.acceptance_threshold:
@@ -202,9 +194,13 @@ class AutoSkillPipeline:
                     skill_files.append(skill_file)
                     self.skill_library.append(candidate)
 
-                    print(f"Accepted skill: {candidate.name} (score: {candidate.overall_score:.2f})")
+                    print(
+                        f"Accepted skill: {candidate.name} (score: {candidate.overall_score:.2f})"
+                    )
                 else:
-                    print(f"Rejected skill: {candidate.name} (score: {candidate.overall_score:.2f})")
+                    print(
+                        f"Rejected skill: {candidate.name} (score: {candidate.overall_score:.2f})"
+                    )
 
             # Prune library if too large
             if len(self.skill_library) > max_skills:
@@ -212,20 +208,19 @@ class AutoSkillPipeline:
 
         return skill_files
 
-    def _extract_skills_from_dialogue(
-        self,
-        dialogue: list[DialogueTurn]
-    ) -> list[SkillCandidate]:
+    def _extract_skills_from_dialogue(self, dialogue: list[DialogueTurn]) -> list[SkillCandidate]:
         """Extract skill candidates from dialogue."""
         # Format dialogue
-        dialogue_text = "\n".join([
-            f"Turn {turn.turn_id}:\n"
-            f"  User: {turn.user_input}\n"
-            f"  Agent: {turn.agent_action}\n"
-            f"  Feedback: {turn.environment_feedback}\n"
-            f"  Success: {turn.success}"
-            for turn in dialogue
-        ])
+        dialogue_text = "\n".join(
+            [
+                f"Turn {turn.turn_id}:\n"
+                f"  User: {turn.user_input}\n"
+                f"  Agent: {turn.agent_action}\n"
+                f"  Feedback: {turn.environment_feedback}\n"
+                f"  Success: {turn.success}"
+                for turn in dialogue
+            ]
+        )
 
         prompt = f"""Extract reusable skills from this agent-environment dialogue.
 
@@ -255,12 +250,12 @@ Output JSON array:
 
                 candidate = SkillCandidate(
                     id=skill_id,
-                    name=data['name'],
-                    description=data['description'],
-                    code=data['code'],
-                    source_dialogue=data.get('source_turns', []),
+                    name=data["name"],
+                    description=data["description"],
+                    code=data["code"],
+                    source_dialogue=data.get("source_turns", []),
                     judge_scores={},
-                    overall_score=0.0
+                    overall_score=0.0,
                 )
 
                 candidates.append(candidate)
@@ -323,7 +318,7 @@ This skill was learned through lifelong learning from agent-environment interact
 """
 
         skill_file = self.skills_dir / f"{candidate.id}.md"
-        with open(skill_file, 'w') as f:
+        with open(skill_file, "w") as f:
             f.write(skill_content)
 
         print(f"Materialized skill: {skill_file}")
@@ -349,24 +344,20 @@ This skill was learned through lifelong learning from agent-environment interact
     def get_library_stats(self) -> dict[str, Any]:
         """Get statistics about skill library."""
         if not self.skill_library:
-            return {
-                'total_skills': 0,
-                'avg_score': 0.0,
-                'score_distribution': {}
-            }
+            return {"total_skills": 0, "avg_score": 0.0, "score_distribution": {}}
 
         scores = [s.overall_score for s in self.skill_library]
 
         return {
-            'total_skills': len(self.skill_library),
-            'avg_score': sum(scores) / len(scores),
-            'min_score': min(scores),
-            'max_score': max(scores),
-            'score_distribution': {
-                'high (>0.8)': sum(1 for s in scores if s > 0.8),
-                'medium (0.6-0.8)': sum(1 for s in scores if 0.6 <= s <= 0.8),
-                'low (<0.6)': sum(1 for s in scores if s < 0.6)
-            }
+            "total_skills": len(self.skill_library),
+            "avg_score": sum(scores) / len(scores),
+            "min_score": min(scores),
+            "max_score": max(scores),
+            "score_distribution": {
+                "high (>0.8)": sum(1 for s in scores if s > 0.8),
+                "medium (0.6-0.8)": sum(1 for s in scores if 0.6 <= s <= 0.8),
+                "low (<0.6)": sum(1 for s in scores if s < 0.6),
+            },
         }
 
 

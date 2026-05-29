@@ -296,11 +296,15 @@ class TestDetectWakeWord:
         result = interface.detect_wake_word(speech_chunk)
         assert result is True
 
-    def test_detect_wake_word_silence(self, interface: VoiceInterface, silence_chunk: bytes) -> None:
+    def test_detect_wake_word_silence(
+        self, interface: VoiceInterface, silence_chunk: bytes
+    ) -> None:
         result = interface.detect_wake_word(silence_chunk)
         assert result is False
 
-    def test_detect_wake_word_low_energy(self, interface: VoiceInterface, low_energy_chunk: bytes) -> None:
+    def test_detect_wake_word_low_energy(
+        self, interface: VoiceInterface, low_energy_chunk: bytes
+    ) -> None:
         result = interface.detect_wake_word(low_energy_chunk)
         assert result is False
 
@@ -318,7 +322,9 @@ class TestDetectWakeWord:
         result = interface.detect_wake_word(b"\x00\x01")
         assert result is False
 
-    def test_detect_wake_word_cooldown(self, interface: VoiceInterface, speech_chunk: bytes) -> None:
+    def test_detect_wake_word_cooldown(
+        self, interface: VoiceInterface, speech_chunk: bytes
+    ) -> None:
         """First detection should succeed, second should fail due to cooldown."""
         first = interface.detect_wake_word(speech_chunk)
         assert first is True

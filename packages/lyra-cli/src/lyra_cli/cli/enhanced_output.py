@@ -1,6 +1,5 @@
 """Enhanced output with best AI agent UI patterns"""
 
-
 from rich.console import Console
 from rich.live import Live
 from rich.panel import Panel
@@ -55,7 +54,11 @@ class EnhancedOutputFormatter:
 
     def stats_line(self, duration: str, tool_count: int, tokens: int, cost: float = 0.0):
         """Stats line (Claude Code pattern)"""
-        parts = [f"{duration}", f"{tool_count} tool{'s' if tool_count != 1 else ''}", f"{tokens:,} tokens"]
+        parts = [
+            f"{duration}",
+            f"{tool_count} tool{'s' if tool_count != 1 else ''}",
+            f"{tokens:,} tokens",
+        ]
         if cost > 0:
             parts.append(f"${cost:.4f}")
         self.console.print(f"\n[dim]{self.SYMBOL_STATS} {' · '.join(parts)}[/dim]")
@@ -92,7 +95,9 @@ class EnhancedOutputFormatter:
 
     def diff_preview(self, filename: str, additions: int, deletions: int):
         """Diff preview (Aider pattern)"""
-        self.console.print(f"  [dim]{filename}[/dim] [green]+{additions}[/green] [red]-{deletions}[/red]")
+        self.console.print(
+            f"  [dim]{filename}[/dim] [green]+{additions}[/green] [red]-{deletions}[/red]"
+        )
 
     def file_tree(self, files: list[str]):
         """File tree display (Cursor pattern)"""
@@ -147,7 +152,9 @@ class EnhancedOutputFormatter:
         bar = "█" * filled + "░" * (bar_width - filled)
 
         color = "green" if percentage < 50 else "yellow" if percentage < 80 else "red"
-        self.console.print(f"[{color}]{bar}[/{color}] {tokens:,}/{max_tokens:,} tokens ({percentage:.1f}%)")
+        self.console.print(
+            f"[{color}]{bar}[/{color}] {tokens:,}/{max_tokens:,} tokens ({percentage:.1f}%)"
+        )
 
     def cost_tracker(self, cost: float, budget: float = 10.0):
         """Cost tracking display"""
@@ -157,7 +164,9 @@ class EnhancedOutputFormatter:
 
     def git_commit(self, message: str, files: int):
         """Git commit display (Aider pattern)"""
-        self.console.print(f"[green]{self.SYMBOL_SUCCESS}[/green] Committed: [bold]{message}[/bold]")
+        self.console.print(
+            f"[green]{self.SYMBOL_SUCCESS}[/green] Committed: [bold]{message}[/bold]"
+        )
         self.console.print(f"  [dim]{files} file{'s' if files != 1 else ''} changed[/dim]")
 
     def clear_line(self):

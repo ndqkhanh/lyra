@@ -132,7 +132,8 @@ class MoLEMEngine:
 
         # Find experts matching this episode's domain
         matched_indices = [
-            i for i, e in enumerate(self.layer.experts)
+            i
+            for i, e in enumerate(self.layer.experts)
             if self._domain_match(episode.task.lower(), e.domain) > 0.5
         ]
 
@@ -246,7 +247,9 @@ class MoLEMEngine:
         pruned_ids: list[str] = []
         keep_indices: list[int] = []
 
-        for i, (expert, weight) in enumerate(zip(self.layer.experts, self.layer.router_weights, strict=False)):
+        for i, (expert, weight) in enumerate(
+            zip(self.layer.experts, self.layer.router_weights, strict=False)
+        ):
             if expert.expert_id.startswith("base_"):
                 keep_indices.append(i)
             elif weight >= threshold:
@@ -274,7 +277,8 @@ class MoLEMEngine:
         """Return experts with non-negligible router weight (> 0.01)."""
         threshold = 0.01
         return tuple(
-            e for e, w in zip(self.layer.experts, self.layer.router_weights, strict=False)
+            e
+            for e, w in zip(self.layer.experts, self.layer.router_weights, strict=False)
             if w > threshold
         )
 
@@ -347,7 +351,9 @@ class MoLEMEngine:
         """Return aggregated statistics for all experts."""
         stats: list[ExpertStats] = []
 
-        for _i, (expert, weight) in enumerate(zip(self.layer.experts, self.layer.router_weights, strict=False)):
+        for _i, (expert, weight) in enumerate(
+            zip(self.layer.experts, self.layer.router_weights, strict=False)
+        ):
             prev = self._expert_stats.get(expert.expert_id)
             trend = (weight - prev.last_weight) if prev else 0.0
 

@@ -60,23 +60,30 @@ class TaintAnalyzer:
                 if isinstance(node, ast.FunctionDef):
                     decorator_names = []
                     for decorator in node.decorator_list:
-                        if isinstance(decorator, ast.Call) and hasattr(decorator.func, 'id'):
+                        if isinstance(decorator, ast.Call) and hasattr(decorator.func, "id"):
                             decorator_names.append(decorator.func.id)
                         elif isinstance(decorator, ast.Attribute):
                             decorator_names.append(decorator.attr)
 
-                    if any('tool' in d.lower() or 'mcp' in d.lower() for d in decorator_names):
+                    if any("tool" in d.lower() or "mcp" in d.lower() for d in decorator_names):
                         params = [arg.arg for arg in node.args.args]
-                        risk_params = [p for p in params if any(
-                            kw in p.lower() for kw in ['cmd', 'exec', 'shell', 'path', 'file', 'sql', 'query']
-                        )]
-                        anchors.append({
-                            "handler": node.name,
-                            "params": params,
-                            "risk_params": risk_params,
-                            "risk_level": "high" if risk_params else "low",
-                            "line": node.lineno,
-                        })
+                        risk_params = [
+                            p
+                            for p in params
+                            if any(
+                                kw in p.lower()
+                                for kw in ["cmd", "exec", "shell", "path", "file", "sql", "query"]
+                            )
+                        ]
+                        anchors.append(
+                            {
+                                "handler": node.name,
+                                "params": params,
+                                "risk_params": risk_params,
+                                "risk_level": "high" if risk_params else "low",
+                                "line": node.lineno,
+                            }
+                        )
         except SyntaxError:
             anchors.append({"handler": "parse_error", "params": [], "risk_level": "unknown"})
         return anchors
@@ -103,7 +110,9 @@ class TaintAnalyzer:
                     tool_name=anchor["handler"],
                     vulnerability_type="taint_injection",
                     severity="high",
-                    description=f"High-risk parameters in {anchor['handler']}: {anchor['risk_params']}",
+                    description=(
+                        f"High-risk parameters in {anchor['handler']}: {anchor['risk_params']}"
+                    ),
                     proof_of_concept=poc,
                     anchor=anchor["handler"],
                     query=",".join(anchor["risk_params"]),
@@ -124,7 +133,9 @@ class PromptEvolver:
             evolved = f"{base_prompt}\n[Feedback: {feedback}]\nTry a different attack vector."
         else:
             evolved = f"{base_prompt}\n[Initial attempt]"
-        self.evolution_history.append({"base": base_prompt, "evolved": evolved, "feedback": feedback})
+        self.evolution_history.append(
+            {"base": base_prompt, "evolved": evolved, "feedback": feedback}
+        )
         return evolved
 
 

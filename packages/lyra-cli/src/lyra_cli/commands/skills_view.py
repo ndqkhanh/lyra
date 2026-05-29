@@ -11,6 +11,7 @@ expose them via simple JSON snapshots without requiring a live connection.
     lyra dag                       — render latest agent DAG
     lyra dag --session SESSION_ID  — specific session
 """
+
 from __future__ import annotations
 
 import json
@@ -154,7 +155,9 @@ def _load_dag(repo_root: Path, session: str | None) -> dict | None:
         return None
 
 
-def _render_node(parent: Tree, node_id: str, nodes: dict, edges: list[dict], visited: set[str]) -> None:
+def _render_node(
+    parent: Tree, node_id: str, nodes: dict, edges: list[dict], visited: set[str]
+) -> None:
     if node_id in visited:
         return
     visited.add(node_id)

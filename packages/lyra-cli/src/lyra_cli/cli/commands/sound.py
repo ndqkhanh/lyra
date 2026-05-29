@@ -79,7 +79,7 @@ def preview(
     except ValueError:
         valid = ", ".join(e.value for e in SoundEvent)
         console.print(f"[red]Invalid event: '{event_name}'.[/red] Valid: {valid}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from None
 
     if sm.active_pack is None:
         console.print("[yellow]No sound pack selected. Use 'sound select <pack>' first.[/yellow]")

@@ -74,7 +74,9 @@ class EntropicConsolidator:
         for frag in fragments:
             self._fragments[frag.fragment_id] = frag
 
-    def consolidate(self, phase: ConsolidationPhase = ConsolidationPhase.NREM_DEEP) -> list[ConsolidatedMemory]:
+    def consolidate(
+        self, phase: ConsolidationPhase = ConsolidationPhase.NREM_DEEP
+    ) -> list[ConsolidatedMemory]:
         """Run one consolidation cycle.
 
         Returns consolidated memories that emerged from this cycle.
@@ -122,15 +124,17 @@ class EntropicConsolidator:
             avg_salience = sum(f.salience for f in cluster) / len(cluster)
             fe = _compute_free_energy(cluster, self.config.temperature)
 
-            results.append(ConsolidatedMemory(
-                memory_id=f"mem-l-{self._cycle_count:04d}-{i:03d}",
-                fragments=tuple(f.fragment_id for f in cluster),
-                summary=summary,
-                free_energy=round(fe, 6),
-                retained_salience=round(avg_salience, 4),
-                compression_ratio=round(len(cluster) / max(len(frags), 1), 4),
-                phase=ConsolidationPhase.NREM_LIGHT,
-            ))
+            results.append(
+                ConsolidatedMemory(
+                    memory_id=f"mem-l-{self._cycle_count:04d}-{i:03d}",
+                    fragments=tuple(f.fragment_id for f in cluster),
+                    summary=summary,
+                    free_energy=round(fe, 6),
+                    retained_salience=round(avg_salience, 4),
+                    compression_ratio=round(len(cluster) / max(len(frags), 1), 4),
+                    phase=ConsolidationPhase.NREM_LIGHT,
+                )
+            )
 
         return results
 
@@ -158,15 +162,17 @@ class EntropicConsolidator:
         summary = " ; ".join(f.content[:60] for f in best_cluster[:3])
         avg_salience = sum(f.salience for f in best_cluster) / len(best_cluster)
 
-        return [ConsolidatedMemory(
-            memory_id=f"mem-d-{self._cycle_count:04d}",
-            fragments=tuple(f.fragment_id for f in best_cluster),
-            summary=summary,
-            free_energy=round(best_fe, 6),
-            retained_salience=round(avg_salience, 4),
-            compression_ratio=round(len(best_cluster) / max(len(frags), 1), 4),
-            phase=ConsolidationPhase.NREM_DEEP,
-        )]
+        return [
+            ConsolidatedMemory(
+                memory_id=f"mem-d-{self._cycle_count:04d}",
+                fragments=tuple(f.fragment_id for f in best_cluster),
+                summary=summary,
+                free_energy=round(best_fe, 6),
+                retained_salience=round(avg_salience, 4),
+                compression_ratio=round(len(best_cluster) / max(len(frags), 1), 4),
+                phase=ConsolidationPhase.NREM_DEEP,
+            )
+        ]
 
     def _rem_synthesis(self, frags: list[MemoryFragment]) -> list[ConsolidatedMemory]:
         """REM: synthesize abstract patterns across diverse fragments."""
@@ -184,15 +190,17 @@ class EntropicConsolidator:
         avg_salience = sum(f.salience for f in novel) / len(novel)
         fe = _compute_free_energy(novel, self.config.temperature * 1.5)
 
-        return [ConsolidatedMemory(
-            memory_id=f"mem-r-{self._cycle_count:04d}",
-            fragments=tuple(f.fragment_id for f in novel),
-            summary=summary,
-            free_energy=round(fe, 6),
-            retained_salience=round(avg_salience, 4),
-            compression_ratio=round(len(novel) / max(len(frags), 1), 4),
-            phase=ConsolidationPhase.REM,
-        )]
+        return [
+            ConsolidatedMemory(
+                memory_id=f"mem-r-{self._cycle_count:04d}",
+                fragments=tuple(f.fragment_id for f in novel),
+                summary=summary,
+                free_energy=round(fe, 6),
+                retained_salience=round(avg_salience, 4),
+                compression_ratio=round(len(novel) / max(len(frags), 1), 4),
+                phase=ConsolidationPhase.REM,
+            )
+        ]
 
     @property
     def pending_fragments(self) -> int:
@@ -270,6 +278,7 @@ def _sample_subset(frags: list[MemoryFragment], size: int) -> list[MemoryFragmen
     probs = [w / total for w in weights]
     selected: set[int] = set()
     import random
+
     while len(selected) < min(size, len(frags)):
         r = random.random()
         cumulative = 0.0

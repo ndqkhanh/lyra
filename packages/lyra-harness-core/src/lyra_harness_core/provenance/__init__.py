@@ -1,7 +1,9 @@
 """lyra_harness_core.provenance — typed append-only witness ledger.
 
-Per [docs/188-witness-provenance-memory-techniques-synthesis.md](../../../../../../research/harness-engineering/docs/188-witness-provenance-memory-techniques-synthesis.md)
-and [docs/186-mnema-witness-lattice.md](../../../../../../research/harness-engineering/docs/186-mnema-witness-lattice.md).
+Per
+[docs/188-witness-provenance-memory-techniques-synthesis.md](../../../../../../research/harness-engineering/docs/188-witness-provenance-memory-techniques-synthesis.md)
+and
+[docs/186-mnema-witness-lattice.md](../../../../../../research/harness-engineering/docs/186-mnema-witness-lattice.md).
 
 A *witness* is a typed, content-addressed (SHA256) record of an event:
 agent decision, tool result, verifier verdict, human approval, retrieval,
@@ -19,6 +21,7 @@ Used by every project that needs auditable claim provenance — Polaris's
 ProvenanceLedger ([docs/172] §2), Helix-Bio's KG-grounded fact attribution
 ([docs/219] §4.4), Aegis-Ops's incident replay ([docs/221] §3.5).
 """
+
 from __future__ import annotations
 
 from .lattice import WitnessLattice

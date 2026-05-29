@@ -9,12 +9,12 @@ def log(msg):
 
 log("Starting instrumented test...")
 
-from harness_tui import ProjectConfig
-from lyra_cli.tui_v2 import lyra_theme
-from lyra_cli.tui_v2.app import LyraHarnessApp
-from lyra_cli.tui_v2.commands import register_lyra_commands
-from lyra_cli.tui_v2.sidebar import build_lyra_sidebar_tabs
-from lyra_cli.tui_v2.transport import LyraTransport
+from harness_tui import ProjectConfig  # noqa: E402
+from lyra_cli.tui_v2 import lyra_theme  # noqa: E402
+from lyra_cli.tui_v2.app import LyraHarnessApp  # noqa: E402
+from lyra_cli.tui_v2.commands import register_lyra_commands  # noqa: E402
+from lyra_cli.tui_v2.sidebar import build_lyra_sidebar_tabs  # noqa: E402
+from lyra_cli.tui_v2.transport import LyraTransport  # noqa: E402
 
 # Patch the app to log lifecycle events
 original_run = LyraHarnessApp.run

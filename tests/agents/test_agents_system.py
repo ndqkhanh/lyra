@@ -4,9 +4,9 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
-
 from lyra_cli.agents import AgentManager, AgentSelector, register_builtin_agents
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "packages/lyra-cli/src"))
 
 
 def test_agent_system():
@@ -77,7 +77,12 @@ def test_agent_system():
     print("=" * 80)
     print()
     print("Agent system features:")
-    print("  ✓ 6 built-in agents (planner, code-reviewer, security-reviewer, tdd-guide, refactor-cleaner, doc-updater)")
+    print(
+
+            "  ✓ 6 built-in agents (planner, code-reviewer, security-reviewer, tdd-guide,"
+            "refactor-cleaner, doc-updater)"
+
+    )
     print("  ✓ YAML frontmatter support")
     print("  ✓ Agent registry")
     print("  ✓ Proactive agent selection")
@@ -93,5 +98,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n✗ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

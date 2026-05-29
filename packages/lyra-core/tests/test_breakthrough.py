@@ -1,4 +1,5 @@
 """Tests for BreakthroughIntegration — the unified AGI upgrade facade."""
+
 from __future__ import annotations
 
 import pytest
@@ -16,7 +17,9 @@ class TestBreakthroughIntegration:
 
     def test_registry_has_all_20_upgrades(self):
         bi = BreakthroughIntegration()
-        assert len(bi.UPGRADE_REGISTRY) >= 20, f"Expected 20+ upgrades, got {len(bi.UPGRADE_REGISTRY)}"
+        assert (
+            len(bi.UPGRADE_REGISTRY) >= 20
+        ), f"Expected 20+ upgrades, got {len(bi.UPGRADE_REGISTRY)}"
 
     def test_all_upgrades_have_domain_and_phase(self):
         bi = BreakthroughIntegration()
@@ -115,7 +118,9 @@ class TestCrossPlanCoordination:
 
     @pytest.mark.asyncio
     async def test_coordinate_performance_drop(self, bi):
-        result = await bi.coordinate("performance_drop", {"component": "router", "fallback": "opus"})
+        result = await bi.coordinate(
+            "performance_drop", {"component": "router", "fallback": "opus"}
+        )
         assert result["action"] == "reroute"
 
     @pytest.mark.asyncio
@@ -130,7 +135,9 @@ class TestCrossPlanCoordination:
 
     @pytest.mark.asyncio
     async def test_coordinate_knowledge_update(self, bi):
-        result = await bi.coordinate("knowledge_update", {"source": "wiki", "entities": ["E1", "E2"]})
+        result = await bi.coordinate(
+            "knowledge_update", {"source": "wiki", "entities": ["E1", "E2"]}
+        )
         assert result["action"] == "propagate"
 
     @pytest.mark.asyncio
@@ -183,8 +190,12 @@ class TestHooks:
 class TestSystemHealth:
     def test_system_health_dataclass(self):
         h = SystemHealth(
-            overall=0.8, by_domain={"REASONING": 0.9}, by_phase={1: 0.85},
-            ready_upgrades=15, total_upgrades=20, agi_readiness=0.78,
+            overall=0.8,
+            by_domain={"REASONING": 0.9},
+            by_phase={1: 0.85},
+            ready_upgrades=15,
+            total_upgrades=20,
+            agi_readiness=0.78,
         )
         assert h.overall == 0.8
         assert h.ready_upgrades == 15

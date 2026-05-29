@@ -84,9 +84,7 @@ class MoELayer:
 
     def update_expert(self, expert_id: str, updated: MoEExpert) -> MoELayer:
         """Return a new layer with one expert replaced."""
-        new_experts = tuple(
-            updated if e.expert_id == expert_id else e for e in self.experts
-        )
+        new_experts = tuple(updated if e.expert_id == expert_id else e for e in self.experts)
         return MoELayer(
             experts=new_experts,
             router_weights=self.router_weights,
@@ -161,9 +159,7 @@ class ForgettingMetrics:
 
     def __post_init__(self) -> None:
         if self.retention < 0.0 or self.retention > 1.0:
-            raise ValueError(
-                f"retention must be in [0.0, 1.0], got {self.retention}"
-            )
+            raise ValueError(f"retention must be in [0.0, 1.0], got {self.retention}")
 
     @property
     def forgetting_rate(self) -> float:
@@ -256,12 +252,19 @@ class EvolvedSkill:
     last_used: float = field(default_factory=time.time)
 
     def record_use(self, success: bool) -> EvolvedSkill:
-        new_rate = (self.success_rate * self.usage_count + (1.0 if success else 0.0)) / (self.usage_count + 1)
+        new_rate = (self.success_rate * self.usage_count + (1.0 if success else 0.0)) / (
+            self.usage_count + 1
+        )
         return EvolvedSkill(
-            id=self.id, name=self.name, description=self.description,
-            source_pattern_ids=self.source_pattern_ids, state=self.state,
-            version=self.version, success_rate=new_rate,
-            usage_count=self.usage_count + 1, last_used=time.time(),
+            id=self.id,
+            name=self.name,
+            description=self.description,
+            source_pattern_ids=self.source_pattern_ids,
+            state=self.state,
+            version=self.version,
+            success_rate=new_rate,
+            usage_count=self.usage_count + 1,
+            last_used=time.time(),
         )
 
 

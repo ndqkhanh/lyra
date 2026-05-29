@@ -59,7 +59,9 @@ class CircuitBreaker:
         recent = [t for t in self.failures if time.time() - t < self.window_seconds]
         if len(recent) >= self.threshold:
             self.state = "open"
-            logger.warning(f"Circuit {self.name} opened ({len(recent)} failures in {self.window_seconds}s)")
+            logger.warning(
+                f"Circuit {self.name} opened ({len(recent)} failures in {self.window_seconds}s)"
+            )
 
 
 class CircuitOpenError(Exception):
@@ -86,7 +88,9 @@ class RecoveryLadder:
                 return result
         return RecoveryResult(success=False, step="human_escalate")
 
-    async def _try_step(self, step: str, failure: Exception, context: dict[str, Any]) -> RecoveryResult:
+    async def _try_step(
+        self, step: str, failure: Exception, context: dict[str, Any]
+    ) -> RecoveryResult:
         if step == "rule_patch":
             return RecoveryResult(success=True, step=step, data="Rule patched")
         elif step == "model_regenerate":

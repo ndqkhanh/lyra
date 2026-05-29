@@ -65,88 +65,187 @@ _DISCLAIMERS: dict[DomainType, str] = {
 
 _VALIDATION_RULES: dict[DomainType, list[dict[str, Any]]] = {
     DomainType.CODING: [
-        {"check": "syntax", "description": "Output must contain valid code syntax",
-         "severity": "critical"},
-        {"check": "types", "description": "Type annotations should match usage",
-         "severity": "high"},
-        {"check": "imports", "description": "All imports must be used or removed",
-         "severity": "medium"},
-        {"check": "error_handling", "description": "All error paths must be handled",
-         "severity": "high"},
-        {"check": "no_hardcoded_secrets", "description": "No API keys, passwords, or tokens",
-         "severity": "critical"},
-        {"check": "no_debug_code", "description": "No console.log, debugger, or TODO left in output",
-         "severity": "medium"},
+        {
+            "check": "syntax",
+            "description": "Output must contain valid code syntax",
+            "severity": "critical",
+        },
+        {
+            "check": "types",
+            "description": "Type annotations should match usage",
+            "severity": "high",
+        },
+        {
+            "check": "imports",
+            "description": "All imports must be used or removed",
+            "severity": "medium",
+        },
+        {
+            "check": "error_handling",
+            "description": "All error paths must be handled",
+            "severity": "high",
+        },
+        {
+            "check": "no_hardcoded_secrets",
+            "description": "No API keys, passwords, or tokens",
+            "severity": "critical",
+        },
+        {
+            "check": "no_debug_code",
+            "description": "No console.log, debugger, or TODO left in output",
+            "severity": "medium",
+        },
     ],
     DomainType.FINANCE: [
-        {"check": "disclaimer_present", "description": "Financial disclaimer must be included",
-         "severity": "critical"},
-        {"check": "no_guarantees", "description": "No guaranteed returns or performance claims",
-         "severity": "critical"},
-        {"check": "risk_disclosure", "description": "Risks must be disclosed with every projection",
-         "severity": "high"},
-        {"check": "math_separation", "description": "Numerical calculations attributed to tools, not AI",
-         "severity": "medium"},
+        {
+            "check": "disclaimer_present",
+            "description": "Financial disclaimer must be included",
+            "severity": "critical",
+        },
+        {
+            "check": "no_guarantees",
+            "description": "No guaranteed returns or performance claims",
+            "severity": "critical",
+        },
+        {
+            "check": "risk_disclosure",
+            "description": "Risks must be disclosed with every projection",
+            "severity": "high",
+        },
+        {
+            "check": "math_separation",
+            "description": "Numerical calculations attributed to tools, not AI",
+            "severity": "medium",
+        },
     ],
     DomainType.MEDICAL: [
-        {"check": "disclaimer_present", "description": "Medical disclaimer must be included",
-         "severity": "critical"},
-        {"check": "defers_to_physician", "description": "Must defer to physician judgment",
-         "severity": "critical"},
-        {"check": "cites_sources", "description": "Medical claims must cite verifiable sources",
-         "severity": "high"},
-        {"check": "no_diagnosis", "description": "Must not provide definitive diagnosis",
-         "severity": "critical"},
-        {"check": "urgency_flag", "description": "Emergency symptoms must trigger urgent care warning",
-         "severity": "critical"},
+        {
+            "check": "disclaimer_present",
+            "description": "Medical disclaimer must be included",
+            "severity": "critical",
+        },
+        {
+            "check": "defers_to_physician",
+            "description": "Must defer to physician judgment",
+            "severity": "critical",
+        },
+        {
+            "check": "cites_sources",
+            "description": "Medical claims must cite verifiable sources",
+            "severity": "high",
+        },
+        {
+            "check": "no_diagnosis",
+            "description": "Must not provide definitive diagnosis",
+            "severity": "critical",
+        },
+        {
+            "check": "urgency_flag",
+            "description": "Emergency symptoms must trigger urgent care warning",
+            "severity": "critical",
+        },
     ],
     DomainType.LEGAL: [
-        {"check": "disclaimer_present", "description": "Legal disclaimer must be included",
-         "severity": "critical"},
-        {"check": "no_legal_advice", "description": "Must not provide definitive legal advice",
-         "severity": "critical"},
-        {"check": "cites_authority", "description": "Legal claims must cite specific authority",
-         "severity": "high"},
-        {"check": "jurisdiction_aware", "description": "Jurisdictional scope must be specified",
-         "severity": "high"},
+        {
+            "check": "disclaimer_present",
+            "description": "Legal disclaimer must be included",
+            "severity": "critical",
+        },
+        {
+            "check": "no_legal_advice",
+            "description": "Must not provide definitive legal advice",
+            "severity": "critical",
+        },
+        {
+            "check": "cites_authority",
+            "description": "Legal claims must cite specific authority",
+            "severity": "high",
+        },
+        {
+            "check": "jurisdiction_aware",
+            "description": "Jurisdictional scope must be specified",
+            "severity": "high",
+        },
     ],
     DomainType.SCIENTIFIC: [
-        {"check": "cites_sources", "description": "Scientific claims must cite peer-reviewed sources",
-         "severity": "high"},
-        {"check": "uncertainty_stated", "description": "Uncertainty and limitations must be acknowledged",
-         "severity": "high"},
-        {"check": "no_overclaim", "description": "Must not overstate significance of findings",
-         "severity": "medium"},
+        {
+            "check": "cites_sources",
+            "description": "Scientific claims must cite peer-reviewed sources",
+            "severity": "high",
+        },
+        {
+            "check": "uncertainty_stated",
+            "description": "Uncertainty and limitations must be acknowledged",
+            "severity": "high",
+        },
+        {
+            "check": "no_overclaim",
+            "description": "Must not overstate significance of findings",
+            "severity": "medium",
+        },
     ],
     DomainType.EDUCATION: [
-        {"check": "age_appropriate", "description": "Content should be appropriate for stated level",
-         "severity": "high"},
-        {"check": "factually_accurate", "description": "All educational content must be accurate",
-         "severity": "critical"},
-        {"check": "encourages_thinking", "description": "Should promote critical thinking, not memorization",
-         "severity": "medium"},
+        {
+            "check": "age_appropriate",
+            "description": "Content should be appropriate for stated level",
+            "severity": "high",
+        },
+        {
+            "check": "factually_accurate",
+            "description": "All educational content must be accurate",
+            "severity": "critical",
+        },
+        {
+            "check": "encourages_thinking",
+            "description": "Should promote critical thinking, not memorization",
+            "severity": "medium",
+        },
     ],
     DomainType.ENGINEERING: [
-        {"check": "safety_considered", "description": "Safety factors and failure modes considered",
-         "severity": "critical"},
-        {"check": "standards_compliant", "description": "Design should reference applicable standards",
-         "severity": "high"},
-        {"check": "assumptions_documented", "description": "All engineering assumptions must be documented",
-         "severity": "medium"},
+        {
+            "check": "safety_considered",
+            "description": "Safety factors and failure modes considered",
+            "severity": "critical",
+        },
+        {
+            "check": "standards_compliant",
+            "description": "Design should reference applicable standards",
+            "severity": "high",
+        },
+        {
+            "check": "assumptions_documented",
+            "description": "All engineering assumptions must be documented",
+            "severity": "medium",
+        },
     ],
     DomainType.CREATIVE: [
-        {"check": "originality_check", "description": "Content should avoid direct copying",
-         "severity": "medium"},
-        {"check": "intent_aligned", "description": "Creative direction should match stated intent",
-         "severity": "medium"},
+        {
+            "check": "originality_check",
+            "description": "Content should avoid direct copying",
+            "severity": "medium",
+        },
+        {
+            "check": "intent_aligned",
+            "description": "Creative direction should match stated intent",
+            "severity": "medium",
+        },
     ],
     DomainType.BUSINESS: [
-        {"check": "disclaimer_present", "description": "Business advisory note should be included",
-         "severity": "medium"},
-        {"check": "data_sourced", "description": "Market claims should cite data sources",
-         "severity": "high"},
-        {"check": "bias_acknowledged", "description": "Potential analytical biases should be flagged",
-         "severity": "medium"},
+        {
+            "check": "disclaimer_present",
+            "description": "Business advisory note should be included",
+            "severity": "medium",
+        },
+        {
+            "check": "data_sourced",
+            "description": "Market claims should cite data sources",
+            "severity": "high",
+        },
+        {
+            "check": "bias_acknowledged",
+            "description": "Potential analytical biases should be flagged",
+            "severity": "medium",
+        },
     ],
 }
 
@@ -195,8 +294,7 @@ class DomainValidator:
 
     def __init__(self) -> None:
         self._rules: dict[DomainType, list[dict[str, Any]]] = {
-            d: [dict(r) for r in rules]
-            for d, rules in _VALIDATION_RULES.items()
+            d: [dict(r) for r in rules] for d, rules in _VALIDATION_RULES.items()
         }
         self._citations: dict[DomainType, list[str]] = {
             d: list(patterns) for d, patterns in _CITATION_PATTERNS.items()
@@ -227,20 +325,18 @@ class DomainValidator:
         for rule in rules:
             check_name = rule["check"]
             passed, detail = self._run_check(domain, output, check_name)
-            results.append({
-                "check": check_name,
-                "description": rule["description"],
-                "severity": rule["severity"],
-                "passed": passed,
-                "detail": detail,
-            })
+            results.append(
+                {
+                    "check": check_name,
+                    "description": rule["description"],
+                    "severity": rule["severity"],
+                    "passed": passed,
+                    "detail": detail,
+                }
+            )
 
-        critical_failures = [
-            r for r in results if not r["passed"] and r["severity"] == "critical"
-        ]
-        high_failures = [
-            r for r in results if not r["passed"] and r["severity"] == "high"
-        ]
+        critical_failures = [r for r in results if not r["passed"] and r["severity"] == "critical"]
+        high_failures = [r for r in results if not r["passed"] and r["severity"] == "high"]
 
         if critical_failures:
             verdict = "rejected"
@@ -300,8 +396,10 @@ class DomainValidator:
 
         # Domains that require citations
         citation_required_domains = {
-            DomainType.MEDICAL, DomainType.LEGAL,
-            DomainType.SCIENTIFIC, DomainType.FINANCE,
+            DomainType.MEDICAL,
+            DomainType.LEGAL,
+            DomainType.SCIENTIFIC,
+            DomainType.FINANCE,
         }
         requires = domain in citation_required_domains
 
@@ -311,9 +409,7 @@ class DomainValidator:
             "citations_found": total_matches,
             "has_citations": total_matches > 0,
             "detail": (
-                f"Found {total_matches} citation(s)"
-                if total_matches > 0
-                else "No citations found"
+                f"Found {total_matches} citation(s)" if total_matches > 0 else "No citations found"
             ),
         }
 
@@ -340,13 +436,9 @@ class DomainValidator:
         for cap in card.capabilities:
             method = cap.validation_method
             if method == ValidationMethod.FORMAL_VERIFICATION:
-                capability_notes.append(
-                    f"Capability '{cap.name}' requires formal verification"
-                )
+                capability_notes.append(f"Capability '{cap.name}' requires formal verification")
             elif method == ValidationMethod.COMPLIANCE_CHECK:
-                capability_notes.append(
-                    f"Capability '{cap.name}' requires compliance check"
-                )
+                capability_notes.append(f"Capability '{cap.name}' requires compliance check")
 
         full_result["validation_notes"] = capability_notes
         return full_result
@@ -355,16 +447,19 @@ class DomainValidator:
     # Customization
     # ------------------------------------------------------------------
 
-    def add_rule(self, domain: DomainType, check: str, description: str,
-                 severity: str = "medium") -> None:
+    def add_rule(
+        self, domain: DomainType, check: str, description: str, severity: str = "medium"
+    ) -> None:
         """Add a custom validation rule for a domain."""
         if domain not in self._rules:
             self._rules[domain] = []
-        self._rules[domain].append({
-            "check": check,
-            "description": description,
-            "severity": severity,
-        })
+        self._rules[domain].append(
+            {
+                "check": check,
+                "description": description,
+                "severity": severity,
+            }
+        )
 
     def add_citation_pattern(self, domain: DomainType, pattern: str) -> None:
         """Add a custom citation pattern for a domain."""
@@ -379,8 +474,12 @@ class DomainValidator:
     def _run_check(self, domain: DomainType, output: str, check: str) -> tuple[bool, str]:
         """Run a single validation check on the output."""
         check_map: dict[str, tuple[DomainType, ...]] = {
-            "disclaimer_present": (DomainType.MEDICAL, DomainType.LEGAL,
-                                   DomainType.FINANCE, DomainType.BUSINESS),
+            "disclaimer_present": (
+                DomainType.MEDICAL,
+                DomainType.LEGAL,
+                DomainType.FINANCE,
+                DomainType.BUSINESS,
+            ),
             "no_guarantees": (DomainType.FINANCE,),
             "defers_to_physician": (DomainType.MEDICAL,),
             "no_diagnosis": (DomainType.MEDICAL,),
@@ -410,8 +509,13 @@ class DomainValidator:
 
         if check == "no_guarantees":
             guaranteed_phrases = [
-                "guaranteed", "risk-free", "sure thing", "no risk",
-                "certain return", "definitely will", "100% return",
+                "guaranteed",
+                "risk-free",
+                "sure thing",
+                "no risk",
+                "certain return",
+                "definitely will",
+                "100% return",
             ]
             for phrase in guaranteed_phrases:
                 if phrase.lower() in output.lower():
@@ -420,8 +524,10 @@ class DomainValidator:
 
         if check == "defers_to_physician":
             deferral_phrases = [
-                "consult your physician", "consult a healthcare provider",
-                "seek medical attention", "ask your doctor",
+                "consult your physician",
+                "consult a healthcare provider",
+                "seek medical attention",
+                "ask your doctor",
                 "professional medical advice",
             ]
             for phrase in deferral_phrases:
@@ -431,8 +537,11 @@ class DomainValidator:
 
         if check == "no_diagnosis":
             diagnostic_phrases = [
-                "you have", "you are diagnosed with", "definitive diagnosis",
-                "confirmed case of", "you definitely have",
+                "you have",
+                "you are diagnosed with",
+                "definitive diagnosis",
+                "confirmed case of",
+                "you definitely have",
             ]
             for phrase in diagnostic_phrases:
                 if phrase.lower() in output.lower():
@@ -441,8 +550,11 @@ class DomainValidator:
 
         if check == "no_legal_advice":
             advice_phrases = [
-                "you should sue", "you should file", "you will win",
-                "definitely liable", "certain to prevail",
+                "you should sue",
+                "you should file",
+                "you will win",
+                "definitely liable",
+                "certain to prevail",
             ]
             for phrase in advice_phrases:
                 if phrase.lower() in output.lower():
@@ -457,8 +569,13 @@ class DomainValidator:
 
         if check == "safety_considered":
             safety_terms = [
-                "safety factor", "failure mode", "fmea", "risk assessment",
-                "margin of safety", "factor of safety", "load case",
+                "safety factor",
+                "failure mode",
+                "fmea",
+                "risk assessment",
+                "margin of safety",
+                "factor of safety",
+                "load case",
             ]
             for term in safety_terms:
                 if term.lower() in output.lower():

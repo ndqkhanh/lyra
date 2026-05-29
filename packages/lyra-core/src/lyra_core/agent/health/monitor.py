@@ -89,7 +89,13 @@ class AgentHealthMonitor:
     ) -> dict[str, object]:
         signals = self._signals.get(source.value, [])
         if not signals:
-            return {"source": source.value, "count": 0, "latest_value": 0.0, "mean_value": 0.0, "trend": HealthTrend.STABLE.value}
+            return {
+                "source": source.value,
+                "count": 0,
+                "latest_value": 0.0,
+                "mean_value": 0.0,
+                "trend": HealthTrend.STABLE.value,
+            }
         values = [s.value for s in signals]
         severities = [s.severity for s in signals]
         latest_sev = severities[-1] if severities else SignalSeverity.OK
@@ -157,7 +163,12 @@ class AgentHealthMonitor:
             if not sigs:
                 continue
             recent = sigs[-self.config.trend_window_count :]
-            warn_count = sum(1 for s in recent if s.severity in (SignalSeverity.WARN, SignalSeverity.DEGRADED, SignalSeverity.CRITICAL))
+            warn_count = sum(
+                1
+                for s in recent
+                if s.severity
+                in (SignalSeverity.WARN, SignalSeverity.DEGRADED, SignalSeverity.CRITICAL)
+            )
             ratio = warn_count / len(recent) if recent else 0
             if ratio >= critical:
                 return "critical"
@@ -173,7 +184,12 @@ class AgentHealthMonitor:
 
     @staticmethod
     def _severity_rank(sev: SignalSeverity) -> int:
-        return {SignalSeverity.OK: 0, SignalSeverity.WARN: 1, SignalSeverity.DEGRADED: 2, SignalSeverity.CRITICAL: 3}[sev]
+        return {
+            SignalSeverity.OK: 0,
+            SignalSeverity.WARN: 1,
+            SignalSeverity.DEGRADED: 2,
+            SignalSeverity.CRITICAL: 3,
+        }[sev]
 
     @property
     def signal_count(self) -> int:

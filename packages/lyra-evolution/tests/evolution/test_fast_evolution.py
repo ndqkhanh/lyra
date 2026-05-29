@@ -353,7 +353,7 @@ class TestIntegration:
         engine.initialize(baseline)
 
         # Run 10 generations
-        for gen in range(10):
+        for _gen in range(10):
             new_nodes = engine.explore_generation_fast(n_mutations=15)
             assert len(new_nodes) > 0
 

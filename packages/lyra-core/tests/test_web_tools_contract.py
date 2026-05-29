@@ -24,6 +24,7 @@ Invariants tested
 - ``WebSearch`` raises ``FeatureUnavailable`` when no provider is
   configured *and* the default provider can't be constructed.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -69,9 +70,8 @@ def test_web_search_caps_results_at_max_results() -> None:
     from lyra_core.tools.web_search import make_web_search_tool
 
     def provider(q, n):
-        return [
-            {"title": str(i), "url": f"https://x/{i}", "snippet": ""} for i in range(20)
-        ]
+        return [{"title": str(i), "url": f"https://x/{i}", "snippet": ""} for i in range(20)]
+
     tool = make_web_search_tool(provider=provider)
     out = tool(query="x", max_results=3)
     assert out["count"] == 3
@@ -125,7 +125,14 @@ class _FakeHttpClient:
         self._resp = resp
         self.calls: list[dict] = []
 
-    def get(self, url: str, *, follow_redirects: bool = True, timeout: float = 10.0, headers: dict | None = None) -> _FakeResponse:
+    def get(
+        self,
+        url: str,
+        *,
+        follow_redirects: bool = True,
+        timeout: float = 10.0,
+        headers: dict | None = None,
+    ) -> _FakeResponse:
         self.calls.append({"url": url, "headers": dict(headers or {}), "timeout": timeout})
         return self._resp
 
@@ -191,9 +198,7 @@ def test_web_fetch_rejects_dangerous_schemes() -> None:
 def test_web_fetch_propagates_http_errors_as_result_not_exception() -> None:
     from lyra_core.tools.web_fetch import make_web_fetch_tool
 
-    fake = _FakeHttpClient(
-        _FakeResponse(text="nope", status_code=404, url="https://t.test/404")
-    )
+    fake = _FakeHttpClient(_FakeResponse(text="nope", status_code=404, url="https://t.test/404"))
     tool = make_web_fetch_tool(http=fake)
 
     out = tool(url="https://t.test/404")

@@ -1,4 +1,5 @@
-"""Lyra Policy Optimizer — RL-based policy search, reward modeling, policy gradient optimization, constrained optimization, policy evaluation, and safe deployment strategies."""
+"""Lyra Policy Optimizer — RL-based policy search, reward modeling, policy gradient optimization,
+constrained optimization, policy evaluation, and safe deployment strategies."""
 
 from __future__ import annotations
 

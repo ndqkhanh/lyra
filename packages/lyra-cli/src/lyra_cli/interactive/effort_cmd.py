@@ -15,6 +15,7 @@ Levels match Claude Code's taxonomy:
 
 EffortWidget — TUI panel showing current level with bar, toggle via Alt+E.
 """
+
 from __future__ import annotations
 
 import os
@@ -34,35 +35,35 @@ from ..commands.registry import CommandResult
 EFFORT_LEVELS = ("low", "medium", "high", "xhigh", "max")
 
 EFFORT_BLURBS = {
-    "low":    "fastest single-turn attempt; cheapest model",
+    "low": "fastest single-turn attempt; cheapest model",
     "medium": "default — Plan + Build with standard verification",
-    "high":   "extra review passes (/review, /ultrareview)",
-    "xhigh":  "deep reasoning + multi-pass verifier",
-    "max":    "full refute-or-promote loop + cross-channel verifier",
+    "high": "extra review passes (/review, /ultrareview)",
+    "xhigh": "deep reasoning + multi-pass verifier",
+    "max": "full refute-or-promote loop + cross-channel verifier",
 }
 
 EFFORT_GLYPH = {
-    "low":    "⚡",
+    "low": "⚡",
     "medium": "◆",
-    "high":   "▲",
-    "xhigh":  "◆◆",
-    "max":    "★★",
+    "high": "▲",
+    "xhigh": "◆◆",
+    "max": "★★",
 }
 
 EFFORT_COLOR = {
-    "low":    "green",
+    "low": "green",
     "medium": "cyan",
-    "high":   "yellow",
-    "xhigh":  "magenta",
-    "max":    "red",
+    "high": "yellow",
+    "xhigh": "magenta",
+    "max": "red",
 }
 
 EFFORT_MAX_TOKENS = {
-    "low":    2_000,
+    "low": 2_000,
     "medium": 4_000,
-    "high":   8_000,
-    "xhigh":  12_000,
-    "max":    16_000,
+    "high": 8_000,
+    "xhigh": 12_000,
+    "max": 16_000,
 }
 
 ENV_VAR = "HARNESS_REASONING_EFFORT"
@@ -77,6 +78,7 @@ def _current_level() -> str:
     if CONFIG_FILE.exists():
         try:
             import json
+
             data = json.loads(CONFIG_FILE.read_text())
             level = data.get("level", "medium")
             if level in EFFORT_LEVELS:
@@ -91,10 +93,12 @@ def _set_level(level: str) -> None:
     os.environ[ENV_VAR] = level
     CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
     import json
+
     CONFIG_FILE.write_text(json.dumps({"level": level, "updated_at": __import__("time").time()}))
 
 
 # ── Slash command ──────────────────────────────────────────────────────
+
 
 def cmd_effort(session: Any, args: str) -> CommandResult:
     """Set or view reasoning effort level.
@@ -171,10 +175,15 @@ def cmd_effort(session: Any, args: str) -> CommandResult:
             ),
         )
 
-    return CommandResult(output=f"Unknown level '{target}'. Use: {', '.join(EFFORT_LEVELS)} or 1-{len(EFFORT_LEVELS)}")
+    return CommandResult(
+        output=(
+            f"Unknown level '{target}'. Use: {', '.join(EFFORT_LEVELS)} or 1-{len(EFFORT_LEVELS)}"
+        )
+    )
 
 
 # ── TUI Widget ─────────────────────────────────────────────────────────
+
 
 class EffortWidget(Widget):
     """Reasoning effort level indicator — Alt+E to toggle.

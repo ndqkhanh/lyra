@@ -17,6 +17,7 @@ from typing import Any
 @dataclass
 class TemporalFact:
     """Fact with temporal validity window."""
+
     id: str
     fact: str
     valid_at: datetime
@@ -47,28 +48,28 @@ class TemporalFact:
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
-            'id': self.id,
-            'fact': self.fact,
-            'valid_at': self.valid_at.isoformat(),
-            'invalid_at': self.invalid_at.isoformat() if self.invalid_at else None,
-            'source': self.source,
-            'confidence': self.confidence,
-            'tags': self.tags,
-            'metadata': self.metadata
+            "id": self.id,
+            "fact": self.fact,
+            "valid_at": self.valid_at.isoformat(),
+            "invalid_at": self.invalid_at.isoformat() if self.invalid_at else None,
+            "source": self.source,
+            "confidence": self.confidence,
+            "tags": self.tags,
+            "metadata": self.metadata,
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> 'TemporalFact':
+    def from_dict(cls, data: dict[str, Any]) -> "TemporalFact":
         """Create from dictionary."""
         return cls(
-            id=data['id'],
-            fact=data['fact'],
-            valid_at=datetime.fromisoformat(data['valid_at']),
-            invalid_at=datetime.fromisoformat(data['invalid_at']) if data['invalid_at'] else None,
-            source=data['source'],
-            confidence=data['confidence'],
-            tags=data['tags'],
-            metadata=data['metadata']
+            id=data["id"],
+            fact=data["fact"],
+            valid_at=datetime.fromisoformat(data["valid_at"]),
+            invalid_at=datetime.fromisoformat(data["invalid_at"]) if data["invalid_at"] else None,
+            source=data["source"],
+            confidence=data["confidence"],
+            tags=data["tags"],
+            metadata=data["metadata"],
         )
 
 
@@ -104,7 +105,7 @@ class TemporalMemoryStore:
 
     def _save_facts(self) -> None:
         """Save facts to disk."""
-        with open(self.store_path, 'w') as f:
+        with open(self.store_path, "w") as f:
             json.dump([f.to_dict() for f in self.facts], f, indent=2)
 
     def add_fact(
@@ -115,7 +116,7 @@ class TemporalMemoryStore:
         source: str = "user",
         confidence: float = 1.0,
         tags: list[str] | None = None,
-        metadata: dict[str, Any] | None = None
+        metadata: dict[str, Any] | None = None,
     ) -> TemporalFact:
         """
         Add a temporal fact.
@@ -145,7 +146,7 @@ class TemporalMemoryStore:
             source=source,
             confidence=confidence,
             tags=tags or [],
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
 
         self.facts.append(temporal_fact)
@@ -176,9 +177,7 @@ class TemporalMemoryStore:
         return False
 
     def query_at_time(
-        self,
-        query_time: datetime | None = None,
-        tags: list[str] | None = None
+        self, query_time: datetime | None = None, tags: list[str] | None = None
     ) -> list[TemporalFact]:
         """
         Query facts valid at a specific time.
@@ -206,10 +205,7 @@ class TemporalMemoryStore:
         return results
 
     def query_range(
-        self,
-        start_time: datetime,
-        end_time: datetime,
-        tags: list[str] | None = None
+        self, start_time: datetime, end_time: datetime, tags: list[str] | None = None
     ) -> list[TemporalFact]:
         """
         Query facts valid during a time range.
@@ -252,15 +248,14 @@ class TemporalMemoryStore:
             List of facts mentioning subject, sorted by valid_at
         """
         subject_lower = subject.lower()
-        results = [
-            fact for fact in self.facts
-            if subject_lower in fact.fact.lower()
-        ]
+        results = [fact for fact in self.facts if subject_lower in fact.fact.lower()]
 
         results.sort(key=lambda f: f.valid_at)
         return results
 
-    def resolve_conflicts(self, subject: str, query_time: datetime | None = None) -> TemporalFact | None:
+    def resolve_conflicts(
+        self, subject: str, query_time: datetime | None = None
+    ) -> TemporalFact | None:
         """
         Resolve temporal conflicts for a subject.
 
@@ -277,8 +272,7 @@ class TemporalMemoryStore:
             query_time = datetime.now()
 
         valid_facts = [
-            fact for fact in self.get_fact_history(subject)
-            if fact.is_valid_at(query_time)
+            fact for fact in self.get_fact_history(subject) if fact.is_valid_at(query_time)
         ]
 
         if not valid_facts:
@@ -295,10 +289,10 @@ class TemporalMemoryStore:
         invalidated = sum(1 for f in self.facts if f.invalid_at is not None)
 
         return {
-            'total_facts': len(self.facts),
-            'currently_valid': currently_valid,
-            'invalidated': invalidated,
-            'never_invalid': len(self.facts) - invalidated
+            "total_facts": len(self.facts),
+            "currently_valid": currently_valid,
+            "invalidated": invalidated,
+            "never_invalid": len(self.facts) - invalidated,
         }
 
 
@@ -353,9 +347,7 @@ Output JSON array:
 
 # Integration with semantic consolidator
 def add_temporal_to_semantic_facts(
-    semantic_consolidator,
-    temporal_store: TemporalMemoryStore,
-    llm
+    semantic_consolidator, temporal_store: TemporalMemoryStore, llm
 ) -> None:
     """
     Add temporal validity to existing semantic facts.
@@ -367,20 +359,16 @@ def add_temporal_to_semantic_facts(
     """
     for semantic_fact in semantic_consolidator.facts:
         # Extract temporal information
-        temporal_facts = extract_temporal_facts(
-            semantic_fact.fact,
-            semantic_fact.extracted_at,
-            llm
-        )
+        temporal_facts = extract_temporal_facts(semantic_fact.fact, semantic_fact.extracted_at, llm)
 
         for tf in temporal_facts:
             temporal_store.add_fact(
-                fact=tf['fact'],
-                valid_at=datetime.fromisoformat(tf['valid_at']),
-                invalid_at=datetime.fromisoformat(tf['invalid_at']) if tf['invalid_at'] else None,
+                fact=tf["fact"],
+                valid_at=datetime.fromisoformat(tf["valid_at"]),
+                invalid_at=datetime.fromisoformat(tf["invalid_at"]) if tf["invalid_at"] else None,
                 source=f"semantic_{semantic_fact.id}",
-                confidence=tf['confidence'],
-                tags=semantic_fact.tags
+                confidence=tf["confidence"],
+                tags=semantic_fact.tags,
             )
 
 

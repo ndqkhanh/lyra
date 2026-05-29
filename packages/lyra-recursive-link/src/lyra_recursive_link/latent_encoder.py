@@ -46,7 +46,10 @@ def compute_compression_ratio(original_tokens: int, latent_dim: int) -> float:
 
 def similarity(a: LatentVector, b: LatentVector) -> float:
     if len(a.vector) != len(b.vector):
-        msg = f"Cannot compute similarity: vectors have different dimensions ({len(a.vector)} vs {len(b.vector)})"
+        msg =(
+            f"Cannot compute similarity: vectors have different dimensions ({len(a.vector)} vs "
+            f"{len(b.vector)})"
+        )
         raise ValueError(msg)
     dot = np.dot(a.vector, b.vector)
     norm_a = np.linalg.norm(a.vector)
@@ -66,9 +69,7 @@ class LatentEncoder:
         self._pca_components: np.ndarray | None = None
         self._pca_mean: np.ndarray | None = None
         self._random_matrix: np.ndarray | None = None
-        self._rng: np.random.Generator = np.random.default_rng(
-            self.default_config.random_seed
-        )
+        self._rng: np.random.Generator = np.random.default_rng(self.default_config.random_seed)
 
     def _tokenize(self, text: str) -> list[str]:
         tokens = re.findall(r"[a-zA-Z]+", text.lower())
@@ -150,9 +151,7 @@ class LatentEncoder:
 
         return [t for t, _ in Counter(tokens).most_common(10)]
 
-    def encode(
-        self, text: str, config: EncodingConfig | None = None
-    ) -> LatentVector:
+    def encode(self, text: str, config: EncodingConfig | None = None) -> LatentVector:
         cfg = config or self.default_config
         tokens = self._tokenize(text)
         self._update_vocabulary(tokens)

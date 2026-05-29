@@ -157,35 +157,34 @@ class RootCauseAnalyzer:
             explanation = self._build_explanation(graph, ancestor, effect_node, best_path, score)
             interventions = self._recommend_interventions(graph, ancestor, effect_node)
 
-            candidates.append(RootCause(
-                node_id=ancestor,
-                score=score,
-                causal_path=best_path,
-                explanation=explanation,
-                recommended_interventions=interventions,
-                evidence={
-                    "num_paths": len(paths),
-                    "path_lengths": [len(p) for p in paths],
-                },
-            ))
+            candidates.append(
+                RootCause(
+                    node_id=ancestor,
+                    score=score,
+                    causal_path=best_path,
+                    explanation=explanation,
+                    recommended_interventions=interventions,
+                    evidence={
+                        "num_paths": len(paths),
+                        "path_lengths": [len(p) for p in paths],
+                    },
+                )
+            )
 
         # Sort by score descending, apply threshold and top-k
         candidates.sort(key=lambda rc: rc.score, reverse=True)
-        candidates = [
-            rc for rc in candidates
-            if rc.score >= self._config.min_attribution_threshold
-        ]
+        candidates = [rc for rc in candidates if rc.score >= self._config.min_attribution_threshold]
         candidates = candidates[: self._config.top_k]
 
         logger.info(
             "Found %d root causes for '%s' (threshold=%.3f)",
-            len(candidates), effect_node, self._config.min_attribution_threshold,
+            len(candidates),
+            effect_node,
+            self._config.min_attribution_threshold,
         )
         return candidates
 
-    def _select_best_path(
-        self, graph: CausalGraph, paths: list[list[str]]
-    ) -> list[str]:
+    def _select_best_path(self, graph: CausalGraph, paths: list[list[str]]) -> list[str]:
         """Select the most significant causal path from a list.
 
         Criteria: shorter paths preferred; ties broken by edge strength.
@@ -213,7 +212,7 @@ class RootCauseAnalyzer:
         for i in range(len(path) - 1):
             edge = graph.get_edge(path[i], path[i + 1])
             strength = edge.strength if edge else 0.0
-            total_strength *= (0.5 + 0.5 * strength)
+            total_strength *= 0.5 + 0.5 * strength
 
         # Penalize longer paths slightly
         length_penalty = 1.0 / np.sqrt(len(path))
@@ -254,9 +253,7 @@ class RootCauseAnalyzer:
 
         return float(np.clip(score, 0.0, 1.0))
 
-    def _anomaly_correlation(
-        self, cause_data: np.ndarray, effect_data: np.ndarray
-    ) -> float:
+    def _anomaly_correlation(self, cause_data: np.ndarray, effect_data: np.ndarray) -> float:
         """Score how strongly anomalies in cause align with anomalies in effect.
 
         An anomaly is defined as a value exceeding z-score threshold.
@@ -265,10 +262,14 @@ class RootCauseAnalyzer:
         if min_len < 10:
             return 0.5
 
-        cause_z = np.abs((cause_data[:min_len] - np.mean(cause_data[:min_len]))
-                         / (np.std(cause_data[:min_len]) + 1e-10))
-        effect_z = np.abs((effect_data[:min_len] - np.mean(effect_data[:min_len]))
-                          / (np.std(effect_data[:min_len]) + 1e-10))
+        cause_z = np.abs(
+            (cause_data[:min_len] - np.mean(cause_data[:min_len]))
+            / (np.std(cause_data[:min_len]) + 1e-10)
+        )
+        effect_z = np.abs(
+            (effect_data[:min_len] - np.mean(effect_data[:min_len]))
+            / (np.std(effect_data[:min_len]) + 1e-10)
+        )
 
         threshold = self._config.anomaly_sensitivity
         cause_anom = cause_z > threshold
@@ -321,12 +322,14 @@ class RootCauseAnalyzer:
             contribution = self._path_score(graph, best_path)
             raw_scores[ancestor] = contribution
 
-            scores.append(AttributionScore(
-                factor=ancestor,
-                contribution=contribution,
-                indirect=len(best_path) > 2,  # more than direct edge
-                path=best_path,
-            ))
+            scores.append(
+                AttributionScore(
+                    factor=ancestor,
+                    contribution=contribution,
+                    indirect=len(best_path) > 2,  # more than direct edge
+                    path=best_path,
+                )
+            )
 
         # Normalize contributions to sum to 1
         total = sum(s.contribution for s in scores)
@@ -379,7 +382,10 @@ class RootCauseAnalyzer:
 
         # If root_cause is a confounder
         for _edge_id, edge in graph.edges.items():
-            if edge.edge_type == EdgeType.BIDIRECTED and root_cause in (edge.source_id, edge.target_id):
+            if edge.edge_type == EdgeType.BIDIRECTED and root_cause in (
+                edge.source_id,
+                edge.target_id,
+            ):
                 other = edge.target_id if edge.source_id == root_cause else edge.source_id
                 recommendations.append(
                     f"Control for unobserved confounder between '{root_cause}' and '{other}'"
@@ -448,20 +454,24 @@ class RootCauseAnalyzer:
             edge_details = []
             for i in range(len(path) - 1):
                 edge = graph.get_edge(path[i], path[i + 1])
-                edge_details.append({
-                    "from": path[i],
-                    "to": path[i + 1],
-                    "type": edge.edge_type.value if edge else "unknown",
-                    "strength": edge.strength if edge else 0.0,
-                    "confidence": edge.confidence if edge else 0.0,
-                })
+                edge_details.append(
+                    {
+                        "from": path[i],
+                        "to": path[i + 1],
+                        "type": edge.edge_type.value if edge else "unknown",
+                        "strength": edge.strength if edge else 0.0,
+                        "confidence": edge.confidence if edge else 0.0,
+                    }
+                )
 
-            chains.append({
-                "path": path,
-                "length": len(path) - 1,
-                "score": self._path_score(graph, path),
-                "edges": edge_details,
-            })
+            chains.append(
+                {
+                    "path": path,
+                    "length": len(path) - 1,
+                    "score": self._path_score(graph, path),
+                    "edges": edge_details,
+                }
+            )
 
         chains.sort(key=lambda c: c["score"], reverse=True)
         return chains
@@ -494,4 +504,7 @@ class RootCauseAnalyzer:
         return results
 
     def __repr__(self) -> str:
-        return f"RootCauseAnalyzer(top_k={self._config.top_k}, threshold={self._config.min_attribution_threshold})"
+        return(
+            f"RootCauseAnalyzer(top_k={self._config.top_k}, threshold="
+            f"{self._config.min_attribution_threshold})"
+        )

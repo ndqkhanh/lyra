@@ -39,6 +39,7 @@ logger = logging.getLogger(__name__)
 
 class AllocationMethod(Enum):
     """Available portfolio allocation methods."""
+
     EQUAL_WEIGHT = "equal_weight"
     MARKET_CAP = "market_cap"
     MINIMUM_VARIANCE = "minimum_variance"
@@ -50,6 +51,7 @@ class AllocationMethod(Enum):
 @dataclass
 class AllocationResult:
     """Output of an allocation optimization."""
+
     method: AllocationMethod
     weights: dict[str, float]  # symbol -> weight
     expected_return: float = 0.0
@@ -66,17 +68,23 @@ class AllocationStrategy:
     used standalone or as inputs to PortfolioOptimizer.
     """
 
-    def __init__(self, name: str = "AllocationStrategy",
-                 default_method: AllocationMethod = AllocationMethod.EQUAL_WEIGHT) -> None:
+    def __init__(
+        self,
+        name: str = "AllocationStrategy",
+        default_method: AllocationMethod = AllocationMethod.EQUAL_WEIGHT,
+    ) -> None:
         self.name = name
         self.default_method = default_method
         self.logger = logging.getLogger(f"{__name__}.{self.name}")
 
-    def allocate(self, symbols: Sequence[str],
-                 method: AllocationMethod | None = None,
-                 expected_returns: dict[str, float] | None = None,
-                 covariances: dict[tuple[str, str], float] | None = None,
-                 risk_profile: RiskProfile = RiskProfile.NEUTRAL) -> AllocationResult:
+    def allocate(
+        self,
+        symbols: Sequence[str],
+        method: AllocationMethod | None = None,
+        expected_returns: dict[str, float] | None = None,
+        covariances: dict[tuple[str, str], float] | None = None,
+        risk_profile: RiskProfile = RiskProfile.NEUTRAL,
+    ) -> AllocationResult:
         """Compute allocation weights for a set of symbols.
 
         Args:
@@ -111,13 +119,17 @@ class AllocationStrategy:
     # Allocation methods
     # ------------------------------------------------------------------
 
-    def _equal_weight(self, symbols: Sequence[str],
-                      expected_returns: dict[str, float] | None = None) -> AllocationResult:
+    def _equal_weight(
+        self, symbols: Sequence[str], expected_returns: dict[str, float] | None = None
+    ) -> AllocationResult:
         """Equal-weight allocation across all symbols."""
         weight = 1.0 / len(symbols)
         weights = dict.fromkeys(symbols, weight)
-        exp_ret = (statistics.mean(expected_returns.values())
-                   if expected_returns and len(expected_returns) > 0 else 0.0)
+        exp_ret = (
+            statistics.mean(expected_returns.values())
+            if expected_returns and len(expected_returns) > 0
+            else 0.0
+        )
         return AllocationResult(
             method=AllocationMethod.EQUAL_WEIGHT,
             weights=weights,
@@ -125,10 +137,13 @@ class AllocationStrategy:
             details=f"Equal weight ({weight:.1%} each) across {len(symbols)} assets.",
         )
 
-    def _risk_parity(self, symbols: Sequence[str],
-                     expected_returns: dict[str, float] | None = None,
-                     covariances: dict[tuple[str, str], float] | None = None,
-                     risk_profile: RiskProfile = RiskProfile.NEUTRAL) -> AllocationResult:
+    def _risk_parity(
+        self,
+        symbols: Sequence[str],
+        expected_returns: dict[str, float] | None = None,
+        covariances: dict[tuple[str, str], float] | None = None,
+        risk_profile: RiskProfile = RiskProfile.NEUTRAL,
+    ) -> AllocationResult:
         """Risk parity: each asset contributes equal risk.
 
         Uses simple inverse-volatility heuristic when full covariance
@@ -150,8 +165,11 @@ class AllocationStrategy:
             # Compute risk contributions from covariance matrix
             weights = self._solve_risk_parity(symbols, covariances)
 
-        exp_ret = (statistics.mean(expected_returns.values())
-                   if expected_returns and len(expected_returns) > 0 else 0.0)
+        exp_ret = (
+            statistics.mean(expected_returns.values())
+            if expected_returns and len(expected_returns) > 0
+            else 0.0
+        )
 
         risk_contrib = dict(weights.items())
         return AllocationResult(
@@ -162,9 +180,12 @@ class AllocationStrategy:
             details=f"Risk parity allocation across {len(symbols)} assets.",
         )
 
-    def _minimum_variance(self, symbols: Sequence[str],
-                          expected_returns: dict[str, float] | None = None,
-                          covariances: dict[tuple[str, str], float] | None = None) -> AllocationResult:
+    def _minimum_variance(
+        self,
+        symbols: Sequence[str],
+        expected_returns: dict[str, float] | None = None,
+        covariances: dict[tuple[str, str], float] | None = None,
+    ) -> AllocationResult:
         """Minimum variance portfolio."""
         if covariances is None or len(covariances) == 0:
             # Equal weight when no covariance data
@@ -184,9 +205,12 @@ class AllocationStrategy:
             details=f"Minimum variance portfolio (σ={pvol:.2%}).",
         )
 
-    def _max_sharpe(self, symbols: Sequence[str],
-                    expected_returns: dict[str, float] | None = None,
-                    covariances: dict[tuple[str, str], float] | None = None) -> AllocationResult:
+    def _max_sharpe(
+        self,
+        symbols: Sequence[str],
+        expected_returns: dict[str, float] | None = None,
+        covariances: dict[tuple[str, str], float] | None = None,
+    ) -> AllocationResult:
         """Maximum Sharpe ratio portfolio."""
         if not expected_returns or not covariances:
             return self._equal_weight(symbols, expected_returns)
@@ -208,9 +232,12 @@ class AllocationStrategy:
             details=f"Maximum Sharpe portfolio (SR={sharpe:.2f}).",
         )
 
-    def _constant_proportion(self, symbols: Sequence[str],
-                              expected_returns: dict[str, float] | None = None,
-                              risk_profile: RiskProfile = RiskProfile.NEUTRAL) -> AllocationResult:
+    def _constant_proportion(
+        self,
+        symbols: Sequence[str],
+        expected_returns: dict[str, float] | None = None,
+        risk_profile: RiskProfile = RiskProfile.NEUTRAL,
+    ) -> AllocationResult:
         """Constant proportion portfolio insurance-style allocation."""
         n = len(symbols)
         base_weight = 1.0 / n
@@ -240,8 +267,9 @@ class AllocationStrategy:
             details=f"Constant proportion allocation (profile={risk_profile.value}).",
         )
 
-    def _market_cap(self, symbols: Sequence[str],
-                    expected_returns: dict[str, float] | None = None) -> AllocationResult:
+    def _market_cap(
+        self, symbols: Sequence[str], expected_returns: dict[str, float] | None = None
+    ) -> AllocationResult:
         """Market-cap-weighted allocation (equal weight if no cap data)."""
         if not expected_returns:
             return self._equal_weight(symbols, expected_returns)
@@ -260,8 +288,9 @@ class AllocationStrategy:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _solve_risk_parity(symbols: Sequence[str],
-                           covariances: dict[tuple[str, str], float]) -> dict[str, float]:
+    def _solve_risk_parity(
+        symbols: Sequence[str], covariances: dict[tuple[str, str], float]
+    ) -> dict[str, float]:
         """Solve for equal risk contribution weights using iterative method."""
         n = len(symbols)
         if n == 0:
@@ -285,8 +314,10 @@ class AllocationStrategy:
             # Marginal risk contributions
             mrc = {}
             for i in symbols:
-                sum_cov = sum(weights[j] * covariances.get((i, j), covariances.get((j, i), 0.0))
-                             for j in symbols)
+                sum_cov = sum(
+                    weights[j] * covariances.get((i, j), covariances.get((j, i), 0.0))
+                    for j in symbols
+                )
                 mrc[i] = sum_cov / total_risk if total_risk > 0 else 0.0
 
             # Risk contributions
@@ -310,8 +341,9 @@ class AllocationStrategy:
         return weights
 
     @staticmethod
-    def _solve_min_variance(symbols: Sequence[str],
-                            covariances: dict[tuple[str, str], float]) -> dict[str, float]:
+    def _solve_min_variance(
+        symbols: Sequence[str], covariances: dict[tuple[str, str], float]
+    ) -> dict[str, float]:
         """Solve for minimum variance portfolio using inverse-variance heuristic."""
         n = len(symbols)
         if n == 0:
@@ -329,9 +361,11 @@ class AllocationStrategy:
         return {s: v / total for s, v in inv_var.items()}
 
     @staticmethod
-    def _solve_max_sharpe(symbols: Sequence[str],
-                          expected_returns: dict[str, float],
-                          covariances: dict[tuple[str, str], float]) -> dict[str, float]:
+    def _solve_max_sharpe(
+        symbols: Sequence[str],
+        expected_returns: dict[str, float],
+        covariances: dict[tuple[str, str], float],
+    ) -> dict[str, float]:
         """Solve for maximum Sharpe portfolio using simplified approach."""
         n = len(symbols)
         if n == 0:
@@ -344,8 +378,9 @@ class AllocationStrategy:
         if expected_returns:
             total_ret = sum(max(0.0, expected_returns.get(s, 0.0)) for s in symbols)
             if total_ret > 0:
-                ret_weights = {s: max(0.0, expected_returns.get(s, 0.0)) / total_ret
-                              for s in symbols}
+                ret_weights = {
+                    s: max(0.0, expected_returns.get(s, 0.0)) / total_ret for s in symbols
+                }
                 # Blend min-var and return-based
                 weights = {s: 0.5 * min_var[s] + 0.5 * ret_weights[s] for s in symbols}
                 total_w = sum(weights.values())
@@ -355,8 +390,9 @@ class AllocationStrategy:
         return min_var
 
     @staticmethod
-    def _portfolio_variance(weights: dict[str, float],
-                            covariances: dict[tuple[str, str], float]) -> float:
+    def _portfolio_variance(
+        weights: dict[str, float], covariances: dict[tuple[str, str], float]
+    ) -> float:
         """Compute portfolio variance given weights and covariance matrix."""
         pvar = 0.0
         symbols = list(weights.keys())
@@ -375,6 +411,7 @@ class AllocationStrategy:
 @dataclass
 class SharpeSnapshot:
     """Rolling Sharpe ratio at a point in time."""
+
     timestamp: datetime.datetime
     sharpe_ratio: float
     periods_used: int
@@ -389,17 +426,16 @@ class SharpeTracker:
     rolling annualized Sharpe ratio on demand.
     """
 
-    def __init__(self, name: str = "SharpeTracker",
-                 window_days: int = 252,
-                 risk_free_rate: float = 0.0) -> None:
+    def __init__(
+        self, name: str = "SharpeTracker", window_days: int = 252, risk_free_rate: float = 0.0
+    ) -> None:
         self.name = name
         self.window_days = window_days
         self.risk_free_rate = risk_free_rate
         self.logger = logging.getLogger(f"{__name__}.{self.name}")
         self._daily_returns: list[tuple[datetime.datetime, float]] = []
 
-    def record_return(self, return_pct: float,
-                      timestamp: datetime.datetime | None = None) -> None:
+    def record_return(self, return_pct: float, timestamp: datetime.datetime | None = None) -> None:
         """Record a daily portfolio return."""
         self._daily_returns.append(
             (timestamp or datetime.datetime.now(), return_pct / 100.0),
@@ -407,11 +443,15 @@ class SharpeTracker:
         # Prune old entries beyond window
         if len(self._daily_returns) > self.window_days * 2:
             _cutoff = len(self._daily_returns) - self.window_days * 2
-            self._daily_returns = self._daily_returns[-self.window_days * 2:]
+            self._daily_returns = self._daily_returns[-self.window_days * 2 :]
 
     def compute(self) -> SharpeSnapshot:
         """Compute the current rolling Sharpe ratio."""
-        recent = self._daily_returns[-self.window_days:] if len(self._daily_returns) > self.window_days else self._daily_returns
+        recent = (
+            self._daily_returns[-self.window_days :]
+            if len(self._daily_returns) > self.window_days
+            else self._daily_returns
+        )
 
         if len(recent) < 5:
             return SharpeSnapshot(
@@ -462,20 +502,26 @@ class PortfolioOptimizer:
     monitoring into a single optimisation interface.
     """
 
-    def __init__(self, name: str = "PortfolioOptimizer",
-                 strategy: AllocationStrategy | None = None,
-                 sharpe_tracker: SharpeTracker | None = None) -> None:
+    def __init__(
+        self,
+        name: str = "PortfolioOptimizer",
+        strategy: AllocationStrategy | None = None,
+        sharpe_tracker: SharpeTracker | None = None,
+    ) -> None:
         self.name = name
         self.strategy = strategy or AllocationStrategy()
         self.sharpe_tracker = sharpe_tracker or SharpeTracker()
         self.logger = logging.getLogger(f"{__name__}.{self.name}")
         self._snapshots: list[PerformanceSnapshot] = []
 
-    def optimize(self, portfolio: Portfolio,
-                 assets: Sequence[Asset],
-                 expected_returns: dict[str, float] | None = None,
-                 covariances: dict[tuple[str, str], float] | None = None,
-                 method: AllocationMethod | None = None) -> AllocationResult:
+    def optimize(
+        self,
+        portfolio: Portfolio,
+        assets: Sequence[Asset],
+        expected_returns: dict[str, float] | None = None,
+        covariances: dict[tuple[str, str], float] | None = None,
+        method: AllocationMethod | None = None,
+    ) -> AllocationResult:
         """Run full portfolio optimisation.
 
         Args:
@@ -502,7 +548,8 @@ class PortfolioOptimizer:
 
         self.logger.info(
             "Optimized portfolio (%s): %d assets, σ=%.2f%%, SR=%.2f",
-            result.method.value, len(symbols),
+            result.method.value,
+            len(symbols),
             result.expected_volatility * 100.0 if result.expected_volatility > 0 else 0.0,
             result.sharpe_ratio,
         )

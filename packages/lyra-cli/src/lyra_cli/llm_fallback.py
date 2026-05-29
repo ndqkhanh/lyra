@@ -108,7 +108,9 @@ class FallbackExecutor:
         self.chain = chain or []
         self._provider_factory = provider_factory
 
-    def execute(self, messages: list[Any], model_override: str | None = None) -> tuple[str, str, Any]:
+    def execute(
+        self, messages: list[Any], model_override: str | None = None
+    ) -> tuple[str, str, Any]:
         """Execute messages (DEPRECATED).
 
         Raises:

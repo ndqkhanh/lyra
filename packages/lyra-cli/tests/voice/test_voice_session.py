@@ -27,7 +27,9 @@ class TestWakeWordResult:
         assert r.confidence == 0.0
 
     def test_valid_result(self):
-        r = WakeWordResult(detected=True, confidence=0.9, phrase="hey lyra hello", remaining_text="hello")
+        r = WakeWordResult(
+            detected=True, confidence=0.9, phrase="hey lyra hello", remaining_text="hello"
+        )
         assert r.detected
         assert r.confidence == 0.9
         assert r.remaining_text == "hello"

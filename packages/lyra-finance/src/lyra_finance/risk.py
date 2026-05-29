@@ -40,15 +40,16 @@ logger = logging.getLogger(__name__)
 @dataclass
 class RiskLimits:
     """Configured risk limits for a portfolio."""
-    max_single_position_pct: float = 0.20        # 20% max per position
-    max_leverage: float = 1.0                     # no leverage by default
-    max_concentration_pct: float = 0.30           # 30% max per sector
-    max_drawdown_pct: float = 0.15                # 15% max drawdown before halt
-    var_95_limit_pct: float = 0.02                # 2% daily VaR limit
-    min_trades_before_var: int = 10               # minimum trades for VaR calc
-    stop_loss_pct_default: float = 0.05           # 5% default stop loss
-    max_daily_trades: int = 50                    # trade frequency limit
-    max_order_value: float = 1_000_000.0          # single order notional cap
+
+    max_single_position_pct: float = 0.20  # 20% max per position
+    max_leverage: float = 1.0  # no leverage by default
+    max_concentration_pct: float = 0.30  # 30% max per sector
+    max_drawdown_pct: float = 0.15  # 15% max drawdown before halt
+    var_95_limit_pct: float = 0.02  # 2% daily VaR limit
+    min_trades_before_var: int = 10  # minimum trades for VaR calc
+    stop_loss_pct_default: float = 0.05  # 5% default stop loss
+    max_daily_trades: int = 50  # trade frequency limit
+    max_order_value: float = 1_000_000.0  # single order notional cap
 
 
 class RiskManager:
@@ -58,15 +59,13 @@ class RiskManager:
     first gate before any trading decision is forwarded for execution.
     """
 
-    def __init__(self, name: str = "RiskManager",
-                 limits: RiskLimits | None = None) -> None:
+    def __init__(self, name: str = "RiskManager", limits: RiskLimits | None = None) -> None:
         self.name = name
         self.limits = limits or RiskLimits()
         self.logger = logging.getLogger(f"{__name__}.{self.name}")
         self._var_data: list[float] = []  # daily returns for VaR calculation
 
-    def check_trade(self, decision: TradingDecision,
-                    portfolio: Portfolio) -> tuple[bool, str]:
+    def check_trade(self, decision: TradingDecision, portfolio: Portfolio) -> tuple[bool, str]:
         """Validate a trade against all risk limits.
 
         Returns:
@@ -85,8 +84,9 @@ class RiskManager:
 
         return (True, "All risk checks passed.")
 
-    def compute_var(self, daily_returns: Sequence[float] | None = None,
-                    confidence: float = 0.95) -> RiskMetrics:
+    def compute_var(
+        self, daily_returns: Sequence[float] | None = None, confidence: float = 0.95
+    ) -> RiskMetrics:
         """Compute Value-at-Risk and related metrics.
 
         Uses historical simulation method (deterministic).
@@ -112,14 +112,14 @@ class RiskManager:
 
         # Volatility (annualized, assuming daily returns)
         vol = statistics.stdev(returns) if len(returns) > 1 else 0.0
-        annualized_vol = vol * (252 ** 0.5)
+        annualized_vol = vol * (252**0.5)
 
         # Max drawdown
         max_dd = self._compute_max_drawdown(returns)
 
         # Sharpe (assuming 0% risk-free rate)
         avg_return = statistics.mean(returns)
-        sharpe = (avg_return / vol * (252 ** 0.5)) if vol > 0 else 0.0
+        sharpe = (avg_return / vol * (252**0.5)) if vol > 0 else 0.0
 
         return RiskMetrics(
             var_95=var_95 * 100.0,
@@ -137,9 +137,9 @@ class RiskManager:
         if len(self._var_data) > 500:
             self._var_data.pop(0)
 
-    def risk_adjust_decision(self, decision: TradingDecision,
-                             risk_metrics: RiskMetrics,
-                             portfolio: Portfolio) -> TradingDecision:
+    def risk_adjust_decision(
+        self, decision: TradingDecision, risk_metrics: RiskMetrics, portfolio: Portfolio
+    ) -> TradingDecision:
         """Scale back a decision based on current risk metrics.
 
         Applies risk-based position sizing reduction when VaR or drawdown
@@ -156,14 +156,18 @@ class RiskManager:
 
         # Reduce size if drawdown is near limit
         if risk_metrics.max_drawdown > self.limits.max_drawdown_pct * 50.0:
-            drawdown_ratio = 1.0 - (risk_metrics.max_drawdown / (self.limits.max_drawdown_pct * 100.0))
+            drawdown_ratio = 1.0 - (
+                risk_metrics.max_drawdown / (self.limits.max_drawdown_pct * 100.0)
+            )
             adjustment *= max(0.1, drawdown_ratio)
 
         # Apply adjustment
         adjusted_pct = decision.position_size_pct * adjustment
         self.logger.info(
             "Risk adjustment: %.1f%% of original size (VaR=%.2f%%, DD=%.2f%%).",
-            adjustment * 100.0, risk_metrics.var_95, risk_metrics.max_drawdown,
+            adjustment * 100.0,
+            risk_metrics.var_95,
+            risk_metrics.max_drawdown,
         )
 
         return TradingDecision(
@@ -174,8 +178,7 @@ class RiskManager:
             time_horizon_days=decision.time_horizon_days,
             target_price=decision.target_price,
             stop_loss=decision.stop_loss,
-            reasoning=(f"Risk-adjusted: {decision.reasoning} "
-                       f"| Adjustment: {adjustment:.0%}"),
+            reasoning=(f"Risk-adjusted: {decision.reasoning} " f"| Adjustment: {adjustment:.0%}"),
             supporting_reports=decision.supporting_reports,
         )
 
@@ -183,25 +186,30 @@ class RiskManager:
     # Internal check methods
     # ------------------------------------------------------------------
 
-    def _check_position_limit(self, decision: TradingDecision,
-                              portfolio: Portfolio) -> tuple[bool, str]:
+    def _check_position_limit(
+        self, decision: TradingDecision, portfolio: Portfolio
+    ) -> tuple[bool, str]:
         """Check single position size and sector concentration."""
         if decision.position_size_pct > self.limits.max_single_position_pct:
-            return (False,
-                    f"Position size {decision.position_size_pct:.1%} exceeds "
-                    f"limit of {self.limits.max_single_position_pct:.1%}.")
+            return (
+                False,
+                f"Position size {decision.position_size_pct:.1%} exceeds "
+                f"limit of {self.limits.max_single_position_pct:.1%}.",
+            )
         return (True, "")
 
-    def _check_cash_availability(self, decision: TradingDecision,
-                                 portfolio: Portfolio) -> tuple[bool, str]:
-        """"Check sufficient cash for buy orders."""
+    def _check_cash_availability(
+        self, decision: TradingDecision, portfolio: Portfolio
+    ) -> tuple[bool, str]:
+        """ "Check sufficient cash for buy orders."""
         if decision.direction == TradeDirection.SHORT:
             return (True, "")
         cost = portfolio.total_value * decision.position_size_pct
         if cost > portfolio.cash:
-            return (False,
-                    f"Insufficient cash: ${cost:.2f} needed, "
-                    f"${portfolio.cash:.2f} available.")
+            return (
+                False,
+                f"Insufficient cash: ${cost:.2f} needed, " f"${portfolio.cash:.2f} available.",
+            )
         return (True, "")
 
     def _check_daily_trade_limit(self, _decision: TradingDecision) -> tuple[bool, str]:
@@ -209,14 +217,17 @@ class RiskManager:
         # NOTE: daily count should be tracked externally; we return OK here.
         return (True, "")
 
-    def _check_notional_limit(self, decision: TradingDecision,
-                              portfolio: Portfolio) -> tuple[bool, str]:
+    def _check_notional_limit(
+        self, decision: TradingDecision, portfolio: Portfolio
+    ) -> tuple[bool, str]:
         """Check single order notional value limit."""
         notional = portfolio.total_value * decision.position_size_pct
         if notional > self.limits.max_order_value:
-            return (False,
-                    f"Order notional ${notional:.2f} exceeds "
-                    f"limit of ${self.limits.max_order_value:.2f}.")
+            return (
+                False,
+                f"Order notional ${notional:.2f} exceeds "
+                f"limit of ${self.limits.max_order_value:.2f}.",
+            )
         return (True, "")
 
     @staticmethod
@@ -228,7 +239,7 @@ class RiskManager:
         peak = 1.0
         max_dd = 0.0
         for r in returns:
-            cumulative *= (1.0 + r)
+            cumulative *= 1.0 + r
             if cumulative > peak:
                 peak = cumulative
             dd = (peak - cumulative) / peak
@@ -245,12 +256,13 @@ class RiskManager:
 @dataclass
 class BreakerConfig:
     """Circuit breaker threshold configuration."""
-    daily_loss_pct: float = 0.10          # 10% daily loss triggers halt
+
+    daily_loss_pct: float = 0.10  # 10% daily loss triggers halt
     portfolio_drawdown_pct: float = 0.20  # 20% total drawdown triggers liquidation
-    single_trade_loss_pct: float = 0.05   # 5% loss on single trade triggers review
-    volatility_spike_pct: float = 0.08    # 8% daily vol spike triggers halt
-    cooldown_minutes: int = 30            # cool-down after circuit break
-    max_consecutive_losses: int = 5       # stop after 5 consecutive losses
+    single_trade_loss_pct: float = 0.05  # 5% loss on single trade triggers review
+    volatility_spike_pct: float = 0.08  # 8% daily vol spike triggers halt
+    cooldown_minutes: int = 30  # cool-down after circuit break
+    max_consecutive_losses: int = 5  # stop after 5 consecutive losses
 
 
 class CircuitBreaker:
@@ -260,8 +272,7 @@ class CircuitBreaker:
     actions when pre-defined thresholds are breached.
     """
 
-    def __init__(self, name: str = "CircuitBreaker",
-                 config: BreakerConfig | None = None) -> None:
+    def __init__(self, name: str = "CircuitBreaker", config: BreakerConfig | None = None) -> None:
         self.name = name
         self.config = config or BreakerConfig()
         self.logger = logging.getLogger(f"{__name__}.{self.name}")
@@ -292,7 +303,7 @@ class CircuitBreaker:
             event = CircuitBreakerEvent(
                 symbol="PORTFOLIO",
                 reason=f"Daily loss {daily_return_pct:.2f}% exceeds "
-                       f"limit {self.config.daily_loss_pct * 100:.0f}%.",
+                f"limit {self.config.daily_loss_pct * 100:.0f}%.",
                 threshold=self.config.daily_loss_pct * 100.0,
                 current_value=daily_return_pct,
                 action_taken="halt_trading",
@@ -308,7 +319,7 @@ class CircuitBreaker:
             event = CircuitBreakerEvent(
                 symbol="PORTFOLIO",
                 reason=f"Portfolio drawdown {drawdown_pct:.2f}% exceeds "
-                       f"limit {self.config.portfolio_drawdown_pct * 100:.0f}%.",
+                f"limit {self.config.portfolio_drawdown_pct * 100:.0f}%.",
                 threshold=self.config.portfolio_drawdown_pct * 100.0,
                 current_value=drawdown_pct,
                 action_taken="liquidate",
@@ -320,7 +331,10 @@ class CircuitBreaker:
     def check_trade_loss(self, trade: Trade) -> list[CircuitBreakerEvent]:
         """Check if a single trade loss exceeds threshold."""
         events: list[CircuitBreakerEvent] = []
-        if trade.pnl < 0 and abs(trade.pnl) / max(trade.notional_value, 1) >= self.config.single_trade_loss_pct:
+        if (
+            trade.pnl < 0
+            and abs(trade.pnl) / max(trade.notional_value, 1) >= self.config.single_trade_loss_pct
+        ):
             self._consecutive_losses += 1
             if self._consecutive_losses >= self.config.max_consecutive_losses:
                 event = CircuitBreakerEvent(
@@ -350,7 +364,9 @@ class CircuitBreaker:
         self._triggered_at = event.timestamp
         self.logger.warning(
             "CIRCUIT BREAKER TRIGGERED: %s — %s (action: %s)",
-            event.symbol, event.reason, event.action_taken,
+            event.symbol,
+            event.reason,
+            event.action_taken,
         )
 
 
@@ -362,6 +378,7 @@ class CircuitBreaker:
 @dataclass
 class ComplianceRule:
     """A single compliance rule definition."""
+
     name: str
     description: str
     enabled: bool = True
@@ -408,8 +425,7 @@ class ComplianceMonitor:
         }
         self._recent_sells: dict[str, list[tuple[str, float, datetime.datetime]]] = {}
 
-    def pre_trade_check(self, decision: TradingDecision,
-                        portfolio: Portfolio) -> tuple[bool, str]:
+    def pre_trade_check(self, decision: TradingDecision, portfolio: Portfolio) -> tuple[bool, str]:
         """Run compliance rules before a trade is executed."""
         checks = [
             self._check_concentration(decision, portfolio),
@@ -462,13 +478,16 @@ class ComplianceMonitor:
     # Internal rule checks
     # ------------------------------------------------------------------
 
-    def _check_concentration(self, decision: TradingDecision,
-                             portfolio: Portfolio) -> tuple[bool, str]:
+    def _check_concentration(
+        self, decision: TradingDecision, portfolio: Portfolio
+    ) -> tuple[bool, str]:
         """Check that position won't exceed concentration limit."""
         if decision.position_size_pct > 0.30:
-            return (False,
-                    f"Position would be {decision.position_size_pct:.1%} of portfolio, "
-                    "exceeds 30% concentration limit.")
+            return (
+                False,
+                f"Position would be {decision.position_size_pct:.1%} of portfolio, "
+                "exceeds 30% concentration limit.",
+            )
         return (True, "")
 
     def _check_wash_sale(self, decision: TradingDecision) -> tuple[bool, str]:
@@ -480,9 +499,11 @@ class ComplianceMonitor:
         now = datetime.datetime.now()
         for _sell_id, _price, ts in sells:
             if (now - ts).days < 30:
-                return (False,
-                        f"Wash sale risk: {symbol} was sold at a loss on {ts.date()} "
-                        f"(within 30-day window).")
+                return (
+                    False,
+                    f"Wash sale risk: {symbol} was sold at a loss on {ts.date()} "
+                    f"(within 30-day window).",
+                )
         return (True, "")
 
     def _record_sell(self, trade: Trade) -> None:
@@ -497,6 +518,5 @@ class ComplianceMonitor:
         # Prune records older than 30 days
         now = datetime.datetime.now()
         self._recent_sells[trade.symbol] = [
-            s for s in self._recent_sells[trade.symbol]
-            if (now - s[2]).days < 30
+            s for s in self._recent_sells[trade.symbol] if (now - s[2]).days < 30
         ]

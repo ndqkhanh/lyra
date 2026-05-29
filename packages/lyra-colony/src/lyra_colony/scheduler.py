@@ -235,9 +235,7 @@ class ColonyScheduler:
         self._agent_labels.pop(agent_id, None)
         self._agent_load.pop(agent_id, None)
         # Reassign any pending tasks for this agent
-        orphaned = [
-            a for a in self._pending_assignments.values() if a.agent_id == agent_id
-        ]
+        orphaned = [a for a in self._pending_assignments.values() if a.agent_id == agent_id]
         for assignment in orphaned:
             self._task_state[assignment.task_id] = TaskState.QUEUED
             self._pending_assignments.pop(assignment.assignment_id, None)
@@ -272,7 +270,9 @@ class ColonyScheduler:
         self._task_state[task.task_id] = TaskState.QUEUED
         self.metrics.current_queue_depth = len(self._heap)
 
-        logger.debug("Submitted task %s (priority=%d, type=%s)", task.task_id, task.priority, task.task_type)
+        logger.debug(
+            "Submitted task %s (priority=%d, type=%s)", task.task_id, task.priority, task.task_type
+        )
         return task.task_id
 
     def submit_batch(self, tasks: Sequence[Task]) -> list[str]:
@@ -298,7 +298,11 @@ class ColonyScheduler:
         async with self._coalesce_lock:
             self._coalesce_buffer[task.task_type].append(task)
             if len(self._coalesce_buffer[task.task_type]) >= 10:
-                logger.info("Coalesce buffer for %s has %d items", task.task_type, len(self._coalesce_buffer[task.task_type]))
+                logger.info(
+                    "Coalesce buffer for %s has %d items",
+                    task.task_type,
+                    len(self._coalesce_buffer[task.task_type]),
+                )
 
     # ------------------------------------------------------------------
     # Scheduling strategies
@@ -371,9 +375,7 @@ class ColonyScheduler:
             # Affinity check: all labels must match
             labels = self._agent_labels.get(agent_id, {})
             if task.affinity_labels:
-                match = all(
-                    labels.get(k) == v for k, v in task.affinity_labels.items()
-                )
+                match = all(labels.get(k) == v for k, v in task.affinity_labels.items())
                 if not match:
                     continue
             candidates.append(agent_id)
@@ -404,6 +406,7 @@ class ColonyScheduler:
             return candidates[0]
 
         import random
+
         r = random.random() * total
         cumulative = 0.0
         for aid, w in weights:
@@ -434,9 +437,7 @@ class ColonyScheduler:
         labels = self._agent_labels.get(agent_id, {})
         if not task.affinity_labels:
             return 0.0
-        matches = sum(
-            1 for k, v in task.affinity_labels.items() if labels.get(k) == v
-        )
+        matches = sum(1 for k, v in task.affinity_labels.items() if labels.get(k) == v)
         return matches / len(task.affinity_labels)
 
     def _deadline_first(self, candidates: list[str], task: Task) -> str:
@@ -450,7 +451,9 @@ class ColonyScheduler:
     def mark_completed(self, assignment: TaskAssignment) -> None:
         """Mark a task as completed."""
         self._task_state[assignment.task_id] = TaskState.COMPLETED
-        self._agent_load[assignment.agent_id] = max(0, self._agent_load.get(assignment.agent_id, 1) - 1)
+        self._agent_load[assignment.agent_id] = max(
+            0, self._agent_load.get(assignment.agent_id, 1) - 1
+        )
         self._pending_assignments.pop(assignment.assignment_id, None)
         self._completed.append(assignment)
         self.metrics.tasks_completed += 1
@@ -461,7 +464,9 @@ class ColonyScheduler:
     def mark_failed(self, assignment: TaskAssignment) -> None:
         """Mark a task as failed."""
         self._task_state[assignment.task_id] = TaskState.FAILED
-        self._agent_load[assignment.agent_id] = max(0, self._agent_load.get(assignment.agent_id, 1) - 1)
+        self._agent_load[assignment.agent_id] = max(
+            0, self._agent_load.get(assignment.agent_id, 1) - 1
+        )
         self._pending_assignments.pop(assignment.assignment_id, None)
         self.metrics.tasks_failed += 1
 

@@ -194,7 +194,8 @@ class SectionUsageTracker:
 
     def __init__(self) -> None:
         self._sections: dict[str, dict[str, SectionUsage]] = defaultdict(dict)
-        self._skill_meta: dict[str, tuple[int, float, float]] = {}  # (invocations, last_used, first_used)
+        # (invocations, last_used, first_used)
+        self._skill_meta: dict[str, tuple[int, float, float]] = {}
 
     def record_reference(self, skill_id: str, section_id: str, char_count: int = 0) -> None:
         """Record a reference to a specific section of a skill."""
@@ -257,7 +258,9 @@ class SectionUsageTracker:
         sections = self._sections.get(skill_id, {})
         return tuple(sid for sid, s in sections.items() if s.reference_count == 0)
 
-    def get_all_profiles(self, skill_total_chars: dict[str, int] | None = None) -> tuple[SkillUsageProfile, ...]:
+    def get_all_profiles(
+        self, skill_total_chars: dict[str, int] | None = None
+    ) -> tuple[SkillUsageProfile, ...]:
         """Build usage profiles for all tracked skills."""
         char_map = skill_total_chars or {}
         profiles: list[SkillUsageProfile] = []
@@ -321,7 +324,9 @@ class SkillCompactor:
 
     # ── Trim ──────────────────────────────────────────────────────────────
 
-    def find_trims(self, skill_total_chars: dict[str, int] | None = None) -> tuple[SectionTrimResult, ...]:
+    def find_trims(
+        self, skill_total_chars: dict[str, int] | None = None
+    ) -> tuple[SectionTrimResult, ...]:
         """Find all skills with unreferenced sections that can be trimmed."""
         results: list[SectionTrimResult] = []
         char_map = skill_total_chars or {}
@@ -336,19 +341,22 @@ class SkillCompactor:
                 continue
 
             trimmed_chars = sum(
-                s.char_count for s in profile.sections
-                if s.section_id in unreferenced
+                s.char_count for s in profile.sections if s.section_id in unreferenced
             )
             chars_before = profile.total_chars
             chars_after = chars_before - trimmed_chars
 
-            results.append(SectionTrimResult(
-                skill_id=skill_id,
-                trimmed_sections=unreferenced,
-                chars_before=chars_before,
-                chars_after=chars_after,
-                compression_pct=(trimmed_chars / chars_before * 100) if chars_before > 0 else 0.0,
-            ))
+            results.append(
+                SectionTrimResult(
+                    skill_id=skill_id,
+                    trimmed_sections=unreferenced,
+                    chars_before=chars_before,
+                    chars_after=chars_after,
+                    compression_pct=(
+                        (trimmed_chars / chars_before * 100) if chars_before > 0 else 0.0
+                    ),
+                )
+            )
 
         return tuple(results)
 
@@ -378,13 +386,15 @@ class SkillCompactor:
 
                 if similarity >= self._merge_similarity:
                     shared = tuple(sorted(intersection))
-                    candidates.append(MergeCandidate(
-                        skill_a=a,
-                        skill_b=b,
-                        similarity=round(similarity, 3),
-                        shared_tags=shared,
-                        suggested_name=f"{a}+{b}",
-                    ))
+                    candidates.append(
+                        MergeCandidate(
+                            skill_a=a,
+                            skill_b=b,
+                            similarity=round(similarity, 3),
+                            shared_tags=shared,
+                            suggested_name=f"{a}+{b}",
+                        )
+                    )
 
         candidates.sort(key=lambda c: c.similarity, reverse=True)
         return tuple(candidates)
@@ -460,7 +470,9 @@ class SkillCompactor:
 
         # Merge updates — combine tags for merged pairs, remove originals
         for merge in plan.merges:
-            combined = self._skill_tags.get(merge.skill_a, frozenset()) | self._skill_tags.get(merge.skill_b, frozenset())
+            combined = self._skill_tags.get(merge.skill_a, frozenset()) | self._skill_tags.get(
+                merge.skill_b, frozenset()
+            )
             self._skill_tags[merge.suggested_name] = combined
             self._skill_tags.pop(merge.skill_a, None)
             self._skill_tags.pop(merge.skill_b, None)

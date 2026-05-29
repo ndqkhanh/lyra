@@ -1,4 +1,5 @@
 """Tests for SDLC automation modules."""
+
 from __future__ import annotations
 
 from lyra_core.sdlc.changelog_generator import (
@@ -45,7 +46,9 @@ class TestPipelineRunner:
     def test_passing_stage(self):
         config = PipelineConfig(stages=("unit",))
         pipeline = PipelineRunner(config=config)
-        pipeline.register_stage("unit", lambda: {"status": "passed", "total": 10, "passed": 10, "failed": 0})
+        pipeline.register_stage(
+            "unit", lambda: {"status": "passed", "total": 10, "passed": 10, "failed": 0}
+        )
         result = pipeline.run()
         assert result.stages[0].status == StageStatus.PASSED
         assert result.total_tests == 10
@@ -69,6 +72,7 @@ class TestPipelineRunner:
 
         def _fail():
             raise RuntimeError("fail")
+
         called = {"integration": False}
 
         def _integration():
@@ -84,8 +88,12 @@ class TestPipelineRunner:
     def test_multiple_stages(self):
         config = PipelineConfig(stages=("unit", "integration"))
         pipeline = PipelineRunner(config=config)
-        pipeline.register_stage("unit", lambda: {"status": "passed", "total": 5, "passed": 5, "failed": 0})
-        pipeline.register_stage("integration", lambda: {"status": "passed", "total": 3, "passed": 3, "failed": 0})
+        pipeline.register_stage(
+            "unit", lambda: {"status": "passed", "total": 5, "passed": 5, "failed": 0}
+        )
+        pipeline.register_stage(
+            "integration", lambda: {"status": "passed", "total": 3, "passed": 3, "failed": 0}
+        )
         result = pipeline.run()
         assert result.overall_status == StageStatus.PASSED
         assert result.total_tests == 8
@@ -170,11 +178,13 @@ class TestChangelogGenerator:
 
     def test_parse_commits_batch(self):
         gen = ChangelogGenerator()
-        entries = gen.parse_commits([
-            "feat: add login",
-            "fix: patch auth bug",
-            "not a conventional commit",
-        ])
+        entries = gen.parse_commits(
+            [
+                "feat: add login",
+                "fix: patch auth bug",
+                "not a conventional commit",
+            ]
+        )
         assert len(entries) == 2
 
     def test_generate_markdown(self):
@@ -203,6 +213,7 @@ class TestReleaseManager:
 
     def test_bump_invalid_version(self):
         import pytest
+
         vb = VersionBumper()
         with pytest.raises(ValueError):
             vb.bump("invalid", BumpType.PATCH)

@@ -13,6 +13,7 @@ Provides:
 ECC reference: ECC's everything-claude-code conventional commit conventions
 (SKILL.md, instinct rules).
 """
+
 from __future__ import annotations
 
 import shlex
@@ -23,6 +24,7 @@ from typing import Any
 from ..commands.registry import CommandResult
 
 # ── Git helpers (pure) ─────────────────────────────────────────────────
+
 
 def _run_git(args: list[str], cwd: Path | None = None) -> tuple[str, str, int]:
     """Run a git command and return (stdout, stderr, exit_code)."""
@@ -50,7 +52,7 @@ def get_branch(repo_root: Path | None = None) -> str:
 def get_dirty_count(repo_root: Path | None = None) -> int:
     """Count dirty (modified + untracked) files."""
     out, _, _ = _run_git(["status", "--porcelain"], repo_root)
-    return len([l for l in out.split("\n") if l.strip()]) if out else 0
+    return len([line for line in out.split("\n") if line.strip()]) if out else 0
 
 
 def is_detached(repo_root: Path | None = None) -> bool:
@@ -86,12 +88,14 @@ def _rich_available() -> bool:
     try:
         from rich.console import Console  # noqa: F401
         from rich.table import Table  # noqa: F401
+
         return True
     except ImportError:
         return False
 
 
 # ── Slash command handler ──────────────────────────────────────────────
+
 
 def cmd_git(session: Any, args: str) -> CommandResult:
     """Git integration — status, diff, commit, log, branch.
@@ -107,7 +111,7 @@ def cmd_git(session: Any, args: str) -> CommandResult:
     """
     parts = shlex.split(args.strip()) if args.strip() else []
     subcmd = parts[0].lower() if parts else "status"
-    repo_root = getattr(session, 'repo_root', Path.cwd()) if session else Path.cwd()
+    repo_root = getattr(session, "repo_root", Path.cwd()) if session else Path.cwd()
 
     # ── /git status ────────────────────────────────────────────────────
     if subcmd == "status":
@@ -149,7 +153,9 @@ def cmd_git(session: Any, args: str) -> CommandResult:
             header += f" · [cyan]{ahead} ahead[/]"
 
         return CommandResult(
-            output=f"On branch {branch}: {len([l for l in out.split(chr(10)) if l.strip()])} changes",
+            output=(
+                f"On branch {branch}: {len([line for line in out.split(chr(10)) if line.strip()])} changes"
+            ),
             renderable=f"{header}\n" + "\n".join(lines) if _rich_available() else None,
         )
 
@@ -172,7 +178,9 @@ def cmd_git(session: Any, args: str) -> CommandResult:
         if len(out) > 5000:
             out = out[:5000] + "\n[dim]… diff truncated (use --stat)[/]"
 
-        return CommandResult(output="git diff output", renderable=f"[dim]{out}[/]" if _rich_available() else None)
+        return CommandResult(
+            output="git diff output", renderable=f"[dim]{out}[/]" if _rich_available() else None
+        )
 
     # ── /git log ───────────────────────────────────────────────────────
     if subcmd == "log":
@@ -213,7 +221,7 @@ def cmd_git(session: Any, args: str) -> CommandResult:
                 lines.append(f"  {glyph} {name}")
 
         return CommandResult(
-            output=f"Branches ({len([l for l in out.split(chr(10)) if l.strip()])})",
+            output=f"Branches ({len([line for line in out.split(chr(10)) if line.strip()])})",
             renderable="\n".join(lines) if _rich_available() else None,
         )
 
@@ -234,12 +242,14 @@ def cmd_git(session: Any, args: str) -> CommandResult:
             return CommandResult(output=f"Commit failed: {err}")
         return CommandResult(output=f"✓ {out}")
 
-    return CommandResult(
-        output="Usage: /git [status|diff|log|branch|commit]"
-    )
+    return CommandResult(output="Usage: /git [status|diff|log|branch|commit]")
 
 
 __all__ = [
-    "cmd_git", "get_branch", "get_dirty_count", "render_status_badge",
-    "get_commits_ahead", "is_detached",
+    "cmd_git",
+    "get_branch",
+    "get_dirty_count",
+    "render_status_badge",
+    "get_commits_ahead",
+    "is_detached",
 ]

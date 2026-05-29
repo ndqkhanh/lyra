@@ -318,7 +318,9 @@ class TestMoLEMEngine:
 
         engine.learn(ContinualEpisode(task="task_a", input_distribution="d", performance_delta=0.1))
         engine.learn(ContinualEpisode(task="task_b", input_distribution="d", performance_delta=0.1))
-        engine.learn(ContinualEpisode(task="task_a", input_distribution="d", performance_delta=0.05))
+        engine.learn(
+            ContinualEpisode(task="task_a", input_distribution="d", performance_delta=0.05)
+        )
 
         fm = engine.compute_forgetting()
         assert fm.task_count == 2
@@ -344,7 +346,9 @@ class TestMoLEMEngine:
         engine = MoLEMEngine(base_experts=2)
         engine.add_expert("domain_x", "x_spec")
         for _ in range(3):
-            engine.learn(ContinualEpisode(task="domain_x", input_distribution="d", performance_delta=0.1))
+            engine.learn(
+                ContinualEpisode(task="domain_x", input_distribution="d", performance_delta=0.1)
+            )
         fm = engine.compute_forgetting()
         assert fm.task_count >= 1
 
@@ -528,10 +532,13 @@ class TestContinualLearner:
 
     def test_learn_task(self):
         cl = ContinualLearner()
-        result = cl.learn_task("task_1", [
-            AgentExperience(task_id="task_1", state={}, action="a", result="r", reward=1.0)
-            for _ in range(5)
-        ])
+        result = cl.learn_task(
+            "task_1",
+            [
+                AgentExperience(task_id="task_1", state={}, action="a", result="r", reward=1.0)
+                for _ in range(5)
+            ],
+        )
         assert result["task"] == "task_1"
         assert result["total_experiences"] == 5
         assert cl.task_count == 1
@@ -539,10 +546,13 @@ class TestContinualLearner:
     def test_multiple_tasks(self):
         cl = ContinualLearner()
         for t in range(3):
-            cl.learn_task(f"task_{t}", [
-                AgentExperience(task_id=f"task_{t}", state={}, action="a", result="r")
-                for _ in range(5)
-            ])
+            cl.learn_task(
+                f"task_{t}",
+                [
+                    AgentExperience(task_id=f"task_{t}", state={}, action="a", result="r")
+                    for _ in range(5)
+                ],
+            )
         assert cl.task_count == 3
 
 
@@ -580,7 +590,9 @@ class TestIntegration:
         engine.route("Analyze sentiment of this review")
 
         # Learn
-        engine.learn(ContinualEpisode(task="sentiment", input_distribution="reviews", performance_delta=0.3))
+        engine.learn(
+            ContinualEpisode(task="sentiment", input_distribution="reviews", performance_delta=0.3)
+        )
 
         # After learning — sentiment expert should be more prominent for sentiment queries
         later_experts = engine.route("Analyze sentiment of this review")
@@ -594,7 +606,11 @@ class TestIntegration:
         # Learn task A
         engine.add_expert("task_a_domain", "A")
         for _ in range(3):
-            engine.learn(ContinualEpisode(task="task_a_domain", input_distribution="d", performance_delta=0.1))
+            engine.learn(
+                ContinualEpisode(
+                    task="task_a_domain", input_distribution="d", performance_delta=0.1
+                )
+            )
 
         # Compress current state
         compressor.compress(engine.layer.router_weights, "state_after_A")
@@ -602,7 +618,11 @@ class TestIntegration:
         # Learn task B
         engine.add_expert("task_b_domain", "B")
         for _ in range(2):
-            engine.learn(ContinualEpisode(task="task_b_domain", input_distribution="d", performance_delta=0.1))
+            engine.learn(
+                ContinualEpisode(
+                    task="task_b_domain", input_distribution="d", performance_delta=0.1
+                )
+            )
 
         # Check forgetting
         fm = engine.compute_forgetting()

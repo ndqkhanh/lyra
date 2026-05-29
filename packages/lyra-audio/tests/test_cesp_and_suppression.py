@@ -180,7 +180,9 @@ class TestCespEngineSoundSelection:
         for _ in range(10):
             # Clear history between calls to avoid cooldown
             e.clear_history()
-            r = e.select("fantasy", CespCategory.TASK_COMPLETE, candidates, no_repeat=True, cooldown_ms=0)
+            r = e.select(
+                "fantasy", CespCategory.TASK_COMPLETE, candidates, no_repeat=True, cooldown_ms=0
+            )
             results.append(r)
 
         # Manual verification: no-repeat should diversify
@@ -331,7 +333,9 @@ class TestSuppressionResult:
         assert not r.suppressed
 
     def test_suppressed(self):
-        r = SuppressionResult(suppressed=True, reason=SuppressionReason.SILENT_HOURS, detail="Night time")
+        r = SuppressionResult(
+            suppressed=True, reason=SuppressionReason.SILENT_HOURS, detail="Night time"
+        )
         assert r.suppressed
         assert r.detail == "Night time"
 

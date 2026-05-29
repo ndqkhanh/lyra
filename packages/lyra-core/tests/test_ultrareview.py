@@ -1,4 +1,5 @@
 """UltraReview pipeline tests (v3.7 L37-7)."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -22,7 +23,7 @@ class StaticReviewer(Reviewer):
     family: str = "default"
     findings: tuple[ReviewFinding, ...] = ()
 
-    def review(self, hunks):                          # noqa: ARG002
+    def review(self, hunks):  # noqa: ARG002
         return list(self.findings)
 
 
@@ -56,9 +57,9 @@ def test_pipeline_admits_two_families() -> None:
 
 def test_aggregate_groups_by_path_and_severity() -> None:
     findings = [
-        ReviewFinding(reviewer="r1", path="a.py", severity=Severity.WARN,  message="x"),
+        ReviewFinding(reviewer="r1", path="a.py", severity=Severity.WARN, message="x"),
         ReviewFinding(reviewer="r2", path="a.py", severity=Severity.BLOCKER, message="y"),
-        ReviewFinding(reviewer="r1", path="b.py", severity=Severity.INFO,  message="z"),
+        ReviewFinding(reviewer="r1", path="b.py", severity=Severity.INFO, message="z"),
     ]
     summary = aggregate(findings)
     assert summary.by_path["a.py"][0].path == "a.py"
@@ -76,7 +77,9 @@ def test_aggregate_no_blockers_when_no_findings() -> None:
 
 def test_pipeline_collects_findings_from_all_reviewers() -> None:
     f1 = ReviewFinding(reviewer="r1", path="a.py", severity=Severity.WARN, message="warn-from-r1")
-    f2 = ReviewFinding(reviewer="r2", path="a.py", severity=Severity.BLOCKER, message="block-from-r2")
+    f2 = ReviewFinding(
+        reviewer="r2", path="a.py", severity=Severity.BLOCKER, message="block-from-r2"
+    )
     r1 = StaticReviewer(name="r1", family="anthropic", findings=(f1,))
     r2 = StaticReviewer(name="r2", family="openai", findings=(f2,))
     pipe = UltraReviewPipeline(reviewers=(r1, r2))
@@ -95,8 +98,12 @@ def test_render_no_findings_is_concise() -> None:
 
 def test_render_groups_by_file() -> None:
     findings = [
-        ReviewFinding(reviewer="r1", path="a.py", severity=Severity.WARN, message="watch out", line=42),
-        ReviewFinding(reviewer="r2", path="b.py", severity=Severity.BLOCKER, message="never do this"),
+        ReviewFinding(
+            reviewer="r1", path="a.py", severity=Severity.WARN, message="watch out", line=42
+        ),
+        ReviewFinding(
+            reviewer="r2", path="b.py", severity=Severity.BLOCKER, message="never do this"
+        ),
     ]
     md = render_summary_md(aggregate(findings))
     assert "## a.py" in md

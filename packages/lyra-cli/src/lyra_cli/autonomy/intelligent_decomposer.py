@@ -128,12 +128,18 @@ class IntelligentDecomposer:
             if s.id == subtask_id:
                 meta = dict(s.metadata)
                 meta["completed"] = True
-                new_subtasks.append(IntelligentSubtask(
-                    id=s.id, description=s.description, effort=s.effort,
-                    priority=s.priority, depends_on=s.depends_on,
-                    estimated_minutes=s.estimated_minutes,
-                    parallel_group=s.parallel_group, metadata=meta,
-                ))
+                new_subtasks.append(
+                    IntelligentSubtask(
+                        id=s.id,
+                        description=s.description,
+                        effort=s.effort,
+                        priority=s.priority,
+                        depends_on=s.depends_on,
+                        estimated_minutes=s.estimated_minutes,
+                        parallel_group=s.parallel_group,
+                        metadata=meta,
+                    )
+                )
             else:
                 new_subtasks.append(s)
 
@@ -165,82 +171,212 @@ class IntelligentDecomposer:
 
     def _auth_subtasks(self, goal_id: str) -> list[IntelligentSubtask]:
         return [
-            IntelligentSubtask(f"{goal_id}_research", "Research auth protocols (OAuth2, JWT, Passkey)",
-                EffortLevel.LOW, Priority.HIGH, estimated_minutes=30, parallel_group=0),
-            IntelligentSubtask(f"{goal_id}_schema", "Design user & session database schema",
-                EffortLevel.MEDIUM, Priority.HIGH, depends_on=(f"{goal_id}_research",),
-                estimated_minutes=45, parallel_group=1),
-            IntelligentSubtask(f"{goal_id}_register", "Implement registration endpoint",
-                EffortLevel.MEDIUM, Priority.CRITICAL, depends_on=(f"{goal_id}_schema",),
-                estimated_minutes=60, parallel_group=2),
-            IntelligentSubtask(f"{goal_id}_login", "Implement login endpoint with rate limiting",
-                EffortLevel.MEDIUM, Priority.CRITICAL, depends_on=(f"{goal_id}_schema",),
-                estimated_minutes=60, parallel_group=2),
-            IntelligentSubtask(f"{goal_id}_tokens", "Implement JWT refresh & revocation",
-                EffortLevel.MEDIUM, Priority.HIGH, depends_on=(f"{goal_id}_login",),
-                estimated_minutes=45, parallel_group=3),
-            IntelligentSubtask(f"{goal_id}_verify", "Integration tests & security review",
-                EffortLevel.HIGH, Priority.HIGH,
+            IntelligentSubtask(
+                f"{goal_id}_research",
+                "Research auth protocols (OAuth2, JWT, Passkey)",
+                EffortLevel.LOW,
+                Priority.HIGH,
+                estimated_minutes=30,
+                parallel_group=0,
+            ),
+            IntelligentSubtask(
+                f"{goal_id}_schema",
+                "Design user & session database schema",
+                EffortLevel.MEDIUM,
+                Priority.HIGH,
+                depends_on=(f"{goal_id}_research",),
+                estimated_minutes=45,
+                parallel_group=1,
+            ),
+            IntelligentSubtask(
+                f"{goal_id}_register",
+                "Implement registration endpoint",
+                EffortLevel.MEDIUM,
+                Priority.CRITICAL,
+                depends_on=(f"{goal_id}_schema",),
+                estimated_minutes=60,
+                parallel_group=2,
+            ),
+            IntelligentSubtask(
+                f"{goal_id}_login",
+                "Implement login endpoint with rate limiting",
+                EffortLevel.MEDIUM,
+                Priority.CRITICAL,
+                depends_on=(f"{goal_id}_schema",),
+                estimated_minutes=60,
+                parallel_group=2,
+            ),
+            IntelligentSubtask(
+                f"{goal_id}_tokens",
+                "Implement JWT refresh & revocation",
+                EffortLevel.MEDIUM,
+                Priority.HIGH,
+                depends_on=(f"{goal_id}_login",),
+                estimated_minutes=45,
+                parallel_group=3,
+            ),
+            IntelligentSubtask(
+                f"{goal_id}_verify",
+                "Integration tests & security review",
+                EffortLevel.HIGH,
+                Priority.HIGH,
                 depends_on=(f"{goal_id}_register", f"{goal_id}_login"),
-                estimated_minutes=90, parallel_group=3),
+                estimated_minutes=90,
+                parallel_group=3,
+            ),
         ]
 
     def _api_subtasks(self, goal_id: str) -> list[IntelligentSubtask]:
         return [
-            IntelligentSubtask(f"{goal_id}_design", "Design API contract (OpenAPI/GraphQL schema)",
-                EffortLevel.MEDIUM, Priority.HIGH, estimated_minutes=45, parallel_group=0),
-            IntelligentSubtask(f"{goal_id}_models", "Implement data models & validation",
-                EffortLevel.MEDIUM, Priority.CRITICAL, depends_on=(f"{goal_id}_design",),
-                estimated_minutes=60, parallel_group=1),
-            IntelligentSubtask(f"{goal_id}_handlers", "Implement route handlers",
-                EffortLevel.HIGH, Priority.CRITICAL, depends_on=(f"{goal_id}_models",),
-                estimated_minutes=120, parallel_group=2),
-            IntelligentSubtask(f"{goal_id}_middleware", "Add auth, logging, CORS middleware",
-                EffortLevel.MEDIUM, Priority.HIGH, depends_on=(f"{goal_id}_models",),
-                estimated_minutes=45, parallel_group=2),
-            IntelligentSubtask(f"{goal_id}_docs", "Generate API documentation",
-                EffortLevel.LOW, Priority.LOW, depends_on=(f"{goal_id}_design",),
-                estimated_minutes=30, parallel_group=1),
-            IntelligentSubtask(f"{goal_id}_test", "Write API integration tests",
-                EffortLevel.HIGH, Priority.HIGH, depends_on=(f"{goal_id}_handlers",),
-                estimated_minutes=90, parallel_group=3),
+            IntelligentSubtask(
+                f"{goal_id}_design",
+                "Design API contract (OpenAPI/GraphQL schema)",
+                EffortLevel.MEDIUM,
+                Priority.HIGH,
+                estimated_minutes=45,
+                parallel_group=0,
+            ),
+            IntelligentSubtask(
+                f"{goal_id}_models",
+                "Implement data models & validation",
+                EffortLevel.MEDIUM,
+                Priority.CRITICAL,
+                depends_on=(f"{goal_id}_design",),
+                estimated_minutes=60,
+                parallel_group=1,
+            ),
+            IntelligentSubtask(
+                f"{goal_id}_handlers",
+                "Implement route handlers",
+                EffortLevel.HIGH,
+                Priority.CRITICAL,
+                depends_on=(f"{goal_id}_models",),
+                estimated_minutes=120,
+                parallel_group=2,
+            ),
+            IntelligentSubtask(
+                f"{goal_id}_middleware",
+                "Add auth, logging, CORS middleware",
+                EffortLevel.MEDIUM,
+                Priority.HIGH,
+                depends_on=(f"{goal_id}_models",),
+                estimated_minutes=45,
+                parallel_group=2,
+            ),
+            IntelligentSubtask(
+                f"{goal_id}_docs",
+                "Generate API documentation",
+                EffortLevel.LOW,
+                Priority.LOW,
+                depends_on=(f"{goal_id}_design",),
+                estimated_minutes=30,
+                parallel_group=1,
+            ),
+            IntelligentSubtask(
+                f"{goal_id}_test",
+                "Write API integration tests",
+                EffortLevel.HIGH,
+                Priority.HIGH,
+                depends_on=(f"{goal_id}_handlers",),
+                estimated_minutes=90,
+                parallel_group=3,
+            ),
         ]
 
     def _migration_subtasks(self, goal_id: str) -> list[IntelligentSubtask]:
         return [
-            IntelligentSubtask(f"{goal_id}_audit", "Audit current schema & data",
-                EffortLevel.MEDIUM, Priority.CRITICAL, estimated_minutes=60, parallel_group=0),
-            IntelligentSubtask(f"{goal_id}_plan", "Design migration plan & rollback strategy",
-                EffortLevel.MEDIUM, Priority.HIGH, depends_on=(f"{goal_id}_audit",),
-                estimated_minutes=45, parallel_group=1),
-            IntelligentSubtask(f"{goal_id}_script", "Write forward migration script",
-                EffortLevel.HIGH, Priority.CRITICAL, depends_on=(f"{goal_id}_plan",),
-                estimated_minutes=60, parallel_group=2),
-            IntelligentSubtask(f"{goal_id}_rollback", "Write rollback script",
-                EffortLevel.MEDIUM, Priority.HIGH, depends_on=(f"{goal_id}_plan",),
-                estimated_minutes=30, parallel_group=2),
-            IntelligentSubtask(f"{goal_id}_test_migrate", "Test migration on staging",
-                EffortLevel.HIGH, Priority.CRITICAL,
+            IntelligentSubtask(
+                f"{goal_id}_audit",
+                "Audit current schema & data",
+                EffortLevel.MEDIUM,
+                Priority.CRITICAL,
+                estimated_minutes=60,
+                parallel_group=0,
+            ),
+            IntelligentSubtask(
+                f"{goal_id}_plan",
+                "Design migration plan & rollback strategy",
+                EffortLevel.MEDIUM,
+                Priority.HIGH,
+                depends_on=(f"{goal_id}_audit",),
+                estimated_minutes=45,
+                parallel_group=1,
+            ),
+            IntelligentSubtask(
+                f"{goal_id}_script",
+                "Write forward migration script",
+                EffortLevel.HIGH,
+                Priority.CRITICAL,
+                depends_on=(f"{goal_id}_plan",),
+                estimated_minutes=60,
+                parallel_group=2,
+            ),
+            IntelligentSubtask(
+                f"{goal_id}_rollback",
+                "Write rollback script",
+                EffortLevel.MEDIUM,
+                Priority.HIGH,
+                depends_on=(f"{goal_id}_plan",),
+                estimated_minutes=30,
+                parallel_group=2,
+            ),
+            IntelligentSubtask(
+                f"{goal_id}_test_migrate",
+                "Test migration on staging",
+                EffortLevel.HIGH,
+                Priority.CRITICAL,
                 depends_on=(f"{goal_id}_script", f"{goal_id}_rollback"),
-                estimated_minutes=45, parallel_group=3),
+                estimated_minutes=45,
+                parallel_group=3,
+            ),
         ]
 
     def _default_subtasks(self, goal_id: str, description: str) -> list[IntelligentSubtask]:
         return [
-            IntelligentSubtask(f"{goal_id}_research", f"Research: {description}",
-                EffortLevel.LOW, Priority.HIGH, estimated_minutes=30, parallel_group=0),
-            IntelligentSubtask(f"{goal_id}_design", f"Design: {description}",
-                EffortLevel.MEDIUM, Priority.HIGH, depends_on=(f"{goal_id}_research",),
-                estimated_minutes=45, parallel_group=1),
-            IntelligentSubtask(f"{goal_id}_implement", f"Implement: {description}",
-                EffortLevel.HIGH, Priority.CRITICAL, depends_on=(f"{goal_id}_design",),
-                estimated_minutes=120, parallel_group=2),
-            IntelligentSubtask(f"{goal_id}_test", f"Test: {description}",
-                EffortLevel.HIGH, Priority.HIGH, depends_on=(f"{goal_id}_implement",),
-                estimated_minutes=60, parallel_group=3),
-            IntelligentSubtask(f"{goal_id}_review", f"Review: {description}",
-                EffortLevel.MEDIUM, Priority.MEDIUM, depends_on=(f"{goal_id}_test",),
-                estimated_minutes=30, parallel_group=4),
+            IntelligentSubtask(
+                f"{goal_id}_research",
+                f"Research: {description}",
+                EffortLevel.LOW,
+                Priority.HIGH,
+                estimated_minutes=30,
+                parallel_group=0,
+            ),
+            IntelligentSubtask(
+                f"{goal_id}_design",
+                f"Design: {description}",
+                EffortLevel.MEDIUM,
+                Priority.HIGH,
+                depends_on=(f"{goal_id}_research",),
+                estimated_minutes=45,
+                parallel_group=1,
+            ),
+            IntelligentSubtask(
+                f"{goal_id}_implement",
+                f"Implement: {description}",
+                EffortLevel.HIGH,
+                Priority.CRITICAL,
+                depends_on=(f"{goal_id}_design",),
+                estimated_minutes=120,
+                parallel_group=2,
+            ),
+            IntelligentSubtask(
+                f"{goal_id}_test",
+                f"Test: {description}",
+                EffortLevel.HIGH,
+                Priority.HIGH,
+                depends_on=(f"{goal_id}_implement",),
+                estimated_minutes=60,
+                parallel_group=3,
+            ),
+            IntelligentSubtask(
+                f"{goal_id}_review",
+                f"Review: {description}",
+                EffortLevel.MEDIUM,
+                Priority.MEDIUM,
+                depends_on=(f"{goal_id}_test",),
+                estimated_minutes=30,
+                parallel_group=4,
+            ),
         ]
 
     # ── dependency validation ────────────────────────────────────────
@@ -251,9 +387,7 @@ class IntelligentDecomposer:
         for s in subtasks:
             for dep in s.depends_on:
                 if dep not in ids:
-                    raise CyclicDependencyError(
-                        f"Subtask '{s.id}' depends on unknown '{dep}'"
-                    )
+                    raise CyclicDependencyError(f"Subtask '{s.id}' depends on unknown '{dep}'")
 
         in_degree = {s.id: len(s.depends_on) for s in subtasks}
         adj: dict[str, list[str]] = {s.id: [] for s in subtasks}
@@ -307,8 +441,7 @@ class IntelligentDecomposer:
         for wave_idx in sorted(wave_groups):
             ids = wave_groups[wave_idx]
             effort = sum(
-                next(st.estimated_minutes for st in subtasks if st.id == sid)
-                for sid in ids
+                next(st.estimated_minutes for st in subtasks if st.id == sid) for sid in ids
             )
             waves.append(ExecutionWave(wave_idx, tuple(ids), effort))
 

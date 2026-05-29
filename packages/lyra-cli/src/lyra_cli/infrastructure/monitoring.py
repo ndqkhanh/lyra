@@ -200,7 +200,9 @@ class MetricsCollector:
 
         self._metrics[name].add_point(value, labels)
 
-    def increment(self, name: str, value: float = 1.0, labels: dict[str, str] | None = None) -> None:
+    def increment(
+        self, name: str, value: float = 1.0, labels: dict[str, str] | None = None
+    ) -> None:
         """Increment a counter metric.
 
         Args:
@@ -308,14 +310,16 @@ class AlertManager:
             message: Alert message
             metadata: Additional metadata
         """
-        self._alert_rules.append({
-            "name": name,
-            "metric_name": metric_name,
-            "condition": condition,
-            "severity": severity,
-            "message": message,
-            "metadata": metadata or {},
-        })
+        self._alert_rules.append(
+            {
+                "name": name,
+                "metric_name": metric_name,
+                "condition": condition,
+                "severity": severity,
+                "message": message,
+                "metadata": metadata or {},
+            }
+        )
         logger.debug(f"Added alert rule: {name} for metric {metric_name}")
 
     def add_threshold_rule(

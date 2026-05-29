@@ -1,4 +1,5 @@
 """Tests for note_constructor.py — agentic note construction."""
+
 from __future__ import annotations
 
 import pytest
@@ -171,7 +172,11 @@ This is a solid pattern to remember."""]
 
     async def test_extracts_json_without_fence(self, constructor):
         constructor.llm.responses = [
-            '{"should_store": true, "keywords": ["simple"], "tags": ["test"], "contextual_description": "simple test", "merge_target_index": null, "merged_content": null, "reason": "simple"}'
+(
+                '{"should_store": true, "keywords": ["simple"], "tags": ["test"],'
+                '"contextual_description": "simple test", "merge_target_index": null,'
+                '"merged_content": null, "reason": "simple"}'
+            )
         ]
 
         result = await constructor.construct("simple test content for direct json parsing")

@@ -71,15 +71,55 @@ class DependencyAnalyzerSkill:
     """Analyze imports and dependency graphs for optimization opportunities."""
 
     STANDARD_LIBS: set[str] = {
-        "os", "sys", "re", "json", "math", "datetime", "pathlib",
-        "collections", "itertools", "functools", "typing", "abc",
-        "enum", "hashlib", "random", "string", "io", "copy",
-        "inspect", "ast", "time", "logging", "dataclasses",
-        "fractions", "decimal", "uuid", "csv", "html", "urllib",
-        "http", "xml", "socket", "ssl", "email", "base64",
-        "struct", "pickle", "threading", "subprocess", "tempfile",
-        "shutil", "glob", "fnmatch", "linecache", "textwrap",
-        "traceback", "warnings", "weakref", "statistics",
+        "os",
+        "sys",
+        "re",
+        "json",
+        "math",
+        "datetime",
+        "pathlib",
+        "collections",
+        "itertools",
+        "functools",
+        "typing",
+        "abc",
+        "enum",
+        "hashlib",
+        "random",
+        "string",
+        "io",
+        "copy",
+        "inspect",
+        "ast",
+        "time",
+        "logging",
+        "dataclasses",
+        "fractions",
+        "decimal",
+        "uuid",
+        "csv",
+        "html",
+        "urllib",
+        "http",
+        "xml",
+        "socket",
+        "ssl",
+        "email",
+        "base64",
+        "struct",
+        "pickle",
+        "threading",
+        "subprocess",
+        "tempfile",
+        "shutil",
+        "glob",
+        "fnmatch",
+        "linecache",
+        "textwrap",
+        "traceback",
+        "warnings",
+        "weakref",
+        "statistics",
     }
 
     def __init__(self) -> None:
@@ -158,9 +198,7 @@ class DependencyAnalyzerSkill:
                     )
             elif isinstance(node, ast.ImportFrom):
                 if node.module:
-                    names = tuple(
-                        alias.asname or alias.name for alias in node.names
-                    )
+                    names = tuple(alias.asname or alias.name for alias in node.names)
                     dep_type = self._classify_dependency(node.module)
                     imports.append(
                         ImportInfo(
@@ -222,9 +260,7 @@ class DependencyAnalyzerSkill:
             except SyntaxError:
                 pass
 
-    def _find_circular_dependencies(
-        self, all_sources: dict[str, str]
-    ) -> list[CircularDependency]:
+    def _find_circular_dependencies(self, all_sources: dict[str, str]) -> list[CircularDependency]:
         """Detect circular dependencies using DFS."""
         cycles: list[CircularDependency] = []
         visited: set[str] = set()
@@ -282,20 +318,24 @@ class DependencyAnalyzerSkill:
                     description=f"Found {len(circular)} circular dependencies.",
                     impact="high",
                     effort="high",
-                    suggestion="Extract shared dependencies into a common module or use dependency injection.",
+                    suggestion=(
+                        "Extract shared dependencies into a common module or use dependency"
+                        "injection."
+                    ),
                 )
             )
 
-        third_party = [
-            i for i in imports if i.dependency_type == DependencyType.THIRD_PARTY
-        ]
+        third_party = [i for i in imports if i.dependency_type == DependencyType.THIRD_PARTY]
         if third_party:
             suggestions.append(
                 DependencySuggestion(
                     description=f"Module has {len(third_party)} third-party dependencies.",
                     impact="medium",
                     effort="medium",
-                    suggestion="Review if all third-party dependencies are necessary. Consider using stdlib alternatives.",
+                    suggestion=(
+                        "Review if all third-party dependencies are necessary. Consider using"
+                        "stdlib alternatives."
+                    ),
                 )
             )
 
@@ -309,15 +349,9 @@ class DependencyAnalyzerSkill:
     ) -> dict[str, int | float]:
         """Compute dependency health statistics."""
         total = len(imports)
-        stdlib = sum(
-            1 for i in imports if i.dependency_type == DependencyType.STANDARD_LIBRARY
-        )
-        third_party = sum(
-            1 for i in imports if i.dependency_type == DependencyType.THIRD_PARTY
-        )
-        local = sum(
-            1 for i in imports if i.dependency_type == DependencyType.LOCAL
-        )
+        stdlib = sum(1 for i in imports if i.dependency_type == DependencyType.STANDARD_LIBRARY)
+        third_party = sum(1 for i in imports if i.dependency_type == DependencyType.THIRD_PARTY)
+        local = sum(1 for i in imports if i.dependency_type == DependencyType.LOCAL)
         unused = sum(1 for i in imports if not i.is_used)
         lines = len(source.splitlines())
 

@@ -1,4 +1,5 @@
 """Local SQLite event store for transparency hook events."""
+
 from __future__ import annotations
 
 import json
@@ -25,8 +26,7 @@ class EventStore:
 
     def _init_schema(self) -> None:
         with self._conn() as conn:
-            conn.execute(
-                """
+            conn.execute("""
                 CREATE TABLE IF NOT EXISTS hook_events (
                     event_id    TEXT PRIMARY KEY,
                     session_id  TEXT NOT NULL,
@@ -35,14 +35,9 @@ class EventStore:
                     payload_json TEXT NOT NULL DEFAULT '{}',
                     received_at REAL NOT NULL
                 )
-                """
-            )
-            conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_session ON hook_events(session_id)"
-            )
-            conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_received ON hook_events(received_at)"
-            )
+                """)
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_session ON hook_events(session_id)")
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_received ON hook_events(received_at)")
 
     def append(self, event: HookEvent) -> None:
         with self._conn() as conn:
@@ -59,7 +54,10 @@ class EventStore:
             )
 
     def tail(self, n: int = 50, *, session_id: str | None = None) -> list[HookEvent]:
-        sql = "SELECT event_id, session_id, hook_type, tool_name, payload_json, received_at FROM hook_events"
+        sql = (
+            "SELECT event_id, session_id, hook_type, tool_name, payload_json, received_at"
+            " FROM hook_events"
+        )
         params: list = []
         if session_id:
             sql += " WHERE session_id = ?"
@@ -71,7 +69,10 @@ class EventStore:
         return [HookEvent(*row) for row in reversed(rows)]
 
     def since(self, ts: float, *, session_id: str | None = None) -> list[HookEvent]:
-        sql = "SELECT event_id, session_id, hook_type, tool_name, payload_json, received_at FROM hook_events WHERE received_at > ?"
+        sql = (
+            "SELECT event_id, session_id, hook_type, tool_name, payload_json, received_at"
+            " FROM hook_events WHERE received_at > ?"
+        )
         params: list = [ts]
         if session_id:
             sql += " AND session_id = ?"

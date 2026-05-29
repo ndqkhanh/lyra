@@ -373,12 +373,8 @@ class ContextProfiler:
             await self._apply_recommendation(recommendation)
 
         if self._metrics:
-            tokens_freed = (
-                recommendation.target_free_tokens if recommendation else 0
-            )
-            quality_loss = (
-                recommendation.estimated_quality_loss if recommendation else 0.0
-            )
+            tokens_freed = recommendation.target_free_tokens if recommendation else 0
+            quality_loss = recommendation.estimated_quality_loss if recommendation else 0.0
             self._metrics.record_compaction(
                 strategy=(
                     recommendation.strategy if recommendation else CompactionStrategy.BALANCED
@@ -417,10 +413,7 @@ class ContextProfiler:
         return ContextHealth.HEALTHY
 
     def _count_by_type(self) -> dict[ContextElementType, int]:
-        return {
-            ct: len(ids)
-            for ct, ids in self._elements_by_type.items()
-        }
+        return {ct: len(ids) for ct, ids in self._elements_by_type.items()}
 
     def _top_elements(self, limit: int = 10) -> list[tuple[str, float]]:
         sorted_els = sorted(
@@ -456,29 +449,39 @@ class ContextProfiler:
         recommendations: list[CompactionRecommendation] = []
 
         if health in (ContextHealth.CRITICAL, ContextHealth.EXCEEDED):
-            recommendations.append(self._make_recommendation(
-                CompactionStrategy.AGGRESSIVE,
-                urgency=health,
-            ))
-            recommendations.append(self._make_recommendation(
-                CompactionStrategy.BALANCED,
-                urgency=health,
-            ))
+            recommendations.append(
+                self._make_recommendation(
+                    CompactionStrategy.AGGRESSIVE,
+                    urgency=health,
+                )
+            )
+            recommendations.append(
+                self._make_recommendation(
+                    CompactionStrategy.BALANCED,
+                    urgency=health,
+                )
+            )
         elif health == ContextHealth.WARNING:
-            recommendations.append(self._make_recommendation(
-                CompactionStrategy.BALANCED,
-                urgency=health,
-            ))
-            recommendations.append(self._make_recommendation(
-                CompactionStrategy.CONSERVATIVE,
-                urgency=health,
-            ))
+            recommendations.append(
+                self._make_recommendation(
+                    CompactionStrategy.BALANCED,
+                    urgency=health,
+                )
+            )
+            recommendations.append(
+                self._make_recommendation(
+                    CompactionStrategy.CONSERVATIVE,
+                    urgency=health,
+                )
+            )
 
         if self._budget.utilization_pct > 60.0:
-            recommendations.append(self._make_recommendation(
-                CompactionStrategy.ADAPTIVE,
-                urgency=health,
-            ))
+            recommendations.append(
+                self._make_recommendation(
+                    CompactionStrategy.ADAPTIVE,
+                    urgency=health,
+                )
+            )
 
         return recommendations
 
@@ -488,17 +491,17 @@ class ContextProfiler:
         urgency: ContextHealth,
     ) -> CompactionRecommendation:
         elements_to_drop = [
-            eid for eid, el in self._elements.items()
+            eid
+            for eid, el in self._elements.items()
             if el.importance_score < 0.15 and self._can_drop(eid)
         ]
         elements_to_compact = [
-            eid for eid, el in self._elements.items()
+            eid
+            for eid, el in self._elements.items()
             if 0.15 <= el.importance_score < 0.5 and self._can_compact(eid)
         ]
 
-        total_freeable = sum(
-            self._elements[eid].token_count for eid in elements_to_drop
-        )
+        total_freeable = sum(self._elements[eid].token_count for eid in elements_to_drop)
         total_freeable += sum(
             int(self._elements[eid].token_count * 0.6) for eid in elements_to_compact
         )
@@ -627,9 +630,7 @@ class ContextAnalyzer:
         avg_importance = total_importance / max(len(elements), 1)
         compression_ratio = 1.0 - avg_importance
 
-        freeable = sum(
-            el.token_count for el in elements if el.importance_score < 0.3
-        )
+        freeable = sum(el.token_count for el in elements if el.importance_score < 0.3)
 
         return ContextDashboard(
             total_tokens=total_tokens,
@@ -675,7 +676,11 @@ class ProfileMatcher:
         if not task_type:
             raise ValueError("task_type must not be empty")
         self._patterns[task_type] = profile_signature
-        logger.debug("Registered pattern for task_type=%s with %d features", task_type, len(profile_signature))
+        logger.debug(
+            "Registered pattern for task_type=%s with %d features",
+            task_type,
+            len(profile_signature),
+        )
 
     def deregister_pattern(self, task_type: str) -> bool:
         """Remove a registered pattern. Returns True if it existed."""
@@ -696,7 +701,12 @@ class ProfileMatcher:
                 best_score = score
                 best_type = task_type
 
-        logger.debug("Matched profile to '%s' (score=%.3f, candidates=%d)", best_type, best_score, len(self._patterns))
+        logger.debug(
+            "Matched profile to '%s' (score=%.3f, candidates=%d)",
+            best_type,
+            best_score,
+            len(self._patterns),
+        )
         return best_type
 
     def match_with_scores(self, profile: ContextProfile) -> list[tuple[str, float]]:
@@ -728,7 +738,11 @@ class ProfileMatcher:
                 score += len(overlap) / max(len(expected_set), 1)
             elif isinstance(profile_value, dict):
                 # Dict: key overlap
-                expected_keys = set(expected_value) if isinstance(expected_value, dict) else {str(expected_value)}
+                expected_keys = (
+                    set(expected_value)
+                    if isinstance(expected_value, dict)
+                    else {str(expected_value)}
+                )
                 score += len(expected_keys & set(profile_value)) / max(len(expected_keys), 1)
             elif isinstance(profile_value, str):
                 # String: substring match

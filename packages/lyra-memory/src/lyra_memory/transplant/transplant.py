@@ -53,7 +53,7 @@ class MemoryTransplanter:
         records: list[TransplantRecord] = []
         entries_to_move = src.retrieve(indices)
 
-        for i, entry in zip(indices, entries_to_move):
+        for _i, entry in zip(indices, entries_to_move):
             tgt.add(entry)
             record = TransplantRecord(
                 source_module=src.name,

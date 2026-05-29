@@ -275,7 +275,9 @@ class AbductionEngine:
             else:
                 parent_vals[p] = self._evaluate_recursive(p, evidence, noise)
 
-        return eq.function(parent_vals) + noise.get(eq.noise_var, np.zeros(self._config.n_posterior_samples))
+        return eq.function(parent_vals) + noise.get(
+            eq.noise_var, np.zeros(self._config.n_posterior_samples)
+        )
 
     # ── Strategy: Optimization ──────────────────────────────────────────
 
@@ -308,12 +310,16 @@ class AbductionEngine:
         x0 = np.zeros(n_exo)
         try:
             result = optimize.minimize(
-                loss, x0,
+                loss,
+                x0,
                 method="Nelder-Mead",
-                options={"maxiter": self._config.max_iterations, "xatol": self._config.noise_tolerance},
+                options={
+                    "maxiter": self._config.max_iterations,
+                    "xatol": self._config.noise_tolerance,
+                },
             )
         except Exception:
-            raise AbductionError("Optimization abduction failed to converge.")
+            raise AbductionError("Optimization abduction failed to converge.") from None
 
         # Create posterior samples as small perturbations around MAP
         n = self._config.n_posterior_samples
@@ -322,7 +328,9 @@ class AbductionEngine:
             exo = self._scm.exogenous_vars[name]
             map_val = result.x[i]
             # Add small Gaussian noise around MAP for posterior approximation
-            noise_posterior[name] = np.random.normal(map_val, max(exo.noise.std if hasattr(exo.noise, 'std') else 0.1, 0.01), n)
+            noise_posterior[name] = np.random.normal(
+                map_val, max(exo.noise.std if hasattr(exo.noise, "std") else 0.1, 0.01), n
+            )
 
         log_prob = self._compute_evidence_log_prob(evidence, noise_posterior)
 
@@ -352,7 +360,10 @@ class AbductionEngine:
                     parent_vals[p] = values[p]
                 else:
                     parent_vals[p] = np.zeros_like(next(iter(values.values())))
-            values[var_name] = eq.evaluate(parent_vals, noise_dict.get(eq.noise_var, np.zeros_like(next(iter(values.values())))))
+            values[var_name] = eq.evaluate(
+                parent_vals,
+                noise_dict.get(eq.noise_var, np.zeros_like(next(iter(values.values())))),
+            )
         return {k: v for k, v in values.items() if k in self._scm.endogenous_vars}
 
     # ── Strategy: Rejection Sampling ────────────────────────────────────
@@ -368,7 +379,9 @@ class AbductionEngine:
         while len(next(iter(accepted.values()))) < target and n_attempts < max_attempts:
             n_attempts += 1
             # Draw noise from prior
-            noise_candidate = {name: self._scm.exogenous_vars[name].sample_noise(1) for name in exo_names}
+            noise_candidate = {
+                name: self._scm.exogenous_vars[name].sample_noise(1) for name in exo_names
+            }
             # Predict
             predicted = self._predict_from_noise(noise_candidate)
             # Accept
@@ -454,12 +467,9 @@ class AbductionEngine:
                     proposal_std *= 0.9
 
         # Discard burn-in
-        posterior_samples = samples[self._config.mcmc_burnin:]
+        posterior_samples = samples[self._config.mcmc_burnin :]
 
-        noise_posterior = {
-            name: posterior_samples[:, i]
-            for i, name in enumerate(exo_names)
-        }
+        noise_posterior = {name: posterior_samples[:, i] for i, name in enumerate(exo_names)}
 
         log_prob = self._compute_evidence_log_prob(evidence, noise_posterior)
 
@@ -523,10 +533,7 @@ class AbductionEngine:
             grad_mu = np.zeros(n_exo)
             grad_sigma = np.zeros(n_exo)
 
-            log_posts = np.array([
-                self._log_posterior(s, exo_names, evidence)
-                for s in samples
-            ])
+            log_posts = np.array([self._log_posterior(s, exo_names, evidence) for s in samples])
 
             # Normalize for stability
             log_posts = log_posts - np.max(log_posts)
@@ -534,7 +541,7 @@ class AbductionEngine:
             for i, s in enumerate(samples):
                 weight = np.exp(log_posts[i])
                 grad_mu += weight * (s - mu) / (sigma**2)
-                grad_sigma += weight * ((s - mu)**2 / sigma**3 - 1.0 / sigma)
+                grad_sigma += weight * ((s - mu) ** 2 / sigma**3 - 1.0 / sigma)
 
             grad_mu /= len(samples)
             grad_sigma /= len(samples)
@@ -550,10 +557,7 @@ class AbductionEngine:
 
         # Sample final posterior
         posterior_samples = np.random.normal(mu, sigma, (n, n_exo))
-        noise_posterior = {
-            name: posterior_samples[:, i]
-            for i, name in enumerate(exo_names)
-        }
+        noise_posterior = {name: posterior_samples[:, i] for i, name in enumerate(exo_names)}
 
         log_prob = self._compute_evidence_log_prob(evidence, noise_posterior)
 

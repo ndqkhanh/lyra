@@ -230,7 +230,7 @@ class PluginManager:
                 with open(path) as f:
                     data = yaml.safe_load(f)
             except ImportError:
-                raise ValueError("PyYAML required for .yaml manifests")
+                raise ValueError("PyYAML required for .yaml manifests") from None
         else:
             data = json.loads(path.read_text())
         return PluginManifest.from_dict(data)

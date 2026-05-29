@@ -24,7 +24,9 @@ from lyra_skills.compaction import (
 
 class TestSectionUsage:
     def test_create(self):
-        s = SectionUsage(section_id="examples", reference_count=5, last_referenced_at=1000.0, char_count=200)
+        s = SectionUsage(
+            section_id="examples", reference_count=5, last_referenced_at=1000.0, char_count=200
+        )
         assert s.section_id == "examples"
         assert s.reference_count == 5
         assert s.char_count == 200

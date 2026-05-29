@@ -267,7 +267,9 @@ class TestDomainRouter:
         assert result.confidence > 0.3
 
     def test_classify_education_task(self, router: DomainRouter) -> None:
-        result = router.classify("Create a lesson plan for teaching algebra to high school students")
+        result = router.classify(
+            "Create a lesson plan for teaching algebra to high school students"
+        )
         assert result.domain_type == DomainType.EDUCATION
         assert result.confidence > 0.3
 
@@ -314,9 +316,7 @@ class TestDomainRouter:
         assert card is None
 
     def test_detect_multi_domain(self, router: DomainRouter) -> None:
-        result = router.detect_multi_domain(
-            "Design a financial trading algorithm in Python"
-        )
+        result = router.detect_multi_domain("Design a financial trading algorithm in Python")
         assert result.primary.domain_type in (DomainType.CODING, DomainType.FINANCE)
         assert len(result.secondary) >= 0
 
@@ -325,16 +325,12 @@ class TestDomainRouter:
         assert result.primary.domain_type == DomainType.CODING
 
     def test_cross_domain_insights(self, router: DomainRouter) -> None:
-        insights = router.get_cross_domain_insights(
-            DomainType.CODING, DomainType.ENGINEERING
-        )
+        insights = router.get_cross_domain_insights(DomainType.CODING, DomainType.ENGINEERING)
         assert len(insights) > 0
         assert insights[0].source_domain == DomainType.CODING
 
     def test_cross_domain_same(self, router: DomainRouter) -> None:
-        insights = router.get_cross_domain_insights(
-            DomainType.CODING, DomainType.CODING
-        )
+        insights = router.get_cross_domain_insights(DomainType.CODING, DomainType.CODING)
         assert insights == []
 
     def test_set_threshold(self, router: DomainRouter) -> None:
@@ -440,9 +436,7 @@ class TestExpertRegistry:
     def test_list_domains(self) -> None:
         registry = ExpertRegistry()
         cards = {
-            DomainType.CODING: ExpertCard(
-                identity="Coder", role="Code", domain=DomainType.CODING
-            ),
+            DomainType.CODING: ExpertCard(identity="Coder", role="Code", domain=DomainType.CODING),
             DomainType.FINANCE: ExpertCard(
                 identity="Fin", role="Finance", domain=DomainType.FINANCE
             ),
@@ -751,9 +745,7 @@ class TestCrossDomainFusion:
         assert result["fusion_confidence"] > 0.5
 
     def test_transfer_knowledge_same_domain(self, fusion: CrossDomainFusion) -> None:
-        result = fusion.transfer_knowledge(
-            DomainType.CODING, DomainType.CODING, "modular design"
-        )
+        result = fusion.transfer_knowledge(DomainType.CODING, DomainType.CODING, "modular design")
         assert result["confidence"] == 1.0
         assert result["adapted_concept"] == "modular design"
 
@@ -788,21 +780,20 @@ class TestCrossDomainFusion:
         assert isinstance(analogies, list)
 
     def test_compute_fusion_confidence_same(self, fusion: CrossDomainFusion) -> None:
-        assert fusion.compute_fusion_confidence(
-            DomainType.CODING, DomainType.CODING
-        ) == 1.0
+        assert fusion.compute_fusion_confidence(DomainType.CODING, DomainType.CODING) == 1.0
 
     def test_compute_fusion_confidence_cross(self, fusion: CrossDomainFusion) -> None:
-        confidence = fusion.compute_fusion_confidence(
-            DomainType.CODING, DomainType.ENGINEERING
-        )
+        confidence = fusion.compute_fusion_confidence(DomainType.CODING, DomainType.ENGINEERING)
         assert 0 < confidence <= 1.0
 
     def test_add_analogy(self, fusion: CrossDomainFusion) -> None:
         fusion.add_analogy(
-            DomainType.CODING, DomainType.MEDICAL,
-            "debugging", "diagnostic reasoning",
-            0.7, "Both involve systematic elimination of possibilities",
+            DomainType.CODING,
+            DomainType.MEDICAL,
+            "debugging",
+            "diagnostic reasoning",
+            0.7,
+            "Both involve systematic elimination of possibilities",
         )
         analogies = fusion.identify_analogies(DomainType.CODING, DomainType.MEDICAL)
         assert len(analogies) > 0
@@ -810,8 +801,11 @@ class TestCrossDomainFusion:
     def test_add_analogy_invalid_confidence(self, fusion: CrossDomainFusion) -> None:
         with pytest.raises(ValueError, match="confidence must be in"):
             fusion.add_analogy(
-                DomainType.CODING, DomainType.MEDICAL,
-                "a", "b", 1.5,
+                DomainType.CODING,
+                DomainType.MEDICAL,
+                "a",
+                "b",
+                1.5,
             )
 
     def test_set_similarity(self, fusion: CrossDomainFusion) -> None:
@@ -870,7 +864,8 @@ class TestIntegration:
         validator = DomainValidator()
 
         result = fusion.fuse_expertise(
-            DomainType.CODING, DomainType.ENGINEERING,
+            DomainType.CODING,
+            DomainType.ENGINEERING,
             "Design a modular sensing system",
         )
         assert result["fusion_confidence"] > 0.5
@@ -902,9 +897,7 @@ class TestIntegration:
         router = DomainRouter()
         fusion = CrossDomainFusion()
 
-        multi = router.detect_multi_domain(
-            "Design a financial trading algorithm in Python"
-        )
+        multi = router.detect_multi_domain("Design a financial trading algorithm in Python")
 
         if multi.requires_fusion:
             result = fusion.fuse_expertise(
@@ -929,9 +922,7 @@ class TestIntegration:
     def test_registry_constructor_with_cards(self) -> None:
         """Registry can be initialized with a card dict."""
         cards = {
-            DomainType.CODING: ExpertCard(
-                identity="Coder", role="Code", domain=DomainType.CODING
-            ),
+            DomainType.CODING: ExpertCard(identity="Coder", role="Code", domain=DomainType.CODING),
         }
         registry = ExpertRegistry(cards=cards)
         assert len(registry) == 1
@@ -945,6 +936,7 @@ class TestIntegration:
             return a + b
         """
         result = validator.validate_output(DomainType.CODING, code)
-        critical_fails = [c for c in result["checks"]
-                          if not c["passed"] and c["severity"] == "critical"]
+        critical_fails = [
+            c for c in result["checks"] if not c["passed"] and c["severity"] == "critical"
+        ]
         assert len(critical_fails) == 0

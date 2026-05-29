@@ -10,17 +10,17 @@ import sys
 import time
 from pathlib import Path
 
+from lyra_cli.ui.fixed_layout import FixedBottomLayout, StreamingRenderer
+
 # Add lyra_cli to path
 sys.path.insert(0, str(Path(__file__).parent / "packages/lyra-cli/src"))
-
-from lyra_cli.ui.fixed_layout import FixedBottomLayout, StreamingRenderer
 
 
 def test_fixed_bottom_layout():
     """Test that fixed bottom layout works correctly"""
-    print("="*80)
+    print("=" * 80)
     print("INTEGRATION TEST: Fixed Bottom Layout")
-    print("="*80)
+    print("=" * 80)
     print()
 
     layout = FixedBottomLayout()
@@ -90,9 +90,9 @@ def test_fixed_bottom_layout():
     print("  Resize handler: ✓")
     print()
 
-    print("="*80)
+    print("=" * 80)
     print("ALL TESTS PASSED ✓")
-    print("="*80)
+    print("=" * 80)
     print()
     print("The fixed bottom layout is working correctly!")
     print()
@@ -100,9 +100,9 @@ def test_fixed_bottom_layout():
 
 def test_visual_demo():
     """Visual demonstration of fixed bottom layout"""
-    print("="*80)
+    print("=" * 80)
     print("VISUAL DEMO: Fixed Bottom Layout")
-    print("="*80)
+    print("=" * 80)
     print()
     print("This demo will show the fixed bottom layout in action.")
     print("Watch how the input box and status line stay at the bottom")
@@ -117,11 +117,21 @@ def test_visual_demo():
 
     try:
         # Show welcome
-        layout.append_content("╭─────────────────────────────── Lyra UI Test ───────────────────────────────╮")
-        layout.append_content("│                                                                            │")
-        layout.append_content("│  Testing Fixed Bottom Layout                                               │")
-        layout.append_content("│                                                                            │")
-        layout.append_content("╰────────────────────────────────────────────────────────────────────────────╯")
+        layout.append_content(
+            "╭─────────────────────────────── Lyra UI Test ───────────────────────────────╮"
+        )
+        layout.append_content(
+            "│                                                                            │"
+        )
+        layout.append_content(
+            "│  Testing Fixed Bottom Layout                                               │"
+        )
+        layout.append_content(
+            "│                                                                            │"
+        )
+        layout.append_content(
+            "╰────────────────────────────────────────────────────────────────────────────╯"
+        )
         layout.append_content("")
 
         # Set initial status
@@ -156,9 +166,9 @@ def test_visual_demo():
 
 def test_agent_handler_integration():
     """Test agent handler integration"""
-    print("="*80)
+    print("=" * 80)
     print("INTEGRATION TEST: Agent Handler")
-    print("="*80)
+    print("=" * 80)
     print()
 
     from lyra_cli.cli.agent_handler import FixedLayoutAgentHandler
@@ -191,11 +201,7 @@ def test_agent_handler_integration():
 
     # Test 4: Turn end
     print("✓ Test 4: Turn end")
-    result = {
-        "usage": {
-            "total_tokens": 1234
-        }
-    }
+    result = {"usage": {"total_tokens": 1234}}
     handler.on_turn_end("test-turn-1", result)
     assert handler.current_turn is None
     print("  Turn ended successfully")
@@ -209,9 +215,9 @@ def test_agent_handler_integration():
     print("  Error handled successfully")
     print()
 
-    print("="*80)
+    print("=" * 80)
     print("ALL AGENT HANDLER TESTS PASSED ✓")
-    print("="*80)
+    print("=" * 80)
     print()
 
 
@@ -219,8 +225,12 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Integration tests for fixed bottom layout")
-    parser.add_argument("--test", choices=["unit", "visual", "agent", "all"],
-                       default="all", help="Which test to run")
+    parser.add_argument(
+        "--test",
+        choices=["unit", "visual", "agent", "all"],
+        default="all",
+        help="Which test to run",
+    )
     args = parser.parse_args()
 
     try:
@@ -250,5 +260,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n❌ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

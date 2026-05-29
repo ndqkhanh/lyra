@@ -13,6 +13,7 @@ The handlers stay deliberately thin — heavy lifting lives in
 :mod:`lyra_core.meta`. The CLI surface is *display + dispatch*, not
 business logic.
 """
+
 from __future__ import annotations
 
 import json
@@ -41,6 +42,7 @@ class _StubResult:
 def _result_class() -> type:
     try:
         from .session import CommandResult  # type: ignore
+
         return CommandResult
     except Exception:
         return _StubResult
@@ -91,10 +93,7 @@ def cmd_team(session: Any, args: str) -> Any:
         if lead is None:
             return _ok("No team registered for this session. Use /team spawn to create one.")
         names = ", ".join(lead.teammates) or "—"
-        return _ok(
-            f"team={lead.team_name} mode={lead.mode} "
-            f"teammates=[{names}]"
-        )
+        return _ok(f"team={lead.team_name} mode={lead.mode} " f"teammates=[{names}]")
 
     if sub == "status":
         if lead is None:
@@ -119,6 +118,7 @@ def cmd_team(session: Any, args: str) -> Any:
         if lead is None:
             lead = _create_default_lead(session)
         from lyra_core.teams import TeammateSpec
+
         try:
             lead.spawn(TeammateSpec(name=name, model=model))
         except Exception as e:
@@ -180,12 +180,10 @@ def cmd_scaling(session: Any, args: str) -> Any:
     sa = _resolve_scaling_axes(session)
     if not raw:
         from lyra_core.meta import render_scaling_table
+
         snap = sa.snapshot()
         best = sa.best_lever()
-        return _ok(
-            render_scaling_table(snap)
-            + f"\n\nbest lever: {best.axis} — {best.next_lever}"
-        )
+        return _ok(render_scaling_table(snap) + f"\n\nbest lever: {best.axis} — {best.next_lever}")
     parts = raw.split(maxsplit=1)
     if parts[0] == "axis" and len(parts) > 1:
         target = parts[1].strip()
@@ -199,9 +197,7 @@ def cmd_scaling(session: Any, args: str) -> Any:
                     f"  cost={p.cost_hint:.2f} benefit={p.benefit_hint:.2f} "
                     f"cost_benefit={p.cost_benefit:.2f}"
                 )
-        return _ok(
-            f"unknown axis {target!r}; one of: pretrain, ttc, memory, tool_use"
-        )
+        return _ok(f"unknown axis {target!r}; one of: pretrain, ttc, memory, tool_use")
     return _ok(_SCALING_HELP)
 
 
@@ -282,6 +278,7 @@ def cmd_bundle(session: Any, args: str) -> Any:
         path = Path(parts[1])
         try:
             from lyra_core.bundle import SourceBundle
+
             b = SourceBundle.load(path)
             b.validate()
         except Exception as e:
@@ -295,8 +292,7 @@ def cmd_bundle(session: Any, args: str) -> Any:
         target_dir = (
             Path(parts[2])
             if len(parts) > 2
-            else Path.home() / ".lyra" / "bundles"
-                 / bundle_path.parent.name
+            else Path.home() / ".lyra" / "bundles" / bundle_path.parent.name
         )
         try:
             from lyra_core.bundle import AgentInstaller, SourceBundle
@@ -316,13 +312,12 @@ def cmd_bundle(session: Any, args: str) -> Any:
 
     if sub == "export":
         if len(parts) < 3:
-            return _ok(
-                "Usage: /bundle export <path> <claude-code|cursor|codex|gemini-cli>"
-            )
+            return _ok("Usage: /bundle export <path> <claude-code|cursor|codex|gemini-cli>")
         bundle_path = Path(parts[1])
         target = parts[2].strip()
         try:
             from lyra_core.bundle import SourceBundle, resolve_exporter
+
             b = SourceBundle.load(bundle_path)
             exporter = resolve_exporter(target)  # type: ignore[arg-type]
             target_dir = Path.home() / f".lyra-export-{target}"
@@ -346,8 +341,15 @@ def cmd_bundle(session: Any, args: str) -> Any:
         if not rows:
             return _ok("No bundles installed. /bundle install <path> to install one.")
         lines = ["installed bundles:"]
-        lines.append("name                  | version  | domain        | dual | hash             | target_dir")
-        lines.append("----------------------|----------|---------------|------|------------------|----------")
+        lines.append(
+
+                "name                  | version  | domain        | dual | hash             |"
+                "target_dir"
+
+        )
+        lines.append(
+            "----------------------|----------|---------------|------|------------------|----------"
+        )
         for r in rows:
             dual = "yes" if r.dual_use else "no"
             short_hash = r.bundle_hash[:16]
@@ -368,9 +370,7 @@ def cmd_bundle(session: Any, args: str) -> Any:
             )
         rest_parts = (parts[1] + " " + parts[2]).split()
         if len(rest_parts) < 3:
-            return _ok(
-                "Usage: /bundle fetch <url> <signature_hex> <marketplace>"
-            )
+            return _ok("Usage: /bundle fetch <url> <signature_hex> <marketplace>")
         url, signature, marketplace = rest_parts[0], rest_parts[1], rest_parts[2]
         try:
             from lyra_core.bundle import FetchSpec, MarketplaceFetcher
@@ -378,9 +378,7 @@ def cmd_bundle(session: Any, args: str) -> Any:
             registry = _resolve_marketplace_registry(session)
             fetcher = MarketplaceFetcher(registry=registry)
             fetched = fetcher.fetch(
-                FetchSpec(
-                    url=url, expected_signature=signature, marketplace=marketplace
-                )
+                FetchSpec(url=url, expected_signature=signature, marketplace=marketplace)
             )
         except Exception as e:
             return _ok(f"fetch failed: {e}")
@@ -394,17 +392,11 @@ def cmd_bundle(session: Any, args: str) -> Any:
 
     if sub == "trust":
         if len(parts) < 3:
-            return _ok(
-                "Usage: /bundle trust <marketplace> <fingerprint> <secret_hex>"
-            )
+            return _ok("Usage: /bundle trust <marketplace> <fingerprint> <secret_hex>")
         rest_parts = (parts[1] + " " + parts[2]).split()
         if len(rest_parts) < 3:
-            return _ok(
-                "Usage: /bundle trust <marketplace> <fingerprint> <secret_hex>"
-            )
-        marketplace, fingerprint, secret_hex = (
-            rest_parts[0], rest_parts[1], rest_parts[2]
-        )
+            return _ok("Usage: /bundle trust <marketplace> <fingerprint> <secret_hex>")
+        marketplace, fingerprint, secret_hex = (rest_parts[0], rest_parts[1], rest_parts[2])
         try:
             from lyra_core.bundle import MarketplaceKey
 
@@ -418,9 +410,7 @@ def cmd_bundle(session: Any, args: str) -> Any:
             )
         except Exception as e:
             return _ok(f"trust failed: {e}")
-        return _ok(
-            f"trusted marketplace={marketplace} fingerprint={fingerprint}"
-        )
+        return _ok(f"trusted marketplace={marketplace} fingerprint={fingerprint}")
 
     if sub == "uninstall":
         if len(parts) < 3:
@@ -432,13 +422,11 @@ def cmd_bundle(session: Any, args: str) -> Any:
                 global_installed_registry,
                 uninstall_bundle,
             )
+
             # If the user supplied a short hash prefix, expand it.
             reg = global_installed_registry()
             if len(bundle_hash) < 64:
-                matches = [
-                    r for r in reg.all()
-                    if r.bundle_hash.startswith(bundle_hash)
-                ]
+                matches = [r for r in reg.all() if r.bundle_hash.startswith(bundle_hash)]
                 if len(matches) == 0:
                     return _ok(f"no installed bundle matches hash prefix {bundle_hash!r}")
                 if len(matches) > 1:
@@ -512,15 +500,8 @@ def _resolve_real_executor(session: Any) -> Any:
         return None
 
     llm = getattr(session, "llm", None) or getattr(session, "_llm", None)
-    tools = (
-        getattr(session, "tools", None)
-        or getattr(session, "_tools", None)
-        or {}
-    )
-    store = (
-        getattr(session, "store", None)
-        or getattr(session, "_store", None)
-    )
+    tools = getattr(session, "tools", None) or getattr(session, "_tools", None) or {}
+    store = getattr(session, "store", None) or getattr(session, "_store", None)
     if llm is None or store is None:
         return None
 
@@ -546,9 +527,7 @@ def _resolve_scaling_axes(session: Any):
         sa.record_pretrain(model="auto", param_b=70.0, quality=0.85)
         sa.record_ttc(max_samples=1, verifier_count=2, avg_pass_rate=0.7)
         sa.record_memory(context_tokens=200_000, tier_count=2, retrieval_score=0.7)
-        sa.record_tool_use(
-            native_count=10, mcp_server_count=3, avg_success_rate=0.85
-        )
+        sa.record_tool_use(native_count=10, mcp_server_count=3, avg_success_rate=0.85)
         session._v311_scaling = sa
     return sa
 
@@ -582,6 +561,7 @@ def _resolve_coverage_index(session: Any):
             idx = global_index()
         except Exception:
             from lyra_core.bundle import VerifierCoverageIndex
+
             idx = VerifierCoverageIndex()
         session._v311_coverage = idx
     return idx

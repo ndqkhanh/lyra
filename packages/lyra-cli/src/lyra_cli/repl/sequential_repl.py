@@ -21,6 +21,7 @@ from ..ui import (
 @dataclass
 class REPLConfig:
     """Configuration for Sequential REPL"""
+
     context_budget: int = 200000
     permission_mode: str = "ask"  # ask, bypass, deny
     show_context: bool = True
@@ -42,7 +43,7 @@ class SequentialREPL:
         self,
         api_key: str | None = None,
         model: str = "claude-opus-4-20250514",
-        config: REPLConfig | None = None
+        config: REPLConfig | None = None,
     ):
         # Configuration
         self.config = config or REPLConfig()
@@ -124,11 +125,9 @@ class SequentialREPL:
     def _on_turn_finished(self, event):
         """Handle turn finished"""
         # Print stats line
-        duration = getattr(event, 'duration_s', 0.0)
+        duration = getattr(event, "duration_s", 0.0)
         stats_line = self.formatter.format_stats_line(
-            duration_s=duration,
-            tool_count=0,
-            tokens=event.tokens_in + event.tokens_out
+            duration_s=duration, tool_count=0, tokens=event.tokens_in + event.tokens_out
         )
         print(f"\n\n{stats_line}\n")
 
@@ -227,7 +226,7 @@ class SequentialREPL:
         cwd = os.getcwd()
         home = os.path.expanduser("~")
         if cwd.startswith(home):
-            cwd = "~" + cwd[len(home):]
+            cwd = "~" + cwd[len(home) :]
         print(f"   ✦✧✦✧✦✧✦    {cwd}")
         print()
         print()
@@ -292,7 +291,9 @@ class SequentialREPL:
         """Show context usage information"""
         percentage = self._get_context_percentage()
         print()
-        print(f"Context usage: {self.context_used:,} / {self.context_budget:,} tokens ({percentage}%)")
+        print(
+            f"Context usage: {self.context_used:,} / {self.context_budget:,} tokens ({percentage}%)"
+        )
         print()
 
     def process_message(self, user_message: str):
@@ -306,10 +307,7 @@ class SequentialREPL:
             return
 
         # Emit turn started
-        self.dispatcher.emit(TurnStarted(
-            turn_id="turn-1",
-            user_text=user_message
-        ))
+        self.dispatcher.emit(TurnStarted(turn_id="turn-1", user_text=user_message))
 
         # Show active response
         active_line = self.formatter.format_active_response("Thinking...")
@@ -325,18 +323,12 @@ class SequentialREPL:
             with client.messages.stream(
                 model=self.model,
                 max_tokens=4096,
-                messages=[{
-                    "role": "user",
-                    "content": user_message
-                }],
+                messages=[{"role": "user", "content": user_message}],
             ) as stream:
                 for text in stream.text_stream:
                     assistant_message += text
                     # Emit text delta event
-                    self.dispatcher.emit(TextDelta(
-                        turn_id="turn-1",
-                        text=text
-                    ))
+                    self.dispatcher.emit(TextDelta(turn_id="turn-1", text=text))
 
             # Get usage stats
             final_message = stream.get_final_message()
@@ -347,7 +339,7 @@ class SequentialREPL:
                 turn_id="turn-1",
                 tokens_in=usage.input_tokens,
                 tokens_out=usage.output_tokens,
-                stop_reason=final_message.stop_reason or "end_turn"
+                stop_reason=final_message.stop_reason or "end_turn",
             )
 
             # Emit turn finished event

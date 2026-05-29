@@ -1,4 +1,5 @@
 """Tests for L311.x bundle marketplace fetcher."""
+
 from __future__ import annotations
 
 import io
@@ -20,7 +21,9 @@ from lyra_core.bundle import (
 # ---- helpers ----------------------------------------------------------
 
 
-def _build_test_bundle_tar(*, name: str = "fetched-bundle", with_path_escape_tool: bool = False) -> bytes:
+def _build_test_bundle_tar(
+    *, name: str = "fetched-bundle", with_path_escape_tool: bool = False
+) -> bytes:
     """Pack a minimal valid bundle into a tar.gz."""
     files: dict[str, str] = {}
     files["persona.md"] = "fetched persona\n"
@@ -81,6 +84,7 @@ def _make_unsafe_tar_with_absolute_path() -> bytes:
 def _stub_fetch(payload: bytes):
     def _fetch(url: str) -> bytes:
         return payload
+
     return _fetch
 
 
@@ -106,8 +110,12 @@ def test_fetcher_happy_path(tmp_path):
     sig = sign_archive(payload, key)
     reg = MarketplaceRegistry()
     reg.trust("argus", key)
-    f = MarketplaceFetcher(registry=reg, cache_root=tmp_path / "cache", fetch_url=_stub_fetch(payload))
-    spec = FetchSpec(url="https://argus.example.com/b.tar.gz", expected_signature=sig, marketplace="argus")
+    f = MarketplaceFetcher(
+        registry=reg, cache_root=tmp_path / "cache", fetch_url=_stub_fetch(payload)
+    )
+    spec = FetchSpec(
+        url="https://argus.example.com/b.tar.gz", expected_signature=sig, marketplace="argus"
+    )
     out = f.fetch(spec)
     assert out.bundle.manifest.name == "fetched-bundle"
     assert out.sbom.signing_key_fingerprint == "argus-key-v1"
@@ -124,9 +132,12 @@ def test_fetch_rejects_signature_mismatch(tmp_path):
     key = MarketplaceKey(fingerprint="k", secret=b"secret")
     reg = MarketplaceRegistry()
     reg.trust("argus", key)
-    f = MarketplaceFetcher(registry=reg, cache_root=tmp_path / "cache", fetch_url=_stub_fetch(payload))
-    spec = FetchSpec(url="https://argus.example.com/b.tar.gz",
-                     expected_signature="0" * 64, marketplace="argus")
+    f = MarketplaceFetcher(
+        registry=reg, cache_root=tmp_path / "cache", fetch_url=_stub_fetch(payload)
+    )
+    spec = FetchSpec(
+        url="https://argus.example.com/b.tar.gz", expected_signature="0" * 64, marketplace="argus"
+    )
     with pytest.raises(SignatureMismatchError, match="LBL-FETCH-VERIFY"):
         f.fetch(spec)
 
@@ -137,8 +148,12 @@ def test_fetch_rejects_untrusted_marketplace(tmp_path):
     sig = sign_archive(payload, key)
     reg = MarketplaceRegistry()
     # NOT trusted.
-    f = MarketplaceFetcher(registry=reg, cache_root=tmp_path / "cache", fetch_url=_stub_fetch(payload))
-    spec = FetchSpec(url="https://argus.example.com/b.tar.gz", expected_signature=sig, marketplace="argus")
+    f = MarketplaceFetcher(
+        registry=reg, cache_root=tmp_path / "cache", fetch_url=_stub_fetch(payload)
+    )
+    spec = FetchSpec(
+        url="https://argus.example.com/b.tar.gz", expected_signature=sig, marketplace="argus"
+    )
     with pytest.raises(MarketplaceError, match="not trusted"):
         f.fetch(spec)
 
@@ -152,8 +167,12 @@ def test_fetch_blocks_path_escape_tool_descriptor(tmp_path):
     sig = sign_archive(payload, key)
     reg = MarketplaceRegistry()
     reg.trust("argus", key)
-    f = MarketplaceFetcher(registry=reg, cache_root=tmp_path / "cache", fetch_url=_stub_fetch(payload))
-    spec = FetchSpec(url="https://argus.example.com/b.tar.gz", expected_signature=sig, marketplace="argus")
+    f = MarketplaceFetcher(
+        registry=reg, cache_root=tmp_path / "cache", fetch_url=_stub_fetch(payload)
+    )
+    spec = FetchSpec(
+        url="https://argus.example.com/b.tar.gz", expected_signature=sig, marketplace="argus"
+    )
     with pytest.raises(FetchScopeError, match="LBL-FETCH-SCOPE"):
         f.fetch(spec)
 
@@ -167,8 +186,12 @@ def test_fetch_rejects_path_escape_in_archive(tmp_path):
     sig = sign_archive(payload, key)
     reg = MarketplaceRegistry()
     reg.trust("argus", key)
-    f = MarketplaceFetcher(registry=reg, cache_root=tmp_path / "cache", fetch_url=_stub_fetch(payload))
-    spec = FetchSpec(url="https://argus.example.com/b.tar.gz", expected_signature=sig, marketplace="argus")
+    f = MarketplaceFetcher(
+        registry=reg, cache_root=tmp_path / "cache", fetch_url=_stub_fetch(payload)
+    )
+    spec = FetchSpec(
+        url="https://argus.example.com/b.tar.gz", expected_signature=sig, marketplace="argus"
+    )
     with pytest.raises(MarketplaceError):
         f.fetch(spec)
 
@@ -199,16 +222,21 @@ def test_fetch_rejects_javascript_url(tmp_path):
 
 def test_fetch_honors_expected_hash(tmp_path):
     import hashlib
+
     payload = _build_test_bundle_tar()
     correct = hashlib.sha256(payload).hexdigest()
     key = MarketplaceKey(fingerprint="k", secret=b"secret")
     sig = sign_archive(payload, key)
     reg = MarketplaceRegistry()
     reg.trust("argus", key)
-    f = MarketplaceFetcher(registry=reg, cache_root=tmp_path / "cache", fetch_url=_stub_fetch(payload))
+    f = MarketplaceFetcher(
+        registry=reg, cache_root=tmp_path / "cache", fetch_url=_stub_fetch(payload)
+    )
     spec = FetchSpec(
-        url="https://argus.example.com/b.tar.gz", expected_signature=sig,
-        marketplace="argus", expected_hash=correct,
+        url="https://argus.example.com/b.tar.gz",
+        expected_signature=sig,
+        marketplace="argus",
+        expected_hash=correct,
     )
     out = f.fetch(spec)
     assert out.bundle.manifest.name == "fetched-bundle"
@@ -220,10 +248,14 @@ def test_fetch_rejects_hash_mismatch(tmp_path):
     sig = sign_archive(payload, key)
     reg = MarketplaceRegistry()
     reg.trust("argus", key)
-    f = MarketplaceFetcher(registry=reg, cache_root=tmp_path / "cache", fetch_url=_stub_fetch(payload))
+    f = MarketplaceFetcher(
+        registry=reg, cache_root=tmp_path / "cache", fetch_url=_stub_fetch(payload)
+    )
     spec = FetchSpec(
-        url="https://argus.example.com/b.tar.gz", expected_signature=sig,
-        marketplace="argus", expected_hash="0" * 64,
+        url="https://argus.example.com/b.tar.gz",
+        expected_signature=sig,
+        marketplace="argus",
+        expected_hash="0" * 64,
     )
     with pytest.raises(MarketplaceError, match="content hash mismatch"):
         f.fetch(spec)
@@ -242,8 +274,12 @@ def test_fetched_bundle_installable(tmp_path):
     sig = sign_archive(payload, key)
     reg = MarketplaceRegistry()
     reg.trust("argus", key)
-    f = MarketplaceFetcher(registry=reg, cache_root=tmp_path / "cache", fetch_url=_stub_fetch(payload))
-    spec = FetchSpec(url="https://argus.example.com/b.tar.gz", expected_signature=sig, marketplace="argus")
+    f = MarketplaceFetcher(
+        registry=reg, cache_root=tmp_path / "cache", fetch_url=_stub_fetch(payload)
+    )
+    spec = FetchSpec(
+        url="https://argus.example.com/b.tar.gz", expected_signature=sig, marketplace="argus"
+    )
     fetched = f.fetch(spec)
 
     inst = AgentInstaller(bundle=fetched.bundle)
@@ -260,9 +296,14 @@ def test_sbom_entry_serializable(tmp_path):
     sig = sign_archive(payload, key)
     reg = MarketplaceRegistry()
     reg.trust("argus", key)
-    f = MarketplaceFetcher(registry=reg, cache_root=tmp_path / "cache", fetch_url=_stub_fetch(payload))
-    out = f.fetch(FetchSpec(url="https://argus.example.com/b.tar.gz",
-                            expected_signature=sig, marketplace="argus"))
+    f = MarketplaceFetcher(
+        registry=reg, cache_root=tmp_path / "cache", fetch_url=_stub_fetch(payload)
+    )
+    out = f.fetch(
+        FetchSpec(
+            url="https://argus.example.com/b.tar.gz", expected_signature=sig, marketplace="argus"
+        )
+    )
     j = out.sbom.to_json()
     assert j["bundle_name"] == "fetched-bundle"
     assert j["marketplace"] == "argus"

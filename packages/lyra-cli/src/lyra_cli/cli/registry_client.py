@@ -116,7 +116,11 @@ class RegistryClient:
                 index = self.fetch_index(registry["name"])
                 for skill_name, skill_data in index["skills"].items():
                     # Filter by query
-                    if query and query.lower() not in skill_name.lower() and query.lower() not in skill_data["description"].lower():
+                    if (
+                        query
+                        and query.lower() not in skill_name.lower()
+                        and query.lower() not in skill_data["description"].lower()
+                    ):
                         continue
 
                     # Filter by tag
@@ -163,9 +167,7 @@ class RegistryClient:
                 skill_package = response.json()
 
                 # Cache downloaded package
-                cache_file = (
-                    self.cache_dir / "skills" / f"{name}-{skill_meta['version']}.json"
-                )
+                cache_file = self.cache_dir / "skills" / f"{name}-{skill_meta['version']}.json"
                 cache_file.parent.mkdir(parents=True, exist_ok=True)
                 cache_file.write_text(json.dumps(skill_package, indent=2))
 
@@ -173,9 +175,7 @@ class RegistryClient:
 
         raise ValueError(f"Skill '{name}' not found in any enabled registry")
 
-    def check_updates(
-        self, installed_skills: dict[str, str]
-    ) -> dict[str, tuple[str, str]]:
+    def check_updates(self, installed_skills: dict[str, str]) -> dict[str, tuple[str, str]]:
         """Check for updates to installed skills.
 
         Args:

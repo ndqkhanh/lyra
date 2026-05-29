@@ -1,4 +1,5 @@
 """Tests for zettelkasten_store.py — full Zettelkasten integration."""
+
 from __future__ import annotations
 
 import pytest
@@ -52,9 +53,14 @@ class StubVectorStore:
     async def search(self, embedding: list[float], k: int) -> list[dict]:
         self.search_history.append((embedding, k))
         results = []
-        for nid, (emb, meta) in self._store.items():
-            results.append({"id": nid, "content": meta.get("content", ""),
-                          "keywords": meta.get("keywords", [])})
+        for nid, (_emb, meta) in self._store.items():
+            results.append(
+                {
+                    "id": nid,
+                    "content": meta.get("content", ""),
+                    "keywords": meta.get("keywords", []),
+                }
+            )
         return results[:k]
 
     async def insert(self, note_id: str, embedding: list[float], metadata: dict) -> None:
@@ -86,7 +92,10 @@ class TestZettelkastenMemoryStore:
     async def test_write_rejected_content(self, store):
         """When the constructor rejects content, write() returns None."""
         store.llm.responses = [
-            '{"should_store": false, "reason": "duplicate", "keywords": [], "tags": [], "contextual_description": "", "merge_target_index": null, "merged_content": null}',
+(
+                '{"should_store": false, "reason": "duplicate", "keywords": [], "tags": [],'
+                '"contextual_description": "", "merge_target_index": null, "merged_content": null}'
+            ),
         ]
 
         result = await store.write("this is a duplicate content that should be rejected")
@@ -97,7 +106,11 @@ class TestZettelkastenMemoryStore:
         """Valid content should be stored as a new note."""
         store.llm.responses = [
             # Note constructor
-            '{"should_store": true, "keywords": ["test", "pytest"], "tags": ["testing"], "contextual_description": "learned about testing", "merge_target_index": null, "merged_content": null, "reason": "new knowledge"}',
+(
+                '{"should_store": true, "keywords": ["test", "pytest"], "tags": ["testing"],'
+                '"contextual_description": "learned about testing", "merge_target_index": null,'
+                '"merged_content": null, "reason": "new knowledge"}'
+            ),
             # Link generator
             "[]",
             # Memory evolver
@@ -114,7 +127,11 @@ class TestZettelkastenMemoryStore:
         """Writing a note that connects to existing notes creates links."""
         # First, seed an existing note
         store.llm.responses = [
-            '{"should_store": true, "keywords": ["base"], "tags": ["base"], "contextual_description": "base", "merge_target_index": null, "merged_content": null, "reason": "first"}',
+(
+                '{"should_store": true, "keywords": ["base"], "tags": ["base"],'
+                '"contextual_description": "base", "merge_target_index": null, "merged_content":'
+                'null, "reason": "first"}'
+            ),
             "[]",
             '{"should_update": false, "reason": "none"}',
         ]
@@ -123,8 +140,13 @@ class TestZettelkastenMemoryStore:
 
         # Now write a second note that links to the first
         store.llm.responses = [
-            '{"should_store": true, "keywords": ["extended"], "tags": ["extended"], "contextual_description": "extends base", "merge_target_index": null, "merged_content": null, "reason": "extend"}',
-            f'[{{"target_id": "{first.id}", "link_type": "extends", "confidence": 0.9, "rationale": "builds on base"}}]',
+(
+                '{"should_store": true, "keywords": ["extended"], "tags": ["extended"],'
+                '"contextual_description": "extends base", "merge_target_index": null,'
+                '"merged_content": null, "reason": "extend"}'
+            ),
+            f'[{{"target_id": "{first.id}", "link_type": "extends", "confidence": 0.9,'  # noqa: E501
+            f' "rationale": "builds on base"}}]',
             '{"should_update": false, "reason": "no update"}',
         ]
 
@@ -139,7 +161,9 @@ class TestZettelkastenMemoryStore:
         # Seed notes
         for i in range(3):
             store.llm.responses = [
-                f'{{"should_store": true, "keywords": ["kw{i}"], "tags": ["tag{i}"], "contextual_description": "note {i}", "merge_target_index": null, "merged_content": null, "reason": "seed"}}',
+                f'{{"should_store": true, "keywords": ["kw{i}"], "tags": ["tag{i}"],'  # noqa: E501
+                f' "contextual_description": "note {i}", "merge_target_index": null,'
+                f' "merged_content": null, "reason": "seed"}}',
                 "[]",
                 '{"should_update": false, "reason": "no update"}',
             ]
@@ -151,15 +175,24 @@ class TestZettelkastenMemoryStore:
     async def test_get_with_context(self, store):
         """Retrieve a note with its linked neighborhood."""
         store.llm.responses = [
-            '{"should_store": true, "keywords": ["a"], "tags": ["a"], "contextual_description": "note a", "merge_target_index": null, "merged_content": null, "reason": "first"}',
+(
+                '{"should_store": true, "keywords": ["a"], "tags": ["a"],'
+                '"contextual_description": "note a", "merge_target_index": null, "merged_content":'
+                'null, "reason": "first"}'
+            ),
             "[]",
             '{"should_update": false, "reason": "none"}',
         ]
         note_a = await store.write("this is content about topic alpha with some length")
 
         store.llm.responses = [
-            '{"should_store": true, "keywords": ["b"], "tags": ["b"], "contextual_description": "note b", "merge_target_index": null, "merged_content": null, "reason": "second"}',
-            f'[{{"target_id": "{note_a.id}", "link_type": "extends", "confidence": 0.9, "rationale": "extends a"}}]',
+(
+                '{"should_store": true, "keywords": ["b"], "tags": ["b"],'
+                '"contextual_description": "note b", "merge_target_index": null, "merged_content":'
+                'null, "reason": "second"}'
+            ),
+            f'[{{"target_id": "{note_a.id}", "link_type": "extends", "confidence": 0.9,'  # noqa: E501
+            f' "rationale": "extends a"}}]',
             '{"should_update": false, "reason": "none"}',
         ]
         note_b = await store.write("this is content about topic beta that extends alpha")
@@ -172,7 +205,11 @@ class TestZettelkastenMemoryStore:
     async def test_write_with_evolution(self, store):
         """Writing related content should trigger evolution of nearby notes."""
         store.llm.responses = [
-            '{"should_store": true, "keywords": ["orig"], "tags": ["orig"], "contextual_description": "original", "merge_target_index": null, "merged_content": null, "reason": "first"}',
+(
+                '{"should_store": true, "keywords": ["orig"], "tags": ["orig"],'
+                '"contextual_description": "original", "merge_target_index": null,'
+                '"merged_content": null, "reason": "first"}'
+            ),
             "[]",
             '{"should_update": false, "reason": "none"}',
         ]
@@ -180,9 +217,16 @@ class TestZettelkastenMemoryStore:
 
         # Now write something that evolves the original
         store.llm.responses = [
-            '{"should_store": true, "keywords": ["refined"], "tags": ["refined"], "contextual_description": "refined", "merge_target_index": null, "merged_content": null, "reason": "refine"}',
+(
+                '{"should_store": true, "keywords": ["refined"], "tags": ["refined"],'
+                '"contextual_description": "refined", "merge_target_index": null,'
+                '"merged_content": null, "reason": "refine"}'
+            ),
             "[]",
-            '{"should_update": true, "reason": "refined", "new_content": "updated original", "new_keywords": ["updated"], "new_tags": ["updated"]}',
+(
+                '{"should_update": true, "reason": "refined", "new_content": "updated original",'
+                '"new_keywords": ["updated"], "new_tags": ["updated"]}'
+            ),
         ]
 
         refined = await store.write("more specific original knowledge")
@@ -193,7 +237,11 @@ class TestZettelkastenMemoryStore:
     async def test_write_with_merge(self, store):
         """When constructor decides to merge, existing note should be updated."""
         store.llm.responses = [
-            '{"should_store": true, "keywords": ["base"], "tags": ["base"], "contextual_description": "base", "merge_target_index": null, "merged_content": null, "reason": "first"}',
+(
+                '{"should_store": true, "keywords": ["base"], "tags": ["base"],'
+                '"contextual_description": "base", "merge_target_index": null, "merged_content":'
+                'null, "reason": "first"}'
+            ),
             "[]",
             '{"should_update": false, "reason": "none"}',
         ]
@@ -202,7 +250,9 @@ class TestZettelkastenMemoryStore:
         # Now write content that merges into the original
         original_id = original.id
         store.llm.responses = [
-            f'{{"should_store": true, "keywords": ["merged"], "tags": ["merged"], "contextual_description": "merged", "merge_target_index": "{original_id}", "merged_content": "merged combined content", "reason": "merge"}}',
+            f'{{"should_store": true, "keywords": ["merged"], "tags": ["merged"],'  # noqa: E501
+            f' "contextual_description": "merged", "merge_target_index": "{original_id}",'
+            f' "merged_content": "merged combined content", "reason": "merge"}}',
             "[]",
             '{"should_update": false, "reason": "none"}',
         ]
@@ -239,8 +289,12 @@ class TestAgenticMemoryNote:
 
     def test_to_dict(self):
         note = AgenticMemoryNote(
-            id="n1", content="c", keywords=["k"], tags=["t"],
-            contextual_description="cd", linked_memories=["n2"],
+            id="n1",
+            content="c",
+            keywords=["k"],
+            tags=["t"],
+            contextual_description="cd",
+            linked_memories=["n2"],
         )
         d = note.to_dict()
         assert d["id"] == "n1"

@@ -34,17 +34,13 @@ class TestIntegrityGate:
             validators=[
                 MinimumSourceCountValidator(min_sources=10),
                 SourceDiversityValidator(min_source_types=3),
-            ]
+            ],
         )
 
         research_state = {
-            "sources": [
-                {"id": f"s{i}", "source_type": "arxiv"} for i in range(5)
-            ] + [
-                {"id": f"s{i}", "source_type": "github"} for i in range(5, 10)
-            ] + [
-                {"id": f"s{i}", "source_type": "semantic_scholar"} for i in range(10, 15)
-            ]
+            "sources": [{"id": f"s{i}", "source_type": "arxiv"} for i in range(5)]
+            + [{"id": f"s{i}", "source_type": "github"} for i in range(5, 10)]
+            + [{"id": f"s{i}", "source_type": "semantic_scholar"} for i in range(10, 15)]
         }
 
         result = gate.validate(research_state)
@@ -54,10 +50,7 @@ class TestIntegrityGate:
 
     def test_stage_2_5_gate_blocks_with_insufficient_sources(self):
         """Test stage 2.5 blocks with insufficient sources"""
-        gate = IntegrityGate(
-            stage="2.5",
-            validators=[MinimumSourceCountValidator(min_sources=10)]
-        )
+        gate = IntegrityGate(stage="2.5", validators=[MinimumSourceCountValidator(min_sources=10)])
 
         research_state = {"sources": [{"id": f"s{i}"} for i in range(5)]}
 
@@ -74,7 +67,7 @@ class TestIntegrityGate:
                 CitationFidelityValidator(min_fidelity=1.0),
                 ClaimVerificationValidator(min_verification=0.95),
                 TemporalConsistencyValidator(),
-            ]
+            ],
         )
 
         research_state = {
@@ -118,7 +111,7 @@ class TestMultiLayerCitationVerifier:
             authors=["Author 1"],
             year=2023,
             doi="10.1234/test",
-            arxiv_id="2301.00000"
+            arxiv_id="2301.00000",
         )
 
         result = verifier.verify_citation(citation, "Test claim")
@@ -133,11 +126,7 @@ class TestMultiLayerCitationVerifier:
         verifier.semantic_scholar = True
 
         citation = Citation(
-            id="test1",
-            title="Test Paper",
-            authors=["Author 1"],
-            year=2023,
-            doi="10.1234/test"
+            id="test1", title="Test Paper", authors=["Author 1"], year=2023, doi="10.1234/test"
         )
 
         exists = verifier.verify_citation_exists(citation)
@@ -156,7 +145,7 @@ class TestMultiLayerCitationVerifier:
             authors=["Author 1"],
             year=2023,
             doi="10.1234/test",
-            arxiv_id="2301.00000"
+            arxiv_id="2301.00000",
         )
 
         triangulated = verifier.cross_index_triangulation(citation)
@@ -174,12 +163,7 @@ class TestTemporalVerifier:
                 {
                     "text": "X is better than Y",
                     "date": "2020-01-01",
-                    "citations": [
-                        {
-                            "id": "c1",
-                            "published_date": "2023-01-01"  # Future citation!
-                        }
-                    ]
+                    "citations": [{"id": "c1", "published_date": "2023-01-01"}],  # Future citation!
                 }
             ]
         }
@@ -210,16 +194,16 @@ class TestTemporalVerifier:
                 {
                     "text": "X was proposed in 2020",
                     "date": "2023-01-01",
-                    "citations": [
-                        {"id": "c1", "published_date": "2020-01-01"}
-                    ]
+                    "citations": [{"id": "c1", "published_date": "2020-01-01"}],
                 }
             ]
         }
 
         violations = verifier.verify_temporal_consistency(report)
         # Should have no anachronistic citations
-        anachronistic = [v for v in violations if v.type == TemporalViolationType.ANACHRONISTIC_CITATION]
+        anachronistic = [
+            v for v in violations if v.type == TemporalViolationType.ANACHRONISTIC_CITATION
+        ]
         assert len(anachronistic) == 0
 
 
@@ -244,22 +228,26 @@ class TestValidators:
         validator = SourceDiversityValidator(min_source_types=3)
 
         # Test pass
-        result = validator.validate({
-            "sources": [
-                {"source_type": "arxiv"},
-                {"source_type": "github"},
-                {"source_type": "semantic_scholar"},
-            ]
-        })
+        result = validator.validate(
+            {
+                "sources": [
+                    {"source_type": "arxiv"},
+                    {"source_type": "github"},
+                    {"source_type": "semantic_scholar"},
+                ]
+            }
+        )
         assert result.passed
 
         # Test fail
-        result = validator.validate({
-            "sources": [
-                {"source_type": "arxiv"},
-                {"source_type": "arxiv"},
-            ]
-        })
+        result = validator.validate(
+            {
+                "sources": [
+                    {"source_type": "arxiv"},
+                    {"source_type": "arxiv"},
+                ]
+            }
+        )
         assert not result.passed
 
     def test_citation_fidelity_validator(self):
@@ -267,25 +255,29 @@ class TestValidators:
         validator = CitationFidelityValidator(min_fidelity=1.0)
 
         # Test pass
-        result = validator.validate({
-            "report": {
-                "citations": [
-                    {"id": "c1", "valid": True},
-                    {"id": "c2", "valid": True},
-                ]
+        result = validator.validate(
+            {
+                "report": {
+                    "citations": [
+                        {"id": "c1", "valid": True},
+                        {"id": "c2", "valid": True},
+                    ]
+                }
             }
-        })
+        )
         assert result.passed
 
         # Test fail
-        result = validator.validate({
-            "report": {
-                "citations": [
-                    {"id": "c1", "valid": True},
-                    {"id": "c2", "valid": False},
-                ]
+        result = validator.validate(
+            {
+                "report": {
+                    "citations": [
+                        {"id": "c1", "valid": True},
+                        {"id": "c2", "valid": False},
+                    ]
+                }
             }
-        })
+        )
         assert not result.passed
         assert result.severity == Severity.CRITICAL
 

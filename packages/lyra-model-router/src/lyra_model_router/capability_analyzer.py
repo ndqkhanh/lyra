@@ -14,6 +14,7 @@ class TaskRequirements:
         complexity_score: Estimated complexity 0.0-1.0.
         required_capabilities: Tuple of capability tags needed.
     """
+
     category: str
     complexity_score: float
     required_capabilities: tuple[str, ...]
@@ -21,8 +22,26 @@ class TaskRequirements:
 
 # Keywords that hint at task categories
 _CATEGORY_KEYWORDS: dict[str, tuple[str, ...]] = {
-    "architecture": ("architecture", "design", "system", "plan", "overview", "trade-off", "decision"),
-    "coding": ("code", "implement", "function", "class", "write", "program", "script", "debug", "refactor"),
+    "architecture": (
+        "architecture",
+        "design",
+        "system",
+        "plan",
+        "overview",
+        "trade-off",
+        "decision",
+    ),
+    "coding": (
+        "code",
+        "implement",
+        "function",
+        "class",
+        "write",
+        "program",
+        "script",
+        "debug",
+        "refactor",
+    ),
     "review": ("review", "audit", "check", "inspect", "verify", "validate", "quality"),
     "research": ("research", "analyze", "investigate", "explore", "survey", "compare", "deep dive"),
     "lookup": ("lookup", "find", "search", "retrieve", "get", "fetch", "simple query"),

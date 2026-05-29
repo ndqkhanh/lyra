@@ -73,9 +73,7 @@ class ModelVote:
     def __post_init__(self) -> None:
         """Clamp confidence to [0.0, 1.0]."""
         if not 0.0 <= self.confidence <= 1.0:
-            object.__setattr__(
-                self, "confidence", max(0.0, min(1.0, self.confidence))
-            )
+            object.__setattr__(self, "confidence", max(0.0, min(1.0, self.confidence)))
 
 
 @dataclass(frozen=True)
@@ -108,18 +106,12 @@ class AdversarialVerdict:
     def __post_init__(self) -> None:
         """Validate votes tuple has exactly 3 elements."""
         if len(self.votes) != 3:
-            raise ValueError(
-                f"AdversarialVerdict requires exactly 3 votes, got {len(self.votes)}"
-            )
+            raise ValueError(f"AdversarialVerdict requires exactly 3 votes, got {len(self.votes)}")
         # Clamp confidence and consensus_level
         if not 0.0 <= self.confidence <= 1.0:
-            object.__setattr__(
-                self, "confidence", max(0.0, min(1.0, self.confidence))
-            )
+            object.__setattr__(self, "confidence", max(0.0, min(1.0, self.confidence)))
         if not 0.0 <= self.consensus_level <= 1.0:
-            object.__setattr__(
-                self, "consensus_level", max(0.0, min(1.0, self.consensus_level))
-            )
+            object.__setattr__(self, "consensus_level", max(0.0, min(1.0, self.consensus_level)))
 
 
 @dataclass(frozen=True)
@@ -147,9 +139,9 @@ class VerificationRequest:
 class ModelProvider(Protocol):
     """Protocol for model invocation.
 
-    Any object that implements this protocol can be used as a model provider
-    for adversarial verification. This enables testing with mock providers
-    and integration with different LLM backends.
+    Any object that implements this protocol can be used as a model provider for adversarial
+    verification. This enables testing with mock providers and integration with different LLM
+    backends.
     """
 
     async def invoke(
@@ -176,7 +168,7 @@ class ModelProvider(Protocol):
 # ── Prompt Templates ───────────────────────────────────────────────────
 
 
-_VERIFICATION_PROMPT_TEMPLATE = """You are a safety reviewer evaluating whether an AI agent action should be approved.
+_VERIFICATION_PROMPT_TEMPLATE = """You are a safety reviewer checking AI agent actions for approval.
 
 **Action Description:**
 {action_description}
@@ -280,7 +272,7 @@ def _parse_model_response(response: str, model_name: str, model_family: ModelFam
             # Collect remaining lines as part of reasoning
             idx = lines.index(line)
             if idx + 1 < len(lines):
-                reasoning += "\n" + "\n".join(lines[idx + 1:])
+                reasoning += "\n" + "\n".join(lines[idx + 1 :])
             break
 
     if not reasoning:
@@ -383,9 +375,7 @@ def _aggregate_votes(
     if dissenting:
         reasoning_lines.append("\nDissenting opinions:")
         for vote in dissenting:
-            reasoning_lines.append(
-                f"  {vote.model_family.value}: {vote.reasoning[:100]}..."
-            )
+            reasoning_lines.append(f"  {vote.model_family.value}: {vote.reasoning[:100]}...")
 
     reasoning_summary = "\n".join(reasoning_lines)
 
@@ -585,9 +575,13 @@ class AdversarialVerifier:
             }
 
         n = len(self._history)
-        approve_count = sum(1 for v in self._history if v.final_verdict == AdversarialVerdictType.APPROVE)
+        approve_count = sum(
+            1 for v in self._history if v.final_verdict == AdversarialVerdictType.APPROVE
+        )
         deny_count = sum(1 for v in self._history if v.final_verdict == AdversarialVerdictType.DENY)
-        uncertain_count = sum(1 for v in self._history if v.final_verdict == AdversarialVerdictType.UNCERTAIN)
+        uncertain_count = sum(
+            1 for v in self._history if v.final_verdict == AdversarialVerdictType.UNCERTAIN
+        )
         escalation_count = sum(1 for v in self._history if v.requires_escalation)
 
         return {

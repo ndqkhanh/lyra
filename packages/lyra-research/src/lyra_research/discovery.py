@@ -15,6 +15,7 @@ import requests
 
 class SourceType(str, Enum):
     """Type of research source."""
+
     PAPER = "paper"
     REPOSITORY = "repository"
     BLOG = "blog"
@@ -25,6 +26,7 @@ class SourceType(str, Enum):
 @dataclass
 class ResearchSource:
     """A discovered research source."""
+
     id: str
     title: str
     source_type: SourceType
@@ -132,12 +134,22 @@ class SemanticScholarDiscovery:
 
                 if response.status_code == 429:  # Rate limited
                     if attempt < max_retries - 1:
-                        delay = base_delay * (2 ** attempt)  # Exponential backoff
-                        print(f"Semantic Scholar rate limited. Retrying in {delay}s... (attempt {attempt + 1}/{max_retries})")
+                        delay = base_delay * (2**attempt)  # Exponential backoff
+                        print(
+
+                                f"Semantic Scholar rate limited. Retrying in {delay}s... (attempt "
+                                f"{attempt + 1}/{max_retries})"
+
+                        )
                         time.sleep(delay)
                         continue
                     else:
-                        print(f"Semantic Scholar API error: Rate limit exceeded after {max_retries} attempts")
+                        print(
+
+                                f"Semantic Scholar API error: Rate limit exceeded after "
+                                f"{max_retries} attempts"
+
+                        )
                         return []
 
                 if response.status_code != 200:
@@ -172,7 +184,7 @@ class SemanticScholarDiscovery:
 
             except Exception as e:
                 if attempt < max_retries - 1:
-                    delay = base_delay * (2 ** attempt)
+                    delay = base_delay * (2**attempt)
                     print(f"Semantic Scholar error: {e}. Retrying in {delay}s...")
                     time.sleep(delay)
                 else:
@@ -228,9 +240,7 @@ class GitHubDiscovery:
 
             for repo in data.get("items", []):
                 # Parse created_at
-                created_at = datetime.fromisoformat(
-                    repo["created_at"].replace("Z", "+00:00")
-                )
+                created_at = datetime.fromisoformat(repo["created_at"].replace("Z", "+00:00"))
 
                 source = ResearchSource(
                     id=str(repo["id"]),
@@ -246,7 +256,9 @@ class GitHubDiscovery:
                         "forks": repo.get("forks_count", 0),
                         "open_issues": repo.get("open_issues_count", 0),
                         "topics": repo.get("topics", []),
-                        "license": repo.get("license", {}).get("name", "") if repo.get("license") else "",
+                        "license": (
+                            repo.get("license", {}).get("name", "") if repo.get("license") else ""
+                        ),
                         "default_branch": repo.get("default_branch", "main"),
                     },
                 )

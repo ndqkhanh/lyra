@@ -10,6 +10,7 @@ from .symbols import SymbolRegistry
 @dataclass
 class ExpandableSection:
     """Expandable content section"""
+
     id: str
     title: str
     content: str
@@ -22,6 +23,7 @@ class ExpandableSection:
 @dataclass
 class CollapseState:
     """State manager for collapsed/expanded sections"""
+
     states: dict[str, bool] = field(default_factory=dict)
 
     def is_expanded(self, section_id: str) -> bool:
@@ -61,11 +63,7 @@ class TruncationEngine:
         self.layout = LayoutEngine()
 
     def truncate_lines(
-        self,
-        lines: list[str],
-        max_lines: int,
-        preserve_first: int = 5,
-        preserve_last: int = 3
+        self, lines: list[str], max_lines: int, preserve_first: int = 5, preserve_last: int = 3
     ) -> tuple[list[str], int]:
         """
         Truncate lines with smart preservation.
@@ -87,11 +85,7 @@ class TruncationEngine:
         # Otherwise just show first max_lines
         return lines[:max_lines], hidden_count
 
-    def create_truncation_indicator(
-        self,
-        hidden_count: int,
-        indent: int = 0
-    ) -> str:
+    def create_truncation_indicator(self, hidden_count: int, indent: int = 0) -> str:
         """Create '… +N lines' indicator"""
         indent_str = " " * indent
         indicator = f"… +{hidden_count} lines"
@@ -113,11 +107,7 @@ class ExpandableRenderer:
         self.truncation = TruncationEngine(use_colors=use_colors)
         self.collapse_state = CollapseState()
 
-    def render_section(
-        self,
-        section: ExpandableSection,
-        indent: int = 0
-    ) -> list[str]:
+    def render_section(self, section: ExpandableSection, indent: int = 0) -> list[str]:
         """Render expandable section"""
         lines = []
         indent_str = " " * indent
@@ -144,7 +134,7 @@ class ExpandableRenderer:
                     content_lines,
                     section.truncate_at,
                     section.preserve_first,
-                    section.preserve_last
+                    section.preserve_last,
                 )
 
                 for line in truncated:
@@ -167,7 +157,7 @@ class ExpandableRenderer:
         warning_count: int,
         file_count: int,
         diagnostics: list[dict] | None = None,
-        indent: int = 0
+        indent: int = 0,
     ) -> list[str]:
         """Render diagnostic issues with collapse/expand"""
         lines = []
@@ -178,7 +168,11 @@ class ExpandableRenderer:
         is_expanded = self.collapse_state.is_expanded(section_id)
         expand_hint = "" if is_expanded else " (ctrl+o to expand)"
 
-        summary = f"Found {self.colors.red(str(error_count))} errors, {self.colors.yellow(str(warning_count))} warnings in {file_count} file(s){self.colors.dim(expand_hint)}"
+        summary =(
+            f"Found {self.colors.red(str(error_count))} errors, "
+            f"{self.colors.yellow(str(warning_count))} warnings in {file_count} file(s)"
+            f"{self.colors.dim(expand_hint)}"
+        )
         lines.append(f"{indent_str}{self.colors.dim(connector)}  {summary}")
 
         # If expanded, show diagnostics
@@ -198,7 +192,9 @@ class ExpandableRenderer:
                     severity_icon = self.colors.cyan("ℹ")
 
                 location = f"{file_path}:{line_num}"
-                diag_line = f"{indent_str}  {severity_icon} {self.colors.cyan(location)} - {message}"
+                diag_line = (
+                    f"{indent_str}  {severity_icon} {self.colors.cyan(location)} - {message}"
+                )
                 lines.append(diag_line)
 
         return lines
@@ -209,7 +205,7 @@ class ExpandableRenderer:
         files_read: list[tuple[str, int]],
         files_referenced: list[str],
         skills_restored: list[str],
-        indent: int = 0
+        indent: int = 0,
     ) -> list[str]:
         """Render conversation compaction event"""
         lines = []
@@ -221,7 +217,9 @@ class ExpandableRenderer:
         is_expanded = self.collapse_state.is_expanded(section_id)
         expand_hint = " (ctrl+o for history)" if not is_expanded else ""
 
-        header = f"{self.colors.yellow(symbol)} Conversation compacted{self.colors.dim(expand_hint)}"
+        header = (
+            f"{self.colors.yellow(symbol)} Conversation compacted{self.colors.dim(expand_hint)}"
+        )
         lines.append(f"{indent_str}{header}")
 
         # Always show summary items
@@ -240,7 +238,12 @@ class ExpandableRenderer:
 
         # If expanded, show additional details
         if is_expanded:
-            lines.append(f"{indent_str}{self.colors.dim(connector)}  {self.colors.dim('Full compaction history:')}")
+            lines.append(
+
+                    f"{indent_str}{self.colors.dim(connector)}  "
+                    f"{self.colors.dim('Full compaction history:')}"
+
+            )
             lines.append(f"{indent_str}    {self.colors.dim('- Original size: 150,000 tokens')}")
             lines.append(f"{indent_str}    {self.colors.dim('- Compacted size: 45,000 tokens')}")
             lines.append(f"{indent_str}    {self.colors.dim('- Savings: 70%')}")

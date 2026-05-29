@@ -1,4 +1,5 @@
 """Contract tests for the ``pdf_extract`` tool."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -48,7 +49,9 @@ def test_direct_helper_raises_for_bad_magic(tmp_path: Path) -> None:
         extract_text_from_pdf(p)
 
 
-def test_no_backend_installed_returns_error(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_no_backend_installed_returns_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     p = tmp_path / "empty.pdf"
     p.write_bytes(b"%PDF-1.4\n%EOF\n")
 

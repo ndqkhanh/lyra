@@ -15,7 +15,7 @@ except Exception as e:
     print(f"Cannot get terminal size: {e}")
 
 # Check TERM environment variable
-import os
+import os  # noqa: E402
 
 print(f"TERM: {os.environ.get('TERM', 'not set')}")
 print(f"COLORTERM: {os.environ.get('COLORTERM', 'not set')}")

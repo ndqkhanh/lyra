@@ -18,19 +18,19 @@ from enum import Enum
 
 
 class PricingTier(Enum):
-    BUDGET = "budget"        # cheapest available
-    STANDARD = "standard"    # balanced cost/perf
-    PREMIUM = "premium"      # best quality, highest cost
+    BUDGET = "budget"  # cheapest available
+    STANDARD = "standard"  # balanced cost/perf
+    PREMIUM = "premium"  # best quality, highest cost
 
 
 # Approximate pricing per 1M tokens (USD) — snapshot, updated via config
 _DEFAULT_PRICING: dict[str, dict[str, float]] = {
-    "claude-haiku-4-5":     {"input": 0.80, "output": 4.00},
-    "claude-sonnet-4-6":    {"input": 3.00, "output": 15.00},
-    "claude-opus-4-7":      {"input": 15.00, "output": 75.00},
-    "deepseek-v4-pro":      {"input": 0.50, "output": 2.00},
-    "gpt-4o":               {"input": 2.50, "output": 10.00},
-    "gpt-4o-mini":          {"input": 0.15, "output": 0.60},
+    "claude-haiku-4-5": {"input": 0.80, "output": 4.00},
+    "claude-sonnet-4-6": {"input": 3.00, "output": 15.00},
+    "claude-opus-4-7": {"input": 15.00, "output": 75.00},
+    "deepseek-v4-pro": {"input": 0.50, "output": 2.00},
+    "gpt-4o": {"input": 2.50, "output": 10.00},
+    "gpt-4o-mini": {"input": 0.15, "output": 0.60},
 }
 
 _TIER_MAPPING: dict[str, PricingTier] = {
@@ -51,7 +51,7 @@ class ProviderQuote:
     estimated_total_usd: float
     est_input_tokens: int
     est_output_tokens: int
-    load_factor: float        # 0 = idle, 1 = saturated
+    load_factor: float  # 0 = idle, 1 = saturated
     latency_estimate_ms: float
     timestamp: float
 
@@ -78,16 +78,20 @@ class DynamicPricingEngine:
         snapshot = engine.snapshot(input_tokens=1000, output_tokens=500)
     """
 
-    pricing_table: dict[str, dict[str, float]] = field(default_factory=lambda: dict(_DEFAULT_PRICING))
+    pricing_table: dict[str, dict[str, float]] = field(
+        default_factory=lambda: dict(_DEFAULT_PRICING)
+    )
     load_factors: dict[str, float] = field(default_factory=dict)
-    latency_profiles: dict[str, float] = field(default_factory=lambda: {
-        "claude-haiku-4-5": 200.0,
-        "claude-sonnet-4-6": 800.0,
-        "claude-opus-4-7": 2500.0,
-        "deepseek-v4-pro": 600.0,
-        "gpt-4o": 1200.0,
-        "gpt-4o-mini": 300.0,
-    })
+    latency_profiles: dict[str, float] = field(
+        default_factory=lambda: {
+            "claude-haiku-4-5": 200.0,
+            "claude-sonnet-4-6": 800.0,
+            "claude-opus-4-7": 2500.0,
+            "deepseek-v4-pro": 600.0,
+            "gpt-4o": 1200.0,
+            "gpt-4o-mini": 300.0,
+        }
+    )
     budget_pressure: float = 0.0
 
     def estimate(
@@ -180,7 +184,8 @@ class DynamicPricingEngine:
         """Estimate cost for a routing tier (fast/reasoning/advisor)."""
         pricing_tier = _TIER_MAPPING.get(tier, PricingTier.STANDARD)
         candidates = [
-            pid for pid, p in self.pricing_table.items()
+            pid
+            for pid, p in self.pricing_table.items()
             if (
                 (pricing_tier == PricingTier.BUDGET and p["input"] <= 1.0)
                 or (pricing_tier == PricingTier.STANDARD and 1.0 < p["input"] <= 5.0)

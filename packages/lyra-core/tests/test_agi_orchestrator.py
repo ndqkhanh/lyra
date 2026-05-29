@@ -110,9 +110,18 @@ class TestAGIOrchestrator:
     def test_get_overview_agi_readiness_requires_three_ready(self, orch):
         """agi_readiness requires >0.6 overall health AND >=3 ready phases."""
         high_pkgs = {
-            "lyra_verification_mesh", "lyra_hbhc", "lyra_viper_mcp", "lyra_attestor",
-            "lyra_causal_graph", "lyra_counterfactual", "lyra_science_pipeline", "lyra_claim_verification",
-            "lyra_drift_detector", "lyra_skill_weaver", "lyra_context_profiler", "lyra_competence_map",
+            "lyra_verification_mesh",
+            "lyra_hbhc",
+            "lyra_viper_mcp",
+            "lyra_attestor",
+            "lyra_causal_graph",
+            "lyra_counterfactual",
+            "lyra_science_pipeline",
+            "lyra_claim_verification",
+            "lyra_drift_detector",
+            "lyra_skill_weaver",
+            "lyra_context_profiler",
+            "lyra_competence_map",
         }
 
         def mock_import(name, *args, **__):
@@ -129,7 +138,10 @@ class TestAGIOrchestrator:
     def test_get_overview_agi_readiness_fails_below_three_ready(self, orch):
         """agi_readiness fails when <3 phases are ready."""
         high_pkgs = {
-            "lyra_verification_mesh", "lyra_hbhc", "lyra_viper_mcp", "lyra_attestor",
+            "lyra_verification_mesh",
+            "lyra_hbhc",
+            "lyra_viper_mcp",
+            "lyra_attestor",
         }
 
         def mock_import(name, *args, **__):

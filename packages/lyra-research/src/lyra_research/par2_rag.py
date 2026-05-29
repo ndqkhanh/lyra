@@ -34,11 +34,11 @@ logger = logging.getLogger(__name__)
 class ActionType(Enum):
     """Categories of research actions."""
 
-    SEARCH = "search"          # Query a knowledge source
-    READ = "read"              # Read / ingest a source document
-    ANALYZE = "analyze"        # Analyse findings
+    SEARCH = "search"  # Query a knowledge source
+    READ = "read"  # Read / ingest a source document
+    ANALYZE = "analyze"  # Analyse findings
     SYNTHESIZE = "synthesize"  # Synthesize multiple findings
-    VERIFY = "verify"          # Verify claims or citations
+    VERIFY = "verify"  # Verify claims or citations
 
 
 class ActionStatus(Enum):
@@ -462,8 +462,7 @@ class PAR2RAGEngine:
 
         elif action.action_type == ActionType.VERIFY:
             content = (
-                f"Verification: {action.description}. "
-                f"Claims checked against cited sources."
+                f"Verification: {action.description}. " f"Claims checked against cited sources."
             )
             confidence = 0.8
             sources = [action.target] if action.target else []
@@ -528,9 +527,7 @@ class PAR2RAGEngine:
         for f in findings:
             for src in f.sources:
                 if src in sources_seen and sources_seen[src] != f.content[:50]:
-                    inconsistencies.append(
-                        f"Source '{src}' cited with differing interpretations."
-                    )
+                    inconsistencies.append(f"Source '{src}' cited with differing interpretations.")
                     break
                 sources_seen[src] = f.content[:50]
 
@@ -663,7 +660,9 @@ class PAR2RAGEngine:
         if coverage:
             summary_parts.append("\nCoverage by subtopic:")
             for cmap in coverage:
-                summary_parts.append(f"  - {cmap.subtopic_id}: {cmap.coverage:.0%} ({cmap.evidence_count} items)")
+                summary_parts.append(
+                    f"  - {cmap.subtopic_id}: {cmap.coverage:.0%} ({cmap.evidence_count} items)"
+                )
 
         # Run source verification audit on combined findings
         audit: AuditReport | None = None
@@ -818,7 +817,10 @@ def _generate_subtopic_templates(query: str, depth: int) -> list[tuple[str, str]
         ),
         (
             f"Comparative analysis for {query}",
-            f"Head-to-head comparisons of top methods, trade-offs, and selection guidance for {query}.",
+(
+                f"Head-to-head comparisons of top methods, trade-offs, and selection guidance for "
+                f"{query}."
+            ),
         ),
         (
             f"Future directions for {query}",

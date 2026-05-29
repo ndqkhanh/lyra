@@ -93,20 +93,22 @@ class RetrievalRouter:
                 tiers_used.append(tier)
                 self._stats[tier] += 1
                 for i, r in enumerate(tier_results):
-                    all_results.append(RankedResult(
-                        item_id=r.get("id", f"{tier.value}:{i}"),
-                        content=r.get("content", ""),
-                        score=r.get("score", 0.5),
-                        tier=tier,
-                        rank=i + 1,
-                    ))
+                    all_results.append(
+                        RankedResult(
+                            item_id=r.get("id", f"{tier.value}:{i}"),
+                            content=r.get("content", ""),
+                            score=r.get("score", 0.5),
+                            tier=tier,
+                            rank=i + 1,
+                        )
+                    )
 
             if len(all_results) >= ctx.max_results:
                 break
 
         total_ms = (time.perf_counter() - start) * 1000
         all_results.sort(key=lambda r: -r.score)
-        results = all_results[:ctx.max_results]
+        results = all_results[: ctx.max_results]
 
         return RetrievalReport(
             results=results,
@@ -115,9 +117,7 @@ class RetrievalRouter:
             result_count=len(results),
         )
 
-    def _search_tier(
-        self, tier: RetrievalTier, ctx: RetrievalContext
-    ) -> list[dict]:
+    def _search_tier(self, tier: RetrievalTier, ctx: RetrievalContext) -> list[dict]:
         searcher = self._searchers.get(tier)
         if searcher is None:
             return []
@@ -140,7 +140,11 @@ class RetrievalRouter:
     def _adapt_grep_results(self, searcher: object, ctx: RetrievalContext) -> list[dict]:
         results = searcher.search(ctx.query, limit=ctx.max_results)  # type: ignore[union-attr]
         return [
-            {"id": f"grep:{r.file_path}:{r.line_number}", "content": r.line_content, "score": r.score}
+            {
+                "id": f"grep:{r.file_path}:{r.line_number}",
+                "content": r.line_content,
+                "score": r.score,
+            }
             for r in results
         ]
 

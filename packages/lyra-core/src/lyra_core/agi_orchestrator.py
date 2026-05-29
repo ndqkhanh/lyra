@@ -23,11 +23,12 @@ logger = logging.getLogger(__name__)
 
 class AGIPhase(Enum):
     """The 5 phases of AGI development, implemented sequentially but running concurrently."""
-    CITADEL = auto()       # Safety first
-    ORACLE = auto()        # Understanding
-    CHAMELEON = auto()     # Adaptation
-    SINGULARITY = auto()   # Self-improvement
-    SUPERORGANISM = auto() # Collective
+
+    CITADEL = auto()  # Safety first
+    ORACLE = auto()  # Understanding
+    CHAMELEON = auto()  # Adaptation
+    SINGULARITY = auto()  # Self-improvement
+    SUPERORGANISM = auto()  # Collective
 
 
 @dataclass
@@ -53,24 +54,44 @@ class AGIOrchestrator:
     def __init__(self):
         self.plans: dict[AGIPhase, PlanStatus] = {
             AGIPhase.CITADEL: PlanStatus(
-                name="Citadel", phase=AGIPhase.CITADEL,
-                packages=["lyra-verification-mesh", "lyra-hbhc", "lyra-viper-mcp", "lyra-attestor"]
+                name="Citadel",
+                phase=AGIPhase.CITADEL,
+                packages=["lyra-verification-mesh", "lyra-hbhc", "lyra-viper-mcp", "lyra-attestor"],
             ),
             AGIPhase.ORACLE: PlanStatus(
-                name="Oracle", phase=AGIPhase.ORACLE,
-                packages=["lyra-causal-graph", "lyra-counterfactual", "lyra-science-pipeline", "lyra-claim-verification"]
+                name="Oracle",
+                phase=AGIPhase.ORACLE,
+                packages=[
+                    "lyra-causal-graph",
+                    "lyra-counterfactual",
+                    "lyra-science-pipeline",
+                    "lyra-claim-verification",
+                ],
             ),
             AGIPhase.CHAMELEON: PlanStatus(
-                name="Chameleon", phase=AGIPhase.CHAMELEON,
-                packages=["lyra-drift-detector", "lyra-skill-weaver", "lyra-context-profiler", "lyra-competence-map"]
+                name="Chameleon",
+                phase=AGIPhase.CHAMELEON,
+                packages=[
+                    "lyra-drift-detector",
+                    "lyra-skill-weaver",
+                    "lyra-context-profiler",
+                    "lyra-competence-map",
+                ],
             ),
             AGIPhase.SINGULARITY: PlanStatus(
-                name="Singularity", phase=AGIPhase.SINGULARITY,
-                packages=["lyra-meta-evolution", "lyra-recursive-reward", "lyra-fork-worker"]
+                name="Singularity",
+                phase=AGIPhase.SINGULARITY,
+                packages=["lyra-meta-evolution", "lyra-recursive-reward", "lyra-fork-worker"],
             ),
             AGIPhase.SUPERORGANISM: PlanStatus(
-                name="Superorganism", phase=AGIPhase.SUPERORGANISM,
-                packages=["lyra-colony", "lyra-emergent-coord", "lyra-gossip-memory", "lyra-agent-lifecycle"]
+                name="Superorganism",
+                phase=AGIPhase.SUPERORGANISM,
+                packages=[
+                    "lyra-colony",
+                    "lyra-emergent-coord",
+                    "lyra-gossip-memory",
+                    "lyra-agent-lifecycle",
+                ],
             ),
         }
         self._health_history: list[dict[str, Any]] = []
@@ -84,15 +105,21 @@ class AGIOrchestrator:
             status.last_check = now
             status.health_score = self._compute_health(phase)
             status.is_ready = status.health_score > 0.6
-        self._health_history.append({
-            "timestamp": now,
-            "plans": {p.name: {"health": s.health_score, "ready": s.is_ready} for p, s in self.plans.items()}
-        })
+        self._health_history.append(
+            {
+                "timestamp": now,
+                "plans": {
+                    p.name: {"health": s.health_score, "ready": s.is_ready}
+                    for p, s in self.plans.items()
+                },
+            }
+        )
         return self.plans
 
     def _compute_health(self, phase: AGIPhase) -> float:
         """Compute health score for a phase. Simplified — real version imports actual packages."""
         import importlib
+
         score = 0.0
         count = 0
         for pkg in self.plans[phase].packages:
@@ -118,7 +145,9 @@ class AGIOrchestrator:
             if status.is_ready:
                 overview["ready_phases"] += 1
         overview["overall_health"] = total_health / max(len(self.plans), 1)
-        overview["agi_readiness"] = overview["overall_health"] > 0.6 and overview["ready_phases"] >= 3
+        overview["agi_readiness"] = (
+            overview["overall_health"] > 0.6 and overview["ready_phases"] >= 3
+        )
         return overview
 
     async def start_background_health(self, interval: float = 60.0):

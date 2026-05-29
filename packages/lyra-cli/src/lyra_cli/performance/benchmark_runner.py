@@ -119,13 +119,19 @@ class BenchmarkRunner:
         """Create latency benchmark configurations."""
         return [
             BenchmarkConfig(
-                name="latency_llm_call", category=BenchmarkCategory.LATENCY,
-                iterations=10, warmup_iterations=3, baseline_value=500.0,
+                name="latency_llm_call",
+                category=BenchmarkCategory.LATENCY,
+                iterations=10,
+                warmup_iterations=3,
+                baseline_value=500.0,
                 metadata={"unit": "ms", "description": "Average LLM call latency"},
             ),
             BenchmarkConfig(
-                name="latency_tool_call", category=BenchmarkCategory.LATENCY,
-                iterations=20, warmup_iterations=5, baseline_value=50.0,
+                name="latency_tool_call",
+                category=BenchmarkCategory.LATENCY,
+                iterations=20,
+                warmup_iterations=5,
+                baseline_value=50.0,
                 metadata={"unit": "ms", "description": "Average tool call latency"},
             ),
         ]
@@ -135,13 +141,17 @@ class BenchmarkRunner:
         """Create throughput benchmark configurations."""
         return [
             BenchmarkConfig(
-                name="throughput_commands", category=BenchmarkCategory.THROUGHPUT,
-                iterations=3, baseline_value=10.0,
+                name="throughput_commands",
+                category=BenchmarkCategory.THROUGHPUT,
+                iterations=3,
+                baseline_value=10.0,
                 metadata={"unit": "commands/s", "description": "Command throughput"},
             ),
             BenchmarkConfig(
-                name="throughput_tokens", category=BenchmarkCategory.THROUGHPUT,
-                iterations=3, baseline_value=1000.0,
+                name="throughput_tokens",
+                category=BenchmarkCategory.THROUGHPUT,
+                iterations=3,
+                baseline_value=1000.0,
                 metadata={"unit": "tokens/s", "description": "Token generation throughput"},
             ),
         ]
@@ -151,13 +161,17 @@ class BenchmarkRunner:
         """Create memory benchmark configurations."""
         return [
             BenchmarkConfig(
-                name="memory_context_load", category=BenchmarkCategory.MEMORY,
-                iterations=5, baseline_value=256.0,
+                name="memory_context_load",
+                category=BenchmarkCategory.MEMORY,
+                iterations=5,
+                baseline_value=256.0,
                 metadata={"unit": "MB", "description": "Memory used loading context"},
             ),
             BenchmarkConfig(
-                name="memory_session_state", category=BenchmarkCategory.MEMORY,
-                iterations=5, baseline_value=50.0,
+                name="memory_session_state",
+                category=BenchmarkCategory.MEMORY,
+                iterations=5,
+                baseline_value=50.0,
                 metadata={"unit": "MB", "description": "Memory used per session"},
             ),
         ]
@@ -167,13 +181,17 @@ class BenchmarkRunner:
         """Create token efficiency benchmark configurations."""
         return [
             BenchmarkConfig(
-                name="token_efficiency_prompt", category=BenchmarkCategory.TOKEN_EFFICIENCY,
-                iterations=10, baseline_value=0.85,
+                name="token_efficiency_prompt",
+                category=BenchmarkCategory.TOKEN_EFFICIENCY,
+                iterations=10,
+                baseline_value=0.85,
                 metadata={"unit": "ratio", "description": "Prompt token efficiency ratio"},
             ),
             BenchmarkConfig(
-                name="token_efficiency_response", category=BenchmarkCategory.TOKEN_EFFICIENCY,
-                iterations=10, baseline_value=0.80,
+                name="token_efficiency_response",
+                category=BenchmarkCategory.TOKEN_EFFICIENCY,
+                iterations=10,
+                baseline_value=0.80,
                 metadata={"unit": "ratio", "description": "Response token efficiency ratio"},
             ),
         ]
@@ -270,7 +288,9 @@ class BenchmarkRunner:
             f"{config.name}_mean_ms": mean,
         }
 
-    def _compare_to_baseline(self, config: BenchmarkConfig, metrics: dict[str, float]) -> BaselineComparison | None:
+    def _compare_to_baseline(
+        self, config: BenchmarkConfig, metrics: dict[str, float]
+    ) -> BaselineComparison | None:
         """Compare results against a stored baseline value."""
         if config.baseline_value is None:
             return None
@@ -292,11 +312,7 @@ class BenchmarkRunner:
 
     def detect_regressions(self) -> list[BenchmarkResult]:
         """Find benchmark results that have regressed against baselines."""
-        return [
-            r
-            for r in self.results
-            if r.baseline is not None and r.baseline.regressed
-        ]
+        return [r for r in self.results if r.baseline is not None and r.baseline.regressed]
 
     def get_summary(self) -> dict[str, Any]:
         """Get a summary of all benchmark results."""
@@ -332,13 +348,15 @@ class BenchmarkRunner:
                     "metrics": r.metrics,
                     "duration_seconds": r.duration_seconds,
                     "error": r.error_message,
-                    "baseline": {
-                        "value": r.baseline.baseline_value,
-                        "change_pct": r.baseline.change_pct,
-                        "regressed": r.baseline.regressed,
-                    }
-                    if r.baseline
-                    else None,
+                    "baseline": (
+                        {
+                            "value": r.baseline.baseline_value,
+                            "change_pct": r.baseline.change_pct,
+                            "regressed": r.baseline.regressed,
+                        }
+                        if r.baseline
+                        else None
+                    ),
                 }
                 for r in self.results
             ],

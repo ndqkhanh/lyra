@@ -23,10 +23,10 @@ from enum import Enum
 
 
 class GateNumber(Enum):
-    GATE_1 = 1    # Syntax & Structure
-    GATE_2 = 2    # Semantic Correctness
-    GATE_3 = 3    # Performance Benchmark
-    GATE_4 = 4    # Safety Screener
+    GATE_1 = 1  # Syntax & Structure
+    GATE_2 = 2  # Semantic Correctness
+    GATE_3 = 3  # Performance Benchmark
+    GATE_4 = 4  # Safety Screener
 
 
 class GateStatus(Enum):
@@ -42,9 +42,9 @@ class GateResult:
 
     gate: GateNumber
     status: GateStatus
-    score: float                       # 0.0–1.0
+    score: float  # 0.0–1.0
     threshold: float
-    issues: tuple[str, ...]            # Issues found
+    issues: tuple[str, ...]  # Issues found
     auto_fixes_applied: tuple[str, ...]  # Fixes auto-applied
     recommendation: str
     timestamp: float
@@ -57,7 +57,7 @@ class ValidationReport:
     report_id: str
     skill_name: str
     skill_triggers: tuple[str, ...]
-    skill_body: str                    # The skill implementation
+    skill_body: str  # The skill implementation
     gate_results: tuple[GateResult, ...]
     passed: bool
     needs_human_review: bool
@@ -164,10 +164,7 @@ def _gate2_semantic(skill_body: str) -> GateResult:
     if is_shell:
         if not re.match(r"^#!\s*/", stripped.split("\n")[0]):
             issues.append(_SEMANTIC_CHECKS["valid_shebang"])
-        if not any(
-            kw in stripped
-            for kw in ("def ", "function", "()", "echo", "printf", "#!/")
-        ):
+        if not any(kw in stripped for kw in ("def ", "function", "()", "echo", "printf", "#!/")):
             issues.append(_SEMANTIC_CHECKS["function_defined"])
     else:
         if "def " not in stripped and "class " not in stripped and "import " not in stripped:
@@ -175,8 +172,8 @@ def _gate2_semantic(skill_body: str) -> GateResult:
 
     secret_patterns = [
         r'(?:api[_-]?key|apikey|secret|token|password|passwd)\s*[:=]\s*["\'][\w\-]{8,}["\']',
-        r'(?:sk-[A-Za-z0-9]{20,})',
-        r'(?:AKIA[0-9A-Z]{16})',
+        r"(?:sk-[A-Za-z0-9]{20,})",
+        r"(?:AKIA[0-9A-Z]{16})",
     ]
     for pat in secret_patterns:
         if re.search(pat, stripped, re.IGNORECASE):
@@ -184,7 +181,9 @@ def _gate2_semantic(skill_body: str) -> GateResult:
             break
 
     destructive_defaults = [
-        r'\brm\s+-rf\b', r'\bDROP\s+TABLE\b', r'\bDELETE\s+FROM\b',
+        r"\brm\s+-rf\b",
+        r"\bDROP\s+TABLE\b",
+        r"\bDELETE\s+FROM\b",
     ]
     for pat in destructive_defaults:
         if re.search(pat, stripped, re.IGNORECASE):
@@ -237,11 +236,13 @@ def _gate3_performance(skill_body: str, skill_triggers: tuple[str, ...]) -> Gate
     if line_count > 1000:
         issues.append("Skill exceeds 1000-line limit — rejected")
 
-    import_count = sum(1 for ln in lines if ln.strip().startswith("import ") or ln.strip().startswith("from "))
+    import_count = sum(
+        1 for ln in lines if ln.strip().startswith("import ") or ln.strip().startswith("from ")
+    )
     if import_count > 20:
         issues.append(f"Excessive imports ({import_count}); may increase startup time")
 
-    _loop_count = sum(1 for ln in lines if re.search(r'\b(for|while)\b', ln))
+    _loop_count = sum(1 for ln in lines if re.search(r"\b(for|while)\b", ln))
     nested_loops = 0
     indent_levels = []
     for ln in lines:
@@ -249,7 +250,7 @@ def _gate3_performance(skill_body: str, skill_triggers: tuple[str, ...]) -> Gate
         if stripped:
             indent = len(ln) - len(stripped)
             indent_levels.append(indent // 4)
-            if re.search(r'\b(for|while)\b', stripped):
+            if re.search(r"\b(for|while)\b", stripped):
                 if len(indent_levels) >= 2 and indent_levels[-1] > indent_levels[-2]:
                     nested_loops += 1
 
@@ -303,15 +304,15 @@ def _gate4_safety(skill_body: str) -> GateResult:
     issues: list[str] = []
 
     dangerous_calls = [
-        (r'\bsubprocess\.(call|run|Popen)\b', "subprocess execution"),
-        (r'\bos\.system\b', "shell command execution"),
-        (r'\beval\s*\(', "eval() call"),
-        (r'\bexec\s*\(', "exec() call"),
-        (r'\b__import__\s*\(', "dynamic import"),
-        (r'\bshutil\.rmtree\b', "recursive directory deletion"),
+        (r"\bsubprocess\.(call|run|Popen)\b", "subprocess execution"),
+        (r"\bos\.system\b", "shell command execution"),
+        (r"\beval\s*\(", "eval() call"),
+        (r"\bexec\s*\(", "exec() call"),
+        (r"\b__import__\s*\(", "dynamic import"),
+        (r"\bshutil\.rmtree\b", "recursive directory deletion"),
         (r'\bopen\s*\([^)]*[\'"][wa][\'"]', "file write in skill body"),
-        (r'requests\.(?:post|put|patch|delete)\b', "outbound HTTP request"),
-        (r'\bsocket\.', "raw socket usage"),
+        (r"requests\.(?:post|put|patch|delete)\b", "outbound HTTP request"),
+        (r"\bsocket\.", "raw socket usage"),
     ]
 
     for pattern, desc in dangerous_calls:
@@ -320,7 +321,7 @@ def _gate4_safety(skill_body: str) -> GateResult:
 
     file_write_patterns = [
         (r'open\s*\([^)]*[\'"][wa][\'"]', "file write"),
-        (r'\.write\s*\(', "write operation"),
+        (r"\.write\s*\(", "write operation"),
     ]
     file_ops = sum(1 for p, _ in file_write_patterns if re.search(p, skill_body, re.IGNORECASE))
 
@@ -353,6 +354,7 @@ def _gate4_safety(skill_body: str) -> GateResult:
 
 
 # ── Pipeline ──────────────────────────────────────────────────────────
+
 
 @dataclass
 class SkillValidationPipeline:
@@ -405,9 +407,7 @@ class SkillValidationPipeline:
         results.append(r1)
 
         if r1.status == GateStatus.REJECTED:
-            report = self._build_report(
-                skill_name, skill_triggers, skill_body, tuple(results)
-            )
+            report = self._build_report(skill_name, skill_triggers, skill_body, tuple(results))
             self._history.append(report)
             return report
 
@@ -422,9 +422,7 @@ class SkillValidationPipeline:
             r4 = _gate4_safety(skill_body)
             results.append(r4)
 
-        report = self._build_report(
-            skill_name, skill_triggers, skill_body, tuple(results)
-        )
+        report = self._build_report(skill_name, skill_triggers, skill_body, tuple(results))
         self._history.append(report)
         return report
 
@@ -435,23 +433,23 @@ class SkillValidationPipeline:
         skill_body: str,
         results: tuple[GateResult, ...],
     ) -> ValidationReport:
-        passed = all(
-            r.status in (GateStatus.PASSED, GateStatus.AUTO_FIXED)
-            for r in results
-        )
-        needs_review = any(
-            r.status == GateStatus.NEEDS_REVIEW for r in results
-        )
-        composite = (
-            sum(r.score for r in results) / len(results) if results else 0.0
-        )
+        passed = all(r.status in (GateStatus.PASSED, GateStatus.AUTO_FIXED) for r in results)
+        needs_review = any(r.status == GateStatus.NEEDS_REVIEW for r in results)
+        composite = sum(r.score for r in results) / len(results) if results else 0.0
 
         if passed and not needs_review:
-            summary = f"Skill '{skill_name}' passed all {len(results)} gates (score={composite:.3f})."
+            summary = (
+                f"Skill '{skill_name}' passed all {len(results)} gates (score={composite:.3f})."
+            )
         elif needs_review:
-            summary = f"Skill '{skill_name}' needs human review ({len(results)} gates, score={composite:.3f})."
+            summary =(
+                f"Skill '{skill_name}' needs human review ({len(results)} gates, score="
+                f"{composite:.3f})."
+            )
         else:
-            summary = f"Skill '{skill_name}' rejected ({len(results)} gates, score={composite:.3f})."
+            summary = (
+                f"Skill '{skill_name}' rejected ({len(results)} gates, score={composite:.3f})."
+            )
 
         return ValidationReport(
             report_id=f"vr-{uuid.uuid4().hex[:12]}",

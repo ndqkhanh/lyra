@@ -40,7 +40,9 @@ class PredictionConfig:
     n_samples: int = 5000
     confidence_level: float = 0.95
     compute_full_distribution: bool = True
-    uncertainty_methods: list[str] = field(default_factory=lambda: ["std", "entropy", "quantile_range"])
+    uncertainty_methods: list[str] = field(
+        default_factory=lambda: ["std", "entropy", "quantile_range"]
+    )
     random_seed: int | None = None
 
 
@@ -212,9 +214,7 @@ class PredictionEngine:
 
         outcome_samples = values.get(target_var)
         if outcome_samples is None:
-            raise PredictionError(
-                f"Failed to compute values for target variable '{target_var}'."
-            )
+            raise PredictionError(f"Failed to compute values for target variable '{target_var}'.")
 
         # Compute statistics
         expected = float(np.mean(outcome_samples))
@@ -243,7 +243,9 @@ class PredictionEngine:
             },
         )
 
-        logger.debug("Prediction for %s: %.4f [%.4f, %.4f]", target_var, expected, ci_lower, ci_upper)
+        logger.debug(
+            "Prediction for %s: %.4f [%.4f, %.4f]", target_var, expected, ci_lower, ci_upper
+        )
         return result
 
     async def predict_async(
@@ -309,7 +311,9 @@ class PredictionEngine:
             # Differential entropy: -sum(p * log(p) * width) for p > 0
             nonzero = hist > 0
             if nonzero.any():
-                entropy = -float(np.sum(hist[nonzero] * np.log(hist[nonzero] + 1e-10) * bin_widths[0]))
+                entropy = -float(
+                    np.sum(hist[nonzero] * np.log(hist[nonzero] + 1e-10) * bin_widths[0])
+                )
 
         # Quantile range
         quantile_range = 0.0
@@ -476,15 +480,11 @@ class PredictionEngine:
             raise PredictionError("At least one intervention is required.")
 
         if target_var not in self._scm.endogenous_vars:
-            raise PredictionError(
-                f"Target variable '{target_var}' not found in SCM."
-            )
+            raise PredictionError(f"Target variable '{target_var}' not found in SCM.")
 
         for var_name in intervention:
             if var_name not in self._scm.endogenous_vars:
-                raise PredictionError(
-                    f"Intervention variable '{var_name}' not found in SCM."
-                )
+                raise PredictionError(f"Intervention variable '{var_name}' not found in SCM.")
 
     def __repr__(self) -> str:
         return f"PredictionEngine(scm={self._scm})"

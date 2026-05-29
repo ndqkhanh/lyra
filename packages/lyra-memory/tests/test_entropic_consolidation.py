@@ -37,7 +37,9 @@ class TestMemoryFragment:
         assert frag.source == "observation"
 
     def test_fragment_high_salience(self):
-        frag = MemoryFragment("f-err", "CRITICAL: deployment failed", 0.95, 0.9, -0.7, "error", 2000.0)
+        frag = MemoryFragment(
+            "f-err", "CRITICAL: deployment failed", 0.95, 0.9, -0.7, "error", 2000.0
+        )
         assert frag.salience > 0.9
         assert frag.emotional_valence < 0
 
@@ -129,7 +131,9 @@ class TestEntropicConsolidator:
     def test_deep_consolidation_with_high_salience(self):
         consolidator = EntropicConsolidator()
         frags = [
-            MemoryFragment(f"d{i}", f"important memory {i}", 0.7 + i * 0.05, 0.5, 0.2, "obs", float(i))
+            MemoryFragment(
+                f"d{i}", f"important memory {i}", 0.7 + i * 0.05, 0.5, 0.2, "obs", float(i)
+            )
             for i in range(8)
         ]
         consolidator.ingest(frags)
@@ -139,7 +143,15 @@ class TestEntropicConsolidator:
     def test_rem_synthesis(self):
         consolidator = EntropicConsolidator()
         frags = [
-            MemoryFragment(f"r{i}", f"diverse content {i}", 0.6, 0.5 + i * 0.1, 0.1 * i, f"source_{i % 3}", float(i))
+            MemoryFragment(
+                f"r{i}",
+                f"diverse content {i}",
+                0.6,
+                0.5 + i * 0.1,
+                0.1 * i,
+                f"source_{i % 3}",
+                float(i),
+            )
             for i in range(6)
         ]
         consolidator.ingest(frags)

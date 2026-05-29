@@ -282,7 +282,12 @@ class ContractNetProtocol:
         session.state = NegotiationState.AGREED
         self._contracts[contract.contract_id] = contract
 
-        logger.info("Awarded contract %s to %s (value=%.2f)", contract.contract_id, best_offer.proposer_id, best_offer.value)
+        logger.info(
+            "Awarded contract %s to %s (value=%.2f)",
+            contract.contract_id,
+            best_offer.proposer_id,
+            best_offer.value,
+        )
         return contract
 
     def get_contract(self, contract_id: str) -> Contract | None:
@@ -339,7 +344,9 @@ class MultiRoundNegotiator:
             deadline=deadline or _now() + (rounds * 5.0),
         )
         self._sessions[session.session_id] = session
-        logger.info("Started negotiation %s: %d participants", session.session_id, len(participants))
+        logger.info(
+            "Started negotiation %s: %d participants", session.session_id, len(participants)
+        )
         return session
 
     def make_offer(
@@ -354,7 +361,11 @@ class MultiRoundNegotiator:
         if session is None:
             raise NegotiationError(f"No session {session_id}")
 
-        if session.state in (NegotiationState.AGREED, NegotiationState.REJECTED, NegotiationState.EXPIRED):
+        if session.state in (
+            NegotiationState.AGREED,
+            NegotiationState.REJECTED,
+            NegotiationState.EXPIRED,
+        ):
             raise NegotiationError(f"Session {session_id} is {session.state.name}")
 
         if session.is_expired():
@@ -406,7 +417,12 @@ class MultiRoundNegotiator:
             round_number=session.current_round,
         )
         session.offers.append(offer)
-        logger.debug("Counter-offer by %s in round %d of %s", counter_proposer_id, session.current_round, session_id)
+        logger.debug(
+            "Counter-offer by %s in round %d of %s",
+            counter_proposer_id,
+            session.current_round,
+            session_id,
+        )
         return offer
 
     def accept_offer(self, session_id: str, offer_id: str, acceptor_id: str) -> Contract:
@@ -455,7 +471,12 @@ class MultiRoundNegotiator:
         session.state = NegotiationState.AGREED
         self._agreements[contract.contract_id] = contract
 
-        logger.info("Agreement reached in %s: %s accepted %s's offer", session_id, acceptor_id, target.proposer_id)
+        logger.info(
+            "Agreement reached in %s: %s accepted %s's offer",
+            session_id,
+            acceptor_id,
+            target.proposer_id,
+        )
         return contract
 
     def reject_session(self, session_id: str) -> None:
@@ -477,6 +498,7 @@ class MultiRoundNegotiator:
             return max(0.1, value - self._concession_rate * 0.75 * round_num)
         elif strategy == "random":
             import random
+
             return max(0.1, value + random.uniform(-0.2, 0.2))
         return value
 
@@ -583,7 +605,9 @@ class ConflictResolver:
             {"conflict_id": conflict_id, "resolution": resolution, "strategy": strat.name}
         )
 
-        logger.info("Resolved conflict %s via %s: %s", conflict_id, strat.name, resolution["winner"])
+        logger.info(
+            "Resolved conflict %s via %s: %s", conflict_id, strat.name, resolution["winner"]
+        )
         return resolution
 
     def _resolve_majority(self, conflict: dict[str, Any]) -> dict[str, Any]:
@@ -630,6 +654,7 @@ class ConflictResolver:
     def _resolve_random(self, conflict: dict[str, Any]) -> dict[str, Any]:
         """Resolve by random selection."""
         import random
+
         positions: dict[str, str] = conflict["positions"]
         unique = list(set(positions.values()))
         winner = random.choice(unique) if unique else "unresolved"
@@ -646,7 +671,8 @@ class ConflictResolver:
         for v in votes:
             vote_counts[v] += 1
 
-        winner = max(vote_counts, key=vote_counts.get) if vote_counts else "unresolved"  # type: ignore[arg-type]
+        # type: ignore[arg-type]
+        winner = max(vote_counts, key=vote_counts.get) if vote_counts else "unresolved"
         return {
             "winner": winner,
             "method": "ranked_choice",

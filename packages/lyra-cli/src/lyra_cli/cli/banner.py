@@ -36,18 +36,22 @@ def show_banner(console: Console, model: str = "Auto", show_full: bool = True):
     else:
         # Minimal banner
         console.print()
-        console.print(f"[bold cyan]Lyra[/bold cyan] [dim]·[/dim] [bold magenta]{model}[/bold magenta]")
+        console.print(
+            f"[bold cyan]Lyra[/bold cyan] [dim]·[/dim] [bold magenta]{model}[/bold magenta]"
+        )
 
         # Show path
         cwd = os.getcwd()
         home = os.path.expanduser("~")
         if cwd.startswith(home):
-            cwd = "~" + cwd[len(home):]
+            cwd = "~" + cwd[len(home) :]
         console.print(f"[dim blue]{cwd}[/dim blue]")
         console.print()
 
 
-def show_banner_with_stats(console: Console, model: str = "Auto", tokens: int = 0, cost: float = 0.0):
+def show_banner_with_stats(
+    console: Console, model: str = "Auto", tokens: int = 0, cost: float = 0.0
+):
     """Show banner with stats (Continue pattern)"""
 
     banner = Text()
@@ -72,7 +76,7 @@ def show_banner_with_stats(console: Console, model: str = "Auto", tokens: int = 
     cwd = os.getcwd()
     home = os.path.expanduser("~")
     if cwd.startswith(home):
-        cwd = "~" + cwd[len(home):]
+        cwd = "~" + cwd[len(home) :]
     banner.append(f"\n{cwd}", style="dim blue")
 
     panel = Panel(
@@ -108,7 +112,7 @@ def show_banner_gradient(console: Console, model: str = "Auto"):
     cwd = os.getcwd()
     home = os.path.expanduser("~")
     if cwd.startswith(home):
-        cwd = "~" + cwd[len(home):]
+        cwd = "~" + cwd[len(home) :]
     console.print(f"    [dim blue]{cwd}[/dim blue]")
     console.print()
 
@@ -117,7 +121,9 @@ def show_banner_compact(console: Console, model: str = "Auto"):
     """Show compact banner (Claude Code style)"""
 
     console.print()
-    console.print("[bold cyan]╦  ╦ ╦ ╦═╗ ╔═╗[/bold cyan]  [bold magenta]" + model + "[/bold magenta]")
+    console.print(
+        "[bold cyan]╦  ╦ ╦ ╦═╗ ╔═╗[/bold cyan]  [bold magenta]" + model + "[/bold magenta]"
+    )
     console.print("[bold cyan]║  ╚╦╝ ╠╦╝ ╠═╣[/bold cyan]  [dim]AI Coding Assistant[/dim]")
     console.print("[bold cyan]╩═╝ ╩  ╩╚═ ╩ ╩[/bold cyan]")
 
@@ -125,7 +131,7 @@ def show_banner_compact(console: Console, model: str = "Auto"):
     cwd = os.getcwd()
     home = os.path.expanduser("~")
     if cwd.startswith(home):
-        cwd = "~" + cwd[len(home):]
+        cwd = "~" + cwd[len(home) :]
     console.print(f"\n[dim blue]{cwd}[/dim blue]")
     console.print()
 
@@ -153,7 +159,7 @@ def show_banner_animated(console: Console, model: str = "Auto"):
     cwd = os.getcwd()
     home = os.path.expanduser("~")
     if cwd.startswith(home):
-        cwd = "~" + cwd[len(home):]
+        cwd = "~" + cwd[len(home) :]
     console.print(f"    [dim blue]{cwd}[/dim blue]")
     console.print()
 
@@ -177,7 +183,7 @@ def show_banner_boxed(console: Console, model: str = "Auto"):
     cwd = os.getcwd()
     home = os.path.expanduser("~")
     if cwd.startswith(home):
-        cwd = "~" + cwd[len(home):]
+        cwd = "~" + cwd[len(home) :]
     banner.append(f"{cwd}\n", style="dim blue")
 
     panel = Panel(

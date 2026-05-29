@@ -56,7 +56,7 @@ class SelectionResult:
     selected: list[AgentGenome]
     rejected: list[AgentGenome]
     selection_pressure: float  # ratio of selected to total
-    diversity_score: float     # population diversity after selection
+    diversity_score: float  # population diversity after selection
 
 
 @dataclass
@@ -146,7 +146,7 @@ class TournamentSelection(SelectionStrategy):
         selected: list[AgentGenome] = []
 
         # Keep elite individuals
-        for elite in sorted_pop[:self.elite_count]:
+        for elite in sorted_pop[: self.elite_count]:
             selected.append(elite)
             selected_ids.add(elite.agent_id)
 
@@ -204,7 +204,7 @@ class RouletteSelection(SelectionStrategy):
         selected: list[AgentGenome] = []
         selected_ids: set[str] = set()
 
-        for elite in sorted_pop[:self.elite_count]:
+        for elite in sorted_pop[: self.elite_count]:
             selected.append(elite)
             selected_ids.add(elite.agent_id)
 
@@ -318,8 +318,8 @@ class CrossoverOperator:
         all_weights = set(parent1.strategy_weights.keys()) | set(parent2.strategy_weights.keys())
         for key in all_weights:
             child.strategy_weights[key] = (
-                (parent1.strategy_weights.get(key, 0.0) + parent2.strategy_weights.get(key, 0.0)) / 2
-            )
+                parent1.strategy_weights.get(key, 0.0) + parent2.strategy_weights.get(key, 0.0)
+            ) / 2
 
         # Blend active strategies
         child.active_strategies = list(
@@ -327,11 +327,13 @@ class CrossoverOperator:
         )
 
         # Crossover objective weights (average)
-        all_objectives = set(parent1.objective_weights.keys()) | set(parent2.objective_weights.keys())
+        all_objectives = set(parent1.objective_weights.keys()) | set(
+            parent2.objective_weights.keys()
+        )
         for key in all_objectives:
             child.objective_weights[key] = (
-                (parent1.objective_weights.get(key, 0.0) + parent2.objective_weights.get(key, 0.0)) / 2
-            )
+                parent1.objective_weights.get(key, 0.0) + parent2.objective_weights.get(key, 0.0)
+            ) / 2
 
         return child
 
@@ -430,13 +432,12 @@ class MutationOperator:
                 noise = random.uniform(-self.mutation_strength, self.mutation_strength)
                 genome.strategy_weights[key] = max(0.0, min(1.0, old + noise))
                 if abs(genome.strategy_weights[key] - old) > 0.001:
-                    changes.append(f"mut_sw[{key}]: {old:.4f} -> {genome.strategy_weights[key]:.4f}")
+                    changes.append(
+                        f"mut_sw[{key}]: {old:.4f} -> {genome.strategy_weights[key]:.4f}"
+                    )
 
         # Swap mutation: swap two active strategies
-        if (
-            len(genome.active_strategies) > 1
-            and random.random() < self.mutation_rate * 0.5
-        ):
+        if len(genome.active_strategies) > 1 and random.random() < self.mutation_rate * 0.5:
             i, j = random.sample(range(len(genome.active_strategies)), 2)
             genome.active_strategies[i], genome.active_strategies[j] = (
                 genome.active_strategies[j],
@@ -458,11 +459,13 @@ class MutationOperator:
                 genome.objective_weights[key] /= total_obj
 
         genome.generation += 1
-        self._mutation_history.append({
-            "agent_id": genome.agent_id,
-            "generation": genome.generation,
-            "changes": len(changes),
-        })
+        self._mutation_history.append(
+            {
+                "agent_id": genome.agent_id,
+                "generation": genome.generation,
+                "changes": len(changes),
+            }
+        )
 
         return genome, changes
 
@@ -553,7 +556,8 @@ class GeneticOptimizer:
         self._fitness_cache.clear()
         logger.info(
             "Initialized population of %d genomes (generation %d)",
-            len(self._population), self._generation,
+            len(self._population),
+            self._generation,
         )
 
     async def evaluate_population(
@@ -566,14 +570,16 @@ class GeneticOptimizer:
         # Evaluate in parallel batches
         batch_size = 10
         for i in range(0, len(self._population), batch_size):
-            batch = self._population[i:i + batch_size]
+            batch = self._population[i : i + batch_size]
             tasks = [fitness_fn.evaluate(genome) for genome in batch]
             batch_scores = await asyncio.gather(*tasks, return_exceptions=True)
 
             for genome, score in zip(batch, batch_scores, strict=False):
                 if isinstance(score, Exception):
                     logger.warning(
-                        "Fitness evaluation failed for %s: %s", genome.agent_id, score,
+                        "Fitness evaluation failed for %s: %s",
+                        genome.agent_id,
+                        score,
                     )
                     scores[genome.agent_id] = 0.0
                 else:
@@ -639,9 +645,9 @@ class GeneticOptimizer:
                 mutation_count += 1
 
         # 5. Build new population: elites + offspring
-        elites = selected[:self.elite_count]
+        elites = selected[: self.elite_count]
         new_population = elites + offspring
-        self._population = new_population[:self.population_size]
+        self._population = new_population[: self.population_size]
 
         # 6. Evaluate new population
         await self.evaluate_population(fitness_fn)
@@ -674,8 +680,14 @@ class GeneticOptimizer:
 
         logger.info(
             "Generation %d: avg_fit %.4f -> %.4f, best %.4f -> %.4f, div %.3f [%d cross, %d mut]",
-            self._generation, avg_before, avg_after, best_before, best_after,
-            div_after, crossover_count, mutation_count,
+            self._generation,
+            avg_before,
+            avg_after,
+            best_before,
+            best_after,
+            div_after,
+            crossover_count,
+            mutation_count,
         )
 
         return result
@@ -710,7 +722,9 @@ class GeneticOptimizer:
             if stagnation_count >= stagnation_patience:
                 logger.info(
                     "Converged at generation %d (best=%.4f, patience=%d)",
-                    self._generation, best_fitness, stagnation_patience,
+                    self._generation,
+                    best_fitness,
+                    stagnation_patience,
                 )
                 break
 
@@ -725,10 +739,7 @@ class GeneticOptimizer:
         if not self._population:
             return 0.0, 0.0, 0.0
 
-        scores = [
-            self._fitness_cache.get(g.agent_id, 0.0)
-            for g in self._population
-        ]
+        scores = [self._fitness_cache.get(g.agent_id, 0.0) for g in self._population]
 
         avg = sum(scores) / len(scores)
         best = max(scores)

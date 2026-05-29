@@ -25,7 +25,9 @@ async def test_spec_worthy_prompts():
     for prompt in spec_worthy_prompts:
         verdict = await detector.classify(prompt)
         assert verdict.spec_worthy, f"Failed to detect spec-worthy: {prompt[:50]}..."
-        assert verdict.confidence >= 0.7, f"Low confidence ({verdict.confidence}) for: {prompt[:50]}..."
+        assert (
+            verdict.confidence >= 0.7
+        ), f"Low confidence ({verdict.confidence}) for: {prompt[:50]}..."
 
 
 @pytest.mark.asyncio
@@ -49,7 +51,9 @@ async def test_not_spec_worthy_prompts():
     for prompt in not_spec_worthy_prompts:
         verdict = await detector.classify(prompt)
         assert not verdict.spec_worthy, f"False positive for: {prompt}"
-        assert verdict.confidence < 0.7, f"High confidence ({verdict.confidence}) for simple task: {prompt}"
+        assert (
+            verdict.confidence < 0.7
+        ), f"High confidence ({verdict.confidence}) for simple task: {prompt}"
 
 
 @pytest.mark.asyncio

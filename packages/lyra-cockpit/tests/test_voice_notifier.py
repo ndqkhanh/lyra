@@ -22,7 +22,9 @@ class TestVoiceConfig:
 
     def test_custom_values(self) -> None:
         mappings = (("error", "alert_error"),)
-        config = VoiceConfig(enabled=False, volume=0.5, voice_pack="minimal", event_mappings=mappings)
+        config = VoiceConfig(
+            enabled=False, volume=0.5, voice_pack="minimal", event_mappings=mappings
+        )
         assert config.enabled is False
         assert config.volume == 0.5
         assert config.voice_pack == "minimal"

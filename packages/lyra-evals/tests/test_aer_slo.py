@@ -1,4 +1,5 @@
 """Tests for Phase A: Agent Execution Record + SLO tracker."""
+
 from __future__ import annotations
 
 import time
@@ -26,6 +27,7 @@ class TestAgentExecutionRecord:
 
     def test_evidence_list_populated(self):
         import json
+
         rec = new_aer("r", "s", 0)
         object.__setattr__(rec, "evidence_refs", json.dumps(["ref-a", "ref-b"]))
         assert rec.evidence_list() == ["ref-a", "ref-b"]
@@ -38,6 +40,7 @@ class TestAgentExecutionRecord:
 
     def test_pid_port_list(self):
         import json
+
         rec = new_aer("r", "s", 0)
         object.__setattr__(rec, "child_pids", json.dumps([1234, 5678]))
         object.__setattr__(rec, "open_ports", json.dumps([8080]))
@@ -104,7 +107,10 @@ class TestAERStore:
         try:
             with store.transaction():
                 store._conn.execute(
-                    "INSERT INTO agent_execution_records(run_id, session_id, turn_index) VALUES (?, ?, ?)",
+(
+                        "INSERT INTO agent_execution_records(run_id, session_id, turn_index)"
+                        "VALUES (?, ?, ?)"
+                    ),
                     ("bad", "sess-rollback", 99),
                 )
                 raise ValueError("force rollback")
@@ -203,7 +209,12 @@ class TestSLOTracker:
     def test_default_slos_complete(self):
         names = {s.name for s in DEFAULT_SLOS}
         expected = {
-            "cost_budget", "context_safety", "latency",
-            "quality", "safety", "resource_hygiene", "human_control",
+            "cost_budget",
+            "context_safety",
+            "latency",
+            "quality",
+            "safety",
+            "resource_hygiene",
+            "human_control",
         }
         assert names == expected

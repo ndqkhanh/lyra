@@ -301,13 +301,17 @@ class StructuralCausalModel:
             The created ``ExogenousVariable``.
         """
         if noise is None:
-            noise = _noise_from_config({"type": self._config.default_noise_type, "std": self._config.noise_scale})
+            noise = _noise_from_config(
+                {"type": self._config.default_noise_type, "std": self._config.noise_scale}
+            )
         var = ExogenousVariable(name=name, noise=noise)
         self._exogenous[name] = var
         self._invalidate_order()
         return var
 
-    def add_endogenous(self, name: str, parents: list[str] | None = None, description: str = "") -> EndogenousVariable:
+    def add_endogenous(
+        self, name: str, parents: list[str] | None = None, description: str = ""
+    ) -> EndogenousVariable:
         """Register an endogenous variable.
 
         Args:
@@ -346,9 +350,13 @@ class StructuralCausalModel:
             SCMError: If the variable or noise variable has not been registered.
         """
         if variable not in self._endogenous:
-            raise SCMError(f"Endogenous variable '{variable}' not registered. Call add_endogenous first.")
+            raise SCMError(
+                f"Endogenous variable '{variable}' not registered. Call add_endogenous first."
+            )
         if noise_var not in self._exogenous:
-            raise SCMError(f"Exogenous variable '{noise_var}' not registered. Call add_exogenous first.")
+            raise SCMError(
+                f"Exogenous variable '{noise_var}' not registered. Call add_exogenous first."
+            )
         eq = SCMEquation(
             variable=variable,
             function=function,
@@ -375,8 +383,8 @@ class StructuralCausalModel:
             in_degree[name] = 0
             children[name] = []
 
-        for name, var in self._endogenous.items():
-            for parent in var.parents:
+        for name, _var in self._endogenous.items():
+            for parent in _var.parents:
                 if parent in self._endogenous:
                     in_degree[name] = in_degree.get(name, 0) + 1
                     children.setdefault(parent, []).append(name)
@@ -413,7 +421,9 @@ class StructuralCausalModel:
         """Draw noise for every exogenous variable."""
         return {name: var.sample_noise(n) for name, var in self._exogenous.items()}
 
-    def _evaluate(self, noise: dict[str, np.ndarray], interventions: dict[str, np.ndarray] | None = None) -> dict[str, np.ndarray]:
+    def _evaluate(
+        self, noise: dict[str, np.ndarray], interventions: dict[str, np.ndarray] | None = None
+    ) -> dict[str, np.ndarray]:
         """Evaluate all equations given noise and optional interventions."""
         interventions = interventions or {}
         values: dict[str, np.ndarray] = dict(noise)
@@ -493,16 +503,18 @@ class StructuralCausalModel:
         """
         issues: list[str] = []
 
-        for name, var in self._endogenous.items():
+        for name, _var in self._endogenous.items():
             if name not in self._equations:
                 issues.append(f"Endogenous variable '{name}' has no equation.")
 
         for name, eq in self._equations.items():
             if eq.noise_var not in self._exogenous:
-                issues.append(f"Equation for '{name}' references unknown noise var '{eq.noise_var}'.")
+                issues.append(
+                    f"Equation for '{name}' references unknown noise var '{eq.noise_var}'."
+                )
 
-        for name, var in self._endogenous.items():
-            for parent in var.parents:
+        for name, _var in self._endogenous.items():
+            for parent in _var.parents:
                 if parent not in self._endogenous and parent not in self._exogenous:
                     issues.append(f"Variable '{name}' references unknown parent '{parent}'.")
 
@@ -586,6 +598,7 @@ def make_chain_scm(
 def _make_chain_equation(coef: float, parent_name: str) -> Callable:
     def eq(pv: dict[str, np.ndarray]) -> np.ndarray:
         return coef * pv.get(parent_name, np.zeros(1))
+
     return eq
 
 

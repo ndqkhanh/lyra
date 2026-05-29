@@ -9,6 +9,7 @@ Implements:
 
 Public surface: :func:`cmd_memory_lifecycle`.
 """
+
 from __future__ import annotations
 
 import datetime
@@ -44,15 +45,16 @@ def _extract_text_messages(messages: list[Any], last_n: int = 20) -> list[dict[s
     result: list[dict[str, str]] = []
     for msg in messages[-last_n:]:
         try:
-            role = getattr(msg, "role", None) or (msg.get("role") if isinstance(msg, dict) else "unknown")
+            role = getattr(msg, "role", None) or (
+                msg.get("role") if isinstance(msg, dict) else "unknown"
+            )
             if isinstance(msg, dict):
                 content = msg.get("content", "")
             else:
                 content = getattr(msg, "content", "")
             if isinstance(content, list):
                 text = " ".join(
-                    (c.get("text", "") if isinstance(c, dict) else str(c))
-                    for c in content
+                    (c.get("text", "") if isinstance(c, dict) else str(c)) for c in content
                 )
             else:
                 text = str(content) if content else ""
@@ -80,20 +82,23 @@ def _consolidate(session: Any) -> Any:
 
     lines: list[str] = []
     for m in msgs:
-        role_tag = "[bold green]user[/bold green]" if m["role"] == "user" else "[dim]assistant[/dim]"
+        role_tag = (
+            "[bold green]user[/bold green]" if m["role"] == "user" else "[dim]assistant[/dim]"
+        )
         snippet = m["text"][:120].replace("[", "\\[")
         lines.append(f"  {role_tag}: {snippet}")
 
-    summary_text = "\n".join(
-        f"{m['role']}: {m['text'][:120]}" for m in msgs
-    )
+    summary_text = "\n".join(f"{m['role']}: {m['text'][:120]}" for m in msgs)
 
     ts = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     turn = getattr(session, "turn", 0)
     out_path = _ensure_dir(_MEMORY_ROOT) / f"consolidation-{ts}.md"
     try:
         out_path.write_text(
-            f"# Consolidation — {ts}\n\nturn: {turn}\n\n## Last {len(msgs)} messages\n\n{summary_text}\n",
+(
+                f"# Consolidation — {ts}\n\nturn: {turn}\n\n## Last {len(msgs)} messages\n\n"
+                f"{summary_text}\n"
+            ),
             encoding="utf-8",
         )
         footer = f"[dim]Written → {out_path}[/dim]"
@@ -135,7 +140,10 @@ def _distill(session: Any) -> Any:
 
     try:
         out_path.write_text(
-            f"# Strategy Lessons — {ts}\n\nmodel: {model}\nturn: {turn}\n\n## Lessons\n\n{lesson_text}\n",
+(
+                f"# Strategy Lessons — {ts}\n\nmodel: {model}\nturn: {turn}\n\n## Lessons\n\n"
+                f"{lesson_text}\n"
+            ),
             encoding="utf-8",
         )
         footer = f"[dim]Written → {out_path}[/dim]"
@@ -146,7 +154,10 @@ def _distill(session: Any) -> Any:
     body += f"\n\n{footer}"
     return Panel(
         body,
-        title=f"[bold magenta]Memory: Distill[/bold magenta] [dim]({len(assistant_msgs)} assistant turns)[/dim]",
+        title=(
+            f"[bold magenta]Memory: Distill[/bold magenta] [dim]({len(assistant_msgs)}"
+            f" assistant turns)[/dim]"
+        ),
         border_style="magenta",
     )
 
@@ -182,7 +193,9 @@ def _audit() -> Any:
             size_str = "?"
             mtime = "?"
 
-        rel = str(fpath.relative_to(root.parent)) if fpath.is_relative_to(root.parent) else str(fpath)
+        rel = (
+            str(fpath.relative_to(root.parent)) if fpath.is_relative_to(root.parent) else str(fpath)
+        )
         parts = fpath.relative_to(root).parts
         mem_type = parts[0] if len(parts) > 1 else "general"
         scope = "session" if "session" in rel else "global"
@@ -233,7 +246,10 @@ def _evolve(note_id: str, session: Any) -> Any:
         status = f"[red]Failed to update {target}: {exc}[/red]"
 
     return Panel(
-        f"Note: [bold]{target}[/bold]\n\n{status}\n\nLinks added:\n{evidence.replace('[', chr(91))}",
+(
+            f"Note: [bold]{target}[/bold]\n\n{status}\n\nLinks added:\n"
+            f"{evidence.replace('[', chr(91))}"
+        ),
         title="[bold yellow]Memory: Evolve[/bold yellow]",
         border_style="yellow",
     )
@@ -252,7 +268,9 @@ def _promote(note_id: str, session: Any) -> Any:
             break
 
     repo_root: Path | None = getattr(session, "repo_root", None)
-    skills_base = (repo_root / ".lyra" / "skills") if repo_root else (Path.home() / ".lyra" / "skills")
+    skills_base = (
+        (repo_root / ".lyra" / "skills") if repo_root else (Path.home() / ".lyra" / "skills")
+    )
     _ensure_dir(skills_base)
 
     slug = _slugify(note_id)
@@ -333,7 +351,9 @@ def cmd_memory_lifecycle(session: Any, args: str) -> Any:
             if not rest:
                 return CommandResult(output="usage: /memory lifecycle promote <note-id>")
             renderable = _promote(rest, session)
-            return CommandResult(output=f"promote {rest!r}: see panel above.", renderable=renderable)
+            return CommandResult(
+                output=f"promote {rest!r}: see panel above.", renderable=renderable
+            )
 
         usage = (
             "memory lifecycle sub-commands:\n"

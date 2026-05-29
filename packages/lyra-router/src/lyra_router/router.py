@@ -209,9 +209,7 @@ class ModelRouter:
         """Add a custom domain routing rule to Tier 1."""
         self._tier1.add_rule(keyword, tier)
 
-    def add_training_example(
-        self, task: str, complexity: TaskComplexity, tier: ModelTier
-    ) -> None:
+    def add_training_example(self, task: str, complexity: TaskComplexity, tier: ModelTier) -> None:
         """Add a training example to both Tier 2 and Tier 3."""
         self._tier2.add_example(task, complexity, tier)
         self._tier3.train(task, complexity)
@@ -225,11 +223,7 @@ class ModelRouter:
     @property
     def stats(self) -> dict:
         """Return current router statistics."""
-        avg_latency = (
-            self._total_latency_ms / self._route_count
-            if self._route_count > 0
-            else 0.0
-        )
+        avg_latency = self._total_latency_ms / self._route_count if self._route_count > 0 else 0.0
         return {
             "route_count": self._route_count,
             "tier_hits": dict(self._tier_hits),
@@ -250,9 +244,7 @@ class ModelRouter:
         # Budget-aware tier downgrade
         if self.budget.should_downgrade_tier(target_tier):
             original_tier = target_tier
-            fallback = self.providers.get_fallback_model(
-                target_tier, self.budget.regime.value
-            )
+            fallback = self.providers.get_fallback_model(target_tier, self.budget.regime.value)
             if fallback:
                 target_tier = fallback.tier
                 logger.info(
@@ -265,7 +257,10 @@ class ModelRouter:
                     complexity=complexity,
                     model_tier=target_tier,
                     confidence=tier_result.confidence * 0.9,
-                    reasoning=f"{tier_result.reasoning} (downgraded from {original_tier.value} for budget)",
+                    reasoning=(
+                        f"{tier_result.reasoning} (downgraded from {original_tier.value}"
+                        f" for budget)"
+                    ),
                     matched_rule=tier_result.matched_rule,
                 )
 

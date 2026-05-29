@@ -1,6 +1,7 @@
 """lyra_harness_core.pipeline — composable end-to-end pipelines.
 
-Per [docs/199-multi-hop-reasoning-techniques-arc.md](../../../../../../research/harness-engineering/docs/199-multi-hop-reasoning-techniques-arc.md)
+Per
+[docs/199-multi-hop-reasoning-techniques-arc.md](../../../../../../research/harness-engineering/docs/199-multi-hop-reasoning-techniques-arc.md)
 Phase 2 (DSPy declarative pipelines) — wraps the lyra_harness_core primitives
 (router + operators + gates + cache + budget) into a single composable
 callable. Each project either uses :class:`MultiHopPipeline` directly or
@@ -18,6 +19,7 @@ already have. It exists to *guarantee* that the canonical sequence runs in
 the canonical order, with budget tracked + cache consulted + gates fired in
 the right places.
 """
+
 from __future__ import annotations
 
 from .multi_hop_pipeline import (

@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
 """Catch any exception that causes early exit."""
+
 import sys
 import traceback
 from pathlib import Path
 
-sys.path.insert(0, 'packages/lyra-cli/src')
-sys.path.insert(0, 'packages/lyra-ui/src')
-
-# Patch Textual's App.run to catch exceptions
+from lyra_cli.tui_v2 import launch_tui_v2
+from lyra_cli.tui_v2.app import LyraHarnessApp
 from textual.app import App
 
+sys.path.insert(0, "packages/lyra-cli/src")
+sys.path.insert(0, "packages/lyra-ui/src")
+
+# Patch Textual's App.run to catch exceptions
+
 original_run = App.run
+
 
 def patched_run(self, *args, **kwargs):
     try:
@@ -23,13 +28,14 @@ def patched_run(self, *args, **kwargs):
         traceback.print_exc(file=sys.stderr)
         raise
 
+
 App.run = patched_run
 
 # Also patch the app's on_mount and _post_mount
-from lyra_cli.tui_v2.app import LyraHarnessApp
 
 original_on_mount = LyraHarnessApp.on_mount
 original_post_mount = LyraHarnessApp._post_mount
+
 
 def patched_on_mount(self):
     try:
@@ -37,9 +43,14 @@ def patched_on_mount(self):
         original_on_mount(self)
         print("[PATCH] LyraHarnessApp.on_mount() completed", file=sys.stderr, flush=True)
     except Exception as e:
-        print(f"[PATCH] LyraHarnessApp.on_mount() EXCEPTION: {type(e).__name__}: {e}", file=sys.stderr, flush=True)
+        print(
+            f"[PATCH] LyraHarnessApp.on_mount() EXCEPTION: {type(e).__name__}: {e}",
+            file=sys.stderr,
+            flush=True,
+        )
         traceback.print_exc(file=sys.stderr)
         raise
+
 
 def patched_post_mount(self):
     try:
@@ -47,20 +58,24 @@ def patched_post_mount(self):
         original_post_mount(self)
         print("[PATCH] LyraHarnessApp._post_mount() completed", file=sys.stderr, flush=True)
     except Exception as e:
-        print(f"[PATCH] LyraHarnessApp._post_mount() EXCEPTION: {type(e).__name__}: {e}", file=sys.stderr, flush=True)
+        print(
+            f"[PATCH] LyraHarnessApp._post_mount() EXCEPTION: {type(e).__name__}: {e}",
+            file=sys.stderr,
+            flush=True,
+        )
         traceback.print_exc(file=sys.stderr)
         raise
+
 
 LyraHarnessApp.on_mount = patched_on_mount
 LyraHarnessApp._post_mount = patched_post_mount
 
 # Now run the TUI
-from lyra_cli.tui_v2 import launch_tui_v2
 
 print("[TEST] Launching TUI...", file=sys.stderr, flush=True)
 exit_code = launch_tui_v2(
     repo_root=Path.cwd(),
-    model='claude-sonnet-4.6',
+    model="claude-sonnet-4.6",
     mock=False,
     max_steps=20,
 )

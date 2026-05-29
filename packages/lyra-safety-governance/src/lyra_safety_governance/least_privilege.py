@@ -120,7 +120,9 @@ class LeastPrivilegeEngine:
         )
         return False
 
-    def grant_temporary(self, agent_id: str, action_type: ActionType, target_pattern: str, duration: int) -> Privilege:
+    def grant_temporary(
+        self, agent_id: str, action_type: ActionType, target_pattern: str, duration: int
+    ) -> Privilege:
         """Grant a temporary privilege to an agent."""
         if duration > self._config.max_temp_duration:
             raise PrivilegeError(
@@ -163,15 +165,21 @@ class LeastPrivilegeEngine:
                 agent_id=revoked.agent_id,
                 privilege_level=profile.privilege_level,
                 granted_privileges=tuple(
-                    p for p in profile.granted_privileges
-                    if not (p.action_type == revoked.action_type and p.target_pattern == revoked.target_pattern)
+                    p
+                    for p in profile.granted_privileges
+                    if not (
+                        p.action_type == revoked.action_type
+                        and p.target_pattern == revoked.target_pattern
+                    )
                 ),
                 denial_history=profile.denial_history,
                 trust_score=profile.trust_score,
             )
         return True
 
-    def escalation_required(self, current_level: PrivilegeLevel, requested_action: ActionType) -> bool:
+    def escalation_required(
+        self, current_level: PrivilegeLevel, requested_action: ActionType
+    ) -> bool:
         """Determine if escalation is needed for the requested action."""
         required = _LEVEL_REQUIRED_ACTIONS.get(requested_action, PrivilegeLevel.NONE)
         return current_level.value < required.value
@@ -211,4 +219,5 @@ class LeastPrivilegeEngine:
     def _target_matches(self, pattern: str, target: str) -> bool:
         """Check if a target matches a pattern (simple glob-like matching)."""
         import fnmatch
+
         return fnmatch.fnmatch(target, pattern)

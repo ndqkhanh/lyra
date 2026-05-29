@@ -15,7 +15,10 @@ def test_mock_llm_returns_scripted_strings():
 def test_mock_llm_tool_calls_from_dict():
     llm = MockLLM(
         scripted_outputs=[
-            {"text": "using calc", "tool_calls": [{"name": "calculator", "args": {"expression": "1+1"}}]}
+            {
+                "text": "using calc",
+                "tool_calls": [{"name": "calculator", "args": {"expression": "1+1"}}],
+            }
         ]
     )
     m = llm.generate([Message.user("q")])

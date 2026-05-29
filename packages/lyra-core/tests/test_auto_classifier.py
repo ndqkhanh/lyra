@@ -1,4 +1,5 @@
 """Auto-mode safety classifier tests (v3.7 L37-4)."""
+
 from __future__ import annotations
 
 from lyra_core.permissions.auto_classifier import (
@@ -32,7 +33,8 @@ def test_curl_pipe_sh_refused() -> None:
 def test_force_push_to_main_refused() -> None:
     cls = AutoModeClassifier()
     decision = cls.evaluate(
-        kind="bash", payload={"command": "git push --force origin main"},
+        kind="bash",
+        payload={"command": "git push --force origin main"},
     )
     assert decision.verdict is AutoVerdict.REFUSE
 
@@ -40,7 +42,8 @@ def test_force_push_to_main_refused() -> None:
 def test_drop_table_refused() -> None:
     cls = AutoModeClassifier()
     decision = cls.evaluate(
-        kind="bash", payload={"command": "psql -c 'DROP TABLE users'"},
+        kind="bash",
+        payload={"command": "psql -c 'DROP TABLE users'"},
     )
     assert decision.verdict is AutoVerdict.REFUSE
 
@@ -72,7 +75,8 @@ def test_sensitive_path_etc_passwd_asks() -> None:
 def test_sensitive_path_aws_credentials_asks() -> None:
     cls = AutoModeClassifier()
     decision = cls.evaluate(
-        kind="read", payload={"path": "/Users/x/.aws/credentials"},
+        kind="read",
+        payload={"path": "/Users/x/.aws/credentials"},
     )
     assert decision.verdict is AutoVerdict.ASK
 
@@ -98,7 +102,8 @@ def test_git_status_auto_runs() -> None:
 def test_side_effect_bash_no_allowlist_asks() -> None:
     cls = AutoModeClassifier()
     decision = cls.evaluate(
-        kind="bash", payload={"command": "make test", "target": "test"},
+        kind="bash",
+        payload={"command": "make test", "target": "test"},
     )
     assert decision.verdict is AutoVerdict.ASK
 
@@ -106,7 +111,8 @@ def test_side_effect_bash_no_allowlist_asks() -> None:
 def test_side_effect_bash_allowlisted_target_auto_runs() -> None:
     cls = AutoModeClassifier(side_effect_allowlist=frozenset({"test"}))
     decision = cls.evaluate(
-        kind="bash", payload={"command": "make test", "target": "test"},
+        kind="bash",
+        payload={"command": "make test", "target": "test"},
     )
     assert decision.verdict is AutoVerdict.AUTO_RUN
 
@@ -119,9 +125,13 @@ def test_unknown_kind_defaults_to_ask() -> None:
 
 def test_extra_destructive_pattern_extends_default() -> None:
     import re
-    cls = AutoModeClassifier(extra_destructive=(re.compile(r"\bproject_specific_destructive_cmd\b"),))
+
+    cls = AutoModeClassifier(
+        extra_destructive=(re.compile(r"\bproject_specific_destructive_cmd\b"),)
+    )
     decision = cls.evaluate(
-        kind="bash", payload={"command": "project_specific_destructive_cmd run"},
+        kind="bash",
+        payload={"command": "project_specific_destructive_cmd run"},
     )
     assert decision.verdict is AutoVerdict.REFUSE
 

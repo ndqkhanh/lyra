@@ -1,10 +1,16 @@
 """lyra_harness_core.verifier — multi-axis composable safety gates for actions.
 
-Per [docs/221-aegis-ops-multi-hop-collaborative-apply-plan.md](../../../../../../research/harness-engineering/docs/221-aegis-ops-multi-hop-collaborative-apply-plan.md) §3.4
+Per
+[docs/221-aegis-ops-multi-hop-collaborative-apply-plan.md]
+(../../../../../../research/harness-engineering/
+docs/221-aegis-ops-multi-hop-collaborative-apply-plan.md) §3.4
 (Aegis-Ops "verifier composing dry-run + diff + policy + permission + HITL"),
-[docs/220-orion-code-multi-hop-collaborative-apply-plan.md](../../../../../../research/harness-engineering/docs/220-orion-code-multi-hop-collaborative-apply-plan.md) §3.4
+[docs/220-orion-code-multi-hop-collaborative-apply-plan.md]
+(../../../../../../research/harness-engineering/
+docs/220-orion-code-multi-hop-collaborative-apply-plan.md) §3.4
 (Orion-Code "verifier composing test + lint + type-check + security-scan + BL-*"),
-and [docs/11-verifier-evaluator-loops.md](../../../../../../research/harness-engineering/docs/11-verifier-evaluator-loops.md).
+and
+[docs/11-verifier-evaluator-loops.md](../../../../../../research/harness-engineering/docs/11-verifier-evaluator-loops.md).
 
 The composer runs N axis-typed verifiers in order, aggregates results into a
 :class:`CompositeVerdict`, and reports the maximum severity. Each verifier
@@ -19,6 +25,7 @@ Composes with:
     - :mod:`lyra_harness_core.forensic.ReplayComparator` — failed verifications
       record into the trajectory's side-effect log for later audit.
 """
+
 from __future__ import annotations
 
 from .composer import (

@@ -22,6 +22,7 @@ from typing import Any
 @dataclass
 class ResearchArtifact:
     """Single research artifact (file)."""
+
     slug: str
     title: str
     content: str
@@ -44,12 +45,7 @@ class FeynmanPipeline:
     """
 
     def __init__(
-        self,
-        llm_planner,
-        llm_researcher,
-        llm_verifier,
-        llm_synthesizer,
-        artifacts_dir: Path
+        self, llm_planner, llm_researcher, llm_verifier, llm_synthesizer, artifacts_dir: Path
     ):
         """
         Initialize Feynman pipeline.
@@ -69,11 +65,7 @@ class FeynmanPipeline:
         self.artifacts_dir = Path(artifacts_dir)
         self.artifacts_dir.mkdir(parents=True, exist_ok=True)
 
-    def run(
-        self,
-        research_question: str,
-        context_docs: list[str] | None = None
-    ) -> Path:
+    def run(self, research_question: str, context_docs: list[str] | None = None) -> Path:
         """
         Run complete Feynman pipeline.
 
@@ -100,10 +92,7 @@ class FeynmanPipeline:
 
         # Stage 4: Synthesis
         synthesis_artifact = self._stage_4_synthesis(
-            slug,
-            plan_artifact,
-            findings_artifacts,
-            verification_artifact
+            slug, plan_artifact, findings_artifacts, verification_artifact
         )
 
         print(f"\n✅ Research complete: {synthesis_artifact}")
@@ -113,8 +102,8 @@ class FeynmanPipeline:
         """Generate slug for research session."""
         # Create slug from question
         slug_base = research_question.lower()[:50]
-        slug_base = ''.join(c if c.isalnum() or c == ' ' else '' for c in slug_base)
-        slug_base = '-'.join(slug_base.split())
+        slug_base = "".join(c if c.isalnum() or c == " " else "" for c in slug_base)
+        slug_base = "-".join(slug_base.split())
 
         # Add hash for uniqueness
         hash_suffix = hashlib.md5(research_question.encode()).hexdigest()[:8]
@@ -122,10 +111,7 @@ class FeynmanPipeline:
         return f"{slug_base}-{hash_suffix}"
 
     def _stage_1_planning(
-        self,
-        slug: str,
-        research_question: str,
-        context_docs: list[str] | None
+        self, slug: str, research_question: str, context_docs: list[str] | None
     ) -> Path:
         """Stage 1: Create research plan."""
         print("\n[Stage 1: Planning]")
@@ -163,17 +149,13 @@ Output JSON:
 
         # Write plan artifact
         plan_path = self.artifacts_dir / f"{slug}-plan.json"
-        with open(plan_path, 'w') as f:
+        with open(plan_path, "w") as f:
             json.dump(plan_data, f, indent=2)
 
         print(f"✓ Plan created: {len(plan_data['sub_questions'])} sub-questions")
         return plan_path
 
-    def _stage_2_research(
-        self,
-        slug: str,
-        plan_path: Path
-    ) -> list[Path]:
+    def _stage_2_research(self, slug: str, plan_path: Path) -> list[Path]:
         """Stage 2: Execute research, write findings."""
         print("\n[Stage 2: Research]")
 
@@ -183,7 +165,7 @@ Output JSON:
 
         findings_paths = []
 
-        for sub_q in plan['sub_questions']:
+        for sub_q in plan["sub_questions"]:
             print(f"  Researching: {sub_q['question'][:60]}...")
 
             prompt = f"""Research this question and provide detailed findings.
@@ -213,7 +195,7 @@ Output JSON:
 
             # Write findings artifact
             findings_path = self.artifacts_dir / f"{slug}-findings-{sub_q['id']}.json"
-            with open(findings_path, 'w') as f:
+            with open(findings_path, "w") as f:
                 json.dump(findings_data, f, indent=2)
 
             findings_paths.append(findings_path)
@@ -221,11 +203,7 @@ Output JSON:
         print(f"✓ Research complete: {len(findings_paths)} findings")
         return findings_paths
 
-    def _stage_3_verification(
-        self,
-        slug: str,
-        findings_paths: list[Path]
-    ) -> Path:
+    def _stage_3_verification(self, slug: str, findings_paths: list[Path]) -> Path:
         """Stage 3: Verify findings and citations."""
         print("\n[Stage 3: Verification]")
 
@@ -264,18 +242,19 @@ Output JSON:
 
         # Write verification artifact
         verification_path = self.artifacts_dir / f"{slug}-verification.json"
-        with open(verification_path, 'w') as f:
+        with open(verification_path, "w") as f:
             json.dump(verification_data, f, indent=2)
 
-        print(f"✓ Verification complete: {verification_data['citation_coverage']:.0%} citation coverage")
+        print(
+
+                f"✓ Verification complete: {verification_data['citation_coverage']:.0%}"
+                f" citation coverage"
+
+        )
         return verification_path
 
     def _stage_4_synthesis(
-        self,
-        slug: str,
-        plan_path: Path,
-        findings_paths: list[Path],
-        verification_path: Path
+        self, slug: str, plan_path: Path, findings_paths: list[Path], verification_path: Path
     ) -> Path:
         """Stage 4: Synthesize final report."""
         print("\n[Stage 4: Synthesis]")
@@ -314,7 +293,7 @@ Output markdown format.
 
         # Write synthesis artifact
         synthesis_path = self.artifacts_dir / f"{slug}-synthesis.md"
-        with open(synthesis_path, 'w') as f:
+        with open(synthesis_path, "w") as f:
             f.write(synthesis_content)
 
         print("✓ Synthesis complete")
@@ -322,24 +301,19 @@ Output markdown format.
 
     def get_artifacts(self, slug: str) -> dict[str, list[Path]]:
         """Get all artifacts for a research session."""
-        artifacts = {
-            'plan': [],
-            'findings': [],
-            'verification': [],
-            'synthesis': []
-        }
+        artifacts = {"plan": [], "findings": [], "verification": [], "synthesis": []}
 
         for artifact_file in self.artifacts_dir.glob(f"{slug}-*.json"):
-            if 'plan' in artifact_file.name:
-                artifacts['plan'].append(artifact_file)
-            elif 'findings' in artifact_file.name:
-                artifacts['findings'].append(artifact_file)
-            elif 'verification' in artifact_file.name:
-                artifacts['verification'].append(artifact_file)
+            if "plan" in artifact_file.name:
+                artifacts["plan"].append(artifact_file)
+            elif "findings" in artifact_file.name:
+                artifacts["findings"].append(artifact_file)
+            elif "verification" in artifact_file.name:
+                artifacts["verification"].append(artifact_file)
 
         for artifact_file in self.artifacts_dir.glob(f"{slug}-*.md"):
-            if 'synthesis' in artifact_file.name:
-                artifacts['synthesis'].append(artifact_file)
+            if "synthesis" in artifact_file.name:
+                artifacts["synthesis"].append(artifact_file)
 
         return artifacts
 
@@ -357,32 +331,29 @@ class VerificationPrimitive:
     """
 
     @staticmethod
-    def add_verification_metadata(
-        artifact_path: Path,
-        verification_data: dict[str, Any]
-    ) -> None:
+    def add_verification_metadata(artifact_path: Path, verification_data: dict[str, Any]) -> None:
         """Add verification metadata to artifact."""
         # Load artifact
         with open(artifact_path) as f:
-            if artifact_path.suffix == '.json':
+            if artifact_path.suffix == ".json":
                 artifact = json.load(f)
             else:
-                artifact = {'content': f.read()}
+                artifact = {"content": f.read()}
 
         # Add verification
-        artifact['_verification'] = {
-            'verified_at': datetime.now().isoformat(),
-            'verification_method': verification_data.get('method', 'llm'),
-            'confidence': verification_data.get('confidence', 0.0),
-            'limitations': verification_data.get('limitations', [])
+        artifact["_verification"] = {
+            "verified_at": datetime.now().isoformat(),
+            "verification_method": verification_data.get("method", "llm"),
+            "confidence": verification_data.get("confidence", 0.0),
+            "limitations": verification_data.get("limitations", []),
         }
 
         # Write back
-        with open(artifact_path, 'w') as f:
-            if artifact_path.suffix == '.json':
+        with open(artifact_path, "w") as f:
+            if artifact_path.suffix == ".json":
                 json.dump(artifact, f, indent=2)
             else:
-                f.write(artifact['content'])
+                f.write(artifact["content"])
 
 
 # Usage example

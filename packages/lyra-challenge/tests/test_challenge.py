@@ -56,7 +56,10 @@ def sample_problem(sample_test_cases: tuple[TestCase, ...]) -> ChallengeProblem:
     return ChallengeProblem(
         problem_id="prob_001",
         title="Simple Addition",
-        description="Write a function that adds two numbers.\n\nGiven two integers a and b, return their sum.",
+        description=(
+            "Write a function that adds two numbers.\n\nGiven two integers a and b, return their"
+            "sum."
+        ),
         domain=ChallengeDomain.CODE_GENERATION.value,
         difficulty=Difficulty.EASY.value,
         test_cases=sample_test_cases,
@@ -159,8 +162,11 @@ class TestTestCase:
 
     def test_hidden_with_weight(self) -> None:
         tc = TestCase(
-            test_id="t2", input_data="x", expected_output="y",
-            is_hidden=True, weight=2.5,
+            test_id="t2",
+            input_data="x",
+            expected_output="y",
+            is_hidden=True,
+            weight=2.5,
         )
         assert tc.is_hidden is True
         assert tc.weight == 2.5
@@ -209,9 +215,14 @@ class TestChallengeSuite:
 class TestSolutionAttempt:
     def test_create(self) -> None:
         sa = SolutionAttempt(
-            attempt_id="a1", problem_id="p1", agent_id="agent1",
+            attempt_id="a1",
+            problem_id="p1",
+            agent_id="agent1",
             solution_text="def add(a, b): return a + b",
-            status="PASSED", score=1.0, tests_passed=3, tests_total=3,
+            status="PASSED",
+            score=1.0,
+            tests_passed=3,
+            tests_total=3,
             execution_time_seconds=0.1,
         )
         assert sa.agent_id == "agent1"
@@ -219,9 +230,15 @@ class TestSolutionAttempt:
 
     def test_frozen_immutability(self) -> None:
         sa = SolutionAttempt(
-            attempt_id="a1", problem_id="p1", agent_id="x",
-            solution_text="", status="PENDING", score=0.0,
-            tests_passed=0, tests_total=0, execution_time_seconds=0.0,
+            attempt_id="a1",
+            problem_id="p1",
+            agent_id="x",
+            solution_text="",
+            status="PENDING",
+            score=0.0,
+            tests_passed=0,
+            tests_total=0,
+            execution_time_seconds=0.0,
         )
         with pytest.raises(Exception):
             sa.score = 1.0  # type: ignore[misc]
@@ -230,16 +247,26 @@ class TestSolutionAttempt:
 class TestAgentRanking:
     def test_create(self) -> None:
         ar = AgentRanking(
-            agent_id="agent1", suite_id="s1", total_score=9.5,
-            problems_solved=5, problems_attempted=10, rank=1, percentile=0.95,
+            agent_id="agent1",
+            suite_id="s1",
+            total_score=9.5,
+            problems_solved=5,
+            problems_attempted=10,
+            rank=1,
+            percentile=0.95,
         )
         assert ar.agent_id == "agent1"
         assert ar.rank == 1
 
     def test_frozen_immutability(self) -> None:
         ar = AgentRanking(
-            agent_id="a", suite_id="s", total_score=0.0,
-            problems_solved=0, problems_attempted=0, rank=1, percentile=1.0,
+            agent_id="a",
+            suite_id="s",
+            total_score=0.0,
+            problems_solved=0,
+            problems_attempted=0,
+            rank=1,
+            percentile=1.0,
         )
         with pytest.raises(Exception):
             ar.rank = 2  # type: ignore[misc]
@@ -286,9 +313,7 @@ class TestEngineInit:
 
 
 class TestSuiteManagement:
-    def test_register_and_list(
-        self, engine: ChallengeEngine, sample_suite: ChallengeSuite
-    ) -> None:
+    def test_register_and_list(self, engine: ChallengeEngine, sample_suite: ChallengeSuite) -> None:
         engine.register_suite(sample_suite)
         suites = engine.list_suites()
         assert len(suites) == 1
@@ -297,9 +322,7 @@ class TestSuiteManagement:
     def test_list_empty(self, engine: ChallengeEngine) -> None:
         assert engine.list_suites() == []
 
-    def test_get_problems(
-        self, engine: ChallengeEngine, sample_suite: ChallengeSuite
-    ) -> None:
+    def test_get_problems(self, engine: ChallengeEngine, sample_suite: ChallengeSuite) -> None:
         engine.register_suite(sample_suite)
         problems = engine.get_problems("suite_test")
         assert len(problems) == 1
@@ -326,18 +349,18 @@ class TestGrading:
     def test_exact_match_pass(
         self, engine: ChallengeEngine, sample_problem: ChallengeProblem
     ) -> None:
-        result = engine.grade_solution(
-            sample_problem, "4", strategy="EXACT_MATCH"
-        )
+        result = engine.grade_solution(sample_problem, "4", strategy="EXACT_MATCH")
         assert result.status == SolutionStatus.PARTIAL.value  # only 1 of 3 matches
 
-    def test_exact_match_perfect(
-        self, engine: ChallengeEngine
-    ) -> None:
+    def test_exact_match_perfect(self, engine: ChallengeEngine) -> None:
         tc = (TestCase(test_id="t1", input_data="", expected_output="42"),)
         p = ChallengeProblem(
-            problem_id="p1", title="T", description="D",
-            domain="CODE_GENERATION", difficulty="EASY", test_cases=tc,
+            problem_id="p1",
+            title="T",
+            description="D",
+            domain="CODE_GENERATION",
+            difficulty="EASY",
+            test_cases=tc,
         )
         result = engine.grade_solution(p, "42", strategy="EXACT_MATCH")
         assert result.status == SolutionStatus.PASSED.value
@@ -346,9 +369,7 @@ class TestGrading:
     def test_fuzzy_match_partial(
         self, engine: ChallengeEngine, sample_problem: ChallengeProblem
     ) -> None:
-        result = engine.grade_solution(
-            sample_problem, "4 8 30", strategy="FUZZY_MATCH"
-        )
+        result = engine.grade_solution(sample_problem, "4 8 30", strategy="FUZZY_MATCH")
         assert result.score > 0.0
 
     def test_empty_solution(
@@ -358,47 +379,53 @@ class TestGrading:
         assert result.status == SolutionStatus.FAILED.value
         assert result.score == 0.0
 
-    def test_partial_credit(
-        self, engine: ChallengeEngine
-    ) -> None:
+    def test_partial_credit(self, engine: ChallengeEngine) -> None:
         tc = (TestCase(test_id="t1", input_data="", expected_output="hello world"),)
         p = ChallengeProblem(
-            problem_id="p1", title="T", description="D",
-            domain="CODE_GENERATION", difficulty="EASY", test_cases=tc,
+            problem_id="p1",
+            title="T",
+            description="D",
+            domain="CODE_GENERATION",
+            difficulty="EASY",
+            test_cases=tc,
         )
         result = engine.grade_solution(p, "hello", strategy="PARTIAL_CREDIT")
         assert result.score > 0.0
         assert result.score < 1.0
 
-    def test_semantic_equivalence(
-        self, engine: ChallengeEngine
-    ) -> None:
+    def test_semantic_equivalence(self, engine: ChallengeEngine) -> None:
         tc = (TestCase(test_id="t1", input_data="", expected_output="def foo(): pass"),)
         p = ChallengeProblem(
-            problem_id="p1", title="T", description="D",
-            domain="CODE_GENERATION", difficulty="EASY", test_cases=tc,
+            problem_id="p1",
+            title="T",
+            description="D",
+            domain="CODE_GENERATION",
+            difficulty="EASY",
+            test_cases=tc,
         )
-        result = engine.grade_solution(
-            p, "def foo(): pass", strategy="SEMANTIC_EQUIVALENCE"
-        )
+        result = engine.grade_solution(p, "def foo(): pass", strategy="SEMANTIC_EQUIVALENCE")
         assert result.score == 1.0
 
-    def test_no_test_cases(
-        self, engine: ChallengeEngine
-    ) -> None:
+    def test_no_test_cases(self, engine: ChallengeEngine) -> None:
         p = ChallengeProblem(
-            problem_id="p1", title="T", description="D",
-            domain="CODE_GENERATION", difficulty="EASY", test_cases=(),
+            problem_id="p1",
+            title="T",
+            description="D",
+            domain="CODE_GENERATION",
+            difficulty="EASY",
+            test_cases=(),
         )
         result = engine.grade_solution(p, "anything")
         assert result.status == SolutionStatus.PASSED.value
 
-    def test_no_test_cases_empty_solution(
-        self, engine: ChallengeEngine
-    ) -> None:
+    def test_no_test_cases_empty_solution(self, engine: ChallengeEngine) -> None:
         p = ChallengeProblem(
-            problem_id="p1", title="T", description="D",
-            domain="CODE_GENERATION", difficulty="EASY", test_cases=(),
+            problem_id="p1",
+            title="T",
+            description="D",
+            domain="CODE_GENERATION",
+            difficulty="EASY",
+            test_cases=(),
         )
         result = engine.grade_solution(p, "")
         assert result.score == 0.0
@@ -419,9 +446,7 @@ class TestAgentEvaluation:
 
 
 class TestRankings:
-    def test_compute_rankings(
-        self, engine: ChallengeEngine, sample_suite: ChallengeSuite
-    ) -> None:
+    def test_compute_rankings(self, engine: ChallengeEngine, sample_suite: ChallengeSuite) -> None:
         engine.register_suite(sample_suite)
         engine.evaluate_agent_on_suite("suite_test", "agent_a", {"prob_001": "4"})
         engine.evaluate_agent_on_suite("suite_test", "agent_b", {"prob_001": "8"})
@@ -440,15 +465,18 @@ class TestDifficultyEstimation:
     def test_trivial(self, engine: ChallengeEngine) -> None:
         tc = (TestCase(test_id="t1", input_data="", expected_output=""),)
         p = ChallengeProblem(
-            problem_id="p1", title="T", description="Short",
-            domain="CODE_GENERATION", difficulty="EASY", test_cases=tc,
+            problem_id="p1",
+            title="T",
+            description="Short",
+            domain="CODE_GENERATION",
+            difficulty="EASY",
+            test_cases=tc,
         )
         assert engine.estimate_difficulty(p) == Difficulty.EASY.value
 
     def test_expert(self, engine: ChallengeEngine) -> None:
         tcs = tuple(
-            TestCase(test_id=f"t{i}", input_data="x" * 50, expected_output="y")
-            for i in range(20)
+            TestCase(test_id=f"t{i}", input_data="x" * 50, expected_output="y") for i in range(20)
         )
         p = ChallengeProblem(
             problem_id="p1",
@@ -492,13 +520,15 @@ class TestEdgeCases:
             engine.register_suite(s)
         assert len(engine.list_suites()) == 5
 
-    def test_solution_with_unusual_characters(
-        self, engine: ChallengeEngine
-    ) -> None:
+    def test_solution_with_unusual_characters(self, engine: ChallengeEngine) -> None:
         tc = (TestCase(test_id="t1", input_data="", expected_output="café"),)
         p = ChallengeProblem(
-            problem_id="p1", title="T", description="D",
-            domain="CODE_GENERATION", difficulty="EASY", test_cases=tc,
+            problem_id="p1",
+            title="T",
+            description="D",
+            domain="CODE_GENERATION",
+            difficulty="EASY",
+            test_cases=tc,
         )
         result = engine.grade_solution(p, "café", strategy="EXACT_MATCH")
         assert result.status == SolutionStatus.PASSED.value

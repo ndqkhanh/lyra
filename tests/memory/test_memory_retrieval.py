@@ -47,7 +47,9 @@ class TestRelevanceScorer:
         """Test scoring with high importance."""
         from src.memory.memory_store import Memory
 
-        scorer = RelevanceScorer(importance_weight=1.0, recency_weight=0.0, frequency_weight=0.0, content_weight=0.0)
+        scorer = RelevanceScorer(
+            importance_weight=1.0, recency_weight=0.0, frequency_weight=0.0, content_weight=0.0
+        )
 
         memory = Memory(
             memory_id="test-1",
@@ -65,7 +67,9 @@ class TestRelevanceScorer:
         """Test scoring with recency."""
         from src.memory.memory_store import Memory
 
-        scorer = RelevanceScorer(importance_weight=0.0, recency_weight=1.0, frequency_weight=0.0, content_weight=0.0)
+        scorer = RelevanceScorer(
+            importance_weight=0.0, recency_weight=1.0, frequency_weight=0.0, content_weight=0.0
+        )
 
         recent = Memory("m1", "Test", MemoryType.SEMANTIC, time.time(), importance=0.5)
         old = Memory("m2", "Test", MemoryType.SEMANTIC, time.time() - 86400 * 30, importance=0.5)
@@ -79,7 +83,9 @@ class TestRelevanceScorer:
         """Test scoring with access frequency."""
         from src.memory.memory_store import Memory
 
-        scorer = RelevanceScorer(importance_weight=0.0, recency_weight=0.0, frequency_weight=1.0, content_weight=0.0)
+        scorer = RelevanceScorer(
+            importance_weight=0.0, recency_weight=0.0, frequency_weight=1.0, content_weight=0.0
+        )
 
         frequent = Memory("m1", "Test", MemoryType.SEMANTIC, time.time(), importance=0.5)
         frequent.access_count = 10
@@ -97,8 +103,7 @@ class TestRelevanceScorer:
         scorer = RelevanceScorer()
 
         similarity = scorer._calculate_content_similarity(
-            "Python programming language",
-            "Python language"
+            "Python programming language", "Python language"
         )
 
         assert similarity > 0.0
@@ -183,7 +188,12 @@ class TestMemoryRetriever:
 
         ltm.add("Python programming", MemoryType.SEMANTIC, importance=0.8, tags=["python"])
         ltm.add("JavaScript coding", MemoryType.SEMANTIC, importance=0.7, tags=["javascript"])
-        ltm.add("Python and JavaScript", MemoryType.SEMANTIC, importance=0.9, tags=["python", "javascript"])
+        ltm.add(
+            "Python and JavaScript",
+            MemoryType.SEMANTIC,
+            importance=0.9,
+            tags=["python", "javascript"],
+        )
 
         retriever = MemoryRetriever(ltm)
         results = retriever.retrieve("Python", strategy=RetrievalStrategy.HYBRID)
@@ -197,10 +207,7 @@ class TestMemoryRetriever:
         ltm.add("Semantic memory", MemoryType.SEMANTIC, importance=0.8)
 
         retriever = MemoryRetriever(ltm)
-        results = retriever.retrieve(
-            "memory",
-            filters={"type": MemoryType.SEMANTIC}
-        )
+        results = retriever.retrieve("memory", filters={"type": MemoryType.SEMANTIC})
 
         assert all(r.memory.memory_type == MemoryType.SEMANTIC for r in results)
 
@@ -213,8 +220,7 @@ class TestMemoryRetriever:
 
         retriever = MemoryRetriever(ltm)
         results = retriever.retrieve(
-            "Test",
-            filters={"tags": ["tag1", "tag2"], "match_all_tags": False}
+            "Test", filters={"tags": ["tag1", "tag2"], "match_all_tags": False}
         )
 
         assert len(results) == 2
@@ -234,10 +240,7 @@ class TestMemoryRetriever:
         ltm._rebuild_index()
 
         retriever = MemoryRetriever(ltm)
-        results = retriever.retrieve(
-            "memory",
-            filters={"time_range": {"start": now - 100}}
-        )
+        results = retriever.retrieve("memory", filters={"time_range": {"start": now - 100}})
 
         assert len(results) == 1
 
@@ -245,7 +248,9 @@ class TestMemoryRetriever:
         """Test retrieving similar memories."""
         ltm = LongTermMemory()
 
-        m1 = ltm.add("Python programming language", MemoryType.SEMANTIC, tags=["python", "programming"])
+        m1 = ltm.add(
+            "Python programming language", MemoryType.SEMANTIC, tags=["python", "programming"]
+        )
         ltm.add("Python web development", MemoryType.SEMANTIC, tags=["python", "web"])
         ltm.add("JavaScript programming", MemoryType.SEMANTIC, tags=["javascript", "programming"])
 

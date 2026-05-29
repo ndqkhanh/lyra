@@ -1,4 +1,5 @@
 """Tests for lyra_harness_core.evals — equal_budget, ttc_curve, active_params."""
+
 from __future__ import annotations
 
 import pytest
@@ -130,7 +131,9 @@ class TestTTCCurve:
 
 class TestActiveParamReading:
     def test_valid(self):
-        r = ActiveParamReading(total_params=47_000_000_000, active_params=12_900_000_000, n_tokens=1000)
+        r = ActiveParamReading(
+            total_params=47_000_000_000, active_params=12_900_000_000, n_tokens=1000
+        )
         assert r.active_param_token_cost == 12_900_000_000 * 1000
 
     def test_total_below_active_rejected(self):

@@ -96,7 +96,7 @@ class TestFullAGIPipeline:
     def test_all_core_upgrades(self):
         """Verify all 9 upgrade modules are usable."""
         try:
-            from lyra_memory.graph_tier import GraphMemoryStore
+            from lyra_memory.graph_tier import GraphMemoryStore  # noqa: F401
         except (ImportError, ModuleNotFoundError):
             pass  # Optional dependency
         assert True

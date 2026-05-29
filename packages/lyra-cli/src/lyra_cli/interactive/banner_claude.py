@@ -141,8 +141,8 @@ def render_claude_style_banner(
     )
     table.add_column(justify="center", width=left_w, no_wrap=True, overflow="ellipsis")
     table.add_column(justify="left", width=right_w, no_wrap=True, overflow="ellipsis")
-    for l, r in zip(left_rows, right_rows, strict=False):
-        table.add_row(l, r)
+    for left, right in zip(left_rows, right_rows, strict=False):
+        table.add_row(left, right)
 
     console.print(table)
     return buf.getvalue()

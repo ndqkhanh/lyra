@@ -11,6 +11,7 @@ Tests:
 
 Total: 35 tests
 """
+
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock
 
@@ -117,7 +118,8 @@ def sample_report():
     """Create a sample research report."""
     return ResearchReport(
         topic="Test Research Report",
-        executive_summary="This is a comprehensive test report on AI research. " * 10,  # Make it long enough
+        executive_summary="This is a comprehensive test report on AI research. "
+        * 10,  # Make it long enough
         taxonomy_section="Taxonomy content",
         best_papers_section="Paper 1\nPaper 2\nPaper 3",
         gaps_section="Gap analysis",
@@ -192,9 +194,7 @@ def test_role_base_initialization(context_manager):
 
     class TestRole(Role):
         async def execute(self, input_data):
-            return RoleResult(
-                role_name=self.name, status=RoleStatus.SUCCESS, data=input_data
-            )
+            return RoleResult(role_name=self.name, status=RoleStatus.SUCCESS, data=input_data)
 
         def validate_input(self, input_data):
             return True
@@ -500,7 +500,9 @@ async def test_review_role_validate_output():
     # Invalid outputs
     assert role.validate_output({}) is False  # Missing fields
     assert role.validate_output({"approved": True}) is False  # Missing fields
-    assert role.validate_output({"approved": True, "issues": [], "quality_score": 1.5}) is False  # Bad score
+    assert (
+        role.validate_output({"approved": True, "issues": [], "quality_score": 1.5}) is False
+    )  # Bad score
 
 
 @pytest.mark.asyncio
@@ -673,7 +675,9 @@ async def test_role_orchestrator_initialization(context_manager):
 
 
 @pytest.mark.asyncio
-async def test_role_orchestrator_execute_pipeline_mocked(context_manager, sample_sources, sample_analyses, sample_report):
+async def test_role_orchestrator_execute_pipeline_mocked(
+    context_manager, sample_sources, sample_analyses, sample_report
+):
     """Test RoleOrchestrator full pipeline with mocks."""
     orchestrator = RoleOrchestrator(context_manager)
 
@@ -762,7 +766,9 @@ async def test_role_orchestrator_execute_partial_pipeline(context_manager, sampl
 
 
 @pytest.mark.asyncio
-async def test_role_orchestrator_get_pipeline_stats(context_manager, sample_sources, sample_analyses, sample_report):
+async def test_role_orchestrator_get_pipeline_stats(
+    context_manager, sample_sources, sample_analyses, sample_report
+):
     """Test RoleOrchestrator pipeline statistics."""
     orchestrator = RoleOrchestrator(context_manager)
 

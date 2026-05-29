@@ -151,9 +151,7 @@ class IntelligentModelRouter:
                 return decision
 
         # Ultimate fallback
-        decision = self._make_decision(
-            self._fallback_model(), strategy, complexity, query
-        )
+        decision = self._make_decision(self._fallback_model(), strategy, complexity, query)
         self._record(decision)
         return decision
 
@@ -164,9 +162,7 @@ class IntelligentModelRouter:
         is_reasoning: bool = False,
     ) -> ModelSpec:
         """Select the most cost-effective model meeting reliability requirement."""
-        candidates = [
-            m for m in self._models if m.accuracy_estimate >= required_reliability
-        ]
+        candidates = [m for m in self._models if m.accuracy_estimate >= required_reliability]
         if cost_budget is not None:
             candidates = [m for m in candidates if m.cost_per_1k_tokens <= cost_budget]
         if is_reasoning:
@@ -179,9 +175,7 @@ class IntelligentModelRouter:
         """Record a turn for multi-turn routing context."""
         self._turn_history.append(turn)
 
-    def _multi_turn_route(
-        self, query: str, candidates: list[ModelSpec]
-    ) -> RoutingDecision:
+    def _multi_turn_route(self, query: str, candidates: list[ModelSpec]) -> RoutingDecision:
         """Route considering conversation history."""
         context_tokens = sum(t.history_tokens for t in self._turn_history)
         avg_complexity = sum(t.estimated_complexity for t in self._turn_history) / max(
@@ -200,14 +194,10 @@ class IntelligentModelRouter:
                 return decision
 
         # Default to standard tier for multi-turn
-        standard = [
-            m for m in candidates if m.tier in (ModelTier.STANDARD, ModelTier.FAST)
-        ]
+        standard = [m for m in candidates if m.tier in (ModelTier.STANDARD, ModelTier.FAST)]
         if standard:
             best = min(standard, key=lambda m: m.cost_per_1k_tokens)
-            decision = self._make_decision(
-                best, RoutingStrategy.MULTI_TURN, avg_complexity, query
-            )
+            decision = self._make_decision(best, RoutingStrategy.MULTI_TURN, avg_complexity, query)
             self._record(decision)
             return decision
 
@@ -221,8 +211,7 @@ class IntelligentModelRouter:
         return [
             m
             for m in self._models
-            if m.cost_per_1k_tokens * 10 <= budget.remaining_cost
-            and not budget.cost_exhausted
+            if m.cost_per_1k_tokens * 10 <= budget.remaining_cost and not budget.cost_exhausted
         ]
 
     def _make_decision(
@@ -236,7 +225,9 @@ class IntelligentModelRouter:
             confidence=round(confidence, 4),
             estimated_cost=round(est_cost, 6),
             strategy=strategy,
-            reasoning=f"Selected {model.name} (tier={model.tier.value}) for complexity={complexity:.2f}",
+            reasoning=(
+                f"Selected {model.name} (tier={model.tier.value}) for complexity={complexity:.2f}"
+            ),
         )
 
     def _record(self, decision: RoutingDecision) -> None:
@@ -265,9 +256,7 @@ class IntelligentModelRouter:
             decisions_by_tier=tiers,
             total_cost=round(self._total_cost, 6),
             total_tokens=self._total_tokens,
-            avg_confidence=(
-                round(sum(confidences) / len(confidences), 4) if confidences else 0.0
-            ),
+            avg_confidence=(round(sum(confidences) / len(confidences), 4) if confidences else 0.0),
             fallback_rate=0.0,
         )
 

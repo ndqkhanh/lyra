@@ -73,9 +73,7 @@ class NoteConstructor:
         response = await self.llm.complete(prompt)
         return self._parse_decision(response)
 
-    def _build_construction_prompt(
-        self, content: str, nearby_notes: list[dict]
-    ) -> str:
+    def _build_construction_prompt(self, content: str, nearby_notes: list[dict]) -> str:
         nearby_fmt = ""
         if nearby_notes:
             entries = []
@@ -98,7 +96,8 @@ Existing related notes:
 Decide:
 1. STORE: Is this non-trivial, non-duplicate information worth remembering? (true/false)
 2. KEYWORDS: Extract up to {self.max_keywords} specific keywords for retrieval
-3. TAGS: Assign up to {self.max_tags} semantic tags (e.g., "bug-fix", "architecture", "python", "api-design")
+3. TAGS: Assign up to {self.max_tags} semantic tags (e.g., "bug-fix", "architecture", "python",
+"api-design")
 4. CONTEXT: Write a one-line contextual description for when/why this memory matters
 5. MERGE: Should this merge into an existing note? If yes, provide the note index and merged content
 
@@ -117,9 +116,7 @@ Respond with JSON only:
         try:
             data = json.loads(self._extract_json(response))
         except (json.JSONDecodeError, KeyError):
-            return ConstructionDecision(
-                should_store=False, reason="failed to parse LLM response"
-            )
+            return ConstructionDecision(should_store=False, reason="failed to parse LLM response")
 
         return ConstructionDecision(
             should_store=bool(data.get("should_store", False)),

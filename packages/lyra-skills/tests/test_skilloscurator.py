@@ -1,4 +1,5 @@
 """Tests for Phase I — SkillOS curator."""
+
 import pytest
 from lyra_skills.skilloscurator import (
     CurationAction,
@@ -29,13 +30,22 @@ class TestCurationReward:
         assert r.total() == pytest.approx(1.0)
 
     def test_total_partial(self):
-        r = CurationReward(task_outcome=0.5, operation_validity=0.0, content_quality=0.0, compression_ratio=0.0)
+        r = CurationReward(
+            task_outcome=0.5, operation_validity=0.0, content_quality=0.0, compression_ratio=0.0
+        )
         cfg = CurationRewardConfig()
         assert r.total(cfg) == pytest.approx(0.50 * 0.5)
 
     def test_compression_capped_at_one(self):
-        r = CurationReward(task_outcome=0.0, operation_validity=0.0, content_quality=0.0, compression_ratio=5.0)
-        cfg = CurationRewardConfig(compression_weight=1.0, task_outcome_weight=0, operation_validity_weight=0, content_quality_weight=0)
+        r = CurationReward(
+            task_outcome=0.0, operation_validity=0.0, content_quality=0.0, compression_ratio=5.0
+        )
+        cfg = CurationRewardConfig(
+            compression_weight=1.0,
+            task_outcome_weight=0,
+            operation_validity_weight=0,
+            content_quality_weight=0,
+        )
         assert r.total(cfg) == pytest.approx(1.0)
 
     def test_custom_weights(self):

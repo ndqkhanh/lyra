@@ -28,9 +28,9 @@ logger = logging.getLogger(__name__)
 class VerificationLayer(Enum):
     """The three verification layers."""
 
-    PRE_EXECUTION = auto()       # Before execution: formal checks
-    DURING_EXECUTION = auto()    # During execution: CPL
-    POST_EXECUTION = auto()      # After execution: runtime
+    PRE_EXECUTION = auto()  # Before execution: formal checks
+    DURING_EXECUTION = auto()  # During execution: CPL
+    POST_EXECUTION = auto()  # After execution: runtime
 
 
 class VerificationStatus(Enum):
@@ -231,11 +231,11 @@ class ConfidenceAggregator:
             VerificationStatus.FAIL: 3,
             VerificationStatus.ERROR: 4,
         }
-        return max(statuses, key=lambda s: priority.get(s, 0)) if statuses else VerificationStatus.PASS
+        return (
+            max(statuses, key=lambda s: priority.get(s, 0)) if statuses else VerificationStatus.PASS
+        )
 
-    def _dempster_shafer(
-        self, confidences: dict[VerificationLayer, float]
-    ) -> float:
+    def _dempster_shafer(self, confidences: dict[VerificationLayer, float]) -> float:
         """Simple Dempster-Shafer combination for confidence values."""
         combined = 1.0
         for conf in confidences.values():
@@ -272,6 +272,7 @@ class VerificationMesh:
         """Get or lazily create CPL verifier."""
         if self._cpl_verifier is None:
             from .cpl_verifier import CPLVerifier
+
             self._cpl_verifier = CPLVerifier()
         return self._cpl_verifier
 
@@ -280,6 +281,7 @@ class VerificationMesh:
         """Get or lazily create formal verifier."""
         if self._formal_verifier is None:
             from .formal_verifier import FormalVerifier
+
             self._formal_verifier = FormalVerifier()
         return self._formal_verifier
 
@@ -288,6 +290,7 @@ class VerificationMesh:
         """Get or lazily create runtime verifier."""
         if self._runtime_verifier is None:
             from .runtime_verifier import RuntimeVerifier
+
             self._runtime_verifier = RuntimeVerifier()
         return self._runtime_verifier
 
@@ -328,17 +331,11 @@ class VerificationMesh:
         async def _run_cpl() -> list[VerificationResult]:
             cpl_results: list[VerificationResult] = []
             if prompt_text:
-                cpl_results.append(
-                    await self.cpl.verify_prompt(prompt_text)
-                )
+                cpl_results.append(await self.cpl.verify_prompt(prompt_text))
             if output_text:
-                cpl_results.append(
-                    await self.cpl.verify_output(output_text)
-                )
+                cpl_results.append(await self.cpl.verify_output(output_text))
             for event in trace:
-                cpl_results.append(
-                    await self.cpl.verify_event(event)
-                )
+                cpl_results.append(await self.cpl.verify_event(event))
             return cpl_results
 
         # Layer 3: Post-execution (runtime)
@@ -385,12 +382,14 @@ class VerificationMesh:
         report.overall_status = status
 
         self._reports.append(report)
-        self._execution_history.append({
-            "trace_length": len(trace),
-            "status": status.name,
-            "confidence": confidence,
-            "timestamp": time.time(),
-        })
+        self._execution_history.append(
+            {
+                "trace_length": len(trace),
+                "status": status.name,
+                "confidence": confidence,
+                "timestamp": time.time(),
+            }
+        )
 
         return report
 
@@ -434,9 +433,7 @@ class VerificationMesh:
             "total_checks": total_passes + total_fails,
             "passes": total_passes,
             "fails": total_fails,
-            "pass_rate": (
-                total_passes / max(total_passes + total_fails, 1)
-            ),
+            "pass_rate": (total_passes / max(total_passes + total_fails, 1)),
             "layer_summary": {
                 layer.name: {
                     "pass_rate": lr.pass_rate,

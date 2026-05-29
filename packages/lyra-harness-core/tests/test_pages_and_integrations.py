@@ -1,4 +1,5 @@
 """Tests for Pages document surface + external-graph integration bridges."""
+
 from __future__ import annotations
 
 import pytest
@@ -30,27 +31,19 @@ class TestPageSnapshot:
 
     def test_v1_with_parent_rejected(self):
         with pytest.raises(ValueError):
-            PageSnapshot(
-                page_id="p1", content="x", author="u:a", version=1, parent_version=0
-            )
+            PageSnapshot(page_id="p1", content="x", author="u:a", version=1, parent_version=0)
 
     def test_v_above_1_requires_parent(self):
         with pytest.raises(ValueError):
-            PageSnapshot(
-                page_id="p1", content="x", author="u:a", version=2, parent_version=None
-            )
+            PageSnapshot(page_id="p1", content="x", author="u:a", version=2, parent_version=None)
 
     def test_zero_version_rejected(self):
         with pytest.raises(ValueError):
-            PageSnapshot(
-                page_id="p1", content="x", author="u:a", version=0, parent_version=None
-            )
+            PageSnapshot(page_id="p1", content="x", author="u:a", version=0, parent_version=None)
 
     def test_empty_author_rejected(self):
         with pytest.raises(ValueError):
-            PageSnapshot(
-                page_id="p1", content="x", author="", version=1, parent_version=None
-            )
+            PageSnapshot(page_id="p1", content="x", author="", version=1, parent_version=None)
 
     def test_agent_edit_flag(self):
         s = PageSnapshot(
@@ -98,68 +91,92 @@ class TestPageHistory:
 
     def test_duplicate_version_rejected(self):
         h = PageHistory(page_id="p1")
-        h.append_snapshot(PageSnapshot(
-            page_id="p1", content="a", author="u:a", version=1, parent_version=None
-        ))
+        h.append_snapshot(
+            PageSnapshot(page_id="p1", content="a", author="u:a", version=1, parent_version=None)
+        )
         with pytest.raises(ValueError):
-            h.append_snapshot(PageSnapshot(
-                page_id="p1", content="b", author="u:b", version=1, parent_version=None
-            ))
+            h.append_snapshot(
+                PageSnapshot(
+                    page_id="p1", content="b", author="u:b", version=1, parent_version=None
+                )
+            )
 
     def test_at_version(self):
         h = PageHistory(page_id="p1")
-        h.append_snapshot(PageSnapshot(
-            page_id="p1", content="a", author="u:a", version=1, parent_version=None
-        ))
+        h.append_snapshot(
+            PageSnapshot(page_id="p1", content="a", author="u:a", version=1, parent_version=None)
+        )
         assert h.at_version(1).content == "a"
         assert h.at_version(99) is None
 
     def test_linear_chain_simple(self):
         h = PageHistory(page_id="p1")
         for v, parent in [(1, None), (2, 1), (3, 2)]:
-            h.append_snapshot(PageSnapshot(
-                page_id="p1", content=f"v{v}", author="u:a", version=v, parent_version=parent
-            ))
+            h.append_snapshot(
+                PageSnapshot(
+                    page_id="p1", content=f"v{v}", author="u:a", version=v, parent_version=parent
+                )
+            )
         chain = h.linear_chain()
         assert [s.version for s in chain] == [1, 2, 3]
 
     def test_authors_chronological_unique(self):
         h = PageHistory(page_id="p1")
-        h.append_snapshot(PageSnapshot(
-            page_id="p1", content="a", author="user:alice", version=1, parent_version=None,
-            created_at=1.0,
-        ))
-        h.append_snapshot(PageSnapshot(
-            page_id="p1", content="b", author="agent:bot", version=2, parent_version=1,
-            created_at=2.0,
-        ))
-        h.append_snapshot(PageSnapshot(
-            page_id="p1", content="c", author="user:alice", version=3, parent_version=2,
-            created_at=3.0,
-        ))
+        h.append_snapshot(
+            PageSnapshot(
+                page_id="p1",
+                content="a",
+                author="user:alice",
+                version=1,
+                parent_version=None,
+                created_at=1.0,
+            )
+        )
+        h.append_snapshot(
+            PageSnapshot(
+                page_id="p1",
+                content="b",
+                author="agent:bot",
+                version=2,
+                parent_version=1,
+                created_at=2.0,
+            )
+        )
+        h.append_snapshot(
+            PageSnapshot(
+                page_id="p1",
+                content="c",
+                author="user:alice",
+                version=3,
+                parent_version=2,
+                created_at=3.0,
+            )
+        )
         # Alice once, bot once, in chronological order.
         assert h.authors() == ["user:alice", "agent:bot"]
 
     def test_no_conflicts_on_linear(self):
         h = PageHistory(page_id="p1")
         for v, parent in [(1, None), (2, 1)]:
-            h.append_snapshot(PageSnapshot(
-                page_id="p1", content="x", author="u:a", version=v, parent_version=parent
-            ))
+            h.append_snapshot(
+                PageSnapshot(
+                    page_id="p1", content="x", author="u:a", version=v, parent_version=parent
+                )
+            )
         assert h.conflicts() == []
 
     def test_concurrent_edits_produce_conflict(self):
         h = PageHistory(page_id="p1")
-        h.append_snapshot(PageSnapshot(
-            page_id="p1", content="a", author="u:a", version=1, parent_version=None
-        ))
+        h.append_snapshot(
+            PageSnapshot(page_id="p1", content="a", author="u:a", version=1, parent_version=None)
+        )
         # Two edits both forking from version 1.
-        h.append_snapshot(PageSnapshot(
-            page_id="p1", content="b", author="u:b", version=2, parent_version=1
-        ))
-        h.append_snapshot(PageSnapshot(
-            page_id="p1", content="c", author="agent:bot", version=3, parent_version=1
-        ))
+        h.append_snapshot(
+            PageSnapshot(page_id="p1", content="b", author="u:b", version=2, parent_version=1)
+        )
+        h.append_snapshot(
+            PageSnapshot(page_id="p1", content="c", author="agent:bot", version=3, parent_version=1)
+        )
         conflicts = h.conflicts()
         assert len(conflicts) == 1
         assert conflicts[0].parent_version == 1
@@ -167,12 +184,14 @@ class TestPageHistory:
 
     def test_stats(self):
         h = PageHistory(page_id="p1")
-        h.append_snapshot(PageSnapshot(
-            page_id="p1", content="a", author="user:alice", version=1, parent_version=None
-        ))
-        h.append_snapshot(PageSnapshot(
-            page_id="p1", content="b", author="agent:bot", version=2, parent_version=1
-        ))
+        h.append_snapshot(
+            PageSnapshot(
+                page_id="p1", content="a", author="user:alice", version=1, parent_version=None
+            )
+        )
+        h.append_snapshot(
+            PageSnapshot(page_id="p1", content="b", author="agent:bot", version=2, parent_version=1)
+        )
         s = h.stats()
         assert s["snapshots"] == 2
         assert s["user_edits"] == 1
@@ -275,7 +294,9 @@ class _ForeignGraph:
 class TestAdaptedNode:
     def test_wrap_default_attrs(self):
         class N:
-            def __init__(self): self.id, self.title = "x", "X"
+            def __init__(self):
+                self.id, self.title = "x", "X"
+
         adapted = AdaptedNode.wrap(N())
         assert adapted.id == "x"
         assert adapted.title == "X"
@@ -287,7 +308,9 @@ class TestAdaptedNode:
         assert adapted.title == "Y label"
 
     def test_wrap_missing_id_raises(self):
-        class N: pass
+        class N:
+            pass
+
         with pytest.raises(AttributeError):
             AdaptedNode.wrap(N())
 
@@ -295,7 +318,9 @@ class TestAdaptedNode:
 class TestAdaptedEdge:
     def test_wrap_default_attrs(self):
         class E:
-            def __init__(self): self.src, self.dst = "a", "b"
+            def __init__(self):
+                self.src, self.dst = "a", "b"
+
         adapted = AdaptedEdge.wrap(E())
         assert adapted.src == "a"
         assert adapted.dst == "b"
@@ -310,7 +335,9 @@ class TestAdaptedEdge:
 class TestAdaptedDocument:
     def test_wrap_with_doc_id(self):
         class D:
-            def __init__(self): self.doc_id, self.text = "d1", "hello"
+            def __init__(self):
+                self.doc_id, self.text = "d1", "hello"
+
         adapted = AdaptedDocument.wrap(D())
         assert adapted.doc_id == "d1"
         assert adapted.text == "hello"
@@ -318,7 +345,9 @@ class TestAdaptedDocument:
 
     def test_wrap_falls_back_to_id(self):
         class D:
-            def __init__(self): self.id, self.text = "d1", "x"
+            def __init__(self):
+                self.id, self.text = "d1", "x"
+
         adapted = AdaptedDocument.wrap(D())
         assert adapted.doc_id == "d1"
 
@@ -326,6 +355,7 @@ class TestAdaptedDocument:
         class D:
             def __init__(self):
                 self.doc_id, self.text, self.anchor_node_id = "d1", "x", "alice"
+
         adapted = AdaptedDocument.wrap(D())
         assert adapted.anchor_node_id == "alice"
 
@@ -360,12 +390,16 @@ class TestAdaptedGraph:
 
     def test_skips_malformed_edges(self):
         # Edge missing src/dst should be silently skipped.
-        class BadEdge: pass
+        class BadEdge:
+            pass
+
         g = _ForeignGraph(
             nodes=[_ForeignNode("a"), _ForeignNode("b")],
             edges=[_ForeignEdge("a", "b"), BadEdge()],
         )
-        adapted = adapt_graph(g, node_id_attr="name", edge_src_attr="src_id", edge_dst_attr="dst_id")
+        adapted = adapt_graph(
+            g, node_id_attr="name", edge_src_attr="src_id", edge_dst_attr="dst_id"
+        )
         edges = list(adapted.all_edges())
         # Only the valid edge survives.
         assert len(edges) == 1
@@ -379,33 +413,55 @@ class TestVerifyGraphProtocol:
         assert missing == []
 
     def test_missing_methods(self):
-        class Stub: pass
+        class Stub:
+            pass
+
         ok, missing = verify_graph_protocol(Stub())
         assert ok is False
         assert "all_nodes()" in missing
 
     def test_node_missing_title(self):
         class N:
-            def __init__(self): self.id = "x"
+            def __init__(self):
+                self.id = "x"
+
             # no title
+
         class G:
-            def all_nodes(self): return [N()]
-            def all_edges(self): return []
-            def __contains__(self, x): return False
+            def all_nodes(self):
+                return [N()]
+
+            def all_edges(self):
+                return []
+
+            def __contains__(self, x):
+                return False
+
         ok, missing = verify_graph_protocol(G())
         assert ok is False
         assert "Node.title" in missing
 
     def test_edge_missing_dst(self):
         class N:
-            def __init__(self): self.id, self.title = "x", "X"
+            def __init__(self):
+                self.id, self.title = "x", "X"
+
         class E:
-            def __init__(self): self.src = "x"
+            def __init__(self):
+                self.src = "x"
+
             # no dst
+
         class G:
-            def all_nodes(self): return [N()]
-            def all_edges(self): return [E()]
-            def __contains__(self, x): return False
+            def all_nodes(self):
+                return [N()]
+
+            def all_edges(self):
+                return [E()]
+
+            def __contains__(self, x):
+                return False
+
         ok, missing = verify_graph_protocol(G())
         assert ok is False
         assert "Edge.dst" in missing
@@ -421,14 +477,18 @@ class TestEndToEndAdaptedGraphWithHippoRAG:
         )
         adapted = adapt_graph(
             foreign,
-            node_id_attr="name", node_title_attr="label",
-            edge_src_attr="src_id", edge_dst_attr="dst_id",
+            node_id_attr="name",
+            node_title_attr="label",
+            edge_src_attr="src_id",
+            edge_dst_attr="dst_id",
         )
         retriever = HippoRAGRetriever(graph=adapted)
-        retriever.build_index([
-            SimpleDocument(doc_id="d1", text="alice knows bob", anchor_node_id="alice"),
-            SimpleDocument(doc_id="d2", text="unrelated", anchor_node_id=None),
-        ])
+        retriever.build_index(
+            [
+                SimpleDocument(doc_id="d1", text="alice knows bob", anchor_node_id="alice"),
+                SimpleDocument(doc_id="d2", text="unrelated", anchor_node_id=None),
+            ]
+        )
         hits = retriever.retrieve("alice")
         assert len(hits) >= 1
         # The doc anchored at alice should rank highly.

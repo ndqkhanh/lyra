@@ -7,7 +7,8 @@ rewriting it. The bundle is the canonical form; exporters are
 view-transformers.
 
 The 2026 cross-harness lesson ([`docs/07`](../../../../../../../docs/07-model-context-protocol.md),
-[`docs/62`](../../../../../../../docs/62-everything-claude-code.md), [`docs/239`](../../../../../../../docs/239-software-3-0-paradigm.md)):
+[`docs/62`](../../../../../../../docs/62-everything-claude-code.md),
+[`docs/239`](../../../../../../../docs/239-software-3-0-paradigm.md)):
 **Skills + hooks + agents + rules + MCP form a de-facto portable
 extension contract** — the same source bundle, projected per target,
 runs inside multiple harnesses.
@@ -32,6 +33,7 @@ Usage::
     bundle.validate()
     ClaudeCodeExporter().export(bundle, target=Path.home() / ".claude")
 """
+
 from __future__ import annotations
 
 from .base import (

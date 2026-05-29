@@ -83,7 +83,9 @@ class MetaKnowledgeStore:
                 confidence=new_confidence,
                 supporting_evidence=new_support,
                 contradicting_evidence=existing.contradicting_evidence,
-                source_sessions=list(set(existing.source_sessions + ([session_id] if session_id else []))),
+                source_sessions=list(
+                    set(existing.source_sessions + ([session_id] if session_id else []))
+                ),
                 created_at=existing.created_at,
                 last_updated=time.time(),
             )
@@ -109,10 +111,7 @@ class MetaKnowledgeStore:
             return None
         new_contra = list(entry.contradicting_evidence) + [evidence]
         ratio = len(entry.supporting_evidence) / max(len(new_contra), 1)
-        new_conf = (
-            KnowledgeConfidence.HYPOTHESIS if ratio < 1.0
-            else entry.confidence
-        )
+        new_conf = KnowledgeConfidence.HYPOTHESIS if ratio < 1.0 else entry.confidence
         updated = MetaKnowledge(
             entry_id=entry.entry_id,
             knowledge_type=entry.knowledge_type,
@@ -138,7 +137,8 @@ class MetaKnowledgeStore:
         if min_confidence is not None:
             conf_order = list(KnowledgeConfidence)
             results = [
-                e for e in results
+                e
+                for e in results
                 if conf_order.index(e.confidence) >= conf_order.index(min_confidence)
             ]
         return sorted(results, key=lambda e: e.evidence_ratio, reverse=True)

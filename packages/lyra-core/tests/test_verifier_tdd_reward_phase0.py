@@ -1,4 +1,5 @@
 """RED tests for v1.8 Wave-1 §3.4 — TDD-Reward inference signal."""
+
 from __future__ import annotations
 
 import pytest
@@ -8,8 +9,12 @@ from lyra_core.verifier import TddTestOutcome, compute_tdd_reward
 def test_compute_tdd_reward_rejects_duplicate_nodeids() -> None:
     """Public contract: a duplicate nodeid is a programmer error, raise loudly."""
     outcomes = [
-        TddTestOutcome(nodeid="tests/test_a.py::test_x", was_failing_before=True, is_passing_after=True),
-        TddTestOutcome(nodeid="tests/test_a.py::test_x", was_failing_before=False, is_passing_after=True),
+        TddTestOutcome(
+            nodeid="tests/test_a.py::test_x", was_failing_before=True, is_passing_after=True
+        ),
+        TddTestOutcome(
+            nodeid="tests/test_a.py::test_x", was_failing_before=False, is_passing_after=True
+        ),
     ]
     with pytest.raises(ValueError, match="duplicate"):
         compute_tdd_reward(outcomes)

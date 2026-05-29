@@ -9,10 +9,15 @@ import time
 from lyra_core.collective import DeadEndEntry, DeadEndRegistry
 
 
-def _entry(id: str, hypothesis: str, approach: str = "", tags: list[str] | None = None) -> DeadEndEntry:
+def _entry(
+    id: str, hypothesis: str, approach: str = "", tags: list[str] | None = None
+) -> DeadEndEntry:
     return DeadEndEntry(
-        id=id, hypothesis=hypothesis, approach=approach,
-        failure_reason="test failure", discovered_by="test-agent",
+        id=id,
+        hypothesis=hypothesis,
+        approach=approach,
+        failure_reason="test failure",
+        discovered_by="test-agent",
         tags=tags or [],
     )
 
@@ -109,8 +114,14 @@ class TestPerformance:
     def test_large_registry_query_speed(self):
         reg = DeadEndRegistry()
         for i in range(1000):
-            reg.register(_entry(f"de{i}", f"hypothesis number {i} about topic {i % 20}",
-                                f"approach variant {i % 10}", tags=[f"tag{i % 5}"]))
+            reg.register(
+                _entry(
+                    f"de{i}",
+                    f"hypothesis number {i} about topic {i % 20}",
+                    f"approach variant {i % 10}",
+                    tags=[f"tag{i % 5}"],
+                )
+            )
 
         start = time.monotonic()
         is_dead, _ = reg.is_known_dead_end("hypothesis number 500 about topic 0")
@@ -147,10 +158,7 @@ class TestConcurrency:
             except Exception as e:
                 errors.append(e)
 
-        threads = [
-            threading.Thread(target=register_batch, args=(i * 250, 250))
-            for i in range(4)
-        ]
+        threads = [threading.Thread(target=register_batch, args=(i * 250, 250)) for i in range(4)]
         for t in threads:
             t.start()
         for t in threads:

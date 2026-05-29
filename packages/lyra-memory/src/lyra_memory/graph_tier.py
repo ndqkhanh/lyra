@@ -45,7 +45,9 @@ class KnowledgeGraph:
         self.edges[edge.source_id].append(edge)
         self.reverse_edges[edge.target_id].append(edge)
 
-    def get_neighbors(self, node_id: str, relation: str | None = None) -> list[tuple[str, str, float]]:
+    def get_neighbors(
+        self, node_id: str, relation: str | None = None
+    ) -> list[tuple[str, str, float]]:
         neighbors = []
         for edge in self.edges.get(node_id, []):
             if relation is None or edge.relation == relation:
@@ -59,9 +61,7 @@ class KnowledgeGraph:
         results = []
         for node in self.nodes.values():
             if node.node_type == query_type:
-                total_weight = sum(
-                    e.weight for e in self.edges.get(node.id, [])
-                ) + sum(
+                total_weight = sum(e.weight for e in self.edges.get(node.id, [])) + sum(
                     e.weight for e in self.reverse_edges.get(node.id, [])
                 )
                 if total_weight >= min_weight:
@@ -83,7 +83,9 @@ class MMRReranker:
     def reset(self):
         self._served = []
 
-    def rerank(self, items: list[tuple[str, float, np.ndarray]], top_k: int = 5) -> list[tuple[str, float]]:
+    def rerank(
+        self, items: list[tuple[str, float, np.ndarray]], top_k: int = 5
+    ) -> list[tuple[str, float]]:
         selected = []
         candidates = list(range(len(items)))
         while len(selected) < min(top_k, len(items)):
@@ -92,10 +94,18 @@ class MMRReranker:
             for i in candidates:
                 relevance = items[i][1]
                 if self._served:
-                    max_sim = max(
-                        np.dot(items[i][2], items[j][2]) / max(np.linalg.norm(items[i][2]) * np.linalg.norm(items[j][2]), 1e-10)
-                        for j in selected if len(items[j]) > 2 and items[j][2] is not None and items[i][2] is not None
-                    ) if len(items[i]) > 2 and items[i][2] is not None else 0.0
+                    max_sim = (
+                        max(
+                            np.dot(items[i][2], items[j][2])
+                            / max(np.linalg.norm(items[i][2]) * np.linalg.norm(items[j][2]), 1e-10)
+                            for j in selected
+                            if len(items[j]) > 2
+                            and items[j][2] is not None
+                            and items[i][2] is not None
+                        )
+                        if len(items[i]) > 2 and items[i][2] is not None
+                        else 0.0
+                    )
                 else:
                     max_sim = 0.0
                 mmr = self.lambda_param * relevance - (1.0 - self.lambda_param) * max_sim
@@ -187,7 +197,9 @@ class GraphMemoryStore:
         self.dreamer = AutoDreamer()
         self.federation = FederatedRetriever()
 
-    async def store(self, node: KnowledgeGraphNode, edges: list[KnowledgeGraphEdge] | None = None) -> str:
+    async def store(
+        self, node: KnowledgeGraphNode, edges: list[KnowledgeGraphEdge] | None = None
+    ) -> str:
         nid = self.graph.add_node(node)
         self.actr.encode(nid)
         if edges:

@@ -1,4 +1,6 @@
-"""Skill Dependency Resolution — graph-based dependency resolution with circular detection (Tarjan's algorithm)."""
+"""Skill Dependency Resolution — graph-based dependency resolution with circular detection (Tarjan's
+algorithm)."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -71,8 +73,8 @@ class DependencyGraph:
 class DependencyResolver:
     """Resolves skill dependency graphs, detects cycles, and computes optimal load order.
 
-    Uses Tarjan's algorithm for strongly connected component (cycle) detection
-    and Kahn's algorithm for topological sorting.
+    Uses Tarjan's algorithm for strongly connected component (cycle) detection and Kahn's algorithm
+    for topological sorting.
     """
 
     def __init__(self) -> None:

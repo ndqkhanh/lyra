@@ -231,7 +231,9 @@ class CodeReviewerSkill:
                             severity=Severity.LOW,
                             category=FindingCategory.PERFORMANCE,
                             message="Use of range(len(...)) pattern detected.",
-                            suggestion="Use 'enumerate()' for index-based iteration or iterate directly.",
+                            suggestion=(
+                                "Use 'enumerate()' for index-based iteration or iterate directly."
+                            ),
                             code="RANGE_LEN",
                         )
                     )
@@ -269,11 +271,36 @@ class CodeReviewerSkill:
     def _check_security_patterns(self, source: str) -> None:
         """Check for common security anti-patterns via regex."""
         patterns: list[tuple[str, str, Severity, str]] = [
-            (r"eval\s*\(", "Use of eval() allows arbitrary code execution.", Severity.CRITICAL, "EVAL_USAGE"),
-            (r"exec\s*\(", "Use of exec() allows arbitrary code execution.", Severity.CRITICAL, "EXEC_USAGE"),
-            (r"pickle\.loads?", "Pickle can execute arbitrary code during deserialization.", Severity.CRITICAL, "PICKLE_USAGE"),
-            (r"os\.system\s*\(", "subprocess.run() is safer than os.system().", Severity.HIGH, "OS_SYSTEM"),
-            (r"subprocess\.call\(.*shell=True", "shell=True enables shell injection attacks.", Severity.CRITICAL, "SHELL_TRUE"),
+            (
+                r"eval\s*\(",
+                "Use of eval() allows arbitrary code execution.",
+                Severity.CRITICAL,
+                "EVAL_USAGE",
+            ),
+            (
+                r"exec\s*\(",
+                "Use of exec() allows arbitrary code execution.",
+                Severity.CRITICAL,
+                "EXEC_USAGE",
+            ),
+            (
+                r"pickle\.loads?",
+                "Pickle can execute arbitrary code during deserialization.",
+                Severity.CRITICAL,
+                "PICKLE_USAGE",
+            ),
+            (
+                r"os\.system\s*\(",
+                "subprocess.run() is safer than os.system().",
+                Severity.HIGH,
+                "OS_SYSTEM",
+            ),
+            (
+                r"subprocess\.call\(.*shell=True",
+                "shell=True enables shell injection attacks.",
+                Severity.CRITICAL,
+                "SHELL_TRUE",
+            ),
         ]
         for pattern, message, severity, code in patterns:
             for match in re.finditer(pattern, source):

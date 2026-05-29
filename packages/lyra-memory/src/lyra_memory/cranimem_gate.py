@@ -78,20 +78,24 @@ class CraniMemAdmissionGate:
             self._prune_lowest_utility()
 
         # Gate decision
-        if adjusted_relevance >= self.config.relevance_threshold and candidate.utility_score >= self.config.utility_threshold:
+        if (
+            adjusted_relevance >= self.config.relevance_threshold
+            and candidate.utility_score >= self.config.utility_threshold
+        ):
             self._buffer[candidate.candidate_id] = candidate
             self._stats["admitted"] += 1
             return GateDecision(
                 candidate_id=candidate.candidate_id,
                 action=GateAction.ADMIT,
                 reason=f"Relevance {adjusted_relevance:.2f} >= {self.config.relevance_threshold}, "
-                       f"Utility {candidate.utility_score:.2f} >= {self.config.utility_threshold}",
+                f"Utility {candidate.utility_score:.2f} >= {self.config.utility_threshold}",
                 relevance_score=round(adjusted_relevance, 4),
                 utility_score=candidate.utility_score,
             )
 
         if adjusted_relevance >= self.config.relevance_threshold * 0.5:
             import time
+
             self._deferred[candidate.candidate_id] = (candidate, time.time())
             self._stats["deferred"] += 1
             return GateDecision(
@@ -130,10 +134,10 @@ class CraniMemAdmissionGate:
         """Set a new goal; re-evaluates deferred candidates against goal relevance."""
         self._current_goal = goal
         import time
+
         now = time.time()
         expired = [
-            cid for cid, (_, ts) in self._deferred.items()
-            if now - ts > self.config.defer_ttl_sec
+            cid for cid, (_, ts) in self._deferred.items() if now - ts > self.config.defer_ttl_sec
         ]
         for cid in expired:
             self._deferred.pop(cid, None)

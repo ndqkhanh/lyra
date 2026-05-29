@@ -45,7 +45,9 @@ class ApiDesignerSkill:
 
         self._issues.clear()
         for ep in endpoints:
-            self._validate_endpoint(ep.get("path", ""), ep.get("method", ""), ep.get("description", ""))
+            self._validate_endpoint(
+                ep.get("path", ""), ep.get("method", ""), ep.get("description", "")
+            )
 
         score = max(0, 100 - len(self._issues) * 5)
         return {
@@ -57,26 +59,61 @@ class ApiDesignerSkill:
 
     def _validate_endpoint(self, path: str, method: str, description: str) -> None:
         if method.upper() not in self._VALID_METHODS:
-            self._issues.append(DesignIssue(path, method, DesignIssueSeverity.ERROR,
-                f"Invalid HTTP method '{method}'.",
-                f"Use one of: {', '.join(sorted(self._VALID_METHODS))}.",
-                "API-INVALID-METHOD"))
+            self._issues.append(
+                DesignIssue(
+                    path,
+                    method,
+                    DesignIssueSeverity.ERROR,
+                    f"Invalid HTTP method '{method}'.",
+                    f"Use one of: {', '.join(sorted(self._VALID_METHODS))}.",
+                    "API-INVALID-METHOD",
+                )
+            )
 
         if not path.startswith("/"):
-            self._issues.append(DesignIssue(path, method, DesignIssueSeverity.WARNING,
-                "API path should start with '/'.",
-                "Prefix paths with '/' (e.g., '/users').",
-                "API-PATH-SLASH"))
+            self._issues.append(
+                DesignIssue(
+                    path,
+                    method,
+                    DesignIssueSeverity.WARNING,
+                    "API path should start with '/'.",
+                    "Prefix paths with '/' (e.g., '/users').",
+                    "API-PATH-SLASH",
+                )
+            )
 
         if "//" in path:
-            self._issues.append(DesignIssue(path, method, DesignIssueSeverity.ERROR,
-                "Path contains double slash.", "Remove double slashes.", "API-DOUBLE-SLASH"))
+            self._issues.append(
+                DesignIssue(
+                    path,
+                    method,
+                    DesignIssueSeverity.ERROR,
+                    "Path contains double slash.",
+                    "Remove double slashes.",
+                    "API-DOUBLE-SLASH",
+                )
+            )
 
         if path.split("/")[-1].startswith("_"):
-            self._issues.append(DesignIssue(path, method, DesignIssueSeverity.WARNING,
-                "Path segment starts with underscore (private convention).",
-                "Use public naming for API paths.", "API-PRIVATE-PATH"))
+            self._issues.append(
+                DesignIssue(
+                    path,
+                    method,
+                    DesignIssueSeverity.WARNING,
+                    "Path segment starts with underscore (private convention).",
+                    "Use public naming for API paths.",
+                    "API-PRIVATE-PATH",
+                )
+            )
 
         if not description:
-            self._issues.append(DesignIssue(path, method, DesignIssueSeverity.INFO,
-                "Endpoint has no description.", "Add a brief description of the endpoint.", "API-NO-DESC"))
+            self._issues.append(
+                DesignIssue(
+                    path,
+                    method,
+                    DesignIssueSeverity.INFO,
+                    "Endpoint has no description.",
+                    "Add a brief description of the endpoint.",
+                    "API-NO-DESC",
+                )
+            )

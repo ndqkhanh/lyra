@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable
+from typing import Any
 
 from .exceptions import FlowCompositionError
 
@@ -57,9 +58,7 @@ class FlowEngine:
     """
 
     def __init__(self) -> None:
-        self._step_handlers: dict[
-            str, Callable[[str, dict[str, Any]], dict[str, Any]]
-        ] = {}
+        self._step_handlers: dict[str, Callable[[str, dict[str, Any]], dict[str, Any]]] = {}
         self._composition_cache: dict[str, FlowDefinition] = {}
 
     def register_step_handler(
@@ -216,15 +215,11 @@ class FlowEngine:
 
         return outputs
 
-    async def _run_step(
-        self, step: FlowStep, ctx: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def _run_step(self, step: FlowStep, ctx: dict[str, Any]) -> dict[str, Any]:
         handler = self._step_handlers.get(step.step_type, _noop_step)
         return await _run_handler(handler, step.action, ctx)
 
-    def _select_pattern(
-        self, capabilities: list[str], ctx: dict[str, Any]
-    ) -> FlowPattern:
+    def _select_pattern(self, capabilities: list[str], ctx: dict[str, Any]) -> FlowPattern:
         if "reflect" in capabilities or "critique" in capabilities:
             return FlowPattern.REFLECTIVE
         if "branch" in capabilities or "parallel" in capabilities:
@@ -233,14 +228,14 @@ class FlowEngine:
             return FlowPattern.META
         return FlowPattern.SEQUENTIAL
 
-    def _build_steps(
-        self, capabilities: list[str], pattern: FlowPattern
-    ) -> tuple[FlowStep, ...]:
+    def _build_steps(self, capabilities: list[str], pattern: FlowPattern) -> tuple[FlowStep, ...]:
         if pattern == FlowPattern.REFLECTIVE:
             return (
                 FlowStep(step_type="generate", action="generate_answer"),
                 FlowStep(step_type="critique", action="self_critique", next_steps=("revise",)),
-                FlowStep(step_type="revise", action="revise_answer", condition="critique_score < 0.8"),
+                FlowStep(
+                    step_type="revise", action="revise_answer", condition="critique_score < 0.8"
+                ),
                 FlowStep(step_type="finalize", action="finalize_answer"),
             )
 

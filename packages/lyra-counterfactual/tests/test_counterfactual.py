@@ -86,7 +86,9 @@ def legacy_engine() -> CounterfactualEngine:
     g = CausalGraph()
     g.add_entity(EntityNode(id="tool", name="git", entity_type="tool"))
     g.add_entity(EntityNode(id="file", name="main.py", entity_type="file"))
-    a = ActionEdge(id="a1", source_id="tool", target_id="file", action_type="execute", timestamp=1.0)
+    a = ActionEdge(
+        id="a1", source_id="tool", target_id="file", action_type="execute", timestamp=1.0
+    )
     g.add_action(a)
     g.add_outcome(OutcomeNode(id="o1", result="success", success=True, latency=0.3))
     a.outcome_id = "o1"
@@ -102,26 +104,20 @@ class TestLegacyCounterfactualEngine:
     """Tests for legacy CausalGraph-based counterfactual engine."""
 
     def test_legacy_simulate(self, legacy_engine):
-        intervention = Intervention(
-            action_type="execute", source_id="tool", target_id="file"
-        )
+        intervention = Intervention(action_type="execute", source_id="tool", target_id="file")
         result = legacy_engine.simulate(intervention)
         assert result.predicted_outcome is not None
         assert 0.0 <= result.confidence <= 1.0
         assert isinstance(result.causal_path, list)
 
     def test_legacy_simulate_unknown(self, legacy_engine):
-        intervention = Intervention(
-            action_type="read", source_id="unknown", target_id="unknown"
-        )
+        intervention = Intervention(action_type="read", source_id="unknown", target_id="unknown")
         result = legacy_engine.simulate(intervention)
         assert result.causal_path is not None
 
     def test_legacy_async_simulate(self, legacy_engine):
         async def _run():
-            intervention = Intervention(
-                action_type="execute", source_id="tool", target_id="file"
-            )
+            intervention = Intervention(action_type="execute", source_id="tool", target_id="file")
             return legacy_engine.simulate(intervention)
 
         result = asyncio.run(_run())
@@ -303,10 +299,12 @@ class TestAbduction:
 
     def test_batch_abduce(self, scm):
         engine = AbductionEngine(scm)
-        results = engine.batch_abduce([
-            {"X0": 1.0, "X1": 2.0},
-            {"X0": -1.0, "X1": -2.0},
-        ])
+        results = engine.batch_abduce(
+            [
+                {"X0": 1.0, "X1": 2.0},
+                {"X0": -1.0, "X1": -2.0},
+            ]
+        )
         assert len(results) == 2
 
     def test_null_scm_raises(self):
@@ -341,10 +339,12 @@ class TestActionPrediction:
 
     def test_evaluate_actions(self, scm):
         predictor = ActionPredictor(scm)
-        results = predictor.evaluate_actions([
-            {"name": "High X0", "intervention": {"X0": 2.0}, "target": "X1"},
-            {"name": "Low X0", "intervention": {"X0": -1.0}, "target": "X1"},
-        ])
+        results = predictor.evaluate_actions(
+            [
+                {"name": "High X0", "intervention": {"X0": 2.0}, "target": "X1"},
+                {"name": "Low X0", "intervention": {"X0": -1.0}, "target": "X1"},
+            ]
+        )
         assert len(results) == 2
         assert results[0].expected_value > results[1].expected_value
 
@@ -364,21 +364,25 @@ class TestActionPrediction:
 
     def test_rank_actions(self, scm):
         predictor = ActionPredictor(scm)
-        results = predictor.evaluate_actions([
-            {"name": "A", "intervention": {"X0": 3.0}, "target": "X1"},
-            {"name": "B", "intervention": {"X0": 1.0}, "target": "X1"},
-            {"name": "C", "intervention": {"X0": 2.0}, "target": "X1"},
-        ])
+        results = predictor.evaluate_actions(
+            [
+                {"name": "A", "intervention": {"X0": 3.0}, "target": "X1"},
+                {"name": "B", "intervention": {"X0": 1.0}, "target": "X1"},
+                {"name": "C", "intervention": {"X0": 2.0}, "target": "X1"},
+            ]
+        )
         ranked = predictor.rank_actions(results, rank_by="expected_value")
         assert ranked[0].action_name == "A"  # highest value
         assert ranked[-1].action_name == "B"  # lowest value
 
     def test_best_action(self, scm):
         predictor = ActionPredictor(scm)
-        results = predictor.evaluate_actions([
-            {"name": "Low", "intervention": {"X0": 0.0}, "target": "X1"},
-            {"name": "High", "intervention": {"X0": 3.0}, "target": "X1"},
-        ])
+        results = predictor.evaluate_actions(
+            [
+                {"name": "Low", "intervention": {"X0": 0.0}, "target": "X1"},
+                {"name": "High", "intervention": {"X0": 3.0}, "target": "X1"},
+            ]
+        )
         best = predictor.best_action(results)
         assert best is not None
         assert best.action_name == "High"
@@ -411,9 +415,11 @@ class TestActionPrediction:
 
     def test_invalid_ranking_metric(self, scm):
         predictor = ActionPredictor(scm)
-        results = predictor.evaluate_actions([
-            {"name": "test", "intervention": {"X0": 1.0}, "target": "X1"},
-        ])
+        results = predictor.evaluate_actions(
+            [
+                {"name": "test", "intervention": {"X0": 1.0}, "target": "X1"},
+            ]
+        )
         with pytest.raises(ActionPredictionError):
             predictor.rank_actions(results, rank_by="invalid")
 
@@ -439,7 +445,13 @@ class TestPrediction:
         assert result.expected_value is not None
         assert result.ci_upper >= result.ci_lower
         assert result.distribution_type in (
-            "gaussian", "skewed", "bimodal", "heavy_tailed", "uniform", "unknown", "insufficient_data"
+            "gaussian",
+            "skewed",
+            "bimodal",
+            "heavy_tailed",
+            "uniform",
+            "unknown",
+            "insufficient_data",
         )
 
     def test_predict_with_samples(self, scm):
@@ -467,7 +479,9 @@ class TestPrediction:
         assert len(results) == 3
 
     def test_probability_better_than(self, scm):
-        engine = PredictionEngine(scm, PredictionConfig(n_samples=2000, compute_full_distribution=True))
+        engine = PredictionEngine(
+            scm, PredictionConfig(n_samples=2000, compute_full_distribution=True)
+        )
         abd = AbductionEngine(scm).abduce({"X0": 1.0, "X1": 2.0})
         result = engine.predict(abd.noise_posterior, {"X0": 2.0}, "X1")
         prob = engine.probability_better_than(result, 0.0)
@@ -531,10 +545,12 @@ class TestIntegration:
 
         # 2. Action
         act_predictor = ActionPredictor(scm_complex, noise_posterior=abd_result.noise_posterior)
-        act_results = act_predictor.evaluate_actions([
-            {"name": "Increase X", "intervention": {"X": 2.0}, "target": "Y"},
-            {"name": "Decrease X", "intervention": {"X": 0.0}, "target": "Y"},
-        ])
+        act_results = act_predictor.evaluate_actions(
+            [
+                {"name": "Increase X", "intervention": {"X": 2.0}, "target": "Y"},
+                {"name": "Decrease X", "intervention": {"X": 0.0}, "target": "Y"},
+            ]
+        )
 
         # 3. Prediction
         pred_engine = PredictionEngine(scm_complex)

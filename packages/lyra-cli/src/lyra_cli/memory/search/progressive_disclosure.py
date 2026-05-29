@@ -47,9 +47,7 @@ class ProgressiveDisclosure:
 
     DEFAULT_EXCERPT_LEN = 150
 
-    def disclose_metadata(
-        self, items: list[DisclosedMemory]
-    ) -> DisclosureBatch:
+    def disclose_metadata(self, items: list[DisclosedMemory]) -> DisclosureBatch:
         start = time.perf_counter()
         metadata_items = [
             DisclosedMemory(
@@ -73,9 +71,7 @@ class ProgressiveDisclosure:
             elapsed_ms=round(elapsed, 2),
         )
 
-    def disclose_triggers(
-        self, items: list[DisclosedMemory]
-    ) -> DisclosureBatch:
+    def disclose_triggers(self, items: list[DisclosedMemory]) -> DisclosureBatch:
         start = time.perf_counter()
         trigger_items = [
             DisclosedMemory(
@@ -85,7 +81,8 @@ class ProgressiveDisclosure:
                 excerpt=item.excerpt[: self.DEFAULT_EXCERPT_LEN],
                 tags=item.tags,
                 timestamp=item.timestamp,
-                token_estimate=len(item.excerpt[:self.DEFAULT_EXCERPT_LEN].split()) + len(item.tags) * 3,
+                token_estimate=len(item.excerpt[: self.DEFAULT_EXCERPT_LEN].split())
+                + len(item.tags) * 3,
                 full_content="",
             )
             for item in items
@@ -99,9 +96,7 @@ class ProgressiveDisclosure:
             elapsed_ms=round(elapsed, 2),
         )
 
-    def disclose_full(
-        self, items: list[DisclosedMemory]
-    ) -> DisclosureBatch:
+    def disclose_full(self, items: list[DisclosedMemory]) -> DisclosureBatch:
         start = time.perf_counter()
         full_items = [
             DisclosedMemory(
@@ -111,9 +106,7 @@ class ProgressiveDisclosure:
                 excerpt=item.full_content if item.full_content else item.excerpt,
                 tags=item.tags,
                 timestamp=item.timestamp,
-                token_estimate=len(
-                    (item.full_content or item.excerpt).split()
-                ),
+                token_estimate=len((item.full_content or item.excerpt).split()),
                 full_content=item.full_content,
             )
             for item in items
@@ -133,14 +126,11 @@ class ProgressiveDisclosure:
         selected_ids: list[str],
     ) -> DisclosureBatch:
         """Progressively disclose only selected items to full content."""
-        selected = [
-            item for item in metadata.items
-            if item.memory_id in selected_ids
-        ]
+        selected = [item for item in metadata.items if item.memory_id in selected_ids]
         return self.disclose_full(selected)
 
     def stats(self) -> dict:
         return {
-            "disclosure_levels": [l.value for l in DisclosureLevel],
+            "disclosure_levels": [level.value for level in DisclosureLevel],
             "default_excerpt_len": self.DEFAULT_EXCERPT_LEN,
         }

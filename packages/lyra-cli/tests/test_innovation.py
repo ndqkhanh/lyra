@@ -1,6 +1,5 @@
 """Tests for Lyra Ultra Phase 8: Innovation & Differentiation."""
 
-
 from lyra_cli.innovation import (
     CounterexampleTest,
     # Cross-Session Learning
@@ -16,6 +15,7 @@ from lyra_cli.innovation import (
 # ============================================================================
 # Mermaid Canvas Tests
 # ============================================================================
+
 
 def test_mermaid_canvas_creation():
     """Test creating a Mermaid canvas."""
@@ -148,6 +148,7 @@ def test_mermaid_canvas_different_diagram_types():
 # Falsification Loop Tests
 # ============================================================================
 
+
 def test_falsification_loop_creation():
     """Test creating a falsification loop."""
     loop = FalsificationLoop()
@@ -235,6 +236,7 @@ def test_falsification_hypothesis_status():
 # Cross-Session Learning Tests
 # ============================================================================
 
+
 def test_cross_session_learner_creation():
     """Test creating a cross-session learner."""
     learner = CrossSessionLearner()
@@ -264,10 +266,12 @@ def test_cross_session_extract_patterns():
 
     # Add multiple sessions with same workflow
     for i in range(5):
-        learner.add_session({
-            "session_id": f"s{i}",
-            "workflow": "code_review",
-        })
+        learner.add_session(
+            {
+                "session_id": f"s{i}",
+                "workflow": "code_review",
+            }
+        )
 
     patterns = learner.extract_patterns()
 
@@ -325,6 +329,7 @@ def test_cross_session_pattern_confidence():
 # Integration Tests
 # ============================================================================
 
+
 def test_mermaid_canvas_knowledge_graph():
     """Test creating a knowledge graph."""
     canvas = MermaidCanvas(DiagramType.KNOWLEDGE_GRAPH)
@@ -359,7 +364,9 @@ def test_falsification_with_multiple_claims():
     results = loop.run_falsification(answer)
 
     assert results["total_claims"] >= 3
-    assert results["confirmed"] + results["refuted"] + results["uncertain"] == results["total_claims"]
+    assert (
+        results["confirmed"] + results["refuted"] + results["uncertain"] == results["total_claims"]
+    )
 
 
 def test_cross_session_learning_workflow():
@@ -370,11 +377,13 @@ def test_cross_session_learning_workflow():
     workflows = ["code_review", "debug", "code_review", "test", "code_review", "debug"]
 
     for i, workflow in enumerate(workflows):
-        learner.add_session({
-            "session_id": f"s{i}",
-            "workflow": workflow,
-            "success": True,
-        })
+        learner.add_session(
+            {
+                "session_id": f"s{i}",
+                "workflow": workflow,
+                "success": True,
+            }
+        )
 
     # Extract patterns
     patterns = learner.extract_patterns()
@@ -414,6 +423,7 @@ def test_mermaid_canvas_workflow_visualization():
 # ============================================================================
 # Performance Tests
 # ============================================================================
+
 
 def test_mermaid_canvas_large_graph():
     """Test canvas with large graph."""

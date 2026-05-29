@@ -11,6 +11,7 @@ and preferred style. This module brings the same concept to Lyra with:
 
 ECC reference: ``.claude/identity.json`` structure + ``team-config.json``.
 """
+
 from __future__ import annotations
 
 import json
@@ -28,12 +29,14 @@ PROFILE_PATH = Path.home() / ".lyra" / "profile.json"
 
 # ── Data model ─────────────────────────────────────────────────────────
 
+
 @dataclass
 class LyraProfile:
     """User profile — persisted to ``~/.lyra/profile.json``.
 
     Mirrors ECC's identity.json shape.
     """
+
     version: str = "1.0"
     name: str = ""
     email: str = ""
@@ -96,6 +99,7 @@ class LyraProfile:
 
 # ── Profile I/O ─────────────────────────────────────────────────────────
 
+
 def load_profile() -> LyraProfile:
     """Load profile from disk, returning defaults if missing."""
     if PROFILE_PATH.exists():
@@ -138,6 +142,7 @@ def auto_detect_level(used_commands: list[str]) -> str:
 
 # ── Slash command handler ──────────────────────────────────────────────
 
+
 def cmd_profile(session: Any, args: str) -> CommandResult:
     """View or edit your Lyra profile.
 
@@ -163,13 +168,19 @@ def cmd_profile(session: Any, args: str) -> CommandResult:
 
         # Type coercion
         field_map = {
-            "name": "name", "email": "email",
-            "level": "technical_level", "technical_level": "technical_level",
-            "verbosity": "verbosity", "verbose": "verbosity",
-            "model": "default_model", "default_model": "default_model",
-            "mode": "default_mode", "default_mode": "default_mode",
+            "name": "name",
+            "email": "email",
+            "level": "technical_level",
+            "technical_level": "technical_level",
+            "verbosity": "verbosity",
+            "verbose": "verbosity",
+            "model": "default_model",
+            "default_model": "default_model",
+            "mode": "default_mode",
+            "default_mode": "default_mode",
             "theme": "theme",
-            "comments": "code_comments", "code_comments": "code_comments",
+            "comments": "code_comments",
+            "code_comments": "code_comments",
             "explanations": "explanations",
         }
 
@@ -207,12 +218,19 @@ def cmd_whoami(session: Any, _args: str) -> CommandResult:
     profile = load_profile()
     return CommandResult(
         output=profile.summary(),
-        renderable=f"[bold]{profile.name or 'anon'}[/] · [cyan]{profile.technical_level}[/] · {', '.join(profile.domains)}",
+        renderable=(
+            f"[bold]{profile.name or 'anon'}[/] · [cyan]{profile.technical_level}[/] · "
+            f"{', '.join(profile.domains)}"
+        ),
     )
 
 
 __all__ = [
-    "LyraProfile", "load_profile", "save_profile",
-    "cmd_profile", "cmd_whoami", "auto_detect_level",
+    "LyraProfile",
+    "load_profile",
+    "save_profile",
+    "cmd_profile",
+    "cmd_whoami",
+    "auto_detect_level",
     "PROFILE_PATH",
 ]

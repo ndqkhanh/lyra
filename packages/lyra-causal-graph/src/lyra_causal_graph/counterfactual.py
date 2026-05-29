@@ -175,9 +175,7 @@ class CounterfactualReasoner:
         """Async version for long-running queries."""
         return self.query(query)
 
-    def batch_query(
-        self, queries: list[CounterfactualQuery]
-    ) -> list[CounterfactualResult]:
+    def batch_query(self, queries: list[CounterfactualQuery]) -> list[CounterfactualResult]:
         """Answer multiple counterfactual queries.
 
         Args:
@@ -335,7 +333,9 @@ class CounterfactualReasoner:
                 elif p in noise_posterior:
                     parent_values[p] = noise_posterior[p]
                 elif p in self._scm.exogenous_vars:
-                    parent_values[p] = noise_posterior.get(p, self._scm.exogenous_vars[p].sample_noise(n))
+                    parent_values[p] = noise_posterior.get(
+                        p, self._scm.exogenous_vars[p].sample_noise(n)
+                    )
                 else:
                     parent_values[p] = np.zeros(n)
 

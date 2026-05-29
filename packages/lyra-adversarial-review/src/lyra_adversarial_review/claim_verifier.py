@@ -76,7 +76,9 @@ class ClaimVerifier:
             stage=VerificationStage.INTEGRITY,
             passed=passed,
             score=round(score, 4),
-            evidence=f"Integrity score: {score:.4f} (threshold: {self._config.min_confidence_threshold})",
+            evidence=(
+                f"Integrity score: {score:.4f} (threshold: {self._config.min_confidence_threshold})"
+            ),
             issues=issues,
         )
 
@@ -160,9 +162,7 @@ class ClaimVerifier:
                 stage_breakdown[key]["avg_score"] += stage.score
 
         for key in stage_breakdown:
-            stage_breakdown[key]["avg_score"] = round(
-                stage_breakdown[key]["avg_score"] / total, 4
-            )
+            stage_breakdown[key]["avg_score"] = round(stage_breakdown[key]["avg_score"] / total, 4)
 
         return VerificationReport(
             total_claims=total,
@@ -208,9 +208,7 @@ class ClaimVerifier:
 
         return max(0.0, score), issues
 
-    async def _evaluate_mapping(
-        self, claim: Claim, raw_output: str
-    ) -> tuple[float, list[str]]:
+    async def _evaluate_mapping(self, claim: Claim, raw_output: str) -> tuple[float, list[str]]:
         issues: list[str] = []
         score = 1.0
 
@@ -268,7 +266,9 @@ class ClaimVerifier:
             score -= contrad_ratio * 0.5
 
         if contradictory > supporting:
-            issues.append(f"More contradictory refs ({contradictory}) than supporting ({supporting})")
+            issues.append(
+                f"More contradictory refs ({contradictory}) than supporting ({supporting})"
+            )
         if supporting == 0:
             issues.append("No supporting cross-references found")
 

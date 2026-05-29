@@ -3,13 +3,12 @@
 
 import os
 import sys
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
-
 import time
 
 from lyra_cli.cli.responsive_ui import ResponsiveChatUI, ResponsiveUI
 from rich.console import Console
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "packages/lyra-cli/src"))
 
 
 def test_responsive_banner():
@@ -46,7 +45,10 @@ def test_responsive_text():
     print("=" * 80)
     print()
 
-    long_text = "This is a very long line of text that should wrap automatically when the terminal is too narrow to display it all on one line. The responsive UI will handle this gracefully."
+    long_text =(
+        "This is a very long line of text that should wrap automatically when the terminal is too"
+        "narrow to display it all on one line. The responsive UI will handle this gracefully."
+    )
 
     wrapped = ui.responsive_text(long_text)
     console.print(wrapped)
@@ -96,7 +98,13 @@ def test_responsive_chat():
     chat.show_tool_use("Write", "fibonacci.py")
 
     # Assistant response
-    chat.show_message("assistant", "I've created a fibonacci function that uses dynamic programming for efficiency. The function handles edge cases and returns the nth fibonacci number.")
+    chat.show_message(
+        "assistant",
+(
+            "I've created a fibonacci function that uses dynamic programming for efficiency. The"
+            "function handles edge cases and returns the nth fibonacci number."
+        ),
+    )
 
     # Stats
     chat.show_stats("2.3s", 3, 1234)
@@ -148,11 +156,12 @@ if __name__ == "__main__":
         print("Try the live resize demo? (y/n)")
 
         response = input().strip().lower()
-        if response == 'y':
+        if response == "y":
             test_live_resize()
 
     except Exception as e:
         print(f"\n✗ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

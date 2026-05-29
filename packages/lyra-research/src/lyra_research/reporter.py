@@ -16,12 +16,14 @@ from uuid import uuid4
 # CrossSourceSynthesizer
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class FieldTaxonomy:
     """Structured taxonomy of a research field."""
+
     topic: str
-    categories: list[str]                      # Main sub-areas
-    subcategories: dict[str, list[str]]        # {category: [sub-area, ...]}
+    categories: list[str]  # Main sub-areas
+    subcategories: dict[str, list[str]]  # {category: [sub-area, ...]}
     key_methods: list[str]
     key_datasets: list[str]
     key_metrics: list[str]
@@ -30,35 +32,83 @@ class FieldTaxonomy:
 @dataclass
 class SynthesisResult:
     """Result of cross-source synthesis."""
+
     topic: str
     taxonomy: FieldTaxonomy
-    best_papers: dict[str, list[str]]          # {category: [paper_titles]}
-    best_repos: dict[str, list[str]]           # {use_case: [repo_names]}
-    relationships: list[str]                   # ["Paper A extends Paper B", ...]
-    contradictions: list[str]                  # ["Paper A claims X, Paper B claims Y"]
-    gaps: list[str]                            # Gap descriptions
-    synthesis_quality: float                   # 0.0-1.0
+    best_papers: dict[str, list[str]]  # {category: [paper_titles]}
+    best_repos: dict[str, list[str]]  # {use_case: [repo_names]}
+    relationships: list[str]  # ["Paper A extends Paper B", ...]
+    contradictions: list[str]  # ["Paper A claims X, Paper B claims Y"]
+    gaps: list[str]  # Gap descriptions
+    synthesis_quality: float  # 0.0-1.0
     source_count: int
 
 
 # Common ML/research method keywords for taxonomy detection
 _METHOD_KEYWORDS = [
-    "transformer", "attention", "retrieval", "memory", "contrastive",
-    "diffusion", "distillation", "pruning", "quantization", "fine-tuning",
-    "reinforcement", "generative", "classification", "detection", "segmentation",
-    "embedding", "pretraining", "finetuning", "adaptation", "alignment",
+    "transformer",
+    "attention",
+    "retrieval",
+    "memory",
+    "contrastive",
+    "diffusion",
+    "distillation",
+    "pruning",
+    "quantization",
+    "fine-tuning",
+    "reinforcement",
+    "generative",
+    "classification",
+    "detection",
+    "segmentation",
+    "embedding",
+    "pretraining",
+    "finetuning",
+    "adaptation",
+    "alignment",
 ]
 
 _DATASET_KEYWORDS = [
-    "imagenet", "coco", "mnist", "cifar", "squad", "glue", "superglue",
-    "wikitext", "c4", "pile", "laion", "openwebtext", "bookcorpus",
-    "pascal", "ade20k", "cityscapes", "vctk", "librispeech",
+    "imagenet",
+    "coco",
+    "mnist",
+    "cifar",
+    "squad",
+    "glue",
+    "superglue",
+    "wikitext",
+    "c4",
+    "pile",
+    "laion",
+    "openwebtext",
+    "bookcorpus",
+    "pascal",
+    "ade20k",
+    "cityscapes",
+    "vctk",
+    "librispeech",
 ]
 
 _METRIC_KEYWORDS = [
-    "accuracy", "precision", "recall", "f1", "bleu", "rouge", "perplexity",
-    "auc", "map", "iou", "psnr", "ssim", "fid", "inception", "top-1", "top-5",
-    "wer", "cer", "sacrebleu",
+    "accuracy",
+    "precision",
+    "recall",
+    "f1",
+    "bleu",
+    "rouge",
+    "perplexity",
+    "auc",
+    "map",
+    "iou",
+    "psnr",
+    "ssim",
+    "fid",
+    "inception",
+    "top-1",
+    "top-5",
+    "wer",
+    "cer",
+    "sacrebleu",
 ]
 
 # Relationship extraction patterns
@@ -120,19 +170,46 @@ class CrossSourceSynthesizer:
         # Detect categories from recurring noun phrases in titles
         title_words: dict[str, int] = {}
         for a in analyses:
-            tokens = re.findall(r'\b[a-z]{4,}\b', (a.get('title', '') + ' ' + a.get('abstract', '')).lower())
+            tokens = re.findall(
+                r"\b[a-z]{4,}\b", (a.get("title", "") + " " + a.get("abstract", "")).lower()
+            )
             for tok in tokens:
                 title_words[tok] = title_words.get(tok, 0) + 1
 
         # Filter stopwords and pick top recurring content words as categories
         stopwords = {
-            "that", "with", "from", "this", "have", "been", "they", "their",
-            "using", "show", "paper", "work", "model", "models", "method",
-            "approach", "results", "based", "large", "data", "learn", "learning",
-            "neural", "deep", "network", "networks", "training", "trained",
+            "that",
+            "with",
+            "from",
+            "this",
+            "have",
+            "been",
+            "they",
+            "their",
+            "using",
+            "show",
+            "paper",
+            "work",
+            "model",
+            "models",
+            "method",
+            "approach",
+            "results",
+            "based",
+            "large",
+            "data",
+            "learn",
+            "learning",
+            "neural",
+            "deep",
+            "network",
+            "networks",
+            "training",
+            "trained",
         }
         category_candidates = [
-            w for w, cnt in sorted(title_words.items(), key=lambda x: -x[1])
+            w
+            for w, cnt in sorted(title_words.items(), key=lambda x: -x[1])
             if w not in stopwords and cnt >= 2
         ][:8]
 
@@ -148,10 +225,7 @@ class CrossSourceSynthesizer:
         # Build subcategories: each category gets up to 3 related words
         subcategories: dict[str, list[str]] = {}
         for cat in category_candidates:
-            subs = [
-                w for w in category_candidates
-                if w != cat and cat[:4] in w or w[:4] in cat
-            ][:3]
+            subs = [w for w in category_candidates if w != cat and cat[:4] in w or w[:4] in cat][:3]
             subcategories[cat] = subs
 
         return FieldTaxonomy(
@@ -171,8 +245,8 @@ class CrossSourceSynthesizer:
         ungrouped: list[str] = []
 
         for paper in analyses:
-            title = paper.get('title', '')
-            abstract = paper.get('abstract', '').lower()
+            title = paper.get("title", "")
+            abstract = paper.get("abstract", "").lower()
             text = f"{title} {abstract}".lower()
             best_cat: str | None = None
             best_count = 0
@@ -208,8 +282,8 @@ class CrossSourceSynthesizer:
         ungrouped: list[str] = []
 
         for repo in repos:
-            name = repo.get('title', repo.get('name', ''))
-            desc = (repo.get('description', '') or '').lower()
+            name = repo.get("title", repo.get("name", ""))
+            desc = (repo.get("description", "") or "").lower()
             assigned = False
 
             for use_case, keywords in use_case_keywords.items():
@@ -231,8 +305,8 @@ class CrossSourceSynthesizer:
         relationships: list[str] = []
 
         for analysis in analyses:
-            title = analysis.get('title', '')
-            abstract = analysis.get('abstract', '')
+            title = analysis.get("title", "")
+            abstract = analysis.get("abstract", "")
             if not abstract:
                 continue
 
@@ -259,21 +333,23 @@ class CrossSourceSynthesizer:
 # CitationBinder
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class BoundCitation:
     """A claim with its bound source."""
+
     claim_text: str
     source_id: str
     source_title: str
     source_url: str
-    citation_key: str       # e.g. "[1]", "[Smith2024]"
+    citation_key: str  # e.g. "[1]", "[Smith2024]"
 
 
 # Patterns that identify verifiable claim sentences
 _CLAIM_SENTENCE_PATTERNS = [
-    r'[A-Z][^.!?]{20,150}(?:achiev|show|demonstrat|outperform|report|find|improv)[^.!?]{0,80}[.!?]',
-    r'[A-Z][^.!?]{0,60}\d+(?:\.\d+)?%[^.!?]{0,80}[.!?]',
-    r'[A-Z][^.!?]{0,80}state.of.the.art[^.!?]{0,80}[.!?]',
+    r"[A-Z][^.!?]{20,150}(?:achiev|show|demonstrat|outperform|report|find|improv)[^.!?]{0,80}[.!?]",
+    r"[A-Z][^.!?]{0,60}\d+(?:\.\d+)?%[^.!?]{0,80}[.!?]",
+    r"[A-Z][^.!?]{0,80}state.of.the.art[^.!?]{0,80}[.!?]",
 ]
 
 
@@ -308,18 +384,18 @@ class CitationBinder:
                 cite_key = f"[{cite_num}]"
                 bc = BoundCitation(
                     claim_text=claim,
-                    source_id=source.get('source_id', ''),
-                    source_title=source.get('title', ''),
-                    source_url=source.get('url', ''),
+                    source_id=source.get("source_id", ""),
+                    source_title=source.get("title", ""),
+                    source_url=source.get("url", ""),
                     citation_key=cite_key,
                 )
                 bound_citations.append(bc)
                 # Insert citation key after the claim in the text
                 claim_end = claim.rstrip()
-                if claim_end and claim_end[-1] in '.!?':
-                    replacement = claim_end[:-1] + ' ' + cite_key + claim_end[-1]
+                if claim_end and claim_end[-1] in ".!?":
+                    replacement = claim_end[:-1] + " " + cite_key + claim_end[-1]
                 else:
-                    replacement = claim_end + ' ' + cite_key
+                    replacement = claim_end + " " + cite_key
                 modified_text = modified_text.replace(claim, replacement, 1)
             else:
                 unbound.append(claim)
@@ -343,22 +419,18 @@ class CitationBinder:
                 unique.append(c)
         return unique
 
-    def _find_source_for_claim(
-        self, claim: str, sources: list[dict]
-    ) -> dict | None:
+    def _find_source_for_claim(self, claim: str, sources: list[dict]) -> dict | None:
         """Find the best matching source for a claim via keyword overlap."""
         if not sources:
             return None
 
-        claim_words = set(re.findall(r'\b[a-zA-Z]{4,}\b', claim.lower()))
+        claim_words = set(re.findall(r"\b[a-zA-Z]{4,}\b", claim.lower()))
         best_source: dict | None = None
         best_overlap = 0
 
         for source in sources:
-            source_text = (
-                f"{source.get('title', '')} {source.get('abstract', '')}"
-            ).lower()
-            source_words = set(re.findall(r'\b[a-zA-Z]{4,}\b', source_text))
+            source_text = (f"{source.get('title', '')} {source.get('abstract', '')}").lower()
+            source_words = set(re.findall(r"\b[a-zA-Z]{4,}\b", source_text))
             overlap = len(claim_words & source_words)
             if overlap > best_overlap:
                 best_overlap = overlap
@@ -398,9 +470,11 @@ class CitationBinder:
 # ResearchReportGenerator
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ResearchReport:
     """A complete deep research report."""
+
     topic: str
     report_id: str = field(default_factory=lambda: str(uuid4()))
 
@@ -444,7 +518,9 @@ class ResearchReport:
         if self.gaps_section:
             sections.append(f"## Research Gaps\n\n{self.gaps_section}\n")
         if self.contested_claims_section:
-            sections.append(f"## Contested Claims & Counter-Evidence\n\n{self.contested_claims_section}\n")
+            sections.append(
+                f"## Contested Claims & Counter-Evidence\n\n{self.contested_claims_section}\n"
+            )
         if self.next_steps_section:
             sections.append(f"## Next Steps\n\n{self.next_steps_section}\n")
         if self.references_section:
@@ -455,7 +531,7 @@ class ResearchReport:
         """Save report as Markdown file. Returns file path."""
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
-        safe_topic = re.sub(r'[^a-zA-Z0-9_\-]', '_', self.topic)[:60]
+        safe_topic = re.sub(r"[^a-zA-Z0-9_\-]", "_", self.topic)[:60]
         filename = f"report_{safe_topic}_{self.report_id[:8]}.md"
         file_path = output_dir / filename
         file_path.write_text(self.to_markdown(), encoding="utf-8")
@@ -486,22 +562,20 @@ class ResearchReportGenerator:
         report.sources_used = synthesis.source_count
         report.executive_summary = self._generate_executive_summary(synthesis)
         report.taxonomy_section = self._generate_taxonomy_section(synthesis.taxonomy)
-        report.best_papers_section = self._generate_papers_section(
-            synthesis.best_papers, sources
-        )
-        report.best_repos_section = self._generate_repos_section(
-            synthesis.best_repos, sources
-        )
+        report.best_papers_section = self._generate_papers_section(synthesis.best_papers, sources)
+        report.best_repos_section = self._generate_repos_section(synthesis.best_repos, sources)
         report.gaps_section = self._generate_gaps_section(gaps or synthesis.gaps)
         report.contested_claims_section = self._generate_contested_section(contradictions)
         report.next_steps_section = self._generate_next_steps(synthesis, gaps or synthesis.gaps)
 
         # Bind citations in the full report text (all sections concatenated)
-        full_text = "\n".join([
-            report.executive_summary,
-            report.best_papers_section,
-            report.best_repos_section,
-        ])
+        full_text = "\n".join(
+            [
+                report.executive_summary,
+                report.best_papers_section,
+                report.best_repos_section,
+            ]
+        )
         _, bound, unbound = self.binder.bind(full_text, sources)
         fidelity = self.binder.citation_fidelity(bound, unbound)
         report.citation_fidelity = fidelity
@@ -511,9 +585,7 @@ class ResearchReportGenerator:
 
         # Compute overall quality score
         report.quality_score = round(
-            0.4 * checklist_completion +
-            0.4 * synthesis.synthesis_quality +
-            0.2 * fidelity,
+            0.4 * checklist_completion + 0.4 * synthesis.synthesis_quality + 0.2 * fidelity,
             3,
         )
 
@@ -570,7 +642,7 @@ class ResearchReportGenerator:
             return "*No papers found.*"
 
         lines = []
-        source_lookup = {s.get('title', ''): s for s in sources}
+        source_lookup = {s.get("title", ""): s for s in sources}
 
         for category, titles in best_papers.items():
             if not titles:
@@ -580,23 +652,19 @@ class ResearchReportGenerator:
             lines.append("|-------|-------|")
             for title in titles[:5]:
                 src = source_lookup.get(title, {})
-                venue = src.get('venue', src.get('source_id', '—'))
+                venue = src.get("venue", src.get("source_id", "—"))
                 lines.append(f"| {title} | {venue} |")
             lines.append("")
 
         return "\n".join(lines)
 
-    def _generate_repos_section(
-        self, best_repos: dict[str, list[str]], sources: list[dict]
-    ) -> str:
+    def _generate_repos_section(self, best_repos: dict[str, list[str]], sources: list[dict]) -> str:
         """Render best repos as Markdown table with stars/description."""
         if not best_repos:
             return "*No repositories found.*"
 
         lines = []
-        source_lookup = {
-            s.get('title', s.get('name', '')): s for s in sources
-        }
+        source_lookup = {s.get("title", s.get("name", "")): s for s in sources}
 
         for use_case, names in best_repos.items():
             if not names:
@@ -606,8 +674,8 @@ class ResearchReportGenerator:
             lines.append("|------------|-------|-------------|")
             for name in names[:5]:
                 src = source_lookup.get(name, {})
-                stars = src.get('stars', '—')
-                desc = (src.get('description', '') or '')[:80]
+                stars = src.get("stars", "—")
+                desc = (src.get("description", "") or "")[:80]
                 lines.append(f"| {name} | {stars} | {desc} |")
             lines.append("")
 
@@ -641,9 +709,7 @@ class ResearchReportGenerator:
             lines.append("1. Explore emerging sub-areas in the taxonomy for novel contributions.")
 
         if synthesis.taxonomy.key_methods:
-            lines.append(
-                f"2. Compare {synthesis.taxonomy.key_methods[0]} against newer baselines."
-            )
+            lines.append(f"2. Compare {synthesis.taxonomy.key_methods[0]} against newer baselines.")
         else:
             lines.append("2. Review baseline comparisons across the surveyed sources.")
 
@@ -670,16 +736,18 @@ class ResearchReportGenerator:
 # ReportQualityChecker
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class QualityReport:
     """Quality evaluation of a research report."""
-    coverage_score: float           # checklist_answered / checklist_total
-    citation_fidelity: float        # bound_citations / total_claims
-    source_breadth: float           # unique_sources_used / sources_found
-    gap_detection: float            # gaps_found / expected_gaps (heuristic)
-    overall_score: float            # weighted average
-    passed: bool                    # overall_score >= threshold
-    issues: list[str]               # Specific quality issues found
+
+    coverage_score: float  # checklist_answered / checklist_total
+    citation_fidelity: float  # bound_citations / total_claims
+    source_breadth: float  # unique_sources_used / sources_found
+    gap_detection: float  # gaps_found / expected_gaps (heuristic)
+    overall_score: float  # weighted average
+    passed: bool  # overall_score >= threshold
+    issues: list[str]  # Specific quality issues found
 
 
 class ReportQualityChecker:
@@ -690,12 +758,12 @@ class ReportQualityChecker:
     """
 
     COVERAGE_WEIGHT = 0.30
-    CITATION_WEIGHT = 0.40         # Highest weight — no hallucinations
+    CITATION_WEIGHT = 0.40  # Highest weight — no hallucinations
     BREADTH_WEIGHT = 0.15
     GAP_WEIGHT = 0.15
 
-    MIN_CITATION_FIDELITY = 1.0    # Hard gate
-    MIN_COVERAGE = 0.75            # Soft gate
+    MIN_CITATION_FIDELITY = 1.0  # Hard gate
+    MIN_COVERAGE = 0.75  # Soft gate
 
     def check(
         self,
@@ -725,7 +793,8 @@ class ReportQualityChecker:
 
         # Gap detection: count gaps in the report
         gap_lines = [
-            ln for ln in report.gaps_section.splitlines()
+            ln
+            for ln in report.gaps_section.splitlines()
             if ln.strip() and not ln.strip().startswith("*")
         ]
         gaps_found = len(gap_lines)
@@ -733,22 +802,19 @@ class ReportQualityChecker:
 
         # Weighted overall
         overall_score = round(
-            self.COVERAGE_WEIGHT * coverage_score +
-            self.CITATION_WEIGHT * citation_fidelity +
-            self.BREADTH_WEIGHT * source_breadth +
-            self.GAP_WEIGHT * gap_detection,
+            self.COVERAGE_WEIGHT * coverage_score
+            + self.CITATION_WEIGHT * citation_fidelity
+            + self.BREADTH_WEIGHT * source_breadth
+            + self.GAP_WEIGHT * gap_detection,
             4,
         )
 
         # Collect issues
         if coverage_score < self.MIN_COVERAGE:
-            issues.append(
-                f"Coverage too low: {coverage_score:.0%} < {self.MIN_COVERAGE:.0%}"
-            )
+            issues.append(f"Coverage too low: {coverage_score:.0%} < {self.MIN_COVERAGE:.0%}")
         if citation_fidelity < self.MIN_CITATION_FIDELITY:
             issues.append(
-                f"Citation fidelity too low: {citation_fidelity:.0%} "
-                f"(some claims lack sources)"
+                f"Citation fidelity too low: {citation_fidelity:.0%} " f"(some claims lack sources)"
             )
         if source_breadth < 0.5:
             issues.append(
@@ -778,11 +844,8 @@ class ReportQualityChecker:
             and quality.coverage_score >= self.MIN_COVERAGE
         )
 
-    def is_deliverable_scores(
-        self, citation_fidelity: float, coverage_score: float
-    ) -> bool:
+    def is_deliverable_scores(self, citation_fidelity: float, coverage_score: float) -> bool:
         """True if raw scores pass all gates (internal helper)."""
         return (
-            citation_fidelity >= self.MIN_CITATION_FIDELITY
-            and coverage_score >= self.MIN_COVERAGE
+            citation_fidelity >= self.MIN_CITATION_FIDELITY and coverage_score >= self.MIN_COVERAGE
         )

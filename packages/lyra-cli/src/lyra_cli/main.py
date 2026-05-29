@@ -27,12 +27,14 @@ Examples:
   lyra -p "step1,step2,step3"  # Sequential pipeline
 
 For more information, visit: https://github.com/ndqkhanh/lyra
-        """
+        """,
     )
 
     parser.add_argument("--version", action="version", version="Lyra 0.1.0 (ECC Integration)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
-    parser.add_argument("-p", "--pipeline", type=str, help="Sequential pipeline (comma-separated steps)")
+    parser.add_argument(
+        "-p", "--pipeline", type=str, help="Sequential pipeline (comma-separated steps)"
+    )
 
     subparsers = parser.add_subparsers(dest="command", help="Commands")
 

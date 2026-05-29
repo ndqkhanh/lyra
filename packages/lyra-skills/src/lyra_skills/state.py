@@ -29,7 +29,6 @@ import os
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 __all__ = [
     "SkillsState",
@@ -187,4 +186,4 @@ def save_state(
 
 # Optional: typed re-export for downstream callers that don't want
 # to import `Optional` themselves.
-StatePathLike = Optional[Path | str]
+StatePathLike = Path | str | None

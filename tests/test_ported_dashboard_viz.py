@@ -4,6 +4,7 @@ The original tested AgentFleetManager, TaskBoard, MonitoringPanel as
 separate classes. In our TUI, all of these are rolled into
 AgentDashboardWidget — so tests target the widget's internal API.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -13,6 +14,7 @@ pytestmark = pytest.mark.textual
 
 def test_dashboard_widget_init():
     from lyra_cli.tui_v2.widgets.agent_dashboard import AgentDashboardWidget
+
     dash = AgentDashboardWidget()
     assert dash is not None
     assert len(dash._agent_data) == 0
@@ -22,6 +24,7 @@ def test_dashboard_widget_init():
 
 def test_agent_lifecycle():
     from lyra_cli.tui_v2.widgets.agent_dashboard import AgentDashboardWidget, AgentStatus
+
     dash = AgentDashboardWidget()
     dash.register_agent("a1", "Agent-1", model="gpt-4o", emoji="🤖")
     assert "a1" in dash._agent_data
@@ -36,6 +39,7 @@ def test_agent_lifecycle():
 
 def test_task_lifecycle():
     from lyra_cli.tui_v2.widgets.agent_dashboard import AgentDashboardWidget, TaskStatus
+
     dash = AgentDashboardWidget()
     dash.add_task("t1", "Build feature", status=TaskStatus.TODO, assignee="alice")
     assert "t1" in dash._task_data
@@ -46,6 +50,7 @@ def test_task_lifecycle():
 
 def test_monitoring_feed():
     from lyra_cli.tui_v2.widgets.agent_dashboard import AgentDashboardWidget
+
     dash = AgentDashboardWidget()
     dash.log_event("info", "System started")
     dash.log_event("success", "Task completed")
@@ -59,6 +64,7 @@ def test_monitoring_feed():
 
 def test_agent_status_enum():
     from lyra_cli.tui_v2.widgets.agent_dashboard import AgentStatus
+
     assert AgentStatus.IDLE.glyph == "○"
     assert AgentStatus.WORKING.glyph == "⏺"
     assert AgentStatus.DONE.glyph == "✓"
@@ -69,6 +75,7 @@ def test_agent_status_enum():
 
 def test_task_status_enum():
     from lyra_cli.tui_v2.widgets.agent_dashboard import TaskStatus
+
     assert TaskStatus.TODO.glyph == "◻"
     assert TaskStatus.DOING.glyph == "⏳"
     assert TaskStatus.DONE.glyph == "◼"
@@ -77,7 +84,10 @@ def test_task_status_enum():
 
 def test_agent_info():
     from lyra_cli.tui_v2.widgets.agent_dashboard import AgentInfo, AgentStatus
-    agent = AgentInfo(agent_id="a1", name="Worker", model="deepseek", status=AgentStatus.WORKING, emoji="🤖")
+
+    agent = AgentInfo(
+        agent_id="a1", name="Worker", model="deepseek", status=AgentStatus.WORKING, emoji="🤖"
+    )
     line = agent.line
     assert "Worker" in line
     assert "🤖" in line
@@ -86,6 +96,7 @@ def test_agent_info():
 
 def test_task_item():
     from lyra_cli.tui_v2.widgets.agent_dashboard import TaskItem, TaskStatus
+
     task = TaskItem(task_id="t1", title="Fix bug", status=TaskStatus.DOING, assignee="bob")
     assert "Fix bug" in task.line
     assert "@bob" in task.line
@@ -93,6 +104,7 @@ def test_task_item():
 
 def test_monitor_event():
     from lyra_cli.tui_v2.widgets.agent_dashboard import MonitorEvent
+
     ev = MonitorEvent(level="warning", message="Disk usage high")
     assert "Disk" in ev.line
     assert "⚠" in ev.line
@@ -100,6 +112,7 @@ def test_monitor_event():
 
 def test_dashboard_multiple_agents():
     from lyra_cli.tui_v2.widgets.agent_dashboard import AgentDashboardWidget, AgentStatus
+
     dash = AgentDashboardWidget()
     for i in range(5):
         dash.register_agent(f"a{i}", f"Agent-{i}", model="gpt-4o")
@@ -114,6 +127,7 @@ def test_dashboard_multiple_agents():
 
 def test_dashboard_multiple_tasks():
     from lyra_cli.tui_v2.widgets.agent_dashboard import AgentDashboardWidget, TaskStatus
+
     dash = AgentDashboardWidget()
     for i in range(8):
         dash.add_task(f"t{i}", f"Task {i}", status=TaskStatus.TODO)

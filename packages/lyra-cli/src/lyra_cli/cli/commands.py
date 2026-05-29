@@ -23,7 +23,6 @@ LYRA_COMMANDS = {
     "/compact": "Compress chat history",
     "/search": "Search sessions (FTS5)",
     "/replay": "Replay past sessions",
-
     # === MODELS & CONFIGURATION ===
     "/model": "Show current model + fast/smart slots",
     "/models": "List all available models",
@@ -32,17 +31,14 @@ LYRA_COMMANDS = {
     "/stream": "Toggle streaming output",
     "/config": "Configuration management",
     "/credentials": "Set API credentials",
-
     # === MODES ===
     "/mode": "Switch mode (agent|plan|debug|ask)",
-
     # === PLANNING & EXECUTION ===
     "/plan": "Generate implementation plan",
     "/approve": "Approve plan and execute",
     "/reject": "Reject current plan",
     "/spawn": "Fork subagent in worktree",
     "/verify": "Replay verifier",
-
     # === CODE REVIEW & DIFF ===
     "/review": "Post-turn diff review",
     "/diff": "Show working tree diff",
@@ -50,13 +46,11 @@ LYRA_COMMANDS = {
     "/map": "ASCII tree of repo",
     "/security-review": "OWASP security review",
     "/simplify": "3-pass review (quality/reuse/efficiency)",
-
     # === TOOLS & SKILLS ===
     "/tools": "List registered tools",
     "/skills": "Show injected SKILL.md files",
     "/memory": "Show memory window",
     "/mcp": "Manage MCP servers",
-
     # === SESSIONS & HANDOFF ===
     "/session": "Session management",
     "/handoff": "Generate handoff message",
@@ -66,26 +60,21 @@ LYRA_COMMANDS = {
     "/resume": "Resume session",
     "/fork": "Fork session",
     "/rename": "Rename session",
-
     # === TEAMS & AGENTS ===
     "/team": "Multi-agent team execution",
     "/agents": "List available agents",
     "/agentteams": "Anthropic Agent Teams runtime",
-
     # === RESEARCH & INVESTIGATION ===
     "/research": "Deep research workflow (10-step pipeline)",
     "/investigate": "DCI-mode investigation",
     "/deep-research": "Alias for /research",
-
     # === CRON & SCHEDULING ===
     "/cron": "Manage cron jobs",
     "/schedule": "Alias for /cron",
     "/loop": "Recurring prompt",
-
     # === MEMORY & REFLECTION ===
     "/reflect": "Add lesson to memory",
     "/btw": "Add side note to memory",
-
     # === CONFIGURATION & THEME ===
     "/theme": "Switch color theme",
     "/color": "Tint prompt accent",
@@ -96,7 +85,6 @@ LYRA_COMMANDS = {
     "/vim": "Toggle vim mode",
     "/sandbox": "Toggle filesystem sandbox",
     "/sound": "Sound effects — list, select, toggle, preview",
-
     # === OBSERVABILITY & DEBUGGING ===
     "/trace": "Toggle event logging",
     "/self": "Agent introspection",
@@ -109,7 +97,6 @@ LYRA_COMMANDS = {
     "/hooks": "List active hooks",
     "/permissions": "Permission mode",
     "/usage": "Usage statistics",
-
     # === ADVANCED FEATURES ===
     "/autopilot": "Supervised autonomy status",
     "/ultrawork": "Enhanced work mode",
@@ -128,7 +115,6 @@ LYRA_COMMANDS = {
     "/plugin": "Plugin management",
     "/reload-plugins": "Reload plugins",
     "/claude-api": "Claude API reference",
-
     # === LYRA UNIQUE FEATURES ===
     "/scaling": "Four-axis scaling laws",
     "/coverage": "Verifier coverage index",
@@ -150,7 +136,6 @@ LYRA_COMMANDS = {
     "/split": "Split view",
     "/pair": "Pair programming mode",
     "/recap": "Terse summary",
-
     # === GIT OPERATIONS ===
     "/commit": "Create git commit",
     "/pr": "Create pull request",
@@ -161,20 +146,100 @@ LYRA_COMMANDS = {
 def get_command_category(command: str) -> str:
     """Get category for a command."""
     categories = {
-        "conversation": ["/help", "/exit", "/quit", "/clear", "/new", "/history", "/compact", "/search", "/replay"],
+        "conversation": [
+            "/help",
+            "/exit",
+            "/quit",
+            "/clear",
+            "/new",
+            "/history",
+            "/compact",
+            "/search",
+            "/replay",
+        ],
         "models": ["/model", "/models", "/status", "/budget", "/stream", "/config", "/credentials"],
         "planning": ["/plan", "/approve", "/reject", "/spawn", "/verify", "/mode"],
         "review": ["/review", "/diff", "/blame", "/map", "/security-review", "/simplify"],
         "tools": ["/tools", "/skills", "/memory", "/mcp"],
-        "sessions": ["/session", "/handoff", "/retro", "/export", "/copy", "/resume", "/fork", "/rename"],
+        "sessions": [
+            "/session",
+            "/handoff",
+            "/retro",
+            "/export",
+            "/copy",
+            "/resume",
+            "/fork",
+            "/rename",
+        ],
         "teams": ["/team", "/agents", "/agentteams"],
         "research": ["/research", "/investigate", "/deep-research"],
         "scheduling": ["/cron", "/schedule", "/loop"],
         "memory": ["/reflect", "/btw"],
-        "theme": ["/theme", "/color", "/statusline", "/fast", "/focus", "/tui", "/vim", "/sandbox", "/sound"],
-        "debug": ["/trace", "/self", "/context", "/stats", "/cost", "/badges", "/debug", "/doctor", "/hooks", "/permissions", "/usage"],
-        "advanced": ["/autopilot", "/ultrawork", "/ralph", "/ralplan", "/continue", "/sharpen", "/directive", "/contract", "/batch", "/add-dir", "/pr-comments", "/feedback", "/release-notes", "/logout", "/plugin", "/reload-plugins", "/claude-api"],
-        "unique": ["/scaling", "/coverage", "/bundle", "/meta-evolve", "/commands", "/keybindings", "/palette", "/soul", "/policy", "/evals", "/auth", "/init", "/rewind", "/redo", "/toolsets", "/wiki", "/voice", "/split", "/pair", "/recap"],
+        "theme": [
+            "/theme",
+            "/color",
+            "/statusline",
+            "/fast",
+            "/focus",
+            "/tui",
+            "/vim",
+            "/sandbox",
+            "/sound",
+        ],
+        "debug": [
+            "/trace",
+            "/self",
+            "/context",
+            "/stats",
+            "/cost",
+            "/badges",
+            "/debug",
+            "/doctor",
+            "/hooks",
+            "/permissions",
+            "/usage",
+        ],
+        "advanced": [
+            "/autopilot",
+            "/ultrawork",
+            "/ralph",
+            "/ralplan",
+            "/continue",
+            "/sharpen",
+            "/directive",
+            "/contract",
+            "/batch",
+            "/add-dir",
+            "/pr-comments",
+            "/feedback",
+            "/release-notes",
+            "/logout",
+            "/plugin",
+            "/reload-plugins",
+            "/claude-api",
+        ],
+        "unique": [
+            "/scaling",
+            "/coverage",
+            "/bundle",
+            "/meta-evolve",
+            "/commands",
+            "/keybindings",
+            "/palette",
+            "/soul",
+            "/policy",
+            "/evals",
+            "/auth",
+            "/init",
+            "/rewind",
+            "/redo",
+            "/toolsets",
+            "/wiki",
+            "/voice",
+            "/split",
+            "/pair",
+            "/recap",
+        ],
         "git": ["/commit", "/pr", "/push"],
     }
 

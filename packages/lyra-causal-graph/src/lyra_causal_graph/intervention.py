@@ -181,7 +181,9 @@ class InterventionModel:
             return self._scm_intervention(scm, treatment, value, outcome)
 
         if graph is not None:
-            return self._graph_based_intervention(data, treatment, value, outcome, graph, selected_method)
+            return self._graph_based_intervention(
+                data, treatment, value, outcome, graph, selected_method
+            )
 
         # Fallback: regression-based estimation without graph
         return self._regression_intervention(data, treatment, value, outcome)
@@ -547,13 +549,16 @@ class BackdoorAdjuster:
             # Return empty set and estimate directly
             logger.debug(
                 "No confounders found for (%s -> %s); no adjustment needed.",
-                treatment, outcome,
+                treatment,
+                outcome,
             )
             return []
 
         logger.debug(
             "Backdoor adjustment set for %s->%s: %s",
-            treatment, outcome, adjustment_set,
+            treatment,
+            outcome,
+            adjustment_set,
         )
         return adjustment_set
 
@@ -582,7 +587,7 @@ class BackdoorAdjuster:
         try:
             beta = np.linalg.lstsq(X, Outcome, rcond=None)[0]
         except np.linalg.LinAlgError:
-            raise AdjustmentError("Backdoor adjustment failed: singular matrix.")
+            raise AdjustmentError("Backdoor adjustment failed: singular matrix.") from None
 
         # Predict at treatment=value, averaged over adjustment set
         # E[Y | do(X=x)] = (1/n) * sum_i E[Y | X=x, Z=z_i]
@@ -595,9 +600,7 @@ class BackdoorAdjuster:
         stats.norm.ppf(1 - (1 - config.confidence_level) / 2)
 
         # Bootstrap CI
-        ci_lower, ci_upper = self._bootstrap_ci(
-            data, treatment, value, outcome, adj_set, config
-        )
+        ci_lower, ci_upper = self._bootstrap_ci(data, treatment, value, outcome, adj_set, config)
 
         return InterventionResult(
             treatment=treatment,
@@ -634,7 +637,9 @@ class BackdoorAdjuster:
             X = np.column_stack([np.ones(n), boot_T] + [boot_data[c] for c in adj_set])
             try:
                 beta = np.linalg.lstsq(X, boot_O, rcond=None)[0]
-                X_do = np.column_stack([np.ones(n), np.full(n, value)] + [boot_data[c] for c in adj_set])
+                X_do = np.column_stack(
+                    [np.ones(n), np.full(n, value)] + [boot_data[c] for c in adj_set]
+                )
                 est = float(np.mean(X_do @ beta))
                 estimates.append(est)
             except np.linalg.LinAlgError:
@@ -688,9 +693,7 @@ class FrontdoorAdjuster:
                 if self._is_valid_mediator(graph, treatment, outcome, mediator):
                     return mediator
 
-        raise AdjustmentError(
-            f"No valid frontdoor mediator found for ({treatment} -> {outcome})."
-        )
+        raise AdjustmentError(f"No valid frontdoor mediator found for ({treatment} -> {outcome}).")
 
     def _is_valid_mediator(
         self, graph: CausalGraph, treatment: str, outcome: str, mediator: str
@@ -702,7 +705,9 @@ class FrontdoorAdjuster:
         graph.parents(treatment)
         parents_of_mediator = graph.parents(mediator)
         # If M's only parent is X, condition 1 holds
-        if not parents_of_mediator or (len(parents_of_mediator) == 1 and treatment in parents_of_mediator):
+        if not parents_of_mediator or (
+            len(parents_of_mediator) == 1 and treatment in parents_of_mediator
+        ):
             return True
         # Check if backdoor from M->Y is blocked by X
         return treatment in graph.parents(outcome) or treatment in graph.parents(mediator)
@@ -735,7 +740,7 @@ class FrontdoorAdjuster:
         try:
             beta_my = np.linalg.lstsq(X_my, Outcome, rcond=None)[0]
         except np.linalg.LinAlgError:
-            raise AdjustmentError("Frontdoor adjustment failed: singular matrix.")
+            raise AdjustmentError("Frontdoor adjustment failed: singular matrix.") from None
 
         # Step 3: Combine
         X_do = np.column_stack([np.ones(n), np.full(n, m_do), Treatment])
@@ -780,6 +785,4 @@ def _validate_data(
 
     for var_name, arr in data.items():
         if len(arr) != n:
-            raise InterventionError(
-                f"Variable '{var_name}' has {len(arr)} samples, expected {n}."
-            )
+            raise InterventionError(f"Variable '{var_name}' has {len(arr)} samples, expected {n}.")

@@ -121,37 +121,66 @@ class DesignReviewReport:
 _COMMON_PATTERNS: list[tuple[str, list[str], str]] = [
     ("Repository Pattern", ["repository", "data access", "dao"], "Data access abstraction layer"),
     ("Factory Pattern", ["factory", "creator", "builder"], "Object creation encapsulation"),
-    ("Observer Pattern", ["observer", "event", "listener", "pub/sub", "publish-subscribe"],
-     "Event-driven communication"),
-    ("Strategy Pattern", ["strategy", "policy", "algorithm", "pluggable"],
-     "Interchangeable algorithms"),
+    (
+        "Observer Pattern",
+        ["observer", "event", "listener", "pub/sub", "publish-subscribe"],
+        "Event-driven communication",
+    ),
+    (
+        "Strategy Pattern",
+        ["strategy", "policy", "algorithm", "pluggable"],
+        "Interchangeable algorithms",
+    ),
     ("Singleton Pattern", ["singleton", "global", "shared instance"], "Single instance guarantee"),
-    ("Dependency Injection", ["dependency injection", "di", "inversion of control", "ioc"],
-     "Dependency management"),
-    ("Circuit Breaker", ["circuit breaker", "circuit_breaker", "resilience"],
-     "Failure handling"),
-    ("CQRS", ["cqrs", "command query", "read model", "write model"],
-     "Command-Query Responsibility Segregation"),
-    ("Event Sourcing", ["event sourcing", "event store", "event log"],
-     "Event-based state management"),
+    (
+        "Dependency Injection",
+        ["dependency injection", "di", "inversion of control", "ioc"],
+        "Dependency management",
+    ),
+    ("Circuit Breaker", ["circuit breaker", "circuit_breaker", "resilience"], "Failure handling"),
+    (
+        "CQRS",
+        ["cqrs", "command query", "read model", "write model"],
+        "Command-Query Responsibility Segregation",
+    ),
+    (
+        "Event Sourcing",
+        ["event sourcing", "event store", "event log"],
+        "Event-based state management",
+    ),
 ]
 
 _ANTI_PATTERNS: list[tuple[str, list[str], str, str]] = [
-    ("God Class", ["god class", "god object", "blob", "utility class"],
-     "A class with too many responsibilities",
-     "HIGH"),
-    ("Spaghetti Code", ["spaghetti", "tight coupling", "circular dependency"],
-      "Unstructured interdependent code",
-      "HIGH"),
-    ("Golden Hammer", ["golden hammer", "over-engineering", "overuse"],
-     "Applying a familiar solution everywhere",
-     "MEDIUM"),
-    ("Singleton Overuse", ["excessive singleton", "global state"],
-      "Overuse of global state via singletons",
-      "MEDIUM"),
-    ("Magic Numbers", ["magic number", "magic string", "hardcoded"],
-      "Hardcoded values without named constants",
-      "LOW"),
+    (
+        "God Class",
+        ["god class", "god object", "blob", "utility class"],
+        "A class with too many responsibilities",
+        "HIGH",
+    ),
+    (
+        "Spaghetti Code",
+        ["spaghetti", "tight coupling", "circular dependency"],
+        "Unstructured interdependent code",
+        "HIGH",
+    ),
+    (
+        "Golden Hammer",
+        ["golden hammer", "over-engineering", "overuse"],
+        "Applying a familiar solution everywhere",
+        "MEDIUM",
+    ),
+    (
+        "Singleton Overuse",
+        ["excessive singleton", "global state"],
+        "Overuse of global state via singletons",
+        "MEDIUM",
+    ),
+    (
+        "Magic Numbers",
+        ["magic number", "magic string", "hardcoded"],
+        "Hardcoded values without named constants",
+        "LOW",
+    ),
 ]
 
 
@@ -207,10 +236,22 @@ class DesignReviewer:
         for pattern_name, keywords, _ in _COMMON_PATTERNS:
             detected = any(kw in design_lower for kw in keywords)
             if detected:
-                quality = "Good" if pattern_name in ("Repository Pattern", "Dependency Injection",
-                                                      "Circuit Breaker") else "Fair"
-                appropriateness = "Appropriate for this context" if quality == "Good" else "Consider applicability"
-                recommendation = "Keep and maintain this pattern" if quality == "Good" else "Verify this pattern solves the right problem"
+                quality = (
+                    "Good"
+                    if pattern_name
+                    in ("Repository Pattern", "Dependency Injection", "Circuit Breaker")
+                    else "Fair"
+                )
+                appropriateness = (
+                    "Appropriate for this context"
+                    if quality == "Good"
+                    else "Consider applicability"
+                )
+                recommendation = (
+                    "Keep and maintain this pattern"
+                    if quality == "Good"
+                    else "Verify this pattern solves the right problem"
+                )
             else:
                 quality = "N/A"
                 appropriateness = "Not applicable or not yet evaluated"
@@ -238,7 +279,11 @@ class DesignReviewer:
                         anti_pattern_name=name,
                         description=desc,
                         location="Throughout design (keyword matched)",
-                        impact=f"{'Major architectural concern' if severity == 'HIGH' else 'Quality concern'}",
+                        impact=(
+                            "Major architectural concern"
+                            if severity == "HIGH"
+                            else "Quality concern"
+                        ),
                         suggested_refactoring=f"Refactor to eliminate {name.lower()} pattern",
                         severity=severity,
                     )
@@ -249,29 +294,46 @@ class DesignReviewer:
     def _assess_scalability(design_lower: str) -> list[ScalabilityFinding]:
         findings_list: list[ScalabilityFinding] = []
 
-        has_horizontal = "horizontal" in design_lower or "auto-scaling" in design_lower or "scale out" in design_lower
+        has_horizontal = (
+            "horizontal" in design_lower
+            or "auto-scaling" in design_lower
+            or "scale out" in design_lower
+        )
         has_sharding = "shard" in design_lower or "partition" in design_lower
         has_cache = "cache" in design_lower or "caching" in design_lower
-        has_queue = "queue" in design_lower or "async" in design_lower or "message broker" in design_lower
+        has_queue = (
+            "queue" in design_lower or "async" in design_lower or "message broker" in design_lower
+        )
 
         findings_list.append(
             ScalabilityFinding(
                 aspect="Compute Scaling",
-                current_state="Horizontal scaling addressed" if has_horizontal else "Not explicitly addressed",
+                current_state=(
+                    "Horizontal scaling addressed" if has_horizontal else "Not explicitly addressed"
+                ),
                 risk_level="LOW" if has_horizontal else "HIGH",
                 bottleneck_description="Single compute instance limits throughput",
                 recommendation="Design for horizontal scaling with stateless application servers",
-                estimated_scale_limit="10x with horizontal scaling" if has_horizontal else "< 2x without it",
+                estimated_scale_limit=(
+                    "10x with horizontal scaling" if has_horizontal else "< 2x without it"
+                ),
             )
         )
 
         findings_list.append(
             ScalabilityFinding(
                 aspect="Data Scaling",
-                current_state="Sharding/partitioning addressed" if has_sharding else "Not explicitly addressed",
+                current_state=(
+                    "Sharding/partitioning addressed"
+                    if has_sharding
+                    else "Not explicitly addressed"
+                ),
                 risk_level="LOW" if has_sharding else "HIGH",
                 bottleneck_description="Single database becomes bottleneck as data grows",
-                recommendation="Implement data partitioning strategy (e.g., hash-based or range-based sharding)",
+                recommendation=(
+                    "Implement data partitioning strategy (e.g., hash-based or range-based"
+                    "sharding)"
+                ),
                 estimated_scale_limit="100x with sharding" if has_sharding else "< 5x without it",
             )
         )
@@ -279,18 +341,26 @@ class DesignReviewer:
         findings_list.append(
             ScalabilityFinding(
                 aspect="Caching Strategy",
-                current_state="Caching strategy addressed" if has_cache else "Not explicitly addressed",
+                current_state=(
+                    "Caching strategy addressed" if has_cache else "Not explicitly addressed"
+                ),
                 risk_level="MEDIUM" if has_cache else "HIGH",
                 bottleneck_description="Repeated computations and database queries under load",
-                recommendation="Implement multi-tier caching (L1: in-memory, L2: distributed Redis)",
-                estimated_scale_limit="Caching can improve throughput 10-100x for read-heavy workloads",
+                recommendation=(
+                    "Implement multi-tier caching (L1: in-memory, L2: distributed Redis)"
+                ),
+                estimated_scale_limit=(
+                    "Caching can improve throughput 10-100x for read-heavy workloads"
+                ),
             )
         )
 
         findings_list.append(
             ScalabilityFinding(
                 aspect="Async Processing",
-                current_state="Async/queue pattern addressed" if has_queue else "Not explicitly addressed",
+                current_state=(
+                    "Async/queue pattern addressed" if has_queue else "Not explicitly addressed"
+                ),
                 risk_level="LOW" if has_queue else "MEDIUM",
                 bottleneck_description="Synchronous processing blocks resources under load",
                 recommendation="Use message queues for decoupling and buffering",
@@ -318,7 +388,9 @@ class DesignReviewer:
                     id=f"DRF-{finding_id:03d}",
                     category=ReviewCategory.PATTERN_USAGE,
                     title="Limited design pattern usage",
-                    description=f"Only {detected_count} common design patterns detected in the design",
+                    description=(
+                        f"Only {detected_count} common design patterns detected in the design"
+                    ),
                     rationale="Design patterns provide proven solutions to recurring problems",
                     suggestion="Consider applying additional patterns appropriate to the domain",
                     quality=DesignQuality.NEEDS_IMPROVEMENT,
@@ -336,7 +408,9 @@ class DesignReviewer:
                         category=ReviewCategory.ANTI_PATTERN,
                         title=f"Anti-pattern detected: {ap.anti_pattern_name}",
                         description=ap.description,
-                        rationale="Anti-patterns indicate design problems that will compound over time",
+                        rationale=(
+                            "Anti-patterns indicate design problems that will compound over time"
+                        ),
                         suggestion=ap.suggested_refactoring,
                         quality=DesignQuality.NEEDS_IMPROVEMENT,
                         effort_to_fix="High" if ap.severity == "HIGH" else "Medium",
@@ -351,9 +425,17 @@ class DesignReviewer:
                     id=f"DRF-{finding_id:03d}",
                     category=ReviewCategory.SCALABILITY,
                     title="Scalability not addressed",
-                    description="Design document does not discuss scalability requirements or strategy",
-                    rationale="Scalability is a critical non-functional requirement for production systems",
-                    suggestion="Add a scalability section covering expected load, bottlenecks, and scaling approach",
+                    description=(
+                        "Design document does not discuss scalability requirements or strategy"
+                    ),
+                    rationale=(
+                        "Scalability is a critical non-functional requirement for production"
+                        "systems"
+                    ),
+                    suggestion=(
+                        "Add a scalability section covering expected load, bottlenecks, and"
+                        "scaling approach"
+                    ),
                     quality=DesignQuality.NEEDS_IMPROVEMENT,
                     effort_to_fix="Medium",
                 )
@@ -368,8 +450,12 @@ class DesignReviewer:
                     category=ReviewCategory.COMPLETENESS,
                     title="Monitoring and observability not discussed",
                     description="No mention of logging, metrics, tracing, or alerting",
-                    rationale="Production systems require observability for operation and debugging",
-                    suggestion="Add observability section covering logs, metrics, traces, and dashboards",
+                    rationale=(
+                        "Production systems require observability for operation and debugging"
+                    ),
+                    suggestion=(
+                        "Add observability section covering logs, metrics, traces, and dashboards"
+                    ),
                     quality=DesignQuality.ADEQUATE,
                     effort_to_fix="Medium",
                 )
@@ -385,7 +471,10 @@ class DesignReviewer:
                     title="Error handling strategy missing",
                     description="Design does not explicitly cover error handling and recovery",
                     rationale="Robust error handling is essential for system reliability",
-                    suggestion="Add error handling patterns: retries, circuit breakers, graceful degradation",
+                    suggestion=(
+                        "Add error handling patterns: retries, circuit breakers, graceful"
+                        "degradation"
+                    ),
                     quality=DesignQuality.ADEQUATE,
                     effort_to_fix="Medium",
                 )
@@ -399,7 +488,9 @@ class DesignReviewer:
             ImprovementSuggestion(
                 area="Documentation",
                 suggestion="Add a glossary of terms and architectural decision records (ADRs)",
-                rationale="Improves onboarding and documents design rationale for future maintainers",
+                rationale=(
+                    "Improves onboarding and documents design rationale for future maintainers"
+                ),
                 expected_impact="Reduces onboarding time and design drift",
                 implementation_difficulty="Low",
             ),
@@ -412,8 +503,14 @@ class DesignReviewer:
             ),
             ImprovementSuggestion(
                 area="Security",
-                suggestion="Add a security section covering authentication, authorization, and data protection",
-                rationale="Security is often an afterthought; addressing it in design prevents costly rework",
+                suggestion=(
+                    "Add a security section covering authentication, authorization, and data"
+                    "protection"
+                ),
+                rationale=(
+                    "Security is often an afterthought; addressing it in design prevents costly"
+                    "rework"
+                ),
                 expected_impact="Reduces security vulnerabilities and compliance risks",
                 implementation_difficulty="Medium",
             ),
@@ -454,9 +551,7 @@ class DesignReviewer:
     ) -> DesignQuality:
         detected_patterns = sum(1 for p in patterns if p.detected)
         anti_pattern_count = len(anti_patterns)
-        high_risk_scalability = sum(
-            1 for s in scalability if s.risk_level == "HIGH"
-        )
+        high_risk_scalability = sum(1 for s in scalability if s.risk_level == "HIGH")
 
         if detected_patterns >= 4 and anti_pattern_count == 0 and high_risk_scalability == 0:
             return DesignQuality.EXCELLENT
@@ -478,19 +573,16 @@ class DesignReviewer:
         pattern_score = min(100, sum(1 for p in patterns if p.detected) * 12)
         anti_pattern_penalty = min(40, len(anti_patterns) * 10)
         scalability_score = max(
-            0, 100 - sum(
-                25 for s in scalability if s.risk_level == "HIGH"
-            ) - sum(
-                15 for s in scalability if s.risk_level == "MEDIUM"
-            )
+            0,
+            100
+            - sum(25 for s in scalability if s.risk_level == "HIGH")
+            - sum(15 for s in scalability if s.risk_level == "MEDIUM"),
         )
         findings_count = len(findings)
         findings_penalty = min(30, findings_count * 5)
 
         overall = max(
-            0, min(100,
-                   pattern_score + scalability_score - anti_pattern_penalty - findings_penalty
-                   )
+            0, min(100, pattern_score + scalability_score - anti_pattern_penalty - findings_penalty)
         )
 
         return {

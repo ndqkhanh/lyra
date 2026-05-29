@@ -213,7 +213,7 @@ class ConsolidationEngine:
             by_type[mem.type].append(mem)
 
         # Check for contradictions within each type
-        for mem_type, type_memories in by_type.items():
+        for _mem_type, type_memories in by_type.items():
             for i, mem1 in enumerate(type_memories):
                 for mem2 in type_memories[i+1:]:
                     if self._are_contradictory(mem1, mem2):
@@ -243,7 +243,7 @@ class ConsolidationEngine:
             by_type[mem.type].append(mem)
 
         # Look for repeated content patterns
-        for mem_type, type_memories in by_type.items():
+        for _mem_type, type_memories in by_type.items():
             if len(type_memories) < self.pattern_min_frequency:
                 continue
 

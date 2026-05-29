@@ -99,9 +99,7 @@ class Agent(ABC):
             capacity=10,
             consolidation_threshold=5,
         )
-        self.long_term_memory = LongTermMemory(
-            storage_path=f"data/memory/{agent_id}_ltm.json"
-        )
+        self.long_term_memory = LongTermMemory(storage_path=f"data/memory/{agent_id}_ltm.json")
         self.memory_retriever = MemoryRetriever(self.long_term_memory)
         self.memory_consolidator = MemoryConsolidator(
             self.short_term_memory,
@@ -201,7 +199,10 @@ class Agent(ABC):
         await self.send_message(
             to_agent="coordinator",
             message_type=MessageType.HELP_REQUEST,
-            content={"issue": issue, "task_id": self.current_task.task_id if self.current_task else None},
+            content={
+                "issue": issue,
+                "task_id": self.current_task.task_id if self.current_task else None,
+            },
         )
         # In a real implementation, this would wait for a response
         return None
@@ -260,8 +261,13 @@ class Agent(ABC):
 
     # Memory-related methods
 
-    def remember(self, content: str, memory_type: MemoryType = MemoryType.EPISODIC,
-                 importance: float = 0.5, tags: list[str] | None = None) -> None:
+    def remember(
+        self,
+        content: str,
+        memory_type: MemoryType = MemoryType.EPISODIC,
+        importance: float = 0.5,
+        tags: list[str] | None = None,
+    ) -> None:
         """
         Store information in long-term memory.
 
@@ -278,9 +284,14 @@ class Agent(ABC):
             tags=tags or [],
         )
 
-    def recall(self, query: str, limit: int = 5, min_score: float = 0.5,
-               strategy: RetrievalStrategy = RetrievalStrategy.HYBRID,
-               filters: dict | None = None) -> list[Any]:
+    def recall(
+        self,
+        query: str,
+        limit: int = 5,
+        min_score: float = 0.5,
+        strategy: RetrievalStrategy = RetrievalStrategy.HYBRID,
+        filters: dict | None = None,
+    ) -> list[Any]:
         """
         Retrieve relevant memories.
 
@@ -302,8 +313,9 @@ class Agent(ABC):
             filters=filters,
         )
 
-    def add_conversation_turn(self, role: str, content: str,
-                             metadata: dict[str, Any] | None = None) -> None:
+    def add_conversation_turn(
+        self, role: str, content: str, metadata: dict[str, Any] | None = None
+    ) -> None:
         """
         Add a conversation turn to short-term memory.
 

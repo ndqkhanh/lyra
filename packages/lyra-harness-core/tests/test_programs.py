@@ -1,4 +1,5 @@
 """Tests for lyra_harness_core.programs — DSPy-style compilable programs."""
+
 from __future__ import annotations
 
 import pytest
@@ -22,9 +23,11 @@ from lyra_harness_core.routing import BELLERouter
 
 
 def _build_immediate_answer_pipeline(answer: str = "42") -> MultiHopPipeline:
-    llm = StubLLM(responses=[
-        f"Are follow up questions needed here? No\nSo the final answer is: {answer}\n",
-    ])
+    llm = StubLLM(
+        responses=[
+            f"Are follow up questions needed here? No\nSo the final answer is: {answer}\n",
+        ]
+    )
     return MultiHopPipeline(
         router=BELLERouter(),
         self_ask=SelfAskOperator(llm=llm, retriever=StubRetriever(), max_hops=1),
@@ -176,7 +179,7 @@ class TestEvaluate:
         program = MultiHopProgram(pipeline=pipeline, signature=sig)
 
         # Two examples — one expects "42" (score=1.0), one expects "x" (score=0.0).
-        # But the StubLLM only has 1 response, so we need to extend or use a fresh pipeline per example.
+        # But the StubLLM only has 1 response, so we need to extend or use a fresh pipeline
         # Simpler: only one example.
         examples = [Example(inputs={"question": "q"}, output="42")]
         score = evaluate(

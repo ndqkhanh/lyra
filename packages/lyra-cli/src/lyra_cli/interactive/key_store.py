@@ -19,6 +19,7 @@ On session boot :meth:`hydrate_env` injects all stored keys into
 ``os.environ`` (current process only — never shell rc files) so every
 downstream component picks them up without extra wiring.
 """
+
 from __future__ import annotations
 
 import json
@@ -69,6 +70,7 @@ def _kr_set(provider: str, api_key: str) -> bool:
     """Store *api_key* in the OS keyring. Returns True on success."""
     try:
         import keyring as _kr  # type: ignore[import-not-found]
+
         _kr.set_password(_KEYRING_SERVICE, provider, api_key)
         return True
     except Exception:
@@ -79,6 +81,7 @@ def _kr_get(provider: str) -> str | None:
     """Retrieve a key from the OS keyring, or None."""
     try:
         import keyring as _kr  # type: ignore[import-not-found]
+
         return _kr.get_password(_KEYRING_SERVICE, provider) or None
     except Exception:
         return None
@@ -88,6 +91,7 @@ def _kr_delete(provider: str) -> None:
     """Remove a key from the OS keyring (best-effort)."""
     try:
         import keyring as _kr  # type: ignore[import-not-found]
+
         _kr.delete_password(_KEYRING_SERVICE, provider)
     except Exception:
         pass
@@ -156,7 +160,9 @@ class KeyStore:
             entry["base_url"] = base_url
         data["providers"][provider] = entry
         self._save_raw(data)
-        self._stamp_env(provider, {"api_key": api_key, **({"base_url": base_url} if base_url else {})})
+        self._stamp_env(
+            provider, {"api_key": api_key, **({"base_url": base_url} if base_url else {})}
+        )
 
     def get(self, provider: str) -> dict[str, str] | None:
         """Return the stored entry including the live api_key, or ``None``."""

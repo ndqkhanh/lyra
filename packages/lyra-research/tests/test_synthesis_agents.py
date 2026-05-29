@@ -1,6 +1,7 @@
 """
 Tests for synthesis agents.
 """
+
 import pytest
 from lyra_research.agents.analysis.analysis_base import Analysis
 from lyra_research.agents.synthesis import (
@@ -26,7 +27,10 @@ async def test_cross_source_synthesizer_basic():
         Analysis(
             source_id="s2",
             analysis_type="paper",
-            findings=["Transformer architecture enables parallelization", "Attention weights are interpretable"],
+            findings=[
+                "Transformer architecture enables parallelization",
+                "Attention weights are interpretable",
+            ],
             confidence=0.85,
         ),
     ]
@@ -389,39 +393,45 @@ async def test_synthesis_pipeline_integration():
 
     # Step 2: Contradiction detection
     contradiction = ContradictionDetectorAgent()
-    contradiction_result = await contradiction.synthesize([
-        Analysis(
-            source_id="synthesis",
-            analysis_type="cross_source",
-            findings=synthesis_result.findings,
-            metadata=synthesis_result.metadata,
-            confidence=synthesis_result.confidence,
-        )
-    ])
+    contradiction_result = await contradiction.synthesize(
+        [
+            Analysis(
+                source_id="synthesis",
+                analysis_type="cross_source",
+                findings=synthesis_result.findings,
+                metadata=synthesis_result.metadata,
+                confidence=synthesis_result.confidence,
+            )
+        ]
+    )
 
     # Step 3: Evidence audit
     evidence = EvidenceAuditorAgent()
-    evidence_result = await evidence.synthesize([
-        Analysis(
-            source_id="contradiction",
-            analysis_type="contradiction",
-            findings=contradiction_result.findings,
-            metadata=contradiction_result.metadata,
-            confidence=contradiction_result.confidence,
-        )
-    ])
+    evidence_result = await evidence.synthesize(
+        [
+            Analysis(
+                source_id="contradiction",
+                analysis_type="contradiction",
+                findings=contradiction_result.findings,
+                metadata=contradiction_result.metadata,
+                confidence=contradiction_result.confidence,
+            )
+        ]
+    )
 
     # Step 4: Falsification check
     falsification = FalsificationCheckerAgent()
-    final_result = await falsification.synthesize([
-        Analysis(
-            source_id="evidence",
-            analysis_type="evidence",
-            findings=evidence_result.findings,
-            metadata=evidence_result.metadata,
-            confidence=evidence_result.confidence,
-        )
-    ])
+    final_result = await falsification.synthesize(
+        [
+            Analysis(
+                source_id="evidence",
+                analysis_type="evidence",
+                findings=evidence_result.findings,
+                metadata=evidence_result.metadata,
+                confidence=evidence_result.confidence,
+            )
+        ]
+    )
 
     assert final_result.synthesis_type == "falsification"
     assert "falsification_risks" in final_result.metadata

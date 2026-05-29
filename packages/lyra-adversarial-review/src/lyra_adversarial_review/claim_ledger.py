@@ -94,7 +94,9 @@ class ClaimLedger:
         return sorted(results, key=lambda e: e.timestamp, reverse=True)
 
     async def get_unverified(self) -> list[LedgerEntry]:
-        return [e for e in self._entries.values() if e.verification_status == ClaimStatus.UNVERIFIED]
+        return [
+            e for e in self._entries.values() if e.verification_status == ClaimStatus.UNVERIFIED
+        ]
 
     async def get_verified(self) -> list[LedgerEntry]:
         verified_statuses = {

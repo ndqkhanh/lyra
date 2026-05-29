@@ -138,8 +138,11 @@ class TmuxManager:
 
         result = subprocess.run(
             [
-                "tmux", "capture-pane", "-t",
-                f"{session_name}:0.{pane_index}", "-p",
+                "tmux",
+                "capture-pane",
+                "-t",
+                f"{session_name}:0.{pane_index}",
+                "-p",
             ],
             capture_output=True,
             text=True,
@@ -181,8 +184,12 @@ class TmuxManager:
         try:
             result = subprocess.run(
                 [
-                    "tmux", "display-message", "-t", session_name,
-                    "-p", "#{pane_id}|#{session_name}|#{window_index}|#{pane_index}|#{pane_title}|#{pane_current_command}",
+                    "tmux",
+                    "display-message",
+                    "-t",
+                    session_name,
+                    "-p",
+                    "#{pane_id}|#{session_name}|#{window_index}|#{pane_index}|#{pane_title}|#{pane_current_command}",
                 ],
                 capture_output=True,
                 text=True,

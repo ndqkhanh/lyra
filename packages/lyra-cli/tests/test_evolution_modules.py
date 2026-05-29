@@ -99,9 +99,7 @@ class TestPromptMutator:
 
     def test_mutate_reorder_multiple_sentences(self):
         mutator = PromptMutator()
-        results = mutator.mutate(
-            "First step. Second step. Third step.", [MutationOp.REORDER]
-        )
+        results = mutator.mutate("First step. Second step. Third step.", [MutationOp.REORDER])
         assert len(results) == 1
 
     def test_mutate_add_constraint(self):
@@ -118,9 +116,7 @@ class TestPromptMutator:
 
     def test_mutate_simplify(self):
         mutator = PromptMutator()
-        results = mutator.mutate(
-            "First. Second. Third. Fourth. Fifth.", [MutationOp.SIMPLIFY]
-        )
+        results = mutator.mutate("First. Second. Third. Fourth. Fifth.", [MutationOp.SIMPLIFY])
         assert len(results) == 1
 
     def test_mutation_result_fields(self):
@@ -167,34 +163,54 @@ class TestFitnessEvaluator:
         assert not report.meets_all_targets
 
     def test_evaluate_custom_targets(self):
-        targets = [FitnessTarget(name="accuracy", weight=1.0, target_value=0.95, higher_is_better=True)]
+        targets = [
+            FitnessTarget(name="accuracy", weight=1.0, target_value=0.95, higher_is_better=True)
+        ]
         evaluator = FitnessEvaluator(targets=targets)
         report = evaluator.evaluate("s1", {"accuracy": 0.97})
         assert report.meets_all_targets
 
     def test_get_best(self):
         evaluator = FitnessEvaluator()
-        evaluator.evaluate("a", {"success_rate": 0.9, "speed_ms": 400.0, "cost_tokens": 800.0, "quality_score": 0.9})
-        evaluator.evaluate("b", {"success_rate": 0.5, "speed_ms": 2000.0, "cost_tokens": 3000.0, "quality_score": 0.3})
+        evaluator.evaluate(
+            "a",
+            {"success_rate": 0.9, "speed_ms": 400.0, "cost_tokens": 800.0, "quality_score": 0.9},
+        )
+        evaluator.evaluate(
+            "b",
+            {"success_rate": 0.5, "speed_ms": 2000.0, "cost_tokens": 3000.0, "quality_score": 0.3},
+        )
         best = evaluator.get_best()
         assert best is not None
         assert best.strategy_id == "a"
 
     def test_get_history(self):
         evaluator = FitnessEvaluator()
-        evaluator.evaluate("s1", {"success_rate": 0.8, "speed_ms": 600.0, "cost_tokens": 900.0, "quality_score": 0.8})
-        evaluator.evaluate("s1", {"success_rate": 0.9, "speed_ms": 400.0, "cost_tokens": 700.0, "quality_score": 0.9})
+        evaluator.evaluate(
+            "s1",
+            {"success_rate": 0.8, "speed_ms": 600.0, "cost_tokens": 900.0, "quality_score": 0.8},
+        )
+        evaluator.evaluate(
+            "s1",
+            {"success_rate": 0.9, "speed_ms": 400.0, "cost_tokens": 700.0, "quality_score": 0.9},
+        )
         history = evaluator.get_history("s1")
         assert len(history) == 2
 
     def test_normalize_higher_is_better(self):
         evaluator = FitnessEvaluator()
-        report = evaluator.evaluate("s1", {"success_rate": 0.9, "speed_ms": 500.0, "cost_tokens": 1000.0, "quality_score": 0.85})
+        report = evaluator.evaluate(
+            "s1",
+            {"success_rate": 0.9, "speed_ms": 500.0, "cost_tokens": 1000.0, "quality_score": 0.85},
+        )
         assert report.scores["success_rate"] == 1.0
 
     def test_stats(self):
         evaluator = FitnessEvaluator()
-        evaluator.evaluate("s1", {"success_rate": 0.9, "speed_ms": 500.0, "cost_tokens": 1000.0, "quality_score": 0.85})
+        evaluator.evaluate(
+            "s1",
+            {"success_rate": 0.9, "speed_ms": 500.0, "cost_tokens": 1000.0, "quality_score": 0.85},
+        )
         s = evaluator.stats()
         assert s["strategies_evaluated"] == 1
 

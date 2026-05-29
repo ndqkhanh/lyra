@@ -2,10 +2,11 @@
 Tree Search Reasoning Engine - MCTS-style exploration.
 """
 
+from __future__ import annotations
+
 import math
 import time
 from dataclasses import dataclass, field
-from typing import List, Optional
 
 from anthropic import Anthropic
 
@@ -24,8 +25,8 @@ class ReasoningNode:
 
     content: str
     step_type: StepType
-    parent: Optional["ReasoningNode"] = None
-    children: List["ReasoningNode"] = field(default_factory=list)
+    parent: ReasoningNode | None = None
+    children: list[ReasoningNode] = field(default_factory=list)
     visits: int = 0
     value: float = 0.0
     depth: int = 0
@@ -48,15 +49,13 @@ class ReasoningNode:
     def uct_score(self, exploration_weight: float = 1.414) -> float:
         """Calculate UCT (Upper Confidence Bound for Trees) score."""
         if self.visits == 0:
-            return float('inf')
+            return float("inf")
 
         if self.parent is None or self.parent.visits == 0:
             return self.get_average_value()
 
         exploitation = self.get_average_value()
-        exploration = exploration_weight * math.sqrt(
-            math.log(self.parent.visits) / self.visits
-        )
+        exploration = exploration_weight * math.sqrt(math.log(self.parent.visits) / self.visits)
 
         return exploitation + exploration
 
@@ -72,7 +71,7 @@ class TreeSearchEngine:
     - Path pruning
     """
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         self.client = Anthropic(api_key=api_key) if api_key else Anthropic()
 
     def reason(
@@ -168,7 +167,7 @@ class TreeSearchEngine:
         node: ReasoningNode,
         config: ReasoningConfig,
         num_children: int = 3,
-    ) -> List[ReasoningNode]:
+    ) -> list[ReasoningNode]:
         """
         Expand node by generating child nodes.
 
@@ -204,12 +203,13 @@ class TreeSearchEngine:
         node: ReasoningNode,
         alternative_num: int,
         config: ReasoningConfig,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Generate an alternative reasoning step."""
         prompt = f"""Given this reasoning step:
 {node.content}
 
-Generate alternative reasoning step #{alternative_num + 1} that explores a different approach or perspective.
+Generate alternative reasoning step #{alternative_num + 1} that explores a different approach or
+perspective.
 Be creative but stay relevant to the task.
 
 Alternative reasoning step:"""
@@ -256,7 +256,7 @@ Alternative reasoning step:"""
     def _backpropagate(
         self,
         node: ReasoningNode,
-        children: List[ReasoningNode],
+        children: list[ReasoningNode],
     ) -> None:
         """Backpropagate values up the tree."""
         if not children:
@@ -277,7 +277,8 @@ Alternative reasoning step:"""
 
         # Remove children below threshold
         root.children = [
-            child for child in root.children
+            child
+            for child in root.children
             if child.get_average_value() >= threshold or child.visits < 2
         ]
 
@@ -285,7 +286,7 @@ Alternative reasoning step:"""
         for child in root.children:
             self._prune_tree(child, threshold)
 
-    def _extract_best_path(self, root: ReasoningNode) -> List[ReasoningNode]:
+    def _extract_best_path(self, root: ReasoningNode) -> list[ReasoningNode]:
         """Extract the best path from root to leaf."""
         path = [root]
         node = root

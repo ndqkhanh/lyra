@@ -4,6 +4,7 @@ Both operators (Self-Ask, IRCoT) accept a caller-injected LLM + Retriever via
 these Protocols. Production wires :class:`lyra_harness_core.models.LLMProvider`
 through a thin adapter; tests use the stubs.
 """
+
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -30,7 +31,9 @@ class LLMTextGenerator(Protocol):
 
     name: str
 
-    def generate(self, prompt: str, *, max_tokens: int = 512, stop: list[str] | None = None) -> str: ...
+    def generate(
+        self, prompt: str, *, max_tokens: int = 512, stop: list[str] | None = None
+    ) -> str: ...
 
 
 class Retriever(Protocol):

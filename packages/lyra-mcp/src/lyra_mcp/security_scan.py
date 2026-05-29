@@ -38,14 +38,18 @@ class MCPTaintAnalyzer:
                     params = {arg.arg for arg in node.args.args}
                     risky_params = params & self.RISKY_PARAMS
                     if risky_params:
-                        vulns.append(MCPVulnerability(
-                            tool_name=tool_name,
-                            vulnerability_type="taint_injection",
-                            severity="high",
-                            description=f"High-risk parameters: {', '.join(risky_params)}",
-                            line_number=node.lineno,
-                            proof_of_concept=f"Exploit via {'/'.join(risky_params)} parameter injection",
-                        ))
+                        vulns.append(
+                            MCPVulnerability(
+                                tool_name=tool_name,
+                                vulnerability_type="taint_injection",
+                                severity="high",
+                                description=f"High-risk parameters: {', '.join(risky_params)}",
+                                line_number=node.lineno,
+                                proof_of_concept=(
+                                    f"Exploit via {'/'.join(risky_params)} parameter injection"
+                                ),
+                            )
+                        )
         except SyntaxError:
             pass
         return vulns

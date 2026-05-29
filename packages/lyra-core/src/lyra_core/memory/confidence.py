@@ -2,7 +2,8 @@
 
 Extends Lyra's v3.7 :class:`~lyra_core.memory.auto_memory.AutoMemory`
 with per-entry confidence tracking, matching the Claude Code 2026
-"instinct extraction" pattern ([`docs/62-everything-claude-code.md`](../../../../../../docs/62-everything-claude-code.md)).
+"instinct extraction" pattern
+([`docs/62-everything-claude-code.md`](../../../../../../docs/62-everything-claude-code.md)).
 The 2025–2026 lesson from operating long-running self-improving agents:
 **every extracted pattern needs a probabilistic weight from the start**,
 or junk-memory accumulates and the loop drifts.
@@ -28,6 +29,7 @@ register or tombstone — that policy lives one layer up (auto-memory
 manager) so the same tracker can be wired to different durable
 substrates without coupling.
 """
+
 from __future__ import annotations
 
 import json
@@ -299,7 +301,9 @@ class ConfidenceTracker:
         try:
             from lyra_core.hir import events
 
-            kind = "confidence.promote" if isinstance(event, PromotionEvent) else "confidence.demote"
+            kind = (
+                "confidence.promote" if isinstance(event, PromotionEvent) else "confidence.demote"
+            )
             events.emit(
                 kind,
                 entry_id=event.record.entry_id,

@@ -25,10 +25,24 @@ from dataclasses import dataclass
 FEATURE_DIM = 12
 
 TOOL_CATEGORY_MAP: dict[str, int] = {
-    "read": 0, "read_file": 0, "grep": 0, "find": 0, "cat": 0,
-    "write": 1, "write_file": 1, "edit": 1, "patch": 1,
-    "exec": 2, "bash": 2, "execute": 2, "run": 2,
-    "network": 3, "curl": 3, "fetch": 3, "api": 3, "web": 3,
+    "read": 0,
+    "read_file": 0,
+    "grep": 0,
+    "find": 0,
+    "cat": 0,
+    "write": 1,
+    "write_file": 1,
+    "edit": 1,
+    "patch": 1,
+    "exec": 2,
+    "bash": 2,
+    "execute": 2,
+    "run": 2,
+    "network": 3,
+    "curl": 3,
+    "fetch": 3,
+    "api": 3,
+    "web": 3,
 }
 
 
@@ -42,7 +56,9 @@ class StateVector:
 
     def __post_init__(self) -> None:
         if len(self.features) != FEATURE_DIM:
-            raise ValueError(f"StateVector must have {FEATURE_DIM} features, got {len(self.features)}")
+            raise ValueError(
+                f"StateVector must have {FEATURE_DIM} features, got {len(self.features)}"
+            )
 
     def __getitem__(self, idx: int) -> float:
         return self.features[idx]
@@ -139,10 +155,18 @@ class StateEncoder:
     @staticmethod
     def feature_names() -> tuple[str, ...]:
         return (
-            "task_ambiguity", "tool_risk", "context_pressure", "uncertainty",
-            "budget_pressure", "evidence_conflict", "repeated_failure",
-            "advisor_budget_left", "reasoning_ratio", "fast_ratio",
-            "turn_index_norm", "tool_category",
+            "task_ambiguity",
+            "tool_risk",
+            "context_pressure",
+            "uncertainty",
+            "budget_pressure",
+            "evidence_conflict",
+            "repeated_failure",
+            "advisor_budget_left",
+            "reasoning_ratio",
+            "fast_ratio",
+            "turn_index_norm",
+            "tool_category",
         )
 
 

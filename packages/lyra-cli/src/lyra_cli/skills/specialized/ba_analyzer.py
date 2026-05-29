@@ -286,9 +286,7 @@ class BAAnalyzer:
         ]
 
     @staticmethod
-    def _build_user_stories(
-        requirements: str, use_cases: list[UseCase]
-    ) -> list[UserStory]:
+    def _build_user_stories(requirements: str, use_cases: list[UseCase]) -> list[UserStory]:
         stories: list[UserStory] = [
             UserStory(
                 id="US-001",
@@ -375,9 +373,11 @@ class BAAnalyzer:
                 module="Auth",
                 inputs=("username", "password", "MFA token"),
                 outputs=("JWT/Session token", "User profile"),
-                rules=("Password must meet complexity requirements",
-                       "MFA enforced for admin accounts",
-                       "Session expires after 24h inactivity"),
+                rules=(
+                    "Password must meet complexity requirements",
+                    "MFA enforced for admin accounts",
+                    "Session expires after 24h inactivity",
+                ),
             ),
             FunctionalRequirement(
                 id="FR-002",
@@ -385,9 +385,11 @@ class BAAnalyzer:
                 module="Data Management",
                 inputs=("Entity data", "Query parameters"),
                 outputs=("Persisted records", "Query results"),
-                rules=("All inputs validated server-side",
-                       "Soft delete for critical entities",
-                       "Pagination enforced for list endpoints"),
+                rules=(
+                    "All inputs validated server-side",
+                    "Soft delete for critical entities",
+                    "Pagination enforced for list endpoints",
+                ),
             ),
             FunctionalRequirement(
                 id="FR-003",
@@ -395,9 +397,11 @@ class BAAnalyzer:
                 module="Authorization",
                 inputs=("User role", "Resource identifier", "Action"),
                 outputs=("Access grant/deny decision",),
-                rules=("Roles: Admin, Editor, Viewer",
-                       "Permissions defined per resource-action pair",
-                       "Audit log for all access decisions"),
+                rules=(
+                    "Roles: Admin, Editor, Viewer",
+                    "Permissions defined per resource-action pair",
+                    "Audit log for all access decisions",
+                ),
             ),
             FunctionalRequirement(
                 id="FR-004",
@@ -405,9 +409,11 @@ class BAAnalyzer:
                 module="Audit",
                 inputs=("User identity", "Action", "Before/after state"),
                 outputs=("Audit log entry",),
-                rules=("All mutating operations logged",
-                       "Logs immutable after creation",
-                       "Retention period: 90 days"),
+                rules=(
+                    "All mutating operations logged",
+                    "Logs immutable after creation",
+                    "Retention period: 90 days",
+                ),
             ),
         ]
 
@@ -469,49 +475,63 @@ class BAAnalyzer:
         gaps: list[GapItem] = []
 
         if "performance" not in requirements:
-            gaps.append(GapItem(
-                id="GAP-001",
-                description="No performance requirements specified",
-                impact="Risk of performance issues in production",
-                recommendation="Define P95/P99 latency targets and throughput requirements",
-                priority=Priority.MUST_HAVE,
-            ))
+            gaps.append(
+                GapItem(
+                    id="GAP-001",
+                    description="No performance requirements specified",
+                    impact="Risk of performance issues in production",
+                    recommendation="Define P95/P99 latency targets and throughput requirements",
+                    priority=Priority.MUST_HAVE,
+                )
+            )
 
         if "security" not in requirements:
-            gaps.append(GapItem(
-                id="GAP-002",
-                description="Security requirements not explicitly defined",
-                impact="Potential security vulnerabilities",
-                recommendation="Add authentication, authorization, and data protection requirements",
-                priority=Priority.MUST_HAVE,
-            ))
+            gaps.append(
+                GapItem(
+                    id="GAP-002",
+                    description="Security requirements not explicitly defined",
+                    impact="Potential security vulnerabilities",
+                    recommendation=(
+                        "Add authentication, authorization, and data protection requirements"
+                    ),
+                    priority=Priority.MUST_HAVE,
+                )
+            )
 
         if "backup" not in requirements and "disaster" not in requirements:
-            gaps.append(GapItem(
-                id="GAP-003",
-                description="Disaster recovery and backup requirements missing",
-                impact="Data loss risk in case of system failure",
-                recommendation="Define RPO/RTO targets and backup strategy",
-                priority=Priority.SHOULD_HAVE,
-            ))
+            gaps.append(
+                GapItem(
+                    id="GAP-003",
+                    description="Disaster recovery and backup requirements missing",
+                    impact="Data loss risk in case of system failure",
+                    recommendation="Define RPO/RTO targets and backup strategy",
+                    priority=Priority.SHOULD_HAVE,
+                )
+            )
 
         if "monitoring" not in requirements and "observability" not in requirements:
-            gaps.append(GapItem(
-                id="GAP-004",
-                description="No monitoring or observability requirements",
-                impact="Blind to production issues",
-                recommendation="Add logging, metrics, and alerting requirements",
-                priority=Priority.SHOULD_HAVE,
-            ))
+            gaps.append(
+                GapItem(
+                    id="GAP-004",
+                    description="No monitoring or observability requirements",
+                    impact="Blind to production issues",
+                    recommendation="Add logging, metrics, and alerting requirements",
+                    priority=Priority.SHOULD_HAVE,
+                )
+            )
 
         if "compliance" not in requirements and "regulatory" not in requirements:
-            gaps.append(GapItem(
-                id="GAP-005",
-                description="Compliance requirements not addressed",
-                impact="Legal and regulatory risk",
-                recommendation="Identify applicable regulations (GDPR, HIPAA, SOC2) and add requirements",
-                priority=Priority.COULD_HAVE,
-            ))
+            gaps.append(
+                GapItem(
+                    id="GAP-005",
+                    description="Compliance requirements not addressed",
+                    impact="Legal and regulatory risk",
+                    recommendation=(
+                        "Identify applicable regulations (GDPR, HIPAA, SOC2) and add requirements"
+                    ),
+                    priority=Priority.COULD_HAVE,
+                )
+            )
 
         return gaps
 

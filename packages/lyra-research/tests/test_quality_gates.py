@@ -1,4 +1,5 @@
 """Tests for quality gates and verification system."""
+
 from datetime import datetime, timezone
 
 import pytest
@@ -104,11 +105,15 @@ def test_discovery_gate_pass():
     gate = DiscoveryGate()
 
     # Create 15 sources with 4 different types
-    source_types = [SourceType.PAPER, SourceType.REPOSITORY, SourceType.BLOG, SourceType.DOCUMENTATION]
+    source_types = [
+        SourceType.PAPER,
+        SourceType.REPOSITORY,
+        SourceType.BLOG,
+        SourceType.DOCUMENTATION,
+    ]
     sources = [
         ResearchSource(
             id=f"src_{i}",
-
             title=f"Source {i}",
             url=f"https://example.com/{i}",
             source_type=source_types[i % 4],
@@ -130,7 +135,6 @@ def test_discovery_gate_fail_min_sources():
     sources = [
         ResearchSource(
             id=f"src_{i}",
-
             title=f"Source {i}",
             url=f"https://example.com/{i}",
             source_type=SourceType.PAPER,
@@ -152,7 +156,6 @@ def test_discovery_gate_fail_diversity():
     sources = [
         ResearchSource(
             id=f"src_{i}",
-
             title=f"Source {i}",
             url=f"https://example.com/{i}",
             source_type=SourceType.PAPER if i % 2 == 0 else SourceType.REPOSITORY,
@@ -171,11 +174,15 @@ def test_discovery_gate_fail_quality():
     gate = DiscoveryGate()
 
     # 15 sources with 4 types but low quality
-    source_types = [SourceType.PAPER, SourceType.REPOSITORY, SourceType.BLOG, SourceType.DOCUMENTATION]
+    source_types = [
+        SourceType.PAPER,
+        SourceType.REPOSITORY,
+        SourceType.BLOG,
+        SourceType.DOCUMENTATION,
+    ]
     sources = [
         ResearchSource(
             id=f"src_{i}",
-
             title=f"Source {i}",
             url=f"https://example.com/{i}",
             source_type=source_types[i % 4],
@@ -199,8 +206,8 @@ def test_analysis_gate_pass():
 
     # Create 10 analyses with good quality
     analyses = [
-        Analysis(source_id=f"src_{i}",
-
+        Analysis(
+            source_id=f"src_{i}",
             analysis_type="paper",
             quality_score=0.7,
             findings={"key": "value"},
@@ -218,8 +225,8 @@ def test_analysis_gate_fail_min_analyses():
 
     # Only 3 analyses (need 5)
     analyses = [
-        Analysis(source_id=f"src_{i}",
-
+        Analysis(
+            source_id=f"src_{i}",
             analysis_type="paper",
             quality_score=0.7,
             findings={},
@@ -238,8 +245,8 @@ def test_analysis_gate_fail_quality():
 
     # 10 analyses but low quality
     analyses = [
-        Analysis(source_id=f"src_{i}",
-
+        Analysis(
+            source_id=f"src_{i}",
             analysis_type="paper",
             quality_score=0.3,  # Below 0.5 threshold
             findings={},
@@ -257,8 +264,8 @@ def test_analysis_gate_fail_coverage():
 
     # 10 analyses but only 5 have quality scores
     analyses = [
-        Analysis(source_id=f"src_{i}",
-
+        Analysis(
+            source_id=f"src_{i}",
             analysis_type="paper",
             quality_score=0.7 if i < 5 else 0.0,  # Only 50% coverage (need 80%)
             findings={},
@@ -557,11 +564,15 @@ def test_gate_enforcer_pass():
     """Test gate enforcer with passing data."""
     enforcer = GateEnforcer()
 
-    source_types = [SourceType.PAPER, SourceType.REPOSITORY, SourceType.BLOG, SourceType.DOCUMENTATION]
+    source_types = [
+        SourceType.PAPER,
+        SourceType.REPOSITORY,
+        SourceType.BLOG,
+        SourceType.DOCUMENTATION,
+    ]
     sources = [
         ResearchSource(
             id=f"src_{i}",
-
             title=f"Source {i}",
             url=f"https://example.com/{i}",
             source_type=source_types[i % 4],
@@ -583,7 +594,6 @@ def test_gate_enforcer_reject():
     sources = [
         ResearchSource(
             id=f"src_{i}",
-
             title=f"Source {i}",
             url=f"https://example.com/{i}",
             source_type=SourceType.PAPER,
@@ -605,7 +615,6 @@ def test_gate_enforcer_retry():
     sources = [
         ResearchSource(
             id=f"src_{i}",
-
             title=f"Source {i}",
             url=f"https://example.com/{i}",
             source_type=SourceType.PAPER if i % 2 == 0 else SourceType.REPOSITORY,
@@ -627,7 +636,6 @@ def test_gate_enforcer_escalate():
     sources = [
         ResearchSource(
             id=f"src_{i}",
-
             title=f"Source {i}",
             url=f"https://example.com/{i}",
             source_type=SourceType.PAPER if i % 2 == 0 else SourceType.REPOSITORY,
@@ -658,11 +666,15 @@ def test_gate_enforcer_stats():
     enforcer = GateEnforcer()
 
     # Run some enforcements
-    source_types = [SourceType.PAPER, SourceType.REPOSITORY, SourceType.BLOG, SourceType.DOCUMENTATION]
+    source_types = [
+        SourceType.PAPER,
+        SourceType.REPOSITORY,
+        SourceType.BLOG,
+        SourceType.DOCUMENTATION,
+    ]
     sources = [
         ResearchSource(
             id=f"src_{i}",
-
             title=f"Source {i}",
             url=f"https://example.com/{i}",
             source_type=source_types[i % 4],
@@ -746,7 +758,6 @@ def test_verifier_accuracy_pass():
     sources = [
         ResearchSource(
             id=f"src_{i}",
-
             title=f"Source {i}",
             url=f"https://example.com/{i}",
             source_type=source_types[i % 3],
@@ -778,7 +789,6 @@ def test_verifier_accuracy_fail():
     sources = [
         ResearchSource(
             id=f"src_{i}",
-
             title=f"Source {i}",
             url=f"https://example.com/{i}",
             source_type=SourceType.PAPER,  # Only one type
@@ -853,7 +863,6 @@ def test_verifier_all():
     sources = [
         ResearchSource(
             id=f"src_{i}",
-
             title=f"Source {i}",
             url=f"https://example.com/{i}",
             source_type=source_types[i % 3],

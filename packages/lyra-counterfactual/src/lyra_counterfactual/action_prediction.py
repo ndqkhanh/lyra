@@ -29,7 +29,8 @@ class ActionConfig:
 
     Attributes:
         n_eval_samples: Number of Monte Carlo samples for outcome evaluation.
-        rank_by: Metric to rank actions by ("expected_value", "upper_ci", "lower_ci", "probability_improvement").
+        rank_by: Metric to rank actions by ("expected_value", "upper_ci", "lower_ci",
+        "probability_improvement").
         default_intervention_strength: Default intervention magnitude.
         random_seed: Seed for reproducibility.
     """
@@ -185,6 +186,7 @@ class ActionPredictor:
         std = float(np.std(outcome_samples))
 
         from scipy import stats
+
         ci_mult = stats.norm.ppf(0.975)
         ci_lower = expected - ci_mult * std / np.sqrt(n)
         ci_upper = expected + ci_mult * std / np.sqrt(n)
@@ -251,7 +253,11 @@ class ActionPredictor:
             pred = self.predict(intervention, target, action_name=name)
 
             # Calculate probability of improvement over baseline
-            if baseline_pred is not None and pred.outcome_samples is not None and baseline_pred.outcome_samples is not None:
+            if (
+                baseline_pred is not None
+                and pred.outcome_samples is not None
+                and baseline_pred.outcome_samples is not None
+            ):
                 # P(Y_action > Y_baseline)
                 prob_improvement = float(
                     np.mean(pred.outcome_samples > baseline_pred.outcome_samples)
@@ -298,15 +304,29 @@ class ActionPredictor:
 
         sort_key: Any
         if metric == "expected_value":
-            sort_key = lambda p: p.expected_value  # noqa: E731
+
+            def sort_key(p):
+                return p.expected_value  # noqa: E731
+
         elif metric == "upper_ci":
-            sort_key = lambda p: p.ci_upper  # noqa: E731
+
+            def sort_key(p):
+                return p.ci_upper  # noqa: E731
+
         elif metric == "lower_ci":
-            sort_key = lambda p: p.ci_lower  # noqa: E731
+
+            def sort_key(p):
+                return p.ci_lower  # noqa: E731
+
         elif metric == "probability_improvement":
-            sort_key = lambda p: p.probability_improvement  # noqa: E731
+
+            def sort_key(p):
+                return p.probability_improvement  # noqa: E731
+
         else:
-            sort_key = lambda p: p.expected_value  # noqa: E731
+
+            def sort_key(p):
+                return p.expected_value  # noqa: E731
 
         return sorted(predictions, key=sort_key, reverse=True)
 
@@ -378,11 +398,13 @@ class ActionPredictor:
         for combo in itertools.product(*value_lists):
             intervention = dict(zip(var_names, combo, strict=False))
             name = "do(" + ", ".join(f"{k}={v}" for k, v in intervention.items()) + ")"
-            specs.append({
-                "name": name,
-                "intervention": intervention,
-                "target": target_var,
-            })
+            specs.append(
+                {
+                    "name": name,
+                    "intervention": intervention,
+                    "target": target_var,
+                }
+            )
 
         return self.evaluate_actions(specs)
 
@@ -393,17 +415,12 @@ class ActionPredictor:
         if not intervention:
             raise ActionPredictionError("At least one intervention variable is required.")
 
-
         for var_name in intervention:
             if var_name not in self._scm.endogenous_vars:
-                raise ActionPredictionError(
-                    f"Intervention variable '{var_name}' not found in SCM."
-                )
+                raise ActionPredictionError(f"Intervention variable '{var_name}' not found in SCM.")
 
         if target_var not in self._scm.endogenous_vars:
-            raise ActionPredictionError(
-                f"Target variable '{target_var}' not found in SCM."
-            )
+            raise ActionPredictionError(f"Target variable '{target_var}' not found in SCM.")
 
     def __repr__(self) -> str:
         has_posterior = len(self._noise_posterior) > 0

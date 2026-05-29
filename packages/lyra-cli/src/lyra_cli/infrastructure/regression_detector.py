@@ -60,7 +60,7 @@ class MetricHistory:
             return 0.0
         m = self.mean
         variance = sum((x - m) ** 2 for x in self.values) / len(self.values)
-        return variance ** 0.5
+        return variance**0.5
 
     def add(self, value: float, max_items: int = 1000) -> None:
         self.values.append(value)
@@ -88,7 +88,9 @@ class RegressionDetector:
     def recent_events(self) -> list[RegressionEvent]:
         return list(self._events)
 
-    def record(self, metric: str, value: float, timestamp: float | None = None) -> RegressionEvent | None:
+    def record(
+        self, metric: str, value: float, timestamp: float | None = None
+    ) -> RegressionEvent | None:
         if metric not in self._history:
             self._history[metric] = MetricHistory()
 
@@ -120,7 +122,9 @@ class RegressionDetector:
         deviation = self._compute_deviation(value, hist.mean)
         return self._classify(deviation)
 
-    def compare(self, current: dict[str, float], _baseline_tag: str | None = None) -> list[RegressionEvent]:
+    def compare(
+        self, current: dict[str, float], _baseline_tag: str | None = None
+    ) -> list[RegressionEvent]:
         results: list[RegressionEvent] = []
         for metric, value in current.items():
             event = self.record(metric, value)
@@ -146,12 +150,12 @@ class RegressionDetector:
             "metrics_tracked": len(self._history),
             "total_events": len(self._events),
             "events_by_severity": {
-                s.value: sum(1 for e in self._events if e.severity == s)
-                for s in RegressionSeverity
+                s.value: sum(1 for e in self._events if e.severity == s) for s in RegressionSeverity
             },
             "baselines": {
                 name: {"count": h.count, "mean": round(h.mean, 4), "std": round(h.std, 4)}
-                for name, h in self._history.items() if h.count > 0
+                for name, h in self._history.items()
+                if h.count > 0
             },
         }
 

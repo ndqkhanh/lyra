@@ -98,7 +98,7 @@ def _git_log_recent(count: int = 5) -> list[str]:
             ["git", "log", "--format=%s", f"-{count}", "--"],
             capture_output=True, text=True, timeout=10,
         )
-        return [l.strip() for l in r.stdout.split("\n") if l.strip()]
+        return [line.strip() for line in r.stdout.split("\n") if line.strip()]
     except Exception:
         return []
 
@@ -120,7 +120,7 @@ def _generate_handoff(session: Any = None) -> HandoffContent:
     commits = _git_log_recent()
     diff_stat = _git_diff_stat()
 
-    files_changed = len([l for l in diff_stat.split("\n") if l.strip()]) if diff_stat else 0
+    files_changed = len([line for line in diff_stat.split("\n") if line.strip()]) if diff_stat else 0
 
     title = f"PR: {branch or 'current-branch'} — {commits[0] if commits else 'changeset'}"
 

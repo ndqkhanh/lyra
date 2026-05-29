@@ -16,6 +16,7 @@ from typing import Any
 
 class EditPass(Enum):
     """Editing pass types"""
+
     STRUCTURE = "structure"
     CLARITY = "clarity"
     ACCURACY = "accuracy"
@@ -26,6 +27,7 @@ class EditPass(Enum):
 @dataclass
 class EditResult:
     """Result from editing pass"""
+
     pass_type: EditPass
     changes_made: int
     issues_found: list[str]
@@ -185,12 +187,14 @@ class FivePassEditor:
             # Check structure
             if len(text) < 100:
                 issues.append("Text too short for proper structure")
-            if not any(marker in text for marker in ["Introduction", "Methods", "Results", "Conclusion"]):
+            if not any(
+                marker in text for marker in ["Introduction", "Methods", "Results", "Conclusion"]
+            ):
                 suggestions.append("Consider adding standard section headers")
 
         elif pass_type == EditPass.CLARITY:
             # Check clarity
-            avg_sentence_length = len(text.split()) / max(len(text.split('.')), 1)
+            avg_sentence_length = len(text.split()) / max(len(text.split(".")), 1)
             if avg_sentence_length > 25:
                 issues.append(f"Average sentence length too long: {avg_sentence_length:.1f} words")
                 suggestions.append("Break long sentences into shorter ones")
@@ -218,5 +222,5 @@ class FivePassEditor:
             changes_made=changes,
             issues_found=issues,
             suggestions=suggestions,
-            edited_text=text
+            edited_text=text,
         )

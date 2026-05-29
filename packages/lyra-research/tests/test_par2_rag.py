@@ -162,7 +162,10 @@ class TestResearchKG:
 
     def test_extract_entities(self):
         kg = ResearchKG("test")
-        text = "The Transformer Architecture was introduced by Google Research. BERT Model outperformed previous benchmarks."
+        text =(
+            "The Transformer Architecture was introduced by Google Research. BERT Model"
+            "outperformed previous benchmarks."
+        )
         entities = kg.extract_entities(text)
         assert len(entities) > 0
         names = {e.name for e in entities}
@@ -398,7 +401,9 @@ class TestSourceVerifier:
         sv = SourceVerifier()
         text = "Research demonstrates that BERT improves NLP."
         citations = {
-            "Research demonstrates that BERT improves NLP.": "BERT achieves new SOTA on NLP benchmarks."
+            "Research demonstrates that BERT improves NLP.":(
+                "BERT achieves new SOTA on NLP benchmarks."
+            )
         }
         report = sv.audit_document(text, citations=citations)
         assert report.total_claims == 1
@@ -439,7 +444,10 @@ class TestPerspectiveAgent:
 
     def test_analyze_produces_analysis(self):
         agent = PerspectiveAgent(PerspectiveType.OPTIMIST)
-        findings = "This breakthrough novel method achieves state-of-the-art performance and is highly scalable."
+        findings =(
+            "This breakthrough novel method achieves state-of-the-art performance and is highly"
+            "scalable."
+        )
         analysis = agent.analyze(findings)
         assert isinstance(analysis, PerspectiveAnalysis)
         assert analysis.perspective == PerspectiveType.OPTIMIST
@@ -507,7 +515,10 @@ class TestMultiPerspectiveSynthesizer:
     def test_debate(self):
         syn = MultiPerspectiveSynthesizer()
         topic = "attention mechanisms"
-        findings = "Transformer models with self-attention achieve state-of-the-art results on NLP benchmarks."
+        findings =(
+            "Transformer models with self-attention achieve state-of-the-art results on NLP"
+            "benchmarks."
+        )
         rounds = syn.debate(topic, findings, rounds=2)
         assert len(rounds) == 2
         for r in rounds:
@@ -584,9 +595,7 @@ class TestResearchPlan:
         assert plan.created_at != ""
 
     def test_topic_count_multiple(self):
-        subtopics = tuple(
-            Subtopic(id=f"s{i}", title=f"T{i}") for i in range(5)
-        )
+        subtopics = tuple(Subtopic(id=f"s{i}", title=f"T{i}") for i in range(5))
         plan = ResearchPlan(id="p2", query="q", depth=2, subtopics=subtopics)
         assert plan.topic_count == 5
 

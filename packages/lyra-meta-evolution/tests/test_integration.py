@@ -130,7 +130,9 @@ class TestFullPipeline:
 
     def test_full_orchestrator_mini_pipeline(self):
         """Run a minimal orchestrator pipeline."""
-        config = __import__("lyra_meta_evolution.orchestrator", fromlist=["CycleConfig"]).CycleConfig(
+        config = __import__(
+            "lyra_meta_evolution.orchestrator", fromlist=["CycleConfig"]
+        ).CycleConfig(
             max_cycles=3,
             cycles_per_level={
                 EvolutionLevel.L1_PARAMETER: 2,
@@ -155,28 +157,43 @@ class TestFullPipeline:
         pf = ParetoFrontier()
 
         # Speed-favoring solution
-        pf.add("fast", ObjectiveVector(values={
-            ObjectiveDimension.SPEED: 0.9,
-            ObjectiveDimension.QUALITY: 0.4,
-            ObjectiveDimension.COST: 0.6,
-        }))
+        pf.add(
+            "fast",
+            ObjectiveVector(
+                values={
+                    ObjectiveDimension.SPEED: 0.9,
+                    ObjectiveDimension.QUALITY: 0.4,
+                    ObjectiveDimension.COST: 0.6,
+                }
+            ),
+        )
 
         # Quality-favoring solution (different trade-off)
-        pf.add("quality", ObjectiveVector(values={
-            ObjectiveDimension.SPEED: 0.4,
-            ObjectiveDimension.QUALITY: 0.9,
-            ObjectiveDimension.COST: 0.3,
-        }))
+        pf.add(
+            "quality",
+            ObjectiveVector(
+                values={
+                    ObjectiveDimension.SPEED: 0.4,
+                    ObjectiveDimension.QUALITY: 0.9,
+                    ObjectiveDimension.COST: 0.3,
+                }
+            ),
+        )
 
         # Should have 2 solutions (neither dominates the other)
         assert pf.size == 2
 
         # A clearly dominated solution should not be added
-        pf.add("dominated", ObjectiveVector(values={
-            ObjectiveDimension.SPEED: 0.3,
-            ObjectiveDimension.QUALITY: 0.3,
-            ObjectiveDimension.COST: 0.2,
-        }))
+        pf.add(
+            "dominated",
+            ObjectiveVector(
+                values={
+                    ObjectiveDimension.SPEED: 0.3,
+                    ObjectiveDimension.QUALITY: 0.3,
+                    ObjectiveDimension.COST: 0.2,
+                }
+            ),
+        )
         # Either dominated or added (depends on overall objective values)
         assert pf.size >= 2
 

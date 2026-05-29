@@ -16,6 +16,7 @@ Five default query types cover the canon:
 Subclasses or alternative classifiers (LLM-backed, fine-tuned) plug in via
 the :class:`Classifier` Protocol.
 """
+
 from __future__ import annotations
 
 import enum
@@ -193,7 +194,10 @@ class BELLERouter:
                 query=decision.query,
                 query_type=QueryType.SINGLE_HOP,
                 confidence=decision.confidence,
-                reason=f"low confidence ({decision.confidence:.2f}); fell back from {decision.query_type.value}",
+                reason=(
+                    f"low confidence ({decision.confidence:.2f}); fell back from "
+                    f"{decision.query_type.value}"
+                ),
                 suggested_operators=("direct_retrieve",),
             )
         return decision

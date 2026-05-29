@@ -25,7 +25,8 @@ class _FakeHttp:
             text = json.dumps(payload)
             def json(self): return payload
             def raise_for_status(self):
-                if code >= 400: raise RuntimeError(f"HTTP {code}")
+                if code >= 400:
+                    raise RuntimeError(f"HTTP {code}")
         return R()
 
 

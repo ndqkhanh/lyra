@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Union
 
 import numpy as np
 
@@ -64,9 +63,9 @@ class SequentialResult:
     stage_names: tuple[str, ...]
 
 
-CollaborationResult = Union[
-    MixtureResult, DeliberationResult, DistillationResult, SequentialResult
-]
+CollaborationResult = (
+    MixtureResult | DeliberationResult | DistillationResult | SequentialResult
+)
 
 
 def convergence_check(prev: LatentVector, current: LatentVector) -> bool:

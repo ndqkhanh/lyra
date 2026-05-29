@@ -28,7 +28,9 @@ from lyra_core.collective import (
 # ── Helpers ────────────────────────────────────────────────────────────
 
 
-def _hypothesis(id: str, statement: str, proposed_by: str = "agent-1", test_criteria: str = "") -> Hypothesis:
+def _hypothesis(
+    id: str, statement: str, proposed_by: str = "agent-1", test_criteria: str = ""
+) -> Hypothesis:
     return Hypothesis(
         id=id,
         statement=statement,
@@ -37,7 +39,9 @@ def _hypothesis(id: str, statement: str, proposed_by: str = "agent-1", test_crit
     )
 
 
-def _post(id: str, author: str, kind: PostKind, content: str, thread_id: str | None = None) -> ForumPost:
+def _post(
+    id: str, author: str, kind: PostKind, content: str, thread_id: str | None = None
+) -> ForumPost:
     return ForumPost(id=id, author_id=author, kind=kind, content=content, thread_id=thread_id)
 
 
@@ -60,8 +64,10 @@ class TestHypothesisDrivenResearch:
     def test_propose_hypothesis_blocked_by_dead_end(self):
         state = CollectiveState()
         dead = DeadEndEntry(
-            id="de1", hypothesis="Transformer attention patterns are learnable",
-            approach="standard analysis", failure_reason="already disproven",
+            id="de1",
+            hypothesis="Transformer attention patterns are learnable",
+            approach="standard analysis",
+            failure_reason="already disproven",
             discovered_by="agent-2",
         )
         state.dead_ends.register(dead)
@@ -74,8 +80,12 @@ class TestHypothesisDrivenResearch:
         state = CollectiveState()
         forum = state.forum
         thread = forum.create_thread("t1", "Test topic", hypothesis="H1")
-        obs = _post("p1", "research-agent", PostKind.OBSERVATION,
-                     "Experiment shows attention patterns ARE learnable")
+        obs = _post(
+            "p1",
+            "research-agent",
+            PostKind.OBSERVATION,
+            "Experiment shows attention patterns ARE learnable",
+        )
         assert forum.post("t1", obs) is True
 
         thread = forum.get_thread("t1")
@@ -87,8 +97,12 @@ class TestHypothesisDrivenResearch:
         state = CollectiveState()
         h = _hypothesis("h1", "All models overfit with small data")
         state.propose_hypothesis(h, champion_id="agent-1")
-        state.verify_hypothesis("h1", "Disproven: only some architectures overfit",
-                                verified=False, verifier_id="agent-2")
+        state.verify_hypothesis(
+            "h1",
+            "Disproven: only some architectures overfit",
+            verified=False,
+            verifier_id="agent-2",
+        )
 
         assert state.hypotheses["h1"].status == "falsified"
         assert state.dead_ends.entry_count == 1
@@ -99,8 +113,9 @@ class TestHypothesisDrivenResearch:
         state = CollectiveState()
         h = _hypothesis("h1", "Valid finding")
         state.propose_hypothesis(h, champion_id="agent-1")
-        state.verify_hypothesis("h1", "Confirmed by experiment",
-                                verified=True, verifier_id="agent-2")
+        state.verify_hypothesis(
+            "h1", "Confirmed by experiment", verified=True, verifier_id="agent-2"
+        )
         assert state.hypotheses["h1"].status == "verified"
         assert state.dead_ends.entry_count == 0  # No dead-end for verified
 
@@ -128,14 +143,22 @@ class TestHypothesisDrivenResearch:
         thread = state.forum.create_thread("t-critique", "Critique of finding X")
 
         # Team A posts a proposal
-        state.forum.post("t-critique", _post("p1", "team-a", PostKind.PROPOSAL,
-                                              "Finding: attention heads specialize"))
+        state.forum.post(
+            "t-critique",
+            _post("p1", "team-a", PostKind.PROPOSAL, "Finding: attention heads specialize"),
+        )
         # Team B posts a critique
-        state.forum.post("t-critique", _post("p2", "team-b", PostKind.CRITIQUE,
-                                              "Counter: specialization is task-dependent"))
+        state.forum.post(
+            "t-critique",
+            _post("p2", "team-b", PostKind.CRITIQUE, "Counter: specialization is task-dependent"),
+        )
         # Resolution post
-        state.forum.post("t-critique", _post("p3", "arbitrator", PostKind.RESOLUTION,
-                                              "Both partially correct; context matters"))
+        state.forum.post(
+            "t-critique",
+            _post(
+                "p3", "arbitrator", PostKind.RESOLUTION, "Both partially correct; context matters"
+            ),
+        )
 
         thread = state.forum.get_thread("t-critique")
         assert thread is not None
@@ -206,7 +229,9 @@ class TestAutoScientistsFullCycle:
         assert thread_id is not None
         state.forum.post(thread_id, _post("p1", "agent-1", PostKind.PROPOSAL, "Let's test this"))
         state.forum.post(thread_id, _post("p2", "agent-2", PostKind.SUPPORT, "Agreed"))
-        state.forum.post(thread_id, _post("p3", "agent-3", PostKind.CRITIQUE, "Check different architectures"))
+        state.forum.post(
+            thread_id, _post("p3", "agent-3", PostKind.CRITIQUE, "Check different architectures")
+        )
 
         # Cast votes to generate consensus signal
         thread = state.forum.get_thread(thread_id)
@@ -215,13 +240,15 @@ class TestAutoScientistsFullCycle:
         thread.vote("p2", "agent-2", 1)
         thread.vote("p3", "agent-3", -1)
         assert thread.post_count == 3
-        # With 3 participants × 3 posts = 9 max votes, total votes = 1+1-1 = 1, ratio = 1/9 ≈ 0.11 → WEAK
+        # With 3 participants × 3 posts = 9 max votes, total votes = 1+1-1 = 1, ratio = 1/9 ≈
         assert thread.consensus in (ConsensusLevel.WEAK, ConsensusLevel.NONE)
 
         # Execute phase
         team.status = "working"
         team.complete_cycle()
-        state.verify_hypothesis("h1", "Confirmed: larger batches help", verified=True, verifier_id="agent-1")
+        state.verify_hypothesis(
+            "h1", "Confirmed: larger batches help", verified=True, verifier_id="agent-1"
+        )
 
         assert state.hypotheses["h1"].status == "verified"
         assert team.cycles_completed == 1

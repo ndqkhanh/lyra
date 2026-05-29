@@ -47,7 +47,7 @@ def test_research_command():
                 if "Research complete" in line or "Report" in line or "Sources analyzed" in line:
                     print("\n✓ Research completed!")
                     break
-        except:
+        except Exception:
             break
 
     # Send exit command

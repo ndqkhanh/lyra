@@ -71,8 +71,12 @@ class ExperimentRegistry:
         self._counter = 0
 
     def create_experiment(
-        self, name: str, control: AgentConfig, variant: AgentConfig,
-        traffic_split: float = 0.1, metrics: list[Metric] | None = None
+        self,
+        name: str,
+        control: AgentConfig,
+        variant: AgentConfig,
+        traffic_split: float = 0.1,
+        metrics: list[Metric] | None = None,
     ) -> AgentExperiment:
         self._counter += 1
         exp = AgentExperiment(
@@ -134,7 +138,11 @@ class ExperimentRegistry:
                 "mean": variant_mean,
             },
             "improvement": (variant_mean - control_mean) if control_mean is not None else None,
-            "winner": "variant" if variant_mean and control_mean and variant_mean > control_mean else "control",
+            "winner": (
+                "variant"
+                if variant_mean and control_mean and variant_mean > control_mean
+                else "control"
+            ),
         }
 
     def promote_variant(self, experiment_id: str) -> AgentConfig | None:
@@ -156,6 +164,10 @@ class ExperimentRegistry:
     def summary(self) -> dict[str, Any]:
         return {
             "total": len(self.experiments),
-            "running": sum(1 for e in self.experiments.values() if e.status == ExperimentStatus.RUNNING),
-            "completed": sum(1 for e in self.experiments.values() if e.status == ExperimentStatus.COMPLETED),
+            "running": sum(
+                1 for e in self.experiments.values() if e.status == ExperimentStatus.RUNNING
+            ),
+            "completed": sum(
+                1 for e in self.experiments.values() if e.status == ExperimentStatus.COMPLETED
+            ),
         }

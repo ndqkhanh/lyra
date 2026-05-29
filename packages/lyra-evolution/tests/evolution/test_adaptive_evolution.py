@@ -325,7 +325,7 @@ class TestIntegration:
         engine.initialize(baseline)
 
         # Run 20 generations with adaptive mutation
-        for gen in range(20):
+        for _gen in range(20):
             new_nodes = engine.explore_generation_adaptive(n_mutations=15)
             assert len(new_nodes) > 0
 

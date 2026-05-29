@@ -2,7 +2,6 @@
 Tests for specialized skills
 """
 
-
 import pytest
 from lyra_cli.skills.specialized import (
     get_registry,
@@ -35,6 +34,7 @@ from lyra_cli.skills.specialized.test_generator import TestGeneratorSkill
 # =========================================================================
 # Existing Registry Tests
 # =========================================================================
+
 
 class TestSpecializedSkills:
     """Test specialized skills registry."""
@@ -121,10 +121,14 @@ class TestSpecializedSkills:
             assert skill.description, f"Skill {skill.name} missing description"
             assert skill.tags, f"Skill {skill.name} missing tags"
             assert skill.triggers, f"Skill {skill.name} missing triggers"
-            assert skill.model in ["haiku", "sonnet", "opus"], \
-                f"Skill {skill.name} has invalid model: {skill.model}"
-            assert skill.file_path.exists(), \
-                f"Skill {skill.name} file does not exist: {skill.file_path}"
+            assert skill.model in [
+                "haiku",
+                "sonnet",
+                "opus",
+            ], f"Skill {skill.name} has invalid model: {skill.model}"
+            assert (
+                skill.file_path.exists()
+            ), f"Skill {skill.name} file does not exist: {skill.file_path}"
 
     def test_skill_file_structure(self):
         """Test that skill files have proper structure."""
@@ -134,16 +138,15 @@ class TestSpecializedSkills:
             content = skill.file_path.read_text()
 
             # Check for YAML frontmatter
-            assert content.startswith("---"), \
-                f"Skill {skill.name} missing YAML frontmatter"
+            assert content.startswith("---"), f"Skill {skill.name} missing YAML frontmatter"
 
             # Check for required sections
-            assert "# " in content, \
-                f"Skill {skill.name} missing main heading"
+            assert "# " in content, f"Skill {skill.name} missing main heading"
 
             # Check for core competencies section
-            assert "Core Competencies" in content or "Competencies" in content, \
-                f"Skill {skill.name} missing competencies section"
+            assert (
+                "Core Competencies" in content or "Competencies" in content
+            ), f"Skill {skill.name} missing competencies section"
 
     def test_no_duplicate_skills(self):
         """Test that there are no duplicate skill names."""
@@ -162,8 +165,9 @@ class TestSpecializedSkills:
         for trigger in all_triggers:
             matches = search_skills(trigger)
             # Each trigger should match at most 3 skills
-            assert len(matches) <= 3, \
-                f"Trigger '{trigger}' matches too many skills: {[s.name for s in matches]}"
+            assert (
+                len(matches) <= 3
+            ), f"Trigger '{trigger}' matches too many skills: {[s.name for s in matches]}"
 
 
 class TestSkillIntegration:
@@ -202,8 +206,7 @@ class TestSkillIntegration:
         skill_names = [s.skill_name for s in result.selected_skills]
         # Check that at least one backend-related skill is selected
         backend_related = any(
-            "backend" in name or "api" in name or "fullstack" in name
-            for name in skill_names
+            "backend" in name or "api" in name or "fullstack" in name for name in skill_names
         )
         assert backend_related, f"No backend-related skills found in: {skill_names}"
 
@@ -299,10 +302,7 @@ class TestCodeReviewerSkill:
         result = skill.run({"source": GOOD_CODE})
         assert "findings" in result
         # Good code should have minimal or no findings
-        critical_high = [
-            f for f in result["findings"]
-            if f["severity"] in ("CRITICAL", "HIGH")
-        ]
+        critical_high = [f for f in result["findings"] if f["severity"] in ("CRITICAL", "HIGH")]
         assert len(critical_high) == 0
 
     def test_bare_except_detected(self):
@@ -453,10 +453,12 @@ class TestTestGeneratorSkill:
 
     def test_specific_function_filter(self):
         skill = TestGeneratorSkill()
-        result = skill.run({
-            "source": FUNCTION_SOURCE,
-            "function_names": ["add"],
-        })
+        result = skill.run(
+            {
+                "source": FUNCTION_SOURCE,
+                "function_names": ["add"],
+            }
+        )
         assert len(result["tests"]) == 1
         assert result["tests"][0]["function_name"] == "add"
 
@@ -518,10 +520,7 @@ class TestRefactoringAdvisorSkill:
         result = skill.run({"source": SIMPLE_CODE})
         # Short functions should have minimal suggestions
         if "suggestions" in result:
-            extract_methods = [
-                s for s in result["suggestions"]
-                if s["type"] == "extract_method"
-            ]
+            extract_methods = [s for s in result["suggestions"] if s["type"] == "extract_method"]
             assert len(extract_methods) == 0
 
     def test_complex_code_produces_suggestions(self):
@@ -595,11 +594,13 @@ class TestDocumentationWriterSkill:
 
     def test_generates_readme_section(self):
         skill = DocumentationWriterSkill()
-        result = skill.run({
-            "source": UNDOCUMENTED,
-            "module_name": "testmod",
-            "output_format": "readme",
-        })
+        result = skill.run(
+            {
+                "source": UNDOCUMENTED,
+                "module_name": "testmod",
+                "output_format": "readme",
+            }
+        )
         assert "readme_section" in result
         assert "Functions" in result["readme_section"]
         assert "calculate" in result["readme_section"]
@@ -659,8 +660,14 @@ class TestPerformanceProfilerSkill:
         for r in result["results"]:
             assert "estimated_complexity" in r
             assert r["estimated_complexity"] in (
-                "O(1)", "O(log n)", "O(n)", "O(n log n)",
-                "O(n^2)", "O(n^3)", "O(2^n)", "O(?)"
+                "O(1)",
+                "O(log n)",
+                "O(n)",
+                "O(n log n)",
+                "O(n^2)",
+                "O(n^3)",
+                "O(2^n)",
+                "O(?)",
             )
 
     def test_profile_report_structure(self):
@@ -728,19 +735,22 @@ class TestDependencyAnalyzerSkill:
 
     def test_suggestions_generated(self):
         skill = DependencyAnalyzerSkill()
-        result = skill.run({
-            "source": LOCAL_IMPORTS,
-            "all_sources": {
-                "mod_a": "import os\nfrom lyra_cli.skills import skill_curator",
-                "mod_b": "import json\nfrom lyra_cli.skills import skill_curator",
-            },
-        })
+        result = skill.run(
+            {
+                "source": LOCAL_IMPORTS,
+                "all_sources": {
+                    "mod_a": "import os\nfrom lyra_cli.skills import skill_curator",
+                    "mod_b": "import json\nfrom lyra_cli.skills import skill_curator",
+                },
+            }
+        )
         assert "suggestions" in result
 
 
 # =========================================================================
 # SRE Incident Responder Skill Tests
 # =========================================================================
+
 
 class TestSREIncidentResponder:
     """Tests for the SREIncidentResponder."""
@@ -752,44 +762,59 @@ class TestSREIncidentResponder:
 
     def test_sev1_classification(self):
         skill = SREIncidentResponder()
-        result = skill.run({
-            "incident_description": "Production is completely down. All users affected. Critical outage in progress.",
-        })
+        result = skill.run(
+            {
+                "incident_description":(
+                    "Production is completely down. All users affected. Critical outage in"
+                    "progress."
+                ),
+            }
+        )
         assert result["severity"] == "SEV1"
         assert "impact" in result
         assert result["impact"]["affected_users_percentage"] == "100%"
 
     def test_sev3_classification(self):
         skill = SREIncidentResponder()
-        result = skill.run({
-            "incident_description": "Minor cosmetic issue on settings page for single user.",
-        })
+        result = skill.run(
+            {
+                "incident_description": "Minor cosmetic issue on settings page for single user.",
+            }
+        )
         assert result["severity"] == "SEV3"
 
     def test_runbook_generated(self):
         skill = SREIncidentResponder()
-        result = skill.run({
-            "incident_description": "Database connection pool exhausted. High error rates on API.",
-            "environment": "production",
-            "incident_title": "DB Connection Exhaustion",
-        })
+        result = skill.run(
+            {
+                "incident_description":(
+                    "Database connection pool exhausted. High error rates on API."
+                ),
+                "environment": "production",
+                "incident_title": "DB Connection Exhaustion",
+            }
+        )
         assert "runbook" in result
         assert len(result["runbook"]["steps"]) > 0
         assert result["runbook"]["owner_team"] == "SRE Team (on-call)"
 
     def test_escalation_path_present(self):
         skill = SREIncidentResponder()
-        result = skill.run({
-            "incident_description": "Security breach detected in authentication service.",
-        })
+        result = skill.run(
+            {
+                "incident_description": "Security breach detected in authentication service.",
+            }
+        )
         assert "escalation_path" in result
         assert len(result["escalation_path"]) >= 2
 
     def test_post_mortem_template(self):
         skill = SREIncidentResponder()
-        result = skill.run({
-            "incident_description": "Cache cluster failure caused increased latency.",
-        })
+        result = skill.run(
+            {
+                "incident_description": "Cache cluster failure caused increased latency.",
+            }
+        )
         assert "post_mortem_template" in result
         assert "Root Cause Analysis" in result["post_mortem_template"]["root_cause_section"]
 
@@ -797,6 +822,7 @@ class TestSREIncidentResponder:
 # =========================================================================
 # Cloud Architect Skill Tests
 # =========================================================================
+
 
 class TestCloudArchitect:
     """Tests for the CloudArchitect."""
@@ -808,38 +834,51 @@ class TestCloudArchitect:
 
     def test_basic_architecture(self):
         skill = CloudArchitect()
-        result = skill.run({
-            "requirements": "Need a web application with database storage and user authentication.",
-            "project_name": "MyApp",
-            "provider": "AWS",
-        })
+        result = skill.run(
+            {
+                "requirements":(
+                    "Need a web application with database storage and user authentication."
+                ),
+                "project_name": "MyApp",
+                "provider": "AWS",
+            }
+        )
         assert result["title"] == "MyApp"
         assert len(result["components"]) >= 3
         assert any("auth" in c["name"] for c in result["components"])
 
     def test_gcp_provider(self):
         skill = CloudArchitect()
-        result = skill.run({
-            "requirements": "Global application with CDN and caching.",
-            "provider": "GCP",
-        })
+        result = skill.run(
+            {
+                "requirements": "Global application with CDN and caching.",
+                "provider": "GCP",
+            }
+        )
         assert result["provider"] == "GCP"
         assert any("cdn" in c["name"].lower() for c in result["components"])
 
     def test_cost_breakdown(self):
         skill = CloudArchitect()
-        result = skill.run({
-            "requirements": "Simple API service with database.",
-            "budget_monthly": "5000",
-        })
+        result = skill.run(
+            {
+                "requirements": "Simple API service with database.",
+                "budget_monthly": "5000",
+            }
+        )
         assert "cost" in result
         assert result["cost"]["currency"] == "USD"
 
     def test_high_availability_design(self):
         skill = CloudArchitect()
-        result = skill.run({
-            "requirements": "System requires high availability and disaster recovery with multi-region support.",
-        })
+        result = skill.run(
+            {
+                "requirements":(
+                    "System requires high availability and disaster recovery with multi-region"
+                    "support."
+                ),
+            }
+        )
         assert result["availability"]["multi_az"] is True
         assert result["availability"]["multi_region"] is True
         assert "99.99" in result["availability"]["sla_percentage"]
@@ -848,6 +887,7 @@ class TestCloudArchitect:
 # =========================================================================
 # Solution Architect Skill Tests
 # =========================================================================
+
 
 class TestSolutionArchitect:
     """Tests for the SolutionArchitect."""
@@ -859,10 +899,14 @@ class TestSolutionArchitect:
 
     def test_basic_solution_architecture(self):
         skill = SolutionArchitect()
-        result = skill.run({
-            "requirements": "Build a scalable e-commerce platform with real-time inventory updates.",
-            "project_name": "E-Commerce Platform",
-        })
+        result = skill.run(
+            {
+                "requirements":(
+                    "Build a scalable e-commerce platform with real-time inventory updates."
+                ),
+                "project_name": "E-Commerce Platform",
+            }
+        )
         assert result["title"] == "E-Commerce Platform"
         assert len(result["components"]) >= 3
         assert "trade_offs" in result
@@ -870,27 +914,33 @@ class TestSolutionArchitect:
 
     def test_trade_off_analysis(self):
         skill = SolutionArchitect()
-        result = skill.run({
-            "requirements": "Financial transaction processing system.",
-        })
+        result = skill.run(
+            {
+                "requirements": "Financial transaction processing system.",
+            }
+        )
         # Financial systems should prefer CP
         cap_decision = next(t for t in result["trade_offs"] if "CAP" in t["title"])
         assert cap_decision["chosen"] == "CP"
 
     def test_sequence_diagrams(self):
         skill = SolutionArchitect()
-        result = skill.run({
-            "requirements": "Build a REST API with external integrations.",
-        })
+        result = skill.run(
+            {
+                "requirements": "Build a REST API with external integrations.",
+            }
+        )
         assert "sequence_diagrams" in result
         assert "main_request_flow" in result["sequence_diagrams"]
         assert "error_handling_flow" in result["sequence_diagrams"]
 
     def test_tech_stack(self):
         skill = SolutionArchitect()
-        result = skill.run({
-            "requirements": "Build a web application with ML capabilities.",
-        })
+        result = skill.run(
+            {
+                "requirements": "Build a web application with ML capabilities.",
+            }
+        )
         layers = [t["layer"] for t in result["tech_stack"]]
         assert "ML/AI" in layers
 
@@ -898,6 +948,7 @@ class TestSolutionArchitect:
 # =========================================================================
 # PM Planner Skill Tests
 # =========================================================================
+
 
 class TestPMPlanner:
     """Tests for the PMPlanner."""
@@ -909,27 +960,33 @@ class TestPMPlanner:
 
     def test_wbs_generated(self):
         skill = PMPlanner()
-        result = skill.run({
-            "project_description": "Build a new SaaS product with team of 5 engineers.",
-            "project_name": "SaaS Product",
-        })
+        result = skill.run(
+            {
+                "project_description": "Build a new SaaS product with team of 5 engineers.",
+                "project_name": "SaaS Product",
+            }
+        )
         assert "wbs" in result
         assert len(result["wbs"]["phases"]) >= 3
         assert result["wbs"]["total_estimated_hours"] > 0
 
     def test_milestones_created(self):
         skill = PMPlanner()
-        result = skill.run({
-            "project_description": "Develop a mobile app with backend API.",
-        })
+        result = skill.run(
+            {
+                "project_description": "Develop a mobile app with backend API.",
+            }
+        )
         assert "milestones" in result
         assert len(result["milestones"]) >= 4
 
     def test_risk_register(self):
         skill = PMPlanner()
-        result = skill.run({
-            "project_description": "Build a system requiring security and compliance.",
-        })
+        result = skill.run(
+            {
+                "project_description": "Build a system requiring security and compliance.",
+            }
+        )
         assert "risk_register" in result
         risks = result["risk_register"]
         categories = {r["category"] for r in risks}
@@ -937,10 +994,12 @@ class TestPMPlanner:
 
     def test_stakeholder_analysis(self):
         skill = PMPlanner()
-        result = skill.run({
-            "project_description": "Enterprise system with multiple teams.",
-            "team_size": 8,
-        })
+        result = skill.run(
+            {
+                "project_description": "Enterprise system with multiple teams.",
+                "team_size": 8,
+            }
+        )
         assert "stakeholders" in result
         assert len(result["stakeholders"]) >= 4
 
@@ -948,6 +1007,7 @@ class TestPMPlanner:
 # =========================================================================
 # BA Analyzer Skill Tests
 # =========================================================================
+
 
 class TestBAAnalyzer:
     """Tests for the BAAnalyzer."""
@@ -959,28 +1019,37 @@ class TestBAAnalyzer:
 
     def test_use_cases_generated(self):
         skill = BAAnalyzer()
-        result = skill.run({
-            "requirements": "Users need to log in and manage their data securely.",
-            "project_name": "User Portal",
-        })
+        result = skill.run(
+            {
+                "requirements": "Users need to log in and manage their data securely.",
+                "project_name": "User Portal",
+            }
+        )
         assert result["title"] == "User Portal"
         assert "use_cases" in result
         assert len(result["use_cases"]) >= 1
 
     def test_user_stories(self):
         skill = BAAnalyzer()
-        result = skill.run({
-            "requirements": "Build a notification system with email alerts.",
-        })
+        result = skill.run(
+            {
+                "requirements": "Build a notification system with email alerts.",
+            }
+        )
         assert "user_stories" in result
         stories = result["user_stories"]
-        assert any("notification" in s["i_want"].lower() or "notify" in s["i_want"].lower() for s in stories)
+        assert any(
+            "notification" in s["i_want"].lower() or "notify" in s["i_want"].lower()
+            for s in stories
+        )
 
     def test_functional_and_non_functional(self):
         skill = BAAnalyzer()
-        result = skill.run({
-            "requirements": "Build a reliable and secure system.",
-        })
+        result = skill.run(
+            {
+                "requirements": "Build a reliable and secure system.",
+            }
+        )
         assert "functional_reqs" in result
         assert len(result["functional_reqs"]) >= 3
         assert "non_functional_reqs" in result
@@ -988,9 +1057,11 @@ class TestBAAnalyzer:
 
     def test_gap_analysis(self):
         skill = BAAnalyzer()
-        result = skill.run({
-            "requirements": "Basic CRUD operations.",
-        })
+        result = skill.run(
+            {
+                "requirements": "Basic CRUD operations.",
+            }
+        )
         assert "gaps" in result
         # Should flag missing performance/security requirements
         assert len(result["gaps"]) >= 2
@@ -999,6 +1070,7 @@ class TestBAAnalyzer:
 # =========================================================================
 # Brainstorm Facilitator Skill Tests
 # =========================================================================
+
 
 class TestBrainstormFacilitator:
     """Tests for the BrainstormFacilitator."""
@@ -1010,20 +1082,24 @@ class TestBrainstormFacilitator:
 
     def test_scamper_method(self):
         skill = BrainstormFacilitator()
-        result = skill.run({
-            "topic": "Improve our mobile app onboarding experience",
-            "method": "SCAMPER",
-        })
+        result = skill.run(
+            {
+                "topic": "Improve our mobile app onboarding experience",
+                "method": "SCAMPER",
+            }
+        )
         assert result["method"] == "SCAMPER"
         assert "ideas" in result
         assert len(result["top_ideas"]) > 0
 
     def test_six_hats_method(self):
         skill = BrainstormFacilitator()
-        result = skill.run({
-            "topic": "New feature prioritization",
-            "method": "six_thinking_hats",
-        })
+        result = skill.run(
+            {
+                "topic": "New feature prioritization",
+                "method": "six_thinking_hats",
+            }
+        )
         assert result["method"] == "six_thinking_hats"
         assert "hats" in result["ideas"]
         colors = {h["hat_color"] for h in result["ideas"]["hats"]}
@@ -1033,19 +1109,23 @@ class TestBrainstormFacilitator:
 
     def test_random_stimulus(self):
         skill = BrainstormFacilitator()
-        result = skill.run({
-            "topic": "Improve team collaboration",
-            "method": "random_stimulus",
-        })
+        result = skill.run(
+            {
+                "topic": "Improve team collaboration",
+                "method": "random_stimulus",
+            }
+        )
         assert result["method"] == "random_stimulus"
         assert "stimulus_ideas" in result["ideas"]
 
     def test_reverse_brainstorming(self):
         skill = BrainstormFacilitator()
-        result = skill.run({
-            "topic": "Reduce customer churn",
-            "method": "reverse_brainstorming",
-        })
+        result = skill.run(
+            {
+                "topic": "Reduce customer churn",
+                "method": "reverse_brainstorming",
+            }
+        )
         assert result["method"] == "reverse_brainstorming"
         assert "reverse_ideas" in result["ideas"]
 
@@ -1053,6 +1133,7 @@ class TestBrainstormFacilitator:
 # =========================================================================
 # Data Engineer Skill Tests
 # =========================================================================
+
 
 class TestDataEngineer:
     """Tests for the DataEngineer."""
@@ -1064,26 +1145,32 @@ class TestDataEngineer:
 
     def test_pipeline_design(self):
         skill = DataEngineer()
-        result = skill.run({
-            "requirements": "Build a data pipeline for analytics with batch processing.",
-            "project_name": "Analytics Pipeline",
-        })
+        result = skill.run(
+            {
+                "requirements": "Build a data pipeline for analytics with batch processing.",
+                "project_name": "Analytics Pipeline",
+            }
+        )
         assert "pipeline" in result
         assert result["pipeline"]["mode"] == "batch"
         assert len(result["pipeline"]["steps"]) >= 3
 
     def test_streaming_pipeline(self):
         skill = DataEngineer()
-        result = skill.run({
-            "requirements": "Real-time streaming data from Kafka with low latency.",
-        })
+        result = skill.run(
+            {
+                "requirements": "Real-time streaming data from Kafka with low latency.",
+            }
+        )
         assert result["pipeline"]["mode"] == "streaming"
 
     def test_data_model(self):
         skill = DataEngineer()
-        result = skill.run({
-            "requirements": "Design star schema for e-commerce analytics.",
-        })
+        result = skill.run(
+            {
+                "requirements": "Design star schema for e-commerce analytics.",
+            }
+        )
         assert "data_model" in result
         model = result["data_model"]
         assert model["schema_type"] == "star_schema"
@@ -1092,9 +1179,11 @@ class TestDataEngineer:
 
     def test_quality_checks(self):
         skill = DataEngineer()
-        result = skill.run({
-            "requirements": "Need robust data quality monitoring.",
-        })
+        result = skill.run(
+            {
+                "requirements": "Need robust data quality monitoring.",
+            }
+        )
         assert "quality_checks" in result
         assert len(result["quality_checks"]) >= 4
 
@@ -1102,6 +1191,7 @@ class TestDataEngineer:
 # =========================================================================
 # AI Researcher Skill Tests
 # =========================================================================
+
 
 class TestAIResearcher:
     """Tests for the AIResearcher."""
@@ -1113,28 +1203,38 @@ class TestAIResearcher:
 
     def test_research_plan_structure(self):
         skill = AIResearcher()
-        result = skill.run({
-            "research_question": "Can self-supervised learning improve few-shot classification accuracy?",
-            "domain": "computer vision",
-        })
+        result = skill.run(
+            {
+                "research_question":(
+                    "Can self-supervised learning improve few-shot classification accuracy?"
+                ),
+                "domain": "computer vision",
+            }
+        )
         assert "question" in result
         assert result["question"]["primary_question"] == result["title"]
         assert len(result["question"]["sub_questions"]) >= 2
 
     def test_literature_review(self):
         skill = AIResearcher()
-        result = skill.run({
-            "research_question": "How effective are transformer models for time series forecasting?",
-        })
+        result = skill.run(
+            {
+                "research_question":(
+                    "How effective are transformer models for time series forecasting?"
+                ),
+            }
+        )
         assert "literature_review" in result
         assert len(result["literature_review"]) >= 2
 
     def test_experiment_design(self):
         skill = AIResearcher()
-        result = skill.run({
-            "research_question": "Does model scaling improve NLP task performance?",
-            "research_type": "empirical",
-        })
+        result = skill.run(
+            {
+                "research_question": "Does model scaling improve NLP task performance?",
+                "research_type": "empirical",
+            }
+        )
         assert "experiments" in result
         assert len(result["experiments"]) >= 3
         assert "evaluation" in result
@@ -1144,6 +1244,7 @@ class TestAIResearcher:
 # =========================================================================
 # Design Reviewer Skill Tests
 # =========================================================================
+
 
 class TestDesignReviewer:
     """Tests for the DesignReviewer."""
@@ -1155,44 +1256,52 @@ class TestDesignReviewer:
 
     def test_good_design_review(self):
         skill = DesignReviewer()
-        result = skill.run({
-            "design_doc": (
-                "This system uses the repository pattern for data access. "
-                "We use dependency injection throughout. "
-                "The architecture uses CQRS for separating reads and writes. "
-                "Circuit breaker pattern is used for resilience. "
-                "Horizontal scaling is supported via stateless services. "
-                "Caching strategy includes Redis for hot data. "
-                "Error handling includes retries with exponential backoff."
-            ),
-            "design_title": "Order Processing System",
-        })
+        result = skill.run(
+            {
+                "design_doc": (
+                    "This system uses the repository pattern for data access. "
+                    "We use dependency injection throughout. "
+                    "The architecture uses CQRS for separating reads and writes. "
+                    "Circuit breaker pattern is used for resilience. "
+                    "Horizontal scaling is supported via stateless services. "
+                    "Caching strategy includes Redis for hot data. "
+                    "Error handling includes retries with exponential backoff."
+                ),
+                "design_title": "Order Processing System",
+            }
+        )
         assert result["design_title"] == "Order Processing System"
         assert result["overall_quality"] in ("EXCELLENT", "GOOD", "ADEQUATE")
 
     def test_pattern_assessment(self):
         skill = DesignReviewer()
-        result = skill.run({
-            "design_doc": "Simple architecture with no specific patterns mentioned.",
-        })
+        result = skill.run(
+            {
+                "design_doc": "Simple architecture with no specific patterns mentioned.",
+            }
+        )
         assert "pattern_assessments" in result
         assessments = result["pattern_assessments"]
         assert len(assessments) >= 5
 
     def test_scalability_analysis(self):
         skill = DesignReviewer()
-        result = skill.run({
-            "design_doc": "Single server deployment with no caching or queue.",
-        })
+        result = skill.run(
+            {
+                "design_doc": "Single server deployment with no caching or queue.",
+            }
+        )
         assert "scalability_findings" in result
         high_risk = [s for s in result["scalability_findings"] if s["risk_level"] == "HIGH"]
         assert len(high_risk) >= 2
 
     def test_improvement_suggestions(self):
         skill = DesignReviewer()
-        result = skill.run({
-            "design_doc": "Basic CRUD API design.",
-        })
+        result = skill.run(
+            {
+                "design_doc": "Basic CRUD API design.",
+            }
+        )
         assert "improvements" in result
         assert len(result["improvements"]) >= 2
 
@@ -1200,6 +1309,7 @@ class TestDesignReviewer:
 # =========================================================================
 # Debugging Assistant Skill Tests
 # =========================================================================
+
 
 class TestDebuggingAssistant:
     """Tests for the DebuggingAssistant."""
@@ -1211,45 +1321,59 @@ class TestDebuggingAssistant:
 
     def test_five_whys_analysis(self):
         skill = DebuggingAssistant()
-        result = skill.run({
-            "error_description": "NullPointerException when processing user profile data.",
-            "environment": "Production - us-east-1",
-        })
+        result = skill.run(
+            {
+                "error_description": "NullPointerException when processing user profile data.",
+                "environment": "Production - us-east-1",
+            }
+        )
         assert result["environment"] == "Production - us-east-1"
         assert "five_whys" in result
         assert len(result["five_whys"]) == 5
 
     def test_hypothesis_generation(self):
         skill = DebuggingAssistant()
-        result = skill.run({
-            "error_description": "TypeError: expected str, got NoneType in user authentication flow.",
-            "stack_trace": "File auth.py line 42 in validate_token()",
-        })
+        result = skill.run(
+            {
+                "error_description":(
+                    "TypeError: expected str, got NoneType in user authentication flow."
+                ),
+                "stack_trace": "File auth.py line 42 in validate_token()",
+            }
+        )
         assert "hypotheses" in result
         assert len(result["hypotheses"]) >= 3
 
     def test_diagnostic_steps(self):
         skill = DebuggingAssistant()
-        result = skill.run({
-            "error_description": "API timeout after recent deployment. Configuration may be wrong.",
-        })
+        result = skill.run(
+            {
+                "error_description":(
+                    "API timeout after recent deployment. Configuration may be wrong."
+                ),
+            }
+        )
         assert "diagnostic_steps" in result
         assert len(result["diagnostic_steps"]) >= 5
 
     def test_fix_suggestions(self):
         skill = DebuggingAssistant()
-        result = skill.run({
-            "error_description": "Null reference in payment processing module.",
-        })
+        result = skill.run(
+            {
+                "error_description": "Null reference in payment processing module.",
+            }
+        )
         assert "fix_suggestions" in result
         assert len(result["fix_suggestions"]) >= 2
         assert any("confidence" in f for f in result["fix_suggestions"])
 
     def test_regression_tests(self):
         skill = DebuggingAssistant()
-        result = skill.run({
-            "error_description": "Race condition in concurrent task scheduler.",
-        })
+        result = skill.run(
+            {
+                "error_description": "Race condition in concurrent task scheduler.",
+            }
+        )
         assert "regression_tests" in result
         assert len(result["regression_tests"]) >= 2
 

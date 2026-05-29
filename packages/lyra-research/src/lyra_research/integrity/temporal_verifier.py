@@ -17,6 +17,7 @@ from typing import Any
 
 class TemporalViolationType(Enum):
     """Types of temporal violations"""
+
     RETROSPECTIVE_ARITHMETIC = "retrospective_arithmetic"
     ANACHRONISTIC_CITATION = "anachronistic_citation"
     COMPARATOR_UNMATERIALIZED = "comparator_unmaterialized"
@@ -27,6 +28,7 @@ class TemporalViolationType(Enum):
 @dataclass
 class TemporalViolation:
     """Temporal violation data"""
+
     type: TemporalViolationType
     claim: str
     citation: str
@@ -80,12 +82,14 @@ class TemporalVerifier:
             # Simple pattern matching for year comparisons
             # In production, would use more sophisticated NLP
             if self._contains_backward_comparison(text):
-                violations.append(TemporalViolation(
-                    type=TemporalViolationType.RETROSPECTIVE_ARITHMETIC,
-                    claim=text,
-                    citation="",
-                    reason="Claim compares past to future"
-                ))
+                violations.append(
+                    TemporalViolation(
+                        type=TemporalViolationType.RETROSPECTIVE_ARITHMETIC,
+                        claim=text,
+                        citation="",
+                        reason="Claim compares past to future",
+                    )
+                )
 
         return violations
 
@@ -115,12 +119,17 @@ class TemporalVerifier:
                     pub_date = datetime.fromisoformat(pub_date)
 
                 if pub_date > claim_date:
-                    violations.append(TemporalViolation(
-                        type=TemporalViolationType.ANACHRONISTIC_CITATION,
-                        claim=claim.get("text", ""),
-                        citation=citation.get("id", ""),
-                        reason=f"Claim dated {claim_date.date()} cites paper from {pub_date.date()}"
-                    ))
+                    violations.append(
+                        TemporalViolation(
+                            type=TemporalViolationType.ANACHRONISTIC_CITATION,
+                            claim=claim.get("text", ""),
+                            citation=citation.get("id", ""),
+                            reason=(
+                                f"Claim dated {claim_date.date()} cites paper from "
+                                f"{pub_date.date()}"
+                            ),
+                        )
+                    )
 
         return violations
 
@@ -136,7 +145,9 @@ class TemporalVerifier:
         for claim in claims:
             text = claim.get("text", "")
             # Check for comparison keywords
-            if any(keyword in text.lower() for keyword in ["outperforms", "better than", "compared to"]):
+            if any(
+                keyword in text.lower() for keyword in ["outperforms", "better than", "compared to"]
+            ):
                 # In production, would verify the comparator exists
                 # For now, just flag for manual review
                 pass
@@ -170,13 +181,15 @@ class TemporalVerifier:
             text = claim.get("text", "")
             for term in deictic_terms:
                 if term in text.lower():
-                    violations.append(TemporalViolation(
-                        type=TemporalViolationType.DEICTIC_PRESENT,
-                        claim=text,
-                        citation="",
-                        reason=f"Ambiguous temporal reference: '{term}'",
-                        severity="MEDIUM"
-                    ))
+                    violations.append(
+                        TemporalViolation(
+                            type=TemporalViolationType.DEICTIC_PRESENT,
+                            claim=text,
+                            citation="",
+                            reason=f"Ambiguous temporal reference: '{term}'",
+                            severity="MEDIUM",
+                        )
+                    )
                     break
 
         return violations
@@ -185,8 +198,9 @@ class TemporalVerifier:
         """Check if text contains backward temporal comparison"""
         # Simple heuristic - would be more sophisticated in production
         import re
+
         # Look for patterns like "2020...2025" or "earlier...later"
-        year_pattern = r'\b(19|20)\d{2}\b'
+        year_pattern = r"\b(19|20)\d{2}\b"
         years = re.findall(year_pattern, text)
         if len(years) >= 2:
             # Check if years are in descending order (backward)

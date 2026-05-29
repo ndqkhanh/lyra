@@ -68,7 +68,7 @@ class MetricTracker:
             return 0.0
         m = self.mean
         variance = sum((x - m) ** 2 for x in self._window) / len(self._window)
-        return variance ** 0.5
+        return variance**0.5
 
     def add(self, value: float) -> None:
         self._window.append(value)
@@ -78,7 +78,9 @@ class MetricTracker:
         else:
             alpha = 1 - self._decay
             self._ewma = self._decay * self._ewma + alpha * value
-            self._ewma_var = self._decay * self._ewma_var + alpha * (value - self._ewma) ** 2  # type: ignore[operator]
+            self._ewma_var = (
+                self._decay * self._ewma_var + alpha * (value - self._ewma) ** 2
+            )  # type: ignore[operator]
 
     def z_score(self, value: float) -> float:
         """Return the z-score of a value relative to the rolling window."""
@@ -114,7 +116,9 @@ class AnomalyDetector:
                 decay=self.config.decay_factor,
             )
 
-    def observe(self, metric: str, value: float, timestamp: float | None = None) -> AnomalyEvent | None:
+    def observe(
+        self, metric: str, value: float, timestamp: float | None = None
+    ) -> AnomalyEvent | None:
         """Feed an observation and check for anomaly."""
         import time as _time
 
@@ -155,8 +159,7 @@ class AnomalyDetector:
             "metrics_tracked": len(self._trackers),
             "total_events": self.event_count,
             "events_by_severity": {
-                s.value: sum(1 for e in self._events if e.severity == s)
-                for s in AnomalySeverity
+                s.value: sum(1 for e in self._events if e.severity == s) for s in AnomalySeverity
             },
             "metric_summaries": {
                 name: {"count": t.count, "mean": t.mean, "std": t.std}

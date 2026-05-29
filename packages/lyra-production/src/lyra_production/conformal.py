@@ -31,7 +31,9 @@ class ConformalRouter:
         self._outcomes: list[tuple[ReliabilityTier, bool]] = []
         self._calibration_window = calibration_window
 
-    def route(self, tier: ReliabilityTier, available_actions: tuple[str, ...]) -> ConformalPrediction:
+    def route(
+        self, tier: ReliabilityTier, available_actions: tuple[str, ...]
+    ) -> ConformalPrediction:
         """Route to a reliability tier and produce a conformal prediction set."""
         guarantee = self._TIER_GUARANTEES[tier]
         cost = self._TIER_COSTS[tier]
@@ -51,7 +53,7 @@ class ConformalRouter:
         """Record whether a routing decision produced a successful outcome."""
         self._outcomes.append((tier, success))
         if len(self._outcomes) > self._calibration_window:
-            self._outcomes = self._outcomes[-self._calibration_window:]
+            self._outcomes = self._outcomes[-self._calibration_window :]
 
     def _compute_confidence(self, tier: ReliabilityTier) -> float:
         tier_outcomes = [s for t, s in self._outcomes if t == tier]
@@ -59,7 +61,9 @@ class ConformalRouter:
             return self._TIER_GUARANTEES[tier]
         return sum(tier_outcomes) / len(tier_outcomes)
 
-    def select_tier(self, required_reliability: float, cost_budget: float | None = None) -> ReliabilityTier:
+    def select_tier(
+        self, required_reliability: float, cost_budget: float | None = None
+    ) -> ReliabilityTier:
         """Select the most cost-effective tier meeting the reliability requirement."""
         for tier in (ReliabilityTier.LOW, ReliabilityTier.MEDIUM, ReliabilityTier.HIGH):
             confidence = self._compute_confidence(tier)

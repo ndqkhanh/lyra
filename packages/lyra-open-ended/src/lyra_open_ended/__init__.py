@@ -205,46 +205,50 @@ _PHASE_ORDER: list[CurriculumPhase] = [
     CurriculumPhase.FRONTIER,
 ]
 
-_POSITIVE_KEYWORDS: frozenset[str] = frozenset({
-    "successful",
-    "completed",
-    "understood",
-    "mastered",
-    "learned",
-    "implemented",
-    "solved",
-    "achieved",
-    "excellent",
-    "great",
-    "smooth",
-    "easy",
-    "straightforward",
-    "confident",
-    "proficient",
-    "accomplished",
-    "grasped",
-    "fluent",
-})
+_POSITIVE_KEYWORDS: frozenset[str] = frozenset(
+    {
+        "successful",
+        "completed",
+        "understood",
+        "mastered",
+        "learned",
+        "implemented",
+        "solved",
+        "achieved",
+        "excellent",
+        "great",
+        "smooth",
+        "easy",
+        "straightforward",
+        "confident",
+        "proficient",
+        "accomplished",
+        "grasped",
+        "fluent",
+    }
+)
 
-_NEGATIVE_KEYWORDS: frozenset[str] = frozenset({
-    "failed",
-    "struggled",
-    "confused",
-    "unclear",
-    "difficult",
-    "incomplete",
-    "unresolved",
-    "stuck",
-    "poor",
-    "bad",
-    "unsure",
-    "challenging",
-    "overwhelming",
-    "error",
-    "bug",
-    "problem",
-    "lost",
-})
+_NEGATIVE_KEYWORDS: frozenset[str] = frozenset(
+    {
+        "failed",
+        "struggled",
+        "confused",
+        "unclear",
+        "difficult",
+        "incomplete",
+        "unresolved",
+        "stuck",
+        "poor",
+        "bad",
+        "unsure",
+        "challenging",
+        "overwhelming",
+        "error",
+        "bug",
+        "problem",
+        "lost",
+    }
+)
 
 
 def _difficulty_to_phase(difficulty: GoalDifficulty) -> CurriculumPhase:
@@ -799,7 +803,9 @@ class OpenEndedLearner:
         GoalOutcome
             Structured evaluation result.
         """
-        success_rating = self._calculate_success_rating(outcome_description, time_spent, goal.estimated_steps)
+        success_rating = self._calculate_success_rating(
+            outcome_description, time_spent, goal.estimated_steps
+        )
         skills = self._extract_skills(outcome_description)
         hints = self._generate_next_hints(outcome_description, goal.domain)
 
@@ -985,8 +991,7 @@ class OpenEndedLearner:
         knowledge_gaps = self._identify_knowledge_gaps()
 
         outstanding = [
-            g for g in self._goals.values()
-            if g.status in (GoalStatus.PROPOSED, GoalStatus.ACTIVE)
+            g for g in self._goals.values() if g.status in (GoalStatus.PROPOSED, GoalStatus.ACTIVE)
         ]
 
         return {
@@ -1178,9 +1183,7 @@ class OpenEndedLearner:
         unavailable = completed_titles | proposed_titles
 
         related = [
-            t.title
-            for t in _GOAL_CATALOG
-            if t.domain == domain and t.title not in unavailable
+            t.title for t in _GOAL_CATALOG if t.domain == domain and t.title not in unavailable
         ]
         related.sort()
         return tuple(related[:3])

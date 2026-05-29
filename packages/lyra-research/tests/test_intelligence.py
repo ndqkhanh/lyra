@@ -4,7 +4,6 @@ Tests for the Research Intelligence Core (intelligence.py).
 All tests run offline — no network calls.
 """
 
-
 from lyra_research.intelligence import (
     AuditReport,
     Contradiction,
@@ -20,6 +19,7 @@ from lyra_research.intelligence import (
 # ---------------------------------------------------------------------------
 # VerifiableChecklistGenerator tests
 # ---------------------------------------------------------------------------
+
 
 def test_checklist_generates_universal_items():
     """Standard depth generates 10 items from UNIVERSAL_TEMPLATES."""
@@ -127,6 +127,7 @@ def test_checklist_unanswered_questions_partial():
 # EvidenceAudit tests
 # ---------------------------------------------------------------------------
 
+
 def test_evidence_audit_flags_uncited_claim():
     """A claim with no nearby source ID is flagged."""
     audit = EvidenceAudit()
@@ -140,7 +141,9 @@ def test_evidence_audit_flags_uncited_claim():
 def test_evidence_audit_accepts_cited_claim():
     """A claim with a nearby source ID is verified."""
     audit = EvidenceAudit()
-    text = "The model achieves 95% accuracy on the benchmark [paper_abc]. See paper_abc for details."
+    text = (
+        "The model achieves 95% accuracy on the benchmark [paper_abc]. See paper_abc for details."
+    )
     report = audit.audit(text, available_source_ids=["paper_abc"])
     assert report.verified_claims > 0
 
@@ -189,7 +192,9 @@ def test_evidence_audit_no_claims():
 def test_evidence_audit_extract_claims_returns_list():
     """extract_claims returns a list of strings."""
     audit = EvidenceAudit()
-    text = "The system outperforms baseline by a wide margin. It shows state-of-the-art performance."
+    text = (
+        "The system outperforms baseline by a wide margin. It shows state-of-the-art performance."
+    )
     claims = audit.extract_claims(text)
     assert isinstance(claims, list)
 
@@ -213,6 +218,7 @@ def test_evidence_audit_has_citation_not_found():
 # ---------------------------------------------------------------------------
 # ContradictionDetector tests
 # ---------------------------------------------------------------------------
+
 
 def test_contradiction_detector_no_sources():
     """Empty source list produces no contradictions."""
@@ -292,6 +298,7 @@ def test_contradiction_fields():
 # GapAnalyzer tests
 # ---------------------------------------------------------------------------
 
+
 def test_gap_analyzer_returns_list():
     """analyze() always returns a list."""
     analyzer = GapAnalyzer()
@@ -306,7 +313,9 @@ def test_gap_analyzer_extracts_explicit_gaps():
         {
             "source_id": "s1",
             "title": "Survey",
-            "abstract": "This area remains challenging and future work should explore multi-modal settings.",
+            "abstract":(
+                "This area remains challenging and future work should explore multi-modal settings."
+            ),
             "findings": [],
         }
     ]
@@ -321,9 +330,7 @@ def test_gap_analyzer_coverage_gaps():
     analyzer = GapAnalyzer()
     checklist = gen.generate("quantum computing")
     # Provide sources with completely unrelated content
-    sources = [
-        {"source_id": "s1", "abstract": "Deep learning is great.", "findings": []}
-    ]
+    sources = [{"source_id": "s1", "abstract": "Deep learning is great.", "findings": []}]
     gaps = analyzer.coverage_gaps(sources, checklist)
     assert isinstance(gaps, list)
     assert len(gaps) > 0
@@ -357,13 +364,12 @@ def test_gap_severity_values():
 # FalsificationChecker tests
 # ---------------------------------------------------------------------------
 
+
 def test_falsification_checker_returns_notes():
     """check() returns one FalsificationNote per claim."""
     checker = FalsificationChecker()
     claims = ["BERT outperforms GPT on classification tasks"]
-    sources = [
-        {"source_id": "s1", "abstract": "BERT shows strong results.", "findings": []}
-    ]
+    sources = [{"source_id": "s1", "abstract": "BERT shows strong results.", "findings": []}]
     notes = checker.check(claims, sources)
     assert len(notes) == 1
     assert isinstance(notes[0], FalsificationNote)
@@ -382,8 +388,16 @@ def test_falsification_checker_verdict_supported():
     checker = FalsificationChecker()
     claims = ["Transformers achieve good results on NLP tasks"]
     sources = [
-        {"source_id": "s1", "abstract": "Transformers are very effective for NLP tasks.", "findings": []},
-        {"source_id": "s2", "abstract": "Attention-based models improve performance significantly.", "findings": []},
+        {
+            "source_id": "s1",
+            "abstract": "Transformers are very effective for NLP tasks.",
+            "findings": [],
+        },
+        {
+            "source_id": "s2",
+            "abstract": "Attention-based models improve performance significantly.",
+            "findings": [],
+        },
     ]
     notes = checker.check(claims, sources)
     assert notes[0].verdict == "supported"
@@ -395,7 +409,11 @@ def test_falsification_checker_verdict_contested():
     claims = ["our model outperforms all baselines"]
     sources = [
         {"source_id": "s1", "abstract": "Great performance across benchmarks.", "findings": []},
-        {"source_id": "s2", "abstract": "Our method fails to outperform this baseline in the results.", "findings": []},
+        {
+            "source_id": "s2",
+            "abstract": "Our method fails to outperform this baseline in the results.",
+            "findings": [],
+        },
         {"source_id": "s3", "abstract": "Consistent improvements observed.", "findings": []},
     ]
     notes = checker.check(claims, sources)
@@ -408,7 +426,11 @@ def test_falsification_checker_check_consensus():
     checker = FalsificationChecker()
     claims = ["Model X is state-of-the-art"]
     sources = [
-        {"source_id": "s1", "abstract": "Model X shows impressive state-of-the-art results.", "findings": []}
+        {
+            "source_id": "s1",
+            "abstract": "Model X shows impressive state-of-the-art results.",
+            "findings": [],
+        }
     ]
     consensus = checker.check_consensus(claims, sources)
     assert isinstance(consensus, dict)
@@ -420,9 +442,7 @@ def test_falsification_checker_multiple_claims():
     """check() handles multiple claims correctly."""
     checker = FalsificationChecker()
     claims = ["Claim A about transformers", "Claim B about efficiency"]
-    sources = [
-        {"source_id": "s1", "abstract": "Transformers are efficient.", "findings": []}
-    ]
+    sources = [{"source_id": "s1", "abstract": "Transformers are efficient.", "findings": []}]
     notes = checker.check(claims, sources)
     assert len(notes) == 2
 

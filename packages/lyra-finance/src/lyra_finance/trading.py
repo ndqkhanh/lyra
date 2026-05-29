@@ -47,6 +47,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class DebateRound:
     """One round of debate with bull and bear arguments."""
+
     bull_score: float = 0.0
     bear_score: float = 0.0
     bull_reports: tuple[AnalystReport, ...] = field(default_factory=tuple)
@@ -63,8 +64,7 @@ class BullBearDebate:
     than averaging away disagreement.
     """
 
-    def __init__(self, name: str = "BullBearDebate",
-                 bull_bias: float = 0.0) -> None:
+    def __init__(self, name: str = "BullBearDebate", bull_bias: float = 0.0) -> None:
         """
         Args:
             name: Identifier for this debate instance.
@@ -75,9 +75,12 @@ class BullBearDebate:
         self.bull_bias = max(-0.5, min(0.5, bull_bias))
         self.logger = logging.getLogger(f"{__name__}.{self.name}")
 
-    def debate(self, reports: Sequence[AnalystReport],
-               asset: Asset | None = None,
-               _market_data: Sequence[MarketData] | None = None) -> DebateRound:
+    def debate(
+        self,
+        reports: Sequence[AnalystReport],
+        asset: Asset | None = None,
+        _market_data: Sequence[MarketData] | None = None,
+    ) -> DebateRound:
         """Run one full debate round from analyst reports.
 
         Args:
@@ -95,7 +98,9 @@ class BullBearDebate:
 
         self.logger.info(
             "Debate: %d bull, %d bear, %d neutral reports for %s",
-            len(bull_reports), len(bear_reports), len(neutral_reports),
+            len(bull_reports),
+            len(bear_reports),
+            len(neutral_reports),
             reports[0].symbol if reports else "unknown",
         )
 
@@ -107,8 +112,9 @@ class BullBearDebate:
         bull_score += self.bull_bias
 
         # Determine direction
-        decision = self._decide(bull_score, bear_score, bull_reports, bear_reports,
-                                neutral_reports, asset)
+        decision = self._decide(
+            bull_score, bear_score, bull_reports, bear_reports, neutral_reports, asset
+        )
 
         return DebateRound(
             bull_score=bull_score,
@@ -118,8 +124,7 @@ class BullBearDebate:
             consensus_decision=decision,
         )
 
-    def _weighted_score(self, reports: tuple[AnalystReport, ...],
-                        _is_bull: bool) -> float:
+    def _weighted_score(self, reports: tuple[AnalystReport, ...], _is_bull: bool) -> float:
         """Compute confidence-weighted aggregate score."""
         if not reports:
             return 0.0
@@ -138,16 +143,25 @@ class BullBearDebate:
             weight_sum += w
         return total / weight_sum if weight_sum > 0 else 0.0
 
-    def _decide(self, bull_score: float, bear_score: float,
-                bull_reports: tuple[AnalystReport, ...],
-                bear_reports: tuple[AnalystReport, ...],
-                neutral_reports: tuple[AnalystReport, ...],
-                asset: Asset | None) -> TradingDecision:
+    def _decide(
+        self,
+        bull_score: float,
+        bear_score: float,
+        bull_reports: tuple[AnalystReport, ...],
+        bear_reports: tuple[AnalystReport, ...],
+        neutral_reports: tuple[AnalystReport, ...],
+        asset: Asset | None,
+    ) -> TradingDecision:
         """Translate debate scores into a TradingDecision."""
-        symbol = (bull_reports[0].symbol if bull_reports
-                  else bear_reports[0].symbol if bear_reports
-                  else neutral_reports[0].symbol if neutral_reports
-                  else "UNKNOWN")
+        symbol = (
+            bull_reports[0].symbol
+            if bull_reports
+            else (
+                bear_reports[0].symbol
+                if bear_reports
+                else neutral_reports[0].symbol if neutral_reports else "UNKNOWN"
+            )
+        )
         net_score = bull_score - bear_score
         max_score = max(bull_score, bear_score, 1.0)
 
@@ -217,8 +231,9 @@ class TradingAgent:
     execution. Validates every trade against risk limits before submission.
     """
 
-    def __init__(self, name: str = "TradingAgent",
-                 default_order_type: OrderType = OrderType.MARKET) -> None:
+    def __init__(
+        self, name: str = "TradingAgent", default_order_type: OrderType = OrderType.MARKET
+    ) -> None:
         self.name = name
         self.default_order_type = default_order_type
         self._orders: list[Order] = []
@@ -237,9 +252,9 @@ class TradingAgent:
     def trade_history(self) -> tuple[Trade, ...]:
         return tuple(self._trades)
 
-    def execute_decision(self, decision: TradingDecision,
-                         portfolio: Portfolio,
-                         current_price: float | None = None) -> Order | None:
+    def execute_decision(
+        self, decision: TradingDecision, portfolio: Portfolio, current_price: float | None = None
+    ) -> Order | None:
         """Convert a TradingDecision into an Order.
 
         Returns None if the trade is rejected (zero quantity, no position
@@ -281,32 +296,42 @@ class TradingAgent:
         self._orders.append(order)
         self.logger.info(
             "Created %s order: %d shares of %s at %.2f (%.1f%% of portfolio).",
-            side.value, quantity, decision.symbol, price,
+            side.value,
+            quantity,
+            decision.symbol,
+            price,
             decision.position_size_pct * 100.0,
         )
         return order
 
-    def fill_order(self, order_id: str, fill_price: float,
-                   fill_quantity: int | None = None,
-                   commission: float = 0.0) -> Trade | None:
+    def fill_order(
+        self,
+        order_id: str,
+        fill_price: float,
+        fill_quantity: int | None = None,
+        commission: float = 0.0,
+    ) -> Trade | None:
         """Mark an order as filled, creating the corresponding Trade."""
         for i, order in enumerate(self._orders):
             if order.id != order_id:
                 continue
             if not order.is_open:
-                self.logger.warning("Order %s is not open (status: %s).",
-                                    order_id, order.status.value)
+                self.logger.warning(
+                    "Order %s is not open (status: %s).", order_id, order.status.value
+                )
                 return None
 
             qty = fill_quantity or order.quantity
             new_filled = order.filled_quantity + qty
             if new_filled > order.quantity:
-                self.logger.warning("Fill quantity %d exceeds order %s quantity %d.",
-                                    qty, order_id, order.quantity)
+                self.logger.warning(
+                    "Fill quantity %d exceeds order %s quantity %d.", qty, order_id, order.quantity
+                )
                 return None
 
-            new_status = (OrderStatus.FILLED if new_filled >= order.quantity
-                          else OrderStatus.PARTIALLY_FILLED)
+            new_status = (
+                OrderStatus.FILLED if new_filled >= order.quantity else OrderStatus.PARTIALLY_FILLED
+            )
 
             updated_order = Order(
                 id=order.id,
@@ -385,11 +410,12 @@ class TradingAgent:
 @dataclass
 class PortfolioConfig:
     """Configuration for portfolio management strategy."""
+
     risk_profile: RiskProfile = RiskProfile.NEUTRAL
-    max_position_pct: float = 0.20       # max % of portfolio per position
-    min_cash_pct: float = 0.05           # min cash reserve
+    max_position_pct: float = 0.20  # max % of portfolio per position
+    min_cash_pct: float = 0.05  # min cash reserve
     rebalance_threshold_pct: float = 5.0  # drift % that triggers rebalance
-    target_position_count: int = 10       # desired number of positions
+    target_position_count: int = 10  # desired number of positions
     rebalance_frequency_days: int = 30
 
 
@@ -401,15 +427,16 @@ class PortfolioManager:
     larger positions.
     """
 
-    def __init__(self, name: str = "PortfolioManager",
-                 config: PortfolioConfig | None = None) -> None:
+    def __init__(
+        self, name: str = "PortfolioManager", config: PortfolioConfig | None = None
+    ) -> None:
         self.name = name
         self.config = config or PortfolioConfig()
         self.logger = logging.getLogger(f"{__name__}.{self.name}")
 
-    def size_position(self, decision: TradingDecision,
-                      portfolio: Portfolio,
-                      current_price: float) -> int:
+    def size_position(
+        self, decision: TradingDecision, portfolio: Portfolio, current_price: float
+    ) -> int:
         """Calculate shares to allocate, respecting limits.
 
         Applies:
@@ -446,14 +473,17 @@ class PortfolioManager:
         target_allocation = 1.0 / self.config.target_position_count
 
         for position in portfolio.positions:
-            actual_pct = position.market_value / portfolio.total_value if portfolio.total_value > 0 else 0
+            actual_pct = (
+                position.market_value / portfolio.total_value if portfolio.total_value > 0 else 0
+            )
             drift = abs(actual_pct - target_allocation) * 100.0
             if drift > self.config.rebalance_threshold_pct:
                 return True
         return False
 
-    def rebalance(self, portfolio: Portfolio,
-                  current_prices: dict[str, float]) -> list[TradingDecision]:
+    def rebalance(
+        self, portfolio: Portfolio, current_prices: dict[str, float]
+    ) -> list[TradingDecision]:
         """Generate trading decisions to rebalance portfolio.
 
         Returns list of TradingDecision instances to bring the portfolio
@@ -467,7 +497,9 @@ class PortfolioManager:
 
         # Check current drift
         for position in portfolio.positions:
-            current_value = position.quantity * current_prices.get(position.symbol, position.current_price)
+            current_value = position.quantity * current_prices.get(
+                position.symbol, position.current_price
+            )
             target_value = target_allocation
 
             if current_value > target_value * (1 + self.config.rebalance_threshold_pct / 100.0):
@@ -475,25 +507,29 @@ class PortfolioManager:
                 excess = current_value - target_value
                 direction = TradeDirection.SHORT
                 pct = excess / portfolio.total_value
-                decisions.append(TradingDecision(
-                    symbol=position.symbol,
-                    direction=direction,
-                    confidence=0.6,
-                    position_size_pct=pct,
-                    reasoning=f"Rebalancing: overweight {position.symbol}.",
-                ))
+                decisions.append(
+                    TradingDecision(
+                        symbol=position.symbol,
+                        direction=direction,
+                        confidence=0.6,
+                        position_size_pct=pct,
+                        reasoning=f"Rebalancing: overweight {position.symbol}.",
+                    )
+                )
             elif current_value < target_value * (1 - self.config.rebalance_threshold_pct / 100.0):
                 # Underweight — buy more
                 deficit = target_value - current_value
                 direction = TradeDirection.LONG
                 pct = deficit / portfolio.total_value
-                decisions.append(TradingDecision(
-                    symbol=position.symbol,
-                    direction=direction,
-                    confidence=0.6,
-                    position_size_pct=pct,
-                    reasoning=f"Rebalancing: underweight {position.symbol}.",
-                ))
+                decisions.append(
+                    TradingDecision(
+                        symbol=position.symbol,
+                        direction=direction,
+                        confidence=0.6,
+                        position_size_pct=pct,
+                        reasoning=f"Rebalancing: underweight {position.symbol}.",
+                    )
+                )
 
         return decisions
 

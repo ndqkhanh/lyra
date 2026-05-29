@@ -48,10 +48,10 @@ class ReplayEvent:
             return "[dim](first turn)[/]"
         lines = self.diff.split("\n")[:8]
         return "\n".join(
-            f"[green]{l}[/]" if l.startswith("+") else
-            f"[red]{l}[/]" if l.startswith("-") else
-            l
-            for l in lines
+            f"[green]{line}[/]" if line.startswith("+") else
+            f"[red]{line}[/]" if line.startswith("-") else
+            line
+            for line in lines
         )
 
 

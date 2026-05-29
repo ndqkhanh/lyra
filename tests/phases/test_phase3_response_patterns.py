@@ -4,9 +4,9 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
-
 from lyra_cli.ui import ResponseFormatter
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "packages/lyra-cli/src"))
 
 
 def test_active_response():
@@ -143,7 +143,9 @@ def test_with_streaming():
     print()
     print(formatter.format_info("Running 4 agents in parallel"))
     print()
-    print(formatter.format_tool_call("Agent 1", "Research GitHub repos · 10 tool uses · 29.7k tokens"))
+    print(
+        formatter.format_tool_call("Agent 1", "Research GitHub repos · 10 tool uses · 29.7k tokens")
+    )
     print(formatter.format_tool_result("Bash: Fetch RTK README via gh API", indent_level=1))
     print()
     print(formatter.format_tool_call("Agent 2", "Search GitHub · 6 tool uses · 29.9k tokens"))

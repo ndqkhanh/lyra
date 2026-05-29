@@ -141,8 +141,16 @@ class ValidatePipeline:
         stages.append(
             StageResult(
                 stage="executor",
-                status=StageStatus.APPROVED if executor_confidence >= self.config.min_validator_confidence else StageStatus.NEEDS_CLARIFICATION,
-                decision=ValidationDecision.PROCEED if executor_confidence >= self.config.min_validator_confidence else ValidationDecision.FLAG,
+                status=(
+                    StageStatus.APPROVED
+                    if executor_confidence >= self.config.min_validator_confidence
+                    else StageStatus.NEEDS_CLARIFICATION
+                ),
+                decision=(
+                    ValidationDecision.PROCEED
+                    if executor_confidence >= self.config.min_validator_confidence
+                    else ValidationDecision.FLAG
+                ),
                 reviewer_model=executor_model,
                 reasoning="Executor self-assessment",
                 confidence=executor_confidence,
@@ -153,12 +161,15 @@ class ValidatePipeline:
 
         # Stage 2: Validator (different model family if configured)
         if validator_fn is not None:
-            validator_result = validator_fn("validator", {
-                "action_text": action_text,
-                "executor_output": executor_output,
-                "executor_model": executor_model,
-                "executor_confidence": executor_confidence,
-            })
+            validator_result = validator_fn(
+                "validator",
+                {
+                    "action_text": action_text,
+                    "executor_output": executor_output,
+                    "executor_model": executor_model,
+                    "executor_confidence": executor_confidence,
+                },
+            )
             stages.append(validator_result)
         else:
             stages.append(self._default_validator(executor_model, executor_output, action_text))
@@ -166,11 +177,14 @@ class ValidatePipeline:
         # Stage 3: Critic (reviews validator reasoning)
         if self.config.enable_critic_stage:
             if critic_fn is not None:
-                critic_result = critic_fn("critic", {
-                    "action_text": action_text,
-                    "executor_output": executor_output,
-                    "validator_stage": stages[-1],
-                })
+                critic_result = critic_fn(
+                    "critic",
+                    {
+                        "action_text": action_text,
+                        "executor_output": executor_output,
+                        "validator_stage": stages[-1],
+                    },
+                )
                 stages.append(critic_result)
             else:
                 stages.append(self._default_critic(stages[-1]))
@@ -319,7 +333,11 @@ class ValidatePipeline:
             status=StageStatus.APPROVED if not issues else StageStatus.NEEDS_CLARIFICATION,
             decision=validator_stage.decision if not issues else ValidationDecision.FLAG,
             reviewer_model="heuristic-critic",
-            reasoning="Reviewed validator output" if not issues else f"Found {len(issues)} concern(s) with validation",
+            reasoning=(
+                "Reviewed validator output"
+                if not issues
+                else f"Found {len(issues)} concern(s) with validation"
+            ),
             confidence=confidence,
             issues_found=tuple(issues),
             suggestions=tuple(suggestions),

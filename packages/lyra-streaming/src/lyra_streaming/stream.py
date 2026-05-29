@@ -84,7 +84,9 @@ class TokenStream:
         # Signal backpressure when buffer exceeds threshold
         if self._queue.qsize() >= self._backpressure_threshold:
             self._backpressure_event.clear()
-            logger.debug("Backpressure applied on stream %s (buffer=%d)", self.run_id, self._queue.qsize())
+            logger.debug(
+                "Backpressure applied on stream %s (buffer=%d)", self.run_id, self._queue.qsize()
+            )
 
     async def read(self) -> StreamToken | None:
         """Await and return the next token, or ``None`` if the stream is finished.
@@ -101,7 +103,11 @@ class TokenStream:
         if self._queue.qsize() < self._backpressure_threshold // 2:
             if not self._backpressure_event.is_set():
                 self._backpressure_event.set()
-                logger.debug("Backpressure released on stream %s (buffer=%d)", self.run_id, self._queue.qsize())
+                logger.debug(
+                    "Backpressure released on stream %s (buffer=%d)",
+                    self.run_id,
+                    self._queue.qsize(),
+                )
 
         return token
 
@@ -123,7 +129,9 @@ class TokenStream:
             self._backpressure_event.clear()
         else:
             self._backpressure_event.set()
-        logger.debug("Stream %s backpressure threshold set to %d", self.run_id, self._backpressure_threshold)
+        logger.debug(
+            "Stream %s backpressure threshold set to %d", self.run_id, self._backpressure_threshold
+        )
 
     @property
     def is_active(self) -> bool:

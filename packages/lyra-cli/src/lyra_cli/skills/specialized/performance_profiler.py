@@ -124,9 +124,9 @@ class PerformanceProfilerSkill:
                     line=node.lineno,
                     target=node.name,
                     description=f"Nested loops detected (depth {nested_loops}).",
-                    complexity=ComplexityClass.QUADRATIC
-                    if nested_loops == 2
-                    else ComplexityClass.CUBIC,
+                    complexity=(
+                        ComplexityClass.QUADRATIC if nested_loops == 2 else ComplexityClass.CUBIC
+                    ),
                     suggestion="Consider flattening loops or using more efficient data structures.",
                     estimated_impact="high",
                 )
@@ -253,8 +253,16 @@ class PerformanceProfilerSkill:
 
         expensive: dict[str, tuple[str, ComplexityClass, str]] = {
             "deepcopy": ("Deep copy operation is expensive.", ComplexityClass.LINEAR, "medium"),
-            "sort": ("Sort operation in a loop may be O(n log n) each iteration.", ComplexityClass.LINEARRITHMIC, "high"),
-            "sorted": ("Sort operation may be expensive in hot paths.", ComplexityClass.LINEARRITHMIC, "medium"),
+            "sort": (
+                "Sort operation in a loop may be O(n log n) each iteration.",
+                ComplexityClass.LINEARRITHMIC,
+                "high",
+            ),
+            "sorted": (
+                "Sort operation may be expensive in hot paths.",
+                ComplexityClass.LINEARRITHMIC,
+                "medium",
+            ),
         }
 
         if name in expensive:
@@ -270,9 +278,7 @@ class PerformanceProfilerSkill:
                 )
             )
 
-    def _compute_optimization_score(
-        self, issues: list[PerformanceIssue], body_lines: int
-    ) -> int:
+    def _compute_optimization_score(self, issues: list[PerformanceIssue], body_lines: int) -> int:
         """Compute an optimization priority score (0-100)."""
         impact_scores = {"high": 30, "medium": 15, "low": 5}
         base = 100

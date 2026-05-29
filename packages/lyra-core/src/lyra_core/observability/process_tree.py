@@ -11,6 +11,7 @@ Key data model:
     root (session) → subagent A → subagent A1
                    → subagent B
 """
+
 from __future__ import annotations
 
 import json
@@ -209,8 +210,7 @@ class ProcessTree:
 
         elif isinstance(event, SubagentFinished):
             state = AgentLifecycleState(
-                event.status if event.status in AgentLifecycleState._value2member_map_
-                else "done"
+                event.status if event.status in AgentLifecycleState._value2member_map_ else "done"
             )
             self.transition(event.agent_id, state)
             node = self._nodes.get(event.agent_id)
@@ -292,7 +292,10 @@ class ProcessTree:
     def render(self):  # type: ignore[no-untyped-def]  # noqa: F821
         from rich.tree import Tree
 
-        label = f"[bold]Lyra Process Tree[/bold]  session={self.session_id or '?'}  active={self.active_count()}"
+        label =(
+            f"[bold]Lyra Process Tree[/bold]  session={self.session_id or '?'}  active="
+            f"{self.active_count()}"
+        )
         rich_tree = Tree(label)
 
         def _add(parent_rich, node: AgentNode) -> None:

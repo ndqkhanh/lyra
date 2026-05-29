@@ -8,12 +8,14 @@ Chen et al. 2024 (NeurIPS, arXiv:2410.23875). Three mechanisms:
     Reflection — when a path looks wrong, backtrack, prune, restart with an
                  alternative sub-objective.
 
-Per [docs/200-graph-grounded-multi-hop-retrieval.md](../../../../../../research/harness-engineering/docs/200-graph-grounded-multi-hop-retrieval.md)
+Per
+[docs/200-graph-grounded-multi-hop-retrieval.md](../../../../../../research/harness-engineering/docs/200-graph-grounded-multi-hop-retrieval.md)
 §"Plan-on-Graph", PoG fixes the fragility of fixed-breadth KG search by
 letting the walker choose adaptive breadth and *backtrack* when wrong. This
 implementation uses a Protocol-typed ``PathScorer`` so production wires an LLM
 judge while tests use deterministic stubs.
 """
+
 from __future__ import annotations
 
 import enum

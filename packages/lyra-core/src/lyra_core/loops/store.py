@@ -15,6 +15,7 @@ States:
 - ``completed`` — terminal contract state observed; no further work.
 - ``terminated`` — user-cancelled.
 """
+
 from __future__ import annotations
 
 import json
@@ -114,10 +115,19 @@ class LoopStore:
                      terminal_cause=excluded.terminal_cause,
                      payload_json=excluded.payload_json
                 """,
-                (record.id, record.kind, record.state, record.run_dir,
-                 record.created_at, record.updated_at, record.cum_usd,
-                 record.iter_count, record.contract_state,
-                 record.terminal_cause, record.payload_json),
+                (
+                    record.id,
+                    record.kind,
+                    record.state,
+                    record.run_dir,
+                    record.created_at,
+                    record.updated_at,
+                    record.cum_usd,
+                    record.iter_count,
+                    record.contract_state,
+                    record.terminal_cause,
+                    record.payload_json,
+                ),
             )
 
     def get(self, loop_id: str) -> LoopRecord | None:
@@ -133,7 +143,8 @@ class LoopStore:
         placeholders = ",".join("?" for _ in states)
         with self._conn() as cx:
             rows = cx.execute(
-                f"SELECT * FROM loops WHERE state IN ({placeholders})", states,
+                f"SELECT * FROM loops WHERE state IN ({placeholders})",
+                states,
             ).fetchall()
         return [_row_to_record(r) for r in rows]
 
@@ -159,8 +170,7 @@ class LoopStore:
                 )
         return ids
 
-    def transition(self, loop_id: str, *, state: str,
-                   terminal_cause: str | None = None) -> None:
+    def transition(self, loop_id: str, *, state: str, terminal_cause: str | None = None) -> None:
         with self._conn() as cx:
             cx.execute(
                 "UPDATE loops SET state=?, terminal_cause=?, updated_at=? WHERE id=?",
@@ -170,9 +180,15 @@ class LoopStore:
 
 def _row_to_record(row: sqlite3.Row) -> LoopRecord:
     return LoopRecord(
-        id=row["id"], kind=row["kind"], state=row["state"], run_dir=row["run_dir"],
-        created_at=row["created_at"], updated_at=row["updated_at"],
-        cum_usd=row["cum_usd"], iter_count=row["iter_count"],
-        contract_state=row["contract_state"], terminal_cause=row["terminal_cause"],
+        id=row["id"],
+        kind=row["kind"],
+        state=row["state"],
+        run_dir=row["run_dir"],
+        created_at=row["created_at"],
+        updated_at=row["updated_at"],
+        cum_usd=row["cum_usd"],
+        iter_count=row["iter_count"],
+        contract_state=row["contract_state"],
+        terminal_cause=row["terminal_cause"],
         payload_json=row["payload_json"],
     )

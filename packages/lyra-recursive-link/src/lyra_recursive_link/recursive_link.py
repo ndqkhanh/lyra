@@ -92,7 +92,10 @@ class RecursiveLink:
         for m in messages:
             if len(m.vector) != dim:
                 raise LinkError(
-                    f"All messages must have same latent dimension (got {len(m.vector)}, expected {dim})"
+
+                        f"All messages must have same latent dimension (got {len(m.vector)}"
+                        f", expected {dim})"
+
                 )
 
     def _mean_aggregate(self, messages: list[LatentVector]) -> np.ndarray:
@@ -103,9 +106,7 @@ class RecursiveLink:
         vectors = np.array([m.vector for m in messages])
         return np.max(vectors, axis=0).astype(np.float64)
 
-    def _attention_aggregate(
-        self, messages: list[LatentVector], cfg: LinkConfig
-    ) -> np.ndarray:
+    def _attention_aggregate(self, messages: list[LatentVector], cfg: LinkConfig) -> np.ndarray:
         vectors = np.array([m.vector for m in messages])
         query = vectors[-1:]
         keys = vectors[:-1] if len(vectors) > 1 else vectors
@@ -117,17 +118,13 @@ class RecursiveLink:
         temperature = max(0.001, cfg.attention_temperature)
         weights = np.exp(scores / temperature)
         weights = weights / (np.sum(weights) + 1e-10)
-        weighted_sum = np.sum(
-            keys * weights.reshape(-1, 1), axis=0
-        ).astype(np.float64)
+        weighted_sum = np.sum(keys * weights.reshape(-1, 1), axis=0).astype(np.float64)
         return weighted_sum
 
     def _weighted_sum(self, messages: list[LatentVector]) -> np.ndarray:
         vectors = np.array([m.vector for m in messages])
         n = len(messages)
-        weights = np.array(
-            [1.0 / (i + 1) for i in range(n)], dtype=np.float64
-        )
+        weights = np.array([1.0 / (i + 1) for i in range(n)], dtype=np.float64)
         weights = weights / np.sum(weights)
         return np.sum(vectors * weights.reshape(-1, 1), axis=0).astype(np.float64)
 
@@ -136,9 +133,7 @@ class RecursiveLink:
     ) -> LatentVector:
         agg_vec = aggregated.vector if isinstance(aggregated, LatentVector) else aggregated
         residual = (original.vector + agg_vec) / 2.0
-        cr = compute_compression_ratio(
-            original.original_length, len(residual)
-        )
+        cr = compute_compression_ratio(original.original_length, len(residual))
         return LatentVector(
             vector=residual.astype(np.float64),
             original_length=original.original_length,

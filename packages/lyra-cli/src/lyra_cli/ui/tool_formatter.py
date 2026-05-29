@@ -11,6 +11,7 @@ from .symbols import SymbolRegistry
 @dataclass
 class ToolCall:
     """Tool call data structure"""
+
     id: str
     name: str
     parameters: dict[str, Any]
@@ -23,6 +24,7 @@ class ToolCall:
 @dataclass
 class ToolResult:
     """Tool result data structure"""
+
     success: bool
     data: Any = None
     error: dict[str, Any] | None = None
@@ -32,6 +34,7 @@ class ToolResult:
 @dataclass
 class Diagnostic:
     """Diagnostic message"""
+
     severity: str  # error, warning, info, hint
     message: str
     file: str | None = None
@@ -43,6 +46,7 @@ class Diagnostic:
 @dataclass
 class DiffHunk:
     """Diff hunk for file updates"""
+
     start_line: int
     context_before: list[tuple[int, str]]
     removed: list[tuple[int, str]]
@@ -59,10 +63,7 @@ class ToolCallFormatter:
         self.layout = LayoutEngine()
 
     def render_tool_call(
-        self,
-        tool_call: ToolCall,
-        indent: int = 0,
-        show_parameters: bool = True
+        self, tool_call: ToolCall, indent: int = 0, show_parameters: bool = True
     ) -> list[str]:
         """Render tool call with parameters"""
         lines = []
@@ -122,10 +123,7 @@ class ToolCallFormatter:
         return f"{indent_str}{self.colors.dim(key)}: {value_str}"
 
     def render_tool_result(
-        self,
-        tool_result: ToolResult,
-        indent: int = 2,
-        show_data: bool = True
+        self, tool_result: ToolResult, indent: int = 2, show_data: bool = True
     ) -> list[str]:
         """Render tool result"""
         lines = []
@@ -174,11 +172,7 @@ class ToolCallFormatter:
             # For complex types, show summary
             return f"{type(data).__name__}: {str(data)[:100]}"
 
-    def render_diagnostics(
-        self,
-        diagnostics: list[Diagnostic],
-        indent: int = 0
-    ) -> list[str]:
+    def render_diagnostics(self, diagnostics: list[Diagnostic], indent: int = 0) -> list[str]:
         """Render diagnostic messages"""
         lines = []
         indent_str = " " * indent
@@ -225,7 +219,7 @@ class ToolCallFormatter:
         added_lines: int,
         removed_lines: int,
         hunks: list[DiffHunk] | None = None,
-        indent: int = 0
+        indent: int = 0,
     ) -> list[str]:
         """Render file update with diff"""
         lines = []
@@ -233,7 +227,9 @@ class ToolCallFormatter:
 
         # Header
         symbol = self.symbols.status("running")
-        header = f"{indent_str}{self.colors.yellow(symbol)} {self.colors.bold(f'Update({file_path})')}"
+        header = (
+            f"{indent_str}{self.colors.yellow(symbol)} {self.colors.bold(f'Update({file_path})')}"
+        )
         lines.append(header)
 
         # Summary
@@ -271,13 +267,7 @@ class ToolCallFormatter:
 
         return lines
 
-    def _render_diff_line(
-        self,
-        line_num: int,
-        content: str,
-        change_type: str,
-        indent: int
-    ) -> str:
+    def _render_diff_line(self, line_num: int, content: str, change_type: str, indent: int) -> str:
         """Render a single diff line"""
         indent_str = " " * indent
 

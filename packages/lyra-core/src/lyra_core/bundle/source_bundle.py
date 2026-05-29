@@ -14,6 +14,7 @@ plain strings or short lists, no anchors / refs / merges. We
 deliberately do not add a YAML dep just for this file; the parser is
 ~30 lines and lives in :func:`_parse_minimal_yaml`.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -119,11 +120,11 @@ class RoutineSpec:
     kind: Literal["cron", "webhook", "api"]
     name: str
     handler: str
-    schedule: str = ""             # for cron
-    timezone: str = "UTC"          # for cron
-    repo: str = ""                 # for webhook
-    events: tuple[str, ...] = ()   # for webhook
-    path: str = ""                 # for api
+    schedule: str = ""  # for cron
+    timezone: str = "UTC"  # for cron
+    repo: str = ""  # for webhook
+    events: tuple[str, ...] = ()  # for webhook
+    path: str = ""  # for api
 
 
 # ---- manifest ---------------------------------------------------------
@@ -166,9 +167,7 @@ class SourceBundle:
             raise BundleValidationError(f"bundle root not a directory: {root}")
         manifest_path = root / "bundle.yaml"
         if not manifest_path.exists():
-            raise BundleValidationError(
-                f"missing bundle.yaml at {manifest_path}"
-            )
+            raise BundleValidationError(f"missing bundle.yaml at {manifest_path}")
         meta = _parse_minimal_yaml(manifest_path.read_text(encoding="utf-8"))
 
         manifest = BundleManifest(
@@ -220,8 +219,7 @@ class SourceBundle:
             raise BundleValidationError("verifier.command is empty")
         if not (0.0 <= self.manifest.smoke_eval_threshold <= 1.0):
             raise BundleValidationError(
-                f"smoke_eval_threshold {self.manifest.smoke_eval_threshold} "
-                f"outside [0,1]"
+                f"smoke_eval_threshold {self.manifest.smoke_eval_threshold} " f"outside [0,1]"
             )
 
     # ---- hashing --------------------------------------------------
@@ -343,9 +341,7 @@ def _load_evals(root: Path, raw: Any) -> EvalSpec:
         raise BundleValidationError(f"evals.golden missing: {gp}")
     if not rp.exists():
         raise BundleValidationError(f"evals.rubric missing: {rp}")
-    eval_count = sum(
-        1 for line in gp.read_text(encoding="utf-8").splitlines() if line.strip()
-    )
+    eval_count = sum(1 for line in gp.read_text(encoding="utf-8").splitlines() if line.strip())
     return EvalSpec(golden_path=golden, rubric_path=rubric, eval_count=eval_count)
 
 
@@ -451,7 +447,9 @@ def _parse_block(lines: list[str]) -> Any:
     mapping. List items can span multiple lines, with sibling keys
     indented one level deeper than the leading ``- ``.
     """
-    stripped = [line.rstrip() for line in lines if line.strip() and not line.lstrip().startswith("#")]
+    stripped = [
+        line.rstrip() for line in lines if line.strip() and not line.lstrip().startswith("#")
+    ]
     if not stripped:
         return {}
 

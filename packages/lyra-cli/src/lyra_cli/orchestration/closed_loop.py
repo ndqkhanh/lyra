@@ -79,7 +79,7 @@ class ClosedLoopController:
         verify_fn: Callable[[Any], VerificationResult],
         correct_fn: Callable[[Any, VerificationResult], Any],
         initial_input: Any,
-        max_iterations: int | None = None
+        max_iterations: int | None = None,
     ) -> tuple[bool, Any, list[LoopIteration]]:
         """
         Execute a task with closed-loop verification.
@@ -149,11 +149,15 @@ class ClosedLoopController:
             # Update average iterations to success
             total_success = self.stats["successful_executions"]
             current_avg = self.stats["avg_iterations_to_success"]
-            new_avg = (current_avg * (total_success - 1) + len(execution.iterations)) / total_success
+            new_avg = (
+                current_avg * (total_success - 1) + len(execution.iterations)
+            ) / total_success
             self.stats["avg_iterations_to_success"] = new_avg
         else:
             self.stats["failed_executions"] += 1
-            execution.final_output = execution.iterations[-1].output_data if execution.iterations else None
+            execution.final_output = (
+                execution.iterations[-1].output_data if execution.iterations else None
+            )
 
         return success, execution.final_output, execution.iterations
 
@@ -272,7 +276,8 @@ class SimpleVerifier:
 
         # Check if exactly 0 tests passed (not "10 passed", "20 passed", etc.)
         import re
-        if re.search(r'\b0\s+passed\b', test_output):
+
+        if re.search(r"\b0\s+passed\b", test_output):
             issues.append("No tests passed")
 
         passed = len(issues) == 0

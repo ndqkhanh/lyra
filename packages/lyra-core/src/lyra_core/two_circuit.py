@@ -81,7 +81,11 @@ class TwoCircuitBridge:
         """Submit a Cold Path improvement for review."""
         self._pending[result.improvement_id] = result
         result.status = ImprovementStatus.PENDING
-        logger.info("Cold Path improvement submitted: %s (Δ=%.2f)", result.improvement_id, result.score_delta)
+        logger.info(
+            "Cold Path improvement submitted: %s (Δ=%.2f)",
+            result.improvement_id,
+            result.score_delta,
+        )
         return result.improvement_id
 
     async def review(

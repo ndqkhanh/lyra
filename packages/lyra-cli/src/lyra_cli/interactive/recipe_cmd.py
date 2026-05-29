@@ -12,6 +12,7 @@ Usage:
   /recipe run <name> [--dry-run]      — execute a recipe (scaffold files)
   /recipe run <name> [--dir <path>]   — run in specific directory
 """
+
 from __future__ import annotations
 
 import textwrap
@@ -24,17 +25,20 @@ from ..commands.registry import CommandResult
 
 # ── Recipe definition ──────────────────────────────────────────────────
 
+
 @dataclass
 class RecipeFile:
     """A file to be created by a recipe."""
-    path: str        # Relative path template
-    content: str     # File content template
+
+    path: str  # Relative path template
+    content: str  # File content template
     overwrite: bool = False
 
 
 @dataclass
 class Recipe:
     """A concrete, runnable workflow recipe."""
+
     name: str
     description: str
     steps: list[str]
@@ -43,17 +47,21 @@ class Recipe:
 
     @property
     def summary(self) -> str:
-        return f"[accent]{self.name}[/]  [dim]— {self.description}[/]  ({len(self.steps)} steps, {len(self.files)} files)"
+        return(
+            f"[accent]{self.name}[/]  [dim]— {self.description}[/]  ({len(self.steps)} steps, "
+            f"{len(self.files)} files)"
+        )
 
 
 # ── Built-in recipes ──────────────────────────────────────────────────
+
 
 def _scaffold_new_command(name: str) -> list[RecipeFile]:
     """Generate files for a new slash command."""
     return [
         RecipeFile(
             path=f"packages/lyra-cli/src/lyra_cli/interactive/{name}_cmd.py",
-            content=textwrap.dedent(f'''\
+            content=textwrap.dedent(f"""\
                 \"\"\"``/{name}`` — auto-generated command.
 
                 Usage:
@@ -84,12 +92,12 @@ def _scaffold_new_command(name: str) -> list[RecipeFile]:
 
 
                 __all__ = ["cmd_{name}"]
-            '''),
+            """),
             overwrite=False,
         ),
         RecipeFile(
             path=f"packages/lyra-cli/tests/test_{name}_cmd.py",
-            content=textwrap.dedent(f'''\
+            content=textwrap.dedent(f"""\
                 \"\"\"Tests for /{name} command.\"\"\"
                 from __future__ import annotations
 
@@ -106,7 +114,7 @@ def _scaffold_new_command(name: str) -> list[RecipeFile]:
                     result = cmd_{name}(FakeSession(), "")
                     assert result is not None
                     assert "default" in result.output
-            '''),
+            """),
             overwrite=False,
         ),
     ]
@@ -272,6 +280,7 @@ _SCAFFOLD_FN: dict[str, Callable[[str], list[RecipeFile]]] = {
 
 # ── Command handler ───────────────────────────────────────────────────
 
+
 def cmd_recipe(session: Any, args: str) -> CommandResult:
     """Concrete, runnable workflow recipes with file scaffolding.
 
@@ -388,10 +397,15 @@ def cmd_recipe(session: Any, args: str) -> CommandResult:
 
         if dry_run:
             lines.append("")
-            lines.append("[yellow]⚠ Dry run — no files written. Run without --dry-run to execute.[/]")
+            lines.append(
+                "[yellow]⚠ Dry run — no files written. Run without --dry-run to execute.[/]"
+            )
 
         return CommandResult(
-            output=f"Recipe '{recipe_name}': {len(list(recipe.files))} files, {len(recipe.steps)} steps",
+            output=(
+                f"Recipe '{recipe_name}': {len(list(recipe.files))} files, {len(recipe.steps)}"
+                f" steps"
+            ),
             renderable="\n".join(lines),
         )
 

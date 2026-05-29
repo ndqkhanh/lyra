@@ -166,7 +166,9 @@ class SprintModel:
         self._sprints[sprint.sprint_id] = failed
         return failed
 
-    def complete_sprint(self, sprint: Sprint, tasks: list[SprintTask] | None = None) -> SprintResult:
+    def complete_sprint(
+        self, sprint: Sprint, tasks: list[SprintTask] | None = None
+    ) -> SprintResult:
         done = Sprint(
             sprint_id=sprint.sprint_id,
             goal=sprint.goal,
@@ -178,7 +180,7 @@ class SprintModel:
         )
         self._sprints[sprint.sprint_id] = done
         all_artifacts: list[str] = []
-        for t in (tasks or []):
+        for t in tasks or []:
             all_artifacts.extend(t.artifacts)
         return SprintResult(
             sprint=done,

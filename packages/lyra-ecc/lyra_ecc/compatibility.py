@@ -6,7 +6,6 @@ Provides compatibility between ECC and Lyra architectures.
 
 import logging
 from pathlib import Path
-from typing import Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +13,7 @@ logger = logging.getLogger(__name__)
 class ECCCompatibilityLayer:
     """Main compatibility layer for ECC integration."""
 
-    def __init__(self, ecc_path: Optional[Path] = None):
+    def __init__(self, ecc_path: Path | None = None):
         """
         Initialize ECC compatibility layer.
 
@@ -54,7 +53,7 @@ class ECCCompatibilityLayer:
             logger.error(f"Failed to initialize ECC compatibility: {e}")
             return False
 
-    def _build_compatibility_matrix(self) -> Dict:
+    def _build_compatibility_matrix(self) -> dict:
         """Build compatibility matrix between ECC and Lyra."""
         matrix = {
             "skills": {
@@ -98,7 +97,7 @@ class ECCCompatibilityLayer:
             return 0
         return len(list(self.rules_path.glob("**/*.md")))
 
-    def get_compatibility_report(self) -> Dict:
+    def get_compatibility_report(self) -> dict:
         """
         Get compatibility report.
 

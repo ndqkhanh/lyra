@@ -42,7 +42,8 @@ class LeaderboardManager:
     """Manages leaderboards for models and domains."""
 
     def __init__(self) -> None:
-        self._entries: dict[str, dict[str, tuple[float, int, int]]] = {}  # category -> {name -> (score, num_evals, last_change)}
+        # category -> {name -> (score, num_evals, last_change)}
+        self._entries: dict[str, dict[str, tuple[float, int, int]]] = {}
         self._history: dict[str, list[tuple[float, float]]] = {}  # name -> [(timestamp, score)]
 
     async def update_entry(self, name: str, score: float, domain: str) -> None:
@@ -68,9 +69,7 @@ class LeaderboardManager:
             self._history[name] = []
         self._history[name].append((time.time(), score))
 
-    async def get_leaderboard(
-        self, category: str = "overall", top_k: int = 10
-    ) -> Leaderboard:
+    async def get_leaderboard(self, category: str = "overall", top_k: int = 10) -> Leaderboard:
         """Get the leaderboard for a category."""
         cat_entries = self._entries.get(category)
         if cat_entries is None:
@@ -82,9 +81,7 @@ class LeaderboardManager:
             )
 
         # Sort by score descending
-        sorted_items = sorted(
-            cat_entries.items(), key=lambda x: x[1][0], reverse=True
-        )
+        sorted_items = sorted(cat_entries.items(), key=lambda x: x[1][0], reverse=True)
 
         entries_list: list[LeaderboardEntry] = []
         for i, (name, (score, num_evals, change)) in enumerate(sorted_items[:top_k]):
@@ -135,9 +132,7 @@ class LeaderboardManager:
         for name in names:
             scores = model_scores[name]
             if not scores:
-                raise LeaderboardError(
-                    f"No scores found for model: {name}"
-                )
+                raise LeaderboardError(f"No scores found for model: {name}")
             avg = sum(scores) / len(scores)
             avg_scores.append((name, avg))
 

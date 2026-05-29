@@ -273,9 +273,7 @@ class AgentLoop:
                     except ContinueLoop as cont:
                         if result.stop_extensions < self.max_stop_extensions:
                             result.stop_extensions += 1
-                            messages.append(
-                                {"role": "user", "content": cont.user_message}
-                            )
+                            messages.append({"role": "user", "content": cont.user_message})
                             continue
                         # Cap reached — let the loop terminate even though
                         # the hook asked to continue. Mark stop_cap so the
@@ -286,7 +284,9 @@ class AgentLoop:
                     # No deny → conversation turn ends here.
                     result.final_text = content
                     result.stopped_by = (
-                        "end_turn" if stop_reason in ("end_turn", "stop", "complete") else stop_reason
+                        "end_turn"
+                        if stop_reason in ("end_turn", "stop", "complete")
+                        else stop_reason
                     )
                     break
 
@@ -379,9 +379,7 @@ class AgentLoop:
             return
 
         try:
-            self.review_executor.submit(
-                spawn_skill_review, self, session_id=session_id
-            )
+            self.review_executor.submit(spawn_skill_review, self, session_id=session_id)
         except Exception:
             # Never let the critical path fail on a review submission.
             return
@@ -404,9 +402,7 @@ class AgentLoop:
             SessionCtx(session_id=session_id, user_text=user_text),
         )
 
-    def _record_assistant(
-        self, session_id: str, content: str, tool_calls: list[dict]
-    ) -> None:
+    def _record_assistant(self, session_id: str, content: str, tool_calls: list[dict]) -> None:
         append = getattr(self.store, "append_message", None)
         if callable(append):
             append(
@@ -429,14 +425,17 @@ class AgentLoop:
         session_id = getattr(self, "_current_session_id", "unknown")
         turn = getattr(self, "_current_turn", 0)
         prompt_tokens = sum(len(str(m.get("content", ""))) // 4 for m in messages)
-        bus.emit(LLMCallStarted(
-            session_id=session_id,
-            prompt_tokens=prompt_tokens,
-            model="unknown",
-            turn=turn,
-        ))
+        bus.emit(
+            LLMCallStarted(
+                session_id=session_id,
+                prompt_tokens=prompt_tokens,
+                model="unknown",
+                turn=turn,
+            )
+        )
 
         import time
+
         start_time = time.time()
         response = call(messages=messages, tools=tool_defs)
         duration_ms = (time.time() - start_time) * 1000
@@ -447,15 +446,17 @@ class AgentLoop:
         # Emit LLMCallFinished event
         content = str(response.get("content", "") or "")
         output_tokens = len(content) // 4
-        bus.emit(LLMCallFinished(
-            session_id=session_id,
-            input_tokens=prompt_tokens,
-            output_tokens=output_tokens,
-            cache_read_tokens=0,
-            duration_ms=duration_ms,
-            model="unknown",
-            turn=turn,
-        ))
+        bus.emit(
+            LLMCallFinished(
+                session_id=session_id,
+                input_tokens=prompt_tokens,
+                output_tokens=output_tokens,
+                cache_read_tokens=0,
+                duration_ms=duration_ms,
+                model="unknown",
+                turn=turn,
+            )
+        )
 
         return dict(response)
 
@@ -479,15 +480,19 @@ class AgentLoop:
         bus = get_event_bus()
         session_id = getattr(self, "_current_session_id", "unknown")
         import json
+
         args_str = json.dumps(arguments if isinstance(arguments, dict) else {}, default=str)
         args_preview = args_str[:80]
-        bus.emit(ToolCallStarted(
-            session_id=session_id,
-            tool_name=name,
-            args_preview=args_preview,
-        ))
+        bus.emit(
+            ToolCallStarted(
+                session_id=session_id,
+                tool_name=name,
+                args_preview=args_preview,
+            )
+        )
 
         import time
+
         start_time = time.time()
         try:
             if isinstance(arguments, Mapping):
@@ -500,12 +505,14 @@ class AgentLoop:
             duration_ms = (time.time() - start_time) * 1000
 
             # Emit ToolCallFinished event (success)
-            bus.emit(ToolCallFinished(
-                session_id=session_id,
-                tool_name=name,
-                duration_ms=duration_ms,
-                is_error=False,
-            ))
+            bus.emit(
+                ToolCallFinished(
+                    session_id=session_id,
+                    tool_name=name,
+                    duration_ms=duration_ms,
+                    is_error=False,
+                )
+            )
             return result
 
         except KeyboardInterrupt:
@@ -516,12 +523,14 @@ class AgentLoop:
             error_result = {"error": str(exc), "type": type(exc).__name__}
 
             # Emit ToolCallFinished event (error)
-            bus.emit(ToolCallFinished(
-                session_id=session_id,
-                tool_name=name,
-                duration_ms=duration_ms,
-                is_error=True,
-            ))
+            bus.emit(
+                ToolCallFinished(
+                    session_id=session_id,
+                    tool_name=name,
+                    duration_ms=duration_ms,
+                    is_error=True,
+                )
+            )
             return error_result
 
 

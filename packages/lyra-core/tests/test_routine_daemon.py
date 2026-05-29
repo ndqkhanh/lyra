@@ -1,4 +1,5 @@
 """Tests for RoutineDaemon — drives RoutineRegistry on schedule."""
+
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
@@ -58,11 +59,13 @@ def test_daemon_skips_non_cron_triggers():
     reg = RoutineRegistry()
     reg.register_workflow("noop", lambda *_: None)
     reg.register_routine(
-        Routine(name="webhook.x", trigger=GitHubWebhookTrigger(repo="o/r", events=("push",)), workflow="noop")
+        Routine(
+            name="webhook.x",
+            trigger=GitHubWebhookTrigger(repo="o/r", events=("push",)),
+            workflow="noop",
+        )
     )
-    reg.register_routine(
-        Routine(name="api.x", trigger=HttpApiTrigger(path="/x"), workflow="noop")
-    )
+    reg.register_routine(Routine(name="api.x", trigger=HttpApiTrigger(path="/x"), workflow="noop"))
     d = RoutineDaemon(registry=reg)
     d._refresh_schedule()
     snap = d.schedule_snapshot()
@@ -144,8 +147,12 @@ def test_daemon_multiple_routines_independent_schedules():
 
     reg.register_workflow("fast", lambda n, p: counts.__setitem__("fast", counts["fast"] + 1))
     reg.register_workflow("slow", lambda n, p: counts.__setitem__("slow", counts["slow"] + 1))
-    reg.register_routine(Routine(name="r.fast", trigger=CronTrigger(expression="every 1m"), workflow="fast"))
-    reg.register_routine(Routine(name="r.slow", trigger=CronTrigger(expression="every 5m"), workflow="slow"))
+    reg.register_routine(
+        Routine(name="r.fast", trigger=CronTrigger(expression="every 1m"), workflow="fast")
+    )
+    reg.register_routine(
+        Routine(name="r.slow", trigger=CronTrigger(expression="every 5m"), workflow="slow")
+    )
 
     d = RoutineDaemon(registry=reg, clock=clock)
     d.tick_once()
@@ -165,7 +172,9 @@ def test_daemon_unparseable_expression_skipped():
     reg = RoutineRegistry()
     reg.register_workflow("noop", lambda *_: None)
     reg.register_routine(
-        Routine(name="x.bad", trigger=CronTrigger(expression="not a real schedule"), workflow="noop")
+        Routine(
+            name="x.bad", trigger=CronTrigger(expression="not a real schedule"), workflow="noop"
+        )
     )
     d = RoutineDaemon(registry=reg, clock=clock)
     d.tick_once()
@@ -184,6 +193,7 @@ def test_daemon_start_stop_threaded():
     try:
         # Let it tick a couple of times.
         import time as _t
+
         _t.sleep(0.2)
     finally:
         d.stop(timeout=2.0)
@@ -217,6 +227,7 @@ def test_daemon_emits_hir_event(monkeypatch):
         captured.append((name, attrs))
 
     from lyra_core.hir import events
+
     monkeypatch.setattr(events, "emit", fake_emit)
 
     clock = _MockClock(datetime(2026, 5, 9, 9, 0, tzinfo=timezone.utc))

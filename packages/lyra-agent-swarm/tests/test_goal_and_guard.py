@@ -114,7 +114,9 @@ class TestGoalEvent:
 
     def test_event_has_metrics_snapshot(self):
         m = GoalMetrics(tokens_used=500)
-        e = GoalEvent(timestamp=time.time(), event_type="progress", details="Working", metrics_snapshot=m)
+        e = GoalEvent(
+            timestamp=time.time(), event_type="progress", details="Working", metrics_snapshot=m
+        )
         assert e.metrics_snapshot.tokens_used == 500
 
 
@@ -514,7 +516,11 @@ class TestGuardVerdict:
         assert not v.is_blocked
 
     def test_block_verdict(self):
-        v = GuardVerdict(action=GuardAction.BLOCK, reason=GuardReason.DESTRUCTIVE_PATTERN, detail="rm -rf detected")
+        v = GuardVerdict(
+            action=GuardAction.BLOCK,
+            reason=GuardReason.DESTRUCTIVE_PATTERN,
+            detail="rm -rf detected",
+        )
         assert not v.is_allowed
         assert v.is_blocked
         assert v.detail == "rm -rf detected"
@@ -776,9 +782,15 @@ class TestContinuousGuardStats:
         g = ContinuousGuard()
         stats = g.stats()
         expected_keys = {
-            "consecutive_failures", "total_cost_usd", "files_modified",
-            "operations_this_minute", "is_paused", "pause_reason",
-            "total_operations", "success_rate", "cost_per_hour_limit",
+            "consecutive_failures",
+            "total_cost_usd",
+            "files_modified",
+            "operations_this_minute",
+            "is_paused",
+            "pause_reason",
+            "total_operations",
+            "success_rate",
+            "cost_per_hour_limit",
             "files_per_hour_limit",
         }
         assert set(stats.keys()) >= expected_keys

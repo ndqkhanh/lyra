@@ -140,7 +140,7 @@ class ToolOutputFilter:
         lines = output.splitlines()
         if len(lines) <= 30:
             return output
-        kept = [l for l in lines if l.strip() and not l.startswith('\t')]
+        kept = [line for line in lines if line.strip() and not line.startswith('\t')]
         return '\n'.join(kept[:50])
 
     def _filter_test(self, output: str) -> str:

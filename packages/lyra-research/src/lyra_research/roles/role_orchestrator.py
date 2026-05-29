@@ -13,6 +13,7 @@ Each role:
 - Validates input/output
 - Returns typed result
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -86,9 +87,7 @@ class RoleOrchestrator:
         print(f"[RoleOrchestrator] Step 1/5: Discovery (model: {self.discovery.model})")
         discovery_result = await self.discovery.run(query)
         if discovery_result.status.value != "success":
-            raise RuntimeError(
-                f"Discovery failed: {discovery_result.error}"
-            )
+            raise RuntimeError(f"Discovery failed: {discovery_result.error}")
         print(
             f"[RoleOrchestrator] Discovery complete: {discovery_result.total_sources} sources found"
         )
@@ -97,9 +96,7 @@ class RoleOrchestrator:
         print(f"[RoleOrchestrator] Step 2/5: Analysis (model: {self.analysis.model})")
         analysis_result = await self.analysis.run(discovery_result.sources)
         if analysis_result.status.value != "success":
-            raise RuntimeError(
-                f"Analysis failed: {analysis_result.error}"
-            )
+            raise RuntimeError(f"Analysis failed: {analysis_result.error}")
         print(
             f"[RoleOrchestrator] Analysis complete: {analysis_result.total_analyzed} analyses, "
             f"avg quality: {analysis_result.average_quality_score:.2f}"
@@ -109,11 +106,10 @@ class RoleOrchestrator:
         print(f"[RoleOrchestrator] Step 3/5: Synthesis (model: {self.synthesis.model})")
         synthesis_result = await self.synthesis.run(analysis_result.analyses)
         if synthesis_result.status.value != "success":
-            raise RuntimeError(
-                f"Synthesis failed: {synthesis_result.error}"
-            )
+            raise RuntimeError(f"Synthesis failed: {synthesis_result.error}")
         print(
-            f"[RoleOrchestrator] Synthesis complete: {synthesis_result.contradictions_found} contradictions, "
+            f"[RoleOrchestrator] Synthesis complete: {synthesis_result.contradictions_found}"
+            f" contradictions, "
             f"{synthesis_result.evidence_verified} evidence verified"
         )
 
@@ -121,9 +117,7 @@ class RoleOrchestrator:
         print(f"[RoleOrchestrator] Step 4/5: Review (model: {self.review.model})")
         review_result = await self.review.run(synthesis_result.report)
         if review_result.status.value != "success":
-            raise RuntimeError(
-                f"Review failed: {review_result.error}"
-            )
+            raise RuntimeError(f"Review failed: {review_result.error}")
         print(
             f"[RoleOrchestrator] Review complete: approved={review_result.approved}, "
             f"quality={review_result.overall_quality_score:.2f}, "
@@ -136,12 +130,8 @@ class RoleOrchestrator:
         curation_input = (synthesis_result.report, review_result)
         curation_result = await self.curator.run(curation_input)
         if curation_result.status.value != "success":
-            raise RuntimeError(
-                f"Curation failed: {curation_result.error}"
-            )
-        print(
-            f"[RoleOrchestrator] Curation complete: accepted={curation_result.accepted}"
-        )
+            raise RuntimeError(f"Curation failed: {curation_result.error}")
+        print(f"[RoleOrchestrator] Curation complete: accepted={curation_result.accepted}")
 
         completed_at = datetime.now(timezone.utc)
         total_duration = (completed_at - started_at).total_seconds()
@@ -170,9 +160,7 @@ class RoleOrchestrator:
         print(f"[RoleOrchestrator] Pipeline complete in {total_duration:.2f}s")
         return result
 
-    async def execute_partial_pipeline(
-        self, query: str, stop_at: str
-    ) -> dict[str, any]:
+    async def execute_partial_pipeline(self, query: str, stop_at: str) -> dict[str, any]:
         """
         Execute partial pipeline for testing/debugging.
 

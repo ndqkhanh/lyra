@@ -64,8 +64,7 @@ _PATTERNS: dict[ReasoningPatternType, tuple[tuple[str, Pattern[str], FlagSeverit
         (
             "fabricated_citation",
             re.compile(
-                r"\b(?:arxiv:\d{4}\.\d{5}|https?://\S+)\b"
-                r"(?!.*(?:exists|confirmed|verified))",
+                r"\b(?:arxiv:\d{4}\.\d{5}|https?://\S+)\b" r"(?!.*(?:exists|confirmed|verified))",
                 re.IGNORECASE,
             ),
             FlagSeverity.HIGH,
@@ -73,8 +72,7 @@ _PATTERNS: dict[ReasoningPatternType, tuple[tuple[str, Pattern[str], FlagSeverit
         (
             "contradictory_statement",
             re.compile(
-                r"(?=.*\b(?:always|never|must)\b)(?=.*\b(?:sometimes|maybe|might)\b)"
-                r".{0,200}",
+                r"(?=.*\b(?:always|never|must)\b)(?=.*\b(?:sometimes|maybe|might)\b)" r".{0,200}",
                 re.IGNORECASE | re.DOTALL,
             ),
             FlagSeverity.MEDIUM,
@@ -272,8 +270,8 @@ class ReasoningMonitor:
             raise SafetyViolation(report)
     """
 
-    _patterns: dict[ReasoningPatternType, tuple[tuple[str, Pattern[str], FlagSeverity], ...]] = field(
-        default_factory=lambda: dict(_PATTERNS)
+    _patterns: dict[ReasoningPatternType, tuple[tuple[str, Pattern[str], FlagSeverity], ...]] = (
+        field(default_factory=lambda: dict(_PATTERNS))
     )
     _history: list[ReasoningReport] = field(default_factory=list)
 
@@ -305,9 +303,7 @@ class ReasoningMonitor:
                             severity=severity,
                             matched_text=match.group(0)[:200],
                             pattern_name=pattern_name,
-                            confidence=self._compute_confidence(
-                                match.group(0), pattern
-                            ),
+                            confidence=self._compute_confidence(match.group(0), pattern),
                         )
                     )
 

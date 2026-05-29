@@ -3,7 +3,6 @@ Chain-of-Thought Reasoning Engine.
 """
 
 import time
-from typing import List, Optional
 
 from anthropic import Anthropic
 
@@ -27,7 +26,7 @@ class ChainOfThoughtEngine:
     - Adaptive depth
     """
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         self.client = Anthropic(api_key=api_key) if api_key else Anthropic()
 
     def reason(
@@ -70,7 +69,10 @@ class ChainOfThoughtEngine:
                 step.verification_score = verification_score
 
                 # Backtrack if verification fails
-                if verification_score < config.verification_threshold and config.enable_backtracking:
+                if (
+                    verification_score < config.verification_threshold
+                    and config.enable_backtracking
+                ):
                     if len(trace.steps) > 0:
                         # Remove last step and try alternative
                         removed_step = trace.steps.pop()
@@ -106,9 +108,9 @@ class ChainOfThoughtEngine:
     def _generate_step(
         self,
         current_state: str,
-        previous_steps: List[ReasoningStep],
+        previous_steps: list[ReasoningStep],
         config: ReasoningConfig,
-    ) -> Optional[ReasoningStep]:
+    ) -> ReasoningStep | None:
         """Generate the next reasoning step."""
         # Build context from previous steps
         context = self._build_context(current_state, previous_steps)
@@ -145,7 +147,7 @@ class ChainOfThoughtEngine:
         self,
         step: ReasoningStep,
         current_state: str,
-        previous_steps: List[ReasoningStep],
+        previous_steps: list[ReasoningStep],
     ) -> float:
         """
         Verify a reasoning step.
@@ -176,7 +178,7 @@ class ChainOfThoughtEngine:
     def _build_context(
         self,
         current_state: str,
-        previous_steps: List[ReasoningStep],
+        previous_steps: list[ReasoningStep],
     ) -> str:
         """Build context from current state and previous steps."""
         context = f"Task: {current_state}\n\n"
@@ -188,7 +190,7 @@ class ChainOfThoughtEngine:
 
         return context
 
-    def _determine_step_type(self, previous_steps: List[ReasoningStep]) -> StepType:
+    def _determine_step_type(self, previous_steps: list[ReasoningStep]) -> StepType:
         """Determine the type of the next step."""
         if not previous_steps:
             return StepType.HYPOTHESIS
@@ -214,10 +216,20 @@ class ChainOfThoughtEngine:
     def _build_prompt(self, context: str, step_type: StepType) -> str:
         """Build prompt for step generation."""
         prompts = {
-            StepType.HYPOTHESIS: "Based on the task, what is your initial hypothesis or approach? Be specific and clear.",
-            StepType.EVIDENCE: "What evidence or information supports or refutes the current reasoning? Provide concrete details.",
-            StepType.ANALYSIS: "Analyze the evidence and reasoning so far. What conclusions can you draw?",
-            StepType.CONCLUSION: "Based on all the reasoning above, what is your final conclusion? Be definitive.",
+            StepType.HYPOTHESIS:(
+                "Based on the task, what is your initial hypothesis or approach? Be specific and"
+                "clear."
+            ),
+            StepType.EVIDENCE:(
+                "What evidence or information supports or refutes the current reasoning? Provide"
+                "concrete details."
+            ),
+            StepType.ANALYSIS:(
+                "Analyze the evidence and reasoning so far. What conclusions can you draw?"
+            ),
+            StepType.CONCLUSION:(
+                "Based on all the reasoning above, what is your final conclusion? Be definitive."
+            ),
         }
 
         instruction = prompts.get(step_type, "Continue reasoning about this task.")

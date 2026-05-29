@@ -94,9 +94,7 @@ class BudgetDashboard:
         """Return the budget configuration."""
         return self._config
 
-    async def record_cost(
-        self, category: str, amount: float, model: str, tokens: int
-    ) -> str:
+    async def record_cost(self, category: str, amount: float, model: str, tokens: int) -> str:
         """Record a new cost entry.
 
         Args:
@@ -139,12 +137,8 @@ class BudgetDashboard:
         day_start = now - (now % 86400)
         month_start = now - (now % (86400 * 30))
 
-        daily_spend = sum(
-            e.amount for e in self._entries if e.timestamp >= day_start
-        )
-        monthly_spend = sum(
-            e.amount for e in self._entries if e.timestamp >= month_start
-        )
+        daily_spend = sum(e.amount for e in self._entries if e.timestamp >= day_start)
+        monthly_spend = sum(e.amount for e in self._entries if e.timestamp >= month_start)
 
         remaining_daily = max(0.0, self._config.daily_limit - daily_spend)
         remaining_monthly = max(0.0, self._config.monthly_limit - monthly_spend)
@@ -157,14 +151,28 @@ class BudgetDashboard:
 
         alerts_list: list[str] = []
         if daily_spend >= self._config.daily_limit:
-            alerts_list.append(f"Daily limit of {self._config.currency} {self._config.daily_limit} exceeded")
+            alerts_list.append(
+                f"Daily limit of {self._config.currency} {self._config.daily_limit} exceeded"
+            )
         elif daily_spend >= self._config.daily_limit * self._config.alert_threshold:
-            alerts_list.append(f"Daily spend at {daily_spend / self._config.daily_limit:.0%} of limit (threshold: {self._config.alert_threshold:.0%})")
+            alerts_list.append(
+
+                    f"Daily spend at {daily_spend / self._config.daily_limit:.0%}"
+                    f" of limit (threshold: {self._config.alert_threshold:.0%})"
+
+            )
 
         if monthly_spend >= self._config.monthly_limit:
-            alerts_list.append(f"Monthly limit of {self._config.currency} {self._config.monthly_limit} exceeded")
+            alerts_list.append(
+                f"Monthly limit of {self._config.currency} {self._config.monthly_limit} exceeded"
+            )
         elif monthly_spend >= self._config.monthly_limit * self._config.alert_threshold:
-            alerts_list.append(f"Monthly spend at {monthly_spend / self._config.monthly_limit:.0%} of limit (threshold: {self._config.alert_threshold:.0%})")
+            alerts_list.append(
+
+                    f"Monthly spend at {monthly_spend / self._config.monthly_limit:.0%}"
+                    f" of limit (threshold: {self._config.alert_threshold:.0%})"
+
+            )
 
         return BudgetReport(
             daily_spend=daily_spend,
@@ -185,6 +193,4 @@ class BudgetDashboard:
             A tuple of CostEntry instances from the specified period.
         """
         cutoff = time.time() - (hours * 3600)
-        return tuple(
-            e for e in self._entries if e.timestamp >= cutoff
-        )
+        return tuple(e for e in self._entries if e.timestamp >= cutoff)

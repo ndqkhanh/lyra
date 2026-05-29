@@ -24,6 +24,7 @@ from pathlib import Path
 @dataclass
 class Lesson:
     """A lesson learned from experience."""
+
     id: int | None
     tags: list[str]
     verdict: str
@@ -33,6 +34,7 @@ class Lesson:
 
 
 # ── Tier 1: Core Memory ────────────────────────────────────────────────────
+
 
 class CoreMemoryStore:
     """Always-in-context user facts. ≤500 tokens. JSON-persisted.
@@ -93,6 +95,7 @@ class CoreMemoryStore:
 
 
 # ── Tier 2: Archival Memory ────────────────────────────────────────────────
+
 
 class ArchivalStore:
     """SQLite FTS5 store for past session summaries. Retrieved by BM25 search.
@@ -159,6 +162,7 @@ class ArchivalStore:
 
 # ── Tier 3: Reasoning Bank (existing) ─────────────────────────────────────
 
+
 class ReasoningBank:
     """SQLite-backed store for lessons learned from experience."""
 
@@ -189,7 +193,10 @@ class ReasoningBank:
     ) -> int:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.execute(
-                "INSERT INTO lessons (tags, verdict, lesson, context, timestamp) VALUES (?, ?, ?, ?, ?)",
+(
+                    "INSERT INTO lessons (tags, verdict, lesson, context, timestamp) VALUES (?, ?,"
+                    "?, ?, ?)"
+                ),
                 (json.dumps(tags), verdict, lesson, context, datetime.now().isoformat()),
             )
             return cursor.lastrowid  # type: ignore[return-value]
@@ -206,14 +213,14 @@ class ReasoningBank:
                     cursor = conn.execute(
                         "SELECT id, tags, verdict, lesson, context, timestamp "
                         "FROM lessons WHERE tags LIKE ? ORDER BY timestamp DESC",
-                        (f'%{tag}%',),
+                        (f"%{tag}%",),
                     )
                     results.extend(cursor.fetchall())
             elif query:
                 cursor = conn.execute(
                     "SELECT id, tags, verdict, lesson, context, timestamp "
                     "FROM lessons WHERE lesson LIKE ? OR context LIKE ? ORDER BY timestamp DESC",
-                    (f'%{query}%', f'%{query}%'),
+                    (f"%{query}%", f"%{query}%"),
                 )
                 results = cursor.fetchall()
             else:
@@ -237,6 +244,7 @@ class ReasoningBank:
 
 
 # ── Facade ─────────────────────────────────────────────────────────────────
+
 
 class MemoryManager:
     """Facade over all memory tiers. Used by TUI commands and agent_integration."""
@@ -266,9 +274,7 @@ class MemoryManager:
 
     # ── Tier 2: Archival memory ──────────────────────────────────────────
 
-    def archive_session(
-        self, session_id: str, summary: str, tags: list[str] | None = None
-    ) -> None:
+    def archive_session(self, session_id: str, summary: str, tags: list[str] | None = None) -> None:
         self.archival.store(session_id, summary, tags)
 
     def search_archival(self, query: str, limit: int = 3) -> list[str]:
@@ -351,9 +357,5 @@ class MemoryManager:
 
     def _save_memories(self) -> None:
         memory_dir = Path("~/.lyra/memory").expanduser()
-        (memory_dir / "skills_memory.json").write_text(
-            json.dumps(self.skills_memory, indent=2)
-        )
-        (memory_dir / "playbook_memory.json").write_text(
-            json.dumps(self.playbook_memory, indent=2)
-        )
+        (memory_dir / "skills_memory.json").write_text(json.dumps(self.skills_memory, indent=2))
+        (memory_dir / "playbook_memory.json").write_text(json.dumps(self.playbook_memory, indent=2))

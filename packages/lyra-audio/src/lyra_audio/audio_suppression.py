@@ -34,7 +34,7 @@ class SilentHours:
     """
 
     start_hhmm: str  # e.g. "22:00"
-    end_hhmm: str    # e.g. "07:00"
+    end_hhmm: str  # e.g. "07:00"
 
     def __post_init__(self) -> None:
         self._validate()
@@ -202,7 +202,10 @@ class AudioSuppression:
                 return SuppressionResult(
                     suppressed=True,
                     reason=SuppressionReason.SPAM_THROTTLE,
-                    detail=f"Annoyed threshold reached: {len(self._play_timestamps)} plays in {self._config.annoyed_window_seconds}s",
+                    detail=(
+                        f"Annoyed threshold reached: {len(self._play_timestamps)} plays in "
+                        f"{self._config.annoyed_window_seconds}s"
+                    ),
                 )
 
         return SuppressionResult(

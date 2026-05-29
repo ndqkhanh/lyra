@@ -8,7 +8,7 @@ import logging
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +28,8 @@ class Rule:
     name: str
     description: str
     severity: RuleSeverity
-    language: Optional[str] = None
-    pattern: Optional[str] = None
+    language: str | None = None
+    pattern: str | None = None
 
     def applies_to(self, file_path: Path) -> bool:
         """Check if rule applies to file."""
@@ -75,7 +75,7 @@ class Rule:
 class RuleCheckResult:
     """Result of checking code against a rule."""
     passed: bool
-    message: Optional[str] = None
+    message: str | None = None
     line: int = 0
 
 
@@ -86,13 +86,13 @@ class RuleViolation:
     severity: RuleSeverity
     message: str
     line: int
-    file_path: Optional[Path] = None
+    file_path: Path | None = None
 
 
 class RulesEngine:
     """ECC-compatible rules engine for Lyra."""
 
-    def __init__(self, rules_path: Optional[Path] = None):
+    def __init__(self, rules_path: Path | None = None):
         """
         Initialize rules engine.
 
@@ -100,9 +100,9 @@ class RulesEngine:
             rules_path: Path to rules directory
         """
         self.rules_path = rules_path or Path.home() / ".claude" / "rules"
-        self.common_rules: List[Rule] = []
-        self.language_rules: Dict[str, List[Rule]] = {}
-        self.active_rules: List[Rule] = []
+        self.common_rules: list[Rule] = []
+        self.language_rules: dict[str, list[Rule]] = {}
+        self.active_rules: list[Rule] = []
 
         self._load_rules()
 
@@ -129,10 +129,10 @@ class RulesEngine:
     def _load_rules_from_dir(
         self,
         rules_dir: Path,
-        language: Optional[str] = None
-    ) -> List[Rule]:
+        language: str | None = None
+    ) -> list[Rule]:
         """Load rules from a directory."""
-        rules: List[Rule] = []
+        rules: list[Rule] = []
 
         for rule_file in rules_dir.glob("*.md"):
             try:
@@ -143,7 +143,7 @@ class RulesEngine:
 
         return rules
 
-    def _parse_rule_file(self, rule_file: Path, language: Optional[str]) -> Rule:
+    def _parse_rule_file(self, rule_file: Path, language: str | None) -> Rule:
         """Parse a rule file."""
         content = rule_file.read_text()
 
@@ -183,7 +183,7 @@ class RulesEngine:
 
         logger.info(f"Activated {len(self.active_rules)} rules for project")
 
-    def _detect_languages(self, project_path: Path) -> List[str]:
+    def _detect_languages(self, project_path: Path) -> list[str]:
         """Detect programming languages used in project."""
         languages = set()
 
@@ -212,7 +212,7 @@ class RulesEngine:
 
         return list(languages)
 
-    def check(self, code: str, file_path: Path) -> List[RuleViolation]:
+    def check(self, code: str, file_path: Path) -> list[RuleViolation]:
         """
         Check code against active rules.
 
@@ -223,7 +223,7 @@ class RulesEngine:
         Returns:
             List of rule violations
         """
-        violations: List[RuleViolation] = []
+        violations: list[RuleViolation] = []
 
         for rule in self.active_rules:
             if rule.applies_to(file_path):
@@ -239,7 +239,7 @@ class RulesEngine:
 
         return violations
 
-    def get_rules_summary(self) -> Dict[str, Any]:
+    def get_rules_summary(self) -> dict[str, Any]:
         """Get summary of loaded rules."""
         return {
             "common_rules": len(self.common_rules),

@@ -109,13 +109,15 @@ class SkillOptimizer:
             current_score = best_score
             self._pass_counter += 1
 
-            passes.append(OptimizationPass(
-                pass_id=f"opt-{self._pass_counter:04d}",
-                edits=(best_edit,),
-                score_before=round(current_score - improvement, 4),
-                score_after=round(current_score, 4),
-                delta=round(improvement, 4),
-            ))
+            passes.append(
+                OptimizationPass(
+                    pass_id=f"opt-{self._pass_counter:04d}",
+                    edits=(best_edit,),
+                    score_before=round(current_score - improvement, 4),
+                    score_after=round(current_score, 4),
+                    delta=round(improvement, 4),
+                )
+            )
 
         self._history.extend(passes)
         return current_text, passes
@@ -145,9 +147,9 @@ class SkillOptimizer:
 
         # Specificity: detect parameters, examples, edge cases
         specificity_signals = [
-            r"\{[\w_]+\}",           # {parameter} placeholders
-            r"`[^`]+`",              # inline code
-            r"e\.g\.",               # examples
+            r"\{[\w_]+\}",  # {parameter} placeholders
+            r"`[^`]+`",  # inline code
+            r"e\.g\.",  # examples
             r"for example",
             r"returns?",
             r"raises?",
@@ -166,7 +168,10 @@ class SkillOptimizer:
         )
 
     def _generate_edits(
-        self, text: str, strategy: OptimizationStrategy, domain: str = "",
+        self,
+        text: str,
+        strategy: OptimizationStrategy,
+        domain: str = "",
     ) -> list[TextEdit]:
         """Generate candidate edits for a given strategy."""
         edits: list[TextEdit] = []
@@ -197,13 +202,15 @@ class SkillOptimizer:
         for pattern, replacement, rationale in substitutions:
             match = re.search(pattern, text, re.IGNORECASE)
             if match:
-                edits.append(TextEdit(
-                    strategy=OptimizationStrategy.CLARIFY,
-                    original_segment=match.group(),
-                    optimized_segment=replacement,
-                    rationale=rationale,
-                    expected_improvement=0.05,
-                ))
+                edits.append(
+                    TextEdit(
+                        strategy=OptimizationStrategy.CLARIFY,
+                        original_segment=match.group(),
+                        optimized_segment=replacement,
+                        rationale=rationale,
+                        expected_improvement=0.05,
+                    )
+                )
         return edits
 
     def _condense_edits(self, text: str) -> list[TextEdit]:
@@ -217,13 +224,15 @@ class SkillOptimizer:
         ]
         for redundant, concise in redundancies:
             if redundant in text:
-                edits.append(TextEdit(
-                    strategy=OptimizationStrategy.CONDENSE,
-                    original_segment=redundant,
-                    optimized_segment=concise,
-                    rationale=f"Remove redundant phrase '{redundant.strip()}'",
-                    expected_improvement=0.03,
-                ))
+                edits.append(
+                    TextEdit(
+                        strategy=OptimizationStrategy.CONDENSE,
+                        original_segment=redundant,
+                        optimized_segment=concise,
+                        rationale=f"Remove redundant phrase '{redundant.strip()}'",
+                        expected_improvement=0.03,
+                    )
+                )
         return edits
 
     def _restructure_edits(self, text: str) -> list[TextEdit]:
@@ -231,29 +240,35 @@ class SkillOptimizer:
         # Add section headers if missing
         if "## " not in text and len(text) > 200:
             header = "## Instructions\n\n"
-            edits.append(TextEdit(
-                strategy=OptimizationStrategy.RESTRUCTURE,
-                original_segment=text[:min(10, len(text))],
-                optimized_segment=header + text[:min(10, len(text))],
-                rationale="Add markdown section header for structure",
-                expected_improvement=0.04,
-            ))
+            edits.append(
+                TextEdit(
+                    strategy=OptimizationStrategy.RESTRUCTURE,
+                    original_segment=text[: min(10, len(text))],
+                    optimized_segment=header + text[: min(10, len(text))],
+                    rationale="Add markdown section header for structure",
+                    expected_improvement=0.04,
+                )
+            )
         return edits
 
     def _example_edits(self, text: str, domain: str = "") -> list[TextEdit]:
         edits: list[TextEdit] = []
         if "e.g." not in text and "for example" not in text.lower():
-            example = f"\n\ne.g. `{domain}_tool(input=\"value\") -> expected_output`" if domain else ""
+            example = (
+                f'\n\ne.g. `{domain}_tool(input="value") -> expected_output`' if domain else ""
+            )
             if example:
                 last_period = text.rfind(".")
                 if last_period > 0:
-                    edits.append(TextEdit(
-                        strategy=OptimizationStrategy.ADD_EXAMPLES,
-                        original_segment=text[last_period:last_period + 1],
-                        optimized_segment=f".{example}",
-                        rationale="Add concrete usage example for clarity",
-                        expected_improvement=0.06,
-                    ))
+                    edits.append(
+                        TextEdit(
+                            strategy=OptimizationStrategy.ADD_EXAMPLES,
+                            original_segment=text[last_period : last_period + 1],
+                            optimized_segment=f".{example}",
+                            rationale="Add concrete usage example for clarity",
+                            expected_improvement=0.06,
+                        )
+                    )
         return edits
 
     @property

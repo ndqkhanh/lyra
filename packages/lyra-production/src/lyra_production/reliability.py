@@ -4,7 +4,6 @@ Based on 2026 production patterns: stateful orchestration layer, embedded
 observability at every decision point, and continuous evaluation loops.
 """
 
-
 from .models import ExecutionState, ReliabilitySnapshot
 
 
@@ -47,7 +46,7 @@ class ThreeLayerReliability:
     def retry_delay(self, execution_id: str) -> float:
         """Exponential backoff delay for retries."""
         retries = self._retry_counts.get(execution_id, 0)
-        return self._retry_delay_base ** retries
+        return self._retry_delay_base**retries
 
     def record_evaluation(self, execution_id: str, score: float) -> None:
         """Record a continuous evaluation score."""
@@ -66,7 +65,11 @@ class ThreeLayerReliability:
         """Generate a point-in-time reliability snapshot."""
         total = len(self._executions)
         successful = sum(1 for s in self._executions.values() if s == ExecutionState.COMPLETED)
-        failed = sum(1 for s in self._executions.values() if s in (ExecutionState.FAILED, ExecutionState.RETRYING))
+        failed = sum(
+            1
+            for s in self._executions.values()
+            if s in (ExecutionState.FAILED, ExecutionState.RETRYING)
+        )
         retried = sum(1 for s in self._executions.values() if s == ExecutionState.RETRYING)
 
         all_scores = [s for scores in self._eval_scores.values() for s in scores]

@@ -158,9 +158,24 @@ class TestHeuristicPool:
         pool = self._make_pool()
         order = []
 
-        h1 = MemoryHeuristic(name="low", priority=0.1, condition=lambda m: True, action=lambda m: order.append("low") or 1)
-        h2 = MemoryHeuristic(name="high", priority=0.9, condition=lambda m: True, action=lambda m: order.append("high") or 1)
-        h3 = MemoryHeuristic(name="mid", priority=0.5, condition=lambda m: True, action=lambda m: order.append("mid") or 1)
+        h1 = MemoryHeuristic(
+            name="low",
+            priority=0.1,
+            condition=lambda m: True,
+            action=lambda m: order.append("low") or 1,
+        )
+        h2 = MemoryHeuristic(
+            name="high",
+            priority=0.9,
+            condition=lambda m: True,
+            action=lambda m: order.append("high") or 1,
+        )
+        h3 = MemoryHeuristic(
+            name="mid",
+            priority=0.5,
+            condition=lambda m: True,
+            action=lambda m: order.append("mid") or 1,
+        )
 
         pool.register(h1)
         pool.register(h2)
@@ -173,8 +188,10 @@ class TestHeuristicPool:
         pool = self._make_pool()
         for i in range(5):
             h = MemoryHeuristic(
-                name=f"h{i}", priority=float(i),
-                condition=lambda m: True, action=lambda m: 1,
+                name=f"h{i}",
+                priority=float(i),
+                condition=lambda m: True,
+                action=lambda m: 1,
             )
             pool.register(h)
 
@@ -183,14 +200,18 @@ class TestHeuristicPool:
 
     def test_apply_skips_disabled(self):
         pool = self._make_pool()
-        h = MemoryHeuristic(name="off", priority=1.0, condition=lambda m: True, action=lambda m: 1, enabled=False)
+        h = MemoryHeuristic(
+            name="off", priority=1.0, condition=lambda m: True, action=lambda m: 1, enabled=False
+        )
         pool.register(h)
         affected = pool.apply(self._make_module())
         assert affected == 0
 
     def test_apply_skips_non_matching(self):
         pool = self._make_pool()
-        h = MemoryHeuristic(name="never", priority=1.0, condition=lambda m: False, action=lambda m: 1)
+        h = MemoryHeuristic(
+            name="never", priority=1.0, condition=lambda m: False, action=lambda m: 1
+        )
         pool.register(h)
         affected = pool.apply(self._make_module())
         assert affected == 0
@@ -199,8 +220,10 @@ class TestHeuristicPool:
         pool = self._make_pool()
         for i in range(5):
             h = MemoryHeuristic(
-                name=f"h{i}", priority=float(i),
-                condition=lambda m: True, action=lambda m: 1,
+                name=f"h{i}",
+                priority=float(i),
+                condition=lambda m: True,
+                action=lambda m: 1,
             )
             pool.register(h)
 
@@ -211,7 +234,9 @@ class TestHeuristicPool:
     def test_top_k_skips_disabled(self):
         pool = self._make_pool()
         h1 = MemoryHeuristic(name="on", priority=1.0, condition=lambda m: True, action=lambda m: 1)
-        h2 = MemoryHeuristic(name="off", priority=0.9, condition=lambda m: True, action=lambda m: 1, enabled=False)
+        h2 = MemoryHeuristic(
+            name="off", priority=0.9, condition=lambda m: True, action=lambda m: 1, enabled=False
+        )
         pool.register(h1)
         pool.register(h2)
         top = pool.top_k(2)
@@ -220,9 +245,15 @@ class TestHeuristicPool:
 
     def test_find_by_substring(self):
         pool = self._make_pool()
-        h1 = MemoryHeuristic(name="compress_large", priority=0.5, condition=lambda m: True, action=lambda m: 1)
-        h2 = MemoryHeuristic(name="compress_small", priority=0.3, condition=lambda m: True, action=lambda m: 1)
-        h3 = MemoryHeuristic(name="evict_old", priority=0.7, condition=lambda m: True, action=lambda m: 1)
+        h1 = MemoryHeuristic(
+            name="compress_large", priority=0.5, condition=lambda m: True, action=lambda m: 1
+        )
+        h2 = MemoryHeuristic(
+            name="compress_small", priority=0.3, condition=lambda m: True, action=lambda m: 1
+        )
+        h3 = MemoryHeuristic(
+            name="evict_old", priority=0.7, condition=lambda m: True, action=lambda m: 1
+        )
         pool.register(h1)
         pool.register(h2)
         pool.register(h3)
@@ -232,7 +263,9 @@ class TestHeuristicPool:
 
     def test_find_case_insensitive(self):
         pool = self._make_pool()
-        h = MemoryHeuristic(name="COMPRESS", priority=0.5, condition=lambda m: True, action=lambda m: 1)
+        h = MemoryHeuristic(
+            name="COMPRESS", priority=0.5, condition=lambda m: True, action=lambda m: 1
+        )
         pool.register(h)
         assert len(pool.find("compress")) == 1
 

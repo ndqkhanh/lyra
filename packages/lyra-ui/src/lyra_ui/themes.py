@@ -262,7 +262,9 @@ class ThemeManager:
 
         # Add rows
         table.add_row("Primary", theme.primary, f"[{theme.primary}]Sample[/{theme.primary}]")
-        table.add_row("Secondary", theme.secondary, f"[{theme.secondary}]Sample[/{theme.secondary}]")
+        table.add_row(
+            "Secondary", theme.secondary, f"[{theme.secondary}]Sample[/{theme.secondary}]"
+        )
         table.add_row("Success", theme.success, f"[{theme.success}]Sample[/{theme.success}]")
         table.add_row("Warning", theme.warning, f"[{theme.warning}]Sample[/{theme.warning}]")
         table.add_row("Error", theme.error, f"[{theme.error}]Sample[/{theme.error}]")
@@ -329,16 +331,18 @@ class ThemeManager:
             Rich theme
         """
         theme = self.get_theme(name)
-        return RichTheme({
-            "primary": theme.primary,
-            "secondary": theme.secondary,
-            "success": theme.success,
-            "warning": theme.warning,
-            "error": theme.error,
-            "info": theme.info,
-            "dim": theme.dim,
-            "bright": theme.bright,
-        })
+        return RichTheme(
+            {
+                "primary": theme.primary,
+                "secondary": theme.secondary,
+                "success": theme.success,
+                "warning": theme.warning,
+                "error": theme.error,
+                "info": theme.info,
+                "dim": theme.dim,
+                "bright": theme.bright,
+            }
+        )
 
 
 class AnimationEffects:

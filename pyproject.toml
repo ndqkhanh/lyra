@@ -118,6 +118,7 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "packages/**/tests/**/*.py" = ["B017"]  # Allow broad exception assertions in tests
+"packages/**/__init__.py" = ["F401"]  # Allow unused imports for re-exports
 
 [tool.mypy]
 python_version = "3.10"

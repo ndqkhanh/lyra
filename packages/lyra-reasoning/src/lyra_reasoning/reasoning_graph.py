@@ -13,7 +13,7 @@ import copy
 import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
 
 __all__ = [
     "EvidenceNode",
@@ -43,7 +43,7 @@ class EvidenceNode:
     claim: str
     evidence_type: str = "observation"
     confidence: float = 0.5
-    sources: Tuple[str, ...] = field(default_factory=tuple)
+    sources: tuple[str, ...] = field(default_factory=tuple)
     timestamp: float = field(default_factory=time.time)
 
     def __post_init__(self: EvidenceNode) -> None:
@@ -101,10 +101,10 @@ class ReasoningGraph:
     """
 
     def __init__(self: ReasoningGraph) -> None:
-        self._nodes: Dict[str, EvidenceNode] = {}
-        self._edges: Dict[str, ReasoningEdge] = {}
-        self._outgoing: Dict[str, List[str]] = defaultdict(list)
-        self._incoming: Dict[str, List[str]] = defaultdict(list)
+        self._nodes: dict[str, EvidenceNode] = {}
+        self._edges: dict[str, ReasoningEdge] = {}
+        self._outgoing: dict[str, list[str]] = defaultdict(list)
+        self._incoming: dict[str, list[str]] = defaultdict(list)
 
     # ------------------------------------------------------------------
     # Mutation
@@ -150,15 +150,15 @@ class ReasoningGraph:
     # Query utilities
     # ------------------------------------------------------------------
 
-    def get_node(self: ReasoningGraph, node_id: str) -> Optional[EvidenceNode]:
+    def get_node(self: ReasoningGraph, node_id: str) -> EvidenceNode | None:
         """Look up a node by ID, returning ``None`` if absent."""
         return self._nodes.get(node_id)
 
-    def get_edge(self: ReasoningGraph, edge_id: str) -> Optional[ReasoningEdge]:
+    def get_edge(self: ReasoningGraph, edge_id: str) -> ReasoningEdge | None:
         """Look up an edge by ID, returning ``None`` if absent."""
         return self._edges.get(edge_id)
 
-    def get_support_chain(self: ReasoningGraph, node_id: str) -> List[EvidenceNode]:
+    def get_support_chain(self: ReasoningGraph, node_id: str) -> list[EvidenceNode]:
         """Walk the graph to discover all evidence that supports *node_id*.
 
         Performs a backward traversal following ``supports`` and ``refines``
@@ -172,7 +172,7 @@ class ReasoningGraph:
         if node_id not in self._nodes:
             return []
 
-        visited: Set[str] = set()
+        visited: set[str] = set()
         queue: deque = deque()
         queue.append(node_id)
         visited.add(node_id)
@@ -190,7 +190,7 @@ class ReasoningGraph:
         # Return all visited nodes *except* the queried node itself
         return [self._nodes[nid] for nid in visited if nid != node_id]
 
-    def get_contradictions(self: ReasoningGraph, node_id: str) -> List[EvidenceNode]:
+    def get_contradictions(self: ReasoningGraph, node_id: str) -> list[EvidenceNode]:
         """Find nodes that contradict the claim made by *node_id*.
 
         Traverses ``contradicts`` edges in both directions — a node may
@@ -202,7 +202,7 @@ class ReasoningGraph:
         if node_id not in self._nodes:
             return []
 
-        contradicting: Set[str] = set()
+        contradicting: set[str] = set()
 
         for edge_id in self._outgoing.get(node_id, []):
             edge = self._edges[edge_id]
@@ -220,7 +220,7 @@ class ReasoningGraph:
     # Pattern mining
     # ------------------------------------------------------------------
 
-    def find_patterns(self: ReasoningGraph) -> List[Dict[str, Any]]:
+    def find_patterns(self: ReasoningGraph) -> list[dict[str, Any]]:
         """Mine common reasoning subgraph structures.
 
         Currently detects three pattern types:
@@ -234,12 +234,12 @@ class ReasoningGraph:
             A list of dictionaries with keys ``pattern_type``, ``frequency``,
             and ``example_node_ids``.
         """
-        patterns: List[Dict[str, Any]] = []
-        seen: Set[str] = set()
+        patterns: list[dict[str, Any]] = []
+        seen: set[str] = set()
 
         # --- Pattern 1: observation → inference → conclusion ---
         chain_count = 0
-        chain_examples: List[str] = []
+        chain_examples: list[str] = []
         for nid, node in self._nodes.items():
             if node.evidence_type != "observation":
                 continue
@@ -274,8 +274,8 @@ class ReasoningGraph:
 
         # --- Pattern 2: contradiction pairs ---
         contradiction_pairs = 0
-        contradiction_examples: List[str] = []
-        for eid, edge in self._edges.items():
+        contradiction_examples: list[str] = []
+        for _eid, edge in self._edges.items():
             if edge.relation == "contradicts":
                 contradiction_pairs += 1
                 if len(contradiction_examples) < 3:
@@ -290,16 +290,16 @@ class ReasoningGraph:
 
         # --- Pattern 3: refinement chains (3+ nodes via refines) ---
         refinement_chains = 0
-        refinement_examples: List[str] = []
-        visited_edges: Set[str] = set()
+        refinement_examples: list[str] = []
+        visited_edges: set[str] = set()
 
         for start_nid in self._nodes:
             if start_nid in visited_edges:
                 continue
-            chain: List[str] = []
+            chain: list[str] = []
             cur = start_nid
             while cur:
-                next_nid: Optional[str] = None
+                next_nid: str | None = None
                 for eid in self._outgoing.get(cur, []):
                     edge = self._edges[eid]
                     if edge.relation == "refines":
@@ -341,7 +341,7 @@ class ReasoningGraph:
         Returns:
             The total number of removed nodes.
         """
-        to_remove: Set[str] = {
+        to_remove: set[str] = {
             nid for nid, node in self._nodes.items()
             if node.confidence < confidence_threshold
         }
@@ -409,7 +409,7 @@ class ReasoningGraph:
         merged._rebuild_adjacency()
 
         # Track node_id remapping for edges coming from ``other``
-        remap: Dict[str, str] = {}
+        remap: dict[str, str] = {}
 
         for nid, node in other._nodes.items():
             dup = merged._find_duplicate(node)
@@ -447,11 +447,11 @@ class ReasoningGraph:
         """Rebuild outgoing/incoming indexes from the stored edges."""
         self._outgoing.clear()
         self._incoming.clear()
-        for eid, edge in self._edges.items():
-            self._outgoing[edge.from_node].append(eid)
-            self._incoming[edge.to_node].append(eid)
+        for _eid, edge in self._edges.items():
+            self._outgoing[edge.from_node].append(_eid)
+            self._incoming[edge.to_node].append(_eid)
 
-    def _find_duplicate(self: ReasoningGraph, node: EvidenceNode) -> Optional[str]:
+    def _find_duplicate(self: ReasoningGraph, node: EvidenceNode) -> str | None:
         """Find a node in this graph similar to *node*, or return ``None``."""
         for nid, existing in self._nodes.items():
             if existing.evidence_type != node.evidence_type:
@@ -475,7 +475,7 @@ class ReasoningGraph:
     # Serialization
     # ------------------------------------------------------------------
 
-    def to_dict(self: ReasoningGraph) -> Dict[str, Any]:
+    def to_dict(self: ReasoningGraph) -> dict[str, Any]:
         """Serialize the graph to a JSON-compatible dictionary.
 
         Returns:
@@ -507,7 +507,7 @@ class ReasoningGraph:
         }
 
     @classmethod
-    def from_dict(cls: type[ReasoningGraph], data: Dict[str, Any]) -> ReasoningGraph:
+    def from_dict(cls: type[ReasoningGraph], data: dict[str, Any]) -> ReasoningGraph:
         """Deserialize a graph from a dictionary produced by :meth:`to_dict`.
 
         Args:
@@ -546,7 +546,7 @@ class ReasoningGraph:
     # Stats
     # ------------------------------------------------------------------
 
-    def get_stats(self: ReasoningGraph) -> Dict[str, Any]:
+    def get_stats(self: ReasoningGraph) -> dict[str, Any]:
         """Compute aggregate statistics for the graph.
 
         Returns:

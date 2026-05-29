@@ -13,6 +13,7 @@ Dimensions:
   D5 — Coverage: topic-space entropy (is the store diverse enough?)
   D6 — Freshness: write-rate over recent window
 """
+
 from __future__ import annotations
 
 import math
@@ -126,9 +127,7 @@ class MemoryHealthMonitor:
         d6 = self._probe_freshness(write_timestamps, t, cfg)
 
         w = cfg.composite_weights
-        composite = (
-            w[0] * d1 + w[1] * d2 + w[2] * d3 + w[3] * d4 + w[4] * d5 + w[5] * d6
-        )
+        composite = w[0] * d1 + w[1] * d2 + w[2] * d3 + w[3] * d4 + w[4] * d5 + w[5] * d6
         # All dimensions are scored such that higher = healthier,
         # except staleness, contradiction, and hallucination which are
         # inverted before weighting.
@@ -147,9 +146,7 @@ class MemoryHealthMonitor:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _probe_staleness(
-        records: Sequence[dict], now: float, cfg: HealthConfig
-    ) -> float:
+    def _probe_staleness(records: Sequence[dict], now: float, cfg: HealthConfig) -> float:
         """D1: 1.0 = all fresh, 0.0 = all fully stale."""
         if not records:
             return 0.5  # neutral — no data
@@ -162,15 +159,17 @@ class MemoryHealthMonitor:
         return sum(scores) / len(scores)
 
     @staticmethod
-    def _probe_contradiction(
-        records: Sequence[dict], cfg: HealthConfig
-    ) -> float:
+    def _probe_contradiction(records: Sequence[dict], cfg: HealthConfig) -> float:
         """D2: 1.0 = no contradictions, 0.0 = many conflicts.
 
         Uses a lightweight key-fact overlap heuristic: if two memories
         share a subject key but assert opposite values, they conflict.
         """
-        window = records[-cfg.contradiction_window:] if len(records) > cfg.contradiction_window else records
+        window = (
+            records[-cfg.contradiction_window :]
+            if len(records) > cfg.contradiction_window
+            else records
+        )
         if len(window) < 2:
             return 1.0
 
@@ -199,20 +198,21 @@ class MemoryHealthMonitor:
         return max(0.0, 1.0 - conflict_count / pair_count)
 
     @staticmethod
-    def _probe_hallucination(
-        records: Sequence[dict], now: float, cfg: HealthConfig
-    ) -> float:
+    def _probe_hallucination(records: Sequence[dict], now: float, cfg: HealthConfig) -> float:
         """D3: 1.0 = no unverified, 0.0 = all unverified."""
         window_age = cfg.hallucination_max_age_seconds
         recent = [
-            r for r in records
+            r
+            for r in records
             if now - float(r.get("created_at", r.get("captured_at", 0.0))) <= window_age
         ]
         if not recent:
             return 1.0  # no recent writes → no hallucination signal
         unverified = sum(
-            1 for r in recent
-            if str(r.get("verifier_status", "")).lower() in ("unverified", "flagged", "hallucination")
+            1
+            for r in recent
+            if str(r.get("verifier_status", "")).lower()
+            in ("unverified", "flagged", "hallucination")
         )
         return max(0.0, 1.0 - unverified / len(recent))
 
@@ -225,20 +225,13 @@ class MemoryHealthMonitor:
         return sum(confidences) / len(confidences)
 
     @staticmethod
-    def _probe_coverage(
-        records: Sequence[dict], cfg: HealthConfig
-    ) -> float:
+    def _probe_coverage(records: Sequence[dict], cfg: HealthConfig) -> float:
         """D5: topic diversity score (entropy-based)."""
         if not records:
             return 0.0
         topics: Counter[str] = Counter()
         for r in records:
-            topic = str(
-                r.get("content_type")
-                or r.get("type")
-                or r.get("category")
-                or "unknown"
-            )
+            topic = str(r.get("content_type") or r.get("type") or r.get("category") or "unknown")
             topics[topic] += 1
         distinct = len(topics)
         ratio = min(1.0, distinct / cfg.coverage_min_topics)
@@ -254,9 +247,7 @@ class MemoryHealthMonitor:
         return round(0.5 * ratio + 0.5 * entropy_norm, 4)
 
     @staticmethod
-    def _probe_freshness(
-        write_timestamps: Sequence[float], now: float, cfg: HealthConfig
-    ) -> float:
+    def _probe_freshness(write_timestamps: Sequence[float], now: float, cfg: HealthConfig) -> float:
         """D6: write-rate in the freshness window vs expected."""
         window = cfg.freshness_window_seconds
         recent = sum(1 for ts in write_timestamps if now - ts <= window)

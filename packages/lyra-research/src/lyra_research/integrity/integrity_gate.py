@@ -12,6 +12,7 @@ from typing import Protocol
 
 class Severity(Enum):
     """Issue severity levels"""
+
     CRITICAL = "CRITICAL"
     HIGH = "HIGH"
     MEDIUM = "MEDIUM"
@@ -21,6 +22,7 @@ class Severity(Enum):
 @dataclass
 class ValidationResult:
     """Result from a single validator"""
+
     passed: bool
     severity: Severity
     message: str
@@ -30,6 +32,7 @@ class ValidationResult:
 @dataclass
 class GateResult:
     """Result from integrity gate validation"""
+
     passed: bool
     stage: str
     issues: list[ValidationResult]
@@ -83,12 +86,14 @@ class IntegrityGate:
                 results.append(result)
             except Exception as e:
                 # Validator failure is treated as CRITICAL
-                results.append(ValidationResult(
-                    passed=False,
-                    severity=Severity.CRITICAL,
-                    message=f"Validator failed: {str(e)}",
-                    validator_name=validator.__class__.__name__
-                ))
+                results.append(
+                    ValidationResult(
+                        passed=False,
+                        severity=Severity.CRITICAL,
+                        message=f"Validator failed: {str(e)}",
+                        validator_name=validator.__class__.__name__,
+                    )
+                )
 
         # Check for CRITICAL issues
         blocking_issues = [r for r in results if r.severity == Severity.CRITICAL and not r.passed]
@@ -99,7 +104,10 @@ class IntegrityGate:
                 stage=self.stage,
                 issues=results,
                 blocking_issues=blocking_issues,
-                message=f"Stage {self.stage} BLOCKED: {len(blocking_issues)} CRITICAL issues detected. Cannot proceed."
+                message=(
+                    f"Stage {self.stage} BLOCKED: {len(blocking_issues)}"
+                    f" CRITICAL issues detected. Cannot proceed."
+                ),
             )
 
         return GateResult(
@@ -107,5 +115,5 @@ class IntegrityGate:
             stage=self.stage,
             issues=results,
             blocking_issues=[],
-            message=f"Stage {self.stage} passed: All validators successful"
+            message=f"Stage {self.stage} passed: All validators successful",
         )

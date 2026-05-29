@@ -2,7 +2,6 @@
 Unit tests for Verification System.
 """
 
-
 from lyra_reasoning.types import ReasoningStep, ReasoningStrategy, ReasoningTrace, StepType
 from lyra_reasoning.verification import (
     CrossAgentVerifier,
@@ -50,7 +49,7 @@ class TestStepVerifier:
 
         step_with_indicators = ReasoningStep(
             content="Given the hypothesis that X, and the evidence showing Y, "
-                   "we can therefore conclude Z because of the logical connection",
+            "we can therefore conclude Z because of the logical connection",
             step_type=StepType.ANALYSIS,
         )
 
@@ -90,10 +89,18 @@ class TestTraceVerifier:
             task="Test",
             strategy=ReasoningStrategy.CHAIN_OF_THOUGHT,
             steps=[
-                ReasoningStep(content="Hypothesis", step_type=StepType.HYPOTHESIS, verification_score=0.8),
-                ReasoningStep(content="Evidence", step_type=StepType.EVIDENCE, verification_score=0.9),
-                ReasoningStep(content="Analysis", step_type=StepType.ANALYSIS, verification_score=0.85),
-                ReasoningStep(content="Conclusion", step_type=StepType.CONCLUSION, verification_score=0.9),
+                ReasoningStep(
+                    content="Hypothesis", step_type=StepType.HYPOTHESIS, verification_score=0.8
+                ),
+                ReasoningStep(
+                    content="Evidence", step_type=StepType.EVIDENCE, verification_score=0.9
+                ),
+                ReasoningStep(
+                    content="Analysis", step_type=StepType.ANALYSIS, verification_score=0.85
+                ),
+                ReasoningStep(
+                    content="Conclusion", step_type=StepType.CONCLUSION, verification_score=0.9
+                ),
             ],
         )
 
@@ -110,7 +117,9 @@ class TestTraceVerifier:
             task="Test",
             strategy=ReasoningStrategy.CHAIN_OF_THOUGHT,
             steps=[
-                ReasoningStep(content="Hypothesis", step_type=StepType.HYPOTHESIS, verification_score=0.8),
+                ReasoningStep(
+                    content="Hypothesis", step_type=StepType.HYPOTHESIS, verification_score=0.8
+                ),
                 # Missing evidence, analysis, conclusion
             ],
         )
@@ -167,8 +176,12 @@ class TestCrossAgentVerifier:
             task="Test",
             strategy=ReasoningStrategy.CHAIN_OF_THOUGHT,
             steps=[
-                ReasoningStep(content="Step 1", step_type=StepType.HYPOTHESIS, verification_score=0.8),
-                ReasoningStep(content="Step 2", step_type=StepType.EVIDENCE, verification_score=0.9),
+                ReasoningStep(
+                    content="Step 1", step_type=StepType.HYPOTHESIS, verification_score=0.8
+                ),
+                ReasoningStep(
+                    content="Step 2", step_type=StepType.EVIDENCE, verification_score=0.9
+                ),
             ],
         )
 
@@ -185,7 +198,9 @@ class TestCrossAgentVerifier:
             task="Test",
             strategy=ReasoningStrategy.CHAIN_OF_THOUGHT,
             steps=[
-                ReasoningStep(content="Step", step_type=StepType.HYPOTHESIS, verification_score=0.8),
+                ReasoningStep(
+                    content="Step", step_type=StepType.HYPOTHESIS, verification_score=0.8
+                ),
             ],
         )
 
@@ -320,8 +335,12 @@ class TestVerificationSystem:
             task="Test",
             strategy=ReasoningStrategy.CHAIN_OF_THOUGHT,
             steps=[
-                ReasoningStep(content="Step 1", step_type=StepType.HYPOTHESIS, verification_score=0.8),
-                ReasoningStep(content="Step 2", step_type=StepType.EVIDENCE, verification_score=0.9),
+                ReasoningStep(
+                    content="Step 1", step_type=StepType.HYPOTHESIS, verification_score=0.8
+                ),
+                ReasoningStep(
+                    content="Step 2", step_type=StepType.EVIDENCE, verification_score=0.9
+                ),
             ],
         )
 

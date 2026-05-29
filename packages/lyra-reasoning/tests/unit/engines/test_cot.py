@@ -88,6 +88,7 @@ class TestChainOfThoughtEngine:
 
         # After hypothesis -> EVIDENCE
         from lyra_reasoning.types import ReasoningStep
+
         steps = [ReasoningStep(content="test", step_type=StepType.HYPOTHESIS)]
         assert cot_engine._determine_step_type(steps) == StepType.EVIDENCE
 
@@ -130,7 +131,11 @@ class TestChainOfThoughtEngine:
         good_response = Mock()
         good_response.content = [Mock(text="This is a much better reasoning step with evidence.")]
 
-        mock_anthropic_client.messages.create.side_effect = [bad_response, good_response, good_response]
+        mock_anthropic_client.messages.create.side_effect = [
+            bad_response,
+            good_response,
+            good_response,
+        ]
 
         # Execute reasoning
         trace = cot_engine.reason("Test task", basic_budget, basic_config)
@@ -175,7 +180,12 @@ class TestChainOfThoughtEngine:
         context = "Test context"
 
         # Test each step type
-        for step_type in [StepType.HYPOTHESIS, StepType.EVIDENCE, StepType.ANALYSIS, StepType.CONCLUSION]:
+        for step_type in [
+            StepType.HYPOTHESIS,
+            StepType.EVIDENCE,
+            StepType.ANALYSIS,
+            StepType.CONCLUSION,
+        ]:
             prompt = cot_engine._build_prompt(context, step_type)
             assert context in prompt
             assert len(prompt) > len(context)
@@ -192,7 +202,9 @@ class TestChainOfThoughtEngine:
         assert initial_state in new_state
         assert step.content in new_state
 
-    def test_conclusion_detection(self, cot_engine, mock_anthropic_client, basic_config, basic_budget):
+    def test_conclusion_detection(
+        self, cot_engine, mock_anthropic_client, basic_config, basic_budget
+    ):
         """Test that reasoning completes successfully."""
         # Mock responses
         responses = [

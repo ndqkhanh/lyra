@@ -18,6 +18,7 @@ Invariants tested:
   :class:`CommandResult` (never raises on timeout).
 - ``cmd`` must be a non-empty list — argv-safe, no shell concatenation.
 """
+
 from __future__ import annotations
 
 import sys
@@ -30,7 +31,9 @@ from lyra_core.terminal import CommandResult, TerminalBackend
 
 
 class _FakeContainer:
-    def __init__(self, *, exit_code: int = 0, logs: bytes = b"", raise_on_wait: Exception | None = None):
+    def __init__(
+        self, *, exit_code: int = 0, logs: bytes = b"", raise_on_wait: Exception | None = None
+    ):
         self._exit_code = exit_code
         self._logs = logs
         self._raise_on_wait = raise_on_wait
@@ -61,9 +64,7 @@ class _FakeContainers:
         self._next_container = container
 
     def run(self, image: str, command, **kwargs) -> _FakeContainer:
-        self.run_calls.append(
-            {"image": image, "command": command, **kwargs}
-        )
+        self.run_calls.append({"image": image, "command": command, **kwargs})
         ctr = self._next_container or _FakeContainer()
         self._next_container = None
         return ctr

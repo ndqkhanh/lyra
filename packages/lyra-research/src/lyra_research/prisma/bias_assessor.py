@@ -12,6 +12,7 @@ from typing import Any
 
 class BiasDomain(Enum):
     """Risk of bias domains"""
+
     SELECTION_BIAS = "selection_bias"
     PERFORMANCE_BIAS = "performance_bias"
     DETECTION_BIAS = "detection_bias"
@@ -21,6 +22,7 @@ class BiasDomain(Enum):
 
 class RiskLevel(Enum):
     """Risk levels"""
+
     LOW = "low"
     MODERATE = "moderate"
     HIGH = "high"
@@ -30,6 +32,7 @@ class RiskLevel(Enum):
 @dataclass
 class DomainAssessment:
     """Assessment for a single bias domain"""
+
     domain: BiasDomain
     risk: RiskLevel
     reason: str
@@ -39,6 +42,7 @@ class DomainAssessment:
 @dataclass
 class BiasAssessment:
     """Complete bias assessment for a study"""
+
     study_id: str
     domain_assessments: dict[BiasDomain, DomainAssessment]
     overall_risk: RiskLevel
@@ -79,7 +83,7 @@ class RiskOfBiasAssessor:
             study_id=study.get("id", "unknown"),
             domain_assessments=assessments,
             overall_risk=overall_risk,
-            summary=summary
+            summary=summary,
         )
 
     def assess_selection_bias(self, study: dict[str, Any]) -> DomainAssessment:
@@ -110,10 +114,7 @@ class RiskOfBiasAssessor:
             reason = "No randomization mentioned"
 
         return DomainAssessment(
-            domain=BiasDomain.SELECTION_BIAS,
-            risk=risk,
-            reason=reason,
-            evidence=methods[:200]
+            domain=BiasDomain.SELECTION_BIAS, risk=risk, reason=reason, evidence=methods[:200]
         )
 
     def assess_performance_bias(self, study: dict[str, Any]) -> DomainAssessment:
@@ -139,11 +140,7 @@ class RiskOfBiasAssessor:
             risk = RiskLevel.HIGH
             reason = "No blinding mentioned"
 
-        return DomainAssessment(
-            domain=BiasDomain.PERFORMANCE_BIAS,
-            risk=risk,
-            reason=reason
-        )
+        return DomainAssessment(domain=BiasDomain.PERFORMANCE_BIAS, risk=risk, reason=reason)
 
     def assess_detection_bias(self, study: dict[str, Any]) -> DomainAssessment:
         """
@@ -165,11 +162,7 @@ class RiskOfBiasAssessor:
             risk = RiskLevel.MODERATE
             reason = "Outcome assessment blinding unclear"
 
-        return DomainAssessment(
-            domain=BiasDomain.DETECTION_BIAS,
-            risk=risk,
-            reason=reason
-        )
+        return DomainAssessment(domain=BiasDomain.DETECTION_BIAS, risk=risk, reason=reason)
 
     def assess_attrition_bias(self, study: dict[str, Any]) -> DomainAssessment:
         """
@@ -194,11 +187,7 @@ class RiskOfBiasAssessor:
             risk = RiskLevel.HIGH
             reason = f"High dropout rate: {dropout_rate:.1%}"
 
-        return DomainAssessment(
-            domain=BiasDomain.ATTRITION_BIAS,
-            risk=risk,
-            reason=reason
-        )
+        return DomainAssessment(domain=BiasDomain.ATTRITION_BIAS, risk=risk, reason=reason)
 
     def assess_reporting_bias(self, study: dict[str, Any]) -> DomainAssessment:
         """
@@ -224,11 +213,7 @@ class RiskOfBiasAssessor:
             risk = RiskLevel.UNCLEAR
             reason = "Pre-registration status unclear"
 
-        return DomainAssessment(
-            domain=BiasDomain.REPORTING_BIAS,
-            risk=risk,
-            reason=reason
-        )
+        return DomainAssessment(domain=BiasDomain.REPORTING_BIAS, risk=risk, reason=reason)
 
     def calculate_overall_risk(self, assessments: dict[BiasDomain, DomainAssessment]) -> RiskLevel:
         """
@@ -258,7 +243,9 @@ class RiskOfBiasAssessor:
         # Otherwise, MODERATE
         return RiskLevel.MODERATE
 
-    def generate_summary(self, assessments: dict[BiasDomain, DomainAssessment], overall_risk: RiskLevel) -> str:
+    def generate_summary(
+        self, assessments: dict[BiasDomain, DomainAssessment], overall_risk: RiskLevel
+    ) -> str:
         """
         Generate summary of bias assessment
 
@@ -270,7 +257,9 @@ class RiskOfBiasAssessor:
             Summary text
         """
         high_risk_domains = [d.name for d, a in assessments.items() if a.risk == RiskLevel.HIGH]
-        moderate_risk_domains = [d.name for d, a in assessments.items() if a.risk == RiskLevel.MODERATE]
+        moderate_risk_domains = [
+            d.name for d, a in assessments.items() if a.risk == RiskLevel.MODERATE
+        ]
 
         summary = f"Overall risk: {overall_risk.value.upper()}. "
 

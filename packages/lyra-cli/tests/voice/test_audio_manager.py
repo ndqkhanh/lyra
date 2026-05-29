@@ -151,7 +151,9 @@ class TestAudioManager:
     def test_list_devices_pyaudio(self):
         expected = [
             AudioDevice(name="Mic", device_type=DeviceType.INPUT, device_id=0, sample_rate=44100),
-            AudioDevice(name="Speaker", device_type=DeviceType.OUTPUT, device_id=1, sample_rate=48000),
+            AudioDevice(
+                name="Speaker", device_type=DeviceType.OUTPUT, device_id=1, sample_rate=48000
+            ),
         ]
         mgr = AudioManager()
         mgr._pyaudio_available = True

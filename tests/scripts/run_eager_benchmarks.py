@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Run eager tools performance benchmarks."""
+
 import asyncio
 import sys
 from pathlib import Path
 
+from lyra_cli.eager_tools.benchmarks import run_benchmarks
+
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent / "packages/lyra-cli/src"))
-
-from lyra_cli.eager_tools.benchmarks import run_benchmarks
 
 
 async def main():
@@ -48,10 +49,20 @@ async def main():
     target_max = 1.5
 
     if avg_speedup >= target_min:
-        print(f"✅ SUCCESS: Average speedup {avg_speedup:.2f}x meets target ({target_min}x-{target_max}x)")
+        print(
+
+                f"✅ SUCCESS: Average speedup {avg_speedup:.2f}x meets target ({target_min}x-"
+                f"{target_max}x)"
+
+        )
         return 0
     else:
-        print(f"⚠️  WARNING: Average speedup {avg_speedup:.2f}x below target ({target_min}x-{target_max}x)")
+        print(
+
+                f"⚠️  WARNING: Average speedup {avg_speedup:.2f}x below target ({target_min}x-"
+                f"{target_max}x)"
+
+        )
         return 1
 
 

@@ -172,7 +172,10 @@ class ZeroTrustFederation:
             self._denial_count += 1
             return AuthDecision(
                 allowed=False,
-                reason=f"Agent '{agent_id}' session expired ({elapsed:.0f}s > {self.config.session_timeout_sec}s)",
+                reason=(
+                    f"Agent '{agent_id}' session expired ({elapsed:.0f}s > "
+                    f"{self.config.session_timeout_sec}s)"
+                ),
                 agent_id=agent_id,
                 action=action,
                 status=AuthStatus.EXPIRED,
@@ -185,7 +188,7 @@ class ZeroTrustFederation:
             return AuthDecision(
                 allowed=False,
                 reason=f"Agent '{agent_id}' level {identity.federation_level.value} "
-                       f"insufficient for {action} (requires {action_level.value})",
+                f"insufficient for {action} (requires {action_level.value})",
                 agent_id=agent_id,
                 action=action,
                 status=AuthStatus.DENIED,
@@ -240,20 +243,29 @@ class ZeroTrustFederation:
         cap = self.registry._capabilities.get(capability_id)
         if cap is None:
             return AuthDecision(
-                allowed=False, reason="Unknown capability", agent_id="",
-                action="", status=AuthStatus.DENIED,
+                allowed=False,
+                reason="Unknown capability",
+                agent_id="",
+                action="",
+                status=AuthStatus.DENIED,
             )
 
         if time.time() > cap.expires_at:
             return AuthDecision(
-                allowed=False, reason="Capability expired",
-                agent_id=cap.holder, action=cap.action, status=AuthStatus.EXPIRED,
+                allowed=False,
+                reason="Capability expired",
+                agent_id=cap.holder,
+                action=cap.action,
+                status=AuthStatus.EXPIRED,
             )
 
         if cap.use_count >= cap.max_uses:
             return AuthDecision(
-                allowed=False, reason="Capability exhausted",
-                agent_id=cap.holder, action=cap.action, status=AuthStatus.DENIED,
+                allowed=False,
+                reason="Capability exhausted",
+                agent_id=cap.holder,
+                action=cap.action,
+                status=AuthStatus.DENIED,
             )
 
         # Increment use count by replacing with updated capability
@@ -272,8 +284,11 @@ class ZeroTrustFederation:
         self.registry._capabilities[cap.capability_id] = updated
 
         return AuthDecision(
-            allowed=True, reason="Capability verified",
-            agent_id=cap.holder, action=cap.action, status=AuthStatus.ALLOWED,
+            allowed=True,
+            reason="Capability verified",
+            agent_id=cap.holder,
+            action=cap.action,
+            status=AuthStatus.ALLOWED,
         )
 
     def stats(self) -> dict:

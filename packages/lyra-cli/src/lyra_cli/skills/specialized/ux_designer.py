@@ -52,33 +52,58 @@ class UXDesignerSkill:
 
         has_loading = any(s.get("has_loading_state") for s in screens)
         if not has_loading and screens:
-            issues.append(UXIssue("visibility_of_system_status", HeuristicViolation.MAJOR,
-                "No loading states defined — users won't know the system is working.",
-                "Add loading indicators, progress bars, or skeleton screens."))
+            issues.append(
+                UXIssue(
+                    "visibility_of_system_status",
+                    HeuristicViolation.MAJOR,
+                    "No loading states defined — users won't know the system is working.",
+                    "Add loading indicators, progress bars, or skeleton screens.",
+                )
+            )
 
         has_error = any(s.get("has_error_state") for s in screens)
         if not has_error and screens:
-            issues.append(UXIssue("error_prevention", HeuristicViolation.CRITICAL,
-                "No error states defined — users will be confused by failures.",
-                "Design error messages, recovery actions, and fallback states."))
+            issues.append(
+                UXIssue(
+                    "error_prevention",
+                    HeuristicViolation.CRITICAL,
+                    "No error states defined — users will be confused by failures.",
+                    "Design error messages, recovery actions, and fallback states.",
+                )
+            )
 
         has_empty = any(s.get("has_empty_state") for s in screens)
         if not has_empty and len(screens) > 2:
-            issues.append(UXIssue("help_documentation", HeuristicViolation.MINOR,
-                "No empty states designed — new users see blank screens.",
-                "Add empty state illustrations with call-to-action guidance."))
+            issues.append(
+                UXIssue(
+                    "help_documentation",
+                    HeuristicViolation.MINOR,
+                    "No empty states designed — new users see blank screens.",
+                    "Add empty state illustrations with call-to-action guidance.",
+                )
+            )
 
-        has_confirmation = any("confirm" in str(s).lower() or "modal" in str(s).lower() for s in screens)
+        has_confirmation = any(
+            "confirm" in str(s).lower() or "modal" in str(s).lower() for s in screens
+        )
         if not has_confirmation and len(screens) > 1:
-            issues.append(UXIssue("user_control_freedom", HeuristicViolation.MAJOR,
-                "No confirmation dialogs for destructive actions.",
-                "Add confirmation modals for delete, overwrite, and irreversible actions."))
+            issues.append(
+                UXIssue(
+                    "user_control_freedom",
+                    HeuristicViolation.MAJOR,
+                    "No confirmation dialogs for destructive actions.",
+                    "Add confirmation modals for delete, overwrite, and irreversible actions.",
+                )
+            )
 
         return {
             "issues": [i.__dict__ for i in issues],
             "heuristics_evaluated": len(_NIELSEN_HEURISTICS),
-            "score": max(0, 100
+            "score": max(
+                0,
+                100
                 - len([i for i in issues if i.severity == HeuristicViolation.CRITICAL]) * 25
                 - len([i for i in issues if i.severity == HeuristicViolation.MAJOR]) * 15
-                - len([i for i in issues if i.severity == HeuristicViolation.MINOR]) * 5),
+                - len([i for i in issues if i.severity == HeuristicViolation.MINOR]) * 5,
+            ),
         }

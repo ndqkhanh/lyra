@@ -1,8 +1,9 @@
 """Red tests for the three shipped hooks in Phase 1:
-    1. tdd-gate stub           — block writes to src/** without RED proof
-    2. secrets-scan            — block write/edit/bash args carrying secrets
-    3. destructive-pattern     — block rm -rf / and similar catastrophic bash
+1. tdd-gate stub           — block writes to src/** without RED proof
+2. secrets-scan            — block write/edit/bash args carrying secrets
+3. destructive-pattern     — block rm -rf / and similar catastrophic bash
 """
+
 from __future__ import annotations
 
 from lyra_core.hooks.destructive_pattern import destructive_pattern_hook
@@ -30,7 +31,9 @@ def test_secrets_scan_blocks_gh_token_in_bash() -> None:
     call = ToolCall(
         id="c1",
         name="Bash",
-        args={"command": "curl -H 'Authorization: Bearer ghp_1234567890abcdef1234567890abcdef1234'"},
+        args={
+            "command": "curl -H 'Authorization: Bearer ghp_1234567890abcdef1234567890abcdef1234'"
+        },
     )
     d = secrets_scan_hook(call, None)
     assert d.block is True
@@ -78,9 +81,7 @@ def test_destructive_pattern_blocks_rm_rf_home() -> None:
 
 
 def test_destructive_pattern_blocks_dd_to_disk() -> None:
-    call = ToolCall(
-        id="c1", name="Bash", args={"command": "dd if=/dev/zero of=/dev/sda"}
-    )
+    call = ToolCall(id="c1", name="Bash", args={"command": "dd if=/dev/zero of=/dev/sda"})
     d = destructive_pattern_hook(call, None)
     assert d.block is True
 
@@ -92,17 +93,13 @@ def test_destructive_pattern_blocks_mkfs() -> None:
 
 
 def test_destructive_pattern_blocks_force_push_main() -> None:
-    call = ToolCall(
-        id="c1", name="Bash", args={"command": "git push --force origin main"}
-    )
+    call = ToolCall(id="c1", name="Bash", args={"command": "git push --force origin main"})
     d = destructive_pattern_hook(call, None)
     assert d.block is True
 
 
 def test_destructive_pattern_allows_safe_rm() -> None:
-    call = ToolCall(
-        id="c1", name="Bash", args={"command": "rm .lyra/scratch.txt"}
-    )
+    call = ToolCall(id="c1", name="Bash", args={"command": "rm .lyra/scratch.txt"})
     d = destructive_pattern_hook(call, None)
     assert d.block is False
 

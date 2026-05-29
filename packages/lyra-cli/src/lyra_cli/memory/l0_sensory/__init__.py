@@ -8,7 +8,7 @@ removing noise and irrelevant information before passing to short-term memory.
 from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 @dataclass

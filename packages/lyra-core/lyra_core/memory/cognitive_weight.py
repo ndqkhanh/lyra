@@ -16,6 +16,7 @@ from datetime import datetime
 @dataclass
 class MemoryEntry:
     """Memory entry with cognitive weight."""
+
     id: str
     content: str
     session_id: str
@@ -80,12 +81,15 @@ class CognitiveWeightAttributor:
         cursor = conn.cursor()
 
         # Get all tool calls for this session
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT turn_id, tool_name, success, retrieved_entry_ids
             FROM tool_calls
             WHERE session_id = ?
             ORDER BY turn_id
-        """, (session_id,))
+        """,
+            (session_id,),
+        )
 
         tool_calls = cursor.fetchall()
 
@@ -93,12 +97,13 @@ class CognitiveWeightAttributor:
             if not retrieved_ids_str:
                 continue
 
-            retrieved_ids = retrieved_ids_str.split(',')
+            retrieved_ids = retrieved_ids_str.split(",")
             delta = 0.1 if success else -0.1
 
             for entry_id in retrieved_ids:
                 # Update cognitive weight
-                cursor.execute("""
+                cursor.execute(
+                    """
                     UPDATE memory
                     SET cognitive_weight = CASE
                         WHEN cognitive_weight + ? > 1.0 THEN 1.0
@@ -109,7 +114,9 @@ class CognitiveWeightAttributor:
                     success_count = success_count + CASE WHEN ? THEN 1 ELSE 0 END,
                     failure_count = failure_count + CASE WHEN ? THEN 0 ELSE 1 END
                     WHERE id = ?
-                """, (delta, delta, delta, success, success, entry_id))
+                """,
+                    (delta, delta, delta, success, success, entry_id),
+                )
 
         conn.commit()
         conn.close()
@@ -128,11 +135,14 @@ class CognitiveWeightAttributor:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT cognitive_weight
             FROM memory
             WHERE id = ?
-        """, (entry_id,))
+        """,
+            (entry_id,),
+        )
 
         result = cursor.fetchone()
         conn.close()
@@ -156,12 +166,15 @@ class CognitiveWeightAttributor:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT cognitive_weight, retrieval_count,
                    success_count, failure_count
             FROM memory
             WHERE id = ?
-        """, (entry_id,))
+        """,
+            (entry_id,),
+        )
 
         result = cursor.fetchone()
         conn.close()
@@ -172,11 +185,11 @@ class CognitiveWeightAttributor:
         weight, retrieval_count, success_count, failure_count = result
 
         return {
-            'cognitive_weight': weight,
-            'retrieval_count': retrieval_count,
-            'success_count': success_count,
-            'failure_count': failure_count,
-            'success_rate': success_count / retrieval_count if retrieval_count > 0 else 0.0
+            "cognitive_weight": weight,
+            "retrieval_count": retrieval_count,
+            "success_count": success_count,
+            "failure_count": failure_count,
+            "success_rate": success_count / retrieval_count if retrieval_count > 0 else 0.0,
         }
 
     def prune_low_weight_entries(self, threshold: float = -0.5):
@@ -189,11 +202,14 @@ class CognitiveWeightAttributor:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             DELETE FROM memory
             WHERE cognitive_weight < ?
             AND retrieval_count >= 5  -- Only prune if retrieved at least 5 times
-        """, (threshold,))
+        """,
+            (threshold,),
+        )
 
         deleted_count = cursor.rowcount
         conn.commit()
@@ -203,7 +219,9 @@ class CognitiveWeightAttributor:
 
 
 # Integration with existing retrieval
-def apply_cognitive_weights(results: list[dict], attributor: CognitiveWeightAttributor) -> list[dict]:
+def apply_cognitive_weights(
+    results: list[dict], attributor: CognitiveWeightAttributor
+) -> list[dict]:
     """
     Apply cognitive weights to retrieval results.
 
@@ -215,12 +233,12 @@ def apply_cognitive_weights(results: list[dict], attributor: CognitiveWeightAttr
         Results with weighted scores, sorted by weighted score
     """
     for result in results:
-        entry_id = result['id']
-        base_score = result['score']
-        result['weighted_score'] = attributor.get_weighted_score(entry_id, base_score)
-        result['base_score'] = base_score  # Keep original for debugging
+        entry_id = result["id"]
+        base_score = result["score"]
+        result["weighted_score"] = attributor.get_weighted_score(entry_id, base_score)
+        result["base_score"] = base_score  # Keep original for debugging
 
     # Re-sort by weighted score
-    results.sort(key=lambda x: x['weighted_score'], reverse=True)
+    results.sort(key=lambda x: x["weighted_score"], reverse=True)
 
     return results

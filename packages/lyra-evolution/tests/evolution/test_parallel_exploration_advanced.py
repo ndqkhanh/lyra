@@ -263,7 +263,7 @@ class TestIntegration:
         root_id = engine.initialize(baseline)
 
         # Run evolution for 5 generations
-        for gen in range(5):
+        for _gen in range(5):
             new_nodes = engine.explore_generation(n_mutations=8, mutation_rate=0.2)
             assert len(new_nodes) > 0
 

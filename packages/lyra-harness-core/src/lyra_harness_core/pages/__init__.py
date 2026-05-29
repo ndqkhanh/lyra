@@ -1,7 +1,12 @@
 """lyra_harness_core.pages — Lobe-Pages-style co-authored document surface.
 
-Per [docs/205-lobehub-collaborative-teammate-platform.md](../../../../../../research/harness-engineering/docs/205-lobehub-collaborative-teammate-platform.md) §2.2,
-[docs/206-collaborative-ai-canon-2026.md](../../../../../../research/harness-engineering/docs/206-collaborative-ai-canon-2026.md) §4 (branching + Pages),
+Per
+[docs/205-lobehub-collaborative-teammate-platform.md]
+(../../../../../../research/harness-engineering/docs/205-lobehub-collaborative-teammate-platform.md)
+§2.2,
+[docs/206-collaborative-ai-canon-2026.md]
+(../../../../../../research/harness-engineering/docs/206-collaborative-ai-canon-2026.md)
+§4 (branching + Pages),
 and per-project apply plans:
 
     - [docs/203] §1 — Polaris co-authored research writeup
@@ -22,6 +27,7 @@ each edit is appended to the history with a parent-version pointer. Conflicts
 (two edits with the same parent) are recorded but not auto-resolved; the host
 harness decides whether to surface them as branches or merge them.
 """
+
 from __future__ import annotations
 
 from .pages import (

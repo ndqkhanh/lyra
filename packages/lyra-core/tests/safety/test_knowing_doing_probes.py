@@ -78,7 +78,9 @@ class TestGapReport:
         assert report.severe_count == 1
 
     def test_report_immutable(self):
-        r = GapReport(probes=(), mean_gap=0.0, max_gap=0.0, severe_count=0, overall_severity=GapSeverity.NONE)
+        r = GapReport(
+            probes=(), mean_gap=0.0, max_gap=0.0, severe_count=0, overall_severity=GapSeverity.NONE
+        )
         with pytest.raises(Exception):
             r.mean_gap = 1.0
 

@@ -32,7 +32,7 @@ import logging
 import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -75,13 +75,13 @@ class PlanNode:
 
     node_id: str
     description: str
-    parent_id: Optional[str] = None
-    children: Tuple[str, ...] = ()
-    dependencies: Tuple[str, ...] = ()
+    parent_id: str | None = None
+    children: tuple[str, ...] = ()
+    dependencies: tuple[str, ...] = ()
     estimated_steps: int = 1
     status: str = NodeStatus.PENDING.value
     priority: int = 5
-    assigned_agent: Optional[str] = None
+    assigned_agent: str | None = None
 
 
 @dataclass(frozen=True)
@@ -100,7 +100,7 @@ class Milestone:
     milestone_id: str
     description: str
     completion_criteria: str
-    depends_on_milestones: Tuple[str, ...] = ()
+    depends_on_milestones: tuple[str, ...] = ()
     deadline_step: int = 0
     verified: bool = False
 
@@ -119,11 +119,11 @@ class PlanTree:
     """
 
     root: PlanNode
-    nodes: Dict[str, PlanNode]
+    nodes: dict[str, PlanNode]
     total_steps: int
     completed_steps: int
     created_at: float
-    milestones: Tuple[Milestone, ...] = ()
+    milestones: tuple[Milestone, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -136,9 +136,9 @@ class WorldState:
         assumptions: Working assumptions that may be revised.
     """
 
-    variables: Tuple[Tuple[str, str], ...]
-    invariants: Tuple[str, ...]
-    assumptions: Tuple[str, ...]
+    variables: tuple[tuple[str, str], ...]
+    invariants: tuple[str, ...]
+    assumptions: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -155,8 +155,8 @@ class SimulationResult:
 
     projected_state: WorldState
     success: bool
-    violated_invariants: Tuple[str, ...] = ()
-    side_effects: Tuple[str, ...] = ()
+    violated_invariants: tuple[str, ...] = ()
+    side_effects: tuple[str, ...] = ()
     confidence: float = 0.5
 
 
@@ -177,8 +177,8 @@ class ProgressSnapshot:
     plan_id: str
     completed_nodes: int
     total_nodes: int
-    current_milestone: Optional[str] = None
-    blockers: Tuple[str, ...] = ()
+    current_milestone: str | None = None
+    blockers: tuple[str, ...] = ()
     elapsed_steps: int = 0
     estimated_remaining: int = 0
 
@@ -225,7 +225,7 @@ class LongHorizonPlanner:
         tree = planner.update_node(tree, "n1", NodeStatus.COMPLETED.value)
     """
 
-    def __init__(self, config: Optional[LongHorizonConfig] = None) -> None:
+    def __init__(self, config: LongHorizonConfig | None = None) -> None:
         self._config = config or LongHorizonConfig()
         self._node_counter: int = 0
 
@@ -234,7 +234,7 @@ class LongHorizonPlanner:
     def create_plan(
         self,
         goal: str,
-        context: Optional[Dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
     ) -> PlanTree:
         """Hierarchically decompose *goal* into a complete ``PlanTree``.
 
@@ -256,7 +256,7 @@ class LongHorizonPlanner:
             estimated_steps=self._estimate_steps(goal),
         )
 
-        all_nodes: Dict[str, PlanNode] = {"root": root}
+        all_nodes: dict[str, PlanNode] = {"root": root}
         self._decompose_recursive(root, 0, ctx, all_nodes)
 
         total = sum(n.estimated_steps for n in all_nodes.values())
@@ -275,8 +275,8 @@ class LongHorizonPlanner:
         node: PlanNode,
         depth: int,
         config: LongHorizonConfig,
-        context: Optional[Dict[str, Any]] = None,
-    ) -> List[PlanNode]:
+        context: dict[str, Any] | None = None,
+    ) -> list[PlanNode]:
         """Decompose *node* into sub-tasks.
 
         Creates child ``PlanNode`` instances based on the description,
@@ -295,7 +295,7 @@ class LongHorizonPlanner:
             return []
 
         ctx = context or {}
-        children: List[PlanNode] = []
+        children: list[PlanNode] = []
 
         sub_tasks = self._generate_sub_tasks(node.description, ctx)
         num_children = min(len(sub_tasks), config.max_breadth)
@@ -304,7 +304,7 @@ class LongHorizonPlanner:
             self._node_counter += 1
             child_id = f"n{self._node_counter}"
             desc = sub_tasks[i] if i < len(sub_tasks) else f"Sub-task {i + 1}"
-            dep_ids: Tuple[str, ...] = ()
+            dep_ids: tuple[str, ...] = ()
             if i > 0:
                 dep_ids = (child_id[:1] + str(self._node_counter - 1),)
 
@@ -320,7 +320,7 @@ class LongHorizonPlanner:
 
         return children
 
-    def get_next_tasks(self, plan: PlanTree, limit: int = 5) -> List[PlanNode]:
+    def get_next_tasks(self, plan: PlanTree, limit: int = 5) -> list[PlanNode]:
         """Return tasks that are ready to execute.
 
         A task is ready when all its dependencies have ``COMPLETED`` status
@@ -340,7 +340,7 @@ class LongHorizonPlanner:
             if n.status == NodeStatus.COMPLETED.value
         }
 
-        ready: List[PlanNode] = []
+        ready: list[PlanNode] = []
         for node in plan.nodes.values():
             if node.status not in (
                 NodeStatus.PENDING.value,
@@ -389,7 +389,7 @@ class LongHorizonPlanner:
             assigned_agent=node.assigned_agent,
         )
 
-        new_nodes: Dict[str, PlanNode] = dict(plan.nodes)
+        new_nodes: dict[str, PlanNode] = dict(plan.nodes)
         new_nodes[node_id] = updated_node
 
         # Propagate blocker status when a dependency fails
@@ -500,7 +500,7 @@ class LongHorizonPlanner:
                     return False
         return True
 
-    def detect_blockers(self, plan: PlanTree) -> List[PlanNode]:
+    def detect_blockers(self, plan: PlanTree) -> list[PlanNode]:
         """Find all nodes that are currently blocked.
 
         A node is blocked if any of its dependencies have ``FAILED`` status.
@@ -516,7 +516,7 @@ class LongHorizonPlanner:
             for nid, n in plan.nodes.items()
             if n.status == NodeStatus.FAILED.value
         }
-        blocked: List[PlanNode] = []
+        blocked: list[PlanNode] = []
         for node in plan.nodes.values():
             if node.status == NodeStatus.BLOCKED.value:
                 blocked.append(node)
@@ -569,7 +569,7 @@ class LongHorizonPlanner:
 
         # Re-decompose the replacement
         depth = self._node_depth(plan, failed_node_id)
-        child_context: Dict[str, Any] = {"replan": True}
+        child_context: dict[str, Any] = {"replan": True}
         child_nodes = self.decompose(
             replacement,
             depth,
@@ -630,7 +630,7 @@ class LongHorizonPlanner:
         elapsed = plan.completed_steps
         remaining = plan.total_steps - elapsed
 
-        current_milestone: Optional[str] = None
+        current_milestone: str | None = None
         for ms in plan.milestones:
             if not ms.verified:
                 current_milestone = ms.milestone_id
@@ -646,7 +646,7 @@ class LongHorizonPlanner:
             estimated_remaining=max(0, remaining),
         )
 
-    def get_critical_path(self, plan: PlanTree) -> List[str]:
+    def get_critical_path(self, plan: PlanTree) -> list[str]:
         """Return the longest dependency chain through the plan.
 
         Considers both explicit dependencies (``dependencies`` field) and
@@ -661,15 +661,15 @@ class LongHorizonPlanner:
             List of node IDs forming the critical path, ordered root-to-leaf.
         """
         # Build predecessor list: every node implicitly depends on its parent
-        implicit_deps: Dict[str, List[str]] = {}
+        implicit_deps: dict[str, list[str]] = {}
         for nid, node in plan.nodes.items():
-            deps: List[str] = list(node.dependencies)
+            deps: list[str] = list(node.dependencies)
             if node.parent_id is not None and node.parent_id != nid:
                 deps.append(node.parent_id)
             implicit_deps[nid] = deps
 
         visited: set[str] = set()
-        topo: List[str] = []
+        topo: list[str] = []
 
         def _dfs(nid: str) -> None:
             if nid in visited:
@@ -685,12 +685,12 @@ class LongHorizonPlanner:
             if nid not in visited:
                 _dfs(nid)
 
-        longest: Dict[str, int] = {}
-        predecessor: Dict[str, Optional[str]] = {}
+        longest: dict[str, int] = {}
+        predecessor: dict[str, str | None] = {}
 
         for nid in topo:
             node = plan.nodes[nid]
-            best_pred: Optional[str] = None
+            best_pred: str | None = None
             best_len = 0
             for dep in implicit_deps.get(nid, []):
                 if dep in longest and longest[dep] > best_len:
@@ -701,8 +701,8 @@ class LongHorizonPlanner:
 
         leaf = max(longest, key=lambda k: longest[k])
 
-        path: List[str] = []
-        current: Optional[str] = leaf
+        path: list[str] = []
+        current: str | None = leaf
         while current is not None:
             path.append(current)
             current = predecessor.get(current)
@@ -715,8 +715,8 @@ class LongHorizonPlanner:
         self,
         node: PlanNode,
         depth: int,
-        context: Dict[str, Any],
-        all_nodes: Dict[str, PlanNode],
+        context: dict[str, Any],
+        all_nodes: dict[str, PlanNode],
     ) -> None:
         """Recursively decompose *node* and populate *all_nodes*."""
         # Safety cap: stop if plan already exceeds max_total_steps
@@ -727,7 +727,7 @@ class LongHorizonPlanner:
         if not children:
             return
 
-        child_ids: List[str] = []
+        child_ids: list[str] = []
         for child in children:
             child_ids.append(child.node_id)
             all_nodes[child.node_id] = child
@@ -751,8 +751,8 @@ class LongHorizonPlanner:
     @staticmethod
     def _generate_sub_tasks(
         description: str,
-        context: Dict[str, Any],
-    ) -> List[str]:
+        context: dict[str, Any],
+    ) -> list[str]:
         """Generate sub-task descriptions for a node.
 
         Stub implementation returns 2--4 patterns based on description
@@ -845,13 +845,13 @@ class WorldModel:
     """
 
     def __init__(self) -> None:
-        self._simulation_history: List[Tuple[WorldState, SimulationResult]] = []
+        self._simulation_history: list[tuple[WorldState, SimulationResult]] = []
 
     def define_state(
         self,
-        variables: Dict[str, str],
-        invariants: Optional[List[str]] = None,
-        assumptions: Optional[List[str]] = None,
+        variables: dict[str, str],
+        invariants: list[str] | None = None,
+        assumptions: list[str] | None = None,
     ) -> WorldState:
         """Create a new ``WorldState`` from dictionaries.
 
@@ -888,7 +888,7 @@ class WorldModel:
             ``SimulationResult`` with projected state and confidence.
         """
         var_dict = dict(state.variables)
-        side_effects: List[str] = []
+        side_effects: list[str] = []
         action_lower = action.lower()
 
         action_words = set(action_lower.split())
@@ -934,7 +934,7 @@ class WorldModel:
     def check_invariants(
         self,
         state: WorldState,
-    ) -> Tuple[bool, Tuple[str, ...]]:
+    ) -> tuple[bool, tuple[str, ...]]:
         """Verify that all invariants hold in *state*.
 
         Stub implementation using keyword-based violation detection.
@@ -946,7 +946,7 @@ class WorldModel:
             ``(all_ok, violated_invariant_descriptions)``.
         """
         var_dict = dict(state.variables)
-        violated: List[str] = []
+        violated: list[str] = []
 
         for inv in state.invariants:
             inv_lower = inv.lower()
@@ -963,7 +963,7 @@ class WorldModel:
         self,
         before: WorldState,
         after: WorldState,
-    ) -> List[str]:
+    ) -> list[str]:
         """Diff two world states, returning human-readable changes.
 
         Args:
@@ -973,7 +973,7 @@ class WorldModel:
         Returns:
             Human-readable change descriptions.
         """
-        changes: List[str] = []
+        changes: list[str] = []
         before_vars = dict(before.variables)
         after_vars = dict(after.variables)
 
@@ -996,7 +996,7 @@ class WorldModel:
     def update_state(
         self,
         state: WorldState,
-        updates: Dict[str, str],
+        updates: dict[str, str],
     ) -> WorldState:
         """Apply updates to *state* immutably.
 
@@ -1020,7 +1020,7 @@ class WorldModel:
     @property
     def simulation_history(
         self,
-    ) -> Tuple[Tuple[WorldState, SimulationResult], ...]:
+    ) -> tuple[tuple[WorldState, SimulationResult], ...]:
         """Read-only history of all simulations performed."""
         return tuple(self._simulation_history)
 

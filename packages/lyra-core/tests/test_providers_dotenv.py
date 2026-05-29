@@ -4,6 +4,7 @@ Mirrors claw-code's parse_dotenv semantics so users who switch from
 claw-code to Lyra get identical resolution behaviour for their
 existing .env files.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -67,7 +68,9 @@ def test_dotenv_value_for_cwd_finds_key(monkeypatch: pytest.MonkeyPatch, tmp_pat
     assert dot.dotenv_value("MISSING") is None
 
 
-def test_dotenv_value_returns_none_when_empty(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_dotenv_value_returns_none_when_empty(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     (tmp_path / ".env").write_text("FOO=\n")
     monkeypatch.chdir(tmp_path)
     assert dot.dotenv_value("FOO") is None, "empty value is semantically equivalent to unset"

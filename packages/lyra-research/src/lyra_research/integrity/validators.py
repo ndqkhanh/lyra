@@ -25,14 +25,14 @@ class MinimumSourceCountValidator:
                 passed=False,
                 severity=Severity.CRITICAL,
                 message=f"Insufficient sources: {count} found, minimum {self.min_sources} required",
-                validator_name="MinimumSourceCountValidator"
+                validator_name="MinimumSourceCountValidator",
             )
 
         return ValidationResult(
             passed=True,
             severity=Severity.LOW,
             message=f"Source count OK: {count} sources found",
-            validator_name="MinimumSourceCountValidator"
+            validator_name="MinimumSourceCountValidator",
         )
 
 
@@ -52,15 +52,18 @@ class SourceDiversityValidator:
             return ValidationResult(
                 passed=False,
                 severity=Severity.HIGH,
-                message=f"Low source diversity: {count} types, minimum {self.min_source_types} required. Types: {source_types}",
-                validator_name="SourceDiversityValidator"
+                message=(
+                    f"Low source diversity: {count} types, minimum {self.min_source_types}"
+                    f" required. Types: {source_types}"
+                ),
+                validator_name="SourceDiversityValidator",
             )
 
         return ValidationResult(
             passed=True,
             severity=Severity.LOW,
             message=f"Source diversity OK: {count} types found",
-            validator_name="SourceDiversityValidator"
+            validator_name="SourceDiversityValidator",
         )
 
 
@@ -76,15 +79,18 @@ class CitationAccessibilityValidator:
             return ValidationResult(
                 passed=False,
                 severity=Severity.HIGH,
-                message=f"{len(inaccessible)} sources inaccessible: {[s.get('id') for s in inaccessible[:5]]}",
-                validator_name="CitationAccessibilityValidator"
+                message=(
+                    f"{len(inaccessible)} sources inaccessible: "
+                    f"{[s.get('id') for s in inaccessible[:5]]}"
+                ),
+                validator_name="CitationAccessibilityValidator",
             )
 
         return ValidationResult(
             passed=True,
             severity=Severity.LOW,
             message="All sources accessible",
-            validator_name="CitationAccessibilityValidator"
+            validator_name="CitationAccessibilityValidator",
         )
 
 
@@ -102,7 +108,7 @@ class DuplicationDetector:
                 passed=True,
                 severity=Severity.LOW,
                 message="No sources to check",
-                validator_name="DuplicationDetector"
+                validator_name="DuplicationDetector",
             )
 
         # Check for duplicate IDs
@@ -115,15 +121,18 @@ class DuplicationDetector:
             return ValidationResult(
                 passed=False,
                 severity=Severity.MEDIUM,
-                message=f"High duplication: {duplicate_ratio:.1%} duplicates (max {self.max_duplicate_ratio:.1%})",
-                validator_name="DuplicationDetector"
+                message=(
+                    f"High duplication: {duplicate_ratio:.1%} duplicates (max "
+                    f"{self.max_duplicate_ratio:.1%})"
+                ),
+                validator_name="DuplicationDetector",
             )
 
         return ValidationResult(
             passed=True,
             severity=Severity.LOW,
             message=f"Duplication OK: {duplicate_ratio:.1%}",
-            validator_name="DuplicationDetector"
+            validator_name="DuplicationDetector",
         )
 
 
@@ -143,7 +152,7 @@ class CitationFidelityValidator:
                 passed=True,
                 severity=Severity.LOW,
                 message="No citations to validate",
-                validator_name="CitationFidelityValidator"
+                validator_name="CitationFidelityValidator",
             )
 
         valid_citations = [c for c in citations if c.get("valid", False)]
@@ -154,15 +163,18 @@ class CitationFidelityValidator:
             return ValidationResult(
                 passed=False,
                 severity=Severity.CRITICAL,
-                message=f"Low citation fidelity: {fidelity:.1%} (target {self.min_fidelity:.1%}). Invalid: {invalid[:5]}",
-                validator_name="CitationFidelityValidator"
+                message=(
+                    f"Low citation fidelity: {fidelity:.1%} (target {self.min_fidelity:.1%}"
+                    f"). Invalid: {invalid[:5]}"
+                ),
+                validator_name="CitationFidelityValidator",
             )
 
         return ValidationResult(
             passed=True,
             severity=Severity.LOW,
             message=f"Citation fidelity OK: {fidelity:.1%}",
-            validator_name="CitationFidelityValidator"
+            validator_name="CitationFidelityValidator",
         )
 
 
@@ -182,7 +194,7 @@ class ClaimVerificationValidator:
                 passed=True,
                 severity=Severity.LOW,
                 message="No claims to validate",
-                validator_name="ClaimVerificationValidator"
+                validator_name="ClaimVerificationValidator",
             )
 
         verified_claims = [c for c in claims if c.get("verified", False)]
@@ -193,15 +205,18 @@ class ClaimVerificationValidator:
             return ValidationResult(
                 passed=False,
                 severity=Severity.CRITICAL,
-                message=f"Low verification rate: {verification_rate:.1%} (target {self.min_verification:.1%}). Unverified: {unverified[:3]}",
-                validator_name="ClaimVerificationValidator"
+                message=(
+                    f"Low verification rate: {verification_rate:.1%} (target "
+                    f"{self.min_verification:.1%}). Unverified: {unverified[:3]}"
+                ),
+                validator_name="ClaimVerificationValidator",
             )
 
         return ValidationResult(
             passed=True,
             severity=Severity.LOW,
             message=f"Claim verification OK: {verification_rate:.1%}",
-            validator_name="ClaimVerificationValidator"
+            validator_name="ClaimVerificationValidator",
         )
 
 
@@ -217,15 +232,18 @@ class TemporalConsistencyValidator:
             return ValidationResult(
                 passed=False,
                 severity=Severity.HIGH,
-                message=f"{len(violations)} temporal violations detected: {[v.get('type') for v in violations[:3]]}",
-                validator_name="TemporalConsistencyValidator"
+                message=(
+                    f"{len(violations)} temporal violations detected: "
+                    f"{[v.get('type') for v in violations[:3]]}"
+                ),
+                validator_name="TemporalConsistencyValidator",
             )
 
         return ValidationResult(
             passed=True,
             severity=Severity.LOW,
             message="No temporal violations",
-            validator_name="TemporalConsistencyValidator"
+            validator_name="TemporalConsistencyValidator",
         )
 
 
@@ -245,7 +263,7 @@ class CompletenessValidator:
                 passed=True,
                 severity=Severity.LOW,
                 message="No checklist items",
-                validator_name="CompletenessValidator"
+                validator_name="CompletenessValidator",
             )
 
         completed = [i for i in items if i.get("completed", False)]
@@ -256,13 +274,16 @@ class CompletenessValidator:
             return ValidationResult(
                 passed=False,
                 severity=Severity.MEDIUM,
-                message=f"Low completion: {completion_rate:.1%} (target {self.min_completion:.1%}). Incomplete: {incomplete[:3]}",
-                validator_name="CompletenessValidator"
+                message=(
+                    f"Low completion: {completion_rate:.1%} (target {self.min_completion:.1%}"
+                    f"). Incomplete: {incomplete[:3]}"
+                ),
+                validator_name="CompletenessValidator",
             )
 
         return ValidationResult(
             passed=True,
             severity=Severity.LOW,
             message=f"Completion OK: {completion_rate:.1%}",
-            validator_name="CompletenessValidator"
+            validator_name="CompletenessValidator",
         )

@@ -8,6 +8,7 @@ States:
 - FAILED: Role execution failed
 - RETRYING: Role is retrying after failure
 """
+
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -136,9 +137,7 @@ class RoleStateMachine:
             event="start",
         )
 
-    def add_transition(
-        self, transition: RoleTransition, event: str
-    ) -> None:
+    def add_transition(self, transition: RoleTransition, event: str) -> None:
         """Add a state transition.
 
         Args:
@@ -168,9 +167,7 @@ class RoleStateMachine:
         """
         self._current_state[role_name] = state
 
-    def transition(
-        self, role_name: str, event: str
-    ) -> tuple[bool, str | None]:
+    def transition(self, role_name: str, event: str) -> tuple[bool, str | None]:
         """Execute state transition for a role.
 
         Args:
@@ -191,7 +188,13 @@ class RoleStateMachine:
 
         # Check if transition is allowed
         if not transition.can_transition():
-            return False, f"Transition condition not met for {current_state.value} → {transition.to_state.value}"
+            return (
+                False,
+(
+                    f"Transition condition not met for {current_state.value} → "
+                    f"{transition.to_state.value}"
+                ),
+            )
 
         # Execute transition
         try:

@@ -13,6 +13,7 @@ from uuid import uuid4
 
 class MemoryScope(str, Enum):
     """Scope of memory - determines visibility and lifecycle."""
+
     USER = "user"  # User-specific, persists across all projects
     SESSION = "session"  # Current session only
     PROJECT = "project"  # Project-specific, persists across sessions
@@ -21,6 +22,7 @@ class MemoryScope(str, Enum):
 
 class MemoryType(str, Enum):
     """Type of memory - determines storage and retrieval strategy."""
+
     EPISODIC = "episodic"  # Concrete events with timestamps
     SEMANTIC = "semantic"  # Stable facts and knowledge
     PROCEDURAL = "procedural"  # Reusable workflows and skills
@@ -30,6 +32,7 @@ class MemoryType(str, Enum):
 
 class VerifierStatus(str, Enum):
     """Verification status of memory."""
+
     UNVERIFIED = "unverified"  # Not yet verified
     VERIFIED = "verified"  # Passed verification
     REJECTED = "rejected"  # Failed verification
@@ -122,8 +125,12 @@ class MemoryRecord:
             content=data["content"],
             source_span=data.get("source_span"),
             created_at=datetime.fromisoformat(data["created_at"]),
-            valid_from=datetime.fromisoformat(data["valid_from"]) if data.get("valid_from") else None,
-            valid_until=datetime.fromisoformat(data["valid_until"]) if data.get("valid_until") else None,
+            valid_from=(
+                datetime.fromisoformat(data["valid_from"]) if data.get("valid_from") else None
+            ),
+            valid_until=(
+                datetime.fromisoformat(data["valid_until"]) if data.get("valid_until") else None
+            ),
             confidence=data["confidence"],
             links=data.get("links", []),
             verifier_status=VerifierStatus(data["verifier_status"]),

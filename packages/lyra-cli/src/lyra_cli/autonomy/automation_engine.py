@@ -108,7 +108,9 @@ class AutomationEngine:
             metadata=metadata or {},
         )
         self.schedules[schedule_id] = schedule
-        logger.info("schedule_added: id=%s kind=recurring interval=%s", schedule_id, interval_seconds)
+        logger.info(
+            "schedule_added: id=%s kind=recurring interval=%s", schedule_id, interval_seconds
+        )
         return schedule
 
     def add_one_shot(

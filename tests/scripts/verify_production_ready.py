@@ -5,7 +5,8 @@ import os
 import sys
 
 # Add project to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "packages/lyra-cli/src"))
+
 
 def test_all_commands():
     """Test all CLI commands"""
@@ -26,19 +27,16 @@ def test_all_commands():
         ("/help", "opus", "Help command"),
         ("/h", "opus", "Help shorthand"),
         ("/?", "opus", "Help alias"),
-
         # Model commands
         ("/model opus", "sonnet", "Model switch to opus"),
         ("/model sonnet", "opus", "Model switch to sonnet"),
         ("/model haiku", "opus", "Model switch to haiku"),
         ("/m opus", "sonnet", "Model shorthand"),
-
         # Info commands
         ("/version", "opus", "Version command"),
         ("/v", "opus", "Version shorthand"),
         ("/debug", "opus", "Debug command"),
         ("/status", "opus", "Status alias"),
-
         # Management commands
         ("/config", "opus", "Config command"),
         ("/settings", "opus", "Settings alias"),
@@ -48,7 +46,6 @@ def test_all_commands():
         ("/skill", "opus", "Skill alias"),
         ("/history", "opus", "History command"),
         ("/hist", "opus", "History shorthand"),
-
         # Invalid command
         ("/invalid", "opus", "Invalid command (should error)"),
     ]
@@ -144,12 +141,24 @@ def test_features():
     print("=" * 80 + "\n")
 
     features = [
-        ("Welcome screen", lambda: __import__('lyra_cli.cli.welcome', fromlist=['show_welcome'])),
-        ("Output formatting", lambda: __import__('lyra_cli.cli.output', fromlist=['OutputFormatter'])),
-        ("Interactive prompts", lambda: __import__('lyra_cli.cli.prompts', fromlist=['LyraPrompt'])),
-        ("Agent callbacks", lambda: __import__('lyra_cli.agent.callbacks', fromlist=['AgentOutputCallback'])),
-        ("Agent loop", lambda: __import__('lyra_cli.agent.loop', fromlist=['SimpleAgentLoop'])),
-        ("CLI handler", lambda: __import__('lyra_cli.cli.agent_handler', fromlist=['CLIAgentHandler'])),
+        ("Welcome screen", lambda: __import__("lyra_cli.cli.welcome", fromlist=["show_welcome"])),
+        (
+            "Output formatting",
+            lambda: __import__("lyra_cli.cli.output", fromlist=["OutputFormatter"]),
+        ),
+        (
+            "Interactive prompts",
+            lambda: __import__("lyra_cli.cli.prompts", fromlist=["LyraPrompt"]),
+        ),
+        (
+            "Agent callbacks",
+            lambda: __import__("lyra_cli.agent.callbacks", fromlist=["AgentOutputCallback"]),
+        ),
+        ("Agent loop", lambda: __import__("lyra_cli.agent.loop", fromlist=["SimpleAgentLoop"])),
+        (
+            "CLI handler",
+            lambda: __import__("lyra_cli.cli.agent_handler", fromlist=["CLIAgentHandler"]),
+        ),
     ]
 
     passed = 0

@@ -62,8 +62,7 @@ class PerformanceMonitor:
 
         # Calculate FPS from frame times
         frame_deltas = [
-            self.frame_times[i] - self.frame_times[i-1]
-            for i in range(1, len(self.frame_times))
+            self.frame_times[i] - self.frame_times[i - 1] for i in range(1, len(self.frame_times))
         ]
         avg_frame_time = sum(frame_deltas) / len(frame_deltas)
         fps = 1.0 / avg_frame_time if avg_frame_time > 0 else 0
@@ -76,7 +75,7 @@ class PerformanceMonitor:
             "fps": fps,
             "cpu_avg": cpu_avg,
             "cpu_max": cpu_max,
-            "duration": time.monotonic() - self.start_time
+            "duration": time.monotonic() - self.start_time,
         }
 
 
@@ -150,12 +149,14 @@ class TreeSimulator:
 
         # Create 100 nodes in a tree structure
         for i in range(100):
-            self.nodes.append({
-                "id": i,
-                "label": f"Node {i}",
-                "parent": i // 10 if i > 0 else None,
-                "children": []
-            })
+            self.nodes.append(
+                {
+                    "id": i,
+                    "label": f"Node {i}",
+                    "parent": i // 10 if i > 0 else None,
+                    "children": [],
+                }
+            )
 
         # Build parent-child relationships
         for node in self.nodes:
@@ -244,9 +245,7 @@ async def run_stress_test(duration_s=60):
     # Create layout
     layout = Layout()
     layout.split_column(
-        Layout(name="header", size=3),
-        Layout(name="body"),
-        Layout(name="footer", size=3)
+        Layout(name="header", size=3), Layout(name="body"), Layout(name="footer", size=3)
     )
 
     # Start monitoring
@@ -277,15 +276,16 @@ async def run_stress_test(duration_s=60):
             header_text.append("✳ Stress Testing", style="cyan bold")
             header_text.append(f" ({elapsed:.1f}s · ", style="dim")
             header_text.append(token_stream.get_display(), style="cyan")
-            header_text.append(f" · {stats['fps']:.1f} FPS · CPU {stats['cpu_avg']:.1f}%)", style="dim")
+            header_text.append(
+                f" · {stats['fps']:.1f} FPS · CPU {stats['cpu_avg']:.1f}%)", style="dim"
+            )
             layout["header"].update(Panel(header_text, border_style="cyan"))
 
             # Update body
             bg_tasks.render(progress, task_ids)
             body_layout = Layout()
             body_layout.split_row(
-                Layout(progress, name="progress"),
-                Layout(tree_sim.render(), name="tree")
+                Layout(progress, name="progress"), Layout(tree_sim.render(), name="tree")
             )
             layout["body"].update(body_layout)
 
@@ -294,7 +294,7 @@ async def run_stress_test(duration_s=60):
             layout["footer"].update(Panel(footer_text, border_style="dim"))
 
             # Refresh at 30 FPS
-            await asyncio.sleep(1/30)
+            await asyncio.sleep(1 / 30)
 
     # Wait for background tasks to complete
     await token_task
@@ -315,7 +315,9 @@ def evaluate_results(stats):
     # CPU usage
     cpu_pass = stats["cpu_avg"] < 10.0
     cpu_status = "[green]✓ PASS[/green]" if cpu_pass else "[red]✗ FAIL[/red]"
-    console.print(f"  CPU Usage: {stats['cpu_avg']:.2f}% avg, {stats['cpu_max']:.2f}% max {cpu_status}")
+    console.print(
+        f"  CPU Usage: {stats['cpu_avg']:.2f}% avg, {stats['cpu_max']:.2f}% max {cpu_status}"
+    )
     console.print("    Criteria: < 10%")
 
     # Frame rate

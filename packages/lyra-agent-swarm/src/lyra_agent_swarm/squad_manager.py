@@ -143,7 +143,9 @@ class SquadManager:
     def record_completion(self, squad: Squad, success: bool, duration: float) -> Squad:
         old = squad.metrics
         new_tasks = old.tasks_completed + 1
-        new_rate = ((old.success_rate * old.tasks_completed) + (1.0 if success else 0.0)) / new_tasks
+        new_rate = (
+            (old.success_rate * old.tasks_completed) + (1.0 if success else 0.0)
+        ) / new_tasks
         new_avg = ((old.avg_completion_time * old.tasks_completed) + duration) / new_tasks
         updated = Squad(
             squad_id=squad.squad_id,

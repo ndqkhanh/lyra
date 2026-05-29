@@ -97,7 +97,7 @@ class TestSkillLevel:
     def test_ordering(self):
         """Test skill level ordering by definition."""
         levels = list(SkillLevel)
-        names = [l.value for l in levels]
+        names = [level.value for level in levels]
         assert names == ["novice", "beginner", "intermediate", "advanced", "expert"]
 
 
@@ -336,7 +336,8 @@ class TestUserProfileManager:
                 content="Fix Python bug in parser",
                 outcome="success",
                 importance=0.8,
-            ) for _ in range(20)
+            )
+            for _ in range(20)
         ]
         rich = RichRepresentation(
             user_id="user-1",
@@ -390,7 +391,7 @@ class TestUserProfileManager:
         interactions = [
             InteractionRecord(
                 content="Refactor the API endpoint to use async/await "
-                        "with proper error handling and type checking",
+                "with proper error handling and type checking",
                 importance=0.5,
             ),
             InteractionRecord(
@@ -592,16 +593,24 @@ class TestTripartiteMemory:
         """Test searching across memory tiers."""
         memory = TripartiteMemory()
         memory.add_to_working(MemoryEntry(content="Python function", memory_type="working"))
-        memory._episodic.append(MemoryEntry(content="Python bug fix", memory_type="episodic", importance=0.7))
-        memory._semantic.append(MemoryEntry(content="Python expertise", memory_type="semantic", importance=0.9))
+        memory._episodic.append(
+            MemoryEntry(content="Python bug fix", memory_type="episodic", importance=0.7)
+        )
+        memory._semantic.append(
+            MemoryEntry(content="Python expertise", memory_type="semantic", importance=0.9)
+        )
         results = memory.search_memory("python", memory_type="all")
         assert len(results) == 3
 
     def test_search_specific_type(self):
         """Test searching a specific memory type."""
         memory = TripartiteMemory()
-        memory._episodic.append(MemoryEntry(content="Episodic python", memory_type="episodic", importance=0.6))
-        memory._semantic.append(MemoryEntry(content="Semantic python", memory_type="semantic", importance=0.9))
+        memory._episodic.append(
+            MemoryEntry(content="Episodic python", memory_type="episodic", importance=0.6)
+        )
+        memory._semantic.append(
+            MemoryEntry(content="Semantic python", memory_type="semantic", importance=0.9)
+        )
         results = memory.search_memory("python", memory_type="semantic")
         assert len(results) == 1
         assert results[0].memory_type == "semantic"
@@ -769,8 +778,7 @@ class TestAutonomyController:
         """Test trust score with interaction history."""
         controller = AutonomyController()
         interactions = [
-            InteractionRecord(content="Task", outcome="success", importance=0.5)
-            for _ in range(30)
+            InteractionRecord(content="Task", outcome="success", importance=0.5) for _ in range(30)
         ]
         rich = RichRepresentation(
             user_id="user-1",

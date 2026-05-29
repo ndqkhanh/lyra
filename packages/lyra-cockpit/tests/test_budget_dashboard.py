@@ -21,7 +21,9 @@ class TestBudgetConfig:
         assert config.currency == "USD"
 
     def test_custom_values(self) -> None:
-        config = BudgetConfig(daily_limit=100.0, monthly_limit=2000.0, alert_threshold=0.9, currency="EUR")
+        config = BudgetConfig(
+            daily_limit=100.0, monthly_limit=2000.0, alert_threshold=0.9, currency="EUR"
+        )
         assert config.daily_limit == 100.0
         assert config.monthly_limit == 2000.0
         assert config.alert_threshold == 0.9

@@ -10,6 +10,7 @@ Ports the 244-line key_store.py credential system into a usable UX:
 
 ECC reference: enterprise-controls.md credential management.
 """
+
 from __future__ import annotations
 
 import os
@@ -20,10 +21,18 @@ from ..commands.registry import CommandResult
 # ── Known providers and their env vars ─────────────────────────────────
 
 PROVIDERS: dict[str, dict[str, str]] = {
-    "anthropic": {"env": "ANTHROPIC_API_KEY", "url": "https://api.anthropic.com", "color": "yellow"},
+    "anthropic": {
+        "env": "ANTHROPIC_API_KEY",
+        "url": "https://api.anthropic.com",
+        "color": "yellow",
+    },
     "openai": {"env": "OPENAI_API_KEY", "url": "https://api.openai.com", "color": "green"},
     "deepseek": {"env": "DEEPSEEK_API_KEY", "url": "https://api.deepseek.com", "color": "blue"},
-    "gemini": {"env": "GEMINI_API_KEY", "url": "https://generativelanguage.googleapis.com", "color": "cyan"},
+    "gemini": {
+        "env": "GEMINI_API_KEY",
+        "url": "https://generativelanguage.googleapis.com",
+        "color": "cyan",
+    },
     "groq": {"env": "GROQ_API_KEY", "url": "https://api.groq.com", "color": "magenta"},
     "openrouter": {"env": "OPENROUTER_API_KEY", "url": "https://openrouter.ai/api", "color": "dim"},
     "mistral": {"env": "MISTRAL_API_KEY", "url": "https://api.mistral.ai", "color": "cyan"},
@@ -61,6 +70,7 @@ def _test_provider(provider: str) -> str:
         return "unknown provider"
     import urllib.error
     import urllib.request
+
     try:
         req = urllib.request.Request(info["url"], method="HEAD")
         req.timeout = 5
@@ -73,6 +83,7 @@ def _test_provider(provider: str) -> str:
 
 
 # ── Slash command ─────────────────────────────────────────────────────
+
 
 def cmd_keys(session: Any, args: str) -> CommandResult:
     """View and manage API provider keys.
@@ -92,15 +103,15 @@ def cmd_keys(session: Any, args: str) -> CommandResult:
     if subcmd == "list":
         lines = ["[bold]Providers[/]"]
         configured = 0
-        for name, info in sorted(PROVIDERS.items()):
-            is_set, masked = _check_env(name)
+        for _name, info in sorted(PROVIDERS.items()):
+            is_set, masked = _check_env(_name)
             glyph = "[green]✓[/]" if is_set else "[dim]○[/]"
             color = info["color"]
             if is_set:
                 configured += 1
-                lines.append(f"  {glyph} [{color}]{name:<12}[/] {masked}")
+                lines.append(f"  {glyph} [{color}]{_name:<12}[/] {masked}")
             else:
-                lines.append(f"  {glyph} [{color}]{name:<12}[/]")
+                lines.append(f"  {glyph} [{color}]{_name:<12}[/]")
         lines.append("")
         lines.append(f"[dim]{configured}/{len(PROVIDERS)} providers configured[/]")
         return CommandResult(
@@ -159,7 +170,7 @@ def cmd_keys(session: Any, args: str) -> CommandResult:
     if subcmd == "env":
         lines = ["[bold]Environment Variables[/]"]
         count = 0
-        for name, info in sorted(PROVIDERS.items()):
+        for _name, info in sorted(PROVIDERS.items()):
             env_var = info["env"]
             value = os.environ.get(env_var, "")
             if value:
@@ -186,7 +197,10 @@ def cmd_keys(session: Any, args: str) -> CommandResult:
         result = _test_provider(name)
         return CommandResult(
             output=f"{name}: {result}",
-            renderable=f"[bold]{name}[/]  [dim]{info['url']}[/]\n  Result: {'[green]✓[/]' if 'reachable' in result else '[red]✗[/]'} {result}",
+            renderable=(
+                f"[bold]{name}[/]  [dim]{info['url']}[/]\n  Result: "
+                f"{'[green]✓[/]' if 'reachable' in result else '[red]✗[/]'} {result}"
+            ),
         )
 
     return CommandResult(output="Usage: /keys [list|show|set|remove|env|test]")

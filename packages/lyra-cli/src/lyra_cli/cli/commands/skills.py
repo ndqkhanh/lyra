@@ -18,6 +18,7 @@ formatter = OutputFormatter(console)
 def _pack_name(manifest) -> str:
     """Derive pack name from the skill's source path."""
     import os
+
     parts = manifest.path.split(os.sep)
     for i, part in enumerate(parts):
         if part == "packs" and i + 1 < len(parts):
@@ -35,7 +36,7 @@ def list_cmd(
         manifests = load_skills(shipped_pack_roots())
     except Exception as exc:
         formatter.error_message(f"Failed to load skills: {exc}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from exc
 
     if pack:
         manifests = [m for m in manifests if _pack_name(m) == pack]
@@ -65,8 +66,7 @@ def list_cmd(
 
     console.print(table)
     formatter.info_message(
-        f"Total: {len(manifests)} skills across "
-        f"{len({_pack_name(m) for m in manifests})} packs"
+        f"Total: {len(manifests)} skills across " f"{len({_pack_name(m) for m in manifests})} packs"
     )
 
 
@@ -77,14 +77,16 @@ def show(skill_name: str) -> None:
         manifests = load_skills(shipped_pack_roots())
     except Exception as exc:
         formatter.error_message(f"Failed to load skills: {exc}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from exc
 
     for m in manifests:
         if m.id == skill_name:
             console.print(f"[bold]Skill:[/bold] {m.name} ({m.id})")
             console.print(f"[bold]Pack:[/bold]  {_pack_name(m)}")
             console.print(f"[bold]Description:[/bold] {m.description}")
-            console.print(f"[bold]Keywords:[/bold] {', '.join(m.keywords) if m.keywords else '(none)'}")
+            console.print(
+                f"[bold]Keywords:[/bold] {', '.join(m.keywords) if m.keywords else '(none)'}"
+            )
             if m.version:
                 console.print(f"[bold]Version:[/bold] {m.version}")
             if m.applies_to:
@@ -111,12 +113,17 @@ def stats(
     if skill_name:
         skill_stats = ledger.get(skill_name)
         from lyra_skills.ledger import utility_score
+
         u = utility_score(skill_stats)
         console.print(f"[bold]{skill_name}[/bold]")
         console.print(f"  Successes: {skill_stats.successes}")
         console.print(f"  Failures:  {skill_stats.failures}")
         console.print(f"  Utility:   {u:+.3f}")
-        console.print(f"  Last used: {skill_stats.last_used_at:.0f}" if skill_stats.last_used_at else "  Last used: never")
+        console.print(
+            f"  Last used: {skill_stats.last_used_at:.0f}"
+            if skill_stats.last_used_at
+            else "  Last used: never"
+        )
     else:
         table = Table(title="Skill Usage Statistics")
         table.add_column("Skill", style="green")
@@ -130,8 +137,10 @@ def stats(
             m = manifest_by_id.get(s.skill_id)
             pack = _pack_name(m) if m else "—"
             table.add_row(
-                s.skill_id, pack,
-                str(s.successes), str(s.failures),
+                s.skill_id,
+                pack,
+                str(s.successes),
+                str(s.failures),
                 f"{s.utility:+.2f}",
             )
 
@@ -154,8 +163,4 @@ def search(query: str) -> None:
 
     formatter.info_message(f"Found {len(matches)} matching skill(s):")
     for m in matches:
-        console.print(
-            f"  [green]{m.id}[/green] "
-            f"({_pack_name(m)}) — "
-            f"{m.description[:100]}"
-        )
+        console.print(f"  [green]{m.id}[/green] " f"({_pack_name(m)}) — " f"{m.description[:100]}")

@@ -1,4 +1,5 @@
-"""Event-Sourced Agent Loop — Agent Loop 2.0 with Multi-Stream execution and speculative planning."""
+"""Event-Sourced Agent Loop — Agent Loop 2.0 with Multi-Stream execution and speculative
+planning."""
 
 from __future__ import annotations
 
@@ -81,7 +82,9 @@ class MultiStreamExecutor:
     async def execute_parallel(self, prompt: str, tools: list[str]) -> dict[str, Any]:
         async def thinking():
             await asyncio.sleep(0.1)  # simulated thinking
-            await self.thinking_stream.put({"type": "thought", "content": f"Analyzing {prompt[:20]}..."})
+            await self.thinking_stream.put(
+                {"type": "thought", "content": f"Analyzing {prompt[:20]}..."}
+            )
 
         async def io():
             await asyncio.sleep(0.05)  # simulated I/O
@@ -102,17 +105,21 @@ class SpeculativePlanner:
         self.max_speculations = max_speculations
         self.plans: list[dict[str, Any]] = []
 
-    async def speculate(self, current_state: dict[str, Any], idle_time: float) -> list[dict[str, Any]]:
+    async def speculate(
+        self, current_state: dict[str, Any], idle_time: float
+    ) -> list[dict[str, Any]]:
         """Generate speculative plans during idle time."""
         if idle_time < 0.1:
             return []
         plans = []
         for i in range(min(self.max_speculations, int(idle_time / 0.1))):
-            plans.append({
-                "plan_id": f"spec_{i}",
-                "strategy": f"alternative_{i}",
-                "expected_utility": 1.0 - (i * 0.2),
-            })
+            plans.append(
+                {
+                    "plan_id": f"spec_{i}",
+                    "strategy": f"alternative_{i}",
+                    "expected_utility": 1.0 - (i * 0.2),
+                }
+            )
         self.plans.extend(plans)
         return plans
 
@@ -166,16 +173,34 @@ class EventSourcedAgentLoop:
         self.adaptor = RuntimeHarnessAdaptor()
 
     async def step(self, prompt: str, tools: list[str]) -> dict[str, Any]:
-        self.log.emit(StepEvent(EventType.AGENT_STARTED, self.agent_id, self._now(), {"prompt": prompt}))
+        self.log.emit(
+            StepEvent(EventType.AGENT_STARTED, self.agent_id, self._now(), {"prompt": prompt})
+        )
 
-        adapted_tools = self.adaptor.adapt_tools({"task_type": prompt.split()[0] if prompt else "general"})
-        self.log.emit(StepEvent(EventType.THOUGHT_GENERATED, self.agent_id, self._now(), {"prompt_length": len(prompt)}))
+        adapted_tools = self.adaptor.adapt_tools(
+            {"task_type": prompt.split()[0] if prompt else "general"}
+        )
+        self.log.emit(
+            StepEvent(
+                EventType.THOUGHT_GENERATED,
+                self.agent_id,
+                self._now(),
+                {"prompt_length": len(prompt)},
+            )
+        )
 
         exec_result = await self.executor.execute_parallel(prompt, adapted_tools)
         self.log.emit(StepEvent(EventType.TOOL_CALLED, self.agent_id, self._now(), exec_result))
 
         spec_plans = await self.planner.speculate({}, idle_time=0.5)
-        self.log.emit(StepEvent(EventType.STEP_COMPLETED, self.agent_id, self._now(), {"spec_plans": len(spec_plans)}))
+        self.log.emit(
+            StepEvent(
+                EventType.STEP_COMPLETED,
+                self.agent_id,
+                self._now(),
+                {"spec_plans": len(spec_plans)},
+            )
+        )
 
         return {
             "agent_id": self.agent_id,

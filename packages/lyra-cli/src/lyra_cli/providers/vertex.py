@@ -23,6 +23,7 @@ the adapter:
   proper :class:`ToolCall` objects, mirroring the public-Gemini
   adapter so the same agent loop drives both endpoints.
 """
+
 from __future__ import annotations
 
 import json
@@ -71,6 +72,7 @@ class GeminiVertexLLM(LLMProvider):
                     "install with `pip install 'lyra[vertex]'`"
                 )
             import vertexai  # type: ignore
+
             vertexai.init(project=project, location=location)
             self._client = GenerativeModel(model)
         self.model = model
@@ -97,7 +99,7 @@ class GeminiVertexLLM(LLMProvider):
         """
         if m.role == "tool":
             parts: list[dict[str, Any]] = []
-            for r in (m.tool_results or []):
+            for r in m.tool_results or []:
                 try:
                     response_obj: Any = json.loads(r.content)
                     if not isinstance(response_obj, dict):
@@ -119,7 +121,7 @@ class GeminiVertexLLM(LLMProvider):
         parts: list[dict[str, Any]] = []
         if m.content:
             parts.append({"text": m.content})
-        for c in (m.tool_calls or []):
+        for c in m.tool_calls or []:
             parts.append(
                 {
                     "functionCall": {
@@ -171,13 +173,7 @@ class GeminiVertexLLM(LLMProvider):
         # ``[{"function_declarations": [...]}]`` shape; we adapt from
         # Anthropic-style schemas the rest of the stack uses.
         if tools:
-            kwargs["tools"] = [
-                {
-                    "function_declarations": [
-                        self._tool_to_vertex(t) for t in tools
-                    ]
-                }
-            ]
+            kwargs["tools"] = [{"function_declarations": [self._tool_to_vertex(t) for t in tools]}]
 
         resp = self._client.generate_content(**kwargs)
         self._record_usage(resp)
@@ -207,8 +203,7 @@ class GeminiVertexLLM(LLMProvider):
         completion = (
             getattr(meta, "candidates_token_count", None)
             if not isinstance(meta, dict)
-            else meta.get("candidates_token_count")
-            or meta.get("candidatesTokenCount")
+            else meta.get("candidates_token_count") or meta.get("candidatesTokenCount")
         )
         total = (
             getattr(meta, "total_token_count", None)
@@ -262,17 +257,14 @@ class GeminiVertexLLM(LLMProvider):
             else candidate.get("content")
         )
         parts = (
-            (getattr(content, "parts", None) if not isinstance(content, dict) else content.get("parts"))
-            or []
-        )
+            getattr(content, "parts", None)
+            if not isinstance(content, dict)
+            else content.get("parts")
+        ) or []
         text_chunks: list[str] = []
         tool_calls: list[ToolCall] = []
         for i, p in enumerate(parts):
-            t = (
-                getattr(p, "text", None)
-                if not isinstance(p, dict)
-                else p.get("text")
-            )
+            t = getattr(p, "text", None) if not isinstance(p, dict) else p.get("text")
             if isinstance(t, str) and t:
                 text_chunks.append(t)
             fc = (
@@ -282,14 +274,10 @@ class GeminiVertexLLM(LLMProvider):
             )
             if fc is not None:
                 name = (
-                    getattr(fc, "name", None)
-                    if not isinstance(fc, dict)
-                    else fc.get("name")
+                    getattr(fc, "name", None) if not isinstance(fc, dict) else fc.get("name")
                 ) or ""
                 args = (
-                    getattr(fc, "args", None)
-                    if not isinstance(fc, dict)
-                    else fc.get("args")
+                    getattr(fc, "args", None) if not isinstance(fc, dict) else fc.get("args")
                 ) or {}
                 # SDK args are a Struct/MapComposite; coerce to plain
                 # dict so the agent loop and JSON-encoders can work

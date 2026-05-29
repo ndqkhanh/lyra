@@ -124,7 +124,9 @@ class DoctorCommand:
                 self.console.print()
 
             if self.warnings:
-                self.console.print(f"[bold yellow]Found {len(self.warnings)} warning(s)[/bold yellow]")
+                self.console.print(
+                    f"[bold yellow]Found {len(self.warnings)} warning(s)[/bold yellow]"
+                )
                 for check, msg in self.warnings:
                     self.console.print(f"  • {check}: {msg}")
                 self.console.print()

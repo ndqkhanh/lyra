@@ -3,6 +3,7 @@
 Reads running processes via psutil (preferred) or ``ps aux`` fallback.
 Identifies Claude Code / subagent processes by command pattern.
 """
+
 from __future__ import annotations
 
 import re
@@ -21,6 +22,7 @@ _COMPILED = [re.compile(p) for p in _AGENT_PATTERNS]
 @dataclass(frozen=True)
 class RawProcess:
     """Minimal OS-level process snapshot."""
+
     pid: int
     command: str
     cwd: str
@@ -37,7 +39,9 @@ def _scan_via_psutil() -> list[RawProcess]:
     import psutil  # type: ignore[import-untyped]
 
     out: list[RawProcess] = []
-    for proc in psutil.process_iter(["pid", "cmdline", "cwd", "cpu_percent", "memory_info", "create_time"]):
+    for proc in psutil.process_iter(
+        ["pid", "cmdline", "cwd", "cpu_percent", "memory_info", "create_time"]
+    ):
         try:
             info = proc.info
             cmd = " ".join(info.get("cmdline") or [])
@@ -101,6 +105,7 @@ def scan_agent_processes() -> list[RawProcess]:
     """Return all detected agent processes. Prefers psutil; falls back to ps."""
     try:
         import psutil  # noqa: F401
+
         return _scan_via_psutil()
     except ImportError:
         return _scan_via_ps()

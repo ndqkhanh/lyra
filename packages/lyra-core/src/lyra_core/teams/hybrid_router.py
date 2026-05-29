@@ -57,14 +57,20 @@ class HybridCommunicationRouter:
         self._latent = latent_compressor
         self._routing_log: list[RoutedMessage] = []
 
-    def route(self, content: str, category: str, metadata: dict[str, Any] | None = None) -> RoutedMessage:
+    def route(
+        self, content: str, category: str, metadata: dict[str, Any] | None = None
+    ) -> RoutedMessage:
         meta = metadata or {}
         msg_len = len(content)
 
         # Always use text for:
         # - Short messages (under threshold)
         # - Alerts, questions, plan approvals (require exact fidelity)
-        if category in (MessageCategory.ALERT, MessageCategory.QUESTION, MessageCategory.PLAN_APPROVAL):
+        if category in (
+            MessageCategory.ALERT,
+            MessageCategory.QUESTION,
+            MessageCategory.PLAN_APPROVAL,
+        ):
             return self._text_route(content, category, meta)
 
         if msg_len < self.TEXT_THRESHOLD:
@@ -128,7 +134,9 @@ class HybridCommunicationRouter:
     def routing_stats(self) -> dict[str, int | float]:
         text_count = sum(1 for m in self._routing_log if m.channel == Channel.TEXT)
         latent_count = sum(1 for m in self._routing_log if m.channel == Channel.LATENT)
-        total_savings = sum(m.token_savings for m in self._routing_log if m.channel == Channel.LATENT)
+        total_savings = sum(
+            m.token_savings for m in self._routing_log if m.channel == Channel.LATENT
+        )
         return {
             "text_routes": text_count,
             "latent_routes": latent_count,

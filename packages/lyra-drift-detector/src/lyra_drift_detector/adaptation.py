@@ -173,7 +173,9 @@ class ThresholdRecalibrationStrategy:
             signal.threshold = new_threshold
             logger.info(
                 "Threshold recalibrated for '%s': %.4f -> %.4f",
-                signal.metric, current, new_threshold,
+                signal.metric,
+                current,
+                new_threshold,
             )
             return True
         except Exception as exc:
@@ -397,7 +399,8 @@ class AdaptationEngine:
         self._checkpoints.append(checkpoint)
         logger.info(
             "Checkpoint created: %s for component '%s'",
-            checkpoint.checkpoint_id[:8], component,
+            checkpoint.checkpoint_id[:8],
+            component,
         )
         return checkpoint
 
@@ -461,7 +464,11 @@ class AdaptationEngine:
         component = f"{signal.drift_type.name}_{signal.metric}"
         checkpoint = self.create_checkpoint(
             component,
-            {"signal_score": signal.score, "signal_threshold": signal.threshold, "context": context},
+            {
+                "signal_score": signal.score,
+                "signal_threshold": signal.threshold,
+                "context": context,
+            },
         )
 
         record = AdaptationRecord(
@@ -478,7 +485,9 @@ class AdaptationEngine:
         self._history.append(record)
         logger.info(
             "Adaptation recommended: action=%s strategy=%s confidence=%.2f",
-            best_action.name, best_strategy.name, best_confidence,
+            best_action.name,
+            best_strategy.name,
+            best_confidence,
         )
         return record
 
@@ -495,7 +504,9 @@ class AdaptationEngine:
             The updated record.
         """
         if strategy is None:
-            strategy = self._strategies.get(record.notes.split(":")[1].split(",")[0].strip().lower())
+            strategy = self._strategies.get(
+                record.notes.split(":")[1].split(",")[0].strip().lower()
+            )
             if strategy is None:
                 record.status = AdaptationStatus.FAILED
                 record.completed_at = time.time()

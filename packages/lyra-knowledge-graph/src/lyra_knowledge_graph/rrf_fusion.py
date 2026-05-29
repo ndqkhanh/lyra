@@ -89,7 +89,7 @@ class RRFusion:
             entry["metadata"] = result.get("metadata", {})
 
         # RRF score computation
-        for item_id, entry in rrf_scores.items():
+        for _item_id, entry in rrf_scores.items():
             rrf_score = 0.0
             if entry["keyword_rank"] is not None:
                 rrf_score += 1.0 / (self._k + entry["keyword_rank"])
@@ -144,9 +144,9 @@ class RRFusion:
                 rrf_scores[item_id]["ranks"][list_idx] = rank + 1
                 rrf_scores[item_id]["scores"][list_idx] = result.get("score", 0.0)
 
-        for item_id, entry in rrf_scores.items():
+        for _item_id, entry in rrf_scores.items():
             rrf_score = 0.0
-            for list_idx, rank_val in entry["ranks"].items():
+            for _list_idx, rank_val in entry["ranks"].items():
                 rrf_score += 1.0 / (self._k + rank_val)
             entry["rrf_score"] = rrf_score
 

@@ -1,6 +1,9 @@
 """Dual-use intent classifier gate.
 
-Per [docs/219-helix-bio-multi-hop-collaborative-apply-plan.md](../../../../../../research/harness-engineering/docs/219-helix-bio-multi-hop-collaborative-apply-plan.md) §3.2 —
+Per
+[docs/219-helix-bio-multi-hop-collaborative-apply-plan.md]
+(../../../../../../research/harness-engineering/
+docs/219-helix-bio-multi-hop-collaborative-apply-plan.md) §3.2 —
 Helix-Bio Tier-0 non-negotiable. Classifies queries on a dual-use risk axis
 (pathogen-of-concern synthesis, controlled-substance analog design,
 gain-of-function-adjacent assays). High-risk → HITL approval; medium-risk →
@@ -13,7 +16,8 @@ Layered design:
       classifier through this slot.
     - :class:`DualUseGate` — composes a classifier with action policy.
 
-Cf. [docs/49-agents-of-chaos-red-teaming.md](../../../../../../research/harness-engineering/docs/49-agents-of-chaos-red-teaming.md),
+Cf.
+[docs/49-agents-of-chaos-red-teaming.md](../../../../../../research/harness-engineering/docs/49-agents-of-chaos-red-teaming.md),
 [docs/122-explainability-compliance.md](../../../../../../research/harness-engineering/docs/122-explainability-compliance.md).
 
 The keyword classifier is *intentionally minimal*. Production deployments
@@ -21,6 +25,7 @@ should replace it with an LM-backed classifier and a domain-curated taxonomy.
 The rule-based fallback's job is to fail-closed-by-default + provide an
 auditable baseline, not to enumerate every dual-use risk.
 """
+
 from __future__ import annotations
 
 import enum
@@ -114,9 +119,7 @@ class KeywordRiskClassifier:
     """
 
     name: str = "keyword-risk-classifier-v1"
-    high_patterns: dict[str, tuple[str, ...]] = field(
-        default_factory=lambda: _HIGH_RISK_PATTERNS
-    )
+    high_patterns: dict[str, tuple[str, ...]] = field(default_factory=lambda: _HIGH_RISK_PATTERNS)
     medium_patterns: dict[str, tuple[str, ...]] = field(
         default_factory=lambda: _MEDIUM_RISK_PATTERNS
     )
@@ -211,9 +214,7 @@ class DualUseGate:
     """
 
     classifier: DualUseClassifier
-    policy: dict[RiskLevel, GateAction] = field(
-        default_factory=lambda: dict(_DEFAULT_POLICY)
-    )
+    policy: dict[RiskLevel, GateAction] = field(default_factory=lambda: dict(_DEFAULT_POLICY))
     audit_log: list[GateDecision] = field(default_factory=list)
     block_on_classifier_error: bool = True
 
@@ -233,7 +234,10 @@ class DualUseGate:
             decision = GateDecision(
                 verdict=failure_verdict,
                 action=action,
-                audit_reason=f"classifier_error fail_{'closed' if self.block_on_classifier_error else 'open'}",
+                audit_reason=(
+                    f"classifier_error fail_"
+                    f"{'closed' if self.block_on_classifier_error else 'open'}"
+                ),
             )
             self.audit_log.append(decision)
             return decision

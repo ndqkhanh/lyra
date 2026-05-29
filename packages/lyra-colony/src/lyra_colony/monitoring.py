@@ -298,9 +298,7 @@ class ColonyMonitor:
         """Return agents that have not sent a heartbeat recently."""
         now = _now()
         return [
-            aid
-            for aid, last in self._agent_last_heartbeat.items()
-            if now - last > timeout_seconds
+            aid for aid, last in self._agent_last_heartbeat.items() if now - last > timeout_seconds
         ]
 
     # ------------------------------------------------------------------
@@ -310,15 +308,13 @@ class ColonyMonitor:
     def record_latency(self, latency_s: float) -> None:
         self._latency_samples.append(latency_s)
         if len(self._latency_samples) > self._history_window * 10:
-            self._latency_samples = self._latency_samples[-self._history_window * 10:]
+            self._latency_samples = self._latency_samples[-self._history_window * 10 :]
 
     def record_throughput(self, count: int) -> None:
         self._throughput_samples.append((_now(), count))
         # Prune old samples
         cutoff = _now() - self._history_window
-        self._throughput_samples = [
-            (t, c) for t, c in self._throughput_samples if t > cutoff
-        ]
+        self._throughput_samples = [(t, c) for t, c in self._throughput_samples if t > cutoff]
 
     def record_error(self, task_type: str) -> None:
         self._error_counts[task_type] += 1
@@ -399,7 +395,9 @@ class ColonyMonitor:
             alert = Alert(
                 rule_name=rule.name,
                 severity=rule.severity,
-                message=rule.message_template.format(metric=rule.metric, value=value, threshold=rule.threshold),
+                message=rule.message_template.format(
+                    metric=rule.metric, value=value, threshold=rule.threshold
+                ),
                 metric_name=rule.metric,
                 metric_value=value,
                 threshold=rule.threshold,
@@ -414,7 +412,7 @@ class ColonyMonitor:
 
         # Prune old alerts
         if len(self._alerts) > self._max_alerts:
-            self._alerts = self._alerts[-self._max_alerts:]
+            self._alerts = self._alerts[-self._max_alerts :]
 
         return new_alerts
 
@@ -454,7 +452,7 @@ class ColonyMonitor:
         )
         self._audit_log.append(entry)
         if len(self._audit_log) > self._max_audit_entries:
-            self._audit_log = self._audit_log[-self._max_audit_entries:]
+            self._audit_log = self._audit_log[-self._max_audit_entries :]
 
     def get_audit_log(
         self,

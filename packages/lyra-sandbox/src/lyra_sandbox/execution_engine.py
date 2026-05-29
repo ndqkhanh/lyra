@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
-from typing import Sequence
+from collections.abc import Sequence
 
 from .docker_sandbox import DockerConfig, DockerSandbox
 from .exceptions import CodeRequest, ExecutionError, ExecutionResult, Language, SecurityScanError

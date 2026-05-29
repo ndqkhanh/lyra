@@ -1,4 +1,5 @@
 """RED tests for v1.8 Wave-1 §3.2 — ReasoningBank with failure-distillation + MaTTS."""
+
 from __future__ import annotations
 
 from lyra_core.memory import (
@@ -11,7 +12,9 @@ from lyra_core.memory import (
 )
 
 
-def _trajectory(*, outcome: TrajectoryOutcome, sig: str = "parse-json", n_steps: int = 3) -> Trajectory:
+def _trajectory(
+    *, outcome: TrajectoryOutcome, sig: str = "parse-json", n_steps: int = 3
+) -> Trajectory:
     return Trajectory(
         id=f"t-{outcome.value}-{sig}",
         task_signature=sig,

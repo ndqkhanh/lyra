@@ -1,6 +1,7 @@
 """Sub-question decomposition cache.
 
-Per [docs/199-multi-hop-reasoning-techniques-arc.md](../../../../../../research/harness-engineering/docs/199-multi-hop-reasoning-techniques-arc.md)
+Per
+[docs/199-multi-hop-reasoning-techniques-arc.md](../../../../../../research/harness-engineering/docs/199-multi-hop-reasoning-techniques-arc.md)
 and the Tier-0 day-by-day checklists in [docs/203], [docs/208], [docs/220].
 
 Sub-question decompositions repeat across queries (especially fan-out questions
@@ -11,6 +12,7 @@ The cache is **scoped** by ``namespace`` so cross-project / cross-tenant
 poisoning is prevented — Aegis-Ops's per-runbook context isolation pattern
 generalises here: the cache key includes the namespace.
 """
+
 from __future__ import annotations
 
 import re

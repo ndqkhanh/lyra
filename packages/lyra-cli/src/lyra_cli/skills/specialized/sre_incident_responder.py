@@ -120,22 +120,47 @@ class IncidentResponsePlan:
 # ---------------------------------------------------------------------------
 _SEVERITY_KEYWORDS: dict[IncidentSeverity, list[str]] = {
     IncidentSeverity.SEV1: [
-        "down", "outage", "data loss", "security breach", "p0", "critical",
-        "complete failure", "all users", "production down",
+        "down",
+        "outage",
+        "data loss",
+        "security breach",
+        "p0",
+        "critical",
+        "complete failure",
+        "all users",
+        "production down",
     ],
     IncidentSeverity.SEV2: [
-        "degraded", "slow", "high error", "p1", "major", "partial outage",
-        "feature broken", "increased latency",
+        "degraded",
+        "slow",
+        "high error",
+        "p1",
+        "major",
+        "partial outage",
+        "feature broken",
+        "increased latency",
     ],
     IncidentSeverity.SEV3: [
-        "minor", "p2", "non-critical", "single user", "cosmetic",
-        "unable to access", "intermittent",
+        "minor",
+        "p2",
+        "non-critical",
+        "single user",
+        "cosmetic",
+        "unable to access",
+        "intermittent",
     ],
     IncidentSeverity.SEV4: [
-        "p3", "low priority", "enhancement", "documentation",
+        "p3",
+        "low priority",
+        "enhancement",
+        "documentation",
     ],
     IncidentSeverity.SEV5: [
-        "p4", "trivial", "cosmetic", "typo", "visual",
+        "p4",
+        "trivial",
+        "cosmetic",
+        "typo",
+        "visual",
     ],
 }
 
@@ -163,9 +188,7 @@ class SREIncidentResponder:
         if not description:
             return {"error": "No incident description provided"}
 
-        title = input_data.get(
-            "incident_title", self._extract_title(description)
-        )
+        title = input_data.get("incident_title", self._extract_title(description))
         environment = input_data.get("environment", "production")
 
         severity = self._assess_severity(description)
@@ -211,14 +234,18 @@ class SREIncidentResponder:
         desc_lower = description.lower()
         self._keywords_found.clear()
 
-        for severity, keywords in _SEVERITY_KEYWORDS.items():
+        for _severity, keywords in _SEVERITY_KEYWORDS.items():
             for kw in keywords:
                 if kw in desc_lower:
                     self._keywords_found.append(kw)
 
-        for severity in (IncidentSeverity.SEV1, IncidentSeverity.SEV2,
-                         IncidentSeverity.SEV3, IncidentSeverity.SEV4,
-                         IncidentSeverity.SEV5):
+        for severity in (
+            IncidentSeverity.SEV1,
+            IncidentSeverity.SEV2,
+            IncidentSeverity.SEV3,
+            IncidentSeverity.SEV4,
+            IncidentSeverity.SEV5,
+        ):
             for kw in _SEVERITY_KEYWORDS[severity]:
                 if kw in desc_lower:
                     return severity
@@ -268,8 +295,7 @@ class SREIncidentResponder:
         desc_lower = description.lower()
 
         data_risk = any(
-            kw in desc_lower
-            for kw in ["data loss", "corruption", "integrity", "rollback"]
+            kw in desc_lower for kw in ["data loss", "corruption", "integrity", "rollback"]
         )
 
         if severity == IncidentSeverity.SEV1:
@@ -297,9 +323,7 @@ class SREIncidentResponder:
             data_integrity_risk=data_risk,
         )
 
-    def _generate_runbook(
-        self, severity: IncidentSeverity, environment: str
-    ) -> Runbook:
+    def _generate_runbook(self, severity: IncidentSeverity, environment: str) -> Runbook:
         common_steps: list[RunbookStep] = [
             RunbookStep(
                 step_number=1,
@@ -339,7 +363,10 @@ class SREIncidentResponder:
                 ),
                 RunbookStep(
                     step_number=6,
-                    action=f"Attempt mitigation: rollback, scale out, or failover {self._affected_services[0] if self._affected_services else 'affected services'}",
+                    action=(
+                        "Attempt mitigation: rollback, scale out, or failover "
+                        f"{self._affected_services[0] if self._affected_services else 'affected services'}"  # noqa: E501
+                    ),
                     expected_outcome="Mitigation in progress",
                     estimated_duration="30 min",
                 ),
@@ -356,8 +383,12 @@ class SREIncidentResponder:
                     estimated_duration="15 min",
                 ),
             ]
-            prerequisites = ("Runbook access", "On-call roster", "VPN access",
-                            f"{environment} dashboard access")
+            prerequisites = (
+                "Runbook access",
+                "On-call roster",
+                "VPN access",
+                f"{environment} dashboard access",
+            )
             owner = "SRE Team (on-call)"
         else:
             severity_steps = [
@@ -406,27 +437,29 @@ class SREIncidentResponder:
         ]
 
         if severity in (IncidentSeverity.SEV1, IncidentSeverity.SEV2):
-            base_path.extend([
-                EscalationEntry(
-                    level=2,
-                    team="SRE Lead",
-                    contact_channel="Slack / Phone",
-                    response_sla="15 min",
-                    after_hours_contact="On-call escalation",
-                ),
-                EscalationEntry(
-                    level=3,
-                    team="Engineering Manager",
-                    contact_channel="Phone",
-                    response_sla="30 min",
-                ),
-                EscalationEntry(
-                    level=4,
-                    team="VP of Engineering / CTO",
-                    contact_channel="Emergency bridge",
-                    response_sla="60 min",
-                ),
-            ])
+            base_path.extend(
+                [
+                    EscalationEntry(
+                        level=2,
+                        team="SRE Lead",
+                        contact_channel="Slack / Phone",
+                        response_sla="15 min",
+                        after_hours_contact="On-call escalation",
+                    ),
+                    EscalationEntry(
+                        level=3,
+                        team="Engineering Manager",
+                        contact_channel="Phone",
+                        response_sla="30 min",
+                    ),
+                    EscalationEntry(
+                        level=4,
+                        team="VP of Engineering / CTO",
+                        contact_channel="Emergency bridge",
+                        response_sla="60 min",
+                    ),
+                ]
+            )
         else:
             base_path.append(
                 EscalationEntry(
@@ -491,9 +524,7 @@ class SREIncidentResponder:
         )
 
     @staticmethod
-    def _extract_tags(
-        description: str, severity: IncidentSeverity
-    ) -> list[str]:
+    def _extract_tags(description: str, severity: IncidentSeverity) -> list[str]:
         tags = [severity.value.lower()]
         desc_lower = description.lower()
 

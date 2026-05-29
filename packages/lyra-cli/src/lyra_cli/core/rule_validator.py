@@ -1,4 +1,5 @@
 """Rule validator for checking code against rules."""
+
 from dataclasses import dataclass
 from typing import Any
 
@@ -9,6 +10,7 @@ from .rule_registry import RuleRegistry
 @dataclass
 class RuleViolation:
     """A rule violation."""
+
     rule_name: str
     severity: RuleSeverity
     message: str
@@ -19,6 +21,7 @@ class RuleViolation:
 @dataclass
 class ValidationResult:
     """Result from rule validation."""
+
     passed: bool
     violations: list[RuleViolation]
     rules_checked: int
@@ -40,12 +43,12 @@ class RuleValidator:
             violations.extend(rule_violations)
 
         return ValidationResult(
-            passed=len(violations) == 0,
-            violations=violations,
-            rules_checked=len(rules)
+            passed=len(violations) == 0, violations=violations, rules_checked=len(rules)
         )
 
-    def validate_category(self, category: RuleCategory, context: dict[str, Any] | None = None) -> ValidationResult:
+    def validate_category(
+        self, category: RuleCategory, context: dict[str, Any] | None = None
+    ) -> ValidationResult:
         """Validate code against rules in a specific category."""
         violations = []
         rules = self.registry.get_rules_by_category(category)
@@ -55,12 +58,12 @@ class RuleValidator:
             violations.extend(rule_violations)
 
         return ValidationResult(
-            passed=len(violations) == 0,
-            violations=violations,
-            rules_checked=len(rules)
+            passed=len(violations) == 0, violations=violations, rules_checked=len(rules)
         )
 
-    def _check_rule(self, rule: RuleMetadata, context: dict[str, Any] | None = None) -> list[RuleViolation]:
+    def _check_rule(
+        self, rule: RuleMetadata, context: dict[str, Any] | None = None
+    ) -> list[RuleViolation]:
         """Check a single rule."""
         # TODO: Implement actual rule checking
         # For now, return empty list (no violations)

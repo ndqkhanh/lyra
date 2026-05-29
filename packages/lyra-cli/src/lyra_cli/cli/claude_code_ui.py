@@ -12,26 +12,26 @@ class ClaudeCodeUI:
     """UI components matching real Claude Code interface"""
 
     # Status symbols (from real Claude Code)
-    ACTIVE = "⏺"      # Filled circle
-    INACTIVE = "◯"    # Empty circle
-    FORWARD = "⏵"     # Forward arrow
-    MODE = "⏵⏵"       # Double forward (mode indicator)
-    THINKING = "✶"    # Star (roosting/thinking)
-    STATS = "✻"       # Asterisk (stats)
-    TOOL = "⎿"        # Tool indicator
-    SELECT = "❯"      # Selection arrow
-    CHECK = "✔"       # Checkmark
-    BULLET = "●"      # Bullet point
+    ACTIVE = "⏺"  # Filled circle
+    INACTIVE = "◯"  # Empty circle
+    FORWARD = "⏵"  # Forward arrow
+    MODE = "⏵⏵"  # Double forward (mode indicator)
+    THINKING = "✶"  # Star (roosting/thinking)
+    STATS = "✻"  # Asterisk (stats)
+    TOOL = "⎿"  # Tool indicator
+    SELECT = "❯"  # Selection arrow
+    CHECK = "✔"  # Checkmark
+    BULLET = "●"  # Bullet point
 
     # Box drawing characters
-    BOX_TL = "╭"      # Top-left
-    BOX_TR = "╮"      # Top-right
-    BOX_BL = "╰"      # Bottom-left
-    BOX_BR = "╯"      # Bottom-right
-    BOX_H = "─"       # Horizontal
-    BOX_V = "│"       # Vertical
-    BOX_VR = "├"      # Vertical-right (tree)
-    BOX_UR = "└"      # Up-right (tree end)
+    BOX_TL = "╭"  # Top-left
+    BOX_TR = "╮"  # Top-right
+    BOX_BL = "╰"  # Bottom-left
+    BOX_BR = "╯"  # Bottom-right
+    BOX_H = "─"  # Horizontal
+    BOX_V = "│"  # Vertical
+    BOX_VR = "├"  # Vertical-right (tree)
+    BOX_UR = "└"  # Up-right (tree end)
 
     def __init__(self, console: Console):
         self.console = console
@@ -46,7 +46,7 @@ class ClaudeCodeUI:
         cwd = os.getcwd()
         home = os.path.expanduser("~")
         if cwd.startswith(home):
-            cwd = "~" + cwd[len(home):]
+            cwd = "~" + cwd[len(home) :]
         # Truncate long paths
         if len(cwd) > 50:
             parts = cwd.split("/")
@@ -92,16 +92,29 @@ class ClaudeCodeUI:
     def agent_tree(self, agents: list[tuple[str, str, int, int]]):
         """Tree structure for running agents (Claude Code style)"""
 
-        self.console.print(f"[cyan]{self.ACTIVE}[/cyan] Running {len(agents)} agents… [dim](ctrl+o to expand)[/dim]")
+        self.console.print(
+
+                f"[cyan]{self.ACTIVE}[/cyan] Running {len(agents)}"
+                f" agents… [dim](ctrl+o to expand)[/dim]"
+
+        )
 
         for i, (name, task, tools, tokens) in enumerate(agents):
             is_last = i == len(agents) - 1
             branch = self.BOX_UR if is_last else self.BOX_VR
 
-            self.console.print(f"   {branch} {name} · {tools} tool uses · {tokens/1000:.1f}k tokens")
+            self.console.print(
+                f"   {branch} {name} · {tools} tool uses · {tokens/1000:.1f}k tokens"
+            )
             self.console.print(f"   {'  ' if is_last else self.BOX_V} {self.TOOL}  {task}")
 
-    def interactive_menu(self, title: str, options: list[tuple[str, str, str]], selected: int = 0, current: int = None):
+    def interactive_menu(
+        self,
+        title: str,
+        options: list[tuple[str, str, str]],
+        selected: int = 0,
+        current: int = None,
+    ):
         """Interactive menu with selection (Claude Code style)"""
 
         # Divider
@@ -166,7 +179,9 @@ class ClaudeCodeUI:
             self.console.print(f"  {arrow} {command} [dim]({status})[/dim]")
 
         self.console.print()
-        self.console.print("  [dim]↑/↓ to select · Enter to view · x to stop · ←/Esc to close[/dim]")
+        self.console.print(
+            "  [dim]↑/↓ to select · Enter to view · x to stop · ←/Esc to close[/dim]"
+        )
 
     def collapsible_section(self, title: str, items: list[str], expanded: bool = False):
         """Collapsible section (Claude Code style)"""
@@ -180,7 +195,12 @@ class ClaudeCodeUI:
     def thinking_indicator(self, message: str, duration: str, tokens: int):
         """Thinking/roosting indicator (Claude Code style)"""
 
-        self.console.print(f"[yellow]{self.THINKING}[/yellow] {message} [dim]({duration} · ↓ {tokens/1000:.1f}k tokens · almost done thinking)[/dim]")
+        self.console.print(
+
+                f"[yellow]{self.THINKING}[/yellow] {message} [dim]({duration} · ↓ {tokens/1000:.1f}"
+                f"k tokens · almost done thinking)[/dim]"
+
+        )
         self.console.print(f"  {self.TOOL}  [dim]Tip: Use /btw to ask a quick side question[/dim]")
 
     def agent_list(self, agents: list[tuple[str, str, str, int]]):
@@ -191,7 +211,9 @@ class ClaudeCodeUI:
             is_selected = i == 0
 
             if is_selected:
-                self.console.print(f"  {self.ACTIVE} [bold]main[/bold]  [dim]↑/↓ to select · Enter to view[/dim]")
+                self.console.print(
+                    f"  {self.ACTIVE} [bold]main[/bold]  [dim]↑/↓ to select · Enter to view[/dim]"
+                )
             else:
                 # Truncate long tasks
                 if len(task) > 50:

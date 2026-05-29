@@ -47,7 +47,15 @@ class TestBaton:
         assert baton.progress == 0.0
 
     def test_baton_immutable(self):
-        b = Baton(relay_id="r1", leg_index=0, state_snapshot=(), progress=0.0, started_at=0.0, handed_off_at=0.0, accumulated_reward=0.0)
+        b = Baton(
+            relay_id="r1",
+            leg_index=0,
+            state_snapshot=(),
+            progress=0.0,
+            started_at=0.0,
+            handed_off_at=0.0,
+            accumulated_reward=0.0,
+        )
         with pytest.raises(Exception):
             b.progress = 1.0
 

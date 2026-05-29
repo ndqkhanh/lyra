@@ -71,7 +71,12 @@ def _cmd_model(arg: str, console: Console) -> None:
         if key in available:
             console.print(f"[info]Model set to {arg.strip()} ({available[key]}).[/info]")
         else:
-            console.print(f"[warning]Unknown model '{arg}'. Available: {', '.join(available.keys())}[/warning]")
+            console.print(
+
+                    f"[warning]Unknown model '{arg}'. Available: {', '.join(available.keys())}"
+                    f"[/warning]"
+
+            )
     else:
         current = os.environ.get("LYRA_MODEL", "claude-sonnet-4-20250514")
         console.print(f"[info]Current model: {current}[/info]")

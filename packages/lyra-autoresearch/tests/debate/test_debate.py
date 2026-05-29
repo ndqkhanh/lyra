@@ -1,4 +1,5 @@
 """Tests for lyra-autoresearch debate module."""
+
 from __future__ import annotations
 
 from unittest.mock import Mock, patch
@@ -61,7 +62,9 @@ class TestDebateResult:
         assert len(result.key_insights) == 2
 
     def test_no_consensus(self):
-        result = DebateResult(topic="T", rounds=[], final_synthesis="s", consensus_reached=False, key_insights=[])
+        result = DebateResult(
+            topic="T", rounds=[], final_synthesis="s", consensus_reached=False, key_insights=[]
+        )
         assert not result.consensus_reached
 
 
@@ -74,8 +77,13 @@ class TestDebateAgentCore:
         assert agent.model == "claude-3-opus"
 
     def test_all_perspectives_exist(self):
-        perspectives = [Perspective.SKEPTIC, Perspective.OPTIMIST, Perspective.METHODOLOGIST,
-                        Perspective.DOMAIN_EXPERT, Perspective.PRAGMATIST]
+        perspectives = [
+            Perspective.SKEPTIC,
+            Perspective.OPTIMIST,
+            Perspective.METHODOLOGIST,
+            Perspective.DOMAIN_EXPERT,
+            Perspective.PRAGMATIST,
+        ]
         assert len(perspectives) == 5
         assert len({p.value for p in perspectives}) == 5
 
@@ -98,6 +106,7 @@ class TestDebateAgentWithMockedLLM:
                     m.content = [Mock()]
                     m.content[0].text = f"Response via {model or 'default'}"
                     return m
+
         return FakeAnthropic()
 
     @pytest.fixture
@@ -111,6 +120,7 @@ class TestDebateAgentWithMockedLLM:
                         m.choices = [Mock()]
                         m.choices[0].message.content = f"Response via {model or 'default'}"
                         return m
+
         return FakeOpenAI()
 
     def test_anthropic_response(self, fake_anthropic):
@@ -147,7 +157,8 @@ class TestDebatePanelWithMocks:
     def _patch_and_client(self):
         """Patch Anthropic and provide a working fake client."""
         import lyra_autoresearch.debate as debate_mod
-        orig = getattr(debate_mod, 'Anthropic', None)
+
+        orig = getattr(debate_mod, "Anthropic", None)
         FakeAnthropic = type("Anthropic", (), {})
         debate_mod.Anthropic = FakeAnthropic
 

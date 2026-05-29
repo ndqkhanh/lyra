@@ -1,4 +1,5 @@
 """Tests for the Intelligent Goal Decomposer."""
+
 from __future__ import annotations
 
 import pytest
@@ -28,15 +29,19 @@ class TestIntelligentSubtask:
 
     def test_subtask_with_dependencies(self):
         st = IntelligentSubtask(
-            id="task_2", description="Dependent task",
-            effort=EffortLevel.HIGH, priority=Priority.CRITICAL,
+            id="task_2",
+            description="Dependent task",
+            effort=EffortLevel.HIGH,
+            priority=Priority.CRITICAL,
             depends_on=("task_1", "task_0"),
         )
         assert len(st.depends_on) == 2
 
     def test_subtask_is_frozen(self):
         st = IntelligentSubtask(
-            id="t1", description="test", effort=EffortLevel.LOW,
+            id="t1",
+            description="test",
+            effort=EffortLevel.LOW,
             priority=Priority.LOW,
         )
         with pytest.raises(Exception):
@@ -104,15 +109,21 @@ class TestIntelligentDecomposer:
         first_id = plan.subtasks[0].id
         plan = dec.mark_complete(plan, first_id)
         assert plan.progress > 0.0
-        assert plan.subtask_by_id(first_id).metadata.get("completed") is True  # type: ignore[union-attr]
+        assert (
+            plan.subtask_by_id(first_id).metadata.get("completed") is True
+        )  # type: ignore[union-attr]
 
     def test_mark_complete_is_immutable(self):
         dec = IntelligentDecomposer()
         plan = dec.decompose("G-1", "Build auth system")
         first_id = plan.subtasks[0].id
         plan2 = dec.mark_complete(plan, first_id)
-        assert plan.subtask_by_id(first_id).metadata.get("completed") is not True  # type: ignore[union-attr]
-        assert plan2.subtask_by_id(first_id).metadata.get("completed") is True  # type: ignore[union-attr]
+        assert (
+            plan.subtask_by_id(first_id).metadata.get("completed") is not True
+        )  # type: ignore[union-attr]
+        assert (
+            plan2.subtask_by_id(first_id).metadata.get("completed") is True
+        )  # type: ignore[union-attr]
 
     def test_cyclic_dependency_detected(self):
         dec = IntelligentDecomposer()
@@ -127,7 +138,9 @@ class TestIntelligentDecomposer:
     def test_unknown_dependency_detected(self):
         dec = IntelligentDecomposer()
         dec._generate_subtasks = lambda _g, _d, _c: [  # type: ignore[assignment]
-            IntelligentSubtask("a", "Task A", EffortLevel.LOW, Priority.LOW, depends_on=("nonexistent",)),
+            IntelligentSubtask(
+                "a", "Task A", EffortLevel.LOW, Priority.LOW, depends_on=("nonexistent",)
+            ),
         ]
         with pytest.raises(CyclicDependencyError, match="unknown"):
             dec.decompose("BAD-1", "Bad dep test")

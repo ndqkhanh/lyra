@@ -3,7 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from .audit_logger import AuditLogger
 
 
 class GovernanceLayer(Enum):

@@ -40,10 +40,10 @@ class EvictionError(OptimizerError):
 class EvictionPolicy(Enum):
     """Eviction strategies for context elements."""
 
-    LRU = auto()                    # Least Recently Used
-    LFU = auto()                    # Least Frequently Used
-    IMPORTANCE_WEIGHTED = auto()    # Weighted by importance score
-    HYBRID = auto()                 # Combines LRU + importance
+    LRU = auto()  # Least Recently Used
+    LFU = auto()  # Least Frequently Used
+    IMPORTANCE_WEIGHTED = auto()  # Weighted by importance score
+    HYBRID = auto()  # Combines LRU + importance
 
 
 @dataclass
@@ -51,10 +51,10 @@ class EvictionCandidate:
     """An element considered for eviction."""
 
     element_id: str
-    lru_score: float       # 0.0 (least recent) to 1.0 (most recent)
+    lru_score: float  # 0.0 (least recent) to 1.0 (most recent)
     importance_score: float  # 0.0 (least important) to 1.0 (most important)
     size_tokens: int
-    combined_score: float   # Lower = more evictable
+    combined_score: float  # Lower = more evictable
     eviction_priority: float = 0.0
 
 
@@ -249,17 +249,15 @@ class ContextOptimizer:
         )
         self._optimization_history.append(result)
 
-        CompactionRecommendation = __import__(
-            "lyra_context_profiler.profiler", fromlist=["CompactionRecommendation"]
-        ).CompactionRecommendation
-
         return CompactionRecommendation(
             strategy=strategy,
             target_free_tokens=cumulative_freed,
             estimated_quality_loss=quality_loss,
             elements_to_compact=elements_to_compact,
             elements_to_drop=elements_to_drop,
-            rationale=f"Optimized via {eviction_policy.name} eviction with {strategy.name} strategy",
+            rationale=(
+                f"Optimized via {eviction_policy.name} eviction with {strategy.name} strategy"
+            ),
             urgency=urgency,
         )
 
@@ -437,7 +435,9 @@ class ContextOptimizer:
 
         logger.info(
             "Cache warming (%s): preloaded %d elements, %d tokens",
-            strategy_name, len(preload), token_budget_used,
+            strategy_name,
+            len(preload),
+            token_budget_used,
         )
         return preload
 
@@ -482,9 +482,7 @@ class ContextOptimizer:
     ) -> list[EvictionCandidate]:
         """Rank all elements by evictability."""
         now = time.time()
-        max_age = max(
-            (now - self._access_timestamps.get(eid, now)) for eid in elements
-        ) or 1.0
+        max_age = max((now - self._access_timestamps.get(eid, now)) for eid in elements) or 1.0
 
         candidates: list[EvictionCandidate] = []
         for eid, element in elements.items():
@@ -504,20 +502,18 @@ class ContextOptimizer:
             elif policy == EvictionPolicy.IMPORTANCE_WEIGHTED:
                 combined = 1.0 - importance + dep_penalty
             else:  # HYBRID
-                combined = (
-                    0.4 * (1.0 - lru_score)
-                    + 0.4 * (1.0 - importance)
-                    + 0.2 * dep_penalty
-                )
+                combined = 0.4 * (1.0 - lru_score) + 0.4 * (1.0 - importance) + 0.2 * dep_penalty
 
-            candidates.append(EvictionCandidate(
-                element_id=eid,
-                lru_score=lru_score,
-                importance_score=importance,
-                size_tokens=token_count,
-                combined_score=1.0 - combined,  # Higher = more evictable
-                eviction_priority=combined,
-            ))
+            candidates.append(
+                EvictionCandidate(
+                    element_id=eid,
+                    lru_score=lru_score,
+                    importance_score=importance,
+                    size_tokens=token_count,
+                    combined_score=1.0 - combined,  # Higher = more evictable
+                    eviction_priority=combined,
+                )
+            )
 
         candidates.sort(key=lambda c: c.eviction_priority, reverse=True)
         return candidates
@@ -534,7 +530,8 @@ class ContextOptimizer:
         # Same type elements should cluster together
         cluster_types = {
             str(getattr(elements[eid], "element_type", "unknown"))
-            for eid in cluster if eid in elements
+            for eid in cluster
+            if eid in elements
         }
         return element_type in cluster_types
 

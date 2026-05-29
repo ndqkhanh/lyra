@@ -10,13 +10,13 @@ from typing import Any
 from .models import Verdict
 
 # Spec-worthy signals
-SPEC_VERBS = r'\b(build|create|implement|design|architect|add)\b'
-MULTI_STEP_NOUNS = r'\b(system|module|subsystem|feature|pipeline|framework|integration|engine)\b'
-SCOPE_INDICATORS = r'\b(whole|end-to-end|production|mvp|v1)\b'
+SPEC_VERBS = r"\b(build|create|implement|design|architect|add)\b"
+MULTI_STEP_NOUNS = r"\b(system|module|subsystem|feature|pipeline|framework|integration|engine)\b"
+SCOPE_INDICATORS = r"\b(whole|end-to-end|production|mvp|v1)\b"
 
 # Exemption signals
-EXEMPT_VERBS = r'\b(fix|patch|update|bump|rename|small|quick|typo|one-liner|run|test|check|show)\b'
-FILE_REFERENCE = r'\b(line\s+\d+|\.py|\.ts|\.js|\.md)\b'
+EXEMPT_VERBS = r"\b(fix|patch|update|bump|rename|small|quick|typo|one-liner|run|test|check|show)\b"
+FILE_REFERENCE = r"\b(line\s+\d+|\.py|\.ts|\.js|\.md)\b"
 
 THRESHOLD = 0.7
 MAX_PROMPT_LENGTH = 10000  # Truncate very long prompts
@@ -42,10 +42,10 @@ class Detector:
             prompt = prompt[:MAX_PROMPT_LENGTH]
 
         # Always-bypass conditions
-        if prompt.startswith('/'):
+        if prompt.startswith("/"):
             return Verdict(False, 1.0, "slash command", "slash command", 0)
 
-        if os.getenv('LYRA_AUTOSPEC', 'on') == 'off':
+        if os.getenv("LYRA_AUTOSPEC", "on") == "off":
             return Verdict(False, 1.0, "disabled via env", "LYRA_AUTOSPEC=off", 0)
 
         if active_phase != "idle":
@@ -60,26 +60,28 @@ class Detector:
             return Verdict(True, confidence, "rule-based: spec-worthy", None, latency)
 
         if confidence <= 0.3:
-            return Verdict(False, confidence, "rule-based: not spec-worthy",
-                         "simple task or query", latency)
+            return Verdict(
+                False, confidence, "rule-based: not spec-worthy", "simple task or query", latency
+            )
 
         # Stage 2: LLM-assisted (ambiguous band 0.3-0.7)
         if self.llm_client and 0.3 < confidence < THRESHOLD:
             llm_verdict = await self._llm_classify(prompt)
             latency = (time.perf_counter() - start) * 1000
             return Verdict(
-                llm_verdict['spec_worthy'],
-                llm_verdict['confidence'],
+                llm_verdict["spec_worthy"],
+                llm_verdict["confidence"],
                 f"llm-assisted: {llm_verdict['reasoning']}",
-                None if llm_verdict['spec_worthy'] else "llm classified as simple",
-                latency
+                None if llm_verdict["spec_worthy"] else "llm classified as simple",
+                latency,
             )
 
         # Default: not spec-worthy
         return Verdict(False, confidence, "below threshold", "insufficient signals", latency)
 
     def _rule_based_score_cached(self, prompt: str) -> float:
-        """Cached version of rule-based scoring (manual cache avoids lru_cache memory leak on methods)."""
+        """Cached version of rule-based scoring (manual cache avoids lru_cache memory leak on
+        methods)."""
         if not hasattr(self, "_score_cache"):
             self._score_cache: dict[str, float] = {}
         if prompt not in self._score_cache:
@@ -118,8 +120,4 @@ class Detector:
     async def _llm_classify(self, prompt: str) -> dict:
         """Use LLM for ambiguous cases."""
         # Placeholder - will implement with actual LLM call
-        return {
-            'spec_worthy': False,
-            'confidence': 0.5,
-            'reasoning': 'llm not configured'
-        }
+        return {"spec_worthy": False, "confidence": 0.5, "reasoning": "llm not configured"}

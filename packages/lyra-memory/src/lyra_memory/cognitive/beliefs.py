@@ -145,7 +145,9 @@ class CBTBeliefHierarchy:
 
     @property
     def total_beliefs(self) -> int:
-        return len(self.core_beliefs) + len(self.intermediate_beliefs) + len(self.automatic_thoughts)
+        return (
+            len(self.core_beliefs) + len(self.intermediate_beliefs) + len(self.automatic_thoughts)
+        )
 
     @property
     def stable_core_count(self) -> int:

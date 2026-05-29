@@ -1,4 +1,5 @@
-"""Auto-scaling based on SLA metrics: predictive scaling, reactive scaling, resource optimization, cost-quality tradeoff management."""
+"""Auto-scaling based on SLA metrics: predictive scaling, reactive scaling, resource optimization,
+cost-quality tradeoff management."""
 
 from __future__ import annotations
 
@@ -31,9 +32,9 @@ class ScalingDirection(Enum):
 class ScalingStrategy(Enum):
     """Scaling approach."""
 
-    REACTIVE = auto()       # Threshold-based
-    PREDICTIVE = auto()     # ML/statistical prediction
-    HYBRID = auto()         # Combined
+    REACTIVE = auto()  # Threshold-based
+    PREDICTIVE = auto()  # ML/statistical prediction
+    HYBRID = auto()  # Combined
     SCHEDULE_BASED = auto()  # Time-based schedule
 
 
@@ -112,14 +113,14 @@ class CostQualityTradeoff:
 class ReactiveScaler:
     """Threshold-based reactive auto-scaler.
 
-    Scales up when metrics exceed thresholds and scales down when
-    metrics are well below thresholds for a sustained period.
+    Scales up when metrics exceed thresholds and scales down when metrics are well below thresholds
+    for a sustained period.
     """
 
     def __init__(
         self,
-        scale_up_threshold: float = 0.8,    # Utilization threshold to scale up
-        scale_down_threshold: float = 0.3,   # Utilization to scale down
+        scale_up_threshold: float = 0.8,  # Utilization threshold to scale up
+        scale_down_threshold: float = 0.3,  # Utilization to scale down
         cooldown_seconds: float = 60.0,
         step_size: int = 1,
     ) -> None:
@@ -224,8 +225,8 @@ class ReactiveScaler:
 class PredictiveScaler:
     """ML-based predictive auto-scaler using historical patterns.
 
-    Analyzes historical metric trends to predict future demand
-    and proactively scale before thresholds are breached.
+    Analyzes historical metric trends to predict future demand and proactively scale before
+    thresholds are breached.
     """
 
     def __init__(
@@ -333,12 +334,13 @@ class PredictiveScaler:
         if predicted_p95 > current_p95 * (1 + self.trend_threshold):
             if config.current_replicas < config.max_replicas:
                 needed_replicas = int(
-                    config.current_replicas
-                    * (predicted_p95 / max(current_p95, 1.0))
+                    config.current_replicas * (predicted_p95 / max(current_p95, 1.0))
                 )
                 new_count = min(needed_replicas, config.max_replicas)
 
-                confidence = min(0.9, max(0.5, (predicted_p95 - current_p95) / max(current_p95, 1.0)))
+                confidence = min(
+                    0.9, max(0.5, (predicted_p95 - current_p95) / max(current_p95, 1.0))
+                )
 
                 return ScalingDecision(
                     agent_id=agent_id,
@@ -347,7 +349,7 @@ class PredictiveScaler:
                     to_replicas=new_count,
                     confidence=confidence,
                     reason=f"Predictive scale up: latency trending up "
-                           f"(current={current_p95:.0f}ms, predicted={predicted_p95:.0f}ms)",
+                    f"(current={current_p95:.0f}ms, predicted={predicted_p95:.0f}ms)",
                     strategy=ScalingStrategy.PREDICTIVE,
                 )
 
@@ -382,8 +384,8 @@ class PredictiveScaler:
 class AutoScaler:
     """Unified auto-scaler combining reactive and predictive strategies.
 
-    Manages resource configurations, evaluates scaling decisions,
-    and optimizes for cost-quality tradeoffs.
+    Manages resource configurations, evaluates scaling decisions, and optimizes for cost-quality
+    tradeoffs.
     """
 
     def __init__(
@@ -410,8 +412,12 @@ class AutoScaler:
             config: Resource configuration.
         """
         self._configs[agent_id] = config
-        logger.info("Resource config set for '%s': %d-%d replicas",
-                    agent_id, config.min_replicas, config.max_replicas)
+        logger.info(
+            "Resource config set for '%s': %d-%d replicas",
+            agent_id,
+            config.min_replicas,
+            config.max_replicas,
+        )
 
     def get_config(self, agent_id: str) -> ResourceConfig:
         """Get resource config, creating a default if none exists."""
@@ -439,7 +445,10 @@ class AutoScaler:
             react_decision = self._reactive.evaluate(agent_id, stats, config)
             pred_decision = self._predictive.evaluate(agent_id, stats, self.metrics, config)
 
-            if react_decision.direction == ScalingDirection.UP or pred_decision.direction == ScalingDirection.UP:
+            if (
+                react_decision.direction == ScalingDirection.UP
+                or pred_decision.direction == ScalingDirection.UP
+            ):
                 # Prefer the more aggressive scale-up
                 if (
                     pred_decision.direction == ScalingDirection.UP
@@ -448,7 +457,10 @@ class AutoScaler:
                     decision = pred_decision
                 else:
                     decision = react_decision
-            elif react_decision.direction == ScalingDirection.DOWN and pred_decision.direction == ScalingDirection.DOWN:
+            elif (
+                react_decision.direction == ScalingDirection.DOWN
+                and pred_decision.direction == ScalingDirection.DOWN
+            ):
                 decision = react_decision  # Prefer reactive for scale-down
             else:
                 decision = ScalingDecision(
@@ -464,10 +476,14 @@ class AutoScaler:
         self._decisions.append(decision)
 
         if decision.direction != ScalingDirection.NONE:
-            logger.info("Scaling decision for '%s': %s %d->%d (%s)",
-                        agent_id, decision.direction.name,
-                        decision.from_replicas, decision.to_replicas,
-                        decision.reason)
+            logger.info(
+                "Scaling decision for '%s': %s %d->%d (%s)",
+                agent_id,
+                decision.direction.name,
+                decision.from_replicas,
+                decision.to_replicas,
+                decision.reason,
+            )
 
         return decision
 

@@ -1,4 +1,5 @@
-"""Emergent behavior detection: pattern recognition, novelty detection, and strategy amplification."""
+"""Emergent behavior detection: pattern recognition, novelty detection, and strategy
+amplification."""
 
 from __future__ import annotations
 
@@ -130,8 +131,8 @@ class NoveltyScore:
 
 
 class EmergenceDetector:
-    """Detects emergent behaviors through interaction pattern analysis,
-    novelty detection, and strategy amplification.
+    """Detects emergent behaviors through interaction pattern analysis, novelty detection, and
+    strategy amplification.
 
     Monitors agent interactions to identify:
     - Recurring interaction patterns (cooperation, competition, specialization)
@@ -192,7 +193,7 @@ class EmergenceDetector:
 
         # Prune history
         if len(self._interactions) > self._history_window:
-            self._interactions = self._interactions[-self._history_window:]
+            self._interactions = self._interactions[-self._history_window :]
 
     # ------------------------------------------------------------------
     # Pattern detection
@@ -271,10 +272,7 @@ class EmergenceDetector:
         """Get existing pattern or create a new one for overlapping agents."""
         # Check for existing overlapping pattern
         for _pid, pattern in self._patterns.items():
-            if (
-                pattern.pattern_type == pattern_type
-                and set(agents) & set(pattern.agents_involved)
-            ):
+            if pattern.pattern_type == pattern_type and set(agents) & set(pattern.agents_involved):
                 pattern.frequency = max(pattern.frequency, frequency)
                 pattern.last_observed = _now()
                 pattern.confidence = max(pattern.confidence, confidence)
@@ -298,8 +296,8 @@ class EmergenceDetector:
     def identify_emergent_strategies(self) -> list[EmergentBehavior]:
         """Identify emergent strategies from observed patterns.
 
-        An emergent strategy is a combination of patterns that produces
-        outcomes better than what individual agents could achieve.
+        An emergent strategy is a combination of patterns that produces outcomes better than what
+        individual agents could achieve.
         """
         detected: list[EmergentBehavior] = []
 
@@ -318,7 +316,10 @@ class EmergenceDetector:
 
                 behavior = EmergentBehavior(
                     name=f"{p1.pattern_type}-{p2.pattern_type} synergy",
-                    description=f"Emergent coordination between {p1.pattern_type} and {p2.pattern_type} patterns",
+                    description=(
+                        f"Emergent coordination between {p1.pattern_type} and {p2.pattern_type}"
+                        f" patterns"
+                    ),
                     source_patterns=[p1.pattern_id, p2.pattern_id],
                     complexity=min(10, p1.frequency + p2.frequency),
                     utility=(p1.confidence + p2.confidence) / 2,
@@ -341,12 +342,16 @@ class EmergenceDetector:
 
         if history:
             # Novelty: how different from past behaviors
-            matches = sum(1 for b in history if self._signature_similarity(b, behavior_signature) > 0.5)
+            matches = sum(
+                1 for b in history if self._signature_similarity(b, behavior_signature) > 0.5
+            )
             novelty = 1.0 - (matches / len(history))
 
             # Surprise: how unexpected given recent behavior
             recent = history[-5:]
-            recent_matches = sum(1 for b in recent if self._signature_similarity(b, behavior_signature) > 0.3)
+            recent_matches = sum(
+                1 for b in recent if self._signature_similarity(b, behavior_signature) > 0.3
+            )
             expected = recent_matches / max(len(recent), 1)
             surprise = abs(1.0 - novelty - expected)
 
@@ -419,7 +424,9 @@ class EmergenceDetector:
                 recent_avg = sum(scores[-5:]) / 5 if len(scores) >= 5 else avg
                 if recent_avg >= avg - 1e-10:
                     to_amplify.append(sid)
-                    logger.info("Amplifying strategy %s (avg=%.2f, recent=%.2f)", sid, avg, recent_avg)
+                    logger.info(
+                        "Amplifying strategy %s (avg=%.2f, recent=%.2f)", sid, avg, recent_avg
+                    )
 
         return to_amplify
 
@@ -438,7 +445,9 @@ class EmergenceDetector:
 
         # Novelty rate
         recent_scores = self._novelty_scores[-100:] if self._novelty_scores else []
-        novelty_rate = sum(1 for n in recent_scores if n.novelty >= self._novelty_threshold) / max(len(recent_scores), 1)
+        novelty_rate = sum(1 for n in recent_scores if n.novelty >= self._novelty_threshold) / max(
+            len(recent_scores), 1
+        )
 
         # Emergence score: composite measure
         emergence_score = (

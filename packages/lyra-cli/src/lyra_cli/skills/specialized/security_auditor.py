@@ -147,7 +147,10 @@ class SecurityAuditorSkill:
                 r'(?:api[_-]?key|apikey|api[_-]?secret)\s*=\s*["\'][A-Za-z0-9_\-]{16,}',
                 "Hardcoded API Key",
                 VulnerabilitySeverity.CRITICAL,
-                "Credentials hardcoded in source code. Use environment variables or a secret manager.",
+(
+                    "Credentials hardcoded in source code. Use environment variables or a secret"
+                    "manager."
+                ),
                 "CWE-798",
             ),
             (
@@ -182,7 +185,10 @@ class SecurityAuditorSkill:
                     owasp=OwaspCategory.A02_CRYPTOGRAPHIC_FAILURES,
                     title=title,
                     description=description,
-                    remediation="Move secrets to environment variables or a secrets manager like HashiCorp Vault.",
+                    remediation=(
+                        "Move secrets to environment variables or a secrets manager like HashiCorp"
+                        "Vault."
+                    ),
                     code_snippet=snippet[:80],
                     cwe_id=cwe,
                 )
@@ -192,7 +198,9 @@ class SecurityAuditorSkill:
         patterns: list[tuple[str, re.Pattern, VulnerabilitySeverity]] = [
             (
                 "String-based SQL query construction",
-                re.compile(r'execute\s*\(\s*[f"\'"].*\b(?:SELECT|INSERT|UPDATE|DELETE)\b.*["\']\s*[+%]'),
+                re.compile(
+                    r'execute\s*\(\s*[f"\'"].*\b(?:SELECT|INSERT|UPDATE|DELETE)\b.*["\']\s*[+%]'
+                ),
                 VulnerabilitySeverity.CRITICAL,
             ),
             (
@@ -209,8 +217,13 @@ class SecurityAuditorSkill:
                     severity=severity,
                     owasp=OwaspCategory.A03_INJECTION,
                     title=title,
-                    description="SQL query built with string interpolation is vulnerable to injection.",
-                    remediation="Use parameterized queries or an ORM. Never concatenate user input into SQL.",
+                    description=(
+                        "SQL query built with string interpolation is vulnerable to injection."
+                    ),
+                    remediation=(
+                        "Use parameterized queries or an ORM. Never concatenate user input into"
+                        "SQL."
+                    ),
                     code_snippet=source.splitlines()[line_num - 1].strip()[:80],
                     cwe_id="CWE-89",
                 )
@@ -248,7 +261,10 @@ class SecurityAuditorSkill:
                     owasp=OwaspCategory.A03_INJECTION,
                     title=title,
                     description="Unescaped HTML output may lead to XSS attacks.",
-                    remediation="Use safe templating with auto-escaping. Sanitize user input before rendering.",
+                    remediation=(
+                        "Use safe templating with auto-escaping. Sanitize user input before"
+                        "rendering."
+                    ),
                     code_snippet=source.splitlines()[line_num - 1].strip()[:80],
                     cwe_id="CWE-79",
                 )
@@ -276,7 +292,10 @@ class SecurityAuditorSkill:
                     owasp=OwaspCategory.A01_BROKEN_ACCESS_CONTROL,
                     title=title,
                     description="User-controlled file path may allow directory traversal.",
-                    remediation="Use os.path.realpath() and validate the resolved path is within an allowed directory.",
+                    remediation=(
+                        "Use os.path.realpath() and validate the resolved path is within an"
+                        "allowed directory."
+                    ),
                     code_snippet=source.splitlines()[line_num - 1].strip()[:80],
                     cwe_id="CWE-22",
                 )
@@ -285,7 +304,11 @@ class SecurityAuditorSkill:
         """Scan for insecure deserialization."""
         patterns = [
             (r"pickle\.loads?\s*\(", "pickle deserialization", VulnerabilitySeverity.CRITICAL),
-            (r"yaml\.load\s*\((?![^)]*Loader=SafeLoader)", "Unsafe yaml.load()", VulnerabilitySeverity.CRITICAL),
+            (
+                r"yaml\.load\s*\((?![^)]*Loader=SafeLoader)",
+                "Unsafe yaml.load()",
+                VulnerabilitySeverity.CRITICAL,
+            ),
             (r"marshal\.loads?\s*\(", "marshal deserialization", VulnerabilitySeverity.CRITICAL),
             (r"jsonpickle\.decode\s*\(", "jsonpickle deserialization", VulnerabilitySeverity.HIGH),
         ]
@@ -298,7 +321,9 @@ class SecurityAuditorSkill:
                     owasp=OwaspCategory.A08_DATA_INTEGRITY,
                     title=title,
                     description="Insecure deserialization can lead to remote code execution.",
-                    remediation="Use safe serialization formats (JSON) or restrict allowed classes.",
+                    remediation=(
+                        "Use safe serialization formats (JSON) or restrict allowed classes."
+                    ),
                     code_snippet=source.splitlines()[line_num - 1].strip()[:80],
                     cwe_id="CWE-502",
                 )
@@ -326,7 +351,9 @@ class SecurityAuditorSkill:
                     owasp=OwaspCategory.A10_SSRF,
                     title=title,
                     description="Dynamic URL construction allows SSRF attacks.",
-                    remediation="Validate URLs against an allowlist. Restrict outbound network access.",
+                    remediation=(
+                        "Validate URLs against an allowlist. Restrict outbound network access."
+                    ),
                     code_snippet=source.splitlines()[line_num - 1].strip()[:80],
                     cwe_id="CWE-918",
                 )
@@ -358,7 +385,9 @@ class SecurityAuditorSkill:
                     severity=severity,
                     owasp=OwaspCategory.A02_CRYPTOGRAPHIC_FAILURES,
                     title=title,
-                    description=f"{title} detected. Cryptographically broken algorithms should not be used.",
+                    description=(
+                        f"{title} detected. Cryptographically broken algorithms should not be used."
+                    ),
                     remediation="Use SHA-256/SHA-3 for hashing and AES-256 for encryption.",
                     code_snippet=source.splitlines()[line_num - 1].strip()[:80],
                     cwe_id="CWE-327",
@@ -367,8 +396,18 @@ class SecurityAuditorSkill:
     def _scan_auth_failures(self, source: str) -> None:
         """Scan for authentication failures."""
         patterns = [
-            (r"@login_required", "Django login_required decorator", VulnerabilitySeverity.LOW, False),
-            (r"permission_classes\s*=\s*\[\s*\]", "Empty DRF permission classes", VulnerabilitySeverity.HIGH, True),
+            (
+                r"@login_required",
+                "Django login_required decorator",
+                VulnerabilitySeverity.LOW,
+                False,
+            ),
+            (
+                r"permission_classes\s*=\s*\[\s*\]",
+                "Empty DRF permission classes",
+                VulnerabilitySeverity.HIGH,
+                True,
+            ),
         ]
         for pattern, title, severity, _ in patterns:
             for match in re.finditer(pattern, source):

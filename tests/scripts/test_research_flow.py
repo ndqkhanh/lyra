@@ -4,12 +4,12 @@
 import sys
 from pathlib import Path
 
+from lyra_cli.commands.research import handle_research_command
+from lyra_research.orchestrator import ResearchOrchestrator, ResearchProgress
+
 # Add packages to path
 sys.path.insert(0, str(Path(__file__).parent / "packages/lyra-cli/src"))
 sys.path.insert(0, str(Path(__file__).parent / "packages/lyra-research/src"))
-
-from lyra_cli.commands.research import handle_research_command
-from lyra_research.orchestrator import ResearchOrchestrator, ResearchProgress
 
 
 def test_research_command():
@@ -20,6 +20,7 @@ def test_research_command():
 
     # Capture output
     outputs = []
+
     def capture_output(msg):
         outputs.append(msg)
         print(msg)
@@ -27,8 +28,7 @@ def test_research_command():
     try:
         # Test with a simple topic
         result = handle_research_command(
-            "topic 'Python async patterns' --depth quick",
-            output_fn=capture_output
+            "topic 'Python async patterns' --depth quick", output_fn=capture_output
         )
         print(f"\n✓ Command returned: {result}")
         print(f"✓ Captured {len(outputs)} output lines")
@@ -36,8 +36,10 @@ def test_research_command():
     except Exception as e:
         print(f"\n✗ Error: {type(e).__name__}: {e}")
         import traceback
+
         traceback.print_exc()
         return False
+
 
 def test_orchestrator_direct():
     """Test the orchestrator directly."""
@@ -52,6 +54,7 @@ def test_orchestrator_direct():
 
         # Progress callback
         progress_updates = []
+
         def on_progress(p: ResearchProgress):
             bar = "█" * p.current_step + "░" * (10 - p.current_step)
             msg = f"[{bar}] Step {p.current_step}/10: {p.current_step_name}"
@@ -61,9 +64,7 @@ def test_orchestrator_direct():
         # Run research
         print("\nStarting research...")
         result = orchestrator.research(
-            topic="Python async patterns",
-            depth="quick",
-            progress_callback=on_progress
+            topic="Python async patterns", depth="quick", progress_callback=on_progress
         )
 
         print("\n✓ Research completed")
@@ -76,7 +77,9 @@ def test_orchestrator_direct():
             print(f"⚠ Error reported: {result.error}")
 
         if result.report:
-            report_str = str(result.report) if hasattr(result.report, '__str__') else repr(result.report)
+            report_str = (
+                str(result.report) if hasattr(result.report, "__str__") else repr(result.report)
+            )
             print(f"✓ Report generated ({len(report_str)} chars)")
             print("\nReport preview:")
             print("-" * 80)
@@ -87,8 +90,10 @@ def test_orchestrator_direct():
     except Exception as e:
         print(f"\n✗ Error: {type(e).__name__}: {e}")
         import traceback
+
         traceback.print_exc()
         return False
+
 
 def main():
     """Run all tests."""
@@ -115,6 +120,7 @@ def main():
     print(f"\nTotal: {passed}/{total} tests passed")
 
     return 0 if passed == total else 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

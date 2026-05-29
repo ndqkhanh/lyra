@@ -23,6 +23,7 @@ from lyra_research.sources import (
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _mock_response(json_data, status_code=200):
     """Return a mock requests.Response with the given JSON body."""
     mock = MagicMock()
@@ -35,6 +36,7 @@ def _mock_response(json_data, status_code=200):
 # ---------------------------------------------------------------------------
 # OpenReview
 # ---------------------------------------------------------------------------
+
 
 class TestOpenReviewDiscovery:
     def test_openreview_discovery_returns_list(self):
@@ -85,6 +87,7 @@ class TestOpenReviewDiscovery:
 # ---------------------------------------------------------------------------
 # HuggingFace Papers
 # ---------------------------------------------------------------------------
+
 
 class TestHuggingFacePapersDiscovery:
     def test_huggingface_papers_discovery_returns_list(self):
@@ -150,6 +153,7 @@ class TestHuggingFacePapersDiscovery:
 # Papers with Code
 # ---------------------------------------------------------------------------
 
+
 class TestPapersWithCodeDiscovery:
     def test_papers_with_code_discovery_returns_list(self):
         """search() returns a list of ResearchSource on success."""
@@ -201,6 +205,7 @@ class TestPapersWithCodeDiscovery:
 # ---------------------------------------------------------------------------
 # ACL Anthology
 # ---------------------------------------------------------------------------
+
 
 class TestACLAnthologyDiscovery:
     def test_acl_anthology_discovery_returns_list(self):
@@ -262,6 +267,7 @@ class TestACLAnthologyDiscovery:
 # Citation traversal
 # ---------------------------------------------------------------------------
 
+
 class TestCitationTraversal:
     def _make_paper(self, paper_id: str, title: str) -> dict:
         return {
@@ -318,13 +324,9 @@ class TestCitationTraversal:
     def test_citation_traversal_snowball(self):
         """snowball() does BFS and deduplicates results."""
         # First call: citations for seed
-        citations_payload = {
-            "data": [{"citingPaper": self._make_paper("hop1-001", "Hop1 Citing")}]
-        }
+        citations_payload = {"data": [{"citingPaper": self._make_paper("hop1-001", "Hop1 Citing")}]}
         # Second call: references for seed
-        refs_payload = {
-            "data": [{"citedPaper": self._make_paper("hop1-002", "Hop1 Reference")}]
-        }
+        refs_payload = {"data": [{"citedPaper": self._make_paper("hop1-002", "Hop1 Reference")}]}
         # Subsequent calls for depth-2 hops return empty
         empty_payload = {"data": []}
 
@@ -374,6 +376,7 @@ class TestCitationTraversal:
 # ---------------------------------------------------------------------------
 # GitHub activity scorer
 # ---------------------------------------------------------------------------
+
 
 class TestGitHubActivityScorer:
     def test_github_activity_scorer_score(self):
@@ -455,6 +458,7 @@ class TestGitHubActivityScorer:
 # Source quality scorer
 # ---------------------------------------------------------------------------
 
+
 class TestSourceQualityScorer:
     def _make_source(
         self,
@@ -530,7 +534,9 @@ class TestSourceQualityScorer:
     def test_source_quality_scorer_relevance(self):
         """Relevance score increases when query terms appear in title/abstract."""
         scorer = SourceQualityScorer()
-        relevant = self._make_source(title="attention is all you need", abstract="transformer attention")
+        relevant = self._make_source(
+            title="attention is all you need", abstract="transformer attention"
+        )
         irrelevant = self._make_source(title="cooking recipes", abstract="pasta and sauce")
 
         r_score = scorer._relevance_score(relevant, "attention transformer")

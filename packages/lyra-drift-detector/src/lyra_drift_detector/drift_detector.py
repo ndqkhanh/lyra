@@ -113,9 +113,7 @@ class DriftReport:
 # ── Statistical utilities ──────────────────────────────────────────────
 
 
-def _ks_test(
-    reference: np.ndarray, current: np.ndarray
-) -> tuple[float, float]:
+def _ks_test(reference: np.ndarray, current: np.ndarray) -> tuple[float, float]:
     """Two-sample Kolmogorov-Smirnov test.
 
     Args:
@@ -260,13 +258,9 @@ class BaseDriftDetector:
         detection_method: DetectionMethod = DetectionMethod.THRESHOLD,
     ) -> None:
         if window_size < 10:
-            raise InvalidConfigurationError(
-                self.__class__.__name__, "window_size must be >= 10"
-            )
+            raise InvalidConfigurationError(self.__class__.__name__, "window_size must be >= 10")
         if threshold <= 0:
-            raise InvalidConfigurationError(
-                self.__class__.__name__, "threshold must be positive"
-            )
+            raise InvalidConfigurationError(self.__class__.__name__, "threshold must be positive")
 
         self.window_size = window_size
         self.threshold = threshold
@@ -293,7 +287,9 @@ class BaseDriftDetector:
         """Raise if baseline is not ready."""
         if not self.has_baseline:
             raise InsufficientDataError(
-                "baseline", self.min_samples, len(self._baseline) if self._baseline is not None else 0
+                "baseline",
+                self.min_samples,
+                len(self._baseline) if self._baseline is not None else 0,
             )
 
     def _record_signal(self, signal: DriftSignal) -> None:
@@ -346,9 +342,7 @@ class PerformanceDriftDetector(BaseDriftDetector):
             self._ewma[metric] = 0.0
         self._metric_buffers[metric].append(value)
         # Update EWMA
-        self._ewma[metric] = (
-            self._ewma_alpha * value + (1 - self._ewma_alpha) * self._ewma[metric]
-        )
+        self._ewma[metric] = self._ewma_alpha * value + (1 - self._ewma_alpha) * self._ewma[metric]
 
     def record_batch(self, observations: dict[str, float]) -> None:
         """Record multiple metric observations at once."""
@@ -388,7 +382,7 @@ class PerformanceDriftDetector(BaseDriftDetector):
                 details={"reason": "insufficient_data", "samples": len(values)},
             )
 
-        current = np.array(values[-self.min_samples:], dtype=np.float64)
+        current = np.array(values[-self.min_samples :], dtype=np.float64)
 
         score: float
         if self.detection_method == DetectionMethod.EWMA:
@@ -404,7 +398,9 @@ class PerformanceDriftDetector(BaseDriftDetector):
                 current_mean = float(np.mean(current))
                 score = abs(current_mean - baseline_mean) / max(baseline_std, 1e-10)
             else:
-                score = abs(float(np.mean(current)) - float(np.median(current))) / max(float(np.std(current)), 1e-10)
+                score = abs(float(np.mean(current)) - float(np.median(current))) / max(
+                    float(np.std(current)), 1e-10
+                )
 
         elif self.detection_method == DetectionMethod.CUSUM:
             score = self._cusum_check(current)
@@ -419,7 +415,9 @@ class PerformanceDriftDetector(BaseDriftDetector):
 
         else:
             # Default: simple threshold
-            score = abs(float(np.mean(current)) - float(np.median(current))) / max(float(np.std(current)), 1e-10)
+            score = abs(float(np.mean(current)) - float(np.median(current))) / max(
+                float(np.std(current)), 1e-10
+            )
 
         is_drift = score > self.threshold
         signal = DriftSignal(
@@ -478,8 +476,12 @@ class ContextDriftDetector(BaseDriftDetector):
         min_samples: int = 20,
         detection_method: DetectionMethod = DetectionMethod.KL_DIVERGENCE,
     ) -> None:
-        super().__init__(window_size=1000, threshold=threshold, min_samples=min_samples,
-                         detection_method=detection_method)
+        super().__init__(
+            window_size=1000,
+            threshold=threshold,
+            min_samples=min_samples,
+            detection_method=detection_method,
+        )
         self._baseline_profile: dict[str, float] = {}
         self._current_profile: dict[str, float] = {}
         self._profile_history: deque[dict[str, float]] = deque(maxlen=100)
@@ -594,10 +596,12 @@ class DistributionDriftDetector(BaseDriftDetector):
 
     def set_reference(self, samples: Sequence[float]) -> None:
         """Set reference distribution samples."""
-        self._reference_samples = deque(samples[-self.window_size:], maxlen=self.window_size)
+        self._reference_samples = deque(samples[-self.window_size :], maxlen=self.window_size)
         self._baseline = np.array(samples, dtype=np.float64)
 
-    def record(self, value: float, task_type: str = "", features: dict[str, float] | None = None) -> None:
+    def record(
+        self, value: float, task_type: str = "", features: dict[str, float] | None = None
+    ) -> None:
         """Record a new sample for distribution tracking.
 
         Args:
@@ -634,7 +638,7 @@ class DistributionDriftDetector(BaseDriftDetector):
             cur = list(self._current_samples)[half:]
         else:
             ref = list(self._reference_samples)
-            cur = list(self._current_samples)[-self.min_samples:]
+            cur = list(self._current_samples)[-self.min_samples :]
 
         ref_arr = np.array(ref, dtype=np.float64)
         cur_arr = np.array(cur, dtype=np.float64)
@@ -772,7 +776,11 @@ class RewardDriftDetector(BaseDriftDetector):
         recent_std = float(np.std(recent))
 
         if self.detection_method == DetectionMethod.KS_TEST:
-            baseline = rewards_arr[:-recent_n] if len(rewards_arr) > recent_n else rewards_arr[:len(rewards_arr)//2]
+            baseline = (
+                rewards_arr[:-recent_n]
+                if len(rewards_arr) > recent_n
+                else rewards_arr[: len(rewards_arr) // 2]
+            )
             ks_stat, _ = _ks_test(baseline, recent)
             score = ks_stat
         elif self.detection_method == DetectionMethod.Z_SCORE:
@@ -932,7 +940,8 @@ class ConceptDriftDetector(BaseDriftDetector):
         # Semantic drift via embedding shift
         if concept_id and concept_id in self._semantic_anchors:
             recent_instances = [
-                i for i in list(self._concept_history)[-self.min_samples:]
+                i
+                for i in list(self._concept_history)[-self.min_samples :]
                 if i["concept_id"] == concept_id and "embedding" in i
             ]
             if recent_instances:
@@ -1012,10 +1021,9 @@ class DriftOrchestrator:
         Returns:
             List of all drift signals from all detectors.
         """
+
         # Run checks concurrently
-        async def _safe_check(
-            detector: Any, method_name: str = "check_drift"
-        ) -> list[DriftSignal]:
+        async def _safe_check(detector: Any, method_name: str = "check_drift") -> list[DriftSignal]:
             try:
                 result = getattr(detector, method_name)()
                 asyncio.get_running_loop()
@@ -1132,23 +1140,29 @@ class DriftOrchestrator:
             key = s.drift_type.name
             if key not in by_type:
                 by_type[key] = []
-            by_type[key].append({
-                "metric": s.metric,
-                "score": s.score,
-                "threshold": s.threshold,
-                "is_drift": s.is_drift,
-                "severity": s.severity.name,
-            })
+            by_type[key].append(
+                {
+                    "metric": s.metric,
+                    "score": s.score,
+                    "threshold": s.threshold,
+                    "is_drift": s.is_drift,
+                    "severity": s.severity.name,
+                }
+            )
 
         return {
             "adaptation_needed": any(s.is_drift for s in signals),
             "drift_count": sum(1 for s in signals if s.is_drift),
             "total_signals": len(signals),
             "by_type": by_type,
-            "latest_report": {
-                "overall_score": self._reports[-1].overall_score,
-                "recommendation": self._reports[-1].recommendation,
-            } if self._reports else None,
+            "latest_report": (
+                {
+                    "overall_score": self._reports[-1].overall_score,
+                    "recommendation": self._reports[-1].recommendation,
+                }
+                if self._reports
+                else None
+            ),
         }
 
     @property

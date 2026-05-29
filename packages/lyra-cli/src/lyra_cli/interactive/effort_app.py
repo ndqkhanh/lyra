@@ -48,7 +48,7 @@ def _build_fragments(picker: EffortPicker, *, width: int) -> FormattedText:
 
     # Track: dim by default, marker bright at cursor position.
     fragments.append(("class:track", "  "))
-    for i, ch in enumerate(track):
+    for _i, ch in enumerate(track):
         if ch == "▲":
             fragments.append(("class:marker", ch))
         else:

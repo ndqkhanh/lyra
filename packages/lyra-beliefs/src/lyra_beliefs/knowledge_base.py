@@ -1,4 +1,5 @@
-"""Domain knowledge storage: fact storage with provenance, rule storage, ontology alignment, versioning."""
+"""Domain knowledge storage: fact storage with provenance, rule storage, ontology alignment,
+versioning."""
 
 from __future__ import annotations
 
@@ -21,11 +22,11 @@ logger = logging.getLogger(__name__)
 class RuleType(Enum):
     """Types of rules in the knowledge base."""
 
-    IF_THEN = auto()        # Simple conditional
-    DEFAULT = auto()        # Defeasible default rule
-    STRICT = auto()         # Must-always-hold rule
-    PRAGMATIC = auto()      # Heuristic/rule of thumb
-    ONTOLOGICAL = auto()    # Domain ontology constraint
+    IF_THEN = auto()  # Simple conditional
+    DEFAULT = auto()  # Defeasible default rule
+    STRICT = auto()  # Must-always-hold rule
+    PRAGMATIC = auto()  # Heuristic/rule of thumb
+    ONTOLOGICAL = auto()  # Domain ontology constraint
 
 
 @dataclass
@@ -138,8 +139,8 @@ class KnowledgeVersion:
 class KnowledgeBase:
     """Domain knowledge storage with provenance tracking and versioning.
 
-    Stores facts, rules, and ontology concepts, tracks their provenance,
-    supports versioned snapshots, and provides ontology alignment utilities.
+    Stores facts, rules, and ontology concepts, tracks their provenance, supports versioned
+    snapshots, and provides ontology alignment utilities.
     """
 
     def __init__(self, belief_system: BeliefSystem | None = None) -> None:
@@ -237,12 +238,14 @@ class KnowledgeBase:
         rule.version = self._current_version
 
         # Register conditional probability
-        self.belief_system.set_conditional(
-            rule.antecedent, rule.consequent, rule.confidence
-        )
+        self.belief_system.set_conditional(rule.antecedent, rule.consequent, rule.confidence)
 
-        logger.debug("Rule added: %s (%s -> %s)", rule.rule_id[:8],
-                    rule.antecedent[:30], rule.consequent[:30])
+        logger.debug(
+            "Rule added: %s (%s -> %s)",
+            rule.rule_id[:8],
+            rule.antecedent[:30],
+            rule.consequent[:30],
+        )
         return rule
 
     def create_rule(

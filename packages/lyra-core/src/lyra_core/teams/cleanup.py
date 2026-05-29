@@ -34,7 +34,9 @@ class CleanupReport:
 
     @property
     def success_count(self) -> int:
-        return sum(1 for a in self.actions if a.action in (CleanupAction.ARCHIVED, CleanupAction.DELETED))
+        return sum(
+            1 for a in self.actions if a.action in (CleanupAction.ARCHIVED, CleanupAction.DELETED)
+        )
 
     @property
     def failure_count(self) -> int:
@@ -93,7 +95,11 @@ class TeamCleanupManager:
                     os.kill(pid, 0)
                 except (OSError, ValueError):
                     orphans.append(team_dir.name)
-                    logger.warning("Orphaned team detected: %s (PID %s dead)", team_dir.name, lock_file.read_text().strip() if lock_file.exists() else "?")
+                    logger.warning(
+                        "Orphaned team detected: %s (PID %s dead)",
+                        team_dir.name,
+                        lock_file.read_text().strip() if lock_file.exists() else "?",
+                    )
             else:
                 orphans.append(team_dir.name)
 
@@ -150,35 +156,48 @@ class TeamCleanupManager:
 
             shutil.copytree(team_dir, dest)
             manifest = dest / "manifest.json"
-            manifest.write_text(json.dumps({
-                "team_name": team_dir.name,
-                "archived_at": datetime.now(timezone.utc).isoformat(),
-                "original_path": str(team_dir),
-            }, indent=2))
+            manifest.write_text(
+                json.dumps(
+                    {
+                        "team_name": team_dir.name,
+                        "archived_at": datetime.now(timezone.utc).isoformat(),
+                        "original_path": str(team_dir),
+                    },
+                    indent=2,
+                )
+            )
 
-            report.actions.append(CleanupRecord(
-                path=str(team_dir),
-                action=CleanupAction.ARCHIVED,
-                reason=f"Archived to {dest}",
-            ))
+            report.actions.append(
+                CleanupRecord(
+                    path=str(team_dir),
+                    action=CleanupAction.ARCHIVED,
+                    reason=f"Archived to {dest}",
+                )
+            )
         except OSError as exc:
-            report.actions.append(CleanupRecord(
-                path=str(team_dir),
-                action=CleanupAction.FAILED,
-                reason=str(exc),
-            ))
+            report.actions.append(
+                CleanupRecord(
+                    path=str(team_dir),
+                    action=CleanupAction.FAILED,
+                    reason=str(exc),
+                )
+            )
 
     @staticmethod
     def _remove_dir(directory: Path, report: CleanupReport) -> None:
         try:
             shutil.rmtree(directory)
-            report.actions.append(CleanupRecord(
-                path=str(directory),
-                action=CleanupAction.DELETED,
-            ))
+            report.actions.append(
+                CleanupRecord(
+                    path=str(directory),
+                    action=CleanupAction.DELETED,
+                )
+            )
         except OSError as exc:
-            report.actions.append(CleanupRecord(
-                path=str(directory),
-                action=CleanupAction.FAILED,
-                reason=str(exc),
-            ))
+            report.actions.append(
+                CleanupRecord(
+                    path=str(directory),
+                    action=CleanupAction.FAILED,
+                    reason=str(exc),
+                )
+            )

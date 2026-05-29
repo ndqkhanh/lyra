@@ -153,7 +153,11 @@ class ResearchKG:
         self._adj[entity_a_id].append(idx)
         self._adj[entity_b_id].append(idx)  # undirected for traversal
         logger.debug(
-            "KG[%s] linked %s -[%s]-> %s", self.name, entity_a_id, relation_type, entity_b_id,
+            "KG[%s] linked %s -[%s]-> %s",
+            self.name,
+            entity_a_id,
+            relation_type,
+            entity_b_id,
         )
         return relation
 
@@ -272,9 +276,7 @@ class ResearchKG:
         )
         return result
 
-    def find_path(
-        self, source_id: str, target_id: str, max_depth: int = 6
-    ) -> list[str] | None:
+    def find_path(self, source_id: str, target_id: str, max_depth: int = 6) -> list[str] | None:
         """Return the shortest path (by edges) between *source* and *target*.
 
         Args:
@@ -332,7 +334,9 @@ class ResearchKG:
                 if a and b:
                     contradictions.append((a.name, b.name, rel.evidence))
         logger.debug(
-            "KG[%s] detected %d contradictions", self.name, len(contradictions),
+            "KG[%s] detected %d contradictions",
+            self.name,
+            len(contradictions),
         )
         return contradictions
 
@@ -389,8 +393,25 @@ class ResearchKG:
 
 _ENTITY_CLASSIFICATION_PATTERNS: list[tuple[str, list[str]]] = [
     ("person", ["University", "Institute", "Lab", "Professor", "Dr.", "Research"]),
-    ("organization", ["Inc", "Corp", "Corporation", "LLC", "Labs", "AI", "OpenAI", "Google", "Meta", "Microsoft"]),
-    ("technology", ["Model", "Framework", "Algorithm", "Architecture", "Transformer", "Neural", "BERT", "GPT"]),
+    (
+        "organization",
+        [
+            "Inc",
+            "Corp",
+            "Corporation",
+            "LLC",
+            "Labs",
+            "AI",
+            "OpenAI",
+            "Google",
+            "Meta",
+            "Microsoft",
+        ],
+    ),
+    (
+        "technology",
+        ["Model", "Framework", "Algorithm", "Architecture", "Transformer", "Neural", "BERT", "GPT"],
+    ),
     ("concept", ["Learning", "Theory", "Optimization", "Regularization", "Attention", "Gradient"]),
     ("event", ["Conference", "Workshop", "Symposium", "Challenge", "Competition", "Benchmark"]),
 ]

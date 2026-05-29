@@ -1,4 +1,5 @@
-"""Tests for search plugin modules — DCIZeroIndex, RetrievalRouter, ProgressiveDisclosure, VerbatimLayer."""
+"""Tests for search plugin modules — DCIZeroIndex, RetrievalRouter, ProgressiveDisclosure,
+VerbatimLayer."""
 
 import time
 

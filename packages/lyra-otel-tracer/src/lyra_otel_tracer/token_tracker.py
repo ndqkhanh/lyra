@@ -122,7 +122,10 @@ class TokenTracker:
             alerts.append(
                 TokenAlert(
                     alert_type="threshold_exceeded",
-                    message=f"Total token usage {current_total} exceeds threshold {self._alert_threshold}",
+                    message=(
+                        f"Total token usage {current_total} exceeds threshold "
+                        f"{self._alert_threshold}"
+                    ),
                     threshold=self._alert_threshold,
                     current_usage=current_total,
                     timestamp=now,

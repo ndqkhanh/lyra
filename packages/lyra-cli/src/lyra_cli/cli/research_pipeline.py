@@ -13,6 +13,7 @@ Pipeline (GPT-Researcher / STORM inspired):
   Phase 8 · Cite         — build verified Sources section
   Phase 9 · Store        — archive session summary in ArchivalStore
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -34,15 +35,15 @@ class ResearchPhase:
 
 
 RESEARCH_PHASES = [
-    ResearchPhase("Decompose",  "Breaking topic into sub-questions",    0.08),
-    ResearchPhase("Search",     "Parallel web search",                  0.15),
-    ResearchPhase("Scrape",     "Fetching full source content",         0.15),
-    ResearchPhase("Extract",    "Distilling facts + citations",         0.18),
-    ResearchPhase("Gap detect", "Identifying missing angles",           0.08),
-    ResearchPhase("Follow-up",  "Targeted gap-fill searches",           0.10),
-    ResearchPhase("Synthesize", "Writing report with citations",        0.16),
-    ResearchPhase("Cite",       "Verifying & grounding citations",      0.05),
-    ResearchPhase("Store",      "Archiving session to memory",          0.05),
+    ResearchPhase("Decompose", "Breaking topic into sub-questions", 0.08),
+    ResearchPhase("Search", "Parallel web search", 0.15),
+    ResearchPhase("Scrape", "Fetching full source content", 0.15),
+    ResearchPhase("Extract", "Distilling facts + citations", 0.18),
+    ResearchPhase("Gap detect", "Identifying missing angles", 0.08),
+    ResearchPhase("Follow-up", "Targeted gap-fill searches", 0.10),
+    ResearchPhase("Synthesize", "Writing report with citations", 0.16),
+    ResearchPhase("Cite", "Verifying & grounding citations", 0.05),
+    ResearchPhase("Store", "Archiving session to memory", 0.05),
 ]
 
 # Max sources to scrape fully (keeps cost down)
@@ -57,7 +58,7 @@ class RealResearchPipeline:
     def __init__(
         self,
         client: Any,
-        provider: str,          # "anthropic" | "openai"
+        provider: str,  # "anthropic" | "openai"
         model_name: str,
         cred_mgr: Any = None,
     ) -> None:
@@ -68,7 +69,7 @@ class RealResearchPipeline:
         self._search: Any = None  # lazy — resolved on first run()
 
         self._sources: list[SearchResult] = []
-        self._facts: list[str] = []         # "[N] fact text"
+        self._facts: list[str] = []  # "[N] fact text"
         self._report: str = ""
 
     # ── Public entry point ────────────────────────────────────────────────
@@ -89,38 +90,54 @@ class RealResearchPipeline:
         total = 0.0
 
         for phase in RESEARCH_PHASES:
-            yield {"type": "phase", "phase": phase.name,
-                   "progress": total, "content": phase.description}
+            yield {
+                "type": "phase",
+                "phase": phase.name,
+                "progress": total,
+                "content": phase.description,
+            }
             async for event in self._run_phase(phase.name, topic):
                 yield event
             total += phase.weight
-            yield {"type": "progress", "phase": phase.name,
-                   "progress": min(total, 1.0), "content": f"{phase.name} complete"}
+            yield {
+                "type": "progress",
+                "phase": phase.name,
+                "progress": min(total, 1.0),
+                "content": f"{phase.name} complete",
+            }
 
-        yield {"type": "done", "phase": "Complete",
-               "progress": 1.0, "content": self._report}
+        yield {"type": "done", "phase": "Complete", "progress": 1.0, "content": self._report}
 
     # ── Phase dispatch ─────────────────────────────────────────────────────
 
     async def _run_phase(self, name: str, topic: str) -> AsyncIterator[dict]:
         if name == "Decompose":
-            async for e in self._phase_decompose(topic): yield e
+            async for e in self._phase_decompose(topic):
+                yield e
         elif name == "Search":
-            async for e in self._phase_search(): yield e
+            async for e in self._phase_search():
+                yield e
         elif name == "Scrape":
-            async for e in self._phase_scrape(): yield e
+            async for e in self._phase_scrape():
+                yield e
         elif name == "Extract":
-            async for e in self._phase_extract(): yield e
+            async for e in self._phase_extract():
+                yield e
         elif name == "Gap detect":
-            async for e in self._phase_gap_detect(topic): yield e
+            async for e in self._phase_gap_detect(topic):
+                yield e
         elif name == "Follow-up":
-            async for e in self._phase_followup(): yield e
+            async for e in self._phase_followup():
+                yield e
         elif name == "Synthesize":
-            async for e in self._phase_synthesize(topic): yield e
+            async for e in self._phase_synthesize(topic):
+                yield e
         elif name == "Cite":
-            async for e in self._phase_cite(): yield e
+            async for e in self._phase_cite():
+                yield e
         elif name == "Store":
-            async for e in self._phase_store(topic): yield e
+            async for e in self._phase_store(topic):
+                yield e
 
     # ── Phase 1: Decompose ────────────────────────────────────────────────
 
@@ -129,7 +146,8 @@ class RealResearchPipeline:
 
         prompt = (
             f"Research topic: {topic}\n\n"
-            "Generate exactly 5 focused sub-questions that together cover the topic comprehensively. "
+            "Generate exactly 5 focused sub-questions that together cover the topic"
+            "comprehensively. "
             "Each sub-question should address a distinct angle: background, current state, "
             "technical details, key players, and practical implications.\n\n"
             "Respond with a JSON array of strings only. Example:\n"
@@ -138,7 +156,7 @@ class RealResearchPipeline:
         raw = await self._llm(prompt, max_tokens=400)
         try:
             # Extract JSON array from response
-            match = re.search(r'\[.*?\]', raw, re.DOTALL)
+            match = re.search(r"\[.*?\]", raw, re.DOTALL)
             questions: list[str] = json.loads(match.group()) if match else []
         except Exception:
             questions = []
@@ -163,13 +181,14 @@ class RealResearchPipeline:
 
     async def _phase_search(self) -> AsyncIterator[dict]:
         provider_name = self._search.name
-        yield {"type": "finding",
-               "content": f"Searching via {provider_name} ({len(self._pending_queries)} queries in parallel)…"}
+        yield {
+            "type": "finding",
+            "content":(
+                f"Searching via {provider_name} ({len(self._pending_queries)} queries in parallel)…"
+            ),
+        }
 
-        tasks = [
-            self._search.search(q, num_results=6)
-            for q in self._pending_queries
-        ]
+        tasks = [self._search.search(q, num_results=6) for q in self._pending_queries]
         results_per_query = await asyncio.gather(*tasks, return_exceptions=True)
 
         seen_urls: set[str] = set()
@@ -182,14 +201,19 @@ class RealResearchPipeline:
                     r.source_idx = len(self._sources) + 1
                     self._sources.append(r)
 
-        yield {"type": "finding",
-               "content": f"Found {len(self._sources)} unique sources across {len(self._pending_queries)} queries"}
+        yield {
+            "type": "finding",
+            "content":(
+                f"Found {len(self._sources)} unique sources across {len(self._pending_queries)}"
+                f" queries"
+            ),
+        }
 
     # ── Phase 3: Scrape ───────────────────────────────────────────────────
 
     async def _phase_scrape(self) -> AsyncIterator[dict]:
         # Pick the top N sources per query (by score or order) for full scraping
-        to_scrape = self._sources[:_MAX_SCRAPE_PER_QUERY * len(self._pending_queries)]
+        to_scrape = self._sources[: _MAX_SCRAPE_PER_QUERY * len(self._pending_queries)]
         to_scrape = to_scrape[:12]  # Hard cap
 
         yield {"type": "finding", "content": f"Scraping {len(to_scrape)} sources for full content…"}
@@ -210,8 +234,10 @@ class RealResearchPipeline:
 
     async def _phase_extract(self) -> AsyncIterator[dict]:
         sources_with_content = [s for s in self._sources if len(s.content) > 100]
-        yield {"type": "finding",
-               "content": f"Extracting facts from {len(sources_with_content)} sources…"}
+        yield {
+            "type": "finding",
+            "content": f"Extracting facts from {len(sources_with_content)} sources…",
+        }
 
         async def _extract_one(src: SearchResult) -> list[str]:
             content_preview = src.content[:2000]
@@ -230,9 +256,7 @@ class RealResearchPipeline:
                 for line in raw.strip().splitlines()
                 if line.strip() and f"[{src.source_idx}]" in line
             ]
-            return facts if facts else [
-                f"{src.snippet[:200]} [{src.source_idx}]"
-            ]
+            return facts if facts else [f"{src.snippet[:200]} [{src.source_idx}]"]
 
         tasks = [_extract_one(s) for s in sources_with_content[:10]]
         results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -261,15 +285,20 @@ class RealResearchPipeline:
         )
         raw = await self._llm(prompt, max_tokens=200)
         try:
-            match = re.search(r'\[.*?\]', raw, re.DOTALL)
+            match = re.search(r"\[.*?\]", raw, re.DOTALL)
             self._gap_queries = json.loads(match.group()) if match else []
         except Exception:
             self._gap_queries = []
 
         self._gap_queries = self._gap_queries[:3]
         if self._gap_queries:
-            yield {"type": "finding",
-                   "content": f"Identified {len(self._gap_queries)} coverage gaps — running follow-up searches"}
+            yield {
+                "type": "finding",
+                "content":(
+                    f"Identified {len(self._gap_queries)}"
+                    f" coverage gaps — running follow-up searches"
+                ),
+            }
         else:
             yield {"type": "finding", "content": "Coverage is comprehensive — no gaps detected"}
 
@@ -280,8 +309,7 @@ class RealResearchPipeline:
             yield {"type": "finding", "content": "No gap queries — skipping follow-up"}
             return
 
-        yield {"type": "finding",
-               "content": f"Running {len(self._gap_queries)} gap-fill searches…"}
+        yield {"type": "finding", "content": f"Running {len(self._gap_queries)} gap-fill searches…"}
 
         tasks = [self._search.search(q, num_results=4) for q in self._gap_queries]
         results_per_query = await asyncio.gather(*tasks, return_exceptions=True)
@@ -300,22 +328,29 @@ class RealResearchPipeline:
 
         if new_count:
             # Extract facts from the new sources too
-            new_sources = [s for s in self._sources if s.source_idx > len(self._sources) - new_count]
+            new_sources = [
+                s for s in self._sources if s.source_idx > len(self._sources) - new_count
+            ]
             for src in new_sources[:6]:
                 if len(src.content) < 100:
                     src.content = await self._search.scrape(src.url, max_chars=_SCRAPE_CHARS)
                 if src.content:
                     prompt = (
                         f"Source [{src.source_idx}]: {src.title}\n{src.content[:1500]}\n\n"
-                        f"Extract 2-3 key facts. Each must end with [{src.source_idx}]. One per line."
+(
+                            f"Extract 2-3 key facts. Each must end with [{src.source_idx}"
+                            f"]. One per line."
+                        )
                     )
                     raw = await self._llm(prompt, max_tokens=200)
                     for line in raw.strip().splitlines():
                         if line.strip() and f"[{src.source_idx}]" in line:
                             self._facts.append(line.strip())
 
-        yield {"type": "finding",
-               "content": f"Added {new_count} new sources, {len(self._facts)} total facts"}
+        yield {
+            "type": "finding",
+            "content": f"Added {new_count} new sources, {len(self._facts)} total facts",
+        }
 
     # ── Phase 7: Synthesize ───────────────────────────────────────────────
 
@@ -324,8 +359,7 @@ class RealResearchPipeline:
 
         facts_block = "\n".join(f"• {f}" for f in self._facts[:60])
         sources_block = "\n".join(
-            f"[{s.source_idx}] {s.title} — {s.url}"
-            for s in self._sources[:25]
+            f"[{s.source_idx}] {s.title} — {s.url}" for s in self._sources[:25]
         )
 
         prompt = (
@@ -359,7 +393,7 @@ class RealResearchPipeline:
 
     async def _phase_cite(self) -> AsyncIterator[dict]:
         # Find which [N] citations are actually used in the report
-        used_idxs = {int(m) for m in re.findall(r'\[(\d+)\]', self._report)}
+        used_idxs = {int(m) for m in re.findall(r"\[(\d+)\]", self._report)}
 
         sources_section = "\n\n## Sources\n\n"
         cited_sources = [s for s in self._sources if s.source_idx in used_idxs]
@@ -376,22 +410,28 @@ class RealResearchPipeline:
 
         self._report += sources_section
 
-        yield {"type": "finding",
-               "content": (
-                   f"{len(cited_sources)} citations verified · "
-                   f"{len(self._sources)} total sources · "
-                   f"provider: {self._search.name}"
-               )}
+        yield {
+            "type": "finding",
+            "content": (
+                f"{len(cited_sources)} citations verified · "
+                f"{len(self._sources)} total sources · "
+                f"provider: {self._search.name}"
+            ),
+        }
 
     # ── Phase 9: Store ────────────────────────────────────────────────────
 
     async def _phase_store(self, topic: str) -> AsyncIterator[dict]:
         try:
             from .memory_manager import MemoryManager
+
             mm = MemoryManager()
             import hashlib
             import time
-            session_id = f"research_{hashlib.md5(topic.encode()).hexdigest()[:8]}_{int(time.time())}"
+
+            session_id = (
+                f"research_{hashlib.md5(topic.encode()).hexdigest()[:8]}_{int(time.time())}"
+            )
             summary = (
                 f"Deep research on '{topic}'. "
                 f"{len(self._sources)} sources, {len(self._facts)} facts. "
@@ -399,7 +439,10 @@ class RealResearchPipeline:
                 f"Key findings: {' '.join(self._facts[:3])[:300]}"
             )
             mm.archive_session(session_id, summary, tags=["research", topic.split()[0]])
-            yield {"type": "finding", "content": f"Session archived to memory (id: {session_id[:20]})"}
+            yield {
+                "type": "finding",
+                "content": f"Session archived to memory (id: {session_id[:20]})",
+            }
         except Exception as e:
             yield {"type": "finding", "content": f"Memory store skipped: {e}"}
 

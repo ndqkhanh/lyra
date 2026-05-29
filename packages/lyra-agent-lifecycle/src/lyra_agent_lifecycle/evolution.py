@@ -187,7 +187,9 @@ class EvolutionTracker:
         if len(self._quality_scores[agent_id]) > 500:
             self._quality_scores[agent_id] = self._quality_scores[agent_id][-500:]
 
-    def take_snapshot(self, agent_id: str, capabilities: list[str] | None = None) -> PerformanceSnapshot:
+    def take_snapshot(
+        self, agent_id: str, capabilities: list[str] | None = None
+    ) -> PerformanceSnapshot:
         """Take a performance snapshot of an agent."""
         task_count = self._task_counts.get(agent_id, 0)
         success_count = self._success_counts.get(agent_id, 0)
@@ -213,7 +215,7 @@ class EvolutionTracker:
 
         self._snapshots[agent_id].append(snapshot)
         if len(self._snapshots[agent_id]) > self._max_snapshots:
-            self._snapshots[agent_id] = self._snapshots[agent_id][-self._max_snapshots:]
+            self._snapshots[agent_id] = self._snapshots[agent_id][-self._max_snapshots :]
 
         return snapshot
 
@@ -243,7 +245,7 @@ class EvolutionTracker:
         for cap in added:
             profile.add_capability(cap)
 
-        for cap in (removed or []):
+        for cap in removed or []:
             profile.remove_capability(cap)
 
         logger.debug("Evolved capabilities for %s: +%s -%s", agent_id, added, removed or [])

@@ -94,7 +94,9 @@ class StateMachine:
         payload: dict[str, Any] | None = None,
     ) -> None:
         """Attempt to move to *target*, raising on failure."""
-        allowed = [t for t in self.transitions if t.from_state == self.state and t.to_state == target]
+        allowed = [
+            t for t in self.transitions if t.from_state == self.state and t.to_state == target
+        ]
         if not allowed:
             raise TransitionError(
                 f"No allowed transition from {self.state.value!r} to {target.value!r}"
@@ -141,5 +143,3 @@ class StateMachine:
                 cb(from_state, to_state, self.context)
             except Exception:
                 logger.exception("state_machine_listener_failed")
-
-

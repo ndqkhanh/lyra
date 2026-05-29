@@ -41,17 +41,35 @@ class NetworkEngineerSkill:
         for rule in rules:
             port = rule.get("port", 0)
             if port in self._INSECURE_PORTS and rule.get("source") == "0.0.0.0/0":
-                findings.append(NetworkFinding(f"port_{port}", NetworkRisk.CRITICAL,
-                    f"Port {port} exposed to the internet.", "Restrict to specific IP ranges or use a VPN/bastion."))
+                findings.append(
+                    NetworkFinding(
+                        f"port_{port}",
+                        NetworkRisk.CRITICAL,
+                        f"Port {port} exposed to the internet.",
+                        "Restrict to specific IP ranges or use a VPN/bastion.",
+                    )
+                )
 
         if not subnets:
-            findings.append(NetworkFinding("subnets", NetworkRisk.MEDIUM,
-                "No subnet configuration provided.", "Define private/public subnet architecture for defense in depth."))
+            findings.append(
+                NetworkFinding(
+                    "subnets",
+                    NetworkRisk.MEDIUM,
+                    "No subnet configuration provided.",
+                    "Define private/public subnet architecture for defense in depth.",
+                )
+            )
 
         has_egress = any(r.get("direction") == "egress" for r in rules)
         if not has_egress:
-            findings.append(NetworkFinding("egress", NetworkRisk.HIGH,
-                "No egress filtering rules — data exfiltration risk.", "Add egress rules to restrict outbound traffic."))
+            findings.append(
+                NetworkFinding(
+                    "egress",
+                    NetworkRisk.HIGH,
+                    "No egress filtering rules — data exfiltration risk.",
+                    "Add egress rules to restrict outbound traffic.",
+                )
+            )
 
         return {
             "findings": [f.__dict__ for f in findings],

@@ -539,28 +539,32 @@ class WorldGraph:
 
         for world_id, relations in self._relations.items():
             for rel in relations.values():
-                all_edges.append({
-                    "id": rel.id,
-                    "source_id": rel.source_id,
-                    "target_id": rel.target_id,
-                    "relation_type": rel.relation_type.value,
-                    "weight": rel.weight,
-                    "world_id": world_id,
-                    "metadata": rel.metadata,
-                })
+                all_edges.append(
+                    {
+                        "id": rel.id,
+                        "source_id": rel.source_id,
+                        "target_id": rel.target_id,
+                        "relation_type": rel.relation_type.value,
+                        "weight": rel.weight,
+                        "world_id": world_id,
+                        "metadata": rel.metadata,
+                    }
+                )
 
         for edge in self._cross_world_edges.values():
-            all_edges.append({
-                "id": edge.id,
-                "source_id": edge.source_node_id,
-                "target_id": edge.target_node_id,
-                "relation_type": edge.relation_type.value,
-                "weight": edge.weight,
-                "source_world_id": edge.source_world_id,
-                "target_world_id": edge.target_world_id,
-                "cross_world": True,
-                "metadata": edge.metadata,
-            })
+            all_edges.append(
+                {
+                    "id": edge.id,
+                    "source_id": edge.source_node_id,
+                    "target_id": edge.target_node_id,
+                    "relation_type": edge.relation_type.value,
+                    "weight": edge.weight,
+                    "source_world_id": edge.source_world_id,
+                    "target_world_id": edge.target_world_id,
+                    "cross_world": True,
+                    "metadata": edge.metadata,
+                }
+            )
 
         return {
             "nodes": all_nodes,
@@ -600,7 +604,9 @@ class WorldGraphMemory:
         self._embedder = embedder
         self._merge_conflicts: dict[str, list[str]] = defaultdict(list)
 
-    def add_world(self, name: str, description: str = "", metadata: dict[str, Any] | None = None) -> str:
+    def add_world(
+        self, name: str, description: str = "", metadata: dict[str, Any] | None = None
+    ) -> str:
         """
         Create a new world in the graph.
 
@@ -768,7 +774,9 @@ class WorldGraphMemory:
         ts = timestamp or datetime.now()
         return self.graph.get_snapshot_at(world_id, ts)
 
-    def create_snapshot(self, world_id: str, metadata: dict[str, Any] | None = None) -> WorldSnapshot:
+    def create_snapshot(
+        self, world_id: str, metadata: dict[str, Any] | None = None
+    ) -> WorldSnapshot:
         """
         Create a new temporal snapshot of the current world state.
 
@@ -825,7 +833,8 @@ class WorldGraphMemory:
         for world_id in (world_a_id, world_b_id):
             for node in self.graph.list_nodes(world_id):
                 existing = [
-                    n for n in self.graph.list_nodes(merged_id)
+                    n
+                    for n in self.graph.list_nodes(merged_id)
                     if n.label == node.label and n.node_type == node.node_type
                 ]
                 if existing:

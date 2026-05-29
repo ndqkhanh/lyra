@@ -19,8 +19,8 @@ from lyra_context_profiler.strategies import CompactionStrategy
 
 class _FakeElement:
     """Minimal element for testing compaction."""
-    def __init__(self, id, content, token_count=None, importance_score=0.5,
-                 element_type="unknown"):
+
+    def __init__(self, id, content, token_count=None, importance_score=0.5, element_type="unknown"):
         self.id = id
         self.content = content
         self.token_count = token_count or max(1, len(content) // 4)
@@ -31,14 +31,26 @@ class _FakeElement:
 @pytest.fixture
 def basic_elements():
     return {
-        "a": _FakeElement("a", "This is a very long document that contains lots of information about the project. "
-                                "It describes the architecture, the design decisions, and the implementation details. "
-                                "There are many sections covering different topics. The first section discusses goals. "
-                                "Further sections detail the approach.", token_count=200, importance_score=0.8),
-        "b": _FakeElement("b", "Short note: remember to fix bug #123", token_count=20, importance_score=0.3),
-        "c": _FakeElement("c", "Another comprehensive document with detailed explanations of the API. "
-                                "It includes code examples, parameter descriptions, and return value documentation. "
-                                "Each endpoint is documented with request/response examples.", token_count=150, importance_score=0.6),
+        "a": _FakeElement(
+            "a",
+            "This is a very long document that contains lots of information about the project. "
+            "It describes the architecture, the design decisions, and the implementation details. "
+            "There are many sections covering different topics. The first section discusses goals. "
+            "Further sections detail the approach.",
+            token_count=200,
+            importance_score=0.8,
+        ),
+        "b": _FakeElement(
+            "b", "Short note: remember to fix bug #123", token_count=20, importance_score=0.3
+        ),
+        "c": _FakeElement(
+            "c",
+            "Another comprehensive document with detailed explanations of the API. "
+            "It includes code examples, parameter descriptions, and return value documentation. "
+            "Each endpoint is documented with request/response examples.",
+            token_count=150,
+            importance_score=0.6,
+        ),
     }
 
 
@@ -46,8 +58,10 @@ def basic_elements():
 def elements_with_dupes():
     return {
         "a": _FakeElement("a", "The quick brown fox jumps over the lazy dog", token_count=30),
-        "b": _FakeElement("b", "The quick brown fox jumps over the lazy dog", token_count=30),  # exact dupe
-        "c": _FakeElement("c", "The quick brown fox jumps over the lazy cat", token_count=30),  # near dupe
+        # exact dupe
+        "b": _FakeElement("b", "The quick brown fox jumps over the lazy dog", token_count=30),
+        # near dupe
+        "c": _FakeElement("c", "The quick brown fox jumps over the lazy cat", token_count=30),
     }
 
 
@@ -95,8 +109,10 @@ class TestHierarchicalSummarizer:
 
     def test_level_2_shortens_content(self):
         hs = HierarchicalSummarizer()
-        content = "First sentence here. Second sentence goes on. Third sentence continues. " \
-                  "Fourth sentence is important. Fifth sentence wraps up. Sixth sentence ends it."
+        content = (
+            "First sentence here. Second sentence goes on. Third sentence continues. "
+            "Fourth sentence is important. Fifth sentence wraps up. Sixth sentence ends it."
+        )
         result = hs.summarize(content, level=2)
         assert len(result) < len(content)
         assert "First" in result
@@ -131,39 +147,49 @@ class TestCompactionEngine:
 
     def test_compact_basic_returns_result(self, basic_elements):
         engine = CompactionEngine()
-        result = asyncio.run(engine.compact(
-            basic_elements,
-            strategy=CompactionStrategy.BALANCED,
-            mode=CompactionMode.LOSSY,
-            element_importance={"a": 0.8, "b": 0.3, "c": 0.6},
-        ))
+        result = asyncio.run(
+            engine.compact(
+                basic_elements,
+                strategy=CompactionStrategy.BALANCED,
+                mode=CompactionMode.LOSSY,
+                element_importance={"a": 0.8, "b": 0.3, "c": 0.6},
+            )
+        )
         assert isinstance(result, CompactionResult)
         assert result.original_tokens > 0
         assert result.strategy == CompactionStrategy.BALANCED
 
     def test_compact_conservative_preserves_more(self, basic_elements):
         engine = CompactionEngine()
-        result = asyncio.run(engine.compact(
-            basic_elements,
-            strategy=CompactionStrategy.CONSERVATIVE,
-            mode=CompactionMode.LOSSY,
-            element_importance={"a": 0.8, "b": 0.3, "c": 0.6},
-        ))
+        result = asyncio.run(
+            engine.compact(
+                basic_elements,
+                strategy=CompactionStrategy.CONSERVATIVE,
+                mode=CompactionMode.LOSSY,
+                element_importance={"a": 0.8, "b": 0.3, "c": 0.6},
+            )
+        )
         assert result.compaction_ratio > 0.5  # Conservative should keep most
 
     def test_compact_aggressive_frees_more(self, basic_elements):
         engine = CompactionEngine()
-        result = asyncio.run(engine.compact(
-            basic_elements,
-            strategy=CompactionStrategy.AGGRESSIVE,
-            mode=CompactionMode.LOSSY,
-            element_importance={"a": 0.1, "b": 0.1, "c": 0.1},  # all low importance
-        ))
+        result = asyncio.run(
+            engine.compact(
+                basic_elements,
+                strategy=CompactionStrategy.AGGRESSIVE,
+                mode=CompactionMode.LOSSY,
+                element_importance={"a": 0.1, "b": 0.1, "c": 0.1},  # all low importance
+            )
+        )
         assert result.elements_dropped >= 0
 
     def test_progressive_disclosure(self, basic_elements):
         engine = CompactionEngine()
-        levels = {"a": DisclosureLevel.OVERVIEW, "b": DisclosureLevel.HIDDEN, "c": DisclosureLevel.FULL}
+        levels = {
+            "a": DisclosureLevel.OVERVIEW,
+            "b": DisclosureLevel.HIDDEN,
+            "c": DisclosureLevel.FULL,
+        }
         result = asyncio.run(engine.progressive_disclose(basic_elements, levels))
         # b is hidden, should not be in result
         assert "b" not in result
@@ -181,9 +207,11 @@ class TestCompactionEngine:
     def test_lossless_mode(self, basic_elements):
         """Lossless should not discard information, only remove duplicates."""
         engine = CompactionEngine()
-        result = asyncio.run(engine.compact(
-            basic_elements,
-            strategy=CompactionStrategy.CONSERVATIVE,
-            mode=CompactionMode.LOSSLESS,
-        ))
+        result = asyncio.run(
+            engine.compact(
+                basic_elements,
+                strategy=CompactionStrategy.CONSERVATIVE,
+                mode=CompactionMode.LOSSLESS,
+            )
+        )
         assert result.mode == CompactionMode.LOSSLESS

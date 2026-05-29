@@ -117,14 +117,15 @@ class InstinctEngine:
         import uuid
 
         already_converted = {
-            pid
-            for s in self._skills.values()
-            for pid in (s.source_pattern_ids or ())
+            pid for s in self._skills.values() for pid in (s.source_pattern_ids or ())
         }
 
         new_skills: list[EvolvedSkill] = []
         for pattern in self._patterns.values():
-            strong = pattern.confidence >= self._min_confidence and pattern.frequency >= self._min_frequency
+            strong = (
+                pattern.confidence >= self._min_confidence
+                and pattern.frequency >= self._min_frequency
+            )
             if strong and pattern.id not in already_converted:
                 skill = EvolvedSkill(
                     id=str(uuid.uuid4()),
@@ -145,16 +146,25 @@ class InstinctEngine:
         if skill is None:
             return None
         updated = EvolvedSkill(
-            id=skill.id, name=skill.name, description=skill.description,
-            source_pattern_ids=skill.source_pattern_ids, state=SkillState.RETIRED,
-            version=skill.version, success_rate=skill.success_rate,
-            usage_count=skill.usage_count, last_used=time(),
+            id=skill.id,
+            name=skill.name,
+            description=skill.description,
+            source_pattern_ids=skill.source_pattern_ids,
+            state=SkillState.RETIRED,
+            version=skill.version,
+            success_rate=skill.success_rate,
+            usage_count=skill.usage_count,
+            last_used=time(),
         )
         self._skills[skill_id] = updated
         return updated
 
     def active_skills(self) -> list[EvolvedSkill]:
-        return [s for s in self._skills.values() if s.state == SkillState.EMERGING or s.state == SkillState.STABLE]
+        return [
+            s
+            for s in self._skills.values()
+            if s.state == SkillState.EMERGING or s.state == SkillState.STABLE
+        ]
 
     @property
     def trace_count(self) -> int:

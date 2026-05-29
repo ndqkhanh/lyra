@@ -20,8 +20,10 @@ from lyra_context_profiler.importance import (
 
 class _FakeElement:
     """Minimal element for testing importance scoring."""
-    def __init__(self, id, content, token_count=100, access_count=1,
-                 dependencies=None, recency=0.0):
+
+    def __init__(
+        self, id, content, token_count=100, access_count=1, dependencies=None, recency=0.0
+    ):
         self.id = id
         self.content = content
         self.token_count = token_count
@@ -36,8 +38,12 @@ class _FakeElement:
 def sample_elements():
     return [
         _FakeElement("a", "def test_function(): return 42", token_count=50, access_count=5),
-        _FakeElement("b", "This is a documentation string for the API", token_count=200, access_count=1),
-        _FakeElement("c", "The quick brown fox jumps over the lazy dog", token_count=30, access_count=10),
+        _FakeElement(
+            "b", "This is a documentation string for the API", token_count=200, access_count=1
+        ),
+        _FakeElement(
+            "c", "The quick brown fox jumps over the lazy dog", token_count=30, access_count=10
+        ),
     ]
 
 
@@ -55,29 +61,49 @@ class TestScoreWeights:
     def test_default_weights_sum_near_one(self):
         w = ScoreWeights()
         total = (
-            w.tfidf_weight + w.recency_weight + w.task_relevance_weight
-            + w.dependency_weight + w.usage_weight + w.ml_weight
+            w.tfidf_weight
+            + w.recency_weight
+            + w.task_relevance_weight
+            + w.dependency_weight
+            + w.usage_weight
+            + w.ml_weight
         )
         assert abs(total - 1.0) < 0.01
 
     def test_normalize_makes_sum_one(self):
         w = ScoreWeights(tfidf_weight=0.5, recency_weight=0.5)
         n = w.normalize()
-        total = sum([
-            n.tfidf_weight, n.recency_weight, n.task_relevance_weight,
-            n.dependency_weight, n.usage_weight, n.ml_weight,
-        ])
+        total = sum(
+            [
+                n.tfidf_weight,
+                n.recency_weight,
+                n.task_relevance_weight,
+                n.dependency_weight,
+                n.usage_weight,
+                n.ml_weight,
+            ]
+        )
         assert abs(total - 1.0) < 0.01
 
     def test_all_zero_weights_normalizes_to_equal(self):
         w = ScoreWeights(
-            tfidf_weight=0, recency_weight=0, task_relevance_weight=0,
-            dependency_weight=0, usage_weight=0, ml_weight=0,
+            tfidf_weight=0,
+            recency_weight=0,
+            task_relevance_weight=0,
+            dependency_weight=0,
+            usage_weight=0,
+            ml_weight=0,
         ).normalize()
-        total = sum([
-            w.tfidf_weight, w.recency_weight, w.task_relevance_weight,
-            w.dependency_weight, w.usage_weight, w.ml_weight,
-        ])
+        total = sum(
+            [
+                w.tfidf_weight,
+                w.recency_weight,
+                w.task_relevance_weight,
+                w.dependency_weight,
+                w.usage_weight,
+                w.ml_weight,
+            ]
+        )
         assert abs(total - 1.0) < 0.01
 
 
@@ -209,9 +235,15 @@ class TestDependencyScorer:
 class TestMLImportancePredictor:
     def test_predict_returns_bounded_value(self):
         ml = MLImportancePredictor()
-        features = {"token_count": 100, "access_count": 5, "recency": 0.8,
-                    "dependency_count": 3, "content_length": 500,
-                    "unique_word_ratio": 0.7, "keyword_density": 0.3}
+        features = {
+            "token_count": 100,
+            "access_count": 5,
+            "recency": 0.8,
+            "dependency_count": 3,
+            "content_length": 500,
+            "unique_word_ratio": 0.7,
+            "keyword_density": 0.3,
+        }
         score = ml.predict(features)
         assert 0.0 <= score <= 1.0
 
@@ -231,7 +263,9 @@ class TestMLImportancePredictor:
         ml = MLImportancePredictor()
         features = [
             MLImportancePredictor.extract_features(
-                _FakeElement("a", "important critical key function main", token_count=200, access_count=10),
+                _FakeElement(
+                    "a", "important critical key function main", token_count=200, access_count=10
+                ),
             ),
             MLImportancePredictor.extract_features(
                 _FakeElement("b", "a the is", token_count=10, access_count=0),
@@ -280,6 +314,13 @@ class TestImportanceCalculator:
         importance_calc.set_weights(new)
         # Weights are normalized, so they should sum to ~1.0
         w = importance_calc.current_weights
-        total = w.tfidf_weight + w.recency_weight + w.task_relevance_weight + w.dependency_weight + w.usage_weight + w.ml_weight
+        total = (
+            w.tfidf_weight
+            + w.recency_weight
+            + w.task_relevance_weight
+            + w.dependency_weight
+            + w.usage_weight
+            + w.ml_weight
+        )
         assert abs(total - 1.0) < 0.01
         assert w.tfidf_weight > 0  # Should be non-zero

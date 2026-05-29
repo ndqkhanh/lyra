@@ -109,7 +109,7 @@ class TestPerformanceBenchmarks:
 
         results = {}
 
-        for strategy_name, strategy_enum in strategies:
+        for strategy_name, _strategy_enum in strategies:
             start = time.time()
             result = agent.reason(task, strategy=strategy_name, depth="standard")
             duration = time.time() - start

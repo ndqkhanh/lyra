@@ -9,7 +9,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root / "packages/lyra-cli/src"))
 
-from lyra_cli.streaming.buffer import ScrollbackBuffer
+from lyra_cli.streaming.buffer import ScrollbackBuffer  # noqa: E402
 
 
 def test_large_buffer_performance():

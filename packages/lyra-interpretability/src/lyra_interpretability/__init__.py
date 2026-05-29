@@ -344,13 +344,9 @@ class InterpretabilityEngine:
         DecisionTrace
             The newly created decision trace.
         """
-        input_summary = (
-            input_text[:100] + "..." if len(input_text) > 100 else input_text
-        )
+        input_summary = input_text[:100] + "..." if len(input_text) > 100 else input_text
         reasoning_steps = tuple(reasoning)
-        alt_tuple = tuple(
-            (alternatives or [])[: self._config.max_alternatives]
-        )
+        alt_tuple = tuple((alternatives or [])[: self._config.max_alternatives])
 
         # Derive feature attributions from the input text
         attributions = self.attribute_features(decision)
@@ -548,23 +544,20 @@ class InterpretabilityEngine:
         all_attributions: dict[str, FeatureAttribution] = {}
         for trace in agent_traces:
             for attr in trace.key_factors:
-                if attr.feature not in all_attributions or attr.score > all_attributions[attr.feature].score:
+                if (
+                    attr.feature not in all_attributions
+                    or attr.score > all_attributions[attr.feature].score
+                ):
                     all_attributions[attr.feature] = attr
 
-        sorted_attributions = tuple(
-            sorted(all_attributions.values(), key=lambda a: -a.score)
-        )
+        sorted_attributions = tuple(sorted(all_attributions.values(), key=lambda a: -a.score))
 
         # Counterfactuals for this agent (all stored counterfactuals)
-        agent_cfs = tuple(
-            cf for cf in self._counterfactuals
-        )
+        agent_cfs = tuple(cf for cf in self._counterfactuals)
 
         # Transparency score: ratio of decisions with at least one attribution
         if len(agent_traces) > 0:
-            traces_with_attribution = sum(
-                1 for t in agent_traces if len(t.key_factors) > 0
-            )
+            traces_with_attribution = sum(1 for t in agent_traces if len(t.key_factors) > 0)
             transparency = traces_with_attribution / len(agent_traces)
         else:
             transparency = 1.0
@@ -595,9 +588,7 @@ class InterpretabilityEngine:
         """
         # Find the matching trace
         matches = [
-            t
-            for t in self._traces
-            if t.agent_id == agent_id and t.decision_id == decision_id
+            t for t in self._traces if t.agent_id == agent_id and t.decision_id == decision_id
         ]
         if not matches:
             return f"No decision found with ID '{decision_id}' for agent '{agent_id}'."
@@ -620,9 +611,7 @@ class InterpretabilityEngine:
             lines.append("")
             lines.append("Key Factors (ranked by importance):")
             for attr in trace.key_factors[:5]:
-                lines.append(
-                    f"  #{attr.rank} {attr.feature} (score: {attr.score:.3f})"
-                )
+                lines.append(f"  #{attr.rank} {attr.feature} (score: {attr.score:.3f})")
 
         if trace.alternatives_considered:
             lines.append("")
@@ -644,9 +633,9 @@ class InterpretabilityEngine:
         num_traces = len(self._traces)
         if num_traces > 0:
             avg_confidence = sum(t.confidence for t in self._traces) / num_traces
-            avg_alternatives = sum(
-                len(t.alternatives_considered) for t in self._traces
-            ) / num_traces
+            avg_alternatives = (
+                sum(len(t.alternatives_considered) for t in self._traces) / num_traces
+            )
         else:
             avg_confidence = 0.0
             avg_alternatives = 0.0

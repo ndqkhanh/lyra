@@ -101,7 +101,7 @@ class TestReasoningNode:
     def test_uct_score_no_visits(self):
         """Test UCT score for unvisited node."""
         node = ReasoningNode(content="Test", step_type=StepType.HYPOTHESIS)
-        assert node.uct_score() == float('inf')
+        assert node.uct_score() == float("inf")
 
     def test_uct_score_with_parent(self):
         """Test UCT score calculation with parent."""
@@ -116,7 +116,7 @@ class TestReasoningNode:
 
         # UCT should be finite
         uct = child.uct_score()
-        assert uct != float('inf')
+        assert uct != float("inf")
         assert uct > 0
 
     def test_uct_exploration_weight(self):
@@ -151,7 +151,9 @@ class TestTreeSearchEngine:
             TreeSearchEngine(api_key="test-key")
             mock.assert_called_once_with(api_key="test-key")
 
-    def test_reason_basic_flow(self, tree_engine, mock_anthropic_client, basic_config, basic_budget):
+    def test_reason_basic_flow(
+        self, tree_engine, mock_anthropic_client, basic_config, basic_budget
+    ):
         """Test basic tree search reasoning flow."""
         # Mock API responses
         mock_response = Mock()
@@ -315,11 +317,13 @@ class TestTreeSearchEngine:
         trace = tree_engine.reason("Test task", basic_budget, basic_config)
 
         # Check all nodes in trace
-        for step in trace.steps:
+        for _step in trace.steps:
             # Depth should be reasonable (< 10)
             assert True  # Depth is internal to nodes
 
-    def test_generate_alternative_error_handling(self, tree_engine, mock_anthropic_client, basic_config):
+    def test_generate_alternative_error_handling(
+        self, tree_engine, mock_anthropic_client, basic_config
+    ):
         """Test error handling in alternative generation."""
         mock_anthropic_client.messages.create.side_effect = Exception("API Error")
 
@@ -329,7 +333,9 @@ class TestTreeSearchEngine:
         # Should return None on error
         assert result is None
 
-    def test_multiple_iterations(self, tree_engine, mock_anthropic_client, basic_config, basic_budget):
+    def test_multiple_iterations(
+        self, tree_engine, mock_anthropic_client, basic_config, basic_budget
+    ):
         """Test multiple MCTS iterations."""
         mock_response = Mock()
         mock_response.content = [Mock(text="Alternative reasoning step")]

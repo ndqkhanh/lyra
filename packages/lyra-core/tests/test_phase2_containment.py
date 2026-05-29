@@ -1,4 +1,5 @@
-"""Comprehensive tests for Phase 2: Containment hierarchy (Project/Team/Agent/TopologyTree/ConfigTree/ModeStack)."""
+"""Comprehensive tests for Phase 2: Containment hierarchy
+(Project/Team/Agent/TopologyTree/ConfigTree/ModeStack)."""
 
 from __future__ import annotations
 
@@ -32,11 +33,14 @@ class _StubAgent:
         from lyra_core.protocol import AgentHealth, AgentIdentity, AgentLifecycle, AgentState
 
         self._identity = AgentIdentity(
-            agent_id=agent_id, project_id=project_id, agent_type="test",
+            agent_id=agent_id,
+            project_id=project_id,
+            agent_type="test",
             capabilities=frozenset({"test"}),
         )
         self._state = AgentState(
-            lifecycle=AgentLifecycle.READY, health=AgentHealth.HEALTHY,
+            lifecycle=AgentLifecycle.READY,
+            health=AgentHealth.HEALTHY,
             since=time.time(),
         )
         self._modes: list[AgentMode] = []
@@ -333,8 +337,9 @@ class TestTeamMembership:
         assert m.project_config_overrides == {}
 
     def test_custom_overrides(self):
-        m = TeamMembership(team_id="t1", project_id="p1",
-                          project_config_overrides={"max_tokens": 2048})
+        m = TeamMembership(
+            team_id="t1", project_id="p1", project_config_overrides={"max_tokens": 2048}
+        )
         assert m.project_config_overrides["max_tokens"] == 2048
 
 
@@ -442,20 +447,24 @@ class TestTopologyTree:
         assert set(tree.children[0].agent_ids) == {"a1", "a2"}
 
     def test_pick_consensus_majority(self):
-        result = TopologyTree._pick_consensus({
-            "a1": "Option A is best. Here's why...",
-            "a2": "Option A is best. I agree...",
-            "a3": "Option B is better. Because...",
-        })
+        result = TopologyTree._pick_consensus(
+            {
+                "a1": "Option A is best. Here's why...",
+                "a2": "Option A is best. I agree...",
+                "a3": "Option B is better. Because...",
+            }
+        )
         assert "Consensus" in result
         assert "2/3" in result
 
     def test_pick_consensus_no_majority(self):
-        result = TopologyTree._pick_consensus({
-            "a1": "Option A is best.",
-            "a2": "Option B is better.",
-            "a3": "Option C for sure.",
-        })
+        result = TopologyTree._pick_consensus(
+            {
+                "a1": "Option A is best.",
+                "a2": "Option B is better.",
+                "a3": "Option C for sure.",
+            }
+        )
         assert "No consensus" in result
 
     def test_pick_consensus_empty(self):
@@ -472,8 +481,7 @@ class TestTopologyTree:
         assert tree.config == {}
 
     def test_config_custom(self):
-        tree = TopologyTree(kind=TopologyKind.PARALLEL,
-                           config={"timeout": 30})
+        tree = TopologyTree(kind=TopologyKind.PARALLEL, config={"timeout": 30})
         assert tree.config["timeout"] == 30
 
 

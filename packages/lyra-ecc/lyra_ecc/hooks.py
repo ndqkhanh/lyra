@@ -7,10 +7,11 @@ Implements ECC-compatible hooks system for Lyra.
 import asyncio
 import inspect
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -28,10 +29,10 @@ class HookType(Enum):
 class HookContext:
     """Context passed to hooks."""
     event_type: HookType
-    tool_name: Optional[str] = None
-    file_path: Optional[Path] = None
-    args: Optional[Dict[str, Any]] = None
-    result: Optional[Any] = None
+    tool_name: str | None = None
+    file_path: Path | None = None
+    args: dict[str, Any] | None = None
+    result: Any | None = None
 
 
 @dataclass(frozen=True)
@@ -40,10 +41,10 @@ class HookResult:
     success: bool
     skipped: bool = False
     formatted: bool = False
-    error: Optional[str] = None
+    error: str | None = None
 
     @classmethod
-    def merge(cls, results: List['HookResult']) -> 'HookResult':
+    def merge(cls, results: list['HookResult']) -> 'HookResult':
         """Merge multiple hook results."""
         if not results:
             return cls(success=True)
@@ -64,7 +65,7 @@ class ECCHooksEngine:
 
     def __init__(self):
         """Initialize hooks engine."""
-        self.hooks: Dict[HookType, List[Callable]] = {
+        self.hooks: dict[HookType, list[Callable]] = {
             HookType.PRE_TOOL_USE: [],
             HookType.POST_TOOL_USE: [],
             HookType.SESSION_START: [],
@@ -101,7 +102,7 @@ class ECCHooksEngine:
         Returns:
             Merged result from all hooks
         """
-        results: List[HookResult] = []
+        results: list[HookResult] = []
 
         for hook in self.hooks.get(event, []):
             try:

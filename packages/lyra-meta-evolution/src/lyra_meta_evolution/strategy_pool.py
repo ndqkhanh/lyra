@@ -169,8 +169,8 @@ class SimilarityMetrics:
     @staticmethod
     def jaccard_signature(sig1: str, sig2: str) -> float:
         """Jaccard similarity of strategy signatures."""
-        s1 = {sig1[i:i + 2] for i in range(0, len(sig1), 2)}
-        s2 = {sig2[i:i + 2] for i in range(0, len(sig2), 2)}
+        s1 = {sig1[i : i + 2] for i in range(0, len(sig1), 2)}
+        s2 = {sig2[i : i + 2] for i in range(0, len(sig2), 2)}
         intersection = len(s1 & s2)
         union = len(s1 | s2)
         return intersection / union if union > 0 else 0.0
@@ -247,7 +247,9 @@ class StrategyPool:
         self._encodings[encoding.strategy_id] = encoding
         self._add_count += 1
 
-        logger.debug("Added strategy %s to pool (size=%d)", encoding.strategy_id, len(self._strategies))
+        logger.debug(
+            "Added strategy %s to pool (size=%d)", encoding.strategy_id, len(self._strategies)
+        )
         return record
 
     def get_strategy(self, strategy_id: str) -> StrategyRecord:
@@ -306,7 +308,9 @@ class StrategyPool:
 
         # Use a sampled approach for large pools
         sample_size = min(len(encodings), 100)
-        sampled = encodings if len(encodings) <= sample_size else random.sample(encodings, sample_size)
+        sampled = (
+            encodings if len(encodings) <= sample_size else random.sample(encodings, sample_size)
+        )
 
         for i in range(len(sampled)):
             for j in range(i + 1, len(sampled)):
@@ -348,7 +352,7 @@ class StrategyPool:
 
             # Novelty = average distance to k nearest neighbors
             distances.sort()
-            k_nearest = distances[:min(k, len(distances))]
+            k_nearest = distances[: min(k, len(distances))]
             novelty = sum(k_nearest) / max(len(k_nearest), 1)
             scores.append((candidate, novelty))
 
@@ -414,8 +418,7 @@ class StrategyPool:
     ) -> list[StrategyRecord]:
         """Get the top-performing strategies."""
         candidates = [
-            r for r in self._strategies.values()
-            if r.usage_count >= min_usage and not r.archived
+            r for r in self._strategies.values() if r.usage_count >= min_usage and not r.archived
         ]
         candidates.sort(key=lambda r: r.avg_fitness, reverse=True)
         return candidates[:top_k]
@@ -506,5 +509,3 @@ class StrategyPool:
         if not self._strategies:
             return 0.0
         return sum(r.avg_fitness for r in self._strategies.values()) / len(self._strategies)
-
-

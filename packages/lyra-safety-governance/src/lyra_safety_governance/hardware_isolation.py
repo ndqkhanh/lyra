@@ -63,11 +63,20 @@ class IsolationHealth:
 
 
 _DANGEROUS_KEYWORDS: tuple[str, ...] = (
-    "import os", "import subprocess", "import shutil",
-    "__import__('os')", "eval(", "exec(", "compile(",
-    "open(", "file(", "socket.",
-    "BaseException", "__subclasses__",
-    "sys.modules", "__builtins__",
+    "import os",
+    "import subprocess",
+    "import shutil",
+    "__import__('os')",
+    "eval(",
+    "exec(",
+    "compile(",
+    "open(",
+    "file(",
+    "socket.",
+    "BaseException",
+    "__subclasses__",
+    "sys.modules",
+    "__builtins__",
 )
 
 
@@ -83,7 +92,9 @@ class IsolationManager:
         self._sandboxes: dict[str, SandboxConfig] = {}
         self._health_errors: list[str] = []
 
-    def isolate_and_execute(self, request: ExecutionRequest, config: SandboxConfig) -> ExecutionResult:
+    def isolate_and_execute(
+        self, request: ExecutionRequest, config: SandboxConfig
+    ) -> ExecutionResult:
         """Validate an execution request against the sandbox configuration.
 
         Performs safety checks on the code and verifies the isolation level

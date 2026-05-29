@@ -127,17 +127,13 @@ class SequentialComposer:
                         needed.add(inp.name)
 
         if not chain:
-            raise CompositionError(
-                f"Cannot satisfy outputs: {required_outputs}"
-            )
+            raise CompositionError(f"Cannot satisfy outputs: {required_outputs}")
 
         total_cost = sum(
-            self.registry.get(sid).estimated_cost
-            for sid in chain if self.registry.get(sid)
+            self.registry.get(sid).estimated_cost for sid in chain if self.registry.get(sid)
         )
         total_latency = sum(
-            self.registry.get(sid).avg_latency_ms
-            for sid in chain if self.registry.get(sid)
+            self.registry.get(sid).avg_latency_ms for sid in chain if self.registry.get(sid)
         )
 
         return CompositionPlan(
@@ -170,10 +166,12 @@ class SequentialComposer:
                 continue
 
             context_score = (
-                sum(1 for k, v in context.items()
-                    if skill.context_requirements.get(k, 0) <= v + 0.1)
+                sum(
+                    1 for k, v in context.items() if skill.context_requirements.get(k, 0) <= v + 0.1
+                )
                 / max(len(skill.context_requirements), 1)
-                if skill.context_requirements else 0.5
+                if skill.context_requirements
+                else 0.5
             )
 
             score = (
@@ -193,8 +191,7 @@ class SequentialComposer:
         if not chain:
             return 0.0
         qualities = [
-            self.registry.get(sid).quality_score
-            for sid in chain if self.registry.get(sid)
+            self.registry.get(sid).quality_score for sid in chain if self.registry.get(sid)
         ]
         return sum(qualities) / len(qualities) if qualities else 0.0
 
@@ -255,12 +252,10 @@ class ParallelComposer:
 
         # Fan-out cost = sum, latency = max
         total_cost = sum(
-            self.registry.get(sid).estimated_cost
-            for sid in branches if self.registry.get(sid)
+            self.registry.get(sid).estimated_cost for sid in branches if self.registry.get(sid)
         )
         max_latency = max(
-            (self.registry.get(sid).avg_latency_ms
-             for sid in branches if self.registry.get(sid)),
+            (self.registry.get(sid).avg_latency_ms for sid in branches if self.registry.get(sid)),
             default=0.0,
         )
 
@@ -313,15 +308,21 @@ class ParallelComposer:
 
         plan = CompositionPlan(
             plan_id=f"fan_{int(time.time() * 1000)}",
-            modules=[source_skill_id] + workers + ([aggregators[0].skill_id] if aggregators else []),
+            modules=[source_skill_id]
+            + workers
+            + ([aggregators[0].skill_id] if aggregators else []),
             expected_outputs=required_outputs,
-            estimated_cost=source.estimated_cost + sum(
-                self.registry.get(sid).estimated_cost
-                for sid in workers if self.registry.get(sid)
+            estimated_cost=source.estimated_cost
+            + sum(
+                self.registry.get(sid).estimated_cost for sid in workers if self.registry.get(sid)
             ),
-            estimated_latency_ms=source.avg_latency_ms + max(
-                (self.registry.get(sid).avg_latency_ms
-                 for sid in workers if self.registry.get(sid)),
+            estimated_latency_ms=source.avg_latency_ms
+            + max(
+                (
+                    self.registry.get(sid).avg_latency_ms
+                    for sid in workers
+                    if self.registry.get(sid)
+                ),
                 default=0.0,
             ),
             pattern=CompositionPattern.FANOUT,
@@ -334,8 +335,7 @@ class ParallelComposer:
         if not skills:
             return 0.0
         qualities = [
-            self.registry.get(sid).quality_score
-            for sid in skills if self.registry.get(sid)
+            self.registry.get(sid).quality_score for sid in skills if self.registry.get(sid)
         ]
         if not qualities:
             return 0.0
@@ -385,7 +385,9 @@ class ConditionalComposer:
             modules=all_modules,
             expected_outputs=list(set(then_required + else_required)),
             estimated_cost=max(then_plan.estimated_cost, else_plan.estimated_cost),
-            estimated_latency_ms=max(then_plan.estimated_latency_ms, else_plan.estimated_latency_ms),
+            estimated_latency_ms=max(
+                then_plan.estimated_latency_ms, else_plan.estimated_latency_ms
+            ),
             pattern=CompositionPattern.CONDITIONAL,
             quality_score=(then_plan.quality_score + else_plan.quality_score) / 2.0,
             metadata={
@@ -558,7 +560,9 @@ class MasterComposer:
         elif pattern == CompositionPattern.CONDITIONAL:
             condition = kwargs.get("condition", "auto")
             else_outputs = kwargs.get("else_outputs", [])
-            return self._conditional.build(condition, required_outputs, else_outputs, context=context)
+            return self._conditional.build(
+                condition, required_outputs, else_outputs, context=context
+            )
         elif pattern == CompositionPattern.ITERATIVE:
             skill_id = kwargs.get("skill_id", "")
             check = kwargs.get("convergence_check", "auto")

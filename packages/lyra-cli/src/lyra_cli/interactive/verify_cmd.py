@@ -12,6 +12,7 @@ This command scaffolds a verification checklist and tracks pass/fail:
 
 Renders as a formatted checklist with pass/fail/pending indicators.
 """
+
 from __future__ import annotations
 
 import time
@@ -24,6 +25,7 @@ from ..commands.registry import CommandResult
 @dataclass
 class VerificationCheck:
     """One verifiable check item."""
+
     id: int
     description: str
     status: str = "pending"  # pending | pass | fail
@@ -55,7 +57,9 @@ def cmd_verify(session: Any, args: str) -> CommandResult:
     # ── /verify (show) ────────────────────────────────────────────────
     if subcmd == "show" or not parts:
         if not _checks:
-            return CommandResult(output="No verification checks. Add one with /verify add <description>")
+            return CommandResult(
+                output="No verification checks. Add one with /verify add <description>"
+            )
 
         lines = ["[bold]Verification Checklist[/]"]
         passed = sum(1 for c in _checks if c.status == "pass")
@@ -69,7 +73,12 @@ def cmd_verify(session: Any, args: str) -> CommandResult:
         bar += "[red]" + "█" * f_failed + "[/]"
         bar += "[dim]" + "░" * (bar_w - f_passed - f_failed) + "[/]"
 
-        lines.append(f"  {bar}  [green]{passed}[/]/{total} passed  [green]{passed/total*100 if total else 0:.0f}%[/]")
+        lines.append(
+
+                f"  {bar}  [green]{passed}[/]/{total} passed  [green]"
+                f"{passed/total*100 if total else 0:.0f}%[/]"
+
+        )
         lines.append("")
 
         for check in _checks:
@@ -100,16 +109,26 @@ def cmd_verify(session: Any, args: str) -> CommandResult:
 
     # ── /verify pass [N] ──────────────────────────────────────────────
     if subcmd == "pass":
-        target_id = int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else (_checks[-1].id if _checks else None)
+        target_id = (
+            int(parts[1])
+            if len(parts) > 1 and parts[1].isdigit()
+            else (_checks[-1].id if _checks else None)
+        )
         for check in _checks:
             if check.id == target_id:
                 check.status = "pass"
-                return CommandResult(output=f"✓ Check #{check.id} marked passed: {check.description[:50]}")
+                return CommandResult(
+                    output=f"✓ Check #{check.id} marked passed: {check.description[:50]}"
+                )
         return CommandResult(output=f"Check #{target_id} not found")
 
     # ── /verify fail [N] ──────────────────────────────────────────────
     if subcmd == "fail":
-        target_id = int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else (_checks[-1].id if _checks else None)
+        target_id = (
+            int(parts[1])
+            if len(parts) > 1 and parts[1].isdigit()
+            else (_checks[-1].id if _checks else None)
+        )
         reason = " ".join(parts[2:]) if len(parts) > 2 else "failed"
         for check in _checks:
             if check.id == target_id:

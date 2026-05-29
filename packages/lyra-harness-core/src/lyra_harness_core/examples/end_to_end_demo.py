@@ -6,6 +6,7 @@ modules into one working multi-hop research workflow. Run as a script
 ``run_research_demo()``. The integration test ``test_end_to_end_demo.py``
 asserts the canonical trajectory.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -109,42 +110,50 @@ def build_demo_retriever() -> HippoRAGRetriever:
 
 def _build_stub_llm_for_self_ask() -> StubLLM:
     """Scripted Self-Ask trajectory: one follow-up then final answer."""
-    return StubLLM(responses=[
-        "Are follow up questions needed here? Yes\n"
-        "Follow up: who directed Casablanca?\n",
-        "Are follow up questions needed here? No\n"
-        "So the final answer is: Bob Curtiz\n",
-    ])
+    return StubLLM(
+        responses=[
+            "Are follow up questions needed here? Yes\n" "Follow up: who directed Casablanca?\n",
+            "Are follow up questions needed here? No\n" "So the final answer is: Bob Curtiz\n",
+        ]
+    )
 
 
 def _build_stub_llm_for_ircot() -> StubLLM:
     """Scripted IRCoT trajectory."""
-    return StubLLM(responses=[
-        "Casablanca was directed by Bob Curtiz.",
-        "Curtiz worked for Warner Bros.",
-        "Answer: Bob Curtiz",
-    ])
+    return StubLLM(
+        responses=[
+            "Casablanca was directed by Bob Curtiz.",
+            "Curtiz worked for Warner Bros.",
+            "Answer: Bob Curtiz",
+        ]
+    )
 
 
 def _build_demo_retriever_stub() -> StubRetriever:
     """Stub retriever returning the indexed docs by query."""
-    return StubRetriever(fixtures={
-        "who directed Casablanca?": [
+    return StubRetriever(
+        fixtures={
+            "who directed Casablanca?": [
+                RetrievedDoc(
+                    doc_id="d2",
+                    text="Bob Curtiz directed the film Casablanca.",
+                    score=0.95,
+                    source="demo",
+                ),
+            ],
+        },
+        fallback=lambda q, k: [
             RetrievedDoc(
-                doc_id="d2",
-                text="Bob Curtiz directed the film Casablanca.",
-                score=0.95,
-                source="demo",
+                doc_id="d3", text="Casablanca was released in 1942 by Warner Bros.", score=0.6
             ),
         ],
-    }, fallback=lambda q, k: [
-        RetrievedDoc(doc_id="d3", text="Casablanca was released in 1942 by Warner Bros.", score=0.6),
-    ])
+    )
 
 
 def _build_chain_of_note_gate() -> ChainOfNoteGate:
     """Deterministic Chain-of-Note gate: docs containing 'Casablanca' or
     'Curtiz' or 'Warner' are RELEVANT; others IRRELEVANT."""
+
     def note_writer(*, query, doc_id, content):
         relevant_terms = ("casablanca", "curtiz", "warner")
         is_relevant = any(t in content.lower() for t in relevant_terms)
@@ -161,6 +170,7 @@ def _build_chain_of_note_gate() -> ChainOfNoteGate:
             note="off-topic",
             score=0.0,
         )
+
     return ChainOfNoteGate(note_writer=note_writer, threshold=0.5)
 
 
@@ -255,9 +265,7 @@ def run_research_demo(
 
     # 4. Surface the budget remaining for cost-accounting integration.
     budget_remaining = (
-        program.pipeline.budget.remaining()
-        if program.pipeline.budget is not None
-        else 0
+        program.pipeline.budget.remaining() if program.pipeline.budget is not None else 0
     )
 
     return DemoOutput(

@@ -129,7 +129,11 @@ class SecurityScanner:
         for pattern in policy.blocked_patterns:
             for lineno, line in enumerate(code.splitlines(), start=1):
                 if pattern in line:
-                    severity = FindingSeverity.CRITICAL if _is_critical_pattern(pattern) else FindingSeverity.HIGH
+                    severity = (
+                        FindingSeverity.CRITICAL
+                        if _is_critical_pattern(pattern)
+                        else FindingSeverity.HIGH
+                    )
                     findings.append(
                         SecurityFinding(
                             line_number=lineno,
@@ -208,7 +212,10 @@ class SecurityScanner:
                                     line_number=node.lineno,
                                     severity=FindingSeverity.HIGH,
                                     pattern=f"{node.func.value.id}.{node.func.attr}",
-                                    description=f"Potentially dangerous call: {node.func.value.id}.{node.func.attr}",
+                                    description=(
+                                        f"Potentially dangerous call: {node.func.value.id}."
+                                        f"{node.func.attr}"
+                                    ),
                                 )
                             )
         except SyntaxError:

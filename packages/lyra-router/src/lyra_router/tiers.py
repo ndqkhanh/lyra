@@ -47,37 +47,89 @@ class TierResult:
 # specific (AGENTIC) to least specific (TRIVIAL) so the first match wins.
 
 _AGENTIC_KEYWORDS: set[str] = {
-    "build a", "create a complete", "full application", "entire codebase",
-    "autonomous", "multi-agent", "multi-step research", "deep research",
-    "from scratch", "self-correcting", "self-improving", "autonomously",
-    "orchestrate", "deploy to production", "end-to-end", "refactor entire",
-    "system design", "full pipeline", "integrated system",
+    "build a",
+    "create a complete",
+    "full application",
+    "entire codebase",
+    "autonomous",
+    "multi-agent",
+    "multi-step research",
+    "deep research",
+    "from scratch",
+    "self-correcting",
+    "self-improving",
+    "autonomously",
+    "orchestrate",
+    "deploy to production",
+    "end-to-end",
+    "refactor entire",
+    "system design",
+    "full pipeline",
+    "integrated system",
 }
 
 _COMPLEX_KEYWORDS: set[str] = {
-    "architecture", "architect", "system design", "scalability",
-    "trade-off", "tradeoff", "database schema", "data model",
-    "security audit", "performance optimization", "deep analysis",
-    "evaluate", "compare frameworks", "design pattern",
-    "best practice", "migration strategy", "cost optimization",
-    "microservices", "distributed", "concurrency model",
-    "review this codebase", "code review of the entire",
-    "design a system", "design an api",
+    "architecture",
+    "architect",
+    "system design",
+    "scalability",
+    "trade-off",
+    "tradeoff",
+    "database schema",
+    "data model",
+    "security audit",
+    "performance optimization",
+    "deep analysis",
+    "evaluate",
+    "compare frameworks",
+    "design pattern",
+    "best practice",
+    "migration strategy",
+    "cost optimization",
+    "microservices",
+    "distributed",
+    "concurrency model",
+    "review this codebase",
+    "code review of the entire",
+    "design a system",
+    "design an api",
 }
 
 _MODERATE_KEYWORDS: set[str] = {
-    "implement", "write a function", "debug", "fix this bug",
-    "add feature", "refactor", "write tests for",
-    "explain how", "how does", "what is the difference",
-    "optimize this", "write a script", "configure",
-    "integrate", "api endpoint", "database query",
-    "middleware", "authentication", "authorization",
+    "implement",
+    "write a function",
+    "debug",
+    "fix this bug",
+    "add feature",
+    "refactor",
+    "write tests for",
+    "explain how",
+    "how does",
+    "what is the difference",
+    "optimize this",
+    "write a script",
+    "configure",
+    "integrate",
+    "api endpoint",
+    "database query",
+    "middleware",
+    "authentication",
+    "authorization",
 }
 
 _SIMPLE_KEYWORDS: set[str] = {
-    "what is", "define", "lookup", "find", "search for",
-    "convert", "translate", "syntax for", "example of",
-    "who is", "when was", "where is",
+    "what is",
+    "define",
+    "lookup",
+    "find",
+    "search for",
+    "convert",
+    "translate",
+    "syntax for",
+    "example of",
+    "who is",
+    "when was",
+    "where is",
 }
 
 _TRIVIAL_PATTERNS: list[str] = [
@@ -186,7 +238,9 @@ class RuleTier:
             )
 
         # 5. Question detection: questions tend to be simple/moderate
-        if task_lower.endswith("?") or task_lower.startswith(("what", "how", "why", "when", "where", "who", "can", "is", "do", "does")):
+        if task_lower.endswith("?") or task_lower.startswith(
+            ("what", "how", "why", "when", "where", "who", "can", "is", "do", "does")
+        ):
             return TierResult(
                 complexity=TaskComplexity.SIMPLE,
                 model_tier=ModelTier.HAIKU,
@@ -239,6 +293,7 @@ class SemanticTier:
         """Try to load sentence-transformers; fall back to None."""
         try:
             from sentence_transformers import SentenceTransformer  # type: ignore[import-untyped]
+
             self._encoder = SentenceTransformer("all-MiniLM-L6-v2")
             logger.info("SemanticTier: loaded sentence-transformers (all-MiniLM-L6-v2)")
         except Exception:
@@ -248,24 +303,76 @@ class SemanticTier:
         """Build a reference corpus of example tasks with known classifications."""
         examples: list[tuple[str, TaskComplexity, ModelTier]] = [
             # AGENTIC
-            ("build a complete e-commerce application from scratch", TaskComplexity.AGENTIC, ModelTier.AGENTIC),
-            ("create an autonomous agent that researches topics and writes reports", TaskComplexity.AGENTIC, ModelTier.AGENTIC),
-            ("refactor the entire codebase to use dependency injection", TaskComplexity.AGENTIC, ModelTier.AGENTIC),
-            ("deploy a production-grade microservices cluster with monitoring", TaskComplexity.AGENTIC, ModelTier.AGENTIC),
+            (
+                "build a complete e-commerce application from scratch",
+                TaskComplexity.AGENTIC,
+                ModelTier.AGENTIC,
+            ),
+            (
+                "create an autonomous agent that researches topics and writes reports",
+                TaskComplexity.AGENTIC,
+                ModelTier.AGENTIC,
+            ),
+            (
+                "refactor the entire codebase to use dependency injection",
+                TaskComplexity.AGENTIC,
+                ModelTier.AGENTIC,
+            ),
+            (
+                "deploy a production-grade microservices cluster with monitoring",
+                TaskComplexity.AGENTIC,
+                ModelTier.AGENTIC,
+            ),
             # COMPLEX
-            ("design the database schema for a multi-tenant SaaS platform", TaskComplexity.COMPLEX, ModelTier.PREMIUM),
-            ("evaluate the trade-offs between PostgreSQL and MongoDB for our use case", TaskComplexity.COMPLEX, ModelTier.PREMIUM),
-            ("perform a security audit of our authentication system", TaskComplexity.COMPLEX, ModelTier.PREMIUM),
-            ("design a scalable event-driven architecture for real-time analytics", TaskComplexity.COMPLEX, ModelTier.PREMIUM),
+            (
+                "design the database schema for a multi-tenant SaaS platform",
+                TaskComplexity.COMPLEX,
+                ModelTier.PREMIUM,
+            ),
+            (
+                "evaluate the trade-offs between PostgreSQL and MongoDB for our use case",
+                TaskComplexity.COMPLEX,
+                ModelTier.PREMIUM,
+            ),
+            (
+                "perform a security audit of our authentication system",
+                TaskComplexity.COMPLEX,
+                ModelTier.PREMIUM,
+            ),
+            (
+                "design a scalable event-driven architecture for real-time analytics",
+                TaskComplexity.COMPLEX,
+                ModelTier.PREMIUM,
+            ),
             # MODERATE
-            ("implement a JWT authentication middleware", TaskComplexity.MODERATE, ModelTier.STANDARD),
-            ("write a function to parse CSV files with error handling", TaskComplexity.MODERATE, ModelTier.STANDARD),
+            (
+                "implement a JWT authentication middleware",
+                TaskComplexity.MODERATE,
+                ModelTier.STANDARD,
+            ),
+            (
+                "write a function to parse CSV files with error handling",
+                TaskComplexity.MODERATE,
+                ModelTier.STANDARD,
+            ),
             ("add pagination to the API endpoint", TaskComplexity.MODERATE, ModelTier.STANDARD),
-            ("debug why the database connection pool is exhausted", TaskComplexity.MODERATE, ModelTier.STANDARD),
+            (
+                "debug why the database connection pool is exhausted",
+                TaskComplexity.MODERATE,
+                ModelTier.STANDARD,
+            ),
             # SIMPLE
-            ("what is the syntax for list comprehension in Python", TaskComplexity.SIMPLE, ModelTier.HAIKU),
+            (
+                "what is the syntax for list comprehension in Python",
+                TaskComplexity.SIMPLE,
+                ModelTier.HAIKU,
+            ),
             ("convert this JSON to YAML", TaskComplexity.SIMPLE, ModelTier.HAIKU),
-            ("find all files modified in the last 24 hours", TaskComplexity.SIMPLE, ModelTier.HAIKU),
+            (
+                "find all files modified in the last 24 hours",
+                TaskComplexity.SIMPLE,
+                ModelTier.HAIKU,
+            ),
             ("what does the git status command do", TaskComplexity.SIMPLE, ModelTier.HAIKU),
             # TRIVIAL
             ("hello", TaskComplexity.TRIVIAL, ModelTier.LOCAL_SLM),
@@ -303,10 +410,7 @@ class SemanticTier:
             df.update(set(tokens))
 
         # IDF
-        self._tfidf_idf = {
-            term: log(corpus_size / (freq + 1)) + 1
-            for term, freq in df.items()
-        }
+        self._tfidf_idf = {term: log(corpus_size / (freq + 1)) + 1 for term, freq in df.items()}
 
         # Vocabulary index
         self._tfidf_vocab = {term: idx for idx, term in enumerate(sorted(df.keys()))}
@@ -364,11 +468,16 @@ class SemanticTier:
 
             if self._corpus_embeddings is None:
                 texts = self._corpus_texts
-                embeddings = self._encoder.encode(texts, convert_to_numpy=True)  # type: ignore[union-attr]
+                embeddings = self._encoder.encode(
+                    texts, convert_to_numpy=True
+                )  # type: ignore[union-attr]
                 self._corpus_embeddings = embeddings
 
-            task_embedding = self._encoder.encode([task], convert_to_numpy=True)  # type: ignore[union-attr]
-            similarities = np.dot(self._corpus_embeddings, task_embedding.T).flatten()  # type: ignore[union-attr]
+            task_embedding = self._encoder.encode(
+                [task], convert_to_numpy=True
+            )  # type: ignore[union-attr]
+            # type: ignore[union-attr]
+            similarities = np.dot(self._corpus_embeddings, task_embedding.T).flatten()
             best_idx = int(np.argmax(similarities))
             best_sim = float(similarities[best_idx])
 
@@ -380,7 +489,10 @@ class SemanticTier:
                 complexity=complexity,
                 model_tier=tier,
                 confidence=confidence,
-                reasoning=f"Semantic match to '{self._corpus_texts[best_idx][:60]}...' (cosine={best_sim:.2f})",
+                reasoning=(
+                    f"Semantic match to '{self._corpus_texts[best_idx][:60]}...' (cosine="
+                    f"{best_sim:.2f})"
+                ),
                 matched_rule=f"semantic:embedding({best_sim:.2f})",
             )
         except Exception as exc:
@@ -413,7 +525,9 @@ class SemanticTier:
             complexity=self._corpus_complexities[best_idx],
             model_tier=self._corpus_tiers[best_idx],
             confidence=confidence,
-            reasoning=f"TF-IDF match to '{self._corpus_texts[best_idx][:60]}...' (cosine={best_sim:.2f})",
+            reasoning=(
+                f"TF-IDF match to '{self._corpus_texts[best_idx][:60]}...' (cosine={best_sim:.2f})"
+            ),
             matched_rule=f"semantic:tfidf({best_sim:.2f})",
         )
 
@@ -455,6 +569,7 @@ class NeuralTier:
         """Initialize the model (sklearn preferred, numpy fallback)."""
         try:
             from sklearn.neural_network import MLPClassifier  # type: ignore[import-untyped]
+
             self._model = MLPClassifier(
                 hidden_layer_sizes=(64, 32),
                 activation="relu",
@@ -503,16 +618,49 @@ class NeuralTier:
         cap_ratio = sum(1 for w in words if w and w[0].isupper()) / max(word_count, 1)
 
         technical_terms = [
-            "api", "database", "server", "client", "endpoint", "json", "xml",
-            "http", "docker", "kubernetes", "microservice", "sql", "nosql",
-            "redis", "cache", "queue", "async", "thread", "process", "lambda",
-            "class", "interface", "module", "package", "dependency",
+            "api",
+            "database",
+            "server",
+            "client",
+            "endpoint",
+            "json",
+            "xml",
+            "http",
+            "docker",
+            "kubernetes",
+            "microservice",
+            "sql",
+            "nosql",
+            "redis",
+            "cache",
+            "queue",
+            "async",
+            "thread",
+            "process",
+            "lambda",
+            "class",
+            "interface",
+            "module",
+            "package",
+            "dependency",
         ]
         tech_count = sum(1 for term in technical_terms if term in task.lower())
 
         imperative_verbs = [
-            "implement", "create", "build", "fix", "debug", "add", "remove",
-            "update", "delete", "write", "read", "run", "deploy", "configure",
+            "implement",
+            "create",
+            "build",
+            "fix",
+            "debug",
+            "add",
+            "remove",
+            "update",
+            "delete",
+            "write",
+            "read",
+            "run",
+            "deploy",
+            "configure",
         ]
         imperative_count = sum(1 for v in imperative_verbs if v in task.lower().split())
 
@@ -570,7 +718,11 @@ class NeuralTier:
         """
         features = self._extract_features(task)
         char_count, word_count, _avg_word_len, question_count, code_indicators = (
-            features[0], features[1], features[2], features[3], features[4]
+            features[0],
+            features[1],
+            features[2],
+            features[3],
+            features[4],
         )
         tech_count, imperative_count = features[7], features[8]
 

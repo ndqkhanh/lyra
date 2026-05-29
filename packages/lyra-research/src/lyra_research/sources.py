@@ -18,6 +18,7 @@ from lyra_research.discovery import ResearchSource, SourceType
 # OpenReview
 # ---------------------------------------------------------------------------
 
+
 class OpenReviewDiscovery:
     """Discover papers from OpenReview (ICLR, NeurIPS, ICML, COLM)."""
 
@@ -69,12 +70,22 @@ class OpenReviewDiscovery:
 
                 if response.status_code == 429:  # Rate limited
                     if attempt < max_retries - 1:
-                        delay = base_delay * (2 ** attempt)
-                        print(f"OpenReview rate limited. Retrying in {delay}s... (attempt {attempt + 1}/{max_retries})")
+                        delay = base_delay * (2**attempt)
+                        print(
+
+                                f"OpenReview rate limited. Retrying in {delay}s... (attempt "
+                                f"{attempt + 1}/{max_retries})"
+
+                        )
                         time.sleep(delay)
                         continue
                     else:
-                        print(f"OpenReview API error: Rate limit exceeded after {max_retries} attempts")
+                        print(
+
+                                f"OpenReview API error: Rate limit exceeded after {max_retries}"
+                                f" attempts"
+
+                        )
                         return []
 
                 if response.status_code != 200:
@@ -86,7 +97,7 @@ class OpenReviewDiscovery:
 
             except Exception as e:
                 if attempt < max_retries - 1:
-                    delay = base_delay * (2 ** attempt)
+                    delay = base_delay * (2**attempt)
                     print(f"OpenReview error: {e}. Retrying in {delay}s...")
                     time.sleep(delay)
                 else:
@@ -133,6 +144,7 @@ class OpenReviewDiscovery:
 # ---------------------------------------------------------------------------
 # HuggingFace Papers
 # ---------------------------------------------------------------------------
+
 
 class HuggingFacePapersDiscovery:
     """Discover papers from the HuggingFace Hub papers API."""
@@ -214,15 +226,12 @@ class HuggingFacePapersDiscovery:
         published_date: datetime | None = None
         if published_at:
             try:
-                published_date = datetime.fromisoformat(
-                    str(published_at).replace("Z", "+00:00")
-                )
+                published_date = datetime.fromisoformat(str(published_at).replace("Z", "+00:00"))
             except Exception:
                 pass
 
         authors = [
-            a.get("name", a) if isinstance(a, dict) else str(a)
-            for a in paper.get("authors", [])
+            a.get("name", a) if isinstance(a, dict) else str(a) for a in paper.get("authors", [])
         ]
 
         return ResearchSource(
@@ -244,6 +253,7 @@ class HuggingFacePapersDiscovery:
 # ---------------------------------------------------------------------------
 # Papers with Code
 # ---------------------------------------------------------------------------
+
 
 class PapersWithCodeDiscovery:
     """Discover papers from Papers with Code."""
@@ -292,12 +302,22 @@ class PapersWithCodeDiscovery:
 
                 if response.status_code == 429:  # Rate limited
                     if attempt < max_retries - 1:
-                        delay = base_delay * (2 ** attempt)
-                        print(f"Papers with Code rate limited. Retrying in {delay}s... (attempt {attempt + 1}/{max_retries})")
+                        delay = base_delay * (2**attempt)
+                        print(
+
+                                f"Papers with Code rate limited. Retrying in {delay}s... (attempt "
+                                f"{attempt + 1}/{max_retries})"
+
+                        )
                         time.sleep(delay)
                         continue
                     else:
-                        print(f"Papers with Code API error: Rate limit exceeded after {max_retries} attempts")
+                        print(
+
+                                f"Papers with Code API error: Rate limit exceeded after "
+                                f"{max_retries} attempts"
+
+                        )
                         return []
 
                 if response.status_code != 200:
@@ -310,7 +330,7 @@ class PapersWithCodeDiscovery:
 
             except Exception as e:
                 if attempt < max_retries - 1:
-                    delay = base_delay * (2 ** attempt)
+                    delay = base_delay * (2**attempt)
                     print(f"Papers with Code error: {e}. Retrying in {delay}s...")
                     time.sleep(delay)
                 else:
@@ -326,9 +346,7 @@ class PapersWithCodeDiscovery:
         published_date: datetime | None = None
         if published_str:
             try:
-                published_date = datetime.fromisoformat(
-                    str(published_str).replace("Z", "+00:00")
-                )
+                published_date = datetime.fromisoformat(str(published_str).replace("Z", "+00:00"))
             except Exception:
                 pass
 
@@ -358,6 +376,7 @@ class PapersWithCodeDiscovery:
 # ---------------------------------------------------------------------------
 # ACL Anthology (via Semantic Scholar venue filter)
 # ---------------------------------------------------------------------------
+
 
 class ACLAnthologyDiscovery:
     """Discover ACL Anthology papers via Semantic Scholar venue filter."""
@@ -451,6 +470,7 @@ class ACLAnthologyDiscovery:
 # ---------------------------------------------------------------------------
 # Citation traversal
 # ---------------------------------------------------------------------------
+
 
 class CitationTraversal:
     """
@@ -607,6 +627,7 @@ class CitationTraversal:
 # GitHub activity scorer
 # ---------------------------------------------------------------------------
 
+
 class GitHubActivityScorer:
     """
     Compute an activity score for a GitHub repository.
@@ -654,10 +675,7 @@ class GitHubActivityScorer:
         issue_score = float(closed_issues_ratio)
 
         return (
-            0.30 * star_score
-            + 0.30 * commit_score
-            + 0.20 * contributor_score
-            + 0.20 * issue_score
+            0.30 * star_score + 0.30 * commit_score + 0.20 * contributor_score + 0.20 * issue_score
         )
 
     def enrich_source(
@@ -715,9 +733,7 @@ class GitHubActivityScorer:
             discovered_at=source.discovered_at,
         )
 
-    def _fetch_commits_per_month(
-        self, owner: str, repo: str, headers: dict[str, str]
-    ) -> float:
+    def _fetch_commits_per_month(self, owner: str, repo: str, headers: dict[str, str]) -> float:
         """Return approximate commits per month over the last 4 weeks."""
         response = requests.get(
             f"{self.GH_API}/repos/{owner}/{repo}/commits",
@@ -729,9 +745,7 @@ class GitHubActivityScorer:
             return float(len(response.json()))
         return 0.0
 
-    def _fetch_contributor_count(
-        self, owner: str, repo: str, headers: dict[str, str]
-    ) -> int:
+    def _fetch_contributor_count(self, owner: str, repo: str, headers: dict[str, str]) -> int:
         """Return the number of contributors (capped at first page)."""
         response = requests.get(
             f"{self.GH_API}/repos/{owner}/{repo}/contributors",
@@ -743,9 +757,7 @@ class GitHubActivityScorer:
             return len(response.json())
         return 0
 
-    def _fetch_closed_issues_ratio(
-        self, owner: str, repo: str, headers: dict[str, str]
-    ) -> float:
+    def _fetch_closed_issues_ratio(self, owner: str, repo: str, headers: dict[str, str]) -> float:
         """Return ratio closed / (closed + open) issues."""
         open_resp = requests.get(
             f"{self.GH_API}/repos/{owner}/{repo}",
@@ -769,6 +781,7 @@ class GitHubActivityScorer:
             link = closed_resp.headers.get("Link", "")
             if 'rel="last"' in link:
                 import re
+
                 m = re.search(r"page=(\d+)>; rel=\"last\"", link)
                 if m:
                     closed_count = int(m.group(1))
@@ -782,6 +795,7 @@ class GitHubActivityScorer:
     def _one_month_ago() -> str:
         """Return ISO-8601 timestamp for 30 days ago."""
         from datetime import timedelta
+
         dt = datetime.now(tz=timezone.utc) - timedelta(days=30)
         return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -789,6 +803,7 @@ class GitHubActivityScorer:
 # ---------------------------------------------------------------------------
 # Multi-signal source quality scorer
 # ---------------------------------------------------------------------------
+
 
 class SourceQualityScorer:
     """
@@ -837,9 +852,7 @@ class SourceQualityScorer:
             + 0.25 * relevance_score
         )
 
-    def rank(
-        self, sources: list[ResearchSource], query: str
-    ) -> list[tuple[ResearchSource, float]]:
+    def rank(self, sources: list[ResearchSource], query: str) -> list[tuple[ResearchSource, float]]:
         """
         Rank sources by quality score descending.
 
@@ -857,6 +870,7 @@ class SourceQualityScorer:
     def _citation_score(self, source: ResearchSource) -> float:
         """Normalise citation count to [0, 1] with log-scale dampening."""
         import math
+
         citations = source.citations or 0
         if citations <= 0:
             return 0.0
@@ -869,7 +883,11 @@ class SourceQualityScorer:
             return 0.5  # Unknown date: neutral
         now = datetime.now()
         # Strip timezone if present
-        pub = source.published_date.replace(tzinfo=None) if source.published_date.tzinfo else source.published_date
+        pub = (
+            source.published_date.replace(tzinfo=None)
+            if source.published_date.tzinfo
+            else source.published_date
+        )
         days_old = (now - pub).days
         # Full score for ≤730 days (~2 years), zero for ≥3650 days (~10 years)
         score = 1.0 - max(0, days_old - 730) / (3650 - 730)

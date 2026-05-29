@@ -1,4 +1,5 @@
 """Tests for ``lyra skill`` CLI (Phase N.3)."""
+
 from __future__ import annotations
 
 import json
@@ -85,9 +86,7 @@ def test_list_command_emits_installed_skills(tmp_path: Path) -> None:
     runner.invoke(skill_app, ["add", str(src / "alpha"), "--target", str(target)])
     runner.invoke(skill_app, ["add", str(src / "beta"), "--target", str(target)])
 
-    result = runner.invoke(
-        skill_app, ["list", "--target", str(target), "--json"]
-    )
+    result = runner.invoke(skill_app, ["list", "--target", str(target), "--json"])
     assert result.exit_code == 0, result.output
     rows = json.loads(result.stdout.strip().splitlines()[-1])
     assert {r["id"] for r in rows} == {"alpha", "beta"}
@@ -98,9 +97,7 @@ def test_remove_command_deletes_skill(tmp_path: Path) -> None:
     target = tmp_path / "skills"
     _write_skill(src, sid="bye")
     runner.invoke(skill_app, ["add", str(src / "bye"), "--target", str(target)])
-    result = runner.invoke(
-        skill_app, ["remove", "bye", "--target", str(target), "--json"]
-    )
+    result = runner.invoke(skill_app, ["remove", "bye", "--target", str(target), "--json"])
     assert result.exit_code == 0
     payload = json.loads(result.stdout.strip().splitlines()[-1])
     assert payload["ok"] is True
@@ -155,9 +152,7 @@ def _seed_ledger(
     save_ledger(ledger)
 
 
-def test_stats_json_lists_seeded_rows(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_stats_json_lists_seeded_rows(tmp_path: Path, monkeypatch) -> None:
     """``lyra skill stats --json`` returns one row per ledger entry.
 
     Each row is a flat dict with the documented columns so external
@@ -194,9 +189,7 @@ def test_stats_json_lists_seeded_rows(
     assert brainstorming["utility"] < tdd["utility"]
 
 
-def test_stats_default_orders_by_utility_desc(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_stats_default_orders_by_utility_desc(tmp_path: Path, monkeypatch) -> None:
     """Without ``--json`` the Rich table sorts highest utility first.
 
     Reflective Learning is most useful when a quick glance highlights
@@ -228,9 +221,7 @@ def test_stats_default_orders_by_utility_desc(
     )
 
 
-def test_stats_top_limits_rows(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_stats_top_limits_rows(tmp_path: Path, monkeypatch) -> None:
     """``--top N`` clamps to the top-N by utility."""
     import time
 
@@ -253,9 +244,7 @@ def test_stats_top_limits_rows(
     assert [r["id"] for r in rows] == ["c", "b"]
 
 
-def test_stats_handles_empty_ledger(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_stats_handles_empty_ledger(tmp_path: Path, monkeypatch) -> None:
     """No ledger file → friendly empty output, exit 0.
 
     First-time users (``lyra`` fresh install) shouldn't see a
@@ -278,9 +267,7 @@ def test_stats_handles_empty_ledger(
 # ---------------------------------------------------------------------------
 
 
-def _install_skill_with_body(
-    src: Path, target: Path, *, sid: str, body: str
-) -> Path:
+def _install_skill_with_body(src: Path, target: Path, *, sid: str, body: str) -> Path:
     """Install a skill that includes a body section.
 
     ``body`` is the markdown that goes after the front-matter and
@@ -288,14 +275,9 @@ def _install_skill_with_body(
     """
     skill_dir = src / sid
     skill_dir.mkdir(parents=True, exist_ok=True)
-    md = (
-        f"---\nid: {sid}\nname: {sid}\nversion: 0.1.0\n"
-        f"description: original\n---\n{body}\n"
-    )
+    md = f"---\nid: {sid}\nname: {sid}\nversion: 0.1.0\n" f"description: original\n---\n{body}\n"
     (skill_dir / "SKILL.md").write_text(md)
-    runner.invoke(
-        skill_app, ["add", str(skill_dir), "--target", str(target)]
-    )
+    runner.invoke(skill_app, ["add", str(skill_dir), "--target", str(target)])
     return target / sid / "SKILL.md"
 
 
@@ -339,9 +321,7 @@ def _seed_failure_history(
         )
 
 
-def test_reflect_dry_run_does_not_modify_skill_md(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_reflect_dry_run_does_not_modify_skill_md(tmp_path: Path, monkeypatch) -> None:
     """Default ``reflect`` is dry-run: shows proposal, doesn't write.
 
     Reflective Learning must not silently mutate user-curated SKILL
@@ -374,9 +354,7 @@ def test_reflect_dry_run_does_not_modify_skill_md(
 
     monkeypatch.setattr(skill_module, "_call_llm_for_reflection", stub_llm)
 
-    result = runner.invoke(
-        skill_app, ["reflect", "planner", "--target", str(target)]
-    )
+    result = runner.invoke(skill_app, ["reflect", "planner", "--target", str(target)])
     assert result.exit_code == 0, result.output
     assert "proposal" in result.output.lower()
     on_disk = skill_path.read_text()
@@ -384,9 +362,7 @@ def test_reflect_dry_run_does_not_modify_skill_md(
     assert "enumerate file paths" not in on_disk
 
 
-def test_reflect_apply_writes_proposed_skill_md(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_reflect_apply_writes_proposed_skill_md(tmp_path: Path, monkeypatch) -> None:
     """``--apply`` writes the LLM proposal to disk.
 
     A backup file (``SKILL.md.bak``) must be left behind so users can
@@ -395,9 +371,7 @@ def test_reflect_apply_writes_proposed_skill_md(
     monkeypatch.setenv("LYRA_HOME", str(tmp_path / ".lyra"))
     src = tmp_path / "src"
     target = tmp_path / "skills"
-    skill_path = _install_skill_with_body(
-        src, target, sid="planner", body="Plan tasks."
-    )
+    skill_path = _install_skill_with_body(src, target, sid="planner", body="Plan tasks.")
     _seed_failure_history(
         monkeypatch,
         skill_id="planner",
@@ -411,9 +385,7 @@ def test_reflect_apply_writes_proposed_skill_md(
     )
     from lyra_cli.commands import skill as skill_module
 
-    monkeypatch.setattr(
-        skill_module, "_call_llm_for_reflection", lambda _p: proposal_md
-    )
+    monkeypatch.setattr(skill_module, "_call_llm_for_reflection", lambda _p: proposal_md)
 
     result = runner.invoke(
         skill_app,
@@ -425,9 +397,7 @@ def test_reflect_apply_writes_proposed_skill_md(
     assert (skill_path.parent / "SKILL.md.bak").exists()
 
 
-def test_reflect_unknown_skill_fails(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_reflect_unknown_skill_fails(tmp_path: Path, monkeypatch) -> None:
     """Reflect on a missing skill exits with a clear diagnostic."""
     monkeypatch.setenv("LYRA_HOME", str(tmp_path / ".lyra"))
     target = tmp_path / "skills"
@@ -442,9 +412,7 @@ def test_reflect_unknown_skill_fails(
     assert "not installed" in payload["error"].lower()
 
 
-def test_reflect_with_no_failures_short_circuits(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_reflect_with_no_failures_short_circuits(tmp_path: Path, monkeypatch) -> None:
     """No recorded failures → reflect refuses with a friendly message.
 
     Reflective Learning is failure-driven; with no failures there's
@@ -454,9 +422,7 @@ def test_reflect_with_no_failures_short_circuits(
     monkeypatch.setenv("LYRA_HOME", str(tmp_path / ".lyra"))
     src = tmp_path / "src"
     target = tmp_path / "skills"
-    _install_skill_with_body(
-        src, target, sid="solid", body="Use SOLID principles."
-    )
+    _install_skill_with_body(src, target, sid="solid", body="Use SOLID principles.")
 
     from lyra_cli.commands import skill as skill_module
 
@@ -465,23 +431,17 @@ def test_reflect_with_no_failures_short_circuits(
 
     monkeypatch.setattr(skill_module, "_call_llm_for_reflection", boom)
 
-    result = runner.invoke(
-        skill_app, ["reflect", "solid", "--target", str(target)]
-    )
+    result = runner.invoke(skill_app, ["reflect", "solid", "--target", str(target)])
     assert result.exit_code == 0, result.output
     assert "no failures" in result.output.lower()
 
 
-def test_reflect_json_emits_proposal_payload(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_reflect_json_emits_proposal_payload(tmp_path: Path, monkeypatch) -> None:
     """``--json`` returns a structured proposal row."""
     monkeypatch.setenv("LYRA_HOME", str(tmp_path / ".lyra"))
     src = tmp_path / "src"
     target = tmp_path / "skills"
-    skill_path = _install_skill_with_body(
-        src, target, sid="planner", body="Plan."
-    )
+    skill_path = _install_skill_with_body(src, target, sid="planner", body="Plan.")
     _seed_failure_history(
         monkeypatch,
         skill_id="planner",
@@ -491,9 +451,7 @@ def test_reflect_json_emits_proposal_payload(
     proposal_md = "---\nid: planner\nname: planner\nversion: 0.2.0\n---\nbetter\n"
     from lyra_cli.commands import skill as skill_module
 
-    monkeypatch.setattr(
-        skill_module, "_call_llm_for_reflection", lambda _p: proposal_md
-    )
+    monkeypatch.setattr(skill_module, "_call_llm_for_reflection", lambda _p: proposal_md)
 
     result = runner.invoke(
         skill_app,
@@ -519,9 +477,7 @@ def _write_events_jsonl(path: Path, events: list[dict]) -> None:
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def _make_user_prompt_event(
-    *, ts: str, line: str, session_id: str = "s1", turn: int = 1
-) -> dict:
+def _make_user_prompt_event(*, ts: str, line: str, session_id: str = "s1", turn: int = 1) -> dict:
     return {
         "ts": ts,
         "kind": "user.prompt",
@@ -530,9 +486,7 @@ def _make_user_prompt_event(
     }
 
 
-def test_consolidate_clusters_recurring_prompts(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_consolidate_clusters_recurring_prompts(tmp_path: Path, monkeypatch) -> None:
     """Consolidate groups similar prompts and proposes a skill per cluster.
 
     The "dream daemon" idea from Memento: when the same kind of
@@ -545,11 +499,31 @@ def test_consolidate_clusters_recurring_prompts(
     _write_events_jsonl(
         sessions_root / "events.jsonl",
         [
-            _make_user_prompt_event(ts="2026-01-01T00:00:00Z", line="optimize this SQL query for postgres", session_id="s1", turn=1),
-            _make_user_prompt_event(ts="2026-01-02T00:00:00Z", line="please optimize this SQL query — it's slow", session_id="s2", turn=1),
-            _make_user_prompt_event(ts="2026-01-03T00:00:00Z", line="optimize this SQL query and explain the plan", session_id="s3", turn=1),
+            _make_user_prompt_event(
+                ts="2026-01-01T00:00:00Z",
+                line="optimize this SQL query for postgres",
+                session_id="s1",
+                turn=1,
+            ),
+            _make_user_prompt_event(
+                ts="2026-01-02T00:00:00Z",
+                line="please optimize this SQL query — it's slow",
+                session_id="s2",
+                turn=1,
+            ),
+            _make_user_prompt_event(
+                ts="2026-01-03T00:00:00Z",
+                line="optimize this SQL query and explain the plan",
+                session_id="s3",
+                turn=1,
+            ),
             # Singleton — should not produce a candidate.
-            _make_user_prompt_event(ts="2026-01-04T00:00:00Z", line="what's my current LLM provider?", session_id="s4", turn=1),
+            _make_user_prompt_event(
+                ts="2026-01-04T00:00:00Z",
+                line="what's my current LLM provider?",
+                session_id="s4",
+                turn=1,
+            ),
         ],
     )
 
@@ -590,9 +564,7 @@ def test_consolidate_clusters_recurring_prompts(
     assert any("optimize this SQL query" in p for p in captured_prompts)
 
 
-def test_consolidate_dry_run_writes_to_candidates_dir(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_consolidate_dry_run_writes_to_candidates_dir(tmp_path: Path, monkeypatch) -> None:
     """Without ``--apply`` proposals land under ``~/.lyra/skill_candidates/``.
 
     Users review the markdown directly before promoting any to
@@ -609,14 +581,10 @@ def test_consolidate_dry_run_writes_to_candidates_dir(
         ],
     )
 
-    proposal = (
-        "---\nid: md-to-html\nname: md-to-html\nversion: 0.1.0\n---\nrender markdown\n"
-    )
+    proposal = "---\nid: md-to-html\nname: md-to-html\nversion: 0.1.0\n---\nrender markdown\n"
     from lyra_cli.commands import skill as skill_module
 
-    monkeypatch.setattr(
-        skill_module, "_call_llm_for_consolidation", lambda _p: proposal
-    )
+    monkeypatch.setattr(skill_module, "_call_llm_for_consolidation", lambda _p: proposal)
 
     result = runner.invoke(
         skill_app,
@@ -632,9 +600,7 @@ def test_consolidate_dry_run_writes_to_candidates_dir(
     assert "md-to-html" in (candidate_dir / "SKILL.md").read_text()
 
 
-def test_consolidate_apply_installs_into_skills_root(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_consolidate_apply_installs_into_skills_root(tmp_path: Path, monkeypatch) -> None:
     """``--apply`` writes proposals into the live skills root.
 
     Phase O.5 deliberately keeps ``--apply`` opt-in because LLM-
@@ -647,20 +613,20 @@ def test_consolidate_apply_installs_into_skills_root(
     _write_events_jsonl(
         sessions_root / "events.jsonl",
         [
-            _make_user_prompt_event(ts="2026-01-01T00:00:00Z", line="write a unit test for this function"),
-            _make_user_prompt_event(ts="2026-01-02T00:00:00Z", line="write unit tests for the parser"),
+            _make_user_prompt_event(
+                ts="2026-01-01T00:00:00Z", line="write a unit test for this function"
+            ),
+            _make_user_prompt_event(
+                ts="2026-01-02T00:00:00Z", line="write unit tests for the parser"
+            ),
             _make_user_prompt_event(ts="2026-01-03T00:00:00Z", line="please write unit tests"),
         ],
     )
 
-    proposal = (
-        "---\nid: unit-test-writer\nname: unit-test-writer\nversion: 0.1.0\n---\nbody\n"
-    )
+    proposal = "---\nid: unit-test-writer\nname: unit-test-writer\nversion: 0.1.0\n---\nbody\n"
     from lyra_cli.commands import skill as skill_module
 
-    monkeypatch.setattr(
-        skill_module, "_call_llm_for_consolidation", lambda _p: proposal
-    )
+    monkeypatch.setattr(skill_module, "_call_llm_for_consolidation", lambda _p: proposal)
 
     result = runner.invoke(
         skill_app,
@@ -676,9 +642,7 @@ def test_consolidate_apply_installs_into_skills_root(
     assert (skills_root / "unit-test-writer" / "SKILL.md").is_file()
 
 
-def test_consolidate_handles_empty_events_log(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_consolidate_handles_empty_events_log(tmp_path: Path, monkeypatch) -> None:
     """Missing or empty events.jsonl → friendly empty result, no crash."""
     monkeypatch.setenv("LYRA_HOME", str(tmp_path / ".lyra"))
     nope = tmp_path / "missing.jsonl"
@@ -690,17 +654,13 @@ def test_consolidate_handles_empty_events_log(
 
     monkeypatch.setattr(skill_module, "_call_llm_for_consolidation", boom)
 
-    result = runner.invoke(
-        skill_app, ["consolidate", "--from", str(nope), "--json"]
-    )
+    result = runner.invoke(skill_app, ["consolidate", "--from", str(nope), "--json"])
     assert result.exit_code == 0, result.output
     payload = json.loads(result.stdout.strip().splitlines()[-1])
     assert payload["candidates"] == []
 
 
-def test_consolidate_skips_existing_skill_ids(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_consolidate_skips_existing_skill_ids(tmp_path: Path, monkeypatch) -> None:
     """If the LLM proposes a skill id already installed, skip without writing.
 
     Avoids both an accidental overwrite and a noisy duplicate
@@ -722,14 +682,10 @@ def test_consolidate_skips_existing_skill_ids(
         ],
     )
 
-    proposal = (
-        "---\nid: md-to-html\nname: md-to-html\nversion: 0.1.0\n---\nbody\n"
-    )
+    proposal = "---\nid: md-to-html\nname: md-to-html\nversion: 0.1.0\n---\nbody\n"
     from lyra_cli.commands import skill as skill_module
 
-    monkeypatch.setattr(
-        skill_module, "_call_llm_for_consolidation", lambda _p: proposal
-    )
+    monkeypatch.setattr(skill_module, "_call_llm_for_consolidation", lambda _p: proposal)
 
     result = runner.invoke(
         skill_app,

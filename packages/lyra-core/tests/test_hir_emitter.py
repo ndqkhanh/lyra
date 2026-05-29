@@ -10,6 +10,7 @@ Contract from docs/blocks/13-observability-hir.md:
         Hook.start, Hook.end,
         TDD.state_change.
 """
+
 from __future__ import annotations
 
 import json
@@ -95,11 +96,7 @@ def test_emit_redacts_secret_looking_values(repo: Path) -> None:
             trace_id="t",
             span_id="sp1",
             actor="generator",
-            attrs={
-                "args": {
-                    "command": "export AWS_ACCESS=AKIAIOSFODNN7EXAMPLE && echo ok"
-                }
-            },
+            attrs={"args": {"command": "export AWS_ACCESS=AKIAIOSFODNN7EXAMPLE && echo ok"}},
         )
     )
     emitter.close()
@@ -160,7 +157,10 @@ def test_emit_default_ts_is_monotonic(repo: Path) -> None:
             )
         )
     emitter.close()
-    ts = [json.loads(line)["ts"] for line in (repo / ".lyra" / "events.jsonl").read_text().splitlines()]
+    ts = [
+        json.loads(line)["ts"]
+        for line in (repo / ".lyra" / "events.jsonl").read_text().splitlines()
+    ]
     assert ts == sorted(ts)
 
 

@@ -1,4 +1,5 @@
-"""Tests for TTS engine — SystemSayBackend, Pyttsx3Backend, EdgeTTSBackend, factory, and synthesize_speech."""
+"""Tests for TTS engine — SystemSayBackend, Pyttsx3Backend, EdgeTTSBackend, factory, and
+synthesize_speech."""
 
 from __future__ import annotations
 
@@ -181,12 +182,15 @@ class TestEdgeTTSBackend:
 
 class TestGetTTSEngine:
     def test_returns_system_say_as_fallback(self):
-        with patch(
-            "lyra_cli.voice.tts_engine.EdgeTTSBackend._try_import",
-            return_value=False,
-        ), patch(
-            "lyra_cli.voice.tts_engine.Pyttsx3Backend._try_import",
-            return_value=False,
+        with (
+            patch(
+                "lyra_cli.voice.tts_engine.EdgeTTSBackend._try_import",
+                return_value=False,
+            ),
+            patch(
+                "lyra_cli.voice.tts_engine.Pyttsx3Backend._try_import",
+                return_value=False,
+            ),
         ):
             engine = get_tts_engine()
             assert isinstance(engine, SystemSayBackend)

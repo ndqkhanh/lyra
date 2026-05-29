@@ -13,6 +13,7 @@ Additional benchmarks:
 - Speedup (5x target)
 - Scalability (10-200 sources)
 """
+
 import asyncio
 import time
 from datetime import datetime, timezone
@@ -51,8 +52,7 @@ def create_mock_result(
     """Create mock pipeline result with configurable parameters."""
     # Discovery
     sources = [
-        {"title": f"Paper {i}", "url": f"http://example.com/{i}"}
-        for i in range(sources_count)
+        {"title": f"Paper {i}", "url": f"http://example.com/{i}"} for i in range(sources_count)
     ]
     discovery = DiscoveryResult(
         role_name="Discovery",
@@ -76,8 +76,10 @@ def create_mock_result(
     report = ResearchReport(
         topic="Benchmark Query",
         executive_summary="Benchmark summary",
-        best_papers_section="## Best Papers\n\n" + "\n".join([f"{i}. Paper {i}" for i in range(10)]),
-        references_section="## References\n\n" + "\n".join([f"{i}. Paper {i}" for i in range(sources_count)]),
+        best_papers_section="## Best Papers\n\n"
+        + "\n".join([f"{i}. Paper {i}" for i in range(10)]),
+        references_section="## References\n\n"
+        + "\n".join([f"{i}. Paper {i}" for i in range(sources_count)]),
         sources_used=sources_count,
         quality_score=quality_score,
     )
@@ -201,7 +203,9 @@ async def test_benchmark_verification_rate(orchestrator):
         verification_rate = (claims_reviewed - claims_modified) / claims_reviewed
 
         # Assert target met
-        assert verification_rate >= 0.90, f"Verification rate {verification_rate:.1%} below 90% target"
+        assert (
+            verification_rate >= 0.90
+        ), f"Verification rate {verification_rate:.1%} below 90% target"
         print(f"\n✓ Benchmark 1 - Verification Rate: {verification_rate:.1%} (Target: 90%+)")
 
 
@@ -224,8 +228,15 @@ async def test_benchmark_quality_gate_pass_rate(orchestrator):
         progress = await orchestrator.research("Benchmark Query")
 
         # Assert target met
-        assert progress.gate_pass_rate >= 0.80, f"Gate pass rate {progress.gate_pass_rate:.1%} below 80% target"
-        print(f"\n✓ Benchmark 2 - Quality Gate Pass Rate: {progress.gate_pass_rate:.1%} (Target: 80%+)")
+        assert (
+            progress.gate_pass_rate >= 0.80
+        ), f"Gate pass rate {progress.gate_pass_rate:.1%} below 80% target"
+        print(
+
+                f"\n✓ Benchmark 2 - Quality Gate Pass Rate: {progress.gate_pass_rate:.1%}"
+                f" (Target: 80%+)"
+
+        )
 
 
 # Benchmark 3: Model Cost Optimization (Target: 30%+ reduction)
@@ -257,7 +268,12 @@ async def test_benchmark_model_cost_optimization(orchestrator):
 
         # Assert target met
         assert cost_reduction >= 0.30, f"Cost reduction {cost_reduction:.1%} below 30% target"
-        print(f"\n✓ Benchmark 3 - Model Cost Optimization: {cost_reduction:.1%} reduction (Target: 30%+)")
+        print(
+
+                f"\n✓ Benchmark 3 - Model Cost Optimization: {cost_reduction:.1%}"
+                f" reduction (Target: 30%+)"
+
+        )
         print(f"  Heterogeneous: ${heterogeneous_cost:.2f}, Claude-only: ${claude_only_cost:.2f}")
 
 
@@ -314,7 +330,12 @@ async def test_benchmark_end_to_end_latency(orchestrator):
 
         # Assert target met (with mocks, should be very fast)
         assert elapsed_time < 300, f"Latency {elapsed_time:.1f}s exceeds 300s (5 min) target"
-        print(f"\n✓ Benchmark 5 - End-to-End Latency: {elapsed_time:.2f}s (Target: <300s for 50 sources)")
+        print(
+
+                f"\n✓ Benchmark 5 - End-to-End Latency: {elapsed_time:.2f}"
+                f"s (Target: <300s for 50 sources)"
+
+        )
 
 
 # Benchmark 6: Full Pipeline Integration
@@ -369,7 +390,12 @@ async def test_benchmark_heterogeneous_model_usage(orchestrator):
         claude_ratio = progress.claude_calls / total_calls
         gpt_ratio = progress.gpt_calls / total_calls
 
-        print(f"\n✓ Benchmark 7 - Heterogeneous Models: Claude={claude_ratio:.1%}, GPT={gpt_ratio:.1%}")
+        print(
+
+                f"\n✓ Benchmark 7 - Heterogeneous Models: Claude={claude_ratio:.1%}, GPT="
+                f"{gpt_ratio:.1%}"
+
+        )
 
 
 # Benchmark 8: Quality Score Consistency
@@ -395,6 +421,7 @@ async def test_benchmark_quality_score_consistency(orchestrator):
 
     # Calculate consistency
     import statistics
+
     avg_quality = statistics.mean(quality_scores)
     std_quality = statistics.stdev(quality_scores) if len(quality_scores) > 1 else 0
 
@@ -509,7 +536,7 @@ def test_benchmark_context_reduction_100_sources(orchestrator):
 
     # Calculate raw context size (all abstracts)
     raw_context = "\n".join(s.abstract for s in sources)
-    raw_size_kb = len(raw_context.encode('utf-8')) / 1024
+    raw_size_kb = len(raw_context.encode("utf-8")) / 1024
 
     # Simulate Phase 2 context optimization
     # - Top 15 cited sources only
@@ -520,7 +547,7 @@ def test_benchmark_context_reduction_100_sources(orchestrator):
     top_sources = sorted_sources[:15]
 
     optimized_context = "\n".join(s.abstract[:500] for s in top_sources)
-    optimized_size_kb = len(optimized_context.encode('utf-8')) / 1024
+    optimized_size_kb = len(optimized_context.encode("utf-8")) / 1024
 
     # Calculate reduction
     reduction_percent = ((raw_size_kb - optimized_size_kb) / raw_size_kb) * 100
@@ -552,34 +579,38 @@ def test_benchmark_context_reduction_scaling():
 
         # Raw context
         raw_context = "\n".join(s.abstract for s in sources)
-        raw_size_kb = len(raw_context.encode('utf-8')) / 1024
+        raw_size_kb = len(raw_context.encode("utf-8")) / 1024
 
         # Optimized context (top 15 sources, 500 char abstracts)
         sorted_sources = sorted(sources, key=lambda s: s.citations, reverse=True)
         top_sources = sorted_sources[:15]
         optimized_context = "\n".join(s.abstract[:500] for s in top_sources)
-        optimized_size_kb = len(optimized_context.encode('utf-8')) / 1024
+        optimized_size_kb = len(optimized_context.encode("utf-8")) / 1024
 
         reduction_percent = ((raw_size_kb - optimized_size_kb) / raw_size_kb) * 100
 
-        results.append({
-            "sources": count,
-            "raw_kb": raw_size_kb,
-            "optimized_kb": optimized_size_kb,
-            "reduction_percent": reduction_percent,
-        })
+        results.append(
+            {
+                "sources": count,
+                "raw_kb": raw_size_kb,
+                "optimized_kb": optimized_size_kb,
+                "reduction_percent": reduction_percent,
+            }
+        )
 
     # Verify all meet target
     for result in results:
-        assert result["reduction_percent"] >= 20, (
-            f"{result['sources']} sources: {result['reduction_percent']:.1f}% < 20%"
-        )
+        assert (
+            result["reduction_percent"] >= 20
+        ), f"{result['sources']} sources: {result['reduction_percent']:.1f}% < 20%"
 
     print("\n✓ Context Reduction Scaling:")
     for result in results:
-        print(f"  {result['sources']:3d} sources: "
-              f"{result['raw_kb']:6.2f}KB → {result['optimized_kb']:5.2f}KB "
-              f"({result['reduction_percent']:5.1f}% reduction)")
+        print(
+            f"  {result['sources']:3d} sources: "
+            f"{result['raw_kb']:6.2f}KB → {result['optimized_kb']:5.2f}KB "
+            f"({result['reduction_percent']:5.1f}% reduction)"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -598,18 +629,30 @@ async def test_benchmark_speedup_100_sources(orchestrator):
     sources = create_mock_sources(100)
 
     # Mock agents for controlled timing
-    for _name in orchestrator.coordinator.discovery.agents if hasattr(orchestrator.coordinator.discovery, 'agents') else {}:
+    for _name in (
+        orchestrator.coordinator.discovery.agents
+        if hasattr(orchestrator.coordinator.discovery, "agents")
+        else {}
+    ):
         agent = Mock()
+
         async def mock_discover(query, max_results=10):
             await asyncio.sleep(0.01)  # Simulate 10ms per agent
             return sources[:max_results]
+
         agent.discover = mock_discover
 
-    for _name in orchestrator.coordinator.analysis.agents if hasattr(orchestrator.coordinator.analysis, 'agents') else {}:
+    for _name in (
+        orchestrator.coordinator.analysis.agents
+        if hasattr(orchestrator.coordinator.analysis, "agents")
+        else {}
+    ):
         agent = Mock()
+
         async def mock_analyze(sources):
             await asyncio.sleep(0.02)  # Simulate 20ms per agent
             return []
+
         agent.analyze = mock_analyze
 
     # Measure Phase 2 execution time (parallel)
@@ -648,6 +691,7 @@ async def test_benchmark_parallel_vs_sequential():
 
     Compares parallel vs sequential agent execution.
     """
+
     # Simulate 6 agents with 100ms each
     async def mock_agent_work():
         await asyncio.sleep(0.1)
@@ -693,7 +737,11 @@ def test_benchmark_verification_rate_target():
 
     # Create test claims with varying citation counts
     claims = [
-        Claim(text="Claim with 3 citations [1][2][3].", confidence=0.9, citations=["[1]", "[2]", "[3]"]),
+        Claim(
+            text="Claim with 3 citations [1][2][3].",
+            confidence=0.9,
+            citations=["[1]", "[2]", "[3]"],
+        ),
         Claim(text="Claim with 2 citations [1][2].", confidence=0.7, citations=["[1]", "[2]"]),
         Claim(text="Claim with 1 citation [1].", confidence=0.5, citations=["[1]"]),
         Claim(text="Claim with no citations.", confidence=0.0, citations=[]),
@@ -748,21 +796,25 @@ def test_benchmark_claim_modification_rate():
     issues = []
     for claim in claims_with_issues:
         if claim.citation_count() == 0:
-            issues.append(ReviewIssue(
-                claim=claim,
-                issue_type="missing_citation",
-                severity="critical",
-                suggested_resolution=DisagreementResolution.REMOVE,
-                explanation="No citations",
-            ))
+            issues.append(
+                ReviewIssue(
+                    claim=claim,
+                    issue_type="missing_citation",
+                    severity="critical",
+                    suggested_resolution=DisagreementResolution.REMOVE,
+                    explanation="No citations",
+                )
+            )
         elif claim.citation_count() == 1:
-            issues.append(ReviewIssue(
-                claim=claim,
-                issue_type="weak_evidence",
-                severity="high",
-                suggested_resolution=DisagreementResolution.SOFTEN,
-                explanation="Single citation",
-            ))
+            issues.append(
+                ReviewIssue(
+                    claim=claim,
+                    issue_type="weak_evidence",
+                    severity="high",
+                    suggested_resolution=DisagreementResolution.SOFTEN,
+                    explanation="Single citation",
+                )
+            )
 
     # Resolve issues
     modified_count = 0
@@ -816,29 +868,33 @@ async def test_benchmark_scalability(orchestrator):
         # Calculate context size
         context_kb = getattr(progress, "context_size_kb", 0) or 15.0
 
-        results.append({
-            "sources": count,
-            "time_seconds": elapsed,
-            "context_kb": context_kb,
-            "quality": 0.85,  # Simulated
-        })
+        results.append(
+            {
+                "sources": count,
+                "time_seconds": elapsed,
+                "context_kb": context_kb,
+                "quality": 0.85,  # Simulated
+            }
+        )
 
     print("\n✓ Scalability Benchmark:")
     print(f"  {'Sources':<10} {'Time (s)':<12} {'Context (KB)':<15} {'Quality':<10}")
     for result in results:
-        print(f"  {result['sources']:<10} "
-              f"{result['time_seconds']:<12.2f} "
-              f"{result['context_kb']:<15.2f} "
-              f"{result['quality']:<10.2f}")
+        print(
+            f"  {result['sources']:<10} "
+            f"{result['time_seconds']:<12.2f} "
+            f"{result['context_kb']:<15.2f} "
+            f"{result['quality']:<10.2f}"
+        )
 
     # Verify scalability
     # Context should not grow linearly with sources
     context_growth = results[-1]["context_kb"] / results[0]["context_kb"]
     source_growth = results[-1]["sources"] / results[0]["sources"]
 
-    assert context_growth < source_growth, (
-        f"Context grows too fast: {context_growth:.1f}x vs {source_growth:.1f}x sources"
-    )
+    assert (
+        context_growth < source_growth
+    ), f"Context grows too fast: {context_growth:.1f}x vs {source_growth:.1f}x sources"
 
 
 @pytest.mark.benchmark
@@ -967,23 +1023,27 @@ def test_benchmark_cost_per_source():
             cost = base_cost * 1.5
 
         cost_per_source = cost / count
-        costs.append({
-            "sources": count,
-            "total_cost": cost,
-            "cost_per_source": cost_per_source,
-        })
+        costs.append(
+            {
+                "sources": count,
+                "total_cost": cost,
+                "cost_per_source": cost_per_source,
+            }
+        )
 
     print("\n✓ Cost Per Source Scaling:")
     print(f"  {'Sources':<10} {'Total Cost':<15} {'Cost/Source':<15}")
     for result in costs:
-        print(f"  {result['sources']:<10} "
-              f"${result['total_cost']:<14.4f} "
-              f"${result['cost_per_source']:<14.6f}")
+        print(
+            f"  {result['sources']:<10} "
+            f"${result['total_cost']:<14.4f} "
+            f"${result['cost_per_source']:<14.6f}"
+        )
 
     # Verify cost per source decreases with scale
-    assert costs[-1]["cost_per_source"] < costs[0]["cost_per_source"], (
-        "Cost per source should decrease with scale"
-    )
+    assert (
+        costs[-1]["cost_per_source"] < costs[0]["cost_per_source"]
+    ), "Cost per source should decrease with scale"
 
 
 # ---------------------------------------------------------------------------
@@ -996,9 +1056,9 @@ def test_benchmark_summary_report():
     """
     Generate summary report of all Phase 2 benchmarks.
     """
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("PHASE 2 WEEK 10 BENCHMARK SUMMARY")
-    print("="*70)
+    print("=" * 70)
 
     print("\n✓ Benchmark 1 - Verification Rate:")
     print("  Target: 90%+ claims verified")
@@ -1037,7 +1097,7 @@ def test_benchmark_summary_report():
     print("  Target: 95%+ pipeline success")
     print("  Result: PASS - 100% success rate")
 
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("ALL PHASE 2 WEEK 10 TARGETS MET ✓")
     print("Total Tests: 1,208+ (1,178 existing + 30 new)")
-    print("="*70 + "\n")
+    print("=" * 70 + "\n")

@@ -137,7 +137,7 @@ class NetworkPolicyManager:
         protocol: str = "tcp",
     ) -> NetworkAction:
         """Evaluate whether a connection is allowed under the active policies."""
-        for name, policy in cls._policies.items():
+        for _name, policy in cls._policies.items():
             if policy.default_action == DefaultPolicy.DENY_ALL:
                 for rule in policy.rules:
                     if rule.direction in (direction, NetworkDirection.BOTH):

@@ -1,4 +1,5 @@
 """Metrics and observability for eager tools."""
+
 import time
 from dataclasses import dataclass, field
 
@@ -31,9 +32,21 @@ class SealMetrics:
         """Return metrics summary."""
         return {
             "seals_detected": len(self.seal_detected_ms),
-            "avg_seal_ms": sum(self.seal_detected_ms) / len(self.seal_detected_ms) if self.seal_detected_ms else 0,
-            "avg_dispatch_ms": sum(self.tool_dispatch_ms) / len(self.tool_dispatch_ms) if self.tool_dispatch_ms else 0,
-            "avg_complete_ms": sum(self.tool_complete_ms) / len(self.tool_complete_ms) if self.tool_complete_ms else 0,
+            "avg_seal_ms": (
+                sum(self.seal_detected_ms) / len(self.seal_detected_ms)
+                if self.seal_detected_ms
+                else 0
+            ),
+            "avg_dispatch_ms": (
+                sum(self.tool_dispatch_ms) / len(self.tool_dispatch_ms)
+                if self.tool_dispatch_ms
+                else 0
+            ),
+            "avg_complete_ms": (
+                sum(self.tool_complete_ms) / len(self.tool_complete_ms)
+                if self.tool_complete_ms
+                else 0
+            ),
         }
 
 

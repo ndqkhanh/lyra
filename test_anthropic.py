@@ -3,6 +3,7 @@
 Test Lyra TUI with Anthropic API
 Tests: SSE streaming, tool calling, theme switching, scrolling
 """
+
 import json
 import os
 import sys
@@ -14,6 +15,7 @@ import requests
 os.environ["ANTHROPIC_API_KEY"] = os.environ.get("ANTHROPIC_AUTH_TOKEN", "")
 os.environ["ANTHROPIC_BASE_URL"] = os.environ.get("ANTHROPIC_BASE_URL", "https://api.anthropic.com")
 
+
 def test_sse_streaming():
     """Test SSE streaming with Anthropic API"""
     print("🧪 Test 1: SSE Streaming with Anthropic")
@@ -23,7 +25,7 @@ def test_sse_streaming():
     payload = {
         "prompt": "Say hello in exactly one sentence.",
         "session_id": "test-anthropic-123",
-        "model": "claude-3-5-sonnet-20241022"
+        "model": "claude-3-5-sonnet-20241022",
     }
 
     try:
@@ -38,8 +40,8 @@ def test_sse_streaming():
 
         for line in response.iter_lines():
             if line:
-                line_str = line.decode('utf-8')
-                if line_str.startswith('data: '):
+                line_str = line.decode("utf-8")
+                if line_str.startswith("data: "):
                     data = json.loads(line_str[6:])
                     events.append(data)
                     print(f"  📦 {data['kind']}: {data.get('payload', '')[:50]}")
@@ -51,6 +53,7 @@ def test_sse_streaming():
         print(f"❌ Error: {e}")
         return False
 
+
 def test_tool_calling():
     """Test tool calling with Anthropic API"""
     print("\n🧪 Test 2: Tool Calling (File Operations)")
@@ -58,9 +61,11 @@ def test_tool_calling():
 
     url = "http://localhost:3737/chat"
     payload = {
-        "prompt": "Create a test file called /tmp/lyra-test.txt with the content 'Hello from Lyra!'",
+        "prompt":(
+            "Create a test file called /tmp/lyra-test.txt with the content 'Hello from Lyra!'"
+        ),
         "session_id": "test-tools-456",
-        "model": "claude-3-5-sonnet-20241022"
+        "model": "claude-3-5-sonnet-20241022",
     }
 
     try:
@@ -74,11 +79,11 @@ def test_tool_calling():
 
         for line in response.iter_lines():
             if line:
-                line_str = line.decode('utf-8')
-                if line_str.startswith('data: '):
+                line_str = line.decode("utf-8")
+                if line_str.startswith("data: "):
                     data = json.loads(line_str[6:])
 
-                    if data['kind'] in ['tool_start', 'tool_end']:
+                    if data["kind"] in ["tool_start", "tool_end"]:
                         tool_events.append(data)
                         print(f"  🔧 {data['kind']}: {data.get('payload', '')}")
 
@@ -92,6 +97,7 @@ def test_tool_calling():
     except Exception as e:
         print(f"❌ Error: {e}")
         return False
+
 
 def test_theme_switching():
     """Test theme switching via API"""
@@ -108,6 +114,7 @@ def test_theme_switching():
 
     print("\n✅ Theme switching test passed (manual verification needed in TUI)")
     return True
+
 
 def main():
     print("🚀 Lyra TUI Testing with Anthropic API")
@@ -156,6 +163,7 @@ def main():
     else:
         print("\n⚠️  Some tests failed")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

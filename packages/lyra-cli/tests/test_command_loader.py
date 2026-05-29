@@ -1,6 +1,5 @@
 """Tests for command loader — Lyra + ECC unified registry."""
 
-
 from lyra_cli.commands.command_loader import CommandLoader
 from lyra_cli.commands.command_registry import Command, CommandRegistry, get_registry
 
@@ -69,7 +68,9 @@ class TestCommandRegistry:
 
     def test_multiple_aliases(self):
         reg = CommandRegistry()
-        cmd = Command(name="multi", description="", handler=lambda: None, aliases=["m1", "m2", "m3"])
+        cmd = Command(
+            name="multi", description="", handler=lambda: None, aliases=["m1", "m2", "m3"]
+        )
         reg.register(cmd)
         assert reg.get("m1") is cmd
         assert reg.get("m2") is cmd
@@ -112,7 +113,9 @@ class TestCommandLoader:
     def test_no_duplicate_names(self):
         cmds = CommandLoader.load_lyra_commands()
         names = [c.name for c in cmds]
-        assert len(names) == len(set(names)), f"Duplicates: {[n for n in names if names.count(n) > 1]}"
+        assert len(names) == len(
+            set(names)
+        ), f"Duplicates: {[n for n in names if names.count(n) > 1]}"
 
 
 class TestGlobalRegistry:

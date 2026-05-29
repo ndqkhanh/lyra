@@ -1,4 +1,6 @@
-"""Quality Evaluation — score skills on clarity, completeness, correctness, usefulness, and testability."""
+"""Quality Evaluation — score skills on clarity, completeness, correctness, usefulness, and
+testability."""
+
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -40,8 +42,8 @@ class EvaluationConfig:
 class QualityEvaluator:
     """Evaluates the quality of skill candidates.
 
-    Analysis is based on heuristic properties of the skill's name,
-    description, trigger patterns, and body content.
+    Analysis is based on heuristic properties of the skill's name, description, trigger patterns,
+    and body content.
     """
 
     def __init__(self, config: EvaluationConfig | None = None) -> None:
@@ -63,22 +65,16 @@ class QualityEvaluator:
         """
         return evaluate(skill)
 
-    def batch_evaluate(
-        self, skills: Sequence[object]
-    ) -> list[QualityScore]:
+    def batch_evaluate(self, skills: Sequence[object]) -> list[QualityScore]:
         """Evaluate multiple skill candidates in batch."""
         return batch_evaluate(skills)
 
-    def rank_by_quality(
-        self, skills: Sequence[object]
-    ) -> list[tuple[object, QualityScore]]:
+    def rank_by_quality(self, skills: Sequence[object]) -> list[tuple[object, QualityScore]]:
         """Rank skill candidates by their overall quality score."""
         return rank_by_quality(skills)
 
 
-def _score_clarity(
-    name: str | None, description: str | None
-) -> float:
+def _score_clarity(name: str | None, description: str | None) -> float:
     """Score clarity based on name and description length and content."""
     score = 0.5
     if name and len(name) > 3:
@@ -110,9 +106,7 @@ def _score_correctness(trigger_patterns: tuple[str, ...]) -> float:
     return min(score + 0.2, 1.0)
 
 
-def _score_usefulness(
-    name: str | None, description: str | None
-) -> float:
+def _score_usefulness(name: str | None, description: str | None) -> float:
     """Score usefulness based on name and description content."""
     score = 0.4
     if name:
@@ -139,9 +133,7 @@ def _score_testability(body: str | None) -> float:
     return min(score, 1.0)
 
 
-def _safe_getattr(
-    obj: object, name: str, default: str = ""
-) -> str:
+def _safe_getattr(obj: object, name: str, default: str = "") -> str:
     """Safely extract a string attribute from an object."""
     val = getattr(obj, name, default)
     if val is None:
@@ -149,9 +141,7 @@ def _safe_getattr(
     return str(val)
 
 
-def _safe_getattr_tuple(
-    obj: object, name: str, default: tuple[str, ...] = ()
-) -> tuple[str, ...]:
+def _safe_getattr_tuple(obj: object, name: str, default: tuple[str, ...] = ()) -> tuple[str, ...]:
     """Safely extract a tuple attribute from an object."""
     val = getattr(obj, name, default)
     if val is None:
@@ -182,9 +172,7 @@ def evaluate(skill: object) -> QualityScore:
     usefulness = _score_usefulness(name, description)
     testability = _score_testability(body)
 
-    overall_raw = (
-        clarity + completeness + correctness + usefulness + testability
-    ) / 5.0
+    overall_raw = (clarity + completeness + correctness + usefulness + testability) / 5.0
     overall = min(overall_raw, 1.0)
 
     return QualityScore(

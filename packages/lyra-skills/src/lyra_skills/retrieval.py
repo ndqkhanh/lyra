@@ -11,6 +11,7 @@ Grounded in:
   retrieval; agentic systems need procedural/grep-based search for exact
   lexical constraints and multi-hop hypothesis refinement.
 """
+
 from __future__ import annotations
 
 import math
@@ -46,6 +47,7 @@ class RetrievalResult:
 # BM25 Retriever                                                       #
 # ------------------------------------------------------------------ #
 
+
 def _tokenize(text: str) -> list[str]:
     return re.findall(r"[a-zA-Z0-9_]+", text.lower())
 
@@ -59,8 +61,8 @@ class BM25Retriever:
     def __init__(self, k1: float = 1.5, b: float = 0.75) -> None:
         self._k1 = k1
         self._b = b
-        self._corpus: dict[str, list[str]] = {}   # skill_id → token list
-        self._df: dict[str, int] = {}              # term → doc frequency
+        self._corpus: dict[str, list[str]] = {}  # skill_id → token list
+        self._df: dict[str, int] = {}  # term → doc frequency
         self._avgdl: float = 0.0
 
     def index(self, skill_id: str, text: str) -> None:
@@ -90,8 +92,7 @@ class BM25Retriever:
                 scores[skill_id] = scores.get(skill_id, 0.0) + idf * numerator / denominator
 
         results = [
-            RetrievalResult(skill_id=sid, score=s, bm25_score=s)
-            for sid, s in scores.items()
+            RetrievalResult(skill_id=sid, score=s, bm25_score=s) for sid, s in scores.items()
         ]
         results.sort(key=lambda r: r.score, reverse=True)
         return results[:top_k]
@@ -101,18 +102,18 @@ class BM25Retriever:
 # DCI Retriever (grep-based direct corpus interaction)                 #
 # ------------------------------------------------------------------ #
 
+
 class DCIRetriever:
     """Direct Corpus Interaction: grep the raw skill filesystem.
 
-    Implements the DCI paradigm from arXiv:2605.05242 — the agent
-    searches skill files using exact pattern matching instead of
-    compressed similarity.  This recovers evidence that embedding
+    Implements the DCI paradigm from arXiv:2605.05242 — the agent searches skill files using exact
+    pattern matching instead of compressed similarity.  This recovers evidence that embedding
     compression would filter out (exact terms, negations, rare tokens).
     """
 
     def __init__(self, skills_root: Path | None = None) -> None:
         self._root = skills_root
-        self._index: dict[str, str] = {}   # skill_id → full text (in-memory mode)
+        self._index: dict[str, str] = {}  # skill_id → full text (in-memory mode)
 
     def load_text(self, skill_id: str, text: str) -> None:
         self._index[skill_id] = text
@@ -132,12 +133,14 @@ class DCIRetriever:
             lines = [ln for ln in text.splitlines() if compiled.search(ln)]
             if lines:
                 score = len(lines) / max(1, len(text.splitlines()))
-                results.append(RetrievalResult(
-                    skill_id=skill_id,
-                    score=score,
-                    dci_score=score,
-                    matched_lines=lines[:5],
-                ))
+                results.append(
+                    RetrievalResult(
+                        skill_id=skill_id,
+                        score=score,
+                        dci_score=score,
+                        matched_lines=lines[:5],
+                    )
+                )
         results.sort(key=lambda r: r.score, reverse=True)
         return results
 
@@ -145,10 +148,7 @@ class DCIRetriever:
         """Return skills matching ALL patterns (conjunction — most precise)."""
         if not patterns:
             return []
-        sets = [
-            {r.skill_id: r for r in self.grep(p)}
-            for p in patterns
-        ]
+        sets = [{r.skill_id: r for r in self.grep(p)} for p in patterns]
         common_ids = set(sets[0].keys())
         for s in sets[1:]:
             common_ids &= set(s.keys())
@@ -160,12 +160,14 @@ class DCIRetriever:
             for s in sets:
                 if sid in s:
                     matched.extend(s[sid].matched_lines)
-            results.append(RetrievalResult(
-                skill_id=sid,
-                score=avg,
-                dci_score=avg,
-                matched_lines=matched[:10],
-            ))
+            results.append(
+                RetrievalResult(
+                    skill_id=sid,
+                    score=avg,
+                    dci_score=avg,
+                    matched_lines=matched[:10],
+                )
+            )
         results.sort(key=lambda r: r.score, reverse=True)
         return results
 
@@ -173,6 +175,7 @@ class DCIRetriever:
 # ------------------------------------------------------------------ #
 # Hybrid Retriever                                                     #
 # ------------------------------------------------------------------ #
+
 
 class HybridRetriever:
     """Combines BM25 + DCI with optional semantic scores.
@@ -185,9 +188,9 @@ class HybridRetriever:
         self,
         bm25: BM25Retriever | None = None,
         dci: DCIRetriever | None = None,
-        alpha: float = 0.40,   # BM25 weight
-        beta: float = 0.40,    # DCI weight
-        gamma: float = 0.20,   # semantic weight
+        alpha: float = 0.40,  # BM25 weight
+        beta: float = 0.40,  # DCI weight
+        gamma: float = 0.20,  # semantic weight
     ) -> None:
         self._bm25 = bm25 or BM25Retriever()
         self._dci = dci or DCIRetriever()
@@ -214,24 +217,26 @@ class HybridRetriever:
             d = dci_hits[sid].dci_score if sid in dci_hits else 0.0
             s = self._semantic_scores.get(sid, 0.0)
             combined = self._alpha * b + self._beta * d + self._gamma * s
-            matched = (dci_hits[sid].matched_lines if sid in dci_hits else [])
-            fused.append(RetrievalResult(
-                skill_id=sid,
-                score=combined,
-                bm25_score=b,
-                dci_score=d,
-                semantic_score=s,
-                matched_lines=matched,
-            ))
+            matched = dci_hits[sid].matched_lines if sid in dci_hits else []
+            fused.append(
+                RetrievalResult(
+                    skill_id=sid,
+                    score=combined,
+                    bm25_score=b,
+                    dci_score=d,
+                    semantic_score=s,
+                    matched_lines=matched,
+                )
+            )
         fused.sort(key=lambda r: r.score, reverse=True)
         return fused[:top_k]
 
 
 class CompetenceAwareRetriever:
-    """Competence-aware retrieval that biases toward skills with proven success in similar contexts."""
+    """Competence-aware retrieval that biases toward skills with proven success in similar
+    contexts."""
 
-    def __init__(self, hybrid: HybridRetriever | None = None,
-                 competence_map_path: str = ""):
+    def __init__(self, hybrid: HybridRetriever | None = None, competence_map_path: str = ""):
         self._hybrid = hybrid or HybridRetriever()
         self._context_scores: dict[str, dict[str, float]] = {}
 

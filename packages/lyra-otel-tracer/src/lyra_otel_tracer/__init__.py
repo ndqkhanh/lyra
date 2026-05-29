@@ -1,4 +1,6 @@
-"""Lyra OTEL Tracer — OpenTelemetry-inspired tracing, token tracking, latency monitoring, cost attribution, hallucination detection, drift monitoring, and Prometheus export for Lyra multi-agent systems."""
+"""Lyra OTEL Tracer — OpenTelemetry-inspired tracing, token tracking, latency monitoring, cost
+attribution, hallucination detection, drift monitoring, and Prometheus export for Lyra multi-agent
+systems."""
 
 from __future__ import annotations
 

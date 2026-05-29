@@ -131,8 +131,12 @@ class SelfImprovement:
         patterns.sort(key=lambda p: p["count"], reverse=True)
 
         if patterns:
-            logger.info("Found %d failure pattern(s); top='%s' (%d occurrences)",
-                         len(patterns), patterns[0]["task_id"], patterns[0]["count"])
+            logger.info(
+                "Found %d failure pattern(s); top='%s' (%d occurrences)",
+                len(patterns),
+                patterns[0]["task_id"],
+                patterns[0]["count"],
+            )
 
         return patterns
 
@@ -167,7 +171,9 @@ class SelfImprovement:
             # Default: generate a simple improvement placeholder
             proposal: dict[str, Any] = {
                 "target_task": pattern["task_id"],
-                "description": f"Auto-generated fix for recurring failure on '{pattern['task_id']}'",
+                "description":(
+                    f"Auto-generated fix for recurring failure on '{pattern['task_id']}'"
+                ),
                 "change_type": "patch",
                 "generation": self._generation,
                 "created_at": datetime.now(UTC),
@@ -224,9 +230,7 @@ class SelfImprovement:
         Returns:
             An improvement identifier for tracking.
         """
-        imp_id = improvement.get(
-            "id", f"imp-{self._generation}-{len(self._improvements):04d}"
-        )
+        imp_id = improvement.get("id", f"imp-{self._generation}-{len(self._improvements):04d}")
         improvement["id"] = imp_id
         improvement["applied_at"] = datetime.now(UTC)
         improvement["active"] = True

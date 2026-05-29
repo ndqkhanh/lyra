@@ -1,4 +1,5 @@
 """DAG teams: dynamic LLM-planned DAG + deterministic scheduler."""
+
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -58,7 +59,11 @@ def validate_dag(dag: DAG, *, strict: bool = False) -> None:
     if len(dag.nodes) > dag.width_budget * len(dag.nodes):
         # Trivially true; real width check below.
         pass
-    if len(dag.nodes) > dag.width_budget and dag.width_budget > 0 and _max_width_of(by_id) > dag.width_budget:
+    if (
+        len(dag.nodes) > dag.width_budget
+        and dag.width_budget > 0
+        and _max_width_of(by_id) > dag.width_budget
+    ):
         raise DAGValidationError(
             f"max level width {_max_width_of(by_id)} exceeds budget {dag.width_budget}"
         )
@@ -66,9 +71,7 @@ def validate_dag(dag: DAG, *, strict: bool = False) -> None:
     for n in dag.nodes:
         for dep in n.deps:
             if dep not in by_id:
-                raise DAGValidationError(
-                    f"node {n.id!r} depends on unknown node {dep!r}"
-                )
+                raise DAGValidationError(f"node {n.id!r} depends on unknown node {dep!r}")
 
     if _detect_cycle(by_id):
         raise DAGValidationError("cycle detected in DAG")
@@ -164,7 +167,5 @@ class Scheduler:
                 if nid in pending_ids:
                     pending_ids.remove(nid)
             if not park_hook(list(completed), list(pending_ids)):
-                return ParkingResult(
-                    completed=completed, pending=pending_ids, halted=True
-                )
+                return ParkingResult(completed=completed, pending=pending_ids, halted=True)
         return ParkingResult(completed=completed, pending=pending_ids, halted=False)

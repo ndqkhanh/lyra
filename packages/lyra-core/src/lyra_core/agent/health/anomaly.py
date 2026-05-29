@@ -129,10 +129,15 @@ class AnomalyDetector:
             source=source,
             metric=metric,
             detected_value=recent_mean,
-            expected_range=(baseline_mean - self.z_threshold * effective_std, baseline_mean + self.z_threshold * effective_std),
+            expected_range=(
+                baseline_mean - self.z_threshold * effective_std,
+                baseline_mean + self.z_threshold * effective_std,
+            ),
             z_score=round(z_score, 4),
             confidence=round(confidence, 4),
-            description=f"drift from baseline {baseline_mean:.4f} to {recent_mean:.4f} (z={z_score:.2f})",
+            description=(
+                f"drift from baseline {baseline_mean:.4f} to {recent_mean:.4f} (z={z_score:.2f})"
+            ),
         )
 
     def reset_baseline(self, source: str, metric: str = "default") -> None:

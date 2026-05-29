@@ -35,6 +35,7 @@ class CredentialStatus(Enum):
 @dataclass
 class HeartbeatCredential:
     """Per-agent credential with bounded expiry window."""
+
     agent_id: str
     parent_id: str
     level: int
@@ -103,7 +104,10 @@ class HBHCManager:
         # Cascade heartbeat up
         if cred.parent_id in self.credentials:
             parent_cred = self.credentials[cred.parent_id]
-            if parent_cred.is_expired or parent_cred.status in (CredentialStatus.EXPIRED, CredentialStatus.REVOKED):
+            if parent_cred.is_expired or parent_cred.status in (
+                CredentialStatus.EXPIRED,
+                CredentialStatus.REVOKED,
+            ):
                 await self.revoke_cascade(agent_id)
                 return False
 

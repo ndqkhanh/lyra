@@ -221,14 +221,14 @@ class ResponsiveUI:
 
         if width < 80:
             # Narrow: Compact format
-            for i, (label, desc) in enumerate(options):
+            for i, (label, _desc) in enumerate(options):
                 arrow = "❯" if i == selected else " "
                 self.console.print(f"  {arrow} {i+1}. {label}")
         else:
             # Wide: Full format with descriptions
-            for i, (label, desc) in enumerate(options):
+            for i, (label, _desc) in enumerate(options):
                 arrow = "❯" if i == selected else " "
-                self.console.print(f"  {arrow} {i+1}. {label}  [dim]{desc}[/dim]")
+                self.console.print(f"  {arrow} {i+1}. {label}  [dim]{_desc}[/dim]")
 
         self.console.print()
         self.console.print("  [dim]Enter to confirm · Esc to cancel[/dim]")

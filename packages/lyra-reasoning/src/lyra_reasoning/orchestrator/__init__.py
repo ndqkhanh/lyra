@@ -2,7 +2,6 @@
 Reasoning Orchestrator - Adaptive compute allocation and strategy selection.
 """
 
-import time
 from typing import Optional
 
 from ..types import (

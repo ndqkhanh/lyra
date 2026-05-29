@@ -164,7 +164,13 @@ class TestResearchDispatchPatterns:
         orch = FleetOrchestrator()
         fleet = orch.create_fleet(
             "multi-source-discovery",
-            agent_ids=("arxiv-agent", "semantic-scholar-agent", "github-agent", "pubmed-agent", "wikipedia-agent"),
+            agent_ids=(
+                "arxiv-agent",
+                "semantic-scholar-agent",
+                "github-agent",
+                "pubmed-agent",
+                "wikipedia-agent",
+            ),
         )
         sources = ["arxiv", "semantic-scholar", "github", "pubmed", "wikipedia"]
         result = orch.fan_out(fleet.id, [f"Search {src}" for src in sources])

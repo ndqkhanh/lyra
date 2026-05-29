@@ -496,7 +496,11 @@ class TestSprintModel:
 
     def test_sprint_frozen(self) -> None:
         sprint = Sprint(
-            sprint_id="s2", goal="test", phases=(), agents=(), start_time=0.0,
+            sprint_id="s2",
+            goal="test",
+            phases=(),
+            agents=(),
+            start_time=0.0,
         )
         with pytest.raises(AttributeError):
             sprint.goal = "changed"  # type: ignore[misc]
@@ -780,8 +784,12 @@ class TestCoalitionFormer:
 
     def test_coalition_former_all_equal_shapley(self) -> None:
         former = CoalitionFormer(CoalitionConfig(min_shapley_threshold=0.0))
-        a1 = DisciplineAgent("a1", "A1", AgentRole.SISYPHUS, "sonnet", frozenset({Capability.CODE_GEN}), 1)
-        a2 = DisciplineAgent("a2", "A2", AgentRole.HEPHAESTUS, "sonnet", frozenset({Capability.CODE_GEN}), 1)
+        a1 = DisciplineAgent(
+            "a1", "A1", AgentRole.SISYPHUS, "sonnet", frozenset({Capability.CODE_GEN}), 1
+        )
+        a2 = DisciplineAgent(
+            "a2", "A2", AgentRole.HEPHAESTUS, "sonnet", frozenset({Capability.CODE_GEN}), 1
+        )
         task = TaskTicket("t1", "test", frozenset({Capability.CODE_GEN}))
         contributions = former.compute_shapley_values([a1, a2], task)
         # Both have same capability, so contributions should be equal
@@ -810,8 +818,22 @@ class TestCoalitionFormer:
 
     def test_coalition_former_different_capabilities(self) -> None:
         former = CoalitionFormer(CoalitionConfig(min_shapley_threshold=0.0))
-        a1 = DisciplineAgent("a1", "A1", AgentRole.SISYPHUS, "sonnet", frozenset({Capability.CODE_GEN, Capability.TESTING}), 1)
-        a2 = DisciplineAgent("a2", "A2", AgentRole.HEPHAESTUS, "sonnet", frozenset({Capability.ARCHITECTURE, Capability.PLANNING}), 1)
+        a1 = DisciplineAgent(
+            "a1",
+            "A1",
+            AgentRole.SISYPHUS,
+            "sonnet",
+            frozenset({Capability.CODE_GEN, Capability.TESTING}),
+            1,
+        )
+        a2 = DisciplineAgent(
+            "a2",
+            "A2",
+            AgentRole.HEPHAESTUS,
+            "sonnet",
+            frozenset({Capability.ARCHITECTURE, Capability.PLANNING}),
+            1,
+        )
         task = TaskTicket("t1", "test", frozenset({Capability.CODE_GEN, Capability.ARCHITECTURE}))
         contributions = former.compute_shapley_values([a1, a2], task)
         assert len(contributions) == 2
@@ -1269,7 +1291,9 @@ class TestSwarmVisualizer:
         assert AgentState.OFFLINE.name == "OFFLINE"
 
     def test_agent_status_creation(self) -> None:
-        status = AgentStatus(agent_id="a1", state=AgentState.BUSY, current_task="deploy", utilization=0.75)
+        status = AgentStatus(
+            agent_id="a1", state=AgentState.BUSY, current_task="deploy", utilization=0.75
+        )
         assert status.agent_id == "a1"
         assert status.state == AgentState.BUSY
         assert status.current_task == "deploy"

@@ -161,9 +161,7 @@ class SprintPipeline:
         team_agents: list[str],
     ) -> Sprint:
         """Create a new sprint with the given goal and team."""
-        sprint_id = hashlib.sha256(
-            f"{goal}|{time.time()}|{uuid.uuid4()}".encode()
-        ).hexdigest()[:16]
+        sprint_id = hashlib.sha256(f"{goal}|{time.time()}|{uuid.uuid4()}".encode()).hexdigest()[:16]
 
         sprint = Sprint(
             sprint_id=sprint_id,
@@ -188,9 +186,7 @@ class SprintPipeline:
 
         tasks: list[SprintTask] = []
         for title, agent, priority, effort in task_descriptions:
-            task_id = hashlib.sha256(
-                f"{sprint_id}|{title}|{agent}".encode()
-            ).hexdigest()[:12]
+            task_id = hashlib.sha256(f"{sprint_id}|{title}|{agent}".encode()).hexdigest()[:12]
             task = SprintTask(
                 task_id=task_id,
                 title=title,
@@ -228,19 +224,21 @@ class SprintPipeline:
                 new_deps = list(t.depends_on)
                 if depends_on_id not in new_deps:
                     new_deps.append(depends_on_id)
-                new_tasks.append(SprintTask(
-                    task_id=t.task_id,
-                    title=t.title,
-                    description=t.description,
-                    assigned_agent=t.assigned_agent,
-                    priority=t.priority,
-                    estimated_effort_min=t.estimated_effort_min,
-                    status=t.status,
-                    depends_on=new_deps,
-                    output=t.output,
-                    started_at=t.started_at,
-                    completed_at=t.completed_at,
-                ))
+                new_tasks.append(
+                    SprintTask(
+                        task_id=t.task_id,
+                        title=t.title,
+                        description=t.description,
+                        assigned_agent=t.assigned_agent,
+                        priority=t.priority,
+                        estimated_effort_min=t.estimated_effort_min,
+                        status=t.status,
+                        depends_on=new_deps,
+                        output=t.output,
+                        started_at=t.started_at,
+                        completed_at=t.completed_at,
+                    )
+                )
                 found = True
             else:
                 new_tasks.append(t)
@@ -301,7 +299,11 @@ class SprintPipeline:
                     status=status,
                     depends_on=t.depends_on,
                     output=output,
-                    started_at=t.started_at if status != TaskStatus.IN_PROGRESS else (t.started_at or time.time()),
+                    started_at=(
+                        t.started_at
+                        if status != TaskStatus.IN_PROGRESS
+                        else (t.started_at or time.time())
+                    ),
                     completed_at=time.time() if status == TaskStatus.COMPLETED else t.completed_at,
                 )
                 new_tasks.append(updated_task)
@@ -377,9 +379,9 @@ class SprintPipeline:
 
         completed_ids = {t.task_id for t in sprint.tasks if t.is_completed}
         return [
-            t for t in sprint.tasks
-            if t.status == TaskStatus.PENDING
-            and all(dep in completed_ids for dep in t.depends_on)
+            t
+            for t in sprint.tasks
+            if t.status == TaskStatus.PENDING and all(dep in completed_ids for dep in t.depends_on)
         ]
 
     def stats(self) -> dict[str, Any]:

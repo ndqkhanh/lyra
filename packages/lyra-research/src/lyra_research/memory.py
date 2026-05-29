@@ -17,9 +17,11 @@ from uuid import uuid4
 # ResearchNote (Zettelkasten / A-Mem style)
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ResearchNote:
     """A single Zettelkasten-style research note with links."""
+
     id: str = field(default_factory=lambda: str(uuid4()))
     topic: str = ""
     title: str = ""
@@ -50,6 +52,7 @@ def _dict_to_note(d: dict[str, Any]) -> ResearchNote:
 # ---------------------------------------------------------------------------
 # ResearchNoteStore
 # ---------------------------------------------------------------------------
+
 
 class ResearchNoteStore:
     """Stores ResearchNotes in a JSON file with link traversal.
@@ -154,9 +157,7 @@ class ResearchNoteStore:
                 continue
             overlap = note_tags & set(existing.tags)
             same_topic = (
-                note.topic
-                and existing.topic
-                and note.topic.lower() == existing.topic.lower()
+                note.topic and existing.topic and note.topic.lower() == existing.topic.lower()
             )
             if len(overlap) >= 2 or same_topic:
                 linked.append(existing_id)
@@ -183,9 +184,11 @@ class ResearchNoteStore:
 # LocalCorpus (DCI-style local paper storage with SQLite)
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class CorpusEntry:
     """A downloaded paper/source stored locally."""
+
     id: str
     source_id: str
     title: str
@@ -219,7 +222,8 @@ class LocalCorpus:
             conn.execute(
                 """
                 INSERT INTO corpus_entries
-                  (id, source_id, title, url, abstract, full_text, source_type, stored_at, metadata_json)
+                  (id, source_id, title, url, abstract, full_text, source_type, stored_at,
+                  metadata_json)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
@@ -273,9 +277,7 @@ class LocalCorpus:
 
     def delete(self, source_id: str) -> bool:
         with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.execute(
-                "DELETE FROM corpus_entries WHERE source_id = ?", (source_id,)
-            )
+            cursor = conn.execute("DELETE FROM corpus_entries WHERE source_id = ?", (source_id,))
         return cursor.rowcount > 0
 
     def count(self) -> int:
@@ -287,8 +289,7 @@ class LocalCorpus:
         """Create SQLite tables if not exist."""
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute(
-                """
+            conn.execute("""
                 CREATE TABLE IF NOT EXISTS corpus_entries (
                     id TEXT NOT NULL,
                     source_id TEXT NOT NULL UNIQUE,
@@ -300,8 +301,7 @@ class LocalCorpus:
                     stored_at TEXT NOT NULL,
                     metadata_json TEXT NOT NULL
                 )
-                """
-            )
+                """)
 
     def _row_to_entry(self, row: tuple) -> CorpusEntry:
         id_, source_id, title, url, abstract, full_text, source_type, stored_at, metadata_json = row
@@ -322,9 +322,11 @@ class LocalCorpus:
 # ResearchStrategyMemory (ReasoningBank-style)
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ResearchStrategy:
     """A learned research strategy from a past session."""
+
     id: str = field(default_factory=lambda: str(uuid4()))
     topic_type: str = ""
     domain: str = ""
@@ -365,18 +367,12 @@ class ResearchStrategyMemory:
 
     def get_best_for_domain(self, domain: str, top_k: int = 3) -> list[ResearchStrategy]:
         """Get top-k strategies for a domain, sorted by outcome_score desc."""
-        matching = [
-            s for s in self._strategies.values()
-            if s.domain.lower() == domain.lower()
-        ]
+        matching = [s for s in self._strategies.values() if s.domain.lower() == domain.lower()]
         matching.sort(key=lambda s: s.outcome_score, reverse=True)
         return matching[:top_k]
 
     def get_for_topic_type(self, topic_type: str) -> list[ResearchStrategy]:
-        return [
-            s for s in self._strategies.values()
-            if s.topic_type.lower() == topic_type.lower()
-        ]
+        return [s for s in self._strategies.values() if s.topic_type.lower() == topic_type.lower()]
 
     def record_outcome(self, strategy_id: str, score: float, lesson: str) -> None:
         """Update a strategy's outcome score and increment use_count."""
@@ -414,9 +410,11 @@ class ResearchStrategyMemory:
 # SessionCaseBank (Memento-style episodic case storage)
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ResearchCase:
     """A completed research session stored as a reusable case."""
+
     id: str = field(default_factory=lambda: str(uuid4()))
     topic: str = ""
     domain: str = ""

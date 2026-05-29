@@ -1,4 +1,5 @@
-"""SLA metrics collection: real-time collection, rolling window aggregation, percentile computation, Prometheus-compatible export."""
+"""SLA metrics collection: real-time collection, rolling window aggregation, percentile computation,
+Prometheus-compatible export."""
 
 from __future__ import annotations
 
@@ -66,8 +67,8 @@ class RollingStats:
 class MetricsCollector:
     """Real-time metric collection with rolling window aggregation.
 
-    Supports common SLA metric types, percentile computation,
-    and export to Prometheus-compatible format.
+    Supports common SLA metric types, percentile computation, and export to Prometheus-compatible
+    format.
     """
 
     def __init__(
@@ -254,10 +255,7 @@ class MetricsCollector:
             Dict of metric_name -> RollingStats.
         """
         now = time.time()
-        if (
-            agent_id in self._stats_cache
-            and now - self._last_stats_compute < self._stats_cache_ttl
-        ):
+        if agent_id in self._stats_cache and now - self._last_stats_compute < self._stats_cache_ttl:
             return self._stats_cache[agent_id]
 
         stats: dict[str, RollingStats] = {}
@@ -460,8 +458,7 @@ class MetricsCollector:
     def total_observations(self) -> int:
         """Total number of metric observations across all agents."""
         return sum(
-            len(obs) for agent_metrics in self._metrics.values()
-            for obs in agent_metrics.values()
+            len(obs) for agent_metrics in self._metrics.values() for obs in agent_metrics.values()
         )
 
     @property

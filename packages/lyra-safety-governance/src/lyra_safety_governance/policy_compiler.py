@@ -71,7 +71,9 @@ class CompiledPolicy:
     def compiled_at(self) -> datetime:
         return self._compiled_at
 
-    def get_matching_rules(self, action_type: ActionType, target: str) -> list[tuple[Decision, RulePriority]]:
+    def get_matching_rules(
+        self, action_type: ActionType, target: str
+    ) -> list[tuple[Decision, RulePriority]]:
         """Get all rules that match the given action type and target."""
         results: list[tuple[Decision, RulePriority]] = []
         for pattern, decision, priority in self._rule_index.get(action_type, []):

@@ -61,9 +61,13 @@ class TestModelCapability:
 
     def test_frozen_cannot_mutate(self):
         cap = ModelCapability(
-            model_id="m", provider="p", tier=0,
-            strengths=("s",), cost_per_1k_tokens=0.01,
-            max_tokens=1000, supports_thinking=False,
+            model_id="m",
+            provider="p",
+            tier=0,
+            strengths=("s",),
+            cost_per_1k_tokens=0.01,
+            max_tokens=1000,
+            supports_thinking=False,
         )
         with pytest.raises(AttributeError):
             cap.tier = 1  # type: ignore[misc]
@@ -121,9 +125,13 @@ class TestRouterConfig:
     def test_custom_config(self):
         registry = {
             "custom-model": ModelCapability(
-                model_id="custom-model", provider="custom", tier=1,
-                strengths=("custom",), cost_per_1k_tokens=0.01,
-                max_tokens=10000, supports_thinking=False,
+                model_id="custom-model",
+                provider="custom",
+                tier=1,
+                strengths=("custom",),
+                cost_per_1k_tokens=0.01,
+                max_tokens=10000,
+                supports_thinking=False,
             ),
         }
         config = RouterConfig(
@@ -228,14 +236,18 @@ class TestCapabilityAnalyzer:
     async def test_capabilities_include_deep_reasoning_at_high_complexity(self):
         analyzer = CapabilityAnalyzer()
         req = await analyzer.analyze_task(
-            "x " * 1000, context_tokens=100000, tools_required=10,
+            "x " * 1000,
+            context_tokens=100000,
+            tools_required=10,
         )
         assert req.complexity_score >= 0.7
         assert "deep_reasoning" in req.required_capabilities
 
     @pytest.mark.asyncio
     async def test_task_requirements_is_frozen(self):
-        req = TaskRequirements(category="coding", complexity_score=0.5, required_capabilities=("coding",))
+        req = TaskRequirements(
+            category="coding", complexity_score=0.5, required_capabilities=("coding",)
+        )
         with pytest.raises(AttributeError):
             req.category = "research"  # type: ignore[misc]
 
@@ -249,7 +261,9 @@ class TestCostOptimizer:
     @pytest.mark.asyncio
     async def test_select_model_returns_model_capability(self):
         optimizer = CostOptimizer()
-        req = TaskRequirements(category="coding", complexity_score=0.5, required_capabilities=("coding",))
+        req = TaskRequirements(
+            category="coding", complexity_score=0.5, required_capabilities=("coding",)
+        )
         model = await optimizer.select_model(req)
         assert isinstance(model, ModelCapability)
         assert model.model_id
@@ -257,44 +271,64 @@ class TestCostOptimizer:
     @pytest.mark.asyncio
     async def test_select_model_respects_preferred_tier(self):
         optimizer = CostOptimizer()
-        req = TaskRequirements(category="coding", complexity_score=0.5, required_capabilities=("coding",))
-        budget = BudgetLimit(max_cost_per_task=float("inf"), max_tokens_per_task=100000, preferred_tier=0)
+        req = TaskRequirements(
+            category="coding", complexity_score=0.5, required_capabilities=("coding",)
+        )
+        budget = BudgetLimit(
+            max_cost_per_task=float("inf"), max_tokens_per_task=100000, preferred_tier=0
+        )
         model = await optimizer.select_model(req, budget_limit=budget)
         assert model.tier == 0
 
     @pytest.mark.asyncio
     async def test_select_model_economy_tier(self):
         optimizer = CostOptimizer()
-        req = TaskRequirements(category="lookup", complexity_score=0.2, required_capabilities=("simple_query",))
-        budget = BudgetLimit(max_cost_per_task=float("inf"), max_tokens_per_task=1000, preferred_tier=2)
+        req = TaskRequirements(
+            category="lookup", complexity_score=0.2, required_capabilities=("simple_query",)
+        )
+        budget = BudgetLimit(
+            max_cost_per_task=float("inf"), max_tokens_per_task=1000, preferred_tier=2
+        )
         model = await optimizer.select_model(req, budget_limit=budget)
         assert model.tier >= 2
 
     @pytest.mark.asyncio
     async def test_select_model_for_architecture(self):
         optimizer = CostOptimizer()
-        req = TaskRequirements(category="architecture", complexity_score=0.9, required_capabilities=("reasoning", "design"))
+        req = TaskRequirements(
+            category="architecture",
+            complexity_score=0.9,
+            required_capabilities=("reasoning", "design"),
+        )
         model = await optimizer.select_model(req)
         assert model.tier == 0  # tier-0 for architecture
 
     @pytest.mark.asyncio
     async def test_select_model_for_research(self):
         optimizer = CostOptimizer()
-        req = TaskRequirements(category="research", complexity_score=0.85, required_capabilities=("research", "reasoning"))
+        req = TaskRequirements(
+            category="research",
+            complexity_score=0.85,
+            required_capabilities=("research", "reasoning"),
+        )
         model = await optimizer.select_model(req)
         assert model.tier == 0  # tier-0 for research
 
     @pytest.mark.asyncio
     async def test_select_model_for_lookup(self):
         optimizer = CostOptimizer()
-        req = TaskRequirements(category="lookup", complexity_score=0.1, required_capabilities=("simple_query",))
+        req = TaskRequirements(
+            category="lookup", complexity_score=0.1, required_capabilities=("simple_query",)
+        )
         model = await optimizer.select_model(req)
         assert model.tier >= 2  # economy or higher
 
     @pytest.mark.asyncio
     async def test_select_model_for_execution(self):
         optimizer = CostOptimizer()
-        req = TaskRequirements(category="execution", complexity_score=0.3, required_capabilities=("execution",))
+        req = TaskRequirements(
+            category="execution", complexity_score=0.3, required_capabilities=("execution",)
+        )
         model = await optimizer.select_model(req)
         # execution should be tier 3, but may fall back if no tier-3 model available
         assert model.tier >= 2
@@ -302,7 +336,9 @@ class TestCostOptimizer:
     @pytest.mark.asyncio
     async def test_select_model_with_budget_constraint(self):
         optimizer = CostOptimizer()
-        req = TaskRequirements(category="coding", complexity_score=0.5, required_capabilities=("coding",))
+        req = TaskRequirements(
+            category="coding", complexity_score=0.5, required_capabilities=("coding",)
+        )
         budget = BudgetLimit(max_cost_per_task=0.001, max_tokens_per_task=10000, preferred_tier=1)
         model = await optimizer.select_model(req, budget_limit=budget)
         assert model.cost_per_1k_tokens <= 0.001 or model.tier >= 2
@@ -312,13 +348,19 @@ class TestCostOptimizer:
         optimizer = CostOptimizer()
         registry = {
             "custom-opus": ModelCapability(
-                model_id="custom-opus", provider="custom", tier=0,
-                strengths=("reasoning",), cost_per_1k_tokens=0.10,
-                max_tokens=200000, supports_thinking=True,
+                model_id="custom-opus",
+                provider="custom",
+                tier=0,
+                strengths=("reasoning",),
+                cost_per_1k_tokens=0.10,
+                max_tokens=200000,
+                supports_thinking=True,
             ),
         }
         config = RouterConfig(model_registry=registry, default_tier=0, routing_rules=("test",))
-        req = TaskRequirements(category="architecture", complexity_score=0.9, required_capabilities=("reasoning",))
+        req = TaskRequirements(
+            category="architecture", complexity_score=0.9, required_capabilities=("reasoning",)
+        )
         model = await optimizer.select_model(req, config=config)
         assert model.model_id == "custom-opus"
 
@@ -421,9 +463,7 @@ class TestKnowingDoingGapDetector:
     @pytest.mark.asyncio
     async def test_infer_multiple_expected_tools(self):
         detector = KnowingDoingGapDetector()
-        gap = await detector.detect_gap(
-            "Search the web, run the script, and verify the results"
-        )
+        gap = await detector.detect_gap("Search the web, run the script, and verify the results")
         assert gap.has_gap
         assert "web_search" in gap.missing_tools
         assert "code_execution" in gap.missing_tools
@@ -466,9 +506,13 @@ class TestCrossModelVerifier:
     async def test_verify_different_families(self):
         verifier = CrossModelVerifier()
         verifier_config = ModelCapability(
-            model_id="deepseek-v4-pro", provider="deepseek", tier=0,
-            strengths=("reasoning",), cost_per_1k_tokens=0.001,
-            max_tokens=128000, supports_thinking=True,
+            model_id="deepseek-v4-pro",
+            provider="deepseek",
+            tier=0,
+            strengths=("reasoning",),
+            cost_per_1k_tokens=0.001,
+            max_tokens=128000,
+            supports_thinking=True,
         )
         result = await verifier.verify(
             output="some output",
@@ -484,9 +528,13 @@ class TestCrossModelVerifier:
     async def test_verify_same_family_anthropic(self):
         verifier = CrossModelVerifier()
         verifier_config = ModelCapability(
-            model_id="claude-haiku-4-5", provider="anthropic", tier=2,
-            strengths=("speed",), cost_per_1k_tokens=0.0025,
-            max_tokens=50000, supports_thinking=False,
+            model_id="claude-haiku-4-5",
+            provider="anthropic",
+            tier=2,
+            strengths=("speed",),
+            cost_per_1k_tokens=0.0025,
+            max_tokens=50000,
+            supports_thinking=False,
         )
         result = await verifier.verify(
             output="some output",
@@ -501,9 +549,13 @@ class TestCrossModelVerifier:
     async def test_verify_same_family_deepseek(self):
         verifier = CrossModelVerifier()
         verifier_config = ModelCapability(
-            model_id="deepseek-v4-flash", provider="deepseek", tier=2,
-            strengths=("speed",), cost_per_1k_tokens=0.0005,
-            max_tokens=64000, supports_thinking=False,
+            model_id="deepseek-v4-flash",
+            provider="deepseek",
+            tier=2,
+            strengths=("speed",),
+            cost_per_1k_tokens=0.0005,
+            max_tokens=64000,
+            supports_thinking=False,
         )
         result = await verifier.verify(
             output="test",
@@ -517,9 +569,13 @@ class TestCrossModelVerifier:
     async def test_verify_anthropic_deepseek_high_diversity(self):
         verifier = CrossModelVerifier()
         verifier_config = ModelCapability(
-            model_id="deepseek-v4-pro", provider="deepseek", tier=0,
-            strengths=("reasoning",), cost_per_1k_tokens=0.001,
-            max_tokens=128000, supports_thinking=True,
+            model_id="deepseek-v4-pro",
+            provider="deepseek",
+            tier=0,
+            strengths=("reasoning",),
+            cost_per_1k_tokens=0.001,
+            max_tokens=128000,
+            supports_thinking=True,
         )
         result = await verifier.verify(
             output="test",
@@ -532,9 +588,13 @@ class TestCrossModelVerifier:
     async def test_verify_unknown_family_lower_diversity(self):
         verifier = CrossModelVerifier()
         verifier_config = ModelCapability(
-            model_id="custom-model", provider="other", tier=1,
-            strengths=("custom",), cost_per_1k_tokens=0.01,
-            max_tokens=10000, supports_thinking=False,
+            model_id="custom-model",
+            provider="other",
+            tier=1,
+            strengths=("custom",),
+            cost_per_1k_tokens=0.01,
+            max_tokens=10000,
+            supports_thinking=False,
         )
         result = await verifier.verify(
             output="test",
@@ -585,9 +645,12 @@ class TestUsageTracker:
     async def test_record_usage(self):
         tracker = UsageTracker()
         record = UsageRecord(
-            model_id="opus", task_type="coding",
-            tokens_in=500, tokens_out=200,
-            latency_ms=3000.0, cost=0.05,
+            model_id="opus",
+            task_type="coding",
+            tokens_in=500,
+            tokens_out=200,
+            latency_ms=3000.0,
+            cost=0.05,
             timestamp=1000.0,
         )
         await tracker.record_usage(record)
@@ -596,41 +659,66 @@ class TestUsageTracker:
     @pytest.mark.asyncio
     async def test_record_multiple(self):
         tracker = UsageTracker()
-        await tracker.record_usage(UsageRecord(
-            model_id="m1", task_type="coding",
-            tokens_in=100, tokens_out=50,
-            latency_ms=100.0, cost=0.01,
-            timestamp=1000.0,
-        ))
-        await tracker.record_usage(UsageRecord(
-            model_id="m2", task_type="reasoning",
-            tokens_in=200, tokens_out=100,
-            latency_ms=200.0, cost=0.02,
-            timestamp=1001.0,
-        ))
+        await tracker.record_usage(
+            UsageRecord(
+                model_id="m1",
+                task_type="coding",
+                tokens_in=100,
+                tokens_out=50,
+                latency_ms=100.0,
+                cost=0.01,
+                timestamp=1000.0,
+            )
+        )
+        await tracker.record_usage(
+            UsageRecord(
+                model_id="m2",
+                task_type="reasoning",
+                tokens_in=200,
+                tokens_out=100,
+                latency_ms=200.0,
+                cost=0.02,
+                timestamp=1001.0,
+            )
+        )
         assert tracker.total_calls == 2
 
     @pytest.mark.asyncio
     async def test_get_stats_per_model(self):
         tracker = UsageTracker()
-        await tracker.record_usage(UsageRecord(
-            model_id="opus", task_type="reasoning",
-            tokens_in=1000, tokens_out=500,
-            latency_ms=5000.0, cost=0.075,
-            timestamp=1000.0,
-        ))
-        await tracker.record_usage(UsageRecord(
-            model_id="sonnet", task_type="coding",
-            tokens_in=500, tokens_out=200,
-            latency_ms=2000.0, cost=0.015,
-            timestamp=1001.0,
-        ))
-        await tracker.record_usage(UsageRecord(
-            model_id="opus", task_type="analysis",
-            tokens_in=800, tokens_out=300,
-            latency_ms=4000.0, cost=0.06,
-            timestamp=1002.0,
-        ))
+        await tracker.record_usage(
+            UsageRecord(
+                model_id="opus",
+                task_type="reasoning",
+                tokens_in=1000,
+                tokens_out=500,
+                latency_ms=5000.0,
+                cost=0.075,
+                timestamp=1000.0,
+            )
+        )
+        await tracker.record_usage(
+            UsageRecord(
+                model_id="sonnet",
+                task_type="coding",
+                tokens_in=500,
+                tokens_out=200,
+                latency_ms=2000.0,
+                cost=0.015,
+                timestamp=1001.0,
+            )
+        )
+        await tracker.record_usage(
+            UsageRecord(
+                model_id="opus",
+                task_type="analysis",
+                tokens_in=800,
+                tokens_out=300,
+                latency_ms=4000.0,
+                cost=0.06,
+                timestamp=1002.0,
+            )
+        )
         stats = await tracker.get_stats_per_model()
         assert "opus" in stats
         assert "sonnet" in stats
@@ -640,24 +728,39 @@ class TestUsageTracker:
     @pytest.mark.asyncio
     async def test_get_stats_per_task(self):
         tracker = UsageTracker()
-        await tracker.record_usage(UsageRecord(
-            model_id="m1", task_type="coding",
-            tokens_in=100, tokens_out=50,
-            latency_ms=100.0, cost=0.01,
-            timestamp=1000.0,
-        ))
-        await tracker.record_usage(UsageRecord(
-            model_id="m1", task_type="reasoning",
-            tokens_in=200, tokens_out=100,
-            latency_ms=200.0, cost=0.02,
-            timestamp=1001.0,
-        ))
-        await tracker.record_usage(UsageRecord(
-            model_id="m2", task_type="coding",
-            tokens_in=300, tokens_out=150,
-            latency_ms=300.0, cost=0.03,
-            timestamp=1002.0,
-        ))
+        await tracker.record_usage(
+            UsageRecord(
+                model_id="m1",
+                task_type="coding",
+                tokens_in=100,
+                tokens_out=50,
+                latency_ms=100.0,
+                cost=0.01,
+                timestamp=1000.0,
+            )
+        )
+        await tracker.record_usage(
+            UsageRecord(
+                model_id="m1",
+                task_type="reasoning",
+                tokens_in=200,
+                tokens_out=100,
+                latency_ms=200.0,
+                cost=0.02,
+                timestamp=1001.0,
+            )
+        )
+        await tracker.record_usage(
+            UsageRecord(
+                model_id="m2",
+                task_type="coding",
+                tokens_in=300,
+                tokens_out=150,
+                latency_ms=300.0,
+                cost=0.03,
+                timestamp=1002.0,
+            )
+        )
         stats = await tracker.get_stats_per_task()
         assert "coding" in stats
         assert "reasoning" in stats
@@ -667,18 +770,28 @@ class TestUsageTracker:
     @pytest.mark.asyncio
     async def test_estimate_session_cost(self):
         tracker = UsageTracker()
-        await tracker.record_usage(UsageRecord(
-            model_id="opus", task_type="reasoning",
-            tokens_in=1000, tokens_out=500,
-            latency_ms=5000.0, cost=0.075,
-            timestamp=1000.0,
-        ))
-        await tracker.record_usage(UsageRecord(
-            model_id="haiku", task_type="lookup",
-            tokens_in=100, tokens_out=50,
-            latency_ms=500.0, cost=0.0025,
-            timestamp=1001.0,
-        ))
+        await tracker.record_usage(
+            UsageRecord(
+                model_id="opus",
+                task_type="reasoning",
+                tokens_in=1000,
+                tokens_out=500,
+                latency_ms=5000.0,
+                cost=0.075,
+                timestamp=1000.0,
+            )
+        )
+        await tracker.record_usage(
+            UsageRecord(
+                model_id="haiku",
+                task_type="lookup",
+                tokens_in=100,
+                tokens_out=50,
+                latency_ms=500.0,
+                cost=0.0025,
+                timestamp=1001.0,
+            )
+        )
         total = await tracker.estimate_session_cost()
         assert total == pytest.approx(0.0775, rel=0.01)
 
@@ -692,29 +805,44 @@ class TestUsageTracker:
     async def test_total_calls_property(self):
         tracker = UsageTracker()
         assert tracker.total_calls == 0
-        await tracker.record_usage(UsageRecord(
-            model_id="m", task_type="t",
-            tokens_in=1, tokens_out=1,
-            latency_ms=1.0, cost=0.001,
-            timestamp=1000.0,
-        ))
+        await tracker.record_usage(
+            UsageRecord(
+                model_id="m",
+                task_type="t",
+                tokens_in=1,
+                tokens_out=1,
+                latency_ms=1.0,
+                cost=0.001,
+                timestamp=1000.0,
+            )
+        )
         assert tracker.total_calls == 1
 
     @pytest.mark.asyncio
     async def test_stats_aggregation_values(self):
         tracker = UsageTracker()
-        await tracker.record_usage(UsageRecord(
-            model_id="m", task_type="t",
-            tokens_in=100, tokens_out=50,
-            latency_ms=200.0, cost=0.01,
-            timestamp=1000.0,
-        ))
-        await tracker.record_usage(UsageRecord(
-            model_id="m", task_type="t",
-            tokens_in=200, tokens_out=100,
-            latency_ms=400.0, cost=0.02,
-            timestamp=1001.0,
-        ))
+        await tracker.record_usage(
+            UsageRecord(
+                model_id="m",
+                task_type="t",
+                tokens_in=100,
+                tokens_out=50,
+                latency_ms=200.0,
+                cost=0.01,
+                timestamp=1000.0,
+            )
+        )
+        await tracker.record_usage(
+            UsageRecord(
+                model_id="m",
+                task_type="t",
+                tokens_in=200,
+                tokens_out=100,
+                latency_ms=400.0,
+                cost=0.02,
+                timestamp=1001.0,
+            )
+        )
         stats = await tracker.get_stats_per_model()
         model_stats = stats["m"]
         assert model_stats.total_tokens_in == 300
@@ -727,9 +855,12 @@ class TestUsageTracker:
     @pytest.mark.asyncio
     async def test_usage_record_frozen(self):
         record = UsageRecord(
-            model_id="m", task_type="t",
-            tokens_in=1, tokens_out=1,
-            latency_ms=1.0, cost=0.001,
+            model_id="m",
+            task_type="t",
+            tokens_in=1,
+            tokens_out=1,
+            latency_ms=1.0,
+            cost=0.001,
             timestamp=1000.0,
         )
         with pytest.raises(AttributeError):
@@ -797,14 +928,22 @@ class TestIntegration:
         tracker = UsageTracker()
 
         ModelCapability(
-            model_id="claude-opus-4-7", provider="anthropic", tier=0,
-            strengths=("reasoning",), cost_per_1k_tokens=0.075,
-            max_tokens=200000, supports_thinking=True,
+            model_id="claude-opus-4-7",
+            provider="anthropic",
+            tier=0,
+            strengths=("reasoning",),
+            cost_per_1k_tokens=0.075,
+            max_tokens=200000,
+            supports_thinking=True,
         )
         deepseek = ModelCapability(
-            model_id="deepseek-v4-pro", provider="deepseek", tier=0,
-            strengths=("reasoning",), cost_per_1k_tokens=0.001,
-            max_tokens=128000, supports_thinking=True,
+            model_id="deepseek-v4-pro",
+            provider="deepseek",
+            tier=0,
+            strengths=("reasoning",),
+            cost_per_1k_tokens=0.001,
+            max_tokens=128000,
+            supports_thinking=True,
         )
 
         result = await verifier.verify(
@@ -815,18 +954,28 @@ class TestIntegration:
         assert result.passed
         assert result.score > 0
 
-        await tracker.record_usage(UsageRecord(
-            model_id="claude-opus-4-7", task_type="research",
-            tokens_in=5000, tokens_out=2000,
-            latency_ms=10000.0, cost=0.525,
-            timestamp=1000.0,
-        ))
-        await tracker.record_usage(UsageRecord(
-            model_id="deepseek-v4-pro", task_type="verification",
-            tokens_in=2000, tokens_out=500,
-            latency_ms=3000.0, cost=0.0025,
-            timestamp=1001.0,
-        ))
+        await tracker.record_usage(
+            UsageRecord(
+                model_id="claude-opus-4-7",
+                task_type="research",
+                tokens_in=5000,
+                tokens_out=2000,
+                latency_ms=10000.0,
+                cost=0.525,
+                timestamp=1000.0,
+            )
+        )
+        await tracker.record_usage(
+            UsageRecord(
+                model_id="deepseek-v4-pro",
+                task_type="verification",
+                tokens_in=2000,
+                tokens_out=500,
+                latency_ms=3000.0,
+                cost=0.0025,
+                timestamp=1001.0,
+            )
+        )
 
         assert tracker.total_calls == 2
         cost = await tracker.estimate_session_cost()
@@ -860,15 +1009,33 @@ class TestIntegration:
         tracker = UsageTracker()
 
         records = [
-            UsageRecord(model_id="opus", task_type="research",
-                        tokens_in=5000, tokens_out=2000,
-                        latency_ms=10000.0, cost=0.525, timestamp=1000.0),
-            UsageRecord(model_id="sonnet", task_type="coding",
-                        tokens_in=2000, tokens_out=800,
-                        latency_ms=4000.0, cost=0.042, timestamp=1001.0),
-            UsageRecord(model_id="haiku", task_type="lookup",
-                        tokens_in=500, tokens_out=200,
-                        latency_ms=1000.0, cost=0.00175, timestamp=1002.0),
+            UsageRecord(
+                model_id="opus",
+                task_type="research",
+                tokens_in=5000,
+                tokens_out=2000,
+                latency_ms=10000.0,
+                cost=0.525,
+                timestamp=1000.0,
+            ),
+            UsageRecord(
+                model_id="sonnet",
+                task_type="coding",
+                tokens_in=2000,
+                tokens_out=800,
+                latency_ms=4000.0,
+                cost=0.042,
+                timestamp=1001.0,
+            ),
+            UsageRecord(
+                model_id="haiku",
+                task_type="lookup",
+                tokens_in=500,
+                tokens_out=200,
+                latency_ms=1000.0,
+                cost=0.00175,
+                timestamp=1002.0,
+            ),
         ]
         for r in records:
             await tracker.record_usage(r)
@@ -925,7 +1092,9 @@ class TestTaskClassifier:
 
     def test_classify_code_review(self):
         classifier = TaskClassifier()
-        result = classifier.classify("Review this PR for code quality and approve if it passes the quality gate")
+        result = classifier.classify(
+            "Review this PR for code quality and approve if it passes the quality gate"
+        )
         assert result.primary == TaskCategory.CODE_REVIEW
 
     def test_classify_debugging(self):
@@ -935,7 +1104,9 @@ class TestTaskClassifier:
 
     def test_classify_refactoring(self):
         classifier = TaskClassifier()
-        result = classifier.classify("Refactor this module to extract method and decouple dependencies")
+        result = classifier.classify(
+            "Refactor this module to extract method and decouple dependencies"
+        )
         assert result.primary == TaskCategory.REFACTORING
 
     def test_classify_testing(self):
@@ -950,7 +1121,9 @@ class TestTaskClassifier:
 
     def test_classify_data_analysis(self):
         classifier = TaskClassifier()
-        result = classifier.classify("Write an ETL pipeline with SQL queries and an analytics dashboard")
+        result = classifier.classify(
+            "Write an ETL pipeline with SQL queries and an analytics dashboard"
+        )
         assert result.primary == TaskCategory.DATA_ANALYSIS
 
     def test_classify_documentation(self):
@@ -1005,9 +1178,13 @@ class TestTaskClassifier:
 
     def test_classify_batch(self):
         classifier = TaskClassifier()
-        results = classifier.classify_batch([
-            "Debug this bug", "Write documentation", "Deploy to Kubernetes",
-        ])
+        results = classifier.classify_batch(
+            [
+                "Debug this bug",
+                "Write documentation",
+                "Deploy to Kubernetes",
+            ]
+        )
         assert len(results) == 3
         assert results[0].primary == TaskCategory.DEBUGGING
         assert results[1].primary == TaskCategory.DOCUMENTATION
@@ -1117,7 +1294,9 @@ class TestComplexityEstimator:
         estimator = ComplexityEstimator()
         result = estimator.estimate(
             "Design a distributed OS kernel with real-time constraints",
-            context_tokens=150_000, tools_required=20, domain="os_kernel",
+            context_tokens=150_000,
+            tools_required=20,
+            domain="os_kernel",
         )
         assert result.recommended_tier == 0
 
@@ -1137,19 +1316,27 @@ class TestPerformanceHistory:
 
     def test_record_and_retrieve(self):
         history = PerformanceHistory()
-        history.record(PerformanceRecord(
-            model_id="claude-sonnet-4-6", category=TaskCategory.CODE_IMPLEMENTATION,
-            complexity=5.0, success=True,
-        ))
+        history.record(
+            PerformanceRecord(
+                model_id="claude-sonnet-4-6",
+                category=TaskCategory.CODE_IMPLEMENTATION,
+                complexity=5.0,
+                success=True,
+            )
+        )
         assert history.record_count == 1
 
     def test_get_model_performance(self):
         history = PerformanceHistory()
         for i in range(5):
-            history.record(PerformanceRecord(
-                model_id="claude-sonnet-4-6", category=TaskCategory.CODE_IMPLEMENTATION,
-                complexity=5.0, success=(i < 4),
-            ))
+            history.record(
+                PerformanceRecord(
+                    model_id="claude-sonnet-4-6",
+                    category=TaskCategory.CODE_IMPLEMENTATION,
+                    complexity=5.0,
+                    success=(i < 4),
+                )
+            )
         perf = history.get_model_performance("claude-sonnet-4-6", TaskCategory.CODE_IMPLEMENTATION)
         assert perf.total_attempts == 5
         assert perf.success_count == 4
@@ -1164,56 +1351,89 @@ class TestPerformanceHistory:
     def test_recommend_model_with_history(self):
         history = PerformanceHistory()
         for _ in range(10):
-            history.record(PerformanceRecord(
-                model_id="claude-opus-4.7", category=TaskCategory.ARCHITECTURE,
-                complexity=8.0, success=True,
-            ))
+            history.record(
+                PerformanceRecord(
+                    model_id="claude-opus-4.7",
+                    category=TaskCategory.ARCHITECTURE,
+                    complexity=8.0,
+                    success=True,
+                )
+            )
         for _ in range(10):
-            history.record(PerformanceRecord(
-                model_id="claude-sonnet-4-6", category=TaskCategory.ARCHITECTURE,
-                complexity=8.0, success=False,
-            ))
+            history.record(
+                PerformanceRecord(
+                    model_id="claude-sonnet-4-6",
+                    category=TaskCategory.ARCHITECTURE,
+                    complexity=8.0,
+                    success=False,
+                )
+            )
         rec = history.recommend_model(
-            TaskCategory.ARCHITECTURE, ["claude-opus-4.7", "claude-sonnet-4-6"],
+            TaskCategory.ARCHITECTURE,
+            ["claude-opus-4.7", "claude-sonnet-4-6"],
         )
         assert rec is not None
         assert rec.model_id == "claude-opus-4.7"
 
     def test_recommend_requires_min_attempts(self):
         history = PerformanceHistory()
-        history.record(PerformanceRecord(
-            model_id="claude-opus-4.7", category=TaskCategory.CODE_IMPLEMENTATION,
-            complexity=5.0, success=True,
-        ))
+        history.record(
+            PerformanceRecord(
+                model_id="claude-opus-4.7",
+                category=TaskCategory.CODE_IMPLEMENTATION,
+                complexity=5.0,
+                success=True,
+            )
+        )
         rec = history.recommend_model(
-            TaskCategory.CODE_IMPLEMENTATION, ["claude-opus-4.7"], min_attempts=3,
+            TaskCategory.CODE_IMPLEMENTATION,
+            ["claude-opus-4.7"],
+            min_attempts=3,
         )
         assert rec is None
 
     def test_category_leaderboard(self):
         history = PerformanceHistory()
         for _ in range(5):
-            history.record(PerformanceRecord(
-                model_id="model-a", category=TaskCategory.CODE_IMPLEMENTATION,
-                complexity=5.0, success=True,
-            ))
+            history.record(
+                PerformanceRecord(
+                    model_id="model-a",
+                    category=TaskCategory.CODE_IMPLEMENTATION,
+                    complexity=5.0,
+                    success=True,
+                )
+            )
         for _ in range(5):
-            history.record(PerformanceRecord(
-                model_id="model-b", category=TaskCategory.CODE_IMPLEMENTATION,
-                complexity=5.0, success=False,
-            ))
+            history.record(
+                PerformanceRecord(
+                    model_id="model-b",
+                    category=TaskCategory.CODE_IMPLEMENTATION,
+                    complexity=5.0,
+                    success=False,
+                )
+            )
         board = history.get_category_leaderboard(TaskCategory.CODE_IMPLEMENTATION)
         assert len(board) == 2
         assert board[0].model_id == "model-a"
 
     def test_global_stats(self):
         history = PerformanceHistory()
-        history.record(PerformanceRecord(
-            model_id="m1", category=TaskCategory.CODE_IMPLEMENTATION, complexity=5.0, success=True,
-        ))
-        history.record(PerformanceRecord(
-            model_id="m2", category=TaskCategory.RESEARCH, complexity=7.0, success=False,
-        ))
+        history.record(
+            PerformanceRecord(
+                model_id="m1",
+                category=TaskCategory.CODE_IMPLEMENTATION,
+                complexity=5.0,
+                success=True,
+            )
+        )
+        history.record(
+            PerformanceRecord(
+                model_id="m2",
+                category=TaskCategory.RESEARCH,
+                complexity=7.0,
+                success=False,
+            )
+        )
         stats = history.get_global_stats()
         assert stats["total_decisions"] == 2
         assert stats["global_success_rate"] == 0.5
@@ -1221,24 +1441,34 @@ class TestPerformanceHistory:
 
     def test_prune_old_records(self):
         history = PerformanceHistory()
-        history.record(PerformanceRecord(
-            model_id="old-model", category=TaskCategory.CODE_IMPLEMENTATION,
-            complexity=5.0, success=True,
-            timestamp=time.time() - 100 * 86400,
-        ))
-        history.record(PerformanceRecord(
-            model_id="new-model", category=TaskCategory.CODE_IMPLEMENTATION,
-            complexity=5.0, success=True,
-            timestamp=time.time(),
-        ))
+        history.record(
+            PerformanceRecord(
+                model_id="old-model",
+                category=TaskCategory.CODE_IMPLEMENTATION,
+                complexity=5.0,
+                success=True,
+                timestamp=time.time() - 100 * 86400,
+            )
+        )
+        history.record(
+            PerformanceRecord(
+                model_id="new-model",
+                category=TaskCategory.CODE_IMPLEMENTATION,
+                complexity=5.0,
+                success=True,
+                timestamp=time.time(),
+            )
+        )
         removed = history.prune_old_records(max_age_days=50.0)
         assert removed == 1
         assert history.record_count == 1
 
     def test_performance_record_is_frozen(self):
         record = PerformanceRecord(
-            model_id="m1", category=TaskCategory.CODE_IMPLEMENTATION,
-            complexity=5.0, success=True,
+            model_id="m1",
+            category=TaskCategory.CODE_IMPLEMENTATION,
+            complexity=5.0,
+            success=True,
         )
         with pytest.raises(Exception):
             record.success = False
@@ -1246,10 +1476,14 @@ class TestPerformanceHistory:
     def test_recommendation_confidence_scales(self):
         history = PerformanceHistory()
         for _ in range(20):
-            history.record(PerformanceRecord(
-                model_id="m1", category=TaskCategory.CODE_IMPLEMENTATION,
-                complexity=5.0, success=True,
-            ))
+            history.record(
+                PerformanceRecord(
+                    model_id="m1",
+                    category=TaskCategory.CODE_IMPLEMENTATION,
+                    complexity=5.0,
+                    success=True,
+                )
+            )
         rec = history.recommend_model(TaskCategory.CODE_IMPLEMENTATION, ["m1"])
         assert rec is not None
         assert rec.confidence >= 0.9
@@ -1267,8 +1501,12 @@ class TestConfidenceEscalator:
     def _mk_decision(name="claude-haiku-4-5", confidence=0.6):
         return RoutingDecision(
             model=ModelSpec(
-                name=name, provider=ModelProvider.ANTHROPIC, tier=ModelTier.FAST,
-                cost_per_1k_tokens=0.001, latency_ms=100.0, accuracy_estimate=confidence,
+                name=name,
+                provider=ModelProvider.ANTHROPIC,
+                tier=ModelTier.FAST,
+                cost_per_1k_tokens=0.001,
+                latency_ms=100.0,
+                accuracy_estimate=confidence,
             ),
             confidence=confidence,
             estimated_cost=0.0005,
@@ -1278,8 +1516,12 @@ class TestConfidenceEscalator:
     @staticmethod
     def _mk_model(name, provider, tier, accuracy, cost=0.003):
         return ModelSpec(
-            name=name, provider=provider, tier=tier,
-            cost_per_1k_tokens=cost, latency_ms=300.0, accuracy_estimate=accuracy,
+            name=name,
+            provider=provider,
+            tier=tier,
+            cost_per_1k_tokens=cost,
+            latency_ms=300.0,
+            accuracy_estimate=accuracy,
         )
 
     def test_low_confidence_triggers_escalation(self):

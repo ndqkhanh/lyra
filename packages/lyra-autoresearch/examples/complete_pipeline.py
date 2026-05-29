@@ -41,7 +41,9 @@ def main():
     print("\n[Stage 1] Hypothesis Formation")
     print("-" * 60)
 
-    hypothesis = "Sparse attention mechanisms can reduce transformer complexity from O(n²) to O(n log n)"
+    hypothesis = (
+        "Sparse attention mechanisms can reduce transformer complexity from O(n²) to O(n log n)"
+    )
     context = """
     Current transformers use full attention, which scales quadratically.
     Recent work on sparse patterns shows promise but lacks rigorous analysis.
@@ -104,6 +106,7 @@ def main():
     def run_experiment():
         """Simulate experiment (may fail)"""
         import random
+
         if random.random() < 0.3:
             raise ValueError("Hyperparameter out of range")
         return {"perplexity": 42.5, "throughput": 1250, "memory": "8GB"}
@@ -149,7 +152,9 @@ def main():
             severity=LessonSeverity.ERROR,
             description=f"Experiment failed: {exec_result.error_message}",
             context={
-                "failure_type": exec_result.failure_type.value if exec_result.failure_type else "unknown",
+                "failure_type": (
+                    exec_result.failure_type.value if exec_result.failure_type else "unknown"
+                ),
                 "iterations": exec_result.iterations,
             },
         )

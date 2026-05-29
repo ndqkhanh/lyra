@@ -138,7 +138,9 @@ class TestCrashLoopDetection:
         assert wd.watchdog_status == WatchdogStatus.CRASH_LOOP_UNHEALTHY
 
     def test_crash_history_pruned_outside_window(self):
-        cfg = WatchdogConfig(crash_loop_threshold=3, crash_loop_window_seconds=0.0)  # immediate prune
+        cfg = WatchdogConfig(
+            crash_loop_threshold=3, crash_loop_window_seconds=0.0
+        )  # immediate prune
         wd = AgentWatchdog(agent_id="a1", project_id="p1", config=cfg)
         wd.record_crash(1)
         wd.record_crash(1)

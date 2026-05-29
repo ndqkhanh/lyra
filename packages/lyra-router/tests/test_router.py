@@ -564,7 +564,11 @@ class TestModelRouter:
 
     def test_route_simple_task(self) -> None:
         decision = self.router.route("what is the syntax for list comprehension in Python")
-        assert decision.complexity in (TaskComplexity.SIMPLE, TaskComplexity.TRIVIAL, TaskComplexity.MODERATE)
+        assert decision.complexity in (
+            TaskComplexity.SIMPLE,
+            TaskComplexity.TRIVIAL,
+            TaskComplexity.MODERATE,
+        )
 
     def test_route_moderate_task(self) -> None:
         decision = self.router.route("implement a JWT authentication middleware")
@@ -606,9 +610,7 @@ class TestModelRouter:
 
     def test_record_outcome_success(self) -> None:
         decision = self.router.route("implement a login form")
-        result = self.router.record_outcome(
-            decision, success=True, latency_ms=100, cost=0.005
-        )
+        result = self.router.record_outcome(decision, success=True, latency_ms=100, cost=0.005)
         assert result is True
 
     def test_circuit_breaker_stops_routing(self) -> None:
@@ -620,9 +622,7 @@ class TestModelRouter:
     def test_record_outcome_returns_false_after_trip(self) -> None:
         decision = self.router.route("test")
         self.router.budget.record(cost_usd=4.9)
-        result = self.router.record_outcome(
-            decision, success=True, latency_ms=10, cost=0.5
-        )
+        result = self.router.record_outcome(decision, success=True, latency_ms=10, cost=0.5)
         assert result is False
 
     def test_budget_downgrade_in_low_regime(self) -> None:

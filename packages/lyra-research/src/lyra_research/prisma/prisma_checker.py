@@ -12,6 +12,7 @@ from typing import Any
 
 class PRISMAItem(Enum):
     """PRISMA-trAIce 17 items"""
+
     TITLE_IDENTIFICATION = "title_identification"
     ABSTRACT_STRUCTURED = "abstract_structured"
     RATIONALE = "rationale"
@@ -34,6 +35,7 @@ class PRISMAItem(Enum):
 @dataclass
 class PRISMAItemResult:
     """Result for a single PRISMA item"""
+
     item: PRISMAItem
     passed: bool
     reason: str
@@ -43,6 +45,7 @@ class PRISMAItemResult:
 @dataclass
 class PRISMAResult:
     """Overall PRISMA compliance result"""
+
     compliance_rate: float
     items: dict[PRISMAItem, PRISMAItemResult]
     passed: bool
@@ -93,7 +96,7 @@ class PRISMAComplianceChecker:
             compliance_rate=compliance_rate,
             items=results,
             passed=compliance_rate >= self.min_compliance,
-            missing_items=missing_items
+            missing_items=missing_items,
         )
 
     def check_title_identification(self, report: dict[str, Any]) -> PRISMAItemResult:
@@ -106,8 +109,12 @@ class PRISMAComplianceChecker:
         return PRISMAItemResult(
             item=PRISMAItem.TITLE_IDENTIFICATION,
             passed=passed,
-            reason="Title identifies as systematic review" if passed else "Title does not identify as systematic review",
-            evidence=report.get("title", "")
+            reason=(
+                "Title identifies as systematic review"
+                if passed
+                else "Title does not identify as systematic review"
+            ),
+            evidence=report.get("title", ""),
         )
 
     def check_abstract_structured(self, report: dict[str, Any]) -> PRISMAItemResult:
@@ -125,7 +132,14 @@ class PRISMAComplianceChecker:
         return PRISMAItemResult(
             item=PRISMAItem.ABSTRACT_STRUCTURED,
             passed=passed,
-            reason="Abstract has all required sections" if passed else f"Abstract missing sections: {[s for s in required_sections if s not in str(abstract).lower()]}"
+            reason=(
+                "Abstract has all required sections"
+                if passed
+                else(
+                    f"Abstract missing sections: "
+                    f"{[s for s in required_sections if s not in str(abstract).lower()]}"
+                )
+            ),
         )
 
     def check_rationale(self, report: dict[str, Any]) -> PRISMAItemResult:
@@ -136,7 +150,7 @@ class PRISMAComplianceChecker:
         return PRISMAItemResult(
             item=PRISMAItem.RATIONALE,
             passed=passed,
-            reason="Rationale provided" if passed else "Rationale missing or too short"
+            reason="Rationale provided" if passed else "Rationale missing or too short",
         )
 
     def check_objectives(self, report: dict[str, Any]) -> PRISMAItemResult:
@@ -147,7 +161,7 @@ class PRISMAComplianceChecker:
         return PRISMAItemResult(
             item=PRISMAItem.OBJECTIVES,
             passed=passed,
-            reason="Objectives stated" if passed else "Objectives missing or unclear"
+            reason="Objectives stated" if passed else "Objectives missing or unclear",
         )
 
     def check_eligibility_criteria(self, report: dict[str, Any]) -> PRISMAItemResult:
@@ -163,7 +177,7 @@ class PRISMAComplianceChecker:
         return PRISMAItemResult(
             item=PRISMAItem.ELIGIBILITY_CRITERIA,
             passed=passed,
-            reason="Eligibility criteria specified" if passed else "Eligibility criteria missing"
+            reason="Eligibility criteria specified" if passed else "Eligibility criteria missing",
         )
 
     def check_information_sources(self, report: dict[str, Any]) -> PRISMAItemResult:
@@ -174,7 +188,11 @@ class PRISMAComplianceChecker:
         return PRISMAItemResult(
             item=PRISMAItem.INFORMATION_SOURCES,
             passed=passed,
-            reason=f"{len(sources)} information sources described" if passed else "Insufficient information sources"
+            reason=(
+                f"{len(sources)} information sources described"
+                if passed
+                else "Insufficient information sources"
+            ),
         )
 
     def check_search_strategy(self, report: dict[str, Any]) -> PRISMAItemResult:
@@ -185,7 +203,9 @@ class PRISMAComplianceChecker:
         return PRISMAItemResult(
             item=PRISMAItem.SEARCH_STRATEGY,
             passed=passed,
-            reason="Search strategy documented" if passed else "Search strategy missing or incomplete"
+            reason=(
+                "Search strategy documented" if passed else "Search strategy missing or incomplete"
+            ),
         )
 
     def check_selection_process(self, report: dict[str, Any]) -> PRISMAItemResult:
@@ -196,7 +216,7 @@ class PRISMAComplianceChecker:
         return PRISMAItemResult(
             item=PRISMAItem.SELECTION_PROCESS,
             passed=passed,
-            reason="Selection process described" if passed else "Selection process missing"
+            reason="Selection process described" if passed else "Selection process missing",
         )
 
     def check_data_collection(self, report: dict[str, Any]) -> PRISMAItemResult:
@@ -207,7 +227,7 @@ class PRISMAComplianceChecker:
         return PRISMAItemResult(
             item=PRISMAItem.DATA_COLLECTION,
             passed=passed,
-            reason="Data collection described" if passed else "Data collection missing"
+            reason="Data collection described" if passed else "Data collection missing",
         )
 
     def check_data_items(self, report: dict[str, Any]) -> PRISMAItemResult:
@@ -218,7 +238,7 @@ class PRISMAComplianceChecker:
         return PRISMAItemResult(
             item=PRISMAItem.DATA_ITEMS,
             passed=passed,
-            reason=f"{len(items)} data items defined" if passed else "Insufficient data items"
+            reason=f"{len(items)} data items defined" if passed else "Insufficient data items",
         )
 
     def check_risk_of_bias(self, report: dict[str, Any]) -> PRISMAItemResult:
@@ -229,7 +249,7 @@ class PRISMAComplianceChecker:
         return PRISMAItemResult(
             item=PRISMAItem.RISK_OF_BIAS,
             passed=passed,
-            reason="Risk of bias assessed" if passed else "Risk of bias assessment missing"
+            reason="Risk of bias assessed" if passed else "Risk of bias assessment missing",
         )
 
     def check_effect_measures(self, report: dict[str, Any]) -> PRISMAItemResult:
@@ -240,7 +260,7 @@ class PRISMAComplianceChecker:
         return PRISMAItemResult(
             item=PRISMAItem.EFFECT_MEASURES,
             passed=passed,
-            reason="Effect measures specified" if passed else "Effect measures missing"
+            reason="Effect measures specified" if passed else "Effect measures missing",
         )
 
     def check_synthesis_methods(self, report: dict[str, Any]) -> PRISMAItemResult:
@@ -251,7 +271,7 @@ class PRISMAComplianceChecker:
         return PRISMAItemResult(
             item=PRISMAItem.SYNTHESIS_METHODS,
             passed=passed,
-            reason="Synthesis methods described" if passed else "Synthesis methods missing"
+            reason="Synthesis methods described" if passed else "Synthesis methods missing",
         )
 
     def check_reporting_bias(self, report: dict[str, Any]) -> PRISMAItemResult:
@@ -262,7 +282,7 @@ class PRISMAComplianceChecker:
         return PRISMAItemResult(
             item=PRISMAItem.REPORTING_BIAS,
             passed=passed,
-            reason="Reporting bias assessed" if passed else "Reporting bias assessment missing"
+            reason="Reporting bias assessed" if passed else "Reporting bias assessment missing",
         )
 
     def check_certainty_assessment(self, report: dict[str, Any]) -> PRISMAItemResult:
@@ -273,7 +293,7 @@ class PRISMAComplianceChecker:
         return PRISMAItemResult(
             item=PRISMAItem.CERTAINTY_ASSESSMENT,
             passed=passed,
-            reason="Certainty assessed" if passed else "Certainty assessment missing"
+            reason="Certainty assessed" if passed else "Certainty assessment missing",
         )
 
     def check_study_characteristics(self, report: dict[str, Any]) -> PRISMAItemResult:
@@ -284,7 +304,7 @@ class PRISMAComplianceChecker:
         return PRISMAItemResult(
             item=PRISMAItem.STUDY_CHARACTERISTICS,
             passed=passed,
-            reason="Study characteristics presented" if passed else "Study characteristics missing"
+            reason="Study characteristics presented" if passed else "Study characteristics missing",
         )
 
     def check_results_synthesis(self, report: dict[str, Any]) -> PRISMAItemResult:
@@ -295,5 +315,9 @@ class PRISMAComplianceChecker:
         return PRISMAItemResult(
             item=PRISMAItem.RESULTS_SYNTHESIS,
             passed=passed,
-            reason="Results synthesis presented" if passed else "Results synthesis missing or incomplete"
+            reason=(
+                "Results synthesis presented"
+                if passed
+                else "Results synthesis missing or incomplete"
+            ),
         )

@@ -1,4 +1,6 @@
-"""lyra-skill-curator: RL-trained skill curation, mining, evaluation, promotion, instinct extraction, confidence scoring, and marketplace sync."""
+"""Lyra-skill-curator: RL-trained skill curation, mining, evaluation, promotion, instinct
+extraction, confidence scoring, and marketplace sync."""
+
 from __future__ import annotations
 
 from .confidence_scorer import (

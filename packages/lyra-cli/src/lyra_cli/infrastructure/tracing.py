@@ -413,10 +413,7 @@ class TraceExporter:
         Returns:
             List of trace dictionaries
         """
-        return [
-            trace.to_dict()
-            for trace in self._tracer.get_all_traces()
-        ]
+        return [trace.to_dict() for trace in self._tracer.get_all_traces()]
 
     def export_to_opentelemetry(self, trace_id: str) -> dict[str, Any] | None:
         """Export trace in OpenTelemetry format.
@@ -451,7 +448,9 @@ class TraceExporter:
                                     "name": span["name"],
                                     "kind": span["kind"].upper(),
                                     "startTimeUnixNano": int(span["start_time"] * 1e9),
-                                    "endTimeUnixNano": int(span["end_time"] * 1e9) if span["end_time"] else None,
+                                    "endTimeUnixNano": (
+                                        int(span["end_time"] * 1e9) if span["end_time"] else None
+                                    ),
                                     "attributes": [
                                         {"key": k, "value": {"stringValue": str(v)}}
                                         for k, v in span["attributes"].items()

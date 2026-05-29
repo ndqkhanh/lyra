@@ -174,30 +174,48 @@ class DebuggingAssistant:
     @staticmethod
     def _classify_bug(combined: str) -> BugCategory | None:
         mappings: list[tuple[list[str], BugCategory]] = [
-            (["null", "none", "nil", "undefined", "attributeerror", "keyerror",
-              "indexerror", "zerodivision"], BugCategory.NULL_POINTER),
-            (["race", "deadlock", "starvation", "thread", "mutex", "lock"],
-             BugCategory.RACE_CONDITION),
-            (["memory", "leak", "oom", "out of memory", "allocation"],
-             BugCategory.MEMORY_LEAK),
-            (["typeerror", "type mismatch", "type", "cast", "conversion"],
-             BugCategory.TYPE_ERROR),
-            (["config", "setting", "environment variable", "env", "ini", "yaml",
-              "toml"], BugCategory.CONFIGURATION),
-            (["timeout", "connection", "socket", "http", "network", "dns"],
-             BugCategory.NETWORK),
-            (["slow", "latency", "timeout", "performance", "bottleneck"],
-             BugCategory.PERFORMANCE),
-            (["sql", "injection", "xss", "csrf", "auth", "permission", "access denied"],
-             BugCategory.SECURITY),
-            (["concurrent", "parallel", "async", "await", "coroutine"],
-             BugCategory.CONCURRENCY),
-            (["regression", "used to work", "previously", "broke", "stopped working"],
-             BugCategory.REGRESSION),
-            (["import", "module", "package", "library", "version", "dependency"],
-             BugCategory.DEPENDENCY),
-            (["unexpected value", "boundary", "edge case", "off-by-one", "overflow"],
-             BugCategory.BOUNDARY),
+            (
+                [
+                    "null",
+                    "none",
+                    "nil",
+                    "undefined",
+                    "attributeerror",
+                    "keyerror",
+                    "indexerror",
+                    "zerodivision",
+                ],
+                BugCategory.NULL_POINTER,
+            ),
+            (
+                ["race", "deadlock", "starvation", "thread", "mutex", "lock"],
+                BugCategory.RACE_CONDITION,
+            ),
+            (["memory", "leak", "oom", "out of memory", "allocation"], BugCategory.MEMORY_LEAK),
+            (["typeerror", "type mismatch", "type", "cast", "conversion"], BugCategory.TYPE_ERROR),
+            (
+                ["config", "setting", "environment variable", "env", "ini", "yaml", "toml"],
+                BugCategory.CONFIGURATION,
+            ),
+            (["timeout", "connection", "socket", "http", "network", "dns"], BugCategory.NETWORK),
+            (["slow", "latency", "timeout", "performance", "bottleneck"], BugCategory.PERFORMANCE),
+            (
+                ["sql", "injection", "xss", "csrf", "auth", "permission", "access denied"],
+                BugCategory.SECURITY,
+            ),
+            (["concurrent", "parallel", "async", "await", "coroutine"], BugCategory.CONCURRENCY),
+            (
+                ["regression", "used to work", "previously", "broke", "stopped working"],
+                BugCategory.REGRESSION,
+            ),
+            (
+                ["import", "module", "package", "library", "version", "dependency"],
+                BugCategory.DEPENDENCY,
+            ),
+            (
+                ["unexpected value", "boundary", "edge case", "off-by-one", "overflow"],
+                BugCategory.BOUNDARY,
+            ),
         ]
 
         for keywords, category in mappings:
@@ -207,9 +225,7 @@ class DebuggingAssistant:
         return BugCategory.LOGIC  # Default
 
     @staticmethod
-    def _run_five_whys(
-        error_desc: str, stack_trace: str
-    ) -> list[WhyAnalysis]:
+    def _run_five_whys(error_desc: str, stack_trace: str) -> list[WhyAnalysis]:
         whys: list[tuple[str, str, str]] = [
             (
                 f"Why did the {error_desc.split()[0] if error_desc.split() else 'error'} occur?",
@@ -251,9 +267,7 @@ class DebuggingAssistant:
         return analyses
 
     @staticmethod
-    def _generate_hypotheses(
-        combined: str, error_desc: str
-    ) -> list[Hypothesis]:
+    def _generate_hypotheses(combined: str, error_desc: str) -> list[Hypothesis]:
         has_null = any(kw in combined for kw in ["null", "none", "empty", "missing"])
         has_type = "type" in combined or "typeerror" in combined
         has_input = any(kw in combined for kw in ["input", "parameter", "argument", "value"])
@@ -269,7 +283,9 @@ class DebuggingAssistant:
                     description="Input validation failure: unexpected None/null value propagated",
                     category=BugCategory.NULL_POINTER if has_null else BugCategory.LOGIC,
                     confidence=ConfidenceLevel.HIGH,
-                    supporting_evidence=(f"Error context mentions null/missing values: {error_desc[:100]}",),
+                    supporting_evidence=(
+                        f"Error context mentions null/missing values: {error_desc[:100]}",
+                    ),
                     contradicting_evidence=("Input validation code exists but may be bypassed",),
                 )
             )
@@ -302,7 +318,9 @@ class DebuggingAssistant:
             hypotheses.append(
                 Hypothesis(
                     id="H-004",
-                    description="Stale or corrupted state: cached data does not reflect current reality",
+                    description=(
+                        "Stale or corrupted state: cached data does not reflect current reality"
+                    ),
                     category=BugCategory.DATA,
                     confidence=ConfidenceLevel.MEDIUM,
                     supporting_evidence=("State/cache/mutation keywords in error context",),
@@ -386,9 +404,7 @@ class DebuggingAssistant:
         ]
 
     @staticmethod
-    def _generate_fixes(
-        combined: str, bug_category: BugCategory | None
-    ) -> list[FixSuggestion]:
+    def _generate_fixes(combined: str, bug_category: BugCategory | None) -> list[FixSuggestion]:
         fixes: list[FixSuggestion] = []
 
         fixes.append(
@@ -397,7 +413,7 @@ class DebuggingAssistant:
                 description="Add null/empty check before accessing the suspect value",
                 confidence=ConfidenceLevel.HIGH,
                 rationale="Most common cause: missing guard clause for None/null values",
-                code_change='if value is None:\n    return default_value  # or handle gracefully',
+                code_change="if value is None:\n    return default_value  # or handle gracefully",
                 risk_of_change="LOW",
                 tested=False,
             )
@@ -409,7 +425,11 @@ class DebuggingAssistant:
                 description="Add input validation and type checking at function boundary",
                 confidence=ConfidenceLevel.MEDIUM,
                 rationale="Prevents invalid data from propagating through the system",
-                code_change="def func(value: ExpectedType) -> Result:\n    if not isinstance(value, ExpectedType):\n        raise TypeError(f'Expected {ExpectedType}, got {type(value)}')",
+                code_change=(
+                    "def func(value: ExpectedType) -> Result:\n    if not isinstance(value,"
+                    "ExpectedType):\n        raise TypeError(f'Expected {ExpectedType}, got"
+                    "{type(value)}')"
+                ),
                 risk_of_change="LOW",
                 tested=False,
             )
@@ -422,7 +442,11 @@ class DebuggingAssistant:
                     description="Add configuration validation at startup with clear error messages",
                     confidence=ConfidenceLevel.HIGH,
                     rationale="Fail fast with clear message instead of cryptic runtime error",
-                    code_change="def validate_config():\n    required_keys = [...]\n    missing = [k for k in required_keys if k not in config]\n    if missing:\n        raise ConfigError(f'Missing: {missing}')",
+                    code_change=(
+                        "def validate_config():\n    required_keys = [...]\n    missing = [k for k"
+                        "in required_keys if k not in config]\n    if missing:\n        raise"
+                        "ConfigError(f'Missing: {missing}')"
+                    ),
                     risk_of_change="LOW",
                     tested=False,
                 )
@@ -434,7 +458,10 @@ class DebuggingAssistant:
                     description="Add synchronization (lock/mutex) around shared resource access",
                     confidence=ConfidenceLevel.HIGH,
                     rationale="Prevents concurrent access from corrupting shared state",
-                    code_change="from threading import Lock\n\n_lock = Lock()\ndef shared_operation():\n    with _lock:\n        # critical section",
+                    code_change=(
+                        "from threading import Lock\n\n_lock = Lock()\ndef shared_operation():\n  "
+                        " with _lock:\n        # critical section"
+                    ),
                     risk_of_change="MEDIUM",
                     tested=False,
                 )
@@ -445,8 +472,13 @@ class DebuggingAssistant:
                     id="F-003",
                     description="Add specific edge case handling for the failing scenario",
                     confidence=ConfidenceLevel.MEDIUM,
-                    rationale="The failing case was not accounted for in the original implementation",
-                    code_change="# Add handling for the specific edge case identified\nif edge_condition:\n    handle_specially()",
+                    rationale=(
+                        "The failing case was not accounted for in the original implementation"
+                    ),
+                    code_change=(
+                        "# Add handling for the specific edge case identified\nif"
+                        "edge_condition:\n    handle_specially()"
+                    ),
                     risk_of_change="LOW",
                     tested=False,
                 )
@@ -471,7 +503,9 @@ class DebuggingAssistant:
                 description="Ensure all functions in the call chain handle null/None gracefully",
                 test_type="Property-based test",
                 input_conditions="Pass None/null values to each function in the call chain",
-                expected_behavior="Functions either handle null gracefully or raise clear TypeError",
+                expected_behavior=(
+                    "Functions either handle null gracefully or raise clear TypeError"
+                ),
             ),
             RegressionTestSuggestion(
                 test_name="test_boundary_values",

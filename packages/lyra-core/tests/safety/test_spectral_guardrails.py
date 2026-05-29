@@ -57,8 +57,12 @@ class TestSpectralResult:
         assert result.hallucination_probability == 0.0
 
     def test_with_anomalies(self):
-        a1 = TokenAnomaly(position=3, token="fake", spectral_score=0.9, baseline_mean=0.2, z_score=3.5)
-        a2 = TokenAnomaly(position=7, token="wrong", spectral_score=0.95, baseline_mean=0.2, z_score=4.2)
+        a1 = TokenAnomaly(
+            position=3, token="fake", spectral_score=0.9, baseline_mean=0.2, z_score=3.5
+        )
+        a2 = TokenAnomaly(
+            position=7, token="wrong", spectral_score=0.95, baseline_mean=0.2, z_score=4.2
+        )
         result = SpectralResult(
             text="some fake and wrong info",
             tokens_analyzed=6,

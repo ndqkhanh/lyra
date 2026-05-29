@@ -185,7 +185,7 @@ class Channel:
 
         self._message_log.append(message)
         if len(self._message_log) > self._max_buffer:
-            self._message_log = self._message_log[-self._max_buffer:]
+            self._message_log = self._message_log[-self._max_buffer :]
 
         self._delivery_receipts.extend(receipts)
         return receipts
@@ -306,7 +306,11 @@ class MessageBus:
             try:
                 q.put_nowait(message)
             except asyncio.QueueFull:
-                logger.warning("Agent %s queue full, dropping message %s", receipt.recipient_id, message.message_id)
+                logger.warning(
+                    "Agent %s queue full, dropping message %s",
+                    receipt.recipient_id,
+                    message.message_id,
+                )
 
         self._log_message(message)
         return receipts
@@ -368,7 +372,7 @@ class MessageBus:
             try:
                 self._agent_queues[message.recipient_id].put_nowait(message)
             except asyncio.QueueFull:
-                raise MessageDeliveryError(f"Queue full for {message.recipient_id}")
+                raise MessageDeliveryError(f"Queue full for {message.recipient_id}") from None
 
         self._log_message(message)
 
@@ -471,7 +475,7 @@ class MessageBus:
     def _log_message(self, message: Message) -> None:
         self._message_log.append(message)
         if len(self._message_log) > self._max_history:
-            self._message_log = self._message_log[-self._max_history:]
+            self._message_log = self._message_log[-self._max_history :]
 
     def get_message_history(self, limit: int = 100) -> list[Message]:
         """Return the most recent messages across all channels."""

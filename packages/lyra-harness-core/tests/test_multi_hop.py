@@ -1,4 +1,5 @@
 """Tests for lyra_harness_core.multi_hop — HippoRAG-2 + decomposition cache."""
+
 from __future__ import annotations
 
 import pytest
@@ -81,7 +82,9 @@ class TestHashEmbedder:
 
 class TestTitleEntityExtractor:
     def test_extract_by_title(self):
-        g = SimpleGraph.from_pairs([("alice", "bob")], titles={"alice": "Alice Smith", "bob": "Bob Jones"})
+        g = SimpleGraph.from_pairs(
+            [("alice", "bob")], titles={"alice": "Alice Smith", "bob": "Bob Jones"}
+        )
         ext = TitleEntityExtractor()
         out = ext.extract("who is Alice", graph=g)
         assert "alice" in out
@@ -144,15 +147,28 @@ class TestHippoRAGRetriever:
     def _build(self):
         g = SimpleGraph.from_pairs(
             [("alice", "bob"), ("bob", "casablanca"), ("casablanca", "1942")],
-            titles={"alice": "Alice", "bob": "Bob Smith", "casablanca": "Casablanca", "1942": "1942"},
+            titles={
+                "alice": "Alice",
+                "bob": "Bob Smith",
+                "casablanca": "Casablanca",
+                "1942": "1942",
+            },
         )
         retriever = HippoRAGRetriever(graph=g)
-        retriever.build_index([
-            SimpleDocument(doc_id="d1", text="alice is married to bob", anchor_node_id="alice"),
-            SimpleDocument(doc_id="d2", text="bob directed the film casablanca", anchor_node_id="bob"),
-            SimpleDocument(doc_id="d3", text="casablanca was released in 1942", anchor_node_id="casablanca"),
-            SimpleDocument(doc_id="d4", text="unrelated coffee shop trivia", anchor_node_id=None),
-        ])
+        retriever.build_index(
+            [
+                SimpleDocument(doc_id="d1", text="alice is married to bob", anchor_node_id="alice"),
+                SimpleDocument(
+                    doc_id="d2", text="bob directed the film casablanca", anchor_node_id="bob"
+                ),
+                SimpleDocument(
+                    doc_id="d3", text="casablanca was released in 1942", anchor_node_id="casablanca"
+                ),
+                SimpleDocument(
+                    doc_id="d4", text="unrelated coffee shop trivia", anchor_node_id=None
+                ),
+            ]
+        )
         return retriever
 
     def test_retrieve_returns_top_k(self):
@@ -181,9 +197,11 @@ class TestHippoRAGRetriever:
     def test_alpha_pure_dense(self):
         g = SimpleGraph.from_pairs([("alice", "bob")])
         r = HippoRAGRetriever(graph=g, alpha=1.0)
-        r.build_index([
-            SimpleDocument(doc_id="d1", text="alice", anchor_node_id="alice"),
-        ])
+        r.build_index(
+            [
+                SimpleDocument(doc_id="d1", text="alice", anchor_node_id="alice"),
+            ]
+        )
         hit = r.retrieve("alice", top_k=1)[0]
         # alpha=1.0 → score = cosine_score; ppr_score is informational only.
         assert hit.score == pytest.approx(hit.cosine_score, abs=1e-6)
@@ -191,9 +209,11 @@ class TestHippoRAGRetriever:
     def test_alpha_pure_ppr(self):
         g = SimpleGraph.from_pairs([("alice", "bob")])
         r = HippoRAGRetriever(graph=g, alpha=0.0)
-        r.build_index([
-            SimpleDocument(doc_id="d1", text="alice", anchor_node_id="alice"),
-        ])
+        r.build_index(
+            [
+                SimpleDocument(doc_id="d1", text="alice", anchor_node_id="alice"),
+            ]
+        )
         hit = r.retrieve("alice", top_k=1)[0]
         assert hit.score == pytest.approx(hit.ppr_score, abs=1e-6)
 
@@ -266,6 +286,7 @@ class TestDecompositionCache:
         cache.put(question="q2", sub_questions=("b",))
         # Touch q1 so q2 becomes LRU.
         import time as _t
+
         _t.sleep(0.001)
         cache.get("q1")
         _t.sleep(0.001)
@@ -280,6 +301,7 @@ class TestDecompositionCache:
         cache.put(question="q", sub_questions=("a",))
         assert cache.get("q") is not None
         import time as _t
+
         _t.sleep(0.07)
         assert cache.get("q") is None
         # And the entry should be evicted on the failed get.

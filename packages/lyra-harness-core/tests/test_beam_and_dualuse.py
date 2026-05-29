@@ -1,4 +1,5 @@
 """Tests for Beam Retrieval + dual-use intent classifier."""
+
 from __future__ import annotations
 
 import pytest
@@ -74,17 +75,19 @@ class TestCoverageScorer:
 class TestBeamRetriever:
     def _build_chain(self):
         """Three-hop chain: query → d1 → d2 → d3."""
-        return StubRetriever(fixtures={
-            "casablanca director origin": [
-                RetrievedDoc(doc_id="d1", text="Casablanca directed by Curtiz", score=0.9),
-            ],
-            "casablanca director origin Casablanca directed by Curtiz": [
-                RetrievedDoc(doc_id="d2", text="Curtiz was Hungarian-American", score=0.85),
-            ],
-            "casablanca director origin Curtiz was Hungarian-American": [
-                RetrievedDoc(doc_id="d3", text="born in Budapest 1886", score=0.8),
-            ],
-        })
+        return StubRetriever(
+            fixtures={
+                "casablanca director origin": [
+                    RetrievedDoc(doc_id="d1", text="Casablanca directed by Curtiz", score=0.9),
+                ],
+                "casablanca director origin Casablanca directed by Curtiz": [
+                    RetrievedDoc(doc_id="d2", text="Curtiz was Hungarian-American", score=0.85),
+                ],
+                "casablanca director origin Curtiz was Hungarian-American": [
+                    RetrievedDoc(doc_id="d3", text="born in Budapest 1886", score=0.8),
+                ],
+            }
+        )
 
     def test_retrieves_top_beam(self):
         retriever = self._build_chain()
@@ -111,12 +114,13 @@ class TestBeamRetriever:
 
     def test_beam_width_limits_survivors(self):
         # 5 candidates, beam_width=2 → only 2 survive.
-        retriever = StubRetriever(fixtures={
-            "q": [
-                RetrievedDoc(doc_id=f"d{i}", text=f"candidate {i}", score=0.5)
-                for i in range(5)
-            ],
-        })
+        retriever = StubRetriever(
+            fixtures={
+                "q": [
+                    RetrievedDoc(doc_id=f"d{i}", text=f"candidate {i}", score=0.5) for i in range(5)
+                ],
+            }
+        )
         beam = BeamRetriever(retriever=retriever, beam_width=2, expand_per_hop=5, max_hops=1)
         result = beam.retrieve("q")
         assert len(result.beams) == 2
@@ -134,9 +138,11 @@ class TestBeamRetriever:
     def test_accept_short_circuits_branch(self):
         """When a beam reaches accept threshold, it's preserved as final."""
         # Single doc completely covers the query.
-        retriever = StubRetriever(fixtures={
-            "alpha bravo": [RetrievedDoc(doc_id="d1", text="alpha bravo charlie")],
-        })
+        retriever = StubRetriever(
+            fixtures={
+                "alpha bravo": [RetrievedDoc(doc_id="d1", text="alpha bravo charlie")],
+            }
+        )
         beam = BeamRetriever(
             retriever=retriever,
             scorer=CoverageScorer(accept_threshold=0.5),
@@ -201,10 +207,14 @@ class TestKeywordRiskClassifier:
 class TestDualUseVerdict:
     def test_invalid_confidence(self):
         with pytest.raises(ValueError):
-            DualUseVerdict(query="q", risk_level=RiskLevel.LOW, matched_categories=(), confidence=1.5)
+            DualUseVerdict(
+                query="q", risk_level=RiskLevel.LOW, matched_categories=(), confidence=1.5
+            )
 
     def test_frozen(self):
-        v = DualUseVerdict(query="q", risk_level=RiskLevel.LOW, matched_categories=(), confidence=0.5)
+        v = DualUseVerdict(
+            query="q", risk_level=RiskLevel.LOW, matched_categories=(), confidence=0.5
+        )
         with pytest.raises(Exception):
             v.confidence = 0.9  # type: ignore[misc]
 
@@ -244,6 +254,7 @@ class TestDualUseGate:
     def test_classifier_error_fail_closed(self):
         class BrokenClassifier:
             name = "broken"
+
             def classify(self, query):
                 raise RuntimeError("LM unreachable")
 
@@ -256,6 +267,7 @@ class TestDualUseGate:
     def test_classifier_error_fail_open(self):
         class BrokenClassifier:
             name = "broken"
+
             def classify(self, query):
                 raise RuntimeError("LM unreachable")
 

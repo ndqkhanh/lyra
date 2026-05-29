@@ -67,12 +67,12 @@ _MODE_LABELS: dict[str, str] = {
 
 def _display_mode(mode: str) -> str:
     return _MODE_LABELS.get(mode, mode)
-from rich.console import Console, Group
-from rich.panel import Panel
-from rich.text import Text
+from rich.console import Console, Group  # noqa: E402
+from rich.panel import Panel  # noqa: E402
+from rich.text import Text  # noqa: E402
 
-from .. import __version__
-from . import themes as _themes
+from .. import __version__  # noqa: E402
+from . import themes as _themes  # noqa: E402
 
 
 @contextlib.contextmanager

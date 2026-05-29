@@ -17,6 +17,7 @@ Three complementary transparency primitives:
 All three expose ``on_event(event)`` so they can attach to the EventBus
 inline alongside LiveDisplay, or be queried from a snapshot.
 """
+
 from __future__ import annotations
 
 import time
@@ -117,7 +118,9 @@ class ContextGauge:
         info.append(f"prompt: {self.prompt_tokens:,}  ", style="dim")
         info.append(f"output: {self.output_tokens:,}  ", style="dim")
         cache_color = "green" if self.cache_hit_pct() >= 50 else "yellow"
-        info.append(f"cache: {self.cache_tokens:,} ({self.cache_hit_pct():.0f}%)", style=cache_color)
+        info.append(
+            f"cache: {self.cache_tokens:,} ({self.cache_hit_pct():.0f}%)", style=cache_color
+        )
         trend = self.trend()
         trend_sym = {"rising": "↑", "falling": "↓", "stable": "→"}.get(trend, "→")
         info.append(f"  {trend_sym}", style="dim")
@@ -136,8 +139,9 @@ class ContextGauge:
         if isinstance(event, LLMCallStarted):
             self.update_from_started(event.prompt_tokens)
         elif isinstance(event, LLMCallFinished):
-            self.update_from_finished(event.input_tokens, event.output_tokens,
-                                      event.cache_read_tokens)
+            self.update_from_finished(
+                event.input_tokens, event.output_tokens, event.cache_read_tokens
+            )
 
 
 # ---------------------------------------------------------------------------

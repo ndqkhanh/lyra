@@ -1,4 +1,5 @@
-"""Lyra Meta Editor — Self-modifying code editor with safe rewrite, AST transformation, mutation testing, and evolution metrics."""
+"""Lyra Meta Editor — Self-modifying code editor with safe rewrite, AST transformation, mutation
+testing, and evolution metrics."""
 
 from __future__ import annotations
 

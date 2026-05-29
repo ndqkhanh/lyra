@@ -128,7 +128,12 @@ class CrossModelReviewer:
             "style": ["style", "format", "naming", "convention"],
             "test_coverage": ["test", "coverage", "unittest", "integration test"],
             "methodology": ["methodology", "approach", "experiment", "study design"],
-            "statistical_validity": ["statistical", "p-value", "significance", "confidence interval"],
+            "statistical_validity": [
+                "statistical",
+                "p-value",
+                "significance",
+                "confidence interval",
+            ],
             "reproducibility": ["reproducible", "replicate", "repeat", "reproduction"],
             "bias_assessment": ["bias", "systematic", "confound", "skew"],
             "injection_prevention": ["injection", "sanitize", "escape", "sql", "command"],

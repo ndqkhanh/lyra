@@ -136,13 +136,13 @@ class ConsensusBuilder:
             first = votes[0]
             stored = self._proposals.get(first.proposal_id)
             if stored is None:
-                raise ConsensusError("Cannot determine proposal from votes and no proposal provided")
+                raise ConsensusError(
+                    "Cannot determine proposal from votes and no proposal provided"
+                )
             resolved = stored
 
         total_weight = sum(v.confidence for v in votes if v.choice != VoteChoice.ABSTAIN)
-        approve_weight = sum(
-            v.confidence for v in votes if v.choice == VoteChoice.APPROVE
-        )
+        approve_weight = sum(v.confidence for v in votes if v.choice == VoteChoice.APPROVE)
         if total_weight == 0:
             return ConsensusResult(
                 proposal=resolved,

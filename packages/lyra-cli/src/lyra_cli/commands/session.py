@@ -433,7 +433,7 @@ def delete_session(
         shutil.rmtree(summary.path)
     except OSError as exc:
         _console.print(f"[red]delete failed[/red]: {exc}")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from exc
     _console.print(f"[green]deleted[/] {summary.session_id}")
 
 

@@ -56,8 +56,8 @@ def main(
 
 
 # Import and register command modules
-from lyra_cli.cli.commands import chat, config, session, skills
-from lyra_cli.cli.commands import debug as debug_cmd
+from lyra_cli.cli.commands import chat, config, session, skills  # noqa: E402
+from lyra_cli.cli.commands import debug as debug_cmd  # noqa: E402
 
 # Register subcommands
 app.command(name="chat")(chat.chat)

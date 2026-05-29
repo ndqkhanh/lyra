@@ -72,13 +72,7 @@ class TestValenceVector:
             density=0.4,
             precision=0.9,
         )
-        expected = (
-            0.30 * 0.5
-            + 0.20 * 0.8
-            + 0.15 * 0.6
-            + 0.15 * 0.4
-            + 0.20 * 0.9
-        )
+        expected = 0.30 * 0.5 + 0.20 * 0.8 + 0.15 * 0.6 + 0.15 * 0.4 + 0.20 * 0.9
         assert v.salience == pytest.approx(expected, rel=1e-9)
 
     def test_salience_uses_abs_emotional_valence(self):
@@ -176,14 +170,20 @@ class TestValenceEstimator:
         assert result.associative_strength == 0.5
 
     async def test_parse_valence_with_json_code_block(self):
-        json_str = '{"emotional_valence": 0.4, "associative_strength": 0.6, "contextual_richness": 0.5, "density": 0.7, "precision": 0.8}'
+        json_str =(
+            '{"emotional_valence": 0.4, "associative_strength": 0.6, "contextual_richness": 0.5,'
+            '"density": 0.7, "precision": 0.8}'
+        )
         response = f"```json\n{json_str}\n```"
         result = ValenceEstimator._parse_valence(response)
         assert result.emotional_valence == 0.4
         assert result.precision == 0.8
 
     async def test_parse_valence_with_plain_code_block(self):
-        json_str = '{"emotional_valence": 0.3, "associative_strength": 0.7, "contextual_richness": 0.4, "density": 0.6, "precision": 0.9}'
+        json_str =(
+            '{"emotional_valence": 0.3, "associative_strength": 0.7, "contextual_richness": 0.4,'
+            '"density": 0.6, "precision": 0.9}'
+        )
         response = f"```\n{json_str}\n```"
         result = ValenceEstimator._parse_valence(response)
         assert result.emotional_valence == 0.3

@@ -19,6 +19,7 @@ process supervision, or systemd integration — those are CLI surfaces
 that compose above it. The supervisor owns: registration, transition,
 crash reconciliation, and queryable status.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -71,6 +72,7 @@ class Autopilot:
         """Register a new running loop. Idempotent — re-registering an
         id refreshes ``updated_at`` and bumps the row back to ``running``."""
         import json as _json
+
         existing = self.store.get(loop_id)
         if existing is not None:
             # Re-register — only allowed when not in pending_resume.
@@ -79,7 +81,9 @@ class Autopilot:
                     f"loop {loop_id} is in pending_resume; call resume() explicitly"
                 )
         record = LoopRecord(
-            id=loop_id, kind=kind, state="running",
+            id=loop_id,
+            kind=kind,
+            state="running",
             run_dir=str(run_dir),
             payload_json=_json.dumps(payload or {}, sort_keys=True),
         )
@@ -113,7 +117,9 @@ class Autopilot:
     ) -> None:
         """Move a loop to ``completed`` (FULFILLED/EXPIRED) or
         ``terminated`` (VIOLATED/TERMINATED)."""
-        terminal_kind = "terminated" if contract_state in ("violated", "terminated") else "completed"
+        terminal_kind = (
+            "terminated" if contract_state in ("violated", "terminated") else "completed"
+        )
         rec = self.store.get(loop_id)
         if rec is None:
             return

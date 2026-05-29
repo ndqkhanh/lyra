@@ -16,6 +16,7 @@ Stdlib-only — no live LLM, no network, no real cron daemon thread.
 The test is deliberately one long function so the lifecycle reads as
 a story.
 """
+
 from __future__ import annotations
 
 import io
@@ -35,7 +36,8 @@ def _build_dual_use_bundle_tar(*, name: str = "e2e-bundle") -> bytes:
         "skills/04-w.md": "---\nname: w\ndescription: w\n---\n# W\n",
         "evals/golden.jsonl": "\n".join(
             json.dumps({"id": i, "expected_pass": True}) for i in range(12)
-        ) + "\n",
+        )
+        + "\n",
         "evals/rubric.md": "# Rubric\n",
         "bundle.yaml": (
             "apiVersion: lyra.dev/v3\n"
@@ -110,11 +112,13 @@ def test_v311_full_lifecycle(tmp_path, monkeypatch):
             cache_root=tmp_path / "cache",
             fetch_url=lambda url: archive,
         )
-        fetched = fetcher.fetch(FetchSpec(
-            url="https://e2e.example.com/bundle.tar.gz",
-            expected_signature=sig,
-            marketplace="e2e-mkt",
-        ))
+        fetched = fetcher.fetch(
+            FetchSpec(
+                url="https://e2e.example.com/bundle.tar.gz",
+                expected_signature=sig,
+                marketplace="e2e-mkt",
+            )
+        )
         assert fetched.bundle.manifest.name == "e2e-bundle"
         assert fetched.bundle.manifest.dual_use is True
         assert len(fetched.bundle.routines) == 1
@@ -187,9 +191,7 @@ def test_v311_full_lifecycle(tmp_path, monkeypatch):
         lead.spawn(TeammateSpec(name="alice"))
         lead.spawn(TeammateSpec(name="bob"))
         a_id = lead.add_task("review module A", assign="alice")
-        lead.add_task(
-            "review module B after A", assign="bob", depends_on=[a_id]
-        )
+        lead.add_task("review module B after A", assign="bob", depends_on=[a_id])
         completed = lead.run_until_idle(timeout_s=2.0)
         assert completed == 2
         assert lead.tasks.summary().completed == 2
@@ -199,7 +201,9 @@ def test_v311_full_lifecycle(tmp_path, monkeypatch):
         # --- 8. Read scaling-axes recommendation ----------------------
         axes = ScalingAxes()
         axes.record_pretrain(model="claude-opus", param_b=200.0, quality=0.9)
-        axes.record_ttc(max_samples=4, verifier_count=cov.verifier_count, avg_pass_rate=cov.pass_rate_30d)
+        axes.record_ttc(
+            max_samples=4, verifier_count=cov.verifier_count, avg_pass_rate=cov.pass_rate_30d
+        )
         axes.record_memory(context_tokens=200_000, tier_count=3, retrieval_score=0.9)
         axes.record_tool_use(native_count=12, mcp_server_count=8, avg_success_rate=0.95)
         positions = axes.snapshot()
@@ -210,9 +214,7 @@ def test_v311_full_lifecycle(tmp_path, monkeypatch):
         # --- 9. Export to every cross-harness target ------------------
         for export_target in list_exporters():
             out = tmp_path / f"export-{export_target}"
-            manifest = resolve_exporter(export_target).export(
-                fetched.bundle, target=out
-            )
+            manifest = resolve_exporter(export_target).export(fetched.bundle, target=out)
             assert manifest.files, f"{export_target} produced no files"
 
         # --- 10. Uninstall — re-verify attestation, drop registry -----

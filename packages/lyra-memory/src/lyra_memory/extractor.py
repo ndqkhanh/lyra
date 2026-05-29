@@ -124,7 +124,10 @@ class MemoryExtractor:
             )
 
         # Pattern 3: Corrections ("Actually, X", "No, Y", "That's wrong")
-        if any(phrase in user_input.lower() for phrase in ["actually", "no,", "that's wrong", "incorrect"]):
+        if any(
+            phrase in user_input.lower()
+            for phrase in ["actually", "no,", "that's wrong", "incorrect"]
+        ):
             candidates.append(
                 MemoryRecord(
                     content=user_input,
@@ -283,8 +286,9 @@ class MemoryExtractor:
         if "python" in new_lower and "python" in old_lower:
             # Extract version numbers
             import re
-            new_versions = re.findall(r'\d+\.\d+', new_lower)
-            old_versions = re.findall(r'\d+\.\d+', old_lower)
+
+            new_versions = re.findall(r"\d+\.\d+", new_lower)
+            old_versions = re.findall(r"\d+\.\d+", old_lower)
             if new_versions and old_versions and new_versions != old_versions:
                 return True
 

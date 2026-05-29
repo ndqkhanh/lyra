@@ -314,9 +314,7 @@ class ConsensusProtocol:
         approve_weight = sum(
             v.weight for v in state.votes.values() if v.choice == VoteChoice.APPROVE
         )
-        reject_weight = sum(
-            v.weight for v in state.votes.values() if v.choice == VoteChoice.REJECT
-        )
+        reject_weight = sum(v.weight for v in state.votes.values() if v.choice == VoteChoice.REJECT)
         total_weight = approve_weight + reject_weight
 
         if total_weight > 0 and approve_weight > total_weight / 2:
@@ -417,7 +415,9 @@ class ConsensusProtocol:
             "topic": proposal.topic,
             "total_voters": len(proposal.voters),
             "votes_cast": len(state.votes),
-            "participation": len(state.votes) / len(proposal.voters) if len(proposal.voters) > 0 else 0,
+            "participation": (
+                len(state.votes) / len(proposal.voters) if len(proposal.voters) > 0 else 0
+            ),
             "approvals": approvals,
             "rejections": rejections,
             "abstentions": abstentions,

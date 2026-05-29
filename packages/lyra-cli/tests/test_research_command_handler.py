@@ -91,7 +91,7 @@ class TestHandleResearchCommandRouting:
         lines, out = _capture()
         code = handle_research_command("", output_fn=out)
         assert code == 1
-        assert any("usage" in l.lower() for l in lines)
+        assert any("usage" in line.lower() for line in lines)
 
     def test_whitespace_args_returns_1(self) -> None:
         lines, out = _capture()
@@ -137,7 +137,7 @@ class TestCmdList:
             lines, out = _capture()
             code = _cmd_list(output_fn=out)
         assert code == 0
-        assert any("no past" in l.lower() for l in lines)
+        assert any("no past" in line.lower() for line in lines)
 
     def test_list_with_cases(self) -> None:
         cases = [
@@ -173,7 +173,7 @@ class TestCmdShow:
             lines, out = _capture()
             code = _cmd_show("nonexistent_xyz", output_fn=out)
         assert code == 1
-        assert any("not found" in l.lower() or "no research" in l.lower() for l in lines)
+        assert any("not found" in line.lower() or "no research" in line.lower() for line in lines)
 
     def test_show_by_partial_id(self) -> None:
         cases = [_make_mock_case("abcd1234", "lora fine-tuning", summary="Good summary")]
@@ -218,7 +218,7 @@ class TestCmdRelated:
             lines, out = _capture()
             code = _cmd_related("obscure topic xyz", output_fn=out)
         assert code == 0
-        assert any("no related" in l.lower() for l in lines)
+        assert any("no related" in line.lower() for line in lines)
 
     def test_related_returns_cases(self) -> None:
         related = [

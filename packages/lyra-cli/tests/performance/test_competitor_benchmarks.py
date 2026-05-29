@@ -61,7 +61,9 @@ def test_comparison_best_and_worst() -> None:
     results = [
         CompetitorResult(CompetitorName.LYRA, BenchmarkDimension.TASK_COMPLETION_TIME, 10.0),
         CompetitorResult(CompetitorName.CLAUDE_CODE, BenchmarkDimension.TASK_COMPLETION_TIME, 15.0),
-        CompetitorResult(CompetitorName.HERMES_AGENT, BenchmarkDimension.TASK_COMPLETION_TIME, 20.0),
+        CompetitorResult(
+            CompetitorName.HERMES_AGENT, BenchmarkDimension.TASK_COMPLETION_TIME, 20.0
+        ),
     ]
     comparison = BenchmarkComparison(
         dimension=BenchmarkDimension.TASK_COMPLETION_TIME,
@@ -76,7 +78,9 @@ def test_comparison_best_and_worst() -> None:
 def test_comparison_ranking() -> None:
     """ranking should sort best-to-worst (lowest first)."""
     results = [
-        CompetitorResult(CompetitorName.HERMES_AGENT, BenchmarkDimension.TASK_COMPLETION_TIME, 20.0),
+        CompetitorResult(
+            CompetitorName.HERMES_AGENT, BenchmarkDimension.TASK_COMPLETION_TIME, 20.0
+        ),
         CompetitorResult(CompetitorName.LYRA, BenchmarkDimension.TASK_COMPLETION_TIME, 10.0),
         CompetitorResult(CompetitorName.CLAUDE_CODE, BenchmarkDimension.TASK_COMPLETION_TIME, 15.0),
     ]

@@ -26,7 +26,10 @@ class TestAIContentDetector:
         detector = AIContentDetector()
 
         # Text with many AI terms
-        ai_text = "This innovative and groundbreaking solution leverages cutting-edge technology to facilitate seamless integration and optimize performance."
+        ai_text =(
+            "This innovative and groundbreaking solution leverages cutting-edge technology to"
+            "facilitate seamless integration and optimize performance."
+        )
 
         result = detector.detect_ai_patterns(ai_text)
         assert result.patterns_detected[AIPattern.HIGH_FREQ_TERMS] > 5
@@ -36,7 +39,10 @@ class TestAIContentDetector:
         """Test detection of throat-clearing openers"""
         detector = AIContentDetector()
 
-        text = "It is important to note that this approach works. It should be emphasized that results vary. As previously mentioned, we tested this."
+        text =(
+            "It is important to note that this approach works. It should be emphasized that"
+            "results vary. As previously mentioned, we tested this."
+        )
 
         result = detector.detect_ai_patterns(text)
         assert result.patterns_detected[AIPattern.THROAT_CLEARING] >= 3
@@ -47,7 +53,10 @@ class TestAIContentDetector:
         detector = AIContentDetector()
 
         # Uniform sentence lengths (AI-like)
-        uniform_text = "This is a test. This is another test. This is yet another test. This is the final test."
+        uniform_text =(
+            "This is a test. This is another test. This is yet another test. This is the final"
+            "test."
+        )
 
         result = detector.detect_ai_patterns(uniform_text)
         assert any("burstiness" in issue.lower() for issue in result.issues)
@@ -56,7 +65,10 @@ class TestAIContentDetector:
         """Test that human-like text is not flagged"""
         detector = AIContentDetector()
 
-        human_text = "We tested the model. It performed well on most benchmarks, achieving 95% accuracy. However, there were some edge cases where it struggled."
+        human_text =(
+            "We tested the model. It performed well on most benchmarks, achieving 95% accuracy."
+            "However, there were some edge cases where it struggled."
+        )
 
         result = detector.detect_ai_patterns(human_text)
         assert not result.is_ai_generated or result.confidence < 0.5
@@ -102,7 +114,10 @@ class TestAIContentDetector:
         detector = AIContentDetector()
 
         # High burstiness (varied sentence lengths)
-        varied_text = "Short. This is a medium length sentence. This is a much longer sentence with many more words to increase the length significantly."
+        varied_text =(
+            "Short. This is a medium length sentence. This is a much longer sentence with many"
+            "more words to increase the length significantly."
+        )
         burstiness_high = detector.calculate_burstiness(varied_text)
         assert burstiness_high > 0.3
 
@@ -119,9 +134,7 @@ class TestFivePassEditor:
         """Test that all 5 passes are applied"""
         editor = FivePassEditor()
 
-        report = {
-            "content": "This is a test report in order to verify the editing process."
-        }
+        report = {"content": "This is a test report in order to verify the editing process."}
 
         edited = editor.edit_report(report)
         assert edited is not None
@@ -134,7 +147,10 @@ class TestFivePassEditor:
         editor = FivePassEditor()
 
         report = {
-            "content": "We need to do this in order to achieve our goal due to the fact that it is important."
+            "content":(
+                "We need to do this in order to achieve our goal due to the fact that it is"
+                "important."
+            )
         }
 
         edited = editor.edit_clarity(report)
@@ -157,7 +173,12 @@ class TestFivePassEditor:
         editor = FivePassEditor()
 
         # Long sentences (make it even longer to trigger the check)
-        text = "This is a very long sentence that goes on and on and on with many clauses and phrases and additional words and more content that make it difficult to read and understand what the author is trying to convey to the reader in this particular context and situation."
+        text =(
+            "This is a very long sentence that goes on and on and on with many clauses and phrases"
+            "and additional words and more content that make it difficult to read and understand"
+            "what the author is trying to convey to the reader in this particular context and"
+            "situation."
+        )
 
         result = editor.analyze_pass(text, EditPass.CLARITY)
         assert result.pass_type == EditPass.CLARITY
@@ -182,7 +203,10 @@ class TestBurstinessAnalyzer:
         """Test analysis of varied sentence lengths"""
         analyzer = BurstinessAnalyzer()
 
-        text = "Short. This is a medium length sentence. This is a much longer sentence with many more words to increase the length significantly."
+        text =(
+            "Short. This is a medium length sentence. This is a much longer sentence with many"
+            "more words to increase the length significantly."
+        )
 
         result = analyzer.analyze(text)
         assert result.burstiness_score > 0.3
@@ -193,7 +217,10 @@ class TestBurstinessAnalyzer:
         """Test analysis of uniform sentence lengths"""
         analyzer = BurstinessAnalyzer()
 
-        text = "This is a test. This is another test. This is yet another test. This is the final test."
+        text =(
+            "This is a test. This is another test. This is yet another test. This is the final"
+            "test."
+        )
 
         result = analyzer.analyze(text)
         assert result.burstiness_score < 0.5
@@ -218,14 +245,20 @@ class TestBurstinessAnalyzer:
         assert analyzer.is_ai_like(uniform)
 
         # Varied text (human-like)
-        varied = "Short. This is a medium length sentence. This is a much longer sentence with many more words."
+        varied =(
+            "Short. This is a medium length sentence. This is a much longer sentence with many"
+            "more words."
+        )
         assert not analyzer.is_ai_like(varied)
 
     def test_get_burstiness_score(self):
         """Test getting burstiness score"""
         analyzer = BurstinessAnalyzer()
 
-        text = "Short. Medium length sentence here. This is a much longer sentence with significantly more words."
+        text =(
+            "Short. Medium length sentence here. This is a much longer sentence with significantly"
+            "more words."
+        )
 
         score = analyzer.get_burstiness_score(text)
         assert 0.0 <= score <= 1.5

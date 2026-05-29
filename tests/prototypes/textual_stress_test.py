@@ -57,8 +57,7 @@ class PerformanceMonitor:
 
         # Calculate FPS from frame times
         frame_deltas = [
-            self.frame_times[i] - self.frame_times[i-1]
-            for i in range(1, len(self.frame_times))
+            self.frame_times[i] - self.frame_times[i - 1] for i in range(1, len(self.frame_times))
         ]
         avg_frame_time = sum(frame_deltas) / len(frame_deltas)
         fps = 1.0 / avg_frame_time if avg_frame_time > 0 else 0
@@ -71,7 +70,7 @@ class PerformanceMonitor:
             "fps": fps,
             "cpu_avg": cpu_avg,
             "cpu_max": cpu_max,
-            "duration": time.monotonic() - self.start_time if self.start_time else 0
+            "duration": time.monotonic() - self.start_time if self.start_time else 0,
         }
 
 
@@ -219,10 +218,10 @@ class StressTestApp(App):
 
         # Start background tasks
         self.set_interval(0.02, self.stream_tokens)  # 50 tokens/sec
-        self.set_interval(0.1, self.update_tasks)    # 10 updates/sec
-        self.set_interval(0.1, self.toggle_tree)     # 10 toggles/sec
+        self.set_interval(0.1, self.update_tasks)  # 10 updates/sec
+        self.set_interval(0.1, self.toggle_tree)  # 10 toggles/sec
         self.set_interval(0.033, self.update_display)  # 30 FPS
-        self.set_interval(0.333, self.sample_cpu)    # 3 samples/sec
+        self.set_interval(0.333, self.sample_cpu)  # 3 samples/sec
 
     def stream_tokens(self) -> None:
         """Simulate token streaming."""
@@ -256,7 +255,10 @@ class StressTestApp(App):
             elapsed = time.monotonic() - (self.start_time or time.monotonic())
             stats = self.perf_monitor.get_stats()
 
-            header_text = f"✳ Stress Testing ({elapsed:.1f}s · {self.token_counter.render()} · {stats['fps']:.1f} FPS · CPU {stats['cpu_avg']:.1f}%)"
+            header_text =(
+                f"✳ Stress Testing ({elapsed:.1f}s · {self.token_counter.render()} · "
+                f"{stats['fps']:.1f} FPS · CPU {stats['cpu_avg']:.1f}%)"
+            )
             header = self.query_one("#header", Static)
             header.update(header_text)
 
@@ -280,12 +282,14 @@ class TreeSimulator:
 
         # Create 100 nodes in a tree structure
         for i in range(100):
-            self.nodes.append({
-                "id": i,
-                "label": f"Node {i}",
-                "parent": i // 10 if i > 0 else None,
-                "children": []
-            })
+            self.nodes.append(
+                {
+                    "id": i,
+                    "label": f"Node {i}",
+                    "parent": i // 10 if i > 0 else None,
+                    "children": [],
+                }
+            )
 
         # Build parent-child relationships
         for node in self.nodes:
@@ -301,9 +305,9 @@ class TreeSimulator:
 def evaluate_results(stats):
     """Evaluate test results against gate criteria."""
 
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("Textual Stress Test Results")
-    print("="*80 + "\n")
+    print("=" * 80 + "\n")
 
     # CPU usage
     cpu_pass = stats["cpu_avg"] < 10.0

@@ -72,11 +72,16 @@ class TestRTKCompressor:
         compressor = RTKCompressor()
         content = "hello world    \nfoo bar  "
         result = compressor.compress(content, CompressionStrategy.STRUCTURAL_MINIFY)
-        assert "    " not in result.compressed.split('\n')[-1] if '\n' in result.compressed else True
+        assert (
+            "    " not in result.compressed.split("\n")[-1] if "\n" in result.compressed else True
+        )
 
     def test_abstract_compression(self):
         compressor = RTKCompressor()
-        content = "import os\nimport sys\nimport re\nimport json\n\n\n# some code here\n# more code\n# even more"
+        content =(
+            "import os\nimport sys\nimport re\nimport json\n\n\n# some code here\n# more code\n#"
+            "even more"
+        )
         result = compressor.compress(content, CompressionStrategy.STRUCTURAL_ABSTRACT)
         assert result.compressed_len <= len(content)
 
@@ -189,7 +194,12 @@ class TestEntropyFilter:
     def test_filter_keeps_meaningful_content(self):
         f = EntropyFilter()
         items = [
-            ContextItem("1", "The authentication module has a race condition in the token refresh logic", "user", time.time()),
+            ContextItem(
+                "1",
+                "The authentication module has a race condition in the token refresh logic",
+                "user",
+                time.time(),
+            ),
         ]
         result = f.filter(items)
         assert len(result.kept) >= 1
@@ -199,7 +209,12 @@ class TestEntropyFilter:
         items = [
             ContextItem("1", "ok", "system", time.time()),
             ContextItem("2", "ack", "system", time.time()),
-            ContextItem("3", "Important: the production database migration failed with error code 500", "system", time.time()),
+            ContextItem(
+                "3",
+                "Important: the production database migration failed with error code 500",
+                "system",
+                time.time(),
+            ),
         ]
         result = f.filter(items)
         assert result.reduction_pct > 0
@@ -209,7 +224,12 @@ class TestEntropyFilter:
         f = EntropyFilter()
         items = [
             ContextItem("1", "ping", "system", time.time()),
-            ContextItem("2", "Detailed analysis of the memory leak in the worker pool", "system", time.time()),
+            ContextItem(
+                "2",
+                "Detailed analysis of the memory leak in the worker pool",
+                "system",
+                time.time(),
+            ),
         ]
         result = f.filter(items)
         assert len(result.kept) >= 1

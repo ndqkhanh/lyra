@@ -1,4 +1,5 @@
 """Integration tests for 3-Agent Hybrid Orchestrator (Week 4)."""
+
 from __future__ import annotations
 
 import time
@@ -211,8 +212,7 @@ def test_orchestrator_task_completion_tracking(orchestrator: ResearchOrchestrato
         progress = orchestrator.research("rlhf")
 
     completed_tasks = [
-        t for t in orchestrator.coordination.get_all_tasks()
-        if t.state == TaskState.COMPLETED
+        t for t in orchestrator.coordination.get_all_tasks() if t.state == TaskState.COMPLETED
     ]
     assert len(completed_tasks) > 0
     assert progress.tasks_completed == len(completed_tasks)
@@ -251,7 +251,10 @@ def test_orchestrator_circuit_breaker_triggers(orchestrator: ResearchOrchestrato
 
     # Should fail due to circuit breaker
     assert progress.error is not None
-    assert "circuit breaker" in progress.error.lower() or "persistent failure" in progress.error.lower()
+    assert (
+        "circuit breaker" in progress.error.lower()
+        or "persistent failure" in progress.error.lower()
+    )
 
 
 def test_orchestrator_timeout_enforcement(orchestrator: ResearchOrchestrator) -> None:
@@ -422,6 +425,7 @@ def test_orchestrator_agent_retry_configuration(orchestrator: ResearchOrchestrat
 
 def test_orchestrator_handles_discovery_failure(orchestrator: ResearchOrchestrator) -> None:
     """Discovery failure is handled gracefully."""
+
     def failing_discover(*args: Any, **kwargs: Any) -> dict[str, list[ResearchSource]]:
         raise RuntimeError("Discovery failed")
 
@@ -434,6 +438,7 @@ def test_orchestrator_handles_discovery_failure(orchestrator: ResearchOrchestrat
 
 def test_orchestrator_handles_capacity_error(orchestrator: ResearchOrchestrator) -> None:
     """Capacity errors are handled gracefully."""
+
     def failing_enforce():
         raise RuntimeError("Capacity limit reached")
 
@@ -490,7 +495,9 @@ def test_orchestrator_persists_to_corpus(orchestrator: ResearchOrchestrator) -> 
 # ---------------------------------------------------------------------------
 
 
-def test_orchestrator_progress_callback_receives_updates(orchestrator: ResearchOrchestrator) -> None:
+def test_orchestrator_progress_callback_receives_updates(
+    orchestrator: ResearchOrchestrator,
+) -> None:
     """Progress callback receives updates at each step."""
     updates: list[ResearchProgress] = []
 
@@ -564,7 +571,9 @@ def test_orchestrator_deep_depth_completes(orchestrator: ResearchOrchestrator) -
     assert progress.is_complete
 
 
-def test_orchestrator_invalid_depth_defaults_to_standard(orchestrator: ResearchOrchestrator) -> None:
+def test_orchestrator_invalid_depth_defaults_to_standard(
+    orchestrator: ResearchOrchestrator,
+) -> None:
     """Invalid depth defaults to standard."""
     with patch.object(orchestrator.discovery, "discover", side_effect=_empty_discover):
         progress = orchestrator.research("transformers", depth="invalid")
@@ -627,4 +636,3 @@ def test_orchestrator_tracks_task_metrics(orchestrator: ResearchOrchestrator) ->
     assert progress.tasks_completed >= 0
     assert progress.tasks_failed >= 0
     assert progress.tasks_retried >= 0
-

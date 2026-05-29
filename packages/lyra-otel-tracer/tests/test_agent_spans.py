@@ -96,7 +96,9 @@ class TestTrace:
         ctx = SpanContext(trace_id="t1", span_id="s1")
         root = AgentSpan(context=ctx, agent_id="a1", operation="op", start_time=0.0, end_time=1.0)
         child_ctx = SpanContext(trace_id="t1", span_id="s2", parent_span_id="s1")
-        child = AgentSpan(context=child_ctx, agent_id="a2", operation="sub_op", start_time=0.5, end_time=0.8)
+        child = AgentSpan(
+            context=child_ctx, agent_id="a2", operation="sub_op", start_time=0.5, end_time=0.8
+        )
         trace = Trace(trace_id="t1", root_span=root, child_spans=(child,), duration_ms=1000.0)
         assert len(trace.child_spans) == 1
         assert trace.duration_ms == 1000.0
@@ -124,9 +126,7 @@ class TestSpanManager:
     async def test_start_span_child(self) -> None:
         mgr = SpanManager()
         parent = await mgr.start_span(agent_id="parent", operation="plan")
-        child = await mgr.start_span(
-            agent_id="child", operation="execute", parent=parent.context
-        )
+        child = await mgr.start_span(agent_id="child", operation="execute", parent=parent.context)
         assert child.context.parent_span_id == parent.context.span_id
         assert child.context.trace_id == parent.context.trace_id
 
@@ -191,9 +191,7 @@ class TestSpanManager:
     async def test_get_trace(self) -> None:
         mgr = SpanManager()
         root = await mgr.start_span(agent_id="root", operation="main")
-        child = await mgr.start_span(
-            agent_id="child", operation="sub", parent=root.context
-        )
+        child = await mgr.start_span(agent_id="child", operation="sub", parent=root.context)
         await mgr.end_span(child)
         root = await mgr.end_span(root)
         trace = await mgr.get_trace(root.context.trace_id)

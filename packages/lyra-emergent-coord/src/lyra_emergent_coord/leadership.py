@@ -320,7 +320,11 @@ class LeaderHealthMonitor:
                 if self._missed_counts[leader_id] >= self._max_missed_heartbeats:
                     self._leader_state[leader_id] = LeaderState.DEPOSED
                     failed.append(leader_id)
-                    logger.warning("Leader %s failed (%d missed heartbeats)", leader_id, self._missed_counts[leader_id])
+                    logger.warning(
+                        "Leader %s failed (%d missed heartbeats)",
+                        leader_id,
+                        self._missed_counts[leader_id],
+                    )
 
         return failed
 
@@ -594,7 +598,7 @@ class LeaderManager:
 
     def list_leaders(self) -> list[LeaderRecord]:
         """List all active leaders."""
-        return [l for l in self._leaders.values() if l.is_healthy]
+        return [leader for leader in self._leaders.values() if leader.is_healthy]
 
     def get_leader_history(self, limit: int = 20) -> list[ElectionResult]:
         """Return recent election results."""
@@ -603,17 +607,17 @@ class LeaderManager:
     def snapshot(self) -> dict[str, Any]:
         """Return a current-state snapshot."""
         return {
-            "active_leaders": len([l for l in self._leaders.values() if l.is_healthy]),
+            "active_leaders": len([leader for leader in self._leaders.values() if leader.is_healthy]),
             "total_agents": len(self._agent_priorities),
             "election_history": len(self._election_history),
             "leaders": [
                 {
-                    "id": l.leader_id,
-                    "domain": l.domain,
-                    "state": l.state.name,
-                    "term": l.term,
-                    "followers": l.follower_count,
+                    "id": leader.leader_id,
+                    "domain": leader.domain,
+                    "state": leader.state.name,
+                    "term": leader.term,
+                    "followers": leader.follower_count,
                 }
-                for l in self._leaders.values()
+                for leader in self._leaders.values()
             ],
         }

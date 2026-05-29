@@ -37,7 +37,9 @@ def sample_elements():
         ),
         ContextElement(
             id="docs_1",
-            content="This module implements mathematical utility functions for the Lyra AGI system.",
+            content=(
+                "This module implements mathematical utility functions for the Lyra AGI system."
+            ),
             element_type=ContextElementType.DOCUMENTATION,
             token_count=200,
         ),
@@ -81,16 +83,24 @@ class TestTokenBudget:
 
 class TestContextElement:
     def test_creation_defaults(self):
-        el = ContextElement(id="test", content="hello world", element_type=ContextElementType.CODE, token_count=10)
+        el = ContextElement(
+            id="test", content="hello world", element_type=ContextElementType.CODE, token_count=10
+        )
         assert el.id == "test"
         assert el.token_count == 10
         assert el.importance_score == 0.0
         assert el.dependencies == []
 
     def test_hash_and_eq(self):
-        a = ContextElement(id="a", content="x", element_type=ContextElementType.CODE, token_count=10)
-        b = ContextElement(id="a", content="y", element_type=ContextElementType.DOCUMENTATION, token_count=20)
-        c = ContextElement(id="c", content="z", element_type=ContextElementType.CODE, token_count=10)
+        a = ContextElement(
+            id="a", content="x", element_type=ContextElementType.CODE, token_count=10
+        )
+        b = ContextElement(
+            id="a", content="y", element_type=ContextElementType.DOCUMENTATION, token_count=20
+        )
+        c = ContextElement(
+            id="c", content="z", element_type=ContextElementType.CODE, token_count=10
+        )
         assert a == b  # Same ID
         assert a != c  # Different ID
         assert hash(a) == hash(b)
@@ -111,12 +121,16 @@ class TestContextProfiler:
         assert profiler.budget.used > 0
 
     def test_add_empty_id_raises(self, profiler):
-        el = ContextElement(id="", content="x", element_type=ContextElementType.CODE, token_count=10)
+        el = ContextElement(
+            id="", content="x", element_type=ContextElementType.CODE, token_count=10
+        )
         with pytest.raises(InvalidContextElementError):
             asyncio.run(profiler.add_element(el))
 
     def test_add_empty_content_raises(self, profiler):
-        el = ContextElement(id="x", content="", element_type=ContextElementType.CODE, token_count=10)
+        el = ContextElement(
+            id="x", content="", element_type=ContextElementType.CODE, token_count=10
+        )
         with pytest.raises(InvalidContextElementError):
             asyncio.run(profiler.add_element(el))
 
@@ -179,7 +193,9 @@ class TestContextProfiler:
     def test_optimize_at_high_utilization(self, sample_elements):
         # Create profiler with tiny budget to force high utilization
         profiler = ContextProfiler(token_budget=100, health_critical_pct=50)
-        el = ContextElement(id="big", content="x" * 500, element_type=ContextElementType.CODE, token_count=90)
+        el = ContextElement(
+            id="big", content="x" * 500, element_type=ContextElementType.CODE, token_count=90
+        )
         asyncio.run(profiler.add_element(el))
         result = asyncio.run(profiler.optimize())
         assert isinstance(result, CompactionRecommendation)
@@ -210,8 +226,10 @@ class TestContextAnalyzer:
         analyzer = ContextAnalyzer(model_context_limit=100)
         els = [
             ContextElement(
-                id="big", content="x" * 500,
-                element_type=ContextElementType.CODE, token_count=95,
+                id="big",
+                content="x" * 500,
+                element_type=ContextElementType.CODE,
+                token_count=95,
             )
         ]
         dashboard = asyncio.run(analyzer.analyze_snapshot(els))
@@ -226,8 +244,11 @@ class TestProfileMatcher:
         matcher = ProfileMatcher()
         matcher.register_pattern("code", {"complexity": 0.5})
         profile = ContextProfile(
-            task_type="code", complexity=0.6,
-            tools_available=[], user_preferences={}, environment_tags=[],
+            task_type="code",
+            complexity=0.6,
+            tools_available=[],
+            user_preferences={},
+            environment_tags=[],
         )
         result = matcher.match(profile)
         assert isinstance(result, str)
@@ -235,8 +256,11 @@ class TestProfileMatcher:
     def test_empty_patterns_returns_general(self):
         matcher = ProfileMatcher()
         profile = ContextProfile(
-            task_type="unknown", complexity=0.0,
-            tools_available=[], user_preferences={}, environment_tags=[],
+            task_type="unknown",
+            complexity=0.0,
+            tools_available=[],
+            user_preferences={},
+            environment_tags=[],
         )
         result = matcher.match(profile)
         assert result == "general"
@@ -246,8 +270,11 @@ class TestProfileMatcher:
         matcher.register_pattern("code", {"complexity": 0.5})
         matcher.register_pattern("debug", {"complexity": 0.7})
         profile = ContextProfile(
-            task_type="code", complexity=0.55,
-            tools_available=[], user_preferences={}, environment_tags=[],
+            task_type="code",
+            complexity=0.55,
+            tools_available=[],
+            user_preferences={},
+            environment_tags=[],
         )
         results = matcher.match_with_scores(profile)
         assert len(results) == 2

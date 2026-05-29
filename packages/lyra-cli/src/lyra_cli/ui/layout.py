@@ -9,6 +9,7 @@ from .colors import AnsiStyle, ColorEngine
 @dataclass(frozen=True)
 class TextSegment:
     """Formatted text segment"""
+
     content: str
     style: AnsiStyle
     indent: int = 0
@@ -17,6 +18,7 @@ class TextSegment:
 @dataclass(frozen=True)
 class LayoutConfig:
     """Layout configuration"""
+
     max_width: int = 120
     indent_size: int = 2
     truncate_at: int = 20
@@ -117,7 +119,9 @@ class LayoutEngine:
         """Create horizontal separator line"""
         return char * width
 
-    def pad_to_width(self, text: str, width: int, align: Literal["left", "right", "center"] = "left") -> str:
+    def pad_to_width(
+        self, text: str, width: int, align: Literal["left", "right", "center"] = "left"
+    ) -> str:
         """Pad text to specific width"""
         visual_width = self.measure_visual_width(text)
 

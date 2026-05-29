@@ -110,8 +110,11 @@ class RaftNode:
         self._reset_election_timeout()
 
     def receive_vote_request(
-        self, candidate_id: str, candidate_term: int,
-        last_log_index: int, last_log_term: int,
+        self,
+        candidate_id: str,
+        candidate_term: int,
+        last_log_index: int,
+        last_log_term: int,
     ) -> bool:
         if candidate_term < self._current_term:
             return False
@@ -153,7 +156,9 @@ class RaftNode:
         return cmds
 
     def _reset_election_timeout(self) -> None:
-        ms = random.uniform(self.config.election_timeout_min_ms, self.config.election_timeout_max_ms)
+        ms = random.uniform(
+            self.config.election_timeout_min_ms, self.config.election_timeout_max_ms
+        )
         self._election_deadline = time.time() + ms / 1000.0
 
     def _start_election(self) -> list[str]:

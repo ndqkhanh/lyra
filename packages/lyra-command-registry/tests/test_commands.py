@@ -1,4 +1,5 @@
 """Tests for lyra-command-registry."""
+
 from lyra_command_registry import Command, CommandRegistry
 
 
@@ -18,7 +19,10 @@ class TestCommandRegistry:
 
     def test_execute_with_handler(self):
         r = CommandRegistry()
-        r.register(Command(name="hello", description="Say hello", pattern="greet"), handler=lambda: "hello!")
+        r.register(
+            Command(name="hello", description="Say hello", pattern="greet"),
+            handler=lambda: "hello!",
+        )
         result = r.execute("hello")
         assert result == "hello!"
 

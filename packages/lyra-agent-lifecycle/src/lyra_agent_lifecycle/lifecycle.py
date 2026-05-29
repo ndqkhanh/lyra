@@ -65,8 +65,18 @@ class LifecycleState(Enum):
 _VALID_TRANSITIONS: dict[LifecycleState, set[LifecycleState]] = {
     LifecycleState.INIT: {LifecycleState.READY, LifecycleState.RETIRED, LifecycleState.ERROR},
     LifecycleState.READY: {LifecycleState.ACTIVE, LifecycleState.RETIRED, LifecycleState.ERROR},
-    LifecycleState.ACTIVE: {LifecycleState.PAUSED, LifecycleState.READY, LifecycleState.RETIRED, LifecycleState.ERROR},
-    LifecycleState.PAUSED: {LifecycleState.READY, LifecycleState.ACTIVE, LifecycleState.RETIRED, LifecycleState.ERROR},
+    LifecycleState.ACTIVE: {
+        LifecycleState.PAUSED,
+        LifecycleState.READY,
+        LifecycleState.RETIRED,
+        LifecycleState.ERROR,
+    },
+    LifecycleState.PAUSED: {
+        LifecycleState.READY,
+        LifecycleState.ACTIVE,
+        LifecycleState.RETIRED,
+        LifecycleState.ERROR,
+    },
     LifecycleState.RETIRED: set(),
     LifecycleState.ERROR: {LifecycleState.READY, LifecycleState.RETIRED},
 }
@@ -155,7 +165,9 @@ class LifecycleHooks:
     on_resume: Callable[[str], Awaitable[None]] | None = None
     on_retire: Callable[[str], Awaitable[None]] | None = None
     on_error: Callable[[str, Exception], Awaitable[None]] | None = None
-    on_upgrade: Callable[[str, str, str], Awaitable[None]] | None = None  # agent_id, old_ver, new_ver
+    on_upgrade: Callable[[str, str, str], Awaitable[None]] | None = (
+        None  # agent_id, old_ver, new_ver
+    )
 
     async def fire_init(self, agent_id: str) -> None:
         if self.on_init:
@@ -409,7 +421,10 @@ class AgentLifecycleManager:
 
         if require_ready and record.state not in (LifecycleState.READY, LifecycleState.PAUSED):
             raise InvalidTransitionError(
-                f"Agent {agent_id} must be READY or PAUSED for upgrade, currently {record.state.name}"
+
+                    f"Agent {agent_id} must be READY or PAUSED for upgrade, currently "
+                    f"{record.state.name}"
+
             )
 
         old_version = record.version
@@ -506,7 +521,7 @@ class AgentLifecycleManager:
 
         # Prune history
         if len(record.history) > self._max_history:
-            record.history = record.history[-self._max_history:]
+            record.history = record.history[-self._max_history :]
 
     def get_state(self, agent_id: str) -> LifecycleState | None:
         """Get the current state of an agent."""
@@ -536,11 +551,7 @@ class AgentLifecycleManager:
     @property
     def active_agents(self) -> dict[str, AgentRecord]:
         """Return all non-retired agents."""
-        return {
-            aid: r
-            for aid, r in self._agents.items()
-            if r.state != LifecycleState.RETIRED
-        }
+        return {aid: r for aid, r in self._agents.items() if r.state != LifecycleState.RETIRED}
 
     @property
     def stats(self) -> dict[str, Any]:

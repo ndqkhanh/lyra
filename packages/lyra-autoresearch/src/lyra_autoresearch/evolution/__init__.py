@@ -16,7 +16,7 @@ import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -229,8 +229,8 @@ class SkillSynthesizer:
         category_str = ", ".join(c.value for c in categories)
 
         # Count severity
-        error_count = sum(1 for l in lessons if l.severity == LessonSeverity.ERROR)
-        critical_count = sum(1 for l in lessons if l.severity == LessonSeverity.CRITICAL)
+        error_count = sum(1 for lesson in lessons if lesson.severity == LessonSeverity.ERROR)
+        critical_count = sum(1 for lesson in lessons if lesson.severity == LessonSeverity.CRITICAL)
 
         return (
             f"Auto-generated skill from {len(lessons)} lessons "

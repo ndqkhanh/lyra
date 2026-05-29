@@ -9,9 +9,11 @@ Composes orthogonally with Chain-of-Note ([gates/chain_of_note.py]):
     - Reason-in-Documents is a per-doc *content-refinement* step.
 Both can run in sequence: CoN drops irrelevant docs, RiD refines the rest.
 
-Per [docs/199-multi-hop-reasoning-techniques-arc.md](../../../../../../research/harness-engineering/docs/199-multi-hop-reasoning-techniques-arc.md)
+Per
+[docs/199-multi-hop-reasoning-techniques-arc.md](../../../../../../research/harness-engineering/docs/199-multi-hop-reasoning-techniques-arc.md)
 Phase 4 + per-project apply plans ([203], [208], [218], [219], [220]).
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -101,9 +103,7 @@ class ReasonInDocuments:
             refined_clean = refined.strip()
             is_relevant = refined_clean.upper() != "NONE" and bool(refined_clean)
             text = refined_clean if is_relevant else ""
-            results.append(
-                DenoisedDoc(original=doc, refined_text=text, is_relevant=is_relevant)
-            )
+            results.append(DenoisedDoc(original=doc, refined_text=text, is_relevant=is_relevant))
         if self.drop_irrelevant:
             results = [d for d in results if d.is_relevant]
         return results

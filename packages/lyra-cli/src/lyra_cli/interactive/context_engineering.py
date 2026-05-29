@@ -8,6 +8,7 @@ Implements:
 
 Public surface: :func:`cmd_context_extended`.
 """
+
 from __future__ import annotations
 
 import datetime
@@ -38,14 +39,17 @@ def _last_user_message(session: Any) -> str:
     messages = getattr(session, "messages", [])
     for msg in reversed(messages):
         try:
-            role = getattr(msg, "role", None) or (msg.get("role") if isinstance(msg, dict) else None)
+            role = getattr(msg, "role", None) or (
+                msg.get("role") if isinstance(msg, dict) else None
+            )
             if role != "user":
                 continue
-            content = msg.get("content", "") if isinstance(msg, dict) else getattr(msg, "content", "")
+            content = (
+                msg.get("content", "") if isinstance(msg, dict) else getattr(msg, "content", "")
+            )
             if isinstance(content, list):
                 text = " ".join(
-                    (c.get("text", "") if isinstance(c, dict) else str(c))
-                    for c in content
+                    (c.get("text", "") if isinstance(c, dict) else str(c)) for c in content
                 )
             else:
                 text = str(content) if content else ""
@@ -62,14 +66,17 @@ def _tool_output_spans(session: Any, last_n: int) -> list[dict[str, Any]]:
     tool_msgs: list[dict[str, Any]] = []
     for msg in messages:
         try:
-            role = getattr(msg, "role", None) or (msg.get("role") if isinstance(msg, dict) else None)
+            role = getattr(msg, "role", None) or (
+                msg.get("role") if isinstance(msg, dict) else None
+            )
             if role != "tool":
                 continue
-            content = msg.get("content", "") if isinstance(msg, dict) else getattr(msg, "content", "")
+            content = (
+                msg.get("content", "") if isinstance(msg, dict) else getattr(msg, "content", "")
+            )
             if isinstance(content, list):
                 text = " ".join(
-                    (c.get("text", "") if isinstance(c, dict) else str(c))
-                    for c in content
+                    (c.get("text", "") if isinstance(c, dict) else str(c)) for c in content
                 )
             else:
                 text = str(content) if content else ""
@@ -169,19 +176,17 @@ def _prune(last_n: int, session: Any) -> Any:
     for i, span in enumerate(spans):
         name = span["name"]
         text = span["text"]
-        is_noise = (
-            name.lower() in _NOISE_NAMES
-            or len(text.strip()) < 20
-        )
+        is_noise = name.lower() in _NOISE_NAMES or len(text.strip()) < 20
         relevance = "[red]noise[/red]" if is_noise else "[green]relevant[/green]"
         snippet = text[:120].replace("[", "\\[")
         table.add_row(str(i), name, relevance, snippet)
 
     noise_count = sum(
-        1 for s in spans
-        if s["name"].lower() in _NOISE_NAMES or len(s["text"].strip()) < 20
+        1 for s in spans if s["name"].lower() in _NOISE_NAMES or len(s["text"].strip()) < 20
     )
-    summary = f"{len(spans)} spans shown — {noise_count} noise, {len(spans) - noise_count} relevant."
+    summary = (
+        f"{len(spans)} spans shown — {noise_count} noise, {len(spans) - noise_count} relevant."
+    )
     return Panel(
         table,
         title=f"[bold yellow]Context: Prune[/bold yellow] [dim](last {last_n})[/dim]",
@@ -207,7 +212,9 @@ def _playbook_list() -> Any:
     try:
         content = _PLAYBOOK_PATH.read_text(encoding="utf-8")
     except Exception as exc:
-        return Panel(f"[red]Read failed: {exc}[/red]", title="[bold blue]Context: Playbook[/bold blue]")
+        return Panel(
+            f"[red]Read failed: {exc}[/red]", title="[bold blue]Context: Playbook[/bold blue]"
+        )
     return Panel(
         content or "[dim](empty)[/dim]",
         title="[bold blue]Context: Playbook[/bold blue]",
@@ -401,7 +408,11 @@ def cmd_context_extended(session: Any, args: str) -> Any:
         if sub == "prune":
             last_n = 5
             if rest.startswith("--last"):
-                token = rest[len("--last"):].strip().split()[0] if rest[len("--last"):].strip() else "5"
+                token = (
+                    rest[len("--last") :].strip().split()[0]
+                    if rest[len("--last") :].strip()
+                    else "5"
+                )
                 try:
                     last_n = int(token)
                 except ValueError:
@@ -423,7 +434,8 @@ def cmd_context_extended(session: Any, args: str) -> Any:
         usage = (
             "context extended sub-commands:\n"
             "  checkpoint [label]                     write compact task-progress block\n"
-            "  prune [--last N]                       show goal-relevant vs noise spans (default N=5)\n"
+            "  prune [--last N]                       show goal-relevant vs noise spans"
+            "(default N=5)\n"
             "  playbook [list|set <k> <v>|append <t>|clear]  manage evolving playbook\n"
             "  inject [<filepath>]                    inject AGENTS.md/CLAUDE.md/file into context"
         )

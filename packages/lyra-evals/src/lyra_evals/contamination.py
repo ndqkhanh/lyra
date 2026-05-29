@@ -12,6 +12,7 @@ training cutoff, we assume contamination. If the dates tie, we assume
 contamination. Operators can always override; we just force them to
 acknowledge the trade-off in writing.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -55,19 +56,20 @@ class ContaminationGuard:
         )
         if not self.allow_contaminated:
             raise ContaminationError(message)
-        self.warnings.append(
-            f"allow_contaminated=True: {message}; record surfaced in retro"
-        )
+        self.warnings.append(f"allow_contaminated=True: {message}; record surfaced in retro")
 
     def _handle_contaminated(self) -> None:
+        cutoff_str = (
+            self.model_training_cutoff.isoformat()
+            if self.model_training_cutoff
+            else "unknown"
+        )
         message = (
             f"corpus {self.corpus_name!r} (cutoff {self.corpus_cutoff.isoformat()}) "
             f"is on or before model {self.model_name!r} training cutoff "
-            f"({self.model_training_cutoff.isoformat() if self.model_training_cutoff else 'unknown'}); "
+            f"({cutoff_str}); "
             f"contaminated"
         )
         if not self.allow_contaminated:
             raise ContaminationError(message)
-        self.warnings.append(
-            f"allow_contaminated=True: {message}; record surfaced in retro"
-        )
+        self.warnings.append(f"allow_contaminated=True: {message}; record surfaced in retro")

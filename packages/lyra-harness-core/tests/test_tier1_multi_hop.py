@@ -1,4 +1,5 @@
 """Tests for Tier-1 multi-hop primitives — PoG, AnchorRAG, Reason-in-Documents."""
+
 from __future__ import annotations
 
 import pytest
@@ -25,12 +26,14 @@ from lyra_harness_core.multi_hop import (
 
 def _diamond_graph():
     """seed → a, b → target. Two paths, both should reach target."""
-    g = SimpleGraph.from_pairs([
-        ("seed", "a"),
-        ("seed", "b"),
-        ("a", "target"),
-        ("b", "target"),
-    ])
+    g = SimpleGraph.from_pairs(
+        [
+            ("seed", "a"),
+            ("seed", "b"),
+            ("a", "target"),
+            ("b", "target"),
+        ]
+    )
     return g
 
 
@@ -65,6 +68,7 @@ class TestPlanOnGraphWalker:
         # Scorer that always rejects → all paths get pruned.
         class RejectAll:
             name = "reject"
+
             def score(self, *, query, path, graph):
                 return PathScore(score=0.1, reason="reject")
 
@@ -197,7 +201,9 @@ class TestMergePredictors:
 
     def test_weights_length_mismatch_raises(self):
         with pytest.raises(ValueError):
-            merge_predictors([FixedAnchorPredictor()], query="q", graph=SimpleGraph(), weights=[1.0, 2.0])
+            merge_predictors(
+                [FixedAnchorPredictor()], query="q", graph=SimpleGraph(), weights=[1.0, 2.0]
+            )
 
 
 # --- Reason-in-Documents -------------------------------------------------
@@ -244,6 +250,7 @@ class TestReasonInDocuments:
     def test_llm_error_fail_open(self):
         class BrokenLLM:
             name = "broken"
+
             def generate(self, prompt, *, max_tokens=512, stop=None):
                 raise RuntimeError("network failure")
 

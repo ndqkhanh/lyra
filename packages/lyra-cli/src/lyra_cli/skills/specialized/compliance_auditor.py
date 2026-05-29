@@ -32,14 +32,30 @@ class ComplianceAuditorSkill:
     """Validates configurations against common regulatory frameworks."""
 
     _GDPR_CHECKS = [
-        ("GDPR-ART5", "data_minimization", "Only collect necessary personal data. Audit data collection points."),
+        (
+            "GDPR-ART5",
+            "data_minimization",
+            "Only collect necessary personal data. Audit data collection points.",
+        ),
         ("GDPR-ART17", "right_to_erasure", "Implement data deletion capability for user requests."),
-        ("GDPR-ART32", "encryption_at_rest", "Encrypt personal data at rest using AES-256 or equivalent."),
+        (
+            "GDPR-ART32",
+            "encryption_at_rest",
+            "Encrypt personal data at rest using AES-256 or equivalent.",
+        ),
         ("GDPR-ART33", "breach_notification", "Implement 72-hour breach notification capability."),
     ]
     _SOC2_CHECKS = [
-        ("SOC2-CC6.1", "access_control", "Implement role-based access control with least privilege."),
-        ("SOC2-CC7.1", "vulnerability_scanning", "Run automated vulnerability scans at least monthly."),
+        (
+            "SOC2-CC6.1",
+            "access_control",
+            "Implement role-based access control with least privilege.",
+        ),
+        (
+            "SOC2-CC7.1",
+            "vulnerability_scanning",
+            "Run automated vulnerability scans at least monthly.",
+        ),
         ("SOC2-CC8.1", "change_management", "Document and approve all production changes."),
     ]
 
@@ -51,16 +67,28 @@ class ComplianceAuditorSkill:
         if "gdpr" in regulations:
             for control_id, check_key, remediation in self._GDPR_CHECKS:
                 if check_key not in config or not config.get(check_key):
-                    findings.append(ComplianceFinding("GDPR", control_id,
-                        ComplianceStatus.NON_COMPLIANT,
-                        f"Missing control: {check_key.replace('_', ' ')}.", remediation))
+                    findings.append(
+                        ComplianceFinding(
+                            "GDPR",
+                            control_id,
+                            ComplianceStatus.NON_COMPLIANT,
+                            f"Missing control: {check_key.replace('_', ' ')}.",
+                            remediation,
+                        )
+                    )
 
         if "soc2" in regulations:
             for control_id, check_key, remediation in self._SOC2_CHECKS:
                 if check_key not in config or not config.get(check_key):
-                    findings.append(ComplianceFinding("SOC 2", control_id,
-                        ComplianceStatus.NEEDS_REVIEW,
-                        f"Control not confirmed: {check_key.replace('_', ' ')}.", remediation))
+                    findings.append(
+                        ComplianceFinding(
+                            "SOC 2",
+                            control_id,
+                            ComplianceStatus.NEEDS_REVIEW,
+                            f"Control not confirmed: {check_key.replace('_', ' ')}.",
+                            remediation,
+                        )
+                    )
 
         non_compliant = len([f for f in findings if f.status == ComplianceStatus.NON_COMPLIANT])
         return {

@@ -3,6 +3,7 @@
 
 Checks all 7 constitution principles programmatically where possible.
 """
+
 import ast
 from pathlib import Path
 
@@ -11,6 +12,7 @@ GREEN = "\033[92m"
 RED = "\033[91m"
 YELLOW = "\033[93m"
 RESET = "\033[0m"
+
 
 def check_file(path: Path) -> tuple[bool, str]:
     """Check if file exists and is valid Python."""
@@ -21,6 +23,7 @@ def check_file(path: Path) -> tuple[bool, str]:
         return True, "Valid Python syntax"
     except SyntaxError as e:
         return False, f"Syntax error: {e}"
+
 
 def check_reactive_properties(file_path: Path, expected_props: list[str]) -> tuple[bool, str]:
     """Check if file uses reactive properties correctly."""
@@ -40,6 +43,7 @@ def check_reactive_properties(file_path: Path, expected_props: list[str]) -> tup
         missing = set(expected_props) - set(found_props)
         return False, f"Missing reactive properties: {', '.join(missing)}"
 
+
 def check_work_decorator(file_path: Path) -> tuple[bool, str]:
     """Check if file uses @work decorator for I/O operations."""
     if not file_path.exists():
@@ -55,6 +59,7 @@ def check_work_decorator(file_path: Path) -> tuple[bool, str]:
         return True, "Uses @work decorator for async operations"
     else:
         return True, "No async I/O detected (OK)"
+
 
 def check_keyboard_bindings(file_path: Path, expected_bindings: list[str]) -> tuple[bool, str]:
     """Check if file defines expected keyboard bindings."""
@@ -73,6 +78,7 @@ def check_keyboard_bindings(file_path: Path, expected_bindings: list[str]) -> tu
         missing = set(expected_bindings) - set(found_bindings)
         return False, f"Missing bindings: {', '.join(missing)}"
 
+
 def check_logging(file_path: Path) -> tuple[bool, str]:
     """Check if file uses structured logging."""
     if not file_path.exists():
@@ -86,12 +92,14 @@ def check_logging(file_path: Path) -> tuple[bool, str]:
     else:
         return False, "No logging detected"
 
+
 def print_result(check_name: str, passed: bool, message: str):
     """Print a formatted check result."""
     status = f"{GREEN}✓{RESET}" if passed else f"{RED}✗{RESET}"
     print(f"{status} {check_name}")
     if message:
         print(f"  {message}")
+
 
 def main():
     base_path = Path(__file__).parent / "packages/lyra-cli/src/lyra_cli/tui_v2"
@@ -107,7 +115,9 @@ def main():
     print()
 
     app_file = base_path / "app.py"
-    passed, msg = check_reactive_properties(app_file, ["turn_index", "thinking_enabled", "fast_mode"])
+    passed, msg = check_reactive_properties(
+        app_file, ["turn_index", "thinking_enabled", "fast_mode"]
+    )
     print_result("App uses reactive state", passed, msg)
 
     metrics_file = base_path / "widgets/metrics_tracker.py"
@@ -149,7 +159,11 @@ def main():
     if compaction_file.exists():
         content = compaction_file.read_text()
         has_richlog = "RichLog" in content
-        print_result("Uses RichLog for streaming", has_richlog, "RichLog found in compaction_banner.py" if has_richlog else "No RichLog detected")
+        print_result(
+            "Uses RichLog for streaming",
+            has_richlog,
+            "RichLog found in compaction_banner.py" if has_richlog else "No RichLog detected",
+        )
     else:
         print_result("Uses RichLog for streaming", False, "compaction_banner.py not found")
     print()
@@ -174,7 +188,11 @@ def main():
         if widget_file.exists():
             content = widget_file.read_text()
             has_reactive = "reactive" in content
-            print_result(f"{widget_name}.py uses reactive", has_reactive, "reactive import found" if has_reactive else "No reactive detected")
+            print_result(
+                f"{widget_name}.py uses reactive",
+                has_reactive,
+                "reactive import found" if has_reactive else "No reactive detected",
+            )
     print()
 
     # VII. Observability
@@ -201,6 +219,7 @@ def main():
     print("  - Log file output verification")
     print()
     print("See PHASE_4_VERIFICATION_CHECKLIST.md for manual test cases.")
+
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,8 @@
 """lyra_harness_core.constitution — per-user 3-principle constitution.
 
-Per [docs/206-collaborative-ai-canon-2026.md](../../../../../../research/harness-engineering/docs/206-collaborative-ai-canon-2026.md) §5,
+Per
+[docs/206-collaborative-ai-canon-2026.md]
+(../../../../../../research/harness-engineering/docs/206-collaborative-ai-canon-2026.md) §5,
 ICAI (arXiv:2406.06560), C3AI (arXiv:2502.15861, ACM Web 2025).
 
 A user's personal constitution is the cleanest serialisable form of "what
@@ -16,6 +18,7 @@ Three core operations:
     - :meth:`ConstitutionRegistry.update_for_edit` — drift signal from
       PRELUDE/CIPHER (NeurIPS 2024) edit-as-preference pattern.
 """
+
 from __future__ import annotations
 
 from .constitution import (

@@ -103,14 +103,16 @@ class ASTTransformer:
                     def __init__(self) -> None:
                         self.changed = False
 
-                    def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.FunctionDef:
+                    def visit_FunctionDef(
+                        self, node: ast.FunctionDef, old_name=old_name, new_name=new_name
+                    ) -> ast.FunctionDef:
                         if node.name == old_name:
                             node.name = new_name
                             self.changed = True
                         return self.generic_visit(node)  # type: ignore[return-value]
 
                     def visit_AsyncFunctionDef(
-                        self, node: ast.AsyncFunctionDef
+                        self, node: ast.AsyncFunctionDef, old_name=old_name, new_name=new_name
                     ) -> ast.AsyncFunctionDef:
                         if node.name == old_name:
                             node.name = new_name

@@ -111,7 +111,11 @@ _CROSS_PROVIDER_FALLBACK: dict[ModelProvider, tuple[ModelProvider, ...]] = {
     ModelProvider.GOOGLE: (ModelProvider.ANTHROPIC, ModelProvider.OPENAI, ModelProvider.LITELLM),
     ModelProvider.LITELLM: (ModelProvider.ANTHROPIC, ModelProvider.OPENAI, ModelProvider.GOOGLE),
     ModelProvider.BEDROCK: (ModelProvider.ANTHROPIC, ModelProvider.LITELLM, ModelProvider.OPENAI),
-    ModelProvider.OPENROUTER: (ModelProvider.ANTHROPIC, ModelProvider.LITELLM, ModelProvider.OPENAI),
+    ModelProvider.OPENROUTER: (
+        ModelProvider.ANTHROPIC,
+        ModelProvider.LITELLM,
+        ModelProvider.OPENAI,
+    ),
 }
 
 
@@ -166,40 +170,44 @@ class ConfidenceEscalator:
             )
 
         # Record that we needed to escalate
-        steps.append(EscalationStep(
-            model=original_decision.model,
-            reason=EscalationReason.LOW_CONFIDENCE,
-            confidence=original_decision.confidence,
-            outcome="escalated",
-        ))
+        steps.append(
+            EscalationStep(
+                model=original_decision.model,
+                reason=EscalationReason.LOW_CONFIDENCE,
+                confidence=original_decision.confidence,
+                outcome="escalated",
+            )
+        )
 
         # Step 1: Same-tier, different provider
-        same_tier_alt = self._find_same_tier_alternatives(
-            original_decision.model, available_models
-        )
+        same_tier_alt = self._find_same_tier_alternatives(original_decision.model, available_models)
         for alt in same_tier_alt[:3]:
             if len(steps) >= self.max_escalation_steps:
                 break
             alt_decision = self._evaluate_alternative(alt, original_decision, strategy)
             if alt_decision.confidence >= self.confidence_threshold:
-                steps.append(EscalationStep(
-                    model=alt,
-                    reason=EscalationReason.LOW_CONFIDENCE,
-                    confidence=alt_decision.confidence,
-                    outcome="accepted",
-                ))
+                steps.append(
+                    EscalationStep(
+                        model=alt,
+                        reason=EscalationReason.LOW_CONFIDENCE,
+                        confidence=alt_decision.confidence,
+                        outcome="accepted",
+                    )
+                )
                 return EscalationResult(
                     final_decision=alt_decision,
                     steps=tuple(steps),
                     total_latency_ms=(time.time() - t0) * 1000,
                     escalated=True,
                 )
-            steps.append(EscalationStep(
-                model=alt,
-                reason=EscalationReason.LOW_CONFIDENCE,
-                confidence=alt_decision.confidence,
-                outcome="escalated",
-            ))
+            steps.append(
+                EscalationStep(
+                    model=alt,
+                    reason=EscalationReason.LOW_CONFIDENCE,
+                    confidence=alt_decision.confidence,
+                    outcome="escalated",
+                )
+            )
 
         # Step 2: Escalate to next tier up
         tier_idx = _TIER_ESCALATION.index(original_decision.model.tier)
@@ -213,46 +221,51 @@ class ConfidenceEscalator:
             for model in tier_models[:2]:
                 alt_decision = self._evaluate_alternative(model, original_decision, strategy)
                 if alt_decision.confidence >= self.confidence_threshold:
-                    steps.append(EscalationStep(
-                        model=model,
-                        reason=EscalationReason.LOW_CONFIDENCE,
-                        confidence=alt_decision.confidence,
-                        outcome="accepted",
-                    ))
+                    steps.append(
+                        EscalationStep(
+                            model=model,
+                            reason=EscalationReason.LOW_CONFIDENCE,
+                            confidence=alt_decision.confidence,
+                            outcome="accepted",
+                        )
+                    )
                     return EscalationResult(
                         final_decision=alt_decision,
                         steps=tuple(steps),
                         total_latency_ms=(time.time() - t0) * 1000,
                         escalated=True,
                     )
-                steps.append(EscalationStep(
-                    model=model,
-                    reason=EscalationReason.LOW_CONFIDENCE,
-                    confidence=alt_decision.confidence,
-                    outcome="escalated",
-                ))
+                steps.append(
+                    EscalationStep(
+                        model=model,
+                        reason=EscalationReason.LOW_CONFIDENCE,
+                        confidence=alt_decision.confidence,
+                        outcome="escalated",
+                    )
+                )
 
         # Step 3: Cross-provider fallback
-        fallback_providers = _CROSS_PROVIDER_FALLBACK.get(
-            original_decision.model.provider, ()
-        )
+        fallback_providers = _CROSS_PROVIDER_FALLBACK.get(original_decision.model.provider, ())
         for provider in fallback_providers:
             if len(steps) >= self.max_escalation_steps:
                 break
             provider_models = [
-                m for m in available_models
+                m
+                for m in available_models
                 if m.provider == provider and m.tier in (ModelTier.STANDARD, ModelTier.REASONING)
             ]
             provider_models.sort(key=lambda m: m.cost_per_1k_tokens)
             for model in provider_models[:1]:
                 alt_decision = self._evaluate_alternative(model, original_decision, strategy)
                 if alt_decision.confidence >= self.confidence_threshold - 0.1:
-                    steps.append(EscalationStep(
-                        model=model,
-                        reason=EscalationReason.PERFORMANCE_DEGRADED,
-                        confidence=alt_decision.confidence,
-                        outcome="accepted",
-                    ))
+                    steps.append(
+                        EscalationStep(
+                            model=model,
+                            reason=EscalationReason.PERFORMANCE_DEGRADED,
+                            confidence=alt_decision.confidence,
+                            outcome="accepted",
+                        )
+                    )
                     return EscalationResult(
                         final_decision=alt_decision,
                         steps=tuple(steps),
@@ -299,10 +312,7 @@ class ConfidenceEscalator:
         original: ModelSpec, available: list[ModelSpec]
     ) -> list[ModelSpec]:
         """Find models in the same tier but from different providers."""
-        return [
-            m for m in available
-            if m.tier == original.tier and m.provider != original.provider
-        ]
+        return [m for m in available if m.tier == original.tier and m.provider != original.provider]
 
     @staticmethod
     def _evaluate_alternative(

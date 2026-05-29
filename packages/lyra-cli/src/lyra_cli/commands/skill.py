@@ -1,11 +1,11 @@
 """``lyra skill`` — install and inspect skills (Phase N.3).
 
-The skill installer's logic lives in :mod:`lyra_skills.installer`; this
-module is just the Typer wrapper that turns it into a command-line UX.
-We intentionally keep the wrapper thin so embedded callers
-(:class:`lyra_cli.client.LyraClient` users, the future HTTP API)
-talk to the installer directly without going through Click.
+The skill installer's logic lives in :mod:`lyra_skills.installer`; this module is just the Typer
+wrapper that turns it into a command-line UX. We intentionally keep the wrapper thin so embedded
+callers (:class:`lyra_cli.client.LyraClient` users, the future HTTP API) talk to the installer
+directly without going through Click.
 """
+
 from __future__ import annotations
 
 import json as _json
@@ -50,21 +50,28 @@ _console = Console()
 @skill_app.command("add")
 def add(
     source: str = typer.Argument(
-        ..., help="Local path or git URL pointing at a SKILL.md-rooted directory.",
+        ...,
+        help="Local path or git URL pointing at a SKILL.md-rooted directory.",
     ),
     target: str | None = typer.Option(
-        None, "--target",
+        None,
+        "--target",
         help="Override install root (default: ~/.lyra/skills or $LYRA_HOME/skills).",
     ),
     subpath: str | None = typer.Option(
-        None, "--subpath",
+        None,
+        "--subpath",
         help="When the source repo holds many skills, point at one with this subpath.",
     ),
     ref: str | None = typer.Option(
-        None, "--ref", help="Git ref (branch/tag/commit) to checkout when source is a URL.",
+        None,
+        "--ref",
+        help="Git ref (branch/tag/commit) to checkout when source is a URL.",
     ),
     force: bool = typer.Option(
-        False, "--force", help="Overwrite an existing skill with the same id.",
+        False,
+        "--force",
+        help="Overwrite an existing skill with the same id.",
     ),
     json_out: bool = typer.Option(False, "--json", help="Emit a JSON result row."),
 ) -> None:
@@ -98,7 +105,7 @@ def add(
             typer.echo(_json.dumps({"ok": False, "error": str(e)}))
         else:
             _console.print(f"[red]install failed:[/] {e}")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
 
     payload = {
         "ok": True,
@@ -128,7 +135,8 @@ def add(
 @skill_app.command("list")
 def _list(
     target: str | None = typer.Option(
-        None, "--target",
+        None,
+        "--target",
         help="Override install root (default: ~/.lyra/skills).",
     ),
     json_out: bool = typer.Option(False, "--json"),
@@ -178,7 +186,9 @@ def _list(
 def remove(
     skill_id: str = typer.Argument(..., help="Skill id to remove (must already be installed)."),
     target: str | None = typer.Option(
-        None, "--target", help="Override install root (default: ~/.lyra/skills).",
+        None,
+        "--target",
+        help="Override install root (default: ~/.lyra/skills).",
     ),
     json_out: bool = typer.Option(False, "--json"),
 ) -> None:
@@ -193,7 +203,7 @@ def remove(
             typer.echo(_json.dumps({"ok": False, "error": str(e)}))
         else:
             _console.print(f"[red]remove failed:[/] {e}")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
 
     if json_out:
         typer.echo(_json.dumps({"ok": True, "id": skill_id, "path": str(removed)}))
@@ -227,9 +237,7 @@ def stats(
         "--top",
         help="Show only the top-N skills by utility (default: all).",
     ),
-    json_out: bool = typer.Option(
-        False, "--json", help="Emit one JSON list of stats rows."
-    ),
+    json_out: bool = typer.Option(False, "--json", help="Emit one JSON list of stats rows."),
 ) -> None:
     """Show per-skill utility from the Read-Write Reflective Learning ledger.
 
@@ -260,7 +268,7 @@ def stats(
             typer.echo(_json.dumps({"ok": False, "error": f"ledger unavailable: {e}"}))
         else:
             _console.print(f"[red]ledger unavailable:[/] {e}")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
 
     ledger = load_ledger()
     rows = top_n(ledger, n=top if top is not None else len(ledger.skills) or 1)
@@ -286,7 +294,9 @@ def stats(
         return
 
     if not rows:
-        _console.print("[dim]no skill activations recorded yet — chat with Lyra to populate the ledger[/]")
+        _console.print(
+            "[dim]no skill activations recorded yet — chat with Lyra to populate the ledger[/]"
+        )
         return
 
     table = Table(title="skill ledger — utility-ranked")
@@ -368,13 +378,12 @@ def _format_recent_failures(stats: object) -> str:
 
 
 def _call_llm_for_reflection(prompt: str) -> str:
-    """One-shot LLM call. Tests monkeypatch this to inject a stub.
+    """One-shot LLM call.
 
-    Uses :func:`lyra_cli.llm_factory.build_llm` to honour the user's
-    configured default provider (CLI ``setup`` flow), so reflection
-    runs through whichever model the user is paying for. Falls back
-    to ``"auto"`` so a fresh install with no model selected still
-    produces a sensible error rather than a stack trace.
+    Tests monkeypatch this to inject a stub.     Uses :func:`lyra_cli.llm_factory.build_llm` to
+    honour the user's     configured default provider (CLI ``setup`` flow), so reflection     runs
+    through whichever model the user is paying for. Falls back     to ``"auto"`` so a fresh install
+    with no model selected still     produces a sensible error rather than a stack trace.
     """
     from lyra_harness_core.messages import Message
 
@@ -393,11 +402,10 @@ def _call_llm_for_reflection(prompt: str) -> str:
 
 @skill_app.command("reflect")
 def reflect(
-    skill_id: str = typer.Argument(
-        ..., help="Skill id to rewrite (must be installed locally)."
-    ),
+    skill_id: str = typer.Argument(..., help="Skill id to rewrite (must be installed locally)."),
     target: str | None = typer.Option(
-        None, "--target",
+        None,
+        "--target",
         help="Override install root (default: ~/.lyra/skills).",
     ),
     apply: bool = typer.Option(
@@ -451,7 +459,7 @@ def reflect(
             typer.echo(_json.dumps({"ok": False, "error": f"ledger unavailable: {e}"}))
         else:
             _console.print(f"[red]reflect failed:[/] ledger unavailable: {e}")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
 
     ledger = load_ledger()
     stats = ledger.get(skill_id)
@@ -493,12 +501,10 @@ def reflect(
         raise
     except Exception as e:
         if json_out:
-            typer.echo(
-                _json.dumps({"ok": False, "error": f"LLM call failed: {e}"})
-            )
+            typer.echo(_json.dumps({"ok": False, "error": f"LLM call failed: {e}"}))
         else:
             _console.print(f"[red]reflect failed:[/] LLM call failed: {e}")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
 
     proposal = proposal.strip() + "\n"
 
@@ -514,7 +520,7 @@ def reflect(
                 typer.echo(_json.dumps({"ok": False, "error": f"write failed: {e}"}))
             else:
                 _console.print(f"[red]reflect failed:[/] write failed: {e}")
-            raise typer.Exit(code=1)
+            raise typer.Exit(code=1) from e
 
     if json_out:
         typer.echo(
@@ -531,9 +537,7 @@ def reflect(
         return
 
     if applied:
-        _console.print(
-            f"[green]applied[/] proposal to [bold]{skill_id}[/] (backup: SKILL.md.bak)"
-        )
+        _console.print(f"[green]applied[/] proposal to [bold]{skill_id}[/] (backup: SKILL.md.bak)")
     else:
         _console.print(
             f"[cyan]proposal[/] for [bold]{skill_id}[/] (dry-run, "
@@ -547,22 +551,20 @@ def reflect(
 # ---------------------------------------------------------------------------
 
 
-_STOPWORDS = frozenset(
-    """
+_STOPWORDS = frozenset(\
+                       """
     a an and are as at be but by can do does for from has have he her him his
     i in is it its like make me my of on or our please she should so
     that the their them there these they this to too us was we were
     what which who why will with would you your yours
-    """.split()
-)
+    """.split())
 
 
 def _stem(tok: str) -> str:
     """Drop trailing ``s``/``es`` on 5+ char tokens (naive plural strip).
 
-    Lets ``test`` and ``tests`` match the same cluster without
-    pulling in nltk. We deliberately leave shorter words alone
-    (``is``, ``us``) and never strip a double-s ending (``glass``,
+    Lets ``test`` and ``tests`` match the same cluster without pulling in nltk. We deliberately
+    leave shorter words alone (``is``, ``us``) and never strip a double-s ending (``glass``,
     ``compass``) — those would be over-aggressive false matches.
     """
     if len(tok) < 5:
@@ -603,9 +605,8 @@ def _jaccard(a: set[str], b: set[str]) -> float:
 def _load_user_prompts(events_path: Path) -> list[dict]:
     """Read ``events.jsonl`` and return ``user.prompt`` rows.
 
-    Returns each prompt as ``{"line": str, "ts": str, "session_id":
-    str, "tokens": set[str]}``. Malformed lines and non-prompt rows
-    are silently dropped.
+    Returns each prompt as ``{"line": str, "ts": str, "session_id": str, "tokens": set[str]}``.
+    Malformed lines and non-prompt rows are silently dropped.
     """
     if not events_path.is_file():
         return []
@@ -640,13 +641,12 @@ def _cluster_prompts(
 ) -> list[list[dict]]:
     """Greedy single-link clustering by Jaccard similarity.
 
-    O(n²) on the prompt list which is fine for typical user
-    histories (hundreds of turns). Each prompt joins the first
-    cluster whose centroid token set has Jaccard >= ``similarity``;
-    otherwise it seeds a new cluster.
+    O(n²) on the prompt list which is fine for typical user histories (hundreds of turns). Each
+    prompt joins the first cluster whose centroid token set has Jaccard >= ``similarity``; otherwise
+    it seeds a new cluster.
 
-    Clusters smaller than ``min_size`` are dropped — a single
-    occurrence isn't enough signal to justify a skill.
+    Clusters smaller than ``min_size`` are dropped — a single occurrence isn't enough signal to
+    justify a skill.
     """
     clusters: list[list[dict]] = []
     centroids: list[set[str]] = []
@@ -677,7 +677,7 @@ def _parse_skill_id(proposal_md: str) -> str | None:
     return None
 
 
-_CONSOLIDATE_PROMPT_TEMPLATE = """You are designing a new Lyra skill from a recurring user request pattern.
+_CONSOLIDATE_PROMPT_TEMPLATE = """Design a new Lyra skill from a recurring user request pattern.
 
 A "skill" is a markdown file (SKILL.md) that gets injected into the
 agent's system prompt when its keywords match the user's request.
@@ -710,11 +710,10 @@ Constraints:
 
 
 def _call_llm_for_consolidation(prompt: str) -> str:
-    """One-shot LLM call. Tests monkeypatch this to inject a stub.
+    """One-shot LLM call.
 
-    Mirrors :func:`_call_llm_for_reflection` so future-us can refactor
-    them into a single ``_one_shot(prompt)`` helper without breaking
-    tests.
+    Tests monkeypatch this to inject a stub.     Mirrors :func:`_call_llm_for_reflection` so future-
+    us can refactor     them into a single ``_one_shot(prompt)`` helper without breaking     tests.
     """
     from lyra_harness_core.messages import Message
 
@@ -915,15 +914,12 @@ def consolidate(
 # ---------------------------------------------------------------------------
 
 
-def _call_llm_for_optimize(
-    prompt: str, *, system: str = "", max_tokens: int = 2048
-) -> str:
+def _call_llm_for_optimize(prompt: str, *, system: str = "", max_tokens: int = 2048) -> str:
     """One LLM call used by the optimizer Executor/Analyst/Mutator triple.
 
-    Kept module-level so tests can monkeypatch a deterministic stub.
-    The lyra provider doesn't natively expose Pydantic structured
-    output, so the optimizer parses JSON from text — we just need a
-    sync ``str -> str`` call here.
+    Kept module-level so tests can monkeypatch a deterministic stub. The lyra provider doesn't
+    natively expose Pydantic structured output, so the optimizer parses JSON from text — we just
+    need a sync ``str -> str`` call here.
     """
     from lyra_harness_core.messages import Message
 
@@ -965,17 +961,11 @@ def _load_scenarios_yaml(path: Path) -> list:
     out: list = []
     for i, row in enumerate(raw):
         if not isinstance(row, dict):
-            raise typer.BadParameter(
-                f"scenarios[{i}] must be a mapping (got {type(row).__name__})"
-            )
+            raise typer.BadParameter(f"scenarios[{i}] must be a mapping (got {type(row).__name__})")
         prompt = str(row.get("prompt") or "").strip()
-        criterion = str(
-            row.get("eval_criterion") or row.get("eval") or ""
-        ).strip()
+        criterion = str(row.get("eval_criterion") or row.get("eval") or "").strip()
         if not prompt or not criterion:
-            raise typer.BadParameter(
-                f"scenarios[{i}] needs both 'prompt' and 'eval' (got {row!r})"
-            )
+            raise typer.BadParameter(f"scenarios[{i}] needs both 'prompt' and 'eval' (got {row!r})")
         out.append(OptimizeScenario(prompt=prompt, eval_criterion=criterion))
     if not out:
         raise typer.BadParameter(f"no scenarios in {path}")
@@ -986,16 +976,12 @@ class _ProviderLLMRunner:
     """Adapter binding lyra's provider call to the optimizer's protocol."""
 
     def call(self, prompt: str, *, system: str = "", max_tokens: int = 2048) -> str:
-        return _call_llm_for_optimize(
-            prompt, system=system, max_tokens=max_tokens
-        )
+        return _call_llm_for_optimize(prompt, system=system, max_tokens=max_tokens)
 
 
 @skill_app.command("optimize")
 def optimize(
-    skill_id: str = typer.Argument(
-        ..., help="Skill id to optimize (must be installed locally)."
-    ),
+    skill_id: str = typer.Argument(..., help="Skill id to optimize (must be installed locally)."),
     scenarios: str = typer.Option(
         ...,
         "--scenarios",
@@ -1085,7 +1071,7 @@ def optimize(
             typer.echo(_json.dumps({"ok": False, "error": str(e)}))
         else:
             _console.print(f"[red]optimize failed:[/] {e}")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
 
     current_md = skill_md.read_text(encoding="utf-8")
 
@@ -1095,9 +1081,7 @@ def optimize(
             cascade, _argus_root, _argus_skills = _build_argus_cascade(target)
         except Exception as e:  # noqa: BLE001 — argus is optional
             if not json_out:
-                _console.print(
-                    f"[yellow]argus telemetry disabled:[/] {e}"
-                )
+                _console.print(f"[yellow]argus telemetry disabled:[/] {e}")
             cascade = None
 
     def _on_round(r: OptimizeRound) -> None:
@@ -1105,18 +1089,12 @@ def optimize(
             ts=_time.time(),
             skill_id=skill_id,
             round_no=r.round_no,
-            strategy=(
-                r.mutation.strategy.value if r.mutation else ""
-            ),
+            strategy=(r.mutation.strategy.value if r.mutation else ""),
             pre_score=r.pre_score,
             post_score=r.post_score,
             accepted=r.accepted,
-            target_section=(
-                r.mutation.target_section if r.mutation else ""
-            ),
-            reasoning=(
-                r.mutation.reasoning if r.mutation else ""
-            ),
+            target_section=(r.mutation.target_section if r.mutation else ""),
+            reasoning=(r.mutation.reasoning if r.mutation else ""),
             error=r.error,
         )
         append_mutation(record)
@@ -1128,9 +1106,7 @@ def optimize(
                     success=r.accepted,
                     query=f"optimize round {r.round_no}",
                     score=r.post_score,
-                    detail=(
-                        r.mutation.reasoning if r.mutation else r.error
-                    ),
+                    detail=(r.mutation.reasoning if r.mutation else r.error),
                 )
             except Exception:  # noqa: BLE001 — telemetry must never fail the loop
                 pass
@@ -1167,7 +1143,7 @@ def optimize(
             typer.echo(_json.dumps({"ok": False, "error": str(e)}))
         else:
             _console.print(f"[red]optimize failed:[/] {e}")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
 
     applied = False
     if apply and result.final_md != current_md:
@@ -1203,9 +1179,7 @@ def optimize(
             f"(backup at {skill_md.with_suffix('.md.bak')})"
         )
     elif result.final_md != current_md:
-        _console.print(
-            "[dim]dry-run — re-run with --apply to write the new SKILL.md[/]"
-        )
+        _console.print("[dim]dry-run — re-run with --apply to write the new SKILL.md[/]")
         if result.diff:
             _console.print(result.diff)
 
@@ -1218,8 +1192,8 @@ def optimize(
 def _build_argus_cascade(target: str | None):
     """Construct a :class:`LyraArgusCascade` and index every installed skill.
 
-    Lazy import keeps the ``harness_skill_router`` dependency off the
-    cold path of unrelated commands.
+    Lazy import keeps the ``harness_skill_router`` dependency off the cold path of unrelated
+    commands.
     """
     from lyra_skills.argus_cascade import LyraArgusCascade
     from lyra_skills.installer import list_installed
@@ -1235,15 +1209,19 @@ def _build_argus_cascade(target: str | None):
 def route(
     query: str = typer.Argument(..., help="Natural-language description of what you need."),
     target: str | None = typer.Option(
-        None, "--target", help="Override install root (default: ~/.lyra/skills).",
+        None,
+        "--target",
+        help="Override install root (default: ~/.lyra/skills).",
     ),
     mode: str = typer.Option(
-        "auto", "--mode",
+        "auto",
+        "--mode",
         help="Cascade mode: auto, keyword, or semantic.",
     ),
     top_k: int = typer.Option(3, "--top-k", min=1, max=20),
     trace: bool = typer.Option(
-        False, "--trace",
+        False,
+        "--trace",
         help="Emit the full reasoning trace (per-tier elapsed_ms + bright lines).",
     ),
     json_out: bool = typer.Option(False, "--json"),
@@ -1265,8 +1243,7 @@ def route(
             "query": query,
             "mode": mode,
             "picks": [
-                {"id": p.manifest.id, "score": p.score, "reason": p.reason}
-                for p in result.picks
+                {"id": p.manifest.id, "score": p.score, "reason": p.reason} for p in result.picks
             ],
         }
         if trace:
@@ -1355,7 +1332,8 @@ def heartbeat(
 def retract(
     skill_id: str = typer.Argument(..., help="Skill id to tombstone."),
     reason: str = typer.Option(
-        ..., "--reason",
+        ...,
+        "--reason",
         help="Reason for retraction (lands in the Argus tombstone ledger).",
     ),
     target: str | None = typer.Option(None, "--target"),
@@ -1368,9 +1346,9 @@ def retract(
     except KeyError:
         if json_out:
             typer.echo(_json.dumps({"ok": False, "error": f"unknown skill {skill_id!r}"}))
-            raise typer.Exit(code=1)
+            raise typer.Exit(code=1) from None
         _console.print(f"[red]unknown skill {skill_id!r}[/]")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from None
 
     if json_out:
         typer.echo(_json.dumps({"ok": True, "skill_id": skill_id, "reason": reason}))

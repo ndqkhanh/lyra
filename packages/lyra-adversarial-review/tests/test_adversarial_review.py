@@ -62,6 +62,7 @@ from lyra_adversarial_review.review_config import (
 # Exceptions
 # =============================================================================
 
+
 class TestExceptions:
     def test_review_error(self) -> None:
         err = ReviewError("base error")
@@ -92,6 +93,7 @@ class TestExceptions:
 # =============================================================================
 # Review Config
 # =============================================================================
+
 
 class TestReviewConfig:
     def test_default_config(self) -> None:
@@ -169,6 +171,7 @@ class TestReviewConfig:
 # =============================================================================
 # Cross-Model Reviewer
 # =============================================================================
+
 
 class TestCrossModelReviewer:
     def test_assign_reviewer_different_family(self) -> None:
@@ -295,6 +298,7 @@ class TestCrossModelReviewer:
 # Claim Verifier (ARIS 3-Stage)
 # =============================================================================
 
+
 class TestClaimVerifier:
     @pytest.mark.asyncio
     async def test_create_claim(self) -> None:
@@ -309,7 +313,9 @@ class TestClaimVerifier:
     @pytest.mark.asyncio
     async def test_check_integrity_passes(self) -> None:
         verifier = ClaimVerifier()
-        claim = verifier.create_claim("A valid scientific claim about the research finding.", "source1", 0.9)
+        claim = verifier.create_claim(
+            "A valid scientific claim about the research finding.", "source1", 0.9
+        )
         result = await verifier.check_integrity(claim)
         assert result.stage == VerificationStage.INTEGRITY
         assert result.score >= 0.3
@@ -324,7 +330,9 @@ class TestClaimVerifier:
     @pytest.mark.asyncio
     async def test_check_integrity_fails_no_source(self) -> None:
         verifier = ClaimVerifier()
-        claim = verifier.create_claim("A long enough claim text that should pass length check", "", 0.5)
+        claim = verifier.create_claim(
+            "A long enough claim text that should pass length check", "", 0.5
+        )
         result = await verifier.check_integrity(claim)
         assert len(result.issues) > 0
 
@@ -333,7 +341,8 @@ class TestClaimVerifier:
         verifier = ClaimVerifier()
         claim = verifier.create_claim(
             "This might possibly be something that could maybe perhaps appear to be true.",
-            "src", 0.8,
+            "src",
+            0.8,
         )
         result = await verifier.check_integrity(claim)
         assert any("hedging" in i.lower() for i in result.issues)
@@ -342,7 +351,9 @@ class TestClaimVerifier:
     async def test_map_results_high_overlap(self) -> None:
         verifier = ClaimVerifier()
         claim = verifier.create_claim("quantum computing entanglement coherence", "src")
-        result = await verifier.map_results(claim, "quantum computing requires entanglement and coherence")
+        result = await verifier.map_results(
+            claim, "quantum computing requires entanglement and coherence"
+        )
         assert result.stage == VerificationStage.MAPPING
 
     @pytest.mark.asyncio
@@ -386,7 +397,9 @@ class TestClaimVerifier:
     @pytest.mark.asyncio
     async def test_full_verify_pipeline_all_pass(self) -> None:
         verifier = ClaimVerifier()
-        claim = verifier.create_claim("quantum computing research advances coherence", "research_paper", 0.9)
+        claim = verifier.create_claim(
+            "quantum computing research advances coherence", "research_paper", 0.9
+        )
         result = await verifier.verify(
             claim,
             "quantum computing research shows advances in coherence times",
@@ -406,13 +419,16 @@ class TestClaimVerifier:
     @pytest.mark.asyncio
     async def test_full_verify_fails_mapping(self) -> None:
         verifier = ClaimVerifier()
-        claim = verifier.create_claim("specific technical claim about advanced AI systems", "src", 0.9)
+        claim = verifier.create_claim(
+            "specific technical claim about advanced AI systems", "src", 0.9
+        )
         result = await verifier.verify(claim, "unrelated output about cooking")
         assert not result.overall_pass
 
     @pytest.mark.asyncio
     async def test_stage_result_frozen(self) -> None:
         from lyra_adversarial_review.claim_verifier import StageResult
+
         sr = StageResult(VerificationStage.INTEGRITY, True, 0.9, "evidence")
         with pytest.raises(AttributeError):
             sr.passed = False  # type: ignore[misc]
@@ -426,6 +442,7 @@ class TestClaimVerifier:
     @pytest.mark.asyncio
     async def test_verification_result_frozen(self) -> None:
         from lyra_adversarial_review.claim_verifier import StageResult
+
         claim = Claim("id", "text", "src")
         sr = StageResult(VerificationStage.INTEGRITY, True, 1.0, "ev")
         vr = VerificationResult(claim, [sr], True, 0.9)
@@ -443,6 +460,7 @@ class TestClaimVerifier:
     async def test_generate_report_with_results(self) -> None:
         verifier = ClaimVerifier()
         from lyra_adversarial_review.claim_verifier import StageResult
+
         claim = Claim("id1", "text", "src")
         sr = StageResult(VerificationStage.INTEGRITY, True, 0.9, "ev")
         vr = VerificationResult(claim, [sr], True, 0.9)
@@ -464,6 +482,7 @@ class TestClaimVerifier:
 # =============================================================================
 # Pivot/Refine Engine
 # =============================================================================
+
 
 class TestPivotRefine:
     def test_recovery_config_defaults(self) -> None:
@@ -524,7 +543,11 @@ class TestPivotRefine:
         engine = PivotRefineEngine()
         engine._pivot_count = 2  # Exhaust all pivots
         signal = FailureSignal(
-            FailureType.APPROACH_INVALID, "context", 4, 3,  # attempt_count=4 > max_attempts=3, but < escalation_threshold=5
+            # attempt_count=4 > max_attempts=3, but < escalation_threshold=5
+            FailureType.APPROACH_INVALID,
+            "context",
+            4,
+            3,
         )
         decision = engine.analyze_failure(signal)
         assert decision.action == RecoveryAction.ABORT
@@ -604,6 +627,7 @@ class TestPivotRefine:
 # =============================================================================
 # Claim Ledger
 # =============================================================================
+
 
 class TestClaimLedger:
     @pytest.mark.asyncio
@@ -765,6 +789,7 @@ class TestClaimLedger:
 # Citation Fencer
 # =============================================================================
 
+
 class TestCitationFencer:
     def test_extract_citations_arxiv(self) -> None:
         fencer = CitationFencer()
@@ -849,7 +874,9 @@ class TestCitationFencer:
     @pytest.mark.asyncio
     async def test_verify_citation_doi_valid(self) -> None:
         fencer = CitationFencer()
-        citation = Citation("DOI:10.1038/s41586-023-06466-5", SourceType.DOI, "10.1038/s41586-023-06466-5")
+        citation = Citation(
+            "DOI:10.1038/s41586-023-06466-5", SourceType.DOI, "10.1038/s41586-023-06466-5"
+        )
         result = await fencer.verify_citation(citation)
         assert result.is_valid
 
@@ -901,7 +928,8 @@ class TestCitationFencer:
     async def test_verify_citation_semantic_scholar(self) -> None:
         fencer = CitationFencer()
         citation = Citation(
-            "s2 test", SourceType.SEMANTIC_SCHOLAR,
+            "s2 test",
+            SourceType.SEMANTIC_SCHOLAR,
             "https://api.semanticscholar.org/graph/v1/paper/test",
         )
         result = await fencer.verify_citation(citation)
@@ -926,7 +954,10 @@ class TestCitationFencer:
     @pytest.mark.asyncio
     async def test_fence_document_mixed_validity(self) -> None:
         fencer = CitationFencer()
-        text = "arXiv:2203.15556 is valid. But check this bad DOI:10.invalid and According to a recent study, it works."
+        text =(
+            "arXiv:2203.15556 is valid. But check this bad DOI:10.invalid and According to a"
+            "recent study, it works."
+        )
         report = await fencer.fence_document(text)
         assert report.flagged_count > 0
 

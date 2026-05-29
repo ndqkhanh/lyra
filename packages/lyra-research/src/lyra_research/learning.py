@@ -6,6 +6,7 @@ workflow optimization, and a safety gate for self-improvement.
 
 All logic is rule/heuristic-based — no LLM calls.
 """
+
 from __future__ import annotations
 
 import json
@@ -24,12 +25,14 @@ from lyra_research.evaluation import QualityTrendTracker
 # ExtractedStrategy
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ExtractedStrategy:
     """A research strategy extracted from a completed session."""
+
     topic: str
     domain: str
-    topic_type: str          # "paper_search", "repo_search", "mixed_search"
+    topic_type: str  # "paper_search", "repo_search", "mixed_search"
     strategy_steps: list[str]
     outcome_score: float
     lessons_learned: str
@@ -40,6 +43,7 @@ class ExtractedStrategy:
 # ---------------------------------------------------------------------------
 # ResearchStrategyExtractor
 # ---------------------------------------------------------------------------
+
 
 class ResearchStrategyExtractor:
     """Extracts reusable research strategies from completed sessions.
@@ -134,9 +138,10 @@ class ResearchStrategyExtractor:
     def detect_topic_type(self, sources_found: dict[str, int]) -> str:
         """Detect whether this was primarily a paper or repo search."""
         paper_sources = sum(
-            v for k, v in sources_found.items()
-            if k in ("arxiv", "openreview", "semantic_scholar", "huggingface",
-                     "papers_with_code", "acl")
+            v
+            for k, v in sources_found.items()
+            if k
+            in ("arxiv", "openreview", "semantic_scholar", "huggingface", "papers_with_code", "acl")
         )
         repo_sources = sources_found.get("github", 0)
         if paper_sources > repo_sources * 2:
@@ -151,7 +156,11 @@ class ResearchStrategyExtractor:
         strategy: ExtractedStrategy,
     ) -> str:
         """Generate lesson text from a successful session."""
-        sources_str = ", ".join(strategy.key_sources_used) if strategy.key_sources_used else "multiple sources"
+        sources_str = (
+            ", ".join(strategy.key_sources_used)
+            if strategy.key_sources_used
+            else "multiple sources"
+        )
         return (
             f"Successful research ({strategy.outcome_score:.0%}) on '{progress.topic}'. "
             f"Key sources: {sources_str}. "
@@ -175,9 +184,11 @@ class ResearchStrategyExtractor:
 # CaseMatch + CaseSelectionPolicy
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class CaseMatch:
     """A matched past case with similarity score."""
+
     case: ResearchCase
     similarity_score: float
     overlap_terms: list[str]
@@ -192,13 +203,27 @@ class CaseSelectionPolicy:
     Online update: records which cases were actually useful.
     """
 
-    _STOPWORDS = frozenset({
-        "the", "a", "an", "of", "in", "for", "on", "with", "to",
-        "and", "or", "is", "are",
-    })
+    _STOPWORDS = frozenset(
+        {
+            "the",
+            "a",
+            "an",
+            "of",
+            "in",
+            "for",
+            "on",
+            "with",
+            "to",
+            "and",
+            "or",
+            "is",
+            "are",
+        }
+    )
 
     def __init__(self, case_bank: SessionCaseBank | None = None) -> None:
         from lyra_research.memory import SessionCaseBank as _SessionCaseBank
+
         self.case_bank = case_bank or _SessionCaseBank()
         self._usefulness_scores: dict[str, float] = {}
 
@@ -214,11 +239,13 @@ class CaseSelectionPolicy:
             if sim > 0:
                 usefulness = self._usefulness_scores.get(case.id, 1.0)
                 adjusted_sim = sim * usefulness * (0.5 + 0.5 * case.quality_score)
-                matches.append(CaseMatch(
-                    case=case,
-                    similarity_score=adjusted_sim,
-                    overlap_terms=terms,
-                ))
+                matches.append(
+                    CaseMatch(
+                        case=case,
+                        similarity_score=adjusted_sim,
+                        overlap_terms=terms,
+                    )
+                )
 
         matches.sort(key=lambda m: m.similarity_score, reverse=True)
         return matches[:top_k]
@@ -247,9 +274,11 @@ class CaseSelectionPolicy:
 # DomainModel + DomainExpertiseAccumulator
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class DomainModel:
     """Accumulated expertise model for a research domain."""
+
     domain: str
     key_venues: list[str] = field(default_factory=list)
     landmark_papers: list[str] = field(default_factory=list)
@@ -355,9 +384,11 @@ class DomainExpertiseAccumulator:
 # WorkflowInsight + ResearchWorkflowOptimizer
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class WorkflowInsight:
     """An insight about what works best in research workflows."""
+
     insight_type: str
     domain: str
     description: str
@@ -384,33 +415,41 @@ class ResearchWorkflowOptimizer:
         insights: list[WorkflowInsight] = []
 
         if trend_tracker.is_improving("overall_score"):
-            insights.append(WorkflowInsight(
-                insight_type="trend",
-                domain="general",
-                description="Overall research quality is improving",
-                evidence=f"Last 3 sessions trend upward (avg: {trend_tracker.average():.0%})",
-                confidence=0.7,
-            ))
+            insights.append(
+                WorkflowInsight(
+                    insight_type="trend",
+                    domain="general",
+                    description="Overall research quality is improving",
+                    evidence=f"Last 3 sessions trend upward (avg: {trend_tracker.average():.0%})",
+                    confidence=0.7,
+                )
+            )
 
         for domain, model in domain_models.items():
             if model.total_sessions >= 2 and model.avg_quality >= 0.75:
-                insights.append(WorkflowInsight(
-                    insight_type="best_domain",
-                    domain=domain,
-                    description=f"Strong research quality in {domain} domain",
-                    evidence=f"{model.total_sessions} sessions, avg quality {model.avg_quality:.0%}",
-                    confidence=min(model.total_sessions / 5, 1.0) * model.avg_quality,
-                ))
+                insights.append(
+                    WorkflowInsight(
+                        insight_type="best_domain",
+                        domain=domain,
+                        description=f"Strong research quality in {domain} domain",
+                        evidence=(
+                            f"{model.total_sessions} sessions, avg quality {model.avg_quality:.0%}"
+                        ),
+                        confidence=min(model.total_sessions / 5, 1.0) * model.avg_quality,
+                    )
+                )
 
         avg_fidelity = trend_tracker.average("citation_fidelity")
         if avg_fidelity < 1.0:
-            insights.append(WorkflowInsight(
-                insight_type="quality_gap",
-                domain="general",
-                description="Citation fidelity below 100% — review source binding",
-                evidence=f"Average fidelity: {avg_fidelity:.0%}",
-                confidence=0.9,
-            ))
+            insights.append(
+                WorkflowInsight(
+                    insight_type="quality_gap",
+                    domain="general",
+                    description="Citation fidelity below 100% — review source binding",
+                    evidence=f"Average fidelity: {avg_fidelity:.0%}",
+                    confidence=0.9,
+                )
+            )
 
         return insights
 
@@ -434,9 +473,11 @@ class ResearchWorkflowOptimizer:
 # GateDecision + SelfImprovementGate
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class GateDecision:
     """Decision from the self-improvement gate."""
+
     approved: bool
     reason: str
     before_score: float
@@ -470,7 +511,9 @@ class SelfImprovementGate:
         if len(before_scores) < self.MIN_TEST_SESSIONS:
             return GateDecision(
                 approved=False,
-                reason=f"Insufficient test sessions: {len(before_scores)} < {self.MIN_TEST_SESSIONS}",
+                reason=(
+                    f"Insufficient test sessions: {len(before_scores)} < {self.MIN_TEST_SESSIONS}"
+                ),
                 before_score=0.0,
                 after_score=0.0,
                 improvement=0.0,
@@ -483,7 +526,10 @@ class SelfImprovementGate:
         if improvement < self.IMPROVEMENT_THRESHOLD:
             return GateDecision(
                 approved=False,
-                reason=f"Insufficient improvement: {improvement:.1%} < {self.IMPROVEMENT_THRESHOLD:.0%}",
+                reason=(
+                    f"Insufficient improvement: {improvement:.1%} < "
+                    f"{self.IMPROVEMENT_THRESHOLD:.0%}"
+                ),
                 before_score=before_avg,
                 after_score=after_avg,
                 improvement=improvement,
@@ -493,7 +539,10 @@ class SelfImprovementGate:
         if min_after < before_avg - 0.1:
             return GateDecision(
                 approved=False,
-                reason=f"Regression detected: worst after-score {min_after:.0%} < baseline {before_avg:.0%}",
+                reason=(
+                    f"Regression detected: worst after-score {min_after:.0%} < baseline "
+                    f"{before_avg:.0%}"
+                ),
                 before_score=before_avg,
                 after_score=after_avg,
                 improvement=improvement,

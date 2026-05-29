@@ -9,6 +9,7 @@ language-server binary) we raise :class:`FeatureUnavailable` with an
 install hint — callers can catch it and either fall back to
 ``MockLSPBackend`` or skip registering the ``lsp`` tool.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -53,7 +54,9 @@ class MultilspyBackend:
         self._ensure_started()
         return self._server.request_diagnostics(file)  # type: ignore[union-attr]
 
-    def hover(self, *, file: str, line: int = 0, char: int = 0, **_: Any) -> str:  # pragma: no cover
+    def hover(
+        self, *, file: str, line: int = 0, char: int = 0, **_: Any
+    ) -> str:  # pragma: no cover
         self._ensure_started()
         return self._server.request_hover(file, line, char) or ""  # type: ignore[union-attr]
 
@@ -61,7 +64,8 @@ class MultilspyBackend:
         self, *, file: str, line: int = 0, char: int = 0, **_: Any
     ) -> list[dict]:  # pragma: no cover
         self._ensure_started()
-        return list(self._server.request_references(file, line, char) or [])  # type: ignore[union-attr]
+        # type: ignore[union-attr]
+        return list(self._server.request_references(file, line, char) or [])
 
     def definition(
         self, *, file: str, line: int = 0, char: int = 0, **_: Any

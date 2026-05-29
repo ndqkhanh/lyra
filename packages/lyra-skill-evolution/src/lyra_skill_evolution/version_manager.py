@@ -209,7 +209,9 @@ class VersionManager:
             self._replace_version(skill_id, rolled_back)
 
         # Create a new version that reverts to the target
-        new_version_number = (history.latest.version_number + 1) if history.latest else target_version_number + 1
+        new_version_number = (
+            (history.latest.version_number + 1) if history.latest else target_version_number + 1
+        )
         new_version = SkillVersion(
             skill_id=skill_id,
             version_number=new_version_number,

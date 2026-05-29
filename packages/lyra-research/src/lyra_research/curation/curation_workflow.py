@@ -1,4 +1,5 @@
 """Curation Workflow — Decision-making process for knowledge curation."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -74,7 +75,10 @@ class CurationWorkflow:
             return CurationDecision(
                 decision_type=DecisionType.APPROVE,
                 entry_id=entry.id,
-                reason=f"Quality score {entry.quality_score:.2f} meets threshold {self.quality_threshold:.2f}",
+                reason=(
+                    f"Quality score {entry.quality_score:.2f} meets threshold "
+                    f"{self.quality_threshold:.2f}"
+                ),
                 quality_threshold=self.quality_threshold,
             )
         elif entry.quality_score >= self.quality_threshold - 0.1:
@@ -82,7 +86,10 @@ class CurationWorkflow:
             return CurationDecision(
                 decision_type=DecisionType.REQUEST_REVISION,
                 entry_id=entry.id,
-                reason=f"Quality score {entry.quality_score:.2f} slightly below threshold {self.quality_threshold:.2f}",
+                reason=(
+                    f"Quality score {entry.quality_score:.2f} slightly below threshold "
+                    f"{self.quality_threshold:.2f}"
+                ),
                 feedback="Please improve content quality to meet acceptance criteria",
                 quality_threshold=self.quality_threshold,
             )
@@ -91,7 +98,10 @@ class CurationWorkflow:
             return CurationDecision(
                 decision_type=DecisionType.REJECT,
                 entry_id=entry.id,
-                reason=f"Quality score {entry.quality_score:.2f} significantly below threshold {self.quality_threshold:.2f}",
+                reason=(
+                    f"Quality score {entry.quality_score:.2f} significantly below threshold "
+                    f"{self.quality_threshold:.2f}"
+                ),
                 quality_threshold=self.quality_threshold,
             )
 
@@ -124,9 +134,7 @@ class CurationWorkflow:
         rejected_entry.metadata["rejection_reason"] = reason
         return rejected_entry
 
-    def request_revision(
-        self, entry: KnowledgeEntry, feedback: str
-    ) -> KnowledgeEntry:
+    def request_revision(self, entry: KnowledgeEntry, feedback: str) -> KnowledgeEntry:
         """
         Request revision with feedback.
 
@@ -156,9 +164,7 @@ class CurationWorkflow:
             metadata=entry.metadata,
         )
 
-    def apply_decision(
-        self, entry: KnowledgeEntry, decision: CurationDecision
-    ) -> KnowledgeEntry:
+    def apply_decision(self, entry: KnowledgeEntry, decision: CurationDecision) -> KnowledgeEntry:
         """
         Apply curation decision to entry.
 

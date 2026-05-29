@@ -10,6 +10,7 @@ from typing import Any
 @dataclass
 class Observation:
     """A single observation from user interaction"""
+
     timestamp: datetime
     session_id: str
     tool_name: str
@@ -73,7 +74,9 @@ class ObservationCapture:
 
         return observations
 
-    def capture_from_hook(self, hook_context: dict[str, Any], session_id: str, project_id: str | None = None):
+    def capture_from_hook(
+        self, hook_context: dict[str, Any], session_id: str, project_id: str | None = None
+    ):
         """Capture observation from hook context"""
         observation = Observation(
             timestamp=datetime.now(),

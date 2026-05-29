@@ -1,4 +1,5 @@
 """Meta-agent controller for evolution."""
+
 import json
 from datetime import datetime
 from pathlib import Path
@@ -45,7 +46,9 @@ class MetaAgent:
             edit_type=EditType.AGENT_CONTEXT,
             target_path="skills.md",
             content="# Updated skills based on observation",
-            rationale=f"Observed {obs.num_candidates} candidates with avg score {obs.avg_score:.2f}",
+            rationale=(
+                f"Observed {obs.num_candidates} candidates with avg score {obs.avg_score:.2f}"
+            ),
         )
 
     def apply_edit(self, action: EditAction) -> None:

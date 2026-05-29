@@ -8,7 +8,7 @@ before promoting to episodic memory (L2).
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 @dataclass

@@ -44,7 +44,14 @@ class TestNegotiationPhase:
         assert NegotiationPhase.IMPASSE.value == "IMPASSE"
 
     def test_all_phases_present(self) -> None:
-        expected = {"PROPOSAL", "COUNTER_PROPOSAL", "CLARIFICATION", "CONCESSION", "AGREEMENT", "IMPASSE"}
+        expected = {
+            "PROPOSAL",
+            "COUNTER_PROPOSAL",
+            "CLARIFICATION",
+            "CONCESSION",
+            "AGREEMENT",
+            "IMPASSE",
+        }
         actual = {m.value for m in NegotiationPhase}
         assert actual == expected
 

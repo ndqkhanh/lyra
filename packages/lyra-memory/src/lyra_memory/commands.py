@@ -108,7 +108,9 @@ class MemoryCommands:
             source_span="manual",
         )
 
-        return f"Memory added successfully!\nID: {memory.id}\nStatus: {memory.verifier_status.value}"
+        return (
+            f"Memory added successfully!\nID: {memory.id}\nStatus: {memory.verifier_status.value}"
+        )
 
     def edit(self, memory_id: str, content: str) -> str:
         """

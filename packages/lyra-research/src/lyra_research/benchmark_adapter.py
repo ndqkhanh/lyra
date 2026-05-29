@@ -12,6 +12,7 @@ Grounding:
 - ResearcherBench (Liu et al. 2026) — 65 frontier AI research questions
 - DeepResearch-ReportEval — faithfulness / groundedness axes
 """
+
 from __future__ import annotations
 
 import json
@@ -41,9 +42,9 @@ class BenchmarkQuestion:
     """One ResearcherBench-style frontier research question."""
 
     id: str
-    domain: str           # "ml" | "nlp" | "agents" | "systems" | "alignment"
+    domain: str  # "ml" | "nlp" | "agents" | "systems" | "alignment"
     question: str
-    difficulty: str = "medium"   # "easy" | "medium" | "hard"
+    difficulty: str = "medium"  # "easy" | "medium" | "hard"
     expected_sources: int = 5
     expected_gaps: int = 1
 
@@ -54,75 +55,177 @@ class BenchmarkQuestion:
 
 _DEFAULT_QUESTIONS: tuple[BenchmarkQuestion, ...] = (
     # --- Agents (13) ---
-    BenchmarkQuestion("Q01", "agents", "Compare ReAct, Reflexion, and Voyager memory strategies", "medium"),
-    BenchmarkQuestion("Q02", "agents", "Survey closed-loop self-rewriting agent architectures since 2024", "hard"),
-    BenchmarkQuestion("Q03", "agents", "What are the SOTA benchmarks for multi-hop agent reasoning?", "medium"),
-    BenchmarkQuestion("Q04", "agents", "Describe LightRAG and HippoRAG graph-memory designs", "medium"),
-    BenchmarkQuestion("Q05", "agents", "Compare IRCoT, Search-R1, and BAAR routing for agent trajectories", "hard"),
-    BenchmarkQuestion("Q06", "agents", "Survey agent observability frameworks (Phoenix, Langfuse, OpenTelemetry GenAI)", "easy"),
-    BenchmarkQuestion("Q07", "agents", "Compare model context protocol (MCP) and agent-2-agent (A2A) standards", "medium"),
-    BenchmarkQuestion("Q08", "agents", "What stability budgets work best for self-rewriting agents?", "hard"),
-    BenchmarkQuestion("Q09", "agents", "Identify gaps in trace-grounded reflection methods", "hard"),
-    BenchmarkQuestion("Q10", "agents", "Best frameworks for fleet-managed parallel agent evolution", "medium"),
-    BenchmarkQuestion("Q11", "agents", "Compare Voyager, SKILL, and ATLAS-RTC skill accumulation", "hard"),
-    BenchmarkQuestion("Q12", "agents", "Survey HITL-interrupt patterns in LangGraph-style checkpointing", "medium"),
-    BenchmarkQuestion("Q13", "agents", "What evaluators detect prompt-injection in retrieval-augmented agents?", "medium"),
+    BenchmarkQuestion(
+        "Q01", "agents", "Compare ReAct, Reflexion, and Voyager memory strategies", "medium"
+    ),
+    BenchmarkQuestion(
+        "Q02", "agents", "Survey closed-loop self-rewriting agent architectures since 2024", "hard"
+    ),
+    BenchmarkQuestion(
+        "Q03", "agents", "What are the SOTA benchmarks for multi-hop agent reasoning?", "medium"
+    ),
+    BenchmarkQuestion(
+        "Q04", "agents", "Describe LightRAG and HippoRAG graph-memory designs", "medium"
+    ),
+    BenchmarkQuestion(
+        "Q05", "agents", "Compare IRCoT, Search-R1, and BAAR routing for agent trajectories", "hard"
+    ),
+    BenchmarkQuestion(
+        "Q06",
+        "agents",
+        "Survey agent observability frameworks (Phoenix, Langfuse, OpenTelemetry GenAI)",
+        "easy",
+    ),
+    BenchmarkQuestion(
+        "Q07",
+        "agents",
+        "Compare model context protocol (MCP) and agent-2-agent (A2A) standards",
+        "medium",
+    ),
+    BenchmarkQuestion(
+        "Q08", "agents", "What stability budgets work best for self-rewriting agents?", "hard"
+    ),
+    BenchmarkQuestion(
+        "Q09", "agents", "Identify gaps in trace-grounded reflection methods", "hard"
+    ),
+    BenchmarkQuestion(
+        "Q10", "agents", "Best frameworks for fleet-managed parallel agent evolution", "medium"
+    ),
+    BenchmarkQuestion(
+        "Q11", "agents", "Compare Voyager, SKILL, and ATLAS-RTC skill accumulation", "hard"
+    ),
+    BenchmarkQuestion(
+        "Q12", "agents", "Survey HITL-interrupt patterns in LangGraph-style checkpointing", "medium"
+    ),
+    BenchmarkQuestion(
+        "Q13",
+        "agents",
+        "What evaluators detect prompt-injection in retrieval-augmented agents?",
+        "medium",
+    ),
     # --- ML (13) ---
-    BenchmarkQuestion("Q14", "ml", "Transformer architecture variants since GPT-4 (2024-2026)", "medium"),
-    BenchmarkQuestion("Q15", "ml", "Compare DPO, IPO, and SimPO preference-tuning algorithms", "hard"),
-    BenchmarkQuestion("Q16", "ml", "Survey speculative decoding methods and their speedups", "medium"),
+    BenchmarkQuestion(
+        "Q14", "ml", "Transformer architecture variants since GPT-4 (2024-2026)", "medium"
+    ),
+    BenchmarkQuestion(
+        "Q15", "ml", "Compare DPO, IPO, and SimPO preference-tuning algorithms", "hard"
+    ),
+    BenchmarkQuestion(
+        "Q16", "ml", "Survey speculative decoding methods and their speedups", "medium"
+    ),
     BenchmarkQuestion("Q17", "ml", "Mixture-of-experts routing: granular vs coarse", "medium"),
-    BenchmarkQuestion("Q18", "ml", "State-space models vs transformers on long-context tasks", "hard"),
+    BenchmarkQuestion(
+        "Q18", "ml", "State-space models vs transformers on long-context tasks", "hard"
+    ),
     BenchmarkQuestion("Q19", "ml", "Test-time scaling laws for reasoning models", "hard"),
     BenchmarkQuestion("Q20", "ml", "Compare RoPE, ALiBi, and YaRN positional encodings", "medium"),
     BenchmarkQuestion("Q21", "ml", "Distillation strategies for small reasoning models", "medium"),
-    BenchmarkQuestion("Q22", "ml", "Efficient attention: FlashAttention v1, v2, v3 differences", "easy"),
+    BenchmarkQuestion(
+        "Q22", "ml", "Efficient attention: FlashAttention v1, v2, v3 differences", "easy"
+    ),
     BenchmarkQuestion("Q23", "ml", "Quantisation: GPTQ vs AWQ vs SmoothQuant", "medium"),
     BenchmarkQuestion("Q24", "ml", "Best practices for SFT data curation in 2026", "medium"),
     BenchmarkQuestion("Q25", "ml", "Hybrid attention models combining sparse + dense", "hard"),
     BenchmarkQuestion("Q26", "ml", "Survey reasoning RL methods (RLOO, GRPO, REINFORCE++)", "hard"),
     # --- NLP (13) ---
-    BenchmarkQuestion("Q27", "nlp", "Survey retrieval-augmented generation evaluation methods", "medium"),
-    BenchmarkQuestion("Q28", "nlp", "Long-context reasoning benchmarks (RULER, ZeroSCROLLS, Loong)", "medium"),
+    BenchmarkQuestion(
+        "Q27", "nlp", "Survey retrieval-augmented generation evaluation methods", "medium"
+    ),
+    BenchmarkQuestion(
+        "Q28", "nlp", "Long-context reasoning benchmarks (RULER, ZeroSCROLLS, Loong)", "medium"
+    ),
     BenchmarkQuestion("Q29", "nlp", "Compare BM25, Contriever, and BGE retrievers in 2026", "easy"),
-    BenchmarkQuestion("Q30", "nlp", "Cross-encoder vs late-interaction (ColBERT) ranking", "medium"),
-    BenchmarkQuestion("Q31", "nlp", "Hallucination detection methods in long-form generation", "hard"),
+    BenchmarkQuestion(
+        "Q30", "nlp", "Cross-encoder vs late-interaction (ColBERT) ranking", "medium"
+    ),
+    BenchmarkQuestion(
+        "Q31", "nlp", "Hallucination detection methods in long-form generation", "hard"
+    ),
     BenchmarkQuestion("Q32", "nlp", "Multilingual reasoning benchmark gaps", "hard"),
     BenchmarkQuestion("Q33", "nlp", "Survey query rewriting techniques for RAG", "medium"),
     BenchmarkQuestion("Q34", "nlp", "Compare GraphRAG variants for enterprise documents", "medium"),
-    BenchmarkQuestion("Q35", "nlp", "Citation faithfulness metrics for AI research reports", "hard"),
+    BenchmarkQuestion(
+        "Q35", "nlp", "Citation faithfulness metrics for AI research reports", "hard"
+    ),
     BenchmarkQuestion("Q36", "nlp", "Code-switching evaluation in multilingual LLMs", "medium"),
     BenchmarkQuestion("Q37", "nlp", "Best evaluation of structured-output JSON generation", "easy"),
     BenchmarkQuestion("Q38", "nlp", "Survey constraint-aware decoding methods", "medium"),
-    BenchmarkQuestion("Q39", "nlp", "Tokeniser quality for non-Latin scripts in 2026 models", "medium"),
+    BenchmarkQuestion(
+        "Q39", "nlp", "Tokeniser quality for non-Latin scripts in 2026 models", "medium"
+    ),
     # --- Systems (13) ---
-    BenchmarkQuestion("Q40", "systems", "Compare vLLM, SGLang, and LMDeploy serving frameworks", "medium"),
-    BenchmarkQuestion("Q41", "systems", "Prefix caching strategies in production LLM serving", "medium"),
-    BenchmarkQuestion("Q42", "systems", "Distributed training: ZeRO-Infinity vs FSDP2 vs DeepSpeed-Ulysses", "hard"),
-    BenchmarkQuestion("Q43", "systems", "Survey GPU kernel libraries (Triton, CUTLASS, ThunderKittens)", "hard"),
-    BenchmarkQuestion("Q44", "systems", "Compare paged attention and continuous batching tradeoffs", "medium"),
-    BenchmarkQuestion("Q45", "systems", "Best practices for LLM checkpoint sharding in 2026", "medium"),
-    BenchmarkQuestion("Q46", "systems", "Survey HBM3e and HBM4 memory bandwidth implications", "easy"),
+    BenchmarkQuestion(
+        "Q40", "systems", "Compare vLLM, SGLang, and LMDeploy serving frameworks", "medium"
+    ),
+    BenchmarkQuestion(
+        "Q41", "systems", "Prefix caching strategies in production LLM serving", "medium"
+    ),
+    BenchmarkQuestion(
+        "Q42",
+        "systems",
+        "Distributed training: ZeRO-Infinity vs FSDP2 vs DeepSpeed-Ulysses",
+        "hard",
+    ),
+    BenchmarkQuestion(
+        "Q43", "systems", "Survey GPU kernel libraries (Triton, CUTLASS, ThunderKittens)", "hard"
+    ),
+    BenchmarkQuestion(
+        "Q44", "systems", "Compare paged attention and continuous batching tradeoffs", "medium"
+    ),
+    BenchmarkQuestion(
+        "Q45", "systems", "Best practices for LLM checkpoint sharding in 2026", "medium"
+    ),
+    BenchmarkQuestion(
+        "Q46", "systems", "Survey HBM3e and HBM4 memory bandwidth implications", "easy"
+    ),
     BenchmarkQuestion("Q47", "systems", "Compare H100, B200, and MI300X for inference", "easy"),
     BenchmarkQuestion("Q48", "systems", "Cost-aware autoscaling for LLM serving fleets", "medium"),
     BenchmarkQuestion("Q49", "systems", "Multi-tenant isolation in shared GPU serving", "hard"),
-    BenchmarkQuestion("Q50", "systems", "Compare TensorRT-LLM, ONNX Runtime, and vLLM for edge inference", "medium"),
+    BenchmarkQuestion(
+        "Q50",
+        "systems",
+        "Compare TensorRT-LLM, ONNX Runtime, and vLLM for edge inference",
+        "medium",
+    ),
     BenchmarkQuestion("Q51", "systems", "Survey speculative-decoding kernel optimisations", "hard"),
-    BenchmarkQuestion("Q52", "systems", "Throughput vs latency tradeoffs in chunked-prefill", "medium"),
+    BenchmarkQuestion(
+        "Q52", "systems", "Throughput vs latency tradeoffs in chunked-prefill", "medium"
+    ),
     # --- Alignment (13) ---
     BenchmarkQuestion("Q53", "alignment", "Compare RLHF, DPO, and KTO alignment methods", "medium"),
     BenchmarkQuestion("Q54", "alignment", "Survey constitutional AI variants in 2026", "medium"),
-    BenchmarkQuestion("Q55", "alignment", "Best practices for jailbreak robustness evaluation", "hard"),
-    BenchmarkQuestion("Q56", "alignment", "Compare red-teaming frameworks for frontier models", "medium"),
-    BenchmarkQuestion("Q57", "alignment", "Survey scalable oversight methods (debate, recursive reward modeling)", "hard"),
-    BenchmarkQuestion("Q58", "alignment", "Interpretability: SAE vs probing vs causal tracing in 2026", "hard"),
+    BenchmarkQuestion(
+        "Q55", "alignment", "Best practices for jailbreak robustness evaluation", "hard"
+    ),
+    BenchmarkQuestion(
+        "Q56", "alignment", "Compare red-teaming frameworks for frontier models", "medium"
+    ),
+    BenchmarkQuestion(
+        "Q57",
+        "alignment",
+        "Survey scalable oversight methods (debate, recursive reward modeling)",
+        "hard",
+    ),
+    BenchmarkQuestion(
+        "Q58", "alignment", "Interpretability: SAE vs probing vs causal tracing in 2026", "hard"
+    ),
     BenchmarkQuestion("Q59", "alignment", "Compare alignment-faking detection methods", "hard"),
     BenchmarkQuestion("Q60", "alignment", "Survey deception and sandbagging benchmarks", "hard"),
-    BenchmarkQuestion("Q61", "alignment", "Best evaluations for tool-use safety in agents", "medium"),
-    BenchmarkQuestion("Q62", "alignment", "Compare model-organisms-of-misalignment programs", "hard"),
-    BenchmarkQuestion("Q63", "alignment", "Survey CBRN safeguards in frontier model evals", "medium"),
-    BenchmarkQuestion("Q64", "alignment", "Mechanistic anomaly detection methods 2024-2026", "hard"),
-    BenchmarkQuestion("Q65", "alignment", "Compare control evaluations vs capability evaluations", "medium"),
+    BenchmarkQuestion(
+        "Q61", "alignment", "Best evaluations for tool-use safety in agents", "medium"
+    ),
+    BenchmarkQuestion(
+        "Q62", "alignment", "Compare model-organisms-of-misalignment programs", "hard"
+    ),
+    BenchmarkQuestion(
+        "Q63", "alignment", "Survey CBRN safeguards in frontier model evals", "medium"
+    ),
+    BenchmarkQuestion(
+        "Q64", "alignment", "Mechanistic anomaly detection methods 2024-2026", "hard"
+    ),
+    BenchmarkQuestion(
+        "Q65", "alignment", "Compare control evaluations vs capability evaluations", "medium"
+    ),
 )
 
 assert len(_DEFAULT_QUESTIONS) == 65, "ResearcherBench requires exactly 65 questions"
@@ -141,16 +244,14 @@ class BenchmarkResult:
     domain: str
     difficulty: str
 
-    faithfulness: float = 0.0     # 1.0 if all claims map to real sources
-    groundedness: float = 0.0     # fraction of claims with >=1 supporting source
+    faithfulness: float = 0.0  # 1.0 if all claims map to real sources
+    groundedness: float = 0.0  # fraction of claims with >=1 supporting source
     coverage_score: float = 0.0
     citation_fidelity: float = 0.0
     overall_score: float = 0.0
     passed: bool = False
     notes: str = ""
-    measured_at: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    measured_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
     def to_dict(self) -> dict:
         return {

@@ -127,7 +127,7 @@ class PreIndexer:
                 content = f.read()
         except OSError as e:
             from .exceptions import IndexingError
-            raise IndexingError(abs_path, str(e))
+            raise IndexingError(abs_path, str(e)) from e
 
         content_hash = str(hash(content))
         lines = content.count("\n") + 1

@@ -201,7 +201,12 @@ class TestDataclassContracts:
 
     def test_compound_result_has_all_required_fields(self):
         slots = tuple(
-            SlotOutput(role=r, content=f"output-{r.value}", confidence=0.85, key_insight=f"insight-{r.value}")
+            SlotOutput(
+                role=r,
+                content=f"output-{r.value}",
+                confidence=0.85,
+                key_insight=f"insight-{r.value}",
+            )
             for r in SlotRole
         )
         result = CompoundResult(

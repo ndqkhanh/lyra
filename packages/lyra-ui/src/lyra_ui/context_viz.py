@@ -279,8 +279,7 @@ class ContextManager:
             Context data dictionary
         """
         return {
-            component.value: self.tracker.get_tokens(component)
-            for component in ContextComponent
+            component.value: self.tracker.get_tokens(component) for component in ContextComponent
         }
 
     def import_context(self, data: dict[str, int]):
@@ -326,7 +325,10 @@ class ContextManager:
         for usage in breakdown:
             if usage.percentage > 40:
                 recommendations.append(
-                    f"⚠️  {usage.description} uses {usage.percentage:.1f}% of context. Consider pruning."
+
+                        f"⚠️  {usage.description} uses {usage.percentage:.1f}"
+                        f"% of context. Consider pruning."
+
                 )
 
         if not recommendations:

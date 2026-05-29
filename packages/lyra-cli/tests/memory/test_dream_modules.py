@@ -105,7 +105,10 @@ class TestQuestionDrivenReflector:
                 "id": "m1",
                 "entity": "Python",
                 "name": "Python",
-                "content": "Python is a high-level programming language known for its readability and versatility.",
+                "content":(
+                    "Python is a high-level programming language known for its readability and"
+                    "versatility."
+                ),
             }
         ]
         session = reflector.reflect(fragments)
@@ -133,7 +136,11 @@ class TestQuestionDrivenReflector:
                 "id": "m1",
                 "entity": "Django",
                 "name": "Django",
-                "content": "Django is a high-level Python web framework that encourages rapid development and clean, pragmatic design. It follows the model-template-view architectural pattern.",
+                "content":(
+                    "Django is a high-level Python web framework that encourages rapid development"
+                    "and clean, pragmatic design. It follows the model-template-view architectural"
+                    "pattern."
+                ),
             }
         ]
         sparse = [
@@ -151,7 +158,12 @@ class TestQuestionDrivenReflector:
     def test_reflect_multiple_fragments(self):
         reflector = QuestionDrivenReflector()
         fragments = [
-            {"id": f"m{i}", "entity": f"Entity{i}", "name": f"Entity{i}", "content": f"Content about entity {i} " * 10}
+            {
+                "id": f"m{i}",
+                "entity": f"Entity{i}",
+                "name": f"Entity{i}",
+                "content": f"Content about entity {i} " * 10,
+            }
             for i in range(5)
         ]
         session = reflector.reflect(fragments)
@@ -160,9 +172,7 @@ class TestQuestionDrivenReflector:
 
     def test_reflect_fragment_without_entity(self):
         reflector = QuestionDrivenReflector()
-        fragments = [
-            {"id": "m1", "content": "just content no entity"}
-        ]
+        fragments = [{"id": "m1", "content": "just content no entity"}]
         session = reflector.reflect(fragments)
         assert session.questions_generated == 0
 

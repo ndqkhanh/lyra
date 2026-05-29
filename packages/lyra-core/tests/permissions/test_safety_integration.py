@@ -9,7 +9,6 @@ Tests the full safety pipeline integration with the existing permissions engine:
     6. Alignment tracking
 """
 
-
 import pytest
 from lyra_core.permissions import (
     LyraMode,
@@ -634,7 +633,12 @@ def test_full_pipeline_scenario(safety_resolver):
 
     # Risk classification detects "password" keyword -> DATA_ACCESS surface
     # which defaults to CRITICAL level
-    assert decision.risk_level in (RiskLevel.LOW, RiskLevel.MEDIUM, RiskLevel.HIGH, RiskLevel.CRITICAL)
+    assert decision.risk_level in (
+        RiskLevel.LOW,
+        RiskLevel.MEDIUM,
+        RiskLevel.HIGH,
+        RiskLevel.CRITICAL,
+    )
 
     # Verify audit record
     records = safety_resolver.audit_logger.records

@@ -11,16 +11,18 @@ from src.core.task import Task, TaskPriority
 
 class AllocationStrategy(Enum):
     """Task allocation strategies."""
+
     CAPABILITY_BASED = "capability_based"  # Route by capability match
-    LOAD_BALANCED = "load_balanced"        # Balance load across agents
-    PRIORITY_FIRST = "priority_first"      # High priority tasks first
-    ROUND_ROBIN = "round_robin"            # Distribute evenly
-    LEAST_LOADED = "least_loaded"          # Assign to least busy agent
+    LOAD_BALANCED = "load_balanced"  # Balance load across agents
+    PRIORITY_FIRST = "priority_first"  # High priority tasks first
+    ROUND_ROBIN = "round_robin"  # Distribute evenly
+    LEAST_LOADED = "least_loaded"  # Assign to least busy agent
 
 
 @dataclass
 class AllocationScore:
     """Score for task-agent allocation."""
+
     agent_id: str
     capability_score: float
     load_score: float
@@ -140,24 +142,25 @@ class TaskAllocator:
 
             # Get weights for current strategy
             weights = self.weights.get(
-                self.strategy,
-                self.weights[AllocationStrategy.CAPABILITY_BASED]
+                self.strategy, self.weights[AllocationStrategy.CAPABILITY_BASED]
             )
 
             # Calculate total score
             total_score = (
-                capability_score * weights["capability"] +
-                load_score * weights["load"] +
-                priority_score * weights["priority"]
+                capability_score * weights["capability"]
+                + load_score * weights["load"]
+                + priority_score * weights["priority"]
             )
 
-            scores.append(AllocationScore(
-                agent_id=agent.agent_id,
-                capability_score=capability_score,
-                load_score=load_score,
-                priority_score=priority_score,
-                total_score=total_score,
-            ))
+            scores.append(
+                AllocationScore(
+                    agent_id=agent.agent_id,
+                    capability_score=capability_score,
+                    load_score=load_score,
+                    priority_score=priority_score,
+                    total_score=total_score,
+                )
+            )
 
         return scores
 
@@ -231,16 +234,18 @@ class TaskAllocator:
             agent: Selected agent
             score: Allocation score
         """
-        self.allocation_history.append({
-            "task_id": task.task_id,
-            "task_type": task.type.value,
-            "agent_id": agent.agent_id,
-            "score": score.total_score,
-            "capability_score": score.capability_score,
-            "load_score": score.load_score,
-            "priority_score": score.priority_score,
-            "strategy": self.strategy.value,
-        })
+        self.allocation_history.append(
+            {
+                "task_id": task.task_id,
+                "task_type": task.type.value,
+                "agent_id": agent.agent_id,
+                "score": score.total_score,
+                "capability_score": score.capability_score,
+                "load_score": score.load_score,
+                "priority_score": score.priority_score,
+                "strategy": self.strategy.value,
+            }
+        )
 
         # Keep last 100 allocations
         if len(self.allocation_history) > 100:
@@ -272,7 +277,9 @@ class TaskAllocator:
             "strategy": self.strategy.value,
             "average_score": avg_score,
             "allocations_by_agent": agent_counts,
-            "most_used_agent": max(agent_counts.items(), key=lambda x: x[1])[0] if agent_counts else None,
+            "most_used_agent": (
+                max(agent_counts.items(), key=lambda x: x[1])[0] if agent_counts else None
+            ),
         }
 
     def set_strategy(self, strategy: AllocationStrategy):

@@ -1,4 +1,5 @@
 """RED tests for v1.8 Wave-2 §8.2 — Confidence-Cascade Router."""
+
 from __future__ import annotations
 
 import pytest
@@ -61,7 +62,9 @@ def test_high_confidence_short_circuits_at_first_stage() -> None:
     """Cheap stage with confidence above threshold → never escalate."""
     stages = [_stage("cheap", 1.0, 0.6), _stage("expensive", 10.0, 0.8)]
     callers = {"cheap": _caller("cheap-answer"), "expensive": _caller("expensive-answer")}
-    router = ConfidenceCascadeRouter(stages=stages, callers=callers, estimator=_FixedConfidence(0.95))
+    router = ConfidenceCascadeRouter(
+        stages=stages, callers=callers, estimator=_FixedConfidence(0.95)
+    )
     result = router.invoke("anything")
     assert result.answer == "cheap-answer"
     assert len(result.invocations) == 1
@@ -76,7 +79,9 @@ def test_low_confidence_escalates_through_full_cascade() -> None:
         "mid": _caller("mid-answer"),
         "expensive": _caller("expensive-answer"),
     }
-    router = ConfidenceCascadeRouter(stages=stages, callers=callers, estimator=_FixedConfidence(0.5))
+    router = ConfidenceCascadeRouter(
+        stages=stages, callers=callers, estimator=_FixedConfidence(0.5)
+    )
     result = router.invoke("hard question")
     assert result.answer == "expensive-answer"
     assert len(result.invocations) == 3
@@ -86,6 +91,8 @@ def test_low_confidence_escalates_through_full_cascade() -> None:
 def test_total_cost_weight_is_sum_of_invoked_stages() -> None:
     stages = [_stage("cheap", 1.0, 0.99), _stage("mid", 5.0, 0.0)]
     callers = {"cheap": _caller("cheap-answer"), "mid": _caller("mid-answer")}
-    router = ConfidenceCascadeRouter(stages=stages, callers=callers, estimator=_FixedConfidence(0.5))
+    router = ConfidenceCascadeRouter(
+        stages=stages, callers=callers, estimator=_FixedConfidence(0.5)
+    )
     result = router.invoke("q")
     assert result.total_cost_weight == pytest.approx(6.0)

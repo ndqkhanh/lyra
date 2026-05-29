@@ -96,9 +96,7 @@ class ReportGenerator:
 
         return json.dumps(data, indent=2)
 
-    def _compute_summary(
-        self, results: list[dict[str, Any]]
-    ) -> dict[str, Any]:
+    def _compute_summary(self, results: list[dict[str, Any]]) -> dict[str, Any]:
         """Compute summary statistics from results.
 
         Args:
@@ -171,9 +169,7 @@ class ReportGenerator:
 
         return "\n".join(lines)
 
-    def _markdown_results_table(
-        self, results: list[dict[str, Any]]
-    ) -> list[str]:
+    def _markdown_results_table(self, results: list[dict[str, Any]]) -> list[str]:
         """Generate a markdown table for benchmark results.
 
         Args:
@@ -197,16 +193,12 @@ class ReportGenerator:
             latency = metrics.get(f"{name}_mean_ms", metrics.get("value", 0))
             regressed = "Yes" if r.get("regressed") else "No"
 
-            lines.append(
-                f"| {name} | {category} | {status} | {latency:.2f} | {regressed} |"
-            )
+            lines.append(f"| {name} | {category} | {status} | {latency:.2f} | {regressed} |")
 
         lines.append("")
         return lines
 
-    def _markdown_comparison_table(
-        self, comparisons: list[dict[str, Any]]
-    ) -> list[str]:
+    def _markdown_comparison_table(self, comparisons: list[dict[str, Any]]) -> list[str]:
         """Generate a markdown table for competitor comparisons.
 
         Args:
@@ -234,16 +226,13 @@ class ReportGenerator:
                 return f"{v:.2f}" if v is not None else "N/A"
 
             lines.append(
-                f"| {dim} | {_fmt(lyra)} | {_fmt(claude)} | "
-                f"{_fmt(hermes)} | {best_name} |"
+                f"| {dim} | {_fmt(lyra)} | {_fmt(claude)} | " f"{_fmt(hermes)} | {best_name} |"
             )
 
         lines.append("")
         return lines
 
-    def _ascii_trend_chart(
-        self, results: list[dict[str, Any]]
-    ) -> list[str]:
+    def _ascii_trend_chart(self, results: list[dict[str, Any]]) -> list[str]:
         """Generate an ASCII bar chart for benchmark latencies.
 
         Args:
@@ -287,7 +276,8 @@ class ReportGenerator:
         return lines
 
     def _generate_text(
-        self, benchmark_results: list[dict[str, Any]],
+        self,
+        benchmark_results: list[dict[str, Any]],
         competitor_comparisons: list[dict[str, Any]] | None,
     ) -> str:
         """Generate a plain text report."""
@@ -299,14 +289,16 @@ class ReportGenerator:
             "",
         ]
         summary = self._compute_summary(benchmark_results)
-        lines.extend([
-            "  Summary:",
-            f"    Total: {summary['total']}",
-            f"    Passed: {summary['passed']}",
-            f"    Failed: {summary['failed']}",
-            f"    Avg Latency: {summary['avg_latency_ms']:.2f} ms",
-            "",
-        ])
+        lines.extend(
+            [
+                "  Summary:",
+                f"    Total: {summary['total']}",
+                f"    Passed: {summary['passed']}",
+                f"    Failed: {summary['failed']}",
+                f"    Avg Latency: {summary['avg_latency_ms']:.2f} ms",
+                "",
+            ]
+        )
         if benchmark_results:
             lines.append("  Benchmark Results:")
             lines.append(f"    {'Name':30s} {'Category':20s} {'Status':12s} {'Latency(ms)':12s}")
@@ -315,7 +307,12 @@ class ReportGenerator:
                 n = r.get("name", "unknown")
                 m = r.get("metrics", {})
                 lat = m.get(f"{n}_mean_ms", m.get("value", 0))
-                lines.append(f"    {n:30s} {r.get('category', ''):20s} {r.get('status', ''):12s} {lat:<12.2f}")
+                lines.append(
+
+                        f"    {n:30s} {r.get('category', ''):20s} {r.get('status', ''):12s} "
+                        f"{lat:<12.2f}"
+
+                )
             lines.append("")
         if competitor_comparisons:
             lines.append("  Competitor Comparison:\n")
@@ -323,15 +320,18 @@ class ReportGenerator:
                 dim = comp.get("dimension", "unknown")
                 lines.append(f"    {dim}:")
                 for r in comp.get("results", []):
-                    lines.append(f"      {r.get('competitor', ''):20s} {r.get('value', 0):.2f} {r.get('unit', '')}")
+                    lines.append(
+
+                            f"      {r.get('competitor', ''):20s} {r.get('value', 0):.2f} "
+                            f"{r.get('unit', '')}"
+
+                    )
                 lines.append(f"      {'Best:':20s} {comp.get('best_competitor', '-')}\n")
         lines.append("=" * 70)
         return "\n".join(lines)
 
 
-def _find_value(
-    results: list[dict[str, Any]], competitor_name: str
-) -> float | None:
+def _find_value(results: list[dict[str, Any]], competitor_name: str) -> float | None:
     """Find a competitor's result value by name.
 
     Args:

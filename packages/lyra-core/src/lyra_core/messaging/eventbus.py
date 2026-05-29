@@ -1,4 +1,5 @@
 """Event bus for publish-subscribe messaging."""
+
 from collections import defaultdict
 from collections.abc import Awaitable, Callable
 
@@ -15,7 +16,9 @@ class EventBus:
     def __init__(self) -> None:
         """Initialize event bus."""
         self._handlers: dict[MessageType, list[Callable[[Message], None]]] = defaultdict(list)
-        self._async_handlers: dict[MessageType, list[Callable[[Message], Awaitable[None]]]] = defaultdict(list)
+        self._async_handlers: dict[MessageType, list[Callable[[Message], Awaitable[None]]]] = (
+            defaultdict(list)
+        )
         self._error_handler: Callable[[Exception], None] | None = None
 
     def subscribe(

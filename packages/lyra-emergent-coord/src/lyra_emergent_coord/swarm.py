@@ -213,8 +213,7 @@ class StigmergySystem:
         return {
             "active_locations": len(self._pheromones),
             "trails": {
-                loc: sum(p.intensity for p in trails)
-                for loc, trails in self._pheromones.items()
+                loc: sum(p.intensity for p in trails) for loc, trails in self._pheromones.items()
             },
         }
 
@@ -237,7 +236,7 @@ class AntColonyOptimizer:
         num_ants: int = 20,
         evaporation_rate: float = 0.1,
         alpha: float = 1.0,  # pheromone influence
-        beta: float = 2.0,   # heuristic influence
+        beta: float = 2.0,  # heuristic influence
         iterations: int = 100,
     ) -> None:
         self._num_ants = num_ants
@@ -317,7 +316,7 @@ class AntColonyOptimizer:
             total = 0.0
             probs: list[tuple[str, float]] = []
             for neighbor, (distance, pheromone) in unvisited.items():
-                prob = (pheromone ** self._alpha) * ((1.0 / distance) ** self._beta)
+                prob = (pheromone**self._alpha) * ((1.0 / distance) ** self._beta)
                 probs.append((neighbor, prob))
                 total += prob
 
@@ -345,7 +344,7 @@ class AntColonyOptimizer:
         """Evaporate pheromone across all edges."""
         for _node, edges in self._graph.items():
             for neighbor in edges:
-                edges[neighbor][1] *= (1.0 - self._evaporation_rate)
+                edges[neighbor][1] *= 1.0 - self._evaporation_rate
 
     def _deposit_on_path(self, path: list[str], deposit: float) -> None:
         """Deposit pheromone along a path."""
@@ -445,14 +444,16 @@ class ParticleSwarmOptimizer:
                 r1 = random.random()
                 r2 = random.random()
 
-                cognitive = self._cognitive_weight * r1 * (particle.best_position[d] - particle.position[d])
-                social = self._social_weight * r2 * (self._global_best_position[d] - particle.position[d])
-
-                particle.velocity[d] = (
-                    self._inertia * particle.velocity[d]
-                    + cognitive
-                    + social
+                cognitive = (
+                    self._cognitive_weight * r1 * (particle.best_position[d] - particle.position[d])
                 )
+                social = (
+                    self._social_weight
+                    * r2
+                    * (self._global_best_position[d] - particle.position[d])
+                )
+
+                particle.velocity[d] = self._inertia * particle.velocity[d] + cognitive + social
                 particle.position[d] += particle.velocity[d]
 
                 # Clamp to bounds
@@ -470,7 +471,9 @@ class ParticleSwarmOptimizer:
         """Run the full PSO optimization for a given number of iterations."""
         for _ in range(iterations):
             self.iterate(fitness_fn)
-        logger.debug("PSO complete: best=%.4f at iteration %d", self._global_best_score, self._iteration)
+        logger.debug(
+            "PSO complete: best=%.4f at iteration %d", self._global_best_score, self._iteration
+        )
         return self.get_best_particle()
 
     def get_best_particle(self) -> Particle:
@@ -728,9 +731,7 @@ class FlockingSystem:
                 neighbors.append(other)
         return neighbors
 
-    def _compute_separation(
-        self, boid: Boid, neighbors: list[Boid]
-    ) -> tuple[float, float]:
+    def _compute_separation(self, boid: Boid, neighbors: list[Boid]) -> tuple[float, float]:
         """Steer away from nearby boids."""
         if not neighbors:
             return (0.0, 0.0)
@@ -748,9 +749,7 @@ class FlockingSystem:
         n = len(neighbors)
         return (sx / n, sy / n)
 
-    def _compute_alignment(
-        self, boid: Boid, neighbors: list[Boid]
-    ) -> tuple[float, float]:
+    def _compute_alignment(self, boid: Boid, neighbors: list[Boid]) -> tuple[float, float]:
         """Steer toward average heading of neighbors."""
         if not neighbors:
             return (0.0, 0.0)
@@ -760,9 +759,7 @@ class FlockingSystem:
 
         return (avg_vx - boid.velocity[0], avg_vy - boid.velocity[1])
 
-    def _compute_cohesion(
-        self, boid: Boid, neighbors: list[Boid]
-    ) -> tuple[float, float]:
+    def _compute_cohesion(self, boid: Boid, neighbors: list[Boid]) -> tuple[float, float]:
         """Steer toward average position of neighbors."""
         if not neighbors:
             return (0.0, 0.0)

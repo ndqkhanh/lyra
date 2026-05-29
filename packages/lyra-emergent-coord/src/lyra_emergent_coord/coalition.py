@@ -107,7 +107,9 @@ class Bid:
             object.__setattr__(
                 self,
                 "total_score",
-                self.capability_score * 0.5 + (1.0 - self.current_load) * 0.3 + self.bid_value * 0.2,
+                self.capability_score * 0.5
+                + (1.0 - self.current_load) * 0.3
+                + self.bid_value * 0.2,
             )
 
 
@@ -211,9 +213,7 @@ class CoalitionFormationEngine:
         self._agent_load.pop(agent_id, None)
         self._agent_performance.pop(agent_id, None)
         # Remove from any active coalitions and trigger restructuring
-        affected = [
-            cid for cid, c in self._coalitions.items() if agent_id in c.member_ids
-        ]
+        affected = [cid for cid, c in self._coalitions.items() if agent_id in c.member_ids]
         for cid in affected:
             self._coalitions.pop(cid, None)
         logger.debug("Unregistered agent %s (affected %d coalitions)", agent_id, len(affected))
@@ -289,7 +289,11 @@ class CoalitionFormationEngine:
         if not bids:
             raise NoValidCoalitionError(f"No agents available for task {task_id}")
 
-        max_size = advertisement.max_coalition_size if advertisement.max_coalition_size > 0 else min(len(bids), self._max_coalition_search)
+        max_size = (
+            advertisement.max_coalition_size
+            if advertisement.max_coalition_size > 0
+            else min(len(bids), self._max_coalition_search)
+        )
         min_size = advertisement.min_coalition_size
 
         best_coalition: Coalition | None = None
@@ -298,10 +302,12 @@ class CoalitionFormationEngine:
         # Search coalition sizes from min to max
         for size in range(min_size, min(max_size, len(bids)) + 1):
             # Try top N combinations based on bids
-            top_bids = bids[:min(size * 2, len(bids))]
+            top_bids = bids[: min(size * 2, len(bids))]
             for combo in itertools.combinations(top_bids, size):
                 member_ids = tuple(b.agent_id for b in combo)
-                covered_caps = self._compute_capability_coverage(member_ids, set(advertisement.required_capabilities))
+                covered_caps = self._compute_capability_coverage(
+                    member_ids, set(advertisement.required_capabilities)
+                )
                 shapley = self._compute_shapley_values(member_ids)
 
                 coalition_value = (
@@ -380,6 +386,7 @@ class CoalitionFormationEngine:
     def _approx_shapley(self, member_ids: tuple[str, ...], samples: int = 100) -> dict[str, float]:
         """Monte Carlo approximation of Shapley values."""
         import random
+
         shapley: dict[str, float] = defaultdict(float)
 
         for _ in range(samples):
@@ -447,9 +454,7 @@ class CoalitionFormationEngine:
             raise CoalitionError(f"Coalition {coalition_id} not found")
 
         # Remove departed members
-        current = tuple(
-            aid for aid in coalition.member_ids if aid in self._agent_capabilities
-        )
+        current = tuple(aid for aid in coalition.member_ids if aid in self._agent_capabilities)
 
         if len(current) < 1:
             # Reform from scratch

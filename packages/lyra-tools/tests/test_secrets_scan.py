@@ -1,4 +1,5 @@
 """Tests for secret scanning tool."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -40,19 +41,23 @@ class TestSecretsScan:
         assert any("aws_access_key" == f["type"] for f in result["findings"])
 
     def test_detects_github_token(self, tmp_path: Path) -> None:
-        (tmp_path / "env.py").write_text("GITHUB_TOKEN=ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789aBcD\n")
+        (tmp_path / "env.py").write_text(
+            "GITHUB_TOKEN=ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789aBcD\n"
+        )
         result = sec_secrets_scan(str(tmp_path), repo_root=str(tmp_path))
         assert result["count"] > 0
         assert any("github_token" == f["type"] for f in result["findings"])
 
     def test_detects_openai_key(self, tmp_path: Path) -> None:
-        (tmp_path / "secrets.py").write_text("openai_key = 'sk-proj-abcdefghijklmnopqrstuvwxyz123456'\n")
+        (tmp_path / "secrets.py").write_text(
+            "openai_key = 'sk-proj-abcdefghijklmnopqrstuvwxyz123456'\n"
+        )
         result = sec_secrets_scan(str(tmp_path), repo_root=str(tmp_path))
         assert result["count"] > 0
         assert any("openai_key" == f["type"] for f in result["findings"])
 
     def test_detects_jwt_in_file(self, tmp_path: Path) -> None:
-        token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8g"
+        token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8g"  # noqa: E501
         (tmp_path / "token.txt").write_text(f"Authorization: Bearer {token}\n")
         result = sec_secrets_scan(str(tmp_path), repo_root=str(tmp_path))
         assert result["count"] > 0

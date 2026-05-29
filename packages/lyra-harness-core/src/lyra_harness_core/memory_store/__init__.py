@@ -1,6 +1,7 @@
 """lyra_harness_core.memory_store — typed layered memory primitive.
 
-Per [docs/184-strongest-memory-techniques-synthesis-may-2026.md](../../../../../../research/harness-engineering/docs/184-strongest-memory-techniques-synthesis-may-2026.md),
+Per
+[docs/184-strongest-memory-techniques-synthesis-may-2026.md](../../../../../../research/harness-engineering/docs/184-strongest-memory-techniques-synthesis-may-2026.md),
 [docs/185-memory-integration-playbook.md](../../../../../../research/harness-engineering/docs/185-memory-integration-playbook.md),
 [docs/186-mnema-witness-lattice.md](../../../../../../research/harness-engineering/docs/186-mnema-witness-lattice.md),
 [docs/187-multi-agent-shared-memory-landscape.md](../../../../../../research/harness-engineering/docs/187-multi-agent-shared-memory-landscape.md).
@@ -25,6 +26,7 @@ Polaris (research notes per [docs/172]),
 Helix-Bio (per-project lab notes), and any project that needs typed,
 namespace-scoped persistent knowledge with retrieval.
 """
+
 from __future__ import annotations
 
 from .store import MemoryStore

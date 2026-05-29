@@ -1,6 +1,5 @@
 """Tests for RetrospectiveMemory and ProspectiveMemory."""
 
-
 from lyra_memory.optimization.dual_memory import (
     CorrectiveIntention,
     ProspectiveMemory,
@@ -60,10 +59,27 @@ class TestCorrectiveIntention:
 class TestRetrospectiveMemory:
     def _make_gradients(self) -> list[TextGrad]:
         return [
-            TextGrad(role="planner", gradient="Plans lack specific milestones", severity=0.8, pattern="recurring"),
-            TextGrad(role="planner", gradient="Time estimates consistently wrong", severity=0.7, pattern="recurring"),
-            TextGrad(role="executor", gradient="Tool calls are too slow", severity=0.6, pattern="recurring"),
-            TextGrad(role="planner", gradient="Minor formatting issue", severity=0.2, pattern="one-off"),
+            TextGrad(
+                role="planner",
+                gradient="Plans lack specific milestones",
+                severity=0.8,
+                pattern="recurring",
+            ),
+            TextGrad(
+                role="planner",
+                gradient="Time estimates consistently wrong",
+                severity=0.7,
+                pattern="recurring",
+            ),
+            TextGrad(
+                role="executor",
+                gradient="Tool calls are too slow",
+                severity=0.6,
+                pattern="recurring",
+            ),
+            TextGrad(
+                role="planner", gradient="Minor formatting issue", severity=0.2, pattern="one-off"
+            ),
         ]
 
     def test_update_stores_significant_patterns(self):
@@ -80,12 +96,22 @@ class TestRetrospectiveMemory:
 
     def test_update_merges_similar_patterns(self):
         rm = RetrospectiveMemory()
-        rm.update("planner", [
-            TextGrad(role="planner", gradient="Specific milestone tracking missing", severity=0.8),
-        ])
-        rm.update("planner", [
-            TextGrad(role="planner", gradient="Missing milestone tracking for tasks", severity=0.7),
-        ])
+        rm.update(
+            "planner",
+            [
+                TextGrad(
+                    role="planner", gradient="Specific milestone tracking missing", severity=0.8
+                ),
+            ],
+        )
+        rm.update(
+            "planner",
+            [
+                TextGrad(
+                    role="planner", gradient="Missing milestone tracking for tasks", severity=0.7
+                ),
+            ],
+        )
         assert len(rm.patterns["planner"]) == 1
         assert rm.patterns["planner"][0].frequency == 2
 
@@ -132,9 +158,13 @@ class TestRetrospectiveMemory:
     def test_find_similar_with_overlap(self):
         rm = RetrospectiveMemory()
 
-        existing = FailurePattern(role="planner", description="specific milestone tracking missing for plans")
+        existing = FailurePattern(
+            role="planner", description="specific milestone tracking missing for plans"
+        )
         rm.patterns["planner"] = [existing]
-        new = FailurePattern(role="planner", description="missing milestone tracking for specific tasks")
+        new = FailurePattern(
+            role="planner", description="missing milestone tracking for specific tasks"
+        )
         result = rm._find_similar("planner", new)
         assert result is not None
         assert result.description == "specific milestone tracking missing for plans"
@@ -155,16 +185,25 @@ class TestProspectiveMemory:
         assert pm.intentions["planner"][0].role == "planner"
 
     async def test_update_uses_llm_for_intention_formulation(self):
-        llm = StubLLM(responses=["When starting a plan, list 3 concrete milestones because specificity ensures alignment."])
+        llm = StubLLM(
+            responses=[
+(
+                    "When starting a plan, list 3 concrete milestones because specificity ensures"
+                    "alignment."
+                )
+            ]
+        )
         pm = ProspectiveMemory(llm=llm)
         await pm.update("planner", self._make_gradients()[:1])
         assert "list 3 concrete milestones" in pm.intentions["planner"][0].intention
 
     async def test_get_formats_intentions(self):
-        llm = StubLLM(responses=[
-            "When X, do Y because Z.",
-            "When A, do B because C.",
-        ])
+        llm = StubLLM(
+            responses=[
+                "When X, do Y because Z.",
+                "When A, do B because C.",
+            ]
+        )
         pm = ProspectiveMemory(llm=llm)
         await pm.update("planner", self._make_gradients())
         output = pm.get("planner")
@@ -176,10 +215,12 @@ class TestProspectiveMemory:
         assert pm.get("nobody") == ""
 
     async def test_total_intentions(self):
-        llm = StubLLM(responses=[
-            "When X, do Y because Z.",
-            "When A, do B because C.",
-        ])
+        llm = StubLLM(
+            responses=[
+                "When X, do Y because Z.",
+                "When A, do B because C.",
+            ]
+        )
         pm = ProspectiveMemory(llm=llm)
         await pm.update("planner", self._make_gradients()[:1])
         await pm.update("executor", self._make_gradients()[1:])

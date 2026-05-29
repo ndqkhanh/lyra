@@ -45,7 +45,7 @@ HERMES_ALIASES: list[tuple[str, str, str]] = [
 @pytest.mark.parametrize(
     "hermes_name,lyra_name,why",
     HERMES_ALIASES,
-    ids=[f"{h}->{l}" for h, l, _ in HERMES_ALIASES],
+    ids=[f"{h}->{lyra_name}" for h, lyra_name, _ in HERMES_ALIASES],
 )
 def test_hermes_alias_resolves_to_canonical_lyra_command(
     hermes_name: str, lyra_name: str, why: str

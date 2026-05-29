@@ -171,10 +171,7 @@ class SolutionArchitect:
             components=tuple(components),
             trade_offs=tuple(trade_offs),
             tech_stack=tuple(tech_stack),
-            sequence_diagrams={
-                name: tuple(steps)
-                for name, steps in sequence_diagrams.items()
-            },
+            sequence_diagrams={name: tuple(steps) for name, steps in sequence_diagrams.items()},
             integration_specs=tuple(integrations),
             constraints=tuple(all_constraints),
             assumptions=tuple(assumptions),
@@ -183,28 +180,21 @@ class SolutionArchitect:
             "trade_offs": [t.__dict__ for t in trade_offs],
             "tech_stack": [t.__dict__ for t in tech_stack],
             "sequence_diagrams": {
-                name: [s.__dict__ for s in steps]
-                for name, steps in sequence_diagrams.items()
+                name: [s.__dict__ for s in steps] for name, steps in sequence_diagrams.items()
             },
             "integration_specs": [i.__dict__ for i in integrations],
         }
 
     @staticmethod
-    def _design_components(
-        requirements: str, project: str
-    ) -> list[SystemComponent]:
+    def _design_components(requirements: str, project: str) -> list[SystemComponent]:
         has_ui = any(kw in requirements for kw in ["ui", "frontend", "web", "dashboard"])
         has_event = any(
-            kw in requirements for kw in
-            ["event", "async", "queue", "message", "kafka", "pubsub"]
+            kw in requirements for kw in ["event", "async", "queue", "message", "kafka", "pubsub"]
         )
         has_reporting = any(
-            kw in requirements for kw in
-            ["report", "analytics", "dashboard", "bi", "olap"]
+            kw in requirements for kw in ["report", "analytics", "dashboard", "bi", "olap"]
         )
-        has_file = any(
-            kw in requirements for kw in ["file", "upload", "document", "blob", "asset"]
-        )
+        has_file = any(kw in requirements for kw in ["file", "upload", "document", "blob", "asset"])
 
         components: list[SystemComponent] = [
             SystemComponent(
@@ -219,15 +209,18 @@ class SolutionArchitect:
         ]
 
         if has_ui:
-            components.insert(0, SystemComponent(
-                name=f"{project}-ui",
-                role="User Interface / Web Application",
-                technology="React / Vue / Angular with SSR",
-                scaling_approach="CDN + static hosting, auto-scale web tier",
-                data_stores=("client_cache",),
-                apis_exposed=(),
-                dependencies=(f"{project}-api",),
-            ))
+            components.insert(
+                0,
+                SystemComponent(
+                    name=f"{project}-ui",
+                    role="User Interface / Web Application",
+                    technology="React / Vue / Angular with SSR",
+                    scaling_approach="CDN + static hosting, auto-scale web tier",
+                    data_stores=("client_cache",),
+                    apis_exposed=(),
+                    dependencies=(f"{project}-api",),
+                ),
+            )
 
         if has_event:
             components.append(
@@ -263,7 +256,10 @@ class SolutionArchitect:
                     scaling_approach="Columnar storage, MPP scaling",
                     data_stores=("analytics_warehouse",),
                     apis_exposed=("SQL", "REST"),
-                    dependencies=(f"{project}-db", f"{project}-eventbus" if has_event else f"{project}-db"),
+                    dependencies=(
+                        f"{project}-db",
+                        f"{project}-eventbus" if has_event else f"{project}-db",
+                    ),
                 )
             )
 
@@ -283,9 +279,7 @@ class SolutionArchitect:
         return components
 
     @staticmethod
-    def _analyze_trade_offs(
-        requirements: str, cap_pref: str | None
-    ) -> list[TradeOffDecision]:
+    def _analyze_trade_offs(requirements: str, cap_pref: str | None) -> list[TradeOffDecision]:
         decisions: list[TradeOffDecision] = []
 
         # CAP trade-off
@@ -303,8 +297,10 @@ class SolutionArchitect:
             TradeOffDecision(
                 id="TRD-001",
                 title="CAP Theorem Trade-off",
-                options=("CP (Consistency + Partition Tolerance)",
-                         "AP (Availability + Partition Tolerance)"),
+                options=(
+                    "CP (Consistency + Partition Tolerance)",
+                    "AP (Availability + Partition Tolerance)",
+                ),
                 chosen=chosen_cap.value,
                 rationale=rationale,
                 consequences=(
@@ -317,8 +313,8 @@ class SolutionArchitect:
 
         # Monolith vs Microservices
         use_micro = any(
-            kw in requirements for kw in
-            ["scalable", "microservice", "team", "independent", "deploy"]
+            kw in requirements
+            for kw in ["scalable", "microservice", "team", "independent", "deploy"]
         )
         decisions.append(
             TradeOffDecision(
@@ -336,15 +332,13 @@ class SolutionArchitect:
 
         # Sync vs Async
         has_async = any(
-            kw in requirements for kw in
-            ["realtime", "async", "event", "streaming", "notification"]
+            kw in requirements for kw in ["realtime", "async", "event", "streaming", "notification"]
         )
         decisions.append(
             TradeOffDecision(
                 id="TRD-003",
                 title="Communication Pattern: Sync vs Async",
-                options=("Synchronous (REST/gRPC)",
-                         "Asynchronous (Events/Messaging)"),
+                options=("Synchronous (REST/gRPC)", "Asynchronous (Events/Messaging)"),
                 chosen="Hybrid: sync for queries, async for commands",
                 rationale="Optimizes for both low-latency queries and decoupled command processing",
                 consequences="Increased system complexity but better resilience and scalabilty",
@@ -357,11 +351,13 @@ class SolutionArchitect:
                 TradeOffDecision(
                     id="TRD-004",
                     title="Eventual Consistency Tolerance",
-                    options=("Strong consistency everywhere",
-                             "Eventual consistency for non-critical paths"),
+                    options=(
+                        "Strong consistency everywhere",
+                        "Eventual consistency for non-critical paths",
+                    ),
                     chosen="Eventual consistency for async flows",
                     rationale="Async processing inherently involves latency;"
-                             " strong consistency would negate benefits",
+                    " strong consistency would negate benefits",
                     consequences="Application must handle stale reads",
                     cap_alignment=None,
                 )
@@ -373,10 +369,7 @@ class SolutionArchitect:
     def _recommend_tech_stack(
         requirements: str,
     ) -> list[TechStackRecommendation]:
-        has_realtime = any(
-            kw in requirements for kw in
-            ["realtime", "websocket", "stream", "live"]
-        )
+        has_realtime = any(kw in requirements for kw in ["realtime", "websocket", "stream", "live"])
         has_ml = any(kw in requirements for kw in ["ml", "ai", "machine learning", "model"])
         has_mobile = any(kw in requirements for kw in ["mobile", "ios", "android", "app"])
 
@@ -399,7 +392,9 @@ class SolutionArchitect:
                 layer="Database",
                 recommended="PostgreSQL 16+",
                 alternatives=("MySQL 8", "CockroachDB", "SQLite"),
-                rationale="Rich feature set: JSON, full-text search, extensions, strong consistency",
+                rationale=(
+                    "Rich feature set: JSON, full-text search, extensions, strong consistency"
+                ),
                 maturity="Mature",
             ),
             TechStackRecommendation(
@@ -467,28 +462,43 @@ class SolutionArchitect:
         # Main request flow
         main_flow: list[SequenceStep] = [
             SequenceStep(
-                step=1, source="Client", target="API Gateway",
-                action="HTTP Request", protocol="HTTPS/REST",
+                step=1,
+                source="Client",
+                target="API Gateway",
+                action="HTTP Request",
+                protocol="HTTPS/REST",
                 data_summary="Request payload with auth token",
             ),
             SequenceStep(
-                step=2, source="API Gateway", target="Backend Service",
-                action="Route request", protocol="HTTP/gRPC",
+                step=2,
+                source="API Gateway",
+                target="Backend Service",
+                action="Route request",
+                protocol="HTTP/gRPC",
                 data_summary="Validated request with identity context",
             ),
             SequenceStep(
-                step=3, source="Backend Service", target="Database",
-                action="Query / Mutate data", protocol="SQL",
+                step=3,
+                source="Backend Service",
+                target="Database",
+                action="Query / Mutate data",
+                protocol="SQL",
                 data_summary="Parameterized query",
             ),
             SequenceStep(
-                step=4, source="Database", target="Backend Service",
-                action="Return result", protocol="SQL",
+                step=4,
+                source="Database",
+                target="Backend Service",
+                action="Return result",
+                protocol="SQL",
                 data_summary="Result set or affected rows",
             ),
             SequenceStep(
-                step=5, source="Backend Service", target="Client",
-                action="HTTP Response", protocol="HTTPS/REST",
+                step=5,
+                source="Backend Service",
+                target="Client",
+                action="HTTP Response",
+                protocol="HTTPS/REST",
                 data_summary="Response body with status code",
             ),
         ]
@@ -497,23 +507,35 @@ class SolutionArchitect:
         # Error handling flow
         error_flow: list[SequenceStep] = [
             SequenceStep(
-                step=1, source="Client", target="API Gateway",
-                action="HTTP Request", protocol="HTTPS/REST",
+                step=1,
+                source="Client",
+                target="API Gateway",
+                action="HTTP Request",
+                protocol="HTTPS/REST",
                 data_summary="Invalid / malformed request",
             ),
             SequenceStep(
-                step=2, source="API Gateway", target="Backend Service",
-                action="Validate & route", protocol="HTTP",
+                step=2,
+                source="API Gateway",
+                target="Backend Service",
+                action="Validate & route",
+                protocol="HTTP",
                 data_summary="Request with validation context",
             ),
             SequenceStep(
-                step=3, source="Backend Service", target="Dead Letter Queue",
-                action="Enqueue failed request", protocol="Queue protocol",
+                step=3,
+                source="Backend Service",
+                target="Dead Letter Queue",
+                action="Enqueue failed request",
+                protocol="Queue protocol",
                 data_summary="Error context + original payload",
             ),
             SequenceStep(
-                step=4, source="Backend Service", target="Client",
-                action="Error Response", protocol="HTTPS",
+                step=4,
+                source="Backend Service",
+                target="Client",
+                action="Error Response",
+                protocol="HTTPS",
                 data_summary="4xx/5xx with correlation ID",
             ),
         ]
@@ -524,13 +546,9 @@ class SolutionArchitect:
     @staticmethod
     def _define_integrations(requirements: str) -> list[IntegrationSpec]:
         has_third_party = any(
-            kw in requirements for kw in
-            ["third", "external", "integration", "api", "partner"]
+            kw in requirements for kw in ["third", "external", "integration", "api", "partner"]
         )
-        has_events = any(
-            kw in requirements for kw in
-            ["event", "async", "message", "stream"]
-        )
+        has_events = any(kw in requirements for kw in ["event", "async", "message", "stream"])
 
         specs: list[IntegrationSpec] = [
             IntegrationSpec(

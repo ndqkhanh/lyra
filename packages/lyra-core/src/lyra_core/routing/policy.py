@@ -8,6 +8,7 @@ Grounded in:
 - Doc 323 §8.5 — Router observability and SLOs
 - arXiv:2602.21227 — BAAR: Budget-Aware Adaptive Routing for LLM agents
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -30,6 +31,7 @@ ModelTier = Literal["fast", "reasoning", "advisor"]
 # Routing signals                                                      #
 # ------------------------------------------------------------------ #
 
+
 @dataclass(frozen=True)
 class RoutingSignals:
     """Per-turn signals that inform tier selection.
@@ -37,17 +39,22 @@ class RoutingSignals:
     All float signals are normalised to [0, 1].
     """
 
-    task_ambiguity: float = 0.0        # inferred from entropy / length of clarifying Qs
-    evidence_conflict: bool = False    # two evidence sources contradict each other
-    tool_risk: float = 0.0             # 0 = read-only, 1 = destructive / irreversible
-    context_pressure: float = 0.0     # context_window_pct / 100
-    uncertainty: float = 0.0          # model self-reported or verifier-derived
-    repeated_failure: bool = False    # same tool failed >= 2 times this trajectory
-    budget_pressure: float = 0.0      # cost_spent / cost_budget
+    task_ambiguity: float = 0.0  # inferred from entropy / length of clarifying Qs
+    evidence_conflict: bool = False  # two evidence sources contradict each other
+    tool_risk: float = 0.0  # 0 = read-only, 1 = destructive / irreversible
+    context_pressure: float = 0.0  # context_window_pct / 100
+    uncertainty: float = 0.0  # model self-reported or verifier-derived
+    repeated_failure: bool = False  # same tool failed >= 2 times this trajectory
+    budget_pressure: float = 0.0  # cost_spent / cost_budget
 
     def __post_init__(self) -> None:
-        for name in ("task_ambiguity", "tool_risk", "context_pressure",
-                     "uncertainty", "budget_pressure"):
+        for name in (
+            "task_ambiguity",
+            "tool_risk",
+            "context_pressure",
+            "uncertainty",
+            "budget_pressure",
+        ):
             v = getattr(self, name)
             if not 0.0 <= v <= 1.0:
                 raise ValueError(f"{name} must be in [0, 1], got {v!r}")
@@ -56,6 +63,7 @@ class RoutingSignals:
 # ------------------------------------------------------------------ #
 # BAAR budget ledger                                                   #
 # ------------------------------------------------------------------ #
+
 
 @dataclass
 class TrajectoryBudget:
@@ -95,13 +103,14 @@ class TrajectoryBudget:
 # Routing config + decision                                            #
 # ------------------------------------------------------------------ #
 
+
 @dataclass(frozen=True)
 class RoutingConfig:
     """Tunable thresholds for the routing policy."""
 
     # Escalate fast → reasoning when any of these are exceeded
     ambiguity_reasoning_threshold: float = 0.4
-    context_reasoning_threshold: float = 0.70   # 70 % context fill
+    context_reasoning_threshold: float = 0.70  # 70 % context fill
     uncertainty_reasoning_threshold: float = 0.5
 
     # Additional gate to escalate reasoning → advisor
@@ -118,12 +127,13 @@ class RoutingDecision:
 
     tier: ModelTier
     reason: str
-    escalated: bool   # True if tier > "fast"
+    escalated: bool  # True if tier > "fast"
 
 
 # ------------------------------------------------------------------ #
 # Pure routing function                                                #
 # ------------------------------------------------------------------ #
+
 
 def route_step(
     signals: RoutingSignals,
@@ -146,17 +156,15 @@ def route_step(
         not budget.advisor_budget_exhausted
         and budget.budget_pressure < cfg.budget_pressure_advisor_cap
         and signals.tool_risk >= cfg.tool_risk_advisor_threshold
-        and (
-            signals.uncertainty >= cfg.uncertainty_advisor_threshold
-            or signals.evidence_conflict
-        )
+        and (signals.uncertainty >= cfg.uncertainty_advisor_threshold or signals.evidence_conflict)
     )
     if advisor_eligible:
         return RoutingDecision(
             tier="advisor",
             reason=(
                 f"tool_risk={signals.tool_risk:.2f} >= {cfg.tool_risk_advisor_threshold}, "
-                f"uncertainty={signals.uncertainty:.2f} or evidence_conflict={signals.evidence_conflict}"
+                f"uncertainty={signals.uncertainty:.2f} or"
+                f" evidence_conflict={signals.evidence_conflict}"
             ),
             escalated=True,
         )
@@ -188,6 +196,7 @@ def route_step(
 # ------------------------------------------------------------------ #
 # Stateful trajectory router                                           #
 # ------------------------------------------------------------------ #
+
 
 class TrajectoryRouter:
     """Wraps route_step with per-trajectory budget tracking.

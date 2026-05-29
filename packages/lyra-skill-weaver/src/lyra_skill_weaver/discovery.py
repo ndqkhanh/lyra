@@ -121,7 +121,11 @@ class SkillDiscoveryEngine:
         self.registry = registry
         self._discovery_history: deque[dict[str, Any]] = deque(maxlen=100)
         self._skip_patterns: list[str] = [
-            "__pycache__", "test_", "conftest", ".pyc", "__init__",
+            "__pycache__",
+            "test_",
+            "conftest",
+            ".pyc",
+            "__init__",
         ]
 
     async def discover_from_directory(
@@ -153,12 +157,14 @@ class SkillDiscoveryEngine:
             except Exception as exc:
                 logger.debug("Could not extract skills from %s: %s", py_file, exc)
 
-        self._discovery_history.append({
-            "source": str(directory),
-            "method": DiscoveryMethod.FILESYSTEM_SCAN.name,
-            "found": len(discovered),
-            "timestamp": time.time(),
-        })
+        self._discovery_history.append(
+            {
+                "source": str(directory),
+                "method": DiscoveryMethod.FILESYSTEM_SCAN.name,
+                "found": len(discovered),
+                "timestamp": time.time(),
+            }
+        )
 
         if discovered:
             logger.info("Discovered %d skills from %s", len(discovered), directory)
@@ -225,7 +231,7 @@ class SkillDiscoveryEngine:
             if in_class:
                 stripped = line.strip()
                 if stripped.startswith('"""') or stripped.startswith("'''"):
-                    description = stripped.strip('"""').strip("'''")
+                    description = stripped.strip('"').strip("'")
                     break
 
         # Heuristic input/output detection
@@ -276,14 +282,16 @@ class SkillDiscoveryEngine:
             if package_path:
                 discovered = await self.discover_from_directory(package_path)
         except ImportError as exc:
-            raise DiscoveryError(package_name, f"Import failed: {exc}")
+            raise DiscoveryError(package_name, f"Import failed: {exc}") from exc
 
-        self._discovery_history.append({
-            "source": package_name,
-            "method": DiscoveryMethod.PACKAGE_IMPORT.name,
-            "found": len(discovered),
-            "timestamp": time.time(),
-        })
+        self._discovery_history.append(
+            {
+                "source": package_name,
+                "method": DiscoveryMethod.PACKAGE_IMPORT.name,
+                "found": len(discovered),
+                "timestamp": time.time(),
+            }
+        )
 
         return discovered
 
@@ -315,7 +323,7 @@ class SkillDiscoveryEngine:
         try:
             data = json.loads(manifest_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
-            raise DiscoveryError(str(manifest_path), f"Failed to read manifest: {exc}")
+            raise DiscoveryError(str(manifest_path), f"Failed to read manifest: {exc}") from exc
 
         discovered: list[SkillDefinition] = []
         for skill_data in data.get("skills", []):
@@ -325,12 +333,14 @@ class SkillDiscoveryEngine:
             except Exception as exc:
                 logger.warning("Failed to parse manifest entry: %s", exc)
 
-        self._discovery_history.append({
-            "source": str(manifest_path),
-            "method": DiscoveryMethod.MANIFEST_FILE.name,
-            "found": len(discovered),
-            "timestamp": time.time(),
-        })
+        self._discovery_history.append(
+            {
+                "source": str(manifest_path),
+                "method": DiscoveryMethod.MANIFEST_FILE.name,
+                "found": len(discovered),
+                "timestamp": time.time(),
+            }
+        )
 
         return discovered
 
@@ -533,7 +543,11 @@ class SkillDiscoveryEngine:
                 missing.append(cap)
             else:
                 best_quality = max(
-                    (self.registry.get(sid).quality_score for sid in producers if self.registry.get(sid)),
+                    (
+                        self.registry.get(sid).quality_score
+                        for sid in producers
+                        if self.registry.get(sid)
+                    ),
                     default=0.0,
                 )
                 if best_quality < 0.5:

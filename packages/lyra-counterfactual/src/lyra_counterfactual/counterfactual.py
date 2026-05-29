@@ -276,8 +276,14 @@ class CounterfactualEngine:
         evidence: dict[str, float],
     ) -> CounterfactualResult:
         """Full three-step counterfactual inference with SCM."""
-        if self._abduction_engine is None or self._action_predictor is None or self._prediction_engine is None:
-            raise CounterfactualEngineError("SCM sub-engines not initialized. Call set_scm() first.")
+        if (
+            self._abduction_engine is None
+            or self._action_predictor is None
+            or self._prediction_engine is None
+        ):
+            raise CounterfactualEngineError(
+                "SCM sub-engines not initialized. Call set_scm() first."
+            )
 
         # Step 1: Abduction
         if evidence:
@@ -366,19 +372,13 @@ class CounterfactualEngine:
             )
         return path
 
-    def _estimate_legacy_confidence(
-        self, intervention: Intervention, path: list[str]
-    ) -> float:
+    def _estimate_legacy_confidence(self, intervention: Intervention, path: list[str]) -> float:
         """Estimate confidence using transfer entropy."""
-        te = self._legacy_graph.compute_li_cte(
-            intervention.source_id, intervention.target_id
-        )
+        te = self._legacy_graph.compute_li_cte(intervention.source_id, intervention.target_id)
         base = 0.5 + (te * 0.4)
         return min(base, 0.95)
 
-    def _legacy_predict_outcome(
-        self, intervention: Intervention, path: list[str]
-    ) -> str:
+    def _legacy_predict_outcome(self, intervention: Intervention, path: list[str]) -> str:
         if "execute" in intervention.action_type or "call" in intervention.action_type:
             return f"Simulated {intervention.action_type} on {intervention.target_id}"
         return f"Would affect {intervention.target_id} via {intervention.action_type}"
@@ -514,9 +514,7 @@ class CounterfactualEngine:
 
         return path
 
-    def _format_outcome(
-        self, target_var: str, pred_result: PredictionResult
-    ) -> str:
+    def _format_outcome(self, target_var: str, pred_result: PredictionResult) -> str:
         """Format the predicted outcome as a readable string."""
         return (
             f"{target_var} = {pred_result.expected_value:.4f} "

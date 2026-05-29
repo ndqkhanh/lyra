@@ -1,8 +1,13 @@
 """lyra_harness_core.forensic — trajectory replay + comparison for sabotage detection.
 
-Per [docs/220-orion-code-multi-hop-collaborative-apply-plan.md](../../../../../../research/harness-engineering/docs/220-orion-code-multi-hop-collaborative-apply-plan.md) §4.9
-(trajectory-replay forensic comparator), [docs/221-aegis-ops-multi-hop-collaborative-apply-plan.md]
-(../../../../../../research/harness-engineering/docs/221-aegis-ops-multi-hop-collaborative-apply-plan.md) §3.5
+Per
+[docs/220-orion-code-multi-hop-collaborative-apply-plan.md]
+(../../../../../../research/harness-engineering/
+docs/220-orion-code-multi-hop-collaborative-apply-plan.md) §4.9
+(trajectory-replay forensic comparator),
+[docs/221-aegis-ops-multi-hop-collaborative-apply-plan.md]
+(../../../../../../research/harness-engineering/
+docs/221-aegis-ops-multi-hop-collaborative-apply-plan.md) §3.5
 (forensic record), and [docs/188-witness-provenance-memory-techniques-synthesis.md]
 (../../../../../../research/harness-engineering/docs/188-witness-provenance-memory-techniques-synthesis.md).
 
@@ -14,6 +19,7 @@ signatures), grouped by task signature, with outlier detection.
 Pure-function agents from :mod:`lyra_harness_core.orchestration` are the
 prerequisite — non-deterministic trajectories cannot be replay-compared.
 """
+
 from __future__ import annotations
 
 from .replay_comparator import (

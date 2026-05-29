@@ -109,10 +109,18 @@ class SwarmVisualizer:
             f"Time: {time.strftime('%H:%M:%S')}",
             "-" * 50,
         ]
-        priority = {AgentState.BUSY: 0, AgentState.BLOCKED: 1, AgentState.IDLE: 2, AgentState.ERROR: 3, AgentState.OFFLINE: 4}
+        priority = {
+            AgentState.BUSY: 0,
+            AgentState.BLOCKED: 1,
+            AgentState.IDLE: 2,
+            AgentState.ERROR: 3,
+            AgentState.OFFLINE: 4,
+        }
         sorted_agents = sorted(snapshot.agents, key=lambda a: priority.get(a.state, 99))
         for agent in sorted_agents:
-            lines.append(f"  [{agent.state.name[:4]}] {agent.agent_id:<20} {agent.current_task or '-'}")
+            lines.append(
+                f"  [{agent.state.name[:4]}] {agent.agent_id:<20} {agent.current_task or '-'}"
+            )
         lines.append("-" * 50)
         if snapshot.metrics:
             lines.append(

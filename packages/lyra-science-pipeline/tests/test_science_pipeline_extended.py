@@ -18,7 +18,12 @@ def _make_pipeline() -> SciencePipeline:
 class TestSciencePipelinePropose:
     def test_propose_hypothesis_returns_hypothesis(self):
         sp = _make_pipeline()
-        h = sp.propose_hypothesis("Larger models generalize better", "model_size", "generalization", "positive correlation")
+        h = sp.propose_hypothesis(
+            "Larger models generalize better",
+            "model_size",
+            "generalization",
+            "positive correlation",
+        )
         assert isinstance(h, Hypothesis)
         assert h.status == "proposed"
         assert h.confidence == 0.5
@@ -33,7 +38,9 @@ class TestSciencePipelinePropose:
 
     def test_hypothesis_fields_preserved(self):
         sp = _make_pipeline()
-        h = sp.propose_hypothesis("Statement", "independent_var", "dependent_var", "expected_effect")
+        h = sp.propose_hypothesis(
+            "Statement", "independent_var", "dependent_var", "expected_effect"
+        )
         assert h.statement == "Statement"
         assert h.independent_var == "independent_var"
         assert h.dependent_var == "dependent_var"
@@ -138,6 +145,7 @@ class TestExperimentRegistry:
     @pytest.fixture
     def registry(self):
         from lyra_experiment import AgentConfig, ExperimentRegistry
+
         return ExperimentRegistry(), AgentConfig
 
     def test_create_and_start_experiment(self, registry):

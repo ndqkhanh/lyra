@@ -4,7 +4,6 @@ Tests for the Research Synthesis & Report Engine (reporter.py).
 All tests run offline — no network calls, no LLM calls.
 """
 
-
 import pytest
 from lyra_research.reporter import (
     BoundCitation,
@@ -20,6 +19,7 @@ from lyra_research.reporter import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def sample_paper_analyses():
     return [
@@ -27,8 +27,8 @@ def sample_paper_analyses():
             "source_id": "p1",
             "title": "Attention Is All You Need",
             "abstract": "We propose a new attention mechanism for transformers. "
-                        "The model achieves state-of-the-art results on translation tasks. "
-                        "It extends previous sequence-to-sequence approaches.",
+            "The model achieves state-of-the-art results on translation tasks. "
+            "It extends previous sequence-to-sequence approaches.",
             "findings": ["New transformer architecture"],
             "venue": "NeurIPS 2017",
             "url": "https://arxiv.org/abs/1706.03762",
@@ -37,8 +37,8 @@ def sample_paper_analyses():
             "source_id": "p2",
             "title": "BERT: Pre-training Deep Bidirectional Transformers",
             "abstract": "We introduce BERT for language understanding. "
-                        "BERT builds on transformer pretraining to achieve "
-                        "state-of-the-art on GLUE benchmark with 93.5% accuracy.",
+            "BERT builds on transformer pretraining to achieve "
+            "state-of-the-art on GLUE benchmark with 93.5% accuracy.",
             "findings": ["Bidirectional pretraining improves performance"],
             "venue": "NAACL 2019",
             "url": "https://arxiv.org/abs/1810.04805",
@@ -47,8 +47,8 @@ def sample_paper_analyses():
             "source_id": "p3",
             "title": "Sparse Attention for Long-Range Transformers",
             "abstract": "We present a sparse attention mechanism that improves over "
-                        "dense attention. Our method reduces memory by 50% while "
-                        "maintaining accuracy on ImageNet.",
+            "dense attention. Our method reduces memory by 50% while "
+            "maintaining accuracy on ImageNet.",
             "findings": ["50% memory reduction"],
             "venue": "ICLR 2021",
             "url": "https://arxiv.org/abs/2004.05150",
@@ -62,7 +62,9 @@ def sample_repo_analyses():
         {
             "source_id": "r1",
             "title": "huggingface/transformers",
-            "description": "State-of-the-art machine learning for train and inference with transformers.",
+            "description":(
+                "State-of-the-art machine learning for train and inference with transformers."
+            ),
             "stars": 120000,
             "language": "Python",
             "url": "https://github.com/huggingface/transformers",
@@ -138,6 +140,7 @@ def sample_report(generator, sample_synthesis, sample_sources):
 # CrossSourceSynthesizer tests
 # ---------------------------------------------------------------------------
 
+
 def test_cross_source_synthesizer_empty_inputs(synthesizer):
     """Synthesizer handles empty inputs without error."""
     result = synthesizer.synthesize(
@@ -180,11 +183,7 @@ def test_cross_source_synthesizer_groups_papers(synthesizer, sample_paper_analys
         contradictions=[],
     )
     # All titles should appear somewhere in best_papers
-    all_grouped_titles = [
-        title
-        for titles in result.best_papers.values()
-        for title in titles
-    ]
+    all_grouped_titles = [title for titles in result.best_papers.values() for title in titles]
     assert len(all_grouped_titles) == len(sample_paper_analyses)
 
 
@@ -198,11 +197,7 @@ def test_cross_source_synthesizer_groups_repos(synthesizer, sample_repo_analyses
         contradictions=[],
     )
     assert isinstance(result.best_repos, dict)
-    all_repo_names = [
-        name
-        for names in result.best_repos.values()
-        for name in names
-    ]
+    all_repo_names = [name for names in result.best_repos.values() for name in names]
     assert len(all_repo_names) == len(sample_repo_analyses)
 
 
@@ -300,12 +295,15 @@ def test_cross_source_synthesizer_taxonomy_key_methods(synthesizer):
         gaps=[],
         contradictions=[],
     )
-    assert "attention" in result.taxonomy.key_methods or "transformer" in result.taxonomy.key_methods
+    assert (
+        "attention" in result.taxonomy.key_methods or "transformer" in result.taxonomy.key_methods
+    )
 
 
 # ---------------------------------------------------------------------------
 # CitationBinder tests
 # ---------------------------------------------------------------------------
+
 
 def test_citation_binder_bind_empty(binder):
     """Binding empty text with empty sources returns unchanged text."""
@@ -398,6 +396,7 @@ def test_citation_binder_find_source_with_overlap(binder, sample_sources):
 # ResearchReport tests
 # ---------------------------------------------------------------------------
 
+
 def test_report_to_markdown_has_title(sample_report):
     """Markdown output contains the topic in the H1 heading."""
     md = sample_report.to_markdown()
@@ -463,9 +462,8 @@ def test_report_generated_at_is_utc(sample_report):
 # ResearchReportGenerator tests
 # ---------------------------------------------------------------------------
 
-def test_report_generator_generates_complete_report(
-    generator, sample_synthesis, sample_sources
-):
+
+def test_report_generator_generates_complete_report(generator, sample_synthesis, sample_sources):
     """Generator produces a ResearchReport with all sections populated."""
     report = generator.generate(
         topic="transformers",
@@ -493,8 +491,10 @@ def test_report_generator_executive_summary(generator, sample_synthesis, sample_
         gaps=[],
         contradictions=[],
     )
-    assert "transformers" in report.executive_summary.lower() or \
-           "transformer attention" in report.executive_summary.lower()
+    assert (
+        "transformers" in report.executive_summary.lower()
+        or "transformer attention" in report.executive_summary.lower()
+    )
     assert str(sample_synthesis.source_count) in report.executive_summary
 
 
@@ -519,7 +519,9 @@ def test_report_generator_papers_section(generator, sample_synthesis, sample_sou
         gaps=[],
         contradictions=[],
     )
-    assert "Title" in report.best_papers_section or "*No papers found.*" in report.best_papers_section
+    assert (
+        "Title" in report.best_papers_section or "*No papers found.*" in report.best_papers_section
+    )
 
 
 def test_report_generator_repos_section(generator, sample_synthesis, sample_sources):
@@ -531,7 +533,10 @@ def test_report_generator_repos_section(generator, sample_synthesis, sample_sour
         gaps=[],
         contradictions=[],
     )
-    assert "Repository" in report.best_repos_section or "*No repositories found.*" in report.best_repos_section
+    assert (
+        "Repository" in report.best_repos_section
+        or "*No repositories found.*" in report.best_repos_section
+    )
 
 
 def test_report_generator_gaps_section(generator, sample_synthesis, sample_sources):
@@ -561,9 +566,7 @@ def test_report_generator_contested_section(generator, sample_synthesis, sample_
     assert "Paper A contradicts Paper B" in report.contested_claims_section
 
 
-def test_report_generator_citation_fidelity_in_range(
-    generator, sample_synthesis, sample_sources
-):
+def test_report_generator_citation_fidelity_in_range(generator, sample_synthesis, sample_sources):
     """citation_fidelity is in [0.0, 1.0]."""
     report = generator.generate(
         topic="transformers",
@@ -575,9 +578,7 @@ def test_report_generator_citation_fidelity_in_range(
     assert 0.0 <= report.citation_fidelity <= 1.0
 
 
-def test_report_generator_quality_score_in_range(
-    generator, sample_synthesis, sample_sources
-):
+def test_report_generator_quality_score_in_range(generator, sample_synthesis, sample_sources):
     """quality_score is in [0.0, 1.0]."""
     report = generator.generate(
         topic="transformers",
@@ -609,6 +610,7 @@ def test_report_generator_next_steps_has_researcher_and_practitioner(
 # ReportQualityChecker tests
 # ---------------------------------------------------------------------------
 
+
 def test_quality_checker_passes_good_report(checker, sample_report):
     """A well-formed report with full coverage and citation fidelity passes."""
     # Force fidelity and mark all answered
@@ -632,7 +634,7 @@ def test_quality_checker_fails_low_coverage(checker, sample_report):
     quality = checker.check(
         report=sample_report,
         checklist_total=10,
-        checklist_answered=5,   # 50% coverage — below threshold
+        checklist_answered=5,  # 50% coverage — below threshold
         sources_found=6,
         gaps_expected=3,
     )

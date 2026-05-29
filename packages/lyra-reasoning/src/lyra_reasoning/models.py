@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ class ReasoningStep:
     action: str
     observation: str
     confidence: float
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if self.confidence < 0.0 or self.confidence > 1.0:
@@ -49,13 +49,13 @@ class ReasoningTrace:
     """
 
     task: str
-    steps: Tuple[ReasoningStep, ...] = ()
+    steps: tuple[ReasoningStep, ...] = ()
     outcome: str = "pending"
     duration: float = 0.0
     token_count: int = 0
     strategy: str = "reflect"
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def add_step(self, step: ReasoningStep) -> "ReasoningTrace":
         """Return a new trace with *step* appended (immutable update)."""
@@ -83,7 +83,7 @@ class ReasoningTrace:
             metadata=self.metadata,
         )
 
-    def final_step(self) -> Optional[ReasoningStep]:
+    def final_step(self) -> ReasoningStep | None:
         """Return the last step in the trace, if any."""
         return self.steps[-1] if self.steps else None
 
@@ -102,7 +102,7 @@ class ReflActEpisode:
     task: str
     trace: ReasoningTrace
     outcome: str
-    lessons_learned: Tuple[str, ...] = ()
+    lessons_learned: tuple[str, ...] = ()
     success: bool = False
     score: float = 0.0
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
@@ -121,12 +121,12 @@ class GRPOTrajectory:
     """
 
     prompt: str
-    responses: Tuple[str, ...]
-    rewards: Tuple[float, ...]
-    advantages: Tuple[float, ...] = ()
+    responses: tuple[str, ...]
+    rewards: tuple[float, ...]
+    advantages: tuple[float, ...] = ()
     group_mean: float = 0.0
     group_std: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if len(self.responses) != len(self.rewards):
@@ -136,7 +136,7 @@ class GRPOTrajectory:
             )
 
     @property
-    def best_response(self) -> Optional[str]:
+    def best_response(self) -> str | None:
         """Return the response with the highest reward."""
         if not self.responses or not self.rewards:
             return None
@@ -153,9 +153,9 @@ class SpiralSample:
     """
 
     prompt: str
-    candidate_responses: Tuple[str, ...]
-    scores: Tuple[float, ...]
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    candidate_responses: tuple[str, ...]
+    scores: tuple[float, ...]
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if len(self.candidate_responses) != len(self.scores):
@@ -164,21 +164,21 @@ class SpiralSample:
                 f"got {len(self.candidate_responses)} vs {len(self.scores)}"
             )
 
-    def best_candidate(self) -> Optional[str]:
+    def best_candidate(self) -> str | None:
         """Return the highest-scored candidate."""
         if not self.candidate_responses or not self.scores:
             return None
         idx = max(range(len(self.scores)), key=lambda i: self.scores[i])
         return self.candidate_responses[idx]
 
-    def worst_candidate(self) -> Optional[str]:
+    def worst_candidate(self) -> str | None:
         """Return the lowest-scored candidate."""
         if not self.candidate_responses or not self.scores:
             return None
         idx = min(range(len(self.scores)), key=lambda i: self.scores[i])
         return self.candidate_responses[idx]
 
-    def preference_pair(self) -> Tuple[Optional[str], Optional[str]]:
+    def preference_pair(self) -> tuple[str | None, str | None]:
         """Return (chosen, rejected) pair for DPO-style training."""
         return self.best_candidate(), self.worst_candidate()
 
@@ -195,8 +195,8 @@ class ThoughtNode:
     score: float = 0.0
     depth: int = 0
     visits: int = 0
-    parent_id: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    parent_id: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -205,6 +205,6 @@ class AnaloguePair:
 
     source_domain: str
     target_domain: str
-    structural_mapping: Dict[str, str] = field(default_factory=dict)
+    structural_mapping: dict[str, str] = field(default_factory=dict)
     similarity_score: float = 0.0
     transfer_confidence: float = 0.0

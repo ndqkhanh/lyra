@@ -20,7 +20,7 @@ from __future__ import annotations
 import logging
 from collections import defaultdict
 from collections.abc import Callable
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from .models import AnaloguePair, ReasoningStep, ReasoningTrace, ThoughtNode
 
@@ -42,7 +42,7 @@ class ChainOfThought:
     def __init__(self, max_steps: int = 10) -> None:
         self.max_steps = max_steps
 
-    def reason(self, task: str, context: Optional[Dict[str, Any]] = None) -> ReasoningTrace:
+    def reason(self, task: str, context: dict[str, Any] | None = None) -> ReasoningTrace:
         """Execute chain-of-thought reasoning on *task*.
 
         Args:
@@ -52,7 +52,7 @@ class ChainOfThought:
         Returns:
             Completed reasoning trace.
         """
-        steps: List[ReasoningStep] = []
+        steps: list[ReasoningStep] = []
         _ = context or {}
         current_state = task
 
@@ -85,10 +85,12 @@ class ChainOfThought:
         )
 
     @staticmethod
-    def _produce_thought(step_num: int, state: str, previous: List[ReasoningStep]) -> str:
+    def _produce_thought(step_num: int, state: str, previous: list[ReasoningStep]) -> str:
         if step_num == 1:
             return f"Parse the task: {state[:100]}. Identify what is being asked."
-        return f"Given previous reasoning, determine the next logical inference for step {step_num}."
+        return (
+            f"Given previous reasoning, determine the next logical inference for step {step_num}."
+        )
 
     @staticmethod
     def _derive_action(thought: str) -> str:
@@ -138,7 +140,7 @@ class TreeOfThoughts:
         self.exploration_mode = exploration_mode
         self.prune_threshold = prune_threshold
 
-    def reason(self, task: str, context: Optional[Dict[str, Any]] = None) -> ReasoningTrace:
+    def reason(self, task: str, context: dict[str, Any] | None = None) -> ReasoningTrace:
         """Explore the reasoning tree and return the best path.
 
         Args:
@@ -149,7 +151,7 @@ class TreeOfThoughts:
             Reasoning trace containing the best path found.
         """
         root = ThoughtNode(id="root", content=task, depth=0)
-        nodes: Dict[str, ThoughtNode] = {root.id: root}
+        nodes: dict[str, ThoughtNode] = {root.id: root}
         node_id_counter = [0]
 
         def _next_id() -> str:
@@ -157,7 +159,7 @@ class TreeOfThoughts:
             return f"n{node_id_counter[0]}"
 
         if self.exploration_mode == "bfs":
-            frontier: List[str] = [root.id]
+            frontier: list[str] = [root.id]
         else:
             frontier = [root.id]
 
@@ -165,7 +167,7 @@ class TreeOfThoughts:
             if not frontier:
                 break
 
-            next_frontier: List[str] = []
+            next_frontier: list[str] = []
 
             for parent_id in frontier:
                 parent = nodes[parent_id]
@@ -216,7 +218,7 @@ class TreeOfThoughts:
             metadata={"nodes_explored": len(nodes), "best_score": best_score},
         )
 
-    def _expand(self, parent: ThoughtNode, next_id: Callable[[], str]) -> List[ThoughtNode]:
+    def _expand(self, parent: ThoughtNode, next_id: Callable[[], str]) -> list[ThoughtNode]:
         """Generate child nodes from *parent*."""
         templates = [
             f"Explore alternative interpretation of: {parent.content[:60]}",
@@ -238,9 +240,7 @@ class TreeOfThoughts:
         base += 0.05 * sum(1 for t in reasoning_terms if t in node.content.lower())
         return min(1.0, max(0.0, base))
 
-    def _extract_best_path(
-        self, nodes: Dict[str, ThoughtNode], root_id: str
-    ) -> List[ThoughtNode]:
+    def _extract_best_path(self, nodes: dict[str, ThoughtNode], root_id: str) -> list[ThoughtNode]:
         """Walk from root to the highest-scoring leaf."""
         path = [nodes[root_id]]
         current_id = root_id
@@ -271,12 +271,12 @@ class SelfConsistency:
     def __init__(
         self,
         n_samples: int = 5,
-        inner_reasoner: Optional[ChainOfThought] = None,
+        inner_reasoner: ChainOfThought | None = None,
     ) -> None:
         self.n_samples = n_samples
         self.inner_reasoner = inner_reasoner or ChainOfThought()
 
-    def reason(self, task: str, context: Optional[Dict[str, Any]] = None) -> ReasoningTrace:
+    def reason(self, task: str, context: dict[str, Any] | None = None) -> ReasoningTrace:
         """Run multiple reasoning chains and return the consensus trace.
 
         Args:
@@ -286,8 +286,8 @@ class SelfConsistency:
         Returns:
             Consensus reasoning trace.
         """
-        traces: List[ReasoningTrace] = []
-        conclusions: Dict[str, int] = defaultdict(int)
+        traces: list[ReasoningTrace] = []
+        conclusions: dict[str, int] = defaultdict(int)
 
         for i in range(self.n_samples):
             trace = self.inner_reasoner.reason(task, context)
@@ -297,20 +297,22 @@ class SelfConsistency:
             if final_step:
                 conclusions[final_step.observation] += 1
 
-            logger.debug("SelfConsistency sample %d: confidence=%.2f", i + 1, final_step.confidence if final_step else 0.0)
+            logger.debug(
+                "SelfConsistency sample %d: confidence=%.2f",
+                i + 1,
+                final_step.confidence if final_step else 0.0,
+            )
 
         # Select majority-vote conclusion
         best_conclusion = max(conclusions, key=conclusions.get) if conclusions else "no_consensus"
         consensus_count = conclusions.get(best_conclusion, 0)
 
         # Build aggregate trace
-        all_steps: List[ReasoningStep] = []
+        all_steps: list[ReasoningStep] = []
         for trace in traces:
             all_steps.extend(trace.steps)
 
-        avg_confidence = (
-            sum(s.confidence for s in all_steps) / len(all_steps) if all_steps else 0.0
-        )
+        avg_confidence = sum(s.confidence for s in all_steps) / len(all_steps) if all_steps else 0.0
 
         logger.info(
             "SelfConsistency: %d/%d chains agreed on conclusion",
@@ -353,7 +355,7 @@ class StepBack:
     def __init__(self) -> None:
         pass
 
-    def reason(self, task: str, context: Optional[Dict[str, Any]] = None) -> ReasoningTrace:
+    def reason(self, task: str, context: dict[str, Any] | None = None) -> ReasoningTrace:
         """Execute step-back reasoning on *task*.
 
         Args:
@@ -363,7 +365,7 @@ class StepBack:
         Returns:
             Completed reasoning trace.
         """
-        steps: List[ReasoningStep] = []
+        steps: list[ReasoningStep] = []
 
         # Phase 1: Abstract
         abstraction = self._abstract(task)
@@ -484,13 +486,13 @@ class AnalogicalReasoning:
 
     def __init__(
         self,
-        analogue_base: Optional[List[AnaloguePair]] = None,
+        analogue_base: list[AnaloguePair] | None = None,
         similarity_threshold: float = 0.3,
     ) -> None:
         self.analogue_base = analogue_base or []
         self.similarity_threshold = similarity_threshold
 
-    def reason(self, task: str, context: Optional[Dict[str, Any]] = None) -> ReasoningTrace:
+    def reason(self, task: str, context: dict[str, Any] | None = None) -> ReasoningTrace:
         """Execute analogical reasoning on *task*.
 
         Args:
@@ -500,7 +502,7 @@ class AnalogicalReasoning:
         Returns:
             Completed reasoning trace.
         """
-        steps: List[ReasoningStep] = []
+        steps: list[ReasoningStep] = []
 
         # Phase 1: Retrieve analogues
         analogues = self._retrieve_analogues(task)
@@ -517,9 +519,11 @@ class AnalogicalReasoning:
         # Phase 2: Map structure
         if analogues:
             best_analogue = analogues[0]
-            mapping_desc = ", ".join(
-                f"{k}->{v}" for k, v in best_analogue.structural_mapping.items()
-            ) if best_analogue.structural_mapping else "direct analogy"
+            mapping_desc = (
+                ", ".join(f"{k}->{v}" for k, v in best_analogue.structural_mapping.items())
+                if best_analogue.structural_mapping
+                else "direct analogy"
+            )
             steps.append(
                 ReasoningStep(
                     step_number=2,
@@ -572,13 +576,13 @@ class AnalogicalReasoning:
         self.analogue_base.append(pair)
         logger.debug("Added analogue: %s -> %s", pair.source_domain, pair.target_domain)
 
-    def _retrieve_analogues(self, task: str) -> List[AnaloguePair]:
+    def _retrieve_analogues(self, task: str) -> list[AnaloguePair]:
         """Retrieve analogues sorted by similarity to *task*."""
         if not self.analogue_base:
             return []
 
         task_tokens = set(task.lower().split())
-        scored: List[Tuple[float, AnaloguePair]] = []
+        scored: list[tuple[float, AnaloguePair]] = []
 
         for pair in self.analogue_base:
             source_tokens = set(pair.source_domain.lower().split())

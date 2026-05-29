@@ -2,8 +2,6 @@
 Multi-level verification system for reasoning traces.
 """
 
-from typing import Dict, List, Optional
-
 from anthropic import Anthropic
 
 from ..types import ReasoningStep, ReasoningTrace, VerificationResult
@@ -12,7 +10,7 @@ from ..types import ReasoningStep, ReasoningTrace, VerificationResult
 class StepVerifier:
     """Verifies individual reasoning steps."""
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         self.client = Anthropic(api_key=api_key) if api_key else Anthropic()
 
     def verify(self, step: ReasoningStep, context: str = "") -> float:
@@ -34,8 +32,15 @@ class StepVerifier:
 
         # Check for reasoning indicators
         reasoning_indicators = [
-            "because", "therefore", "thus", "since", "given",
-            "evidence", "analysis", "conclusion", "hypothesis"
+            "because",
+            "therefore",
+            "thus",
+            "since",
+            "given",
+            "evidence",
+            "analysis",
+            "conclusion",
+            "hypothesis",
         ]
         indicator_count = sum(1 for ind in reasoning_indicators if ind in step.content.lower())
         score += min(0.2, indicator_count * 0.05)
@@ -110,10 +115,10 @@ class ExternalVerifier:
 class CrossAgentVerifier:
     """Verifies reasoning using multiple agents."""
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         self.client = Anthropic(api_key=api_key) if api_key else Anthropic()
 
-    def verify(self, trace: ReasoningTrace, num_verifiers: int = 3) -> List[float]:
+    def verify(self, trace: ReasoningTrace, num_verifiers: int = 3) -> list[float]:
         """
         Verify reasoning using multiple independent agents.
 
@@ -151,7 +156,7 @@ class VerificationSystem:
     - Cross-agent verification
     """
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         self.step_verifier = StepVerifier(api_key)
         self.trace_verifier = TraceVerifier()
         self.external_verifier = ExternalVerifier()
@@ -214,17 +219,21 @@ class VerificationSystem:
             passed=passed,
             details={
                 "avg_step_score": sum(step_scores) / len(step_scores) if step_scores else 0.0,
-                "avg_external_score": sum(external_scores) / len(external_scores) if external_scores else 0.0,
-                "avg_cross_agent_score": sum(cross_agent_scores) / len(cross_agent_scores) if cross_agent_scores else 0.0,
+                "avg_external_score": (
+                    sum(external_scores) / len(external_scores) if external_scores else 0.0
+                ),
+                "avg_cross_agent_score": (
+                    sum(cross_agent_scores) / len(cross_agent_scores) if cross_agent_scores else 0.0
+                ),
             },
         )
 
     def _calculate_overall_score(
         self,
-        step_scores: List[float],
+        step_scores: list[float],
         trace_score: float,
-        external_scores: List[float],
-        cross_agent_scores: List[float],
+        external_scores: list[float],
+        cross_agent_scores: list[float],
     ) -> float:
         """Calculate weighted overall verification score."""
         weights = {
@@ -235,10 +244,16 @@ class VerificationSystem:
         }
 
         # Calculate weighted components
-        step_component = (sum(step_scores) / len(step_scores) if step_scores else 0.5) * weights["step"]
+        step_component = (sum(step_scores) / len(step_scores) if step_scores else 0.5) * weights[
+            "step"
+        ]
         trace_component = trace_score * weights["trace"]
-        external_component = (sum(external_scores) / len(external_scores) if external_scores else 0.5) * weights["external"]
-        cross_agent_component = (sum(cross_agent_scores) / len(cross_agent_scores) if cross_agent_scores else 0.5) * weights["cross_agent"]
+        external_component = (
+            sum(external_scores) / len(external_scores) if external_scores else 0.5
+        ) * weights["external"]
+        cross_agent_component = (
+            sum(cross_agent_scores) / len(cross_agent_scores) if cross_agent_scores else 0.5
+        ) * weights["cross_agent"]
 
         overall = step_component + trace_component + external_component + cross_agent_component
 

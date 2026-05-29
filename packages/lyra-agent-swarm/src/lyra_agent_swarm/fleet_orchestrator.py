@@ -236,10 +236,15 @@ class FleetOrchestrator:
         if fleet is None:
             return None
         updated = Fleet(
-            id=fleet.id, name=fleet.name, status=status,
-            agent_ids=fleet.agent_ids, squad_ids=fleet.squad_ids,
-            tasks=fleet.tasks, batches=fleet.batches,
-            metrics=fleet.metrics, created_at=fleet.created_at,
+            id=fleet.id,
+            name=fleet.name,
+            status=status,
+            agent_ids=fleet.agent_ids,
+            squad_ids=fleet.squad_ids,
+            tasks=fleet.tasks,
+            batches=fleet.batches,
+            metrics=fleet.metrics,
+            created_at=fleet.created_at,
         )
         self._fleets[fleet_id] = updated
         return updated
@@ -250,10 +255,15 @@ class FleetOrchestrator:
         if fleet is None:
             return False
         self._fleets[fleet_id] = Fleet(
-            id=fleet.id, name=fleet.name, status=FleetStatus.DISSOLVED,
-            agent_ids=fleet.agent_ids, squad_ids=fleet.squad_ids,
-            tasks=fleet.tasks, batches=fleet.batches,
-            metrics=fleet.metrics, created_at=fleet.created_at,
+            id=fleet.id,
+            name=fleet.name,
+            status=FleetStatus.DISSOLVED,
+            agent_ids=fleet.agent_ids,
+            squad_ids=fleet.squad_ids,
+            tasks=fleet.tasks,
+            batches=fleet.batches,
+            metrics=fleet.metrics,
+            created_at=fleet.created_at,
         )
         return True
 
@@ -312,8 +322,11 @@ class FleetOrchestrator:
 
         # Update fleet state
         self._fleets[fleet_id] = Fleet(
-            id=fleet.id, name=fleet.name, status=FleetStatus.ACTIVE,
-            agent_ids=fleet.agent_ids, squad_ids=fleet.squad_ids,
+            id=fleet.id,
+            name=fleet.name,
+            status=FleetStatus.ACTIVE,
+            agent_ids=fleet.agent_ids,
+            squad_ids=fleet.squad_ids,
             tasks=fleet.tasks + tuple(tasks),
             batches=fleet.batches + (batch,),
             metrics=fleet.metrics,
@@ -322,7 +335,9 @@ class FleetOrchestrator:
 
         return batch
 
-    def complete_task(self, fleet_id: str, task_id: str, result: str, success: bool = True) -> TaskItem | None:
+    def complete_task(
+        self, fleet_id: str, task_id: str, result: str, success: bool = True
+    ) -> TaskItem | None:
         """Record a task's completion."""
         fleet = self._fleets.get(fleet_id)
         if fleet is None:
@@ -335,7 +350,9 @@ class FleetOrchestrator:
             if t.id == task_id:
                 status = TaskItemStatus.COMPLETED if success else TaskItemStatus.FAILED
                 completed_task = TaskItem(
-                    id=t.id, input=t.input, status=status,
+                    id=t.id,
+                    input=t.input,
+                    status=status,
                     result=result if success else "",
                     error="" if success else result,
                     assigned_agent=t.assigned_agent,
@@ -355,8 +372,11 @@ class FleetOrchestrator:
         metrics = self._compute_metrics(fleet, tuple(updated_tasks))
 
         self._fleets[fleet_id] = Fleet(
-            id=fleet.id, name=fleet.name, status=fleet.status,
-            agent_ids=fleet.agent_ids, squad_ids=fleet.squad_ids,
+            id=fleet.id,
+            name=fleet.name,
+            status=fleet.status,
+            agent_ids=fleet.agent_ids,
+            squad_ids=fleet.squad_ids,
             tasks=tuple(updated_tasks),
             batches=fleet.batches,
             metrics=metrics,
@@ -408,9 +428,7 @@ class FleetOrchestrator:
         if fleet and fleet.agent_ids:
             reduce_agent = fleet.agent_ids[0]
 
-        synthesis = f"{reduce_instruction}:\n" + "\n".join(
-            f"  - {r[:120]}" for r in map_results
-        )
+        synthesis = f"{reduce_instruction}:\n" + "\n".join(f"  - {r[:120]}" for r in map_results)
 
         total_tokens = sum(len(r) // 4 for r in map_results) + len(synthesis) // 4
 
@@ -438,10 +456,15 @@ class FleetOrchestrator:
             return None
         metrics = self._compute_metrics(fleet, fleet.tasks)
         self._fleets[fleet_id] = Fleet(
-            id=fleet.id, name=fleet.name, status=fleet.status,
-            agent_ids=fleet.agent_ids, squad_ids=fleet.squad_ids,
-            tasks=fleet.tasks, batches=fleet.batches,
-            metrics=metrics, created_at=fleet.created_at,
+            id=fleet.id,
+            name=fleet.name,
+            status=fleet.status,
+            agent_ids=fleet.agent_ids,
+            squad_ids=fleet.squad_ids,
+            tasks=fleet.tasks,
+            batches=fleet.batches,
+            metrics=metrics,
+            created_at=fleet.created_at,
         )
         return metrics
 
@@ -450,7 +473,9 @@ class FleetOrchestrator:
         completed = sum(1 for t in tasks if t.status == TaskItemStatus.COMPLETED)
         failed = sum(1 for t in tasks if t.status == TaskItemStatus.FAILED)
         running = sum(1 for t in tasks if t.status == TaskItemStatus.RUNNING)
-        queued = sum(1 for t in tasks if t.status in (TaskItemStatus.QUEUED, TaskItemStatus.ASSIGNED))
+        queued = sum(
+            1 for t in tasks if t.status in (TaskItemStatus.QUEUED, TaskItemStatus.ASSIGNED)
+        )
 
         active_agents = min(running, fleet.agent_count)
         idle_agents = max(0, fleet.agent_count - active_agents)

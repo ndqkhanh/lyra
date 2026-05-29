@@ -289,9 +289,7 @@ class TestReviewExecutor:
         architecture = {"components": ["api", "database"]}
         code_artifacts = [{"path": "main.py"}]
 
-        feedback = await executor._collect_principal_feedback(
-            architecture, code_artifacts
-        )
+        feedback = await executor._collect_principal_feedback(architecture, code_artifacts)
 
         assert "architecture_quality" in feedback
         assert "scalability_assessment" in feedback
@@ -331,9 +329,7 @@ class TestReviewExecutor:
         architecture = {"components": []}
         code_artifacts = []
 
-        feedback = await executor._collect_spec_feedback(
-            prd, architecture, code_artifacts
-        )
+        feedback = await executor._collect_spec_feedback(prd, architecture, code_artifacts)
 
         assert "spec_compliance" in feedback
         assert "documentation_complete" in feedback
@@ -346,10 +342,30 @@ class TestReviewExecutor:
     ) -> None:
         """Test final report generation with all approvals."""
         pm_feedback = {"approval": "approved", "concerns": [], "recommendations": ["R1"]}
-        lead_feedback = {"approval": "approved", "concerns": [], "recommendations": ["R2"], "code_quality": "excellent"}
-        principal_feedback = {"approval": "approved", "concerns": [], "recommendations": [], "architecture_quality": "good"}
-        qa_feedback = {"approval": "approved", "concerns": [], "recommendations": [], "test_coverage": 85}
-        spec_feedback = {"approval": "approved", "concerns": [], "recommendations": [], "documentation_complete": True}
+        lead_feedback = {
+            "approval": "approved",
+            "concerns": [],
+            "recommendations": ["R2"],
+            "code_quality": "excellent",
+        }
+        principal_feedback = {
+            "approval": "approved",
+            "concerns": [],
+            "recommendations": [],
+            "architecture_quality": "good",
+        }
+        qa_feedback = {
+            "approval": "approved",
+            "concerns": [],
+            "recommendations": [],
+            "test_coverage": 85,
+        }
+        spec_feedback = {
+            "approval": "approved",
+            "concerns": [],
+            "recommendations": [],
+            "documentation_complete": True,
+        }
 
         report = executor._generate_final_report(
             pm_feedback=pm_feedback,
@@ -370,11 +386,36 @@ class TestReviewExecutor:
         executor: ReviewExecutor,
     ) -> None:
         """Test final report generation with concerns."""
-        pm_feedback = {"approval": "approved", "concerns": ["Concern 1"], "recommendations": [], "requirements_met": True}
-        lead_feedback = {"approval": "rejected", "concerns": ["Concern 2"], "recommendations": [], "code_quality": "poor"}
-        principal_feedback = {"approval": "approved", "concerns": [], "recommendations": [], "architecture_quality": "good"}
-        qa_feedback = {"approval": "approved", "concerns": [], "recommendations": [], "test_coverage": 70}
-        spec_feedback = {"approval": "approved", "concerns": [], "recommendations": [], "documentation_complete": False}
+        pm_feedback = {
+            "approval": "approved",
+            "concerns": ["Concern 1"],
+            "recommendations": [],
+            "requirements_met": True,
+        }
+        lead_feedback = {
+            "approval": "rejected",
+            "concerns": ["Concern 2"],
+            "recommendations": [],
+            "code_quality": "poor",
+        }
+        principal_feedback = {
+            "approval": "approved",
+            "concerns": [],
+            "recommendations": [],
+            "architecture_quality": "good",
+        }
+        qa_feedback = {
+            "approval": "approved",
+            "concerns": [],
+            "recommendations": [],
+            "test_coverage": 70,
+        }
+        spec_feedback = {
+            "approval": "approved",
+            "concerns": [],
+            "recommendations": [],
+            "documentation_complete": False,
+        }
 
         report = executor._generate_final_report(
             pm_feedback=pm_feedback,

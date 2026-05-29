@@ -60,14 +60,18 @@ class TestObjectiveVector:
             assert vec.values[dim] == 0.0
 
     def test_dominates(self):
-        better = ObjectiveVector(values={
-            ObjectiveDimension.SPEED: 0.8,
-            ObjectiveDimension.QUALITY: 0.9,
-        })
-        worse = ObjectiveVector(values={
-            ObjectiveDimension.SPEED: 0.5,
-            ObjectiveDimension.QUALITY: 0.5,
-        })
+        better = ObjectiveVector(
+            values={
+                ObjectiveDimension.SPEED: 0.8,
+                ObjectiveDimension.QUALITY: 0.9,
+            }
+        )
+        worse = ObjectiveVector(
+            values={
+                ObjectiveDimension.SPEED: 0.5,
+                ObjectiveDimension.QUALITY: 0.5,
+            }
+        )
         assert better.dominates(worse)
         assert not worse.dominates(better)
 
@@ -78,23 +82,29 @@ class TestObjectiveVector:
         assert not b.dominates(a)
 
     def test_partial_dominance_not_enough(self):
-        a = ObjectiveVector(values={
-            ObjectiveDimension.SPEED: 0.9,
-            ObjectiveDimension.QUALITY: 0.4,
-        })
-        b = ObjectiveVector(values={
-            ObjectiveDimension.SPEED: 0.5,
-            ObjectiveDimension.QUALITY: 0.8,
-        })
+        a = ObjectiveVector(
+            values={
+                ObjectiveDimension.SPEED: 0.9,
+                ObjectiveDimension.QUALITY: 0.4,
+            }
+        )
+        b = ObjectiveVector(
+            values={
+                ObjectiveDimension.SPEED: 0.5,
+                ObjectiveDimension.QUALITY: 0.8,
+            }
+        )
         # Neither dominates the other (trade-off)
         assert not a.dominates(b)
         assert not b.dominates(a)
 
     def test_to_list_and_from_list(self):
-        vec = ObjectiveVector(values={
-            ObjectiveDimension.SPEED: 0.5,
-            ObjectiveDimension.QUALITY: 0.7,
-        })
+        vec = ObjectiveVector(
+            values={
+                ObjectiveDimension.SPEED: 0.5,
+                ObjectiveDimension.QUALITY: 0.7,
+            }
+        )
         lst = vec.to_list()
         restored = ObjectiveVector.from_list(lst)
         assert restored.values[ObjectiveDimension.SPEED] == 0.5
@@ -112,10 +122,12 @@ class TestFitnessWeights:
 
     def test_combine(self):
         w = FitnessWeights()
-        vec = ObjectiveVector(values={
-            ObjectiveDimension.SPEED: 1.0,
-            ObjectiveDimension.QUALITY: 1.0,
-        })
+        vec = ObjectiveVector(
+            values={
+                ObjectiveDimension.SPEED: 1.0,
+                ObjectiveDimension.QUALITY: 1.0,
+            }
+        )
         score = w.combine(vec)
         assert 0.0 <= score <= 1.0
 
@@ -143,33 +155,55 @@ class TestFitnessWeights:
 class TestParetoFrontier:
     def test_add_first_solution(self):
         pf = ParetoFrontier()
-        vec = ObjectiveVector(values={ObjectiveDimension.SPEED: 0.8, ObjectiveDimension.QUALITY: 0.7})
+        vec = ObjectiveVector(
+            values={ObjectiveDimension.SPEED: 0.8, ObjectiveDimension.QUALITY: 0.7}
+        )
         assert pf.add("agent_1", vec) is True
         assert pf.size == 1
 
     def test_dominated_solution_not_added(self):
         pf = ParetoFrontier()
-        pf.add("best", ObjectiveVector(values={
-            ObjectiveDimension.SPEED: 0.9,
-            ObjectiveDimension.QUALITY: 0.9,
-        }))
-        result = pf.add("worse", ObjectiveVector(values={
-            ObjectiveDimension.SPEED: 0.5,
-            ObjectiveDimension.QUALITY: 0.5,
-        }))
+        pf.add(
+            "best",
+            ObjectiveVector(
+                values={
+                    ObjectiveDimension.SPEED: 0.9,
+                    ObjectiveDimension.QUALITY: 0.9,
+                }
+            ),
+        )
+        result = pf.add(
+            "worse",
+            ObjectiveVector(
+                values={
+                    ObjectiveDimension.SPEED: 0.5,
+                    ObjectiveDimension.QUALITY: 0.5,
+                }
+            ),
+        )
         assert result is False
         assert pf.size == 1
 
     def test_new_solution_dominates_old(self):
         pf = ParetoFrontier()
-        pf.add("old", ObjectiveVector(values={
-            ObjectiveDimension.SPEED: 0.5,
-            ObjectiveDimension.QUALITY: 0.5,
-        }))
-        pf.add("better", ObjectiveVector(values={
-            ObjectiveDimension.SPEED: 0.7,
-            ObjectiveDimension.QUALITY: 0.6,
-        }))
+        pf.add(
+            "old",
+            ObjectiveVector(
+                values={
+                    ObjectiveDimension.SPEED: 0.5,
+                    ObjectiveDimension.QUALITY: 0.5,
+                }
+            ),
+        )
+        pf.add(
+            "better",
+            ObjectiveVector(
+                values={
+                    ObjectiveDimension.SPEED: 0.7,
+                    ObjectiveDimension.QUALITY: 0.6,
+                }
+            ),
+        )
         # better might not dominate old if old has a higher value in some dimension
         pf.get_frontier()
 
@@ -182,24 +216,39 @@ class TestParetoFrontier:
 
     def test_hypervolume(self):
         pf = ParetoFrontier()
-        pf.add("a", ObjectiveVector(values={
-            ObjectiveDimension.SPEED: 0.8,
-            ObjectiveDimension.QUALITY: 0.7,
-        }))
+        pf.add(
+            "a",
+            ObjectiveVector(
+                values={
+                    ObjectiveDimension.SPEED: 0.8,
+                    ObjectiveDimension.QUALITY: 0.7,
+                }
+            ),
+        )
         hv = pf.hypervolume()
         assert hv > 0.0
 
     def test_coverage(self):
         pf1 = ParetoFrontier()
-        pf1.add("a", ObjectiveVector(values={
-            ObjectiveDimension.SPEED: 0.9,
-            ObjectiveDimension.QUALITY: 0.9,
-        }))
+        pf1.add(
+            "a",
+            ObjectiveVector(
+                values={
+                    ObjectiveDimension.SPEED: 0.9,
+                    ObjectiveDimension.QUALITY: 0.9,
+                }
+            ),
+        )
         pf2 = ParetoFrontier()
-        pf2.add("b", ObjectiveVector(values={
-            ObjectiveDimension.SPEED: 0.5,
-            ObjectiveDimension.QUALITY: 0.5,
-        }))
+        pf2.add(
+            "b",
+            ObjectiveVector(
+                values={
+                    ObjectiveDimension.SPEED: 0.5,
+                    ObjectiveDimension.QUALITY: 0.5,
+                }
+            ),
+        )
         coverage = pf1.coverage(pf2)
         assert 0.0 <= coverage <= 1.0
 
@@ -213,9 +262,7 @@ class TestFitnessEvaluator:
         assert 0.0 <= score <= 1.0
 
     def test_evaluate_population(self, evaluator, benchmark_config):
-        genomes = [
-            AgentGenome(agent_id=f"pop_{i}") for i in range(3)
-        ]
+        genomes = [AgentGenome(agent_id=f"pop_{i}") for i in range(3)]
         scores = asyncio.run(evaluator.evaluate_population(genomes, benchmark_config))
         assert len(scores) == 3
         assert all(0.0 <= v <= 1.0 for v in scores.values())

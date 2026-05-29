@@ -55,9 +55,7 @@ def retry_on_api_error(
             try:
                 return await func(*args, **kwargs)
             except Exception as e:
-                logger.error(
-                    f"api_call_failed: {func.__name__}, error: {str(e)}"
-                )
+                logger.error(f"api_call_failed: {func.__name__}, error: {str(e)}")
                 raise
 
         @retry(
@@ -71,9 +69,7 @@ def retry_on_api_error(
             try:
                 return func(*args, **kwargs)
             except Exception as e:
-                logger.error(
-                    f"api_call_failed: {func.__name__}, error: {str(e)}"
-                )
+                logger.error(f"api_call_failed: {func.__name__}, error: {str(e)}")
                 raise
 
         # Return appropriate wrapper based on function type
@@ -185,7 +181,10 @@ def with_fallback(
             except Exception as e:
                 if log_error:
                     logger.warning(
-                        f"fallback_triggered: {func.__name__}, error: {str(e)}, fallback: {fallback_value}"
+
+                            f"fallback_triggered: {func.__name__}, error: {str(e)}, fallback: "
+                            f"{fallback_value}"
+
                     )
                 return fallback_value
 

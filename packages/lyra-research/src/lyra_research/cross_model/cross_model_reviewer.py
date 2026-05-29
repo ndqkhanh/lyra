@@ -15,12 +15,14 @@ from typing import Any
 
 class ModelType(Enum):
     """Model types"""
+
     CLAUDE_OPUS = "claude_opus"
     GPT4O = "gpt4o"
 
 
 class ReviewDecision(Enum):
     """Review decisions"""
+
     APPROVE = "approve"
     REJECT = "reject"
     REVISE = "revise"
@@ -30,6 +32,7 @@ class ReviewDecision(Enum):
 @dataclass
 class ExecutionResult:
     """Result from executor model"""
+
     content: str
     confidence: float  # 0.0 to 1.0
     model: ModelType
@@ -39,6 +42,7 @@ class ExecutionResult:
 @dataclass
 class ReviewResult:
     """Result from reviewer model"""
+
     decision: ReviewDecision
     confidence: float
     issues: list[str]
@@ -49,6 +53,7 @@ class ReviewResult:
 @dataclass
 class DisagreementResolution:
     """Resolution of disagreement between models"""
+
     final_decision: ReviewDecision
     reasoning: str
     executor_confidence: float
@@ -94,7 +99,7 @@ class CrossModelReviewer:
                 "content": execution.content,
                 "confidence": execution.confidence,
                 "reviewed": False,
-                "executor": execution.model.value
+                "executor": execution.model.value,
             }
 
         # Step 3: Review with GPT-4o
@@ -110,7 +115,7 @@ class CrossModelReviewer:
                 "review_decision": resolution.final_decision.value,
                 "resolution": resolution.reasoning,
                 "executor": execution.model.value,
-                "reviewer": review.model.value
+                "reviewer": review.model.value,
             }
 
         # No disagreement - apply review decision
@@ -122,7 +127,7 @@ class CrossModelReviewer:
             "issues": review.issues,
             "suggestions": review.suggestions,
             "executor": execution.model.value,
-            "reviewer": review.model.value
+            "reviewer": review.model.value,
         }
 
     def execute_task(self, task: dict[str, Any]) -> ExecutionResult:
@@ -138,13 +143,13 @@ class CrossModelReviewer:
         # In production, would call actual Claude Opus API
         # For now, simulate execution
         content = f"Executed: {task.get('description', 'task')}"
-        confidence = task.get('expected_confidence', 0.7)
+        confidence = task.get("expected_confidence", 0.7)
 
         return ExecutionResult(
             content=content,
             confidence=confidence,
             model=ModelType.CLAUDE_OPUS,
-            metadata={"task_id": task.get("id", "unknown")}
+            metadata={"task_id": task.get("id", "unknown")},
         )
 
     def review_execution(self, execution: ExecutionResult, task: dict[str, Any]) -> ReviewResult:
@@ -188,7 +193,7 @@ class CrossModelReviewer:
             confidence=confidence,
             issues=issues,
             suggestions=suggestions,
-            model=ModelType.GPT4O
+            model=ModelType.GPT4O,
         )
 
     def has_disagreement(self, execution: ExecutionResult, review: ReviewResult) -> bool:
@@ -216,10 +221,7 @@ class CrossModelReviewer:
         return False
 
     def resolve_disagreement(
-        self,
-        execution: ExecutionResult,
-        review: ReviewResult,
-        task: dict[str, Any]
+        self, execution: ExecutionResult, review: ReviewResult, task: dict[str, Any]
     ) -> DisagreementResolution:
         """
         Resolve disagreement between models
@@ -240,18 +242,24 @@ class CrossModelReviewer:
         if review.confidence > execution.confidence:
             return DisagreementResolution(
                 final_decision=review.decision,
-                reasoning=f"Reviewer confidence ({review.confidence:.2f}) exceeds executor confidence ({execution.confidence:.2f})",
+                reasoning=(
+                    f"Reviewer confidence ({review.confidence:.2f}) exceeds executor confidence ("
+                    f"{execution.confidence:.2f})"
+                ),
                 executor_confidence=execution.confidence,
                 reviewer_confidence=review.confidence,
-                resolution_method="reviewer_priority"
+                resolution_method="reviewer_priority",
             )
         elif execution.confidence > review.confidence:
             return DisagreementResolution(
                 final_decision=ReviewDecision.APPROVE,
-                reasoning=f"Executor confidence ({execution.confidence:.2f}) exceeds reviewer confidence ({review.confidence:.2f})",
+                reasoning=(
+                    f"Executor confidence ({execution.confidence:.2f}"
+                    f") exceeds reviewer confidence ({review.confidence:.2f})"
+                ),
                 executor_confidence=execution.confidence,
                 reviewer_confidence=review.confidence,
-                resolution_method="executor_priority"
+                resolution_method="executor_priority",
             )
         else:
             return DisagreementResolution(
@@ -259,7 +267,7 @@ class CrossModelReviewer:
                 reasoning="Equal confidence - escalating to human review",
                 executor_confidence=execution.confidence,
                 reviewer_confidence=review.confidence,
-                resolution_method="human_escalation"
+                resolution_method="human_escalation",
             )
 
     def should_review(self, confidence: float) -> bool:

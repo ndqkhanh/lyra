@@ -20,6 +20,7 @@ from typing import Any
 @dataclass
 class AgentProgram:
     """Agent program on Pareto frontier."""
+
     id: str
     code: str
     skills: list[str]  # Skill IDs used by this program
@@ -30,6 +31,7 @@ class AgentProgram:
 @dataclass
 class FailureCase:
     """Failed task execution."""
+
     task_id: str
     task_description: str
     agent_program_id: str
@@ -41,6 +43,7 @@ class FailureCase:
 @dataclass
 class SkillProposal:
     """Proposed skill from failure analysis."""
+
     id: str
     name: str
     description: str
@@ -84,8 +87,7 @@ class ParetoFrontier:
 
         # Remove programs dominated by new program
         self.programs = [
-            p for p in self.programs
-            if not self._dominates(program.metrics, p.metrics)
+            p for p in self.programs if not self._dominates(program.metrics, p.metrics)
         ]
 
         # Add new program
@@ -113,9 +115,7 @@ class ParetoFrontier:
         return better_in_all and better_in_some
 
     def _crowding_distance_selection(
-        self,
-        programs: list[AgentProgram],
-        k: int
+        self, programs: list[AgentProgram], k: int
     ) -> list[AgentProgram]:
         """
         Select k programs with highest crowding distance.
@@ -140,14 +140,10 @@ class ParetoFrontier:
         distances.sort(key=lambda x: x[1], reverse=True)
         return [p for p, _ in distances[:k]]
 
-    def _compute_crowding_distance(
-        self,
-        idx: int,
-        programs: list[AgentProgram]
-    ) -> float:
+    def _compute_crowding_distance(self, idx: int, programs: list[AgentProgram]) -> float:
         """Compute crowding distance for program at idx."""
         if len(programs) <= 2:
-            return float('inf')
+            return float("inf")
 
         distance = 0.0
         metrics_keys = list(programs[0].metrics.keys())
@@ -159,18 +155,17 @@ class ParetoFrontier:
 
             # Boundary points get infinite distance
             if sorted_idx == 0 or sorted_idx == len(programs) - 1:
-                return float('inf')
+                return float("inf")
 
             # Compute distance
-            metric_range = (
-                sorted_programs[-1].metrics.get(key, 0) -
-                sorted_programs[0].metrics.get(key, 0)
+            metric_range = sorted_programs[-1].metrics.get(key, 0) - sorted_programs[0].metrics.get(
+                key, 0
             )
 
             if metric_range > 0:
                 distance += (
-                    sorted_programs[sorted_idx + 1].metrics.get(key, 0) -
-                    sorted_programs[sorted_idx - 1].metrics.get(key, 0)
+                    sorted_programs[sorted_idx + 1].metrics.get(key, 0)
+                    - sorted_programs[sorted_idx - 1].metrics.get(key, 0)
                 ) / metric_range
 
         return distance
@@ -191,14 +186,7 @@ class EvoSkillPipeline:
     4. Evolution: Update Pareto frontier
     """
 
-    def __init__(
-        self,
-        llm_executor,
-        llm_proposer,
-        llm_builder,
-        skills_dir: Path,
-        k: int = 3
-    ):
+    def __init__(self, llm_executor, llm_proposer, llm_builder, skills_dir: Path, k: int = 3):
         """
         Initialize EvoSkill pipeline.
 
@@ -219,11 +207,7 @@ class EvoSkillPipeline:
         self.all_skills: dict[str, SkillProposal] = {}
         self.failure_history: list[FailureCase] = []
 
-    def run(
-        self,
-        tasks: list[dict[str, Any]],
-        generations: int = 10
-    ) -> list[Path]:
+    def run(self, tasks: list[dict[str, Any]], generations: int = 10) -> list[Path]:
         """
         Run EvoSkill evolutionary loop.
 
@@ -241,8 +225,8 @@ class EvoSkillPipeline:
             id="gen0_prog0",
             code="# Base agent with no skills",
             skills=[],
-            metrics={'pass_rate': 0.0, 'avg_steps': 0.0},
-            generation=0
+            metrics={"pass_rate": 0.0, "avg_steps": 0.0},
+            generation=0,
         )
         self.frontier.add(base_program)
 
@@ -279,10 +263,7 @@ class EvoSkillPipeline:
 
         return skill_files
 
-    def _execute_and_collect_failures(
-        self,
-        tasks: list[dict[str, Any]]
-    ) -> list[FailureCase]:
+    def _execute_and_collect_failures(self, tasks: list[dict[str, Any]]) -> list[FailureCase]:
         """Execute frontier programs on tasks, collect failures."""
         failures = []
 
@@ -291,32 +272,30 @@ class EvoSkillPipeline:
                 # Execute task with program
                 result = self._execute_task(program, task)
 
-                if not result['success']:
+                if not result["success"]:
                     failure = FailureCase(
-                        task_id=task['id'],
-                        task_description=task['description'],
+                        task_id=task["id"],
+                        task_description=task["description"],
                         agent_program_id=program.id,
-                        error_message=result['error'],
-                        execution_trace=result['trace'],
-                        missing_capability=result.get('missing_capability', 'unknown')
+                        error_message=result["error"],
+                        execution_trace=result["trace"],
+                        missing_capability=result.get("missing_capability", "unknown"),
                     )
                     failures.append(failure)
                     self.failure_history.append(failure)
 
         return failures
 
-    def _execute_task(
-        self,
-        program: AgentProgram,
-        task: dict[str, Any]
-    ) -> dict[str, Any]:
+    def _execute_task(self, program: AgentProgram, task: dict[str, Any]) -> dict[str, Any]:
         """Execute a task with an agent program."""
         # Load skills
-        skills_text = "\n\n".join([
-            self.all_skills[skill_id].code
-            for skill_id in program.skills
-            if skill_id in self.all_skills
-        ])
+        skills_text = "\n\n".join(
+            [
+                self.all_skills[skill_id].code
+                for skill_id in program.skills
+                if skill_id in self.all_skills
+            ]
+        )
 
         prompt = f"""Execute this task using the provided skills.
 
@@ -333,23 +312,20 @@ Execute and return result."""
             success = "error" not in result.lower()
 
             return {
-                'success': success,
-                'result': result,
-                'error': '' if success else result,
-                'trace': result
+                "success": success,
+                "result": result,
+                "error": "" if success else result,
+                "trace": result,
             }
         except Exception as e:
             return {
-                'success': False,
-                'error': str(e),
-                'trace': str(e),
-                'missing_capability': 'execution_error'
+                "success": False,
+                "error": str(e),
+                "trace": str(e),
+                "missing_capability": "execution_error",
             }
 
-    def _propose_skills_from_failures(
-        self,
-        failures: list[FailureCase]
-    ) -> list[SkillProposal]:
+    def _propose_skills_from_failures(self, failures: list[FailureCase]) -> list[SkillProposal]:
         """Propose skills to address failures."""
         # Group failures by missing capability
         capability_groups: dict[str, list[FailureCase]] = {}
@@ -363,10 +339,12 @@ Execute and return result."""
 
         for capability, group_failures in capability_groups.items():
             # Analyze failures
-            failures_text = "\n".join([
-                f"- Task: {f.task_description}\n  Error: {f.error_message}"
-                for f in group_failures[:5]
-            ])
+            failures_text = "\n".join(
+                [
+                    f"- Task: {f.task_description}\n  Error: {f.error_message}"
+                    for f in group_failures[:5]
+                ]
+            )
 
             prompt = f"""Propose a skill to address these failures.
 
@@ -391,16 +369,18 @@ Output JSON:
                 response = self.proposer.generate(prompt)
                 proposal_data = json.loads(response)
 
-                skill_id = f"evoskill_{hashlib.md5(proposal_data['name'].encode()).hexdigest()[:12]}"
+                skill_id = (
+                    f"evoskill_{hashlib.md5(proposal_data['name'].encode()).hexdigest()[:12]}"
+                )
 
                 proposal = SkillProposal(
                     id=skill_id,
-                    name=proposal_data['name'],
-                    description=proposal_data['description'],
-                    code=proposal_data['code'],
-                    keywords=proposal_data['keywords'],
+                    name=proposal_data["name"],
+                    description=proposal_data["description"],
+                    code=proposal_data["code"],
+                    keywords=proposal_data["keywords"],
                     addresses_failures=[f.task_id for f in group_failures],
-                    confidence=proposal_data.get('confidence', 0.8)
+                    confidence=proposal_data.get("confidence", 0.8),
                 )
 
                 proposals.append(proposal)
@@ -450,7 +430,7 @@ This skill activates when keywords match: {", ".join(proposal.keywords)}
 """
 
         skill_file = self.skills_dir / f"{proposal.id}.md"
-        with open(skill_file, 'w') as f:
+        with open(skill_file, "w") as f:
             f.write(skill_content)
 
         print(f"Built skill: {skill_file}")
@@ -464,8 +444,7 @@ This skill activates when keywords match: {", ".join(proposal.keywords)}
         for i, parent in enumerate(self.frontier.get_programs()):
             # Add one new skill to parent
             available_skills = [
-                s_id for s_id in self.all_skills.keys()
-                if s_id not in parent.skills
+                s_id for s_id in self.all_skills.keys() if s_id not in parent.skills
             ]
 
             if available_skills:
@@ -475,16 +454,14 @@ This skill activates when keywords match: {", ".join(proposal.keywords)}
                     code=f"# Program with skills: {parent.skills + [new_skill]}",
                     skills=parent.skills + [new_skill],
                     metrics={},
-                    generation=generation
+                    generation=generation,
                 )
                 new_programs.append(new_program)
 
         return new_programs
 
     def _evaluate_program(
-        self,
-        program: AgentProgram,
-        tasks: list[dict[str, Any]]
+        self, program: AgentProgram, tasks: list[dict[str, Any]]
     ) -> dict[str, float]:
         """Evaluate program on tasks."""
         successes = 0
@@ -492,13 +469,13 @@ This skill activates when keywords match: {", ".join(proposal.keywords)}
 
         for task in tasks[:20]:  # Evaluate on 20 tasks
             result = self._execute_task(program, task)
-            if result['success']:
+            if result["success"]:
                 successes += 1
-            total_steps += len(result['trace'].split('\n'))
+            total_steps += len(result["trace"].split("\n"))
 
         return {
-            'pass_rate': successes / len(tasks[:20]),
-            'avg_steps': total_steps / len(tasks[:20])
+            "pass_rate": successes / len(tasks[:20]),
+            "avg_steps": total_steps / len(tasks[:20]),
         }
 
 

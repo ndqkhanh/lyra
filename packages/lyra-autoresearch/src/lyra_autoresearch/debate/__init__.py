@@ -13,7 +13,7 @@ Based on: researchclaw/pipeline/debate.py
 import logging
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from anthropic import Anthropic
 from openai import OpenAI
@@ -393,7 +393,7 @@ def run_debate(
                 llm_client = OpenAI()
                 model = "gpt-4"
             except Exception as e:
-                raise ValueError(f"No LLM client available: {e}")
+                raise ValueError(f"No LLM client available: {e}") from e
 
     panel = DebatePanel(
         perspectives=perspectives,

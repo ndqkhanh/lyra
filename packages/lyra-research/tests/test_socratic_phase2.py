@@ -31,13 +31,18 @@ class TestIntentDetector:
             "I want to understand and explore and learn how transformers work",
             "Explain what attention mechanisms are so I can understand them",
             "I'm curious and wondering about the history of neural networks",
-            "I want to learn about and understand reinforcement learning concepts"
+            "I want to learn about and understand reinforcement learning concepts",
         ]
 
         for query in exploratory_queries:
             intent = detector.detect(query)
             # Compare enum values to avoid pytest enum comparison issues
-            assert intent.type.value == IntentType.EXPLORATORY.value, f"Failed for query: {query}, got {intent.type.value} with indicators {intent.indicators}"
+            assert (
+                intent.type.value == IntentType.EXPLORATORY.value
+            ),(
+                f"Failed for query: {query}, got {intent.type.value} with indicators "
+                f"{intent.indicators}"
+            )
             assert intent.confidence >= 0.5
 
     def test_detect_goal_oriented_intent(self):
@@ -48,7 +53,7 @@ class TestIntentDetector:
             "Find and search for the best papers on transformers",
             "I need to compare and find differences between BERT and GPT",
             "Show me and get implementations of attention mechanisms",
-            "Which model should I use and recommend for NLP?"
+            "Which model should I use and recommend for NLP?",
         ]
 
         for query in goal_queries:
@@ -93,10 +98,7 @@ class TestSocraticQuestioningAgent:
         """Test engagement with exploratory query"""
         agent = SocraticQuestioningAgent()
 
-        dialogue = agent.engage(
-            "I want to understand how attention mechanisms work",
-            {}
-        )
+        dialogue = agent.engage("I want to understand how attention mechanisms work", {})
 
         assert dialogue.intent == IntentType.EXPLORATORY
         assert len(dialogue.turns) == 2  # state + challenge
@@ -107,10 +109,7 @@ class TestSocraticQuestioningAgent:
         """Test engagement with goal-oriented query"""
         agent = SocraticQuestioningAgent()
 
-        dialogue = agent.engage(
-            "Find the best papers on transformers",
-            {}
-        )
+        dialogue = agent.engage("Find the best papers on transformers", {})
 
         assert dialogue.intent == IntentType.GOAL_ORIENTED
         assert len(dialogue.turns) == 1  # direct_research
@@ -157,10 +156,7 @@ class TestSocraticQuestioningAgent:
         agent = SocraticQuestioningAgent()
 
         state = UserState(
-            query="Transformers are the best",
-            certainty=0.9,
-            assumptions=[],
-            knowledge_gaps=[]
+            query="Transformers are the best", certainty=0.9, assumptions=[], knowledge_gaps=[]
         )
 
         challenge = agent.generate_challenge(state)
@@ -175,7 +171,7 @@ class TestSocraticQuestioningAgent:
             query="I'm not sure about transformers",
             certainty=0.2,
             assumptions=[],
-            knowledge_gaps=["Definitional understanding"]
+            knowledge_gaps=["Definitional understanding"],
         )
 
         challenge = agent.generate_challenge(state)
@@ -186,10 +182,7 @@ class TestSocraticQuestioningAgent:
         agent = SocraticQuestioningAgent()
 
         state = UserState(
-            query="Transformers seem good",
-            certainty=0.5,
-            assumptions=[],
-            knowledge_gaps=[]
+            query="Transformers seem good", certainty=0.5, assumptions=[], knowledge_gaps=[]
         )
 
         challenge = agent.generate_challenge(state)
@@ -206,7 +199,11 @@ class TestDevilsAdvocateProtocol:
         # Strong rebuttal with evidence and reasoning
         result = protocol.evaluate_rebuttal(
             "Transformers are always better",
-            "However, research by Smith et al. shows that RNNs outperform transformers on sequential tasks because they maintain better temporal dependencies. The study used 10,000 samples and controlled for confounding factors."
+(
+                "However, research by Smith et al. shows that RNNs outperform transformers on"
+                "sequential tasks because they maintain better temporal dependencies. The study"
+                "used 10,000 samples and controlled for confounding factors."
+            ),
         )
 
         assert result.score >= 4
@@ -216,10 +213,7 @@ class TestDevilsAdvocateProtocol:
         """Test no concession on weak rebuttal"""
         protocol = DevilsAdvocateProtocol(concession_threshold=4)
 
-        result = protocol.evaluate_rebuttal(
-            "Transformers are always better",
-            "I disagree"
-        )
+        result = protocol.evaluate_rebuttal("Transformers are always better", "I disagree")
 
         assert result.score < 4
         assert not result.concede
@@ -232,14 +226,20 @@ class TestDevilsAdvocateProtocol:
         # First strong rebuttal - should concede
         result1 = protocol.evaluate_rebuttal(
             "Claim 1",
-            "Strong rebuttal with evidence from research study and data showing clear counter-examples with detailed reasoning because of X therefore Y"
+(
+                "Strong rebuttal with evidence from research study and data showing clear"
+                "counter-examples with detailed reasoning because of X therefore Y"
+            ),
         )
         assert result1.concede
 
         # Second strong rebuttal - should NOT concede (frame-lock)
         result2 = protocol.evaluate_rebuttal(
             "Claim 2",
-            "Another strong rebuttal with evidence from research study and data showing clear counter-examples with detailed reasoning because of X therefore Y"
+(
+                "Another strong rebuttal with evidence from research study and data showing clear"
+                "counter-examples with detailed reasoning because of X therefore Y"
+            ),
         )
         assert not result2.concede
         assert "frame-lock" in result2.reason.lower()
@@ -259,7 +259,7 @@ class TestDevilsAdvocateProtocol:
         # Strong rebuttal with evidence and reasoning
         score = protocol.score_rebuttal(
             "Claim",
-            "Research shows that X. Therefore, Y. However, Z provides a counter-example. " * 10
+            "Research shows that X. Therefore, Y. However, Z provides a counter-example. " * 10,
         )
         assert score >= 4
 
@@ -270,7 +270,10 @@ class TestDevilsAdvocateProtocol:
         # First concession
         protocol.evaluate_rebuttal(
             "Claim 1",
-            "Strong rebuttal with evidence from research study and data showing clear counter-examples with detailed reasoning because of X therefore Y"
+(
+                "Strong rebuttal with evidence from research study and data showing clear"
+                "counter-examples with detailed reasoning because of X therefore Y"
+            ),
         )
 
         # Weak rebuttal - resets counter
@@ -279,7 +282,10 @@ class TestDevilsAdvocateProtocol:
         # Another strong rebuttal - should concede (counter was reset)
         result = protocol.evaluate_rebuttal(
             "Claim 3",
-            "Strong rebuttal with evidence from research study and data showing clear counter-examples with detailed reasoning because of X therefore Y"
+(
+                "Strong rebuttal with evidence from research study and data showing clear"
+                "counter-examples with detailed reasoning because of X therefore Y"
+            ),
         )
         assert result.concede
 
@@ -290,7 +296,10 @@ class TestDevilsAdvocateProtocol:
         # Make a concession
         protocol.evaluate_rebuttal(
             "Claim",
-            "Strong rebuttal with evidence from research study and data showing clear counter-examples with detailed reasoning because of X therefore Y"
+(
+                "Strong rebuttal with evidence from research study and data showing clear"
+                "counter-examples with detailed reasoning because of X therefore Y"
+            ),
         )
 
         assert len(protocol.concession_history) > 0
@@ -331,7 +340,10 @@ class TestSocraticIntegration:
         assert challenge.type == "contradiction"
 
         # Step 5: User provides rebuttal
-        rebuttal = "Research study by Smith shows transformers outperform RNNs because of attention mechanisms therefore they are better"
+        rebuttal =(
+            "Research study by Smith shows transformers outperform RNNs because of attention"
+            "mechanisms therefore they are better"
+        )
         result = advocate.evaluate_rebuttal(user_response, rebuttal)
 
         # Should have a score and decision

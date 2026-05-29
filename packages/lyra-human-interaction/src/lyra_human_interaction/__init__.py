@@ -290,7 +290,9 @@ _DISAGREEMENT_KEYWORDS = frozenset(
 
 def _extract_points(text: str, keywords: frozenset[str]) -> tuple[str, ...]:
     """Extract simple point-like phrases from *text* that contain *keywords*."""
-    sentences = [s.strip() for s in text.replace("!", ".").replace("?", ".").split(".") if s.strip()]
+    sentences = [
+        s.strip() for s in text.replace("!", ".").replace("?", ".").split(".") if s.strip()
+    ]
     matched: list[str] = []
     for sentence in sentences:
         lower = sentence.lower()
@@ -429,9 +431,7 @@ def _build_key_insights(topic: str, reasoning: list[str], level: str) -> tuple[s
             "Resource allocation: justified by expected returns",
         )
     if level == ExplanationLevel.TECHNICAL.value or level == ExplanationLevel.EXPERT.value:
-        return base + (
-            "Cross-validation confirms no contradictory evidence was overlooked.",
-        )
+        return base + ("Cross-validation confirms no contradictory evidence was overlooked.",)
     return base
 
 
@@ -503,7 +503,9 @@ class HumanInteractionEngine:
             A fully populated explanation dataclass.
         """
         effective_level = level or self._config.default_explanation_level
-        template = _EXPLANATION_TEMPLATES.get(effective_level, _EXPLANATION_TEMPLATES["INTERMEDIATE"])
+        template = _EXPLANATION_TEMPLATES.get(
+            effective_level, _EXPLANATION_TEMPLATES["INTERMEDIATE"]
+        )
 
         explanation_id = _generate_id("exp")
         self._explanation_count += 1
@@ -647,7 +649,11 @@ class HumanInteractionEngine:
             phase = NegotiationPhase.IMPASSE.value
             resolution = "Negotiation round limit reached."
         elif has_strong_disagreement:
-            phase = NegotiationPhase.COUNTER_PROPOSAL.value if agent_concession else NegotiationPhase.CONCESSION.value
+            phase = (
+                NegotiationPhase.COUNTER_PROPOSAL.value
+                if agent_concession
+                else NegotiationPhase.CONCESSION.value
+            )
             resolution = ""
         elif agreement_points and disagreement_points:
             phase = NegotiationPhase.CONCESSION.value
@@ -874,9 +880,7 @@ class HumanInteractionEngine:
             A suggested compromise text.
         """
         if not state.points_of_agreement and not state.points_of_disagreement:
-            return (
-                f"Proceeding with the current proposal: {state.agent_proposal[:100]}"
-            )
+            return f"Proceeding with the current proposal: {state.agent_proposal[:100]}"
 
         agreement_summary = "; ".join(state.points_of_agreement[:3])
         disagreement_summary = "; ".join(state.points_of_disagreement[:3])

@@ -16,11 +16,13 @@ signal.signal(signal.SIGINT, signal.SIG_IGN)
 
 
 def main():
-    if not write_json({
-        "jsonrpc": "2.0",
-        "method": "event",
-        "params": {"type": "gateway.ready", "payload": {"skin": resolve_skin()}},
-    }):
+    if not write_json(
+        {
+            "jsonrpc": "2.0",
+            "method": "event",
+            "params": {"type": "gateway.ready", "payload": {"skin": resolve_skin()}},
+        }
+    ):
         sys.exit(0)
 
     for raw in sys.stdin:
@@ -31,7 +33,9 @@ def main():
         try:
             req = json.loads(line)
         except json.JSONDecodeError:
-            if not write_json({"jsonrpc": "2.0", "error": {"code": -32700, "message": "parse error"}, "id": None}):
+            if not write_json(
+                {"jsonrpc": "2.0", "error": {"code": -32700, "message": "parse error"}, "id": None}
+            ):
                 sys.exit(0)
             continue
 

@@ -14,9 +14,11 @@ from typing import Any
 # Context Budget
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ReviewerContextBudget:
     """Context budget limits for adversarial review."""
+
     MAX_CONTEXT_KB: int = 40  # Increased for 10+ agents
     REPORT_KB: int = 12
     TOP_SOURCES_KB: int = 20  # Top 15 cited sources, abstracts only
@@ -24,12 +26,12 @@ class ReviewerContextBudget:
 
     def estimate_size_kb(self, text: str) -> float:
         """Estimate text size in KB."""
-        return len(text.encode('utf-8')) / 1024
+        return len(text.encode("utf-8")) / 1024
 
     def truncate_to_kb(self, text: str, max_kb: int) -> str:
         """Truncate text to fit within KB limit."""
         max_bytes = max_kb * 1024
-        encoded = text.encode('utf-8')
+        encoded = text.encode("utf-8")
         if len(encoded) <= max_bytes:
             return text
         # Truncate and decode, handling potential multi-byte character splits
@@ -37,18 +39,20 @@ class ReviewerContextBudget:
         # Try to decode, removing trailing bytes if needed
         for i in range(4):
             try:
-                return truncated[:-i if i > 0 else len(truncated)].decode('utf-8', errors='ignore')
+                return truncated[: -i if i > 0 else len(truncated)].decode("utf-8", errors="ignore")
             except UnicodeDecodeError:
                 continue
-        return text[:max_bytes // 4]  # Fallback: assume ~4 bytes per char
+        return text[: max_bytes // 4]  # Fallback: assume ~4 bytes per char
 
 
 # ---------------------------------------------------------------------------
 # Disagreement Resolution
 # ---------------------------------------------------------------------------
 
+
 class DisagreementResolution(Enum):
     """Resolution strategies for reviewer disagreements."""
+
     FIX = "fix"  # Add missing citation or strengthen evidence
     SOFTEN = "soften"  # Change "X is Y" to "X may be Y"
     REMOVE = "remove"  # Delete unsupported claim
@@ -58,9 +62,11 @@ class DisagreementResolution(Enum):
 # Data Models
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class Claim:
     """A verifiable claim extracted from a research report."""
+
     text: str
     confidence: float  # 0.0-1.0
     citations: list[str] = field(default_factory=list)  # Citation keys like "[1]", "[2]"
@@ -75,6 +81,7 @@ class Claim:
 @dataclass
 class ReviewIssue:
     """An issue found during adversarial review."""
+
     claim: Claim
     issue_type: str  # "missing_citation", "weak_evidence", "unsupported"
     severity: str  # "critical", "high", "medium", "low"
@@ -85,6 +92,7 @@ class ReviewIssue:
 @dataclass
 class ReviewResult:
     """Result of adversarial review."""
+
     original_report: str
     revised_report: str
     issues_found: list[ReviewIssue]
@@ -98,6 +106,7 @@ class ReviewResult:
 # ---------------------------------------------------------------------------
 # Adversarial Reviewer
 # ---------------------------------------------------------------------------
+
 
 class AdversarialReviewer:
     """
@@ -216,7 +225,7 @@ class AdversarialReviewer:
         """
         # Extract citation keys from report text
         report_text = report.to_markdown()
-        citation_pattern = r'\[(\d+)\]'
+        citation_pattern = r"\[(\d+)\]"
         citations = re.findall(citation_pattern, report_text)
 
         # Count citation frequency
@@ -236,13 +245,13 @@ class AdversarialReviewer:
         cited_source_ids = set()
         for cite_num, _ in sorted_citations:
             # Extract source from references section
-            ref_pattern = rf'^{cite_num}\.\s+(.+?)(?:\s+http|\n|$)'
+            ref_pattern = rf"^{cite_num}\.\s+(.+?)(?:\s+http|\n|$)"
             matches = re.findall(ref_pattern, report.references_section, re.MULTILINE)
             if matches:
                 title = matches[0].strip()
                 # Find matching source
                 for source in sources:
-                    if hasattr(source, 'title') and source.title == title:
+                    if hasattr(source, "title") and source.title == title:
                         cited_source_ids.add(source.id)
                         break
 
@@ -269,27 +278,27 @@ class AdversarialReviewer:
 
         # Extract claims with citations
         # Pattern: sentence ending with [N]
-        claim_pattern = r'([^.!?]+\[\d+\][.!?])'
+        claim_pattern = r"([^.!?]+\[\d+\][.!?])"
         claims_with_citations = re.findall(claim_pattern, report_text)
 
         for claim_text in claims_with_citations:
             # Extract citation numbers
-            citations = re.findall(r'\[(\d+)\]', claim_text)
+            citations = re.findall(r"\[(\d+)\]", claim_text)
 
             # Map citation numbers to source IDs via references section
             source_ids = []
             for cite_num in citations:
-                ref_pattern = rf'^{cite_num}\.\s+(.+?)(?:\s+http|\n|$)'
+                ref_pattern = rf"^{cite_num}\.\s+(.+?)(?:\s+http|\n|$)"
                 matches = re.findall(ref_pattern, report.references_section, re.MULTILINE)
                 if matches:
                     title = matches[0].strip()
                     for source in sources:
-                        if hasattr(source, 'title') and source.title == title:
+                        if hasattr(source, "title") and source.title == title:
                             source_ids.append(source.id)
                             break
 
             # Clean claim text (remove citation)
-            clean_claim = re.sub(r'\[\d+\]', '', claim_text).strip()
+            clean_claim = re.sub(r"\[\d+\]", "", claim_text).strip()
             claim_mapping[clean_claim] = source_ids
 
         return claim_mapping
@@ -310,13 +319,13 @@ class AdversarialReviewer:
         # Patterns for claims that need verification
         claim_patterns = [
             # Numerical claims
-            r'([^.!?]*\d+(?:\.\d+)?%[^.!?]*[.!?])',
+            r"([^.!?]*\d+(?:\.\d+)?%[^.!?]*[.!?])",
             # Outperformance claims
-            r'([^.!?]*(?:outperform|better than|superior to|exceeds)[^.!?]*[.!?])',
+            r"([^.!?]*(?:outperform|better than|superior to|exceeds)[^.!?]*[.!?])",
             # Causal claims
-            r'([^.!?]*(?:causes?|leads? to|results? in|due to)[^.!?]*[.!?])',
+            r"([^.!?]*(?:causes?|leads? to|results? in|due to)[^.!?]*[.!?])",
             # State-of-the-art claims
-            r'([^.!?]*(?:state-of-the-art|SOTA|best|highest|lowest)[^.!?]*[.!?])',
+            r"([^.!?]*(?:state-of-the-art|SOTA|best|highest|lowest)[^.!?]*[.!?])",
         ]
 
         for pattern in claim_patterns:
@@ -325,7 +334,7 @@ class AdversarialReviewer:
                 claim_text = match.strip()
 
                 # Extract citations
-                citations = re.findall(r'\[(\d+)\]', claim_text)
+                citations = re.findall(r"\[(\d+)\]", claim_text)
 
                 # Assign confidence based on citation count
                 citation_count = len(citations)
@@ -340,12 +349,14 @@ class AdversarialReviewer:
 
                 # Only include claims with confidence <0.8
                 if confidence < 0.8:
-                    claims.append(Claim(
-                        text=claim_text,
-                        confidence=confidence,
-                        citations=[f"[{c}]" for c in citations],
-                        source_ids=[],  # Will be populated from claim_mapping
-                    ))
+                    claims.append(
+                        Claim(
+                            text=claim_text,
+                            confidence=confidence,
+                            citations=[f"[{c}]" for c in citations],
+                            source_ids=[],  # Will be populated from claim_mapping
+                        )
+                    )
 
         # Deduplicate
         seen = set()
@@ -374,7 +385,7 @@ class AdversarialReviewer:
             ReviewIssue if problem found, None otherwise
         """
         # Clean claim text for lookup
-        clean_text = re.sub(r'\[\d+\]', '', claim.text).strip()
+        clean_text = re.sub(r"\[\d+\]", "", claim.text).strip()
 
         # Check if claim has sources
         source_ids = claim_mapping.get(clean_text, [])
@@ -437,17 +448,19 @@ class AdversarialReviewer:
 
             # Replace definitive statements with hedged language
             replacements = [
-                (r'\bis\b', 'may be'),
-                (r'\bare\b', 'may be'),
-                (r'\boutperforms?\b', 'appears to outperform'),
-                (r'\bshows?\b', 'suggests'),
-                (r'\bdemonstrates?\b', 'indicates'),
-                (r'\bproves?\b', 'suggests'),
-                (r'\bconfirms?\b', 'supports'),
+                (r"\bis\b", "may be"),
+                (r"\bare\b", "may be"),
+                (r"\boutperforms?\b", "appears to outperform"),
+                (r"\bshows?\b", "suggests"),
+                (r"\bdemonstrates?\b", "indicates"),
+                (r"\bproves?\b", "suggests"),
+                (r"\bconfirms?\b", "supports"),
             ]
 
             for pattern, replacement in replacements:
-                softened_text = re.sub(pattern, replacement, softened_text, count=1, flags=re.IGNORECASE)
+                softened_text = re.sub(
+                    pattern, replacement, softened_text, count=1, flags=re.IGNORECASE
+                )
 
             return Claim(
                 text=softened_text,
@@ -458,7 +471,7 @@ class AdversarialReviewer:
 
         elif issue.suggested_resolution == DisagreementResolution.FIX:
             # Add qualifier indicating need for more evidence
-            fixed_text = claim.text.rstrip('.!?')
+            fixed_text = claim.text.rstrip(".!?")
             fixed_text += " (additional verification needed)."
 
             return Claim(
@@ -519,15 +532,12 @@ class AdversarialReviewer:
         report_kb = self.budget.estimate_size_kb(report_text)
 
         # Sources size (abstracts only)
-        sources_text = "\n".join(
-            getattr(s, 'abstract', '')[:500] for s in cited_sources
-        )
+        sources_text = "\n".join(getattr(s, "abstract", "")[:500] for s in cited_sources)
         sources_kb = self.budget.estimate_size_kb(sources_text)
 
         # Claim mapping size
         mapping_text = "\n".join(
-            f"{claim}: {','.join(sources)}"
-            for claim, sources in claim_mapping.items()
+            f"{claim}: {','.join(sources)}" for claim, sources in claim_mapping.items()
         )
         mapping_kb = self.budget.estimate_size_kb(mapping_text)
 
@@ -538,4 +548,3 @@ class AdversarialReviewer:
             return float(self.budget.MAX_CONTEXT_KB)
 
         return round(total_kb, 2)
-

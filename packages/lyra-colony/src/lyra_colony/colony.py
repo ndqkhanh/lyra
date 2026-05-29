@@ -194,7 +194,9 @@ class AgentColony:
     async def start(self) -> None:
         """Start the colony runtime."""
         self._state = ColonyState.STARTING
-        logger.info("Starting agent colony (min=%d, max=%d)", self.config.min_agents, self.config.max_agents)
+        logger.info(
+            "Starting agent colony (min=%d, max=%d)", self.config.min_agents, self.config.max_agents
+        )
 
         # Start background subsystems
         self._running = True
@@ -270,7 +272,9 @@ class AgentColony:
         self.monitor.update_status(agent_id, AgentStatus.READY)
         self.monitor.log_audit("agent_spawned", agent_id=agent_id, details={"role": spec.role.name})
 
-        logger.info("Spawned agent %s (role=%s, caps=%s)", agent_id, spec.role.name, spec.capabilities)
+        logger.info(
+            "Spawned agent %s (role=%s, caps=%s)", agent_id, spec.role.name, spec.capabilities
+        )
         return agent_id
 
     async def spawn_from_template(self, template_name: str) -> str:
@@ -490,9 +494,7 @@ class AgentColony:
     async def _scale_down(self) -> None:
         """Remove the most idle agent."""
         idle_candidates = [
-            aid
-            for aid, load in self._agent_load.items()
-            if load == 0.0 and aid in self._agents
+            aid for aid, load in self._agent_load.items() if load == 0.0 and aid in self._agents
         ]
         if idle_candidates:
             to_retire = idle_candidates[0]

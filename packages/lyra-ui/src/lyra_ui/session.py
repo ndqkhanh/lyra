@@ -293,7 +293,11 @@ class SessionManager:
         if not self.current_session and not session_id:
             raise ValueError("No active session")
 
-        sid = session_id if session_id else (self.current_session.session_id if self.current_session else "")
+        sid = (
+            session_id
+            if session_id
+            else (self.current_session.session_id if self.current_session else "")
+        )
         if not sid:
             raise ValueError("No session ID available")
 
@@ -376,8 +380,7 @@ class SessionManager:
             sessions = [
                 s
                 for s in sessions
-                if query_lower in s.title.lower()
-                or query_lower in s.description.lower()
+                if query_lower in s.title.lower() or query_lower in s.description.lower()
             ]
 
         if author:

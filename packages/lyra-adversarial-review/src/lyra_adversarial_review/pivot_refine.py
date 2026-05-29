@@ -109,7 +109,10 @@ class PivotRefineEngine:
                 return RecoveryDecision(
                     action=RecoveryAction.REFINE,
                     reason=f"Tool error on attempt {signal.attempt_count + 1}; refining parameters",
-                    modified_params={"retry_delay": 2 ** signal.attempt_count, "timeout_multiplier": 1.5},
+                    modified_params={
+                        "retry_delay": 2**signal.attempt_count,
+                        "timeout_multiplier": 1.5,
+                    },
                 )
             return RecoveryDecision(
                 action=RecoveryAction.RETRY,
@@ -155,7 +158,10 @@ class PivotRefineEngine:
                 return self._build_pivot_decision(signal)
             return RecoveryDecision(
                 action=RecoveryAction.RETRY,
-                reason=f"Resource exhausted on approach; {'pivoting' if self._pivot_count < self._config.max_pivots else 'retrying'}",
+                reason=(
+                    f"Resource exhausted on approach; "
+                    f"{'pivoting' if self._pivot_count < self._config.max_pivots else 'retrying'}"
+                ),
             )
 
         return RecoveryDecision(
@@ -182,7 +188,11 @@ class PivotRefineEngine:
         decisions.append(decision)
         self._total_attempts = self._refine_count + self._pivot_count + cumulative_attempts
 
-        while decision.action in (RecoveryAction.REFINE, RecoveryAction.PIVOT, RecoveryAction.RETRY):
+        while decision.action in (
+            RecoveryAction.REFINE,
+            RecoveryAction.PIVOT,
+            RecoveryAction.RETRY,
+        ):
             cumulative_attempts += 1
             self._total_attempts += 1
 
@@ -275,9 +285,7 @@ class PivotRefineEngine:
             new_approach=approach,
         )
 
-    def _apply_refine(
-        self, task: str, params: dict[str, Any]
-    ) -> str:
+    def _apply_refine(self, task: str, params: dict[str, Any]) -> str:
         refined = task
         if "retry_delay" in params:
             refined += f"\n[Refined: retry_delay={params['retry_delay']}s]"
@@ -302,6 +310,7 @@ class PivotRefineEngine:
 
     def _simulate_recovery(self, decision: RecoveryDecision, base_rate: float) -> bool:
         import random
+
         success_rate = base_rate
         if self._refine_count > self._config.max_refines:
             success_rate *= 0.5

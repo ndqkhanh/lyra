@@ -43,7 +43,10 @@ class TestImportanceScorer:
     def test_emotional_salience_boost(self):
         """Test that emotional content gets boosted."""
         score = self.scorer.score(
-            content="The authentication system keeps failing and I'm really frustrated with debugging this issue",
+            content=(
+                "The authentication system keeps failing and I'm really frustrated with debugging"
+                "this issue"
+            ),
             memory_type=MemoryType.FAILURE,
         )
 
@@ -54,7 +57,10 @@ class TestImportanceScorer:
     def test_user_flag_boost(self):
         """Test that user-flagged memories get boosted."""
         score = self.scorer.score(
-            content="The deployment process requires running npm build followed by npm run deploy to production",
+            content=(
+                "The deployment process requires running npm build followed by npm run deploy to"
+                "production"
+            ),
             memory_type=MemoryType.PROCEDURAL,
             metadata={"user_flagged": True},
         )

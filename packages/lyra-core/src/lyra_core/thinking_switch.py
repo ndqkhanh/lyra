@@ -148,8 +148,18 @@ _CATEGORY_KEYWORDS: dict[str, set[str]] = {
     "generation": {"write", "create", "generate", "compose", "draft", "produce", "make"},
     "refactoring": {"refactor", "rename", "extract", "inline", "move", "restructure"},
     "architecture": {"design", "architecture", "plan", "system", "schema", "blueprint"},
-    "research": {"research", "investigate", "why", "compare", "analyse", "analyze",
-                 "evaluate", "understand", "explain", "root cause"},
+    "research": {
+        "research",
+        "investigate",
+        "why",
+        "compare",
+        "analyse",
+        "analyze",
+        "evaluate",
+        "understand",
+        "explain",
+        "root cause",
+    },
 }
 
 # Weight contributions for each factor (normalised internally).
@@ -197,8 +207,7 @@ class ThinkingSwitch:
 
     def __init__(self, token_budget_override: dict[ThinkingMode, tuple[int, int]] | None = None):
         self._budgets: dict[ThinkingMode, tuple[int, int]] = (
-            token_budget_override if token_budget_override is not None
-            else _MODE_BUDGETS
+            token_budget_override if token_budget_override is not None else _MODE_BUDGETS
         )
         self._decision_history: list[ModeDecision] = []
         self._max_history: int = 1000
@@ -293,7 +302,7 @@ class ThinkingSwitch:
         )
         self._decision_history.append(decision)
         if len(self._decision_history) > self._max_history:
-            self._decision_history = self._decision_history[-self._max_history:]
+            self._decision_history = self._decision_history[-self._max_history :]
         return decision
 
     def should_think(self, task_description: str) -> bool:
@@ -382,29 +391,52 @@ class ThinkingSwitch:
         length_score = max(0.0, min(1.0, length_score))
 
         # Files touched: heuristic based on file-like mentions.
-        file_matches = re.findall(r'\b[\w./-]+\.[a-z]{2,4}\b', task)
+        file_matches = re.findall(r"\b[\w./-]+\.[a-z]{2,4}\b", task)
         files_score = min(1.0, len(file_matches) / 8.0)
 
         # Ambiguity: presence of uncertain or vague language.
         ambiguity_indicators = [
-            "maybe", "possibly", "unclear", "unknown", "somehow",
-            "not sure", "depends", "various", "might", "could be",
+            "maybe",
+            "possibly",
+            "unclear",
+            "unknown",
+            "somehow",
+            "not sure",
+            "depends",
+            "various",
+            "might",
+            "could be",
         ]
         ambiguity_count = sum(1 for w in ambiguity_indicators if w in task.lower())
         ambiguity_score = min(1.0, ambiguity_count / 4.0)
 
         # Risk: keywords suggesting high-stakes changes.
         risk_indicators = [
-            "critical", "production", "breaking", "security", "safety",
-            "irreversible", "data-loss", "rollback", "revert", "urgent",
+            "critical",
+            "production",
+            "breaking",
+            "security",
+            "safety",
+            "irreversible",
+            "data-loss",
+            "rollback",
+            "revert",
+            "urgent",
         ]
         risk_count = sum(1 for w in risk_indicators if w in task.lower())
         risk_score = min(1.0, risk_count / 5.0)
 
         # Novelty: new concepts or unfamiliar territory.
         novelty_indicators = [
-            "new", "unfamiliar", "first time", "never", "novel",
-            "unknown territory", "pilot", "experimental", "explore",
+            "new",
+            "unfamiliar",
+            "first time",
+            "never",
+            "novel",
+            "unknown territory",
+            "pilot",
+            "experimental",
+            "explore",
         ]
         novelty_count = sum(1 for w in novelty_indicators if w in task.lower())
         novelty_score = min(1.0, novelty_count / 4.0)
@@ -413,15 +445,42 @@ class ThinkingSwitch:
         # or cognitively demanding work.
         task_lower = task.lower()
         structural_indicators = [
-            "design", "architecture", "system", "pipeline", "framework",
-            "infrastructure", "orchestrat", "distributed", "scalable",
-            "integration", "interface", "protocol", "multi-agent",
-            "fault tolerant", "redundancy", "cluster", "deploy",
-            "migrate", "transform", "refactor", "restructure",
-            "implement", "build", "create", "develop",
+            "design",
+            "architecture",
+            "system",
+            "pipeline",
+            "framework",
+            "infrastructure",
+            "orchestrat",
+            "distributed",
+            "scalable",
+            "integration",
+            "interface",
+            "protocol",
+            "multi-agent",
+            "fault tolerant",
+            "redundancy",
+            "cluster",
+            "deploy",
+            "migrate",
+            "transform",
+            "refactor",
+            "restructure",
+            "implement",
+            "build",
+            "create",
+            "develop",
             # Research and analysis
-            "research", "investigate", "analyse", "analyze", "evaluate",
-            "consensus", "algorithm", "protocol", "theory", "benchmark",
+            "research",
+            "investigate",
+            "analyse",
+            "analyze",
+            "evaluate",
+            "consensus",
+            "algorithm",
+            "protocol",
+            "theory",
+            "benchmark",
         ]
         structural_count = sum(1 for w in structural_indicators if w in task_lower)
         # Score scales with absolute keyword count + a density bonus for
@@ -532,7 +591,9 @@ class ThinkingSwitch:
 
         return round(min(1.0, score_confidence * 0.5 + extreme_bonus + category_match), 3)
 
-    def _build_reasoning(self, score: int, mode: ThinkingMode, base_cat: str, expected_cat: str) -> str:
+    def _build_reasoning(
+        self, score: int, mode: ThinkingMode, base_cat: str, expected_cat: str
+    ) -> str:
         """Build a short human-readable explanation of the decision.
 
         Parameters

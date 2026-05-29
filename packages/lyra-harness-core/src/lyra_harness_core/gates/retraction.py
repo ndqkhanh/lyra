@@ -1,7 +1,12 @@
 """Retraction-aware retrieval gate.
 
-Per [docs/219-helix-bio-multi-hop-collaborative-apply-plan.md](../../../../../../research/harness-engineering/docs/219-helix-bio-multi-hop-collaborative-apply-plan.md) §3.1,
-[docs/172-polaris-2026-deep-research-roadmap.md](../../../../../../research/harness-engineering/docs/172-polaris-2026-deep-research-roadmap.md) §3 Gap 5,
+Per
+[docs/219-helix-bio-multi-hop-collaborative-apply-plan.md]
+(../../../../../../research/harness-engineering/
+docs/219-helix-bio-multi-hop-collaborative-apply-plan.md) §3.1,
+[docs/172-polaris-2026-deep-research-roadmap.md]
+(../../../../../../research/harness-engineering/docs/172-polaris-2026-deep-research-roadmap.md)
+§3 Gap 5,
 and JMIR 2026 e88766 — **retracted papers must be filtered at the retrieval
 layer, not the LLM-prompt layer**. Major AI tools cite retracted literature
 without warning even when explicitly asked.
@@ -16,6 +21,7 @@ This module ships a :class:`RetractionGate` that:
 A retracted paper *cited as load-bearing evidence* is the kind of failure that
 ends a biomed agent's deployment. This is Tier-0 for Helix-Bio.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

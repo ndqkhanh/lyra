@@ -13,6 +13,7 @@ audited at <1% FPR, or branched safely." Python can't enforce purity at runtime;
 the pattern is to *separate* the policy (which is pure) from the effect (which
 is logged + gated).
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -84,7 +85,9 @@ class SideEffectLog:
         return "\n".join(json.dumps(r.to_dict(), sort_keys=True) for r in self.records)
 
 
-def decision_fingerprint(*, prompt: str, context: dict[str, Any], history: list[dict[str, Any]]) -> str:
+def decision_fingerprint(
+    *, prompt: str, context: dict[str, Any], history: list[dict[str, Any]]
+) -> str:
     """Stable hash of the inputs that determine an agent decision.
 
     Two trajectories with the same fingerprint must produce the same
@@ -101,7 +104,9 @@ def decision_fingerprint(*, prompt: str, context: dict[str, Any], history: list[
 class _PolicyProtocol(Protocol):
     """An agent policy is any callable returning a deterministic decision."""
 
-    def __call__(self, *, prompt: str, context: dict[str, Any], history: list[dict[str, Any]]) -> AgentDecision: ...
+    def __call__(
+        self, *, prompt: str, context: dict[str, Any], history: list[dict[str, Any]]
+    ) -> AgentDecision: ...
 
 
 class PureFunctionAgent:
@@ -115,13 +120,17 @@ class PureFunctionAgent:
         self.log = SideEffectLog()
         self._policy = policy
 
-    def policy(self, *, prompt: str, context: dict[str, Any], history: list[dict[str, Any]]) -> AgentDecision:
+    def policy(
+        self, *, prompt: str, context: dict[str, Any], history: list[dict[str, Any]]
+    ) -> AgentDecision:
         """Override or pass a policy in __init__. Default raises."""
         if self._policy is None:
             raise NotImplementedError("Subclass PureFunctionAgent and override policy(...)")
         return self._policy(prompt=prompt, context=context, history=history)
 
-    def decide(self, *, prompt: str, context: dict[str, Any], history: list[dict[str, Any]]) -> AgentDecision:
+    def decide(
+        self, *, prompt: str, context: dict[str, Any], history: list[dict[str, Any]]
+    ) -> AgentDecision:
         """Make a decision; stamp the fingerprint."""
         fp = decision_fingerprint(prompt=prompt, context=context, history=history)
         decision = self.policy(prompt=prompt, context=context, history=history)
@@ -161,7 +170,9 @@ class TrajectoryReplay:
 
     log: SideEffectLog
 
-    def replay_call(self, *, call_id: str, runner: Callable[[dict[str, Any]], Any] | None = None) -> Any:
+    def replay_call(
+        self, *, call_id: str, runner: Callable[[dict[str, Any]], Any] | None = None
+    ) -> Any:
         record = self.log.find(call_id)
         if record is None:
             raise KeyError(f"call_id {call_id!r} not in log")

@@ -3,6 +3,7 @@
 Production-grade secret scanning with regex patterns covering common credential
 formats. No external dependencies beyond stdlib.
 """
+
 from __future__ import annotations
 
 import re
@@ -15,7 +16,7 @@ _SECRET_PATTERNS: dict[str, str] = {
     "aws_secret_key": r"[A-Za-z0-9/+]{40}",
     "google_api_key": r"AIza[0-9A-Za-z\-_]{35}",
     "github_token": r"(ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{36,255}",
-    "generic_api_key": r"(?i)(api[_-]?key|apikey|secret|token|password|auth)\s*[=:]\s*['\"][A-Za-z0-9_\-\.]{16,}['\"]",
+    "generic_api_key": r"(?i)(api[_-]?key|apikey|secret|token|password|auth)\s*[=:]\s*['\"][A-Za-z0-9_\-\.]{16,}['\"]",  # noqa: E501
     "private_key_header": r"-----BEGIN (RSA|EC|DSA|OPENSSH) PRIVATE KEY-----",
     "jwt_token": r"eyJ[A-Za-z0-9\-_]+\.eyJ[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+",
     "slack_webhook": r"https://hooks\.slack\.com/services/T[A-Z0-9]+/B[A-Z0-9]+/[A-Za-z0-9]+",
@@ -29,21 +30,57 @@ _SECRET_PATTERNS: dict[str, str] = {
 
 # Files to skip (binary, vendored, etc.)
 _SKIP_PATTERNS = {
-    "*.pyc", "*.pyo", "*.so", "*.dylib", "*.dll",
-    "*.woff", "*.woff2", "*.ttf", "*.eot",
-    "*.jpg", "*.jpeg", "*.png", "*.gif", "*.ico", "*.svg",
-    "*.mp3", "*.mp4", "*.wav", "*.ogg",
-    "*.zip", "*.tar", "*.gz", "*.bz2", "*.7z",
-    "*.min.js", "*.min.css", "*.map",
-    "package-lock.json", "*.lock", "*.sum",
-    "Pipfile.lock", "poetry.lock",
+    "*.pyc",
+    "*.pyo",
+    "*.so",
+    "*.dylib",
+    "*.dll",
+    "*.woff",
+    "*.woff2",
+    "*.ttf",
+    "*.eot",
+    "*.jpg",
+    "*.jpeg",
+    "*.png",
+    "*.gif",
+    "*.ico",
+    "*.svg",
+    "*.mp3",
+    "*.mp4",
+    "*.wav",
+    "*.ogg",
+    "*.zip",
+    "*.tar",
+    "*.gz",
+    "*.bz2",
+    "*.7z",
+    "*.min.js",
+    "*.min.css",
+    "*.map",
+    "package-lock.json",
+    "*.lock",
+    "*.sum",
+    "Pipfile.lock",
+    "poetry.lock",
 }
 
 _SKIP_DIRS = {
-    "__pycache__", ".git", ".svn", ".hg",
-    "node_modules", "vendor", "venv", ".venv", "env",
-    ".tox", ".eggs", "dist", "build", ".mypy_cache",
-    ".pytest_cache", ".ruff_cache",
+    "__pycache__",
+    ".git",
+    ".svn",
+    ".hg",
+    "node_modules",
+    "vendor",
+    "venv",
+    ".venv",
+    "env",
+    ".tox",
+    ".eggs",
+    "dist",
+    "build",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
 }
 
 
@@ -109,13 +146,15 @@ def sec_secrets_scan(
                 # Redact the matched secret in context
                 redacted_context = context[:20] + "***REDACTED***" + context[-20:]
 
-                findings.append({
-                    "file": rel_path,
-                    "line": content[:match.start()].count("\n") + 1,
-                    "type": secret_type,
-                    "context": redacted_context,
-                    "start_col": match.start(),
-                })
+                findings.append(
+                    {
+                        "file": rel_path,
+                        "line": content[: match.start()].count("\n") + 1,
+                        "type": secret_type,
+                        "context": redacted_context,
+                        "start_col": match.start(),
+                    }
+                )
 
     # Deduplicate and group by file
     return {
@@ -123,10 +162,7 @@ def sec_secrets_scan(
         "files_scanned": files_scanned,
         "findings": findings,
         "count": len(findings),
-        "severity": (
-            "critical" if len(findings) > 0
-            else "clean"
-        ),
+        "severity": ("critical" if len(findings) > 0 else "clean"),
     }
 
 

@@ -12,6 +12,7 @@ Provides structured multi-step task scaffolding with:
 ECC reference: everything-claude-code feature-development.md +
 database-migration.md + add-language-rules.md structured workflows.
 """
+
 from __future__ import annotations
 
 import time
@@ -24,7 +25,11 @@ from ..commands.registry import CommandResult
 
 WORKFLOW_STEPS: dict[str, list[dict[str, str]]] = {
     "feature": [
-        {"step": "1", "name": "Specification", "prompt": "Define requirements & acceptance criteria"},
+        {
+            "step": "1",
+            "name": "Specification",
+            "prompt": "Define requirements & acceptance criteria",
+        },
         {"step": "2", "name": "Design", "prompt": "Architecture & interface design"},
         {"step": "3", "name": "Implementation", "prompt": "Write the implementation"},
         {"step": "4", "name": "Testing", "prompt": "Write & run tests"},
@@ -73,6 +78,7 @@ WORKFLOW_DESCRIPTIONS = {
 @dataclass
 class WorkflowState:
     """Persistent state for an active workflow."""
+
     name: str
     started_at: float = field(default_factory=time.time)
     current_step: int = 0
@@ -100,7 +106,11 @@ class WorkflowState:
                 glyph = "⏺"
             else:
                 glyph = "◻"
-            marker = f"[green]{glyph}" if completed else (f"[cyan]{glyph}" if active else f"[dim]{glyph}")
+            marker = (
+                f"[green]{glyph}"
+                if completed
+                else (f"[cyan]{glyph}" if active else f"[dim]{glyph}")
+            )
             lines.append(f"  {marker}[/] {s['name']}  [dim]— {s['prompt']}[/]")
         for note_key, note_val in self.notes.items():
             if note_key.startswith("step_"):
@@ -113,6 +123,7 @@ _active_workflow: WorkflowState | None = None
 
 
 # ── Command Handler ────────────────────────────────────────────────────
+
 
 def cmd_workflow(session: Any, args: str) -> CommandResult:
     """Manage structured multi-step workflows.
@@ -238,13 +249,16 @@ def cmd_workflow(session: Any, args: str) -> CommandResult:
         return CommandResult(output=f"Workflow '{name}' cancelled.")
 
     return CommandResult(
-        output="Unknown subcommand. Usage: /workflow [list|start|status|next|step|done|note|cancel]",
+        output=(
+            "Unknown subcommand. Usage: /workflow [list|start|status|next|step|done|note|cancel]"
+        ),
     )
 
 
 def _rich_available() -> bool:
     try:
         from rich.console import Console  # noqa: F401
+
         return True
     except ImportError:
         return False

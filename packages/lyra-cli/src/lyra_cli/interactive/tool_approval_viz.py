@@ -11,6 +11,7 @@ Features:
   • Approval cache visualization ("allowed for this session")
   • Risk-based auto-approval for low-risk tools (configurable)
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -21,26 +22,49 @@ from rich.table import Table
 # ── Risk levels ─────────────────────────────────────────────────────────
 
 LOW_RISK_TOOLS = {
-    "Read", "Grep", "Glob", "ListFiles", "Bash", "WebSearch",
-    "WebFetch", "AgentMemory", "SkillLookup", "Probe", "LSP",
+    "Read",
+    "Grep",
+    "Glob",
+    "ListFiles",
+    "Bash",
+    "WebSearch",
+    "WebFetch",
+    "AgentMemory",
+    "SkillLookup",
+    "Probe",
+    "LSP",
     "SemanticSearch",
 }
 
 MEDIUM_RISK_TOOLS = {
-    "Write", "Edit", "ApplyPatch", "Rename", "Delete",
-    "CreateDirectory", "ImageGeneration", "Voice",
+    "Write",
+    "Edit",
+    "ApplyPatch",
+    "Rename",
+    "Delete",
+    "CreateDirectory",
+    "ImageGeneration",
+    "Voice",
 }
 
 HIGH_RISK_TOOLS = {
-    "Bash", "Subprocess", "Deploy", "Execute", "Kubernetes",
-    "Terraform", "DatabaseQuery", "NetworkRequest",
-    "ServiceWrite", "Webhook",
+    "Bash",
+    "Subprocess",
+    "Deploy",
+    "Execute",
+    "Kubernetes",
+    "Terraform",
+    "DatabaseQuery",
+    "NetworkRequest",
+    "ServiceWrite",
+    "Webhook",
 }
 
 
 @dataclass
 class ApprovalRequest:
     """Context for a tool approval prompt."""
+
     tool_name: str
     args_preview: str = ""
     risk_level: str = "unknown"
@@ -84,6 +108,7 @@ class ApprovalRequest:
 
 # ── Renderers ───────────────────────────────────────────────────────────
 
+
 def render_approval_panel(req: ApprovalRequest) -> Panel:
     """Render a tool approval request as a Rich Panel.
 
@@ -119,7 +144,10 @@ def render_approval_panel(req: ApprovalRequest) -> Panel:
     # Footer with key hints
     footer = ""
     if req.risk_level == "high":
-        footer = "\n[yellow]⚠ High-risk tool[/] — type [bold]y[/] allow · [bold]n[/] deny · [bold]a[/] always allow"
+        footer =(
+            "\n[yellow]⚠ High-risk tool[/] — type [bold]y[/] allow · [bold]n[/] deny · [bold]a[/]"
+            "always allow"
+        )
     elif req.risk_level == "medium":
         footer = "\n[dim]Approve?[/] [bold]y[/] yes · [bold]n[/] no · [bold]a[/] always for session"
     else:
@@ -180,6 +208,11 @@ def classify_risk(tool_name: str) -> str:
 
 
 __all__ = [
-    "ApprovalRequest", "render_approval_panel", "render_approval_summary",
-    "classify_risk", "LOW_RISK_TOOLS", "MEDIUM_RISK_TOOLS", "HIGH_RISK_TOOLS",
+    "ApprovalRequest",
+    "render_approval_panel",
+    "render_approval_summary",
+    "classify_risk",
+    "LOW_RISK_TOOLS",
+    "MEDIUM_RISK_TOOLS",
+    "HIGH_RISK_TOOLS",
 ]

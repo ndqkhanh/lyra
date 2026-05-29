@@ -17,8 +17,15 @@ class ExecutionIntegrity:
     """
 
     _DESTRUCTIVE_PATTERNS = [
-        "rm -rf", "delete", "drop table", "truncate",
-        "format", "purge", "destroy", "--no-verify", "--force",
+        "rm -rf",
+        "delete",
+        "drop table",
+        "truncate",
+        "format",
+        "purge",
+        "destroy",
+        "--no-verify",
+        "--force",
     ]
 
     def __init__(self, strict_mode: bool = True):
@@ -80,7 +87,9 @@ class ExecutionIntegrity:
                     id=str(uuid.uuid4()),
                     tool_name=intent.tool_name,
                     violation_type="outcome_mismatch",
-                    description=f"Expected '{intent.expected_outcome}' but got '{actual_outcome[:100]}'",
+                    description=(
+                        f"Expected '{intent.expected_outcome}' but got '{actual_outcome[:100]}'"
+                    ),
                     severity=ViolationSeverity.MEDIUM,
                 )
                 violations.append(v)

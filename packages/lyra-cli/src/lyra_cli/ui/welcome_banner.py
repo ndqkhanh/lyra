@@ -11,7 +11,7 @@ def print_welcome_banner(
     provider: str = "Anthropic API",
     working_dir: str | None = None,
     context_window: str | None = "1M context",
-    user_name: str | None = None
+    user_name: str | None = None,
 ):
     """Print welcome banner with responsive layout
 
@@ -34,7 +34,9 @@ def print_welcome_banner(
     if width >= 120:
         _print_wide_banner(version, model, effort, provider, working_dir, context_window, user_name)
     elif width >= 80:
-        _print_standard_banner(version, model, effort, provider, working_dir, context_window, user_name)
+        _print_standard_banner(
+            version, model, effort, provider, working_dir, context_window, user_name
+        )
     else:
         _print_narrow_banner(version, model, working_dir)
 
@@ -46,7 +48,7 @@ def _print_wide_banner(
     provider: str,
     working_dir: str,
     context_window: str | None,
-    user_name: str | None
+    user_name: str | None,
 ):
     """Print two-column wide banner (>120 cols)"""
     width = min(shutil.get_terminal_size().columns, 120)
@@ -98,7 +100,7 @@ def _print_standard_banner(
     provider: str,
     working_dir: str,
     context_window: str | None,
-    user_name: str | None
+    user_name: str | None,
 ):
     """Print standard single-column banner (80-120 cols)"""
     width = min(shutil.get_terminal_size().columns, 90)
@@ -154,7 +156,7 @@ def _shorten_path(path: str, max_length: int) -> str:
     # Replace home directory with ~
     home = os.path.expanduser("~")
     if path.startswith(home):
-        path = "~" + path[len(home):]
+        path = "~" + path[len(home) :]
 
     if len(path) <= max_length:
         return path
@@ -162,7 +164,7 @@ def _shorten_path(path: str, max_length: int) -> str:
     # Truncate from the middle
     parts = path.split(os.sep)
     if len(parts) <= 3:
-        return "..." + path[-(max_length - 3):]
+        return "..." + path[-(max_length - 3) :]
 
     # Keep first and last parts, truncate middle
     first = parts[0] or os.sep
@@ -174,21 +176,25 @@ if __name__ == "__main__":
     # Demo all layouts
     print("Wide layout (>120 cols):")
     _print_wide_banner(
-        "0.1.0", "Opus 4.7", "xhigh", "Anthropic API",
+        "0.1.0",
+        "Opus 4.7",
+        "xhigh",
+        "Anthropic API",
         "~/Downloads/MyCV/research/harness-engineering",
-        "1M context", "Khanh"
+        "1M context",
+        "Khanh",
     )
 
     print("\nStandard layout (80-120 cols):")
     _print_standard_banner(
-        "0.1.0", "Opus 4.7", "xhigh", "Anthropic API",
+        "0.1.0",
+        "Opus 4.7",
+        "xhigh",
+        "Anthropic API",
         "~/Downloads/MyCV/research/harness-engineering",
-        "1M context", "Khanh"
+        "1M context",
+        "Khanh",
     )
 
     print("\nNarrow layout (<80 cols):")
-    _print_narrow_banner(
-        "0.1.0", "Opus 4.7",
-        "~/Downloads/MyCV/research/harness-engineering"
-    )
-
+    _print_narrow_banner("0.1.0", "Opus 4.7", "~/Downloads/MyCV/research/harness-engineering")

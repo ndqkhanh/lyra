@@ -3,6 +3,7 @@
 Covers all six modules: tiered_loader, trigger_matcher, context_aware_loader,
 skill_compiler, dependency_resolver, loader_config, and exceptions.
 """
+
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -298,7 +299,7 @@ class TestTieredLoader:
         loader.load_tier2("b")
         stats = loader.loading_stats()
         assert stats.skills_loaded == 1  # Only b is above tier1
-        assert stats.tokens_saved > 0   # b at tier2 instead of tier3
+        assert stats.tokens_saved > 0  # b at tier2 instead of tier3
 
     def test_loading_stats_tokens_saved_pct(self) -> None:
         loader = TieredLoader()
@@ -330,7 +331,9 @@ class TestTieredLoader:
     def test_load_tier_upgrade_to_tier3(self) -> None:
         loader = TieredLoader()
         loader.register_skill(
-            "s", _make_metadata(name="s"), content=_make_content(body="c"),
+            "s",
+            _make_metadata(name="s"),
+            content=_make_content(body="c"),
             references=_make_references(deps=["dep1"]),
         )
         loader.load_tier1("s")
@@ -361,7 +364,9 @@ class TestTieredLoader:
 class TestTriggerMatcher:
     def test_register_trigger(self) -> None:
         tm = TriggerMatcher()
-        tm.register_trigger(Trigger(pattern="deploy", keywords=("deploy", "release"), skill_id="deploy-skill"))
+        tm.register_trigger(
+            Trigger(pattern="deploy", keywords=("deploy", "release"), skill_id="deploy-skill")
+        )
         assert "deploy-skill" in tm.list_triggers()
 
     def test_register_duplicate_raises_trigger_error(self) -> None:
@@ -384,7 +389,9 @@ class TestTriggerMatcher:
 
     def test_match_keyword(self) -> None:
         tm = TriggerMatcher()
-        tm.register_trigger(Trigger(pattern="deploy", keywords=("deploy", "release"), skill_id="dep"))
+        tm.register_trigger(
+            Trigger(pattern="deploy", keywords=("deploy", "release"), skill_id="dep")
+        )
         results = tm.match("I need to deploy this service")
         assert len(results) >= 1
         assert results[0].skill_id == "dep"
@@ -416,8 +423,7 @@ class TestTriggerMatcher:
         config = MatchConfig(min_score=0.0, max_matches=2)
         tm = TriggerMatcher(config=config)
         results = [
-            MatchResult(f"s{i}", 0.5, ("kw",), 0.5, LoadTier.TIER1_METADATA)
-            for i in range(10)
+            MatchResult(f"s{i}", 0.5, ("kw",), 0.5, LoadTier.TIER1_METADATA) for i in range(10)
         ]
         ranked = tm.rank_matches(results)
         assert len(ranked) == 2
@@ -443,7 +449,9 @@ class TestTriggerMatcher:
 
     def test_match_scoring_higher_for_more_keywords(self) -> None:
         tm = TriggerMatcher()
-        tm.register_trigger(Trigger(pattern="full", keywords=("deploy", "release", "rollout"), skill_id="full"))
+        tm.register_trigger(
+            Trigger(pattern="full", keywords=("deploy", "release", "rollout"), skill_id="full")
+        )
         tm.register_trigger(Trigger(pattern="min", keywords=("deploy",), skill_id="min"))
         results = tm.match("deploy and rollout the release")
         # Should have both matches, full should score higher due to more keywords
@@ -509,7 +517,9 @@ class TestContextAwareLoader:
         cal = ContextAwareLoader(loader, budget=ContextBudget(total_tokens=100))
         assert cal.can_load_at_tier("nonexistent", LoadTier.TIER1_METADATA)
         # Tier3 (2000 tokens) won't fit in budget of 100
-        assert not cal.can_load_at_tier("nonexistent", LoadTier.TIER3_REFERENCES, ContextBudget(total_tokens=100))
+        assert not cal.can_load_at_tier(
+            "nonexistent", LoadTier.TIER3_REFERENCES, ContextBudget(total_tokens=100)
+        )
 
     def test_decide_loading_empty_matches(self) -> None:
         loader = TieredLoader()
@@ -522,7 +532,9 @@ class TestContextAwareLoader:
         _register_dummy(loader, "a")
         _register_dummy(loader, "b")
         cal = ContextAwareLoader(loader, budget=ContextBudget(total_tokens=10000))
-        decisions = cal.decide_loading([("a", 0.9, LoadTier.TIER2_CONTENT), ("b", 0.5, LoadTier.TIER1_METADATA)])
+        decisions = cal.decide_loading(
+            [("a", 0.9, LoadTier.TIER2_CONTENT), ("b", 0.5, LoadTier.TIER1_METADATA)]
+        )
         assert len(decisions) == 2
         assert all(d.fits_in_budget for d in decisions)
 
@@ -531,7 +543,9 @@ class TestContextAwareLoader:
         _register_dummy(loader, "a")
         _register_dummy(loader, "b")
         cal = ContextAwareLoader(loader, budget=ContextBudget(total_tokens=10))
-        decisions = cal.decide_loading([("a", 0.9, LoadTier.TIER2_CONTENT), ("b", 0.5, LoadTier.TIER1_METADATA)])
+        decisions = cal.decide_loading(
+            [("a", 0.9, LoadTier.TIER2_CONTENT), ("b", 0.5, LoadTier.TIER1_METADATA)]
+        )
         # First should fit (metadata=50 is estimated tokens, but effective budget might be low)
         # Actually with total=10, metadata alone is 50, so nothing fits
         fits = [d for d in decisions if d.fits_in_budget]
@@ -576,7 +590,9 @@ class TestContextAwareLoader:
         _register_dummy(loader, "evicted")
         loader.load_tier1("kept")
         loader.load_tier1("evicted")
-        evicted = cal.evict_if_needed(["kept", "evicted"], budget_needed=100, policy=EvictionPolicy.LRU)
+        evicted = cal.evict_if_needed(
+            ["kept", "evicted"], budget_needed=100, policy=EvictionPolicy.LRU
+        )
         assert len(evicted) >= 1
 
     def test_evict_if_needed_lfu_policy(self) -> None:
@@ -588,7 +604,9 @@ class TestContextAwareLoader:
         loader.load_tier1("kept")
         loader.load_tier1("kept")
         loader.load_tier1("evicted")
-        evicted = cal.evict_if_needed(["kept", "evicted"], budget_needed=100, policy=EvictionPolicy.LFU)
+        evicted = cal.evict_if_needed(
+            ["kept", "evicted"], budget_needed=100, policy=EvictionPolicy.LFU
+        )
         assert len(evicted) >= 1
 
     def test_evict_if_needed_priority_policy(self) -> None:
@@ -596,7 +614,9 @@ class TestContextAwareLoader:
         cal = ContextAwareLoader(loader)
         _register_dummy(loader, "high", priority=10)
         _register_dummy(loader, "low", priority=1)
-        evicted = cal.evict_if_needed(["high", "low"], budget_needed=1000, policy=EvictionPolicy.PRIORITY)
+        evicted = cal.evict_if_needed(
+            ["high", "low"], budget_needed=1000, policy=EvictionPolicy.PRIORITY
+        )
         assert "low" in evicted
 
     def test_evict_if_needed_fifo_policy(self) -> None:
@@ -938,7 +958,10 @@ class TestDataclassIntegrity:
 
     def test_resolution_result_frozen(self) -> None:
         rr = ResolutionResult(
-            load_order=(), conflicts=(), missing_deps=(), circular_deps=(),
+            load_order=(),
+            conflicts=(),
+            missing_deps=(),
+            circular_deps=(),
         )
         with pytest.raises(AttributeError):
             rr.load_order = ("x",)  # type: ignore[misc]
@@ -965,7 +988,8 @@ class TestIntegration:
         # Set up loader
         loader = TieredLoader()
         meta = _make_metadata(
-            name="code-review", triggers=("review", "audit", "inspect"),
+            name="code-review",
+            triggers=("review", "audit", "inspect"),
             category="dev",
         )
         content = _make_content(body="Review code for bugs")
@@ -1032,8 +1056,12 @@ class TestIntegration:
 
     def test_multiple_triggers_different_skills(self) -> None:
         tm = TriggerMatcher()
-        tm.register_trigger(Trigger(pattern="deploy", keywords=("deploy", "release"), skill_id="ops"))
-        tm.register_trigger(Trigger(pattern="monitor", keywords=("monitor", "alert"), skill_id="mon"))
+        tm.register_trigger(
+            Trigger(pattern="deploy", keywords=("deploy", "release"), skill_id="ops")
+        )
+        tm.register_trigger(
+            Trigger(pattern="monitor", keywords=("monitor", "alert"), skill_id="mon")
+        )
         results = tm.match("deploy to production")
         ops_matches = [r for r in results if r.skill_id == "ops"]
         assert len(ops_matches) >= 1
@@ -1066,7 +1094,10 @@ class TestIntegration:
         assert ok.is_ok
 
         not_ok = ResolutionResult(
-            load_order=(), conflicts=("b",), missing_deps=(), circular_deps=(),
+            load_order=(),
+            conflicts=("b",),
+            missing_deps=(),
+            circular_deps=(),
         )
         assert not not_ok.is_ok
 

@@ -49,10 +49,10 @@ class InvalidGenomeError(MetaEvolutionError):
 class EvolutionLevel(Enum):
     """The four levels of the meta-cognitive evolution stack."""
 
-    L1_PARAMETER = 1     # Hyperparameter tuning
-    L2_STRATEGY = 2      # Algorithm/strategy selection
+    L1_PARAMETER = 1  # Hyperparameter tuning
+    L2_STRATEGY = 2  # Algorithm/strategy selection
     L3_ARCHITECTURE = 3  # Component restructuring
-    L4_GOAL = 4          # Objective function adaptation
+    L4_GOAL = 4  # Objective function adaptation
 
 
 class EvolutionTrigger(Enum):
@@ -161,6 +161,7 @@ class AgentGenome:
     def clone(self, new_id: str | None = None) -> AgentGenome:
         """Create a deep copy of this genome."""
         import copy
+
         cloned = copy.deepcopy(self)
         cloned.agent_id = new_id or f"{self.agent_id}_clone_{time.time()}"
         cloned.parent_ids = [self.agent_id]
@@ -314,7 +315,8 @@ class ParameterController(LevelController):
         parameter_bounds: dict[str, tuple[float, float]] | None = None,
     ):
         super().__init__(
-            config or EvolutionConfig(
+            config
+            or EvolutionConfig(
                 level=EvolutionLevel.L1_PARAMETER,
                 max_iterations=50,
                 convergence_threshold=0.005,
@@ -406,7 +408,8 @@ class StrategyController(LevelController):
         available_strategies: list[str] | None = None,
     ):
         super().__init__(
-            config or EvolutionConfig(
+            config
+            or EvolutionConfig(
                 level=EvolutionLevel.L2_STRATEGY,
                 max_iterations=80,
                 convergence_threshold=0.01,
@@ -414,8 +417,14 @@ class StrategyController(LevelController):
             )
         )
         self.available_strategies = available_strategies or [
-            "greedy", "exploration", "exploitation", "random",
-            "heuristic", "model_based", "rule_based", "ensemble",
+            "greedy",
+            "exploration",
+            "exploitation",
+            "random",
+            "heuristic",
+            "model_based",
+            "rule_based",
+            "ensemble",
         ]
 
     async def evolve(
@@ -436,16 +445,20 @@ class StrategyController(LevelController):
             changes.append(f"strategies: initialized -> {genome.active_strategies}")
 
         # Toggle strategies (add/remove based on trigger)
-        if trigger in (EvolutionTrigger.PERFORMANCE_DEGRADATION, EvolutionTrigger.THRESHOLD_CROSSED):
+        if trigger in (
+            EvolutionTrigger.PERFORMANCE_DEGRADATION,
+            EvolutionTrigger.THRESHOLD_CROSSED,
+        ):
             # Swap worst performing strategy
             if len(genome.active_strategies) > 1:
                 removed = genome.active_strategies.pop()
                 available_replacements = [
-                    s for s in self.available_strategies
-                    if s not in genome.active_strategies
+                    s for s in self.available_strategies if s not in genome.active_strategies
                 ]
                 if available_replacements:
-                    replacement = available_replacements[int(time.time() * 100) % len(available_replacements)]
+                    replacement = available_replacements[
+                        int(time.time() * 100) % len(available_replacements)
+                    ]
                     genome.active_strategies.append(replacement)
                     changes.append(f"strategies: replaced '{removed}' with '{replacement}'")
 
@@ -458,7 +471,9 @@ class StrategyController(LevelController):
                 old = genome.strategy_weights[strategy]
                 genome.strategy_weights[strategy] = max(0.0, min(1.0, old + perturbation))
                 if abs(genome.strategy_weights[strategy] - old) > 0.001:
-                    changes.append(f"weight[{strategy}]: {old:.4f} -> {genome.strategy_weights[strategy]:.4f}")
+                    changes.append(
+                        f"weight[{strategy}]: {old:.4f} -> {genome.strategy_weights[strategy]:.4f}"
+                    )
 
         genome.generation += 1
 
@@ -510,7 +525,8 @@ class ArchitectureController(LevelController):
         allowed_modules: list[str] | None = None,
     ):
         super().__init__(
-            config or EvolutionConfig(
+            config
+            or EvolutionConfig(
                 level=EvolutionLevel.L3_ARCHITECTURE,
                 max_iterations=30,
                 convergence_threshold=0.02,
@@ -519,8 +535,13 @@ class ArchitectureController(LevelController):
             )
         )
         self.allowed_modules = allowed_modules or [
-            "planner", "executor", "reviewer", "researcher",
-            "memory_manager", "tool_router", "output_formatter",
+            "planner",
+            "executor",
+            "reviewer",
+            "researcher",
+            "memory_manager",
+            "tool_router",
+            "output_formatter",
         ]
 
     async def evolve(
@@ -629,7 +650,8 @@ class GoalController(LevelController):
         objective_dimensions: list[str] | None = None,
     ):
         super().__init__(
-            config or EvolutionConfig(
+            config
+            or EvolutionConfig(
                 level=EvolutionLevel.L4_GOAL,
                 max_iterations=20,
                 convergence_threshold=0.03,
@@ -638,8 +660,13 @@ class GoalController(LevelController):
             )
         )
         self.objective_dimensions = objective_dimensions or [
-            "speed", "quality", "cost", "reliability",
-            "adaptability", "safety", "efficiency",
+            "speed",
+            "quality",
+            "cost",
+            "reliability",
+            "adaptability",
+            "safety",
+            "efficiency",
         ]
 
     async def evolve(
@@ -657,8 +684,7 @@ class GoalController(LevelController):
         # Initialize objective weights
         if not genome.objective_weights:
             genome.objective_weights = {
-                dim: 1.0 / len(self.objective_dimensions)
-                for dim in self.objective_dimensions
+                dim: 1.0 / len(self.objective_dimensions) for dim in self.objective_dimensions
             }
             changes.append(f"objectives: initialized {len(self.objective_dimensions)} dimensions")
 
@@ -669,7 +695,9 @@ class GoalController(LevelController):
                 if dim in genome.objective_weights:
                     old = genome.objective_weights[dim]
                     genome.objective_weights[dim] = min(1.0, old * 1.1)
-                    changes.append(f"objective[{dim}]: {old:.4f} -> {genome.objective_weights[dim]:.4f}")
+                    changes.append(
+                        f"objective[{dim}]: {old:.4f} -> {genome.objective_weights[dim]:.4f}"
+                    )
 
         elif trigger == EvolutionTrigger.THRESHOLD_CROSSED:
             # Shift toward speed and cost efficiency
@@ -677,7 +705,9 @@ class GoalController(LevelController):
                 if dim in genome.objective_weights:
                     old = genome.objective_weights[dim]
                     genome.objective_weights[dim] = min(1.0, old * 1.15)
-                    changes.append(f"objective[{dim}]: {old:.4f} -> {genome.objective_weights[dim]:.4f}")
+                    changes.append(
+                        f"objective[{dim}]: {old:.4f} -> {genome.objective_weights[dim]:.4f}"
+                    )
 
         # Normalize weights to sum to 1.0
         total = sum(genome.objective_weights.values())
@@ -861,33 +891,41 @@ class MetaCognitiveStack:
             # Performance issue: tune parameters and strategies
             for level in [EvolutionLevel.L1_PARAMETER, EvolutionLevel.L2_STRATEGY]:
                 result = await self.evolve(genome, EvolutionTrigger.PERFORMANCE_DEGRADATION, level)
-                results["actions"].append({
-                    "level": level.name,
-                    "improvement": result.improvement,
-                    "changes": result.genome_changes,
-                })
+                results["actions"].append(
+                    {
+                        "level": level.name,
+                        "improvement": result.improvement,
+                        "changes": result.genome_changes,
+                    }
+                )
 
         elif any(kw in str(error_type).lower() for kw in ["quality", "accuracy", "incorrect"]):
             # Quality issue: evolve strategies and goals
             for level in [EvolutionLevel.L2_STRATEGY, EvolutionLevel.L4_GOAL]:
                 result = await self.evolve(genome, EvolutionTrigger.PERFORMANCE_DEGRADATION, level)
-                results["actions"].append({
-                    "level": level.name,
-                    "improvement": result.improvement,
-                    "changes": result.genome_changes,
-                })
+                results["actions"].append(
+                    {
+                        "level": level.name,
+                        "improvement": result.improvement,
+                        "changes": result.genome_changes,
+                    }
+                )
 
         else:
             # Unknown failure: evolve all levels
             for level in list(EvolutionLevel):
                 controller = self._controllers[level]
                 if controller.is_ready():
-                    result = await controller.evolve(genome, EvolutionTrigger.PERFORMANCE_DEGRADATION)
-                    results["actions"].append({
-                        "level": level.name,
-                        "improvement": result.improvement,
-                        "changes": result.genome_changes,
-                    })
+                    result = await controller.evolve(
+                        genome, EvolutionTrigger.PERFORMANCE_DEGRADATION
+                    )
+                    results["actions"].append(
+                        {
+                            "level": level.name,
+                            "improvement": result.improvement,
+                            "changes": result.genome_changes,
+                        }
+                    )
 
         self._genomes[agent_id] = genome
         return results
@@ -957,7 +995,8 @@ class MetaCognitiveStack:
             "total_evolutions": len(self._history),
             "genomes_tracked": len(self._genomes),
             "converged_levels": [
-                level.name for level, ctrl in self._controllers.items()
+                level.name
+                for level, ctrl in self._controllers.items()
                 if ctrl.state.status == ConvergenceStatus.CONVERGED
             ],
         }

@@ -18,6 +18,7 @@ Contract (plan Phase 2):
   from ``pre_tool_call``) stops the loop cleanly and marks the
   TurnResult with ``stopped_by="interrupt"``.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -40,6 +41,7 @@ def _import_loop():
 @dataclass
 class _ScriptedLLM:
     """A fake LLM that returns a queued list of responses."""
+
     queue: list[dict]
     calls: list[dict] = field(default_factory=list)
 
@@ -57,8 +59,9 @@ class _InMemoryStore:
     def start_session(self, *, session_id: str, **_: Any) -> None:
         self.sessions.setdefault(session_id, [])
 
-    def append_message(self, *, session_id: str, role: str, content: str,
-                       tool_calls: list | None = None, **_: Any) -> None:
+    def append_message(
+        self, *, session_id: str, role: str, content: str, tool_calls: list | None = None, **_: Any
+    ) -> None:
         self.sessions.setdefault(session_id, []).append(
             {"role": role, "content": content, "tool_calls": tool_calls or []}
         )
@@ -66,6 +69,7 @@ class _InMemoryStore:
 
 class _RecordingPlugin:
     """Records every hook call in order for assertions."""
+
     def __init__(self) -> None:
         self.events: list[str] = []
         self.post_tool_results: list[tuple[str, Any]] = []
@@ -92,12 +96,13 @@ class _RecordingPlugin:
 
 def test_run_conversation_simple_end_turn():
     AgentLoop, IterationBudget, _ = _import_loop()
-    llm = _ScriptedLLM(queue=[
-        {"role": "assistant", "content": "hello world", "stop_reason": "end_turn"},
-    ])
+    llm = _ScriptedLLM(
+        queue=[
+            {"role": "assistant", "content": "hello world", "stop_reason": "end_turn"},
+        ]
+    )
     store = _InMemoryStore()
-    loop = AgentLoop(llm=llm, tools={}, store=store, plugins=[],
-                     budget=IterationBudget(max=5))
+    loop = AgentLoop(llm=llm, tools={}, store=store, plugins=[], budget=IterationBudget(max=5))
 
     result = loop.run_conversation("hi", session_id="s1")
 
@@ -111,12 +116,15 @@ def test_run_conversation_simple_end_turn():
 
 def test_run_conversation_fires_plugin_hooks_in_order():
     AgentLoop, IterationBudget, _ = _import_loop()
-    llm = _ScriptedLLM(queue=[
-        {"role": "assistant", "content": "ok", "stop_reason": "end_turn"},
-    ])
+    llm = _ScriptedLLM(
+        queue=[
+            {"role": "assistant", "content": "ok", "stop_reason": "end_turn"},
+        ]
+    )
     plugin = _RecordingPlugin()
-    loop = AgentLoop(llm=llm, tools={}, store=_InMemoryStore(),
-                     plugins=[plugin], budget=IterationBudget(max=3))
+    loop = AgentLoop(
+        llm=llm, tools={}, store=_InMemoryStore(), plugins=[plugin], budget=IterationBudget(max=3)
+    )
 
     loop.run_conversation("hi", session_id="s1")
 
@@ -127,21 +135,28 @@ def test_run_conversation_fires_plugin_hooks_in_order():
 
 def test_run_conversation_dispatches_tool_calls_and_continues():
     AgentLoop, IterationBudget, _ = _import_loop()
-    llm = _ScriptedLLM(queue=[
-        {
-            "role": "assistant",
-            "content": "",
-            "tool_calls": [{"id": "c1", "name": "echo", "arguments": {"text": "hi"}}],
-            "stop_reason": "tool_use",
-        },
-        {"role": "assistant", "content": "echoed", "stop_reason": "end_turn"},
-    ])
+    llm = _ScriptedLLM(
+        queue=[
+            {
+                "role": "assistant",
+                "content": "",
+                "tool_calls": [{"id": "c1", "name": "echo", "arguments": {"text": "hi"}}],
+                "stop_reason": "tool_use",
+            },
+            {"role": "assistant", "content": "echoed", "stop_reason": "end_turn"},
+        ]
+    )
 
     def echo(text: str) -> str:
         return f"ECHO:{text}"
 
-    loop = AgentLoop(llm=llm, tools={"echo": echo}, store=_InMemoryStore(),
-                     plugins=[], budget=IterationBudget(max=5))
+    loop = AgentLoop(
+        llm=llm,
+        tools={"echo": echo},
+        store=_InMemoryStore(),
+        plugins=[],
+        budget=IterationBudget(max=5),
+    )
 
     result = loop.run_conversation("hi", session_id="s1")
     assert result.final_text == "echoed"
@@ -153,18 +168,24 @@ def test_run_conversation_dispatches_tool_calls_and_continues():
 def test_iteration_budget_caps_loop():
     AgentLoop, IterationBudget, _ = _import_loop()
     # An LLM that never yields end_turn.
-    llm = _ScriptedLLM(queue=[
-        {
-            "role": "assistant",
-            "content": "",
-            "tool_calls": [{"id": f"c{i}", "name": "echo", "arguments": {"text": "x"}}],
-            "stop_reason": "tool_use",
-        }
-        for i in range(20)
-    ])
-    loop = AgentLoop(llm=llm, tools={"echo": lambda text: text},
-                     store=_InMemoryStore(), plugins=[],
-                     budget=IterationBudget(max=3))
+    llm = _ScriptedLLM(
+        queue=[
+            {
+                "role": "assistant",
+                "content": "",
+                "tool_calls": [{"id": f"c{i}", "name": "echo", "arguments": {"text": "x"}}],
+                "stop_reason": "tool_use",
+            }
+            for i in range(20)
+        ]
+    )
+    loop = AgentLoop(
+        llm=llm,
+        tools={"echo": lambda text: text},
+        store=_InMemoryStore(),
+        plugins=[],
+        budget=IterationBudget(max=3),
+    )
 
     result = loop.run_conversation("go", session_id="s1")
     assert result.iterations <= 3
@@ -190,18 +211,20 @@ def test_post_tool_call_fires_with_result_after_each_tool_dispatch():
     and ``post_tool_call`` must always appear in matched pairs.
     """
     AgentLoop, IterationBudget, _ = _import_loop()
-    llm = _ScriptedLLM(queue=[
-        {
-            "role": "assistant",
-            "content": "",
-            "tool_calls": [
-                {"id": "c1", "name": "echo", "arguments": {"text": "hi"}},
-                {"id": "c2", "name": "echo", "arguments": {"text": "bye"}},
-            ],
-            "stop_reason": "tool_use",
-        },
-        {"role": "assistant", "content": "ok", "stop_reason": "end_turn"},
-    ])
+    llm = _ScriptedLLM(
+        queue=[
+            {
+                "role": "assistant",
+                "content": "",
+                "tool_calls": [
+                    {"id": "c1", "name": "echo", "arguments": {"text": "hi"}},
+                    {"id": "c2", "name": "echo", "arguments": {"text": "bye"}},
+                ],
+                "stop_reason": "tool_use",
+            },
+            {"role": "assistant", "content": "ok", "stop_reason": "end_turn"},
+        ]
+    )
 
     def echo(text: str) -> str:
         return f"ECHO:{text}"
@@ -220,23 +243,21 @@ def test_post_tool_call_fires_with_result_after_each_tool_dispatch():
     # Two dispatches → two matched pre/post pairs.
     pre_events = [e for e in plugin.events if e.startswith("pre_tool_call:")]
     post_events = [e for e in plugin.events if e.startswith("post_tool_call:")]
-    assert len(pre_events) == 2, (
-        f"expected 2 pre_tool_call events, got {pre_events}"
-    )
-    assert len(post_events) == 2, (
-        f"expected 2 post_tool_call events, got {post_events}"
-    )
+    assert len(pre_events) == 2, f"expected 2 pre_tool_call events, got {pre_events}"
+    assert len(post_events) == 2, f"expected 2 post_tool_call events, got {post_events}"
 
     # Ordering invariant: post always follows its pre, not before it.
     # Walk the event stream and assert alternation for tool events.
-    tool_events = [e for e in plugin.events if ":" in e and e.split(":", 1)[0].endswith("_tool_call")]
+    tool_events = [
+        e for e in plugin.events if ":" in e and e.split(":", 1)[0].endswith("_tool_call")
+    ]
     for i in range(0, len(tool_events), 2):
-        assert tool_events[i].startswith("pre_tool_call:"), (
-            f"pre must precede post in event stream, got {tool_events}"
-        )
-        assert tool_events[i + 1].startswith("post_tool_call:"), (
-            f"post must follow pre in event stream, got {tool_events}"
-        )
+        assert tool_events[i].startswith(
+            "pre_tool_call:"
+        ), f"pre must precede post in event stream, got {tool_events}"
+        assert tool_events[i + 1].startswith(
+            "post_tool_call:"
+        ), f"post must follow pre in event stream, got {tool_events}"
 
     # Result payload is delivered to the post hook.
     assert plugin.post_tool_results == [
@@ -253,15 +274,17 @@ def test_post_tool_call_fires_even_when_tool_raises():
     which is the entire reason hermes-agent exposes the hook.
     """
     AgentLoop, IterationBudget, _ = _import_loop()
-    llm = _ScriptedLLM(queue=[
-        {
-            "role": "assistant",
-            "content": "",
-            "tool_calls": [{"id": "c1", "name": "boom", "arguments": {}}],
-            "stop_reason": "tool_use",
-        },
-        {"role": "assistant", "content": "ok", "stop_reason": "end_turn"},
-    ])
+    llm = _ScriptedLLM(
+        queue=[
+            {
+                "role": "assistant",
+                "content": "",
+                "tool_calls": [{"id": "c1", "name": "boom", "arguments": {}}],
+                "stop_reason": "tool_use",
+            },
+            {"role": "assistant", "content": "ok", "stop_reason": "end_turn"},
+        ]
+    )
 
     def boom() -> str:
         raise ValueError("kaboom")
@@ -277,9 +300,9 @@ def test_post_tool_call_fires_even_when_tool_raises():
 
     loop.run_conversation("go", session_id="s1")
 
-    assert any(e.startswith("post_tool_call:boom") for e in plugin.events), (
-        "post_tool_call must still fire when the tool body raises"
-    )
+    assert any(
+        e.startswith("post_tool_call:boom") for e in plugin.events
+    ), "post_tool_call must still fire when the tool body raises"
     # The result the hook saw is the synthesised error dict.
     assert plugin.post_tool_results, "post hook saw no result"
     name, result = plugin.post_tool_results[-1]
@@ -289,22 +312,28 @@ def test_post_tool_call_fires_even_when_tool_raises():
 
 def test_keyboard_interrupt_from_plugin_stops_cleanly():
     AgentLoop, IterationBudget, _ = _import_loop()
-    llm = _ScriptedLLM(queue=[
-        {
-            "role": "assistant",
-            "content": "",
-            "tool_calls": [{"id": "c1", "name": "echo", "arguments": {}}],
-            "stop_reason": "tool_use",
-        },
-    ])
+    llm = _ScriptedLLM(
+        queue=[
+            {
+                "role": "assistant",
+                "content": "",
+                "tool_calls": [{"id": "c1", "name": "echo", "arguments": {}}],
+                "stop_reason": "tool_use",
+            },
+        ]
+    )
 
     class InterruptPlugin:
         def pre_tool_call(self, ctx) -> None:
             raise KeyboardInterrupt
 
-    loop = AgentLoop(llm=llm, tools={"echo": lambda: "x"},
-                     store=_InMemoryStore(), plugins=[InterruptPlugin()],
-                     budget=IterationBudget(max=5))
+    loop = AgentLoop(
+        llm=llm,
+        tools={"echo": lambda: "x"},
+        store=_InMemoryStore(),
+        plugins=[InterruptPlugin()],
+        budget=IterationBudget(max=5),
+    )
 
     result = loop.run_conversation("go", session_id="s1")
     assert result.stopped_by == "interrupt"

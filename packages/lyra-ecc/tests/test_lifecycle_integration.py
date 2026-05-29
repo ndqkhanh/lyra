@@ -23,7 +23,8 @@ class TestECCLifecycleIntegration:
 
         assert integration is not None
         assert integration.ecc_engine is not None
-        assert lifecycle_bus.subscribe.call_count == 3  # 3 event types (TOOL_CALL, SESSION_START, SESSION_END)
+        # 3 event types (TOOL_CALL, SESSION_START, SESSION_END)
+        assert lifecycle_bus.subscribe.call_count == 3
 
     def test_on_tool_call_event(self):
         """Test handling TOOL_CALL event."""

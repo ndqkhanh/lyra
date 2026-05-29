@@ -45,7 +45,7 @@ class DreamCycle:
 
         # Find pairs sharing significant words
         linked: set[tuple[str, str]] = set()
-        for word, ids in label_words.items():
+        for _word, ids in label_words.items():
             if len(ids) < 2:
                 continue
             for a, b in itertools.combinations(ids, 2):

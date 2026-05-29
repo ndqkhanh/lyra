@@ -20,6 +20,7 @@ Wave-C Task 11 contract:
    reads the config at boot and applies the known keys, so a user's
    persisted ``theme=midnight`` survives a restart.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -197,7 +198,10 @@ def test_from_config_tolerates_malformed_file(tmp_path: Path) -> None:
     assert fresh.theme == "aurora"
 
 
-@pytest.mark.parametrize("value, expected", [("on", True), ("true", True), ("1", True), ("off", False), ("false", False), ("0", False)])
+@pytest.mark.parametrize(
+    "value, expected",
+    [("on", True), ("true", True), ("1", True), ("off", False), ("false", False), ("0", False)],
+)
 def test_config_bool_keys_accept_aliases(tmp_path: Path, value: str, expected: bool) -> None:
     session = _session(tmp_path)
     session.dispatch(f"/config set vim={value}")

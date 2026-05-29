@@ -127,7 +127,7 @@ class HindsightEngine:
                 trajectory_id=trajectory_id,
                 goal=trajectory.goal,
                 insight=f"Step {i}: '{step.action}' led to negative reward. "
-                        f"Consider using approach similar to step {best_step_idx}: '{best_step.action}'",
+                f"Consider using approach similar to step {best_step_idx}: '{best_step.action}'",
                 alternative_action=best_step.action,
                 expected_improvement=abs(step.reward - best_step.reward),
                 confidence=round(confidence, 4),
@@ -178,12 +178,16 @@ class HindsightEngine:
         if not self._trajectories:
             return {"trajectories": 0, "lessons": 0, "success_rate": 0.0}
 
-        success_count = sum(1 for t in self._trajectories.values() if t.outcome == OutcomeType.SUCCESS)
+        success_count = sum(
+            1 for t in self._trajectories.values() if t.outcome == OutcomeType.SUCCESS
+        )
         return {
             "trajectories": len(self._trajectories),
             "lessons": len(self._lessons),
             "success_rate": round(success_count / len(self._trajectories), 4),
-            "mean_steps": round(sum(t.step_count for t in self._trajectories.values()) / len(self._trajectories), 2),
+            "mean_steps": round(
+                sum(t.step_count for t in self._trajectories.values()) / len(self._trajectories), 2
+            ),
         }
 
 

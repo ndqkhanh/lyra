@@ -1,4 +1,5 @@
 """Tests for optimization and polish - performance, documentation, and production readiness."""
+
 import shutil
 import tempfile
 import time
@@ -160,7 +161,11 @@ def test_pyproject_has_dependencies():
     if pyproject.exists():
         content = pyproject.read_text()
         # Monorepo workspace or regular package
-        assert "dependencies" in content or "[tool.poetry.dependencies]" in content or "requires-python" in content
+        assert (
+            "dependencies" in content
+            or "[tool.poetry.dependencies]" in content
+            or "requires-python" in content
+        )
 
 
 def test_gitignore_exists():

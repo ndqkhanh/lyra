@@ -78,7 +78,10 @@ class FixedLayoutAgentHandler(AgentOutputCallback):
         time_str = self._format_time(duration_seconds)
         token_str = self._format_tokens(total_tokens)
 
-        stats = f"{self.colors.dim(symbol)} {time_str} · {self.tool_count} tool uses · {token_str} tokens"
+        stats =(
+            f"{self.colors.dim(symbol)} {time_str} · {self.tool_count} tool uses · {token_str}"
+            f" tokens"
+        )
         self.layout.append_content("")
         self.layout.append_content(stats)
 
@@ -143,6 +146,7 @@ class CLIAgentHandler(AgentOutputCallback):
     def __init__(self, console: Console):
         self.console = console
         from lyra_cli.cli.output import OutputFormatter
+
         self.formatter = OutputFormatter(console)
         self.current_turn: str | None = None
         self.turn_start_time: float | None = None
@@ -170,7 +174,9 @@ class CLIAgentHandler(AgentOutputCallback):
 
         if self.turn_start_time:
             duration = time.time() - self.turn_start_time
-            duration_str = f"{duration:.1f}s" if duration < 60 else f"{int(duration/60)}m {int(duration%60)}s"
+            duration_str = (
+                f"{duration:.1f}s" if duration < 60 else f"{int(duration/60)}m {int(duration%60)}s"
+            )
         else:
             duration_str = "unknown"
 
@@ -178,7 +184,10 @@ class CLIAgentHandler(AgentOutputCallback):
             usage = result["usage"]
             total_tokens = usage.get("total_tokens", 0)
             self.console.print(
-                f"\n[dim]✻ Worked for {duration_str} · {self.tool_count} tool uses · {total_tokens:,} tokens[/dim]"
+
+                    f"\n[dim]✻ Worked for {duration_str} · {self.tool_count} tool uses · "
+                    f"{total_tokens:,} tokens[/dim]"
+
             )
         else:
             self.console.print(

@@ -299,6 +299,7 @@ class TestCausalGraph:
 
     def test_from_networkx(self):
         import networkx as nx
+
         nxg = nx.DiGraph()
         nxg.add_node("A", name="Alpha")
         nxg.add_node("B", name="Beta")
@@ -361,7 +362,9 @@ class TestCausalGraph:
         g = CausalGraph()
         g.add_entity(EntityNode(id="src", name="src", entity_type="tool"))
         g.add_entity(EntityNode(id="tgt", name="tgt", entity_type="file"))
-        a = ActionEdge(id="a1", source_id="src", target_id="tgt", action_type="write", timestamp=1.0)
+        a = ActionEdge(
+            id="a1", source_id="src", target_id="tgt", action_type="write", timestamp=1.0
+        )
         g.add_action(a)
         o = OutcomeNode(id="o1", result="success", success=True, latency=0.3)
         g.add_outcome(o)
@@ -599,7 +602,9 @@ class TestIntervention:
 
     def test_do_with_graph(self, sample_data, simple_graph):
         model = InterventionModel()
-        result = model.do(sample_data, "X", 1.0, "Y", graph=simple_graph, method=AdjustmentMethod.BACKDOOR)
+        result = model.do(
+            sample_data, "X", 1.0, "Y", graph=simple_graph, method=AdjustmentMethod.BACKDOOR
+        )
         assert result.method == AdjustmentMethod.BACKDOOR
 
     def test_do_with_scm(self, scm):
@@ -633,8 +638,17 @@ class TestIntervention:
             model.do(sample_data, "NONEXISTENT", 1.0, "Y")
 
     def test_ipw_estimate(self, sample_data, chain_graph):
-        model = InterventionModel(InterventionConfig(adjustment_method=AdjustmentMethod.INVERSE_PROPENSITY))
-        result = model.do(sample_data, "X", 1.0, "Y", graph=chain_graph, method=AdjustmentMethod.INVERSE_PROPENSITY)
+        model = InterventionModel(
+            InterventionConfig(adjustment_method=AdjustmentMethod.INVERSE_PROPENSITY)
+        )
+        result = model.do(
+            sample_data,
+            "X",
+            1.0,
+            "Y",
+            graph=chain_graph,
+            method=AdjustmentMethod.INVERSE_PROPENSITY,
+        )
         assert result.method == AdjustmentMethod.INVERSE_PROPENSITY
 
     def test_config_confidence_level(self, sample_data):
@@ -664,7 +678,6 @@ class TestBackdoorAdjuster:
         g.add_directed_edge("C", "X", strength=0.8)
         g.add_directed_edge("C", "Y", strength=0.5)
         g.add_directed_edge("X", "Y", strength=0.9)
-
 
         adjuster = BackdoorAdjuster()
         adj_set = adjuster.find_adjustment_set(g, "X", "Y")

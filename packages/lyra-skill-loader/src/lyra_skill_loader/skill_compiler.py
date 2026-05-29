@@ -1,4 +1,6 @@
-"""Fast Skill Compilation — pre-compute triggers, dependency hashes, and bloom filters for sub-ms lookup."""
+"""Fast Skill Compilation — pre-compute triggers, dependency hashes, and bloom filters for sub-ms
+lookup."""
+
 from __future__ import annotations
 
 import hashlib
@@ -33,7 +35,9 @@ class CompiledIndex:
         self._trigger_index: dict[str, list[str]] = {}
         self._capability_index: dict[str, list[str]] = {}
 
-    def add(self, compiled: CompiledSkill, triggers: Sequence[str], capabilities: Sequence[str]) -> None:
+    def add(
+        self, compiled: CompiledSkill, triggers: Sequence[str], capabilities: Sequence[str]
+    ) -> None:
         """Index a compiled skill by its triggers and capabilities."""
         self._skills[compiled.skill_id] = compiled
 
@@ -87,8 +91,8 @@ class CompiledIndex:
 class SkillCompiler:
     """Pre-compiles skill metadata for fast trigger matching and index creation.
 
-    Uses hash-based signatures for trigger matching and a bloom-like
-    filter for fast negative checking of metadata attributes.
+    Uses hash-based signatures for trigger matching and a bloom-like filter for fast negative
+    checking of metadata attributes.
     """
 
     def __init__(self) -> None:
@@ -106,9 +110,7 @@ class SkillCompiler:
         all_triggers = list(metadata.triggers) + list(metadata.tags)
 
         # Pre-compute normalized trigger strings
-        precomputed = frozenset(
-            self._normalize(t) for t in all_triggers if t
-        )
+        precomputed = frozenset(self._normalize(t) for t in all_triggers if t)
 
         # Compute dependency hashes
         dep_hashes: dict[str, int] = {}
@@ -274,8 +276,8 @@ def _bloom_might_contain(
 ) -> bool:
     """Check if a bloom filter *might* contain an item.
 
-    Returns False if the item is definitely NOT in the set.
-    Returns True if the item MIGHT be in the set (false positives possible).
+    Returns False if the item is definitely NOT in the set. Returns True if the item MIGHT be in the
+    set (false positives possible).
     """
     size = len(bloom)
     if size == 0:

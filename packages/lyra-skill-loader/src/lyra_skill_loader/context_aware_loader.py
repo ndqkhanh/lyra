@@ -1,4 +1,5 @@
 """Context-Budget-Aware Loading — decide what to load, what to evict, and whether it fits."""
+
 from __future__ import annotations
 
 import time
@@ -33,7 +34,8 @@ class ContextBudget:
 
     def __post_init__(self) -> None:
         object.__setattr__(
-            self, "available_tokens",
+            self,
+            "available_tokens",
             self.total_tokens - self.used_tokens,
         )
 
@@ -200,9 +202,7 @@ class ContextAwareLoader:
         decisions = self.decide_loading(matches, b)
 
         to_load = tuple(d for d in decisions if d.fits_in_budget)
-        token_needed = sum(
-            d.estimated_tokens for d in decisions if not d.fits_in_budget
-        )
+        token_needed = sum(d.estimated_tokens for d in decisions if not d.fits_in_budget)
 
         to_evict: tuple[str, ...] = ()
         if token_needed > 0:
@@ -212,9 +212,7 @@ class ContextAwareLoader:
             )
 
         total_after = b.used_tokens + sum(d.estimated_tokens for d in to_load)
-        total_after -= sum(
-            self._loader.estimate_tokens(sid) for sid in to_evict
-        )
+        total_after -= sum(self._loader.estimate_tokens(sid) for sid in to_evict)
 
         return LoadPlan(
             to_load=to_load,
@@ -322,7 +320,10 @@ class ContextAwareLoader:
 
         tiers = [LoadTier.TIER3_REFERENCES, LoadTier.TIER2_CONTENT, LoadTier.TIER1_METADATA]
         for tier in tiers:
-            if tier.tier_number <= suggested.tier_number and tier.estimated_tokens <= available_tokens:
+            if (
+                tier.tier_number <= suggested.tier_number
+                and tier.estimated_tokens <= available_tokens
+            ):
                 return tier
 
         return LoadTier.TIER1_METADATA

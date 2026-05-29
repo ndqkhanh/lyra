@@ -11,6 +11,7 @@ ECC reference: iterative editing requires clear before/after visibility.
 ECC's everything-claude-code conventions emphasize small, reviewable
 diffs — this command makes reviewing them effortless in the REPL.
 """
+
 from __future__ import annotations
 
 import difflib
@@ -56,9 +57,14 @@ def _colorize_diff(diff_text: str, max_lines: int = 40) -> str:
 def _run_diff(cmd: list[str], cwd: Path | None = None) -> tuple[str, int]:
     """Run a diff command and return (output, exit_code)."""
     import subprocess
+
     try:
         result = subprocess.run(
-            cmd, capture_output=True, text=True, timeout=15, cwd=cwd or Path.cwd(),
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=15,
+            cwd=cwd or Path.cwd(),
         )
         return result.stdout, result.returncode
     except FileNotFoundError:
@@ -86,7 +92,11 @@ def _diff_file_vs_head(filepath: str, repo_root: Path) -> str:
 
 def _diff_staged(filepath: str, repo_root: Path) -> str:
     """Diff a file against the index (--cached)."""
-    args = ["git", "diff", "--no-color", "--cached", "--", filepath] if filepath else ["git", "diff", "--no-color", "--cached"]
+    args = (
+        ["git", "diff", "--no-color", "--cached", "--", filepath]
+        if filepath
+        else ["git", "diff", "--no-color", "--cached"]
+    )
     out, ec = _run_diff(args, repo_root)
     return out if ec == 0 else ""
 
@@ -102,7 +112,8 @@ def _diff_two_paths(a: str, b: str) -> str:
     diff = difflib.unified_diff(
         a_content.splitlines(keepends=True),
         b_content.splitlines(keepends=True),
-        fromfile=a, tofile=b,
+        fromfile=a,
+        tofile=b,
     )
     return "".join(diff)
 
@@ -114,6 +125,7 @@ def _diffstat(repo_root: Path) -> str:
 
 
 # ── Command handler ────────────────────────────────────────────────────
+
 
 def cmd_diff(session: Any, args: str) -> CommandResult:
     """Show file diffs with color highlighting.
@@ -127,8 +139,9 @@ def cmd_diff(session: Any, args: str) -> CommandResult:
       /diff --color-words    — word-level diff
     """
     import shlex
+
     parts = shlex.split(args.strip()) if args.strip() else []
-    repo_root = getattr(session, 'repo_root', Path.cwd()) if session else Path.cwd()
+    repo_root = getattr(session, "repo_root", Path.cwd()) if session else Path.cwd()
 
     # ── /diff --stat ───────────────────────────────────────────────────
     if parts and parts[0] == "--stat":

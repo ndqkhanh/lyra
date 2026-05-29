@@ -183,13 +183,25 @@ class ParallelExecutor:
                     return WorkResult(work_id=work_id, success=False, error="Not found")
                 if work.status == "completed":
                     return WorkResult(
-                        work_id=work_id, success=True,
-                        result=work.result, duration=work.completed_at - work.started_at if work.started_at and work.completed_at else 0,
+                        work_id=work_id,
+                        success=True,
+                        result=work.result,
+                        duration=(
+                            work.completed_at - work.started_at
+                            if work.started_at and work.completed_at
+                            else 0
+                        ),
                     )
                 if work.status == "failed":
                     return WorkResult(
-                        work_id=work_id, success=False,
-                        error=work.error, duration=work.completed_at - work.started_at if work.started_at and work.completed_at else 0,
+                        work_id=work_id,
+                        success=False,
+                        error=work.error,
+                        duration=(
+                            work.completed_at - work.started_at
+                            if work.started_at and work.completed_at
+                            else 0
+                        ),
                     )
                 if work.status == "timed_out":
                     return WorkResult(work_id=work_id, success=False, error="Timed out")
@@ -247,9 +259,7 @@ class ParallelExecutor:
         """Worker loop: steal work from the shared queue and execute it."""
         while self._running:
             try:
-                work = await asyncio.wait_for(
-                    self._queue.get(), timeout=1.0
-                )
+                work = await asyncio.wait_for(self._queue.get(), timeout=1.0)
                 async with self._semaphore:
                     await self._execute_work(work)
                 self._queue.task_done()

@@ -17,6 +17,7 @@ backend only touches ``client.containers.run(...)`` + the returned
 container's ``wait``, ``logs``, ``kill``, ``remove`` methods, so the
 double can be very small.
 """
+
 from __future__ import annotations
 
 import time
@@ -93,9 +94,7 @@ class DockerBackend:
         timeout_ms: int = 30_000,
     ) -> CommandResult:
         if not isinstance(cmd, list):
-            raise TypeError(
-                f"DockerBackend.run expects a list argv, got {type(cmd).__name__}"
-            )
+            raise TypeError(f"DockerBackend.run expects a list argv, got {type(cmd).__name__}")
         if not cmd:
             raise ValueError("cmd must be a non-empty list")
 
@@ -119,7 +118,9 @@ class DockerBackend:
         timeout_s = max(1, int(timeout_ms)) / 1000.0
         try:
             wait_result = container.wait(timeout=timeout_s)
-            exit_code = int(wait_result.get("StatusCode", 0)) if isinstance(wait_result, dict) else 0
+            exit_code = (
+                int(wait_result.get("StatusCode", 0)) if isinstance(wait_result, dict) else 0
+            )
             stdout = self._decode(container.logs(stdout=True, stderr=False))
             stderr = self._decode(container.logs(stdout=False, stderr=True))
             truncated = False

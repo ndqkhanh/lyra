@@ -12,6 +12,7 @@ Uses git for content-aware undo (tracks file hashes before/after edits).
 ECC reference: everything-claude-code's iterative editing convention —
 small, reversible, auditable changes.
 """
+
 from __future__ import annotations
 
 import difflib
@@ -25,9 +26,11 @@ from ..commands.registry import CommandResult
 
 # ── Snapshot model ─────────────────────────────────────────────────────
 
+
 @dataclass
 class FileSnapshot:
     """Pre-edit state of one file."""
+
     path: str
     hash: str
     content: str
@@ -36,6 +39,7 @@ class FileSnapshot:
 @dataclass
 class UndoEntry:
     """One reversible operation in the undo stack."""
+
     id: int
     timestamp: float
     description: str
@@ -125,6 +129,7 @@ def get_undo_entry(entry_id: int | None = None) -> UndoEntry | None:
 
 # ── Command Handler ────────────────────────────────────────────────────
 
+
 def cmd_undo(session: Any, args: str) -> CommandResult:
     """Undo recent changes with visual diff support.
 
@@ -147,9 +152,7 @@ def cmd_undo(session: Any, args: str) -> CommandResult:
             glyph = "✓" if entry.restored else "○"
             desc = entry.description[:50]
             files = f" ({len(entry.snapshots)} files)" if entry.snapshots else ""
-            lines.append(
-                f"  [{i + 1}] {glyph} {desc}  [dim]{entry.age_str}{files}[/]"
-            )
+            lines.append(f"  [{i + 1}] {glyph} {desc}  [dim]{entry.age_str}{files}[/]")
         return CommandResult(
             output=f"Undo history: {len(_undo_stack)} entries",
             renderable="\n".join(lines) if _rich_available() else None,
@@ -165,7 +168,11 @@ def cmd_undo(session: Any, args: str) -> CommandResult:
             return CommandResult(output="No diff available — files unchanged.")
         return CommandResult(
             output=d,
-            renderable=f"[dim]─── undo diff: {entry.description} ───[/]\n[cyan]{d}[/]" if _rich_available() else None,
+            renderable=(
+                f"[dim]─── undo diff: {entry.description} ───[/]\n[cyan]{d}[/]"
+                if _rich_available()
+                else None
+            ),
         )
 
     # ── /undo N ────────────────────────────────────────────────────────
@@ -234,6 +241,7 @@ def cmd_redo(session: Any, args: str) -> CommandResult:
 def _rich_available() -> bool:
     try:
         from rich.console import Console  # noqa: F401
+
         return True
     except ImportError:
         return False

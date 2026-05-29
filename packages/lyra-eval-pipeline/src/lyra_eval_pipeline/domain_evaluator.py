@@ -104,7 +104,9 @@ class DomainEvaluator:
         if raw is None:
             raise DomainEvalError(f"Unknown domain: {domain}")
         config = self.get_config(domain)
-        samples = [EvalSample(sample_id=sid, input_text=inp, expected_output=exp) for sid, inp, exp in raw]
+        samples = [
+            EvalSample(sample_id=sid, input_text=inp, expected_output=exp) for sid, inp, exp in raw
+        ]
         if len(samples) > config.max_samples:
             samples = samples[: config.max_samples]
         return tuple(samples)

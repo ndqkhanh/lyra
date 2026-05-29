@@ -2,6 +2,7 @@
 
 Manages data validation and transfer between roles in the pipeline.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -116,7 +117,9 @@ class HandoffProtocol:
 
         return handoff
 
-    def validate_handoff(self, handoff: HandoffData, from_role: Role, to_role: Role) -> tuple[bool, list[str]]:
+    def validate_handoff(
+        self, handoff: HandoffData, from_role: Role, to_role: Role
+    ) -> tuple[bool, list[str]]:
         """Validate handoff data.
 
         Args:
@@ -228,7 +231,8 @@ class HandoffProtocol:
             "total_handoffs": len(self._handoff_history),
             "failed_handoffs": len(self._failed_handoffs),
             "success_rate": (
-                len(self._handoff_history) / (len(self._handoff_history) + len(self._failed_handoffs))
+                len(self._handoff_history)
+                / (len(self._handoff_history) + len(self._failed_handoffs))
                 if (len(self._handoff_history) + len(self._failed_handoffs)) > 0
                 else 0.0
             ),

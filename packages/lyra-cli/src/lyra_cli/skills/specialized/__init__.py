@@ -15,7 +15,6 @@ This module provides 20+ specialized skills across multiple domains:
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List
 
 
 @dataclass
@@ -214,51 +213,65 @@ def search_skills(query: str) -> list[SkillMetadata]:
 # Executable specialized skills (Python-based, not markdown knowledge bases)
 # ---------------------------------------------------------------------------
 
-from .ai_researcher import AIResearcher, ResearchPlan, ResearchType
-from .ba_analyzer import BAAnalysis, BAAnalyzer
-from .brainstorm_facilitator import BrainstormFacilitator, BrainstormMethod, BrainstormSession
-from .cloud_architect import CloudArchitect, CloudArchitectureDesign, CloudProvider
-from .code_reviewer import CodeReviewerSkill, FindingCategory, ReviewFinding, ReviewReport, Severity
-from .data_engineer import DataEngineer, DataEngineeringPlan
-from .debugging_assistant import BugCategory, DebuggingAssistant, DebuggingPlan
-from .dependency_analyzer import (
+from .ai_researcher import AIResearcher, ResearchPlan, ResearchType  # noqa: E402
+from .ba_analyzer import BAAnalysis, BAAnalyzer  # noqa: E402
+from .brainstorm_facilitator import (  # noqa: E402
+    BrainstormFacilitator,
+    BrainstormMethod,
+    BrainstormSession,
+)
+from .cloud_architect import CloudArchitect, CloudArchitectureDesign, CloudProvider  # noqa: E402
+from .code_reviewer import (  # noqa: E402
+    CodeReviewerSkill,
+    FindingCategory,
+    ReviewFinding,
+    ReviewReport,
+    Severity,
+)
+from .data_engineer import DataEngineer, DataEngineeringPlan  # noqa: E402
+from .debugging_assistant import BugCategory, DebuggingAssistant, DebuggingPlan  # noqa: E402
+from .dependency_analyzer import (  # noqa: E402
     CircularDependency,
     DependencyAnalyzerSkill,
     DependencyReport,
     DependencySuggestion,
     ImportInfo,
 )
-from .design_reviewer import DesignQuality, DesignReviewer, DesignReviewReport
-from .documentation_writer import (
+from .design_reviewer import DesignQuality, DesignReviewer, DesignReviewReport  # noqa: E402
+from .documentation_writer import (  # noqa: E402
     ApiEndpoint,
     DocumentationReport,
     DocumentationWriterSkill,
     GeneratedDocstring,
 )
-from .performance_profiler import (
+from .performance_profiler import (  # noqa: E402
     ComplexityClass,
     PerformanceIssue,
     PerformanceProfilerSkill,
     ProfileReport,
     ProfileResult,
 )
-from .pm_planner import PMPlan, PMPlanner
-from .refactoring_advisor import (
+from .pm_planner import PMPlan, PMPlanner  # noqa: E402
+from .refactoring_advisor import (  # noqa: E402
     RefactoringAdvisorSkill,
     RefactoringReport,
     RefactoringSuggestion,
     RefactoringType,
 )
-from .security_auditor import (
+from .security_auditor import (  # noqa: E402
     AuditReport,
     OwaspCategory,
     SecurityAuditorSkill,
     Vulnerability,
     VulnerabilitySeverity,
 )
-from .solution_architect import SolutionArchitect, SolutionArchitectureDoc
-from .sre_incident_responder import IncidentResponsePlan, IncidentSeverity, SREIncidentResponder
-from .test_generator import GeneratedTest, TestCase, TestGeneratorSkill, TestSuite
+from .solution_architect import SolutionArchitect, SolutionArchitectureDoc  # noqa: E402
+from .sre_incident_responder import (  # noqa: E402
+    IncidentResponsePlan,
+    IncidentSeverity,
+    SREIncidentResponder,
+)
+from .test_generator import GeneratedTest, TestCase, TestGeneratorSkill, TestSuite  # noqa: E402
 
 __all__ = [
     # Registry

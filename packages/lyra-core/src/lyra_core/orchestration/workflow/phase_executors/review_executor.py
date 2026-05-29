@@ -113,16 +113,12 @@ class ReviewExecutor(BasePhaseExecutor):
 
             # Collect feedback from each agent
             pm_feedback = await self._collect_pm_feedback(prd, test_results)
-            lead_feedback = await self._collect_lead_feedback(
-                code_artifacts, architecture
-            )
+            lead_feedback = await self._collect_lead_feedback(code_artifacts, architecture)
             principal_feedback = await self._collect_principal_feedback(
                 architecture, code_artifacts
             )
             qa_feedback = await self._collect_qa_feedback(test_results, code_artifacts)
-            spec_feedback = await self._collect_spec_feedback(
-                prd, architecture, code_artifacts
-            )
+            spec_feedback = await self._collect_spec_feedback(prd, architecture, code_artifacts)
 
             # Create feedback artifacts
             feedback_artifact = Artifact.create(
@@ -176,9 +172,7 @@ class ReviewExecutor(BasePhaseExecutor):
                 artifacts=artifacts,
                 duration=duration,
                 metadata={
-                    "agent_ids": {
-                        role.value: agent_id for role, agent_id in agent_ids.items()
-                    },
+                    "agent_ids": {role.value: agent_id for role, agent_id in agent_ids.items()},
                     "review_request_id": review_id,
                     "overall_approval": final_report["overall_approval"],
                     "critical_issues": final_report["critical_issues_count"],
@@ -382,11 +376,17 @@ class ReviewExecutor(BasePhaseExecutor):
             "concerns": all_concerns,
             "recommendations": all_recommendations,
             "summary": {
-                "requirements": "All requirements met" if pm_feedback.get("requirements_met") else "Requirements incomplete",
+                "requirements": (
+                    "All requirements met"
+                    if pm_feedback.get("requirements_met")
+                    else "Requirements incomplete"
+                ),
                 "code_quality": lead_feedback.get("code_quality", "unknown"),
                 "architecture": principal_feedback.get("architecture_quality", "unknown"),
                 "testing": f"{qa_feedback.get('test_coverage', 0)}% coverage",
-                "documentation": "Complete" if spec_feedback.get("documentation_complete") else "Incomplete",
+                "documentation": (
+                    "Complete" if spec_feedback.get("documentation_complete") else "Incomplete"
+                ),
             },
             "agent_feedback": {
                 "pm": pm_feedback,

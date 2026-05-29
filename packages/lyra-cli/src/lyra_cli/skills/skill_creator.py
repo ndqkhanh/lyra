@@ -459,7 +459,10 @@ This skill is automatically triggered when:
         for tool in tools:
             frontmatter += f"\n- {tool}"
 
-        frontmatter += f"\n\n## Confidence Score\n\n{sum(p.confidence for p in patterns) / len(patterns):.0%}\n"
+        frontmatter +=(
+            f"\n\n## Confidence Score\n\n{sum(p.confidence for p in patterns) / len(patterns):.0%}"
+            f"\n"
+        )
 
         frontmatter += "\n## Source\n\nAuto-generated from execution traces.\n"
 
@@ -486,10 +489,7 @@ This skill is automatically triggered when:
             "skills_proposed": self.stats.skills_proposed,
             "skills_accepted": self.stats.skills_accepted,
             "skills_rejected": self.stats.skills_rejected,
-            "acceptance_rate": (
-                self.stats.skills_accepted
-                / max(self.stats.skills_proposed, 1)
-            ),
+            "acceptance_rate": (self.stats.skills_accepted / max(self.stats.skills_proposed, 1)),
             "avg_confidence": self.stats.avg_confidence,
         }
 
@@ -498,10 +498,7 @@ This skill is automatically triggered when:
         pattern_type: PatternType,
     ) -> list[ExtractedPattern]:
         """Get all patterns of a specific type."""
-        return [
-            p for p in self._patterns.values()
-            if p.pattern_type == pattern_type
-        ]
+        return [p for p in self._patterns.values() if p.pattern_type == pattern_type]
 
     def get_high_confidence_patterns(
         self,
@@ -516,7 +513,4 @@ This skill is automatically triggered when:
         Returns:
             List of high-confidence patterns
         """
-        return [
-            p for p in self._patterns.values()
-            if p.occurrence_count >= min_occurrences
-        ]
+        return [p for p in self._patterns.values() if p.occurrence_count >= min_occurrences]

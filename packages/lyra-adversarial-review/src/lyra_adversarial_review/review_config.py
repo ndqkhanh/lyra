@@ -76,10 +76,22 @@ DEFAULT_RULES: ReviewRuleSet = ReviewRuleSet(
     name="default",
     description="Standard review rules for general content verification",
     rules=[
-        ReviewRule("correctness", ".*", ReviewSeverity.CRITICAL, "Verify factual and logical correctness of claims"),
-        ReviewRule("completeness", ".*", ReviewSeverity.HIGH, "Ensure all required aspects are covered"),
+        ReviewRule(
+            "correctness",
+            ".*",
+            ReviewSeverity.CRITICAL,
+            "Verify factual and logical correctness of claims",
+        ),
+        ReviewRule(
+            "completeness", ".*", ReviewSeverity.HIGH, "Ensure all required aspects are covered"
+        ),
         ReviewRule("consistency", ".*", ReviewSeverity.MEDIUM, "Check for internal contradictions"),
-        ReviewRule("citation_accuracy", ".*", ReviewSeverity.HIGH, "Validate that citations support their claims"),
+        ReviewRule(
+            "citation_accuracy",
+            ".*",
+            ReviewSeverity.HIGH,
+            "Validate that citations support their claims",
+        ),
     ],
 )
 
@@ -87,10 +99,19 @@ SECURITY_RULES: ReviewRuleSet = ReviewRuleSet(
     name="security",
     description="Security-focused review rules",
     rules=[
-        ReviewRule("injection_prevention", ".*", ReviewSeverity.CRITICAL, "Detect injection vulnerabilities"),
-        ReviewRule("authentication", ".*", ReviewSeverity.CRITICAL, "Verify authentication correctness"),
+        ReviewRule(
+            "injection_prevention",
+            ".*",
+            ReviewSeverity.CRITICAL,
+            "Detect injection vulnerabilities",
+        ),
+        ReviewRule(
+            "authentication", ".*", ReviewSeverity.CRITICAL, "Verify authentication correctness"
+        ),
         ReviewRule("authorization", ".*", ReviewSeverity.HIGH, "Verify authorization boundaries"),
-        ReviewRule("data_exposure", ".*", ReviewSeverity.CRITICAL, "Check for sensitive data leaks"),
+        ReviewRule(
+            "data_exposure", ".*", ReviewSeverity.CRITICAL, "Check for sensitive data leaks"
+        ),
         ReviewRule("input_validation", ".*", ReviewSeverity.HIGH, "Verify input sanitization"),
     ],
 )
@@ -100,7 +121,9 @@ RESEARCH_RULES: ReviewRuleSet = ReviewRuleSet(
     description="Academic research verification rules",
     rules=[
         ReviewRule("methodology", ".*", ReviewSeverity.CRITICAL, "Verify research methodology"),
-        ReviewRule("statistical_validity", ".*", ReviewSeverity.CRITICAL, "Check statistical claims"),
+        ReviewRule(
+            "statistical_validity", ".*", ReviewSeverity.CRITICAL, "Check statistical claims"
+        ),
         ReviewRule("citation_accuracy", ".*", ReviewSeverity.HIGH, "Validate citation support"),
         ReviewRule("reproducibility", ".*", ReviewSeverity.HIGH, "Ensure claims are reproducible"),
         ReviewRule("bias_assessment", ".*", ReviewSeverity.MEDIUM, "Check for systematic bias"),

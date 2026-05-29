@@ -456,7 +456,7 @@ class UltraMemorySystem:
         # Fetch expanded memories
         # In production, would batch fetch
         expanded = []
-        for mem_id in expanded_ids:
+        for _mem_id in expanded_ids:
             # Would fetch from store
             pass
 

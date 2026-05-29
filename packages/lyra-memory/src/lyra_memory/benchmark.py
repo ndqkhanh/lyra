@@ -185,9 +185,24 @@ class MemoryBenchmark:
         bm25_pass = bm25_results["p95_ms"] < targets["retrieve_p95"]
         hybrid_pass = hybrid_results["p95_ms"] < targets["retrieve_p95"]
 
-        print(f"Write P95 < 50ms: {'✓ PASS' if write_pass else '✗ FAIL'} ({write_results['p95_ms']:.2f}ms)")
-        print(f"BM25 P95 < 100ms: {'✓ PASS' if bm25_pass else '✗ FAIL'} ({bm25_results['p95_ms']:.2f}ms)")
-        print(f"Hybrid P95 < 100ms: {'✓ PASS' if hybrid_pass else '✗ FAIL'} ({hybrid_results['p95_ms']:.2f}ms)")
+        print(
+
+                f"Write P95 < 50ms: {'✓ PASS' if write_pass else '✗ FAIL'} ("
+                f"{write_results['p95_ms']:.2f}ms)"
+
+        )
+        print(
+
+                f"BM25 P95 < 100ms: {'✓ PASS' if bm25_pass else '✗ FAIL'} ("
+                f"{bm25_results['p95_ms']:.2f}ms)"
+
+        )
+        print(
+
+                f"Hybrid P95 < 100ms: {'✓ PASS' if hybrid_pass else '✗ FAIL'} ("
+                f"{hybrid_results['p95_ms']:.2f}ms)"
+
+        )
 
         all_pass = write_pass and bm25_pass and hybrid_pass
         print(f"\nOverall: {'✓ ALL TARGETS MET' if all_pass else '✗ SOME TARGETS MISSED'}")

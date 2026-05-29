@@ -15,7 +15,8 @@ from __future__ import annotations
 
 import logging
 import math
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from collections.abc import Sequence
+from typing import Any
 
 from .models import GRPOTrajectory, SpiralSample
 
@@ -44,15 +45,15 @@ class GRPOTrainer:
         self.group_size = group_size
         self.kl_penalty = kl_penalty
         self.default_learning_rate = default_learning_rate
-        self._training_history: List[Dict[str, Any]] = []
+        self._training_history: list[dict[str, Any]] = []
 
     # ── Candidate generation ──────────────────────────────────────────────
 
     def generate_candidates(
         self,
         prompt: str,
-        n: Optional[int] = None,
-    ) -> List[str]:
+        n: int | None = None,
+    ) -> list[str]:
         """Generate *n* diverse candidate responses for a prompt.
 
         In production this would call an LLM with temperature sampling.
@@ -66,7 +67,7 @@ class GRPOTrainer:
             List of candidate response strings.
         """
         n = n if n is not None else self.group_size
-        candidates: List[str] = []
+        candidates: list[str] = []
 
         for i in range(n):
             response = self._simulate_response(prompt, i)
@@ -79,9 +80,9 @@ class GRPOTrainer:
 
     def score_responses(
         self,
-        candidates: List[str],
-        ground_truth: Optional[str] = None,
-    ) -> List[float]:
+        candidates: list[str],
+        ground_truth: str | None = None,
+    ) -> list[float]:
         """Score each candidate response.
 
         With a *ground_truth* the score is based on string similarity
@@ -102,7 +103,7 @@ class GRPOTrainer:
 
     # ── Advantage computation ─────────────────────────────────────────────
 
-    def compute_advantages(self, rewards: Sequence[float]) -> Tuple[float, ...]:
+    def compute_advantages(self, rewards: Sequence[float]) -> tuple[float, ...]:
         """Compute relative advantage over the group mean.
 
         advantage_i = (reward_i - mean) / (std + epsilon)
@@ -141,8 +142,8 @@ class GRPOTrainer:
     def update_policy(
         self,
         trajectories: Sequence[GRPOTrajectory],
-        learning_rate: Optional[float] = None,
-    ) -> Dict[str, Any]:
+        learning_rate: float | None = None,
+    ) -> dict[str, Any]:
         """Apply a GRPO policy update from a batch of trajectories.
 
         The policy is updated to favour responses with positive advantage
@@ -164,7 +165,7 @@ class GRPOTrainer:
         negative_updates = 0
 
         for traj in trajectories:
-            for i, (response, advantage) in enumerate(zip(traj.responses, traj.advantages)):
+            for _i, (_response, advantage) in enumerate(zip(traj.responses, traj.advantages)):
                 # GRPO loss: -advantage * log_prob (simplified)
                 # Higher advantage -> more positive gradient -> higher probability
                 sample_loss = -advantage * math.log(max(abs(advantage) + 1e-8, 1e-8))
@@ -209,9 +210,9 @@ class GRPOTrainer:
     def train_step(
         self,
         prompt: str,
-        ground_truth: Optional[str] = None,
+        ground_truth: str | None = None,
         *,
-        learning_rate: Optional[float] = None,
+        learning_rate: float | None = None,
     ) -> GRPOTrajectory:
         """Convenience method: generate, score, compute advantages, update.
 
@@ -248,8 +249,8 @@ class GRPOTrainer:
     def train_from_spiral(
         self,
         samples: Sequence[SpiralSample],
-        learning_rate: Optional[float] = None,
-    ) -> Dict[str, Any]:
+        learning_rate: float | None = None,
+    ) -> dict[str, Any]:
         """Train GRPO from SPIRAL (preference-pair) samples.
 
         Converts each ``SpiralSample`` into a ``GRPOTrajectory`` by treating
@@ -263,7 +264,7 @@ class GRPOTrainer:
         Returns:
             Training statistics dict.
         """
-        trajectories: List[GRPOTrajectory] = []
+        trajectories: list[GRPOTrajectory] = []
 
         for sample in samples:
             best = sample.best_candidate()
@@ -272,7 +273,11 @@ class GRPOTrainer:
 
             advantages = self.compute_advantages(sample.scores)
             mean_score = sum(sample.scores) / len(sample.scores) if sample.scores else 0.0
-            variance = sum((s - mean_score) ** 2 for s in sample.scores) / len(sample.scores) if sample.scores else 0.0
+            variance = (
+                sum((s - mean_score) ** 2 for s in sample.scores) / len(sample.scores)
+                if sample.scores
+                else 0.0
+            )
 
             trajectory = GRPOTrajectory(
                 prompt=sample.prompt,
@@ -288,7 +293,7 @@ class GRPOTrainer:
         return self.update_policy(trajectories, learning_rate)
 
     @property
-    def training_history(self) -> List[Dict[str, Any]]:
+    def training_history(self) -> list[dict[str, Any]]:
         return list(self._training_history)
 
     # ── Internal helpers ──────────────────────────────────────────────────
@@ -297,13 +302,15 @@ class GRPOTrainer:
     def _simulate_response(prompt: str, variant: int) -> str:
         """Simulate a diverse LLM response for testing."""
         templates = [
-            f"Response to '{prompt[:40]}...': The key insight is to break down the problem into smaller parts. "
+            f"Response to '{prompt[:40]}"
+            f"...': The key insight is to break down the problem into smaller parts. "
             f"First, identify the core components, then address each systematically.",
             f"Regarding '{prompt[:40]}...': A novel approach involves reframing the question. "
             f"Instead of direct analysis, consider the inverse problem first.",
             f"Analysis of '{prompt[:40]}...': Based on first principles, we can derive a solution. "
             f"Start with foundational assumptions and build upward.",
-            f"On '{prompt[:40]}...': Multiple perspectives exist. The most practical approach balances "
+            f"On '{prompt[:40]}"
+            f"...': Multiple perspectives exist. The most practical approach balances "
             f"theoretical rigor with computational feasibility.",
             f"For '{prompt[:40]}...': Historical precedent suggests an iterative method. "
             f"Begin with a simple baseline and refine through successive approximation.",
@@ -339,8 +346,16 @@ class GRPOTrainer:
             score += 0.1
 
         reasoning_terms = [
-            "because", "therefore", "thus", "since", "given",
-            "analysis", "insight", "derive", "conclude", "evidence",
+            "because",
+            "therefore",
+            "thus",
+            "since",
+            "given",
+            "analysis",
+            "insight",
+            "derive",
+            "conclude",
+            "evidence",
         ]
         matches = sum(1 for t in reasoning_terms if t in response.lower())
         score += min(0.2, matches * 0.04)

@@ -83,8 +83,19 @@ def example_research_pipeline():
 
     print(f"\nFinal Research Proposal:\n{synthesis.conclusion}")
     print("\nPipeline Statistics:")
-    print(f"  Total tokens: {hypotheses.tokens_used + analysis.tokens_used + debate.tokens_used + synthesis.tokens_used}")
-    print(f"  Average verification: {(hypotheses.verification_score + analysis.verification_score + debate.verification_score + synthesis.verification_score) / 4:.2f}")
+    total_tokens = (
+        hypotheses.tokens_used + analysis.tokens_used
+        + debate.tokens_used + synthesis.tokens_used
+    )
+    print(f"  Total tokens: {total_tokens}")
+    scores = [
+        hypotheses.verification_score,
+        analysis.verification_score,
+        debate.verification_score,
+        synthesis.verification_score,
+    ]
+    avg_verification = sum(scores) / len(scores)
+    print(f"  Average verification: {avg_verification:.2f}")
 
 
 def example_iterative_refinement():
@@ -287,7 +298,7 @@ def example_performance_optimization():
     print(f"  Insights: {len(evolution_report['insights'])}")
     print(f"  Recommendations: {len(evolution_report['recommendations'])}")
 
-    for insight in evolution_report['insights']:
+    for insight in evolution_report["insights"]:
         print(f"    - {insight}")
 
     # Continue reasoning with evolved strategies
@@ -328,6 +339,7 @@ def main():
         except Exception as e:
             print(f"\nError in {example.__name__}: {e}")
             import traceback
+
             traceback.print_exc()
 
     print("\n" + "=" * 60)

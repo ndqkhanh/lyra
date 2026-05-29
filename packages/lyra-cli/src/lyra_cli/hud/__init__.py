@@ -14,6 +14,7 @@ Public API:
     - ``available_presets()`` → list[str]
     - ``HudState`` dataclass (the shape the app pushes into the renderer)
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -49,6 +50,7 @@ _PRESETS: dict[str, dict[str, Any]] = {
 @dataclass
 class HudConfig:
     """Configuration for one HUD layout."""
+
     sections: list[str] = field(default_factory=lambda: list(_PRESETS["compact"]["sections"]))
     width_ratio: list[int] = field(default_factory=lambda: list(_PRESETS["compact"]["width_ratio"]))
     title: str = "Lyra HUD"
@@ -57,6 +59,7 @@ class HudConfig:
 @dataclass
 class HudState:
     """Point-in-time state snapshot for the HUD renderer."""
+
     model: str = ""
     provider: str = ""
     mode: str = ""
@@ -74,6 +77,7 @@ class HudState:
 
 
 # ── Public API ──────────────────────────────────────────────────────────
+
 
 def available_presets() -> list[str]:
     return list(_PRESETS.keys())
@@ -149,7 +153,10 @@ def render_inline(state: HudState, max_width: int = 80) -> str:
 
     parts = [
         f"◆ {state.model}",
-        f"[{tok_color}]☰ {tok_pct:.0f}% ({_human_tok(state.tokens_used)}/{_human_tok(state.tokens_max)})[/]",
+(
+            f"[{tok_color}]☰ {tok_pct:.0f}% ({_human_tok(state.tokens_used)}/"
+            f"{_human_tok(state.tokens_max)})[/]"
+        ),
     ]
     if state.agent_running > 0:
         parts.append(f"⏺ {state.agent_running} agents")
@@ -163,6 +170,7 @@ def render_inline(state: HudState, max_width: int = 80) -> str:
 
 
 # ── Panel builders ──────────────────────────────────────────────────────
+
 
 def _build_model_panel(state: HudState, max_width: int) -> Panel:
     t = Table.grid(padding=(0, 1))
@@ -240,6 +248,7 @@ def _build_keys_panel(state: HudState, max_width: int) -> Panel:
 
 # ── Helpers ─────────────────────────────────────────────────────────────
 
+
 def _human_tok(n: int) -> str:
     if n < 1_000:
         return str(n)
@@ -259,6 +268,10 @@ def _fmt_dur(secs: float) -> str:
 
 
 __all__ = [
-    "HudConfig", "HudState", "render", "render_inline",
-    "load_preset", "available_presets",
+    "HudConfig",
+    "HudState",
+    "render",
+    "render_inline",
+    "load_preset",
+    "available_presets",
 ]

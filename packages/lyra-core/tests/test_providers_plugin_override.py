@@ -6,6 +6,7 @@ bump the per-turn output limit for every model via
 editing code. A value of ``None`` falls back to the model's registered
 default.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -28,9 +29,8 @@ def test_explicit_override_wins() -> None:
 
 
 def test_none_override_falls_back_to_model_default() -> None:
-    assert (
-        max_tokens_for_model_with_override("claude-opus-4.5", None)
-        == max_tokens_for_model("claude-opus-4.5")
+    assert max_tokens_for_model_with_override("claude-opus-4.5", None) == max_tokens_for_model(
+        "claude-opus-4.5"
     )
 
 
@@ -48,19 +48,25 @@ def test_override_applied_even_to_unknown_model() -> None:
     assert max_tokens_for_model_with_override("totally-fake-model", 5_000) == 5_000
 
 
-def test_plugin_max_output_tokens_reads_config(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_plugin_max_output_tokens_reads_config(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     settings = tmp_path / "settings.json"
     settings.write_text('{"plugins": {"maxOutputTokens": 24000}}')
     monkeypatch.setenv("LYRA_HOME", str(tmp_path))
     assert plugin_max_output_tokens() == 24_000
 
 
-def test_plugin_max_output_tokens_returns_none_when_missing(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_plugin_max_output_tokens_returns_none_when_missing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setenv("LYRA_HOME", str(tmp_path))
     assert plugin_max_output_tokens() is None
 
 
-def test_plugin_max_output_tokens_returns_none_when_malformed(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_plugin_max_output_tokens_returns_none_when_malformed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     (tmp_path / "settings.json").write_text("not-json")
     monkeypatch.setenv("LYRA_HOME", str(tmp_path))
     assert plugin_max_output_tokens() is None

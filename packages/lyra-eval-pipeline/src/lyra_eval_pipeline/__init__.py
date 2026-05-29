@@ -1,4 +1,5 @@
-"""Lyra Eval Pipeline — Evaluation pipeline framework with domain evaluation, adaptive rubrics, cross-model judging, cost guardrails, leaderboards, and report generation."""
+"""Lyra Eval Pipeline — Evaluation pipeline framework with domain evaluation, adaptive rubrics,
+cross-model judging, cost guardrails, leaderboards, and report generation."""
 
 from __future__ import annotations
 

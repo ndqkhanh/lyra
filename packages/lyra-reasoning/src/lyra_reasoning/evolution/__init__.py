@@ -3,20 +3,19 @@ Evolution Engine - Automatic reasoning strategy improvement.
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional
 
 from ..memory import ReasoningMemory
-from ..types import ReasoningPattern, ReasoningStrategy, StrategyPerformance
+from ..types import ReasoningPattern, ReasoningStrategy, StrategyPerformance  # noqa: F401
 
 
 @dataclass
 class EvolutionReport:
     """Report from evolution cycle."""
 
-    new_strategies: List[str]
-    pruned_strategies: List[str]
-    performance_delta: Dict[str, float]
-    insights: List[str]
+    new_strategies: list[str]
+    pruned_strategies: list[str]
+    performance_delta: dict[str, float]
+    insights: list[str]
 
 
 class EvolutionEngine:
@@ -32,7 +31,7 @@ class EvolutionEngine:
 
     def __init__(self, memory: ReasoningMemory):
         self.memory = memory
-        self.evolution_history: List[EvolutionReport] = []
+        self.evolution_history: list[EvolutionReport] = []
 
     def evolve(self, min_samples: int = 10) -> EvolutionReport:
         """
@@ -73,19 +72,16 @@ class EvolutionEngine:
 
         return report
 
-    def _analyze_performance(self) -> Dict[str, StrategyPerformance]:
+    def _analyze_performance(self) -> dict[str, StrategyPerformance]:
         """Analyze strategy performance."""
         performances = self.memory.get_strategy_performance()
 
-        return {
-            perf.strategy.value: perf
-            for perf in performances
-        }
+        return {perf.strategy.value: perf for perf in performances}
 
     def _identify_opportunities(
         self,
-        performance: Dict[str, StrategyPerformance],
-    ) -> List[str]:
+        performance: dict[str, StrategyPerformance],
+    ) -> list[str]:
         """Identify improvement opportunities."""
         opportunities = []
 
@@ -104,7 +100,7 @@ class EvolutionEngine:
 
         return opportunities
 
-    def _synthesize_strategies(self, opportunities: List[str]) -> List[str]:
+    def _synthesize_strategies(self, opportunities: list[str]) -> list[str]:
         """
         Synthesize new strategies.
 
@@ -127,8 +123,8 @@ class EvolutionEngine:
 
     def _prune_strategies(
         self,
-        performance: Dict[str, StrategyPerformance],
-    ) -> List[str]:
+        performance: dict[str, StrategyPerformance],
+    ) -> list[str]:
         """
         Prune ineffective strategies.
 
@@ -146,9 +142,9 @@ class EvolutionEngine:
 
     def _generate_insights(
         self,
-        performance: Dict[str, StrategyPerformance],
-        opportunities: List[str],
-    ) -> List[str]:
+        performance: dict[str, StrategyPerformance],
+        opportunities: list[str],
+    ) -> list[str]:
         """Generate insights from performance analysis."""
         insights = []
 
@@ -167,7 +163,7 @@ class EvolutionEngine:
         if performance:
             most_efficient = min(
                 performance.items(),
-                key=lambda x: x[1].avg_tokens if x[1].total_uses >= 3 else float('inf'),
+                key=lambda x: x[1].avg_tokens if x[1].total_uses >= 3 else float("inf"),
             )
             insights.append(
                 f"Most token-efficient strategy: {most_efficient[0]} "
@@ -182,8 +178,8 @@ class EvolutionEngine:
 
     def _calculate_delta(
         self,
-        performance: Dict[str, StrategyPerformance],
-    ) -> Dict[str, float]:
+        performance: dict[str, StrategyPerformance],
+    ) -> dict[str, float]:
         """Calculate performance changes."""
         delta = {}
 
@@ -195,7 +191,7 @@ class EvolutionEngine:
 
         return delta
 
-    def get_recommendations(self) -> List[str]:
+    def get_recommendations(self) -> list[str]:
         """Get strategy recommendations based on evolution history."""
         recommendations = []
 
@@ -214,7 +210,10 @@ class EvolutionEngine:
         # Warn about pruning candidates
         if latest.pruned_strategies:
             recommendations.append(
-                f"Consider deprecating low-performing strategies: {', '.join(latest.pruned_strategies)}"
+(
+                    f"Consider deprecating low-performing strategies: "
+                    f"{', '.join(latest.pruned_strategies)}"
+                )
             )
 
         # Share insights

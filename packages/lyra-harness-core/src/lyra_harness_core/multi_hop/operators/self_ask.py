@@ -15,10 +15,12 @@ either parsed from the LLM output OR injected from a retriever call. The
 operator runs the loop until the LLM emits ``So the final answer is:`` or
 ``max_hops`` is reached.
 
-Closes the [docs/201](../../../../../../../research/harness-engineering/docs/201-compositionality-gap-canon.md)
+Closes the
+[docs/201](../../../../../../../research/harness-engineering/docs/201-compositionality-gap-canon.md)
 compositionality gap by materialising the bridge entity as a token rather than
 relying on latent multi-hop reasoning.
 """
+
 from __future__ import annotations
 
 import re

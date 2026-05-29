@@ -62,9 +62,7 @@ class DebiasedJudge:
         raw = self._judge_fn(response, criteria)
         penalty = self._compute_style_bias_penalty(response)
         adjusted = max(raw - penalty, 0.0)
-        rationale = (
-            f"raw={raw:.3f}, style_bias_penalty={penalty:.3f}, adjusted={adjusted:.3f}"
-        )
+        rationale = f"raw={raw:.3f}, style_bias_penalty={penalty:.3f}, adjusted={adjusted:.3f}"
         return JudgeEvaluation(
             score=adjusted,
             rationale=rationale,
@@ -94,9 +92,7 @@ class DebiasedJudge:
         n_lines = len(lines)
 
         # Bullet / numbered list ratio
-        list_lines = sum(
-            1 for l in lines if l.strip().startswith(("-", "*", "+", "1.", "2."))
-        )
+        list_lines = sum(1 for line in lines if line.strip().startswith(("-", "*", "+", "1.", "2.")))
         list_ratio = list_lines / max(n_lines, 1)
 
         # Length penalty (diminishing returns after ~200 words)
@@ -143,15 +139,10 @@ class DebiasedJudge:
             return 0.0
 
         # Score in original order
-        original_scores = [
-            self._judge_fn(r, "quality") for r in responses
-        ]
+        original_scores = [self._judge_fn(r, "quality") for r in responses]
 
         # Score in reversed order
-        [
-            self._judge_fn(r, "quality")
-            for r in reversed(responses)
-        ]
+        [self._judge_fn(r, "quality") for r in reversed(responses)]
 
         # Compute mean absolute score difference per item
         diffs = [
@@ -196,18 +187,13 @@ class DebiasedJudge:
             per-debater scores and the final confidence.
         """
         if not responses:
-            return JudgeEvaluation(
-                score=0.0, rationale="no responses", criteria="quality"
-            )
+            return JudgeEvaluation(score=0.0, rationale="no responses", criteria="quality")
 
         # Each debater scores each response
         all_scores: list[list[float]] = []
         for i in range(n_debaters):
             seed_offset = i * 0.01  # small variance between debaters
-            scores = [
-                min(self._judge_fn(r, "quality") + seed_offset, 1.0)
-                for r in responses
-            ]
+            scores = [min(self._judge_fn(r, "quality") + seed_offset, 1.0) for r in responses]
             all_scores.append(scores)
 
         # Per-response trimmed mean (discard min and max per debater set)
@@ -224,7 +210,11 @@ class DebiasedJudge:
         best_score = max(per_response_means) if per_response_means else 0.0
 
         # Confidence = 1 - spread / max_spread
-        spread = max(per_response_means) - min(per_response_means) if len(per_response_means) > 1 else 0.0
+        spread = (
+            max(per_response_means) - min(per_response_means)
+            if len(per_response_means) > 1
+            else 0.0
+        )
         confidence = 1.0 - spread
 
         rationale = (
@@ -279,8 +269,7 @@ class DebiasedJudge:
         mean_t = sum(truths) / n
         num = sum((p - mean_p) * (t - mean_t) for p, t in zip(preds, truths, strict=False))
         den = math.sqrt(
-            sum((p - mean_p) ** 2 for p in preds)
-            * sum((t - mean_t) ** 2 for t in truths)
+            sum((p - mean_p) ** 2 for p in preds) * sum((t - mean_t) ** 2 for t in truths)
         )
         pearson = num / den if den != 0 else 0.0
 
@@ -291,11 +280,7 @@ class DebiasedJudge:
         spearman = 1.0 - (6.0 * d_sq) / (n * (n * n - 1)) if n > 1 else 0.0
 
         # Accuracy: proportion where both are on same side of 0.5
-        correct = sum(
-            1
-            for p, t in zip(preds, truths, strict=False)
-            if (p >= 0.5) == (t >= 0.5)
-        )
+        correct = sum(1 for p, t in zip(preds, truths, strict=False) if (p >= 0.5) == (t >= 0.5))
         accuracy = correct / n
 
         return {
@@ -332,8 +317,7 @@ class DebiasedJudge:
 
         # Structure hints
         has_intro = any(
-            w.lower() in ("first", "firstly", "introduction", "overview")
-            for w in words[:10]
+            w.lower() in ("first", "firstly", "introduction", "overview") for w in words[:10]
         )
         has_conclusion = any(
             w.lower() in ("finally", "conclusion", "summary", "overall", "thus")

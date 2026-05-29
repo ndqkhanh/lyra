@@ -5,8 +5,6 @@ import os
 import sys
 import time
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
-
 from lyra_cli.events import EventDispatcher, StreamingRenderer
 from lyra_cli.ui import (
     AgentTree,
@@ -16,6 +14,8 @@ from lyra_cli.ui import (
     StatusLine,
     print_welcome_banner,
 )
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "packages/lyra-cli/src"))
 
 
 class LyraREPL:
@@ -46,10 +46,7 @@ class LyraREPL:
 
     def _on_tool_started(self, event):
         """Handle tool started"""
-        tool_line = self.formatter.format_tool_call(
-            event.name,
-            f"{event.input}"
-        )
+        tool_line = self.formatter.format_tool_call(event.name, f"{event.input}")
         self.streaming.finalize_line()
         self.streaming.append_line(tool_line)
 
@@ -57,9 +54,7 @@ class LyraREPL:
         """Handle turn finished"""
         self.streaming.finalize_line()
         stats_line = self.formatter.format_stats_line(
-            duration_s=2.5,
-            tool_count=3,
-            tokens=event.tokens_in + event.tokens_out
+            duration_s=2.5, tool_count=3, tokens=event.tokens_in + event.tokens_out
         )
         self.streaming.append_line(stats_line)
 
@@ -70,7 +65,7 @@ class LyraREPL:
             model="Opus 4.7",
             effort="high",
             provider="Anthropic API",
-            user_name="Khanh"
+            user_name="Khanh",
         )
 
     def render_fixed_ui(self, prompt_text=""):
@@ -102,7 +97,7 @@ class LyraREPL:
             "- Web development\n",
             "- Data science\n",
             "- Machine learning\n",
-            "- Automation\n"
+            "- Automation\n",
         ]
 
         for part in response_parts:
@@ -180,8 +175,12 @@ class LyraREPL:
         # Add agents
         self.agent_tree.add_agent("agent-1", "Research GitHub repos")
         self.agent_tree.add_agent("agent-2", "Search academic papers")
-        self.agent_tree.update_agent("agent-1", tool_count=10, tokens=29700, latest_tool="Bash: gh api")
-        self.agent_tree.update_agent("agent-2", tool_count=6, tokens=29900, latest_tool="Web Search: arxiv")
+        self.agent_tree.update_agent(
+            "agent-1", tool_count=10, tokens=29700, latest_tool="Bash: gh api"
+        )
+        self.agent_tree.update_agent(
+            "agent-2", tool_count=6, tokens=29900, latest_tool="Web Search: arxiv"
+        )
 
         # Show collapsed
         print(self.agent_tree.render())

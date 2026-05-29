@@ -1,4 +1,5 @@
-"""Belief updating strategies: Bayesian, evidence weighting, source reliability, temporal decay, consensus building."""
+"""Belief updating strategies: Bayesian, evidence weighting, source reliability, temporal decay,
+consensus building."""
 
 from __future__ import annotations
 
@@ -93,9 +94,8 @@ class ConsensusResult:
 class BeliefUpdater:
     """Manages belief updating with multiple strategies.
 
-    Supports Bayesian updating, evidence strength weighting,
-    source reliability tracking, temporal decay, and
-    consensus building across multiple sources.
+    Supports Bayesian updating, evidence strength weighting, source reliability tracking, temporal
+    decay, and consensus building across multiple sources.
     """
 
     def __init__(self, belief_system: BeliefSystem) -> None:
@@ -125,9 +125,7 @@ class BeliefUpdater:
         Returns:
             Updated belief.
         """
-        return self.belief_system.update_bayesian(
-            belief_id, evidence_strength, likelihood_ratio
-        )
+        return self.belief_system.update_bayesian(belief_id, evidence_strength, likelihood_ratio)
 
     def jeffreys_update(
         self,
@@ -145,9 +143,7 @@ class BeliefUpdater:
         Returns:
             Updated belief.
         """
-        return self.belief_system.update_jeffreys(
-            belief_id, new_confidence, evidence_reliability
-        )
+        return self.belief_system.update_jeffreys(belief_id, new_confidence, evidence_reliability)
 
     # ── Evidence weighting ─────────────────────────────────────────────
 
@@ -240,14 +236,11 @@ class BeliefUpdater:
         # Update reliability score (exponential moving average)
         alpha = 0.1
         source.reliability_score = (
-            alpha * (1.0 if was_accurate else 0.0)
-            + (1.0 - alpha) * source.reliability_score
+            alpha * (1.0 if was_accurate else 0.0) + (1.0 - alpha) * source.reliability_score
         )
 
         # Update bias estimate
-        source.bias_estimate = (
-            alpha * bias + (1.0 - alpha) * source.bias_estimate
-        )
+        source.bias_estimate = alpha * bias + (1.0 - alpha) * source.bias_estimate
 
     def get_source_reliability(self, source_name: str) -> float:
         """Get the reliability score for a source.
@@ -271,7 +264,8 @@ class BeliefUpdater:
             List of trusted source names.
         """
         return [
-            name for name, prof in self._sources.items()
+            name
+            for name, prof in self._sources.items()
             if prof.reliability_score >= min_reliability
         ]
 
@@ -319,8 +313,11 @@ class BeliefUpdater:
                     adjusted_count += 1
 
         if adjusted_count > 0:
-            logger.info("Temporal decay applied to %d beliefs (half_life=%.1fh)",
-                       adjusted_count, half_life_seconds / 3600)
+            logger.info(
+                "Temporal decay applied to %d beliefs (half_life=%.1fh)",
+                adjusted_count,
+                half_life_seconds / 3600,
+            )
 
         return adjusted_count
 
@@ -337,7 +334,8 @@ class BeliefUpdater:
         return time.time() - belief.last_updated
 
     def get_stale_beliefs(
-        self, max_age_seconds: float = 86400.0 * 30,
+        self,
+        max_age_seconds: float = 86400.0 * 30,
     ) -> list[Belief]:
         """Get beliefs that haven't been updated recently.
 
@@ -349,8 +347,7 @@ class BeliefUpdater:
         """
         now = time.time()
         return [
-            b for b in self.belief_system.get_active()
-            if (now - b.last_updated) > max_age_seconds
+            b for b in self.belief_system.get_active() if (now - b.last_updated) > max_age_seconds
         ]
 
     # ── Consensus building ─────────────────────────────────────────────
@@ -420,7 +417,8 @@ class BeliefUpdater:
         # Create or update a belief from this consensus
         domain = "consensus"
         existing_beliefs = [
-            b for b in self.belief_system._beliefs.values()
+            b
+            for b in self.belief_system._beliefs.values()
             if b.domain == domain and topic.lower() in b.statement.lower()
         ]
 
@@ -436,8 +434,13 @@ class BeliefUpdater:
                 source_reliability=confidence,
             )
 
-        logger.info("Consensus on '%s': %.3f (agreement=%.2f, sources=%d)",
-                    topic, consensus, agreement, len(source_judgments))
+        logger.info(
+            "Consensus on '%s': %.3f (agreement=%.2f, sources=%d)",
+            topic,
+            consensus,
+            agreement,
+            len(source_judgments),
+        )
 
         return result
 
@@ -484,9 +487,11 @@ class BeliefUpdater:
         return {
             "sources_tracked": self.source_count,
             "trusted_sources": len(trusted),
-            "avg_reliability": float(np.mean(
-                [p.reliability_score for p in self._sources.values()]
-            )) if self._sources else 0.0,
+            "avg_reliability": (
+                float(np.mean([p.reliability_score for p in self._sources.values()]))
+                if self._sources
+                else 0.0
+            ),
             "evidence_packets": self.evidence_count,
             "consensus_results": len(self._consensus_results),
             "stale_beliefs": len(stale),

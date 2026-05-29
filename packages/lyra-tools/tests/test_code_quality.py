@@ -1,4 +1,5 @@
 """Tests for code quality tool implementations — lint, format, complexity, dead imports."""
+
 from __future__ import annotations
 
 import ast
@@ -56,7 +57,12 @@ class TestCodeComplexity:
 
     def test_complexity_file_smoke(self, tmp_path: Path) -> None:
         f = tmp_path / "test_mod.py"
-        f.write_text("def simple(x):\n    return x\n\ndef complex_fn(x, y):\n    if x:\n        return y\n    return None\n")
+        f.write_text(
+
+                "def simple(x):\n    return x\n\ndef complex_fn(x, y):\n    if x:\n        return"
+                "y\n    return None\n"
+
+        )
         result = code_complexity(str(f), repo_root=str(tmp_path))
         assert result["count"] == 2
         names = {fn["name"] for fn in result["functions"]}

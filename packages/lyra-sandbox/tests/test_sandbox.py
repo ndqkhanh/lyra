@@ -73,7 +73,6 @@ from lyra_sandbox import (
     NetworkError,
 )
 
-
 # ═══════════════════════════════════════════════════════════════════════════
 # exceptions
 # ═══════════════════════════════════════════════════════════════════════════
@@ -404,9 +403,7 @@ class TestMountPoint:
         assert mp.type == MountType.BIND
 
     def test_custom(self):
-        mp = MountPoint(
-            source="/src", target="/dst", read_only=False, type=MountType.TMPFS
-        )
+        mp = MountPoint(source="/src", target="/dst", read_only=False, type=MountType.TMPFS)
         assert mp.source == "/src"
         assert not mp.read_only
         assert mp.type == MountType.TMPFS
@@ -479,9 +476,7 @@ class TestFilesystemIsolation:
     def test_with_mounts(self):
         workspace = FilesystemIsolation.create_workspace()
         mp = MountPoint(source="/tmp", target="/tmp", read_only=True)
-        FilesystemIsolation.with_mounts(
-            workspace, mounts=(mp,), read_only_root=True
-        )
+        FilesystemIsolation.with_mounts(workspace, mounts=(mp,), read_only_root=True)
         assert os.path.isdir(os.path.join(workspace, "mnt"))
         FilesystemIsolation.cleanup_workspace(workspace)
 
@@ -524,7 +519,14 @@ class TestScanResult:
         r = ScanResult(
             passed=False,
             risk_score=0.8,
-            findings=(SecurityFinding(line_number=1, severity=FindingSeverity.CRITICAL, pattern="os.system", description="bad"),),
+            findings=(
+                SecurityFinding(
+                    line_number=1,
+                    severity=FindingSeverity.CRITICAL,
+                    pattern="os.system",
+                    description="bad",
+                ),
+            ),
             blocked_patterns=("os.system",),
         )
         assert not r.passed
@@ -800,16 +802,12 @@ class TestProcessResult:
 
 class TestProcessSandbox:
     def test_execute_success(self):
-        result = ProcessSandbox.execute(
-            ProcessConfig(command=("echo", "hello sandbox"))
-        )
+        result = ProcessSandbox.execute(ProcessConfig(command=("echo", "hello sandbox")))
         assert "hello sandbox" in result.stdout
         assert result.exit_code == 0
 
     def test_execute_failure(self):
-        result = ProcessSandbox.execute(
-            ProcessConfig(command=("false",))
-        )
+        result = ProcessSandbox.execute(ProcessConfig(command=("false",)))
         assert result.exit_code != 0
 
     def test_execute_with_env(self):
@@ -822,22 +820,16 @@ class TestProcessSandbox:
         assert "test_value" in result.stdout
 
     def test_execute_timeout(self):
-        result = ProcessSandbox.execute(
-            ProcessConfig(command=("sleep", "10"), timeout=1)
-        )
+        result = ProcessSandbox.execute(ProcessConfig(command=("sleep", "10"), timeout=1))
         assert result.was_killed
 
     def test_execute_with_limits(self):
-        result = ProcessSandbox.execute_with_limits(
-            ProcessConfig(command=("echo", "limited"))
-        )
+        result = ProcessSandbox.execute_with_limits(ProcessConfig(command=("echo", "limited")))
         assert "limited" in result.stdout
         assert result.exit_code == 0
 
     def test_execute_no_such_command(self):
-        result = ProcessSandbox.execute(
-            ProcessConfig(command=("nonexistent_cmd_xyz",))
-        )
+        result = ProcessSandbox.execute(ProcessConfig(command=("nonexistent_cmd_xyz",)))
         assert result.exit_code != 0
 
     def test_process_result_immutable(self):
@@ -1008,18 +1000,14 @@ class TestExecutionEngine:
         assert "hello" in result.output
 
     def test_execute_code_too_long(self):
-        engine = ExecutionEngine(
-            policy=ExecutionPolicy(max_code_length=10)
-        )
+        engine = ExecutionEngine(policy=ExecutionPolicy(max_code_length=10))
         with pytest.raises(ExecutionError):
             engine.execute(
                 CodeRequest(code="x" * 20, language=Language.GENERIC),
             )
 
     def test_execute_disallowed_language(self):
-        engine = ExecutionEngine(
-            policy=ExecutionPolicy(allowed_languages=(Language.PYTHON,))
-        )
+        engine = ExecutionEngine(policy=ExecutionPolicy(allowed_languages=(Language.PYTHON,)))
         with pytest.raises(ExecutionError):
             engine.execute(
                 CodeRequest(code="echo hi", language=Language.BASH),
@@ -1032,19 +1020,23 @@ class TestExecutionEngine:
             )
 
     def test_batch_execute(self):
-        results = self.engine.batch_execute([
-            CodeRequest(code="print('a')", language=Language.PYTHON),
-            CodeRequest(code="print('b')", language=Language.PYTHON),
-        ])
+        results = self.engine.batch_execute(
+            [
+                CodeRequest(code="print('a')", language=Language.PYTHON),
+                CodeRequest(code="print('b')", language=Language.PYTHON),
+            ]
+        )
         assert len(results) == 2
         assert results[0].return_code == 0
         assert results[1].return_code == 0
 
     def test_batch_execute_with_failure(self):
-        results = self.engine.batch_execute([
-            CodeRequest(code="import subprocess\nsubprocess.run(['ls'])"),
-            CodeRequest(code="print('b')", language=Language.PYTHON),
-        ])
+        results = self.engine.batch_execute(
+            [
+                CodeRequest(code="import subprocess\nsubprocess.run(['ls'])"),
+                CodeRequest(code="print('b')", language=Language.PYTHON),
+            ]
+        )
         assert len(results) == 2
         assert results[0].return_code == 1  # security failure
         assert "Security scan failed" in results[0].stderr

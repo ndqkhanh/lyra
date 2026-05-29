@@ -62,7 +62,7 @@ def _run_git_log(since: str = "", to: str = "HEAD", max_count: int = 0) -> list[
         result = subprocess.run(
             args, capture_output=True, text=True, timeout=15, cwd=Path.cwd(),
         )
-        return [l.strip() for l in result.stdout.split("\n") if l.strip()]
+        return [line.strip() for line in result.stdout.split("\n") if line.strip()]
     except (subprocess.TimeoutExpired, FileNotFoundError):
         return []
 

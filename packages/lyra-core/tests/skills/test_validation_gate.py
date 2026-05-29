@@ -1,4 +1,5 @@
 """Tests for Phase 3.1 Skill Validation Gates."""
+
 from __future__ import annotations
 
 import pytest
@@ -107,7 +108,9 @@ class TestGate3Performance:
     def test_large_skill_warns(self):
         large = "\n".join(f"x{i} = {i}" for i in range(600))
         result = _gate3(large, ("test",))
-        assert "too large" in " ".join(result.issues).lower() or result.status != GateStatus.REJECTED
+        assert (
+            "too large" in " ".join(result.issues).lower() or result.status != GateStatus.REJECTED
+        )
 
 
 class TestGate4Safety:
@@ -144,17 +147,13 @@ class TestSkillValidationPipeline:
 
     def test_skip_performance_gate(self):
         pipeline = SkillValidationPipeline()
-        report = pipeline.validate(
-            "json-parser", ("json",), VALID_PYTHON, skip_performance=True
-        )
+        report = pipeline.validate("json-parser", ("json",), VALID_PYTHON, skip_performance=True)
         gate_nums = {r.gate for r in report.gate_results}
         assert GateNumber.GATE_3 not in gate_nums
 
     def test_skip_safety_gate(self):
         pipeline = SkillValidationPipeline()
-        report = pipeline.validate(
-            "json-parser", ("json",), VALID_PYTHON, skip_safety=True
-        )
+        report = pipeline.validate("json-parser", ("json",), VALID_PYTHON, skip_safety=True)
         gate_nums = {r.gate for r in report.gate_results}
         assert GateNumber.GATE_4 not in gate_nums
 

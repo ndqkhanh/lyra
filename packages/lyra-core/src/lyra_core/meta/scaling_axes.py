@@ -1,6 +1,7 @@
 """L311-7 — Four-axis scaling-laws aggregator.
 
-Operationalizes the 2026 scaling-law synthesis ([`docs/225-agent-era-scaling-synthesis.md`](../../../../../../docs/225-agent-era-scaling-synthesis.md))
+Operationalizes the 2026 scaling-law synthesis ([`docs/225-agent-era-scaling-synthesis.md`]
+(../../../../../../docs/225-agent-era-scaling-synthesis.md) )
 as a *roadmap input* the operator can read in one place. The four
 axes:
 
@@ -24,6 +25,7 @@ The score on each axis is bounded in [0, 1] for readability; weights
 are deliberate, transparent, and printable. Production callers can
 replace the heuristic with empirical data via :meth:`record_*` calls.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -40,11 +42,11 @@ class ScalingPosition:
     """Where the current install sits on one of the four axes."""
 
     axis: Axis
-    score: float                # in [0, 1]
-    current: str                # human-readable summary of the current state
-    next_lever: str             # the cheapest single upgrade
-    cost_hint: float            # 0 (free) to 1 (expensive); rough only
-    benefit_hint: float         # 0 (no measurable lift) to 1 (large lift)
+    score: float  # in [0, 1]
+    current: str  # human-readable summary of the current state
+    next_lever: str  # the cheapest single upgrade
+    cost_hint: float  # 0 (free) to 1 (expensive); rough only
+    benefit_hint: float  # 0 (no measurable lift) to 1 (large lift)
 
     @property
     def cost_benefit(self) -> float:
@@ -62,27 +64,32 @@ class ScalingAxes:
 
     # pretrain inputs -------------------------------------------------
     pretrain_model: str = "unknown"
-    pretrain_param_b: float = 0.0      # billions; e.g. 70 for Llama-3-70B
-    pretrain_quality: float = 0.5      # subjective in [0, 1]; defaults mid
+    pretrain_param_b: float = 0.0  # billions; e.g. 70 for Llama-3-70B
+    pretrain_quality: float = 0.5  # subjective in [0, 1]; defaults mid
 
     # ttc inputs ------------------------------------------------------
-    ttc_max_samples: int = 1            # best-of-N width
-    ttc_verifier_count: int = 0         # registered verifiers across domains
-    ttc_avg_pass_rate: float = 0.0      # rolling pass rate
+    ttc_max_samples: int = 1  # best-of-N width
+    ttc_verifier_count: int = 0  # registered verifiers across domains
+    ttc_avg_pass_rate: float = 0.0  # rolling pass rate
 
     # memory inputs ---------------------------------------------------
-    memory_context_tokens: int = 8192   # current model's context window
-    memory_tier_count: int = 1          # 1=flat, 2=hot+cold, 3=hot/warm/cold
-    memory_retrieval_score: float = 0.5 # subjective quality
+    memory_context_tokens: int = 8192  # current model's context window
+    memory_tier_count: int = 1  # 1=flat, 2=hot+cold, 3=hot/warm/cold
+    memory_retrieval_score: float = 0.5  # subjective quality
 
     # tool_use inputs -------------------------------------------------
     tool_native_count: int = 0
     tool_mcp_server_count: int = 0
     tool_avg_success_rate: float = 0.5
 
-    notes: dict[Axis, list[str]] = field(default_factory=lambda: {
-        "pretrain": [], "ttc": [], "memory": [], "tool_use": [],
-    })
+    notes: dict[Axis, list[str]] = field(
+        default_factory=lambda: {
+            "pretrain": [],
+            "ttc": [],
+            "memory": [],
+            "tool_use": [],
+        }
+    )
 
     # ---- recorders -----------------------------------------------
 
@@ -178,9 +185,7 @@ class ScalingAxes:
             )
             cost, benefit = 0.2, 0.4
         else:
-            lever = (
-                "Pretrain axis saturated; spend goes to ttc/memory/tool_use."
-            )
+            lever = "Pretrain axis saturated; spend goes to ttc/memory/tool_use."
             cost, benefit = 1.0, 0.05
         return ScalingPosition(
             axis="pretrain",
@@ -206,9 +211,7 @@ class ScalingAxes:
             )
             cost, benefit = 0.3, 0.8
         elif samples_norm < 0.4:
-            lever = (
-                "Raise best-of-N sampling for high-stakes turns (try N=4)."
-            )
+            lever = "Raise best-of-N sampling for high-stakes turns (try N=4)."
             cost, benefit = 0.5, 0.5
         elif self.ttc_avg_pass_rate < 0.7:
             lever = (
@@ -335,8 +338,7 @@ def render_scaling_table(positions: tuple[ScalingPosition, ...]) -> str:
     ]
     header = (
         "| axis     | score |  cost | benft | current"
-        " " * 27
-        + "| next lever                                                   |"
+        " " * 27 + "| next lever                                                   |"
     )
     sep = (
         "|----------|-------|-------|-------|"

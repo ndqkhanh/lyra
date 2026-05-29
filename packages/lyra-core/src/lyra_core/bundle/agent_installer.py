@@ -23,6 +23,7 @@ Idempotency (``LBL-AI-IDEMPOTENT``) is enforced by checking for an
 existing attestation file with the same bundle hash — running install
 twice with the same bundle is a no-op.
 """
+
 from __future__ import annotations
 
 import json
@@ -36,9 +37,7 @@ from typing import Any, Literal
 from .attestation import Attestation, sign_attestation
 from .source_bundle import BundleValidationError, SourceBundle
 
-InstallStep = Literal[
-    "provision", "register_skills", "wire_tools", "smoke_eval", "attest"
-]
+InstallStep = Literal["provision", "register_skills", "wire_tools", "smoke_eval", "attest"]
 
 
 class InstallError(RuntimeError):
@@ -310,9 +309,7 @@ class AgentInstaller:
         reg = self.installed_registry or global_installed_registry()
         att_path = target / "attestation.json"
         now = time.time()
-        existing = reg.find(
-            bundle_hash=attestation.bundle_hash, target_dir=str(target)
-        )
+        existing = reg.find(bundle_hash=attestation.bundle_hash, target_dir=str(target))
         record = InstalledRecord(
             bundle_name=attestation.bundle_name,
             bundle_version=attestation.bundle_version,
@@ -338,12 +335,8 @@ class AgentInstaller:
             raise InstallError(f"bundle invalid: {e}") from e
         # Persona and memory seed go into the target so the runtime
         # can read them without touching the original bundle dir.
-        (target / "persona.md").write_text(
-            self.bundle.persona.text, encoding="utf-8"
-        )
-        (target / "memory_seed.md").write_text(
-            self.bundle.memory.seed_text, encoding="utf-8"
-        )
+        (target / "persona.md").write_text(self.bundle.persona.text, encoding="utf-8")
+        (target / "memory_seed.md").write_text(self.bundle.memory.seed_text, encoding="utf-8")
         # Manifest copy for traceability.
         meta = {
             "apiVersion": self.bundle.manifest.api_version,
@@ -352,9 +345,7 @@ class AgentInstaller:
             "version": self.bundle.manifest.version,
             "dual_use": self.bundle.manifest.dual_use,
         }
-        (target / "manifest.json").write_text(
-            json.dumps(meta, indent=2), encoding="utf-8"
-        )
+        (target / "manifest.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
 
     def _register_skills(self, target: Path) -> list[str]:
         skills_dir = target / "skills"
@@ -394,7 +385,9 @@ class AgentInstaller:
                     self._make_workflow_for(spec, target),
                 )
             if spec.kind == "cron":
-                trigger = CronTrigger(expression=spec.schedule or "0 */1 * * *", timezone=spec.timezone)
+                trigger = CronTrigger(
+                    expression=spec.schedule or "0 */1 * * *", timezone=spec.timezone
+                )
             elif spec.kind == "webhook":
                 trigger = GitHubWebhookTrigger(repo=spec.repo, events=spec.events or ("push",))
             else:  # api
@@ -456,9 +449,7 @@ class AgentInstaller:
                 }
             )
             wired.append(f"{t.kind}:{t.name}")
-        (target / "tools.json").write_text(
-            json.dumps(descriptors, indent=2), encoding="utf-8"
-        )
+        (target / "tools.json").write_text(json.dumps(descriptors, indent=2), encoding="utf-8")
         return wired
 
     def _notify(self, step: InstallStep, payload: dict[str, Any]) -> None:

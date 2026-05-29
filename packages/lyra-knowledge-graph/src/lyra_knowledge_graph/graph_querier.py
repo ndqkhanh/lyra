@@ -84,9 +84,7 @@ class GraphQuerier:
             return self._bfs_paths(source_id, target_id, max_depth)
         return self._dfs_paths(source_id, target_id, max_depth)
 
-    def _bfs_paths(
-        self, source: str, target: str, max_depth: int
-    ) -> list[PathResult]:
+    def _bfs_paths(self, source: str, target: str, max_depth: int) -> list[PathResult]:
         results: list[PathResult] = []
         queue: list[tuple[str, list[str], float]] = [(source, [source], 0.0)]
 
@@ -95,7 +93,9 @@ class GraphQuerier:
             if len(path) > max_depth + 1:
                 continue
             if current == target and len(path) > 1:
-                results.append(PathResult(path=list(path), length=len(path) - 1, total_weight=round(weight, 4)))
+                results.append(
+                    PathResult(path=list(path), length=len(path) - 1, total_weight=round(weight, 4))
+                )
                 continue
             for edge in self._graph.get_outgoing_edges(current):
                 if edge.target_id not in path:
@@ -103,16 +103,16 @@ class GraphQuerier:
 
         return sorted(results, key=lambda r: r.length)
 
-    def _dfs_paths(
-        self, source: str, target: str, max_depth: int
-    ) -> list[PathResult]:
+    def _dfs_paths(self, source: str, target: str, max_depth: int) -> list[PathResult]:
         results: list[PathResult] = []
 
         def _dfs(current: str, path: list[str], weight: float) -> None:
             if len(path) > max_depth + 1:
                 return
             if current == target and len(path) > 1:
-                results.append(PathResult(path=list(path), length=len(path) - 1, total_weight=round(weight, 4)))
+                results.append(
+                    PathResult(path=list(path), length=len(path) - 1, total_weight=round(weight, 4))
+                )
                 return
             for edge in self._graph.get_outgoing_edges(current):
                 if edge.target_id not in path:
@@ -173,11 +173,9 @@ class GraphQuerier:
                 continue
             if relation is not None:
                 has_relation = any(
-                    e.relation == relation
-                    for e in self._graph.get_outgoing_edges(node.node_id)
+                    e.relation == relation for e in self._graph.get_outgoing_edges(node.node_id)
                 ) or any(
-                    e.relation == relation
-                    for e in self._graph.get_incoming_edges(node.node_id)
+                    e.relation == relation for e in self._graph.get_incoming_edges(node.node_id)
                 )
                 if not has_relation:
                     continue
@@ -191,6 +189,7 @@ class GraphQuerier:
         limit: int = 20,
     ) -> QueryResult:
         import time
+
         start = time.time()
 
         query_lower = query.lower()
@@ -224,9 +223,7 @@ class GraphQuerier:
             query_time_ms=round((time.time() - start) * 1000, 2),
         )
 
-    def _approx_pagerank(
-        self, node_id: str, damping: float = 0.85, iterations: int = 20
-    ) -> float:
+    def _approx_pagerank(self, node_id: str, damping: float = 0.85, iterations: int = 20) -> float:
         node_ids = list(self._graph.nodes.keys())
         if not node_ids:
             return 0.0

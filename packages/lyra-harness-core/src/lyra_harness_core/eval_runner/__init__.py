@@ -1,6 +1,7 @@
 """lyra_harness_core.eval_runner — continuous evaluation runner with drift detection.
 
-Per [docs/115-evaluating-llm-systems.md](../../../../../../research/harness-engineering/docs/115-evaluating-llm-systems.md),
+Per
+[docs/115-evaluating-llm-systems.md](../../../../../../research/harness-engineering/docs/115-evaluating-llm-systems.md),
 [docs/21-llm-as-judge-trajectory-eval.md](../../../../../../research/harness-engineering/docs/21-llm-as-judge-trajectory-eval.md),
 and the "evaluation discipline" Tier-0 universal lift cited across every per-
 project apply plan.
@@ -29,6 +30,7 @@ Used by every project that ships to production:
     - Orion-Code ([docs/220]) — SWE-Bench Verified regression CI.
     - Aegis-Ops ([docs/221]) — incident-response correctness over time.
 """
+
 from __future__ import annotations
 
 from .drift import DriftAlert, DriftMonitor

@@ -1,4 +1,5 @@
-"""Runtime behavior verification: sandbox execution, side-effect detection, resource monitoring, output validation."""
+"""Runtime behavior verification: sandbox execution, side-effect detection, resource monitoring,
+output validation."""
 
 from __future__ import annotations
 
@@ -36,9 +37,14 @@ class ResourceLimits:
     max_file_operations: int = 100
     max_network_requests: int = 10
     allowed_modules: list[str] = field(default_factory=list)
-    blocked_modules: list[str] = field(default_factory=lambda: [
-        "os.system", "subprocess", "shutil.rmtree", "socket",
-    ])
+    blocked_modules: list[str] = field(
+        default_factory=lambda: [
+            "os.system",
+            "subprocess",
+            "shutil.rmtree",
+            "socket",
+        ]
+    )
 
 
 @dataclass
@@ -87,8 +93,8 @@ class SideEffect:
 class RuntimeVerifier:
     """Verifies agent behavior at runtime.
 
-    Monitors sandbox execution, detects side effects, validates
-    resource usage, and checks outputs against specifications.
+    Monitors sandbox execution, detects side effects, validates resource usage, and checks outputs
+    against specifications.
     """
 
     def __init__(
@@ -106,9 +112,7 @@ class RuntimeVerifier:
 
     # ── Trace verification ──────────────────────────────────────────────
 
-    async def verify_trace(
-        self, trace: list[dict[str, Any]]
-    ) -> list[VerificationResult]:
+    async def verify_trace(self, trace: list[dict[str, Any]]) -> list[VerificationResult]:
         """Verify an execution trace for runtime issues.
 
         Checks each event for errors, resource violations, and
@@ -125,106 +129,125 @@ class RuntimeVerifier:
         for i, event in enumerate(trace):
             # Check for error events
             if "error" in str(event.get("type", "")).lower():
-                results.append(VerificationResult(
-                    status=VerificationStatus.FAIL,
-                    layer=VerificationLayer.POST_EXECUTION,
-                    verifier="RuntimeVerifier",
-                    check_name=f"trace_error_{i}",
-                    message=f"Error event at position {i}: {event.get('message', 'unknown')}",
-                    details={"event": event},
-                ))
+                results.append(
+                    VerificationResult(
+                        status=VerificationStatus.FAIL,
+                        layer=VerificationLayer.POST_EXECUTION,
+                        verifier="RuntimeVerifier",
+                        check_name=f"trace_error_{i}",
+                        message=f"Error event at position {i}: {event.get('message', 'unknown')}",
+                        details={"event": event},
+                    )
+                )
 
             # Check for timeout events
             if "timeout" in str(event.get("type", "")).lower():
-                results.append(VerificationResult(
-                    status=VerificationStatus.FAIL,
-                    layer=VerificationLayer.POST_EXECUTION,
-                    verifier="RuntimeVerifier",
-                    check_name=f"trace_timeout_{i}",
-                    message=f"Timeout at position {i}",
-                    details={"event": event},
-                ))
+                results.append(
+                    VerificationResult(
+                        status=VerificationStatus.FAIL,
+                        layer=VerificationLayer.POST_EXECUTION,
+                        verifier="RuntimeVerifier",
+                        check_name=f"trace_timeout_{i}",
+                        message=f"Timeout at position {i}",
+                        details={"event": event},
+                    )
+                )
 
             # Check for large outputs
             if "output" in event:
                 output = str(event["output"])
                 if len(output) > self.resource_limits.max_output_tokens:
-                    results.append(VerificationResult(
-                        status=VerificationStatus.WARN,
-                        layer=VerificationLayer.POST_EXECUTION,
-                        verifier="RuntimeVerifier",
-                        check_name=f"large_output_{i}",
-                        message=f"Output exceeds token limit: {len(output)} > {self.resource_limits.max_output_tokens}",
-                    ))
+                    results.append(
+                        VerificationResult(
+                            status=VerificationStatus.WARN,
+                            layer=VerificationLayer.POST_EXECUTION,
+                            verifier="RuntimeVerifier",
+                            check_name=f"large_output_{i}",
+                            message=(
+                                f"Output exceeds token limit: {len(output)} > "
+                                f"{self.resource_limits.max_output_tokens}"
+                            ),
+                        )
+                    )
 
         # Check overall trace characteristics
         results.extend(self._check_trace_invariants(trace))
 
         if not results:
-            results.append(VerificationResult(
-                status=VerificationStatus.PASS,
-                layer=VerificationLayer.POST_EXECUTION,
-                verifier="RuntimeVerifier",
-                check_name="trace_analysis",
-                message=f"Trace of {len(trace)} events verified OK",
-                confidence=1.0,
-            ))
+            results.append(
+                VerificationResult(
+                    status=VerificationStatus.PASS,
+                    layer=VerificationLayer.POST_EXECUTION,
+                    verifier="RuntimeVerifier",
+                    check_name="trace_analysis",
+                    message=f"Trace of {len(trace)} events verified OK",
+                    confidence=1.0,
+                )
+            )
 
         return results
 
-    def _check_trace_invariants(
-        self, trace: list[dict[str, Any]]
-    ) -> list[VerificationResult]:
+    def _check_trace_invariants(self, trace: list[dict[str, Any]]) -> list[VerificationResult]:
         """Check trace invariants: structure, ordering, consistency."""
         results: list[VerificationResult] = []
 
         if not trace:
-            results.append(VerificationResult(
-                status=VerificationStatus.WARN,
-                layer=VerificationLayer.POST_EXECUTION,
-                verifier="RuntimeVerifier",
-                check_name="empty_trace",
-                message="Empty execution trace",
-                confidence=0.8,
-            ))
+            results.append(
+                VerificationResult(
+                    status=VerificationStatus.WARN,
+                    layer=VerificationLayer.POST_EXECUTION,
+                    verifier="RuntimeVerifier",
+                    check_name="empty_trace",
+                    message="Empty execution trace",
+                    confidence=0.8,
+                )
+            )
             return results
 
         # Check: first event should be start/input
         first_event_type = str(trace[0].get("type", "")).lower()
         if not any(word in first_event_type for word in ("start", "input", "begin", "init")):
-            results.append(VerificationResult(
-                status=VerificationStatus.WARN,
-                layer=VerificationLayer.POST_EXECUTION,
-                verifier="RuntimeVerifier",
-                check_name="trace_start",
-                message="Trace does not start with an initialization event",
-                confidence=0.6,
-            ))
+            results.append(
+                VerificationResult(
+                    status=VerificationStatus.WARN,
+                    layer=VerificationLayer.POST_EXECUTION,
+                    verifier="RuntimeVerifier",
+                    check_name="trace_start",
+                    message="Trace does not start with an initialization event",
+                    confidence=0.6,
+                )
+            )
 
         # Check: last event should be end/result
         last_event_type = str(trace[-1].get("type", "")).lower()
-        if not any(word in last_event_type for word in ("end", "result", "finish", "complete", "output")):
-            results.append(VerificationResult(
-                status=VerificationStatus.WARN,
-                layer=VerificationLayer.POST_EXECUTION,
-                verifier="RuntimeVerifier",
-                check_name="trace_end",
-                message="Trace does not end with a completion event",
-                confidence=0.6,
-            ))
+        if not any(
+            word in last_event_type for word in ("end", "result", "finish", "complete", "output")
+        ):
+            results.append(
+                VerificationResult(
+                    status=VerificationStatus.WARN,
+                    layer=VerificationLayer.POST_EXECUTION,
+                    verifier="RuntimeVerifier",
+                    check_name="trace_end",
+                    message="Trace does not end with a completion event",
+                    confidence=0.6,
+                )
+            )
 
         # Check: no duplicate sequential events of the same type
         event_types = [str(e.get("type", "")) for e in trace]
         for i in range(len(event_types) - 1):
             if event_types[i] == event_types[i + 1] and event_types[i] not in ("token", "stream"):
-                results.append(VerificationResult(
-                    status=VerificationStatus.WARN,
-                    layer=VerificationLayer.POST_EXECUTION,
-                    verifier="RuntimeVerifier",
-                    check_name="duplicate_events",
-                    message=f"Duplicate sequential event type: {event_types[i]}",
-                    confidence=0.5,
-                ))
+                results.append(
+                    VerificationResult(
+                        status=VerificationStatus.WARN,
+                        layer=VerificationLayer.POST_EXECUTION,
+                        verifier="RuntimeVerifier",
+                        check_name="duplicate_events",
+                        message=f"Duplicate sequential event type: {event_types[i]}",
+                        confidence=0.5,
+                    )
+                )
                 break
 
         return results
@@ -265,7 +288,9 @@ class RuntimeVerifier:
                 current_val = current[key]
                 if not isinstance(current_val, (int, float)):
                     try:
-                        current_val = float(len(current_val)) if hasattr(current_val, "__len__") else 0.0
+                        current_val = (
+                            float(len(current_val)) if hasattr(current_val, "__len__") else 0.0
+                        )
                     except (ValueError, TypeError):
                         current_val = 0.0
 
@@ -292,7 +317,7 @@ class RuntimeVerifier:
             verifier="RuntimeVerifier",
             check_name="ood_detection",
             message=f"OOD check: max_drift={max_drift:.3f}, mean_drift={mean_drift:.3f} "
-                    f"(threshold={self.ood_threshold})",
+            f"(threshold={self.ood_threshold})",
             confidence=min(1.0, (1.0 - max_drift) + 0.1),
             details={
                 "drift_scores": drift_scores,
@@ -314,9 +339,7 @@ class RuntimeVerifier:
 
     # ── Sandbox verification ────────────────────────────────────────────
 
-    async def verify_sandbox_execution(
-        self, metrics: SandboxMetrics
-    ) -> list[VerificationResult]:
+    async def verify_sandbox_execution(self, metrics: SandboxMetrics) -> list[VerificationResult]:
         """Verify sandbox execution metrics against limits.
 
         Args:
@@ -329,49 +352,63 @@ class RuntimeVerifier:
         limits = self.resource_limits
 
         if metrics.execution_time_ms > limits.max_time_seconds * 1000:
-            results.append(VerificationResult(
-                status=VerificationStatus.FAIL,
-                layer=VerificationLayer.POST_EXECUTION,
-                verifier="RuntimeVerifier",
-                check_name="sandbox_time",
-                message=f"Execution time exceeded: {metrics.execution_time_ms}ms > {limits.max_time_seconds * 1000}ms",
-            ))
+            results.append(
+                VerificationResult(
+                    status=VerificationStatus.FAIL,
+                    layer=VerificationLayer.POST_EXECUTION,
+                    verifier="RuntimeVerifier",
+                    check_name="sandbox_time",
+                    message=(
+                        f"Execution time exceeded: {metrics.execution_time_ms}ms > "
+                        f"{limits.max_time_seconds * 1000}ms"
+                    ),
+                )
+            )
 
         if metrics.peak_memory_mb > limits.max_memory_mb:
-            results.append(VerificationResult(
-                status=VerificationStatus.FAIL,
-                layer=VerificationLayer.POST_EXECUTION,
-                verifier="RuntimeVerifier",
-                check_name="sandbox_memory",
-                message=f"Memory exceeded: {metrics.peak_memory_mb}MB > {limits.max_memory_mb}MB",
-            ))
+            results.append(
+                VerificationResult(
+                    status=VerificationStatus.FAIL,
+                    layer=VerificationLayer.POST_EXECUTION,
+                    verifier="RuntimeVerifier",
+                    check_name="sandbox_memory",
+                    message=(
+                        f"Memory exceeded: {metrics.peak_memory_mb}MB > {limits.max_memory_mb}MB"
+                    ),
+                )
+            )
 
         if metrics.file_ops_count > limits.max_file_operations:
-            results.append(VerificationResult(
-                status=VerificationStatus.WARN,
-                layer=VerificationLayer.POST_EXECUTION,
-                verifier="RuntimeVerifier",
-                check_name="sandbox_file_ops",
-                message=f"File operations exceeded: {metrics.file_ops_count} > {limits.max_file_operations}",
-            ))
+            results.append(
+                VerificationResult(
+                    status=VerificationStatus.WARN,
+                    layer=VerificationLayer.POST_EXECUTION,
+                    verifier="RuntimeVerifier",
+                    check_name="sandbox_file_ops",
+                    message=(
+                        f"File operations exceeded: {metrics.file_ops_count} > "
+                        f"{limits.max_file_operations}"
+                    ),
+                )
+            )
 
         if not results:
-            results.append(VerificationResult(
-                status=VerificationStatus.PASS,
-                layer=VerificationLayer.POST_EXECUTION,
-                verifier="RuntimeVerifier",
-                check_name="sandbox_limits",
-                message="Sandbox execution within limits",
-                details={"metrics": metrics},
-            ))
+            results.append(
+                VerificationResult(
+                    status=VerificationStatus.PASS,
+                    layer=VerificationLayer.POST_EXECUTION,
+                    verifier="RuntimeVerifier",
+                    check_name="sandbox_limits",
+                    message="Sandbox execution within limits",
+                    details={"metrics": metrics},
+                )
+            )
 
         return results
 
     # ── Side effect detection ───────────────────────────────────────────
 
-    def detect_side_effects(
-        self, trace: list[dict[str, Any]]
-    ) -> list[SideEffect]:
+    def detect_side_effects(self, trace: list[dict[str, Any]]) -> list[SideEffect]:
         """Detect side effects from execution trace.
 
         Args:
@@ -389,33 +426,39 @@ class RuntimeVerifier:
             # File system modifications
             if any(kw in event_type for kw in ("file", "write", "save", "create")):
                 if any(kw in event_data for kw in ("/etc/", "/proc/", "C:\\Windows")):
-                    effects.append(SideEffect(
-                        effect_type="file_system",
-                        description="Attempted restricted file system access",
-                        severity="high",
-                        target=event.get("path", "unknown"),
-                        reversible=False,
-                    ))
+                    effects.append(
+                        SideEffect(
+                            effect_type="file_system",
+                            description="Attempted restricted file system access",
+                            severity="high",
+                            target=event.get("path", "unknown"),
+                            reversible=False,
+                        )
+                    )
 
             # Network calls
             if any(kw in event_type for kw in ("http", "request", "fetch", "api")):
-                effects.append(SideEffect(
-                    effect_type="network",
-                    description="Outbound network request",
-                    severity="low",
-                    target=event.get("url", event.get("endpoint", "unknown")),
-                    reversible=True,
-                ))
+                effects.append(
+                    SideEffect(
+                        effect_type="network",
+                        description="Outbound network request",
+                        severity="low",
+                        target=event.get("url", event.get("endpoint", "unknown")),
+                        reversible=True,
+                    )
+                )
 
             # State mutation
             if any(kw in event_type for kw in ("mutate", "modify", "update", "delete")):
-                effects.append(SideEffect(
-                    effect_type="state_mutation",
-                    description=f"State mutation: {event_type}",
-                    severity="medium",
-                    target=event.get("target", "unknown"),
-                    reversible=event.get("reversible", True),
-                ))
+                effects.append(
+                    SideEffect(
+                        effect_type="state_mutation",
+                        description=f"State mutation: {event_type}",
+                        severity="medium",
+                        target=event.get("target", "unknown"),
+                        reversible=event.get("reversible", True),
+                    )
+                )
 
         self._side_effects.extend(effects)
         return effects
@@ -449,9 +492,9 @@ class RuntimeVerifier:
         missing_fields = []
         type_mismatches = []
 
-        for field, expected_type in expected_schema.items():
-            if field not in output:
-                missing_fields.append(field)
+        for field_name, expected_type in expected_schema.items():
+            if field_name not in output:
+                missing_fields.append(field_name)
             else:
                 value = output[field]
                 type_name = expected_type.lower()
@@ -464,7 +507,9 @@ class RuntimeVerifier:
                     "dict": isinstance(value, dict),
                 }
                 if type_name in type_checks and not type_checks[type_name]:
-                    type_mismatches.append(f"{field}: expected {expected_type}, got {type(value).__name__}")
+                    type_mismatches.append(
+                        f"{field}: expected {expected_type}, got {type(value).__name__}"
+                    )
 
         issues = []
         if missing_fields:

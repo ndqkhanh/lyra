@@ -41,17 +41,17 @@ class EmptyContextError(CompactionError):
 class CompactionMode(Enum):
     """Compaction mode: lossless or lossy."""
 
-    LOSSLESS = auto()   # Preserves all information exactly
-    LOSSY = auto()      # May discard or summarize information
+    LOSSLESS = auto()  # Preserves all information exactly
+    LOSSY = auto()  # May discard or summarize information
 
 
 class DisclosureLevel(Enum):
     """Progressive disclosure levels for context elements."""
 
-    FULL = auto()        # Complete content
-    OVERVIEW = auto()    # Summary / abstract
-    MINIMAL = auto()     # Title / key point only
-    HIDDEN = auto()      # Removed from active context
+    FULL = auto()  # Complete content
+    OVERVIEW = auto()  # Summary / abstract
+    MINIMAL = auto()  # Title / key point only
+    HIDDEN = auto()  # Removed from active context
 
 
 @dataclass
@@ -141,7 +141,7 @@ class DuplicateDetector:
         words = text.lower().split()
         if len(words) < k:
             return [text.lower()]
-        return [" ".join(words[i:i + k]) for i in range(len(words) - k + 1)]
+        return [" ".join(words[i : i + k]) for i in range(len(words) - k + 1)]
 
     @staticmethod
     def _jaccard_similarity(h1: str, h2: str) -> float:
@@ -220,8 +220,18 @@ class HierarchicalSummarizer:
         # Keep first 2 sentences (context), last 2 sentences (conclusion),
         # and sentences with key indicators
         key_indicators = {
-            "important", "critical", "must", "should", "error", "warning",
-            "define", "class ", "def ", "function", "return", "import",
+            "important",
+            "critical",
+            "must",
+            "should",
+            "error",
+            "warning",
+            "define",
+            "class ",
+            "def ",
+            "function",
+            "return",
+            "import",
         }
 
         kept: list[str] = []
@@ -235,7 +245,7 @@ class HierarchicalSummarizer:
 
         result = " ".join(kept)
         if len(result) < len(content) * 0.3:
-            result = content[:int(len(content) * 0.6)] + " [...]"
+            result = content[: int(len(content) * 0.6)] + " [...]"
 
         return result
 
@@ -283,9 +293,7 @@ class HierarchicalSummarizer:
             if part.startswith("```"):
                 sentences.append(part)
             else:
-                sentences.extend(
-                    s.strip() for s in re.split(r"(?<=[.!?])\s+", part) if s.strip()
-                )
+                sentences.extend(s.strip() for s in re.split(r"(?<=[.!?])\s+", part) if s.strip())
         return sentences
 
 
@@ -337,14 +345,15 @@ class CompactionEngine:
             raise EmptyContextError("Cannot compact empty context")
 
         start = time.perf_counter()
-        original_tokens = sum(getattr(el, "token_count", len(getattr(el, "content", "")) // 4) for el in elements.values())
+        original_tokens = sum(
+            getattr(el, "token_count", len(getattr(el, "content", "")) // 4)
+            for el in elements.values()
+        )
 
         # Phase 1: Duplicate detection and removal (always lossless)
         duplicates = self._duplicate_detector.find_duplicates(elements)
         duplicate_ids = self._resolve_duplicates(duplicates, element_importance or {})
-        elements_filtered = {
-            eid: el for eid, el in elements.items() if eid not in duplicate_ids
-        }
+        elements_filtered = {eid: el for eid, el in elements.items() if eid not in duplicate_ids}
 
         # Phase 2: Irrelevance filtering
         if mode == CompactionMode.LOSSY:
@@ -423,10 +432,12 @@ class CompactionEngine:
 
         logger.info(
             "Compaction complete: %d -> %d tokens (%.1f%% saved, %.3f quality loss) [%s/%s]",
-            original_tokens, compacted_tokens,
+            original_tokens,
+            compacted_tokens,
             (1.0 - compaction_ratio) * 100,
             quality_loss,
-            strategy.name, mode.name,
+            strategy.name,
+            mode.name,
         )
 
         return result
@@ -535,6 +546,7 @@ class CompactionEngine:
     def _clone_with_content(element: Any, new_content: str) -> Any:
         """Create a shallow clone of an element with replaced content."""
         import copy
+
         cloned = copy.copy(element)
         if hasattr(cloned, "content"):
             cloned.content = new_content

@@ -62,8 +62,7 @@ class CredentialStore:
         """Initialize database schema."""
         self._db = await aiosqlite.connect(str(self.db_path))
 
-        await self._db.execute(
-            """
+        await self._db.execute("""
             CREATE TABLE IF NOT EXISTS credentials (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 provider TEXT NOT NULL,
@@ -75,15 +74,12 @@ class CredentialStore:
                 metadata TEXT,
                 UNIQUE(provider, account_id)
             )
-            """
-        )
+            """)
 
-        await self._db.execute(
-            """
+        await self._db.execute("""
             CREATE INDEX IF NOT EXISTS idx_provider
             ON credentials(provider)
-            """
-        )
+            """)
 
         await self._db.commit()
 
@@ -124,7 +120,8 @@ class CredentialStore:
             """
             INSERT OR REPLACE INTO credentials
             (provider, account_id, account_name, encrypted_token, created_at, updated_at, metadata)
-            VALUES (?, ?, ?, ?, COALESCE((SELECT created_at FROM credentials WHERE provider=? AND account_id=?), ?), ?, ?)
+            VALUES (?, ?, ?, ?, COALESCE((SELECT created_at FROM credentials WHERE provider=? AND
+            account_id=?), ?), ?, ?)
             """,
             (
                 provider,
@@ -204,14 +201,12 @@ class CredentialStore:
                 (provider,),
             )
         else:
-            cursor = await self._db.execute(
-                """
+            cursor = await self._db.execute("""
                 SELECT provider, account_id, account_name, encrypted_token,
                        created_at, updated_at, metadata
                 FROM credentials
                 ORDER BY provider, updated_at DESC
-                """
-            )
+                """)
 
         rows = await cursor.fetchall()
         credentials = []

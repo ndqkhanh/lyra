@@ -156,7 +156,9 @@ class EmergenceDetector:
             transition = PhaseTransition(
                 generation=self._gen,
                 signal_type=EmergenceSignal.SYMBIOSIS,
-                description=f"Resource consumption dropped by {(1 - recent_avg/older_avg)*100:.0f}%",
+                description=(
+                    f"Resource consumption dropped by {(1 - recent_avg/older_avg)*100:.0f}%"
+                ),
                 magnitude=(older_avg - recent_avg) / older_avg,
             )
             self.transitions.append(transition)

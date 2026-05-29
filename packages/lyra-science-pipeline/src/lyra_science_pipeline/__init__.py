@@ -16,8 +16,6 @@ __all__ = [
 ]
 
 
-
-
 @dataclass
 class Hypothesis:
     id: str
@@ -102,11 +100,17 @@ class SciencePipeline:
         analysis = []
         for h in self.hypotheses:
             related = [r for r in self.results if r.hypothesis_id == h.id]
-            analysis.append({
-                "hypothesis": h.statement,
-                "status": h.status,
-                "confidence": h.confidence,
-                "experiments": len(related),
-                "conclusion": "Supported" if any(r.supports_hypothesis for r in related) else "Not supported",
-            })
+            analysis.append(
+                {
+                    "hypothesis": h.statement,
+                    "status": h.status,
+                    "confidence": h.confidence,
+                    "experiments": len(related),
+                    "conclusion": (
+                        "Supported"
+                        if any(r.supports_hypothesis for r in related)
+                        else "Not supported"
+                    ),
+                }
+            )
         return analysis

@@ -44,46 +44,56 @@ class AGILoopPlugin:
     def on_session_start(self, ctx: SessionCtx) -> None:
         if not self._active:
             return
-        self._es_loop.log.emit(StepEvent(
-            EventType.AGENT_STARTED, self.agent_id,
-            self._now(), {"session_id": ctx.session_id, "user_text": ctx.user_text[:80]}
-        ))
+        self._es_loop.log.emit(
+            StepEvent(
+                EventType.AGENT_STARTED,
+                self.agent_id,
+                self._now(),
+                {"session_id": ctx.session_id, "user_text": ctx.user_text[:80]},
+            )
+        )
         logger.info(f"AGI: session {ctx.session_id} started")
 
     def pre_llm_call(self, ctx: Any) -> None:
         if not self._active:
             return
-        self._es_loop.log.emit(StepEvent(
-            EventType.THOUGHT_GENERATED, self.agent_id,
-            self._now(), {"prompt_length": len(str(ctx))}
-        ))
+        self._es_loop.log.emit(
+            StepEvent(
+                EventType.THOUGHT_GENERATED,
+                self.agent_id,
+                self._now(),
+                {"prompt_length": len(str(ctx))},
+            )
+        )
 
     def pre_tool_call(self, ctx: Any) -> None:
         if not self._active:
             return
         tool_name = getattr(ctx, "tool_name", "unknown")
-        self._es_loop.log.emit(StepEvent(
-            EventType.TOOL_CALLED, self.agent_id,
-            self._now(), {"tool": tool_name}
-        ))
+        self._es_loop.log.emit(
+            StepEvent(EventType.TOOL_CALLED, self.agent_id, self._now(), {"tool": tool_name})
+        )
 
     def post_tool_call(self, ctx: Any) -> None:
         if not self._active:
             return
-        self._es_loop.log.emit(StepEvent(
-            EventType.TOOL_RESULT, self.agent_id,
-            self._now(), {}
-        ))
+        self._es_loop.log.emit(StepEvent(EventType.TOOL_RESULT, self.agent_id, self._now(), {}))
 
     def on_session_end(self, ctx: SessionCtx) -> None:
         if not self._active:
             return
-        self._es_loop.log.emit(StepEvent(
-            EventType.AGENT_FINISHED, self.agent_id,
-            self._now(), {"session_id": ctx.session_id}
-        ))
+        self._es_loop.log.emit(
+            StepEvent(
+                EventType.AGENT_FINISHED, self.agent_id, self._now(), {"session_id": ctx.session_id}
+            )
+        )
         state = self._es_loop.log.project(self.agent_id)
-        logger.info(f"AGI: session {ctx.session_id} ended — {state['step']} steps, {len(state['tools_called'])} tools")
+        logger.info(
+
+                f"AGI: session {ctx.session_id} ended — {state['step']} steps, "
+                f"{len(state['tools_called'])} tools"
+
+        )
 
     def get_event_log_summary(self) -> dict[str, Any]:
         """Return AGI event log summary for the orchestrator."""
@@ -95,4 +105,5 @@ class AGILoopPlugin:
 
     def _now(self) -> float:
         import time
+
         return time.time()

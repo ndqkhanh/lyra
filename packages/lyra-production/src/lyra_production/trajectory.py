@@ -40,8 +40,11 @@ class TrajectoryOptimizer:
         if segment is None:
             return None
         updated = TrajectorySegment(
-            id=segment.id, content=segment.content, token_count=segment.token_count,
-            relevance_score=segment.relevance_score, is_redundant=True,
+            id=segment.id,
+            content=segment.content,
+            token_count=segment.token_count,
+            relevance_score=segment.relevance_score,
+            is_redundant=True,
             is_expired=segment.is_expired,
         )
         self._segments[segment_id] = updated
@@ -52,8 +55,11 @@ class TrajectoryOptimizer:
         if segment is None:
             return None
         updated = TrajectorySegment(
-            id=segment.id, content=segment.content, token_count=segment.token_count,
-            relevance_score=segment.relevance_score, is_redundant=segment.is_redundant,
+            id=segment.id,
+            content=segment.content,
+            token_count=segment.token_count,
+            relevance_score=segment.relevance_score,
+            is_redundant=segment.is_redundant,
             is_expired=True,
         )
         self._segments[segment_id] = updated
@@ -65,14 +71,17 @@ class TrajectoryOptimizer:
         segs = list(self._segments.values())
         for i in range(len(segs)):
             for j in range(i + 1, len(segs)):
-                if _jaccard_similarity(segs[i].content, segs[j].content) >= self._redundancy_threshold:
+                if (
+                    _jaccard_similarity(segs[i].content, segs[j].content)
+                    >= self._redundancy_threshold
+                ):
                     pairs.append((segs[i], segs[j]))
         return pairs
 
     def optimize(self) -> dict:
         """Run full trajectory optimization and return statistics."""
         redundant = self.find_redundant_pairs()
-        for a, b in redundant:
+        for _a, b in redundant:
             self.mark_redundant(b.id)
 
         for seg in self._segments.values():

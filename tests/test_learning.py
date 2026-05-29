@@ -3,9 +3,6 @@
 
 import os
 import sys
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages/lyra-cli/src'))
-
 from datetime import datetime
 
 from lyra_cli.learning import (
@@ -15,6 +12,8 @@ from lyra_cli.learning import (
     ObservationCapture,
     ProjectDetector,
 )
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "packages/lyra-cli/src"))
 
 
 def test_learning_system():
@@ -45,7 +44,7 @@ def test_learning_system():
         tool_output={"content": "print('hello')"},
         user_prompt="Read the test file",
         agent_response="Here's the content",
-        project_id=project_id
+        project_id=project_id,
     )
     capture.capture(obs1)
 
@@ -57,7 +56,7 @@ def test_learning_system():
         tool_output={"success": True},
         user_prompt="Fix the bug",
         agent_response="Fixed",
-        project_id=project_id
+        project_id=project_id,
     )
     capture.capture(obs2)
 
@@ -81,7 +80,12 @@ def test_learning_system():
         {"timestamp": datetime.now().isoformat(), "tool_name": "Read", "project_id": project_id},
         {"timestamp": datetime.now().isoformat(), "tool_name": "Read", "project_id": project_id},
         {"timestamp": datetime.now().isoformat(), "tool_name": "Read", "project_id": project_id},
-        {"timestamp": datetime.now().isoformat(), "tool_name": "Edit", "user_prompt": "no, that's wrong", "project_id": project_id},
+        {
+            "timestamp": datetime.now().isoformat(),
+            "tool_name": "Edit",
+            "user_prompt": "no, that's wrong",
+            "project_id": project_id,
+        },
     ]
 
     instincts = extractor.extract_from_observations(sample_obs)
@@ -141,5 +145,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n✗ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

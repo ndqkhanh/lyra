@@ -187,8 +187,8 @@ class ZettelkastenMemoryStore:
 
         outgoing = self._links.get(note_id, [])
         result["links"] = [
-            {"target_id": l.target_id, "type": l.link_type.value}
-            for l in outgoing
+            {"target_id": link.target_id, "type": link.link_type.value}
+            for link in outgoing
         ]
 
         if depth > 0:

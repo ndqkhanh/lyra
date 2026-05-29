@@ -19,9 +19,11 @@ from typing import Any
 # PHASE 5: RESEARCH & LEARNING
 # ============================================================================
 
+
 @dataclass
 class ResearchQuery:
     """A research query with results."""
+
     query: str
     sources: list[str]
     findings: list[str]
@@ -32,6 +34,7 @@ class ResearchQuery:
 @dataclass
 class ReasoningStrategy:
     """A reusable reasoning strategy."""
+
     name: str
     description: str
     steps: list[str]
@@ -57,7 +60,9 @@ class ReasoningBank:
         self.strategies[strategy.name] = strategy
         self._save()
 
-    def retrieve_strategy(self, task: str, min_success_rate: float = 0.7) -> ReasoningStrategy | None:
+    def retrieve_strategy(
+        self, task: str, min_success_rate: float = 0.7
+    ) -> ReasoningStrategy | None:
         """
         Retrieve relevant strategy with conservative threshold.
 
@@ -85,7 +90,9 @@ class ReasoningBank:
                 continue
 
             # Calculate relevance
-            relevance = sum(1 for word in strategy.description.lower().split() if word in task_lower)
+            relevance = sum(
+                1 for word in strategy.description.lower().split() if word in task_lower
+            )
 
             score = relevance * success_rate
             if score > best_score:
@@ -144,8 +151,10 @@ class ResearchEngine:
 # PHASE 6: SAFETY & GOVERNANCE
 # ============================================================================
 
+
 class ThreatLevel(str, Enum):
     """Threat severity level."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -155,6 +164,7 @@ class ThreatLevel(str, Enum):
 @dataclass
 class SecurityThreat:
     """A detected security threat."""
+
     type: str
     level: ThreatLevel
     description: str
@@ -276,9 +286,11 @@ class SafetyGuard:
 # PHASE 7: EVALUATION & TELEMETRY
 # ============================================================================
 
+
 @dataclass
 class Metric:
     """A performance metric."""
+
     name: str
     value: float
     unit: str
@@ -352,6 +364,7 @@ class TelemetrySystem:
 # ============================================================================
 # PHASE 8: INTEGRATION
 # ============================================================================
+
 
 class LyraSystem:
     """

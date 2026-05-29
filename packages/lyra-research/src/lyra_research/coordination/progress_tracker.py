@@ -2,6 +2,7 @@
 
 Tracks progress of individual roles and overall pipeline progress.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -222,16 +223,18 @@ class ProgressTracker:
             "completed_roles": completed_roles,
             "failed_roles": failed_roles,
             "overall_progress": self.get_pipeline_progress(),
-            "started_at": self._pipeline_started_at.isoformat() if self._pipeline_started_at else None,
-            "completed_at": self._pipeline_completed_at.isoformat() if self._pipeline_completed_at else None,
+            "started_at": (
+                self._pipeline_started_at.isoformat() if self._pipeline_started_at else None
+            ),
+            "completed_at": (
+                self._pipeline_completed_at.isoformat() if self._pipeline_completed_at else None
+            ),
             "duration_seconds": duration,
             "roles": {name: self.get_role_status(name) for name in self._role_names},
         }
 
     def reset(self) -> None:
         """Reset all progress tracking."""
-        self._progress = {
-            name: RoleProgress(role_name=name) for name in self._role_names
-        }
+        self._progress = {name: RoleProgress(role_name=name) for name in self._role_names}
         self._pipeline_started_at = None
         self._pipeline_completed_at = None

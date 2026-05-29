@@ -243,12 +243,16 @@ class IntegratedAgent:
             last_check_time=self._last_safety_check,
         )
 
-    def _post_turn_capture(
-        self, user_text: str, result: TurnResult, session_id: str
-    ) -> None:
+    def _post_turn_capture(self, user_text: str, result: TurnResult, session_id: str) -> None:
         """Capture experience after a completed turn."""
-        is_success = result.stopped_by == "end_turn" and not result.final_text.startswith("Action denied")
-        effective_outcome = "success" if is_success else ("failure" if result.stopped_by != "end_turn" else "partial")
+        is_success = result.stopped_by == "end_turn" and not result.final_text.startswith(
+            "Action denied"
+        )
+        effective_outcome = (
+            "success"
+            if is_success
+            else ("failure" if result.stopped_by != "end_turn" else "partial")
+        )
 
         record = ExperienceRecord(
             id=f"exp-{uuid.uuid4().hex[:12]}",
@@ -294,9 +298,18 @@ class IntegratedAgent:
         }
 
     def _halted_result(self) -> TurnResult:
+        reason_val = (
+            self.halt_controller.halt_reason.value
+            if self.halt_controller.halt_reason
+            else "unknown"
+        )
         return TurnResult(
-            final_text=f"Agent is {self.halt_controller.status.value}: {self.halt_controller.halt_reason.value if self.halt_controller.halt_reason else 'unknown'}",
-            stopped_by=self.halt_controller.halt_reason.value if self.halt_controller.halt_reason else "halted",
+            final_text=f"Agent is {self.halt_controller.status.value}: {reason_val}",
+            stopped_by=(
+                self.halt_controller.halt_reason.value
+                if self.halt_controller.halt_reason
+                else "halted"
+            ),
         )
 
     @property
@@ -315,6 +328,7 @@ class IntegratedAgent:
     def _run_async(coro: Any) -> None:
         """Run a coroutine, scheduling on running loop or standalone."""
         import asyncio
+
         try:
             loop = asyncio.get_running_loop()
             loop.create_task(coro)

@@ -41,13 +41,13 @@ class ParetoError(FitnessError):
 class ObjectiveDimension(Enum):
     """Dimensions for multi-objective fitness evaluation."""
 
-    SPEED = auto()         # Task completion speed
-    QUALITY = auto()       # Output quality
-    COST = auto()          # Computational/token cost
-    RELIABILITY = auto()   # Consistency / error rate
+    SPEED = auto()  # Task completion speed
+    QUALITY = auto()  # Output quality
+    COST = auto()  # Computational/token cost
+    RELIABILITY = auto()  # Consistency / error rate
     ADAPTABILITY = auto()  # Performance on novel tasks
-    SAFETY = auto()        # Safety constraint adherence
-    EFFICIENCY = auto()    # Resource utilization efficiency
+    SAFETY = auto()  # Safety constraint adherence
+    EFFICIENCY = auto()  # Resource utilization efficiency
 
 
 # ── Data Classes ────────────────────────────────────────────────────────────────
@@ -69,14 +69,8 @@ class ObjectiveVector:
         Dominates if it is at least as good in all dimensions and strictly
         better in at least one.
         """
-        at_least_as_good = all(
-            self.values[dim] >= other.values[dim]
-            for dim in ObjectiveDimension
-        )
-        strictly_better = any(
-            self.values[dim] > other.values[dim]
-            for dim in ObjectiveDimension
-        )
+        at_least_as_good = all(self.values[dim] >= other.values[dim] for dim in ObjectiveDimension)
+        strictly_better = any(self.values[dim] > other.values[dim] for dim in ObjectiveDimension)
         return at_least_as_good and strictly_better
 
     def to_list(self) -> list[float]:
@@ -85,7 +79,9 @@ class ObjectiveVector:
     @classmethod
     def from_list(cls, values: list[float]) -> ObjectiveVector:
         dims = list(ObjectiveDimension)
-        return cls(values={dim: values[i] if i < len(values) else 0.0 for i, dim in enumerate(dims)})
+        return cls(
+            values={dim: values[i] if i < len(values) else 0.0 for i, dim in enumerate(dims)}
+        )
 
 
 @dataclass
@@ -95,15 +91,17 @@ class FitnessWeights:
     Higher weight = more important in combined fitness.
     """
 
-    weights: dict[ObjectiveDimension, float] = field(default_factory=lambda: {
-        ObjectiveDimension.SPEED: 0.15,
-        ObjectiveDimension.QUALITY: 0.30,
-        ObjectiveDimension.COST: 0.15,
-        ObjectiveDimension.RELIABILITY: 0.20,
-        ObjectiveDimension.ADAPTABILITY: 0.10,
-        ObjectiveDimension.SAFETY: 0.05,
-        ObjectiveDimension.EFFICIENCY: 0.05,
-    })
+    weights: dict[ObjectiveDimension, float] = field(
+        default_factory=lambda: {
+            ObjectiveDimension.SPEED: 0.15,
+            ObjectiveDimension.QUALITY: 0.30,
+            ObjectiveDimension.COST: 0.15,
+            ObjectiveDimension.RELIABILITY: 0.20,
+            ObjectiveDimension.ADAPTABILITY: 0.10,
+            ObjectiveDimension.SAFETY: 0.05,
+            ObjectiveDimension.EFFICIENCY: 0.05,
+        }
+    )
 
     def __post_init__(self) -> None:
         self.normalize()
@@ -116,10 +114,7 @@ class FitnessWeights:
 
     def combine(self, vector: ObjectiveVector) -> float:
         """Combine an objective vector into a scalar fitness score."""
-        return sum(
-            self.weights[dim] * vector.values[dim]
-            for dim in ObjectiveDimension
-        )
+        return sum(self.weights[dim] * vector.values[dim] for dim in ObjectiveDimension)
 
     def adapt(self, performance_history: list[dict[str, float]]) -> FitnessWeights:
         """Adapt weights based on historical performance.
@@ -132,7 +127,9 @@ class FitnessWeights:
 
         new_weights: dict[ObjectiveDimension, float] = {}
         for dim in ObjectiveDimension:
-            values = [h.get(dim.name.lower(), 0.0) for h in performance_history if dim.name.lower() in h]
+            values = [
+                h.get(dim.name.lower(), 0.0) for h in performance_history if dim.name.lower() in h
+            ]
             if len(values) < 2:
                 new_weights[dim] = self.weights[dim]
                 continue
@@ -224,26 +221,26 @@ class ParetoFrontier:
                 return False  # Dominated, not added
 
         # Remove existing solutions that this one dominates
-        self._frontier = [
-            (fid, fvec)
-            for fid, fvec in self._frontier
-            if not vector.dominates(fvec)
-        ]
+        self._frontier = [(fid, fvec) for fid, fvec in self._frontier if not vector.dominates(fvec)]
 
         self._frontier.append((genome_id, vector))
 
         # Trim to max size
         if len(self._frontier) > self._max_size:
-            self._frontier = self._frontier[-self._max_size:]
+            self._frontier = self._frontier[-self._max_size :]
 
-        self._history.append({
-            "genome_id": genome_id,
-            "frontier_size": len(self._frontier),
-            "timestamp": time.time(),
-        })
+        self._history.append(
+            {
+                "genome_id": genome_id,
+                "frontier_size": len(self._frontier),
+                "timestamp": time.time(),
+            }
+        )
 
         logger.debug(
-            "Added %s to Pareto frontier (size=%d)", genome_id, len(self._frontier),
+            "Added %s to Pareto frontier (size=%d)",
+            genome_id,
+            len(self._frontier),
         )
         return True
 
@@ -264,9 +261,7 @@ class ParetoFrontier:
             return 0.0
 
         if reference_point is None:
-            reference_point = ObjectiveVector(
-                values=dict.fromkeys(ObjectiveDimension, 0.0)
-            )
+            reference_point = ObjectiveVector(values=dict.fromkeys(ObjectiveDimension, 0.0))
 
         # Simple approximation: average distance from reference
         total_volume = 0.0
@@ -355,13 +350,15 @@ class FitnessEvaluator:
         combined = self._weights.combine(vector)
 
         # Record
-        self._evaluation_history.append({
-            "agent_id": genome.agent_id,
-            "generation": genome.generation,
-            "fitness": combined,
-            "objectives": {dim.name: vector.values[dim] for dim in ObjectiveDimension},
-            "duration_ms": (time.perf_counter() - start) * 1000,
-        })
+        self._evaluation_history.append(
+            {
+                "agent_id": genome.agent_id,
+                "generation": genome.generation,
+                "fitness": combined,
+                "objectives": {dim.name: vector.values[dim] for dim in ObjectiveDimension},
+                "duration_ms": (time.perf_counter() - start) * 1000,
+            }
+        )
 
         self._evaluation_count += 1
 
@@ -422,10 +419,7 @@ class FitnessEvaluator:
         ruggedness = 0.0
         if n > 1:
             sorted_scores = sorted(scores)
-            diffs = [
-                abs(sorted_scores[i + 1] - sorted_scores[i])
-                for i in range(n - 1)
-            ]
+            diffs = [abs(sorted_scores[i + 1] - sorted_scores[i]) for i in range(n - 1)]
             ruggedness = sum(diffs) / (n - 1) if diffs else 0.0
 
         # Gradient norm: average pairwise fitness difference
@@ -445,8 +439,8 @@ class FitnessEvaluator:
             sorted_s = sorted(scores)
             window = max(3, n // 10)
             for i in range(window, n - window):
-                left_max = max(sorted_s[i - window:i])
-                right_max = max(sorted_s[i + 1:i + window + 1])
+                left_max = max(sorted_s[i - window : i])
+                right_max = max(sorted_s[i + 1 : i + window + 1])
                 if sorted_s[i] > left_max and sorted_s[i] > right_max:
                     local_optima_count += 1
 
@@ -455,8 +449,7 @@ class FitnessEvaluator:
         plateaus = 0
         for i, s1 in enumerate(scores):
             similar = sum(
-                1 for j, s2 in enumerate(scores)
-                if i != j and abs(s1 - s2) < plateau_threshold
+                1 for j, s2 in enumerate(scores) if i != j and abs(s1 - s2) < plateau_threshold
             )
             if similar >= n * 0.1:  # 10% of population is similar
                 plateaus += 1
@@ -496,11 +489,13 @@ class FitnessEvaluator:
                 # Simulate task execution
                 task_score = 0.5 + 0.5 * (time.time() % 1.0)
                 successes += 1
-                task_results.append({
-                    "task_id": task_idx,
-                    "score": task_score,
-                    "time_ms": 100 + (time.time() * 1000) % 500,
-                })
+                task_results.append(
+                    {
+                        "task_id": task_idx,
+                        "score": task_score,
+                        "time_ms": 100 + (time.time() * 1000) % 500,
+                    }
+                )
             except Exception as exc:
                 errors.append(f"Task {task_idx}: {exc}")
                 task_results.append({"task_id": task_idx, "error": str(exc)})
@@ -566,9 +561,12 @@ class FitnessEvaluator:
         # Use benchmark scores, falling back to genome-extracted scores
         if result.scores:
             return ObjectiveVector(values=dict(result.scores))
-        return ObjectiveVector(values=FitnessEvaluator._extract_dimension_scores(
-            genome, result.success_rate,
-        ))
+        return ObjectiveVector(
+            values=FitnessEvaluator._extract_dimension_scores(
+                genome,
+                result.success_rate,
+            )
+        )
 
     # ── Properties ───────────────────────────────────────────────────────────
 

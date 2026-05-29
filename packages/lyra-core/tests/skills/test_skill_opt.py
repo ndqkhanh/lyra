@@ -120,7 +120,10 @@ class TestSkillOptimizer:
 
     def test_returns_pass_history(self):
         optimizer = SkillOptimizer()
-        text = "When you run it, make sure the output is correct. In order to verify, please note that errors matter."
+        text =(
+            "When you run it, make sure the output is correct. In order to verify, please note"
+            "that errors matter."
+        )
         result, passes = optimizer.optimize(text)
         assert isinstance(passes, list)
         for p in passes:

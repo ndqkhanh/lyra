@@ -21,6 +21,7 @@ from lyra_research.memory import (
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def make_note(**kwargs) -> ResearchNote:
     defaults = {
         "topic": "attention mechanisms",
@@ -36,6 +37,7 @@ def make_note(**kwargs) -> ResearchNote:
 
 def make_corpus_entry(**kwargs) -> CorpusEntry:
     from uuid import uuid4
+
     defaults = {
         "id": str(uuid4()),
         "source_id": "arxiv:1234.5678",
@@ -81,6 +83,7 @@ def make_case(**kwargs) -> ResearchCase:
 # ResearchNoteStore
 # ---------------------------------------------------------------------------
 
+
 def test_note_store_add_and_get(tmp_path):
     store = ResearchNoteStore(store_path=tmp_path / "notes.json")
     note = make_note()
@@ -99,7 +102,9 @@ def test_note_store_get_missing_returns_none(tmp_path):
 def test_note_store_search_by_keyword(tmp_path):
     store = ResearchNoteStore(store_path=tmp_path / "notes.json")
     store.add(make_note(title="Transformers for NLP", content="Self-attention is core."))
-    store.add(make_note(title="CNN for vision", content="Convolutions excel at images.", tags=["vision"]))
+    store.add(
+        make_note(title="CNN for vision", content="Convolutions excel at images.", tags=["vision"])
+    )
     results = store.search("self-attention")
     assert any("Transformers" in r.title for r in results)
 
@@ -240,6 +245,7 @@ def test_note_store_loads_empty_on_missing_file(tmp_path):
 # LocalCorpus
 # ---------------------------------------------------------------------------
 
+
 def test_local_corpus_store_and_get(tmp_path):
     corpus = LocalCorpus(db_path=tmp_path / "corpus.db")
     entry = make_corpus_entry()
@@ -264,8 +270,22 @@ def test_local_corpus_no_duplicate(tmp_path):
 
 def test_local_corpus_search(tmp_path):
     corpus = LocalCorpus(db_path=tmp_path / "corpus.db")
-    corpus.store(make_corpus_entry(source_id="s1", title="Transformer self-attention", abstract="Self-attention rocks", full_text="Details about self-attention."))
-    corpus.store(make_corpus_entry(source_id="s2", title="CNN for vision", abstract="Convolutions are great", full_text="No mention of that topic here."))
+    corpus.store(
+        make_corpus_entry(
+            source_id="s1",
+            title="Transformer self-attention",
+            abstract="Self-attention rocks",
+            full_text="Details about self-attention.",
+        )
+    )
+    corpus.store(
+        make_corpus_entry(
+            source_id="s2",
+            title="CNN for vision",
+            abstract="Convolutions are great",
+            full_text="No mention of that topic here.",
+        )
+    )
     results = corpus.search("self-attention")
     assert len(results) == 1
     assert results[0].source_id == "s1"
@@ -273,7 +293,9 @@ def test_local_corpus_search(tmp_path):
 
 def test_local_corpus_search_full_text(tmp_path):
     corpus = LocalCorpus(db_path=tmp_path / "corpus.db")
-    corpus.store(make_corpus_entry(source_id="s1", full_text="attention mechanism detail", abstract=""))
+    corpus.store(
+        make_corpus_entry(source_id="s1", full_text="attention mechanism detail", abstract="")
+    )
     results = corpus.search("attention mechanism detail")
     assert len(results) >= 1
 
@@ -334,6 +356,7 @@ def test_local_corpus_metadata_roundtrip(tmp_path):
 # ---------------------------------------------------------------------------
 # ResearchStrategyMemory
 # ---------------------------------------------------------------------------
+
 
 def test_strategy_memory_save_and_retrieve(tmp_path):
     mem = ResearchStrategyMemory(store_path=tmp_path / "strategies.json")
@@ -407,6 +430,7 @@ def test_strategy_memory_loads_empty_on_missing_file(tmp_path):
 # ---------------------------------------------------------------------------
 # SessionCaseBank
 # ---------------------------------------------------------------------------
+
 
 def test_case_bank_save_and_get_all(tmp_path):
     bank = SessionCaseBank(store_path=tmp_path / "cases.json")

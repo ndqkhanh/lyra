@@ -23,13 +23,9 @@ logger = logging.getLogger(__name__)
 
 _EMAIL_PATTERN = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
 _SSN_PATTERN = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
-_PHONE_PATTERN = re.compile(
-    r"\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b"
-)
+_PHONE_PATTERN = re.compile(r"\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b")
 _CREDIT_CARD_PATTERN = re.compile(r"\b(?:\d{4}[-.\s]?){3}\d{4}\b")
-_IP_ADDRESS_PATTERN = re.compile(
-    r"\b(?:\d{1,3}\.){3}\d{1,3}\b"
-)
+_IP_ADDRESS_PATTERN = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")
 
 _TOXIC_PATTERNS: list[tuple[re.Pattern, float]] = [
     (re.compile(r"(?i)\b(hate|stupid|idiot|dumb|moron|trash)\b"), 0.4),
@@ -71,8 +67,16 @@ class InlineGuardSystem:
 
     def __init__(self) -> None:
         self._nli_vocab: set[str] = {
-            "therefore", "consequently", "thus", "hence", "accordingly",
-            "implies", "entails", "follows", "so", "because",
+            "therefore",
+            "consequently",
+            "thus",
+            "hence",
+            "accordingly",
+            "implies",
+            "entails",
+            "follows",
+            "so",
+            "because",
         }
 
     # ------------------------------------------------------------------
@@ -142,9 +146,7 @@ class InlineGuardSystem:
     # ------------------------------------------------------------------
     # Simple NLI entailment heuristic
     # ------------------------------------------------------------------
-    def check_nli_entailment(
-        self, premise: str, hypothesis: str
-    ) -> float:
+    def check_nli_entailment(self, premise: str, hypothesis: str) -> float:
         """Heuristic NLI score based on lexical overlap + entailment cues.
 
         Returns a score in [0, 1] where 1 = strong entailment.
@@ -173,9 +175,7 @@ class InlineGuardSystem:
     # ------------------------------------------------------------------
     # Token entropy
     # ------------------------------------------------------------------
-    def compute_token_entropy(
-        self, tokens: Sequence[str]
-    ) -> float:
+    def compute_token_entropy(self, tokens: Sequence[str]) -> float:
         """Compute normalised Shannon entropy over token frequencies.
 
         Returns a value in [0, 1] where 1 = maximum uncertainty.
@@ -260,7 +260,9 @@ class InlineGuardSystem:
             SecurityCheck(
                 check_type="injection",
                 passed=not injection_detected,
-                details="; ".join(injection_details) if injection_details else "no injection detected",
+                details=(
+                    "; ".join(injection_details) if injection_details else "no injection detected"
+                ),
             )
         )
 
@@ -268,9 +270,7 @@ class InlineGuardSystem:
 
         # Log if we exceeded the 200 ms budget
         if elapsed_ms > 200.0:
-            logger.warning(
-                "Inline guard budget exceeded: %.1f ms (target <200 ms)", elapsed_ms
-            )
+            logger.warning("Inline guard budget exceeded: %.1f ms (target <200 ms)", elapsed_ms)
 
         return InlineGuardResult(
             passed=overall_passed,
@@ -292,9 +292,7 @@ class InlineGuardSystem:
         return VerificationResult(
             layer=1,
             verdict=Verdict.PASS if guard.passed else Verdict.FAIL,
-            confidence=1.0 - guard.toxicity_score
-            if not guard.injection_detected
-            else 0.0,
+            confidence=1.0 - guard.toxicity_score if not guard.injection_detected else 0.0,
             evidence=f"inline guards: passed={guard.passed}, "
             f"toxicity={guard.toxicity_score:.3f}, "
             f"injection={guard.injection_detected}, "

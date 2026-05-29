@@ -17,9 +17,11 @@ Refactor a Python module from procedural to clean architecture.
 5. Run coverage check
 
 ## Examples
-Here is a very long example showing the before state of a module with hundreds of lines of code that demonstrates the problem clearly and concisely.
+Here is a very long example showing the before state of a module with hundreds of lines of code
+that demonstrates the problem clearly and concisely.
 
-Another example showing the after state with all the refactored components properly separated into clean architecture layers following the dependency inversion principle.
+Another example showing the after state with all the refactored components properly separated into
+clean architecture layers following the dependency inversion principle.
 
 A third example demonstrating edge cases with circular dependencies and how to resolve them.
 
@@ -31,7 +33,8 @@ A fourth example with async patterns and how they fit into the clean architectur
 - v1.0: Initial version
 
 ## Appendix
-Additional notes about compatibility with older Python versions and special considerations for large codebases with many modules.
+Additional notes about compatibility with older Python versions and special considerations for
+large codebases with many modules.
 """
 
 

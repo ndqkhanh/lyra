@@ -1,4 +1,5 @@
-"""Lyra Agent Swarm — Multi-agent orchestration framework with discipline roles, Shapley-value team formation, sprint workflows, consensus building, and autonomous operation."""
+"""Lyra Agent Swarm — Multi-agent orchestration framework with discipline roles, Shapley-value team
+formation, sprint workflows, consensus building, and autonomous operation."""
 
 from __future__ import annotations
 

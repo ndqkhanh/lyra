@@ -7,6 +7,7 @@
 
 Both follow the ``(session, args: str) -> CommandResult`` contract and never raise.
 """
+
 from __future__ import annotations
 
 import json
@@ -17,12 +18,15 @@ from typing import Any
 # Result proxy
 # ---------------------------------------------------------------------------
 
+
 def _result_class() -> type:
     try:
         from .session import CommandResult  # type: ignore[attr-defined]
+
         return CommandResult
     except Exception:
         from lyra_cli.commands.registry import CommandResult as _R
+
         return _R
 
 
@@ -39,10 +43,10 @@ def _ok(text: str, renderable: Any = None) -> Any:
 
 # (priority_label, emoji, border_color, states)
 _PRIORITY_GROUPS: list[tuple[str, str, str, frozenset[str]]] = [
-    ("P0 Needs Attention",  "🔴", "#FF5370", frozenset({"needs_input", "failed"})),
+    ("P0 Needs Attention", "🔴", "#FF5370", frozenset({"needs_input", "failed"})),
     ("P1 Ready for Review", "🟡", "#FFC857", frozenset({"ready_for_review"})),
-    ("P2 Working",          "🔵", "#00E5FF", frozenset({"working"})),
-    ("P3 Completed",        "✅", "#7CFFB2", frozenset({"completed"})),
+    ("P2 Working", "🔵", "#00E5FF", frozenset({"working"})),
+    ("P3 Completed", "✅", "#7CFFB2", frozenset({"completed"})),
 ]
 
 
@@ -86,6 +90,7 @@ def _read_session_files() -> list[dict[str, Any]]:
 # /monitor
 # ---------------------------------------------------------------------------
 
+
 def cmd_monitor(session: Any, args: str) -> Any:
     """Operator fleet view — sessions grouped by attention priority."""
     try:
@@ -93,6 +98,7 @@ def cmd_monitor(session: Any, args: str) -> Any:
         from rich.panel import Panel
         from rich.table import Table
         from rich.text import Text
+
         _has_rich = True
     except ImportError:
         _has_rich = False
@@ -149,20 +155,20 @@ def cmd_monitor(session: Any, args: str) -> Any:
     from rich.text import Text
 
     state_colors: dict[str, str] = {
-        "needs_input":     "#FF5370",
-        "failed":          "#FF5370",
+        "needs_input": "#FF5370",
+        "failed": "#FF5370",
         "ready_for_review": "#FFC857",
-        "working":         "#00E5FF",
-        "completed":       "#7CFFB2",
+        "working": "#00E5FF",
+        "completed": "#7CFFB2",
     }
 
     t = Table(box=SIMPLE, show_header=True, show_edge=False, pad_edge=False)
-    t.add_column("priority",      style="bright_white",  no_wrap=True, width=26)
-    t.add_column("session_id",    style="#00E5FF",        no_wrap=True, width=28)
-    t.add_column("model",         style="#7CFFB2",        no_wrap=True, width=16)
-    t.add_column("turns",         justify="right",        width=6)
-    t.add_column("cost",          justify="right",        width=9)
-    t.add_column("status",        no_wrap=True,           width=18)
+    t.add_column("priority", style="bright_white", no_wrap=True, width=26)
+    t.add_column("session_id", style="#00E5FF", no_wrap=True, width=28)
+    t.add_column("model", style="#7CFFB2", no_wrap=True, width=16)
+    t.add_column("turns", justify="right", width=6)
+    t.add_column("cost", justify="right", width=9)
+    t.add_column("status", no_wrap=True, width=18)
     t.add_column("last_activity", style="#6B7280")
 
     for s in all_sessions:
@@ -199,9 +205,9 @@ def cmd_monitor(session: Any, args: str) -> Any:
 
 _STEP_PATTERNS: list[tuple[str, list[str]]] = [
     ("intent_classification", ["intent", "classify", "understand", "goal", "what do you want"]),
-    ("verification",          ["verify", "check", "assert", "test", "pass", "fail", "correct"]),
-    ("tool_execution",        ["tool", "execute", "run", "bash", "file", "read", "write", "edit"]),
-    ("synthesis",             ["summary", "synthesize", "combine", "result", "conclusion", "answer"]),
+    ("verification", ["verify", "check", "assert", "test", "pass", "fail", "correct"]),
+    ("tool_execution", ["tool", "execute", "run", "bash", "file", "read", "write", "edit"]),
+    ("synthesis", ["summary", "synthesize", "combine", "result", "conclusion", "answer"]),
 ]
 
 
@@ -219,6 +225,7 @@ def _infer_step_type(content: str) -> str:
 # /aer
 # ---------------------------------------------------------------------------
 
+
 def cmd_aer(session: Any, args: str) -> Any:
     """Agent Execution Record viewer."""
     raw = (args or "").strip()
@@ -231,7 +238,9 @@ def cmd_aer(session: Any, args: str) -> Any:
 
     if use_current:
         # Derive from current session's chat history / history
-        chat_history: list[Any] = getattr(session, "_chat_history", []) or getattr(session, "history", [])
+        chat_history: list[Any] = getattr(session, "_chat_history", []) or getattr(
+            session, "history", []
+        )
     else:
         # Try to load from file
         candidate = _SESSIONS_DIR / f"{target_sid}.json"
@@ -251,13 +260,15 @@ def cmd_aer(session: Any, args: str) -> Any:
     for item in chat_history:
         if isinstance(item, str):
             turn_num += 1
-            records.append({
-                "turn":      turn_num,
-                "role":      "user",
-                "step_type": "intent_classification",
-                "snippet":   item[:80],
-                "tokens":    len(item) // 4,
-            })
+            records.append(
+                {
+                    "turn": turn_num,
+                    "role": "user",
+                    "step_type": "intent_classification",
+                    "snippet": item[:80],
+                    "tokens": len(item) // 4,
+                }
+            )
         elif isinstance(item, dict):
             role = item.get("role", "unknown")
             content = item.get("content", "")
@@ -265,16 +276,20 @@ def cmd_aer(session: Any, args: str) -> Any:
                 content = str(content)
             if role == "user":
                 turn_num += 1
-            records.append({
-                "turn":      turn_num,
-                "role":      role,
-                "step_type": _infer_step_type(content),
-                "snippet":   content[:80],
-                "tokens":    len(content) // 4,
-            })
+            records.append(
+                {
+                    "turn": turn_num,
+                    "role": role,
+                    "step_type": _infer_step_type(content),
+                    "snippet": content[:80],
+                    "tokens": len(content) // 4,
+                }
+            )
 
     if not records:
-        return _ok(f"no message history found for session {current_sid if use_current else target_sid}")
+        return _ok(
+            f"no message history found for session {current_sid if use_current else target_sid}"
+        )
 
     # Timeline mode — flat event list
     if timeline_mode:
@@ -288,9 +303,7 @@ def cmd_aer(session: Any, args: str) -> Any:
 
     # Table mode
     plain_lines = [f"AER — {len(records)} record(s)"]
-    plain_lines.append(
-        f"  {'turn':>4}  {'role':<12}  {'step_type':<24}  {'snippet':<56}  tokens"
-    )
+    plain_lines.append(f"  {'turn':>4}  {'role':<12}  {'step_type':<24}  {'snippet':<56}  tokens")
     plain_lines.append("  " + "-" * 110)
     for r in records:
         plain_lines.append(
@@ -304,6 +317,7 @@ def cmd_aer(session: Any, args: str) -> Any:
         from rich.panel import Panel
         from rich.table import Table
         from rich.text import Text
+
         _has_rich = True
     except ImportError:
         _has_rich = False
@@ -318,17 +332,17 @@ def cmd_aer(session: Any, args: str) -> Any:
 
     step_colors: dict[str, str] = {
         "intent_classification": "#FFC857",
-        "tool_execution":        "#00E5FF",
-        "synthesis":             "#7CFFB2",
-        "verification":          "#FF2D95",
+        "tool_execution": "#00E5FF",
+        "synthesis": "#7CFFB2",
+        "verification": "#FF2D95",
     }
 
     t = Table(box=SIMPLE, show_header=True, show_edge=False, pad_edge=False)
-    t.add_column("turn",      style="#6B7280",     justify="right", width=5)
-    t.add_column("role",      style="bold #00E5FF", no_wrap=True,   width=12)
-    t.add_column("step_type", no_wrap=True,                         width=24)
-    t.add_column("snippet",   style="bright_white")
-    t.add_column("tokens",    justify="right",                      width=7)
+    t.add_column("turn", style="#6B7280", justify="right", width=5)
+    t.add_column("role", style="bold #00E5FF", no_wrap=True, width=12)
+    t.add_column("step_type", no_wrap=True, width=24)
+    t.add_column("snippet", style="bright_white")
+    t.add_column("tokens", justify="right", width=7)
 
     for r in records:
         color = step_colors.get(r["step_type"], "#6B7280")

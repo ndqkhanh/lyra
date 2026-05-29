@@ -73,9 +73,9 @@ class CockpitConfigLoader:
             with open(path) as f:
                 data = json.load(f)
         except FileNotFoundError:
-            raise ConfigError(f"Configuration file not found: {path}")
+            raise ConfigError(f"Configuration file not found: {path}") from None
         except json.JSONDecodeError as e:
-            raise ConfigError(f"Invalid JSON in configuration file: {e}")
+            raise ConfigError(f"Invalid JSON in configuration file: {e}") from e
 
         iaa_data = data.get("iaa", {})
         monitor_data = data.get("monitor", {})
@@ -159,4 +159,4 @@ class CockpitConfigLoader:
             with open(path, "w") as f:
                 json.dump(data, f, indent=2)
         except OSError as e:
-            raise ConfigError(f"Failed to write configuration file: {e}")
+            raise ConfigError(f"Failed to write configuration file: {e}") from e

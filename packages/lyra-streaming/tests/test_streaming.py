@@ -432,12 +432,14 @@ class TestAGUIProtocol:
         assert data["type"] == "RUN_STARTED"
 
     def test_decode_run_started(self, protocol):
-        raw = json.dumps({
-            "type": "RUN_STARTED",
-            "run_id": "run-1",
-            "sequence_number": 0,
-            "input_message": "Hi",
-        }).encode("utf-8")
+        raw = json.dumps(
+            {
+                "type": "RUN_STARTED",
+                "run_id": "run-1",
+                "sequence_number": 0,
+                "input_message": "Hi",
+            }
+        ).encode("utf-8")
         event = protocol.decode(raw)
         assert isinstance(event, RunStartedEvent)
         assert event.run_id == "run-1"
@@ -448,19 +450,51 @@ class TestAGUIProtocol:
         events = [
             RunStartedEvent(EventType.RUN_STARTED, "r1", input_message="go"),
             StepStartedEvent(EventType.STEP_STARTED, "r1", step_name="think", step_index=0),
-            StepFinishedEvent(EventType.STEP_FINISHED, "r1", step_name="think", step_index=0, duration_ms=100.0),
-            RunFinishedEvent(EventType.RUN_FINISHED, "r1", output_message="ok", total_steps=1, duration_ms=1000.0),
-            RunErrorEvent(EventType.RUN_ERROR, "r1", error_code="E1", error_message="oops", recoverable=False),
-            TextMessageStartEvent(EventType.TEXT_MESSAGE_START, "r1", message_id="m1", role="assistant"),
-            TextMessageContentEvent(EventType.TEXT_MESSAGE_CONTENT, "r1", message_id="m1", delta="Hi"),
+            StepFinishedEvent(
+                EventType.STEP_FINISHED, "r1", step_name="think", step_index=0, duration_ms=100.0
+            ),
+            RunFinishedEvent(
+                EventType.RUN_FINISHED, "r1", output_message="ok", total_steps=1, duration_ms=1000.0
+            ),
+            RunErrorEvent(
+                EventType.RUN_ERROR, "r1", error_code="E1", error_message="oops", recoverable=False
+            ),
+            TextMessageStartEvent(
+                EventType.TEXT_MESSAGE_START, "r1", message_id="m1", role="assistant"
+            ),
+            TextMessageContentEvent(
+                EventType.TEXT_MESSAGE_CONTENT, "r1", message_id="m1", delta="Hi"
+            ),
             TextMessageEndEvent(EventType.TEXT_MESSAGE_END, "r1", message_id="m1"),
-            ToolCallStartEvent(EventType.TOOL_CALL_START, "r1", tool_call_id="t1", tool_name="search"),
+            ToolCallStartEvent(
+                EventType.TOOL_CALL_START, "r1", tool_call_id="t1", tool_name="search"
+            ),
             ToolCallArgsEvent(EventType.TOOL_CALL_ARGS, "r1", tool_call_id="t1", delta='{"q":'),
-            ToolCallEndEvent(EventType.TOOL_CALL_END, "r1", tool_call_id="t1", tool_name="search", arguments={"q": "AI"}),
-            ToolCallResultEvent(EventType.TOOL_CALL_RESULT, "r1", tool_call_id="t1", tool_name="search", result=["x"]),
+            ToolCallEndEvent(
+                EventType.TOOL_CALL_END,
+                "r1",
+                tool_call_id="t1",
+                tool_name="search",
+                arguments={"q": "AI"},
+            ),
+            ToolCallResultEvent(
+                EventType.TOOL_CALL_RESULT,
+                "r1",
+                tool_call_id="t1",
+                tool_name="search",
+                result=["x"],
+            ),
             StateSnapshotEvent(EventType.STATE_SNAPSHOT, "r1", state={"k": "v"}),
-            StateDeltaEvent(EventType.STATE_DELTA, "r1", operations=[{"op": "add", "path": "/k", "value": "v"}]),
-            InterruptEvent(EventType.INTERRUPT, "r1", interrupt_id="h1", interrupt_type="approval", message="OK?"),
+            StateDeltaEvent(
+                EventType.STATE_DELTA, "r1", operations=[{"op": "add", "path": "/k", "value": "v"}]
+            ),
+            InterruptEvent(
+                EventType.INTERRUPT,
+                "r1",
+                interrupt_id="h1",
+                interrupt_type="approval",
+                message="OK?",
+            ),
             CustomEvent(EventType.CUSTOM, "r1", name="custom1", payload={"data": 1}),
             RawEvent(EventType.RAW, "r1", content="raw-data"),
         ]
@@ -519,7 +553,9 @@ class TestAGUIProtocol:
             protocol.validate(event)
 
     def test_validate_state_delta_invalid_ops(self, protocol):
-        event = StateDeltaEvent(EventType.STATE_DELTA, "r1", operations="not-a-list")  # type: ignore[arg-type]
+        event = StateDeltaEvent(
+            EventType.STATE_DELTA, "r1", operations="not-a-list"
+        )  # type: ignore[arg-type]
         with pytest.raises(ValidationError, match="must be a list"):
             protocol.validate(event)
 

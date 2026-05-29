@@ -109,7 +109,7 @@ class CoTIntegrator:
 
     def self_consistency(self, prompt: str, num_samples: int = 5) -> str:
         samples: list[str] = []
-        for i in range(num_samples):
+        for _i in range(num_samples):
             steps = self.chain_of_thought(prompt, max_steps=3)
             samples.append(steps[-1] if steps else prompt)
 

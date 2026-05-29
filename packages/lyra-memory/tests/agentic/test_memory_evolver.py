@@ -1,4 +1,5 @@
 """Tests for memory_evolver.py — memory evolution on write."""
+
 from __future__ import annotations
 
 import pytest
@@ -99,7 +100,11 @@ class TestMemoryEvolver:
         assert len(results) == 0
 
     async def test_respects_max_evolutions(self, evolver):
-        evolver.llm.responses = [f"""{{"should_update": true, "reason": "update {i}", "new_content": "updated {i}", "new_keywords": ["kw{i}"], "new_tags": ["tag{i}"]}}""" for i in range(10)]
+        evolver.llm.responses = [
+            f'{{"should_update": true, "reason": "update {i}", "new_content": "updated {i}",'  # noqa: E501
+            f' "new_keywords": ["kw{i}"], "new_tags": ["tag{i}"]}}'
+            for i in range(10)
+        ]
 
         nearby = [
             {"id": f"note-{i}", "content": f"content {i}", "keywords": [], "tags": []}

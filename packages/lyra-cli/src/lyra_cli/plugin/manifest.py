@@ -79,7 +79,9 @@ class PluginManifest:
     metadata: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict:
-        kind_val = self.kind.value if isinstance(self.kind, PluginKind) else [k.value for k in self.kind]
+        kind_val = (
+            self.kind.value if isinstance(self.kind, PluginKind) else [k.value for k in self.kind]
+        )
         return {
             "name": self.name,
             "version": self.version,
@@ -94,8 +96,13 @@ class PluginManifest:
             "skills": self.skills,
             "agents": self.agents,
             "requires_python": self.requires_python,
-            "dependencies": [{"name": d.name, "version": d.version, "optional": d.optional} for d in self.dependencies],
-            "permissions": [{"tool": p.tool, "level": p.level, "reason": p.reason} for p in self.permissions],
+            "dependencies": [
+                {"name": d.name, "version": d.version, "optional": d.optional}
+                for d in self.dependencies
+            ],
+            "permissions": [
+                {"tool": p.tool, "level": p.level, "reason": p.reason} for p in self.permissions
+            ],
             "min_lyra_version": self.min_lyra_version,
             "max_lyra_version": self.max_lyra_version,
             "tags": self.tags,

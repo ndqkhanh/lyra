@@ -21,8 +21,16 @@ from lyra_context_profiler.strategies import (
 
 class _FakeElement:
     """Minimal element for testing the optimizer."""
-    def __init__(self, id, content="", token_count=100, importance_score=0.5,
-                 element_type="CODE", access_count=1):
+
+    def __init__(
+        self,
+        id,
+        content="",
+        token_count=100,
+        importance_score=0.5,
+        element_type="CODE",
+        access_count=1,
+    ):
         self.id = id
         self.content = content
         self.token_count = token_count
@@ -53,10 +61,18 @@ def optimizer():
 @pytest.fixture
 def elements():
     return {
-        "a": _FakeElement("a", "important core logic", token_count=500, importance_score=0.9, access_count=20),
-        "b": _FakeElement("b", "less important note", token_count=200, importance_score=0.3, access_count=2),
-        "c": _FakeElement("c", "medium importance", token_count=300, importance_score=0.5, access_count=5),
-        "d": _FakeElement("d", "rarely used log output", token_count=400, importance_score=0.1, access_count=0),
+        "a": _FakeElement(
+            "a", "important core logic", token_count=500, importance_score=0.9, access_count=20
+        ),
+        "b": _FakeElement(
+            "b", "less important note", token_count=200, importance_score=0.3, access_count=2
+        ),
+        "c": _FakeElement(
+            "c", "medium importance", token_count=300, importance_score=0.5, access_count=5
+        ),
+        "d": _FakeElement(
+            "d", "rarely used log output", token_count=400, importance_score=0.1, access_count=0
+        ),
     }
 
 
@@ -142,36 +158,42 @@ class TestContextOptimizer:
         assert optimizer.eviction_policy == EvictionPolicy.LRU
 
     def test_optimize_returns_recommendation(self, optimizer, elements, budget, strategy_registry):
-        result = asyncio.run(optimizer.optimize(
-            elements=elements,
-            dependency_graph={"a": {"b"}, "b": set()},
-            reverse_dependencies={"b": {"a"}},
-            budget=budget,
-            strategy_registry=strategy_registry,
-        ))
+        result = asyncio.run(
+            optimizer.optimize(
+                elements=elements,
+                dependency_graph={"a": {"b"}, "b": set()},
+                reverse_dependencies={"b": {"a"}},
+                budget=budget,
+                strategy_registry=strategy_registry,
+            )
+        )
         # Should return a recommendation when utilization is above 50%
         assert result is not None
 
     def test_optimize_low_utilization_returns_none(self, optimizer, strategy_registry):
         budget = _FakeBudget(total_limit=100000, used=30000)  # 30%
-        result = asyncio.run(optimizer.optimize(
-            elements={},
-            dependency_graph={},
-            reverse_dependencies={},
-            budget=budget,
-            strategy_registry=strategy_registry,
-        ))
+        result = asyncio.run(
+            optimizer.optimize(
+                elements={},
+                dependency_graph={},
+                reverse_dependencies={},
+                budget=budget,
+                strategy_registry=strategy_registry,
+            )
+        )
         assert result is None
 
     def test_optimization_count_increases(self, optimizer, elements, budget, strategy_registry):
         before = optimizer.optimization_count
-        asyncio.run(optimizer.optimize(
-            elements=elements,
-            dependency_graph={"a": set()},
-            reverse_dependencies={},
-            budget=budget,
-            strategy_registry=strategy_registry,
-        ))
+        asyncio.run(
+            optimizer.optimize(
+                elements=elements,
+                dependency_graph={"a": set()},
+                reverse_dependencies={},
+                budget=budget,
+                strategy_registry=strategy_registry,
+            )
+        )
         assert optimizer.optimization_count >= before
 
 

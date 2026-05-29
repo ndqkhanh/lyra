@@ -136,7 +136,8 @@ class TestThalamicGateway:
 
     async def test_filter_uses_pass_through_field_when_below_threshold(self):
         json_str = """{
-            "scores": {"relevance": 0.3, "emotion": 0.3, "urgency": 0.3, "novelty": 0.3, "trust": 0.3, "goal_affinity": 0.3},
+            "scores": {"relevance": 0.3, "emotion": 0.3, "urgency": 0.3, "novelty": 0.3, "trust":
+            0.3, "goal_affinity": 0.3},
             "pass_through": true,
             "reason": "explicit pass"
         }"""
@@ -170,14 +171,20 @@ class TestThalamicGateway:
         assert "goal_affinity" in ThalamicGateway.CHANNELS
 
     async def test_json_in_code_block(self):
-        json_content = '{"scores":{"relevance":0.8,"emotion":0.6,"urgency":0.5,"novelty":0.7,"trust":0.9,"goal_affinity":0.7},"pass_through":true,"reason":"ok"}'
+        json_content = (  # noqa: E501
+            '{"scores":{"relevance":0.8,"emotion":0.6,"urgency":0.5,"novelty":0.7,'
+            '"trust":0.9,"goal_affinity":0.7},"pass_through":true,"reason":"ok"}'
+        )
         llm = StubLLM(responses=[f"```json\n{json_content}\n```"])
         gw = ThalamicGateway(llm=llm)
         result = await gw.filter("content")
         assert result.passed is True
 
     async def test_json_in_plain_code_block(self):
-        json_content = '{"scores":{"relevance":0.8,"emotion":0.6,"urgency":0.5,"novelty":0.7,"trust":0.9,"goal_affinity":0.7},"pass_through":true,"reason":"ok"}'
+        json_content = (  # noqa: E501
+            '{"scores":{"relevance":0.8,"emotion":0.6,"urgency":0.5,"novelty":0.7,'
+            '"trust":0.9,"goal_affinity":0.7},"pass_through":true,"reason":"ok"}'
+        )
         llm = StubLLM(responses=[f"```\n{json_content}\n```"])
         gw = ThalamicGateway(llm=llm)
         result = await gw.filter("content")

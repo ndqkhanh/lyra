@@ -33,8 +33,8 @@ class SkillEmbedding:
     skill_name: str
     skill_triggers: tuple[str, ...]
     skill_body: str
-    dimensions: tuple[float, ...]        # 128-dim frequency vector
-    dimension_labels: tuple[str, ...]    # What each dimension represents
+    dimensions: tuple[float, ...]  # 128-dim frequency vector
+    dimension_labels: tuple[str, ...]  # What each dimension represents
     version: int
 
 
@@ -42,11 +42,11 @@ class SkillEmbedding:
 class PatternMatch:
     """A pattern extracted from a related skill."""
 
-    skill_name: str                      # Source skill
-    pattern_type: str                    # "trigger", "import", "structure"
-    pattern_content: str                 # The extracted pattern
-    relevance: float                     # 0.0–1.0
-    confidence: float                    # 0.0–1.0
+    skill_name: str  # Source skill
+    pattern_type: str  # "trigger", "import", "structure"
+    pattern_content: str  # The extracted pattern
+    relevance: float  # 0.0–1.0
+    confidence: float  # 0.0–1.0
 
 
 @dataclass(frozen=True)
@@ -68,30 +68,140 @@ class TransferResult:
 
 _KEYWORDS: tuple[str, ...] = (
     # Coding patterns (32)
-    "def", "class", "import", "from", "return", "yield", "async", "await",
-    "try", "except", "finally", "raise", "with", "lambda", "pass", "break",
-    "continue", "if", "elif", "else", "for", "while", "and", "or", "not",
-    "in", "is", "None", "True", "False", "self", "super",
+    "def",
+    "class",
+    "import",
+    "from",
+    "return",
+    "yield",
+    "async",
+    "await",
+    "try",
+    "except",
+    "finally",
+    "raise",
+    "with",
+    "lambda",
+    "pass",
+    "break",
+    "continue",
+    "if",
+    "elif",
+    "else",
+    "for",
+    "while",
+    "and",
+    "or",
+    "not",
+    "in",
+    "is",
+    "None",
+    "True",
+    "False",
+    "self",
+    "super",
     # Infrastructure (16)
-    "subprocess", "os", "sys", "json", "yaml", "requests", "http", "api",
-    "docker", "kubernetes", "git", "ci", "cd", "deploy", "build", "test",
+    "subprocess",
+    "os",
+    "sys",
+    "json",
+    "yaml",
+    "requests",
+    "http",
+    "api",
+    "docker",
+    "kubernetes",
+    "git",
+    "ci",
+    "cd",
+    "deploy",
+    "build",
+    "test",
     # AI/ML (16)
-    "model", "train", "inference", "token", "embedding", "prompt", "llm",
-    "agent", "tool", "skill", "pipeline", "dataset", "metric", "score",
-    "accuracy", "benchmark",
+    "model",
+    "train",
+    "inference",
+    "token",
+    "embedding",
+    "prompt",
+    "llm",
+    "agent",
+    "tool",
+    "skill",
+    "pipeline",
+    "dataset",
+    "metric",
+    "score",
+    "accuracy",
+    "benchmark",
     # Safety (16)
-    "safety", "validate", "verify", "check", "audit", "permission", "auth",
-    "secret", "token", "hash", "encrypt", "decrypt", "sandbox", "approve",
-    "deny", "block",
+    "safety",
+    "validate",
+    "verify",
+    "check",
+    "audit",
+    "permission",
+    "auth",
+    "secret",
+    "token",
+    "hash",
+    "encrypt",
+    "decrypt",
+    "sandbox",
+    "approve",
+    "deny",
+    "block",
     # Operations (16)
-    "read", "write", "open", "close", "create", "delete", "update", "list",
-    "get", "post", "put", "patch", "request", "response", "error", "log",
+    "read",
+    "write",
+    "open",
+    "close",
+    "create",
+    "delete",
+    "update",
+    "list",
+    "get",
+    "post",
+    "put",
+    "patch",
+    "request",
+    "response",
+    "error",
+    "log",
     # UI/Frontend (16)
-    "ui", "component", "render", "state", "props", "hook", "effect", "event",
-    "click", "input", "output", "display", "theme", "style", "css", "html",
+    "ui",
+    "component",
+    "render",
+    "state",
+    "props",
+    "hook",
+    "effect",
+    "event",
+    "click",
+    "input",
+    "output",
+    "display",
+    "theme",
+    "style",
+    "css",
+    "html",
     # Shell/CLI (16)
-    "bash", "shell", "cli", "argparse", "command", "flag", "option", "env",
-    "path", "file", "dir", "stdout", "stderr", "stdin", "pipe", "exit",
+    "bash",
+    "shell",
+    "cli",
+    "argparse",
+    "command",
+    "flag",
+    "option",
+    "env",
+    "path",
+    "file",
+    "dir",
+    "stdout",
+    "stderr",
+    "stdin",
+    "pipe",
+    "exit",
 )
 
 
@@ -115,44 +225,55 @@ def _cosine_sim(a: tuple[float, ...], b: tuple[float, ...]) -> float:
     return max(0.0, min(1.0, dot / (na * nb)))
 
 
-def _extract_patterns(source_skill: str, source_body: str, similarity: float) -> tuple[PatternMatch, ...]:
+def _extract_patterns(
+    source_skill: str, source_body: str, similarity: float
+) -> tuple[PatternMatch, ...]:
     """Extract transferable patterns from a source skill."""
     patterns: list[PatternMatch] = []
 
-    imp_match = re.findall(r'^(?:import\s+\w+|from\s+\w+\s+import\s+\w+)', source_body, re.MULTILINE)
+    imp_match = re.findall(
+        r"^(?:import\s+\w+|from\s+\w+\s+import\s+\w+)", source_body, re.MULTILINE
+    )
     if imp_match:
         for imp in imp_match[:3]:
-            patterns.append(PatternMatch(
-                skill_name=source_skill,
-                pattern_type="import",
-                pattern_content=imp,
-                relevance=similarity * 0.8,
-                confidence=0.7,
-            ))
+            patterns.append(
+                PatternMatch(
+                    skill_name=source_skill,
+                    pattern_type="import",
+                    pattern_content=imp,
+                    relevance=similarity * 0.8,
+                    confidence=0.7,
+                )
+            )
 
-    def_match = re.findall(r'^def\s+(\w+)', source_body, re.MULTILINE)
+    def_match = re.findall(r"^def\s+(\w+)", source_body, re.MULTILINE)
     if def_match:
         for func in def_match[:3]:
-            patterns.append(PatternMatch(
-                skill_name=source_skill,
-                pattern_type="structure",
-                pattern_content=f"def {func}",
-                relevance=similarity * 0.7,
-                confidence=0.6,
-            ))
+            patterns.append(
+                PatternMatch(
+                    skill_name=source_skill,
+                    pattern_type="structure",
+                    pattern_content=f"def {func}",
+                    relevance=similarity * 0.7,
+                    confidence=0.6,
+                )
+            )
 
     error_patterns = re.findall(
-        r'(try\s*:.*?except.*?:(?:\s*\w+)?)',
-        source_body, re.DOTALL,
+        r"(try\s*:.*?except.*?:(?:\s*\w+)?)",
+        source_body,
+        re.DOTALL,
     )
     if error_patterns:
-        patterns.append(PatternMatch(
-            skill_name=source_skill,
-            pattern_type="structure",
-            pattern_content="try/except error handling",
-            relevance=similarity * 0.5,
-            confidence=0.5,
-        ))
+        patterns.append(
+            PatternMatch(
+                skill_name=source_skill,
+                pattern_type="structure",
+                pattern_content="try/except error handling",
+                relevance=similarity * 0.5,
+                confidence=0.5,
+            )
+        )
 
     return tuple(patterns)
 

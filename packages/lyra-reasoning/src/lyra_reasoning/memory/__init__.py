@@ -3,16 +3,14 @@ Reasoning Memory - Store and learn from reasoning traces.
 """
 
 import json
-import os
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Optional
 
 from ..types import (
     ReasoningPattern,
     ReasoningStrategy,
     ReasoningTrace,
-    StepType,
+    StepType,  # noqa: F401
     StrategyPerformance,
 )
 
@@ -32,9 +30,9 @@ class ReasoningMemory:
         self.storage_path = Path(storage_path)
         self.storage_path.mkdir(parents=True, exist_ok=True)
 
-        self.traces: List[ReasoningTrace] = []
-        self.patterns: Dict[str, ReasoningPattern] = {}
-        self.strategy_stats: Dict[ReasoningStrategy, StrategyPerformance] = {}
+        self.traces: list[ReasoningTrace] = []
+        self.patterns: dict[str, ReasoningPattern] = {}
+        self.strategy_stats: dict[ReasoningStrategy, StrategyPerformance] = {}
 
         # Load existing data
         self._load()
@@ -66,7 +64,7 @@ class ReasoningMemory:
         # Persist to disk
         self._save()
 
-    def retrieve_similar(self, task: str, k: int = 5) -> List[ReasoningTrace]:
+    def retrieve_similar(self, task: str, k: int = 5) -> list[ReasoningTrace]:
         """
         Find similar past reasoning traces.
 
@@ -131,7 +129,7 @@ class ReasoningMemory:
 
         return best_strategy
 
-    def get_patterns(self, pattern_type: Optional[str] = None) -> List[ReasoningPattern]:
+    def get_patterns(self, pattern_type: str | None = None) -> list[ReasoningPattern]:
         """
         Get learned reasoning patterns.
 
@@ -148,7 +146,7 @@ class ReasoningMemory:
 
         return sorted(patterns, key=lambda p: p.success_rate, reverse=True)
 
-    def get_strategy_performance(self) -> List[StrategyPerformance]:
+    def get_strategy_performance(self) -> list[StrategyPerformance]:
         """
         Get performance metrics for all strategies.
 
@@ -161,7 +159,7 @@ class ReasoningMemory:
             reverse=True,
         )
 
-    def _extract_patterns(self, trace: ReasoningTrace) -> List[ReasoningPattern]:
+    def _extract_patterns(self, trace: ReasoningTrace) -> list[ReasoningPattern]:
         """Extract reasoning patterns from a trace."""
         patterns = []
 

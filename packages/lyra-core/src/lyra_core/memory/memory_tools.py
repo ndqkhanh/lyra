@@ -19,9 +19,11 @@ L38-1 (mem0) and L38-2 (Cognee) wire-ins land later as adapters that
 add new ``scope`` values without changing this surface. L38-3 (PPR
 fusion) extends ``recall`` to fuse rankings across scopes.
 
-See [`docs/185-memory-integration-playbook.md`](../../../../../../docs/185-memory-integration-playbook.md)
+See
+[`docs/185-memory-integration-playbook.md`](../../../../../../docs/185-memory-integration-playbook.md)
 §2.2 for the full Lyra v3.8 plan.
 """
+
 from __future__ import annotations
 
 import time
@@ -38,7 +40,7 @@ from .reasoning_bank import Lesson, ReasoningBank, TrajectoryOutcome
 from .reasoning_bank_store import SqliteReasoningBank
 from .redactor import redact_pair
 
-Scope = str   # "auto" | "skill" | "lesson" | "any"
+Scope = str  # "auto" | "skill" | "lesson" | "any"
 
 # A single returned record can be one of three shapes — the toolset
 # normalises shape via ``RecallResult.payload`` so callers don't need to
@@ -54,8 +56,8 @@ class RecallResult:
     the caller asks ``scope="any"`` and gets a mixed result set.
     """
 
-    scope: str          # "auto" | "skill" | "lesson"
-    record_id: str      # entry_id / skill id / lesson id
+    scope: str  # "auto" | "skill" | "lesson"
+    record_id: str  # entry_id / skill id / lesson id
     title: str
     body: str
     score: float = 0.0  # tier-local rank score (not cross-scope normalised)
@@ -126,28 +128,29 @@ class MemoryToolset:
         """
         hir_emit(
             "memory.recall.start",
-            query_preview=query[:200], scope=scope, top_k=top_k,
+            query_preview=query[:200],
+            scope=scope,
+            top_k=top_k,
             fusion=fusion if scope == "any" else "single",
         )
         per_scope: dict[str, list[RecallResult]] = {}
 
         if scope in ("auto", "any") and self.auto_memory is not None:
             per_scope["auto"] = [
-                _recall_from_entry(entry)
-                for entry in self.auto_memory.retrieve(query, top_n=top_k)
+                _recall_from_entry(entry) for entry in self.auto_memory.retrieve(query, top_n=top_k)
             ]
 
         if scope in ("skill", "any") and self.procedural is not None:
             per_scope["skill"] = [
-                _recall_from_skill(skill)
-                for skill in self.procedural.search(query)
+                _recall_from_skill(skill) for skill in self.procedural.search(query)
             ]
 
         if scope in ("lesson", "any") and self.reasoning_bank is not None:
             per_scope["lesson"] = [
                 _recall_from_lesson(lesson)
                 for lesson in self.reasoning_bank.recall(
-                    task_signature=query, k=top_k,
+                    task_signature=query,
+                    k=top_k,
                 )
             ]
 
@@ -171,14 +174,12 @@ class MemoryToolset:
                 if rk:
                     rankings.append(rk)
             merged = rrf_topk(rankings, top_k=top_k, k=rrf_k)
-            out = tuple(
-                _with_score(lookup[key], score) for key, score in merged
-                if key in lookup
-            )
+            out = tuple(_with_score(lookup[key], score) for key, score in merged if key in lookup)
 
         hir_emit(
             "memory.recall.end",
-            query_preview=query[:200], scope=scope,
+            query_preview=query[:200],
+            scope=scope,
             result_count=len(out),
             top_scope=out[0].scope if out else None,
             fusion=fusion if scope == "any" else "single",
@@ -212,8 +213,7 @@ class MemoryToolset:
         """
         if scope == "any":
             raise ValueError(
-                "remember() needs an explicit scope ('auto', 'skill'); "
-                "'any' is read-only"
+                "remember() needs an explicit scope ('auto', 'skill'); " "'any' is read-only"
             )
         hir_emit("memory.remember.start", scope=scope, title_preview=title[:80])
 
@@ -247,12 +247,13 @@ class MemoryToolset:
                 raise ValueError("remember(scope='skill') requires procedural wired")
             if not (skill_id and skill_name and skill_description is not None):
                 raise ValueError(
-                    "remember(scope='skill') requires skill_id, skill_name, "
-                    "skill_description"
+                    "remember(scope='skill') requires skill_id, skill_name, " "skill_description"
                 )
             record = SkillRecord(
-                id=skill_id, name=skill_name,
-                description=skill_description, body=text,
+                id=skill_id,
+                name=skill_name,
+                description=skill_description,
+                body=text,
             )
             self.procedural.put(record)
             result = _recall_from_skill(record)
@@ -266,7 +267,9 @@ class MemoryToolset:
 
         hir_emit(
             "memory.remember.end",
-            scope=scope, record_id=result.record_id, ok=True,
+            scope=scope,
+            record_id=result.record_id,
+            ok=True,
         )
         return result
 
@@ -330,9 +333,7 @@ class MemoryToolset:
         member ids so the audit log records the promotion.
         """
         if self.reasoning_bank is None:
-            raise ValueError(
-                "commit_consolidation requires reasoning_bank to be wired"
-            )
+            raise ValueError("commit_consolidation requires reasoning_bank to be wired")
         if not proposal.member_entry_ids:
             raise ValueError("commit_consolidation: proposal has no members")
         lid = lesson_id or _consolidation_lesson_id(proposal)
@@ -419,30 +420,42 @@ class MemoryToolset:
 
 def _recall_from_entry(entry: MemoryEntry) -> RecallResult:
     return RecallResult(
-        scope="auto", record_id=entry.entry_id,
-        title=entry.title, body=entry.body, payload=entry,
+        scope="auto",
+        record_id=entry.entry_id,
+        title=entry.title,
+        body=entry.body,
+        payload=entry,
     )
 
 
 def _recall_from_skill(skill: SkillRecord) -> RecallResult:
     return RecallResult(
-        scope="skill", record_id=skill.id,
-        title=skill.name, body=skill.body, payload=skill,
+        scope="skill",
+        record_id=skill.id,
+        title=skill.name,
+        body=skill.body,
+        payload=skill,
     )
 
 
 def _recall_from_lesson(lesson: Lesson) -> RecallResult:
     return RecallResult(
-        scope="lesson", record_id=lesson.id,
-        title=lesson.title, body=lesson.body, payload=lesson,
+        scope="lesson",
+        record_id=lesson.id,
+        title=lesson.title,
+        body=lesson.body,
+        payload=lesson,
     )
 
 
 def _with_score(result: RecallResult, score: float) -> RecallResult:
     """Return a copy of ``result`` with the RRF score attached."""
     return RecallResult(
-        scope=result.scope, record_id=result.record_id,
-        title=result.title, body=result.body, score=score,
+        scope=result.scope,
+        record_id=result.record_id,
+        title=result.title,
+        body=result.body,
+        score=score,
         payload=result.payload,
     )
 
@@ -455,11 +468,8 @@ def _consolidation_lesson_id(proposal: ConsolidationProposal) -> str:
     safely de-dupes.
     """
     import hashlib
-    payload = (
-        proposal.cluster_kind.value
-        + "|"
-        + "|".join(sorted(proposal.member_entry_ids))
-    )
+
+    payload = proposal.cluster_kind.value + "|" + "|".join(sorted(proposal.member_entry_ids))
     digest = hashlib.sha1(payload.encode("utf-8")).hexdigest()[:16]
     return f"consolidation-{digest}"
 

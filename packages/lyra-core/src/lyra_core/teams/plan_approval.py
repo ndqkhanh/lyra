@@ -75,7 +75,9 @@ class PlanApprovalWorkflow:
         self._plans: dict[str, PlanDocument] = {}
         self._audit_log: list[dict[str, object]] = []
 
-    def create_plan(self, plan_id: str, title: str, description: str, steps: list[str], teammate: str) -> PlanDocument:
+    def create_plan(
+        self, plan_id: str, title: str, description: str, steps: list[str], teammate: str
+    ) -> PlanDocument:
         if plan_id in self._plans:
             raise ValueError(f"Plan '{plan_id}' already exists")
 
@@ -120,7 +122,10 @@ class PlanApprovalWorkflow:
         if plan.state != PlanState.IN_REVIEW:
             raise ValueError(f"Plan '{plan_id}' is not IN_REVIEW (current: {plan.state})")
 
-        revision_round = len([d for d in plan.decisions if d.decision == ApprovalDecision.REVISION_REQUESTED]) + 1
+        revision_round = (
+            len([d for d in plan.decisions if d.decision == ApprovalDecision.REVISION_REQUESTED])
+            + 1
+        )
         record = ApprovalRecord(
             decision=ApprovalDecision(decision),
             decided_by=decided_by,
@@ -137,7 +142,9 @@ class PlanApprovalWorkflow:
         elif decision == ApprovalDecision.REVISION_REQUESTED:
             if revision_round >= self.MAX_REVISION_ROUNDS:
                 plan.state = PlanState.REJECTED
-                logger.warning("Plan '%s' exceeded max revision rounds (%d)", plan_id, self.MAX_REVISION_ROUNDS)
+                logger.warning(
+                    "Plan '%s' exceeded max revision rounds (%d)", plan_id, self.MAX_REVISION_ROUNDS
+                )
             else:
                 plan.state = PlanState.DRAFT
 
@@ -190,9 +197,11 @@ class PlanApprovalWorkflow:
         return plan
 
     def _audit(self, plan_id: str, action: str, actor: str) -> None:
-        self._audit_log.append({
-            "plan_id": plan_id,
-            "action": action,
-            "actor": actor,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        })
+        self._audit_log.append(
+            {
+                "plan_id": plan_id,
+                "action": action,
+                "actor": actor,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+        )

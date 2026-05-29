@@ -2,7 +2,6 @@
 Tests for the Research Skills Library (skills.py).
 """
 
-
 from datetime import datetime, timezone
 
 import pytest
@@ -19,6 +18,7 @@ from lyra_research.strategies import SearchStrategy
 # ---------------------------------------------------------------------------
 # ResearchSkill tests
 # ---------------------------------------------------------------------------
+
 
 def test_research_skill_average_performance_empty():
     skill = ResearchSkill(name="test", domain="ml")
@@ -63,6 +63,7 @@ def test_research_skill_created_at_utc():
 # ---------------------------------------------------------------------------
 # ResearchSkillStore tests
 # ---------------------------------------------------------------------------
+
 
 def test_skill_store_builtins_loaded(tmp_path):
     store = ResearchSkillStore(store_path=tmp_path / "skills.json")
@@ -147,6 +148,7 @@ def test_skill_store_get_for_domain_returns_best_performer(tmp_path):
 # QueryRefinementSkill tests
 # ---------------------------------------------------------------------------
 
+
 def test_query_refinement_too_broad():
     skill = QueryRefinementSkill()
     result = skill.refine("deep learning optimization", result_count=500, domain="ml")
@@ -156,9 +158,14 @@ def test_query_refinement_too_broad():
 
 def test_query_refinement_too_narrow():
     skill = QueryRefinementSkill()
-    result = skill.refine("very specific obscure algorithm version 3.2.1", result_count=2, domain="ml")
+    result = skill.refine(
+        "very specific obscure algorithm version 3.2.1", result_count=2, domain="ml"
+    )
     assert result.reason == "too_narrow"
-    assert len(result.refined_query) < len(result.original_query) or result.refined_query == result.original_query
+    assert (
+        len(result.refined_query) < len(result.original_query)
+        or result.refined_query == result.original_query
+    )
 
 
 def test_query_refinement_add_recency():
@@ -167,7 +174,9 @@ def test_query_refinement_add_recency():
     result = skill.refine("attention mechanism", result_count=50, domain="ml")
     assert result.reason == "add_year"
     current_year = datetime.now(timezone.utc).year
-    assert str(current_year) in result.refined_query or str(current_year - 1) in result.refined_query
+    assert (
+        str(current_year) in result.refined_query or str(current_year - 1) in result.refined_query
+    )
 
 
 def test_query_refinement_domain_suffix_ml():
@@ -215,6 +224,7 @@ def test_query_refinement_add_recency_appends_year():
 # ---------------------------------------------------------------------------
 # StrategyAdaptationSkill tests
 # ---------------------------------------------------------------------------
+
 
 def test_strategy_adaptation_selects_breadth_first():
     skill = StrategyAdaptationSkill()
@@ -299,6 +309,7 @@ def test_strategy_adaptation_no_switch_depth_with_enough_papers():
 # ---------------------------------------------------------------------------
 # SkillEvolutionTracker tests
 # ---------------------------------------------------------------------------
+
 
 def test_skill_evolution_record(tmp_path):
     tracker = SkillEvolutionTracker(store_path=tmp_path / "evolution.json")

@@ -10,6 +10,7 @@ import yaml
 @dataclass
 class Instinct:
     """An extracted instinct/pattern"""
+
     id: str
     trigger: str
     action: str
@@ -37,7 +38,7 @@ class InstinctExtractor:
             if obs.get("user_prompt") and "no" in obs["user_prompt"].lower():
                 # User corrected something
                 if i > 0:
-                    prev_obs = observations[i-1]
+                    prev_obs = observations[i - 1]
                     instinct = Instinct(
                         id=f"correction-{obs['timestamp']}",
                         trigger=f"when {prev_obs.get('tool_name', 'unknown')}",
@@ -47,7 +48,7 @@ class InstinctExtractor:
                         evidence=[obs["user_prompt"]],
                         scope="project" if obs.get("project_id") else "global",
                         project_id=obs.get("project_id"),
-                        created_at=datetime.fromisoformat(obs["timestamp"])
+                        created_at=datetime.fromisoformat(obs["timestamp"]),
                     )
                     instincts.append(instinct)
 
@@ -71,7 +72,7 @@ class InstinctExtractor:
                     evidence=[f"Used {count} times"],
                     scope="project",
                     project_id=observations[0].get("project_id") if observations else None,
-                    created_at=datetime.now()
+                    created_at=datetime.now(),
                 )
                 instincts.append(instinct)
 
@@ -131,7 +132,8 @@ class InstinctExtractor:
                 content = instinct_file.read_text()
                 # Parse YAML frontmatter
                 import re
-                match = re.match(r'^---\s*\n(.*?)\n---\s*\n(.*)$', content, re.DOTALL)
+
+                match = re.match(r"^---\s*\n(.*?)\n---\s*\n(.*)$", content, re.DOTALL)
                 if match:
                     frontmatter_text, body = match.groups()
                     frontmatter = yaml.safe_load(frontmatter_text)
@@ -139,13 +141,17 @@ class InstinctExtractor:
                     instinct = Instinct(
                         id=frontmatter["id"],
                         trigger=frontmatter["trigger"],
-                        action=body.split("## Action")[1].split("##")[0].strip() if "## Action" in body else "",
+                        action=(
+                            body.split("## Action")[1].split("##")[0].strip()
+                            if "## Action" in body
+                            else ""
+                        ),
                         confidence=frontmatter["confidence"],
                         domain=frontmatter["domain"],
                         evidence=[],
                         scope=frontmatter["scope"],
                         project_id=frontmatter.get("project_id"),
-                        created_at=datetime.now()
+                        created_at=datetime.now(),
                     )
                     instincts.append(instinct)
             except Exception as e:

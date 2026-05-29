@@ -154,9 +154,7 @@ class BaseMonitor(ABC):
         if not self.state.initialized:
             raise MonitorNotInitializedError(self.name)
         if len(self._data) < self.config.min_samples:
-            raise InsufficientDataError(
-                self.name, self.config.min_samples, len(self._data)
-            )
+            raise InsufficientDataError(self.name, self.config.min_samples, len(self._data))
 
     @abstractmethod
     def compute_drift_score(self) -> float:
@@ -218,7 +216,10 @@ class BaseMonitor(ABC):
         await self._notify_callbacks(signal)
         logger.debug(
             "Monitor '%s' check: score=%.4f threshold=%.4f drift=%s",
-            self.name, score, self.config.threshold, is_drift,
+            self.name,
+            score,
+            self.config.threshold,
+            is_drift,
         )
 
         return signal
@@ -238,12 +239,17 @@ class BaseMonitor(ABC):
     async def start_streaming(self) -> None:
         """Start periodic automatic checks."""
         if self.config.check_interval_seconds <= 0:
-            logger.warning("Monitor '%s' has check_interval_seconds=0, streaming not started", self.name)
+            logger.warning(
+                "Monitor '%s' has check_interval_seconds=0, streaming not started", self.name
+            )
             return
         self._running = True
         self._check_task = asyncio.create_task(self._stream_loop())
-        logger.info("Monitor '%s' started streaming with interval %.1fs",
-                    self.name, self.config.check_interval_seconds)
+        logger.info(
+            "Monitor '%s' started streaming with interval %.1fs",
+            self.name,
+            self.config.check_interval_seconds,
+        )
 
     async def stop_streaming(self) -> None:
         """Stop periodic automatic checks."""
@@ -308,7 +314,8 @@ class PerformanceMonitor(BaseMonitor):
         metric: str = "latency_ms",
     ) -> None:
         super().__init__(
-            config or MonitorConfig(
+            config
+            or MonitorConfig(
                 name=f"performance_{metric}",
                 threshold=0.15,
                 min_samples=20,
@@ -326,9 +333,7 @@ class PerformanceMonitor(BaseMonitor):
     def observe(self, value: float, timestamp: float | None = None) -> None:
         """Record a performance metric observation with EWMA update."""
         super().observe(value, timestamp)
-        self._ewma = (
-            self._ewma_alpha * value + (1 - self._ewma_alpha) * self._ewma
-        )
+        self._ewma = self._ewma_alpha * value + (1 - self._ewma_alpha) * self._ewma
 
     def compute_drift_score(self) -> float:
         """Compute drift using EWMA deviation from median."""
@@ -336,7 +341,7 @@ class PerformanceMonitor(BaseMonitor):
         if len(data) < 10:
             return 0.0
 
-        arr = np.array(data[-self.config.min_samples:], dtype=np.float64)
+        arr = np.array(data[-self.config.min_samples :], dtype=np.float64)
         median = float(np.median(arr))
         std = float(np.std(arr))
 
@@ -362,7 +367,8 @@ class ContextMonitor(BaseMonitor):
         feature_keys: list[str] | None = None,
     ) -> None:
         super().__init__(
-            config or MonitorConfig(
+            config
+            or MonitorConfig(
                 name="context_monitor",
                 threshold=0.2,
                 min_samples=10,
@@ -427,6 +433,7 @@ class ContextMonitor(BaseMonitor):
         m = 0.5 * (p + q)
 
         from .drift_detector import _kl_divergence
+
         jsd = 0.5 * _kl_divergence(p, m) + 0.5 * _kl_divergence(q, m)
         return float(jsd)
 
@@ -455,7 +462,8 @@ class DistributionMonitor(BaseMonitor):
         num_bins: int = 50,
     ) -> None:
         super().__init__(
-            config or MonitorConfig(
+            config
+            or MonitorConfig(
                 name="distribution_monitor",
                 threshold=0.2,
                 min_samples=30,
@@ -491,6 +499,7 @@ class DistributionMonitor(BaseMonitor):
                 top_ratios = np.array([c / total for _, c in top_types])
                 uniform = np.ones(len(top_types)) / len(top_types)
                 from .drift_detector import _kl_divergence
+
                 return min(1.0, float(_kl_divergence(top_ratios, uniform)))
 
         # Fall through to data-based computation
@@ -504,6 +513,7 @@ class DistributionMonitor(BaseMonitor):
         recent = arr[half:]
 
         from .drift_detector import _mmd
+
         mmd_val = _mmd(old, recent, kernel="rbf")
         return min(1.0, mmd_val / max(float(np.std(old)), 1e-10))
 
@@ -525,7 +535,8 @@ class RewardMonitor(BaseMonitor):
         track_per_context: bool = True,
     ) -> None:
         super().__init__(
-            config or MonitorConfig(
+            config
+            or MonitorConfig(
                 name="reward_monitor",
                 threshold=0.2,
                 min_samples=15,
@@ -579,9 +590,7 @@ class RewardMonitor(BaseMonitor):
                 if len(rewards) >= 10:
                     ctx_arr = np.array(rewards, dtype=np.float64)
                     ctx_mean = float(np.mean(ctx_arr))
-                    context_scores.append(
-                        abs(ctx_mean - overall_mean) / max(overall_std, 1e-10)
-                    )
+                    context_scores.append(abs(ctx_mean - overall_mean) / max(overall_std, 1e-10))
             if context_scores:
                 score = 0.7 * score + 0.3 * float(np.max(context_scores))
 
@@ -668,6 +677,7 @@ class MonitorRegistry:
         Returns:
             List of all drift signals.
         """
+
         async def _check_one(monitor: BaseMonitor) -> DriftSignal:
             return await monitor.check()
 
@@ -676,6 +686,7 @@ class MonitorRegistry:
 
     def check_all_sync(self) -> list[DriftSignal]:
         """Synchronous version of check_all."""
+
         async def _run():
             return await self.check_all()
 
@@ -691,16 +702,18 @@ class MonitorRegistry:
             try:
                 signal = monitor.compute_drift_score()  # type: ignore[assignment]
                 # Create signal manually for sync context
-                signals.append(DriftSignal(
-                    drift_type=monitor.drift_type,
-                    metric=monitor.name,
-                    score=float(signal),
-                    threshold=monitor.config.threshold,
-                    is_drift=float(signal) > monitor.config.threshold,
-                    severity=_compute_severity(float(signal), monitor.config.threshold),
-                    method=monitor.config.detection_method,
-                    timestamp=time.time(),
-                ))
+                signals.append(
+                    DriftSignal(
+                        drift_type=monitor.drift_type,
+                        metric=monitor.name,
+                        score=float(signal),
+                        threshold=monitor.config.threshold,
+                        is_drift=float(signal) > monitor.config.threshold,
+                        severity=_compute_severity(float(signal), monitor.config.threshold),
+                        method=monitor.config.detection_method,
+                        timestamp=time.time(),
+                    )
+                )
             except Exception as exc:
                 logger.error("Sync check failed for '%s': %s", monitor.name, exc)
         return signals

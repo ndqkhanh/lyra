@@ -98,7 +98,7 @@ def obs_health(
                 timeout=3,
             )
             git_context["uncommitted_files"] = len(
-                [l for l in st.stdout.split("\n") if l.strip()]
+                [line for line in st.stdout.split("\n") if line.strip()]
             )
         else:
             git_context["repository"] = "not-a-git-repo"

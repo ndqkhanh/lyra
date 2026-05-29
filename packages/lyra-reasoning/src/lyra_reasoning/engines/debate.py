@@ -5,7 +5,6 @@ Enhanced Debate Engine - Multi-agent collaborative reasoning with depth.
 import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional
 
 from anthropic import Anthropic
 
@@ -55,7 +54,7 @@ class DebateRound:
     """A single round of debate."""
 
     round_num: int
-    arguments: List[tuple[Perspective, str, float]]  # (perspective, argument, verification_score)
+    arguments: list[tuple[Perspective, str, float]]  # (perspective, argument, verification_score)
 
     def get_summary(self) -> str:
         """Get round summary."""
@@ -76,37 +75,52 @@ class EnhancedDebateEngine:
     - Proof-based consensus
     """
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         self.client = Anthropic(api_key=api_key) if api_key else Anthropic()
         self.agents = self._initialize_agents()
 
-    def _initialize_agents(self) -> List[DebateAgent]:
+    def _initialize_agents(self) -> list[DebateAgent]:
         """Initialize debate agents with different perspectives."""
         return [
             DebateAgent(
                 perspective=Perspective.SKEPTIC,
                 name="The Skeptic",
-                system_prompt="You are a skeptical analyst. Question assumptions, identify flaws, and demand evidence. Be critical but constructive.",
+                system_prompt=(
+                    "You are a skeptical analyst. Question assumptions, identify flaws, and demand"
+                    "evidence. Be critical but constructive."
+                ),
             ),
             DebateAgent(
                 perspective=Perspective.OPTIMIST,
                 name="The Optimist",
-                system_prompt="You are an optimistic visionary. See potential, identify opportunities, and propose bold ideas. Be ambitious but grounded.",
+                system_prompt=(
+                    "You are an optimistic visionary. See potential, identify opportunities, and"
+                    "propose bold ideas. Be ambitious but grounded."
+                ),
             ),
             DebateAgent(
                 perspective=Perspective.PRAGMATIST,
                 name="The Pragmatist",
-                system_prompt="You are a practical implementer. Focus on feasibility, resources, and real-world constraints. Be realistic and actionable.",
+                system_prompt=(
+                    "You are a practical implementer. Focus on feasibility, resources, and"
+                    "real-world constraints. Be realistic and actionable."
+                ),
             ),
             DebateAgent(
                 perspective=Perspective.METHODOLOGIST,
                 name="The Methodologist",
-                system_prompt="You are a rigorous methodologist. Focus on process, validation, and systematic approaches. Be thorough and precise.",
+                system_prompt=(
+                    "You are a rigorous methodologist. Focus on process, validation, and"
+                    "systematic approaches. Be thorough and precise."
+                ),
             ),
             DebateAgent(
                 perspective=Perspective.SYNTHESIZER,
                 name="The Synthesizer",
-                system_prompt="You are a synthesizer. Find common ground, integrate perspectives, and build consensus. Be balanced and comprehensive.",
+                system_prompt=(
+                    "You are a synthesizer. Find common ground, integrate perspectives, and build"
+                    "consensus. Be balanced and comprehensive."
+                ),
             ),
         ]
 
@@ -130,7 +144,7 @@ class EnhancedDebateEngine:
             Reasoning trace with debate synthesis
         """
         start_time = time.time()
-        rounds: List[DebateRound] = []
+        rounds: list[DebateRound] = []
 
         context = ""
 
@@ -233,7 +247,7 @@ class EnhancedDebateEngine:
         self,
         argument: str,
         perspective: Perspective,
-        agents: List[DebateAgent],
+        agents: list[DebateAgent],
         config: ReasoningConfig,
     ) -> float:
         """Other agents verify this argument."""
@@ -253,7 +267,7 @@ class EnhancedDebateEngine:
 
         return min(1.0, max(0.0, score))
 
-    def _check_consensus(self, rounds: List[DebateRound]) -> bool:
+    def _check_consensus(self, rounds: list[DebateRound]) -> bool:
         """Check if consensus has been reached."""
         if len(rounds) < 2:
             return False
@@ -273,7 +287,7 @@ class EnhancedDebateEngine:
     def _synthesize(
         self,
         task: str,
-        rounds: List[DebateRound],
+        rounds: list[DebateRound],
         config: ReasoningConfig,
     ) -> str:
         """Synthesize final conclusion from debate."""

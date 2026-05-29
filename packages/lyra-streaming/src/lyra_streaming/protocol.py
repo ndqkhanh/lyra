@@ -59,7 +59,9 @@ class AGUIProtocol:
             payload = event.to_dict()
             return json.dumps(payload, ensure_ascii=False, default=str).encode("utf-8")
         except Exception as exc:
-            logger.error("Failed to encode event type=%s run_id=%s: %s", event.type.name, event.run_id, exc)
+            logger.error(
+                "Failed to encode event type=%s run_id=%s: %s", event.type.name, event.run_id, exc
+            )
             raise ProtocolError(f"Encode failed for event type {event.type.name}: {exc}") from exc
 
     @staticmethod
@@ -92,7 +94,7 @@ class AGUIProtocol:
         try:
             event_type = EventType[event_type_name]
         except KeyError:
-            raise ProtocolError(f"Unknown event type: {event_type_name!r}")
+            raise ProtocolError(f"Unknown event type: {event_type_name!r}") from None
 
         event_class = _EVENT_CLASS_BY_TYPE.get(event_type)
         if event_class is None:
@@ -183,7 +185,7 @@ class AGUIProtocol:
         try:
             return EventType[event_type_name]
         except KeyError:
-            raise ProtocolError(f"Unknown event type: {event_type_name!r}")
+            raise ProtocolError(f"Unknown event type: {event_type_name!r}") from None
 
     @classmethod
     def encode_string(cls, event: AGEvent) -> str:

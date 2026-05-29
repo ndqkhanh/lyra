@@ -13,6 +13,7 @@ so :meth:`write_file` / :meth:`read_file` reuse the same
 :class:`LocalSandbox` machinery: the *workspace* is just a tempdir
 that happens to also live inside a container at run time.
 """
+
 from __future__ import annotations
 
 import shutil
@@ -82,10 +83,15 @@ class DockerSandbox(LocalSandbox):
         # ``-v <host>:/workspace`` to surface the workspace inside
         # the container without cp.
         cmd: list[str] = [
-            self._docker_bin, "run", "--rm",
-            "--network", self._network,
-            "-v", f"{self._workspace}:/workspace",
-            "-w", "/workspace" if cwd is None else f"/workspace/{cwd}",
+            self._docker_bin,
+            "run",
+            "--rm",
+            "--network",
+            self._network,
+            "-v",
+            f"{self._workspace}:/workspace",
+            "-w",
+            "/workspace" if cwd is None else f"/workspace/{cwd}",
         ]
         for k, v in (env or {}).items():
             cmd += ["-e", f"{k}={v}"]
@@ -106,8 +112,16 @@ class DockerSandbox(LocalSandbox):
         except subprocess.TimeoutExpired as e:
             timed_out = True
             exit_code = 124
-            stdout = e.stdout if isinstance(e.stdout, str) else (e.stdout or b"").decode("utf-8", "replace")
-            stderr = e.stderr if isinstance(e.stderr, str) else (e.stderr or b"").decode("utf-8", "replace")
+            stdout = (
+                e.stdout
+                if isinstance(e.stdout, str)
+                else (e.stdout or b"").decode("utf-8", "replace")
+            )
+            stderr = (
+                e.stderr
+                if isinstance(e.stderr, str)
+                else (e.stderr or b"").decode("utf-8", "replace")
+            )
         except FileNotFoundError as e:
             # The CLI vanished mid-run — surface as not-available so
             # the picker can downgrade to LocalSandbox on retry.

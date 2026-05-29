@@ -1,6 +1,9 @@
 """KG-grounded fact gate — verify numerical claims against structured KGs.
 
-Per [docs/219-helix-bio-multi-hop-collaborative-apply-plan.md](../../../../../../research/harness-engineering/docs/219-helix-bio-multi-hop-collaborative-apply-plan.md) §4.4 —
+Per
+[docs/219-helix-bio-multi-hop-collaborative-apply-plan.md]
+(../../../../../../research/harness-engineering/
+docs/219-helix-bio-multi-hop-collaborative-apply-plan.md) §4.4 —
 Helix-Bio Tier-1 non-negotiable. Numerical claims (binding affinity, IC50,
 fold accuracy, sequence length, molecular weight, etc.) must:
 
@@ -23,6 +26,7 @@ Composes with:
 Used by Helix-Bio. Cipher-Sec can adopt for CVE-grounded claims (cite NVD).
 Polaris can adopt for typed-trust-tier-grounded claims (cite OpenScholar).
 """
+
 from __future__ import annotations
 
 import enum
@@ -139,9 +143,7 @@ class KGFactGate:
 
     def __post_init__(self) -> None:
         if not 0.0 <= self.relative_tolerance <= 1.0:
-            raise ValueError(
-                f"relative_tolerance must be in [0, 1], got {self.relative_tolerance}"
-            )
+            raise ValueError(f"relative_tolerance must be in [0, 1], got {self.relative_tolerance}")
 
     def verify(self, claim: FactClaim) -> KGFactVerdict:
         """Verify one claim against the cited KG source."""
@@ -217,7 +219,7 @@ class KGFactGate:
                 grounded=False,
                 severity=Severity.ERROR,
                 note=f"mismatch: asserted={claim.asserted_value!r}, "
-                     f"ground_truth={ground_truth!r}",
+                f"ground_truth={ground_truth!r}",
                 ground_truth_value=ground_truth,
             )
 
@@ -228,7 +230,7 @@ class KGFactGate:
                 grounded=False,
                 severity=Severity.ERROR,
                 note=f"type mismatch: asserted is numeric, "
-                     f"ground_truth={type(ground_truth).__name__}",
+                f"ground_truth={type(ground_truth).__name__}",
                 ground_truth_value=ground_truth,
             )
 
@@ -258,7 +260,7 @@ class KGFactGate:
                 grounded=True,
                 severity=Severity.INFO,
                 note=f"within {self.relative_tolerance:.1%} tolerance "
-                     f"(deviation={deviation:.3f})",
+                f"(deviation={deviation:.3f})",
                 ground_truth_value=ground_truth,
                 deviation=deviation,
             )
@@ -267,8 +269,8 @@ class KGFactGate:
             grounded=False,
             severity=Severity.ERROR,
             note=f"exceeds {self.relative_tolerance:.1%} tolerance "
-                 f"(deviation={deviation:.3f}; asserted={claim.asserted_value}, "
-                 f"ground_truth={ground_truth})",
+            f"(deviation={deviation:.3f}; asserted={claim.asserted_value}, "
+            f"ground_truth={ground_truth})",
             ground_truth_value=ground_truth,
             deviation=deviation,
         )
@@ -290,15 +292,11 @@ class KGFactGate:
         c = {
             "total": len(verdicts),
             "grounded": sum(1 for v in verdicts if v.grounded),
-            "no_citation": sum(
-                1 for v in verdicts if v.claim.cited_source is None
-            ),
-            "lookup_failed": sum(
-                1 for v in verdicts
-                if not v.grounded and "lookup" in v.note
-            ),
+            "no_citation": sum(1 for v in verdicts if v.claim.cited_source is None),
+            "lookup_failed": sum(1 for v in verdicts if not v.grounded and "lookup" in v.note),
             "deviation_exceeded": sum(
-                1 for v in verdicts
+                1
+                for v in verdicts
                 if not v.grounded and v.deviation is not None and v.deviation > 0
             ),
         }

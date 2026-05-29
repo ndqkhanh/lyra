@@ -29,6 +29,7 @@ UX matches Claude Code's panel:
 Pricing strings are sourced from public docs as of May 2026; they're
 display-only and don't drive routing or billing.
 """
+
 from __future__ import annotations
 
 import os
@@ -48,9 +49,9 @@ __all__ = ["run_model_dialog"]
 
 @dataclass(frozen=True)
 class _Entry:
-    slug: str        # canonical slug to set on session.model (or "" for "auto")
-    name: str        # display name
-    meta: str        # right-column description / pricing
+    slug: str  # canonical slug to set on session.model (or "" for "auto")
+    name: str  # display name
+    meta: str  # right-column description / pricing
 
 
 @dataclass(frozen=True)
@@ -128,11 +129,11 @@ _PAGE = 8
 # so dialog_model.py stays importable without pulling in effort.py.
 _EFFORT_LEVELS: tuple[str, ...] = ("low", "medium", "high", "xhigh", "max")
 _EFFORT_LABELS: dict[str, str] = {
-    "low":   "Low effort",
+    "low": "Low effort",
     "medium": "Medium effort",
-    "high":  "High effort",
+    "high": "High effort",
     "xhigh": "Very high effort",
-    "max":   "Maximum effort",
+    "max": "Maximum effort",
 }
 
 
@@ -231,12 +232,16 @@ def run_model_dialog(
             rows.append(("class:group", f"  {label}\n"))
             for e in entries:
                 is_cursor = idx == cursor
-                is_current = (current is not None) and (e.slug == current or (e.slug == "" and current in (None, "auto", "")))
+                is_current = (current is not None) and (
+                    e.slug == current or (e.slug == "" and current in (None, "auto", ""))
+                )
                 arrow = "❯ " if is_cursor else "  "
                 check = " ✔" if is_current else "  "
                 cls_arrow = "class:cursor" if is_cursor else "class:dim"
-                cls_name = "class:current" if is_current else (
-                    "class:cursor-row" if is_cursor else "class:name"
+                cls_name = (
+                    "class:current"
+                    if is_current
+                    else ("class:cursor-row" if is_cursor else "class:name")
                 )
                 cls_meta = "class:meta-current" if is_cursor else "class:meta"
                 num = f"{idx + 1:>2}."
@@ -267,11 +272,13 @@ def run_model_dialog(
         is_default = level == "medium"
         suffix = " (default)" if is_default else ""
         hint = "←/→ to adjust" if not state["filter"] else "←/→ adjusts effort (clear filter first)"
-        return FormattedText([
-            ("class:effort-dot", "  ● "),
-            ("class:effort-label", f"{label}{suffix}"),
-            ("class:effort-hint", f"   {hint}"),
-        ])
+        return FormattedText(
+            [
+                ("class:effort-dot", "  ● "),
+                ("class:effort-label", f"{label}{suffix}"),
+                ("class:effort-hint", f"   {hint}"),
+            ]
+        )
 
     def on_filter_change(_: Buffer) -> None:
         state["filter"] = filter_buffer.text

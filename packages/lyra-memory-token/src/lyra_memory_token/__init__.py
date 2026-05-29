@@ -74,7 +74,7 @@ class TokenNativeIndex:
         # Normalize by document length
         for doc_id in scores:
             doc_len = self.doc_token_counts.get(doc_id, 1)
-            scores[doc_id] /= doc_len ** 0.5
+            scores[doc_id] /= doc_len**0.5
 
         ranked = sorted(scores.items(), key=lambda x: -x[1])
         return [(doc_id, score) for doc_id, score in ranked[:top_k]]
@@ -111,7 +111,9 @@ class TokenNativeIndex:
 class MemoryTierRouter:
     """Routes queries to optimal memory tier based on latency budget and query type."""
 
-    def route(self, query: str, latency_budget_ms: float, query_type: str = "general") -> MemoryTier:
+    def route(
+        self, query: str, latency_budget_ms: float, query_type: str = "general"
+    ) -> MemoryTier:
         if latency_budget_ms < 50:
             return MemoryTier.TOKEN_NATIVE
         if query_type == "entity" or "relationship" in query.lower():

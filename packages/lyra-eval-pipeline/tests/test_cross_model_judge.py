@@ -112,9 +112,7 @@ class TestCrossModelJudge:
     @pytest.mark.asyncio
     async def test_solicit_verdict_empty_raises(self) -> None:
         judge = CrossModelJudge()
-        rubric = AdaptiveRubric().create_template(
-            "t", [RubricDimension("a", 1.0, "d", "f")]
-        )
+        rubric = AdaptiveRubric().create_template("t", [RubricDimension("a", 1.0, "d", "f")])
         model = JudgeModel("jm1", "c", "s", (0.0,))
         with pytest.raises(CrossModelError, match="empty response"):
             await judge.solicit_verdict(model, "", rubric)
@@ -193,9 +191,7 @@ class TestCrossModelJudge:
     @pytest.mark.asyncio
     async def test_judge_with_custom_panel(self) -> None:
         judge = CrossModelJudge()
-        rubric = AdaptiveRubric().create_template(
-            "t", [RubricDimension("a", 1.0, "d", "f")]
-        )
+        rubric = AdaptiveRubric().create_template("t", [RubricDimension("a", 1.0, "d", "f")])
         panel = JudgePanel(
             models=(
                 JudgeModel("m1", "c", "s", (0.0,)),
@@ -251,7 +247,9 @@ class TestCrossModelJudge:
             "t", [RubricDimension("a", 1.0, "d", "exact_match")]
         )
         short = await judge.judge("short", rubric)
-        long = await judge.judge("A very long and detailed response that covers everything well", rubric)
+        long = await judge.judge(
+            "A very long and detailed response that covers everything well", rubric
+        )
         # Longer response should tend to score higher
         assert long.consensus_score >= short.consensus_score
 
@@ -263,6 +261,11 @@ class TestCrossModelJudge:
         )
         verdict = await judge.solicit_verdict(
             JudgeModel("m", "c", "s", (0.0,)),
-            "A perfect score response", rubric,
+            "A perfect score response",
+            rubric,
         )
-        assert verdict.reasoning in ("High quality response", "Adequate response with minor issues", "Response needs significant improvement")
+        assert verdict.reasoning in (
+            "High quality response",
+            "Adequate response with minor issues",
+            "Response needs significant improvement",
+        )

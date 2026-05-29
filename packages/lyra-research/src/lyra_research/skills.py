@@ -17,6 +17,7 @@ from lyra_research.strategies import SearchStrategy
 # ResearchSkill (7-tuple skill formalism)
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ResearchSkill:
     """A callable research skill with interface, verifier, and lineage.
@@ -24,17 +25,19 @@ class ResearchSkill:
     Models the 7-tuple from Doc 320: applicability, policy, termination,
     interface, edit_operator, verification, lineage.
     """
+
     id: str = field(default_factory=lambda: str(uuid4()))
-    name: str = ""                  # e.g. "ml_paper_search"
-    domain: str = ""                # e.g. "ml", "nlp", "systems", "general"
-    description: str = ""          # When to use this skill
+    name: str = ""  # e.g. "ml_paper_search"
+    domain: str = ""  # e.g. "ml", "nlp", "systems", "general"
+    description: str = ""  # When to use this skill
 
     # Policy: what the skill does
-    preferred_sources: list[str] = field(default_factory=list)  # ["arxiv", "openreview", "semantic_scholar"]
-    preferred_venues: list[str] = field(default_factory=list)   # ["NeurIPS", "ICLR", "ICML"]
-    query_expansions: list[str] = field(default_factory=list)   # Extra terms to add
+    # ["arxiv", "openreview", "semantic_scholar"]
+    preferred_sources: list[str] = field(default_factory=list)
+    preferred_venues: list[str] = field(default_factory=list)  # ["NeurIPS", "ICLR", "ICML"]
+    query_expansions: list[str] = field(default_factory=list)  # Extra terms to add
     max_results_per_source: int = 30
-    recency_bias: float = 0.5       # 0.0=all-time, 1.0=very-recent-only
+    recency_bias: float = 0.5  # 0.0=all-time, 1.0=very-recent-only
 
     # Termination: when is the search good enough
     min_papers: int = 5
@@ -51,7 +54,11 @@ class ResearchSkill:
 
     def average_performance(self) -> float:
         """Average outcome score across uses."""
-        return sum(self.performance_history) / len(self.performance_history) if self.performance_history else 0.0
+        return (
+            sum(self.performance_history) / len(self.performance_history)
+            if self.performance_history
+            else 0.0
+        )
 
     def record_performance(self, score: float) -> None:
         """Record an outcome score (clamped to 0.0-1.0)."""
@@ -73,6 +80,7 @@ def _dict_to_skill(d: dict) -> ResearchSkill:
 # ---------------------------------------------------------------------------
 # ResearchSkillStore
 # ---------------------------------------------------------------------------
+
 
 class ResearchSkillStore:
     """Stores and retrieves ResearchSkills.
@@ -136,10 +144,7 @@ class ResearchSkillStore:
 
     def get_for_domain(self, domain: str) -> ResearchSkill | None:
         """Get the best skill for a domain (highest average_performance)."""
-        candidates = [
-            s for s in self._skills.values()
-            if s.domain.lower() == domain.lower()
-        ]
+        candidates = [s for s in self._skills.values() if s.domain.lower() == domain.lower()]
         if not candidates:
             return None
         return max(candidates, key=lambda s: s.average_performance())
@@ -196,13 +201,15 @@ class ResearchSkillStore:
 # QueryRefinementSkill
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class RefinementSuggestion:
     """Suggested query refinement with reason and confidence."""
+
     original_query: str
     refined_query: str
-    reason: str             # "too_broad", "too_narrow", "add_year", "add_domain"
-    confidence: float       # 0.0-1.0
+    reason: str  # "too_broad", "too_narrow", "add_year", "add_domain"
+    confidence: float  # 0.0-1.0
 
 
 class QueryRefinementSkill:
@@ -228,7 +235,9 @@ class QueryRefinementSkill:
     # Narrow result count threshold
     NARROW_THRESHOLD = 5
 
-    def refine(self, query: str, result_count: int, domain: str = "general") -> RefinementSuggestion:
+    def refine(
+        self, query: str, result_count: int, domain: str = "general"
+    ) -> RefinementSuggestion:
         """Suggest a refined query based on query text and result count."""
         if self.is_too_broad(query, result_count):
             suffix = self.DOMAIN_SUFFIXES.get(domain, self.DOMAIN_SUFFIXES["general"])
@@ -300,6 +309,7 @@ class QueryRefinementSkill:
 # StrategyAdaptationSkill
 # ---------------------------------------------------------------------------
 
+
 class StrategyAdaptationSkill:
     """Selects and switches search strategies based on topic and source density.
 
@@ -357,10 +367,7 @@ class StrategyAdaptationSkill:
         ):
             return SearchStrategy.DEPTH_FIRST
 
-        if (
-            current_strategy == SearchStrategy.DEPTH_FIRST
-            and papers_found < self.SWITCH_LOW_PAPERS
-        ):
+        if current_strategy == SearchStrategy.DEPTH_FIRST and papers_found < self.SWITCH_LOW_PAPERS:
             return SearchStrategy.BREADTH_FIRST
 
         return None
@@ -370,9 +377,11 @@ class StrategyAdaptationSkill:
 # SkillEvolutionTracker
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class SkillEvolutionRecord:
     """Record of a skill performance measurement."""
+
     skill_name: str
     session_topic: str
     outcome_score: float
@@ -403,7 +412,7 @@ class SkillEvolutionTracker:
     """
 
     MIN_SESSIONS_FOR_PROPOSAL = 3  # Need at least 3 data points
-    IMPROVEMENT_THRESHOLD = 0.1    # Must improve by 10% to accept
+    IMPROVEMENT_THRESHOLD = 0.1  # Must improve by 10% to accept
 
     def __init__(self, store_path: Path | None = None):
         self.store_path = store_path or Path.home() / ".lyra" / "skill_evolution.json"
@@ -423,10 +432,7 @@ class SkillEvolutionTracker:
 
     def get_trend(self, skill_name: str, last_n: int = 5) -> list[float]:
         """Get last N outcome scores for a skill (most recent last)."""
-        skill_records = [
-            r for r in self._records
-            if r.skill_name == skill_name
-        ]
+        skill_records = [r for r in self._records if r.skill_name == skill_name]
         return [r.outcome_score for r in skill_records[-last_n:]]
 
     def propose_refinements(self, skill_name: str) -> list[str]:

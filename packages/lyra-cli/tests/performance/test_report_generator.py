@@ -88,7 +88,9 @@ def test_markdown_format(sample_results: list[dict]) -> None:
     assert "| Name | Category | Status | Latency (ms) | Regressed |" in report
 
 
-def test_markdown_with_comparisons(sample_results: list[dict], sample_comparisons: list[dict]) -> None:
+def test_markdown_with_comparisons(
+    sample_results: list[dict], sample_comparisons: list[dict]
+) -> None:
     """Markdown output should include comparison table when provided."""
     generator = ReportGenerator(config=ReportConfig(format=ReportFormat.MARKDOWN))
     report = generator.generate(sample_results, sample_comparisons)

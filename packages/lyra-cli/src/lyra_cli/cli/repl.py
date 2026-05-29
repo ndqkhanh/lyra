@@ -168,7 +168,6 @@ async def read_prompt(formatter: CLIFormatter) -> str:
         User input string
     """
     try:
-        import os
         from pathlib import Path
 
         from .input import create_prompt_session

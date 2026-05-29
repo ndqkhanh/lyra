@@ -23,7 +23,9 @@ class TestEventMapper:
         """Test mapping logic errors"""
         mapper = EventMapper()
 
-        assert mapper.map_error("AssertionError: value should be positive") == SoundEvent.LOGIC_ERROR
+        assert (
+            mapper.map_error("AssertionError: value should be positive") == SoundEvent.LOGIC_ERROR
+        )
         assert mapper.map_error("Logic error in calculation") == SoundEvent.LOGIC_ERROR
         assert mapper.map_error("Invalid argument") == SoundEvent.LOGIC_ERROR
 

@@ -525,7 +525,7 @@ class TaskQueue:
                         stats["pending"] += 1
 
         # Count all tasks for this queue
-        for task_id, state in self._tasks.items():
+        for _task_id, state in self._tasks.items():
             if state.task.queue_name == queue_name:
                 status = state.status
                 if status == TaskStatus.ASSIGNED:

@@ -342,7 +342,12 @@ class TestSystemIIIMetaRegulator:
     def test_should_plan_deep_request_human(self) -> None:
         r = SystemIIIMetaRegulator()
         # Extremely long task to push complexity towards 0.9+.
-        long_task = "analyze " * 1000 + "compare and contrast " * 500 + "synthesize " * 500 + "evaluate why " * 500
+        long_task = (
+            "analyze " * 1000
+            + "compare and contrast " * 500
+            + "synthesize " * 500
+            + "evaluate why " * 500
+        )
         decision = r.should_plan_deep(long_task)
         # Both ESCALATE_MODEL and REQUEST_HUMAN are valid escalation paths
         # for extremely complex tasks.
@@ -417,7 +422,10 @@ class TestSystemIIIMetaRegulator:
 
     def test_meta_decision_frozen(self) -> None:
         d = MetaDecision(
-            reasoning="test", confidence=0.5, escalation_flag=False, regulation_action=RegulationAction.CONTINUE_FAST
+            reasoning="test",
+            confidence=0.5,
+            escalation_flag=False,
+            regulation_action=RegulationAction.CONTINUE_FAST,
         )
         with pytest.raises(AttributeError):
             d.confidence = 0.9  # type: ignore[misc]
@@ -623,9 +631,7 @@ class TestMCTSPlanner:
             state="child",
             visits=10,
             value=5.0,
-            children=(
-                MCTSNode(state="grandchild", visits=8, value=4.0),
-            ),
+            children=(MCTSNode(state="grandchild", visits=8, value=4.0),),
         )
         root = MCTSNode(state="root", children=(child,))
         path = get_best_path(root)
@@ -1068,7 +1074,9 @@ class TestReasoningTracer:
         events = [
             TraceEvent(TraceEventType.THOUGHT, datetime.now(timezone.utc), {"a": 1}, "system_i"),
             TraceEvent(TraceEventType.ACTION, datetime.now(timezone.utc), {"b": 2}, "system_ii"),
-            TraceEvent(TraceEventType.ESCALATION, datetime.now(timezone.utc), {"c": 3}, "system_iii"),
+            TraceEvent(
+                TraceEventType.ESCALATION, datetime.now(timezone.utc), {"c": 3}, "system_iii"
+            ),
         ]
         for e in events:
             tracer.record_event(tid, e)
@@ -1154,9 +1162,7 @@ class TestIntegration:
             result = await s2.simulate({"task": node.state, "id": "test"}, depth=0)
             results.append(result)
 
-        critique = await s2.critique(
-            await s2.plan("task", BranchingFactor.NARROW), results
-        )
+        critique = await s2.critique(await s2.plan("task", BranchingFactor.NARROW), results)
         assert isinstance(critique.verdict, str)
 
     @pytest.mark.asyncio
@@ -1215,9 +1221,7 @@ class TestIntegration:
         opt = PlanningHorizonOptimizer()
         planner = MCTSPlanner()
 
-        complexity = opt.compute_complexity(
-            num_steps=10, num_dependencies=3, ambiguity_score=0.6
-        )
+        complexity = opt.compute_complexity(num_steps=10, num_dependencies=3, ambiguity_score=0.6)
         horizon = opt.estimate_horizon(complexity, 50.0)
 
         config = MCTSConfig(max_iterations=horizon * 10)

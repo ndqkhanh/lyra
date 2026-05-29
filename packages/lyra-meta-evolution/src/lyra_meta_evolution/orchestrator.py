@@ -81,12 +81,14 @@ class CycleConfig:
     """Configuration for an evolution cycle."""
 
     max_cycles: int = 50
-    cycles_per_level: dict[EvolutionLevel, int] = field(default_factory=lambda: {
-        EvolutionLevel.L1_PARAMETER: 50,
-        EvolutionLevel.L2_STRATEGY: 30,
-        EvolutionLevel.L3_ARCHITECTURE: 15,
-        EvolutionLevel.L4_GOAL: 10,
-    })
+    cycles_per_level: dict[EvolutionLevel, int] = field(
+        default_factory=lambda: {
+            EvolutionLevel.L1_PARAMETER: 50,
+            EvolutionLevel.L2_STRATEGY: 30,
+            EvolutionLevel.L3_ARCHITECTURE: 15,
+            EvolutionLevel.L4_GOAL: 10,
+        }
+    )
     parallel_workers: int = 4
     checkpoint_interval: int = 5
     auto_promote: bool = True
@@ -223,7 +225,9 @@ class EvolutionOrchestrator:
                     # Check convergence
                     if result.improvement < self._config.promote_threshold:
                         logger.info(
-                            "%s converged (improvement=%.6f)", level.name, result.improvement,
+                            "%s converged (improvement=%.6f)",
+                            level.name,
+                            result.improvement,
                         )
                         break
 
@@ -278,7 +282,9 @@ class EvolutionOrchestrator:
             # Phase 1: Evaluate current best
             cycle.phase = CyclePhase.EVALUATION
             if self._best_genome and self._config.benchmark:
-                self._best_fitness = await self._fitness.evaluate(self._best_genome, self._config.benchmark)
+                self._best_fitness = await self._fitness.evaluate(
+                    self._best_genome, self._config.benchmark
+                )
                 cycle.fitness_before = self._best_fitness
 
             # Phase 2: Evolve the genetic population
@@ -302,7 +308,9 @@ class EvolutionOrchestrator:
             cycle.phase = CyclePhase.VERIFICATION
             candidate = self._genetic.best_genome
             if candidate and self._config.benchmark:
-                cycle.fitness_after = await self._fitness.evaluate(candidate, self._config.benchmark)
+                cycle.fitness_after = await self._fitness.evaluate(
+                    candidate, self._config.benchmark
+                )
                 cycle.best_genome_id = candidate.agent_id
             else:
                 cycle.fitness_after = self._best_fitness
@@ -333,9 +341,12 @@ class EvolutionOrchestrator:
 
         logger.info(
             "Cycle %d complete: %s | fitness %.4f -> %.4f | promoted=%s | %dms",
-            cycle.cycle_id, level.name,
-            cycle.fitness_before, cycle.fitness_after,
-            cycle.promoted, int(cycle.duration_ms),
+            cycle.cycle_id,
+            level.name,
+            cycle.fitness_before,
+            cycle.fitness_after,
+            cycle.promoted,
+            int(cycle.duration_ms),
         )
 
         return cycle
@@ -405,19 +416,22 @@ class EvolutionOrchestrator:
             history_length=len(self._cycle_history),
         )
 
-        self._checkpoints.append({
-            "snapshot": snapshot,
-            "meta_checkpoints": self._meta_stack.checkpoint_all(),
-            "pool_export": self._pool.export_pool(),
-        })
+        self._checkpoints.append(
+            {
+                "snapshot": snapshot,
+                "meta_checkpoints": self._meta_stack.checkpoint_all(),
+                "pool_export": self._pool.export_pool(),
+            }
+        )
 
         self._rollback_stack.append(snapshot)
         if len(self._rollback_stack) > self._config.max_rollback_depth:
-            self._rollback_stack = self._rollback_stack[-self._config.max_rollback_depth:]
+            self._rollback_stack = self._rollback_stack[-self._config.max_rollback_depth :]
 
         logger.info(
             "Checkpoint created at cycle %d (level=%s)",
-            self._current_cycle, self._current_level.name if self._current_level else "none",
+            self._current_cycle,
+            self._current_level.name if self._current_level else "none",
         )
 
         return snapshot
@@ -433,9 +447,7 @@ class EvolutionOrchestrator:
         self._status = snapshot.status
         self._current_cycle = snapshot.current_cycle
         self._current_level = (
-            EvolutionLevel[snapshot.current_level]
-            if snapshot.current_level != "none"
-            else None
+            EvolutionLevel[snapshot.current_level] if snapshot.current_level != "none" else None
         )
 
         if snapshot.best_genome:
@@ -458,7 +470,9 @@ class EvolutionOrchestrator:
 
         logger.info(
             "Promoted genome: %s -> %s (fitness=%.4f)",
-            old_id, genome.agent_id, self._best_fitness,
+            old_id,
+            genome.agent_id,
+            self._best_fitness,
         )
 
     async def _promote_best(self) -> None:
@@ -533,7 +547,9 @@ class EvolutionOrchestrator:
         """Create a default fitness function using the fitness evaluator."""
         evaluator = self._fitness
         benchmark = self._config.benchmark or BenchmarkConfig(
-            name="default", description="Default benchmark", task_count=5,
+            name="default",
+            description="Default benchmark",
+            task_count=5,
         )
 
         class DefaultFitness:

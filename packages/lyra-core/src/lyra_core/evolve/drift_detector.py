@@ -123,7 +123,12 @@ class DriftSnapshot:
 
         severities = [m.severity for m in drift_metrics]
         overall = DriftSeverity.NONE
-        for s in (DriftSeverity.CRITICAL, DriftSeverity.SEVERE, DriftSeverity.MODERATE, DriftSeverity.MINOR):
+        for s in (
+            DriftSeverity.CRITICAL,
+            DriftSeverity.SEVERE,
+            DriftSeverity.MODERATE,
+            DriftSeverity.MINOR,
+        ):
             if s in severities:
                 overall = s
                 break
@@ -189,7 +194,8 @@ class DriftDetector:
         """Establish baseline metrics for a prompt.
 
         The baseline values are set equal to the current values (no drift by
-        definition). Metrics dict keys: name -> (current, baseline, warn_thresh, crit_thresh, direction).
+        definition). Metrics dict keys: name -> (current, baseline, warn_thresh, crit_thresh,
+        direction).
         """
         self._versions.setdefault(prompt_id, 1)
         snapshot = DriftSnapshot.collect(
@@ -244,20 +250,33 @@ class DriftDetector:
                 from_version=self._versions.get(prompt_id, 1),
                 to_version=self._versions.get(prompt_id, 1),
                 status=RepairStatus.FAILED,
-                metrics_before=self._baselines.get(prompt_id, DriftSnapshot(
-                    snapshot_id="empty", prompt_id=prompt_id, prompt_version=1,
-                    metrics=(), overall_severity=DriftSeverity.NONE, timestamp=time.time(),
-                )),
+                metrics_before=self._baselines.get(
+                    prompt_id,
+                    DriftSnapshot(
+                        snapshot_id="empty",
+                        prompt_id=prompt_id,
+                        prompt_version=1,
+                        metrics=(),
+                        overall_severity=DriftSeverity.NONE,
+                        timestamp=time.time(),
+                    ),
+                ),
                 metrics_after=None,
                 repair_duration_sec=0.0,
                 error_message="No baseline established for this prompt",
             )
 
-        before_snapshot = self._snapshots[prompt_id][-1] if self._snapshots[prompt_id] else self._baselines[prompt_id]
+        before_snapshot = (
+            self._snapshots[prompt_id][-1]
+            if self._snapshots[prompt_id]
+            else self._baselines[prompt_id]
+        )
         current_version = self._versions[prompt_id]
         repair_start = time.time()
 
-        new_metrics: dict[str, tuple[float, float, float, float, str]] = self._auto_repair_metrics(before_snapshot)
+        new_metrics: dict[str, tuple[float, float, float, float, str]] = self._auto_repair_metrics(
+            before_snapshot
+        )
         if repair_fn is not None:
             try:
                 result = repair_fn(before_snapshot)
@@ -292,7 +311,11 @@ class DriftDetector:
             prompt_id=prompt_id,
             from_version=current_version,
             to_version=self._versions[prompt_id],
-            status=RepairStatus.SUCCESS if after_snapshot.overall_severity == DriftSeverity.NONE else RepairStatus.FAILED,
+            status=(
+                RepairStatus.SUCCESS
+                if after_snapshot.overall_severity == DriftSeverity.NONE
+                else RepairStatus.FAILED
+            ),
             metrics_before=before_snapshot,
             metrics_after=after_snapshot,
             repair_duration_sec=time.time() - repair_start,
@@ -312,8 +335,12 @@ class DriftDetector:
                 to_version=self._versions.get(prompt_id, 1),
                 status=RepairStatus.FAILED,
                 metrics_before=DriftSnapshot(
-                    snapshot_id="empty", prompt_id=prompt_id, prompt_version=1,
-                    metrics=(), overall_severity=DriftSeverity.NONE, timestamp=time.time(),
+                    snapshot_id="empty",
+                    prompt_id=prompt_id,
+                    prompt_version=1,
+                    metrics=(),
+                    overall_severity=DriftSeverity.NONE,
+                    timestamp=time.time(),
                 ),
                 metrics_after=None,
                 repair_duration_sec=0.0,

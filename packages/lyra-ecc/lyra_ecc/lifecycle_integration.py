@@ -5,7 +5,7 @@ Bridges ECC's hooks system with Lyra's lifecycle-based hooks architecture.
 """
 
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from lyra_core.hooks import LifecycleBus, LifecycleEvent
 
@@ -34,7 +34,7 @@ class ECCLifecycleIntegration:
         self.lifecycle_bus.subscribe(LifecycleEvent.SESSION_START, self._on_session_start)
         self.lifecycle_bus.subscribe(LifecycleEvent.SESSION_END, self._on_session_end)
 
-    def _on_tool_call(self, context: Dict[str, Any]) -> None:
+    def _on_tool_call(self, context: dict[str, Any]) -> None:
         """Handle TOOL_CALL event."""
         # Fire POST_TOOL_USE hooks
         self._build_ecc_context(HookType.POST_TOOL_USE, context)
@@ -43,18 +43,18 @@ class ECCLifecycleIntegration:
         # For now, we'll skip async execution in the subscriber
         context["ecc_hook_fired"] = True
 
-    def _on_session_start(self, context: Dict[str, Any]) -> None:
+    def _on_session_start(self, context: dict[str, Any]) -> None:
         """Handle SESSION_START event."""
         self._build_ecc_context(HookType.SESSION_START, context)
         context["ecc_hook_fired"] = True
 
-    def _on_session_end(self, context: Dict[str, Any]) -> None:
+    def _on_session_end(self, context: dict[str, Any]) -> None:
         """Handle SESSION_END event."""
         self._build_ecc_context(HookType.SESSION_END, context)
         context["ecc_hook_fired"] = True
 
     def _build_ecc_context(
-        self, hook_type: HookType, lifecycle_context: Dict[str, Any]
+        self, hook_type: HookType, lifecycle_context: dict[str, Any]
     ) -> HookContext:
         """
         Build ECC hook context from lifecycle context.
@@ -88,7 +88,7 @@ class ECCLifecycleIntegration:
         """
         self.ecc_engine.register_hook(hook_type, hook_fn)
 
-    def get_hook_summary(self) -> Dict[str, Any]:
+    def get_hook_summary(self) -> dict[str, Any]:
         """
         Get summary of registered hooks.
 

@@ -6,7 +6,8 @@ and cross-plan coordination.
 
 Plan → Package mapping:
   Citadel:      lyra-verification-mesh, lyra-hbhc, lyra-viper-mcp, lyra-attestor
-  Oracle:       lyra-causal-graph, lyra-counterfactual, lyra-science-pipeline, lyra-claim-verification
+  Oracle:       lyra-causal-graph, lyra-counterfactual, lyra-science-pipeline,
+  lyra-claim-verification
   Chameleon:    lyra-drift-detector, lyra-skill-weaver, lyra-context-profiler, lyra-competence-map
   Singularity:  lyra-meta-evolution, lyra-recursive-reward, lyra-fork-worker
   Superorganism: lyra-colony, lyra-emergent-coord, lyra-gossip-memory, lyra-agent-lifecycle
@@ -50,6 +51,7 @@ class CapabilityDomain(Enum):
 @dataclass
 class UpgradeStatus:
     """Status of a single breakthrough upgrade."""
+
     name: str
     domain: CapabilityDomain
     phase: int  # 1-5
@@ -86,31 +88,38 @@ class BreakthroughIntegration:
     UPGRADE_REGISTRY: dict[str, tuple[CapabilityDomain, int, list[str]]] = {
         # Phase 1: Foundation
         "aer": (CapabilityDomain.REASONING, 1, ["lyra_reasoning", "lyra_cognitive"]),
-        "hierarchical_memory": (CapabilityDomain.MEMORY, 1, ["lyra_memory", "lyra_memory_token", "lyra_memory_vericache"]),
+        "hierarchical_memory": (
+            CapabilityDomain.MEMORY,
+            1,
+            ["lyra_memory", "lyra_memory_token", "lyra_memory_vericache"],
+        ),
         "context_graph": (CapabilityDomain.MEMORY, 1, ["lyra_memory"]),
-
         # Phase 2: Intelligence
         "self_rewriting": (CapabilityDomain.EVOLUTION, 2, ["lyra_evolution"]),
         "model_routing": (CapabilityDomain.ROUTING, 2, ["lyra_router"]),
         "continuous_learning": (CapabilityDomain.EVOLUTION, 2, ["lyra_continual"]),
-
         # Phase 3: Reasoning
-        "causal_reasoning": (CapabilityDomain.REASONING, 3, ["lyra_causal_graph", "lyra_counterfactual"]),
+        "causal_reasoning": (
+            CapabilityDomain.REASONING,
+            3,
+            ["lyra_causal_graph", "lyra_counterfactual"],
+        ),
         "meta_learning": (CapabilityDomain.EVOLUTION, 3, ["lyra_meta_evolution"]),
         "explainable_ai": (CapabilityDomain.REASONING, 3, ["lyra_cognitive"]),
         "uncertainty": (CapabilityDomain.VERIFICATION, 3, ["lyra_verification"]),
-
         # Phase 4: Collaboration
-        "multi_agent_orch": (CapabilityDomain.ORCHESTRATION, 4, ["lyra_orchestration", "lyra_colony"]),
+        "multi_agent_orch": (
+            CapabilityDomain.ORCHESTRATION,
+            4,
+            ["lyra_orchestration", "lyra_colony"],
+        ),
         "adaptive_compaction": (CapabilityDomain.MEMORY, 4, ["lyra_context_profiler"]),
         "federated_knowledge": (CapabilityDomain.RESEARCH, 4, ["lyra_research"]),
-
         # Phase 5: AGI
         "transfer_learning": (CapabilityDomain.ADAPTATION, 5, ["lyra_continual"]),
         "neuro_symbolic": (CapabilityDomain.REASONING, 5, ["lyra_beliefs"]),
         "temporal_reasoning": (CapabilityDomain.REASONING, 5, ["lyra_causal_graph"]),
         "ethical_framework": (CapabilityDomain.SAFETY, 5, ["lyra_beliefs"]),
-
         # Cross-cutting
         "skill_weaver": (CapabilityDomain.ADAPTATION, 4, ["lyra_skill_weaver"]),
         "drift_detection": (CapabilityDomain.ADAPTATION, 4, ["lyra_drift_detector"]),
@@ -128,9 +137,7 @@ class BreakthroughIntegration:
         self._task: asyncio.Task | None = None
 
         for name, (domain, phase, _pkgs) in self.UPGRADE_REGISTRY.items():
-            self._upgrades[name] = UpgradeStatus(
-                name=name, domain=domain, phase=phase
-            )
+            self._upgrades[name] = UpgradeStatus(name=name, domain=domain, phase=phase)
 
     # ── Availability ─────────────────────────────────────────────
 
@@ -199,46 +206,57 @@ class BreakthroughIntegration:
 
     def _init_aer(self):
         from lyra_reasoning import ReasoningOrchestrator
+
         return ReasoningOrchestrator()
 
     def _init_memory(self):
         from lyra_memory import MemorySystem
+
         return MemorySystem()
 
     def _init_router(self):
         from lyra_router import AgentRouter
+
         return AgentRouter()
 
     def _init_evolution(self):
         from lyra_evolution import EvolutionEngine
+
         return EvolutionEngine()
 
     def _init_continual(self):
         from lyra_continual import ContinualLearning
+
         return ContinualLearning()
 
     def _init_causal(self):
         from lyra_causal_graph import CausalGraph
+
         return CausalGraph()
 
     def _init_meta(self):
         from lyra_meta_evolution import MetaEvolution
+
         return MetaEvolution()
 
     def _init_orchestration(self):
         from lyra_orchestration import OrchestrationBus
+
         return OrchestrationBus()
 
     def _init_context_profiler(self):
         from lyra_context_profiler import ContextProfiler
+
         return ContextProfiler()
 
     def _init_verification_mesh(self):
         from lyra_verification_mesh import VerificationMesh
+
         return VerificationMesh()
 
     def _init_research(self):
         from lyra_research import ResearchCoordinator
+
         return ResearchCoordinator()
 
     # ── Health Monitoring ────────────────────────────────────────
@@ -265,7 +283,9 @@ class BreakthroughIntegration:
         domain_avg = {d: sum(s) / len(s) for d, s in domain_scores.items() if s}
         phase_avg = {p: sum(s) / len(s) for p, s in phase_scores.items() if s}
 
-        overall = sum(status.health_score for status in self._upgrades.values()) / max(len(self._upgrades), 1)
+        overall = sum(status.health_score for status in self._upgrades.values()) / max(
+            len(self._upgrades), 1
+        )
 
         health = SystemHealth(
             overall=round(overall, 3),
@@ -323,10 +343,18 @@ class BreakthroughIntegration:
         return {"action": "activate_shield", "affected": payload.get("source")}
 
     async def _on_drift(self, payload: dict) -> dict:
-        return {"action": "reverify", "domain": payload.get("domain"), "severity": payload.get("severity", "medium")}
+        return {
+            "action": "reverify",
+            "domain": payload.get("domain"),
+            "severity": payload.get("severity", "medium"),
+        }
 
     async def _on_perf_drop(self, payload: dict) -> dict:
-        return {"action": "reroute", "component": payload.get("component"), "new_model": payload.get("fallback")}
+        return {
+            "action": "reroute",
+            "component": payload.get("component"),
+            "new_model": payload.get("fallback"),
+        }
 
     async def _on_new_capability(self, payload: dict) -> dict:
         return {"action": "register", "capability": payload.get("name")}
@@ -335,7 +363,11 @@ class BreakthroughIntegration:
         return {"action": "respawn", "agent_id": payload.get("agent_id")}
 
     async def _on_knowledge_update(self, payload: dict) -> dict:
-        return {"action": "propagate", "source": payload.get("source"), "entities": payload.get("entities", [])}
+        return {
+            "action": "propagate",
+            "source": payload.get("source"),
+            "entities": payload.get("entities", []),
+        }
 
     # ── Background Operations ────────────────────────────────────
 
@@ -390,7 +422,11 @@ class BreakthroughIntegration:
             "domain_health": health.by_domain,
             "phase_health": health.by_phase,
             "upgrades": {
-                name: {"available": s.is_available, "initialized": s.is_initialized, "health": s.health_score}
+                name: {
+                    "available": s.is_available,
+                    "initialized": s.is_initialized,
+                    "health": s.health_score,
+                }
                 for name, s in self._upgrades.items()
             },
         }

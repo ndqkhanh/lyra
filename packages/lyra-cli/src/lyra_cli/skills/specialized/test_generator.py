@@ -123,16 +123,16 @@ class TestGeneratorSkill:
         has_defaults = len(args.defaults) > 0
 
         # Generate happy path test
-        happy_inputs = ", ".join(
-            f"{name}=None" if has_defaults else name
-            for name in arg_names
-        )
+        happy_inputs = ", ".join(f"{name}=None" if has_defaults else name for name in arg_names)
         test_cases.append(
             TestCase(
                 name=f"test_{func_name}_happy_path",
                 category="happy_path",
                 input_example=f"result = {func_name}({happy_inputs})",
-                expected_behavior=f"Returns expected output for valid {', '.join(arg_names) if arg_names else 'input'}",
+                expected_behavior=(
+                    f"Returns expected output for valid "
+                    f"{', '.join(arg_names) if arg_names else 'input'}"
+                ),
             )
         )
 
@@ -164,7 +164,9 @@ class TestGeneratorSkill:
                 TestCase(
                     name=f"test_{func_name}_error_handling",
                     category="error_case",
-                    input_example=f"with pytest.raises(Exception):\\n        await {func_name}(invalid_input)",
+                    input_example=(
+                        f"with pytest.raises(Exception):\\n        await {func_name}(invalid_input)"
+                    ),
                     expected_behavior="Raises appropriate exception for invalid input",
                 )
             )
@@ -173,7 +175,9 @@ class TestGeneratorSkill:
                 TestCase(
                     name=f"test_{func_name}_error_handling",
                     category="error_case",
-                    input_example=f"with pytest.raises(Exception):\\n        {func_name}(invalid_input)",
+                    input_example=(
+                        f"with pytest.raises(Exception):\\n        {func_name}(invalid_input)"
+                    ),
                     expected_behavior="Raises appropriate exception for invalid input",
                 )
             )

@@ -9,6 +9,7 @@ from dataclasses import dataclass
 
 class ConcessionThreshold:
     """Concession threshold levels (1-5 scale)"""
+
     WEAK = 1
     MODERATE = 2
     GOOD = 3
@@ -19,6 +20,7 @@ class ConcessionThreshold:
 @dataclass
 class AdvocateResult:
     """Result from devil's advocate evaluation"""
+
     concede: bool
     score: int  # 1-5
     reason: str
@@ -68,21 +70,17 @@ class DevilsAdvocateProtocol:
                     concede=False,
                     score=score,
                     reason="Frame-lock detected: consecutive concessions not allowed",
-                    counter_rebuttal=self.generate_counter(claim, rebuttal)
+                    counter_rebuttal=self.generate_counter(claim, rebuttal),
                 )
 
             # Concede
             self.consecutive_concessions += 1
-            self.concession_history.append({
-                "claim": claim,
-                "rebuttal": rebuttal,
-                "score": score
-            })
+            self.concession_history.append({"claim": claim, "rebuttal": rebuttal, "score": score})
 
             return AdvocateResult(
                 concede=True,
                 score=score,
-                reason=f"Strong rebuttal (score {score}/{ConcessionThreshold.COMPELLING})"
+                reason=f"Strong rebuttal (score {score}/{ConcessionThreshold.COMPELLING})",
             )
 
         # Don't concede - generate counter-rebuttal
@@ -91,7 +89,7 @@ class DevilsAdvocateProtocol:
             concede=False,
             score=score,
             reason=f"Rebuttal insufficient (score {score}/{self.concession_threshold} required)",
-            counter_rebuttal=self.generate_counter(claim, rebuttal)
+            counter_rebuttal=self.generate_counter(claim, rebuttal),
         )
 
     def score_rebuttal(self, claim: str, rebuttal: str) -> int:
@@ -142,7 +140,10 @@ class DevilsAdvocateProtocol:
         """
         # In production, this would use LLM to generate sophisticated counter-arguments
         # For now, return a template
-        return "While your rebuttal addresses some aspects, consider: What evidence supports the alternative view? Have you accounted for potential confounding factors?"
+        return(
+            "While your rebuttal addresses some aspects, consider: What evidence supports the"
+            "alternative view? Have you accounted for potential confounding factors?"
+        )
 
     def detect_frame_lock(self) -> bool:
         """

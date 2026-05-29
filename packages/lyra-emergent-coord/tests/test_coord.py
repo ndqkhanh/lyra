@@ -53,11 +53,13 @@ class TestCoalitionFormation:
 
     def test_register_and_form_coalition(self, engine: CoalitionFormationEngine) -> None:
         async def _run() -> Coalition:
-            await engine.advertise_task(TaskAdvertisement(
-                task_id="task_1",
-                required_capabilities=("search", "analyze"),
-                complexity=0.5,
-            ))
+            await engine.advertise_task(
+                TaskAdvertisement(
+                    task_id="task_1",
+                    required_capabilities=("search", "analyze"),
+                    complexity=0.5,
+                )
+            )
             return await engine.form_coalition("task_1")
 
         coalition = asyncio.run(_run())
@@ -71,9 +73,12 @@ class TestCoalitionFormation:
 
     async def test_form_coalition_requirements(self, engine: CoalitionFormationEngine) -> None:
         ad = TaskAdvertisement(
-            task_id="t1", task_type="research", complexity=0.5,
+            task_id="t1",
+            task_type="research",
+            complexity=0.5,
             required_capabilities=("nlp", "code"),
-            min_coalition_size=2, max_coalition_size=3,
+            min_coalition_size=2,
+            max_coalition_size=3,
         )
         await engine.advertise_task(ad)
         coalition = await engine.form_coalition("t1")
@@ -97,12 +102,18 @@ class TestCoalitionFormation:
         assert total > 0
 
     def test_bid_total_score(self) -> None:
-        bid = Bid(agent_id="a1", task_id="t1", capability_score=0.8, current_load=0.2, bid_value=0.7)
+        bid = Bid(
+            agent_id="a1", task_id="t1", capability_score=0.8, current_load=0.2, bid_value=0.7
+        )
         assert bid.total_score == pytest.approx(0.78)
 
     def test_coalition_properties(self) -> None:
-        c = Coalition(task_id="t1", leader_id="a1", member_ids=("a1", "a2", "a3"),
-                       shapley_values={"a1": 0.5, "a2": 0.3, "a3": 0.2})
+        c = Coalition(
+            task_id="t1",
+            leader_id="a1",
+            member_ids=("a1", "a2", "a3"),
+            shapley_values={"a1": 0.5, "a2": 0.3, "a3": 0.2},
+        )
         assert c.size == 3
         assert c.avg_shapley == pytest.approx(1.0 / 3.0)
 
@@ -204,7 +215,9 @@ class TestLeaderElection:
         assert len(history) >= 1
 
     def test_election_result_properties(self) -> None:
-        result = ElectionResult(winner_id="agent-1", votes_received=3, total_voters=4, quorum_achieved=True)
+        result = ElectionResult(
+            winner_id="agent-1", votes_received=3, total_voters=4, quorum_achieved=True
+        )
         assert result.vote_share == 0.75
         assert result.is_valid
 
@@ -229,7 +242,9 @@ class TestLeaderElection:
 class TestNegotiation:
     def test_contract_net_protocol(self) -> None:
         cnp = ContractNetProtocol(bid_timeout=5.0)
-        session = asyncio.run(cnp.announce_task("task-1", {"type": "build"}, eligible_agents=["a", "b"]))
+        session = asyncio.run(
+            cnp.announce_task("task-1", {"type": "build"}, eligible_agents=["a", "b"])
+        )
         assert session.state == NegotiationState.OPEN
         offer = cnp.submit_bid(session.session_id, "a", {"price": 10}, value=0.8)
         assert offer.proposer_id == "a"
@@ -248,7 +263,9 @@ class TestNegotiation:
         session = asyncio.run(neg.start_negotiation(participants=["a", "b"], topic="price"))
         offer = neg.make_offer(session.session_id, "a", {"price": 100}, initial_value=0.8)
         assert offer.round_number == 0
-        counter = neg.counter_offer(session.session_id, offer.offer_id, "b", {"price": 80}, value=0.6)
+        counter = neg.counter_offer(
+            session.session_id, offer.offer_id, "b", {"price": 80}, value=0.6
+        )
         assert counter.round_number == 1
         contract = neg.accept_offer(session.session_id, counter.offer_id, "a")
         assert contract.parties == ("b", "a")
@@ -277,16 +294,22 @@ class TestNegotiation:
 
     def test_conflict_resolver_majority(self) -> None:
         resolver = ConflictResolver(default_strategy=ConflictResolutionStrategy.MAJORITY_VOTE)
-        resolver.register_conflict("c1", "test", parties=["a", "b", "c"],
-                                   positions={"a": "opt1", "b": "opt1", "c": "opt2"})
+        resolver.register_conflict(
+            "c1", "test", parties=["a", "b", "c"], positions={"a": "opt1", "b": "opt1", "c": "opt2"}
+        )
         result = resolver.resolve("c1")
         assert result["winner"] == "opt1"
         assert resolver.is_resolved("c1")
 
     def test_conflict_resolver_authority(self) -> None:
         resolver = ConflictResolver()
-        resolver.register_conflict("c2", "auth test", parties=["a", "b"],
-                                   positions={"a": "opt1", "b": "opt2"}, authority="a")
+        resolver.register_conflict(
+            "c2",
+            "auth test",
+            parties=["a", "b"],
+            positions={"a": "opt1", "b": "opt2"},
+            authority="a",
+        )
         result = resolver.resolve("c2", strategy=ConflictResolutionStrategy.AUTHORITY_OVERRIDE)
         assert result["winner"] == "opt1"
 
@@ -353,14 +376,24 @@ class TestEmergenceDetection:
         assert EmergenceDetector._signature_similarity("", "") == 0.0
 
     def test_pattern_significance(self) -> None:
-        p = InteractionPattern(agents_involved=["a", "b"], pattern_type="cooperation", frequency=5, confidence=0.5)
+        p = InteractionPattern(
+            agents_involved=["a", "b"], pattern_type="cooperation", frequency=5, confidence=0.5
+        )
         assert p.is_significant
-        p2 = InteractionPattern(agents_involved=["c"], pattern_type="unknown", frequency=1, confidence=0.1)
+        p2 = InteractionPattern(
+            agents_involved=["c"], pattern_type="unknown", frequency=1, confidence=0.1
+        )
         assert not p2.is_significant
 
     def test_emergent_behavior_model(self) -> None:
-        behavior = EmergentBehavior(name="test", description="desc", source_patterns=["p1"],
-                                    complexity=5, utility=0.7, stability=0.8)
+        behavior = EmergentBehavior(
+            name="test",
+            description="desc",
+            source_patterns=["p1"],
+            complexity=5,
+            utility=0.7,
+            stability=0.8,
+        )
         assert behavior.complexity == 5
 
 
@@ -460,15 +493,21 @@ class TestEmergentIntegration:
         engine.register_agent("leader", capabilities=["manage", "code"])
         engine.register_agent("coder-1", capabilities=["code", "test"])
         engine.register_agent("coder-2", capabilities=["code", "deploy"])
-        ad = TaskAdvertisement(task_id="build-api", required_capabilities=("code",),
-                              min_coalition_size=2, max_coalition_size=3)
+        ad = TaskAdvertisement(
+            task_id="build-api",
+            required_capabilities=("code",),
+            min_coalition_size=2,
+            max_coalition_size=3,
+        )
         await engine.advertise_task(ad)
         coalition = await engine.form_coalition("build-api")
         assert coalition.size >= 2
         assert coalition.leader_id
 
         cnp = ContractNetProtocol()
-        session = await cnp.announce_task("build-api", {"type": "api"}, eligible_agents=list(coalition.member_ids))
+        session = await cnp.announce_task(
+            "build-api", {"type": "api"}, eligible_agents=list(coalition.member_ids)
+        )
         cnp.submit_bid(session.session_id, coalition.leader_id, {"approach": "rest"}, value=0.9)
         contract = cnp.evaluate_and_award(session.session_id)
         assert contract is not None

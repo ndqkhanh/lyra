@@ -6,6 +6,7 @@ Integrates:
 - Week 2: Memory capacity management
 - Week 3: Adversarial review system
 """
+
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -65,8 +66,9 @@ from lyra_research.sources import SourceQualityScorer
 
 class AgentType(Enum):
     """Agent types in the 3-agent hybrid architecture."""
+
     DISCOVERY = "discovery"  # Haiku - parallel source discovery
-    ANALYSIS = "analysis"    # Sonnet - paper/repo analysis
+    ANALYSIS = "analysis"  # Sonnet - paper/repo analysis
     SYNTHESIS = "synthesis"  # Opus - report generation
 
 
@@ -78,6 +80,7 @@ class AgentType(Enum):
 @dataclass
 class AgentConfig:
     """Configuration for an agent in the hybrid system."""
+
     type: AgentType
     model: str  # Model identifier
     timeout_seconds: int
@@ -234,6 +237,7 @@ class ResearchOrchestrator:
 
         # Pipeline components
         import os
+
         semantic_scholar_key = os.environ.get("SEMANTIC_SCHOLAR_API_KEY")
         github_token = os.environ.get("GITHUB_TOKEN")
 
@@ -330,12 +334,8 @@ class ResearchOrchestrator:
             _step(5, "Fetching source metadata")
             self.capacity.enforce_limits()
             self._store_to_corpus(ranked)
-            progress.papers_analyzed = sum(
-                1 for s in ranked if s.source_type.value == "paper"
-            )
-            progress.repos_analyzed = sum(
-                1 for s in ranked if s.source_type.value == "repository"
-            )
+            progress.papers_analyzed = sum(1 for s in ranked if s.source_type.value == "paper")
+            progress.repos_analyzed = sum(1 for s in ranked if s.source_type.value == "repository")
 
             # Step 6: Analyze (Analysis Agent - parallel)
             _step(6, "Analyzing sources")
@@ -393,8 +393,11 @@ class ResearchOrchestrator:
                     # Update report with reviewed content
                     report.content = review_result.revised_report
                 progress.verification_rate = (
-                    review_result.claims_reviewed - review_result.claims_modified
-                ) / review_result.claims_reviewed if review_result.claims_reviewed > 0 else 1.0
+                    (review_result.claims_reviewed - review_result.claims_modified)
+                    / review_result.claims_reviewed
+                    if review_result.claims_reviewed > 0
+                    else 1.0
+                )
                 progress.context_size_kb = review_result.context_size_kb
 
             report.sources_used = len(ranked)
@@ -416,16 +419,12 @@ class ResearchOrchestrator:
 
             # Collect telemetry
             progress.tasks_completed = sum(
-                1 for t in self.coordination.get_all_tasks()
-                if t.state == TaskState.COMPLETED
+                1 for t in self.coordination.get_all_tasks() if t.state == TaskState.COMPLETED
             )
             progress.tasks_failed = sum(
-                1 for t in self.coordination.get_all_tasks()
-                if t.state == TaskState.FAILED
+                1 for t in self.coordination.get_all_tasks() if t.state == TaskState.FAILED
             )
-            progress.tasks_retried = sum(
-                t.retry_count for t in self.coordination.get_all_tasks()
-            )
+            progress.tasks_retried = sum(t.retry_count for t in self.coordination.get_all_tasks())
 
             progress.completed_at = datetime.now(timezone.utc)
             return progress
@@ -458,20 +457,20 @@ class ResearchOrchestrator:
 
         try:
             # Check circuit breaker
-            should_proceed, error = self.coordination.circuit_breaker.should_proceed(task.agent_type)
+            should_proceed, error = self.coordination.circuit_breaker.should_proceed(
+                task.agent_type
+            )
             if not should_proceed:
                 raise RuntimeError(error)
 
             # Execute discovery
-            skill = self.skill_store.get_for_domain("general") or self.skill_store.get_by_name("general_research")
+            skill = self.skill_store.get_for_domain("general") or self.skill_store.get_by_name(
+                "general_research"
+            )
             active_sources = sources or (
                 skill.preferred_sources if skill else ["arxiv", "github", "huggingface"]
             )
-            max_per_source = (
-                50 if depth == "deep"
-                else 30 if depth == "standard"
-                else 15
-            )
+            max_per_source = 50 if depth == "deep" else 30 if depth == "standard" else 15
 
             raw_results = self.discovery.discover(
                 topic,
@@ -505,7 +504,9 @@ class ResearchOrchestrator:
         self.coordination.start_task(task)
 
         try:
-            should_proceed, error = self.coordination.circuit_breaker.should_proceed(task.agent_type)
+            should_proceed, error = self.coordination.circuit_breaker.should_proceed(
+                task.agent_type
+            )
             if not should_proceed:
                 raise RuntimeError(error)
 
@@ -538,7 +539,9 @@ class ResearchOrchestrator:
         self.coordination.start_task(task)
 
         try:
-            should_proceed, error = self.coordination.circuit_breaker.should_proceed(task.agent_type)
+            should_proceed, error = self.coordination.circuit_breaker.should_proceed(
+                task.agent_type
+            )
             if not should_proceed:
                 raise RuntimeError(error)
 
@@ -573,7 +576,9 @@ class ResearchOrchestrator:
         self.coordination.start_task(task)
 
         try:
-            should_proceed, error = self.coordination.circuit_breaker.should_proceed(task.agent_type)
+            should_proceed, error = self.coordination.circuit_breaker.should_proceed(
+                task.agent_type
+            )
             if not should_proceed:
                 raise RuntimeError(error)
 
@@ -639,9 +644,7 @@ class ResearchOrchestrator:
             entries.append(entry)
         return entries
 
-    def _analyze_sources(
-        self, sources: list[ResearchSource]
-    ) -> tuple[list[dict], list[dict]]:
+    def _analyze_sources(self, sources: list[ResearchSource]) -> tuple[list[dict], list[dict]]:
         """Convert sources to paper/repo analysis dicts."""
         papers: list[dict] = []
         repos: list[dict] = []

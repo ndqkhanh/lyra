@@ -133,10 +133,7 @@ class InstinctSystem:
 
     def _detect_tool_sequences(self, observations: list[Observation]) -> int:
         """Detect repeated tool call sequences."""
-        tool_calls = [
-            o for o in observations
-            if o.obs_type == ObservationType.TOOL_CALL
-        ]
+        tool_calls = [o for o in observations if o.obs_type == ObservationType.TOOL_CALL]
         if len(tool_calls) < 3:
             return 0
 
@@ -176,7 +173,10 @@ class InstinctSystem:
             curr = observations[i]
             next_obs = observations[i + 1]
 
-            if curr.obs_type == ObservationType.ERROR and next_obs.obs_type == ObservationType.SUCCESS:
+            if (
+                curr.obs_type == ObservationType.ERROR
+                and next_obs.obs_type == ObservationType.SUCCESS
+            ):
                 error_msg = curr.data.get("message", "")[:60]
                 recovery = next_obs.data.get("action", "")
                 key = f"ERROR:{error_msg} → {recovery}"
@@ -191,7 +191,10 @@ class InstinctSystem:
                         description=f"Error recovery: {error_msg} → {recovery}",
                         observations=[],
                         confidence=min(0.9, 0.5 + count * 0.2),
-                        suggested_skill=f"## Error Recovery: {error_msg}\nWhen this error occurs, try: {recovery}",
+                        suggested_skill=(
+                            f"## Error Recovery: {error_msg}\nWhen this error occurs, try: "
+                            f"{recovery}"
+                        ),
                     )
                     detected += 1
 
@@ -199,10 +202,7 @@ class InstinctSystem:
 
     def _detect_correction_patterns(self, observations: list[Observation]) -> int:
         """Detect user correction patterns."""
-        corrections = [
-            o for o in observations
-            if o.obs_type == ObservationType.USER_CORRECTION
-        ]
+        corrections = [o for o in observations if o.obs_type == ObservationType.USER_CORRECTION]
         detected = 0
 
         for corr in corrections[-20:]:
@@ -219,7 +219,10 @@ class InstinctSystem:
                     description=f"Frequent correction on: {topic}",
                     observations=[],
                     confidence=min(0.85, 0.4 + count * 0.15),
-                    suggested_skill=f"## Best Practice: {topic}\nBased on repeated user feedback, ensure: {topic}",
+                    suggested_skill=(
+                        f"## Best Practice: {topic}\nBased on repeated user feedback, ensure: "
+                        f"{topic}"
+                    ),
                 )
                 detected += 1
             elif count >= 3:

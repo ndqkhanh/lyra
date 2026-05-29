@@ -42,7 +42,9 @@ class PgVectorConfig:
     dbname: str = field(default_factory=lambda: os.environ.get("PGVECTOR_DBNAME", "lyra_memory"))
     user: str = field(default_factory=lambda: os.environ.get("PGVECTOR_USER", "postgres"))
     password: str = field(default_factory=lambda: os.environ.get("PGVECTOR_PASSWORD", ""))
-    vector_dim: int = field(default_factory=lambda: int(os.environ.get("PGVECTOR_VECTOR_DIM", "384")))
+    vector_dim: int = field(
+        default_factory=lambda: int(os.environ.get("PGVECTOR_VECTOR_DIM", "384"))
+    )
     max_connections: int = 10
     connection_timeout: int = 10
 
@@ -242,8 +244,7 @@ class InMemoryVectorStore:
 
         scores.sort(key=lambda x: x[1], reverse=True)
         return [
-            {"id": sid, "score": score, "metadata": meta}
-            for sid, score, meta in scores[:top_k]
+            {"id": sid, "score": score, "metadata": meta} for sid, score, meta in scores[:top_k]
         ]
 
     def delete(self, collection: str, ids: list[str]) -> int:
@@ -467,9 +468,7 @@ class PgVectorStore:
 
         try:
             async with self._pool.acquire() as conn:
-                result = await conn.execute(
-                    f"DELETE FROM {collection} WHERE id = ANY($1)", ids
-                )
+                result = await conn.execute(f"DELETE FROM {collection} WHERE id = ANY($1)", ids)
                 deleted = int(result.split()[-1]) if result else 0
             logger.debug("Deleted %d vectors from pgvector table '%s'", deleted, collection)
             return deleted

@@ -22,10 +22,10 @@ logger = logging.getLogger(__name__)
 class CompactionStrategy(Enum):
     """Compaction strategy enum."""
 
-    AGGRESSIVE = auto()    # Maximize free space
+    AGGRESSIVE = auto()  # Maximize free space
     CONSERVATIVE = auto()  # Minimize information loss
-    BALANCED = auto()      # Optimize for task completion
-    ADAPTIVE = auto()      # Learn from past decisions
+    BALANCED = auto()  # Optimize for task completion
+    ADAPTIVE = auto()  # Learn from past decisions
 
 
 # ── Strategy Parameters ─────────────────────────────────────────────────────────
@@ -39,12 +39,12 @@ class StrategyParameters:
     """
 
     # Retention thresholds (importance score below which elements may be removed)
-    drop_threshold: float = 0.15       # Below this: candidate for dropping
-    compact_threshold: float = 0.50    # Below this: candidate for compaction
-    keep_threshold: float = 0.70       # Above this: always keep
+    drop_threshold: float = 0.15  # Below this: candidate for dropping
+    compact_threshold: float = 0.50  # Below this: candidate for compaction
+    keep_threshold: float = 0.70  # Above this: always keep
 
     # Compaction ratios
-    compression_target: float = 0.60   # Target fraction of content to retain
+    compression_target: float = 0.60  # Target fraction of content to retain
     max_single_element_reduction: float = 0.80  # Max % reduction for one element
 
     # Duplicate handling
@@ -65,12 +65,12 @@ class StrategyParameters:
     max_preload_tokens: int = 6000
 
     # Safety
-    max_quality_loss: float = 0.30     # Maximum acceptable information loss
-    min_retained_elements: int = 3     # Minimum elements to always retain
+    max_quality_loss: float = 0.30  # Maximum acceptable information loss
+    min_retained_elements: int = 3  # Minimum elements to always retain
 
     # Adaptive learning
-    learning_rate: float = 0.05        # How fast to adapt parameters
-    window_size: int = 100             # History window for adaptation
+    learning_rate: float = 0.05  # How fast to adapt parameters
+    window_size: int = 100  # History window for adaptation
 
     def to_dict(self) -> dict[str, Any]:
         """Export parameters as a dictionary."""
@@ -256,7 +256,11 @@ class StrategyRegistry:
     ) -> None:
         """Set or update parameters for a strategy."""
         self._parameters[strategy] = parameters
-        logger.info("Configured %s strategy with drop_threshold=%.2f", strategy.name, parameters.drop_threshold)
+        logger.info(
+            "Configured %s strategy with drop_threshold=%.2f",
+            strategy.name,
+            parameters.drop_threshold,
+        )
 
     def get_parameters(self, strategy: CompactionStrategy) -> StrategyParameters:
         """Get the current parameters for a strategy."""
@@ -310,7 +314,9 @@ class StrategyRegistry:
             # Best = highest success rate * token efficiency
             def score(s: CompactionStrategy) -> float:
                 sr = self._success_rates.get(s, 0.5)
-                avg_freed = sum(r.tokens_freed for r in self._history[s]) / max(len(self._history[s]), 1)
+                avg_freed = sum(r.tokens_freed for r in self._history[s]) / max(
+                    len(self._history[s]), 1
+                )
                 norm_freed = min(avg_freed / 10000, 1.0)  # Normalize to 10k tokens
                 return sr * 0.6 + norm_freed * 0.4
 
@@ -318,7 +324,9 @@ class StrategyRegistry:
 
         logger.debug(
             "Best strategy for %.1f%% utilization: %s (quality_priority=%s)",
-            utilization_pct, best.name, prioritize_quality,
+            utilization_pct,
+            best.name,
+            prioritize_quality,
         )
         return best
 
@@ -385,12 +393,18 @@ class StrategyRegistry:
         target_freed_ratio = 0.15  # Aim for 15% freeable
         if avg_freed / 10000 < target_freed_ratio and avg_loss < params.max_quality_loss * 0.7:
             new_params.drop_threshold = max(params.drop_threshold - lr, 0.02)
-            new_params.compact_threshold = max(params.compact_threshold - lr, params.drop_threshold + 0.05)
+            new_params.compact_threshold = max(
+                params.compact_threshold - lr, params.drop_threshold + 0.05
+            )
 
         self._parameters[strategy] = new_params
         logger.debug(
             "Adapted %s: drop=%.2f compact=%.2f (loss=%.3f, freed=%d)",
-            strategy.name, new_params.drop_threshold, new_params.compact_threshold, avg_loss, int(avg_freed),
+            strategy.name,
+            new_params.drop_threshold,
+            new_params.compact_threshold,
+            avg_loss,
+            int(avg_freed),
         )
 
         return new_params

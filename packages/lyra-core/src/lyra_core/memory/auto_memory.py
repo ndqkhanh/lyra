@@ -22,6 +22,7 @@ Bright-line: ``LBL-AUTO-MEMORY-APPEND-ONLY`` — past entries never
 mutate; rewrites create new dated entries. ``forget`` is a tombstone,
 not a delete.
 """
+
 from __future__ import annotations
 
 import enum
@@ -43,10 +44,10 @@ _SLUG_RE = re.compile(r"[^A-Za-z0-9_-]+")
 
 
 class MemoryKind(str, enum.Enum):
-    USER = "user"               # role / preferences
-    FEEDBACK = "feedback"       # corrections / confirmations
-    PROJECT = "project"         # ongoing work, decisions
-    REFERENCE = "reference"     # external pointers (docs, dashboards)
+    USER = "user"  # role / preferences
+    FEEDBACK = "feedback"  # corrections / confirmations
+    PROJECT = "project"  # ongoing work, decisions
+    REFERENCE = "reference"  # external pointers (docs, dashboards)
 
 
 @dataclass(frozen=True)
@@ -94,8 +95,8 @@ def project_slug(project: str) -> str:
 class AutoMemory:
     """File-backed auto-memory store for one project."""
 
-    root: Path                       # ~/.lyra/memory
-    project: str                     # raw project name; slug derived
+    root: Path  # ~/.lyra/memory
+    project: str  # raw project name; slug derived
 
     def __post_init__(self) -> None:
         self.root = Path(self.root)
@@ -149,8 +150,12 @@ class AutoMemory:
         """Append a new entry. Past entries are never mutated."""
         entry_id = f"{kind.value}-{int(time.time() * 1000)}-{len(self._entries)}"
         entry = MemoryEntry(
-            entry_id=entry_id, kind=kind, title=title, body=body,
-            created_ts=time.time(), extra=dict(extra or {}),
+            entry_id=entry_id,
+            kind=kind,
+            title=title,
+            body=body,
+            created_ts=time.time(),
+            extra=dict(extra or {}),
         )
         return self._append(entry)
 
@@ -163,9 +168,12 @@ class AutoMemory:
         if prev.deleted:
             return prev
         tombstone = MemoryEntry(
-            entry_id=entry_id, kind=prev.kind,
-            title=prev.title, body=prev.body,
-            created_ts=time.time(), deleted=True,
+            entry_id=entry_id,
+            kind=prev.kind,
+            title=prev.title,
+            body=prev.body,
+            created_ts=time.time(),
+            deleted=True,
             extra=dict(prev.extra),
         )
         return self._append(tombstone, replace_md=True)
@@ -177,10 +185,7 @@ class AutoMemory:
         return tuple(e for e in items if not e.deleted)
 
     def by_kind(self, kind: MemoryKind) -> tuple[MemoryEntry, ...]:
-        return tuple(
-            e for e in self._entries.values()
-            if e.kind is kind and not e.deleted
-        )
+        return tuple(e for e in self._entries.values() if e.kind is kind and not e.deleted)
 
     def retrieve(
         self,
@@ -272,7 +277,8 @@ class AutoMemory:
         with self._md_path.open("a", encoding="utf-8") as fh:
             fh.write(
                 f"\n## {entry.title}\n"
-                f"_({entry.kind.value} · {time.strftime('%Y-%m-%d', time.gmtime(entry.created_ts))})_\n\n"
+                f"_({entry.kind.value} · "
+                f"{time.strftime('%Y-%m-%d', time.gmtime(entry.created_ts))})_\n\n"
                 f"{entry.body}\n"
             )
 
@@ -284,7 +290,8 @@ class AutoMemory:
             for e in active:
                 fh.write(
                     f"\n## {e.title}\n"
-                    f"_({e.kind.value} · {time.strftime('%Y-%m-%d', time.gmtime(e.created_ts))})_\n\n"
+                    f"_({e.kind.value} · {time.strftime('%Y-%m-%d', time.gmtime(e.created_ts))}"
+                    f")_\n\n"
                     f"{e.body}\n"
                 )
 

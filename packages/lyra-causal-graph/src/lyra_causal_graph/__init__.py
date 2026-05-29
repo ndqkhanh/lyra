@@ -122,8 +122,8 @@ class EntityNode:
     id: str
     name: str
     entity_type: str = "unknown"
-    properties: dict[str, Any] = _field(default_factory=dict)
-    embedding: Optional[np.ndarray] = None
+    properties: dict[str, _Any] = _field(default_factory=dict)
+    embedding: _np.ndarray | None = None
 
     def to_graph_node(self) -> GraphNode:
         return GraphNode(
@@ -147,12 +147,11 @@ class ActionEdge:
     target_id: str
     action_type: str = "unknown"
     timestamp: float = 0.0
-    outcome_id: Optional[str] = None
-    metadata: dict[str, Any] = _field(default_factory=dict)
+    outcome_id: str | None = None
+    metadata: dict[str, _Any] = _field(default_factory=dict)
+
 
 # Legacy OutcomeNode (from original stub)
-from dataclasses import dataclass
-from dataclasses import field as _field
 
 
 @dataclass
@@ -190,7 +189,7 @@ class LegacyCausalGraph(_CausalGraph):
     Maps the old EntityNode/ActionEdge/OutcomeNode API onto the new CausalGraph.
     """
 
-    def __init__(self, config: Optional[CausalGraphConfig] = None):
+    def __init__(self, config: CausalGraphConfig | None = None):
         super().__init__(config=config)
         self.entities: dict[str, EntityNode] = {}
         self.actions: dict[str, ActionEdge] = {}
@@ -208,8 +207,10 @@ class LegacyCausalGraph(_CausalGraph):
         self.actions[action.id] = action
         try:
             self.add_directed_edge(
-                action.source_id, action.target_id,
-                strength=0.5, confidence=0.5,
+                action.source_id,
+                action.target_id,
+                strength=0.5,
+                confidence=0.5,
             )
         except CycleDetectedError:
             pass
@@ -227,7 +228,9 @@ class LegacyCausalGraph(_CausalGraph):
         return self.entities.get(entity_id)
 
     def get_actions_for_entity(self, entity_id: str) -> list[ActionEdge]:
-        return [a for a in self.actions.values() if a.source_id == entity_id or a.target_id == entity_id]
+        return [
+            a for a in self.actions.values() if a.source_id == entity_id or a.target_id == entity_id
+        ]
 
     def get_outcome_for_action(self, action_id: str) -> OutcomeNode | None:
         action = self.actions.get(action_id)
@@ -245,14 +248,20 @@ class LegacyCausalGraph(_CausalGraph):
         if len(source_actions) < 2 or len(target_actions) < 2:
             return 0.0
 
-        source_seq = np.array([
-            self.outcomes[a.outcome_id].metrics.get("value", 0.0)
-            for a in source_actions if a.outcome_id and a.outcome_id in self.outcomes
-        ])
-        target_seq = np.array([
-            self.outcomes[a.outcome_id].metrics.get("value", 0.0)
-            for a in target_actions if a.outcome_id and a.outcome_id in self.outcomes
-        ])
+        source_seq = np.array(
+            [
+                self.outcomes[a.outcome_id].metrics.get("value", 0.0)
+                for a in source_actions
+                if a.outcome_id and a.outcome_id in self.outcomes
+            ]
+        )
+        target_seq = np.array(
+            [
+                self.outcomes[a.outcome_id].metrics.get("value", 0.0)
+                for a in target_actions
+                if a.outcome_id and a.outcome_id in self.outcomes
+            ]
+        )
 
         if len(source_seq) < 2 or len(target_seq) < 2:
             return 0.0
@@ -275,8 +284,8 @@ class LegacyCausalGraph(_CausalGraph):
         if len(diff_s) < lag + 1 or len(diff_t) < lag + 1:
             return 0.0
 
-        cross_corr = np.correlate(diff_s[:len(diff_s)-lag], diff_t[lag:], mode='valid')
-        auto_corr = np.correlate(diff_s, diff_s, mode='valid')
+        cross_corr = np.correlate(diff_s[: len(diff_s) - lag], diff_t[lag:], mode="valid")
+        auto_corr = np.correlate(diff_s, diff_s, mode="valid")
 
         if len(cross_corr) == 0 or len(auto_corr) == 0:
             return 0.0
@@ -290,10 +299,7 @@ class LegacyCausalGraph(_CausalGraph):
         if not outcome:
             return {"error": "Outcome not found"}
 
-        causal_actions = [
-            a for a in self.actions.values()
-            if a.outcome_id == outcome_id
-        ]
+        causal_actions = [a for a in self.actions.values() if a.outcome_id == outcome_id]
         causal_entities = set()
         for action in causal_actions:
             causal_entities.add(action.source_id)
@@ -315,8 +321,7 @@ class LegacyCausalGraph(_CausalGraph):
             "involved_entities": list(causal_entities),
             "transfer_entropy": te_scores,
             "latent_variables": [
-                {"name": v.name, "confidence": v.confidence}
-                for v in self.latent_vars.values()
+                {"name": v.name, "confidence": v.confidence} for v in self.latent_vars.values()
             ],
         }
 

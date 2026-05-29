@@ -166,9 +166,27 @@ class TestResultRanker:
     def test_rank_sorts_by_overall_score(self):
         rr = ResultRanker()
         results = [
-            {"id": "1", "title": "A", "relevance_score": 0.5, "quality_score": 0.5, "citations": 10},
-            {"id": "2", "title": "B", "relevance_score": 0.9, "quality_score": 0.9, "citations": 200},
-            {"id": "3", "title": "C", "relevance_score": 0.3, "quality_score": 0.3, "citations": 5000},
+            {
+                "id": "1",
+                "title": "A",
+                "relevance_score": 0.5,
+                "quality_score": 0.5,
+                "citations": 10,
+            },
+            {
+                "id": "2",
+                "title": "B",
+                "relevance_score": 0.9,
+                "quality_score": 0.9,
+                "citations": 200,
+            },
+            {
+                "id": "3",
+                "title": "C",
+                "relevance_score": 0.3,
+                "quality_score": 0.3,
+                "citations": 5000,
+            },
         ]
         ranked = rr.rank(results)
         assert len(ranked) == 3
@@ -177,9 +195,7 @@ class TestResultRanker:
 
     def test_rank_assigns_sequential_ranks(self):
         rr = ResultRanker()
-        results = [
-            {"id": f"{i}", "title": f"P{i}"} for i in range(5)
-        ]
+        results = [{"id": f"{i}", "title": f"P{i}"} for i in range(5)]
         ranked = rr.rank(results)
         ranks = [r.rank for r in ranked]
         assert ranks == [1, 2, 3, 4, 5]
@@ -187,10 +203,24 @@ class TestResultRanker:
     def test_rank_custom_weights(self):
         rr = ResultRanker()
         results = [
-            {"id": "1", "title": "High Relevance", "relevance_score": 1.0, "quality_score": 0.1, "citations": 10},
-            {"id": "2", "title": "High Quality", "relevance_score": 0.1, "quality_score": 1.0, "citations": 10},
+            {
+                "id": "1",
+                "title": "High Relevance",
+                "relevance_score": 1.0,
+                "quality_score": 0.1,
+                "citations": 10,
+            },
+            {
+                "id": "2",
+                "title": "High Quality",
+                "relevance_score": 0.1,
+                "quality_score": 1.0,
+                "citations": 10,
+            },
         ]
-        ranked = rr.rank(results, weights={"relevance": 0.9, "quality": 0.1, "novelty": 0.0, "recency": 0.0})
+        ranked = rr.rank(
+            results, weights={"relevance": 0.9, "quality": 0.1, "novelty": 0.0, "recency": 0.0}
+        )
         assert ranked[0].title == "High Relevance"
 
     def test_rank_empty(self):
@@ -199,8 +229,13 @@ class TestResultRanker:
 
     def test_ranked_result_fields(self):
         r = RankedResult(
-            source_id="s1", title="Test", relevance_score=0.8,
-            quality_score=0.7, novelty_score=0.6, overall_score=0.75, rank=1,
+            source_id="s1",
+            title="Test",
+            relevance_score=0.8,
+            quality_score=0.7,
+            novelty_score=0.6,
+            overall_score=0.75,
+            rank=1,
         )
         assert r.source_id == "s1"
         assert r.overall_score == 0.75
@@ -208,8 +243,12 @@ class TestResultRanker:
 
     def test_ranked_result_rank_default(self):
         r = RankedResult(
-            source_id="s1", title="T", relevance_score=0.5,
-            quality_score=0.5, novelty_score=0.5, overall_score=0.5,
+            source_id="s1",
+            title="T",
+            relevance_score=0.5,
+            quality_score=0.5,
+            novelty_score=0.5,
+            overall_score=0.5,
         )
         assert r.rank == 0
 

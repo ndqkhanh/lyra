@@ -46,7 +46,10 @@ def render_dashboard(
 
 def _build_header(rep: BurnReport) -> Table:
     t = Table.grid(padding=(0, 2))
-    t.add_column(); t.add_column(); t.add_column(); t.add_column()
+    t.add_column()
+    t.add_column()
+    t.add_column()
+    t.add_column()
     t.add_row(
         Text("Total spend", style="dim"), f"${rep.total_cost_usd:.2f}",
         Text("Total turns", style="dim"), str(rep.total_turns),

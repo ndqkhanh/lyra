@@ -19,6 +19,7 @@ Sub-commands
 * ``merge <a> <b>``                       — merge two skills into one
 * ``prune [--stale] [--unsafe]``          — list candidates for removal
 """
+
 from __future__ import annotations
 
 import datetime
@@ -68,6 +69,7 @@ _STALE_DAYS = 30
 def _result_class() -> type:
     try:
         from .session import CommandResult  # type: ignore[attr-defined]
+
         return CommandResult
     except Exception:
         from dataclasses import dataclass
@@ -180,8 +182,7 @@ def _cmd_create(session: Any, rest: str) -> Any:
 
     dest.write_text(content)
     return _ok(
-        f"created skill: {dest}\n"
-        f"edit the template then run `/skills admit {name}` to validate."
+        f"created skill: {dest}\n" f"edit the template then run `/skills admit {name}` to validate."
     )
 
 
@@ -222,7 +223,11 @@ def _cmd_audit(session: Any) -> Any:
         present = [s for s in _REQUIRED_SECTIONS if s in text]
         missing = [s for s in _REQUIRED_SECTIONS if s not in text]
         sections_str = ", ".join(s.lstrip("#").strip() for s in present)
-        admitted = "yes" if not missing else f"no (missing: {', '.join(s.lstrip('#').strip() for s in missing)})"
+        admitted = (
+            "yes"
+            if not missing
+            else f"no (missing: {', '.join(s.lstrip('#').strip() for s in missing)})"
+        )
         try:
             mtime = datetime.datetime.fromtimestamp(path.stat().st_mtime).strftime("%Y-%m-%d")
         except OSError:
@@ -340,9 +345,7 @@ def _cmd_compose(session: Any, rest: str) -> Any:
             if in_proc:
                 proc_lines.append(line)
         if proc_lines:
-            procedure_blocks.append(
-                f"### Phase: {sname}\n" + "\n".join(proc_lines).strip()
-            )
+            procedure_blocks.append(f"### Phase: {sname}\n" + "\n".join(proc_lines).strip())
 
     if not_found:
         return _ok(f"skills not found: {', '.join(not_found)}")

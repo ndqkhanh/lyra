@@ -13,7 +13,7 @@ Reference: Yao et al. "ReAct: Synergizing Reasoning and Acting in Language Model
 import re
 import time
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from anthropic import Anthropic
 
@@ -31,8 +31,8 @@ class ToolCall:
     """Represents a tool call to be executed."""
 
     tool_name: str
-    parameters: Dict[str, Any]
-    reasoning: Optional[str] = None
+    parameters: dict[str, Any]
+    reasoning: str | None = None
 
 
 @dataclass
@@ -42,7 +42,7 @@ class ToolResult:
     tool_name: str
     output: str
     success: bool
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class ReActEngine:
@@ -58,8 +58,8 @@ class ReActEngine:
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
-        tools: Optional[Dict[str, Dict[str, Any]]] = None,
+        api_key: str | None = None,
+        tools: dict[str, dict[str, Any]] | None = None,
     ):
         """
         Initialize ReAct engine.
@@ -103,7 +103,7 @@ class ReActEngine:
         )
 
         iteration = 0
-        history: List[ReasoningStep] = []
+        history: list[ReasoningStep] = []
 
         while budget.has_budget() and iteration < config.max_steps:
             # Generate next thought/action
@@ -140,7 +140,10 @@ class ReActEngine:
             if tool_call:
                 # Record action
                 action_step = ReasoningStep(
-                    content=f"Action: {tool_call.tool_name}({self._format_params(tool_call.parameters)})",
+                    content=(
+                        f"Action: {tool_call.tool_name}({self._format_params(tool_call.parameters)}"
+                        f")"
+                    ),
                     step_type=StepType.ANALYSIS,
                 )
                 trace.add_step(action_step)
@@ -176,9 +179,9 @@ class ReActEngine:
     def _generate_step(
         self,
         task: str,
-        history: List[ReasoningStep],
+        history: list[ReasoningStep],
         config: ReasoningConfig,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Generate next reasoning step."""
         context = self._build_context(task, history)
         prompt = self._build_prompt(context)
@@ -196,7 +199,7 @@ class ReActEngine:
             # Return error message
             return f"Error: {str(e)}"
 
-    def _build_context(self, task: str, history: List[ReasoningStep]) -> str:
+    def _build_context(self, task: str, history: list[ReasoningStep]) -> str:
         """Build context from task and history."""
         lines = [f"Task: {task}\n"]
 
@@ -238,7 +241,7 @@ Continue reasoning:"""
             lines.append(f"- {name}({params}): {tool.get('description', 'No description')}")
         return "\n".join(lines)
 
-    def _parse_action(self, text: str) -> Optional[ToolCall]:
+    def _parse_action(self, text: str) -> ToolCall | None:
         """
         Parse action from text.
 
@@ -332,7 +335,11 @@ Continue reasoning:"""
     def _extract_thought(self, text: str) -> str:
         """Extract thought from text."""
         # Look for Thought: pattern
-        match = re.search(r"Thought:\s*(.+?)(?=\n(?:Action|Observation|Answer)|$)", text, re.IGNORECASE | re.DOTALL)
+        match = re.search(
+            r"Thought:\s*(.+?)(?=\n(?:Action|Observation|Answer)|$)",
+            text,
+            re.IGNORECASE | re.DOTALL,
+        )
         if match:
             return match.group(1).strip()
 
@@ -340,7 +347,7 @@ Continue reasoning:"""
         lines = text.strip().split("\n")
         return lines[0] if lines else text
 
-    def _format_params(self, parameters: Dict[str, Any]) -> str:
+    def _format_params(self, parameters: dict[str, Any]) -> str:
         """Format parameters for display."""
         if not parameters:
             return ""

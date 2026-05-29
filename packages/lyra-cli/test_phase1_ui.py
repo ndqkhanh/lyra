@@ -4,9 +4,6 @@
 import os
 import sys
 
-# Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
-
 from lyra_cli.ui import (
     BOX_CHARS,
     STATUS_SYMBOLS,
@@ -15,6 +12,9 @@ from lyra_cli.ui import (
     LyraUIRenderer,
     SymbolRegistry,
 )
+
+# Add src to path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
 
 def print_section(title: str):
@@ -82,7 +82,10 @@ def test_layout():
     layout = LayoutEngine()
 
     print("\n✓ Text Wrapping:")
-    long_text = "This is a very long line of text that should be wrapped to multiple lines when it exceeds the maximum width"
+    long_text =(
+        "This is a very long line of text that should be wrapped to multiple lines when it exceeds"
+        "the maximum width"
+    )
     wrapped = layout.wrap_text(long_text, max_width=40)
     for line in wrapped:
         print(f"  |{line}|")
@@ -130,11 +133,7 @@ def test_renderer():
 
     print("\n✓ Status Line:")
     status = renderer.render_status(
-        "Working on task",
-        elapsed_seconds=125,
-        tokens_in=12450,
-        tokens_out=8320,
-        phase="analyzing"
+        "Working on task", elapsed_seconds=125, tokens_in=12450, tokens_out=8320, phase="analyzing"
     )
     print(status)
 
@@ -142,10 +141,14 @@ def test_renderer():
     root = renderer.render_tree_node("Running 4 agents…", is_last=False, indent_level=0)
     print(root)
 
-    child1 = renderer.render_tree_node("Research GitHub repos · 10 tool uses · 29.7k tokens", is_last=False, indent_level=1)
+    child1 = renderer.render_tree_node(
+        "Research GitHub repos · 10 tool uses · 29.7k tokens", is_last=False, indent_level=1
+    )
     print(child1)
 
-    child2 = renderer.render_tree_node("Search academic papers · 5 tool uses · 29.8k tokens", is_last=True, indent_level=1)
+    child2 = renderer.render_tree_node(
+        "Search academic papers · 5 tool uses · 29.8k tokens", is_last=True, indent_level=1
+    )
     print(child2)
 
     print("\n✓ Tool Result:")
@@ -153,7 +156,9 @@ def test_renderer():
     print(result)
 
     print("\n✓ File Update:")
-    update = renderer.render_file_update("src/lyra_cli/ui/renderer.py", added_lines=8, removed_lines=2)
+    update = renderer.render_file_update(
+        "src/lyra_cli/ui/renderer.py", added_lines=8, removed_lines=2
+    )
     print(update)
 
     print("\n✓ Diff Lines:")
@@ -175,7 +180,7 @@ def test_renderer():
         "general-purpose",
         "Research provided GitHub repos on token reduction",
         elapsed_seconds=30,
-        is_main=False
+        is_main=False,
     )
     print(sub_agent)
 
@@ -205,6 +210,7 @@ def main():
         print(f"  ✗ TEST FAILED: {e}")
         print("=" * 80)
         import traceback
+
         traceback.print_exc()
         return 1
 

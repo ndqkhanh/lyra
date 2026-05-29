@@ -1,6 +1,7 @@
 """Cross-channel evidence checks: catch sabotage (e.g., commented-out
 assertions in tests that claim to pass).
 """
+
 from __future__ import annotations
 
 import re
@@ -9,7 +10,9 @@ from pathlib import Path
 
 _COMMENTED_ASSERT = re.compile(r"^\s*#\s*assert\b", re.MULTILINE)
 _COMMENTED_RAISE = re.compile(r"^\s*#\s*raise\b", re.MULTILINE)
-_BARE_PASS_BODY = re.compile(r"\bdef\s+test_\w+\s*\([^)]*\)\s*:\s*\n(?:\s*#[^\n]*\n)*\s*pass\s*$", re.MULTILINE)
+_BARE_PASS_BODY = re.compile(
+    r"\bdef\s+test_\w+\s*\([^)]*\)\s*:\s*\n(?:\s*#[^\n]*\n)*\s*pass\s*$", re.MULTILINE
+)
 
 
 @dataclass
@@ -30,29 +33,20 @@ def cross_channel_check(
         if not p.is_absolute():
             p = repo_root / p
         if not p.exists():
-            findings.append(
-                CrossChannelFinding(
-                    test_id=tid, reason=f"test file not found: {p}"
-                )
-            )
+            findings.append(CrossChannelFinding(test_id=tid, reason=f"test file not found: {p}"))
             continue
         try:
             body = p.read_text(encoding="utf-8", errors="replace")
         except OSError as e:
             findings.append(
-                CrossChannelFinding(
-                    test_id=tid, reason=f"cannot read test file {p}: {e}"
-                )
+                CrossChannelFinding(test_id=tid, reason=f"cannot read test file {p}: {e}")
             )
             continue
         if _COMMENTED_ASSERT.search(body):
             findings.append(
                 CrossChannelFinding(
                     test_id=tid,
-                    reason=(
-                        "commented-out assertion detected; "
-                        "test may pass vacuously"
-                    ),
+                    reason=("commented-out assertion detected; " "test may pass vacuously"),
                 )
             )
             continue
@@ -66,8 +60,6 @@ def cross_channel_check(
             continue
         if _BARE_PASS_BODY.search(body):
             findings.append(
-                CrossChannelFinding(
-                    test_id=tid, reason="test body is `pass`; no assertion"
-                )
+                CrossChannelFinding(test_id=tid, reason="test body is `pass`; no assertion")
             )
     return findings

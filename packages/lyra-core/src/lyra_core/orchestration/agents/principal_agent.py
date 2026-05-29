@@ -95,9 +95,7 @@ class PrincipalEngineerAgent(BaseAgent):
                             "languages": list(architecture.tech_stack.languages),
                             "frameworks": list(architecture.tech_stack.frameworks),
                             "databases": list(architecture.tech_stack.databases),
-                            "infrastructure": list(
-                                architecture.tech_stack.infrastructure
-                            ),
+                            "infrastructure": list(architecture.tech_stack.infrastructure),
                             "tools": list(architecture.tech_stack.tools),
                         },
                         "data_flow": architecture.data_flow,
@@ -283,7 +281,9 @@ class PrincipalEngineerAgent(BaseAgent):
             tech_stack=tech_stack,
             data_flow="Client -> API Gateway -> Service Layer -> Data Access -> Database",
             scalability_notes="Horizontal scaling via load balancer, caching at multiple layers",
-            security_notes="Authentication at gateway, authorization at service layer, encrypted data at rest",
+            security_notes=(
+                "Authentication at gateway, authorization at service layer, encrypted data at rest"
+            ),
         )
 
         return architecture
@@ -347,7 +347,10 @@ class PrincipalEngineerAgent(BaseAgent):
             id=str(uuid.uuid4()),
             architecture_id=architecture.id,
             title=f"Technical Specification: {architecture.pattern.value}",
-            overview=f"This specification defines the technical implementation for a {architecture.pattern.value} architecture",
+            overview=(
+                f"This specification defines the technical implementation for a "
+                f"{architecture.pattern.value} architecture"
+            ),
             api_contracts=[
                 "REST API with OpenAPI 3.0 specification",
                 "GraphQL API for complex queries",

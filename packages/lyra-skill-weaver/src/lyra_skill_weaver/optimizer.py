@@ -141,8 +141,7 @@ class CompositionProfiler:
         if skill_timings:
             median_time = sorted(skill_timings.values())[len(skill_timings) // 2]
             bottlenecks = [
-                sid for sid, t in skill_timings.items()
-                if t > 2.0 * max(median_time, 1.0)
+                sid for sid, t in skill_timings.items() if t > 2.0 * max(median_time, 1.0)
             ]
         else:
             bottlenecks = []
@@ -205,8 +204,7 @@ class CompositionProfiler:
             "profiled_plans": len(self._profiles),
             "tracked_skills": len(self._skill_stats),
             "skill_stats": {
-                sid: self.get_skill_stats(sid)
-                for sid in list(self._skill_stats.keys())[:10]
+                sid: self.get_skill_stats(sid) for sid in list(self._skill_stats.keys())[:10]
             },
         }
 
@@ -268,9 +266,7 @@ class PlanCache:
         ]
         if context:
             # Normalize context for stable hashing
-            ctx_str = ",".join(
-                f"{k}:{v:.3f}" for k, v in sorted(context.items())
-            )
+            ctx_str = ",".join(f"{k}:{v:.3f}" for k, v in sorted(context.items()))
             key_parts.append(ctx_str)
 
         raw_key = "|".join(key_parts)
@@ -391,10 +387,7 @@ class CompositionOptimizer:
         alternatives.append(plan)  # Include original as an option
 
         # Score alternatives based on objective
-        scored = [
-            (alt, self._score(alt, objective))
-            for alt in alternatives
-        ]
+        scored = [(alt, self._score(alt, objective)) for alt in alternatives]
         scored.sort(key=lambda x: -x[1])  # Higher is better
 
         best_plan = scored[0][0] if scored else plan
@@ -405,7 +398,8 @@ class CompositionOptimizer:
             optimized_plan=best_plan,
             improvement_metrics={
                 "cost_reduction": (
-                    (plan.estimated_cost - best_plan.estimated_cost) / max(plan.estimated_cost, 1e-10)
+                    (plan.estimated_cost - best_plan.estimated_cost)
+                    / max(plan.estimated_cost, 1e-10)
                 ),
                 "latency_reduction": (
                     (plan.estimated_latency_ms - best_plan.estimated_latency_ms)
@@ -452,18 +446,19 @@ class CompositionOptimizer:
                         modules=new_modules,
                         expected_outputs=plan.expected_outputs,
                         estimated_cost=plan.estimated_cost
-                            - skill.estimated_cost
-                            + candidate.estimated_cost,
+                        - skill.estimated_cost
+                        + candidate.estimated_cost,
                         estimated_latency_ms=plan.estimated_latency_ms
-                            - skill.avg_latency_ms
-                            + candidate.avg_latency_ms,
+                        - skill.avg_latency_ms
+                        + candidate.avg_latency_ms,
                         pattern=plan.pattern,
                         quality_score=plan.quality_score,  # Recompute below
                     )
                     # Recompute quality
                     alt_plan.quality_score = sum(
                         self.registry.get(s).quality_score
-                        for s in new_modules if self.registry.get(s)
+                        for s in new_modules
+                        if self.registry.get(s)
                     ) / max(len(new_modules), 1)
 
                     alternatives.append(alt_plan)
@@ -500,11 +495,7 @@ class CompositionOptimizer:
         elif objective == OptimizationObjective.COST_QUALITY_RATIO:
             return quality / max(cost_norm, 0.01)
         else:  # BALANCED
-            return (
-                quality * 0.4
-                + (1.0 - cost_norm) * 0.3
-                + (1.0 - latency_norm) * 0.3
-            )
+            return quality * 0.4 + (1.0 - cost_norm) * 0.3 + (1.0 - latency_norm) * 0.3
 
     async def optimize_with_profiling(
         self,
@@ -552,8 +543,7 @@ class CompositionOptimizer:
         """
         bottlenecks: list[dict[str, Any]] = []
         total_time = sum(
-            self.profiler.get_skill_stats(sid).get("p95_ms", 0)
-            for sid in plan.modules
+            self.profiler.get_skill_stats(sid).get("p95_ms", 0) for sid in plan.modules
         )
 
         for sid in plan.modules:
@@ -563,12 +553,14 @@ class CompositionOptimizer:
             p95 = stats.get("p95_ms", 0)
             fraction = p95 / max(total_time, 1.0)
             if fraction > 0.3:  # Contributes >30% of total time
-                bottlenecks.append({
-                    "skill_id": sid,
-                    "p95_latency_ms": p95,
-                    "fraction_of_total": fraction,
-                    "mean_latency_ms": stats.get("mean_ms", 0),
-                })
+                bottlenecks.append(
+                    {
+                        "skill_id": sid,
+                        "p95_latency_ms": p95,
+                        "fraction_of_total": fraction,
+                        "mean_latency_ms": stats.get("mean_ms", 0),
+                    }
+                )
 
         bottlenecks.sort(key=lambda b: -b["fraction_of_total"])
         return bottlenecks

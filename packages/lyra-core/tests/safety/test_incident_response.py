@@ -47,9 +47,13 @@ class TestPlaybook:
 
     def test_immutable(self):
         pb = Playbook(
-            playbook_id="pb-t", category=IncidentCategory.UNKNOWN,
-            name="T", actions=[], auto_actions=[],
-            cooldown_sec=1.0, escalation_threshold=IncidentSeverity.LOW,
+            playbook_id="pb-t",
+            category=IncidentCategory.UNKNOWN,
+            name="T",
+            actions=[],
+            auto_actions=[],
+            cooldown_sec=1.0,
+            escalation_threshold=IncidentSeverity.LOW,
         )
         with pytest.raises(Exception):
             pb.name = "hacked"  # type: ignore[misc]
@@ -92,10 +96,16 @@ class TestIncidentRecord:
 
     def test_immutable(self):
         record = IncidentRecord(
-            incident_id="i", category=IncidentCategory.UNKNOWN,
-            severity=IncidentSeverity.INFO, description="d",
-            playbook_id=None, actions_taken=[], forensic_snapshot_id=None,
-            created_at=0.0, resolved_at=None, auto_resolved=False,
+            incident_id="i",
+            category=IncidentCategory.UNKNOWN,
+            severity=IncidentSeverity.INFO,
+            description="d",
+            playbook_id=None,
+            actions_taken=[],
+            forensic_snapshot_id=None,
+            created_at=0.0,
+            resolved_at=None,
+            auto_resolved=False,
         )
         with pytest.raises(Exception):
             record.severity = IncidentSeverity.CRITICAL  # type: ignore[misc]
@@ -297,5 +307,7 @@ class TestDefaultPlaybooks:
         assert PlaybookAction.ROTATE_CREDENTIALS in pb.actions
 
     def test_destructive_operation_terminates(self):
-        pb = [p for p in DEFAULT_PLAYBOOKS if p.category == IncidentCategory.DESTRUCTIVE_OPERATION][0]
+        pb = [p for p in DEFAULT_PLAYBOOKS if p.category == IncidentCategory.DESTRUCTIVE_OPERATION][
+            0
+        ]
         assert PlaybookAction.TERMINATE_SESSION in pb.auto_actions

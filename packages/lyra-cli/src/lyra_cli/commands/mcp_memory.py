@@ -12,6 +12,7 @@ Exposes 8 MCP tools for memory operations:
 
 Integration with CoALA 4-tier memory architecture (Phase M7).
 """
+
 from __future__ import annotations
 
 import json as _json
@@ -45,7 +46,9 @@ def recall(
     tier: str | None = typer.Option(
         None,
         "--tier",
-        help="Filter by tier (t0_working, t1_session, t2_semantic, t2_procedural, t3_user, t3_team).",
+        help=(
+            "Filter by tier (t0_working, t1_session, t2_semantic, t2_procedural, t3_user, t3_team)."
+        ),
     ),
     fragment_type: str | None = typer.Option(
         None,
@@ -125,7 +128,9 @@ def write(
     confidence: float = typer.Option(0.8, "--confidence", help="Confidence score (0..1)."),
     agent_id: str = typer.Option("system", "--agent-id", help="Agent ID for provenance."),
     user_id: str = typer.Option("default", "--user-id", help="User ID for provenance."),
-    task_id: str | None = typer.Option(None, "--task-id", help="Task ID for task-scoped fragments."),
+    task_id: str | None = typer.Option(
+        None, "--task-id", help="Task ID for task-scoped fragments."
+    ),
     json_out: bool = typer.Option(False, "--json", help="Emit JSON instead of a table."),
 ) -> None:
     """Add a new memory fragment."""
@@ -182,9 +187,7 @@ def pin(
         typer.echo(_json.dumps(result, indent=2))
         return
 
-    _console.print(
-        f"[green]Pinned[/] fragment [bold]{result['fragment_id']}[/]."
-    )
+    _console.print(f"[green]Pinned[/] fragment [bold]{result['fragment_id']}[/].")
 
 
 # ---------------------------------------------------------------------------
@@ -243,9 +246,7 @@ def list_decisions(
         return
 
     if result["count"] == 0:
-        _console.print(
-            f"[yellow]No decisions found[/] (tier={tier or 'any'})."
-        )
+        _console.print(f"[yellow]No decisions found[/] (tier={tier or 'any'}).")
         return
 
     table = Table(

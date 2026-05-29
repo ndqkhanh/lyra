@@ -50,7 +50,8 @@ def test_connect_providers():
 
 def test_auth_list():
     from lyra_cli.interactive.auth_cmd import cmd_auth
-    class FakeSession: pass
+    class FakeSession:
+        pass
     result = cmd_auth(FakeSession(), "list")
     assert result is not None
     assert isinstance(result.output, str)
@@ -59,7 +60,8 @@ def test_auth_list():
 
 def test_keys_list():
     from lyra_cli.interactive.keys_cmd import cmd_keys
-    class FakeSession: pass
+    class FakeSession:
+        pass
     result = cmd_keys(FakeSession(), "list")
     assert result is not None
     assert "Providers" in result.output
@@ -75,7 +77,8 @@ def test_keys_providers():
 
 def test_keys_env():
     from lyra_cli.interactive.keys_cmd import cmd_keys
-    class FakeSession: pass
+    class FakeSession:
+        pass
     result = cmd_keys(FakeSession(), "env")
     assert result is not None
 

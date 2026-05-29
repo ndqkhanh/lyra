@@ -14,7 +14,8 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from collections.abc import Sequence
+from typing import Any
 
 from .models import ReasoningStep, ReasoningTrace, ReflActEpisode
 
@@ -41,15 +42,15 @@ class ReflActReasoner:
         self.default_max_steps = default_max_steps
         self.confidence_threshold = confidence_threshold
         self.reflection_temperature = reflection_temperature
-        self._episode_history: List[ReflActEpisode] = []
+        self._episode_history: list[ReflActEpisode] = []
 
     # ── Core loop ──────────────────────────────────────────────────────────
 
     def reason(
         self,
         task: str,
-        context: Optional[Dict[str, Any]] = None,
-        max_steps: Optional[int] = None,
+        context: dict[str, Any] | None = None,
+        max_steps: int | None = None,
     ) -> ReasoningTrace:
         """Run the ReflAct loop on *task*.
 
@@ -70,7 +71,7 @@ class ReflActReasoner:
         start = time.monotonic()
 
         ctx = context or {}
-        current_state: Dict[str, Any] = {"task": task, "context": ctx, "history": []}
+        current_state: dict[str, Any] = {"task": task, "context": ctx, "history": []}
 
         for step_num in range(1, max_steps + 1):
             thought = self._think(step_num, current_state)
@@ -110,14 +111,20 @@ class ReflActReasoner:
 
         elapsed = time.monotonic() - start
         final_step = trace.final_step()
-        outcome = "success" if final_step and final_step.confidence >= self.confidence_threshold else "incomplete"
+        outcome = (
+            "success"
+            if final_step and final_step.confidence >= self.confidence_threshold
+            else "incomplete"
+        )
 
         trace = ReasoningTrace(
             task=trace.task,
             steps=trace.steps,
             outcome=outcome,
             duration=elapsed,
-            token_count=sum(len(s.thought) + len(s.action) + len(s.observation) for s in trace.steps),
+            token_count=sum(
+                len(s.thought) + len(s.action) + len(s.observation) for s in trace.steps
+            ),
             strategy=trace.strategy,
             metadata=trace.metadata,
         )
@@ -132,7 +139,7 @@ class ReflActReasoner:
 
     # ── Meta-cognition ─────────────────────────────────────────────────────
 
-    def reflect(self, trace: ReasoningTrace) -> Tuple[str, ...]:
+    def reflect(self, trace: ReasoningTrace) -> tuple[str, ...]:
         """Extract lessons learned from a completed trace.
 
         Analyses what worked and what did not, returning actionable
@@ -144,10 +151,12 @@ class ReflActReasoner:
         Returns:
             Tuple of lesson strings.
         """
-        lessons: List[str] = []
+        lessons: list[str] = []
 
         if not trace.steps:
-            lessons.append("No reasoning steps were taken — task may be too trivial or ill-defined.")
+            lessons.append(
+                "No reasoning steps were taken — task may be too trivial or ill-defined."
+            )
             return tuple(lessons)
 
         # Analyse step confidences
@@ -163,7 +172,9 @@ class ReflActReasoner:
         # Check for improvement trend
         if len(confidences) >= 2:
             early_avg = sum(confidences[: len(confidences) // 2]) / (len(confidences) // 2)
-            late_avg = sum(confidences[len(confidences) // 2 :]) / (len(confidences) - len(confidences) // 2)
+            late_avg = sum(confidences[len(confidences) // 2 :]) / (
+                len(confidences) - len(confidences) // 2
+            )
             if late_avg > early_avg + 0.1:
                 lessons.append("Confidence improved over time — iterative refinement is working.")
             elif late_avg < early_avg - 0.1:
@@ -187,7 +198,7 @@ class ReflActReasoner:
         )
         return tuple(lessons)
 
-    def adapt(self, task: str, lessons: Sequence[str]) -> Dict[str, Any]:
+    def adapt(self, task: str, lessons: Sequence[str]) -> dict[str, Any]:
         """Modify the reasoner's approach based on prior lessons.
 
         Returns an updated context dict that should be passed to
@@ -200,7 +211,7 @@ class ReflActReasoner:
         Returns:
             Adaptation context dict.
         """
-        adaptation: Dict[str, Any] = {
+        adaptation: dict[str, Any] = {
             "task": task,
             "lessons_applied": list(lessons),
             "strategy_modifiers": {},
@@ -223,7 +234,7 @@ class ReflActReasoner:
         )
         return adaptation
 
-    def synthesize(self, traces: Sequence[ReasoningTrace]) -> List[str]:
+    def synthesize(self, traces: Sequence[ReasoningTrace]) -> list[str]:
         """Combine learning from multiple traces into cross-episode insights.
 
         Args:
@@ -235,7 +246,7 @@ class ReflActReasoner:
         if not traces:
             return ["No traces available for synthesis."]
 
-        insights: List[str] = []
+        insights: list[str] = []
 
         successful = [t for t in traces if t.outcome == "success"]
         failed = [t for t in traces if t.outcome != "success"]
@@ -259,9 +270,7 @@ class ReflActReasoner:
             )
 
         # Confidence trajectories
-        all_confidences = [
-            s.confidence for t in traces for s in t.steps if t.steps
-        ]
+        all_confidences = [s.confidence for t in traces for s in t.steps if t.steps]
         if all_confidences:
             avg_confidence = sum(all_confidences) / len(all_confidences)
             insights.append(f"Average step confidence across all traces: {avg_confidence:.2f}")
@@ -283,7 +292,7 @@ class ReflActReasoner:
         self,
         task: str,
         trace: ReasoningTrace,
-        lessons: Optional[Sequence[str]] = None,
+        lessons: Sequence[str] | None = None,
     ) -> ReflActEpisode:
         """Record a completed episode for longitudinal learning.
 
@@ -306,7 +315,11 @@ class ReflActReasoner:
             score=trace.final_step().confidence if trace.final_step() else 0.0,
         )
         self._episode_history.append(episode)
-        logger.info("Recorded episode for task '%s' (total episodes: %d)", task[:60], len(self._episode_history))
+        logger.info(
+            "Recorded episode for task '%s' (total episodes: %d)",
+            task[:60],
+            len(self._episode_history),
+        )
         return episode
 
     @property
@@ -316,7 +329,7 @@ class ReflActReasoner:
     # ── Internal helpers ───────────────────────────────────────────────────
 
     @staticmethod
-    def _think(step_num: int, state: Dict[str, Any]) -> str:
+    def _think(step_num: int, state: dict[str, Any]) -> str:
         """Produce the next thought given the current state.
 
         In a production system this would call an LLM. Here we implement
@@ -334,12 +347,18 @@ class ReflActReasoner:
         if step_num <= 2:
             return f"Analyse the initial observation and formulate a plan for '{task}'."
         elif "error" in last_obs.lower() or "fail" in last_obs.lower():
-            return "The previous action failed. Revise the approach and consider alternative strategies."
+            return(
+                "The previous action failed. Revise the approach and consider alternative"
+                "strategies."
+            )
         else:
-            return f"Build on progress: evaluate current findings and determine the next logical step for '{task}'."
+            return (  # noqa: E501
+                f"Build on progress: evaluate current findings and determine the next logical step"
+                f" for '{task}'."
+            )
 
     @staticmethod
-    def _act(thought: str, state: Dict[str, Any]) -> str:
+    def _act(thought: str, state: dict[str, Any]) -> str:
         """Choose an action based on the current thought."""
         thought_lower = thought.lower()
 
@@ -354,14 +373,16 @@ class ReflActReasoner:
         return "continue_reasoning"
 
     @staticmethod
-    def _observe(action: str, state: Dict[str, Any]) -> str:
+    def _observe(action: str, state: dict[str, Any]) -> str:
         """Simulate observation of the action's outcome."""
         observations = {
             "decompose_task": "Task decomposed into sub-components. Structure is clear.",
             "analyse_and_plan": "Analysis complete. A step-by-step plan has been formulated.",
             "explore_alternative": "Alternative approach identified. New path shows promise.",
             "synthesize_findings": "Findings synthesized into coherent intermediate conclusion.",
-            "continue_reasoning": "Reasoning continues. More information needed for conclusive result.",
+            "continue_reasoning":(
+                "Reasoning continues. More information needed for conclusive result."
+            ),
         }
         return observations.get(action, f"Action '{action}' executed. Observing outcome.")
 

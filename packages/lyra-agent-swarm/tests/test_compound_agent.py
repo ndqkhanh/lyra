@@ -20,7 +20,13 @@ class TestSlotRole:
         assert SlotRole.VERIFIER.value == "verifier"
 
     def test_five_distinct_roles(self):
-        roles = {SlotRole.ANALYST, SlotRole.CRITIC, SlotRole.SYNTHESIZER, SlotRole.EXECUTOR, SlotRole.VERIFIER}
+        roles = {
+            SlotRole.ANALYST,
+            SlotRole.CRITIC,
+            SlotRole.SYNTHESIZER,
+            SlotRole.EXECUTOR,
+            SlotRole.VERIFIER,
+        }
         assert len(roles) == 5
 
 

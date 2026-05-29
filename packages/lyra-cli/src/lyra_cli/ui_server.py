@@ -64,11 +64,13 @@ def _read_changelog_entries() -> list[dict]:
         m = re.match(r"^##\s+\[([^\]]+)\]\s*[—\-]\s*(.+)$", line)
         if m:
             if current_version and current_changes:
-                entries.append({
-                    "version": current_version,
-                    "date": current_date or "",
-                    "highlights": current_changes[:5],
-                })
+                entries.append(
+                    {
+                        "version": current_version,
+                        "date": current_date or "",
+                        "highlights": current_changes[:5],
+                    }
+                )
             current_version = m.group(1)
             current_date = m.group(2).strip()
             current_changes = []
@@ -79,11 +81,13 @@ def _read_changelog_entries() -> list[dict]:
             current_changes.append(change.group(1))
 
     if current_version and current_changes:
-        entries.append({
-            "version": current_version,
-            "date": current_date or "",
-            "highlights": current_changes[:5],
-        })
+        entries.append(
+            {
+                "version": current_version,
+                "date": current_date or "",
+                "highlights": current_changes[:5],
+            }
+        )
 
     return entries[:5]
 
@@ -165,6 +169,7 @@ class LyraUIHandler(BaseHTTPRequestHandler):
             # Pre-check: verify at least one provider has credentials
             from lyra_core.auth.store import list_providers
             from lyra_core.providers.registry import get_available_providers
+
             available = set(get_available_providers()) | set(list_providers())
             if not available:
                 self.send_response(200)
@@ -173,15 +178,17 @@ class LyraUIHandler(BaseHTTPRequestHandler):
                 self.send_header("Connection", "keep-alive")
                 self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
-                error_event = json.dumps({
-                    "kind": "error",
-                    "payload": (
-                        "No API credentials configured. Configure at least one provider:\n"
-                        "  /auth set <provider> <api_key>  — save an API key\n"
-                        "  export ANTHROPIC_API_KEY=...      — or set via environment\n"
-                        "  /providers                        — list available providers"
-                    ),
-                })
+                error_event = json.dumps(
+                    {
+                        "kind": "error",
+                        "payload": (
+                            "No API credentials configured. Configure at least one provider:\n"
+                            "  /auth set <provider> <api_key>  — save an API key\n"
+                            "  export ANTHROPIC_API_KEY=...      — or set via environment\n"
+                            "  /providers                        — list available providers"
+                        ),
+                    }
+                )
                 self.wfile.write(f"data: {error_event}\n\n".encode())
                 self.wfile.flush()
                 return
@@ -226,6 +233,7 @@ class LyraUIHandler(BaseHTTPRequestHandler):
                 # If we can't write the error (connection closed, etc.), log it
                 # We're already in an error handler, so we can't do much more
                 import sys
+
                 print(f"Failed to send error to client: {write_error}", file=sys.stderr)
 
     def _handle_providers(self) -> None:
@@ -276,20 +284,23 @@ class LyraUIHandler(BaseHTTPRequestHandler):
         if not spec:
             _json_response(self, {"error": f"Unknown provider: {provider_key}"}, 404)
             return
-        _json_response(self, {
-            "provider": spec.key,
-            "models": [
-                {
-                    "slug": m.slug,
-                    "display_name": m.display_name,
-                    "description": m.description,
-                    "tags": list(m.tags),
-                    "context_window": m.context_window,
-                    "max_output_tokens": m.max_output_tokens,
-                }
-                for m in spec.models
-            ],
-        })
+        _json_response(
+            self,
+            {
+                "provider": spec.key,
+                "models": [
+                    {
+                        "slug": m.slug,
+                        "display_name": m.display_name,
+                        "description": m.description,
+                        "tags": list(m.tags),
+                        "context_window": m.context_window,
+                        "max_output_tokens": m.max_output_tokens,
+                    }
+                    for m in spec.models
+                ],
+            },
+        )
 
     def _handle_auth_set(self) -> None:
         """POST /auth/set — save API key for a provider."""
@@ -332,21 +343,25 @@ class LyraUIHandler(BaseHTTPRequestHandler):
         """DELETE /auth/delete/{provider} — remove saved API key."""
         provider_key = self.path.rsplit("/", 1)[-1]
         from lyra_core.auth.store import revoke
+
         revoke(provider_key)
         _json_response(self, {"ok": True})
 
     def _handle_settings_get(self) -> None:
         """GET /settings — return current settings."""
         config = load_settings()
-        _json_response(self, {
-            "last_model": config.last_model,
-            "last_provider": config.last_provider,
-            "primary_provider": config.primary_provider,
-            "theme": config.theme,
-            "permission_mode": config.permission_mode,
-            "auto_detect_tasks": config.auto_detect_tasks,
-            "config_version": config.config_version,
-        })
+        _json_response(
+            self,
+            {
+                "last_model": config.last_model,
+                "last_provider": config.last_provider,
+                "primary_provider": config.primary_provider,
+                "theme": config.theme,
+                "permission_mode": config.permission_mode,
+                "auto_detect_tasks": config.auto_detect_tasks,
+                "config_version": config.config_version,
+            },
+        )
 
     def _handle_settings_update(self) -> None:
         """POST /settings — update settings."""
@@ -378,16 +393,46 @@ class LyraUIHandler(BaseHTTPRequestHandler):
     def _handle_tips(self) -> None:
         """GET /tips — return rotating tips for the header."""
         tips = [
-            {"title": "Run /init to create a project CLAUDE.md", "description": "Scaffold SOUL.md + .lyra/ in your repo"},
-            {"title": "Use @ to mention files", "description": "Type @ then a filename for autocomplete"},
-            {"title": "Press Tab to cycle modes", "description": "Switch between agent, plan, ask, and auto"},
-            {"title": "Try /model for the picker", "description": "Interactive model selection with arrow keys"},
-            {"title": "Use ! for shell commands", "description": "Prefix with ! to run bash directly"},
-            {"title": "Ctrl+R searches history", "description": "Search your command history across sessions"},
-            {"title": "Shift+Enter for newlines", "description": "Multi-line input when you need it"},
-            {"title": "/compact saves context", "description": "Summarize your conversation to free up space"},
-            {"title": "/rewind undoes turns", "description": "Restore code and conversation to any checkpoint"},
-            {"title": "/feedback sends bug reports", "description": "Share your experience with the team"},
+            {
+                "title": "Run /init to create a project CLAUDE.md",
+                "description": "Scaffold SOUL.md + .lyra/ in your repo",
+            },
+            {
+                "title": "Use @ to mention files",
+                "description": "Type @ then a filename for autocomplete",
+            },
+            {
+                "title": "Press Tab to cycle modes",
+                "description": "Switch between agent, plan, ask, and auto",
+            },
+            {
+                "title": "Try /model for the picker",
+                "description": "Interactive model selection with arrow keys",
+            },
+            {
+                "title": "Use ! for shell commands",
+                "description": "Prefix with ! to run bash directly",
+            },
+            {
+                "title": "Ctrl+R searches history",
+                "description": "Search your command history across sessions",
+            },
+            {
+                "title": "Shift+Enter for newlines",
+                "description": "Multi-line input when you need it",
+            },
+            {
+                "title": "/compact saves context",
+                "description": "Summarize your conversation to free up space",
+            },
+            {
+                "title": "/rewind undoes turns",
+                "description": "Restore code and conversation to any checkpoint",
+            },
+            {
+                "title": "/feedback sends bug reports",
+                "description": "Share your experience with the team",
+            },
         ]
         _json_response(self, {"tips": tips})
 

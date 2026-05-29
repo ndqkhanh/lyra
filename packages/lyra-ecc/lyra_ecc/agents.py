@@ -7,7 +7,7 @@ Unified agent registry merging ECC's 60 specialized agents with Lyra's RSI agent
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class AgentCategory(Enum):
@@ -28,8 +28,8 @@ class AgentDefinition:
     name: str
     category: AgentCategory
     description: str
-    capabilities: List[str]
-    trigger_patterns: List[str] = field(default_factory=list)
+    capabilities: list[str]
+    trigger_patterns: list[str] = field(default_factory=list)
     model: str = "sonnet"
     source: str = "ECC"  # "ECC" or "Lyra"
     version: str = "1.0.0"
@@ -42,7 +42,7 @@ class AgentDispatchResult:
     agent_name: str
     success: bool
     output: Any
-    error: Optional[str] = None
+    error: str | None = None
     execution_time: float = 0.0
 
 
@@ -54,10 +54,10 @@ class UnifiedAgentRegistry:
     intelligent dispatch system.
     """
 
-    def __init__(self, ecc_path: Optional[Path] = None):
+    def __init__(self, ecc_path: Path | None = None):
         """Initialize unified agent registry."""
         self.ecc_path = ecc_path or Path.home() / ".claude"
-        self.agents: Dict[str, AgentDefinition] = {}
+        self.agents: dict[str, AgentDefinition] = {}
         self._load_agents()
 
     def _load_agents(self) -> None:
@@ -72,7 +72,7 @@ class UnifiedAgentRegistry:
         for agent in rsi_agents:
             self.agents[agent.name] = agent
 
-    def _load_ecc_agents(self) -> List[AgentDefinition]:
+    def _load_ecc_agents(self) -> list[AgentDefinition]:
         """Load ECC's 60 specialized agents."""
         # Planning & Architecture (8 agents)
         planning_agents = [
@@ -267,7 +267,7 @@ class UnifiedAgentRegistry:
 
         return planning_agents + development_agents + quality_agents + language_agents
 
-    def _load_rsi_agents(self) -> List[AgentDefinition]:
+    def _load_rsi_agents(self) -> list[AgentDefinition]:
         """Load Lyra's 7 RSI agents."""
         return [
             AgentDefinition(
@@ -328,7 +328,7 @@ class UnifiedAgentRegistry:
             ),
         ]
 
-    def select_agent(self, task: str, context: Optional[Dict[str, Any]] = None) -> str:
+    def select_agent(self, task: str, context: dict[str, Any] | None = None) -> str:
         """
         Intelligent agent selection based on task and context.
 
@@ -363,7 +363,7 @@ class UnifiedAgentRegistry:
         # Default fallback
         return "executor"
 
-    def dispatch(self, task: str, context: Optional[Dict[str, Any]] = None) -> AgentDispatchResult:
+    def dispatch(self, task: str, context: dict[str, Any] | None = None) -> AgentDispatchResult:
         """
         Dispatch task to appropriate agent.
 
@@ -398,13 +398,13 @@ class UnifiedAgentRegistry:
             },
         )
 
-    def get_agent(self, name: str) -> Optional[AgentDefinition]:
+    def get_agent(self, name: str) -> AgentDefinition | None:
         """Get agent definition by name."""
         return self.agents.get(name)
 
     def list_agents(
-        self, category: Optional[AgentCategory] = None, source: Optional[str] = None
-    ) -> List[AgentDefinition]:
+        self, category: AgentCategory | None = None, source: str | None = None
+    ) -> list[AgentDefinition]:
         """
         List agents, optionally filtered by category or source.
 
@@ -425,7 +425,7 @@ class UnifiedAgentRegistry:
 
         return agents
 
-    def get_registry_summary(self) -> Dict[str, Any]:
+    def get_registry_summary(self) -> dict[str, Any]:
         """Get summary of agent registry."""
         total_agents = len(self.agents)
         ecc_agents = len([a for a in self.agents.values() if a.source == "ECC"])

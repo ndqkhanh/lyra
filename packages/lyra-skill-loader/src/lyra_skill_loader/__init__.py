@@ -1,4 +1,6 @@
-"""lyra-skill-loader: progressive-disclosure skill loading with trigger matching, context budgeting, compilation, and dependency resolution."""
+"""Lyra-skill-loader: progressive-disclosure skill loading with trigger matching, context budgeting,
+compilation, and dependency resolution."""
+
 from __future__ import annotations
 
 from .context_aware_loader import (

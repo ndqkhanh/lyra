@@ -5,6 +5,7 @@ The Polaris-side ``ppr_fusion.py`` was tightly coupled to ``ProgramGraph`` and
 ``lyra_harness_core``, we abstract those into Protocols and provide zero-dependency
 default implementations any project can use.
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -89,7 +90,9 @@ class SimpleGraph:
         return isinstance(node_id, str) and node_id in self.nodes
 
     @classmethod
-    def from_pairs(cls, edges: Iterable[tuple[str, str]], *, titles: dict[str, str] | None = None) -> SimpleGraph:
+    def from_pairs(
+        cls, edges: Iterable[tuple[str, str]], *, titles: dict[str, str] | None = None
+    ) -> SimpleGraph:
         """Build a graph from ``(src, dst)`` edge pairs.
 
         Auto-creates nodes for any id seen on either end of an edge. Optional

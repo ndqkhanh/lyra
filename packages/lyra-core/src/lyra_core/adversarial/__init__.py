@@ -32,30 +32,33 @@ logger = logging.getLogger(__name__)
 
 class ReviewRole(str, Enum):
     """Roles in the adversarial review process."""
-    PRODUCER = "producer"      # Created the work being reviewed
-    REVIEWER = "reviewer"      # Seeks flaws and weaknesses
-    VALIDATOR = "validator"    # Independently verifies correctness
+
+    PRODUCER = "producer"  # Created the work being reviewed
+    REVIEWER = "reviewer"  # Seeks flaws and weaknesses
+    VALIDATOR = "validator"  # Independently verifies correctness
     ARBITRATOR = "arbitrator"  # Resolves disagreements between reviewers
     CONVERGENCE = "convergence"  # Checks if N agents agree
 
 
 class ReviewVerdict(str, Enum):
     """Possible review outcomes."""
-    APPROVED = "approved"        # No issues found
+
+    APPROVED = "approved"  # No issues found
     APPROVED_WITH_SUGGESTIONS = "approved_with_suggestions"  # Minor improvements
-    REVISE = "revise"            # Changes needed before approval
-    REJECTED = "rejected"        # Fundamentally flawed
-    ESCALATED = "escalated"      # Requires arbitrator intervention
-    DEADLOCKED = "deadlocked"    # Can't reach consensus
+    REVISE = "revise"  # Changes needed before approval
+    REJECTED = "rejected"  # Fundamentally flawed
+    ESCALATED = "escalated"  # Requires arbitrator intervention
+    DEADLOCKED = "deadlocked"  # Can't reach consensus
 
 
 class Severity(str, Enum):
     """Issue severity in reviews."""
+
     CRITICAL = "critical"  # Must fix — security, correctness, safety
-    HIGH = "high"          # Should fix — significant quality issues
-    MEDIUM = "medium"      # Consider fixing — maintainability
-    LOW = "low"            # Minor — style, preference
-    INFO = "info"          # Informational only
+    HIGH = "high"  # Should fix — significant quality issues
+    MEDIUM = "medium"  # Consider fixing — maintainability
+    LOW = "low"  # Minor — style, preference
+    INFO = "info"  # Informational only
 
 
 # ── Review ───────────────────────────────────────────────────────────────────
@@ -97,8 +100,7 @@ class AdversarialReview:
 
     @property
     def high_count(self) -> int:
-        return sum(1 for f in self.findings
-                   if f.severity in (Severity.CRITICAL, Severity.HIGH))
+        return sum(1 for f in self.findings if f.severity in (Severity.CRITICAL, Severity.HIGH))
 
     @property
     def is_clean(self) -> bool:
@@ -129,11 +131,12 @@ class AdversarialReview:
 
 class ConvergenceStatus(str, Enum):
     """Status of a convergence check."""
-    PENDING = "pending"        # Not enough reviews yet
-    CONVERGED = "converged"    # N agents agree
-    DIVERGED = "diverged"      # Agents disagree
+
+    PENDING = "pending"  # Not enough reviews yet
+    CONVERGED = "converged"  # N agents agree
+    DIVERGED = "diverged"  # Agents disagree
     DEADLOCKED = "deadlocked"  # Can't resolve disagreement
-    ESCALATED = "escalated"    # Sent to arbitrator
+    ESCALATED = "escalated"  # Sent to arbitrator
 
 
 @dataclass
@@ -163,9 +166,12 @@ class ConvergenceCheck:
       3. Deadlock: if exactly tied → escalate
     """
 
-    def __init__(self, required_reviewers: int = 2,
-                 agreement_threshold: float = 0.6,
-                 bus: EventBus | None = None) -> None:
+    def __init__(
+        self,
+        required_reviewers: int = 2,
+        agreement_threshold: float = 0.6,
+        bus: EventBus | None = None,
+    ) -> None:
         self.required = required_reviewers
         self.agreement_threshold = agreement_threshold
         self._bus = bus or EventBus.get()
@@ -199,6 +205,7 @@ class ConvergenceCheck:
         # Count verdicts
         verdicts = [r.verdict for r in reviews]
         from collections import Counter
+
         verdict_counts = Counter(verdicts)
         most_common_verdict, most_common_count = verdict_counts.most_common(1)[0]
 
@@ -210,16 +217,14 @@ class ConvergenceCheck:
             result.status = ConvergenceStatus.CONVERGED
             result.consensus_verdict = most_common_verdict
             result.dissenting_reviewers = [
-                r.reviewer_id for r in reviews
-                if r.verdict != most_common_verdict
+                r.reviewer_id for r in reviews if r.verdict != most_common_verdict
             ]
         elif agreement > 0.5:
             # Majority but below threshold — weak convergence
             result.status = ConvergenceStatus.DIVERGED
             result.consensus_verdict = most_common_verdict
             result.dissenting_reviewers = [
-                r.reviewer_id for r in reviews
-                if r.verdict != most_common_verdict
+                r.reviewer_id for r in reviews if r.verdict != most_common_verdict
             ]
         elif agreement == 0.5:
             # Exact tie — deadlock
@@ -260,6 +265,7 @@ class ConvergenceCheck:
 
 class WorkflowStatus(str, Enum):
     """Status of a resumable workflow."""
+
     NOT_STARTED = "not_started"
     IN_PROGRESS = "in_progress"
     WAITING_REVIEW = "waiting_review"
@@ -341,19 +347,18 @@ class ResumableWorkflow:
         """Return progress as 0.0–1.0."""
         if not self.steps:
             return 1.0 if self.is_complete else 0.0
-        completed = sum(
-            1 for s in self.steps
-            if s.status in (WorkflowStatus.COMPLETED,)
-        )
+        completed = sum(1 for s in self.steps if s.status in (WorkflowStatus.COMPLETED,))
         return completed / len(self.steps)
 
     def add_step(self, step: WorkflowStep) -> None:
         self.steps.append(step)
 
-    def create_checkpoint(self, step_id: str,
-                         state: dict[str, Any] | None = None) -> WorkflowCheckpoint:
+    def create_checkpoint(
+        self, step_id: str, state: dict[str, Any] | None = None
+    ) -> WorkflowCheckpoint:
         """Create a checkpoint for the current workflow state."""
         import uuid
+
         checkpoint = WorkflowCheckpoint(
             id=f"ckpt_{uuid.uuid4().hex[:8]}",
             workflow_id=self.id,
@@ -363,8 +368,7 @@ class ResumableWorkflow:
         self.checkpoints.append(checkpoint)
         return checkpoint
 
-    def restore_from_checkpoint(self,
-                                checkpoint: WorkflowCheckpoint) -> WorkflowStep | None:
+    def restore_from_checkpoint(self, checkpoint: WorkflowCheckpoint) -> WorkflowStep | None:
         """Restore workflow to a specific checkpoint."""
         # Find the step in our list
         for i, step in enumerate(self.steps):
@@ -416,7 +420,9 @@ class ReviewSession:
     required_reviewers: int = 2
     convergence: ConvergenceCheck = field(default_factory=ConvergenceCheck)
     reviews: list[AdversarialReview] = field(default_factory=list)
-    status: str = "collecting_reviews"  # collecting_reviews, evaluating, converged, deadlocked, resolved
+    status: str = (
+        "collecting_reviews"  # collecting_reviews, evaluating, converged, deadlocked, resolved
+    )
     created_at: float = field(default_factory=time.time)
     resolved_at: float | None = None
     final_verdict: ReviewVerdict | None = None
@@ -436,8 +442,7 @@ class ReviewSession:
 
         return result
 
-    def arbitrate(self, _arbitrator_id: str, verdict: ReviewVerdict,
-                 rationale: str) -> None:
+    def arbitrate(self, _arbitrator_id: str, verdict: ReviewVerdict, rationale: str) -> None:
         """An arbitrator resolves the deadlock/divergence."""
         result = self.convergence.get_result(self.subject_id)
         if result:

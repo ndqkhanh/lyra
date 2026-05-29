@@ -1,6 +1,5 @@
 """FailurePatternGuard — detects 8 recurring failure modes in agent execution."""
 
-
 from .models import FailureMode, FailureSignal
 
 
@@ -18,13 +17,24 @@ class FailurePatternGuard:
     """
 
     _DESTRUCTIVE_PATTERNS = [
-        "rm -rf", "sudo rm", "format c:", "drop table",
-        "delete from", "truncate table", "shutdown", "reboot",
+        "rm -rf",
+        "sudo rm",
+        "format c:",
+        "drop table",
+        "delete from",
+        "truncate table",
+        "shutdown",
+        "reboot",
     ]
 
     _LOOP_SIGNALS = [
-        "retrying", "attempt", "try again", "one more time",
-        "let me try", "re-running", "re-executing",
+        "retrying",
+        "attempt",
+        "try again",
+        "one more time",
+        "let me try",
+        "re-running",
+        "re-executing",
     ]
 
     def __init__(self, drift_turn_threshold: int = 20, loop_threshold: int = 3):
@@ -33,8 +43,12 @@ class FailurePatternGuard:
         self._loop_threshold = loop_threshold
 
     def detect(
-        self, session_id: str, turn_number: int,
-        context: str = "", tool_name: str = "", tool_args: str = "",
+        self,
+        session_id: str,
+        turn_number: int,
+        context: str = "",
+        tool_name: str = "",
+        tool_args: str = "",
     ) -> list[FailureSignal]:
         """Run all 8 failure pattern detectors."""
         signals: list[FailureSignal] = []
@@ -44,7 +58,8 @@ class FailurePatternGuard:
             s = self._make_signal(
                 FailureMode.CONTEXT_OVERLOAD,
                 f"Context length {len(context)} exceeds safe threshold",
-                session_id, turn_number,
+                session_id,
+                turn_number,
             )
             signals.append(s)
 
@@ -53,7 +68,8 @@ class FailurePatternGuard:
             s = self._make_signal(
                 FailureMode.RETRIEVAL_NOISE,
                 f"High retrieval noise: {context.count(chr(10))} newlines in context",
-                session_id, turn_number,
+                session_id,
+                turn_number,
             )
             signals.append(s)
 
@@ -63,7 +79,9 @@ class FailurePatternGuard:
                 s = self._make_signal(
                     FailureMode.HALLUCINATED_ARGS,
                     f"Potentially hallucinated args for {tool_name}: {tool_args}",
-                    session_id, turn_number, severity=0.7,
+                    session_id,
+                    turn_number,
+                    severity=0.7,
                 )
                 signals.append(s)
 
@@ -73,7 +91,9 @@ class FailurePatternGuard:
             s = self._make_signal(
                 FailureMode.RECURSIVE_LOOP,
                 f"Recursive loop detected: {loop_count} loop signals",
-                session_id, turn_number, severity=0.8,
+                session_id,
+                turn_number,
+                severity=0.8,
             )
             signals.append(s)
 
@@ -82,7 +102,9 @@ class FailurePatternGuard:
             s = self._make_signal(
                 FailureMode.POLLING_TAX,
                 f"Polling tax: excessive search calls on turn {turn_number}",
-                session_id, turn_number, severity=0.5,
+                session_id,
+                turn_number,
+                severity=0.5,
             )
             signals.append(s)
 
@@ -92,7 +114,9 @@ class FailurePatternGuard:
                 s = self._make_signal(
                     FailureMode.INSTRUCTION_DRIFT,
                     f"Instruction drift detected at turn {turn_number}",
-                    session_id, turn_number, severity=0.75,
+                    session_id,
+                    turn_number,
+                    severity=0.75,
                 )
                 signals.append(s)
 
@@ -101,7 +125,9 @@ class FailurePatternGuard:
             s = self._make_signal(
                 FailureMode.DESTRUCTIVE_CODE,
                 f"Destructive code pattern in tool args: {tool_args[:100]}",
-                session_id, turn_number, severity=1.0,
+                session_id,
+                turn_number,
+                severity=1.0,
             )
             signals.append(s)
 
@@ -112,7 +138,9 @@ class FailurePatternGuard:
             s = self._make_signal(
                 FailureMode.BIAS_OVERRIDE,
                 f"Pre-training bias override: {bias_count} bias signals",
-                session_id, turn_number, severity=0.6,
+                session_id,
+                turn_number,
+                severity=0.6,
             )
             signals.append(s)
 
@@ -120,11 +148,18 @@ class FailurePatternGuard:
             self._signals[s.id] = s
         return signals
 
-    def _make_signal(self, mode: FailureMode, desc: str, sid: str, turn: int, severity: float = 0.5) -> FailureSignal:
+    def _make_signal(
+        self, mode: FailureMode, desc: str, sid: str, turn: int, severity: float = 0.5
+    ) -> FailureSignal:
         import uuid
+
         return FailureSignal(
-            id=str(uuid.uuid4()), failure_mode=mode, description=desc,
-            session_id=sid, turn_number=turn, severity=severity,
+            id=str(uuid.uuid4()),
+            failure_mode=mode,
+            description=desc,
+            session_id=sid,
+            turn_number=turn,
+            severity=severity,
         )
 
     def signals_by_mode(self, mode: FailureMode) -> list[FailureSignal]:
@@ -148,8 +183,14 @@ def _has_drift_indicators(context: str) -> bool:
     """Check for instruction drift indicators in long sessions."""
     lower = context.lower()
     drift = [
-        "forget", "what was i", "lost track", "starting over",
-        "from scratch", "let me restart", "new approach", "different angle",
+        "forget",
+        "what was i",
+        "lost track",
+        "starting over",
+        "from scratch",
+        "let me restart",
+        "new approach",
+        "different angle",
     ]
     return sum(1 for d in drift if d in lower) >= 2
 

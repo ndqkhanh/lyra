@@ -1,4 +1,5 @@
-"""Tests for L5 Persona memory layer — identity traits, style learner, preference accumulator, persona store."""
+"""Tests for L5 Persona memory layer — identity traits, style learner, preference accumulator,
+persona store."""
 
 import time
 

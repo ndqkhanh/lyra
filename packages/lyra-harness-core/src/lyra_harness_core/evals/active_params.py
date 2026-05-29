@@ -7,6 +7,7 @@ MoE and dense models must normalise against active parameters.
 This module records (total_params, active_params, n_tokens) per inference and
 exposes cost-per-accuracy-grade in active-param-token-units.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -23,7 +24,10 @@ class ActiveParamReading:
     def __post_init__(self) -> None:
         if self.total_params < self.active_params:
             raise ValueError(
-                f"total_params ({self.total_params}) must be >= active_params ({self.active_params})"
+
+                    f"total_params ({self.total_params}) must be >= active_params ("
+                    f"{self.active_params})"
+
             )
         if self.n_tokens < 0:
             raise ValueError(f"n_tokens must be >= 0, got {self.n_tokens}")
@@ -63,9 +67,7 @@ class ActiveParamAccount:
         is the honest cost-efficiency ratio.
         """
         if accuracy_delta <= 0:
-            raise ValueError(
-                f"accuracy_delta must be > 0 for cost-per-grade; got {accuracy_delta}"
-            )
+            raise ValueError(f"accuracy_delta must be > 0 for cost-per-grade; got {accuracy_delta}")
         return self.total_active_cost() / accuracy_delta
 
     def moe_savings_ratio(self) -> float:

@@ -1,4 +1,6 @@
-"""Context-Aware Trigger Matching — match task context to skill triggers with pre-compiled regex patterns (sub-50ms)."""
+"""Context-Aware Trigger Matching — match task context to skill triggers with pre-compiled regex
+patterns (sub-50ms)."""
+
 from __future__ import annotations
 
 import re
@@ -54,8 +56,8 @@ class MatchConfig:
 class TriggerMatcher:
     """Matches task context against registered skill triggers.
 
-    Pre-compiles regex patterns for O(1) keyword matching and supports
-    multiple trigger types (keyword, context, capability, intent, explicit).
+    Pre-compiles regex patterns for O(1) keyword matching and supports multiple trigger types
+    (keyword, context, capability, intent, explicit).
     """
 
     def __init__(self, config: MatchConfig | None = None) -> None:
@@ -106,8 +108,7 @@ class TriggerMatcher:
     def match(self, task_context: str) -> list[MatchResult]:
         """Match task context against all registered triggers.
 
-        Returns unsorted match results. Use :meth:`rank_matches` to sort
-        and filter by score.
+        Returns unsorted match results. Use :meth:`rank_matches` to sort and filter by score.
         """
         if not task_context:
             return []
@@ -124,8 +125,8 @@ class TriggerMatcher:
     def rank_matches(self, matches: list[MatchResult]) -> list[MatchResult]:
         """Sort matches by relevance (descending score) and apply config limits.
 
-        Filters out matches below ``min_score``, caps at ``max_matches``,
-        and sorts by descending score.
+        Filters out matches below ``min_score``, caps at ``max_matches``, and sorts by descending
+        score.
         """
         filtered = [m for m in matches if m.score >= self._config.min_score]
         filtered.sort(key=lambda m: (-m.score, -m.confidence))
@@ -147,7 +148,7 @@ class TriggerMatcher:
 
     def _precompile(self, trigger: Trigger) -> None:
         """Build and store compiled regex patterns for a trigger."""
-        skip_chars = re.compile(r'[^a-z0-9\s-]')
+        skip_chars = re.compile(r"[^a-z0-9\s-]")
 
         def _clean(text: str) -> str:
             return skip_chars.sub("", text.lower().strip())
@@ -158,9 +159,15 @@ class TriggerMatcher:
             cleaned = re.escape(_clean(kw))
             if cleaned:
                 patterns.append(re.compile(r"\b" + cleaned + r"\b", re.IGNORECASE))
-        self._compiled_patterns[trigger.skill_id] = patterns[0] if len(patterns) == 1 else re.compile("|".join(
-            p.pattern for p in patterns
-        )) if patterns else re.compile(r"(?!)")  # never-match pattern
+        self._compiled_patterns[trigger.skill_id] = (
+            patterns[0]
+            if len(patterns) == 1
+            else (
+                re.compile("|".join(p.pattern for p in patterns))
+                if patterns
+                else re.compile(r"(?!)")
+            )
+        )  # never-match pattern
 
         # Compile context regex patterns
         ctx_patterns: list[re.Pattern[str]] = []
@@ -217,9 +224,7 @@ class TriggerMatcher:
         trigger: Trigger,
     ) -> MatchResult | None:
         """Match a single trigger against the task context."""
-        trigger_type, base_score, matched_items = self._detect_trigger_type(
-            task_context, trigger
-        )
+        trigger_type, base_score, matched_items = self._detect_trigger_type(task_context, trigger)
 
         if base_score == 0.0:
             return None

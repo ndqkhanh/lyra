@@ -23,11 +23,11 @@ logger = logging.getLogger(__name__)
 class PerspectiveType(Enum):
     """The five canonical analysis perspectives."""
 
-    OPTIMIST = "optimist"        # Focuses on potential, positives, opportunities
-    SKEPTIC = "skeptic"          # Challenges assumptions, flags risks, demands evidence
-    PRAGMATIST = "pragmatist"    # Grounds in practical constraints, feasibility
-    INNOVATOR = "innovator"      # Explores novel combinations and future directions
-    HISTORIAN = "historian"      # Contextualizes with prior work and historical patterns
+    OPTIMIST = "optimist"  # Focuses on potential, positives, opportunities
+    SKEPTIC = "skeptic"  # Challenges assumptions, flags risks, demands evidence
+    PRAGMATIST = "pragmatist"  # Grounds in practical constraints, feasibility
+    INNOVATOR = "innovator"  # Explores novel combinations and future directions
+    HISTORIAN = "historian"  # Contextualizes with prior work and historical patterns
 
 
 PERSPECTIVE_DESCRIPTIONS: dict[PerspectiveType, str] = {
@@ -195,7 +195,11 @@ class PerspectiveAgent:
             perspective=self.perspective,
             key_insights=tuple(insights),
             strengths=tuple(strengths) if strengths else ("No strong signal alignment detected.",),
-            weaknesses=tuple(weaknesses) if weaknesses else ("Insufficient coverage for this perspective.",),
+            weaknesses=(
+                tuple(weaknesses)
+                if weaknesses
+                else ("Insufficient coverage for this perspective.",)
+            ),
             score=round(score, 4),
             novel_ideas=tuple(novel),
         )
@@ -251,9 +255,7 @@ class PerspectiveAgent:
         for analysis in all_analyses:
             if analysis.perspective != self.perspective:
                 for insight in analysis.key_insights[:2]:
-                    other_insights.append(
-                        f"[from {analysis.perspective.value}] {insight}"
-                    )
+                    other_insights.append(f"[from {analysis.perspective.value}] {insight}")
 
         combined = list(self._criteria.get("synthesis_base", []))
         combined.extend(other_insights)
@@ -276,8 +278,12 @@ class PerspectiveAgent:
             PerspectiveType.OPTIMIST: "Explore scaling to larger datasets and broader domains.",
             PerspectiveType.SKEPTIC: "Design rigorous ablation studies to isolate causal factors.",
             PerspectiveType.PRAGMATIST: "Evaluate cost-efficiency and real-world deployment paths.",
-            PerspectiveType.INNOVATOR: "Combine with orthogonal techniques for novel architectures.",
-            PerspectiveType.HISTORIAN: "Map findings to historical research trajectories and trends.",
+            PerspectiveType.INNOVATOR:(
+                "Combine with orthogonal techniques for novel architectures."
+            ),
+            PerspectiveType.HISTORIAN:(
+                "Map findings to historical research trajectories and trends."
+            ),
         }
         return [prompts.get(self.perspective, "Consider cross-disciplinary connections.")]
 
@@ -318,10 +324,7 @@ class MultiPerspectiveSynthesizer:
 
         for r in range(rounds):
             # Each agent analyses independently
-            analyses = tuple(
-                agent.analyze(findings)
-                for agent in self._agents.values()
-            )
+            analyses = tuple(agent.analyze(findings) for agent in self._agents.values())
 
             # Cross-perspective critiques
             critiques: list[tuple[str, str, str]] = []
@@ -378,9 +381,7 @@ class MultiPerspectiveSynthesizer:
             for insight in analysis.key_insights:
                 insight_counter[insight] += 1
 
-        consensus = tuple(
-            insight for insight, count in insight_counter.items() if count >= 3
-        )
+        consensus = tuple(insight for insight, count in insight_counter.items() if count >= 3)
 
         # Identify dissent (weaknesses / critiques unique to 1-2 perspectives)
         dissent: list[str] = []
@@ -449,9 +450,7 @@ class MultiPerspectiveSynthesizer:
                         all_keywords[word] += 1
 
         # Words appearing in 4+ perspectives suggest consensus
-        return sorted(
-            word for word, count in all_keywords.items() if count >= 4
-        )
+        return sorted(word for word, count in all_keywords.items() if count >= 4)
 
     def highlight_dissent(self, debate_rounds: list[DebateRound]) -> list[str]:
         """Extract areas of productive disagreement.
@@ -480,8 +479,16 @@ def _build_criteria(perspective: PerspectiveType) -> dict:
     """Build the heuristic criteria dictionary for a perspective."""
     criteria_map = {
         PerspectiveType.OPTIMIST: {
-            "positive": ["breakthrough", "novel", "promising", "improvement",
-                         "outperform", "state-of-the-art", "efficient", "scalable"],
+            "positive": [
+                "breakthrough",
+                "novel",
+                "promising",
+                "improvement",
+                "outperform",
+                "state-of-the-art",
+                "efficient",
+                "scalable",
+            ],
             "concern": ["limitation", "failure", "risk"],
             "triggers": {
                 "outperform": "Strong empirical results suggest a significant advance.",
@@ -491,8 +498,7 @@ def _build_criteria(perspective: PerspectiveType) -> dict:
         },
         PerspectiveType.SKEPTIC: {
             "positive": ["rigorous", "ablation", "reproducible", "baseline"],
-            "concern": ["claim", "purport", "state-of-the-art", "breakthrough",
-                        "revolutionize"],
+            "concern": ["claim", "purport", "state-of-the-art", "breakthrough", "revolutionize"],
             "triggers": {
                 "state-of-the-art": "SOTA claims require careful benchmark scrutiny.",
                 "without": "Claims of performance without proper baselines are suspect.",
@@ -500,8 +506,15 @@ def _build_criteria(perspective: PerspectiveType) -> dict:
             },
         },
         PerspectiveType.PRAGMATIST: {
-            "positive": ["implementation", "deploy", "cost", "latency",
-                         "throughput", "hardware", "memory"],
+            "positive": [
+                "implementation",
+                "deploy",
+                "cost",
+                "latency",
+                "throughput",
+                "hardware",
+                "memory",
+            ],
             "concern": ["theoretical", "asymptotic", "oracle"],
             "triggers": {
                 "cost": "Cost considerations are critical for real-world adoption.",
@@ -510,8 +523,14 @@ def _build_criteria(perspective: PerspectiveType) -> dict:
             },
         },
         PerspectiveType.INNOVATOR: {
-            "positive": ["novel", "unconventional", "cross-domain", "hybrid",
-                         "combination", "analogy"],
+            "positive": [
+                "novel",
+                "unconventional",
+                "cross-domain",
+                "hybrid",
+                "combination",
+                "analogy",
+            ],
             "concern": ["standard", "conventional", "traditional"],
             "triggers": {
                 "novel": "A novel approach opens new research directions.",
@@ -520,8 +539,14 @@ def _build_criteria(perspective: PerspectiveType) -> dict:
             },
         },
         PerspectiveType.HISTORIAN: {
-            "positive": ["prior work", "historical", "evolution", "lineage",
-                         "foundation", "classic"],
+            "positive": [
+                "prior work",
+                "historical",
+                "evolution",
+                "lineage",
+                "foundation",
+                "classic",
+            ],
             "concern": ["first", "unprecedented", "revolutionary", "entirely new"],
             "triggers": {
                 "prior": "Building on prior work is essential for cumulative progress.",
@@ -561,4 +586,6 @@ def _blindspots(from_p: PerspectiveType, to_p: PerspectiveType) -> list[str]:
         ],
     }
 
-    return pairs.get((from_p, to_p), [f"{to_p.value} perspective may overlook {from_p.value} concerns."])
+    return pairs.get(
+        (from_p, to_p), [f"{to_p.value} perspective may overlook {from_p.value} concerns."]
+    )

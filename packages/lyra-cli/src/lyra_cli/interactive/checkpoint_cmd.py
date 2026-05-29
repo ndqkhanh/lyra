@@ -13,6 +13,7 @@ state. This command provides:
 Think of it as git stash for conversation state — lightweight,
 addressable, removable.
 """
+
 from __future__ import annotations
 
 import time
@@ -25,6 +26,7 @@ from ..commands.registry import CommandResult
 @dataclass
 class CheckpointSnapshot:
     """A frozen snapshot of session state."""
+
     id: int
     name: str
     timestamp: float = field(default_factory=time.time)
@@ -93,14 +95,15 @@ def cmd_checkpoint(session: Any, args: str) -> CommandResult:
         )
 
     # ── /checkpoint (save) ────────────────────────────────────────────
-    if subcmd == "save" or (subcmd != "restore" and subcmd != "diff"
-                             and subcmd != "delete" and subcmd != "list"):
+    if subcmd == "save" or (
+        subcmd != "restore" and subcmd != "diff" and subcmd != "delete" and subcmd != "list"
+    ):
         name = parts[1] if len(parts) > 1 and subcmd == "save" else _auto_name()
 
         # Gather state from session
-        turn = getattr(session, 'turn_index', 0)
-        tokens = getattr(session, 'total_tokens', 0)
-        msg_count = getattr(session, 'message_count', 0)
+        turn = getattr(session, "turn_index", 0)
+        tokens = getattr(session, "total_tokens", 0)
+        msg_count = getattr(session, "message_count", 0)
 
         cp = CheckpointSnapshot(
             id=_next_cp_id,
@@ -127,7 +130,7 @@ def cmd_checkpoint(session: Any, args: str) -> CommandResult:
             if cp.id == target_id:
                 return CommandResult(
                     output=f"✓ Restored checkpoint #{cp.id}: '{cp.name}' — "
-                           f"T#{cp.turn}, {cp.tokens_used:,} tok",
+                    f"T#{cp.turn}, {cp.tokens_used:,} tok",
                 )
         return CommandResult(output=f"Checkpoint #{target_id} not found")
 
@@ -142,20 +145,27 @@ def cmd_checkpoint(session: Any, args: str) -> CommandResult:
 
         for cp in _checkpoints:
             if cp.id == target_id:
-                current_turn = getattr(session, 'turn_index', 0)
-                current_tokens = getattr(session, 'total_tokens', 0)
+                current_turn = getattr(session, "turn_index", 0)
+                current_tokens = getattr(session, "total_tokens", 0)
                 turn_diff = current_turn - cp.turn
                 tok_diff = current_tokens - cp.tokens_used
 
                 lines = [
                     f"[bold]Diff vs checkpoint #{cp.id}: '{cp.name}'[/]",
                     f"  Turns:    [green]+{turn_diff}[/]",
-                    f"  Tokens:   [green]+{tok_diff:,}[/] ({tok_diff / cp.tokens_used * 100:.0f}% growth)" if cp.tokens_used > 0 else "",
+                    (
+(
+                            f"  Tokens:   [green]+{tok_diff:,}[/] ("
+                            f"{tok_diff / cp.tokens_used * 100:.0f}% growth)"
+                        )
+                        if cp.tokens_used > 0
+                        else ""
+                    ),
                     f"  Elapsed:  [dim]{cp.age_str}[/]",
                 ]
                 return CommandResult(
                     output=f"Diff vs #{cp.id}: +{turn_diff} turns, +{tok_diff:,} tok",
-                    renderable="\n".join(l for l in lines if l),
+                    renderable="\n".join(line for line in lines if line),
                 )
         return CommandResult(output=f"Checkpoint #{target_id} not found")
 
@@ -174,7 +184,9 @@ def cmd_checkpoint(session: Any, args: str) -> CommandResult:
                 return CommandResult(output=f"✓ Deleted checkpoint #{target_id}")
         return CommandResult(output=f"Checkpoint #{target_id} not found")
 
-    return CommandResult(output="Usage: /checkpoint [list|save <name>|restore <N>|diff <N>|delete <N>]")
+    return CommandResult(
+        output="Usage: /checkpoint [list|save <name>|restore <N>|diff <N>|delete <N>]"
+    )
 
 
 __all__ = ["cmd_checkpoint", "CheckpointSnapshot"]

@@ -123,8 +123,10 @@ class TestMemGradPipeline:
 
     def _gradients_json(self) -> str:
         return """[
-            {"role": "planner", "gradient": "Plans lack specificity", "severity": 0.8, "pattern": "recurring"},
-            {"role": "executor", "gradient": "Tool calls are too slow", "severity": 0.6, "pattern": "recurring"}
+            {"role": "planner", "gradient": "Plans lack specificity", "severity": 0.8, "pattern":
+            "recurring"},
+            {"role": "executor", "gradient": "Tool calls are too slow", "severity": 0.6, "pattern":
+            "recurring"}
         ]"""
 
     # ── decompose_feedback ──

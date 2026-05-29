@@ -142,9 +142,7 @@ class KnowledgeExtractor:
     """
 
     def __init__(self) -> None:
-        self._extractors: dict[
-            str, Callable[[str], Awaitable[dict[str, Any]]]
-        ] = {}
+        self._extractors: dict[str, Callable[[str], Awaitable[dict[str, Any]]]] = {}
         self._knowledge_store: dict[str, list[KnowledgeBundle]] = {}
 
     def register_extractor(
@@ -201,7 +199,9 @@ class KnowledgeExtractor:
         if to_agent not in self._knowledge_store:
             self._knowledge_store[to_agent] = []
         self._knowledge_store[to_agent].extend(bundles)
-        logger.info("Transferred %d knowledge bundles from %s to %s", len(bundles), from_agent, to_agent)
+        logger.info(
+            "Transferred %d knowledge bundles from %s to %s", len(bundles), from_agent, to_agent
+        )
         return bundles
 
 
@@ -243,7 +243,7 @@ class StatePreserver:
 
         self._state_store[agent_id].append(snapshot)
         if len(self._state_store[agent_id]) > self._max_snapshots:
-            self._state_store[agent_id] = self._state_store[agent_id][-self._max_snapshots:]
+            self._state_store[agent_id] = self._state_store[agent_id][-self._max_snapshots :]
 
         self._latest_state[agent_id] = snapshot
         logger.debug("Saved state for %s (%s)", agent_id, label)
@@ -348,7 +348,9 @@ class AgentRetirement:
                     timeout=config.max_extraction_timeout,
                 )
                 knowledge_extracted = True
-                logger.debug("Knowledge extracted from %s: %d learnings", agent_id, len(bundle.key_learnings))
+                logger.debug(
+                    "Knowledge extracted from %s: %d learnings", agent_id, len(bundle.key_learnings)
+                )
             except Exception as e:
                 logger.error("Knowledge extraction failed for %s: %s", agent_id, e)
 
@@ -429,7 +431,9 @@ class AgentRetirement:
     # Queries
     # ------------------------------------------------------------------
 
-    def get_audit_log(self, agent_id: str | None = None, limit: int = 100) -> list[RetirementAuditEntry]:
+    def get_audit_log(
+        self, agent_id: str | None = None, limit: int = 100
+    ) -> list[RetirementAuditEntry]:
         """Query the retirement audit log."""
         entries = self._audit_log
         if agent_id is not None:

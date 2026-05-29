@@ -106,7 +106,9 @@ class WebSocketServer:
         self.metrics.active_connections = 0
         logger.info("WebSocket server stopped")
 
-    async def _handle_connection(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:
+    async def _handle_connection(
+        self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
+    ) -> None:
         """Handle a raw TCP connection (used for lightweight testing).
 
         In production the caller should use the ``websockets`` library

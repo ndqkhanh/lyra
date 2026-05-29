@@ -5,6 +5,7 @@ each a short natural-language imperative with optional weight + rationale.
 Real deployments wire the registry to a database; in-process is the test +
 cold-start substrate.
 """
+
 from __future__ import annotations
 
 import time
@@ -185,7 +186,9 @@ class ConstitutionRegistry:
     def get(self, user_id: str) -> Constitution | None:
         return self._store.get(user_id)
 
-    def get_or_create(self, user_id: str, *, default_principles: Iterable[Principle] = ()) -> Constitution:
+    def get_or_create(
+        self, user_id: str, *, default_principles: Iterable[Principle] = ()
+    ) -> Constitution:
         existing = self._store.get(user_id)
         if existing is not None:
             return existing

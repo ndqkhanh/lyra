@@ -11,6 +11,7 @@ Contract from docs/system-design.md:
 Only --help shapes and `init` behavior are verified here; `run`'s end-to-end
 flow ships in Phase 3 when the loop extension is done.
 """
+
 from __future__ import annotations
 
 import json
@@ -161,7 +162,9 @@ def test_init_force_overwrites(tmp_path: Path, runner: CliRunner) -> None:
     assert "user edited" not in (tmp_path / "SOUL.md").read_text()
 
 
-def test_plan_command_with_auto_approve_writes_plan_artifact(tmp_path: Path, runner: CliRunner) -> None:
+def test_plan_command_with_auto_approve_writes_plan_artifact(
+    tmp_path: Path, runner: CliRunner
+) -> None:
     runner.invoke(app, ["init", "--repo-root", str(tmp_path)])
     result = runner.invoke(
         app,
@@ -193,9 +196,7 @@ def test_doctor_prints_status(tmp_path: Path, runner: CliRunner) -> None:
     assert "python" in out.lower()
 
 
-def test_doctor_reports_all_lyra_packages(
-    tmp_path: Path, runner: CliRunner
-) -> None:
+def test_doctor_reports_all_lyra_packages(tmp_path: Path, runner: CliRunner) -> None:
     """Doctor must enumerate the five Lyra packages with versions.
 
     Operators use `doctor` to verify no package got missed in an editable
@@ -229,9 +230,7 @@ def test_version_flag(runner: CliRunner) -> None:
     assert "lyra" in result.stdout.lower()
 
 
-def test_no_args_launches_interactive_session(
-    tmp_path: Path, runner: CliRunner
-) -> None:
+def test_no_args_launches_interactive_session(tmp_path: Path, runner: CliRunner) -> None:
     """``lyra --legacy`` boots the prompt_toolkit REPL.
 
     v3.14 Phase 6 flipped the bare default to the Textual shell, so
@@ -251,14 +250,10 @@ def test_no_args_launches_interactive_session(
     assert "/help" in out  # banner hint
 
 
-def test_no_args_eof_terminates_loop_cleanly(
-    tmp_path: Path, runner: CliRunner
-) -> None:
+def test_no_args_eof_terminates_loop_cleanly(tmp_path: Path, runner: CliRunner) -> None:
     """EOF (empty stdin) must not crash; it's how pipes quit the REPL."""
     runner.invoke(app, ["init", "--repo-root", str(tmp_path)])
-    result = runner.invoke(
-        app, ["--repo-root", str(tmp_path)], input=""
-    )
+    result = runner.invoke(app, ["--repo-root", str(tmp_path)], input="")
     assert result.exit_code == 0, result.stdout
 
 

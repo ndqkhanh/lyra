@@ -6,6 +6,7 @@ Measures:
 - Verification rate: with and without adversarial review
 - Cost: per research query
 """
+
 from __future__ import annotations
 
 import time
@@ -384,7 +385,9 @@ def test_benchmark_retry_overhead(
             raise RuntimeError("Transient error")
         return sources
 
-    with patch.object(orchestrator_with_coordination.discovery, "discover", side_effect=failing_once):
+    with patch.object(
+        orchestrator_with_coordination.discovery, "discover", side_effect=failing_once
+    ):
         progress = orchestrator_with_coordination.research("transformers")
 
     # Should succeed after retry

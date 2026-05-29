@@ -25,13 +25,15 @@ Examples:
   lyra config show             # Show configuration
 
 For more information, visit: https://github.com/ndqkhanh/lyra
-        """
+        """,
     )
 
     parser.add_argument("--version", action="version", version="Lyra 0.1.0 (ECC Integration)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
     parser.add_argument("-c", "--config", type=str, help="Config file path")
-    parser.add_argument("-p", "--pipeline", type=str, help="Sequential pipeline (comma-separated steps)")
+    parser.add_argument(
+        "-p", "--pipeline", type=str, help="Sequential pipeline (comma-separated steps)"
+    )
 
     subparsers = parser.add_subparsers(dest="command", help="Commands")
 
@@ -43,7 +45,9 @@ For more information, visit: https://github.com/ndqkhanh/lyra
 
     # Loop commands
     loop_parser = subparsers.add_parser("loop", help="Loop management")
-    loop_parser.add_argument("action", choices=["start", "stop", "status", "list"], help="Loop action")
+    loop_parser.add_argument(
+        "action", choices=["start", "stop", "status", "list"], help="Loop action"
+    )
     loop_parser.add_argument("name", nargs="?", help="Loop name")
 
     # MCP commands
@@ -69,6 +73,7 @@ For more information, visit: https://github.com/ndqkhanh/lyra
     # Handle pipeline mode
     if args.pipeline:
         from lyra_cli.loops import SequentialPipeline
+
         steps = [s.strip() for s in args.pipeline.split(",")]
         pipeline = SequentialPipeline(steps)
         success = pipeline.execute()

@@ -81,7 +81,9 @@ class FeedbackDescentOptimizer:
         return best
 
     async def _propose_variant(
-        self, current: str, history: list[FeedbackPair],
+        self,
+        current: str,
+        history: list[FeedbackPair],
     ) -> str:
         """Generate an improved variant based on feedback history."""
         history_text = self._format_history(history) if history else "No prior feedback."
@@ -101,7 +103,10 @@ Output the variant text only."""
         return await self.llm.complete(prompt)
 
     async def _compare(
-        self, current: str, proposal: str, history: list[FeedbackPair],
+        self,
+        current: str,
+        proposal: str,
+        history: list[FeedbackPair],
     ) -> FeedbackPair:
         """Compare two variants and determine the winner."""
         history_text = self._format_history(history) if history else "No prior feedback."
@@ -121,7 +126,8 @@ Output JSON only:
 {{
     "winner": "a" or "b" or "tie",
     "rationale": "Brief explanation of why the winner is better",
-    "reset": true/false (true if the proposal represents a breakthrough that invalidates prior feedback)
+    "reset": true/false (true if the proposal represents a breakthrough that invalidates prior
+    feedback)
 }}"""
 
         response = await self.llm.complete(prompt)
@@ -136,7 +142,9 @@ Output JSON only:
 
     @staticmethod
     def _parse_comparison(
-        response: str, candidate_a: str, candidate_b: str,
+        response: str,
+        candidate_a: str,
+        candidate_b: str,
     ) -> FeedbackPair:
         import json
 

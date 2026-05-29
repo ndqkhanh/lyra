@@ -230,8 +230,11 @@ class TestColonyScheduler:
         scheduler = ColonyScheduler()
         scheduler.register_agent("a", capabilities=["gen"])
         import time
+
         past_deadline = time.monotonic() - 10.0
-        task = Task(task_type="test", priority=5, deadline=past_deadline, required_capabilities=("gen",))
+        task = Task(
+            task_type="test", priority=5, deadline=past_deadline, required_capabilities=("gen",)
+        )
         scheduler.submit(task)
         result = await scheduler.assign_next()
         assert result is None
@@ -286,28 +289,38 @@ class TestMessageBus:
 
     async def test_send_fire_forget(self, bus: MessageBus) -> None:
         msg = Message(
-            sender_id="a", recipient_id="b", topic="direct",
-            protocol=Protocol.FIRE_FORGET, payload={"cmd": "ping"},
+            sender_id="a",
+            recipient_id="b",
+            topic="direct",
+            protocol=Protocol.FIRE_FORGET,
+            payload={"cmd": "ping"},
         )
         receipt = await bus.send(msg)
         assert not receipt.acknowledged
 
     async def test_send_request_reply_timeout(self, bus: MessageBus) -> None:
         msg = Message(
-            sender_id="a", recipient_id="b", topic="direct",
-            protocol=Protocol.REQUEST_REPLY, payload={"cmd": "ping"},
+            sender_id="a",
+            recipient_id="b",
+            topic="direct",
+            protocol=Protocol.REQUEST_REPLY,
+            payload={"cmd": "ping"},
         )
         receipt = await bus.send(msg, ack_timeout=0.1)
         assert not receipt.acknowledged
 
     async def test_request_reply_with_acknowledgment(self, bus: MessageBus) -> None:
         msg = Message(
-            sender_id="a", recipient_id="b",
-            protocol=Protocol.REQUEST_REPLY, payload={"q": "status"},
+            sender_id="a",
+            recipient_id="b",
+            protocol=Protocol.REQUEST_REPLY,
+            payload={"q": "status"},
         )
+
         async def ack_after_send() -> None:
             await asyncio.sleep(0.02)
             bus.acknowledge(msg.message_id)
+
         asyncio.create_task(ack_after_send())
         receipt = await bus.send(msg, ack_timeout=1.0)
         assert receipt.acknowledged
@@ -386,12 +399,14 @@ class TestMessageBus:
 class TestMonitoring:
     def test_register_agent(self) -> None:
         from lyra_colony.monitoring import ColonyMonitor
+
         monitor = ColonyMonitor()
         monitor.register_agent("agent-1")
         assert monitor.get_agent_status("agent-1") == AgentStatus.INITIALIZING
 
     def test_update_status(self) -> None:
         from lyra_colony.monitoring import ColonyMonitor
+
         monitor = ColonyMonitor()
         monitor.register_agent("agent-1")
         monitor.update_status("agent-1", AgentStatus.BUSY)
@@ -399,6 +414,7 @@ class TestMonitoring:
 
     def test_heartbeat_and_unresponsive(self) -> None:
         from lyra_colony.monitoring import ColonyMonitor
+
         monitor = ColonyMonitor()
         monitor.register_agent("agent-1")
         unresponsive = monitor.get_unresponsive_agents(timeout_seconds=0.0)
@@ -406,6 +422,7 @@ class TestMonitoring:
 
     def test_metrics_snapshot(self) -> None:
         from lyra_colony.monitoring import ColonyMonitor
+
         monitor = ColonyMonitor()
         monitor.register_agent("a")
         monitor.register_agent("b")
@@ -418,19 +435,30 @@ class TestMonitoring:
 
     def test_health_score(self) -> None:
         from lyra_colony.monitoring import MetricsSnapshot
-        s = MetricsSnapshot(total_agents=4, active_agents=2, idle_agents=1, degraded_agents=1, error_rate=0.0)
+
+        s = MetricsSnapshot(
+            total_agents=4, active_agents=2, idle_agents=1, degraded_agents=1, error_rate=0.0
+        )
         assert 0.0 <= s.health_score <= 1.0
 
     def test_health_score_zero_agents(self) -> None:
         from lyra_colony.monitoring import MetricsSnapshot
+
         s = MetricsSnapshot()
         assert s.health_score == 0.0
 
     def test_alert_acknowledge_and_resolve(self) -> None:
         from lyra_colony.monitoring import AlertRule, ColonyMonitor
+
         monitor = ColonyMonitor()
         monitor.register_agent("a")
-        rule = AlertRule(name="test_alert", metric="queue_depth", threshold=0.0, comparator="gt", cooldown_seconds=0.0)
+        rule = AlertRule(
+            name="test_alert",
+            metric="queue_depth",
+            threshold=0.0,
+            comparator="gt",
+            cooldown_seconds=0.0,
+        )
         monitor.add_alert_rule(rule)
         alerts = monitor.evaluate_alerts()
         if alerts:
@@ -441,6 +469,7 @@ class TestMonitoring:
 
     def test_audit_log(self) -> None:
         from lyra_colony.monitoring import ColonyMonitor
+
         monitor = ColonyMonitor()
         monitor.log_audit("test_action", agent_id="agent-x", details={"key": "val"})
         entries = monitor.get_audit_log(agent_id="agent-x")
@@ -450,6 +479,7 @@ class TestMonitoring:
 
     def test_dashboard(self) -> None:
         from lyra_colony.monitoring import ColonyMonitor
+
         monitor = ColonyMonitor()
         monitor.register_agent("a")
         d = monitor.dashboard()
@@ -459,6 +489,7 @@ class TestMonitoring:
 
     def test_record_latency_and_throughput(self) -> None:
         from lyra_colony.monitoring import ColonyMonitor
+
         monitor = ColonyMonitor()
         monitor.record_latency(0.5)
         monitor.record_latency(1.0)
@@ -468,6 +499,7 @@ class TestMonitoring:
 
     def test_message_recording(self) -> None:
         from lyra_colony.monitoring import ColonyMonitor
+
         monitor = ColonyMonitor()
         for _ in range(5):
             monitor.record_message()
@@ -476,9 +508,18 @@ class TestMonitoring:
 
     async def test_background_collection(self) -> None:
         from lyra_colony.monitoring import AlertRule, ColonyMonitor
+
         monitor = ColonyMonitor()
         monitor.register_agent("a")
-        monitor.add_alert_rule(AlertRule(name="check", metric="queue_depth", threshold=100.0, comparator="gt", cooldown_seconds=0.0))
+        monitor.add_alert_rule(
+            AlertRule(
+                name="check",
+                metric="queue_depth",
+                threshold=100.0,
+                comparator="gt",
+                cooldown_seconds=0.0,
+            )
+        )
         await monitor.start_collection(interval=0.05)
         await asyncio.sleep(0.15)
         await monitor.stop_collection()
@@ -492,7 +533,13 @@ class TestMonitoring:
 class TestAgentColony:
     @pytest.fixture
     def colony(self) -> AgentColony:
-        config = ColonyConfig(min_agents=1, max_agents=5, health_check_interval=10.0, scale_cooldown=10.0, gossip_interval=10.0)
+        config = ColonyConfig(
+            min_agents=1,
+            max_agents=5,
+            health_check_interval=10.0,
+            scale_cooldown=10.0,
+            gossip_interval=10.0,
+        )
         return AgentColony(config=config)
 
     async def test_start_stop_colony(self, colony: AgentColony) -> None:
@@ -505,7 +552,10 @@ class TestAgentColony:
     async def test_spawn_agent(self, colony: AgentColony) -> None:
         await colony.start()
         initial_count = colony.agent_count
-        spec = AgentSpec(role=AgentRole(name="test-agent", kind=AgentRoleKind.WORKER), capabilities=("test", "execute"))
+        spec = AgentSpec(
+            role=AgentRole(name="test-agent", kind=AgentRoleKind.WORKER),
+            capabilities=("test", "execute"),
+        )
         agent_id = await colony.spawn_agent(spec)
         assert agent_id.startswith("test-agent-")
         assert colony.agent_count == initial_count + 1
@@ -516,11 +566,15 @@ class TestAgentColony:
         await colony.start()
         for _i in range(3):
             try:
-                await colony.spawn_agent(AgentSpec(role=AgentRole(name="filler"), capabilities=("general",)))
+                await colony.spawn_agent(
+                    AgentSpec(role=AgentRole(name="filler"), capabilities=("general",))
+                )
             except ColonyOverCapacityError:
                 break
         with pytest.raises(ColonyOverCapacityError):
-            await colony.spawn_agent(AgentSpec(role=AgentRole(name="overflow"), capabilities=("general",)))
+            await colony.spawn_agent(
+                AgentSpec(role=AgentRole(name="overflow"), capabilities=("general",))
+            )
         await colony.stop()
 
     async def test_retire_agent(self, colony: AgentColony) -> None:
@@ -587,7 +641,9 @@ class TestAgentColony:
 
     async def test_agent_discovery_by_role(self, colony: AgentColony) -> None:
         await colony.start()
-        spec = AgentSpec(role=AgentRole(name="obs", kind=AgentRoleKind.OBSERVER), capabilities=("watch",))
+        spec = AgentSpec(
+            role=AgentRole(name="obs", kind=AgentRoleKind.OBSERVER), capabilities=("watch",)
+        )
         aid = await colony.spawn_agent(spec)
         observers = colony.find_agents_by_role(AgentRoleKind.OBSERVER)
         assert aid in observers
@@ -618,7 +674,9 @@ class TestAgentColony:
 
     async def test_find_by_label(self, colony: AgentColony) -> None:
         await colony.start()
-        spec = AgentSpec(role=AgentRole(name="tagged"), capabilities=("general",), labels={"env": "staging"})
+        spec = AgentSpec(
+            role=AgentRole(name="tagged"), capabilities=("general",), labels={"env": "staging"}
+        )
         aid = await colony.spawn_agent(spec)
         result = colony.find_agents_by_label("env", "staging")
         assert aid in result
@@ -663,6 +721,7 @@ class TestEdgeCases:
 
     def test_duplicate_channel_raises(self) -> None:
         from lyra_colony.communication import SubscriptionError
+
         bus = MessageBus()
         bus.create_channel("test")
         with pytest.raises(SubscriptionError):

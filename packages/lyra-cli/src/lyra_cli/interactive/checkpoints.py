@@ -12,6 +12,7 @@ Phase C Gap 3 enhancements:
 All handlers follow the ``(session, args: str) -> CommandResult`` contract
 from :mod:`lyra_cli.interactive.session` and never raise.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -25,12 +26,15 @@ from typing import Any
 # Result-class proxy — lazy so this module can be imported independently.
 # ---------------------------------------------------------------------------
 
+
 def _result_class() -> type:
     try:
         from .session import CommandResult  # type: ignore[attr-defined]
+
         return CommandResult
     except Exception:
         from lyra_cli.commands.registry import CommandResult as _R
+
         return _R
 
 
@@ -44,6 +48,7 @@ def _ok(text: str, renderable: Any = None) -> Any:
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _checkpoints_dir(session: Any) -> Path:
     sid = getattr(session, "session_id", "unknown")
@@ -139,6 +144,7 @@ def _checkpoint_data(session: Any, label: str) -> dict[str, Any]:
 # File snapshotting (Phase C Gap 3)
 # ---------------------------------------------------------------------------
 
+
 def snapshot_files(session: Any, *file_paths: str) -> dict[str, str]:
     """Snapshot files before a tool call writes to them.
 
@@ -180,6 +186,7 @@ def list_file_snapshots(session: Any) -> list[Path]:
 # /checkpoint
 # ---------------------------------------------------------------------------
 
+
 def cmd_checkpoint(session: Any, args: str) -> Any:
     """Save current agent state to ``~/.lyra/checkpoints/<session_id>/<label>.json``.
 
@@ -190,6 +197,7 @@ def cmd_checkpoint(session: Any, args: str) -> Any:
     """
     try:
         import rich as _rich  # noqa: F401
+
         _has_rich = True
     except ImportError:
         _has_rich = False
@@ -216,7 +224,11 @@ def cmd_checkpoint(session: Any, args: str) -> Any:
         return _ok("\n".join(plain_lines))
 
     # --- /checkpoint save [label] (or bare /checkpoint) ---
-    label = rest.strip() if subcmd == "save" else (args.strip() or f"turn-{getattr(session, 'turn', 0)}")
+    label = (
+        rest.strip()
+        if subcmd == "save"
+        else (args.strip() or f"turn-{getattr(session, 'turn', 0)}")
+    )
     if subcmd not in ("save", "") and subcmd:
         label = args.strip() or f"turn-{getattr(session, 'turn', 0)}"
 
@@ -259,12 +271,12 @@ def cmd_checkpoint(session: Any, args: str) -> Any:
     t = Table(box=None, show_header=False, show_edge=False, pad_edge=False, padding=(0, 2))
     t.add_column(style="bold #00E5FF", no_wrap=True)
     t.add_column(style="bright_white")
-    t.add_row("label",   label)
-    t.add_row("file",    str(cp_file))
-    t.add_row("turn",    str(data["turn"]))
-    t.add_row("model",   data["model"])
-    t.add_row("cost",    f"${data['cost_usd']:.4f}")
-    t.add_row("mode",    data["mode"])
+    t.add_row("label", label)
+    t.add_row("file", str(cp_file))
+    t.add_row("turn", str(data["turn"]))
+    t.add_row("model", data["model"])
+    t.add_row("cost", f"${data['cost_usd']:.4f}")
+    t.add_row("mode", data["mode"])
     t.add_row("history", f"{history_count} turns")
     if snap_files:
         t.add_row("files", f"{len(snap_files)} snapshots")
@@ -284,6 +296,7 @@ def cmd_checkpoint(session: Any, args: str) -> Any:
 # ---------------------------------------------------------------------------
 # /checkpoint summarize <N>
 # ---------------------------------------------------------------------------
+
 
 def _cmd_summarize(session: Any, args: str) -> Any:
     """Compact conversation from turn N to current.
@@ -314,15 +327,16 @@ def _cmd_summarize(session: Any, args: str) -> Any:
         line_preview = snap.line[:100].replace("\n", " ") if snap.line else "(empty)"
         lines.append(f"turn {snap.turn:>3} [{snap.mode}] {line_preview}")
 
-    summary_header = (
-        f"conversation summary — turns {n} → {turns_log[-1].turn}\n"
-        f"{'─' * 72}\n"
-    )
-    plain = summary_header + "\n".join(lines) + (
-        f"\n{'─' * 72}\n"
-        f"total: {len(relevant)} turns  ·  "
-        f"from turn {n} to {turns_log[-1].turn}\n"
-        f"paste this as context after /compact to preserve focus"
+    summary_header = f"conversation summary — turns {n} → {turns_log[-1].turn}\n" f"{'─' * 72}\n"
+    plain = (
+        summary_header
+        + "\n".join(lines)
+        + (
+            f"\n{'─' * 72}\n"
+            f"total: {len(relevant)} turns  ·  "
+            f"from turn {n} to {turns_log[-1].turn}\n"
+            f"paste this as context after /compact to preserve focus"
+        )
     )
 
     try:
@@ -333,8 +347,12 @@ def _cmd_summarize(session: Any, args: str) -> Any:
         body = Text()
         body.append(summary_header, style="bold #00E5FF")
         for snap in relevant:
-            mode_style = {"edit_automatically": "#7CFFB2", "plan_mode": "#FFC857",
-                          "ask_before_edits": "#FF5370", "auto_mode": "#7C4DFF"}
+            mode_style = {
+                "edit_automatically": "#7CFFB2",
+                "plan_mode": "#FFC857",
+                "ask_before_edits": "#FF5370",
+                "auto_mode": "#7C4DFF",
+            }
             style = mode_style.get(snap.mode, "#6B7280")
             line_preview = snap.line[:100].replace("\n", " ") if snap.line else "(empty)"
             body.append(f"turn {snap.turn:>3} ", style="dim")
@@ -342,7 +360,7 @@ def _cmd_summarize(session: Any, args: str) -> Any:
             body.append(line_preview + "\n", style="bright_white")
         body.append(
             f"\ntotal: {len(relevant)} turns  ·  from turn {n} to {turns_log[-1].turn}",
-            style="dim italic"
+            style="dim italic",
         )
 
         panel = Panel(
@@ -360,6 +378,7 @@ def _cmd_summarize(session: Any, args: str) -> Any:
 # ---------------------------------------------------------------------------
 # /rollback
 # ---------------------------------------------------------------------------
+
 
 def cmd_rollback(session: Any, args: str) -> Any:
     """Restore session config + message history from a prior checkpoint, or list all checkpoints.
@@ -384,13 +403,15 @@ def cmd_rollback(session: Any, args: str) -> Any:
             try:
                 d = json.loads(f.read_text(encoding="utf-8"))
                 history_ct = len(d.get("message_history", []))
-                rows.append((
-                    d.get("label", f.stem),
-                    str(d.get("turn", "?")),
-                    d.get("timestamp", "")[:19].replace("T", " "),
-                    d.get("model", "?"),
-                    f"{history_ct} turns",
-                ))
+                rows.append(
+                    (
+                        d.get("label", f.stem),
+                        str(d.get("turn", "?")),
+                        d.get("timestamp", "")[:19].replace("T", " "),
+                        d.get("model", "?"),
+                        f"{history_ct} turns",
+                    )
+                )
             except Exception:
                 rows.append((f.stem, "?", "?", "?", "?"))
 
@@ -403,12 +424,13 @@ def cmd_rollback(session: Any, args: str) -> Any:
             from rich.box import ROUNDED, SIMPLE
             from rich.panel import Panel
             from rich.table import Table
+
             t = Table(box=SIMPLE, show_header=True, show_edge=False, pad_edge=False)
-            t.add_column("label",     style="bold #00E5FF")
-            t.add_column("turn",      style="bright_white", justify="right")
+            t.add_column("label", style="bold #00E5FF")
+            t.add_column("turn", style="bright_white", justify="right")
             t.add_column("timestamp", style="#6B7280")
-            t.add_column("model",     style="#7CFFB2")
-            t.add_column("history",   style="#6B7280")
+            t.add_column("model", style="#7CFFB2")
+            t.add_column("history", style="#6B7280")
             for r in rows:
                 t.add_row(*r)
             panel = Panel(
@@ -483,16 +505,17 @@ def cmd_rollback(session: Any, args: str) -> Any:
         from rich.panel import Panel
         from rich.table import Table
         from rich.text import Text
+
         t = Table(box=None, show_header=False, show_edge=False, pad_edge=False, padding=(0, 2))
         t.add_column(style="bold #00E5FF", no_wrap=True)
         t.add_column(style="bright_white")
-        t.add_row("label",        data.get("label", label))
-        t.add_row("turn",         str(data.get("turn", "?")))
-        t.add_row("model",        data.get("model", "?"))
-        t.add_row("mode",         data.get("mode", "?"))
-        t.add_row("cost_usd",     f"${data.get('cost_usd', 0):.4f}")
+        t.add_row("label", data.get("label", label))
+        t.add_row("turn", str(data.get("turn", "?")))
+        t.add_row("model", data.get("model", "?"))
+        t.add_row("mode", data.get("mode", "?"))
+        t.add_row("cost_usd", f"${data.get('cost_usd', 0):.4f}")
         t.add_row("pending_task", data.get("pending_task") or "—")
-        t.add_row("timestamp",    str(data.get("timestamp", "?"))[:19].replace("T", " "))
+        t.add_row("timestamp", str(data.get("timestamp", "?"))[:19].replace("T", " "))
         if history_restored:
             t.add_row("turns restored", str(history_restored))
         elements: list[Any] = [t]
@@ -533,12 +556,14 @@ def _truncate_persisted_log(session: Any, target_length: int) -> None:
 # /verify
 # ---------------------------------------------------------------------------
 
+
 def _parse_verify_args(args: str) -> tuple[str | None, str | None, str]:
     """Parse ``--spec <file>``, ``--rubric "..."`` or bare text.
 
     Returns ``(spec_path_str, rubric_inline, bare_rest)``.
     """
     import shlex
+
     try:
         tokens = shlex.split(args)
     except ValueError:
@@ -599,6 +624,7 @@ def cmd_verify(session: Any, args: str) -> Any:
         from rich.panel import Panel
         from rich.table import Table
         from rich.text import Text
+
         _has_rich = True
     except ImportError:
         _has_rich = False
@@ -622,7 +648,7 @@ def cmd_verify(session: Any, args: str) -> Any:
 
     if not criteria_text.strip():
         return _ok(
-            "no criteria supplied; pass --spec <file>, --rubric \"...\", "
+            'no criteria supplied; pass --spec <file>, --rubric "...", '
             "or set a pending_task on the session"
         )
 
@@ -673,10 +699,10 @@ def cmd_verify(session: Any, args: str) -> Any:
     verdict_styles = {"pass": "#7CFFB2", "partial": "#FFC857", "fail": "#FF5370"}
 
     t = Table(box=SIMPLE, show_header=True, show_edge=False, pad_edge=False)
-    t.add_column("#",         style="#6B7280", justify="right", width=3)
+    t.add_column("#", style="#6B7280", justify="right", width=3)
     t.add_column("criterion", style="bright_white")
-    t.add_column("result",    justify="center", no_wrap=True, width=9)
-    t.add_column("score",     justify="right",  width=6)
+    t.add_column("result", justify="center", no_wrap=True, width=9)
+    t.add_column("score", justify="right", width=6)
 
     for idx, (crit, verdict, score) in enumerate(results, 1):
         vstyle = verdict_styles.get(verdict, "#6B7280")

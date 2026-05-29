@@ -333,9 +333,9 @@ class AgentHealthMonitor:
         bool
             ``True`` if a repetitive pattern is detected.
         """
-        types = recent_actions if recent_actions is not None else [
-            r.action_type for r in self._actions
-        ]
+        types = (
+            recent_actions if recent_actions is not None else [r.action_type for r in self._actions]
+        )
         if len(types) < _LOOP_MIN_REPETITIONS * 2:
             return False
 
@@ -360,7 +360,7 @@ class AgentHealthMonitor:
             match = True
             for i in range(min_repeats):
                 start = len(types) - (i + 1) * pattern_len
-                if types[start:start + pattern_len] != pattern:
+                if types[start : start + pattern_len] != pattern:
                     match = False
                     break
             if match:
@@ -394,71 +394,95 @@ class AgentHealthMonitor:
 
         # Error rate spike.
         if vitals.error_rate > _CRITICAL_ERROR_RATE:
-            signals.append(AnomalySignal(
-                signal_type="error_rate_spike",
-                severity=min(1.0, vitals.error_rate),
-                detected_at=now,
-                context={"error_rate": vitals.error_rate, "consecutive_failures": vitals.consecutive_failures},
-                description=f"Error rate at {vitals.error_rate:.1%} exceeds critical threshold {_CRITICAL_ERROR_RATE:.0%}.",
-            ))
+            signals.append(
+                AnomalySignal(
+                    signal_type="error_rate_spike",
+                    severity=min(1.0, vitals.error_rate),
+                    detected_at=now,
+                    context={
+                        "error_rate": vitals.error_rate,
+                        "consecutive_failures": vitals.consecutive_failures,
+                    },
+                    description=(
+                        f"Error rate at {vitals.error_rate:.1%} exceeds critical threshold "
+                        f"{_CRITICAL_ERROR_RATE:.0%}."
+                    ),
+                )
+            )
         elif vitals.error_rate > _ERROR_RATE_THRESHOLD:
-            signals.append(AnomalySignal(
-                signal_type="error_rate_spike",
-                severity=vitals.error_rate / _CRITICAL_ERROR_RATE,
-                detected_at=now,
-                context={"error_rate": vitals.error_rate},
-                description=f"Error rate at {vitals.error_rate:.1%} exceeds warning threshold {_ERROR_RATE_THRESHOLD:.0%}.",
-            ))
+            signals.append(
+                AnomalySignal(
+                    signal_type="error_rate_spike",
+                    severity=vitals.error_rate / _CRITICAL_ERROR_RATE,
+                    detected_at=now,
+                    context={"error_rate": vitals.error_rate},
+                    description=(
+                        f"Error rate at {vitals.error_rate:.1%} exceeds warning threshold "
+                        f"{_ERROR_RATE_THRESHOLD:.0%}."
+                    ),
+                )
+            )
 
         # Response time degradation.
         if vitals.avg_response_time_ms > 0:
             baseline = self._compute_baseline_latency()
-            if baseline > 0 and vitals.avg_response_time_ms > baseline * _LATENCY_DEGRADATION_FACTOR:
+            if (
+                baseline > 0
+                and vitals.avg_response_time_ms > baseline * _LATENCY_DEGRADATION_FACTOR
+            ):
                 ratio = vitals.avg_response_time_ms / baseline
-                signals.append(AnomalySignal(
-                    signal_type="response_time_degradation",
-                    severity=min(1.0, (ratio - 1.0) / _LATENCY_DEGRADATION_FACTOR),
-                    detected_at=now,
-                    context={
-                        "current_avg_ms": vitals.avg_response_time_ms,
-                        "baseline_ms": baseline,
-                        "ratio": round(ratio, 2),
-                    },
-                    description=(
-                        f"Avg response time {vitals.avg_response_time_ms:.0f}ms is "
-                        f"{ratio:.1f}x the baseline {baseline:.0f}ms."
-                    ),
-                ))
+                signals.append(
+                    AnomalySignal(
+                        signal_type="response_time_degradation",
+                        severity=min(1.0, (ratio - 1.0) / _LATENCY_DEGRADATION_FACTOR),
+                        detected_at=now,
+                        context={
+                            "current_avg_ms": vitals.avg_response_time_ms,
+                            "baseline_ms": baseline,
+                            "ratio": round(ratio, 2),
+                        },
+                        description=(
+                            f"Avg response time {vitals.avg_response_time_ms:.0f}ms is "
+                            f"{ratio:.1f}x the baseline {baseline:.0f}ms."
+                        ),
+                    )
+                )
 
         # Memory growth / leak heuristic.
         if self._detect_memory_leak():
-            signals.append(AnomalySignal(
-                signal_type="memory_leak",
-                severity=0.6,
-                detected_at=now,
-                context={"recent_samples": list(self._last_memory_samples)},
-                description="Consecutive memory growth pattern detected — possible leak.",
-            ))
+            signals.append(
+                AnomalySignal(
+                    signal_type="memory_leak",
+                    severity=0.6,
+                    detected_at=now,
+                    context={"recent_samples": list(self._last_memory_samples)},
+                    description="Consecutive memory growth pattern detected — possible leak.",
+                )
+            )
 
         # Loop detection.
         if self.detect_loops():
-            signals.append(AnomalySignal(
-                signal_type="infinite_loop",
-                severity=0.8,
-                detected_at=now,
-                context={"consecutive_failures": vitals.consecutive_failures},
-                description="Repetitive action pattern detected — possible infinite loop.",
-            ))
+            signals.append(
+                AnomalySignal(
+                    signal_type="infinite_loop",
+                    severity=0.8,
+                    detected_at=now,
+                    context={"consecutive_failures": vitals.consecutive_failures},
+                    description="Repetitive action pattern detected — possible infinite loop.",
+                )
+            )
 
         # Consecutive failures.
         if vitals.consecutive_failures >= 3:
-            signals.append(AnomalySignal(
-                signal_type="consecutive_failures",
-                severity=min(1.0, vitals.consecutive_failures / 10.0),
-                detected_at=now,
-                context={"count": vitals.consecutive_failures},
-                description=f"{vitals.consecutive_failures} consecutive failures recorded.",
-            ))
+            signals.append(
+                AnomalySignal(
+                    signal_type="consecutive_failures",
+                    severity=min(1.0, vitals.consecutive_failures / 10.0),
+                    detected_at=now,
+                    context={"count": vitals.consecutive_failures},
+                    description=f"{vitals.consecutive_failures} consecutive failures recorded.",
+                )
+            )
 
         return signals
 
@@ -537,7 +561,10 @@ class AgentHealthMonitor:
 
         if vitals.consecutive_failures >= 3:
             recommendations.append(
-                f"BACKOFF: Apply exponential backoff ({vitals.consecutive_failures} consecutive failures)."
+
+                    f"BACKOFF: Apply exponential backoff ({vitals.consecutive_failures}"
+                    f" consecutive failures)."
+
             )
 
         if vitals.uptime_seconds > 3600 and vitals.total_actions > 0:
@@ -684,10 +711,15 @@ class AgentHealthMonitor:
 
         if baseline > 0 and vitals.avg_response_time_ms > baseline * 3.0:
             status = HealthStatus.CRITICAL
-            details = f"Avg latency {vitals.avg_response_time_ms:.0f}ms is 3x+ baseline {baseline:.0f}ms."
+            details = (
+                f"Avg latency {vitals.avg_response_time_ms:.0f}ms is 3x+ baseline {baseline:.0f}ms."
+            )
         elif baseline > 0 and vitals.avg_response_time_ms > baseline * _LATENCY_DEGRADATION_FACTOR:
             status = HealthStatus.DEGRADED
-            details = f"Avg latency {vitals.avg_response_time_ms:.0f}ms exceeds 2x baseline {baseline:.0f}ms."
+            details =(
+                f"Avg latency {vitals.avg_response_time_ms:.0f}ms exceeds 2x baseline "
+                f"{baseline:.0f}ms."
+            )
         else:
             status = HealthStatus.HEALTHY
             details = f"Avg latency {vitals.avg_response_time_ms:.0f}ms within expected range."
@@ -728,10 +760,14 @@ class AgentHealthMonitor:
 
         if rate > _CRITICAL_ERROR_RATE:
             status = HealthStatus.CRITICAL
-            details = f"Error rate {rate:.1%} exceeds critical threshold {_CRITICAL_ERROR_RATE:.0%}."
+            details = (
+                f"Error rate {rate:.1%} exceeds critical threshold {_CRITICAL_ERROR_RATE:.0%}."
+            )
         elif rate > _ERROR_RATE_THRESHOLD:
             status = HealthStatus.DEGRADED
-            details = f"Error rate {rate:.1%} exceeds warning threshold {_ERROR_RATE_THRESHOLD:.0%}."
+            details = (
+                f"Error rate {rate:.1%} exceeds warning threshold {_ERROR_RATE_THRESHOLD:.0%}."
+            )
         else:
             status = HealthStatus.HEALTHY
             details = f"Error rate {rate:.1%} within acceptable range."

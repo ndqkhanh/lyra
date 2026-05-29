@@ -35,7 +35,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class BenchmarkType(Enum):
@@ -164,7 +164,11 @@ class BenchmarkReport:
                 benchmark_type.value: {
                     "total": len(results),
                     "passed": sum(1 for r in results if r.passed),
-                    "avg_score": sum(r.score for r in results if r.score is not None) / len(results) if results else 0,
+                    "avg_score": (
+                        sum(r.score for r in results if r.score is not None) / len(results)
+                        if results
+                        else 0
+                    ),
                 }
                 for benchmark_type, results in self.by_type().items()
             },
@@ -205,135 +209,141 @@ class BenchmarkRunner:
         configs = []
 
         # Memory Benchmarks
-        configs.extend([
-            BenchmarkConfig(
-                name="memory_agent_bench_retrieval",
-                benchmark_type=BenchmarkType.MEMORY,
-                baseline_score=0.85,
-                target_score=0.95,
-                metadata={"category": "retrieval"},
-            ),
-            BenchmarkConfig(
-                name="memory_agent_bench_learning",
-                benchmark_type=BenchmarkType.MEMORY,
-                baseline_score=0.80,
-                target_score=0.90,
-                metadata={"category": "learning"},
-            ),
-            BenchmarkConfig(
-                name="memory_agent_bench_long_range",
-                benchmark_type=BenchmarkType.MEMORY,
-                baseline_score=0.75,
-                target_score=0.85,
-                metadata={"category": "long_range"},
-            ),
-            BenchmarkConfig(
-                name="memory_agent_bench_forgetting",
-                benchmark_type=BenchmarkType.MEMORY,
-                baseline_score=0.70,
-                target_score=0.80,
-                metadata={"category": "forgetting"},
-            ),
-            BenchmarkConfig(
-                name="long_mem_eval",
-                benchmark_type=BenchmarkType.MEMORY,
-                baseline_score=0.952,
-                target_score=0.98,
-                metadata={"metric": "R@5"},
-            ),
-            BenchmarkConfig(
-                name="locomo",
-                benchmark_type=BenchmarkType.MEMORY,
-                baseline_score=0.85,
-                target_score=0.90,
-                metadata={"metric": "accuracy"},
-            ),
-        ])
+        configs.extend(
+            [
+                BenchmarkConfig(
+                    name="memory_agent_bench_retrieval",
+                    benchmark_type=BenchmarkType.MEMORY,
+                    baseline_score=0.85,
+                    target_score=0.95,
+                    metadata={"category": "retrieval"},
+                ),
+                BenchmarkConfig(
+                    name="memory_agent_bench_learning",
+                    benchmark_type=BenchmarkType.MEMORY,
+                    baseline_score=0.80,
+                    target_score=0.90,
+                    metadata={"category": "learning"},
+                ),
+                BenchmarkConfig(
+                    name="memory_agent_bench_long_range",
+                    benchmark_type=BenchmarkType.MEMORY,
+                    baseline_score=0.75,
+                    target_score=0.85,
+                    metadata={"category": "long_range"},
+                ),
+                BenchmarkConfig(
+                    name="memory_agent_bench_forgetting",
+                    benchmark_type=BenchmarkType.MEMORY,
+                    baseline_score=0.70,
+                    target_score=0.80,
+                    metadata={"category": "forgetting"},
+                ),
+                BenchmarkConfig(
+                    name="long_mem_eval",
+                    benchmark_type=BenchmarkType.MEMORY,
+                    baseline_score=0.952,
+                    target_score=0.98,
+                    metadata={"metric": "R@5"},
+                ),
+                BenchmarkConfig(
+                    name="locomo",
+                    benchmark_type=BenchmarkType.MEMORY,
+                    baseline_score=0.85,
+                    target_score=0.90,
+                    metadata={"metric": "accuracy"},
+                ),
+            ]
+        )
 
         # Task Benchmarks
-        configs.extend([
-            BenchmarkConfig(
-                name="gaia",
-                benchmark_type=BenchmarkType.TASK,
-                baseline_score=0.70,
-                target_score=0.80,
-                metadata={"frontier": 0.70},
-            ),
-            BenchmarkConfig(
-                name="swe_bench",
-                benchmark_type=BenchmarkType.TASK,
-                baseline_score=0.40,
-                target_score=0.50,
-                metadata={"frontier": 0.40},
-            ),
-            BenchmarkConfig(
-                name="web_arena",
-                benchmark_type=BenchmarkType.TASK,
-                baseline_score=0.60,
-                target_score=0.70,
-                metadata={"frontier": 0.60},
-            ),
-            BenchmarkConfig(
-                name="os_world",
-                benchmark_type=BenchmarkType.TASK,
-                baseline_score=0.50,
-                target_score=0.60,
-                metadata={"frontier": 0.50},
-            ),
-        ])
+        configs.extend(
+            [
+                BenchmarkConfig(
+                    name="gaia",
+                    benchmark_type=BenchmarkType.TASK,
+                    baseline_score=0.70,
+                    target_score=0.80,
+                    metadata={"frontier": 0.70},
+                ),
+                BenchmarkConfig(
+                    name="swe_bench",
+                    benchmark_type=BenchmarkType.TASK,
+                    baseline_score=0.40,
+                    target_score=0.50,
+                    metadata={"frontier": 0.40},
+                ),
+                BenchmarkConfig(
+                    name="web_arena",
+                    benchmark_type=BenchmarkType.TASK,
+                    baseline_score=0.60,
+                    target_score=0.70,
+                    metadata={"frontier": 0.60},
+                ),
+                BenchmarkConfig(
+                    name="os_world",
+                    benchmark_type=BenchmarkType.TASK,
+                    baseline_score=0.50,
+                    target_score=0.60,
+                    metadata={"frontier": 0.50},
+                ),
+            ]
+        )
 
         # Ablation Studies
-        configs.extend([
-            BenchmarkConfig(
-                name="ablation_no_graph_memory",
-                benchmark_type=BenchmarkType.ABLATION,
-                baseline_score=1.0,
-                target_score=0.95,  # Should drop by at least 5%
-                metadata={"component": "graph_memory"},
-            ),
-            BenchmarkConfig(
-                name="ablation_no_verifier_gates",
-                benchmark_type=BenchmarkType.ABLATION,
-                baseline_score=1.0,
-                target_score=0.95,
-                metadata={"component": "verifier_gates"},
-            ),
-            BenchmarkConfig(
-                name="ablation_no_experience_memory",
-                benchmark_type=BenchmarkType.ABLATION,
-                baseline_score=1.0,
-                target_score=0.95,
-                metadata={"component": "experience_memory"},
-            ),
-            BenchmarkConfig(
-                name="ablation_no_context_compression",
-                benchmark_type=BenchmarkType.ABLATION,
-                baseline_score=1.0,
-                target_score=0.95,
-                metadata={"component": "context_compression"},
-            ),
-            BenchmarkConfig(
-                name="ablation_no_model_routing",
-                benchmark_type=BenchmarkType.ABLATION,
-                baseline_score=1.0,
-                target_score=0.95,
-                metadata={"component": "model_routing"},
-            ),
-            BenchmarkConfig(
-                name="ablation_no_multi_agent",
-                benchmark_type=BenchmarkType.ABLATION,
-                baseline_score=1.0,
-                target_score=0.95,
-                metadata={"component": "multi_agent_orchestration"},
-            ),
-            BenchmarkConfig(
-                name="ablation_no_multimodal",
-                benchmark_type=BenchmarkType.ABLATION,
-                baseline_score=1.0,
-                target_score=0.95,
-                metadata={"component": "multimodal_support"},
-            ),
-        ])
+        configs.extend(
+            [
+                BenchmarkConfig(
+                    name="ablation_no_graph_memory",
+                    benchmark_type=BenchmarkType.ABLATION,
+                    baseline_score=1.0,
+                    target_score=0.95,  # Should drop by at least 5%
+                    metadata={"component": "graph_memory"},
+                ),
+                BenchmarkConfig(
+                    name="ablation_no_verifier_gates",
+                    benchmark_type=BenchmarkType.ABLATION,
+                    baseline_score=1.0,
+                    target_score=0.95,
+                    metadata={"component": "verifier_gates"},
+                ),
+                BenchmarkConfig(
+                    name="ablation_no_experience_memory",
+                    benchmark_type=BenchmarkType.ABLATION,
+                    baseline_score=1.0,
+                    target_score=0.95,
+                    metadata={"component": "experience_memory"},
+                ),
+                BenchmarkConfig(
+                    name="ablation_no_context_compression",
+                    benchmark_type=BenchmarkType.ABLATION,
+                    baseline_score=1.0,
+                    target_score=0.95,
+                    metadata={"component": "context_compression"},
+                ),
+                BenchmarkConfig(
+                    name="ablation_no_model_routing",
+                    benchmark_type=BenchmarkType.ABLATION,
+                    baseline_score=1.0,
+                    target_score=0.95,
+                    metadata={"component": "model_routing"},
+                ),
+                BenchmarkConfig(
+                    name="ablation_no_multi_agent",
+                    benchmark_type=BenchmarkType.ABLATION,
+                    baseline_score=1.0,
+                    target_score=0.95,
+                    metadata={"component": "multi_agent_orchestration"},
+                ),
+                BenchmarkConfig(
+                    name="ablation_no_multimodal",
+                    benchmark_type=BenchmarkType.ABLATION,
+                    baseline_score=1.0,
+                    target_score=0.95,
+                    metadata={"component": "multimodal_support"},
+                ),
+            ]
+        )
 
         return configs
 
@@ -582,7 +592,7 @@ class BenchmarkRunner:
             report: Benchmark report
             path: Output file path
         """
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             json.dump(report.to_dict(), f, indent=2)
 
     def print_summary(self, report: BenchmarkReport) -> None:
@@ -609,7 +619,11 @@ class BenchmarkRunner:
             print(f"  {benchmark_type.value.upper()}: {passed}/{len(results)} passed")
 
         print("\nTop Performers:")
-        completed = [r for r in report.results if r.status == BenchmarkStatus.COMPLETE and r.score is not None]
+        completed = [
+            r
+            for r in report.results
+            if r.status == BenchmarkStatus.COMPLETE and r.score is not None
+        ]
         top = sorted(completed, key=lambda r: r.score, reverse=True)[:5]
         for r in top:
             improvement = f" (+{r.improvement_pct:.1f}%)" if r.improvement_pct else ""

@@ -11,6 +11,7 @@ from typing import Any
 
 class IntentType(Enum):
     """User intent types"""
+
     EXPLORATORY = "exploratory"
     GOAL_ORIENTED = "goal_oriented"
 
@@ -18,6 +19,7 @@ class IntentType(Enum):
 @dataclass
 class UserState:
     """Current user understanding state"""
+
     query: str
     certainty: float  # 0.0 to 1.0
     assumptions: list[str] = field(default_factory=list)
@@ -28,6 +30,7 @@ class UserState:
 @dataclass
 class Challenge:
     """Socratic challenge to user's understanding"""
+
     type: str  # "contradiction", "clarification", "alternatives"
     question: str
     reasoning: str
@@ -37,17 +40,16 @@ class Challenge:
 @dataclass
 class SocraticDialogue:
     """Dialogue session tracking"""
+
     turns: list[dict[str, Any]] = field(default_factory=list)
     current_state: UserState | None = None
     intent: IntentType | None = None
 
     def add_turn(self, turn_type: str, content: Any):
         """Add a turn to the dialogue"""
-        self.turns.append({
-            "type": turn_type,
-            "content": content,
-            "turn_number": len(self.turns) + 1
-        })
+        self.turns.append(
+            {"type": turn_type, "content": content, "turn_number": len(self.turns) + 1}
+        )
 
 
 class SocraticQuestioningAgent:
@@ -112,14 +114,27 @@ class SocraticQuestioningAgent:
         """
         # Exploratory indicators
         exploratory_keywords = [
-            "explore", "understand", "learn about", "what is",
-            "how does", "why", "curious", "investigate"
+            "explore",
+            "understand",
+            "learn about",
+            "what is",
+            "how does",
+            "why",
+            "curious",
+            "investigate",
         ]
 
         # Goal-oriented indicators
         goal_keywords = [
-            "find", "search", "list", "compare", "best",
-            "recommend", "which", "should i", "need to"
+            "find",
+            "search",
+            "list",
+            "compare",
+            "best",
+            "recommend",
+            "which",
+            "should i",
+            "need to",
         ]
 
         query_lower = query.lower()
@@ -157,7 +172,7 @@ class SocraticQuestioningAgent:
             certainty=certainty,
             assumptions=assumptions,
             knowledge_gaps=gaps,
-            context=context
+            context=context,
         )
 
     def estimate_certainty(self, query: str) -> float:
@@ -266,9 +281,11 @@ class SocraticQuestioningAgent:
         """
         return Challenge(
             type="contradiction",
-            question=f"You seem certain about '{state.query}'. What evidence would change your mind?",
+            question=(
+                f"You seem certain about '{state.query}'. What evidence would change your mind?"
+            ),
             reasoning="High certainty detected - testing falsifiability",
-            expected_response_type="counter_evidence"
+            expected_response_type="counter_evidence",
         )
 
     def generate_clarification(self, state: UserState) -> Challenge:
@@ -287,14 +304,14 @@ class SocraticQuestioningAgent:
                 type="clarification",
                 question=f"Let's start with {gap}. What specifically would you like to understand?",
                 reasoning="Low certainty - need to clarify scope",
-                expected_response_type="clarification"
+                expected_response_type="clarification",
             )
         else:
             return Challenge(
                 type="clarification",
                 question="What aspect of this topic interests you most?",
                 reasoning="Low certainty - exploring interests",
-                expected_response_type="clarification"
+                expected_response_type="clarification",
             )
 
     def generate_alternatives(self, state: UserState) -> Challenge:
@@ -309,9 +326,12 @@ class SocraticQuestioningAgent:
         """
         return Challenge(
             type="alternatives",
-            question=f"What alternative explanations or approaches have you considered for '{state.query}'?",
+            question=(
+                f"What alternative explanations or approaches have you considered for '"
+                f"{state.query}'?"
+            ),
             reasoning="Medium certainty - exploring alternatives",
-            expected_response_type="alternatives"
+            expected_response_type="alternatives",
         )
 
     def direct_research(self, query: str, context: dict[str, Any]) -> SocraticDialogue:
@@ -327,9 +347,12 @@ class SocraticQuestioningAgent:
         """
         dialogue = SocraticDialogue()
         dialogue.intent = IntentType.GOAL_ORIENTED
-        dialogue.add_turn("direct_research", {
-            "query": query,
-            "mode": "goal_oriented",
-            "message": "Proceeding with direct research (goal-oriented query detected)"
-        })
+        dialogue.add_turn(
+            "direct_research",
+            {
+                "query": query,
+                "mode": "goal_oriented",
+                "message": "Proceeding with direct research (goal-oriented query detected)",
+            },
+        )
         return dialogue

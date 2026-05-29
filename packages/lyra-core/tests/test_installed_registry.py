@@ -1,4 +1,5 @@
 """Tests for the installed-bundles registry + uninstall lifecycle."""
+
 from __future__ import annotations
 
 import json
@@ -36,9 +37,12 @@ def _make_bundle(tmp_path: Path, *, name: str = "iri-test", dual_use: bool = Fal
     (skills / "02-y.md").write_text("---\nname: y\ndescription: y\n---\n", encoding="utf-8")
     evals = root / "evals"
     evals.mkdir(exist_ok=True)
-    (evals / "golden.jsonl").write_text(json.dumps({"id": 1, "expected_pass": True}) + "\n", encoding="utf-8")
+    (evals / "golden.jsonl").write_text(
+        json.dumps({"id": 1, "expected_pass": True}) + "\n", encoding="utf-8"
+    )
     (evals / "rubric.md").write_text("# r\n", encoding="utf-8")
-    (root / "bundle.yaml").write_text(f"""apiVersion: lyra.dev/v3
+    (root / "bundle.yaml").write_text(
+        f"""apiVersion: lyra.dev/v3
 kind: SourceBundle
 name: {name}
 version: 0.1.0
@@ -59,7 +63,9 @@ verifier:
   domain: irt
   command: pytest -q
   budget_seconds: 30
-""", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
     return SourceBundle.load(root)
 
 
@@ -68,10 +74,16 @@ verifier:
 
 def test_record_round_trip_json():
     r = InstalledRecord(
-        bundle_name="x", bundle_version="0.1.0", bundle_hash="abc",
-        target_dir="/tmp/x", attestation_path="/tmp/x/attestation.json",
-        installed_at=1.0, last_verified_at=2.0,
-        dual_use=True, authorized_by="ops:k", verifier_domain="code",
+        bundle_name="x",
+        bundle_version="0.1.0",
+        bundle_hash="abc",
+        target_dir="/tmp/x",
+        attestation_path="/tmp/x/attestation.json",
+        installed_at=1.0,
+        last_verified_at=2.0,
+        dual_use=True,
+        authorized_by="ops:k",
+        verifier_domain="code",
     )
     r2 = InstalledRecord.from_json(r.to_json())
     assert r2 == r
@@ -80,9 +92,13 @@ def test_record_round_trip_json():
 def test_registry_upsert_and_query(tmp_path):
     reg = InstalledRegistry(path=tmp_path / "i.json")
     rec = InstalledRecord(
-        bundle_name="x", bundle_version="0.1.0", bundle_hash="abc",
-        target_dir="/tmp/x", attestation_path="/tmp/x/att.json",
-        installed_at=1.0, last_verified_at=2.0,
+        bundle_name="x",
+        bundle_version="0.1.0",
+        bundle_hash="abc",
+        target_dir="/tmp/x",
+        attestation_path="/tmp/x/att.json",
+        installed_at=1.0,
+        last_verified_at=2.0,
     )
     reg.upsert(rec)
     assert len(reg) == 1
@@ -95,9 +111,13 @@ def test_registry_persistence_across_instances(tmp_path):
     path = tmp_path / "i.json"
     reg = InstalledRegistry(path=path)
     rec = InstalledRecord(
-        bundle_name="x", bundle_version="0.1.0", bundle_hash="abc",
-        target_dir="/tmp/x", attestation_path="/tmp/x/att.json",
-        installed_at=1.0, last_verified_at=2.0,
+        bundle_name="x",
+        bundle_version="0.1.0",
+        bundle_hash="abc",
+        target_dir="/tmp/x",
+        attestation_path="/tmp/x/att.json",
+        installed_at=1.0,
+        last_verified_at=2.0,
     )
     reg.upsert(rec)
     # Reopen — state must survive.
@@ -109,9 +129,13 @@ def test_registry_persistence_across_instances(tmp_path):
 def test_registry_remove(tmp_path):
     reg = InstalledRegistry(path=tmp_path / "i.json")
     rec = InstalledRecord(
-        bundle_name="x", bundle_version="0.1.0", bundle_hash="abc",
-        target_dir="/tmp/x", attestation_path="/tmp/x/att.json",
-        installed_at=1.0, last_verified_at=2.0,
+        bundle_name="x",
+        bundle_version="0.1.0",
+        bundle_hash="abc",
+        target_dir="/tmp/x",
+        attestation_path="/tmp/x/att.json",
+        installed_at=1.0,
+        last_verified_at=2.0,
     )
     reg.upsert(rec)
     removed = reg.remove("abc", "/tmp/x")
@@ -122,14 +146,22 @@ def test_registry_remove(tmp_path):
 def test_registry_distinct_target_dirs_are_distinct_entries(tmp_path):
     reg = InstalledRegistry(path=tmp_path / "i.json")
     rec1 = InstalledRecord(
-        bundle_name="x", bundle_version="0.1.0", bundle_hash="abc",
-        target_dir="/tmp/a", attestation_path="/tmp/a/att.json",
-        installed_at=1.0, last_verified_at=2.0,
+        bundle_name="x",
+        bundle_version="0.1.0",
+        bundle_hash="abc",
+        target_dir="/tmp/a",
+        attestation_path="/tmp/a/att.json",
+        installed_at=1.0,
+        last_verified_at=2.0,
     )
     rec2 = InstalledRecord(
-        bundle_name="x", bundle_version="0.1.0", bundle_hash="abc",
-        target_dir="/tmp/b", attestation_path="/tmp/b/att.json",
-        installed_at=1.0, last_verified_at=2.0,
+        bundle_name="x",
+        bundle_version="0.1.0",
+        bundle_hash="abc",
+        target_dir="/tmp/b",
+        attestation_path="/tmp/b/att.json",
+        installed_at=1.0,
+        last_verified_at=2.0,
     )
     reg.upsert(rec1)
     reg.upsert(rec2)
@@ -161,9 +193,7 @@ def test_installer_dual_use_record_includes_authorized_by(tmp_path, isolated_reg
     assert rows[0].authorized_by == "ops:khanh"
 
 
-def test_installer_idempotent_install_updates_last_verified(
-    tmp_path, isolated_registry
-):
+def test_installer_idempotent_install_updates_last_verified(tmp_path, isolated_registry):
     bundle = _make_bundle(tmp_path)
     target = tmp_path / "out"
     AgentInstaller(bundle=bundle).install(target_dir=target)
@@ -171,6 +201,7 @@ def test_installer_idempotent_install_updates_last_verified(
 
     # Sleep negligibly then re-install.
     import time as _t
+
     _t.sleep(0.01)
     AgentInstaller(bundle=bundle).install(target_dir=target)
     rec = isolated_registry.all()[0]
@@ -266,6 +297,7 @@ def test_uninstall_emits_lifecycle_event(tmp_path, isolated_registry, monkeypatc
         captured.append((name, attrs))
 
     from lyra_core.hir import events
+
     monkeypatch.setattr(events, "emit", fake_emit)
 
     bundle = _make_bundle(tmp_path)

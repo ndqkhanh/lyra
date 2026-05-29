@@ -345,7 +345,8 @@ def test_check_capacity_with_data(temp_db, small_limits):
     # Insert 85 notes (85% of 100 limit)
     for i in range(85):
         cursor.execute(
-            "INSERT INTO memories (id, scope, type, content, created_at, confidence, verifier_status) "
+            "INSERT INTO memories (id, scope, type, content, created_at, confidence,"
+            " verifier_status) "
             "VALUES (?, 'session', 'episodic', ?, ?, 1.0, 'verified')",
             (f"mem_{i}", f"Content {i}", datetime.now(timezone.utc).isoformat()),
         )
@@ -379,7 +380,8 @@ def test_check_capacity_at_limit(temp_db, small_limits):
     # Insert 100 notes (100% of limit)
     for i in range(100):
         cursor.execute(
-            "INSERT INTO memories (id, scope, type, content, created_at, confidence, verifier_status) "
+            "INSERT INTO memories (id, scope, type, content, created_at, confidence,"
+            " verifier_status) "
             "VALUES (?, 'session', 'episodic', ?, ?, 1.0, 'verified')",
             (f"mem_{i}", f"Content {i}", datetime.now(timezone.utc).isoformat()),
         )
@@ -405,7 +407,8 @@ def test_check_capacity_below_threshold(temp_db, small_limits):
     # Insert 50 notes (50% of 100 limit)
     for i in range(50):
         cursor.execute(
-            "INSERT INTO memories (id, scope, type, content, created_at, confidence, verifier_status) "
+            "INSERT INTO memories (id, scope, type, content, created_at, confidence,"
+            " verifier_status) "
             "VALUES (?, 'session', 'episodic', ?, ?, 1.0, 'verified')",
             (f"mem_{i}", f"Content {i}", datetime.now(timezone.utc).isoformat()),
         )
@@ -440,7 +443,8 @@ def test_enforce_limits_warning(temp_db, small_limits):
 
     for i in range(85):
         cursor.execute(
-            "INSERT INTO memories (id, scope, type, content, created_at, confidence, verifier_status) "
+            "INSERT INTO memories (id, scope, type, content, created_at, confidence,"
+            " verifier_status) "
             "VALUES (?, 'session', 'episodic', ?, ?, 1.0, 'verified')",
             (f"mem_{i}", f"Content {i}", datetime.now(timezone.utc).isoformat()),
         )
@@ -462,7 +466,8 @@ def test_enforce_limits_critical(temp_db, small_limits):
 
     for i in range(100):
         cursor.execute(
-            "INSERT INTO memories (id, scope, type, content, created_at, confidence, verifier_status) "
+            "INSERT INTO memories (id, scope, type, content, created_at, confidence,"
+            " verifier_status) "
             "VALUES (?, 'session', 'episodic', ?, ?, 1.0, 'verified')",
             (f"mem_{i}", f"Content {i}", datetime.now(timezone.utc).isoformat()),
         )
@@ -502,7 +507,8 @@ def test_compact_archive_old_notes(temp_db):
     old_date = (datetime.now(timezone.utc) - timedelta(days=100)).isoformat()
     for i in range(10):
         cursor.execute(
-            "INSERT INTO memories (id, scope, type, content, created_at, confidence, verifier_status) "
+            "INSERT INTO memories (id, scope, type, content, created_at, confidence,"
+            " verifier_status) "
             "VALUES (?, 'session', 'episodic', ?, ?, 1.0, 'verified')",
             (f"old_{i}", f"Old content {i}", old_date),
         )
@@ -511,7 +517,8 @@ def test_compact_archive_old_notes(temp_db):
     new_date = (datetime.now(timezone.utc) - timedelta(days=10)).isoformat()
     for i in range(5):
         cursor.execute(
-            "INSERT INTO memories (id, scope, type, content, created_at, confidence, verifier_status) "
+            "INSERT INTO memories (id, scope, type, content, created_at, confidence,"
+            " verifier_status) "
             "VALUES (?, 'session', 'episodic', ?, ?, 1.0, 'verified')",
             (f"new_{i}", f"New content {i}", new_date),
         )
@@ -543,7 +550,8 @@ def test_compact_creates_archive_file(temp_db):
     old_date = (datetime.now(timezone.utc) - timedelta(days=100)).isoformat()
     for i in range(5):
         cursor.execute(
-            "INSERT INTO memories (id, scope, type, content, created_at, confidence, verifier_status) "
+            "INSERT INTO memories (id, scope, type, content, created_at, confidence,"
+            " verifier_status) "
             "VALUES (?, 'session', 'episodic', ?, ?, 1.0, 'verified')",
             (f"old_{i}", f"Old content {i}", old_date),
         )
@@ -573,7 +581,8 @@ def test_compact_deduplicate_content(temp_db):
     # Insert 5 notes with same content
     for i in range(5):
         cursor.execute(
-            "INSERT INTO memories (id, scope, type, content, created_at, confidence, verifier_status) "
+            "INSERT INTO memories (id, scope, type, content, created_at, confidence,"
+            " verifier_status) "
             "VALUES (?, 'session', 'episodic', 'Duplicate content', ?, 1.0, 'verified')",
             (f"dup_{i}", datetime.now(timezone.utc).isoformat()),
         )
@@ -581,7 +590,8 @@ def test_compact_deduplicate_content(temp_db):
     # Insert 3 notes with unique content
     for i in range(3):
         cursor.execute(
-            "INSERT INTO memories (id, scope, type, content, created_at, confidence, verifier_status) "
+            "INSERT INTO memories (id, scope, type, content, created_at, confidence,"
+            " verifier_status) "
             "VALUES (?, 'session', 'episodic', ?, ?, 1.0, 'verified')",
             (f"unique_{i}", f"Unique content {i}", datetime.now(timezone.utc).isoformat()),
         )
@@ -614,7 +624,8 @@ def test_compact_vacuum_reduces_size(temp_db):
     # Insert 100 notes
     for i in range(100):
         cursor.execute(
-            "INSERT INTO memories (id, scope, type, content, created_at, confidence, verifier_status) "
+            "INSERT INTO memories (id, scope, type, content, created_at, confidence,"
+            " verifier_status) "
             "VALUES (?, 'session', 'episodic', ?, ?, 1.0, 'verified')",
             (f"mem_{i}", f"Content {i}" * 100, datetime.now(timezone.utc).isoformat()),
         )
@@ -669,7 +680,8 @@ def test_compact_size_reduction_calculation(temp_db):
     old_date = (datetime.now(timezone.utc) - timedelta(days=100)).isoformat()
     for i in range(50):
         cursor.execute(
-            "INSERT INTO memories (id, scope, type, content, created_at, confidence, verifier_status) "
+            "INSERT INTO memories (id, scope, type, content, created_at, confidence,"
+            " verifier_status) "
             "VALUES (?, 'session', 'episodic', ?, ?, 1.0, 'verified')",
             (f"mem_{i}", f"Content {i}" * 100, old_date),
         )
@@ -821,7 +833,8 @@ def test_get_capacity_report_with_data(temp_db, small_limits):
 
     for i in range(85):
         cursor.execute(
-            "INSERT INTO memories (id, scope, type, content, created_at, confidence, verifier_status) "
+            "INSERT INTO memories (id, scope, type, content, created_at, confidence,"
+            " verifier_status) "
             "VALUES (?, 'session', 'episodic', ?, ?, 1.0, 'verified')",
             (f"mem_{i}", f"Content {i}", datetime.now(timezone.utc).isoformat()),
         )
@@ -931,7 +944,8 @@ def test_full_capacity_lifecycle(temp_db, custom_limits):
 
     for i in range(850):
         cursor.execute(
-            "INSERT INTO memories (id, scope, type, content, created_at, confidence, verifier_status) "
+            "INSERT INTO memories (id, scope, type, content, created_at, confidence,"
+            " verifier_status) "
             "VALUES (?, 'session', 'episodic', ?, ?, 1.0, 'verified')",
             (f"mem_{i}", f"Content {i}", datetime.now(timezone.utc).isoformat()),
         )
@@ -962,7 +976,8 @@ def test_capacity_with_latency_monitoring(temp_db, custom_limits):
 
     for i in range(500):
         cursor.execute(
-            "INSERT INTO memories (id, scope, type, content, created_at, confidence, verifier_status) "
+            "INSERT INTO memories (id, scope, type, content, created_at, confidence,"
+            " verifier_status) "
             "VALUES (?, 'session', 'episodic', ?, ?, 1.0, 'verified')",
             (f"mem_{i}", f"Content {i}", datetime.now(timezone.utc).isoformat()),
         )
@@ -994,7 +1009,8 @@ def test_enforce_and_compact_workflow(temp_db, small_limits):
 
     for i in range(100):
         cursor.execute(
-            "INSERT INTO memories (id, scope, type, content, created_at, confidence, verifier_status) "
+            "INSERT INTO memories (id, scope, type, content, created_at, confidence,"
+            " verifier_status) "
             "VALUES (?, 'session', 'episodic', ?, ?, 1.0, 'verified')",
             (f"mem_{i}", f"Content {i}", datetime.now(timezone.utc).isoformat()),
         )
@@ -1023,7 +1039,8 @@ def test_compaction_reduces_size_by_30_percent(temp_db):
     old_date = (datetime.now(timezone.utc) - timedelta(days=100)).isoformat()
     for i in range(200):
         cursor.execute(
-            "INSERT INTO memories (id, scope, type, content, created_at, confidence, verifier_status) "
+            "INSERT INTO memories (id, scope, type, content, created_at, confidence,"
+            " verifier_status) "
             "VALUES (?, 'session', 'episodic', ?, ?, 1.0, 'verified')",
             (f"mem_{i}", f"Content {i}" * 200, old_date),  # Large content
         )

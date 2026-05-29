@@ -22,6 +22,7 @@ from dataclasses import dataclass
 @dataclass
 class FalsificationTest:
     """Single falsification test."""
+
     id: str
     claim: str
     test_type: str  # "counterexample", "stress_test", "negative_control", "boundary"
@@ -35,6 +36,7 @@ class FalsificationTest:
 @dataclass
 class FalsificationResult:
     """Result of falsification attempt."""
+
     claim: str
     tests: list[FalsificationTest]
     survived: bool
@@ -64,10 +66,7 @@ class FalsificationEngine:
         self.llm = llm
 
     def generate_falsification_tests(
-        self,
-        claim: str,
-        evidence: str,
-        num_tests: int = 5
+        self, claim: str, evidence: str, num_tests: int = 5
     ) -> list[FalsificationTest]:
         """
         Generate tests that could falsify the claim.
@@ -113,9 +112,9 @@ Output JSON array:
                 test = FalsificationTest(
                     id=f"test_{i+1}",
                     claim=claim,
-                    test_type=test_data['test_type'],
-                    test_description=test_data['test_description'],
-                    expected_outcome=test_data['expected_outcome']
+                    test_type=test_data["test_type"],
+                    test_description=test_data["test_description"],
+                    expected_outcome=test_data["expected_outcome"],
                 )
                 tests.append(test)
 
@@ -125,11 +124,7 @@ Output JSON array:
             print(f"Error generating falsification tests: {e}")
             return []
 
-    def execute_test(
-        self,
-        test: FalsificationTest,
-        executor
-    ) -> FalsificationTest:
+    def execute_test(self, test: FalsificationTest, executor) -> FalsificationTest:
         """
         Execute a falsification test.
 
@@ -144,14 +139,12 @@ Output JSON array:
             # Execute test
             result = executor(test.test_description)
 
-            test.actual_outcome = result['outcome']
-            test.evidence = result.get('evidence', '')
+            test.actual_outcome = result["outcome"]
+            test.evidence = result.get("evidence", "")
 
             # Check if test passed (claim survived)
             test.passed = self._evaluate_test_result(
-                test.expected_outcome,
-                test.actual_outcome,
-                test.claim
+                test.expected_outcome, test.actual_outcome, test.claim
             )
 
             return test
@@ -162,12 +155,7 @@ Output JSON array:
             test.passed = None
             return test
 
-    def _evaluate_test_result(
-        self,
-        expected: str,
-        actual: str,
-        claim: str
-    ) -> bool:
+    def _evaluate_test_result(self, expected: str, actual: str, claim: str) -> bool:
         """
         Evaluate if claim survived the test.
 
@@ -200,7 +188,7 @@ Output JSON:
         try:
             response = self.llm.generate(prompt)
             result = json.loads(response)
-            return result.get('survived', False)
+            return result.get("survived", False)
 
         except Exception as e:
             print(f"Error evaluating test result: {e}")
@@ -212,7 +200,7 @@ Output JSON:
         evidence: str,
         executor,
         num_tests: int = 5,
-        survival_threshold: float = 0.6
+        survival_threshold: float = 0.6,
     ) -> FalsificationResult:
         """
         Attempt to falsify a research claim.
@@ -236,7 +224,7 @@ Output JSON:
                 tests=[],
                 survived=True,  # No tests = can't falsify
                 confidence_before=0.5,
-                confidence_after=0.5
+                confidence_after=0.5,
             )
 
         # Execute tests
@@ -270,7 +258,9 @@ Output JSON:
         if not survived:
             qualified_claim = self._generate_qualified_claim(claim, tests)
             if confidence_after < 0.3:
-                rejection_reason = f"Failed {total_tests - passed_tests}/{total_tests} falsification tests"
+                rejection_reason = (
+                    f"Failed {total_tests - passed_tests}/{total_tests} falsification tests"
+                )
 
         return FalsificationResult(
             claim=claim,
@@ -279,14 +269,10 @@ Output JSON:
             confidence_before=confidence_before,
             confidence_after=confidence_after,
             qualified_claim=qualified_claim,
-            rejection_reason=rejection_reason
+            rejection_reason=rejection_reason,
         )
 
-    def _generate_qualified_claim(
-        self,
-        original_claim: str,
-        tests: list[FalsificationTest]
-    ) -> str:
+    def _generate_qualified_claim(self, original_claim: str, tests: list[FalsificationTest]) -> str:
         """
         Generate a qualified/revised claim based on test failures.
 
@@ -307,7 +293,8 @@ Output JSON:
 Original Claim: {original_claim}
 
 Failed Tests:
-{json.dumps([{'test': t.test_description, 'outcome': t.actual_outcome} for t in failed_tests], indent=2)}
+{json.dumps([{'test': t.test_description, 'outcome': t.actual_outcome} for t in failed_tests],
+indent=2)}
 
 Generate a more qualified, accurate claim that:
 1. Acknowledges the limitations found
@@ -323,7 +310,7 @@ Output JSON:
         try:
             response = self.llm.generate(prompt)
             result = json.loads(response)
-            return result.get('qualified_claim', original_claim)
+            return result.get("qualified_claim", original_claim)
 
         except Exception as e:
             print(f"Error generating qualified claim: {e}")
@@ -331,11 +318,7 @@ Output JSON:
 
 
 # Integration with Feynman pipeline
-def add_falsification_to_feynman(
-    feynman_pipeline,
-    llm,
-    executor
-) -> None:
+def add_falsification_to_feynman(feynman_pipeline, llm, executor) -> None:
     """
     Add falsification stage to Feynman pipeline.
 
@@ -354,26 +337,18 @@ def add_falsification_to_feynman(
     for findings_path in feynman_pipeline.findings_paths:
         with open(findings_path) as f:
             findings = json.load(f)
-            claims.append({
-                'claim': findings['answer'],
-                'evidence': json.dumps(findings['citations'])
-            })
+            claims.append(
+                {"claim": findings["answer"], "evidence": json.dumps(findings["citations"])}
+            )
 
     # Falsify each claim
     falsification_results = []
     for claim_data in claims:
-        result = falsifier.falsify_claim(
-            claim_data['claim'],
-            claim_data['evidence'],
-            executor
-        )
+        result = falsifier.falsify_claim(claim_data["claim"], claim_data["evidence"], executor)
         falsification_results.append(result)
 
     # Filter out rejected claims
-    surviving_claims = [
-        r for r in falsification_results
-        if r.survived or r.confidence_after >= 0.5
-    ]
+    surviving_claims = [r for r in falsification_results if r.survived or r.confidence_after >= 0.5]
 
     # Update pipeline with qualified claims
     feynman_pipeline.falsification_results = falsification_results

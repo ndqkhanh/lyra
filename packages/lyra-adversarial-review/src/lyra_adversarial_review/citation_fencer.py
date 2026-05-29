@@ -44,7 +44,9 @@ class FenceReport:
 # Common LLM hallucination patterns
 _HALLUCINATION_PATTERNS: list[re.Pattern] = [
     re.compile(r"according to a (recent|new|groundbreaking) study", re.IGNORECASE),
-    re.compile(r"research (shows|suggests|indicates|demonstrates)\s+\w+\s+(that|how)", re.IGNORECASE),
+    re.compile(
+        r"research (shows|suggests|indicates|demonstrates)\s+\w+\s+(that|how)", re.IGNORECASE
+    ),
     re.compile(r"as (per|cited in|referenced in)\s+\[?\d*\]?"),
     re.compile(r"source:?\s+\[?(citation|reference|source) needed\]?", re.IGNORECASE),
     re.compile(r"I (think|believe|could|might|may) be (that|because)", re.IGNORECASE),
@@ -147,7 +149,9 @@ class CitationFencer:
             url = match.group(0)
             if any(c.url == url for c in citations):
                 continue
-            source_type = SourceType.SEMANTIC_SCHOLAR if "semanticscholar" in url.lower() else SourceType.URL
+            source_type = (
+                SourceType.SEMANTIC_SCHOLAR if "semanticscholar" in url.lower() else SourceType.URL
+            )
             citations.append(
                 Citation(
                     text=url,
@@ -237,10 +241,18 @@ class CitationFencer:
             issues.append(f"URL must start with http:// or https://: {url}")
             return 0.0, issues
         known_domains = [
-            "arxiv.org", "doi.org", "semanticscholar.org",
-            "github.com", "nature.com", "science.org",
-            "ieee.org", "acm.org", "springer.com",
-            "elsevier.com", "plos.org", "pubmed.ncbi.nlm.nih.gov",
+            "arxiv.org",
+            "doi.org",
+            "semanticscholar.org",
+            "github.com",
+            "nature.com",
+            "science.org",
+            "ieee.org",
+            "acm.org",
+            "springer.com",
+            "elsevier.com",
+            "plos.org",
+            "pubmed.ncbi.nlm.nih.gov",
         ]
         if any(d in url.lower() for d in known_domains):
             return 0.7, []

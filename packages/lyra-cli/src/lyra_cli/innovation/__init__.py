@@ -15,11 +15,12 @@ import json
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
 
 # ============================================================================
 # Mermaid Canvas Integration
 # ============================================================================
+
 
 class DiagramType(Enum):
     """Type of Mermaid diagram."""
@@ -282,6 +283,7 @@ class MermaidCanvas:
 # Falsification Loops
 # ============================================================================
 
+
 @dataclass
 class Hypothesis:
     """A testable hypothesis extracted from an answer."""
@@ -347,7 +349,10 @@ class FalsificationLoop:
                 continue
 
             # Look for definitive keywords
-            if any(word in sentence.lower() for word in ["always", "never", "all", "none", "must", "every"]):
+            if any(
+                word in sentence.lower()
+                for word in ["always", "never", "all", "none", "must", "every"]
+            ):
                 hypothesis = Hypothesis(
                     claim=sentence.strip(),
                     confidence=0.8,
@@ -402,19 +407,22 @@ class FalsificationLoop:
 
         # Simulate test execution
         import random
+
         refutes = random.random() < 0.1  # 10% chance of refutation
 
         test.actual_outcome = "Test passed" if not refutes else "Test failed - hypothesis refuted"
         test.refutes = refutes
 
         # Log trace
-        self.trace.append({
-            "timestamp": datetime.now().isoformat(),
-            "test_id": test.test_id,
-            "hypothesis": test.hypothesis,
-            "refutes": refutes,
-            "outcome": test.actual_outcome,
-        })
+        self.trace.append(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "test_id": test.test_id,
+                "hypothesis": test.hypothesis,
+                "refutes": refutes,
+                "outcome": test.actual_outcome,
+            }
+        )
 
         return refutes
 
@@ -461,12 +469,14 @@ class FalsificationLoop:
             else:
                 results["uncertain"] += 1
 
-            results["hypotheses"].append({
-                "claim": hypothesis.claim,
-                "status": hypothesis.status,
-                "confidence": hypothesis.confidence,
-                "counterexamples": hypothesis.counterexamples,
-            })
+            results["hypotheses"].append(
+                {
+                    "claim": hypothesis.claim,
+                    "status": hypothesis.status,
+                    "confidence": hypothesis.confidence,
+                    "counterexamples": hypothesis.counterexamples,
+                }
+            )
 
         return results
 
@@ -474,6 +484,7 @@ class FalsificationLoop:
 # ============================================================================
 # Cross-Session Learning
 # ============================================================================
+
 
 @dataclass
 class SessionPattern:

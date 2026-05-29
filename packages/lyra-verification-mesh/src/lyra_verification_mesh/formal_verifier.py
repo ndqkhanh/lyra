@@ -1,4 +1,5 @@
-"""Pseudo-formal verification: invariant checking, type safety, contracts, property-based testing."""
+"""Pseudo-formal verification: invariant checking, type safety, contracts, property-based
+testing."""
 
 from __future__ import annotations
 
@@ -108,23 +109,27 @@ class InvariantRegistry:
         for name, invariant in self._named_invariants.items():
             try:
                 holds, message = invariant.check(state)
-                results.append(VerificationResult(
-                    status=VerificationStatus.PASS if holds else VerificationStatus.FAIL,
-                    layer=VerificationLayer.PRE_EXECUTION,
-                    verifier="InvariantRegistry",
-                    check_name=name,
-                    message=message,
-                    confidence=1.0 if holds else 0.0,
-                ))
+                results.append(
+                    VerificationResult(
+                        status=VerificationStatus.PASS if holds else VerificationStatus.FAIL,
+                        layer=VerificationLayer.PRE_EXECUTION,
+                        verifier="InvariantRegistry",
+                        check_name=name,
+                        message=message,
+                        confidence=1.0 if holds else 0.0,
+                    )
+                )
             except Exception as exc:
-                results.append(VerificationResult(
-                    status=VerificationStatus.ERROR,
-                    layer=VerificationLayer.PRE_EXECUTION,
-                    verifier="InvariantRegistry",
-                    check_name=name,
-                    message=f"Invariant check error: {exc}",
-                    confidence=0.0,
-                ))
+                results.append(
+                    VerificationResult(
+                        status=VerificationStatus.ERROR,
+                        layer=VerificationLayer.PRE_EXECUTION,
+                        verifier="InvariantRegistry",
+                        check_name=name,
+                        message=f"Invariant check error: {exc}",
+                        confidence=0.0,
+                    )
+                )
         return results
 
 
@@ -134,25 +139,30 @@ class InvariantRegistry:
 class TypeSafetyVerifier:
     """Verifies type safety constraints on data structures.
 
-    Checks that variables, fields, and return values conform to
-    expected type annotations at runtime.
+    Checks that variables, fields, and return values conform to expected type annotations at
+    runtime.
     """
 
     def __init__(self) -> None:
         self._constraints: list[TypeConstraint] = []
         self._type_map: dict[str, type] = {
-            "str": str, "int": int, "float": float, "bool": bool,
-            "list": list, "dict": dict, "tuple": tuple, "set": set,
-            "None": type(None), "Any": object,
+            "str": str,
+            "int": int,
+            "float": float,
+            "bool": bool,
+            "list": list,
+            "dict": dict,
+            "tuple": tuple,
+            "set": set,
+            "None": type(None),
+            "Any": object,
         }
 
     def add_constraint(self, constraint: TypeConstraint) -> None:
         """Add a type constraint to verify."""
         self._constraints.append(constraint)
 
-    def verify_value(
-        self, constraint: TypeConstraint, value: Any
-    ) -> VerificationResult:
+    def verify_value(self, constraint: TypeConstraint, value: Any) -> VerificationResult:
         """Verify a single value against a type constraint.
 
         Args:
@@ -216,9 +226,7 @@ class TypeSafetyVerifier:
         results: list[VerificationResult] = []
         for constraint in self._constraints:
             if constraint.variable_name in values:
-                results.append(
-                    self.verify_value(constraint, values[constraint.variable_name])
-                )
+                results.append(self.verify_value(constraint, values[constraint.variable_name]))
         return results
 
 
@@ -228,8 +236,8 @@ class TypeSafetyVerifier:
 class ContractVerifier:
     """Verifies pre/post conditions on functions and operations.
 
-    Checks that pre-conditions are satisfied before execution and
-    post-conditions hold after execution.
+    Checks that pre-conditions are satisfied before execution and post-conditions hold after
+    execution.
     """
 
     def __init__(self) -> None:
@@ -239,9 +247,7 @@ class ContractVerifier:
         """Add a pre/post condition contract."""
         self._contracts.append(contract)
 
-    async def verify_pre_conditions(
-        self, state: dict[str, Any]
-    ) -> list[VerificationResult]:
+    async def verify_pre_conditions(self, state: dict[str, Any]) -> list[VerificationResult]:
         """Verify all pre-conditions against the current state.
 
         Args:
@@ -253,15 +259,20 @@ class ContractVerifier:
         results: list[VerificationResult] = []
         for contract in self._contracts:
             satisfied = self._evaluate_condition(contract.pre_condition, state)
-            results.append(VerificationResult(
-                status=VerificationStatus.PASS if satisfied else VerificationStatus.FAIL,
-                layer=VerificationLayer.PRE_EXECUTION,
-                verifier="ContractVerifier",
-                check_name=f"pre_{contract.name}",
-                message=f"Pre-condition '{contract.name}' {'satisfied' if satisfied else 'violated'}",
-                confidence=1.0 if satisfied else 0.0,
-                details={"condition": contract.pre_condition, "state": state},
-            ))
+            results.append(
+                VerificationResult(
+                    status=VerificationStatus.PASS if satisfied else VerificationStatus.FAIL,
+                    layer=VerificationLayer.PRE_EXECUTION,
+                    verifier="ContractVerifier",
+                    check_name=f"pre_{contract.name}",
+                    message=(
+                        f"Pre-condition '{contract.name}' "
+                        f"{'satisfied' if satisfied else 'violated'}"
+                    ),
+                    confidence=1.0 if satisfied else 0.0,
+                    details={"condition": contract.pre_condition, "state": state},
+                )
+            )
         return results
 
     async def verify_post_conditions(
@@ -280,15 +291,20 @@ class ContractVerifier:
         combined = {**before_state, "after": after_state}
         for contract in self._contracts:
             satisfied = self._evaluate_condition(contract.post_condition, combined)
-            results.append(VerificationResult(
-                status=VerificationStatus.PASS if satisfied else VerificationStatus.FAIL,
-                layer=VerificationLayer.PRE_EXECUTION,
-                verifier="ContractVerifier",
-                check_name=f"post_{contract.name}",
-                message=f"Post-condition '{contract.name}' {'satisfied' if satisfied else 'violated'}",
-                confidence=1.0 if satisfied else 0.0,
-                details={"condition": contract.post_condition},
-            ))
+            results.append(
+                VerificationResult(
+                    status=VerificationStatus.PASS if satisfied else VerificationStatus.FAIL,
+                    layer=VerificationLayer.PRE_EXECUTION,
+                    verifier="ContractVerifier",
+                    check_name=f"post_{contract.name}",
+                    message=(
+                        f"Post-condition '{contract.name}' "
+                        f"{'satisfied' if satisfied else 'violated'}"
+                    ),
+                    confidence=1.0 if satisfied else 0.0,
+                    details={"condition": contract.post_condition},
+                )
+            )
         return results
 
     @staticmethod
@@ -369,9 +385,8 @@ class ContractVerifier:
 class FormalVerifier:
     """Pseudo-formal verification engine.
 
-    Decomposes reasoning into self-contained modules, verifies each
-    independently via premise-conclusion analysis, and checks invariants,
-    types, and contracts.
+    Decomposes reasoning into self-contained modules, verifies each independently via premise-
+    conclusion analysis, and checks invariants, types, and contracts.
     """
 
     def __init__(self) -> None:
@@ -546,8 +561,7 @@ class FormalVerifier:
     ) -> list[FormalProofResult]:
         """Check all temporal properties against event log."""
         tasks = [
-            self.check_temporal_property(prop, event_log)
-            for prop in self._temporal_properties
+            self.check_temporal_property(prop, event_log) for prop in self._temporal_properties
         ]
         return list(await asyncio.gather(*tasks))
 

@@ -76,11 +76,7 @@ class MemoryVerifier:
             "contradictions_detected": 0,
         }
 
-    def extract_evidence(
-        self,
-        observation: str,
-        claim: str
-    ) -> list[Evidence]:
+    def extract_evidence(self, observation: str, claim: str) -> list[Evidence]:
         """
         Extract evidence from observation supporting the claim.
 
@@ -118,32 +114,44 @@ class MemoryVerifier:
     def _split_sentences(self, text: str) -> list[str]:
         """Split text into sentences."""
         # Simple sentence splitting
-        sentences = re.split(r'[.!?]+', text)
+        sentences = re.split(r"[.!?]+", text)
         return [s.strip() for s in sentences if s.strip()]
 
     def _extract_keywords(self, text: str) -> list[str]:
         """Extract important keywords from text."""
         # Remove common stop words
         stop_words = {
-            'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to',
-            'for', 'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are',
+            "the",
+            "a",
+            "an",
+            "and",
+            "or",
+            "but",
+            "in",
+            "on",
+            "at",
+            "to",
+            "for",
+            "of",
+            "with",
+            "by",
+            "from",
+            "as",
+            "is",
+            "was",
+            "are",
         }
 
         # Extract words
-        words = re.findall(r'\b\w+\b', text.lower())
+        words = re.findall(r"\b\w+\b", text.lower())
 
         # Filter stop words and short words
-        keywords = [
-            w for w in words
-            if w not in stop_words and len(w) > 3
-        ]
+        keywords = [w for w in words if w not in stop_words and len(w) > 3]
 
         return list(set(keywords))
 
     def detect_contradictions(
-        self,
-        claim: str,
-        existing_memories: list[str] | None = None
+        self, claim: str, existing_memories: list[str] | None = None
     ) -> list[str]:
         """
         Detect contradictions between claim and existing memories.
@@ -172,22 +180,28 @@ class MemoryVerifier:
             if len(overlap) >= 2:  # Significant overlap
                 # Check for negation patterns
                 if self._has_negation(claim) != self._has_negation(memory):
-                    contradictions.append(
-                        f"Contradicts existing memory: {memory[:100]}"
-                    )
+                    contradictions.append(f"Contradicts existing memory: {memory[:100]}")
 
         return contradictions
 
     def _has_negation(self, text: str) -> bool:
         """Check if text contains negation."""
-        negation_words = ['not', 'no', 'never', 'none', 'neither', 'cannot', "can't", "won't", "don't"]
+        negation_words = [
+            "not",
+            "no",
+            "never",
+            "none",
+            "neither",
+            "cannot",
+            "can't",
+            "won't",
+            "don't",
+        ]
         text_lower = text.lower()
         return any(neg in text_lower for neg in negation_words)
 
     def verify_claim(
-        self,
-        claim: MemoryClaim,
-        existing_memories: list[str] | None = None
+        self, claim: MemoryClaim, existing_memories: list[str] | None = None
     ) -> VerificationResult:
         """
         Verify a memory claim before writing.
@@ -209,7 +223,10 @@ class MemoryVerifier:
                 confidence=0.0,
                 evidence_count=len(claim.evidence),
                 contradictions=[],
-                reason=f"Insufficient evidence (need {self.min_evidence_count}, got {len(claim.evidence)})",
+                reason=(
+                    f"Insufficient evidence (need {self.min_evidence_count}, got "
+                    f"{len(claim.evidence)})"
+                ),
             )
 
         # Check for contradictions
@@ -228,7 +245,9 @@ class MemoryVerifier:
 
         # Calculate confidence from evidence
         if claim.evidence:
-            avg_evidence_confidence = sum(e.confidence for e in claim.evidence) / len(claim.evidence)
+            avg_evidence_confidence = sum(e.confidence for e in claim.evidence) / len(
+                claim.evidence
+            )
         else:
             avg_evidence_confidence = 0.0
 

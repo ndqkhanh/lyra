@@ -290,7 +290,7 @@ class AgentSpawner:
             logger.debug("Pre-allocated resources for %s: %s", agent_id, limits)
             return True
         except Exception:
-            raise ResourceAllocationError(f"Failed to allocate resources for {agent_id}")
+            raise ResourceAllocationError(f"Failed to allocate resources for {agent_id}") from None
 
     def _release_resources(self, agent_id: str) -> None:
         """Release allocated resources for an agent."""
@@ -318,9 +318,17 @@ class AgentSpawner:
                 return await self._spawn_attempt(aid, config)
             except Exception as e:
                 attempts += 1
-                logger.warning("Spawn attempt %d/%d failed for %s: %s", attempts, config.max_retries + 1, aid, e)
+                logger.warning(
+                    "Spawn attempt %d/%d failed for %s: %s",
+                    attempts,
+                    config.max_retries + 1,
+                    aid,
+                    e,
+                )
                 if attempts > config.max_retries:
-                    raise SpawnError(f"Failed to spawn agent {aid} after {config.max_retries + 1} attempts") from e
+                    raise SpawnError(
+                        f"Failed to spawn agent {aid} after {config.max_retries + 1} attempts"
+                    ) from e
 
                 # Clean up partial state
                 self._release_resources(aid)
@@ -394,9 +402,7 @@ class AgentSpawner:
             )
             logger.debug("Warm-up complete for %s", agent_id)
         except asyncio.TimeoutError:
-            raise WarmupTimeoutError(
-                f"Warm-up timed out for {agent_id} ({config.warmup_timeout}s)"
-            )
+            raise WarmupTimeoutError(f"Warm-up timed out for {agent_id} ({config.warmup_timeout}s)") from None
 
     # ------------------------------------------------------------------
     # Health check
@@ -407,7 +413,10 @@ class AgentSpawner:
         result = await self._health_check.run_checks(agent_id)
         if not result.passed:
             raise HealthCheckFailedError(
-                f"Health check failed for {agent_id}: {result.passed_count}/{result.total_checks} passed"
+
+                    f"Health check failed for {agent_id}: {result.passed_count}/"
+                    f"{result.total_checks} passed"
+
             )
         logger.debug("Health check passed for %s", agent_id)
         return result

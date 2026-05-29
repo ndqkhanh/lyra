@@ -9,6 +9,7 @@ Ports auth.py's DeviceCodeAuth into a usable REPL command:
 Also provides AuthStatusWidget for the TUI — a panel showing
 which providers are authenticated and token expiry info.
 """
+
 from __future__ import annotations
 
 import os
@@ -28,11 +29,31 @@ from ..commands.registry import CommandResult
 
 AUTH_PROVIDERS: dict[str, dict[str, str]] = {
     "github": {"env": "GITHUB_TOKEN", "url": "https://github.com/settings/tokens", "color": "dim"},
-    "copilot": {"env": "COPILOT_TOKEN", "url": "https://github.com/settings/copilot", "color": "green"},
-    "openai": {"env": "OPENAI_API_KEY", "url": "https://platform.openai.com/api-keys", "color": "green"},
-    "anthropic": {"env": "ANTHROPIC_API_KEY", "url": "https://console.anthropic.com", "color": "yellow"},
-    "google": {"env": "GOOGLE_API_KEY", "url": "https://aistudio.google.com/app/apikey", "color": "cyan"},
-    "huggingface": {"env": "HF_TOKEN", "url": "https://huggingface.co/settings/tokens", "color": "yellow"},
+    "copilot": {
+        "env": "COPILOT_TOKEN",
+        "url": "https://github.com/settings/copilot",
+        "color": "green",
+    },
+    "openai": {
+        "env": "OPENAI_API_KEY",
+        "url": "https://platform.openai.com/api-keys",
+        "color": "green",
+    },
+    "anthropic": {
+        "env": "ANTHROPIC_API_KEY",
+        "url": "https://console.anthropic.com",
+        "color": "yellow",
+    },
+    "google": {
+        "env": "GOOGLE_API_KEY",
+        "url": "https://aistudio.google.com/app/apikey",
+        "color": "cyan",
+    },
+    "huggingface": {
+        "env": "HF_TOKEN",
+        "url": "https://huggingface.co/settings/tokens",
+        "color": "yellow",
+    },
 }
 
 TOKEN_DIR = Path.home() / ".lyra" / "tokens"
@@ -52,6 +73,7 @@ def _check_provider(name: str) -> dict:
     if stored:
         try:
             import json
+
             data = json.loads(token_file.read_text())
             exp = data.get("expires_at", 0)
             if exp and time.time() > exp:
@@ -72,6 +94,7 @@ def _check_provider(name: str) -> dict:
 
 
 # ── Slash command ──────────────────────────────────────────────────────
+
 
 def cmd_auth(session: Any, args: str) -> CommandResult:
     """Manage OAuth provider authentication.
@@ -96,7 +119,9 @@ def cmd_auth(session: Any, args: str) -> CommandResult:
             if status["stored"]:
                 glyph = "[green]✓[/]"
                 ok += 1
-                expiry = f" [dim](expires {status['expires_at']})[/]" if status["expires_at"] else ""
+                expiry = (
+                    f" [dim](expires {status['expires_at']})[/]" if status["expires_at"] else ""
+                )
                 lines.append(f"  {glyph} [{color}]{name:<12}[/]{expiry}")
             elif status["env_set"]:
                 glyph = "[yellow]✓[/]"
@@ -131,7 +156,10 @@ def cmd_auth(session: Any, args: str) -> CommandResult:
                 lines.append(f"  Expires: {status['expires_at']}")
         lines.append(f"  URL:     [dim]{status['url']}[/]")
         return CommandResult(
-            output=f"{name}: {'authenticated' if status['stored'] or status['env_set'] else 'not configured'}",
+            output=(
+                f"{name}: "
+                f"{'authenticated' if status['stored'] or status['env_set'] else 'not configured'}"
+            ),
             renderable="\n".join(lines),
         )
 
@@ -169,6 +197,7 @@ def cmd_auth(session: Any, args: str) -> CommandResult:
 
 
 # ── TUI Widget ─────────────────────────────────────────────────────────
+
 
 class AuthStatusWidget(Widget):
     """Auth provider status panel — Ctrl+Shift+A to toggle.
@@ -223,7 +252,11 @@ class AuthStatusWidget(Widget):
             return
         try:
             hint = "[dim](ctrl+shift+a)[/]"
-            ok = sum(1 for n in AUTH_PROVIDERS if _check_provider(n)["stored"] or _check_provider(n)["env_set"])
+            ok = sum(
+                1
+                for n in AUTH_PROVIDERS
+                if _check_provider(n)["stored"] or _check_provider(n)["env_set"]
+            )
             total = len(AUTH_PROVIDERS)
             if self.expanded:
                 self.query_one("#auth-header", Static).update(
@@ -235,7 +268,11 @@ class AuthStatusWidget(Widget):
                     info = AUTH_PROVIDERS[name]
                     color = info.get("color", "dim")
                     if status["stored"]:
-                        exp = f" [dim](exp {status['expires_at'][:10]})[/]" if status["expires_at"] else ""
+                        exp = (
+                            f" [dim](exp {status['expires_at'][:10]})[/]"
+                            if status["expires_at"]
+                            else ""
+                        )
                         lines.append(f"  [green]✓[/] [{color}]{name:<12}[/]{exp}")
                     elif status["env_set"]:
                         lines.append(f"  [yellow]✓[/] [{color}]{name:<12}[/] [dim](env)[/]")

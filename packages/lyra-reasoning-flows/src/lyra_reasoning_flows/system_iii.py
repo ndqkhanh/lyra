@@ -84,7 +84,9 @@ class SystemIIIMetaRegulator:
 
         if complexity >= 0.7:
             return MetaDecision(
-                reasoning=f"Task complexity {complexity:.2f} above escalation threshold; escalate model",
+                reasoning=(
+                    f"Task complexity {complexity:.2f} above escalation threshold; escalate model"
+                ),
                 confidence=0.90,
                 escalation_flag=True,
                 regulation_action=RegulationAction.ESCALATE_MODEL,
@@ -92,7 +94,9 @@ class SystemIIIMetaRegulator:
 
         if complexity >= 0.4:
             return MetaDecision(
-                reasoning=f"Task complexity {complexity:.2f} above planning threshold; engage System II",
+                reasoning=(
+                    f"Task complexity {complexity:.2f} above planning threshold; engage System II"
+                ),
                 confidence=0.85,
                 escalation_flag=True,
                 regulation_action=RegulationAction.ENGAGE_PLANNING,
@@ -114,10 +118,12 @@ class SystemIIIMetaRegulator:
 
         if performance_history:
             # Check recent performance to decide regulation.
-            recent = performance_history[-5:] if len(performance_history) > 5 else performance_history
-            avg_success = sum(
-                1.0 for p in recent if p.get("success", False)
-            ) / len(recent) if recent else 1.0
+            recent = (
+                performance_history[-5:] if len(performance_history) > 5 else performance_history
+            )
+            avg_success = (
+                sum(1.0 for p in recent if p.get("success", False)) / len(recent) if recent else 1.0
+            )
 
             if avg_success < 0.4:
                 base_action = RegulationAction.ESCALATE_MODEL
@@ -159,9 +165,7 @@ class SystemIIIMetaRegulator:
         length_factor = min(1.0, length / 2000.0)
         structure_factor = 1.0 - unique_ratio  # more repetition => simpler
         _special_terms = ["analyze", "compare", "contrast", "synthesize", "evaluate", "why"]
-        special_term_count = sum(
-            1 for term in _special_terms if term in task_context.lower()
-        )
+        special_term_count = sum(1 for term in _special_terms if term in task_context.lower())
         has_special_terms = special_term_count > 0
 
         complexity = length_factor * 0.4 + structure_factor * 0.3

@@ -175,7 +175,7 @@ class MutationTester:
                 test_output="Test timed out",
             )
         except FileNotFoundError:
-            raise MutationTestError("pytest not found in PATH")
+            raise MutationTestError("pytest not found in PATH") from None
         finally:
             import os as _os
             try:

@@ -104,9 +104,7 @@ class RefactoringAdvisorSkill:
             body_lines = node.end_lineno - node.lineno if node.end_lineno else 0
             if body_lines > 30:
                 source_lines = source.splitlines()
-                "\n".join(
-                    source_lines[node.lineno - 1 : node.end_lineno]
-                )
+                "\n".join(source_lines[node.lineno - 1 : node.end_lineno])
                 suggestions.append(
                     RefactoringSuggestion(
                         type=RefactoringType.EXTRACT_METHOD,
@@ -148,9 +146,7 @@ class RefactoringAdvisorSkill:
     def _measure_condition_complexity(self, test: ast.expr) -> int:
         """Measure cyclomatic complexity of a conditional expression."""
         if isinstance(test, ast.BoolOp):
-            return 1 + sum(
-                self._measure_condition_complexity(v) for v in test.values
-            )
+            return 1 + sum(self._measure_condition_complexity(v) for v in test.values)
         if isinstance(test, ast.UnaryOp) and isinstance(test.op, ast.Not):
             return 1 + self._measure_condition_complexity(test.operand)
         if isinstance(test, ast.Compare):
@@ -173,7 +169,7 @@ class RefactoringAdvisorSkill:
         self, node: ast.AST, source: str, suggestions: list[RefactoringSuggestion]
     ) -> None:
         """Flag deeply nested blocks."""
-        if not hasattr(node, 'lineno'):
+        if not hasattr(node, "lineno"):
             return
         depth = self._measure_nesting_depth(node, 0)
         if depth > 4:
@@ -231,7 +227,10 @@ class RefactoringAdvisorSkill:
                         type=RefactoringType.REMOVE_DUPLICATION,
                         line=first_line,
                         target="duplicate code block",
-                        description=f"Duplicate code block found at lines {', '.join(str(o) for o in occurrences)}.",
+                        description=(
+                            f"Duplicate code block found at lines "
+                            f"{', '.join(str(o) for o in occurrences)}."
+                        ),
                         reason="Duplicated code increases maintenance cost and bug surface.",
                         before_code=block,
                         after_code="# Extract to shared function:\n"
@@ -248,7 +247,9 @@ class RefactoringAdvisorSkill:
         for node in ast.walk(tree):
             if isinstance(node, ast.ClassDef):
                 method_count = sum(
-                    1 for n in ast.walk(node) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
+                    1
+                    for n in ast.walk(node)
+                    if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
                 )
                 if method_count > 10:
                     suggestions.append(

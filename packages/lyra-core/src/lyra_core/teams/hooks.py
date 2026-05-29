@@ -33,6 +33,7 @@ Example ``~/.lyra/hooks.yaml``::
 The :class:`TeamHookRegistry` is process-wide; the
 :class:`LeadSession` consults it before emitting blockable events.
 """
+
 from __future__ import annotations
 
 import json
@@ -238,10 +239,7 @@ class TeamHookRegistry:
         s = script.strip()
         # Path-shaped → run as an executable on disk.
         looks_like_path = (
-            s.startswith("/")
-            or s.startswith("~")
-            or s.startswith("./")
-            or s.startswith("../")
+            s.startswith("/") or s.startswith("~") or s.startswith("./") or s.startswith("../")
         )
         if looks_like_path:
             return [os.path.expanduser(s)]
@@ -256,7 +254,9 @@ class TeamHookRegistry:
 # ---- YAML loader -----------------------------------------------------
 
 
-def load_hooks_yaml(path: Path | str, *, registry: TeamHookRegistry | None = None) -> TeamHookRegistry:
+def load_hooks_yaml(
+    path: Path | str, *, registry: TeamHookRegistry | None = None
+) -> TeamHookRegistry:
     """Load a hooks YAML file and register every hook into ``registry``.
 
     Stdlib-only minimal parser (we already have one in
@@ -292,7 +292,8 @@ def load_hooks_yaml(path: Path | str, *, registry: TeamHookRegistry | None = Non
         timeout = entry.get("timeout_s") or entry.get("timeout") or 30
         if not event or not script:
             continue
-        reg.register(HookSpec(event=event, script=script, timeout_s=float(timeout)))  # type: ignore[arg-type]
+        # type: ignore[arg-type]
+        reg.register(HookSpec(event=event, script=script, timeout_s=float(timeout)))
     return reg
 
 

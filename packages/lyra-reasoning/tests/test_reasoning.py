@@ -53,16 +53,24 @@ class TestReasoningStep:
             ReasoningStep(step_number=1, thought="x", action="x", observation="x", confidence=1.5)
 
     def test_frozen_prevents_mutation(self):
-        step = ReasoningStep(step_number=1, thought="t", action="a", observation="o", confidence=0.5)
+        step = ReasoningStep(
+            step_number=1, thought="t", action="a", observation="o", confidence=0.5
+        )
         with pytest.raises(Exception):
             step.confidence = 0.9  # type: ignore[misc]
 
     def test_metadata_default_and_custom(self):
-        default = ReasoningStep(step_number=1, thought="t", action="a", observation="o", confidence=0.5)
+        default = ReasoningStep(
+            step_number=1, thought="t", action="a", observation="o", confidence=0.5
+        )
         assert default.metadata == {}
 
         custom = ReasoningStep(
-            step_number=2, thought="t", action="a", observation="o", confidence=0.6,
+            step_number=2,
+            thought="t",
+            action="a",
+            observation="o",
+            confidence=0.6,
             metadata={"source": "test"},
         )
         assert custom.metadata == {"source": "test"}
@@ -81,7 +89,9 @@ class TestReasoningTrace:
 
     def test_add_step_returns_new_trace(self):
         trace = ReasoningTrace(task="test")
-        step = ReasoningStep(step_number=1, thought="t", action="a", observation="o", confidence=0.7)
+        step = ReasoningStep(
+            step_number=1, thought="t", action="a", observation="o", confidence=0.7
+        )
         updated = trace.add_step(step)
 
         assert trace.num_steps == 0  # original unchanged
@@ -96,8 +106,12 @@ class TestReasoningTrace:
 
     def test_final_step_returns_last(self):
         trace = ReasoningTrace(task="test")
-        s1 = ReasoningStep(step_number=1, thought="t1", action="a1", observation="o1", confidence=0.6)
-        s2 = ReasoningStep(step_number=2, thought="t2", action="a2", observation="o2", confidence=0.9)
+        s1 = ReasoningStep(
+            step_number=1, thought="t1", action="a1", observation="o1", confidence=0.6
+        )
+        s2 = ReasoningStep(
+            step_number=2, thought="t2", action="a2", observation="o2", confidence=0.9
+        )
         trace = trace.add_step(s1).add_step(s2)
 
         assert trace.num_steps == 2
@@ -107,7 +121,9 @@ class TestReasoningTrace:
         trace = ReasoningTrace(task="chain")
         for i in range(5):
             trace = trace.add_step(
-                ReasoningStep(step_number=i + 1, thought="t", action="a", observation="o", confidence=0.5)
+                ReasoningStep(
+                    step_number=i + 1, thought="t", action="a", observation="o", confidence=0.5
+                )
             )
         assert trace.num_steps == 5
 
@@ -270,7 +286,7 @@ class TestReflActReasoner:
         lessons = reasoner.reflect(trace)
         assert isinstance(lessons, tuple)
         assert len(lessons) > 0
-        assert all(isinstance(l, str) for l in lessons)
+        assert all(isinstance(lesson, str) for lesson in lessons)
 
     def test_reflect_on_empty_trace(self):
         reasoner = ReflActReasoner()
@@ -356,7 +372,10 @@ class TestGRPOTrainer:
 
     def test_score_responses_without_ground_truth(self):
         trainer = GRPOTrainer()
-        candidates = ["A short response", "A longer response with reasoning and evidence for the answer"]
+        candidates = [
+            "A short response",
+            "A longer response with reasoning and evidence for the answer",
+        ]
         scores = trainer.score_responses(candidates)
         assert len(scores) == 2
         assert all(0.0 <= s <= 1.0 for s in scores)
@@ -557,15 +576,17 @@ class TestAnalogicalReasoning:
         assert trace.metadata["analogues_found"] == 0
 
     def test_reason_with_analogues(self):
-        ar = AnalogicalReasoning(analogue_base=[
-            AnaloguePair(
-                source_domain="fluid dynamics",
-                target_domain="traffic flow",
-                structural_mapping={"fluid": "cars", "pipe": "road"},
-                similarity_score=0.85,
-                transfer_confidence=0.8,
-            ),
-        ])
+        ar = AnalogicalReasoning(
+            analogue_base=[
+                AnaloguePair(
+                    source_domain="fluid dynamics",
+                    target_domain="traffic flow",
+                    structural_mapping={"fluid": "cars", "pipe": "road"},
+                    similarity_score=0.85,
+                    transfer_confidence=0.8,
+                ),
+            ]
+        )
         trace = ar.reason("Model a fluid dynamics traffic flow problem")
         assert trace.metadata["analogues_found"] >= 0
 
@@ -583,22 +604,27 @@ class TestAnalogicalReasoning:
         assert trace.metadata["analogues_found"] >= 1
 
     def test_similarity_threshold(self):
-        ar = AnalogicalReasoning(analogue_base=[
-            AnaloguePair(source_domain="math", target_domain="physics", similarity_score=0.95),
-        ], similarity_threshold=0.99)
+        ar = AnalogicalReasoning(
+            analogue_base=[
+                AnaloguePair(source_domain="math", target_domain="physics", similarity_score=0.95),
+            ],
+            similarity_threshold=0.99,
+        )
         trace = ar.reason("Unrelated cooking problem")
         assert trace.metadata["analogues_found"] == 0
 
     def test_mixed_quality_step_confidences(self):
-        ar = AnalogicalReasoning(analogue_base=[
-            AnaloguePair(
-                source_domain="optimization",
-                target_domain="scheduling",
-                structural_mapping={"cost": "time"},
-                similarity_score=0.6,
-                transfer_confidence=0.7,
-            ),
-        ])
+        ar = AnalogicalReasoning(
+            analogue_base=[
+                AnaloguePair(
+                    source_domain="optimization",
+                    target_domain="scheduling",
+                    structural_mapping={"cost": "time"},
+                    similarity_score=0.6,
+                    transfer_confidence=0.7,
+                ),
+            ]
+        )
         trace = ar.reason("Schedule optimization for delivery")
         # First step (retrieve) confidence should reflect analogue quality
         assert trace.steps[0].confidence >= 0.3
@@ -619,7 +645,10 @@ class TestIntegration:
 
         # Use trace content to seed GRPO
         trainer = GRPOTrainer(group_size=3)
-        prompt = f"Continue reasoning: {trace.final_step().observation if trace.final_step() else trace.task}"
+        prompt =(
+            f"Continue reasoning: "
+            f"{trace.final_step().observation if trace.final_step() else trace.task}"
+        )
         traj = trainer.train_step(prompt, ground_truth="Proof by contradiction")
         assert isinstance(traj, GRPOTrajectory)
 
@@ -637,7 +666,9 @@ class TestIntegration:
         rewards = tuple(float(i) for i in range(10))
         advantages = trainer.compute_advantages(rewards)
         for i in range(len(advantages) - 1):
-            assert advantages[i] < advantages[i + 1], f"advantage[{i}]={advantages[i]} < advantage[{i+1}]={advantages[i+1]}"
+            assert (
+                advantages[i] < advantages[i + 1]
+            ), f"advantage[{i}]={advantages[i]} < advantage[{i+1}]={advantages[i+1]}"
 
     def test_all_strategies_produce_valid_traces(self):
         """Smoke test: every strategy can reason about a simple task."""

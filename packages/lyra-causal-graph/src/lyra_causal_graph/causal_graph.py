@@ -253,6 +253,7 @@ class ConditionalIndependenceTest:
 def _normal_cdf(x: float) -> float:
     """Approximate standard normal CDF."""
     import math
+
     return 0.5 * (1 + math.erf(x / math.sqrt(2)))
 
 
@@ -337,9 +338,7 @@ class CausalGraph:
             logger.debug("Node '%s' already exists; overwriting.", node_id)
 
         if len(self._nodes) >= self._config.max_nodes and node_id not in self._nodes:
-            raise GraphConstructionError(
-                f"Maximum node count ({self._config.max_nodes}) reached."
-            )
+            raise GraphConstructionError(f"Maximum node count ({self._config.max_nodes}) reached.")
 
         node = GraphNode(
             id=node_id,
@@ -746,7 +745,9 @@ class CausalGraph:
         try:
             import networkx as nx
         except ImportError:
-            raise ImportError("networkx is required for to_networkx(). Install with: pip install networkx")
+            raise ImportError(
+                "networkx is required for to_networkx(). Install with: pip install networkx"
+            ) from None
 
         g = nx.DiGraph()
         for nid, node in self._nodes.items():
@@ -755,20 +756,31 @@ class CausalGraph:
         for edge in self._edges.values():
             if edge.edge_type == EdgeType.DIRECTED:
                 g.add_edge(
-                    edge.source_id, edge.target_id,
-                    strength=edge.strength, confidence=edge.confidence,
-                    edge_id=edge.id, **edge.metadata,
+                    edge.source_id,
+                    edge.target_id,
+                    strength=edge.strength,
+                    confidence=edge.confidence,
+                    edge_id=edge.id,
+                    **edge.metadata,
                 )
             elif edge.edge_type == EdgeType.BIDIRECTED:
                 g.add_edge(
-                    edge.source_id, edge.target_id,
-                    strength=edge.strength, confidence=edge.confidence,
-                    edge_id=edge.id, bidirected=True, **edge.metadata,
+                    edge.source_id,
+                    edge.target_id,
+                    strength=edge.strength,
+                    confidence=edge.confidence,
+                    edge_id=edge.id,
+                    bidirected=True,
+                    **edge.metadata,
                 )
                 g.add_edge(
-                    edge.target_id, edge.source_id,
-                    strength=edge.strength, confidence=edge.confidence,
-                    edge_id=edge.id, bidirected=True, **edge.metadata,
+                    edge.target_id,
+                    edge.source_id,
+                    strength=edge.strength,
+                    confidence=edge.confidence,
+                    edge_id=edge.id,
+                    bidirected=True,
+                    **edge.metadata,
                 )
 
         return g
@@ -789,13 +801,15 @@ class CausalGraph:
         for u, v, attrs in graph.edges(data=True):
             if attrs.get("bidirected"):
                 cg.add_bidirected_edge(
-                    str(u), str(v),
+                    str(u),
+                    str(v),
                     strength=attrs.get("strength", 0.5),
                     confidence=attrs.get("confidence", 0.5),
                 )
             else:
                 cg.add_directed_edge(
-                    str(u), str(v),
+                    str(u),
+                    str(v),
                     strength=attrs.get("strength", 0.5),
                     confidence=attrs.get("confidence", 0.5),
                 )
@@ -864,7 +878,9 @@ class CausalGraph:
             "edge_types": dict(self._count_by(lambda e: e.edge_type.value)),
             "has_cycle": self.has_cycle(),
             "orphan_nodes": len(set(self._nodes) - self._all_connected()),
-            "avg_edge_strength": float(np.mean([e.strength for e in self._edges.values()])) if self._edges else 0.0,
+            "avg_edge_strength": (
+                float(np.mean([e.strength for e in self._edges.values()])) if self._edges else 0.0
+            ),
         }
 
     def _count_by(self, key_fn: Callable) -> dict:
@@ -988,7 +1004,10 @@ class PCAlgorithm:
                             sep_set[key] = set(cond_set)
                             logger.debug(
                                 "Removed edge %s -- %s | %s (p > %.4f)",
-                                a, b, cond_set, self._alpha,
+                                a,
+                                b,
+                                cond_set,
+                                self._alpha,
                             )
                             break
 
@@ -1025,7 +1044,9 @@ class PCAlgorithm:
         logger.info("PC algorithm converged: %d nodes, %d edges", cg.node_count, cg.edge_count)
         return cg
 
-    def _orient_edge(self, cg: CausalGraph, src: str, tgt: str, adjacency: dict[str, set[str]]) -> None:
+    def _orient_edge(
+        self, cg: CausalGraph, src: str, tgt: str, adjacency: dict[str, set[str]]
+    ) -> None:
         """Replace an undirected edge with a directed edge if possible."""
         try:
             # Remove undirected edge
@@ -1047,6 +1068,7 @@ class PCAlgorithm:
 def _subsets_of_size(items: list[str], k: int) -> Iterator[list[str]]:
     """Yield all subsets of ``items`` of exactly size ``k``."""
     from itertools import combinations
+
     return combinations(items, k)
 
 
@@ -1221,14 +1243,20 @@ class FCIAlgorithm:
                     continue
                 if b in adjacency[a]:
                     # Check if a and b have unobserved common causes
-                    has_directed_path = cg.shortest_path(a, b) is not None or cg.shortest_path(b, a) is not None
+                    has_directed_path = (
+                        cg.shortest_path(a, b) is not None or cg.shortest_path(b, a) is not None
+                    )
                     has_common_cause = any(
                         len(set(cg.children(p)) & {a, b}) >= 2
                         for p in var_names
                         if p != a and p != b
                     )
 
-                    if not has_directed_path and not has_common_cause and self._suspected_confounder(cg, a, b, data):
+                    if (
+                        not has_directed_path
+                        and not has_common_cause
+                        and self._suspected_confounder(cg, a, b, data)
+                    ):
                         try:
                             cg.remove_edge(a, b)
                         except InvalidEdgeError:

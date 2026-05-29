@@ -104,13 +104,13 @@ class QuestionDrivenReflector:
             if not entity or not content:
                 continue
 
-            questions = self._generate_questions(
-                memory_id, entity, related.get(memory_id, [])
-            )
+            questions = self._generate_questions(memory_id, entity, related.get(memory_id, []))
             total_questions += len(questions)
 
             score = self._score_recall(memory_id, content, questions)
-            weak_qs = [q.text for q in questions if self._assess_question(q, content) < self.WEAK_THRESHOLD]
+            weak_qs = [
+                q.text for q in questions if self._assess_question(q, content) < self.WEAK_THRESHOLD
+            ]
 
             if score >= self.STRONG_THRESHOLD:
                 strength = SignalStrength.STRONG
@@ -119,14 +119,16 @@ class QuestionDrivenReflector:
             else:
                 strength = SignalStrength.WEAK
 
-            signals.append(ReflectionSignal(
-                memory_id=memory_id,
-                strength=strength,
-                score=round(score, 4),
-                question_count=len(questions),
-                weak_questions=weak_qs,
-                timestamp=time.time(),
-            ))
+            signals.append(
+                ReflectionSignal(
+                    memory_id=memory_id,
+                    strength=strength,
+                    score=round(score, 4),
+                    question_count=len(questions),
+                    weak_questions=weak_qs,
+                    timestamp=time.time(),
+                )
+            )
 
         elapsed = (time.perf_counter() - start) * 1000
         return ReflectionSession(
@@ -149,37 +151,43 @@ class QuestionDrivenReflector:
         for template in self._FACTUAL_TEMPLATES[:1]:
             q_text = template.format(entity=entity)
             qid = hashlib.sha256(f"factual|{memory_id}|{q_text}".encode()).hexdigest()[:10]
-            questions.append(ReflectionQuestion(
-                question_id=qid,
-                question_type=QuestionType.FACTUAL,
-                text=q_text,
-                source_memory_id=memory_id,
-                created_at=time.time(),
-            ))
+            questions.append(
+                ReflectionQuestion(
+                    question_id=qid,
+                    question_type=QuestionType.FACTUAL,
+                    text=q_text,
+                    source_memory_id=memory_id,
+                    created_at=time.time(),
+                )
+            )
 
         if related_entities:
             rel = related_entities[0]
             for template in self._RELATIONAL_TEMPLATES[:1]:
                 q_text = template.format(entity=entity, related=rel)
                 qid = hashlib.sha256(f"relational|{memory_id}|{q_text}".encode()).hexdigest()[:10]
-                questions.append(ReflectionQuestion(
-                    question_id=qid,
-                    question_type=QuestionType.RELATIONAL,
-                    text=q_text,
-                    source_memory_id=memory_id,
-                    created_at=time.time(),
-                ))
+                questions.append(
+                    ReflectionQuestion(
+                        question_id=qid,
+                        question_type=QuestionType.RELATIONAL,
+                        text=q_text,
+                        source_memory_id=memory_id,
+                        created_at=time.time(),
+                    )
+                )
 
         for template in self._APPLIED_TEMPLATES[:1]:
             q_text = template.format(entity=entity)
             qid = hashlib.sha256(f"applied|{memory_id}|{q_text}".encode()).hexdigest()[:10]
-            questions.append(ReflectionQuestion(
-                question_id=qid,
-                question_type=QuestionType.APPLIED,
-                text=q_text,
-                source_memory_id=memory_id,
-                created_at=time.time(),
-            ))
+            questions.append(
+                ReflectionQuestion(
+                    question_id=qid,
+                    question_type=QuestionType.APPLIED,
+                    text=q_text,
+                    source_memory_id=memory_id,
+                    created_at=time.time(),
+                )
+            )
 
         return questions
 
@@ -194,9 +202,7 @@ class QuestionDrivenReflector:
         scores = [self._assess_question(q, content) for q in questions]
         return sum(scores) / len(scores)
 
-    def _assess_question(
-        self, question: ReflectionQuestion, content: str
-    ) -> float:
+    def _assess_question(self, question: ReflectionQuestion, content: str) -> float:
         content_lower = content.lower()
         if question.question_type == QuestionType.FACTUAL:
             keywords = self._extract_keywords(question.text)
@@ -210,8 +216,24 @@ class QuestionDrivenReflector:
     @staticmethod
     def _extract_keywords(text: str) -> list[str]:
         words = text.lower().replace("?", "").replace(".", "").split()
-        stopwords = {"what", "is", "the", "a", "an", "of", "in", "to", "for",
-                      "does", "how", "when", "would", "you", "are", "was"}
+        stopwords = {
+            "what",
+            "is",
+            "the",
+            "a",
+            "an",
+            "of",
+            "in",
+            "to",
+            "for",
+            "does",
+            "how",
+            "when",
+            "would",
+            "you",
+            "are",
+            "was",
+        }
         return [w for w in words if w not in stopwords and len(w) > 2]
 
     def stats(self) -> dict:

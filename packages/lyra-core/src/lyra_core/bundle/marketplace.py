@@ -1,6 +1,8 @@
 """Bundle marketplace fetcher.
 
-Realizes Argus's `marketplace-fetcher` skill ([`projects/argus/bundle/skills/06-marketplace-fetcher.md`](../../../../../../../projects/argus/bundle/skills/06-marketplace-fetcher.md))
+Realizes Argus's `marketplace-fetcher` skill
+([`projects/argus/bundle/skills/06-marketplace-fetcher.md`]
+(../../../../../../../projects/argus/bundle/skills/06-marketplace-fetcher.md))
 as a v3.11 primitive. Fetches a bundle archive from a remote URL,
 verifies its detached signature against a pre-registered marketplace
 key, unpacks it into a sandboxed cache, and returns a path the
@@ -21,6 +23,7 @@ The implementation is **stdlib-only** — `urllib.request` for fetch,
 `hmac` + `hashlib` for verify, `tarfile` for unpack. Real Sigstore
 swap is a v3.11.x follow-up.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -211,14 +214,13 @@ class MarketplaceFetcher:
                     continue
                 # Relative stdio path — must resolve inside the cache.
                 if tool.server.startswith("stdio:"):
-                    relative = tool.server[len("stdio:"):]
+                    relative = tool.server[len("stdio:") :]
                     full = (cache_dir / relative).resolve()
                     try:
                         full.relative_to(cache_dir)
                     except ValueError as err:
                         raise FetchScopeError(
-                            f"tool {tool.name!r} server escapes cache "
-                            f"(LBL-FETCH-SCOPE)"
+                            f"tool {tool.name!r} server escapes cache " f"(LBL-FETCH-SCOPE)"
                         ) from err
 
         # Step 7: SBOM (LBL-FETCH-SBOM).
@@ -243,9 +245,7 @@ class MarketplaceFetcher:
                 # Refuse absolute / parent-traversal paths.
                 p = Path(member.name)
                 if p.is_absolute() or any(part == ".." for part in p.parts):
-                    raise MarketplaceError(
-                        f"unsafe archive member {member.name!r}"
-                    )
+                    raise MarketplaceError(f"unsafe archive member {member.name!r}")
             tar.extractall(dest)
 
 

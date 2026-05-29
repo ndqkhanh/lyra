@@ -52,8 +52,10 @@ def test_picker_horizontal_aliases_match_vertical() -> None:
     horizontal slider and any legacy vertical bindings stay coherent."""
     a = EffortPicker(initial="medium")
     b = EffortPicker(initial="medium")
-    a.down(); a.down()
-    b.right(); b.right()
+    a.down()
+    a.down()
+    b.right()
+    b.right()
     assert a.value == b.value == "xhigh"
     a.up()
     b.left()

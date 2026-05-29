@@ -48,6 +48,7 @@ reasoning into transcripts causes prompt-injection surprises and
 bloats logs. If a future feature wants the reasoning text, the
 hook goes in :meth:`OpenAICompatibleLLM._choice_to_msg`.
 """
+
 from __future__ import annotations
 
 import json
@@ -123,12 +124,12 @@ class ProviderRouting:
     wire payload stays minimal.
     """
 
-    sort: str | None = None                 # "price" | "throughput" | "latency"
-    only: tuple[str, ...] = ()                  # whitelist of upstream provider names
-    ignore: tuple[str, ...] = ()                # blacklist
-    order: tuple[str, ...] = ()                 # priority order to try
-    require_parameters: bool | None = None   # reject providers that drop unknown params
-    data_collection: str | None = None       # "allow" | "deny"
+    sort: str | None = None  # "price" | "throughput" | "latency"
+    only: tuple[str, ...] = ()  # whitelist of upstream provider names
+    ignore: tuple[str, ...] = ()  # blacklist
+    order: tuple[str, ...] = ()  # priority order to try
+    require_parameters: bool | None = None  # reject providers that drop unknown params
+    data_collection: str | None = None  # "allow" | "deny"
 
     def to_payload(self) -> dict[str, Any]:
         """Return the ``provider`` sub-object for ``extra_body``.
@@ -256,8 +257,8 @@ class OpenAICompatibleLLM(LLMProvider):
             return
         self.last_usage = dict(usage)
         for key in ("prompt_tokens", "completion_tokens", "total_tokens"):
-            self.cumulative_usage[key] = (
-                self.cumulative_usage.get(key, 0) + int(usage.get(key, 0) or 0)
+            self.cumulative_usage[key] = self.cumulative_usage.get(key, 0) + int(
+                usage.get(key, 0) or 0
             )
 
     # ------------------------------------------------------------------
@@ -279,15 +280,22 @@ class OpenAICompatibleLLM(LLMProvider):
         # Debug logging AFTER payload is built
         try:
             from ..debug_logger import log_info
-            log_info(f"🔵 OpenAI-compatible API call | Provider: {self.provider_name} | Model: {self.model}")
+
+            log_info(
+
+                    f"🔵 OpenAI-compatible API call | Provider: {self.provider_name} | Model: "
+                    f"{self.model}"
+
+            )
             log_info(f"Total messages in payload: {len(payload['messages'])}")
-            for i, msg_dict in enumerate(payload['messages']):
-                role = msg_dict.get('role', 'unknown')
-                content = str(msg_dict.get('content', ''))[:500]
+            for i, msg_dict in enumerate(payload["messages"]):
+                role = msg_dict.get("role", "unknown")
+                content = str(msg_dict.get("content", ""))[:500]
                 log_info(f"Payload message {i+1} [{role}]: {content}...")
         except Exception as e:
             try:
                 from ..debug_logger import log_info
+
                 log_info(f"Debug logging error: {e}")
             except ImportError:
                 pass
@@ -328,9 +336,7 @@ class OpenAICompatibleLLM(LLMProvider):
         elif self.auth_scheme == "api-key" and self.api_key:
             headers["api-key"] = self.api_key
 
-        req = urllib.request.Request(
-            url, data=data, method="POST", headers=headers
-        )
+        req = urllib.request.Request(url, data=data, method="POST", headers=headers)
         opener = self._urlopen if self._urlopen is not None else urllib.request.urlopen
         try:
             with opener(req, timeout=self.timeout) as resp:
@@ -342,8 +348,7 @@ class OpenAICompatibleLLM(LLMProvider):
             except Exception:  # pragma: no cover — defensive
                 pass
             raise ProviderHTTPError(
-                f"{self.provider_name} HTTP {e.code}: "
-                f"{body.strip()[:500] or e.reason}"
+                f"{self.provider_name} HTTP {e.code}: " f"{body.strip()[:500] or e.reason}"
             ) from e
         except (TimeoutError, urllib.error.URLError, ConnectionError, OSError) as e:
             raise ProviderHTTPError(
@@ -353,9 +358,7 @@ class OpenAICompatibleLLM(LLMProvider):
         try:
             parsed = json.loads(raw)
         except json.JSONDecodeError as e:
-            raise ProviderHTTPError(
-                f"{self.provider_name} returned non-JSON: {raw[:200]!r}"
-            ) from e
+            raise ProviderHTTPError(f"{self.provider_name} returned non-JSON: {raw[:200]!r}") from e
 
         choices = parsed.get("choices") or []
         if not choices:
@@ -454,9 +457,7 @@ class OpenAICompatibleLLM(LLMProvider):
         elif self.auth_scheme == "api-key" and self.api_key:
             headers["api-key"] = self.api_key
 
-        req = urllib.request.Request(
-            url, data=data, method="POST", headers=headers
-        )
+        req = urllib.request.Request(url, data=data, method="POST", headers=headers)
         opener = self._urlopen if self._urlopen is not None else urllib.request.urlopen
 
         try:
@@ -468,8 +469,7 @@ class OpenAICompatibleLLM(LLMProvider):
             except Exception:  # pragma: no cover — defensive
                 pass
             raise ProviderHTTPError(
-                f"{self.provider_name} HTTP {e.code}: "
-                f"{body.strip()[:500] or e.reason}"
+                f"{self.provider_name} HTTP {e.code}: " f"{body.strip()[:500] or e.reason}"
             ) from e
         except (TimeoutError, urllib.error.URLError, ConnectionError, OSError) as e:
             raise ProviderHTTPError(
@@ -706,9 +706,7 @@ class OpenAICompatibleLLM(LLMProvider):
                 )
             )
 
-        finish_raw = choice.get("finish_reason") or (
-            "tool_calls" if tool_calls else "stop"
-        )
+        finish_raw = choice.get("finish_reason") or ("tool_calls" if tool_calls else "stop")
         stop_map = {
             "stop": StopReason.END_TURN,
             "end_turn": StopReason.END_TURN,
@@ -743,19 +741,19 @@ class OpenAICompatibleLLM(LLMProvider):
 class _Preset:
     """Static metadata + factory for one OpenAI-compatible preset."""
 
-    name: str                       # slug used by --llm <name>
-    label: str                      # human label for describe_selection
+    name: str  # slug used by --llm <name>
+    label: str  # human label for describe_selection
     base_url: str
-    env_keys: tuple[str, ...]       # env vars to check, first non-empty wins
+    env_keys: tuple[str, ...]  # env vars to check, first non-empty wins
     default_model: str
-    model_env_keys: tuple[str, ...] = ()   # optional model overrides
-    extra_headers: tuple[tuple[str, str], ...] = ()   # frozen items
+    model_env_keys: tuple[str, ...] = ()  # optional model overrides
+    extra_headers: tuple[tuple[str, str], ...] = ()  # frozen items
     auth_scheme: str = "bearer"
     reasoning: _ReasoningConfig | None = None
     # If True, the factory *also* tries this preset when no env var is
     # set — useful for local servers that don't need a key.
     probe_reachable: bool = False
-    reachable_path: str = "/models"   # used only when probe_reachable
+    reachable_path: str = "/models"  # used only when probe_reachable
 
     def read_api_key(self) -> str | None:
         for k in self.env_keys:
@@ -819,7 +817,7 @@ def _endpoint_reachable(url: str, timeout: float = 0.8) -> bool:
     try:
         req = urllib.request.Request(url, method="GET")
         with urllib.request.urlopen(req, timeout=timeout) as resp:
-            return 200 <= resp.status < 500   # even 401/404 means *something* listened
+            return 200 <= resp.status < 500  # even 401/404 means *something* listened
     except (TimeoutError, urllib.error.URLError, ConnectionError, OSError):
         return False
 
@@ -933,7 +931,7 @@ PRESETS: tuple[_Preset, ...] = (
         name="lmstudio",
         label="LM Studio (local)",
         base_url="http://127.0.0.1:1234/v1",
-        env_keys=(),   # no key needed for local
+        env_keys=(),  # no key needed for local
         model_env_keys=("OPEN_HARNESS_LMSTUDIO_MODEL",),
         # LM Studio accepts any loaded model regardless of slug;
         # leaving this empty makes the server pick whatever is

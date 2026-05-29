@@ -183,14 +183,21 @@ class SymbolicShortTermMemory:
 
         for err in errors[:5]:
             if files:
-                relations.append(Relation(source=err.name, target=files[0].name, label="occurred_in"))
+                relations.append(
+                    Relation(source=err.name, target=files[0].name, label="occurred_in")
+                )
 
         return relations
 
     def _build_mermaid(self, entities: list[EntityNode], relations: list[Relation]) -> str:
         """Build Mermaid graph string."""
         lines = ["graph TD"]
-        kind_styles = {"file": "fa:fa-file", "function": "fa:fa-code", "error": "fa:fa-exclamation-triangle", "result": "fa:fa-chart-bar"}
+        kind_styles = {
+            "file": "fa:fa-file",
+            "function": "fa:fa-code",
+            "error": "fa:fa-exclamation-triangle",
+            "result": "fa:fa-chart-bar",
+        }
 
         for e in entities[:20]:
             sid = _slugify(e.name)

@@ -485,7 +485,9 @@ class TestGEAREvolve:
 
         # Usage count incremented
         updated = gear.list_strategies()[0]
-        assert s.total_uses + 1 == updated.total_uses if updated.strategy_id == s.strategy_id else True
+        assert (
+            s.total_uses + 1 == updated.total_uses if updated.strategy_id == s.strategy_id else True
+        )
 
     def test_execute_search_with_custom_searcher(self, gear: GEAREvolve) -> None:
         def searcher(strategy: GEARStrategy, problem: str) -> dict[str, Any]:
@@ -569,9 +571,7 @@ class TestGEAREvolve:
         assert s["best_success_rate"] == 0.9
 
     def test_feature_similarity(self) -> None:
-        sim = GEAREvolve._feature_similarity(  # type: ignore[attr-defined]
-            (1.0, 0.0), (1.0, 0.0)
-        )
+        sim = GEAREvolve._feature_similarity((1.0, 0.0), (1.0, 0.0))  # type: ignore[attr-defined]
         assert sim == pytest.approx(0.5)  # scaled by /2
 
         sim_zero = GEAREvolve._feature_similarity(  # type: ignore[attr-defined]

@@ -68,8 +68,7 @@ class LatentState:
         """
         content_hash = hashlib.sha256(text_content.encode()).digest()
         vector = tuple(
-            (content_hash[i % len(content_hash)] / 255.0)
-            for i in range(target_dimension)
+            (content_hash[i % len(content_hash)] / 255.0) for i in range(target_dimension)
         )
         original_tokens = len(text_content.split())
         compression_ratio = 1.0 - (target_dimension / max(original_tokens, 1))
@@ -84,9 +83,7 @@ class LatentState:
             compressed_vector=vector,
             dimension=target_dimension,
             compression_ratio=max(0.0, min(compression_ratio, 1.0)),
-            semantic_hash=hashlib.sha256(
-                str(vector).encode()
-            ).hexdigest()[:16],
+            semantic_hash=hashlib.sha256(str(vector).encode()).hexdigest()[:16],
             timestamp=ts,
         )
 
@@ -94,7 +91,9 @@ class LatentState:
         """Compute cosine similarity between two latent states."""
         if self.dimension != other.dimension:
             return 0.0
-        dot = sum(a * b for a, b in zip(self.compressed_vector, other.compressed_vector, strict=False))
+        dot = sum(
+            a * b for a, b in zip(self.compressed_vector, other.compressed_vector, strict=False)
+        )
         norm_a = sum(a * a for a in self.compressed_vector) ** 0.5
         norm_b = sum(b * b for b in other.compressed_vector) ** 0.5
         if norm_a == 0.0 or norm_b == 0.0:
@@ -180,9 +179,7 @@ class RecursiveLink:
 
         ts = time.time()
         ctx = LinkContext(
-            link_id=hashlib.sha256(
-                f"{agent_a}|{agent_b}|{ts}".encode()
-            ).hexdigest()[:16],
+            link_id=hashlib.sha256(f"{agent_a}|{agent_b}|{ts}".encode()).hexdigest()[:16],
             agent_a=agent_a,
             agent_b=agent_b,
             mode=mode,
@@ -299,7 +296,8 @@ class RecursiveLink:
     @property
     def active_links(self) -> int:
         return sum(
-            1 for c in self._links.values()
+            1
+            for c in self._links.values()
             if c.status in (LinkStatus.CONNECTED, LinkStatus.DEGRADED)
         )
 

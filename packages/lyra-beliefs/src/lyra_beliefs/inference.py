@@ -1,4 +1,5 @@
-"""Belief-based inference: deductive, inductive, abductive, default reasoning, confidence propagation."""
+"""Belief-based inference: deductive, inductive, abductive, default reasoning, confidence
+propagation."""
 
 from __future__ import annotations
 
@@ -22,11 +23,11 @@ logger = logging.getLogger(__name__)
 class InferenceType(Enum):
     """Types of logical inference."""
 
-    DEDUCTION = auto()      # From general to specific
-    INDUCTION = auto()      # From specific to general
-    ABDUCTION = auto()      # Best explanation
-    DEFAULT = auto()        # Defeasible (default) reasoning
-    ANALOGICAL = auto()     # Reasoning by analogy
+    DEDUCTION = auto()  # From general to specific
+    INDUCTION = auto()  # From specific to general
+    ABDUCTION = auto()  # Best explanation
+    DEFAULT = auto()  # Defeasible (default) reasoning
+    ANALOGICAL = auto()  # Reasoning by analogy
 
 
 @dataclass
@@ -58,8 +59,8 @@ class InferenceResult:
 class InferenceEngine:
     """Multi-strategy inference engine operating over beliefs and rules.
 
-    Supports deduction, induction, abduction, and default reasoning
-    with confidence propagation through the inference chain.
+    Supports deduction, induction, abduction, and default reasoning with confidence propagation
+    through the inference chain.
     """
 
     def __init__(
@@ -107,7 +108,11 @@ class InferenceEngine:
                 matched_beliefs = []
 
                 for belief_id in known:
-                    belief = self.belief_system.get(belief_id) if belief_id in self.belief_system._beliefs else None
+                    belief = (
+                        self.belief_system.get(belief_id)
+                        if belief_id in self.belief_system._beliefs
+                        else None
+                    )
                     if belief is None:
                         continue
                     belief_words = set(belief.statement.lower().split())
@@ -118,7 +123,8 @@ class InferenceEngine:
                     # Derive consequent
                     best_match = max(matched_beliefs, key=lambda b: b.confidence)
                     inferred_confidence = (
-                        best_match.confidence * rule.confidence
+                        best_match.confidence
+                        * rule.confidence
                         * 0.8  # Penalty for inference uncertainty
                     )
 
@@ -135,17 +141,13 @@ class InferenceEngine:
                     new_beliefs.append(new_belief)
                     known.add(new_belief.belief_id)
                     rules_applied.append(rule_id)
-                    explanation_parts.append(
-                        f"{rule.name}: {rule.antecedent} -> {rule.consequent}"
-                    )
+                    explanation_parts.append(f"{rule.name}: {rule.antecedent} -> {rule.consequent}")
                     new_found = True
 
             if not new_found:
                 break
 
-        confidence = (
-            np.mean([b.confidence for b in new_beliefs]) if new_beliefs else 0.0
-        )
+        confidence = np.mean([b.confidence for b in new_beliefs]) if new_beliefs else 0.0
 
         result = InferenceResult(
             inferred_beliefs=new_beliefs,
@@ -256,7 +258,11 @@ class InferenceEngine:
         Returns:
             InferenceResult with best explanation(s).
         """
-        obs_belief = self.belief_system.get(observation) if observation in self.belief_system._beliefs else None
+        obs_belief = (
+            self.belief_system.get(observation)
+            if observation in self.belief_system._beliefs
+            else None
+        )
         if obs_belief is None:
             return InferenceResult(
                 inference_type=InferenceType.ABDUCTION,
@@ -367,7 +373,8 @@ class InferenceEngine:
 
         # Find applicable default rules
         default_rules = [
-            r for r in self.knowledge_base._rules.values()
+            r
+            for r in self.knowledge_base._rules.values()
             if r.rule_type == RuleType.DEFAULT and r.domain == domain
         ]
 
@@ -400,9 +407,7 @@ class InferenceEngine:
         best_score, best_rule = matched_rules[0]
 
         # Check for exceptions
-        has_exception = any(
-            exc.lower() in query.lower() for exc in best_rule.exceptions
-        )
+        has_exception = any(exc.lower() in query.lower() for exc in best_rule.exceptions)
 
         if has_exception:
             new_belief = self.belief_system.create_belief(
@@ -435,9 +440,7 @@ class InferenceEngine:
 
     # ── Confidence propagation ─────────────────────────────────────────
 
-    def propagate_confidence(
-        self, source_belief_id: str, max_depth: int = 3
-    ) -> dict[str, float]:
+    def propagate_confidence(self, source_belief_id: str, max_depth: int = 3) -> dict[str, float]:
         """Propagate confidence changes through the belief network.
 
         When a belief's confidence changes, this propagates the change
@@ -450,7 +453,11 @@ class InferenceEngine:
         Returns:
             Dict of belief_id -> new_confidence.
         """
-        source = self.belief_system.get(source_belief_id) if source_belief_id in self.belief_system._beliefs else None
+        source = (
+            self.belief_system.get(source_belief_id)
+            if source_belief_id in self.belief_system._beliefs
+            else None
+        )
         if source is None:
             return {}
 
@@ -463,7 +470,11 @@ class InferenceEngine:
             if depth >= max_depth:
                 continue
 
-            current = self.belief_system.get(current_id) if current_id in self.belief_system._beliefs else None
+            current = (
+                self.belief_system.get(current_id)
+                if current_id in self.belief_system._beliefs
+                else None
+            )
             if current is None:
                 continue
 
@@ -477,9 +488,7 @@ class InferenceEngine:
                 prob = self.belief_system.get_conditional(current_id, bid)
                 if prob > 0.5:  # Only propagate if there's a positive relationship
                     influence = (prob - 0.5) * 2.0  # Normalize to [0, 1]
-                    new_conf = belief.confidence + (
-                        (current.confidence - 0.5) * influence * 0.3
-                    )
+                    new_conf = belief.confidence + ((current.confidence - 0.5) * influence * 0.3)
                     new_conf = max(0.0, min(1.0, new_conf))
 
                     if abs(new_conf - belief.confidence) > 0.01:
@@ -513,15 +522,15 @@ class InferenceEngine:
         for inf in self._inference_history:
             by_type[inf.inference_type.name] = by_type.get(inf.inference_type.name, 0) + 1
 
-        total_beliefs_inferred = sum(
-            len(inf.inferred_beliefs) for inf in self._inference_history
-        )
+        total_beliefs_inferred = sum(len(inf.inferred_beliefs) for inf in self._inference_history)
 
         return {
             "total_inferences": len(self._inference_history),
             "by_type": by_type,
             "total_beliefs_inferred": total_beliefs_inferred,
-            "avg_confidence": float(np.mean(
-                [inf.confidence for inf in self._inference_history]
-            )) if self._inference_history else 0.0,
+            "avg_confidence": (
+                float(np.mean([inf.confidence for inf in self._inference_history]))
+                if self._inference_history
+                else 0.0
+            ),
         }

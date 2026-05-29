@@ -10,11 +10,13 @@ an LLM-backed predictor through the :class:`AnchorPredictor` Protocol; tests
 use the zero-dep :class:`TokenOverlapAnchorPredictor` (token-overlap +
 prefix-match) as the cold-start fallback.
 
-Per [docs/200-graph-grounded-multi-hop-retrieval.md](../../../../../../research/harness-engineering/docs/200-graph-grounded-multi-hop-retrieval.md)
+Per
+[docs/200-graph-grounded-multi-hop-retrieval.md](../../../../../../research/harness-engineering/docs/200-graph-grounded-multi-hop-retrieval.md)
 §"AnchorRAG" and the per-project apply plans (Polaris [203], Atlas [218],
 Helix [219], Cipher [221]) — anchor prediction is the Tier-1 fix when entity
 linking is imperfect.
 """
+
 from __future__ import annotations
 
 import re
@@ -118,9 +120,8 @@ class TokenOverlapAnchorPredictor:
             id_tokens = _tokenize(node.id)
 
             jaccard = _jaccard(query_tokens, title_tokens)
-            prefix_hit = (
-                _has_prefix_match(query_tokens, title_tokens)
-                or _has_prefix_match(query_tokens, id_tokens)
+            prefix_hit = _has_prefix_match(query_tokens, title_tokens) or _has_prefix_match(
+                query_tokens, id_tokens
             )
             id_overlap = _jaccard(query_tokens, id_tokens)
 

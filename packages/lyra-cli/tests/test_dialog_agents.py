@@ -5,6 +5,7 @@ catalog/live entry construction, sort modes, filter matching, and
 the detail-rendering helpers in ``session.py`` that the picker hands
 off to.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -156,7 +157,9 @@ def test_matches_catalog_query_against_all_visible_columns() -> None:
 
 
 class _StubRecord:
-    def __init__(self, rid: str, state: str, description: str = "", subagent_type: str = "") -> None:
+    def __init__(
+        self, rid: str, state: str, description: str = "", subagent_type: str = ""
+    ) -> None:
         self.id = rid
         self.state = state
         self.description = description

@@ -35,7 +35,7 @@ class MemTierMemorySystem:
         memory_dir: Path | None = None,
         procedural_db: str | None = None,
         llm_model: str = "deepseek-v4-flash",
-        auto_consolidate: bool = True
+        auto_consolidate: bool = True,
     ):
         """
         Initialize MEMTIER memory system.
@@ -60,7 +60,7 @@ class MemTierMemorySystem:
         self.semantic = SemanticConsolidator(
             self.episodic,
             semantic_store_path=memory_dir / "semantic_facts.json",
-            llm_model=llm_model
+            llm_model=llm_model,
         )
         self.procedural_db = procedural_db
 
@@ -68,11 +68,7 @@ class MemTierMemorySystem:
         self.attributor = CognitiveWeightAttributor(procedural_db)
 
         # Initialize two-stage retriever
-        self.retriever = TwoStageRetriever(
-            self.semantic,
-            self.episodic,
-            procedural_db
-        )
+        self.retriever = TwoStageRetriever(self.semantic, self.episodic, procedural_db)
 
         # Auto-consolidate if enabled
         if auto_consolidate:
@@ -87,7 +83,7 @@ class MemTierMemorySystem:
         event_type: str,
         content: str,
         tokens: int = 0,
-        metadata: dict[str, Any] | None = None
+        metadata: dict[str, Any] | None = None,
     ) -> str:
         """
         Log an event to episodic memory.
@@ -109,7 +105,7 @@ class MemTierMemorySystem:
             event_type=event_type,
             content=content,
             tokens=tokens,
-            metadata=metadata
+            metadata=metadata,
         )
 
         logger.debug(f"Logged {event_type} event: {entry.id}")
@@ -121,7 +117,7 @@ class MemTierMemorySystem:
         k: int = 10,
         include_episodic: bool = True,
         include_semantic: bool = True,
-        include_procedural: bool = True
+        include_procedural: bool = True,
     ) -> list[dict[str, Any]]:
         """
         Search across all memory tiers using two-stage retrieval.
@@ -137,11 +133,7 @@ class MemTierMemorySystem:
             List of search results with scores
         """
         # Use two-stage retrieval
-        results = self.retriever.retrieve(
-            query=query,
-            k=k,
-            include_procedural=include_procedural
-        )
+        results = self.retriever.retrieve(query=query, k=k, include_procedural=include_procedural)
 
         # Filter by tier if requested
         filtered_results = []
@@ -153,15 +145,17 @@ class MemTierMemorySystem:
             if result.source == "procedural" and not include_procedural:
                 continue
 
-            filtered_results.append({
-                'id': result.id,
-                'content': result.content,
-                'score': result.score,
-                'source': result.source,
-                'session_id': result.session_id,
-                'timestamp': result.timestamp,
-                'cognitive_weight': result.cognitive_weight
-            })
+            filtered_results.append(
+                {
+                    "id": result.id,
+                    "content": result.content,
+                    "score": result.score,
+                    "source": result.source,
+                    "session_id": result.session_id,
+                    "timestamp": result.timestamp,
+                    "cognitive_weight": result.cognitive_weight,
+                }
+            )
 
         return filtered_results
 
@@ -178,10 +172,7 @@ class MemTierMemorySystem:
         """
         logger.info(f"Starting consolidation for last {days_back} day(s)")
 
-        stats = self.semantic.consolidate(
-            llm=llm,
-            days_back=days_back
-        )
+        stats = self.semantic.consolidate(llm=llm, days_back=days_back)
 
         logger.info(
             f"Consolidation complete: {stats['facts_added']} facts added, "
@@ -220,19 +211,21 @@ class MemTierMemorySystem:
         retrieval_stats = self.retriever.get_retrieval_stats()
 
         return {
-            'episodic': episodic_stats,
-            'semantic': {
-                'total_facts': len(self.semantic.facts),
-                'avg_confidence': sum(f.confidence for f in self.semantic.facts) / len(self.semantic.facts) if self.semantic.facts else 0.0
+            "episodic": episodic_stats,
+            "semantic": {
+                "total_facts": len(self.semantic.facts),
+                "avg_confidence": (
+                    sum(f.confidence for f in self.semantic.facts) / len(self.semantic.facts)
+                    if self.semantic.facts
+                    else 0.0
+                ),
             },
-            'procedural': {
-                'total_entries': retrieval_stats['procedural_entries']
-            },
-            'total_memory_items': (
-                episodic_stats['total_entries'] +
-                len(self.semantic.facts) +
-                retrieval_stats['procedural_entries']
-            )
+            "procedural": {"total_entries": retrieval_stats["procedural_entries"]},
+            "total_memory_items": (
+                episodic_stats["total_entries"]
+                + len(self.semantic.facts)
+                + retrieval_stats["procedural_entries"]
+            ),
         }
 
     def _check_consolidation_needed(self) -> bool:
@@ -260,21 +253,21 @@ class MemTierMemorySystem:
         import json
 
         export_data = {
-            'exported_at': datetime.now().isoformat(),
-            'stats': self.get_stats(),
-            'semantic_facts': [
+            "exported_at": datetime.now().isoformat(),
+            "stats": self.get_stats(),
+            "semantic_facts": [
                 {
-                    'id': f.id,
-                    'fact': f.fact,
-                    'tags': f.tags,
-                    'confidence': f.confidence,
-                    'cognitive_weight': f.cognitive_weight
+                    "id": f.id,
+                    "fact": f.fact,
+                    "tags": f.tags,
+                    "confidence": f.confidence,
+                    "cognitive_weight": f.cognitive_weight,
                 }
                 for f in self.semantic.facts
-            ]
+            ],
         }
 
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             json.dump(export_data, f, indent=2)
 
         logger.info(f"Memory exported to {output_path}")
@@ -284,10 +277,7 @@ class MemTierMemorySystem:
 _memory_system: MemTierMemorySystem | None = None
 
 
-def get_memory_system(
-    memory_dir: Path | None = None,
-    **kwargs
-) -> MemTierMemorySystem:
+def get_memory_system(memory_dir: Path | None = None, **kwargs) -> MemTierMemorySystem:
     """
     Get or create the global memory system instance.
 
@@ -314,11 +304,7 @@ def log_user_input(session_id: str, project: str, content: str) -> str:
 
 
 def log_tool_call(
-    session_id: str,
-    project: str,
-    tool_name: str,
-    args: dict[str, Any],
-    result: Any
+    session_id: str, project: str, tool_name: str, args: dict[str, Any], result: Any
 ) -> str:
     """Log tool call to episodic memory."""
     memory = get_memory_system()

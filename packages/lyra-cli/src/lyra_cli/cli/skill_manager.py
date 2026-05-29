@@ -1,6 +1,7 @@
 """Skill Manager for Lyra — Phases 1-4: Complete Skill System.
 
-Manages skill installation, loading, execution, configuration, templates, analytics, and composition.
+Manages skill installation, loading, execution, configuration, templates, analytics, and
+composition.
 Integrates 179+ skills from research.
 
 Phase 1 Features:
@@ -42,12 +43,8 @@ class SkillManager:
         self.local_skills_dir = Path.cwd() / ".lyra" / "skills"
 
         # Phase 4: Initialize advanced features
-        self.config_manager = SkillConfigManager(
-            Path.home() / ".lyra" / "skill_config.json"
-        )
-        self.template_engine = SkillTemplateEngine(
-            Path.home() / ".lyra" / "templates"
-        )
+        self.config_manager = SkillConfigManager(Path.home() / ".lyra" / "skill_config.json")
+        self.template_engine = SkillTemplateEngine(Path.home() / ".lyra" / "templates")
         self.analytics = SkillAnalytics(Path.home() / ".lyra" / "analytics")
         self.composition_engine = CompositionEngine(self)
 
@@ -125,13 +122,12 @@ class SkillManager:
                 target_dir = self.global_skills_dir / skill_name
 
                 subprocess.run(
-                    ["git", "clone", source, str(target_dir)],
-                    check=True,
-                    capture_output=True
+                    ["git", "clone", source, str(target_dir)], check=True, capture_output=True
                 )
             else:
                 # Copy from local path
                 import shutil
+
                 source_path = Path(source).expanduser()
                 skill_name = source_path.name
                 target_dir = self.global_skills_dir / skill_name
@@ -190,6 +186,7 @@ class SkillManager:
             def make_handler(skill_name: str):
                 def handler(session, args: str):
                     return session._execute_skill(skill_name, args)
+
                 return handler
 
             # Extract metadata
@@ -346,9 +343,7 @@ class SkillManager:
             for name, s in stats.items()
         }
 
-    def get_top_skills(
-        self, limit: int = 10, sort_by: str = "invocations"
-    ) -> list[dict]:
+    def get_top_skills(self, limit: int = 10, sort_by: str = "invocations") -> list[dict]:
         """Get top skills by usage or performance."""
         top_stats = self.analytics.get_top_skills(limit, sort_by)
         return [
@@ -407,7 +402,9 @@ class MCPManager:
         with open(self.mcp_config, "w") as f:
             json.dump(self.servers, f, indent=2)
 
-    def add_server(self, name: str, command: str, args: list[str] | None = None, env: dict | None = None):
+    def add_server(
+        self, name: str, command: str, args: list[str] | None = None, env: dict | None = None
+    ):
         """Add an MCP server.
 
         Args:

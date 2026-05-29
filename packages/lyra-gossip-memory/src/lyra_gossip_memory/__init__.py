@@ -17,8 +17,6 @@ __all__ = [
 ]
 
 
-
-
 @dataclass
 class MemoryItem:
     id: str
@@ -32,6 +30,7 @@ class MemoryItem:
 @dataclass
 class DualPoolMemory:
     """Each agent has an exploit (consolidated) and explore (experimental) pool."""
+
     exploit_pool: deque[MemoryItem] = field(default_factory=lambda: deque(maxlen=100))
     explore_pool: deque[MemoryItem] = field(default_factory=lambda: deque(maxlen=50))
 
@@ -54,7 +53,9 @@ class DualPoolMemory:
         for pool in [self.exploit_pool, self.explore_pool]:
             scored = []
             for item in pool:
-                score = sum(1 for tag in item.context_tags if tag in query.lower()) + item.importance
+                score = (
+                    sum(1 for tag in item.context_tags if tag in query.lower()) + item.importance
+                )
                 scored.append((score, item))
             scored.sort(key=lambda x: x[0], reverse=True)
             results.extend(item for _, item in scored[:top_k])

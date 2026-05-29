@@ -80,9 +80,7 @@ class BudgetManager:
         warning_threshold: Fraction at which a warning is logged.
     """
 
-    data_dir: Path = field(
-        default_factory=lambda: Path.home() / ".lyra"
-    )
+    data_dir: Path = field(default_factory=lambda: Path.home() / ".lyra")
     daily_limit_usd: float = _DEFAULT_DAILY_LIMIT_USD
     monthly_limit_usd: float = _DEFAULT_MONTHLY_LIMIT_USD
     warning_threshold: float = _DEFAULT_WARNING_THRESHOLD
@@ -121,7 +119,9 @@ class BudgetManager:
         self._save()
 
         self._check_warnings()
-        logger.info("usage_recorded: model=%s cost=%s tokens=%d", model, cost_usd, entry.total_tokens)
+        logger.info(
+            "usage_recorded: model=%s cost=%s tokens=%d", model, cost_usd, entry.total_tokens
+        )
         return entry
 
     def check_limits(self) -> None:
@@ -130,15 +130,9 @@ class BudgetManager:
         today_prefix = now.strftime("%Y-%m-%d")
         month_prefix = now.strftime("%Y-%m")
 
-        daily_cost = sum(
-            e.cost_usd
-            for e in self._entries
-            if e.timestamp.startswith(today_prefix)
-        )
+        daily_cost = sum(e.cost_usd for e in self._entries if e.timestamp.startswith(today_prefix))
         monthly_cost = sum(
-            e.cost_usd
-            for e in self._entries
-            if e.timestamp.startswith(month_prefix)
+            e.cost_usd for e in self._entries if e.timestamp.startswith(month_prefix)
         )
 
         if daily_cost >= self.daily_limit_usd:
@@ -159,9 +153,7 @@ class BudgetManager:
         total_cost = sum(e.cost_usd for e in self._entries)
         total_tok = sum(e.total_tokens for e in self._entries)
 
-        daily_cost = sum(
-            e.cost_usd for e in self._entries if e.timestamp.startswith(today_prefix)
-        )
+        daily_cost = sum(e.cost_usd for e in self._entries if e.timestamp.startswith(today_prefix))
         daily_tok = sum(
             e.total_tokens for e in self._entries if e.timestamp.startswith(today_prefix)
         )
@@ -183,7 +175,9 @@ class BudgetManager:
             monthly_tokens=monthly_tok,
             monthly_limit_usd=self.monthly_limit_usd,
             daily_pct=daily_cost / self.daily_limit_usd if self.daily_limit_usd > 0 else 0.0,
-            monthly_pct=monthly_cost / self.monthly_limit_usd if self.monthly_limit_usd > 0 else 0.0,
+            monthly_pct=(
+                monthly_cost / self.monthly_limit_usd if self.monthly_limit_usd > 0 else 0.0
+            ),
             degraded=daily_cost >= self.daily_limit_usd * self.warning_threshold,
         )
 
@@ -191,9 +185,7 @@ class BudgetManager:
         """Clear today's entries (for testing / manual reset). Returns count removed."""
         today_prefix = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         before = len(self._entries)
-        self._entries = [
-            e for e in self._entries if not e.timestamp.startswith(today_prefix)
-        ]
+        self._entries = [e for e in self._entries if not e.timestamp.startswith(today_prefix)]
         self._save()
         return before - len(self._entries)
 

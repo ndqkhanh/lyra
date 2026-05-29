@@ -61,7 +61,9 @@ class ClaimAuditor:
             return "inferential"
         return "general"
 
-    def map_to_source(self, claim_id: str, source_uri: str, source_text: str) -> SourceMapping | None:
+    def map_to_source(
+        self, claim_id: str, source_uri: str, source_text: str
+    ) -> SourceMapping | None:
         """Map a claim to its verifiable source and compute match score."""
         claim = self._claims.get(claim_id)
         if claim is None:

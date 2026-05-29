@@ -65,12 +65,17 @@ class SpecBenchEvaluator:
     def evaluate_node(self, step: int, action: str, expected: str, actual: str) -> NodeEval:
         verdict = Verdict.PASS if expected == actual else Verdict.FAIL
         return NodeEval(
-            step=step, action=action, expected=expected,
-            actual=actual, verdict=verdict,
-            explanation="Expected output matches" if verdict == Verdict.PASS else "Output mismatch"
+            step=step,
+            action=action,
+            expected=expected,
+            actual=actual,
+            verdict=verdict,
+            explanation="Expected output matches" if verdict == Verdict.PASS else "Output mismatch",
         )
 
-    def evaluate_trace(self, nodes: list[NodeEval], visible_tests: int = 0, held_out_tests: int = 0) -> TraceEval:
+    def evaluate_trace(
+        self, nodes: list[NodeEval], visible_tests: int = 0, held_out_tests: int = 0
+    ) -> TraceEval:
         passed = sum(1 for n in nodes if n.verdict == Verdict.PASS)
         pass_rate = passed / max(len(nodes), 1)
         spec_gap = 0.0
@@ -107,8 +112,16 @@ class SpecBenchEvaluator:
     def get_report(self) -> dict[str, Any]:
         return {
             "total_evals": len(self.system_evals),
-            "reward_hacking_detected": any(e.reward_hacking_detected for e in self.system_evals.values()),
-            "avg_pass_rate": __import__("statistics").mean([e.overall_pass_rate for e in self.system_evals.values()]) if self.system_evals else 0.0,
+            "reward_hacking_detected": any(
+                e.reward_hacking_detected for e in self.system_evals.values()
+            ),
+            "avg_pass_rate": (
+                __import__("statistics").mean(
+                    [e.overall_pass_rate for e in self.system_evals.values()]
+                )
+                if self.system_evals
+                else 0.0
+            ),
         }
 
 
@@ -127,8 +140,9 @@ class ProbabilisticEvaluator:
         n = len(self.scores)
         mean = sum(self.scores) / n
         variance = sum((s - mean) ** 2 for s in self.scores) / max(n - 1, 1)
-        std = variance ** 0.5
+        std = variance**0.5
         import math
+
         se = std / math.sqrt(n)
         return {
             "mean": mean,

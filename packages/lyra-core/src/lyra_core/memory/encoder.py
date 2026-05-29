@@ -24,6 +24,7 @@ Research grounding:
   - Design proposal §4 encoder prompt sketch and §12 open question 2
     (granularity: per-atomic-claim for FACT/DECISION, per-turn for OBSERVATION)
 """
+
 from __future__ import annotations
 
 import re
@@ -125,7 +126,7 @@ def _extract_rationale(text: str) -> str:
     for kw in ("because", "since", "due to", "as", "so that"):
         idx = text.lower().find(kw)
         if idx != -1:
-            snippet = text[idx: idx + 150].strip()
+            snippet = text[idx : idx + 150].strip()
             return snippet
     # Fallback: last 120 chars of text
     return text[-120:].strip()
@@ -163,71 +164,79 @@ class RuleEncoder:
             rationale = _extract_rationale(text)
             content = self._first_sentence(turn.assistant_response or text, 200)
             if content:
-                frags.append(Fragment.make(
-                    tier=MemoryTier.T2_PROCEDURAL,
-                    type=FragmentType.DECISION,
-                    content=content,
-                    provenance=prov,
-                    structured={"rationale": rationale},
-                    entities=_extract_entities(text),
-                    confidence=0.7,
-                    visibility="project",
-                ))
+                frags.append(
+                    Fragment.make(
+                        tier=MemoryTier.T2_PROCEDURAL,
+                        type=FragmentType.DECISION,
+                        content=content,
+                        provenance=prov,
+                        structured={"rationale": rationale},
+                        entities=_extract_entities(text),
+                        confidence=0.7,
+                        visibility="project",
+                    )
+                )
 
         if pref_score >= 1 and not decision_score:
-            content = self._first_sentence(
-                turn.user_message or turn.assistant_response, 200
-            )
+            content = self._first_sentence(turn.user_message or turn.assistant_response, 200)
             if content:
-                frags.append(Fragment.make(
-                    tier=MemoryTier.T3_USER,
-                    type=FragmentType.PREFERENCE,
-                    content=content,
-                    provenance=prov,
-                    entities=_extract_entities(text),
-                    confidence=0.7,
-                    visibility="private",
-                ))
+                frags.append(
+                    Fragment.make(
+                        tier=MemoryTier.T3_USER,
+                        type=FragmentType.PREFERENCE,
+                        content=content,
+                        provenance=prov,
+                        entities=_extract_entities(text),
+                        confidence=0.7,
+                        visibility="private",
+                    )
+                )
 
         if obs_score >= 1 and not frags:
             content = self._first_sentence(turn.assistant_response or text, 200)
             if content:
-                frags.append(Fragment.make(
-                    tier=MemoryTier.T1_SESSION,
-                    type=FragmentType.OBSERVATION,
-                    content=content,
-                    provenance=prov,
-                    entities=_extract_entities(text),
-                    # OBSERVATION defaults to 0.5 via Fragment.make
-                    visibility="task",
-                ))
+                frags.append(
+                    Fragment.make(
+                        tier=MemoryTier.T1_SESSION,
+                        type=FragmentType.OBSERVATION,
+                        content=content,
+                        provenance=prov,
+                        entities=_extract_entities(text),
+                        # OBSERVATION defaults to 0.5 via Fragment.make
+                        visibility="task",
+                    )
+                )
 
         if skill_score >= 1 and not frags:
             content = self._first_sentence(turn.assistant_response or text, 200)
             if content:
-                frags.append(Fragment.make(
-                    tier=MemoryTier.T2_PROCEDURAL,
-                    type=FragmentType.SKILL,
-                    content=content,
-                    provenance=prov,
-                    entities=_extract_entities(text),
-                    confidence=0.7,
-                    visibility="project",
-                ))
+                frags.append(
+                    Fragment.make(
+                        tier=MemoryTier.T2_PROCEDURAL,
+                        type=FragmentType.SKILL,
+                        content=content,
+                        provenance=prov,
+                        entities=_extract_entities(text),
+                        confidence=0.7,
+                        visibility="project",
+                    )
+                )
 
         # Generic FACT fallback for substantial assistant responses
         if not frags and len(turn.assistant_response) > 60:
             content = self._first_sentence(turn.assistant_response, 200)
             if content:
-                frags.append(Fragment.make(
-                    tier=MemoryTier.T2_SEMANTIC,
-                    type=FragmentType.FACT,
-                    content=content,
-                    provenance=prov,
-                    entities=_extract_entities(text),
-                    confidence=0.6,
-                    visibility="project",
-                ))
+                frags.append(
+                    Fragment.make(
+                        tier=MemoryTier.T2_SEMANTIC,
+                        type=FragmentType.FACT,
+                        content=content,
+                        provenance=prov,
+                        entities=_extract_entities(text),
+                        confidence=0.6,
+                        visibility="project",
+                    )
+                )
 
         return frags
 
@@ -330,7 +339,9 @@ JSON:"""
                 continue
 
             structured = dict(item.get("structured", {}))
-            confidence = float(item.get("confidence", 0.5 if ftype is FragmentType.OBSERVATION else 0.7))
+            confidence = float(
+                item.get("confidence", 0.5 if ftype is FragmentType.OBSERVATION else 0.7)
+            )
             entities = [str(e) for e in item.get("entities", [])][:5]
 
             tier = _infer_tier(ftype)
@@ -341,16 +352,18 @@ JSON:"""
                 structured["rationale"] = content  # use content as fallback rationale
 
             try:
-                frags.append(Fragment.make(
-                    tier=tier,
-                    type=ftype,
-                    content=content,
-                    provenance=prov,
-                    structured=structured,
-                    entities=entities,
-                    confidence=confidence,
-                    visibility=visibility,
-                ))
+                frags.append(
+                    Fragment.make(
+                        tier=tier,
+                        type=ftype,
+                        content=content,
+                        provenance=prov,
+                        structured=structured,
+                        entities=entities,
+                        confidence=confidence,
+                        visibility=visibility,
+                    )
+                )
             except ValueError:
                 continue
 

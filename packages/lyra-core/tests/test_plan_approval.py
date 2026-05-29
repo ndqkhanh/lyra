@@ -10,7 +10,9 @@ from lyra_core.teams.plan_approval import (
 class TestPlanApprovalWorkflow:
     def test_create_plan(self):
         wf = PlanApprovalWorkflow()
-        plan = wf.create_plan("p1", "Add auth", "Implement OAuth2", ["Step 1", "Step 2"], "engineer")
+        plan = wf.create_plan(
+            "p1", "Add auth", "Implement OAuth2", ["Step 1", "Step 2"], "engineer"
+        )
         assert plan.plan_id == "p1"
         assert plan.state == PlanState.DRAFT
         assert plan.submitted_by == "engineer"

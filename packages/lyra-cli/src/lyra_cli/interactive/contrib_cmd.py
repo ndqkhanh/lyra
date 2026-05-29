@@ -11,6 +11,7 @@ Usage:
   /contrib gates           — quality gates & CI expectations
   /contrib changelog       — changelog expectations
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -25,7 +26,10 @@ SECTIONS = {
         "glyph": "🔀",
         "lines": [
             "Use [accent]imperative mood[/] in PR titles",
-            "Prefix with conventional commit type: [accent]feat[/], [accent]fix[/], [accent]refactor[/], etc.",
+(
+                "Prefix with conventional commit type: [accent]feat[/], [accent]fix[/],"
+                "[accent]refactor[/], etc."
+            ),
             "Include the issue/feature number when applicable",
             "Keep PRs focused: one logical change per PR",
             "Examples:",

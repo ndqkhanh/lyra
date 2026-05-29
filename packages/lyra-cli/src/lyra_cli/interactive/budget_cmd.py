@@ -9,6 +9,7 @@ Ports the 324-line budget.py enforcement engine into a usable UX:
 
 ECC reference: enterprise-controls.md emphasizes cost observability.
 """
+
 from __future__ import annotations
 
 import json
@@ -33,6 +34,7 @@ BUDGET_FILE = Path.home() / ".lyra" / "budget.json"
 @dataclass
 class BudgetState:
     """Persistent budget state."""
+
     limit_usd: float = 10.0
     spent_usd: float = 0.0
     alert_pct: float = 80.0
@@ -99,6 +101,7 @@ class BudgetState:
 
 # ── Persistence ────────────────────────────────────────────────────────
 
+
 def _load_budget() -> BudgetState:
     if BUDGET_FILE.exists():
         try:
@@ -123,6 +126,7 @@ def _record_spend(amount_usd: float, session_id: str = "") -> BudgetState:
 
 
 # ── Slash command ──────────────────────────────────────────────────────
+
 
 def cmd_budget(session: Any, args: str) -> CommandResult:
     """Track and manage session spending.
@@ -152,7 +156,10 @@ def cmd_budget(session: Any, args: str) -> CommandResult:
             for sid, amt in sorted(state.session_spend.items(), key=lambda x: -x[1])[:5]:
                 lines.append(f"  [dim]{sid[:20]}[/]  ${amt:.4f}")
         return CommandResult(
-            output=f"Budget: ${state.spent_usd:.4f} / ${state.limit_usd:.2f} ({state.pct:.1f}%) [{state.status}]",
+            output=(
+                f"Budget: ${state.spent_usd:.4f} / ${state.limit_usd:.2f} ({state.pct:.1f}%) ["
+                f"{state.status}]"
+            ),
             renderable="\n".join(lines),
         )
 
@@ -204,6 +211,7 @@ def cmd_budget(session: Any, args: str) -> CommandResult:
 
 
 # ── TUI Widget ─────────────────────────────────────────────────────────
+
 
 class BudgetStatusWidget(Widget):
     """Live budget tracker — spend vs cap with alert bar.
@@ -297,6 +305,10 @@ class BudgetStatusWidget(Widget):
 
 
 __all__ = [
-    "cmd_budget", "BudgetState", "BudgetStatusWidget",
-    "_load_budget", "_save_budget", "_record_spend",
+    "cmd_budget",
+    "BudgetState",
+    "BudgetStatusWidget",
+    "_load_budget",
+    "_save_budget",
+    "_record_spend",
 ]

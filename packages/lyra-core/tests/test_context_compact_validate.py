@@ -1,4 +1,5 @@
 """Tests for validated compaction (Phase CE.1, P0-4)."""
+
 from __future__ import annotations
 
 import pytest
@@ -29,17 +30,13 @@ def test_extract_handles_file_anchor_with_column():
 
 
 def test_extract_finds_test_names():
-    msgs = [
-        {"role": "tool", "content": "FAILED tests/test_x.py::test_login_rejects_empty"}
-    ]
+    msgs = [{"role": "tool", "content": "FAILED tests/test_x.py::test_login_rejects_empty"}]
     invs = extract_default_invariants(msgs)
     assert Invariant("test_name", "test_login_rejects_empty") in invs
 
 
 def test_extract_finds_deny_reasons():
-    msgs = [
-        {"role": "system", "content": "deny: write outside repo root"}
-    ]
+    msgs = [{"role": "system", "content": "deny: write outside repo root"}]
     invs = extract_default_invariants(msgs)
     assert Invariant("deny_reason", "write outside repo root") in invs
 
@@ -77,7 +74,9 @@ def test_extract_returns_stable_kinds_order():
     ]
     invs = extract_default_invariants(msgs)
     kinds = [i.kind for i in invs]
-    assert kinds == sorted(kinds, key=lambda k: ["file_anchor", "test_name", "deny_reason"].index(k))
+    assert kinds == sorted(
+        kinds, key=lambda k: ["file_anchor", "test_name", "deny_reason"].index(k)
+    )
 
 
 def test_invariant_rejects_empty_value():

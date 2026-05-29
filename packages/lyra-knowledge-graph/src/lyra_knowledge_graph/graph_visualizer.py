@@ -73,7 +73,7 @@ class GraphVisualizer:
     def _to_dot(self) -> str:
         lines = ["digraph KnowledgeGraph {"]
         lines.append(f"  rankdir={self._style.direction};")
-        lines.append(f'  fontsize={self._style.font_size};')
+        lines.append(f"  fontsize={self._style.font_size};")
         lines.append("")
 
         for node in self._graph.nodes.values():
@@ -82,7 +82,7 @@ class GraphVisualizer:
             lines.append(
                 f'  "{node.node_id}" [label="{label}", '
                 f'fillcolor="{color}", style=filled, '
-                f"tooltip=\"{node.node_type.value}\"];"
+                f'tooltip="{node.node_type.value}"];'
             )
 
         lines.append("")
@@ -136,11 +136,13 @@ class GraphVisualizer:
         children = []
         if depth < max_depth:
             for edge in self._graph.get_outgoing_edges(node_id):
-                children.append({
-                    "relation": edge.relation.value,
-                    "weight": edge.weight,
-                    "node": self._build_tree(edge.target_id, depth + 1, max_depth),
-                })
+                children.append(
+                    {
+                        "relation": edge.relation.value,
+                        "weight": edge.weight,
+                        "node": self._build_tree(edge.target_id, depth + 1, max_depth),
+                    }
+                )
 
         return {
             "id": node.node_id,
@@ -151,7 +153,9 @@ class GraphVisualizer:
         }
 
     def _to_ascii(self) -> str:
-        lines = [f"Knowledge Graph ({self._graph.node_count} nodes, {self._graph.edge_count} edges)"]
+        lines = [
+            f"Knowledge Graph ({self._graph.node_count} nodes, {self._graph.edge_count} edges)"
+        ]
         lines.append("=" * 60)
 
         roots = self._find_roots()
@@ -160,9 +164,7 @@ class GraphVisualizer:
 
         return "\n".join(lines)
 
-    def _ascii_subtree(
-        self, node_id: str, lines: list[str], prefix: str, is_last: bool
-    ) -> None:
+    def _ascii_subtree(self, node_id: str, lines: list[str], prefix: str, is_last: bool) -> None:
         node = self._graph.nodes.get(node_id)
         if node is None:
             return

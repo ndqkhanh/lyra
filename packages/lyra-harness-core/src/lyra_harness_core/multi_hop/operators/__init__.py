@@ -1,6 +1,7 @@
 """lyra_harness_core.multi_hop.operators — externalised-chain primitives.
 
-Per [docs/199-multi-hop-reasoning-techniques-arc.md](../../../../../../../research/harness-engineering/docs/199-multi-hop-reasoning-techniques-arc.md)
+Per
+[docs/199-multi-hop-reasoning-techniques-arc.md](../../../../../../../research/harness-engineering/docs/199-multi-hop-reasoning-techniques-arc.md)
 Phase 1 (prompted retrieval-reasoning) and [docs/201-compositionality-gap-canon.md]
 (../../../../../../../research/harness-engineering/docs/201-compositionality-gap-canon.md)
 (why externalising the chain is the architectural fix for the compositionality gap).
@@ -14,6 +15,7 @@ Two canonical operators:
 Both operators are Protocol-typed (LLM, Retriever) so they're testable against
 deterministic stubs and swappable in production with any LLM/retriever wire.
 """
+
 from __future__ import annotations
 
 from .ircot import IRCoTOperator, IRCoTResult, IRCoTStep

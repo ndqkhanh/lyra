@@ -1,4 +1,5 @@
 """Integration tests: AGI Orchestrator ↔ all 19 packages."""
+
 import asyncio
 import os
 import sys
@@ -14,7 +15,6 @@ if os.path.isdir(_packages_dir):
         _alt = os.path.join(_packages_dir, _d, _d.replace("-", "_"))
         if os.path.isdir(_alt) and os.path.isfile(os.path.join(_alt, "__init__.py")):
             sys.path.insert(0, os.path.join(_packages_dir, _d))
-
 
 
 # Test imports from all 5 plans
@@ -45,6 +45,7 @@ class TestAGIOrchestratorIntegration:
 
     def test_health_check_all_plans(self):
         from lyra_core import AGIOrchestrator, AGIPhase
+
         orch = AGIOrchestrator()
         statuses = asyncio.run(orch.health_check())
         assert len(statuses) == 5
@@ -52,12 +53,14 @@ class TestAGIOrchestratorIntegration:
 
     def test_overview(self):
         from lyra_core import AGIOrchestrator
+
         orch = AGIOrchestrator()
         overview = orch.get_overview()
         assert "overall_health" in overview
 
     def test_emergency_shield(self):
         from lyra_core import AGIOrchestrator
+
         orch = AGIOrchestrator()
         result = asyncio.run(orch.emergency_shield())
         assert result["status"] == "emergency_shield_active"
@@ -69,6 +72,7 @@ class TestCitadelOracleIntegration:
     def test_verification_with_causal_context(self):
         from lyra_causal_graph import CausalGraph, EntityNode
         from lyra_verification_mesh import VerificationMesh
+
         mesh = VerificationMesh()
         graph = CausalGraph()
         graph.add_entity(EntityNode(id="e1", name="test", entity_type="concept"))
@@ -81,6 +85,7 @@ class TestChameleonSingularityIntegration:
     def test_drift_feeds_evolution(self):
         from lyra_drift_detector import DriftOrchestrator
         from lyra_meta_evolution import MetaCognitiveStack
+
         drift = DriftOrchestrator()
         meta = MetaCognitiveStack()
         s = drift.summary
@@ -93,10 +98,15 @@ class TestSuperorganismIntegration:
 
     def test_colony_forms_coalition(self):
         from lyra_colony import AgentColony
+
         colony = AgentColony()
         colony.coordinator.register_agent("coder_1", ["python", "code"])
         colony.coordinator.register_agent("researcher_1", ["search", "analyze"])
-        result = asyncio.run(colony.process_task({"type": "python project", "complexity": 0.4, "capabilities": ["python", "code"]}))
+        result = asyncio.run(
+            colony.process_task(
+                {"type": "python project", "complexity": 0.4, "capabilities": ["python", "code"]}
+            )
+        )
         assert "coalition_id" in result
 
 
@@ -111,6 +121,7 @@ class TestAllUpgrades:
         """Test graph_tier import with safety net."""
         try:
             from lyra_memory.graph_tier import GraphMemoryStore
+
             store = GraphMemoryStore()
             assert store.graph.stats["nodes"] == 0
         except (ImportError, ModuleNotFoundError):
@@ -118,13 +129,15 @@ class TestAllUpgrades:
 
     def test_moss_evolution(self):
         from lyra_evolution.moss_evolution import SourceEvolutionEngine, UserConsentGate
+
         SourceEvolutionEngine()
         gate = UserConsentGate()
         assert len(gate.pending_approvals) == 0
 
     def test_sibyl_harness(self):
         try:
-            from lyra_research.sibyl_harness import SibylPipeline, TrialHarness
+            from lyra_research.sibyl_harness import SibylPipeline, TrialHarness  # noqa: F401
+
             pipeline = SibylPipeline()
             assert len(pipeline.completed_trials) == 0
         except (ImportError, ModuleNotFoundError):
@@ -133,6 +146,7 @@ class TestAllUpgrades:
     def test_coalition_coordinator(self):
         try:
             from lyra_orchestration.coalition_coordinator import CoalitionAwareCoordinator
+
             coord = CoalitionAwareCoordinator()
             assert len(coord.coalitions) == 0
         except (ImportError, ModuleNotFoundError):
@@ -141,12 +155,14 @@ class TestAllUpgrades:
 
     def test_spec_bench(self):
         from lyra_evals.spec_bench import SpecBenchEvaluator
+
         eval_ = SpecBenchEvaluator()
         report = eval_.get_report()
         assert report["total_evals"] == 0
 
     def test_mcp_security_scan(self):
         from lyra_mcp.security_scan import MCPTaintAnalyzer
+
         analyzer = MCPTaintAnalyzer()
         result = analyzer.scan_server("test", {})
         assert result["tools_scanned"] == 0

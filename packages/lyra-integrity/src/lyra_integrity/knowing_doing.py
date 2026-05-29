@@ -50,7 +50,9 @@ class KnowingDoingDetector:
                         tool_name=tool_name,
                         context=context[:300],
                         expected_call=f"{tool_name}(...)",
-                        actual_behavior=f"Context mentions '{signal}' but {tool_name} was not called",
+                        actual_behavior=(
+                            f"Context mentions '{signal}' but {tool_name} was not called"
+                        ),
                         severity=ViolationSeverity.HIGH,
                     )
                     self._gaps[gap.id] = gap
