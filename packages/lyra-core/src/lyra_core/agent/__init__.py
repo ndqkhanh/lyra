@@ -1,19 +1,28 @@
-"""Hermes-style agent primitives for lyra.
+"""Agent primitives for lyra.
 
-``lyra_core.agent`` provides the canonical run-loop the CLI and
-subagent fork both use. The public surface is intentionally tiny so the
-REPL driver and task-tool can share the same iteration contract:
+``lyra_core.agent`` provides the canonical run-loop, persistent sessions,
+and the agent daemon:
 
 - :class:`AgentLoop` — main ``run_conversation`` loop with plugin seams.
-- :class:`IterationBudget` — hard cap on LLM calls per turn.
-- :class:`TurnResult` — structured result returned to callers.
-
-These live in :mod:`lyra_core.agent.loop`; this package init
-re-exports them for convenience.
+- :class:`AgentSession` — persistent lifecycle wrapper with snapshots.
+- :class:`AgentDaemon` — per-user daemon managing session pools.
+- :class:`SessionStatus` — coarse-grained status with colored rings.
 """
 
 from __future__ import annotations
 
+from .daemon import AgentDaemon, DaemonConfig, DaemonStatus
 from .loop import AgentLoop, IterationBudget, TurnResult
+from .session import AgentSession, SessionSnapshot, SessionStatus
 
-__all__ = ["AgentLoop", "IterationBudget", "TurnResult"]
+__all__ = [
+    "AgentDaemon",
+    "AgentLoop",
+    "AgentSession",
+    "DaemonConfig",
+    "DaemonStatus",
+    "IterationBudget",
+    "SessionSnapshot",
+    "SessionStatus",
+    "TurnResult",
+]
