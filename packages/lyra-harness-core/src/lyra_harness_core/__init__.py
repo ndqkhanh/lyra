@@ -337,6 +337,17 @@ from .reflact import (
     Validator,
     compute_success_rate,
 )
+from .resumable import (
+    CheckpointStore,
+    CheckpointStrategy,
+    ResumeAction,
+    ResumePlan,
+    ResumePlanner,
+    ResumableRun,
+    RunCheckpoint,
+    RunResult,
+    RunStatus,
+)
 from .render import (
     eval_run_to_json,
     eval_run_to_markdown,
@@ -892,6 +903,16 @@ __all__ = [
     "WorkflowResult",
     "WorkflowSpec",
     "WorkflowStatus",
+    # Resumable long runs
+    "CheckpointStore",
+    "CheckpointStrategy",
+    "ResumeAction",
+    "ResumePlan",
+    "ResumePlanner",
+    "ResumableRun",
+    "RunCheckpoint",
+    "RunResult",
+    "RunStatus",
     # Active reconstruction memory
     "ActivatedTag",
     "ActiveReconstructionEngine",
