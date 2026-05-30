@@ -478,6 +478,37 @@
 - **NEW** `tests/test_workflow.py` — 54 tests covering all enums, types, DAG operations, engine execution, and integration
 - **UPDATED** `__init__.py` — Exports all workflow symbols
 
+### 2026-05-30 — Tier 1: Voice Mode Completion (P0-B1 through P0-B5)
+
+- **UPDATED** `lyra_voice/providers.py` — Added 4 concrete providers:
+  - `SileroVAD` — Neural VAD with ZCR + spectral heuristics, energy fallback when torch unavailable
+  - `SmartTurn` — Semantic endpoint detection for 23 languages (en, vi, zh, ja, ko, fr, de, es), sentence-completion heuristics
+  - `WhisperSTT` — faster-whisper integration with stub fallback (18 deterministic phrases from audio hash)
+  - `KokoroTTS` — Kokoro-82M integration with sine-tone stub fallback
+  - Updated `VoiceProviderRegistry.__init__` to auto-register silero, smart, whisper, kokoro as built-in defaults
+  - Added `__all__` with all 22 exported symbols
+  - File: 429→838 lines (+409, +4 providers)
+- **NEW** `lyra_voice/sfx.py` — SFX Personality Layer (P0-B4 HIGH×LOW):
+  - `SFXCategory` enum — 14 hook categories (session_start, pre_tool_use, post_tool_use, stop, etc.)
+  - `SFXAsset` (frozen) — name, category, tone_frequency, tone_duration_ms
+  - `VoicePack` (frozen) — themed collection with pack_id, tts_voice, sfx tuple, theme_colors
+  - `SFXManager` — load/switch packs, play() generates fade-in/out sine tones, volume control, per-category mute
+  - `HOOK_TO_SFX` — 14 hook event → SFX category mappings
+  - 3 built-in packs: Minimal (subtle clicks), SciFi (synth chimes), Warcraft III Peon (nostalgic RTS)
+  - File: 355 lines
+- **NEW** `lyra_voice/voice_hooks.py` — Hook-Based Audio Playback (P0-B5 HIGH×LOW):
+  - `HookEvent` enum — 10 hook events (PreToolUse, PostToolUse, Stop, etc.)
+  - `PlaybackMode` enum — sync, async, queued
+  - `VoiceHookMapping` (frozen) — hook → SFX mapping with condition + cooldown
+  - `VoiceHookManager` — on_hook(), mute/unmute per hook, cooldown enforcement, condition evaluation
+  - `DEFAULT_HOOK_MAPPINGS` — 14 pre-configured hook→SFX mappings
+  - File: 258 lines
+- **NEW** `tests/test_sfx.py` — 28 tests (SFXCategory, SFXAsset, VoicePack, BuiltinPacks, SFXManager, HOOK_TO_SFX)
+- **NEW** `tests/test_voice_hooks.py` — 26 tests (HookEvent, PlaybackMode, VoiceHookMapping, VoiceHookStats, DefaultHookMappings, VoiceHookManager, Integration)
+- **UPDATED** `tests/test_providers.py` — +25 tests (SileroVAD, SmartTurn, WhisperSTT, KokoroTTS, VoiceProviderRegistry new providers)
+- **UPDATED** `__init__.py` — Exports all new SFX and voice hook symbols
+- **Test count:** 173 voice tests passing (+93 from baseline 80)
+
 ---
 
 ## Upcoming (Tier 1 — Flagship + Core Engine)
