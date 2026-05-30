@@ -323,6 +323,33 @@
 - **NEW** `tests/test_filesystem_context.py` — 32 tests: StoredItem (3), FilesystemContext (27), integration (2)
 - **UPDATED** `__init__.py` — Exports FilesystemContext, StoredItem
 
+### 2026-05-30 — Tier 1.9: Path-Pattern + Regex Allow/Deny Rules (P1-X #15)
+
+- **NEW** `lyra_harness_core/scope_rules.py` — Declarative scope-based allow/deny rules:
+  - `Scope` enum — FILESYSTEM, NETWORK, SHELL, ALL
+  - `RuleEffect` enum — ALLOW, DENY
+  - `PatternKind` enum — GLOB (fnmatch), REGEX (re.search)
+  - `ScopeRule` (frozen) — name, pattern, effect, scope, kind, priority, description; matches(target), to_dict()
+  - `ScopeMatch` (frozen) — result with allowed, matched_rule, reason
+  - `ScopeRuleSet` — ordered collection sorted by priority, add/remove/has/rules/rules_for_scope, evaluate/is_allowed/is_denied
+  - `ScopeRuleEngine` — multi-scope engine with separate rule sets per scope, add_rule dispatches to relevant scopes
+  - `build_default_filesystem_rules()` — deny /etc/passwd, /etc/shadow, .ssh/, .env*, /sys/ /proc/ /dev/
+  - `build_default_network_rules()` — deny private IPv4 (10./172.16-31./192.168./127.), link-local, metadata service
+  - `build_default_shell_rules()` — deny rm -rf /*, mkfs, fork bomb, raw device writes, chmod 777 /
+  - `build_default_engine()` — full engine with all three default rule sets
+- **NEW** `tests/test_scope_rules.py` — 51 tests: Scope (2), RuleEffect (1), PatternKind (1), ScopeRule (8), ScopeMatch (2), ScopeRuleSet (15), ScopeRuleEngine (7), pre-built rule sets (11), integration (4)
+- **UPDATED** `__init__.py` — Exports PatternKind, RuleEffect, Scope, ScopeMatch, ScopeRule, ScopeRuleEngine, ScopeRuleSet, build_default_engine, build_default_filesystem_rules, build_default_network_rules, build_default_shell_rules
+
+### 2026-05-30 — Tier 1.10: Append-Only Context Log for Crash Recovery (P1-X #16)
+
+- **NEW** `lyra_harness_core/crash_recovery.py` — Durable JSONL append-only log with crash recovery:
+  - `LogEntry` (frozen) — sequence, timestamp, event, data; to_json()/from_json() roundtrip
+  - `Checkpoint` (frozen) — sequence, timestamp, label, snapshot
+  - `AppendOnlyLog` — append() with fsync durability, checkpoint(), mark_start/end/error(), entries/entries_since/entries_by_event, checkpoints()/last_checkpoint(), replay_until_checkpoint(), truncate_before() for log rotation, clear(), persistence across instances
+  - `CrashRecovery` — begin_session/end_session, was_clean_shutdown, last_error, replay() from last checkpoint, last_session_entries(), session_count/error_count
+- **NEW** `tests/test_crash_recovery.py` — 60 tests: LogEntry (6), Checkpoint (3), AppendOnlyLog (25), CrashRecovery (15), integration (3)
+- **UPDATED** `__init__.py` — Exports AppendOnlyLog, Checkpoint, CrashRecovery, LogEntry
+
 ---
 
 ## Upcoming (Tier 1 — Flagship + Core Engine)
