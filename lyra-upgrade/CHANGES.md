@@ -400,6 +400,68 @@
 - **NEW** `tests/test_cranimem.py` — 100 tests: SignalStrength (2), GateDecision (2), MemoryTrace (5), compute_importance (9), classify (5), decisions (5), strengthen (4), replay timing (4), replay select (5), replay (4), decide (10), filter (4), interference (8), ingest/access (7), consolidate (5), replay pipeline (3), filter (4), task_tags (2), stats (5), clear (2), full pipeline (5), integration (3)
 - **UPDATED** `__init__.py` — Exports CraniMemGate, HippocampalReplay, MemoryTrace, PrefrontalGate, SignalStrength, SynapticConsolidator
 
+### 2026-05-30 — Tier 3.1: Active Reconstruction Memory (P2-B2 CRITICAL)
+
+- **NEW** `lyra_harness_core/active_reconstruction.py` — Memory reconstruction engine implementing MRAgent paper pattern:
+  - `TagNode` (frozen) — graph node with tag, weight, activation, threshold, decay
+  - `TagEdge` (frozen) — weighted edge with co-occurrence tracking
+  - `MemoryFragment` (frozen) — raw memory with content and metadata
+  - `Cue` (frozen) — query with tags, context, and weight
+  - `ActivatedTag` (frozen) — result of spreading activation on a node
+  - `ReconstructedMemory` (frozen) — assembled memory with confidence score
+  - `ReconstructionVerdict` enum — VERIFIED, PARTIAL, HALLUCINATION
+  - `SelfVerificationGate` — confidence threshold gating with hallucination detection
+  - `TagNetwork` — spreading activation graph (BFS, configurable max_hops, decay per hop)
+  - `ActiveReconstructionEngine` — main orchestrator: query → activate → fetch → assemble → verify
+  - Confidence scoring: 0.5×activation + 0.3×fragment_score + 0.2×coverage, sigmoid-scaled
+- **NEW** `tests/test_active_reconstruction.py` — 68 tests covering all types and full pipeline
+- **UPDATED** `__init__.py` — Exports all active reconstruction symbols
+
+### 2026-05-30 — Tier 3.2: ReflACT Pipeline (P3-B1 CRITICAL)
+
+- **NEW** `lyra_harness_core/reflact.py` — Reflect→Act→Validate skill optimization implementing Microsoft SkillOpt pattern:
+  - `StepOutcome` enum, `PipelinePhase` enum, `SkillStep` (frozen), `SkillDefinition` (frozen)
+  - `StepTrace` (frozen), `Trajectory` (frozen), `FailureAnalysis` (frozen)
+  - `Reflector` — analyzes failure traces, produces `ReflectReport` with root cause identification
+  - `Actor` — applies `EditAction` fixes to skill definitions, produces `ActResult`
+  - `Validator` + `ImprovementGate` — validates improvements with configurable min_improvement threshold
+  - `EpochStopReason` enum, `EpochResult` (frozen), `ReflACTPipelineResult` (frozen)
+  - `ReflACTPipeline` — epoch-based optimization with early_stop_patience (default 3), improvement_threshold (0.01)
+  - `compute_success_rate()` helper, `_bump_version()` (semver patch), `_apply_fix()` (append fix suffix)
+- **NEW** `tests/test_reflact.py` — 62 tests covering all types, reflector, actor, validator, gate, and full pipeline
+- **UPDATED** `__init__.py` — Exports all ReflACT symbols
+
+### 2026-05-30 — Tier 4.1: Adversarial Verification (P4-B2 CRITICAL)
+
+- **NEW** `lyra_harness_core/adversarial_verify.py` — Attack + Converge + Verdict engine:
+  - `AttackStrategy` enum (8 values), `VerdictKind` enum (5 values), `AttackSeverity` enum (5 values)
+  - `AttackPoint` (frozen) — attack claim with evidence, severity, target fragment
+  - `DefenseResponse` (frozen) — rebuttal, accepted flag, revision, confidence
+  - `RoundResult` (frozen) — per-round accepted_attacks, total_attacks, consensus_score
+  - `ConsensusState` (frozen), `AdversarialVerdict` (frozen) with acceptance_rate property
+  - `AttackAgent` — 8 heuristic strategies: factual_check, logical_flaw, edge_case, completeness, contradiction, assumption_challenge, source_credibility, safety_review
+  - `DefenseAgent` — severity-based defense threshold (CRITICAL→0.9, HIGH→0.7, etc.)
+  - `ConsensusConfig` (frozen) — configurable attack_agents (default 2), convergence_threshold (0.9), max_rounds (3)
+  - `ConsensusEngine` — orchestrates attack→defend→converge loop, outputs structured verdict
+  - `_compute_convergence()` — resolution_rate + trend_bonus scoring
+- **NEW** `tests/test_adversarial_verify.py` — 37 tests covering all types, agents, engine, and integration
+- **UPDATED** `__init__.py` — Exports all adversarial verification symbols
+
+### 2026-05-30 — Tier 4.2: Autonomy Loop + Crash Detection (P4-B4 HIGH)
+
+- **NEW** `lyra_harness_core/autonomy.py` — Continuous operation loop with watchdog, crash detection, and stop condition DSL:
+  - `AgentHealth` enum (5 values), `CrashSeverity` enum (4 values), `StopReason` enum (7 values)
+  - `CrashEvent` (frozen), `CrashLoopState` (frozen) with crash_rate property
+  - `CrashDetector` — 3 crashes within 300s → auto-escalation, prune/reset/check
+  - `HealthCheck` (frozen), `SystemHealth` (frozen) with is_healthy/can_operate properties
+  - `Watchdog` — lifecycle×health matrix (alphaclaw pattern), check_component, check_all, record_error
+  - `StopCondition` (frozen), `StopConditionDSL` — named conditions, evaluate against context
+  - `LoopStep` (frozen), `LoopResult` (frozen) with success_rate property
+  - `AutonomyLoop.run()` — 7-phase loop: health_check → plan → execute → verify → persist → stop_check
+  - Crash-loop detection gates each iteration; plan/execute/verify exceptions recorded and escalated
+- **NEW** `tests/test_autonomy.py` — 80 tests covering all enums, types, detector, watchdog, DSL, loop, and integration
+- **UPDATED** `__init__.py` — Exports all autonomy symbols
+
 ---
 
 ## Upcoming (Tier 1 — Flagship + Core Engine)
