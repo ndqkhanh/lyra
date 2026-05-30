@@ -462,6 +462,22 @@
 - **NEW** `tests/test_autonomy.py` — 80 tests covering all enums, types, detector, watchdog, DSL, loop, and integration
 - **UPDATED** `__init__.py` — Exports all autonomy symbols
 
+### 2026-05-30 — Tier 4.3: Workflow.js Spec (P4-B1 CRITICAL)
+
+- **NEW** `lyra_harness_core/workflow.py` — Code-driven fan-out orchestration (no central round-trip):
+  - `SubTask` (frozen) — task definition with id, agent_type, query, repo, system, metadata
+  - `DecompositionResult` (frozen) — sub_tasks + dependency graph from decomposition
+  - `FanOutConfig` (frozen) — max_concurrency, agent_types, isolation mode
+  - `VerifyConfig` (frozen) — adversarial verification per sub-task output
+  - `CheckpointConfig` (frozen) — resumable execution config with resume strategies
+  - `WorkflowSpec` (frozen) — complete workflow.js spec with with_decomposition()
+  - `WorkflowDAG` — dependency graph with cycle detection (DFS), topological ordering (Kahn's algorithm), ready_tasks
+  - `WorkflowEngine` — decompose → DAG → fan-out (topological waves) → collect; respects max_concurrency
+  - Parallel wave execution: independent tasks run concurrently, dependent tasks sequential per DAG
+  - Graceful error handling: individual task failures tracked, partial completion supported
+- **NEW** `tests/test_workflow.py` — 54 tests covering all enums, types, DAG operations, engine execution, and integration
+- **UPDATED** `__init__.py` — Exports all workflow symbols
+
 ---
 
 ## Upcoming (Tier 1 — Flagship + Core Engine)
