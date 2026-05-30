@@ -20,6 +20,32 @@ Public API:
 from __future__ import annotations
 
 from .agi_integration import AGIAwareLoop, AGIState
+from .auto_compaction import (
+    AutoCompactor,
+    CompactionCandidate,
+    CompactionDecision,
+    CompactionResult,
+    CompactionStrategy,
+    CompactionVerification,
+    FillStatus,
+    QualitySpotCheck,
+    compute_fill_ratio,
+)
+from .code_execution import (
+    BatchExecutor,
+    BatchResult,
+    BatchSpec,
+    CodeBlock,
+    parse_batch_from_json,
+)
+from .context_router import (
+    ContextClassifier,
+    ContextDecision,
+    ContextRoute,
+    ContextRouter,
+    ContextSignal,
+    RuleBasedContextClassifier,
+)
 from .constitution import (
     Constitution,
     ConstitutionRegistry,
@@ -57,6 +83,7 @@ from .evals import (
     TTCCurve,
     TTCPoint,
 )
+from .events import Event, EventBus, Subscription, get_event_bus, set_event_bus
 from .forensic import (
     ReplayComparator,
     Trajectory,
@@ -79,7 +106,7 @@ from .gates import (
     StaticKGSource,
     StaticRetractionIndex,
 )
-from .hooks import Hook, HookDecision, HookEvent, HookRegistry
+from .hooks import Hook, HookDecision, HookEvent, HookExecution, HookHealth, HookRegistry, HookStats, HookWatchdog
 from .integrations import (
     AdaptedDocument,
     AdaptedEdge,
@@ -93,6 +120,14 @@ from .isolation import (
     IsolatedContext,
     NamespacePermission,
     PermissionGrant,
+)
+from .kv_cache import (
+    AppendOnlyContext,
+    CacheBreakpoint,
+    CacheFriendlySerializer,
+    cache_fingerprint,
+    estimate_cache_savings,
+    stable_system_prefix,
 )
 from .loop import AgentLoop, LoopResult
 from .marketplace import (
@@ -126,6 +161,20 @@ from .memory_store import (
 )
 from .messages import Message, StopReason, ToolCall, ToolResult
 from .models import AnthropicLLM, LLMProvider, MockLLM, get_default_llm
+from .providers import (
+    AnthropicProvider,
+    OpenAICompatibleProvider,
+    ProviderConfig,
+    ProviderHealth,
+    ProviderInfo,
+    ProviderKind,
+    ProviderRegistry,
+    StreamChunk,
+    TokenUsage,
+    create_provider,
+    create_provider_registry,
+    get_provider_registry,
+)
 from .multi_hop import (
     DecompositionCache,
     DecompositionEntry,
@@ -147,6 +196,23 @@ from .multi_hop import (
     TitleEntityExtractor,
 )
 from .observability import Span, Tracer
+from .plugins import (
+    DependencySpec,
+    HookBinding,
+    PluginInstance,
+    PluginLifecycle,
+    PluginManifest,
+    PluginSandbox,
+    SandboxConfig,
+    SandboxResult,
+    SemVer,
+    ToolDeclaration,
+    check_version_constraint,
+    load_manifest_from_yaml,
+    parse_manifest,
+    validate_domain,
+    validate_path,
+)
 from .orchestration import (
     AgentDecision,
     PureFunctionAgent,
@@ -208,6 +274,8 @@ from .routines import (
     TriggerKind,
 )
 from .routing import BELLERouter, QueryType, RouteDecision, RuleBasedClassifier
+from .routing import EffortConfig, EffortDecision, EffortRouter, EffortTier, infer_effort
+from .routing import AgentPhase, PhaseConfig, PhaseDecision, PhaseRouter, infer_phase
 from .skill_auto import (
     PromotionVerdict,
     SkillCandidate,
@@ -250,9 +318,48 @@ from .verifier import (
     VerifierAxis,
     VerifierComposer,
 )
+from .workflow_integrity import (
+    Attestation,
+    AttestationVerdict,
+    ChainVerification,
+    TrustChain,
+    WorkflowIntegrity,
+    generate_key,
+    hash_content,
+    sign,
+    verify,
+)
 
 __all__ = [
     "ActiveParamAccount",
+    "BatchExecutor",
+    "BatchResult",
+    "BatchSpec",
+    "CodeBlock",
+    "parse_batch_from_json",
+    "ContextClassifier",
+    "ContextDecision",
+    "ContextRoute",
+    "ContextRouter",
+    "ContextSignal",
+    "RuleBasedContextClassifier",
+    # Plugin Manifest + Sandboxing
+    "check_version_constraint",
+    "DependencySpec",
+    "HookBinding",
+    "load_manifest_from_yaml",
+    "parse_manifest",
+    "PluginInstance",
+    "PluginLifecycle",
+    "PluginManifest",
+    "PluginSandbox",
+    "SandboxConfig",
+    "SandboxResult",
+    "SemVer",
+    "ToolDeclaration",
+    "validate_domain",
+    "validate_path",
+    "AnthropicProvider",
     "ActiveParamReading",
     "AdaptedDocument",
     "AdaptedEdge",
@@ -286,6 +393,16 @@ __all__ = [
     "DocVerdict",
     "DriftAlert",
     "DriftPolicy",
+    "EffortConfig",
+    "EffortDecision",
+    "EffortRouter",
+    "EffortTier",
+    "infer_effort",
+    "AgentPhase",
+    "infer_phase",
+    "PhaseConfig",
+    "PhaseDecision",
+    "PhaseRouter",
     "DualUseClassifier",
     "DualUseGate",
     "DualUseVerdict",
@@ -293,6 +410,11 @@ __all__ = [
     "EditEvent",
     "EditRecorder",
     "Envelope",
+    "Event",
+    "EventBus",
+    "get_event_bus",
+    "set_event_bus",
+    "Subscription",
     "Example",
     "ExtractiveSummarizer",
     "FireResult",
@@ -308,7 +430,11 @@ __all__ = [
     "Hook",
     "HookDecision",
     "HookEvent",
+    "HookExecution",
+    "HookHealth",
     "HookRegistry",
+    "HookStats",
+    "HookWatchdog",
     "InMemoryCuratorHost",
     "InMemoryMarketplaceHost",
     "InstallResult",
@@ -434,7 +560,34 @@ __all__ = [
     "verify_graph_protocol",
     "witness_lattice_to_json",
     "witness_lattice_to_markdown",
+    # Workflow integrity
+    "Attestation",
+    "AttestationVerdict",
+    "ChainVerification",
+    "TrustChain",
+    "WorkflowIntegrity",
+    "generate_key",
+    "hash_content",
+    "sign",
+    "verify",
     # AGI integration
     "AGIAwareLoop",
     "AGIState",
+    # Auto-compaction
+    "AutoCompactor",
+    "CompactionCandidate",
+    "CompactionDecision",
+    "CompactionResult",
+    "CompactionStrategy",
+    "CompactionVerification",
+    "FillStatus",
+    "QualitySpotCheck",
+    "compute_fill_ratio",
+    # KV-cache
+    "AppendOnlyContext",
+    "CacheBreakpoint",
+    "CacheFriendlySerializer",
+    "cache_fingerprint",
+    "estimate_cache_savings",
+    "stable_system_prefix",
 ]
