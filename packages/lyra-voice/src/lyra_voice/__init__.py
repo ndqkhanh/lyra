@@ -908,6 +908,37 @@ class VoiceInterface:
 # Public API
 # ---------------------------------------------------------------------------
 
+from lyra_voice.providers import (
+    EnergyVAD,
+    GapBasedTurn,
+    STTConfig,
+    STTProvider,
+    STTProviderKind,
+    STTResult,
+    TTSConfig,
+    TTSProvider,
+    TTSProviderKind,
+    TurnConfig,
+    TurnDecision,
+    TurnTakingKind,
+    TurnTakingProvider,
+    VADConfig,
+    VADProvider,
+    VADProviderKind,
+    VADSegment,
+    VoiceLanguage,
+    VoicePipelineConfig,
+    VoiceProviderRegistry,
+)
+from lyra_voice.pipeline import (
+    InteractionMode,
+    PipelineEvent,
+    PipelineState,
+    VoicePipeline,
+    VoicePipelineStats,
+    VoiceTurn,
+)
+
 __version__ = "0.1.0"
 
 __all__ = [
@@ -924,4 +955,33 @@ __all__ = [
     "VoiceConfig",
     # Main module
     "VoiceInterface",
+    # Provider abstractions
+    "STTProvider",
+    "TTSProvider",
+    "VADProvider",
+    "TurnTakingProvider",
+    "EnergyVAD",
+    "GapBasedTurn",
+    "VoiceProviderRegistry",
+    # Pipeline
+    "VoicePipeline",
+    "VoicePipelineConfig",
+    "InteractionMode",
+    "PipelineEvent",
+    "PipelineState",
+    "VoiceTurn",
+    "VoicePipelineStats",
+    # Provider types
+    "STTConfig",
+    "STTResult",
+    "STTProviderKind",
+    "TTSConfig",
+    "TTSProviderKind",
+    "VADConfig",
+    "VADSegment",
+    "VADProviderKind",
+    "TurnConfig",
+    "TurnDecision",
+    "TurnTakingKind",
+    "VoiceLanguage",
 ]
