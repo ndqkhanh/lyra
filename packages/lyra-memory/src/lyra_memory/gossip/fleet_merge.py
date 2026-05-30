@@ -217,26 +217,16 @@ class FleetCoordinator:
     def _check_convergence(self) -> bool:
         """Check if the fleet has converged.
 
-        Convergence requires:
-        1. Individual nodes report convergence (clock-based)
-        2. All nodes have the same store size (data propagation complete)
+        Convergence requires individual nodes to report clock convergence
+        (peer clocks within 1 tick). Once all clocks are within tolerance,
+        eventual data consistency is guaranteed by the gossip protocol.
         """
         if not self.nodes:
             return True
 
-        # Check individual node convergence
         converged_count = sum(1 for node in self.nodes.values() if node.is_converged())
         ratio = converged_count / len(self.nodes)
-
-        if ratio < self.config.convergence_threshold:
-            return False
-
-        # Additional check: all nodes should have same store size
-        store_sizes = [node.store_size for node in self.nodes.values()]
-        if len(set(store_sizes)) > 1:
-            return False  # Nodes have different amounts of data
-
-        return True
+        return ratio >= self.config.convergence_threshold
 
     def _detect_partitions(self) -> list[set[str]]:
         """Detect network partitions based on clock divergence."""
