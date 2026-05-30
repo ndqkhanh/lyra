@@ -177,6 +177,16 @@ from lyra_memory.pgvector_store import (
     PgVectorStore,
 )
 from lyra_memory.schema import MemoryRecord, MemoryScope, MemoryType, VerifierStatus
+from lyra_memory.search import (
+    InMemorySearchBackend,
+    Observation,
+    SearchBackend,
+    SearchHit,
+    SearchResult,
+    ThreeLayerSearch,
+    ThreeLayerSearchConfig,
+    TimelineEntry,
+)
 from lyra_memory.store import MemoryStore
 from lyra_memory.symbolic_ssm import (
     CraniMemGate,
@@ -292,6 +302,15 @@ __all__ = [
     "PgVectorStore",
     "PgVectorEmbedding",
     "InMemoryVectorStore",
+    # 3-Layer Memory Search
+    "InMemorySearchBackend",
+    "Observation",
+    "SearchBackend",
+    "SearchHit",
+    "SearchResult",
+    "ThreeLayerSearch",
+    "ThreeLayerSearchConfig",
+    "TimelineEntry",
     # A-MAC Admission Control
     "AdmissionConfig",
     "AdmissionScore",
