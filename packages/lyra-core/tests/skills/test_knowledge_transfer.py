@@ -169,3 +169,264 @@ class TestPatternMatch:
         )
         with pytest.raises(Exception):
             pm.relevance = 0.5  # type: ignore[misc]
+
+
+# ── PatternExtractor Tests ─────────────────────────────────────────
+
+
+class TestPatternExtractor:
+    """Tests for PatternExtractor."""
+
+    def test_extract_imports(self):
+        from lyra_core.skills.transfer.pattern_extractor import (
+            PatternExtractor,
+            PatternType,
+        )
+
+        extractor = PatternExtractor()
+        code = "import json\nimport os\nfrom pathlib import Path\n\ndef main():\n    pass\n"
+        result = extractor.extract("test-skill", code)
+        imports = [p for p in result.patterns if p.pattern_type == PatternType.IMPORT]
+        assert len(imports) >= 2
+
+    def test_extract_functions(self):
+        from lyra_core.skills.transfer.pattern_extractor import (
+            PatternExtractor,
+            PatternType,
+        )
+
+        extractor = PatternExtractor()
+        code = "def calculate_total(items: list) -> float:\n    return sum(items)\n\ndef format_result(value: float) -> str:\n    return str(value)\n"
+        result = extractor.extract("func-skill", code)
+        funcs = [p for p in result.patterns if p.pattern_type == PatternType.FUNCTION]
+        assert len(funcs) >= 2
+
+    def test_extract_classes(self):
+        from lyra_core.skills.transfer.pattern_extractor import (
+            PatternExtractor,
+            PatternType,
+        )
+
+        extractor = PatternExtractor()
+        code = "class DataStore:\n    def __init__(self):\n        self.data = {}\n\nclass CacheManager:\n    pass\n"
+        result = extractor.extract("class-skill", code)
+        classes = [p for p in result.patterns if p.pattern_type == PatternType.CLASS]
+        assert len(classes) >= 2
+
+    def test_extract_decorators(self):
+        from lyra_core.skills.transfer.pattern_extractor import (
+            PatternExtractor,
+            PatternType,
+        )
+
+        extractor = PatternExtractor()
+        code = "@dataclass\nclass Foo:\n    x: int\n\n@staticmethod\ndef helper():\n    pass\n"
+        result = extractor.extract("deco-skill", code)
+        decorators = [p for p in result.patterns if p.pattern_type == PatternType.DECORATOR]
+        assert len(decorators) >= 2
+
+    def test_extract_error_handling(self):
+        from lyra_core.skills.transfer.pattern_extractor import (
+            PatternExtractor,
+            PatternType,
+        )
+
+        extractor = PatternExtractor()
+        code = "try:\n    risky()\nexcept ValueError as e:\n    raise CustomError('failed')\n"
+        result = extractor.extract("error-skill", code)
+        errors = [p for p in result.patterns if p.pattern_type == PatternType.ERROR_HANDLING]
+        assert len(errors) >= 1
+
+    def test_extract_validation(self):
+        from lyra_core.skills.transfer.pattern_extractor import (
+            PatternExtractor,
+            PatternType,
+        )
+
+        extractor = PatternExtractor()
+        code = "def process(data):\n    if not validate(data):\n        raise ValueError('invalid')\n    return data\n"
+        result = extractor.extract("validation-skill", code)
+        validations = [p for p in result.patterns if p.pattern_type == PatternType.VALIDATION]
+        assert len(validations) >= 1
+
+    def test_respects_min_reusability(self):
+        from lyra_core.skills.transfer.pattern_extractor import PatternExtractor
+
+        extractor = PatternExtractor(min_reusability=1.0)
+        code = "import json\n\ndef foo():\n    pass\n"
+        result = extractor.extract("strict-skill", code)
+        assert len(result.patterns) == 0
+
+    def test_extract_multiple_skills(self):
+        from lyra_core.skills.transfer.pattern_extractor import PatternExtractor
+
+        extractor = PatternExtractor()
+        skills = {
+            "skill_a": "import json\n\ndef do_a():\n    pass\n",
+            "skill_b": "import os\n\ndef do_b():\n    pass\n",
+        }
+        results = extractor.extract_multiple(skills)
+        assert len(results) == 2
+
+    def test_clear(self):
+        from lyra_core.skills.transfer.pattern_extractor import PatternExtractor
+
+        extractor = PatternExtractor()
+        extractor.extract("test", "import json")
+        extractor.clear()
+        assert len(extractor._history) == 0
+
+
+# ── EnrichmentEngine Tests ─────────────────────────────────────────
+
+
+class TestEnrichmentEngine:
+    """Tests for EnrichmentEngine."""
+
+    def test_build_actions(self):
+        from lyra_core.skills.transfer.enrichment_engine import EnrichmentEngine
+
+        engine = EnrichmentEngine()
+        patterns = [
+            {
+                "pattern_type": "import",
+                "content": "import json",
+                "name": "json_import",
+                "source_skill": "json-parser",
+                "reusability_score": 0.9,
+            },
+            {
+                "pattern_type": "function",
+                "content": "def validate(data):\n    return True",
+                "name": "validate",
+                "source_skill": "validator",
+                "reusability_score": 0.8,
+            },
+        ]
+        actions = engine.build_actions("target-skill", patterns, "data-processing")
+        assert len(actions) == 2
+
+    def test_enrich_adds_patterns(self):
+        from lyra_core.skills.transfer.enrichment_engine import (
+            EnrichmentEngine,
+            EnrichmentStatus,
+        )
+
+        engine = EnrichmentEngine()
+        actions = engine.build_actions(
+            "target-skill",
+            [
+                {
+                    "pattern_type": "import",
+                    "content": "import json",
+                    "name": "json_import",
+                    "source_skill": "parser",
+                    "reusability_score": 0.9,
+                },
+            ],
+            "data",
+        )
+        result = engine.enrich("target-skill", "def main():\n    pass", actions)
+        assert result.status == EnrichmentStatus.ENRICHED
+        assert result.added_patterns >= 1
+
+    def test_enrich_deduplicates_content(self):
+        from lyra_core.skills.transfer.enrichment_engine import EnrichmentEngine
+
+        engine = EnrichmentEngine()
+        actions = engine.build_actions(
+            "target",
+            [
+                {
+                    "pattern_type": "import",
+                    "content": "import json",
+                    "name": "import_json",
+                    "source_skill": "parser",
+                    "reusability_score": 0.9,
+                },
+                {
+                    "pattern_type": "import",
+                    "content": "import json",  # duplicate
+                    "name": "import_json2",
+                    "source_skill": "parser2",
+                    "reusability_score": 0.9,
+                },
+            ],
+            "data",
+        )
+        # Second duplicate should be filtered by build_actions
+        assert len(actions) == 1
+
+    def test_enrich_empty_actions_unchanged(self):
+        from lyra_core.skills.transfer.enrichment_engine import (
+            EnrichmentEngine,
+            EnrichmentStatus,
+        )
+
+        engine = EnrichmentEngine()
+        result = engine.enrich("target", "def main():\n    pass", [])
+        assert result.status == EnrichmentStatus.UNCHANGED
+
+    def test_enrich_preserves_original_on_reject(self):
+        from lyra_core.skills.transfer.enrichment_engine import (
+            EnrichmentEngine,
+            EnrichmentStatus,
+        )
+
+        engine = EnrichmentEngine()
+        actions = engine.build_actions(
+            "target",
+            [
+                {
+                    "pattern_type": "import",
+                    "content": "import json",
+                    "name": "already_there",
+                    "source_skill": "parser",
+                    "reusability_score": 0.9,
+                },
+            ],
+            "data",
+        )
+        source = "import json\n\ndef main():\n    pass"
+        result = engine.enrich("target", source, actions)
+        assert result.status == EnrichmentStatus.REJECTED
+        assert result.added_patterns == 0
+
+    def test_get_report(self):
+        from lyra_core.skills.transfer.enrichment_engine import EnrichmentEngine
+
+        engine = EnrichmentEngine()
+        actions = engine.build_actions(
+            "skill",
+            [{
+                "pattern_type": "import",
+                "content": "import os",
+                "name": "os_import",
+                "source_skill": "source",
+                "reusability_score": 0.9,
+            }],
+            "data",
+        )
+        engine.enrich("skill", "def main():\n    pass", actions)
+        report = engine.get_report()
+        assert report.total_enrichments == 1
+
+    def test_clear(self):
+        from lyra_core.skills.transfer.enrichment_engine import EnrichmentEngine
+
+        engine = EnrichmentEngine()
+        actions = engine.build_actions(
+            "skill",
+            [{
+                "pattern_type": "import",
+                "content": "import os",
+                "name": "os_import",
+                "source_skill": "source",
+                "reusability_score": 0.9,
+            }],
+            "data",
+        )
+        engine.enrich("skill", "def main():\n    pass", actions)
+        engine.clear()
+        report = engine.get_report()
+        assert report.total_enrichments == 0
