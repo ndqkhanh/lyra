@@ -295,7 +295,7 @@ class TestNeuralTier:
         self.tier.train("implement a rest api with authentication", TaskComplexity.MODERATE)
         self.tier.train("design a distributed system architecture", TaskComplexity.COMPLEX)
         self.tier.train("hello world", TaskComplexity.TRIVIAL)
-        assert len(self.tier._X) == 3
+        assert len(self.tier._ucb.replay_buffer) == 3
 
     def test_multiple_trainings_still_routes(self) -> None:
         for _ in range(15):

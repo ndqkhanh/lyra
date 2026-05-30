@@ -61,12 +61,14 @@ class ModelRouter:
         provider_registry: ProviderRegistry | None = None,
         budget_tracker: BudgetTracker | None = None,
         session_budget_usd: float = 5.0,
+        exploration_ratio: float = 0.1,
     ) -> None:
         """
         Args:
             provider_registry: Pre-configured provider registry. Creates default if None.
             budget_tracker: Pre-configured budget tracker. Creates default if None.
             session_budget_usd: Total USD budget for the session.
+            exploration_ratio: NeuralUCB exploration coefficient (0 = pure exploitation).
         """
         self.providers = provider_registry or ProviderRegistry()
         self.budget = budget_tracker or BudgetTracker(
@@ -74,10 +76,12 @@ class ModelRouter:
             name=f"session-{uuid.uuid4().hex[:8]}",
         )
 
+        self._exploration_ratio = exploration_ratio
+
         # Initialize tiers
         self._tier1 = RuleTier()
         self._tier2 = SemanticTier()
-        self._tier3 = NeuralTier()
+        self._tier3 = NeuralTier(exploration_bonus=exploration_ratio)
 
         # Routing statistics
         self._route_count: int = 0
@@ -166,6 +170,7 @@ class ModelRouter:
         success: bool,
         latency_ms: float,
         cost: float,
+        task: str | None = None,
     ) -> bool:
         """
         Record the outcome of a routing decision for feedback and learning.
@@ -175,6 +180,8 @@ class ModelRouter:
             success: Whether the task completed successfully.
             latency_ms: Actual task latency in milliseconds.
             cost: Actual USD cost of the task.
+            task: Original task description (used for NeuralUCB feature extraction).
+                Falls back to a synthetic description from the decision if not provided.
 
         Returns:
             True if recording succeeded, False if circuit breaker tripped.
@@ -190,10 +197,14 @@ class ModelRouter:
             success=success,
         )
 
-        # Train neural tier with outcome
-        self._tier3.train(
-            task=f"[{decision.complexity.value}] routed to {decision.model}",
-            complexity=decision.complexity,
+        # Train neural tier with outcome (NeuralUCB online learning)
+        task_str = task or f"[{decision.complexity.value}] routed to {decision.model}"
+        self._tier3.update_with_outcome(
+            task=task_str,
+            model_id=decision.tier.value,
+            success=success,
+            latency_ms=latency_ms,
+            cost=cost,
         )
 
         if not within_budget:
@@ -232,6 +243,21 @@ class ModelRouter:
             "budget": self.budget.get_summary(),
             "providers": self.providers.get_stats(),
         }
+
+    def get_router_stats(self) -> dict:
+        """Return detailed router statistics including NeuralUCB model stats.
+
+        Extends :attr:`stats` with per-model performance metrics from
+        the NeuralUCB contextual bandit (pulls, mean rewards, UCB values).
+
+        Returns:
+            Dict with all ``stats`` keys plus ``neural_ucb`` containing
+            per-model performance data.
+        """
+        base = dict(self.stats)
+        base["neural_ucb"] = self._tier3.get_stats()
+        base["exploration_ratio"] = self._exploration_ratio
+        return base
 
     # ── Internal ───────────────────────────────────────────────────
 

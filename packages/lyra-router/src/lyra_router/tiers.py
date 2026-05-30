@@ -18,7 +18,10 @@ from collections import Counter
 from dataclasses import dataclass
 from typing import Any
 
+import numpy as np
+
 from .models import ModelTier, TaskComplexity
+from .neural_ucb import NeuralUCB, UCBConfig
 
 logger = logging.getLogger(__name__)
 
@@ -541,54 +544,42 @@ class SemanticTier:
 
 
 # ────────────────────────────────────────────────────────────────────
-# Tier 3 — Neural Router (MLP classifier)
+# Tier 3 — Neural Router (NeuralUCB contextual bandit)
 # ────────────────────────────────────────────────────────────────────
 
 
 class NeuralTier:
     """
-    Tier 3 — MLP-based classifier with online learning.
+    Tier 3 — NeuralUCB contextual bandit for model selection.
 
     Characteristics:
     - Latency: 20-100ms
     - Cost: ~$0.001
     - Hit rate target: Catch remainder after Tier 1 + 2
 
-    Uses sklearn's MLPClassifier if available; falls back to a
-    simple numpy-based logistic regression implementation.
+    Uses a Neural Upper Confidence Bound (NeuralUCB) algorithm to balance
+    exploration and exploitation when routing tasks to model tiers.
+    Cost-aware rewards: ``reward = success * quality_weight - cost_penalty``.
     """
 
-    _num_classes = 5  # Corresponds to TaskComplexity
+    def __init__(
+        self,
+        exploration_bonus: float = 0.1,
+        cost_sensitivity: float = 0.5,
+    ) -> None:
+        self._exploration_bonus = exploration_bonus
+        self._cost_sensitivity = cost_sensitivity
+        self._input_dim = 10  # Matches _extract_features output
 
-    def __init__(self) -> None:
-        self._model: Any = None
-        self._use_sklearn = False
-        self._init_model()
+        # All model tiers as candidate models
+        self._model_ids = [t.value for t in ModelTier]
 
-    def _init_model(self) -> None:
-        """Initialize the model (sklearn preferred, numpy fallback)."""
-        try:
-            from sklearn.neural_network import MLPClassifier  # type: ignore[import-untyped]
-
-            self._model = MLPClassifier(
-                hidden_layer_sizes=(64, 32),
-                activation="relu",
-                solver="adam",
-                max_iter=200,
-                random_state=42,
-                warm_start=True,
-            )
-            self._use_sklearn = True
-            self._X: list[list[float]] = []
-            self._y: list[int] = []
-            self._fitted = False
-            logger.info("NeuralTier: loaded sklearn MLPClassifier")
-        except ImportError:
-            self._model = None
-            self._use_sklearn = False
-            self._X = []
-            self._y = []
-            logger.info("NeuralTier: sklearn unavailable, using simple logistic fallback")
+        config = UCBConfig(
+            exploration_bonus=exploration_bonus,
+            cost_sensitivity=cost_sensitivity,
+        )
+        self._ucb = NeuralUCB(config, n_models=len(self._model_ids))
+        self._fitted = False
 
     # ── Feature extraction ─────────────────────────────────────────
 
@@ -680,39 +671,34 @@ class NeuralTier:
     # ── Method: route ──────────────────────────────────────────────
 
     def route(self, task: str, context: dict[str, Any] | None = None) -> TierResult | None:
-        """Route using the neural model — always returns a result."""
-        if self._use_sklearn and self._fitted:
-            return self._route_sklearn(task)
-        if self._use_sklearn and not self._fitted:
-            # Not enough data for sklearn — use heuristic until trained
-            return self._route_heuristic(task)
+        """Route using NeuralUCB — always returns a result."""
+        if self._fitted and len(self._ucb.replay_buffer) >= self._ucb.config.min_samples:
+            return self._route_neural(task)
         return self._route_heuristic(task)
 
-    def _route_sklearn(self, task: str) -> TierResult | None:
-        """Route using trained sklearn model."""
+    def _route_neural(self, task: str) -> TierResult | None:
+        """Route using trained NeuralUCB model."""
         try:
-            features = self._extract_features(task)
-            pred = int(self._model.predict([features])[0])
-            probs = self._model.predict_proba([features])[0]
-            confidence = float(probs[pred])
+            features = np.array(self._extract_features(task), dtype=float)
+            model_id, confidence = self._ucb.select_model(features, self._model_ids)
 
-            complexity = _int_to_complexity(pred)
-            tier = _complexity_to_tier(complexity)
+            tier = ModelTier(model_id)
+            complexity = _tier_to_complexity(tier)
 
             return TierResult(
                 complexity=complexity,
                 model_tier=tier,
                 confidence=confidence,
-                reasoning=f"Neural classifier prediction (confidence={confidence:.2f})",
-                matched_rule=f"neural:sklearn({confidence:.2f})",
+                reasoning=f"NeuralUCB selection (confidence={confidence:.2f})",
+                matched_rule=f"neural:ucb({confidence:.2f})",
             )
         except Exception as exc:
-            logger.warning("Sklearn routing failed: %s", exc)
+            logger.warning("NeuralUCB routing failed: %s", exc)
             return self._route_heuristic(task)
 
     def _route_heuristic(self, task: str) -> TierResult | None:
         """
-        Fallback heuristic when no trained model is available.
+        Fallback heuristic when NeuralUCB has insufficient data.
 
         Uses feature thresholds to estimate complexity.
         """
@@ -762,69 +748,50 @@ class NeuralTier:
 
     # ── Online learning ────────────────────────────────────────────
 
+    def update_with_outcome(
+        self,
+        task: str,
+        model_id: str,
+        success: bool,
+        latency_ms: float,
+        cost: float,
+    ) -> None:
+        """Record an outcome and update the NeuralUCB model online.
+
+        Args:
+            task: The original task description (used for feature extraction).
+            model_id: The model tier that was selected (e.g. ``"haiku"``).
+            success: Whether the task completed successfully.
+            latency_ms: Actual task latency in milliseconds.
+            cost: Actual USD cost of the task.
+        """
+        features = np.array(self._extract_features(task), dtype=float)
+        self._ucb.update(model_id, features, success, latency_ms, cost)
+        if len(self._ucb.replay_buffer) >= self._ucb.config.min_samples:
+            self._fitted = True
+
     def train(self, task: str, complexity: TaskComplexity) -> None:
-        """
-        Record a training example for online learning.
+        """Legacy method for backward compatibility.
 
-        For sklearn: accumulates data and fits incrementally.
-        For the fallback: stores data for retraining.
+        Maps the complexity to a default model tier and records
+        a successful outcome at zero cost.
         """
-        features = self._extract_features(task)
-        label = _complexity_to_int(complexity)
-        self._X.append(features)
-        self._y.append(label)
-
-        if self._use_sklearn and len(self._X) >= 10:
-            try:
-                self._model.partial_fit(self._X, self._y, classes=list(range(self._num_classes)))
-                self._X.clear()
-                self._y.clear()
-                self._fitted = True
-                logger.debug("NeuralTier: partial_fit with batch of 10 examples")
-            except Exception as exc:
-                logger.warning("NeuralTier training failed: %s", exc)
+        tier = _complexity_to_tier(complexity)
+        features = np.array(self._extract_features(task), dtype=float)
+        self._ucb.update(tier.value, features, success=True, latency_ms=0.0, cost=0.0)
+        if len(self._ucb.replay_buffer) >= self._ucb.config.min_samples:
+            self._fitted = True
 
     def fit(self) -> bool:
-        """Fit the model on all accumulated data. Returns True on success."""
-        if not self._use_sklearn or len(self._X) < 5:
-            return False
-        try:
-            self._model.fit(self._X, self._y)
-            self._fitted = True
-            self._X.clear()
-            self._y.clear()
-            logger.info("NeuralTier: model fitted on accumulated examples")
-            return True
-        except Exception as exc:
-            logger.warning("NeuralTier fit failed: %s", exc)
-            return False
+        """Return whether the NeuralUCB model has sufficient data for predictions."""
+        return self._fitted
+
+    def get_stats(self) -> dict[str, Any]:
+        """Return NeuralUCB per-model statistics for observability."""
+        return self._ucb.get_model_stats()
 
 
 # ── Helpers ─────────────────────────────────────────────────────────
-
-
-def _complexity_to_int(complexity: TaskComplexity) -> int:
-    """Map TaskComplexity to integer label."""
-    mapping = {
-        TaskComplexity.TRIVIAL: 0,
-        TaskComplexity.SIMPLE: 1,
-        TaskComplexity.MODERATE: 2,
-        TaskComplexity.COMPLEX: 3,
-        TaskComplexity.AGENTIC: 4,
-    }
-    return mapping[complexity]
-
-
-def _int_to_complexity(label: int) -> TaskComplexity:
-    """Map integer label back to TaskComplexity."""
-    mapping = {
-        0: TaskComplexity.TRIVIAL,
-        1: TaskComplexity.SIMPLE,
-        2: TaskComplexity.MODERATE,
-        3: TaskComplexity.COMPLEX,
-        4: TaskComplexity.AGENTIC,
-    }
-    return mapping.get(label, TaskComplexity.MODERATE)
 
 
 def _complexity_to_tier(complexity: TaskComplexity) -> ModelTier:
@@ -836,3 +803,16 @@ def _complexity_to_tier(complexity: TaskComplexity) -> ModelTier:
         TaskComplexity.COMPLEX: ModelTier.PREMIUM,
         TaskComplexity.AGENTIC: ModelTier.AGENTIC,
     }[complexity]
+
+
+def _tier_to_complexity(tier: ModelTier) -> TaskComplexity:
+    """Map model tier back to the default task complexity."""
+    mapping: dict[ModelTier, TaskComplexity] = {
+        ModelTier.LOCAL_SLM: TaskComplexity.TRIVIAL,
+        ModelTier.HAIKU: TaskComplexity.SIMPLE,
+        ModelTier.FAST: TaskComplexity.SIMPLE,
+        ModelTier.STANDARD: TaskComplexity.MODERATE,
+        ModelTier.PREMIUM: TaskComplexity.COMPLEX,
+        ModelTier.AGENTIC: TaskComplexity.AGENTIC,
+    }
+    return mapping.get(tier, TaskComplexity.MODERATE)

@@ -36,6 +36,7 @@ from .models import (
     get_cost_estimate,
     get_tier_for_complexity,
 )
+from .neural_ucb import NeuralUCB, UCBConfig
 from .providers import ProviderRegistry
 from .router import ModelRouter
 from .tiers import NeuralTier, RuleTier, SemanticTier, TierResult
@@ -54,6 +55,9 @@ __all__ = [
     "TaskComplexity",
     "get_cost_estimate",
     "get_tier_for_complexity",
+    # NeuralUCB
+    "NeuralUCB",
+    "UCBConfig",
     # Providers
     "ProviderRegistry",
     # Tiers
