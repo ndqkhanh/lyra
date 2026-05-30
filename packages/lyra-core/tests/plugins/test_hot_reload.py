@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 import os
+import sys
 import time
 
 import pytest
 from lyra_core.plugins.hot_reload import (
     PluginFileState,
     PluginHotReloader,
+    PluginSnapshot,
     ReloadEvent,
     ReloadStatus,
 )
@@ -19,9 +21,34 @@ def reloader():
 
 
 @pytest.fixture
+def reloader_with_validation():
+    return PluginHotReloader(enable_validation=True, enable_rollback=True)
+
+
+@pytest.fixture
 def temp_plugin(tmp_path):
     f = tmp_path / "plugin.py"
     f.write_text("# version 1")
+    return str(f)
+
+
+@pytest.fixture
+def valid_plugin(tmp_path):
+    """Create a valid plugin with manifest."""
+    f = tmp_path / "valid_plugin.py"
+    f.write_text(
+        """
+from lyra_core.plugins.registry import PluginManifest, PluginMetadata
+
+manifest = PluginManifest(
+    metadata=PluginMetadata(
+        name="test-plugin",
+        version="1.0.0",
+        author="test",
+    )
+)
+"""
+    )
     return str(f)
 
 
@@ -195,3 +222,143 @@ class TestPluginHotReloader:
         # Just verify both are there
         assert f1 in reloader.watched_paths
         assert f2 in reloader.watched_paths
+
+
+class TestPluginHotReloaderValidation:
+    """Tests for validation and rollback features."""
+
+    def test_watch_with_plugin_name(self, reloader, temp_plugin):
+        reloader.watch(temp_plugin, plugin_name="test-plugin")
+        assert temp_plugin in reloader.watched_paths
+
+    def test_validation_syntax_error(self, reloader_with_validation, tmp_path):
+        bad_plugin = tmp_path / "bad.py"
+        bad_plugin.write_text("def broken(\n")  # Syntax error
+
+        reloader_with_validation.watch(str(bad_plugin), plugin_name="bad-plugin")
+        bad_plugin.write_text("def still_broken(\n")
+
+        events = reloader_with_validation.poll()
+        assert len(events) == 1
+        # Should either fail validation or rollback after validation failure
+        assert events[0].status in (
+            ReloadStatus.VALIDATION_FAILED,
+            ReloadStatus.ROLLED_BACK,
+        )
+        assert "Syntax error" in events[0].error
+
+    def test_validation_disabled(self, tmp_path):
+        reloader = PluginHotReloader(enable_validation=False)
+        bad_plugin = tmp_path / "bad.py"
+        bad_plugin.write_text("def broken(\n")
+
+        reloader.watch(str(bad_plugin), plugin_name="bad-plugin")
+        bad_plugin.write_text("def still_broken(\n")
+
+        events = reloader.poll()
+        # Should attempt reload even with syntax error
+        assert len(events) == 1
+        assert events[0].status in (ReloadStatus.FAILED, ReloadStatus.ROLLED_BACK)
+
+    def test_validate_reload_method(self, reloader_with_validation, valid_plugin):
+        reloader_with_validation.watch(valid_plugin, plugin_name="test-plugin")
+        assert reloader_with_validation.validate_reload("test-plugin")
+
+    def test_validate_reload_unknown_plugin(self, reloader_with_validation):
+        assert not reloader_with_validation.validate_reload("unknown")
+
+    def test_rollback_on_failure(self, reloader_with_validation, tmp_path):
+        plugin = tmp_path / "plugin.py"
+        plugin.write_text("value = 1\n")
+
+        reloader_with_validation.watch(str(plugin), plugin_name="test-plugin")
+
+        # Modify to invalid syntax
+        plugin.write_text("value = \n")  # Syntax error
+
+        events = reloader_with_validation.poll()
+        assert len(events) == 1
+        # Should either fail validation or rollback
+        assert events[0].status in (
+            ReloadStatus.VALIDATION_FAILED,
+            ReloadStatus.ROLLED_BACK,
+        )
+
+    def test_rollback_disabled(self, tmp_path):
+        reloader = PluginHotReloader(enable_rollback=False)
+        plugin = tmp_path / "plugin.py"
+        plugin.write_text("value = 1\n")
+
+        reloader.watch(str(plugin), plugin_name="test-plugin")
+        plugin.write_text("value = \n")
+
+        events = reloader.poll()
+        assert len(events) == 1
+        # Should fail without rollback
+        assert events[0].status in (ReloadStatus.FAILED, ReloadStatus.VALIDATION_FAILED)
+
+    def test_manual_rollback(self, reloader_with_validation, temp_plugin):
+        reloader_with_validation.watch(temp_plugin, plugin_name="test-plugin")
+        # Manual rollback should not raise even if no snapshot exists
+        reloader_with_validation.rollback_on_failure("test-plugin")
+
+    def test_plugin_snapshot_fields(self):
+        snapshot = PluginSnapshot(
+            plugin_name="test",
+            module_name="test_module",
+            module_dict={"key": "value"},
+            file_hash="abc123",
+            timestamp=time.time(),
+        )
+        assert snapshot.plugin_name == "test"
+        assert snapshot.module_name == "test_module"
+        assert snapshot.module_dict == {"key": "value"}
+
+    def test_stop_clears_snapshots(self, reloader_with_validation, temp_plugin):
+        reloader_with_validation.watch(temp_plugin, plugin_name="test-plugin")
+        reloader_with_validation.stop()
+        # Should clear all state including snapshots
+        assert len(reloader_with_validation._snapshots) == 0
+
+    def test_reload_status_enum_values(self):
+        assert ReloadStatus.LOADED.value == "loaded"
+        assert ReloadStatus.RELOADED.value == "reloaded"
+        assert ReloadStatus.FAILED.value == "failed"
+        assert ReloadStatus.VALIDATION_FAILED.value == "validation_failed"
+        assert ReloadStatus.ROLLED_BACK.value == "rolled_back"
+
+    def test_multiple_plugins_with_names(self, reloader, tmp_path):
+        p1 = tmp_path / "plugin1.py"
+        p2 = tmp_path / "plugin2.py"
+        p1.write_text("# plugin 1")
+        p2.write_text("# plugin 2")
+
+        reloader.watch(str(p1), plugin_name="plugin-1")
+        reloader.watch(str(p2), plugin_name="plugin-2")
+
+        assert reloader.watched_count == 2
+
+    def test_validation_with_registry(self, tmp_path):
+        from lyra_core.plugins.registry import PluginRegistry
+
+        registry = PluginRegistry()
+        reloader = PluginHotReloader(
+            registry=registry, enable_validation=True, enable_rollback=True
+        )
+
+        valid_plugin = tmp_path / "valid.py"
+        valid_plugin.write_text(
+            """
+from lyra_core.plugins.registry import PluginManifest, PluginMetadata
+
+manifest = PluginManifest(
+    metadata=PluginMetadata(
+        name="test-plugin",
+        version="1.0.0",
+    )
+)
+"""
+        )
+
+        reloader.watch(str(valid_plugin), plugin_name="test-plugin")
+        assert reloader.validate_reload("test-plugin")

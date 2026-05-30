@@ -15,13 +15,20 @@ Both surfaces share error semantics: malformed manifests raise
 :class:`PluginManifestError` (declarative) or
 :class:`PluginValidationError` (programmatic). Downstream code that
 doesn't care about the distinction can catch ``ValueError``.
+
+Hot-reload system provides:
+* File system watching with :class:`PluginWatcher`
+* Dependency resolution with :class:`DependencyResolver`
+* Automatic reload with validation and rollback via :class:`PluginHotReloader`
 """
 from __future__ import annotations
 
+from .dependency_resolver import DependencyGraph, DependencyResolver
 from .discovery import Plugin, discover_plugins, fire
 from .hot_reload import (
     PluginFileState,
     PluginHotReloader,
+    PluginSnapshot,
     ReloadEvent,
     ReloadStatus,
 )
@@ -43,8 +50,12 @@ from .registry import (
     load_plugin,
 )
 from .runtime import LoadedPlugin, PluginRuntime
+from .watcher import FileChangeEvent, PluginWatcher, WatcherConfig
 
 __all__ = [
+    "DependencyGraph",
+    "DependencyResolver",
+    "FileChangeEvent",
     "HarnessPlugin",
     "HookResult",
     "LoadedPlugin",
@@ -59,9 +70,12 @@ __all__ = [
     "PluginMetadata",
     "PluginRegistry",
     "PluginRuntime",
+    "PluginSnapshot",
     "PluginValidationError",
+    "PluginWatcher",
     "ReloadEvent",
     "ReloadStatus",
+    "WatcherConfig",
     "discover_plugins",
     "fire",
     "load_manifest",

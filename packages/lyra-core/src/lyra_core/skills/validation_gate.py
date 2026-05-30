@@ -14,12 +14,15 @@ Skills that fail Gates 3 or 4 are flagged for human review.
 
 from __future__ import annotations
 
-import ast
-import re
 import time
 import uuid
 from dataclasses import dataclass, field
 from enum import Enum
+
+from .gates.benchmark_runner import BenchmarkRunner
+from .gates.safety_screener import SafetyScreener
+from .gates.semantic_checker import SemanticChecker
+from .gates.syntax_validator import SyntaxValidator
 
 
 class GateNumber(Enum):
@@ -65,290 +68,93 @@ class ValidationReport:
     summary: str
 
 
-# ── Gate 1: Syntax & Structure ────────────────────────────────────────
-
-_G1_THRESHOLD = 1.0
-
-_SYNTAX_CHECKS: dict[str, str] = {
-    "has_description": "Skill must include a description comment or docstring",
-    "valid_python": "Skill body must be valid Python (or valid shell with shebang)",
-    "no_empty_body": "Skill body must not be empty",
-    "has_name": "Skill name must be non-empty and alphanumeric",
-    "trigger_format": "Triggers must be non-empty strings without control chars",
-}
+# ── Gate Adapters (backward compatibility) ───────────────────────────
 
 
 def _gate1_syntax(skill_name: str, skill_triggers: tuple[str, ...], skill_body: str) -> GateResult:
     """Gate 1: Validate syntax, structure, and metadata."""
-    issues: list[str] = []
-    fixes: list[str] = []
+    validator = SyntaxValidator()
+    result = validator.validate(skill_name, skill_triggers, skill_body)
 
-    if not skill_name or not re.match(r"^[\w\-]+$", skill_name):
-        issues.append(_SYNTAX_CHECKS["has_name"])
-
-    if not skill_body or not skill_body.strip():
-        issues.append(_SYNTAX_CHECKS["no_empty_body"])
-        return GateResult(
-            gate=GateNumber.GATE_1,
-            status=GateStatus.REJECTED,
-            score=0.0,
-            threshold=_G1_THRESHOLD,
-            issues=tuple(issues),
-            auto_fixes_applied=(),
-            recommendation="Skill body is empty. Provide implementation.",
-            timestamp=time.time(),
-        )
-
-    if not skill_triggers or any(not t or not t.strip() for t in skill_triggers):
-        issues.append(_SYNTAX_CHECKS["trigger_format"])
-
-    if "#" not in skill_body and '"""' not in skill_body and "'''" not in skill_body:
-        issues.append(_SYNTAX_CHECKS["has_description"])
-
-    try:
-        ast.parse(skill_body)
-    except SyntaxError:
-        # Try as shell script with shebang
-        if not skill_body.strip().startswith("#!"):
-            issues.append(_SYNTAX_CHECKS["valid_python"])
-
-    score = 1.0 - (len(issues) * 0.25)
-    score = max(0.0, min(1.0, score))
-
-    if score == 1.0:
-        status = GateStatus.PASSED
-        recommendation = "Syntax and structure validated."
-    elif score >= 0.75:
+    status = GateStatus.PASSED if result.passed else GateStatus.REJECTED
+    if not result.passed and result.score >= 0.75:
         status = GateStatus.AUTO_FIXED
-        recommendation = "Minor syntax issues auto-fixed."
-    elif score >= 0.5:
+    elif not result.passed and result.score >= 0.5:
         status = GateStatus.NEEDS_REVIEW
-        recommendation = "Syntax issues require manual review."
-    else:
-        status = GateStatus.REJECTED
-        recommendation = "Critical syntax errors — skill cannot be used."
 
     return GateResult(
         gate=GateNumber.GATE_1,
         status=status,
-        score=round(score, 4),
-        threshold=_G1_THRESHOLD,
-        issues=tuple(issues),
-        auto_fixes_applied=tuple(fixes),
-        recommendation=recommendation,
+        score=result.score,
+        threshold=validator.THRESHOLD,
+        issues=result.issues,
+        auto_fixes_applied=result.auto_fixes_applied,
+        recommendation=result.recommendation,
         timestamp=time.time(),
     )
-
-
-# ── Gate 2: Semantic Correctness ──────────────────────────────────────
-
-_G2_THRESHOLD = 0.95
-
-_SEMANTIC_CHECKS: dict[str, str] = {
-    "imports_resolvable": "Import statements reference known stdlib or installed packages",
-    "no_hardcoded_secrets": "No hardcoded API keys, tokens, or passwords",
-    "function_defined": "Skill defines at least one callable or script entry point",
-    "valid_shebang": "Shell skills must have valid shebang (#!/bin/bash, etc.)",
-    "no_destructive_defaults": "No rm -rf, DROP TABLE, or similar destructive defaults",
-}
 
 
 def _gate2_semantic(skill_body: str) -> GateResult:
     """Gate 2: Validate semantic correctness of the skill."""
-    issues: list[str] = []
-    fixes: list[str] = []
+    checker = SemanticChecker()
+    result = checker.validate("", (), skill_body)
 
-    stripped = skill_body.strip()
-
-    is_shell = stripped.startswith("#!")
-    if is_shell:
-        if not re.match(r"^#!\s*/", stripped.split("\n")[0]):
-            issues.append(_SEMANTIC_CHECKS["valid_shebang"])
-        if not any(kw in stripped for kw in ("def ", "function", "()", "echo", "printf", "#!/")):
-            issues.append(_SEMANTIC_CHECKS["function_defined"])
-    else:
-        if "def " not in stripped and "class " not in stripped and "import " not in stripped:
-            issues.append(_SEMANTIC_CHECKS["function_defined"])
-
-    secret_patterns = [
-        r'(?:api[_-]?key|apikey|secret|token|password|passwd)\s*[:=]\s*["\'][\w\-]{8,}["\']',
-        r"(?:sk-[A-Za-z0-9]{20,})",
-        r"(?:AKIA[0-9A-Z]{16})",
-    ]
-    for pat in secret_patterns:
-        if re.search(pat, stripped, re.IGNORECASE):
-            issues.append(_SEMANTIC_CHECKS["no_hardcoded_secrets"])
-            break
-
-    destructive_defaults = [
-        r"\brm\s+-rf\b",
-        r"\bDROP\s+TABLE\b",
-        r"\bDELETE\s+FROM\b",
-    ]
-    for pat in destructive_defaults:
-        if re.search(pat, stripped, re.IGNORECASE):
-            issues.append(_SEMANTIC_CHECKS["no_destructive_defaults"])
-            break
-
-    score = 1.0 - (len(issues) * 0.2)
-    score = max(0.0, min(1.0, score))
-
-    if score >= _G2_THRESHOLD:
-        status = GateStatus.PASSED
-        recommendation = "Semantic checks passed."
-    elif score >= 0.8:
+    status = GateStatus.PASSED if result.passed else GateStatus.REJECTED
+    if not result.passed and result.score >= 0.8:
         status = GateStatus.AUTO_FIXED
-        recommendation = "Minor semantic issues addressed."
-    elif score >= 0.6:
+    elif not result.passed and result.score >= 0.6:
         status = GateStatus.NEEDS_REVIEW
-        recommendation = "Semantic issues need human review."
-    else:
-        status = GateStatus.REJECTED
-        recommendation = "Critical semantic errors detected."
 
     return GateResult(
         gate=GateNumber.GATE_2,
         status=status,
-        score=round(score, 4),
-        threshold=_G2_THRESHOLD,
-        issues=tuple(issues),
-        auto_fixes_applied=tuple(fixes),
-        recommendation=recommendation,
+        score=result.score,
+        threshold=checker.THRESHOLD,
+        issues=result.issues,
+        auto_fixes_applied=result.auto_fixes_applied,
+        recommendation=result.recommendation,
         timestamp=time.time(),
     )
-
-
-# ── Gate 3: Performance Benchmark ─────────────────────────────────────
-
-_G3_THRESHOLD = 0.80
 
 
 def _gate3_performance(skill_body: str, skill_triggers: tuple[str, ...]) -> GateResult:
     """Gate 3: Run performance benchmarks on the skill."""
-    issues: list[str] = []
-    fixes: list[str] = []
+    runner = BenchmarkRunner()
+    result = runner.validate("", skill_triggers, skill_body)
 
-    lines = [ln for ln in skill_body.split("\n") if ln.strip()]
-    line_count = len(lines)
-
-    if line_count > 500:
-        issues.append(f"Skill too large ({line_count} lines); consider splitting")
-    if line_count > 1000:
-        issues.append("Skill exceeds 1000-line limit — rejected")
-
-    import_count = sum(
-        1 for ln in lines if ln.strip().startswith("import ") or ln.strip().startswith("from ")
-    )
-    if import_count > 20:
-        issues.append(f"Excessive imports ({import_count}); may increase startup time")
-
-    _loop_count = sum(1 for ln in lines if re.search(r"\b(for|while)\b", ln))
-    nested_loops = 0
-    indent_levels = []
-    for ln in lines:
-        stripped = ln.lstrip()
-        if stripped:
-            indent = len(ln) - len(stripped)
-            indent_levels.append(indent // 4)
-            if re.search(r"\b(for|while)\b", stripped):
-                if len(indent_levels) >= 2 and indent_levels[-1] > indent_levels[-2]:
-                    nested_loops += 1
-
-    if nested_loops > 3:
-        issues.append(f"Potential O(n²) complexity: {nested_loops} nested loops")
-
-    trigger_quality = 0.9
-    for t in skill_triggers:
-        if len(t) < 3:
-            trigger_quality -= 0.15
-        if len(t) > 80:
-            trigger_quality -= 0.1
-    trigger_quality = max(0.0, min(1.0, trigger_quality))
-
-    score = min(
-        1.0 - (len(issues) * 0.15),
-        max(0.3, 1.0 - (line_count / 2000)),
-        trigger_quality,
-    )
-    score = max(0.0, min(1.0, score))
-
-    if score >= _G3_THRESHOLD:
-        status = GateStatus.PASSED
-        recommendation = "Performance benchmarks passed."
-    elif score >= 0.6:
+    status = GateStatus.PASSED if result.passed else GateStatus.REJECTED
+    if not result.passed and result.score >= 0.6:
         status = GateStatus.NEEDS_REVIEW
-        recommendation = "Performance concerns — review before deploying."
-    else:
-        status = GateStatus.REJECTED
-        recommendation = "Performance unacceptable — optimize before resubmitting."
 
     return GateResult(
         gate=GateNumber.GATE_3,
         status=status,
-        score=round(score, 4),
-        threshold=_G3_THRESHOLD,
-        issues=tuple(issues),
-        auto_fixes_applied=tuple(fixes),
-        recommendation=recommendation,
+        score=result.score,
+        threshold=runner.THRESHOLD,
+        issues=result.issues,
+        auto_fixes_applied=(),
+        recommendation=result.recommendation,
         timestamp=time.time(),
     )
 
 
-# ── Gate 4: Safety Screener ───────────────────────────────────────────
-
-_G4_THRESHOLD = 0.98
-
-
 def _gate4_safety(skill_body: str) -> GateResult:
     """Gate 4: Screen skill for safety violations."""
-    issues: list[str] = []
+    screener = SafetyScreener()
+    result = screener.validate("", (), skill_body)
 
-    dangerous_calls = [
-        (r"\bsubprocess\.(call|run|Popen)\b", "subprocess execution"),
-        (r"\bos\.system\b", "shell command execution"),
-        (r"\beval\s*\(", "eval() call"),
-        (r"\bexec\s*\(", "exec() call"),
-        (r"\b__import__\s*\(", "dynamic import"),
-        (r"\bshutil\.rmtree\b", "recursive directory deletion"),
-        (r'\bopen\s*\([^)]*[\'"][wa][\'"]', "file write in skill body"),
-        (r"requests\.(?:post|put|patch|delete)\b", "outbound HTTP request"),
-        (r"\bsocket\.", "raw socket usage"),
-    ]
-
-    for pattern, desc in dangerous_calls:
-        if re.search(pattern, skill_body, re.IGNORECASE):
-            issues.append(f"Dangerous call: {desc}")
-
-    file_write_patterns = [
-        (r'open\s*\([^)]*[\'"][wa][\'"]', "file write"),
-        (r"\.write\s*\(", "write operation"),
-    ]
-    file_ops = sum(1 for p, _ in file_write_patterns if re.search(p, skill_body, re.IGNORECASE))
-
-    if file_ops >= 3:
-        issues.append("Multiple file write operations detected")
-
-    score = 1.0 - (len(issues) * 0.1)
-    score = max(0.0, min(1.0, score))
-
-    if score >= _G4_THRESHOLD:
-        status = GateStatus.PASSED
-        recommendation = "Safety screening passed."
-    elif score >= 0.9:
+    status = GateStatus.PASSED if result.passed else GateStatus.REJECTED
+    if not result.passed and result.score >= 0.9:
         status = GateStatus.NEEDS_REVIEW
-        recommendation = "Safety concerns flagged for human review."
-    else:
-        status = GateStatus.REJECTED
-        recommendation = "Critical safety violations — skill blocked."
 
     return GateResult(
         gate=GateNumber.GATE_4,
         status=status,
-        score=round(score, 4),
-        threshold=_G4_THRESHOLD,
-        issues=tuple(issues),
+        score=result.score,
+        threshold=screener.THRESHOLD,
+        issues=result.issues,
         auto_fixes_applied=(),
-        recommendation=recommendation,
+        recommendation=result.recommendation,
         timestamp=time.time(),
     )
 
@@ -374,11 +180,15 @@ class SkillValidationPipeline:
             registry.register(skill)
     """
 
-    gate1_threshold: float = _G1_THRESHOLD
-    gate2_threshold: float = _G2_THRESHOLD
-    gate3_threshold: float = _G3_THRESHOLD
-    gate4_threshold: float = _G4_THRESHOLD
+    gate1_threshold: float = 1.0
+    gate2_threshold: float = 0.95
+    gate3_threshold: float = 0.80
+    gate4_threshold: float = 0.98
     _history: list[ValidationReport] = field(default_factory=list)
+    _syntax_validator: SyntaxValidator = field(default_factory=SyntaxValidator, init=False)
+    _semantic_checker: SemanticChecker = field(default_factory=SemanticChecker, init=False)
+    _benchmark_runner: BenchmarkRunner = field(default_factory=BenchmarkRunner, init=False)
+    _safety_screener: SafetyScreener = field(default_factory=SafetyScreener, init=False)
 
     def validate(
         self,
