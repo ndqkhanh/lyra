@@ -276,6 +276,23 @@
 - **NEW** `tests/test_unified_memory_router.py` — 47 tests: MemoryTier (3), RawMemory (3), MemoryFeatures (2), StoreDecision (2), BanditArm (4), MultiArmedBandit (7), FeatureExtractor (7), CompressionPolicy (4), RetentionPolicy (4), UnifiedMemoryRouter (9), integration (2)
 - **UPDATED** `__init__.py` — Exports UnifiedMemoryRouter, BanditArm, MemoryCompressionPolicy, MemoryFeatureExtractor, MemoryFeatures, MemoryTier, MultiArmedBandit, RawMemory, MemoryRetentionPolicy, StoreDecision
 
+### 2026-05-30 — Tier 3.0: Cross-Platform Skill Format (P3-B2) BREAKTHROUGH
+
+- **NEW** `lyra_harness_core/skill_format.py` — Microsoft Skills Framework compatible skill format:
+  - `SkillInput` (frozen) — typed input parameter (string, integer, float, boolean, array) with required/default/choices
+  - `SkillOutput` (frozen) — output specification (type + description)
+  - `SkillTrigger` (frozen) — keyword and context triggers for skill activation
+  - `SkillRetry` (frozen) — retry configuration (max_attempts, backoff: exponential/linear/fixed)
+  - `SkillManifest` (frozen) — complete skill definition: name, version, description, triggers, allowed_tools, model, inputs, outputs, timeout, retry, source, body
+  - `SkillValidationResult` (frozen) — validation output with errors and warnings
+  - `load_skill_from_markdown(path)` — parse SKILL.md with YAML frontmatter
+  - `load_skill_from_yaml(path)` — parse standalone .yaml skill definition
+  - `load_skill(path)` — auto-detect format (.md → frontmatter, .yaml → YAML, unknown → try both)
+  - `validate_skill_manifest(manifest)` — validate name, version (semver), timeout, retry, model, input/output uniqueness
+  - `SkillManifestRegistry` — register/unregister, find_by_keyword, find_by_context, find_by_tool
+- **NEW** `tests/test_skill_format.py` — 51 tests: SkillInput (3), SkillOutput (2), SkillTrigger (3), SkillRetry (2), SkillManifest (2), SkillValidationResult (3), load_skill_from_markdown (6), load_skill_from_yaml (3), load_skill (3), validate_skill_manifest (9), SkillManifestRegistry (13), integration (2)
+- **UPDATED** `__init__.py` — Exports SkillInput, SkillManifest, SkillManifestRegistry, SkillOutput, SkillRetry, SkillTrigger, SkillValidationResult, load_skill, load_skill_from_markdown, load_skill_from_yaml, validate_skill_manifest
+
 ---
 
 ## Upcoming (Tier 1 — Flagship + Core Engine)
