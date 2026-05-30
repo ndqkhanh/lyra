@@ -26,6 +26,14 @@ from lyra_cli.infrastructure.profiler import (
     PerformanceProfiler,
     ProfileReport,
 )
+from lyra_cli.infrastructure.sla_tracker import (
+    SLAComplianceReport,
+    SLADefinition,
+    SLAMeasurement,
+    SLATracker,
+    SLAViolation,
+    Severity,
+)
 from lyra_cli.infrastructure.reliability import (
     CircuitBreaker,
     CircuitState,
@@ -65,4 +73,11 @@ __all__ = [
     # Profiling
     "PerformanceProfiler",
     "ProfileReport",
+    # SLA (9.4)
+    "SLADefinition",
+    "SLAMeasurement",
+    "SLAViolation",
+    "SLAComplianceReport",
+    "SLATracker",
+    "Severity",
 ]

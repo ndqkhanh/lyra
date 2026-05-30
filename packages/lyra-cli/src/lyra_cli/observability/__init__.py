@@ -31,6 +31,32 @@ from lyra_cli.observability.tracing import (
     TracingProvider,
 )
 
+from lyra_cli.observability.dashboard_command import (
+    DashboardCommand,
+    DashboardConfig,
+    DashboardPanel,
+    PanelType,
+)
+from lyra_cli.observability.health_command import (
+    ComponentHealth,
+    DependencyStatus,
+    HealthCommand,
+    HealthScore,
+)
+from lyra_cli.observability.metrics_command import (
+    MetricsCommand,
+    MetricsFilter,
+    MetricsFormat,
+    MetricsQuery,
+    MetricType,
+)
+from lyra_cli.observability.trace_command import (
+    SpanDetail,
+    TraceCommand,
+    TraceFilter,
+    TraceTimeline,
+)
+
 __all__ = [
     # Tracing
     "SpanKind",
@@ -52,4 +78,22 @@ __all__ = [
     "AgentStatus",
     "SystemHealth",
     "MonitoringDashboard",
+    # Commands (9.3)
+    "MetricsCommand",
+    "MetricsQuery",
+    "MetricsFilter",
+    "MetricsFormat",
+    "MetricType",
+    "HealthCommand",
+    "ComponentHealth",
+    "DependencyStatus",
+    "HealthScore",
+    "TraceCommand",
+    "SpanDetail",
+    "TraceFilter",
+    "TraceTimeline",
+    "DashboardCommand",
+    "DashboardConfig",
+    "DashboardPanel",
+    "PanelType",
 ]
