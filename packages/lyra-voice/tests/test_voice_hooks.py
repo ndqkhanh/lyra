@@ -87,7 +87,7 @@ class TestDefaultHookMappings:
         assert "error" in events
 
     def test_count(self):
-        assert len(DEFAULT_HOOK_MAPPINGS) == 14
+        assert len(DEFAULT_HOOK_MAPPINGS) == 15
 
 
 # ---------------------------------------------------------------------------

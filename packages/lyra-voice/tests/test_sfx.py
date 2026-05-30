@@ -101,18 +101,18 @@ class TestBuiltinPacks:
 
     def test_minimal_pack_has_sfx(self):
         minimal = [p for p in BUILTIN_PACKS if p.pack_id == "minimal"][0]
-        assert len(minimal.sfx) == 14
+        assert len(minimal.sfx) == 15
         categories = {a.category for a in minimal.sfx}
         assert SFXCategory.SESSION_START in categories
         assert SFXCategory.ERROR in categories
 
     def test_scifi_pack_has_sfx(self):
         scifi = [p for p in BUILTIN_PACKS if p.pack_id == "scifi"][0]
-        assert len(scifi.sfx) == 14
+        assert len(scifi.sfx) == 15
 
     def test_warcraft_pack_has_sfx(self):
         wc = [p for p in BUILTIN_PACKS if p.pack_id == "warcraft_peon"][0]
-        assert len(wc.sfx) == 14
+        assert len(wc.sfx) == 15
         assert wc.tts_voice == "kokoro-default"
 
 
@@ -233,6 +233,6 @@ class TestHookToSFX:
             "PreToolUse", "PostToolUse", "Stop", "session_start",
             "session_end", "error", "agent_handoff", "wake_word",
             "barge_in", "thinking", "tool_call", "tool_result",
-            "workflow_complete", "turn_complete",
+            "workflow_complete", "notification", "turn_complete",
         }
         assert set(HOOK_TO_SFX.keys()) == expected

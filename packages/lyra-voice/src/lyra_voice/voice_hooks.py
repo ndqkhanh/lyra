@@ -101,6 +101,7 @@ DEFAULT_HOOK_MAPPINGS: tuple[VoiceHookMapping, ...] = (
     VoiceHookMapping("tool_call", SFXCategory.TOOL_CALL, cooldown_ms=200),
     VoiceHookMapping("tool_result", SFXCategory.TOOL_RESULT, cooldown_ms=200),
     VoiceHookMapping("workflow_complete", SFXCategory.WORKFLOW_COMPLETE),
+    VoiceHookMapping("notification", SFXCategory.NOTIFICATION, cooldown_ms=300),
     VoiceHookMapping("turn_complete", SFXCategory.TURN_COMPLETE, cooldown_ms=300),
 )
 
@@ -128,8 +129,6 @@ class VoiceHookManager:
     _stats: VoiceHookStats = field(default_factory=VoiceHookStats)
     _last_triggered: dict[str, float] = field(default_factory=dict)
     _muted_hooks: set[str] = field(default_factory=set)
-    _hook_handlers: dict[str, list] = field(default_factory=dict)
-
     def __post_init__(self) -> None:
         for mapping in DEFAULT_HOOK_MAPPINGS:
             self._mappings[mapping.hook_event] = mapping
@@ -168,7 +167,7 @@ class VoiceHookManager:
     def on_hook(
         self,
         hook_event: str,
-        context: dict | None = None,
+        context: dict[str, str] | None = None,
     ) -> bytes:
         """Handle a hook event — play the mapped SFX if applicable.
 
@@ -224,7 +223,7 @@ class VoiceHookManager:
         self._stats.total_played += 1
         return audio
 
-    def _evaluate_condition(self, condition: str, context: dict) -> bool:
+    def _evaluate_condition(self, condition: str, context: dict[str, str]) -> bool:
         """Evaluate a simple condition string against hook context.
 
         Supports: ``tool_name==<name>`` and ``status==<status>``.

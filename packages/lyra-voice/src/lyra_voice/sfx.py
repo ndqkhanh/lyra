@@ -35,6 +35,7 @@ class SFXCategory(str, Enum):
     BARGE_IN = "barge_in"
     PRE_TOOL_USE = "pre_tool_use"
     POST_TOOL_USE = "post_tool_use"
+    NOTIFICATION = "notification"
     STOP = "stop"
 
 
@@ -135,6 +136,8 @@ def _build_minimal_pack() -> VoicePack:
                      "Attention ping", tone_frequency=1200.0, tone_duration_ms=100),
             SFXAsset("Barge In", SFXCategory.BARGE_IN,
                      "Quick interrupt tone", tone_frequency=300.0, tone_duration_ms=80),
+            SFXAsset("Notification", SFXCategory.NOTIFICATION,
+                     "Soft notification ping", tone_frequency=550.0, tone_duration_ms=100),
             SFXAsset("PreToolUse", SFXCategory.PRE_TOOL_USE,
                      "Tool start click", tone_frequency=700.0, tone_duration_ms=40),
             SFXAsset("PostToolUse", SFXCategory.POST_TOOL_USE,
@@ -176,6 +179,8 @@ def _build_scifi_pack() -> VoicePack:
                      "Alert ping", tone_frequency=2000.0, tone_duration_ms=120),
             SFXAsset("Interrupt", SFXCategory.BARGE_IN,
                      "Static burst", tone_frequency=180.0, tone_duration_ms=100),
+            SFXAsset("Incoming Message", SFXCategory.NOTIFICATION,
+                     "Synth notification", tone_frequency=1500.0, tone_duration_ms=120),
             SFXAsset("PreToolUse", SFXCategory.PRE_TOOL_USE,
                      "Startup blip", tone_frequency=1100.0, tone_duration_ms=50),
             SFXAsset("PostToolUse", SFXCategory.POST_TOOL_USE,
@@ -217,6 +222,8 @@ def _build_warcraft_pack() -> VoicePack:
                      "\"Yes?\" — Wake word", tone_frequency=350.0, tone_duration_ms=200),
             SFXAsset("What?", SFXCategory.BARGE_IN,
                      "\"What?\" — Interruption", tone_frequency=290.0, tone_duration_ms=200),
+            SFXAsset("What You Want?", SFXCategory.NOTIFICATION,
+                     "\"What you want?\" — Notification", tone_frequency=310.0, tone_duration_ms=300),
             SFXAsset("Yes M'lord", SFXCategory.PRE_TOOL_USE,
                      "\"Yes m'lord\" — Pre-tool", tone_frequency=310.0, tone_duration_ms=200),
             SFXAsset("Alright", SFXCategory.POST_TOOL_USE,
@@ -380,6 +387,7 @@ HOOK_TO_SFX: dict[str, SFXCategory] = {
     "tool_call": SFXCategory.TOOL_CALL,
     "tool_result": SFXCategory.TOOL_RESULT,
     "workflow_complete": SFXCategory.WORKFLOW_COMPLETE,
+    "notification": SFXCategory.NOTIFICATION,
     "turn_complete": SFXCategory.TURN_COMPLETE,
 }
 

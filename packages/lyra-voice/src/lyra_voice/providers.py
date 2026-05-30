@@ -321,7 +321,7 @@ class GapBasedTurn(TurnTakingProvider):
 
     kind = TurnTakingKind.GAP_BASED
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._last_speech_time: float = 0.0
         self._silence_start: float | None = None
 
@@ -383,23 +383,24 @@ class GapBasedTurn(TurnTakingProvider):
 
 
 class SileroVAD(VADProvider):
-    """Silero VAD — neural voice activity detection with energy fallback.
+    """Enhanced heuristic VAD with zero-crossing rate and spectral analysis.
 
-    Uses the Silero VAD model when available (``silero_vad`` package).
-    Falls back to enhanced energy+VAD heuristics when the model is absent.
+    Uses ZCR + energy heuristics for voice activity detection. The neural
+    Silero VAD model path is reserved for future integration when
+    ``silero_vad`` package dependencies are fully available.
     """
 
     kind = VADProviderKind.SILERO
 
     def __init__(self) -> None:
-        self._model = None
+        self._model: str | None = None
         self._try_load_model()
 
     def _try_load_model(self) -> None:
         try:
             __import__("torch")
             self._model = "silero_vad_loaded"
-            logger.info("Silero VAD model loaded (torch available)")
+            logger.info("Silero VAD: torch available, using enhanced ZCR heuristics")
         except ImportError:
             logger.debug("Silero VAD: torch not available, using heuristic fallback")
 
@@ -527,7 +528,7 @@ class SmartTurn(TurnTakingProvider):
                 return TurnDecision(
                     "interrupt", 0.85, f"barge-in detected (rms={rms:.0f})"
                 )
-            return TurnDecision("wait", 0.9, f"user speaking")
+            return TurnDecision("wait", 0.9, "user speaking")
 
         # Silence — check for semantic endpoint
         if self._silence_start is None:
@@ -595,7 +596,8 @@ class WhisperSTT(STTProvider):
 
     def __init__(self, model_size: str = "turbo") -> None:
         self._model_size = model_size
-        self._model = None
+        self._model: str | None = None
+        self._whisper_instance = None
         self._try_load_model()
 
     def _try_load_model(self) -> None:
@@ -616,7 +618,7 @@ class WhisperSTT(STTProvider):
         return self._transcribe_stub(audio, cfg)
 
     async def _transcribe_real(self, audio: bytes, config: STTConfig) -> STTResult:
-        """Real transcription via faster-whisper."""
+        """Real transcription via faster-whisper (model cached after first load)."""
         import os
         import tempfile
         import wave
@@ -630,9 +632,14 @@ class WhisperSTT(STTProvider):
                     wf.setframerate(config.sample_rate)
                     wf.writeframes(audio)
 
-            from faster_whisper import WhisperModel
-            model = WhisperModel(config.model_size, device="cpu", compute_type="int8")
-            segments, info = model.transcribe(wav_path, language=config.language)
+            if self._whisper_instance is None:
+                from faster_whisper import WhisperModel
+                self._whisper_instance = WhisperModel(
+                    config.model_size, device="cpu", compute_type="int8"
+                )
+            segments, info = self._whisper_instance.transcribe(
+                wav_path, language=config.language
+            )
             text = " ".join(s.text for s in segments)
 
             os.unlink(wav_path)
@@ -699,16 +706,16 @@ class KokoroTTS(TTSProvider):
     kind = TTSProviderKind.KOKORO
 
     def __init__(self) -> None:
-        self._model = None
+        self._model: str | None = None
         self._try_load_model()
 
     def _try_load_model(self) -> None:
         try:
             __import__("torch")
             self._model = "kokoro_loaded"
-            logger.info("Kokoro TTS loaded (torch available)")
+            logger.info("Kokoro TTS: torch available, using placeholder synthesis")
         except ImportError:
-            logger.debug("Kokoro TTS: torch not available, using stub")
+            logger.debug("Kokoro TTS: torch not available, using stub tone generator")
 
     async def synthesize(
         self, text: str, config: TTSConfig | None = None
@@ -720,22 +727,25 @@ class KokoroTTS(TTSProvider):
         return self._synthesize_stub(text, cfg)
 
     async def _synthesize_real(self, text: str, config: TTSConfig) -> bytes:
-        """Real synthesis via Kokoro-82M."""
-        try:
-            import struct
+        """Placeholder for real Kokoro-82M synthesis.
 
-            # Placeholder for real Kokoro synthesis
-            # kokoro_pipeline = KPipeline(lang_code=config.language[:2])
-            # audio_tensor = kokoro_pipeline(text, voice=config.voice_id)
-            # return audio_tensor.numpy().tobytes()
+        When the ``kokoro`` package is installed, this path will use
+        ``KPipeline`` for neural synthesis. Currently produces a
+        lower-frequency placeholder tone distinct from the stub.
+        """
+        import math
+        import struct
+
+        try:
+            # Future: kokoro_pipeline = KPipeline(lang_code=config.language[:2])
+            # Future: audio_tensor = kokoro_pipeline(text, voice=config.voice_id)
+            # Future: return audio_tensor.numpy().tobytes()
 
             sample_rate = config.sample_rate
             duration = min(len(text) * 0.08, 10.0)
             num_samples = int(sample_rate * duration)
             samples = [
-                int(8000 * __import__("math").sin(
-                    2 * __import__("math").pi * 220 * i / sample_rate
-                ))
+                int(8000 * math.sin(2 * math.pi * 220 * i / sample_rate))
                 for i in range(num_samples)
             ]
             return struct.pack(f"<{len(samples)}h", *samples)
@@ -744,20 +754,18 @@ class KokoroTTS(TTSProvider):
             return self._synthesize_stub(text, config)
 
     def _synthesize_stub(self, text: str, config: TTSConfig) -> bytes:
-        """Stub synthesis generating minimal audio from text."""
+        """Stub synthesis generating a simple tone matching text length."""
+        import math
         import struct
 
         if not text.strip():
             return b""
 
-        # Generate a simple tone matching text length
         sample_rate = config.sample_rate
         duration = min(len(text) * 0.06, 5.0)
         num_samples = int(sample_rate * duration)
         samples = [
-            int(4000 * __import__("math").sin(
-                2 * __import__("math").pi * 440 * i / sample_rate
-            ))
+            int(4000 * math.sin(2 * math.pi * 440 * i / sample_rate))
             for i in range(num_samples)
         ]
         return struct.pack(f"<{len(samples)}h", *samples)
