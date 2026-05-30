@@ -83,6 +83,7 @@ from .evals import (
     TTCCurve,
     TTCPoint,
 )
+from .filesystem_context import FilesystemContext, StoredItem
 from .events import Event, EventBus, Subscription, get_event_bus, set_event_bus
 from .forensic import (
     ReplayComparator,
@@ -465,6 +466,7 @@ __all__ = [
     "Subscription",
     "Example",
     "ExtractiveSummarizer",
+    "FilesystemContext",
     "FireResult",
     "GateAction",
     "GateDecision",
@@ -579,6 +581,7 @@ __all__ = [
     "Span",
     "StaticRetractionIndex",
     "StoreDecision",
+    "StoredItem",
     "StubDiffVerifier",
     "StubDryRunVerifier",
     "StubPermissionVerifier",

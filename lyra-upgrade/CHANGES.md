@@ -307,6 +307,22 @@
 - **NEW** `tests/test_tool_masking.py` — 41 tests: ToolMaskMode (2), ToolDescriptor (3), ToolMask (8), MaskRule (3), ToolMaskPolicy (6), ToolMaskApplier (10), build_safety_policy (4), build_strict_policy (2), integration (3)
 - **UPDATED** `__init__.py` — Exports MaskRule, ToolDescriptor, ToolMask, ToolMaskApplier, ToolMaskMode, ToolMaskPolicy, build_safety_policy, build_strict_policy
 
+### 2026-05-30 — Tier 2.4: Filesystem as Externalized Context (P2-X #19)
+
+- **NEW** `lyra_harness_core/filesystem_context.py` — Externalized context storage for bulky data:
+  - `StoredItem` (frozen) — metadata: key, path, content_hash, content_type, token_count, size_bytes, metadata
+  - `FilesystemContext` — store bulky data on filesystem, agents interact via paths not raw content
+  - store(key, data) — write data with content-type + metadata, deduplicate by SHA-256 hash, return retrieval path
+  - retrieve(key_or_path, max_tokens) — read content with token budget truncation
+  - retrieve_bytes(key_or_path) — raw bytes retrieval
+  - drop(key) — restorable compression: remove file but preserve index entry
+  - purge(key) — full removal of file + index
+  - truncate(key, max_tokens) — in-place truncation to token budget
+  - list_keys(), item_count, total_size_bytes, get_item() — introspection
+  - clear() / cleanup() — cleanup operations
+- **NEW** `tests/test_filesystem_context.py` — 32 tests: StoredItem (3), FilesystemContext (27), integration (2)
+- **UPDATED** `__init__.py` — Exports FilesystemContext, StoredItem
+
 ---
 
 ## Upcoming (Tier 1 — Flagship + Core Engine)
