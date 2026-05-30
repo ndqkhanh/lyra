@@ -172,6 +172,16 @@ from .integrations import (
     adapt_graph,
     verify_graph_protocol,
 )
+from .ledger import (
+    IdempotencyMode,
+    IdempotentResult,
+    IdempotentRunner,
+    LedgerEntry,
+    LedgerEntryStatus,
+    LedgerQuery,
+    LedgerStats,
+    SharedLedger,
+)
 from .isolation import (
     ContextNamespace,
     IsolatedContext,
@@ -677,6 +687,14 @@ __all__ = [
     "InMemoryCuratorHost",
     "InMemoryMarketplaceHost",
     "InstallResult",
+    "IdempotencyMode",
+    "IdempotentResult",
+    "IdempotentRunner",
+    "LedgerEntry",
+    "LedgerEntryStatus",
+    "LedgerQuery",
+    "LedgerStats",
+    "SharedLedger",
     "IsolatedContext",
     "KeywordRiskClassifier",
     "LLMProvider",
