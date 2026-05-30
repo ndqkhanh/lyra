@@ -293,6 +293,20 @@
 - **NEW** `tests/test_skill_format.py` — 51 tests: SkillInput (3), SkillOutput (2), SkillTrigger (3), SkillRetry (2), SkillManifest (2), SkillValidationResult (3), load_skill_from_markdown (6), load_skill_from_yaml (3), load_skill (3), validate_skill_manifest (9), SkillManifestRegistry (13), integration (2)
 - **UPDATED** `__init__.py` — Exports SkillInput, SkillManifest, SkillManifestRegistry, SkillOutput, SkillRetry, SkillTrigger, SkillValidationResult, load_skill, load_skill_from_markdown, load_skill_from_yaml, validate_skill_manifest
 
+### 2026-05-30 — Tier 2.3: Tool Masking over Tool Removal (P2-B8)
+
+- **NEW** `lyra_harness_core/tool_masking.py` — Tool mask infrastructure preserving KV-cache coherence:
+  - `ToolMaskMode` enum — AUTO (free choice), REQUIRED (subset), SPECIFIED (single tool)
+  - `ToolDescriptor` (frozen) — minimal tool descriptor (name, description, parameters)
+  - `ToolMask` (frozen) — mask configuration with mode, allowed_tools, required_tool, reason; is_restrictive, allows(tool_name)
+  - `MaskRule` (frozen) — single policy rule with condition, mode, priority ordering
+  - `ToolMaskPolicy` — ordered rule evaluation, add_rule with priority sorting, evaluate(phase, task_type, tool_calls_so_far, max_tool_calls)
+  - `ToolMaskApplier` — apply mask to tool list, build provider-agnostic mask config dict, apply_and_config convenience
+  - `build_safety_policy()` — pre-built policy: planning→readonly, execution→auto, verification→readonly
+  - `build_strict_policy(required_tool)` — pre-built policy: SPECIFIED mode for forced tool calls
+- **NEW** `tests/test_tool_masking.py` — 41 tests: ToolMaskMode (2), ToolDescriptor (3), ToolMask (8), MaskRule (3), ToolMaskPolicy (6), ToolMaskApplier (10), build_safety_policy (4), build_strict_policy (2), integration (3)
+- **UPDATED** `__init__.py` — Exports MaskRule, ToolDescriptor, ToolMask, ToolMaskApplier, ToolMaskMode, ToolMaskPolicy, build_safety_policy, build_strict_policy
+
 ---
 
 ## Upcoming (Tier 1 — Flagship + Core Engine)
