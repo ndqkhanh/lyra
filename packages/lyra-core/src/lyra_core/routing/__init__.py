@@ -33,6 +33,12 @@ from .policy_network import (
     PolicyNetwork,
     PolicyWeights,
 )
+from .provider_health import (
+    CircuitState,
+    HealthStatus,
+    ProviderHealthMonitor,
+    ProviderMetrics,
+)
 from .reward_calculator import RewardCalculator, RewardComponents, RewardConfig
 from .rl_policy_optimizer import (
     RLPriorityOptimizer,
@@ -88,4 +94,9 @@ __all__ = [
     "PricingSnapshot",
     "PricingTier",
     "ProviderQuote",
+    # Provider Health (4.2)
+    "CircuitState",
+    "HealthStatus",
+    "ProviderHealthMonitor",
+    "ProviderMetrics",
 ]
