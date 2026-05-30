@@ -278,6 +278,7 @@ class DreamConsolidator:
         novelty_threshold: float = 0.3,
         min_pattern_occurrences: int = 3,
         dedup_similarity_threshold: float = 0.85,
+        streaming_mode: bool = False,
     ) -> None:
         """
         Initialize the dream consolidator.
@@ -287,11 +288,15 @@ class DreamConsolidator:
             novelty_threshold: Minimum novelty score to accept a candidate.
             min_pattern_occurrences: Minimum occurrences to detect a pattern.
             dedup_similarity_threshold: Keyword overlap threshold for dedup.
+            streaming_mode: Enable streaming consolidation mode.
         """
         self._store = memory_store
         self._novelty_threshold = novelty_threshold
         self._min_pattern_occurrences = min_pattern_occurrences
         self._dedup_similarity_threshold = dedup_similarity_threshold
+        self._streaming_mode = streaming_mode
+        self._streaming_buffer: list[dict] = []
+        self._streaming_batch_size = 10
 
     # ------------------------------------------------------------------
     # Phase 1: ORIENT
@@ -608,6 +613,122 @@ class DreamConsolidator:
             )
 
         return surviving
+
+    # ------------------------------------------------------------------
+    # Streaming mode
+    # ------------------------------------------------------------------
+
+    def ingest_streaming(self, trace: dict) -> list[MemoryFragment]:
+        """
+        Ingest a single trace in streaming mode.
+
+        Buffers traces and runs incremental consolidation when batch size
+        is reached. Designed for real-time memory ingestion during active
+        sessions.
+
+        Args:
+            trace: Single trace dict with keys ``content``, ``session_id``,
+                ``timestamp``, ``entities``, and ``type``.
+
+        Returns:
+            List of consolidated memory fragments (empty if batch not ready).
+        """
+        if not self._streaming_mode:
+            raise RuntimeError("Streaming mode not enabled")
+
+        self._streaming_buffer.append(trace)
+
+        # Run consolidation when batch size reached
+        if len(self._streaming_buffer) >= self._streaming_batch_size:
+            return self._process_streaming_batch()
+
+        return []
+
+    def _process_streaming_batch(self) -> list[MemoryFragment]:
+        """
+        Process buffered traces in streaming mode.
+
+        Runs a lightweight consolidation cycle on the buffered traces:
+        - ORIENT phase only (no GATHER to avoid expensive searches)
+        - Direct consolidation without merge (ADD-only)
+        - No pruning (deferred to batch consolidation)
+
+        Returns:
+            List of consolidated memory fragments.
+        """
+        if not self._streaming_buffer:
+            return []
+
+        # ORIENT: Extract candidates from buffer
+        candidates = self.orient(self._streaming_buffer)
+
+        # Lightweight consolidation: skip GATHER and PRUNE
+        consolidated: list[MemoryFragment] = []
+        for candidate in candidates:
+            fragment = candidate.fragment
+
+            # Simple confidence boost based on novelty
+            boosted_confidence = min(1.0, fragment.confidence * (1.0 + candidate.novelty_score * 0.2))
+
+            enriched_fragment = MemoryFragment(
+                content=fragment.content,
+                source_session_id=fragment.source_session_id,
+                memory_type=fragment.memory_type,
+                confidence=boosted_confidence,
+                entities=fragment.entities,
+                timestamp=fragment.timestamp,
+                ttl_days=fragment.ttl_days,
+            )
+            consolidated.append(enriched_fragment)
+
+        # Clear buffer
+        self._streaming_buffer.clear()
+
+        # Save to store
+        for fragment in consolidated:
+            try:
+                self._store.save(fragment)
+            except Exception:
+                # Silently skip failed saves in streaming mode
+                pass
+
+        logger.debug(
+            "Streaming consolidation: %d traces -> %d fragments",
+            len(candidates),
+            len(consolidated),
+        )
+
+        return consolidated
+
+    def flush_streaming(self) -> list[MemoryFragment]:
+        """
+        Flush remaining buffered traces in streaming mode.
+
+        Processes any traces remaining in the buffer, regardless of batch size.
+
+        Returns:
+            List of consolidated memory fragments.
+        """
+        if not self._streaming_mode:
+            raise RuntimeError("Streaming mode not enabled")
+
+        return self._process_streaming_batch()
+
+    def set_streaming_batch_size(self, size: int) -> None:
+        """
+        Set the batch size for streaming consolidation.
+
+        Args:
+            size: Number of traces to buffer before consolidation.
+        """
+        if size <= 0:
+            raise ValueError("Batch size must be positive")
+        self._streaming_batch_size = size
+
+    @property
+    def streaming_buffer_size(self) -> int:
+        """Current number of traces in streaming buffer."""
+        return len(self._streaming_buffer)
 
     # ------------------------------------------------------------------
     # Full cycle

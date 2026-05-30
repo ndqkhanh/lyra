@@ -123,12 +123,32 @@ from lyra_memory.ingestion import (
     RelationExtractor,
     RelationType,
 )
+from lyra_memory.mragent.cue_tag_episode import (
+    CueTagEpisodeEncoder,
+    EpisodeEncoding,
+)
+from lyra_memory.mragent.cue_tag_semantic import (
+    CueTagSemanticEncoder,
+    SemanticEncoding,
+)
 from lyra_memory.mragent.dual_encoder import (
     DenseVector,
     DualEncodedMemory,
     DualEncoder,
     EncoderConfig,
+    MRAgentDualEncoder,
     SparseVector,
+)
+from lyra_memory.routing_fabric import (
+    MemoryResult,
+    RoutingConfig,
+    RoutingFabric,
+)
+from lyra_memory.context_prioritizer import ContextPrioritizer
+from lyra_memory.progressive_disclosure import (
+    DisclosureConfig,
+    DisclosureLevel,
+    ProgressiveDisclosureManager,
 )
 from lyra_memory.multi_graph import (
     CausalRelation,
@@ -289,11 +309,25 @@ __all__ = [
     "EntityNode",
     "SSMRelation",
     # MRAgent Dual Encoding
+    "CueTagEpisodeEncoder",
+    "CueTagSemanticEncoder",
     "DenseVector",
     "DualEncodedMemory",
     "DualEncoder",
     "EncoderConfig",
+    "EpisodeEncoding",
+    "MRAgentDualEncoder",
+    "SemanticEncoding",
     "SparseVector",
+    # Routing Fabric
+    "MemoryResult",
+    "RoutingConfig",
+    "RoutingFabric",
+    # Progressive Disclosure
+    "ContextPrioritizer",
+    "DisclosureConfig",
+    "DisclosureLevel",
+    "ProgressiveDisclosureManager",
     # Entropic Consolidation (Plan 30)
     "ConsolidatedMemory",
     "ConsolidationPhase",
