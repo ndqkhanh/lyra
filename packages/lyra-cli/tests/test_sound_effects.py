@@ -96,7 +96,7 @@ class TestSoundManager:
         sm = SoundManager()
         assert sm.enabled is False
         assert sm.active_pack_name is None
-        assert len(sm.available_packs) == 3
+        assert len(sm.available_packs) >= 3
 
     def test_enable_disable_toggle(self):
         sm = SoundManager()

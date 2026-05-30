@@ -14,6 +14,7 @@ class PersonalityTrait(StrEnum):
     COWBOY = "cowboy"
     ZEN_MASTER = "zen_master"
     DRILL_SERGEANT = "drill_sergeant"
+    WARCRAFT3_PEON = "warcraft3_peon"
 
 
 @dataclass(frozen=True)

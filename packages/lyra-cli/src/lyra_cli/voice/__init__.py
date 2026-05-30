@@ -26,6 +26,7 @@ from .personalities import (
     PiratePersonality,
     RobotPersonality,
     VoiceResponse,
+    Warcraft3PeonPersonality,
     ZenMasterPersonality,
 )
 
@@ -35,6 +36,8 @@ from .sound_notifications import (
     AgentState,
     SoundConfig,
     SoundNotifier,
+    THEME_PRESETS,
+    WARCRAFT3_THEME_PRESETS,
     get_sound_notifier,
 )
 
@@ -98,6 +101,8 @@ __all__ = [
     "AgentState",
     "SoundConfig",
     "SoundNotifier",
+    "THEME_PRESETS",
+    "WARCRAFT3_THEME_PRESETS",
     "get_sound_notifier",
     # Voice session
     "SessionConfig",

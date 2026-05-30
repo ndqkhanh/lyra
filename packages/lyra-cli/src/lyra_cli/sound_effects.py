@@ -31,6 +31,8 @@ class SoundEvent(str, Enum):
     PRE_COMPACT = "pre_compact"
     ERROR = "error"
     TASK_COMPLETE = "task_complete"
+    AGENT_SPAWN = "agent_spawn"
+    COST_WARNING = "cost_warning"
 
 
 @dataclass
@@ -205,7 +207,19 @@ class SoundManager:
             },
         )
 
-        self._packs = {"retro": retro, "minimal": minimal, "sci-fi": sci_fi}
+        warcraft3 = SoundPack(
+            name="warcraft3",
+            description="Warcraft III peon grunts and work sounds",
+            sounds={
+                SoundEvent.SESSION_START: str(base / "warcraft3" / "ready_to_work.wav"),
+                SoundEvent.ERROR: str(base / "warcraft3" / "not_ready.wav"),
+                SoundEvent.TASK_COMPLETE: str(base / "warcraft3" / "work_complete.wav"),
+                SoundEvent.AGENT_SPAWN: str(base / "warcraft3" / "zug_zug.wav"),
+                SoundEvent.COST_WARNING: str(base / "warcraft3" / "not_enough_gold.wav"),
+            },
+        )
+
+        self._packs = {"retro": retro, "minimal": minimal, "sci-fi": sci_fi, "warcraft3": warcraft3}
 
     def generate_pack_skeleton(self, name: str, target_dir: str | Path) -> Path:
         """Create a skeleton directory for a custom sound pack."""

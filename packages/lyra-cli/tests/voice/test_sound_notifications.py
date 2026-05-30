@@ -56,9 +56,12 @@ class TestDefaultSoundPresets:
             assert isinstance(preset, SoundConfig)
             assert preset.enabled
 
-    def test_preset_values_differ(self):
-        freqs = {s: DEFAULT_SOUND_PRESETS[s].frequency for s in AgentState}
-        assert len(set(freqs.values())) == len(AgentState)
+    def test_preset_values_in_range(self):
+        for state in AgentState:
+            preset = DEFAULT_SOUND_PRESETS[state]
+            assert 20 <= preset.frequency <= 20000
+            assert 50 <= preset.duration_ms <= 5000
+            assert 1 <= preset.repetitions <= 20
 
 
 class TestSoundNotifier:

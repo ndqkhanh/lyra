@@ -10,6 +10,7 @@ from .personalities.drill_sergeant import DrillSergeantPersonality
 from .personalities.personality_base import PersonalityBase, PersonalityTrait, VoiceResponse
 from .personalities.pirate import PiratePersonality
 from .personalities.robot import RobotPersonality
+from .personalities.warcraft3_peon import Warcraft3PeonPersonality
 from .personalities.zen_master import ZenMasterPersonality
 
 
@@ -28,6 +29,7 @@ class PersonalityRegistry:
             CowboyPersonality,
             ZenMasterPersonality,
             DrillSergeantPersonality,
+            Warcraft3PeonPersonality,
         ]:
             instance = cls()
             self._personalities[instance.trait] = instance

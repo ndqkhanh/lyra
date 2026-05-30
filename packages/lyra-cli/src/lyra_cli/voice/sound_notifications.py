@@ -17,6 +17,8 @@ __all__ = [
     "AgentState",
     "SoundConfig",
     "SoundNotifier",
+    "WARCRAFT3_THEME_PRESETS",
+    "THEME_PRESETS",
     "get_sound_notifier",
 ]
 
@@ -24,19 +26,25 @@ __all__ = [
 class AgentState(str, Enum):
     """Agent lifecycle states that can trigger sound notifications."""
 
+    STARTUP = "startup"
     TASK_COMPLETE = "task_complete"
     ERROR = "error"
     WARNING = "warning"
     AGENT_READY = "agent_ready"
     AGENT_THINKING = "agent_thinking"
+    AGENT_SPAWN = "agent_spawn"
+    COST_WARNING = "cost_warning"
 
 
 AGENT_STATE_BEEP_PATTERNS: dict[AgentState, str] = {
+    AgentState.STARTUP: "ready",
     AgentState.TASK_COMPLETE: "success",
     AgentState.ERROR: "error",
     AgentState.WARNING: "warning",
     AgentState.AGENT_READY: "ready",
     AgentState.AGENT_THINKING: "thinking",
+    AgentState.AGENT_SPAWN: "ready",
+    AgentState.COST_WARNING: "warning",
 }
 
 
@@ -56,6 +64,8 @@ class SoundConfig:
         Frequency of the beep in Hz. Default 440 (A4).
     repetitions : int
         Number of times to repeat the sound. Default 1.
+    theme : str
+        Optional theme identifier (e.g. ``"warcraft3"``). Defaults to empty.
     """
 
     enabled: bool = True
@@ -63,6 +73,7 @@ class SoundConfig:
     duration_ms: int = 200
     frequency: int = 440
     repetitions: int = 1
+    theme: str = ""
 
     def __post_init__(self) -> None:
         self.duration_ms = max(50, min(5000, self.duration_ms))
@@ -72,6 +83,9 @@ class SoundConfig:
 
 # Standard presets per agent state
 DEFAULT_SOUND_PRESETS: dict[AgentState, SoundConfig] = {
+    AgentState.STARTUP: SoundConfig(
+        frequency=660, duration_ms=200, repetitions=1,
+    ),
     AgentState.TASK_COMPLETE: SoundConfig(
         frequency=880, duration_ms=300, repetitions=2,
     ),
@@ -87,6 +101,44 @@ DEFAULT_SOUND_PRESETS: dict[AgentState, SoundConfig] = {
     AgentState.AGENT_THINKING: SoundConfig(
         frequency=330, duration_ms=150, repetitions=1,
     ),
+    AgentState.AGENT_SPAWN: SoundConfig(
+        frequency=660, duration_ms=200, repetitions=1,
+    ),
+    AgentState.COST_WARNING: SoundConfig(
+        frequency=440, duration_ms=400, repetitions=3,
+    ),
+}
+
+# Warcraft III theme presets — low grunt-like frequencies for peon feel
+WARCRAFT3_THEME_PRESETS: dict[AgentState, SoundConfig] = {
+    AgentState.STARTUP: SoundConfig(
+        frequency=180, duration_ms=250, repetitions=1, theme="warcraft3",
+    ),
+    AgentState.TASK_COMPLETE: SoundConfig(
+        frequency=220, duration_ms=400, repetitions=2, theme="warcraft3",
+    ),
+    AgentState.ERROR: SoundConfig(
+        frequency=120, duration_ms=600, repetitions=3, theme="warcraft3",
+    ),
+    AgentState.WARNING: SoundConfig(
+        frequency=150, duration_ms=350, repetitions=2, theme="warcraft3",
+    ),
+    AgentState.AGENT_READY: SoundConfig(
+        frequency=200, duration_ms=200, repetitions=1, theme="warcraft3",
+    ),
+    AgentState.AGENT_THINKING: SoundConfig(
+        frequency=160, duration_ms=180, repetitions=1, theme="warcraft3",
+    ),
+    AgentState.AGENT_SPAWN: SoundConfig(
+        frequency=200, duration_ms=250, repetitions=1, theme="warcraft3",
+    ),
+    AgentState.COST_WARNING: SoundConfig(
+        frequency=130, duration_ms=500, repetitions=3, theme="warcraft3",
+    ),
+}
+
+THEME_PRESETS: dict[str, dict[AgentState, SoundConfig]] = {
+    "warcraft3": WARCRAFT3_THEME_PRESETS,
 }
 
 
@@ -133,6 +185,26 @@ class SoundNotifier:
     def get_config(self, state: AgentState) -> SoundConfig:
         """Get the sound config for a specific agent state."""
         return self._configs.get(state, SoundConfig(enabled=False))
+
+    def apply_theme(self, theme: str) -> bool:
+        """Apply a theme's sound presets over the current configuration.
+
+        Parameters
+        ----------
+        theme : str
+            Theme name (e.g. ``"warcraft3"``).
+
+        Returns
+        -------
+        bool
+            ``True`` if the theme was found and applied.
+        """
+        presets = THEME_PRESETS.get(theme)
+        if presets is None:
+            return False
+        for state, config in presets.items():
+            self._configs[state] = config
+        return True
 
     def on(self, state: AgentState, callback: Callable[[], None]) -> None:
         """Register a callback that fires when the given state is notified."""

@@ -6,6 +6,7 @@ from .drill_sergeant import DrillSergeantPersonality
 from .personality_base import PersonalityBase, PersonalityTrait, VoiceResponse
 from .pirate import PiratePersonality
 from .robot import RobotPersonality
+from .warcraft3_peon import Warcraft3PeonPersonality
 from .zen_master import ZenMasterPersonality
 
 __all__ = [
@@ -18,4 +19,5 @@ __all__ = [
     "CowboyPersonality",
     "ZenMasterPersonality",
     "DrillSergeantPersonality",
+    "Warcraft3PeonPersonality",
 ]

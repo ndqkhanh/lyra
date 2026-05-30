@@ -273,6 +273,29 @@ from .sre_incident_responder import (  # noqa: E402
 )
 from .test_generator import GeneratedTest, TestCase, TestGeneratorSkill, TestSuite  # noqa: E402
 
+# New specialized skills - Part 2
+from .paper_analyzer import PaperAnalysis, PaperAnalyzer  # noqa: E402
+from .experiment_designer import ExperimentDesign, ExperimentDesigner  # noqa: E402
+from .model_evaluator import ModelEvaluationReport, ModelEvaluator  # noqa: E402
+from .data_scientist import DataScientist, DataSciencePlan  # noqa: E402
+from .aws_architect import AWSArchitect, AWSArchitecturePlan  # noqa: E402
+from .gcp_architect import GCPArchitect, GCPArchitecturePlan  # noqa: E402
+from .azure_architect import AzureArchitect, AzureArchitecturePlan  # noqa: E402
+from .k8s_operator import K8sOperationalPlan, K8sOperator  # noqa: E402
+from .terraform_engineer import TerraformEngineer, TerraformPlan  # noqa: E402
+from .product_manager import ProductManager, ProductPlan  # noqa: E402
+from .technical_pm import TechnicalPM, TechnicalProductPlan  # noqa: E402
+from .program_manager import ProgramManager, ProgramPlan  # noqa: E402
+from .business_analyst import BusinessAnalysis, BusinessAnalyst  # noqa: E402
+from .requirements_engineer import RequirementsEngineer, RequirementsEngineeringPlan  # noqa: E402
+from .ideation_facilitator import IdeationFacilitator, IdeationPlan  # noqa: E402
+from .problem_decomposer import ProblemDecomposer, ProblemDecomposition  # noqa: E402
+from .creative_thinking import CreativeThinking, CreativeThinkingPlan  # noqa: E402
+from .strategy_consultant import StrategyConsultant, StrategicPlan  # noqa: E402
+from .sales_engineer import SalesEngineer, SalesEngineeringPlan  # noqa: E402
+from .solution_consultant import SolutionConsultant, SolutionConsultingPlan  # noqa: E402
+from .demo_specialist import DemoSpecialist, DemoPlan  # noqa: E402
+
 __all__ = [
     # Registry
     "get_registry",
@@ -356,4 +379,52 @@ __all__ = [
     "DebuggingAssistant",
     "DebuggingPlan",
     "BugCategory",
+    # Part 2 - AI Research
+    "PaperAnalyzer",
+    "PaperAnalysis",
+    "ExperimentDesigner",
+    "ExperimentDesign",
+    "ModelEvaluator",
+    "ModelEvaluationReport",
+    "DataScientist",
+    "DataSciencePlan",
+    # Part 2 - Cloud Engineering
+    "AWSArchitect",
+    "AWSArchitecturePlan",
+    "GCPArchitect",
+    "GCPArchitecturePlan",
+    "AzureArchitect",
+    "AzureArchitecturePlan",
+    "K8sOperator",
+    "K8sOperationalPlan",
+    "TerraformEngineer",
+    "TerraformPlan",
+    # Part 2 - Product Management
+    "ProductManager",
+    "ProductPlan",
+    "TechnicalPM",
+    "TechnicalProductPlan",
+    "ProgramManager",
+    "ProgramPlan",
+    # Part 2 - Business Analysis
+    "BusinessAnalyst",
+    "BusinessAnalysis",
+    "RequirementsEngineer",
+    "RequirementsEngineeringPlan",
+    # Part 2 - Brainstorming
+    "IdeationFacilitator",
+    "IdeationPlan",
+    "ProblemDecomposer",
+    "ProblemDecomposition",
+    "CreativeThinking",
+    "CreativeThinkingPlan",
+    "StrategyConsultant",
+    "StrategicPlan",
+    # Part 2 - Sales Engineering
+    "SalesEngineer",
+    "SalesEngineeringPlan",
+    "SolutionConsultant",
+    "SolutionConsultingPlan",
+    "DemoSpecialist",
+    "DemoPlan",
 ]
