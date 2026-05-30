@@ -67,3 +67,11 @@ docs/research/*-repo
 docs/research/*-repo/
 archive/htmlcov/
 archive/dist/
+
+# Generated / transient
+.swarm/
+.claude-flow/
+ProRL-Agent-Server/
+.ruff-errors.txt
+coverage.json
+*.benchmark
