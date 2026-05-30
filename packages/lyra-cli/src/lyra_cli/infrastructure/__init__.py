@@ -34,6 +34,20 @@ from lyra_cli.infrastructure.sla_tracker import (
     SLAViolation,
     Severity,
 )
+from lyra_cli.infrastructure.regression.alert_manager import (
+    AlertManager,
+    AlertRule,
+)
+from lyra_cli.infrastructure.regression.comparator import (
+    BenchmarkComparator,
+    BenchmarkComparisonResult,
+    ComparisonVerdict,
+)
+from lyra_cli.infrastructure.regression.history_store import (
+    BenchmarkRun,
+    HistoryQuery,
+    HistoryStore,
+)
 from lyra_cli.infrastructure.reliability import (
     CircuitBreaker,
     CircuitState,
@@ -80,4 +94,13 @@ __all__ = [
     "SLAComplianceReport",
     "SLATracker",
     "Severity",
+    # Regression Detection (9.2)
+    "BenchmarkComparator",
+    "BenchmarkComparisonResult",
+    "ComparisonVerdict",
+    "BenchmarkRun",
+    "HistoryQuery",
+    "HistoryStore",
+    "AlertManager",
+    "AlertRule",
 ]
