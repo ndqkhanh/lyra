@@ -260,6 +260,22 @@
 - **NEW** `tests/test_slash_commands.py` — 69 tests: CommandArgument (4), CommandFlag (3), CommandDefinition (3), CommandConfig (3), fuzzy_match (8), fuzzy_match_commands (4), load_commands_from_yaml (10), load_commands_from_directories (5), SlashCommandRegistry (28), full pipeline integration (1)
 - **UPDATED** `__init__.py` — Exports SlashCommandArgument, SlashCommandDefinition, SlashCommandFlag, SlashCommandRegistry, CommandConfig, fuzzy_match, fuzzy_match_commands, load_commands_from_directories, load_commands_from_yaml
 
+### 2026-05-30 — Tier 2.1: Unified Memory Router (P2-B1) BREAKTHROUGH
+
+- **NEW** `lyra_harness_core/unified_memory_router.py` — Bandit-based memory store routing:
+  - `MemoryTier` enum — WORKING (T0), EPISODIC (T1), SEMANTIC (T2), PROCEDURAL (T3)
+  - `RawMemory` (frozen) — memory before routing with content_type, source, token_count, metadata
+  - `MemoryFeatures` (frozen) — extracted routing features (content_length, has_code, has_urls, entity_count, token_count)
+  - `StoreDecision` (frozen) — routing result: store tier, compression_level, retention_policy, confidence
+  - `BanditArm` — per-tier statistics with mean and UCB (Upper Confidence Bound)
+  - `MultiArmedBandit` — ε-greedy + UCB1 multi-armed bandit over 4 store tiers
+  - `FeatureExtractor` — extracts routing-relevant features from raw memory
+  - `CompressionPolicy` — tier-specific compression (0% working → 80% procedural)
+  - `RetentionPolicy` — tier-specific retention (ephemeral → permanent)
+  - `UnifiedMemoryRouter` — main router: route(), feedback(), route_batch(), stats
+- **NEW** `tests/test_unified_memory_router.py` — 47 tests: MemoryTier (3), RawMemory (3), MemoryFeatures (2), StoreDecision (2), BanditArm (4), MultiArmedBandit (7), FeatureExtractor (7), CompressionPolicy (4), RetentionPolicy (4), UnifiedMemoryRouter (9), integration (2)
+- **UPDATED** `__init__.py` — Exports UnifiedMemoryRouter, BanditArm, MemoryCompressionPolicy, MemoryFeatureExtractor, MemoryFeatures, MemoryTier, MultiArmedBandit, RawMemory, MemoryRetentionPolicy, StoreDecision
+
 ---
 
 ## Upcoming (Tier 1 — Flagship + Core Engine)
