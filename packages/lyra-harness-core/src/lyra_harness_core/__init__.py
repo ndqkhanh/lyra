@@ -276,6 +276,17 @@ from .routines import (
 from .routing import BELLERouter, QueryType, RouteDecision, RuleBasedClassifier
 from .routing import EffortConfig, EffortDecision, EffortRouter, EffortTier, infer_effort
 from .routing import AgentPhase, PhaseConfig, PhaseDecision, PhaseRouter, infer_phase
+from .slash_commands import (
+    CommandArgument as SlashCommandArgument,
+    CommandConfig,
+    CommandDefinition as SlashCommandDefinition,
+    CommandFlag as SlashCommandFlag,
+    SlashCommandRegistry,
+    fuzzy_match,
+    fuzzy_match_commands,
+    load_commands_from_directories,
+    load_commands_from_yaml,
+)
 from .skill_auto import (
     PromotionVerdict,
     SkillCandidate,
@@ -494,6 +505,15 @@ __all__ = [
     "SkillInvocation",
     "SkillPromoter",
     "SelfAskResult",
+    "SlashCommandArgument",
+    "SlashCommandDefinition",
+    "SlashCommandFlag",
+    "SlashCommandRegistry",
+    "CommandConfig",
+    "fuzzy_match",
+    "fuzzy_match_commands",
+    "load_commands_from_directories",
+    "load_commands_from_yaml",
     "SideEffectLog",
     "SideEffectRecord",
     "SimpleDocument",

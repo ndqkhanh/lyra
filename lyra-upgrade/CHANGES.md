@@ -245,6 +245,21 @@
 - **NEW** `tests/test_auto_compaction.py` — 53 tests: CompactionStrategy (2), FillStatus (6), CompactionCandidate (3), CompactionDecision (3), QualitySpotCheck (2), CompactionVerification (4), CompactionResult (3), compute_fill_ratio (4), AutoCompactor (25), full pipeline integration (1)
 - **UPDATED** `__init__.py` — Exports AutoCompactor, CompactionCandidate, CompactionDecision, CompactionResult, CompactionStrategy, CompactionVerification, FillStatus, QualitySpotCheck, compute_fill_ratio
 
+### 2026-05-30 — Tier 1.4: Custom User-Defined Slash Commands (P1-B4) BREAKTHROUGH
+
+- **NEW** `lyra_harness_core/slash_commands.py` — YAML-configurable slash command system:
+  - `CommandArgument` (frozen) — typed argument definition (string, int, float, bool) with required/default/choices
+  - `CommandFlag` (frozen) — boolean flag definition (--flag)
+  - `CommandDefinition` (frozen) — complete command spec with name, description, usage, handler dispatch path, arguments, flags, source
+  - `CommandConfig` (frozen) — container for all loaded commands from YAML
+  - `fuzzy_match()` — difflib-based fuzzy name matching with configurable cutoff (default 0.6)
+  - `fuzzy_match_commands()` — fuzzy command lookup returning CommandDefinition or None
+  - `load_commands_from_yaml(path)` — parse commands.yaml with full validation
+  - `load_commands_from_directories()` — multi-source loader (explicit dirs, $LYRA_COMMANDS_PATH env var, ~/.lyra/, ./.lyra/)
+  - `SlashCommandRegistry` — register/unregister/register_many, exact + fuzzy lookup, substring suggest, handler dispatch with args/flags/definition
+- **NEW** `tests/test_slash_commands.py` — 69 tests: CommandArgument (4), CommandFlag (3), CommandDefinition (3), CommandConfig (3), fuzzy_match (8), fuzzy_match_commands (4), load_commands_from_yaml (10), load_commands_from_directories (5), SlashCommandRegistry (28), full pipeline integration (1)
+- **UPDATED** `__init__.py` — Exports SlashCommandArgument, SlashCommandDefinition, SlashCommandFlag, SlashCommandRegistry, CommandConfig, fuzzy_match, fuzzy_match_commands, load_commands_from_directories, load_commands_from_yaml
+
 ---
 
 ## Upcoming (Tier 1 — Flagship + Core Engine)
