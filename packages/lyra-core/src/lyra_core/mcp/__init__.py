@@ -21,6 +21,23 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
 
+from lyra_core.mcp.server_discovery import (
+    DiscoveredServer,
+    DiscoveryResult,
+    DiscoverySource,
+    HealthStatus,
+    ServerDiscovery,
+)
+from lyra_core.mcp.transport_pool import (
+    ConnectionInfo,
+    ConnectionState,
+    PoolStats,
+    PoolStatus,
+    TransportConfig,
+    TransportPool,
+    TransportType,
+)
+
 TrustState = Literal["trusted", "untrusted"]
 
 
@@ -124,4 +141,18 @@ __all__ = [
     "MCPServer",
     "TrustState",
     "trust_banner_for",
+    # Server Discovery
+    "DiscoverySource",
+    "HealthStatus",
+    "DiscoveredServer",
+    "DiscoveryResult",
+    "ServerDiscovery",
+    # Transport Pool
+    "TransportType",
+    "ConnectionState",
+    "PoolStatus",
+    "TransportConfig",
+    "ConnectionInfo",
+    "PoolStats",
+    "TransportPool",
 ]
