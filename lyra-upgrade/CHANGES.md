@@ -375,6 +375,31 @@
 - **NEW** `tests/test_session_fork.py` — 57 tests: SessionSnapshot (5), SessionFork (3), CheckpointStore snapshots (11), forking (21), cleanup (7), integration (3)
 - **UPDATED** `__init__.py` — Exports CheckpointStore, SessionFork, SessionSnapshot
 
+### 2026-05-30 — Tier 1.13: State-Machine Tool Gating per Workflow Phase (P1-X)
+
+- **NEW** `lyra_harness_core/tool_gating.py` — Workflow phase state machine with tool gating:
+  - `WorkflowPhase` enum: INIT, PLANNING, RESEARCH, EXECUTION, VERIFICATION, REVIEW, COMPLETE, ERROR
+  - `PhaseDef` (frozen) — phase definition with allowed_tools (None=all, empty=none), required_tools, max_tool_calls
+  - `Transition` (frozen) — named directed edge between phases with optional guard function
+  - `PhaseStateMachine` — add_phase, add_transition (with GuardFn), transition (guard + history), can_transition, can_use_tool, record_tool_call, allowed_tools/required_tools, phase_tool_summary, to_dict
+  - `build_standard_workflow()` — 8-phase workflow with 13 transitions including error recovery and back-navigation
+  - `build_readonly_workflow()` — 3-phase read-only workflow
+- **NEW** `tests/test_tool_gating.py` — 83 tests: WorkflowPhase (2), Transition (3), PhaseDef (3), phase management (5), transitions (10), guards (6), tool gating (13), introspection (7), edge cases (5), standard workflow (17), readonly workflow (8), integration (4)
+- **UPDATED** `__init__.py` — Exports PhaseDef, PhaseStateMachine, Transition, WorkflowPhase, build_readonly_workflow, build_standard_workflow
+
+### 2026-05-30 — Tier 2.5: CraniMem Bio-Gating (P2-B4)
+
+- **NEW** `lyra_harness_core/cranimem.py` — Bio-inspired memory gating with three mechanisms:
+  - `SignalStrength` enum: WEAK, MODERATE, STRONG, CRITICAL
+  - `GateDecision` enum: RETAIN, CONSOLIDATE, DISCARD, REPLAY
+  - `MemoryTrace` (frozen) — trace metadata: access_count, importance_score, consolidation_count, replay_count, surprise_score, emotional_salience, tags
+  - `SynapticConsolidator` — Hebbian-like strengthening with configurable weights (access=0.35, recency=0.25, surprise=0.25, emotion=0.15), exponential decay (half-life 3600s), compute_importance, classify, should_consolidate/should_discard, strengthen (diminishing returns)
+  - `HippocampalReplay` — interval-gated replay, select_for_replay (prioritizes critical/strong), replay strengthens traces
+  - `PrefrontalGate` — working memory capacity (7±2), task-relevance gating (CRITICAL→RETAIN, STRONG+relevant→RETAIN, STRONG+irrelevant→CONSOLIDATE, MODERATE+relevant→REPLAY, MODERATE+irrelevant→CONSOLIDATE, WEAK→DISCARD), filter_working_memory, detect_interference (Jaccard tag similarity)
+  - `CraniMemGate` — unified pipeline: ingest, access (frozen replacement), consolidate (moves to long-term), replay, filter_working_memory, stats, clear
+- **NEW** `tests/test_cranimem.py` — 100 tests: SignalStrength (2), GateDecision (2), MemoryTrace (5), compute_importance (9), classify (5), decisions (5), strengthen (4), replay timing (4), replay select (5), replay (4), decide (10), filter (4), interference (8), ingest/access (7), consolidate (5), replay pipeline (3), filter (4), task_tags (2), stats (5), clear (2), full pipeline (5), integration (3)
+- **UPDATED** `__init__.py` — Exports CraniMemGate, HippocampalReplay, MemoryTrace, PrefrontalGate, SignalStrength, SynapticConsolidator
+
 ---
 
 ## Upcoming (Tier 1 — Flagship + Core Engine)
