@@ -350,6 +350,31 @@
 - **NEW** `tests/test_crash_recovery.py` — 60 tests: LogEntry (6), Checkpoint (3), AppendOnlyLog (25), CrashRecovery (15), integration (3)
 - **UPDATED** `__init__.py` — Exports AppendOnlyLog, Checkpoint, CrashRecovery, LogEntry
 
+### 2026-05-30 — Tier 1.11: Tiered MCP Server Bundling (P1-B3)
+
+- **NEW** `lyra_harness_core/mcp_bundling.py` — Lifecycle-managed MCP server bundling:
+  - `MCPTier` enum — TIER_1 (always-on, core tools), TIER_2 (on-demand, specialized)
+  - `MCPServerState` enum — STOPPED, STARTING, RUNNING, DEGRADED, STOPPING, ERROR
+  - `MCPServerHealth` enum — HEALTHY, DEGRADED, UNHEALTHY, UNKNOWN
+  - `MCPServerManifest` (frozen) — name, command, args, env, tier, description, tools list, version, startup_timeout, health_check_interval, metadata
+  - `MCPServerInstance` — runtime state per server: manifest, state, health, pid, uptime, restart_count, error_message; is_running, is_degraded, tool_count
+  - `TieredBundle` — collection of tier_1 + tier_2 servers; all_servers, running/degraded, servers_by_tier, tools_by_tier, all_tools, is_tier_healthy
+  - `MCPLifecycleManager` — register/unregister, start/stop/restart with rate limiting, start_tier/stop_tier, start_all (Tier-1→Tier-2 health gating), stop_all, health_check/health_check_all, mark_degraded/mark_unhealthy, get_server_info, get_tool_providers, stats
+  - `build_default_tier1_manifests()` — 4 Tier-1 servers: filesystem, git, search, context
+  - `build_default_tier2_manifests()` — 4 Tier-2 servers: database, browser, slack, memory
+  - `build_default_bundle()` — full bundle with all 8 servers registered
+- **NEW** `tests/test_mcp_bundling.py` — 50 tests: enums (3), MCPServerManifest (4), MCPServerInstance (5), TieredBundle (10), MCPLifecycleManager (19), pre-built (5), integration (2)
+- **UPDATED** `__init__.py` — Exports MCPLifecycleManager, MCPServerHealth, MCPServerInstance, MCPServerManifest, MCPServerState, MCPTier, TieredBundle, build_default_bundle, build_default_tier1_manifests, build_default_tier2_manifests
+
+### 2026-05-30 — Tier 1.12: Fork-from-Checkpoint Session Exploration (P1-B6)
+
+- **NEW** `lyra_harness_core/session_fork.py` — Session snapshot and forking system:
+  - `SessionSnapshot` (frozen) — immutable capture of agent state: snapshot_id, parent_session_id, timestamp, label, context, metadata
+  - `SessionFork` (frozen) — forked session: fork_id, snapshot_id, parent_session_id, created_at, label, status (active/completed/abandoned/merged)
+  - `CheckpointStore` — create_snapshot, get_snapshots/get_snapshot/latest_snapshot, delete_snapshot, snapshot_count, fork() from snapshot_id, get_fork/get_forks/fork_count, complete_fork/abandon_fork/merge_fork, active_forks, parent_session, sibling_forks, fork_tree() for lineage visualization, prune_old_snapshots, clear
+- **NEW** `tests/test_session_fork.py` — 57 tests: SessionSnapshot (5), SessionFork (3), CheckpointStore snapshots (11), forking (21), cleanup (7), integration (3)
+- **UPDATED** `__init__.py` — Exports CheckpointStore, SessionFork, SessionSnapshot
+
 ---
 
 ## Upcoming (Tier 1 — Flagship + Core Engine)
