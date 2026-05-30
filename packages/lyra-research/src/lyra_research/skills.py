@@ -336,7 +336,7 @@ class StrategyAdaptationSkill:
     SWITCH_LOW_QUALITY = 0.4
     SWITCH_LOW_PAPERS = 5
 
-    def select_strategy(self, topic: str, _domain: str = "general") -> SearchStrategy:
+    def select_strategy(self, topic: str, domain: str = "general") -> SearchStrategy:
         """Select best strategy based on topic keywords (longest match wins)."""
         topic_lower = topic.lower()
         # Sort by keyword length descending so more specific phrases match first
