@@ -20,6 +20,8 @@ import time
 import uuid
 from typing import Any
 
+from lyra_effort import EffortLevel, EffortManager
+
 from .budget import BudgetTracker
 from .models import (
     ModelAssignment,
@@ -62,6 +64,7 @@ class ModelRouter:
         budget_tracker: BudgetTracker | None = None,
         session_budget_usd: float = 5.0,
         exploration_ratio: float = 0.1,
+        effort_manager: EffortManager | None = None,
     ) -> None:
         """
         Args:
@@ -69,6 +72,7 @@ class ModelRouter:
             budget_tracker: Pre-configured budget tracker. Creates default if None.
             session_budget_usd: Total USD budget for the session.
             exploration_ratio: NeuralUCB exploration coefficient (0 = pure exploitation).
+            effort_manager: Pre-configured effort manager. Creates default (HIGH effort) if None.
         """
         self.providers = provider_registry or ProviderRegistry()
         self.budget = budget_tracker or BudgetTracker(
@@ -77,6 +81,7 @@ class ModelRouter:
         )
 
         self._exploration_ratio = exploration_ratio
+        self._effort = effort_manager or EffortManager()
 
         # Initialize tiers
         self._tier1 = RuleTier()
@@ -96,6 +101,7 @@ class ModelRouter:
         task: str,
         context: dict[str, Any] | None = None,
         force_tier: int | None = None,
+        effort_level: str | None = None,
     ) -> RoutingDecision:
         """
         Route a task through the 3-tier cascade and return a model decision.
@@ -104,15 +110,27 @@ class ModelRouter:
             task: Natural language task description.
             context: Optional context (conversation history, user preferences, tags).
             force_tier: If set, skip to this tier (1, 2, or 3).
+            effort_level: Override the session effort level for this decision.
+                One of ``low``, ``medium``, ``high``, ``xhigh``, ``max``, ``ultracode``.
 
         Returns:
-            A RoutingDecision with the selected model, tier, confidence, and reasoning.
+            A RoutingDecision with the selected model, tier, confidence, reasoning,
+            and effort parameters (budget_tokens, thinking_instruction, reasoning_effort).
 
         Raises:
             RuntimeError: If the circuit breaker has tripped.
         """
         context = context or {}
         start_time = time.perf_counter()
+
+        # Resolve effort level for this routing decision
+        if effort_level:
+            try:
+                level = EffortLevel(effort_level)
+            except ValueError:
+                level = self._effort.current_level
+        else:
+            level = self._effort.current_level
 
         # Check circuit breaker
         if self.budget.is_tripped:
@@ -129,7 +147,7 @@ class ModelRouter:
             tier_result = self._tier1.route(task, context)
             if tier_result and tier_result.confidence >= self._TIER1_MIN_CONFIDENCE:
                 self._tier_hits[1] += 1
-                decision = self._build_decision(tier_result, tier_used=1)
+                decision = self._build_decision(tier_result, tier_used=1, effort_level=level)
                 elapsed = (time.perf_counter() - start_time) * 1000
                 self._record_stats(decision, elapsed)
                 logger.debug("Tier 1 (rule) matched: %s", tier_result.reasoning)
@@ -140,7 +158,7 @@ class ModelRouter:
             tier_result = self._tier2.route(task, context)
             if tier_result and tier_result.confidence >= self._TIER2_MIN_CONFIDENCE:
                 self._tier_hits[2] += 1
-                decision = self._build_decision(tier_result, tier_used=2)
+                decision = self._build_decision(tier_result, tier_used=2, effort_level=level)
                 elapsed = (time.perf_counter() - start_time) * 1000
                 self._record_stats(decision, elapsed)
                 logger.debug("Tier 2 (semantic) matched: %s", tier_result.reasoning)
@@ -159,10 +177,27 @@ class ModelRouter:
             )
 
         self._tier_hits[3] += 1
-        decision = self._build_decision(tier_result, tier_used=3)
+        decision = self._build_decision(tier_result, tier_used=3, effort_level=level)
         elapsed = (time.perf_counter() - start_time) * 1000
         self._record_stats(decision, elapsed)
         return decision
+
+    def set_effort(self, level: str | EffortLevel) -> None:
+        """
+        Set the session effort level.
+
+        Args:
+            level: Effort level name or enum value.
+                ``ultracode`` automatically enables auto-orchestration.
+        """
+        if isinstance(level, str):
+            level = EffortLevel(level)
+        self._effort.set_level(level)
+
+    @property
+    def effort(self) -> EffortManager:
+        """Return the session's effort manager."""
+        return self._effort
 
     def record_outcome(
         self,
@@ -261,11 +296,14 @@ class ModelRouter:
 
     # ── Internal ───────────────────────────────────────────────────
 
-    def _build_decision(self, tier_result: TierResult, tier_used: int) -> RoutingDecision:
-        """Build a RoutingDecision from a tier result, applying budget constraints."""
+    def _build_decision(
+        self, tier_result: TierResult, tier_used: int, effort_level: EffortLevel | None = None
+    ) -> RoutingDecision:
+        """Build a RoutingDecision from a tier result, applying budget constraints and effort."""
 
         complexity = tier_result.complexity
         target_tier = tier_result.model_tier
+        level = effort_level or self._effort.current_level
 
         # Budget-aware tier downgrade
         if self.budget.should_downgrade_tier(target_tier):
@@ -301,6 +339,9 @@ class ModelRouter:
 
         cost_estimate = get_cost_estimate(complexity)
 
+        # ── Attach effort mapping ─────────────────────────────
+        effort_mapping = self._effort.map_effort(level, provider=model.provider)
+
         return RoutingDecision(
             model=model.model_name,
             tier=target_tier,
@@ -310,6 +351,10 @@ class ModelRouter:
             cost_estimate_usd=cost_estimate,
             tier_used=tier_used,
             budget_regime=self.budget.regime,
+            effort_level=level.value,
+            effort_budget_tokens=effort_mapping.budget_tokens,
+            effort_instruction=effort_mapping.thinking_instruction,
+            effort_reasoning=effort_mapping.reasoning_effort,
         )
 
     def _pick_any_model(self) -> ModelAssignment:
