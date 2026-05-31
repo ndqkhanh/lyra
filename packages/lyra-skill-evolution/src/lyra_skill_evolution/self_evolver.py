@@ -1279,11 +1279,14 @@ class SelfEvolver:
     ) -> list[tuple[str, str]]:
         """Flatten a skill content dict into (string_value, location) pairs.
 
+        Also emits key-value pair strings (e.g. ``"api_key: sk-..."``) so
+        that regex patterns anchored on key names can match.
+
         Args:
             content: The skill content dictionary.
 
         Returns:
-            List of (string_value, location_key) tuples.
+            List of (string_value_or_keyval, location_key) tuples.
         """
         strings: list[tuple[str, str]] = []
 
@@ -1292,6 +1295,10 @@ class SelfEvolver:
                 strings.append((d, prefix or "root"))
             elif isinstance(d, dict):
                 for key, value in d.items():
+                    # Emit key-value pair string for credential-like patterns
+                    if isinstance(value, str):
+                        strings.append((f'{key}="{value}"', f"{prefix}.{key}" if prefix else key))
+                        strings.append((f"{key}='{value}'", f"{prefix}.{key}" if prefix else key))
                     flatten(value, f"{prefix}.{key}" if prefix else key)
             elif isinstance(d, list):
                 for i, item in enumerate(d):

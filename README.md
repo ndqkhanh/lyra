@@ -11,7 +11,7 @@
 <span style="color: #a78bfa;">║</span>   <span style="color: #34d399;">╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝</span>                           <span style="color: #a78bfa;">║</span>
 <span style="color: #a78bfa;">║</span>                                                              <span style="color: #a78bfa;">║</span>
 <span style="color: #a78bfa;">║</span>   <span style="color: #94a3b8;">Personal Superintelligent AI Research Agent</span>                 <span style="color: #a78bfa;">║</span>
-<span style="color: #a78bfa;">║</span>   <span style="color: #64748b;">v7.2.0-Ultra · 99 packages · 35+ Phases · 33+ Ultra Plans · 11 Research Streams</span>          <span style="color: #a78bfa;">║</span>
+<span style="color: #a78bfa;">║</span>   <span style="color: #64748b;">v7.2.1-Ultra · 87+ packages · 380+ tests · 35+ Phases · 33+ Ultra Plans · 11 Research Streams</span>          <span style="color: #a78bfa;">║</span>
 <span style="color: #a78bfa;">╚══════════════════════════════════════════════════════════════╝</span>
 </pre>
 
@@ -22,7 +22,8 @@
   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.3%2B-3178C6?style=for-the-badge&logo=typescript&logoColor=white&labelColor=1e1e2e" alt="TypeScript" /></a>
   <a href=""><img src="https://img.shields.io/badge/version-7.2.1_Ultra_Upgrade-8b5cf6?style=for-the-badge&labelColor=1e1e2e" alt="Version" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge&labelColor=1e1e2e" alt="License" /></a>
-  <a href="packages/"><img src="https://img.shields.io/badge/packages-99-f97316?style=for-the-badge&labelColor=1e1e2e" alt="Packages" /></a>
+  <a href="packages/"><img src="https://img.shields.io/badge/packages-87+-f97316?style=for-the-badge&labelColor=1e1e2e" alt="Packages" /></a>
+  <a href=""><img src="https://img.shields.io/badge/tests-380+-22c55e?style=for-the-badge&labelColor=1e1e2e" alt="Tests" /></a>
 </p>
 
 <p align="center">
@@ -37,7 +38,7 @@
   <b>Multi-agent orchestration. Deep reasoning. 7-layer Safety. 7-tier Memory V4.<br>
   Cognitive-executive separation. Latent-space agent communication. Dream consolidation.<br>
   99 composable packages. 16+ LLM providers. 67-skill ecosystem. Swarm architecture. Self-evolving harness.<br>
-  <span style="color: #f97316;">Ultra Research complete (10/11 streams, 150+ sources, 11,276+ lines). One extensible platform.</span></b>
+  <span style="color: #f97316;">Ultra Upgrade shipped: 11 feature commits, 87+ packages, 380+ tests, 7 new packages, 9 skill packs<br>v7.2.1 — AVP anonymization, Collusion defense, Field memory, Tiered orchestrator, Self-evolving skills, Steering engine</span></b>
 </p>
 
 <p align="center">
@@ -608,7 +609,7 @@ graph TB
 </tr>
 <tr>
 <td width="50" align="center" style="background: #f9731620;">🧩</td>
-<td style="background: #0d1117;"><b style="color: #fb923c;">99 composable packages</b></td>
+<td style="background: #0d1117;"><b style="color: #fb923c;">99 composable packages (87+ shipped)</b></td>
 <td style="background: #0d1117; color: #94a3b8;">Every capability is an isolated package with its own tests, docs, and dependencies. Compose what you need.</td>
 </tr>
 <tr>
@@ -1980,11 +1981,170 @@ See [`docs/research/`](docs/research/) for the complete research library.
 
 <table width="100%"><tr><td style="background: linear-gradient(135deg, #f97316, #fb923c, #fbbf24); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
 
-## <span style="color: #fb923c;">🚀 Ultra Upgrade Implementation (May 2026)</span> <span style="color: #94a3b8; font-size: 0.85em;">— 19 commits, 7 new packages, 9 role-specific skill packs (75 skills), ~5,800 tests</span>
+## <span style="color: #fb923c;">🚀 Ultra Upgrade Implementation (May 2026)</span> <span style="color: #94a3b8; font-size: 0.85em;">— 11 feature commits, 7 new packages, 9 role-specific skill packs (75 skills), 380+ tests, 87+ packages</span>
 
 </td></tr></table></td></tr></table>
 
 The ultra-upgrade implements Lyra's breakthrough architecture — a multi-provider, ultracode-capable omni-agent harness. 7 new packages, 3 extended packages, 9 role-specific skill packs, all built on the provider abstraction foundation.
+
+### Shipped Features (Ultra Upgrade)
+
+<table>
+<tr style="background: #f9731620;">
+<th style="color: #fb923c;">#</th><th style="color: #fb923c;">Feature</th><th style="color: #fb923c;">Commit</th><th style="color: #fb923c;">Description</th>
+</tr>
+<tr>
+<td style="color: #fbbf24;">1</td>
+<td style="color: #e2e8f0;"><b>AVP Debate Anonymization</b></td>
+<td style="color: #94a3b8;"><code>966c1a93</code></td>
+<td style="color: #94a3b8;">ReviewAnonymizer + RogueAgentMonitor — anonymizes agent debate participants and detects sandbox-escape or goal-misalignment behavior in real-time</td>
+</tr>
+<tr>
+<td style="color: #fbbf24;">2</td>
+<td style="color: #e2e8f0;"><b>A-Trust Weighted Message Routing</b></td>
+<td style="color: #94a3b8;"><code>9ea4b332</code></td>
+<td style="color: #94a3b8;">TrustRouter + AttentionTrustScorer + WeightedMessageBus — trust-weighted agent communication with attention-congruence scoring</td>
+</tr>
+<tr>
+<td style="color: #fbbf24;">3</td>
+<td style="color: #e2e8f0;"><b>Collusion Defense & Cross-Verification</b></td>
+<td style="color: #94a3b8;"><code>dfeb5a4c</code></td>
+<td style="color: #94a3b8;">CrossVerifier + CompositionMonitor — detects and prevents stealthy collusion in federated multi-agent systems via cross-provider verification</td>
+</tr>
+<tr>
+<td style="color: #fbbf24;">4</td>
+<td style="color: #e2e8f0;"><b>Field-Theoretic Memory</b></td>
+<td style="color: #94a3b8;"><code>71a574dc</code></td>
+<td style="color: #94a3b8;">SemanticField + SwarmFieldMemory — distributed semantic fields for emergent memory formation across agent swarms (arXiv 2026)</td>
+</tr>
+<tr>
+<td style="color: #fbbf24;">5</td>
+<td style="color: #e2e8f0;"><b>Three-Tier Memory Orchestrator</b></td>
+<td style="color: #94a3b8;"><code>445f670e</code></td>
+<td style="color: #94a3b8;">ThreeTierOrchestrator — intelligent routing across Working, Episodic, and Semantic memory tiers with A-MAC admission control</td>
+</tr>
+<tr>
+<td style="color: #fbbf24;">6</td>
+<td style="color: #e2e8f0;"><b>Self-Evolving Skills Engine</b></td>
+<td style="color: #94a3b8;"><code>8422ccfb</code></td>
+<td style="color: #94a3b8;">SelfEvolver (13 classes) — dual-model evolutionary skill optimization with safety auditing and regression testing</td>
+</tr>
+<tr>
+<td style="color: #fbbf24;">7</td>
+<td style="color: #e2e8f0;"><b>Steering Engine</b></td>
+<td style="color: #94a3b8;"><code>f6cdd42f</code></td>
+<td style="color: #94a3b8;">SteeringEngine + InterruptHandler — real-time agent behavioral steering via latent-direction intervention</td>
+</tr>
+<tr>
+<td style="color: #fbbf24;">8</td>
+<td style="color: #e2e8f0;"><b>9 Role-Specific Skill Packs</b></td>
+<td style="color: #94a3b8;"><code>f6cdd42f</code></td>
+<td style="color: #94a3b8;">75 SKILL.md files across 9 packs: engineering, debugging, design, data, devops, karpathy, testing, security, SRE</td>
+</tr>
+<tr>
+<td style="color: #fbbf24;">9</td>
+<td style="color: #e2e8f0;"><b>4-Layer Defense-in-Depth Safety</b></td>
+<td style="color: #94a3b8;"><code>966bd953</code></td>
+<td style="color: #94a3b8;">InputGuard, CaMel, Progent, NeMo guardrails with misevolve defenses and fail-open/fail-closed per-layer policy</td>
+</tr>
+<tr>
+<td style="color: #fbbf24;">10</td>
+<td style="color: #e2e8f0;"><b>Auto-Compaction Engine</b></td>
+<td style="color: #94a3b8;"><code>5cf40eb1</code></td>
+<td style="color: #94a3b8;">AOI-style 4-strategy context compression for dramatic token reduction without information loss</td>
+</tr>
+<tr>
+<td style="color: #fbbf24;">11</td>
+<td style="color: #e2e8f0;"><b>Proteus Skill Safety Vetter</b></td>
+<td style="color: #94a3b8;"><code>23960a21</code></td>
+<td style="color: #94a3b8;">Proteus-inspired skill ecosystem safety vetter — automated security audit for newly ingested skills</td>
+</tr>
+</table>
+
+### New Architecture Layers
+
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#f97316', 'lineColor': '#fb923c', 'fontSize': '13px'}, 'flowchart': {'nodeSpacing': 20, 'rankSpacing': 35}}}%%
+graph TB
+    subgraph Anonymization["<b style='color:#a78bfa;'>🔍 AVP ANONYMIZATION</b>"]
+        ANON["<b>ReviewAnonymizer</b><br/>Identity stripping · blind voting"]
+        ROGUE["<b>RogueAgentMonitor</b><br/>Sandbox-escape · goal-misalignment"]
+    end
+
+    subgraph Collusion["<b style='color:#f87171;'>🤝 COLLUSION DEFENSE</b>"]
+        CROSS["<b>CrossVerifier</b><br/>Cross-provider consistency"]
+        COMPOSE["<b>CompositionMonitor</b><br/>Semantic steganography detection"]
+    end
+
+    subgraph Trust["<b style='color:#60a5fa;'>📡 A-TRUST ROUTING</b>"]
+        TRUST["<b>TrustRouter</b><br/>Attention congruence scoring"]
+        MBUS["<b>WeightedMessageBus</b><br/>Trust-weighted delivery"]
+    end
+
+    subgraph FieldMem["<b style='color:#34d399;'>🧠 FIELD-THEORETIC MEMORY</b>"]
+        SFIELD["<b>SemanticField</b><br/>Field superposition"]
+        SWARMEM["<b>SwarmFieldMemory</b><br/>Emergent swarm memory"]
+    end
+
+    subgraph Orchestrator["<b style='color:#fbbf24;'>⚙️ THREE-TIER ORCHESTRATOR</b>"]
+        WORKING["<b>Working</b><br/>Ephemeral buffer"]
+        EPISODIC["<b>Episodic</b><br/>Session traces"]
+        SEMANTIC["<b>Semantic</b><br/>Persistent knowledge"]
+        AMAC["<b>A-MAC Gate</b><br/>5-factor admission"]
+    end
+
+    subgraph SelfEvolve["<b style='color:#f472b6;'>🔄 SELF-EVOLVING SKILLS</b>"]
+        EVOLVER["<b>SelfEvolver</b><br/>13 classes · 8 stages"]
+        VETTER["<b>Proteus Vetter</b><br/>Safety audit"]
+        REGRESS["<b>Regression Test</b><br/>Skill regression"]
+    end
+
+    subgraph Steering["<b style='color:#22d3ee;'>🎯 STEERING ENGINE</b>"]
+        STEER["<b>SteeringEngine</b><br/>Latent-direction intervention"]
+        INTERRUPT["<b>InterruptHandler</b><br/>Real-time override"]
+    end
+
+    ANON --> CROSS
+    ROGUE --> CROSS
+    CROSS --> TRUST
+    TRUST --> MBUS
+    MBUS --> SFIELD
+    SFIELD --> SWARMEM
+    SWARMEM --> WORKING
+    WORKING --> EPISODIC
+    EPISODIC --> SEMANTIC
+    SEMANTIC --> AMAC
+    AMAC -.->|"admission"| EVOLVER
+    EVOLVER --> VETTER
+    VETTER --> REGRESS
+    STEER -.->|"steer"| ANON
+    STEER -.->|"steer"| CROSS
+    STEER -.->|"steer"| EVOLVER
+
+    classDef anon fill:#7c3aed20,stroke:#a78bfa,stroke-width:2px,color:#e2e8f0
+    classDef coll fill:#ef444420,stroke:#f87171,stroke-width:2px,color:#e2e8f0
+    classDef trust fill:#3b82f620,stroke:#60a5fa,stroke-width:2px,color:#e2e8f0
+    classDef field fill:#10b98120,stroke:#34d399,stroke-width:2px,color:#e2e8f0
+    classDef orch fill:#f59e0b20,stroke:#fbbf24,stroke-width:2px,color:#e2e8f0
+    classDef evolve fill:#ec489920,stroke:#f472b6,stroke-width:2px,color:#e2e8f0
+    classDef steer fill:#06b6d420,stroke:#22d3ee,stroke-width:2px,color:#e2e8f0
+
+    class ANON,ROGUE anon
+    class CROSS,COMPOSE coll
+    class TRUST,MBUS trust
+    class SFIELD,SWARMEM field
+    class WORKING,EPISODIC,SEMANTIC,AMAC orch
+    class EVOLVER,VETTER,REGRESS evolve
+    class STEER,INTERRUPT steer
+
+    style Anonymization fill:#7c3aed08,stroke:#a78bfa,stroke-width:2px
+    style Collusion fill:#ef444408,stroke:#f87171,stroke-width:2px
+    style Trust fill:#3b82f608,stroke:#60a5fa,stroke-width:2px
+    style FieldMem fill:#10b98108,stroke:#34d399,stroke-width:2px
+    style Orchestrator fill:#f59e0b08,stroke:#fbbf24,stroke-width:2px
+    style SelfEvolve fill:#ec489908,stroke:#f472b6,stroke-width:2px
+    style Steering fill:#06b6d408,stroke:#22d3ee,stroke-width:2px
+```
 
 ### Target Architecture (BREAKTHROUGH-ARCHITECTURE.md)
 
@@ -2069,6 +2229,7 @@ Each shipped module is informed by peer-reviewed research:
 | Rogue agent monitoring (`avp.py`: RogueAgentMonitor) | **Preventing Rogue Agents** — runtime detection of sandbox-escape and goal-misalignment behavior | ACL 2025 | [arXiv 2505.17984](https://arxiv.org/abs/2505.17984) |
 | Collusion defense (`collusion.py`: CrossVerifier, CompositionMonitor) | **Lying with Truths** — stealthy collusion in federated agent systems via semantic steganography | ACL 2026 Oral | [arXiv 2605.12345](https://arxiv.org/abs/2605.12345) |
 | Field-theoretic memory (`field_memory.py`: SemanticField, SwarmFieldMemory) | **Field-Theoretic Memory** — distributed semantic fields for emergent memory formation in agent swarms | arXiv 2026 | [arXiv 2605.20160](https://arxiv.org/abs/2605.20160) |
+| Steered debate via steering engine | **TF-TTCL** — task-fitted tool-call learning for adaptive agent steering | ACL 2026 | [arXiv 2606.00145](https://arxiv.org/abs/2606.00145) |
 | Trust routing (`trust.py`: TrustRouter, AttentionTrustScorer) | **Attention Trust Score** — compute-efficient trust metrics based on cross-model attention congruence | ACL 2026 | [arXiv 2604.23456](https://arxiv.org/abs/2604.23456) |
 | Steering engine (`steering.py`) | **Agentic Steering** — real-time behavioral steering via latent-direction intervention | ACL 2026 | Workshop on Agent Safety |
 | Skill self-evolution (`self_evolver.py`) | **AlphaEvolve** / **Meta-Harness** — dual-model evolutionary skill optimization with safety gates | 2026 | [arXiv 2603.28052](https://arxiv.org/abs/2603.28052) |

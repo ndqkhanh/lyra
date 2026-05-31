@@ -174,6 +174,9 @@ class CriticVerdict:
         confidence: How confident the critic is (0.0–1.0).
         reasoning: Explanation of the verdict.
         evidence_tier: Quality of supporting evidence (A–D).
+        trust_dimensions: Optional 6-dimension trust scores per Gricean maxims.
+            Used by A-Trust for inter-agent message trust weighting. Keys are
+            one of: quality, quantity, relevance, manner, sincerity, competence.
     """
 
     critic_id: str
@@ -182,6 +185,7 @@ class CriticVerdict:
     confidence: float
     reasoning: str = ""
     evidence_tier: str = "C"  # A = gold standard, B = strong, C = moderate, D = weak
+    trust_dimensions: dict[str, float] | None = None
 
 
 class MutationGate:

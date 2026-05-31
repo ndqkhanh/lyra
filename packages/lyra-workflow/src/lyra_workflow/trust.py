@@ -21,10 +21,36 @@ Integration with existing AVP:
 from __future__ import annotations
 
 import math
-import uuid
 from collections.abc import Callable
+from enum import Enum
 from dataclasses import dataclass, field
 from typing import Any
+
+
+# ---------------------------------------------------------------------------
+# TrustDimension — 6 Gricean dimensions
+# ---------------------------------------------------------------------------
+
+
+class TrustDimension(str, Enum):
+    """Six Gricean trust dimensions for inter-agent message evaluation.
+
+    Based on Grice's maxims of communication, adapted for multi-agent trust:
+
+    - **QUALITY**: Truthfulness and factual accuracy of the message.
+    - **QUANTITY**: Appropriate level of detail (not too terse, not too verbose).
+    - **RELEVANCE**: How well the message addresses the current task or context.
+    - **MANNER**: Clarity, structure, and lack of ambiguity.
+    - **SINCERITY**: Whether the message reflects genuine belief (no deception).
+    - **COMPETENCE**: Whether the agent has the capability to produce a reliable message.
+    """
+
+    QUALITY = "quality"
+    QUANTITY = "quantity"
+    RELEVANCE = "relevance"
+    MANNER = "manner"
+    SINCERITY = "sincerity"
+    COMPETENCE = "competence"
 
 
 # ---------------------------------------------------------------------------
@@ -192,6 +218,102 @@ class TrustHistory:
             "average": self.average.to_dict(),
             "volatility": round(self.volatility, 3),
             "trend": round(self.trend, 3),
+        }
+
+
+# ---------------------------------------------------------------------------
+# AgentTrustProfile — per-agent per-dimension trust tracking
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class AgentTrustProfile:
+    """Tracks per-agent trust scores across all six dimensions over time.
+
+    Maintains a separate ``TrustHistory`` for each Gricean dimension,
+    enabling dimension-level analysis (e.g., "agent is factual but irrelevant").
+
+    Attributes:
+        agent_id: Unique identifier for the agent.
+        dimension_histories: Map of dimension -> TrustHistory.
+        window_size: Maximum number of recent scores per dimension.
+    """
+
+    agent_id: str
+    dimension_histories: dict[TrustDimension, TrustHistory] = field(default_factory=dict)
+    window_size: int = 50
+
+    @classmethod
+    def create(cls, agent_id: str, window_size: int = 50) -> AgentTrustProfile:
+        """Create a profile with pre-initialized dimension histories."""
+        profile = cls(agent_id=agent_id, window_size=window_size)
+        for dim in TrustDimension:
+            profile.dimension_histories[dim] = TrustHistory(
+                agent_id=f"{agent_id}/{dim.value}",
+                window_size=window_size,
+            )
+        return profile
+
+    def record(self, score: TrustScore) -> None:
+        """Record a trust score update, decomposing into per-dimension histories."""
+        for dim in TrustDimension:
+            val = getattr(score, dim.value)
+            history = self.dimension_histories.setdefault(
+                dim,
+                TrustHistory(agent_id=f"{self.agent_id}/{dim.value}", window_size=self.window_size),
+            )
+            history.record(TrustScore.equal(val))
+
+    @property
+    def dimension_averages(self) -> dict[str, float]:
+        """Per-dimension average trust scores over the tracked history."""
+        return {
+            dim.value: self.dimension_histories[dim].average.overall
+            for dim in TrustDimension
+        }
+
+    @property
+    def dimension_trends(self) -> dict[str, float]:
+        """Per-dimension trust trend (positive = improving)."""
+        return {
+            dim.value: self.dimension_histories[dim].trend
+            for dim in TrustDimension
+        }
+
+    @property
+    def weakest_dimension(self) -> tuple[TrustDimension, float]:
+        """Return the dimension with the lowest average trust score.
+
+        Useful for targeted improvement: identifies the trust axis that
+        most needs attention for this agent.
+        """
+        dim_scores = {
+            dim: self.dimension_histories[dim].average.overall
+            for dim in TrustDimension
+        }
+        worst = min(dim_scores, key=dim_scores.get)
+        return worst, dim_scores[worst]
+
+    @property
+    def strongest_dimension(self) -> tuple[TrustDimension, float]:
+        """Return the dimension with the highest average trust score."""
+        dim_scores = {
+            dim: self.dimension_histories[dim].average.overall
+            for dim in TrustDimension
+        }
+        best = max(dim_scores, key=dim_scores.get)
+        return best, dim_scores[best]
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize profile to a plain dict."""
+        return {
+            "agent_id": self.agent_id,
+            "dimension_averages": self.dimension_averages,
+            "dimension_trends": self.dimension_trends,
+            "weakest": self.weakest_dimension[0].value,
+            "weakest_score": round(self.weakest_dimension[1], 3),
+            "strongest": self.strongest_dimension[0].value,
+            "strongest_score": round(self.strongest_dimension[1], 3),
         }
 
 
@@ -572,6 +694,7 @@ class TrustWeightedRouter:
         """
         self._evaluator = evaluator or TrustEvaluator()
         self._histories: dict[str, TrustHistory] = {}
+        self._profiles: dict[str, AgentTrustProfile] = {}
         self._default_weight = default_weight
         self._min_weight = min_weight
         self._routed_count: int = 0
@@ -588,7 +711,7 @@ class TrustWeightedRouter:
         """Evaluate and route a message with trust-based weighting.
 
         1. Evaluates the message against the six trust dimensions.
-        2. Records the evaluation in the sender's trust history.
+        2. Records the evaluation in the sender's trust history and profile.
         3. Computes the routing weight from the historical trust trajectory.
         4. Returns a WeightedMessage with the final weight.
 
@@ -615,6 +738,10 @@ class TrustWeightedRouter:
         history = self._get_or_create_history(sender_id)
         history.record(evaluation.score)
 
+        # Record in per-dimension profile
+        profile = self._get_or_create_profile(sender_id)
+        profile.record(evaluation.score)
+
         # Compute weight
         weight = self._compute_weight(sender_id, history, evaluation)
 
@@ -629,6 +756,8 @@ class TrustWeightedRouter:
                 "evaluator": evaluation.evaluator,
                 "volatility": history.volatility,
                 "trend": history.trend,
+                "weakest_dimension": profile.weakest_dimension[0].value,
+                "strongest_dimension": profile.strongest_dimension[0].value,
             },
         )
 
@@ -658,18 +787,28 @@ class TrustWeightedRouter:
         """Return the trust history for a given agent, or None."""
         return self._histories.get(agent_id)
 
+    def get_profile(self, agent_id: str) -> AgentTrustProfile | None:
+        """Return the per-dimension trust profile for a given agent, or None."""
+        return self._profiles.get(agent_id)
+
     def get_all_histories(self) -> dict[str, TrustHistory]:
         """Return a copy of all trust histories."""
         return dict(self._histories)
+
+    def get_all_profiles(self) -> dict[str, AgentTrustProfile]:
+        """Return a copy of all agent trust profiles."""
+        return dict(self._profiles)
 
     @property
     def stats(self) -> dict[str, Any]:
         """Aggregate routing statistics."""
         histories = self.get_all_histories()
+        profiles = self.get_all_profiles()
         return {
             "routed_total": self._routed_count,
             "agents_tracked": len(histories),
             "histories": {aid: h.to_dict() for aid, h in histories.items()},
+            "profiles": {aid: p.to_dict() for aid, p in profiles.items()},
             "average_trust": (
                 sum(h.average.overall for h in histories.values()) / len(histories)
                 if histories else 0.0
@@ -707,6 +846,11 @@ class TrustWeightedRouter:
             self._histories[agent_id] = TrustHistory(agent_id=agent_id)
         return self._histories[agent_id]
 
+    def _get_or_create_profile(self, agent_id: str) -> AgentTrustProfile:
+        if agent_id not in self._profiles:
+            self._profiles[agent_id] = AgentTrustProfile.create(agent_id=agent_id)
+        return self._profiles[agent_id]
+
 
 # ---------------------------------------------------------------------------
 # Integration helpers — bridge AVP CriticVerdict to A-Trust
@@ -716,11 +860,16 @@ class TrustWeightedRouter:
 def trust_from_critic_verdicts(verdicts: list[dict[str, Any]]) -> TrustScore:
     """Derive a TrustScore from AVP critic verdicts.
 
-    Maps the AVP's confidence and evidence_tier fields to Gricean dimensions:
+    Maps the AVP's confidence and evidence_tier fields to Gricean dimensions.
+
+    If any verdict dict contains a ``trust_dimensions`` key (from
+    CriticVerdict.trust_dimensions), those per-dimension scores are used
+    directly for the applicable dimensions (quality, quantity, relevance,
+    manner, sincerity, competence), with confidence/consensus filling gaps.
 
     - **quality**: Average of all critic confidence scores.
     - **competence**: evidence_tier mapping (A=1.0, B=0.8, C=0.6, D=0.3).
-    - **sincerity**: Consistency among critict votes (low disagreement = high sincerity).
+    - **sincerity**: Consistency among critic votes (low disagreement = high sincerity).
     - **relevance, quantity, manner**: Set to neutral (0.5) — AVP critics do not
       evaluate these dimensions directly; they must be filled by the TrustEvaluator.
 
@@ -733,6 +882,12 @@ def trust_from_critic_verdicts(verdicts: list[dict[str, Any]]) -> TrustScore:
     if not verdicts:
         return TrustScore.neutral()
 
+    # Check if any verdict has direct trust_dimensions (from CriticVerdict field)
+    direct_td = _extract_direct_trust_dimensions(verdicts)
+    if direct_td:
+        return direct_td
+
+    # Fallback: derive from confidence and evidence_tier
     # Quality: mean confidence
     confidences = [v.get("confidence", 0.5) for v in verdicts]
     quality = sum(confidences) / len(confidences)
@@ -762,4 +917,41 @@ def trust_from_critic_verdicts(verdicts: list[dict[str, Any]]) -> TrustScore:
         manner=0.5,
         sincerity=sincerity,
         competence=competence,
+    )
+
+
+def _extract_direct_trust_dimensions(verdicts: list[dict[str, Any]]) -> TrustScore | None:
+    """Extract trust dimensions directly from verdicts with trust_dimensions field.
+
+    Returns a TrustScore if at least one verdict has the field, else None.
+    Averages per-dimension scores across all verdicts that provide them.
+    """
+    verdicts_with_td = [
+        v for v in verdicts
+        if isinstance(v.get("trust_dimensions"), dict)
+    ]
+    if not verdicts_with_td:
+        return None
+
+    # Average per-dimension values across all verdicts that provide them
+    dim_sums: dict[str, float] = {}
+    dim_counts: dict[str, int] = {}
+    for v in verdicts_with_td:
+        td = v["trust_dimensions"]
+        for dim in ("quality", "quantity", "relevance", "manner", "sincerity", "competence"):
+            val = td.get(dim)
+            if val is not None and isinstance(val, (int, float)):
+                dim_sums[dim] = dim_sums.get(dim, 0.0) + float(val)
+                dim_counts[dim] = dim_counts.get(dim, 0) + 1
+
+    if not dim_sums:
+        return None
+
+    return TrustScore(
+        quality=dim_sums.get("quality", 0.5) / max(dim_counts.get("quality", 1), 1),
+        quantity=dim_sums.get("quantity", 0.5) / max(dim_counts.get("quantity", 1), 1),
+        relevance=dim_sums.get("relevance", 0.5) / max(dim_counts.get("relevance", 1), 1),
+        manner=dim_sums.get("manner", 0.5) / max(dim_counts.get("manner", 1), 1),
+        sincerity=dim_sums.get("sincerity", 0.5) / max(dim_counts.get("sincerity", 1), 1),
+        competence=dim_sums.get("competence", 0.5) / max(dim_counts.get("competence", 1), 1),
     )
