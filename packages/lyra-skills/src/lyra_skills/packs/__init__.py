@@ -4,20 +4,29 @@ from __future__ import annotations
 from pathlib import Path
 
 _PACK_NAMES = [
+    "ai-research",
     "atomic-skills",
-    "tdd-sprint",
-    "karpathy",
-    "safety",
-    "migration",
+    "ba",
+    "brainstorming",
+    "cloud-engineering",
+    "data",
     "debugging",
-    "optimization",
-    "security",
-    "refactoring",
-    "testing",
+    "design",
     "devops",
     "documentation",
-    "data",
+    "engineering",
     "general",
+    "karpathy",
+    "migration",
+    "optimization",
+    "pm",
+    "refactoring",
+    "safety",
+    "security",
+    "solution-architecture",
+    "sre",
+    "tdd-sprint",
+    "testing",
 ]
 
 

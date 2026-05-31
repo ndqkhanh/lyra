@@ -1,12 +1,15 @@
 """One-shot command execution for Lyra CLI.
 
 Provides non-interactive execution mode for scripting and automation.
+Agent loop driven by the harness-core AgentLoop + lyra_cli.llm_factory.
 """
 
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
 from pathlib import Path
+
+from lyra_cli.llm_factory import build_llm
 
 from .formatter import CLIFormatter, get_formatter
 from .messages import StreamEvent
@@ -24,7 +27,7 @@ async def execute_oneshot(
     Args:
         prompt: User prompt to execute
         repo_root: Repository root directory
-        model: LLM model to use
+        model: LLM model to use (e.g. opus, sonnet, haiku, or auto)
         budget_cap_usd: Optional budget cap in USD
         output_format: Output format (text, json, markdown)
 
@@ -56,27 +59,48 @@ async def run_oneshot_turn(
     model: str,
     budget_cap: float | None = None,
 ) -> AsyncIterator[StreamEvent]:
-    """Execute one-shot agent turn.
+    """Execute one-shot agent turn using the harness-core AgentLoop.
+
+    Builds an LLM provider from the configured env (``build_llm``),
+    runs the prompt through ``AgentLoop.run()``, and yields the
+    final text as a ``StreamEvent``.
 
     Args:
         prompt: User prompt
         repo_root: Repository root directory
-        model: LLM model to use
+        model: LLM model to use (e.g. opus, sonnet, haiku, or auto)
         budget_cap: Optional budget cap in USD
 
     Yields:
         Stream events
     """
-    # TODO: Implement actual agent loop integration
-    _ = repo_root, model, budget_cap  # Suppress unused warnings
+    import os
+
+    from lyra_harness_core.loop import AgentLoop
+    from lyra_harness_core.tools import ToolRegistry
+
+    _ = repo_root  # repo_root is used indirectly via cwd for tool scoping
+
+    # Map user-friendly model name to provider kind
+    provider_kind = {"opus": "anthropic", "sonnet": "anthropic", "haiku": "anthropic"}.get(
+        model.lower().strip(), "auto"
+    )
+    if provider_kind != "auto":
+        os.environ["HARNESS_LLM_MODEL"] = model
+    else:
+        os.environ.pop("HARNESS_LLM_MODEL", None)
+
+    # Build the LLM provider
+    llm = build_llm(provider_kind)
+
+    # Run via the harness AgentLoop (no tools wired by default)
+    tool_registry = ToolRegistry()
+    loop = AgentLoop(llm=llm, tools=tool_registry, max_steps=10)
+    result = loop.run(prompt)
 
     yield StreamEvent(
         event_type="text_delta",
-        data={"text": f"One-shot execution: {prompt}\n\n"},
-    )
-    yield StreamEvent(
-        event_type="text_delta",
-        data={"text": "Agent loop integration coming soon."},
+        data={"text": result.final_text},
     )
 
 

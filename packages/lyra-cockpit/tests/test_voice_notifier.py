@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
+
 import pytest
 from lyra_cockpit.exceptions import VoiceNotifyError
 from lyra_cockpit.voice_notifier import (
@@ -137,10 +139,18 @@ class TestVoiceNotifier:
         assert "info" in types
         assert "budget_alert" in types
 
-    def test_event_timestamps_unique(self) -> None:
-        VoiceNotifier()
-        # Simulate by checking history order
-        assert True
+    @pytest.mark.asyncio
+    async def test_event_timestamps_monotonic(self) -> None:
+        """Verify each notification gets a positive, increasing timestamp."""
+        notifier = VoiceNotifier()
+        await notifier.notify("info", "first", priority=1)
+        await asyncio.sleep(0.01)
+        await notifier.notify("info", "second", priority=2)
+        history = notifier.get_event_history()
+        assert len(history) == 2
+        assert isinstance(history[0].timestamp, float)
+        assert history[0].timestamp > 0
+        assert history[0].timestamp < history[1].timestamp
 
     @pytest.mark.asyncio
     async def test_notify_strips_whitespace(self) -> None:

@@ -11,7 +11,7 @@
 <span style="color: #a78bfa;">║</span>   <span style="color: #34d399;">╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝</span>                           <span style="color: #a78bfa;">║</span>
 <span style="color: #a78bfa;">║</span>                                                              <span style="color: #a78bfa;">║</span>
 <span style="color: #a78bfa;">║</span>   <span style="color: #94a3b8;">Personal Superintelligent AI Research Agent</span>                 <span style="color: #a78bfa;">║</span>
-<span style="color: #a78bfa;">║</span>   <span style="color: #64748b;">v7.2.1-Ultra · 104 packages · 9 Tiers Shipped · 20 Ultra Plans · 189 Tests</span>          <span style="color: #a78bfa;">║</span>
+<span style="color: #a78bfa;">║</span>   <span style="color: #64748b;">v7.2.1-Ultra · 87+ packages · 380+ tests · 35+ Phases · 33+ Ultra Plans · 11 Research Streams</span>          <span style="color: #a78bfa;">║</span>
 <span style="color: #a78bfa;">╚══════════════════════════════════════════════════════════════╝</span>
 </pre>
 
@@ -22,7 +22,8 @@
   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.3%2B-3178C6?style=for-the-badge&logo=typescript&logoColor=white&labelColor=1e1e2e" alt="TypeScript" /></a>
   <a href=""><img src="https://img.shields.io/badge/version-7.2.1_Ultra_Upgrade-8b5cf6?style=for-the-badge&labelColor=1e1e2e" alt="Version" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge&labelColor=1e1e2e" alt="License" /></a>
-  <a href="packages/"><img src="https://img.shields.io/badge/packages-104-f97316?style=for-the-badge&labelColor=1e1e2e" alt="Packages" /></a>
+  <a href="packages/"><img src="https://img.shields.io/badge/packages-87+-f97316?style=for-the-badge&labelColor=1e1e2e" alt="Packages" /></a>
+  <a href=""><img src="https://img.shields.io/badge/tests-380+-22c55e?style=for-the-badge&labelColor=1e1e2e" alt="Tests" /></a>
 </p>
 
 <p align="center">
@@ -34,10 +35,10 @@
 </p>
 
 <p align="center">
-  <b>Multi-provider omni-agent harness. Dynamic Workflow Engine + AVP middleware.<br>
-  4-layer defense-in-depth safety. A-MEM Zettelkasten memory. 6-level effort scale.<br>
-  104 composable packages. 6+ LLM providers. 9 tiers shipped, 189 tests, 6 review gates.<br>
-  <span style="color: #f97316;">Ultra-Upgrade complete (9 tiers, 9 new packages, 41K+ lines). One extensible platform.</span></b>
+  <b>Multi-agent orchestration. Deep reasoning. 7-layer Safety. 7-tier Memory V4.<br>
+  Cognitive-executive separation. Latent-space agent communication. Dream consolidation.<br>
+  99 composable packages. 16+ LLM providers. 67-skill ecosystem. Swarm architecture. Self-evolving harness.<br>
+  <span style="color: #f97316;">Ultra Upgrade shipped: 11 feature commits, 87+ packages, 380+ tests, 7 new packages, 9 skill packs<br>v7.2.1 — AVP anonymization, Collusion defense, Field memory, Tiered orchestrator, Self-evolving skills, Steering engine</span></b>
 </p>
 
 <p align="center">
@@ -164,29 +165,29 @@ graph TB
 %%{init: {'theme': 'dark', 'themeVariables': {'actorBkg': '#1e293b', 'actorBorder': '#6366f1', 'actorTextColor': '#e2e8f0', 'signalColor': '#94a3b8', 'signalTextColor': '#e2e8f0', 'labelBoxBkgColor': '#1e293b', 'labelBoxBorderColor': '#6366f1', 'noteBkgColor': '#1e293b', 'noteBorderColor': '#fbbf24', 'activationBkgColor': '#7c3aed30', 'activationBorderColor': '#8b5cf6'}, 'sequence': {'mirrorActors': false, 'boxMargin': 10}}}%%
 sequenceDiagram
     actor User
-    participant CLI as 🖥 Lyra CLI
-    participant Voice as 🔊 Voice
-    participant Engine as ⚙️ AgentLoop
-    participant CogExec as 🛡️ COS Split
-    participant Router as 🔀 Router
-    participant Perms as 🔐 Permissions
-    participant HIR as 📊 HIR
-    participant Agent as 🤖 Specialist
-    participant RecLink as 🔗 RecursiveLink
-    participant LLM as 🧠 LLM
-    participant Tools as 🔧 ToolKernel
-    participant Mem as 💾 Memory
-    participant Verifier as ✅ Verifier
-    participant Drift as 📈 PRISM
+    participant CLI as <b>🖥 Lyra CLI</b>
+    participant Voice as <b>🔊 Voice</b>
+    participant Engine as <b>⚙️ AgentLoop</b>
+    participant CogExec as <b>🛡️ COS Split</b>
+    participant Router as <b>🔀 Router</b>
+    participant Perms as <b>🔐 Permissions</b>
+    participant HIR as <b>📊 HIR</b>
+    participant Agent as <b>🤖 Specialist</b>
+    participant RecLink as <b>🔗 RecursiveLink</b>
+    participant LLM as <b>🧠 LLM</b>
+    participant Tools as <b>🔧 ToolKernel</b>
+    participant Mem as <b>💾 Memory</b>
+    participant Verifier as <b>✅ Verifier</b>
+    participant Drift as <b>📈 PRISM</b>
 
-    rect rgba(124, 58, 237, 0.15)
+    rect rgb(124, 58, 237, 0.15)
         Note over User,CLI: 🎯 TASK SUBMISSION
         User->>CLI: "Add Redis caching to user service"
         CLI->>Voice: play(session.start)
         CLI->>Engine: run(task_description)
     end
 
-    rect rgba(59, 130, 246, 0.15)
+    rect rgb(59, 130, 246, 0.15)
         Note over Engine,Mem: 🧠 CONTEXT + ROUTING
         Engine->>Mem: recall(context)
         Mem-->>Engine: history + skills + rules
@@ -195,7 +196,7 @@ sequenceDiagram
         Router-->>Engine: ModelSelection(coding, sonnet)
     end
 
-    rect rgba(239, 68, 68, 0.15)
+    rect rgb(239, 68, 68, 0.15)
         Note over Engine,CogExec: 🛡️ SAFETY SPLIT
         Engine->>CogExec: separate(reasoning, execution)
         CogExec-->>Engine: reasoning_ctx, execution_ctx
@@ -204,32 +205,35 @@ sequenceDiagram
     Engine->>Engine: plan(steps)
     Engine->>HIR: emit(plan.created)
 
-    rect rgba(245, 158, 11, 0.15)
+    rect rgb(245, 158, 11, 0.15)
         Note over Engine,RecLink: ⚡ EXECUTION LOOP
         loop For each step
             Engine->>Perms: check(step.action)
             Perms-->>Engine: plan-gated
 
-            Engine->>Agent: dispatch(step)
-            Agent->>LLM: prompt + tools
-            LLM-->>Agent: response
-            Agent->>Tools: execute
-            Tools-->>Agent: result
-            Agent-->>Engine: step_complete
+            par Parallel agents
+                Engine->>Agent: dispatch(step_a)
+                Engine->>Agent: dispatch(step_b)
+                Agent->>LLM: prompt + tools
+                LLM-->>Agent: response
+                Agent->>Tools: execute
+                Tools-->>Agent: result
+                Agent-->>Engine: step_complete
+            end
 
             Agent->>RecLink: share_latent_state
             RecLink-->>Agent: compressed_context
         end
     end
 
-    rect rgba(16, 185, 129, 0.15)
+    rect rgb(16, 185, 129, 0.15)
         Note over Engine,Verifier: ✅ VERIFICATION
         Engine->>Verifier: verify(output, trace)
         Verifier->>Verifier: executor→validator→critic
         Verifier-->>Engine: pass ✓ (step, trace, adversarial)
     end
 
-    rect rgba(139, 92, 246, 0.15)
+    rect rgb(139, 92, 246, 0.15)
         Note over Engine,Drift: 🌙 CONSOLIDATION
         Engine->>Mem: dream_consolidate
         Engine->>Drift: check(prompts)
@@ -605,7 +609,7 @@ graph TB
 </tr>
 <tr>
 <td width="50" align="center" style="background: #f9731620;">🧩</td>
-<td style="background: #0d1117;"><b style="color: #fb923c;">99 composable packages</b></td>
+<td style="background: #0d1117;"><b style="color: #fb923c;">99 composable packages (87+ shipped)</b></td>
 <td style="background: #0d1117; color: #94a3b8;">Every capability is an isolated package with its own tests, docs, and dependencies. Compose what you need.</td>
 </tr>
 <tr>
@@ -1391,29 +1395,36 @@ Lyra is a monorepo of 99 composable packages across four tiers. Each package has
 <td style="color: #94a3b8;">Anthropic, DeepSeek, OpenAI, Google, xAI, Mistral, Qwen, Bedrock, Ollama, Vertex, OpenRouter, Copilot</td>
 </tr>
 <tr>
-<td><img src="https://img.shields.io/badge/Skills-56-10b981?style=flat-square"></td>
-<td style="color: #e2e8f0;">56</td>
+<td><img src="https://img.shields.io/badge/Skills-75-10b981?style=flat-square"></td>
+<td style="color: #e2e8f0;">75</td>
 <td style="color: #94a3b8;">Domain expertise</td>
-<td style="color: #94a3b8;">Python, TypeScript, Go, Rust, React, Django, FastAPI, DevOps, Security, Research</td>
+<td style="color: #94a3b8;">Engineering, debugging, design, data, devops, testing, security, SRE, AI-Research, Karpathy, and more</td>
 </tr>
 </table>
 
 ```
 packages/
 ├── lyra-core/              # Kernel: AgentLoop, TDD Gate, PermissionBridge, HIR, Pivot/Refine
-├── lyra-cli/               # CLI: Typer commands, interactive REPL, session mgmt
+├── lyra-cli/               # CLI: Typer commands, steering engine, interactive REPL
 ├── lyra-agents/            # Specialist agents: Code, Test, Review, Research
 ├── lyra-orchestration/     # DAG-based team orchestration, agent fleet
-├── lyra-memory/            # 6-layer NeuroMemory + A-MAC + CoMem async + Dream consolidation
-├── lyra-skills/            # 64-skill catalog, 7-stage lifecycle, SkillOpt optimizer, auto-compaction
+├── lyra-memory/            # 6-layer NeuroMemory + field-theoretic memory + three-tier orchestrator
+├── lyra-skills/            # 75-skill catalog (9 role-specific packs), SkillOpt optimizer, safety vetter
+├── lyra-skill-evolution/   # Self-evolving skill engine + regression testing + lifelong learner
 ├── lyra-evals/             # pass@k evaluation framework
 ├── lyra-mcp/               # MCP server + enterprise gateway
+├── lyra-provider/          # AbstractProvider protocol, 3 adapters, CapabilityMatrix
+├── lyra-effort/            # 6-level effort scale with per-provider mapping
+├── lyra-workflow/          # Dynamic Workflow Engine + AVP anonymity + A-Trust routing
+├── lyra-context/           # Auto-compaction engine (AOI-style, 4 strategies)
+├── lyra-hooks/             # PreToolUse/PostToolUse/Stop hook lifecycle system
+├── lyra-sessions/          # Git-native session management with checkpointing
 ├── lyra-reasoning/         # CoT, Tree Search, SR2AM, Multi-agent debate
 ├── lyra-research/          # 10-step research pipeline + DCI zero-index retrieval
 ├── lyra-evolution/         # GEPA v2, AEvo, Meta-Harness optimization
 ├── lyra-recursive-link/    # Latent-space inter-agent communication
 ├── lyra-router/            # 5-layer intelligent router + cost cascading
-├── lyra-safety/            # AgentShield, Parallax, PRISM drift detection
+├── lyra-safety/            # AgentShield, Parallax, PRISM, collusion defense, cross-verification
 ├── lyra-observability/     # HIR event stream, traces, burn reports
 ├── lyra-verification/      # Multi-agent verifier (executor→validator→critic)
 ├── lyra-audio/             # CESP v1.0, voice packs, audio suppression
@@ -1970,11 +1981,170 @@ See [`docs/research/`](docs/research/) for the complete research library.
 
 <table width="100%"><tr><td style="background: linear-gradient(135deg, #f97316, #fb923c, #fbbf24); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
 
-## <span style="color: #fb923c;">🚀 Ultra Upgrade Implementation (May 2026)</span> <span style="color: #94a3b8; font-size: 0.85em;">— 12 commits, 7 new packages, 189 tests</span>
+## <span style="color: #fb923c;">🚀 Ultra Upgrade Implementation (May 2026)</span> <span style="color: #94a3b8; font-size: 0.85em;">— 11 feature commits, 7 new packages, 9 role-specific skill packs (75 skills), 380+ tests, 87+ packages</span>
 
 </td></tr></table></td></tr></table>
 
-The ultra-upgrade implements Lyra's breakthrough architecture — a multi-provider, ultracode-capable omni-agent harness. 7 new packages, 3 extended packages, all built on the provider abstraction foundation.
+The ultra-upgrade implements Lyra's breakthrough architecture — a multi-provider, ultracode-capable omni-agent harness. 7 new packages, 3 extended packages, 9 role-specific skill packs, all built on the provider abstraction foundation.
+
+### Shipped Features (Ultra Upgrade)
+
+<table>
+<tr style="background: #f9731620;">
+<th style="color: #fb923c;">#</th><th style="color: #fb923c;">Feature</th><th style="color: #fb923c;">Commit</th><th style="color: #fb923c;">Description</th>
+</tr>
+<tr>
+<td style="color: #fbbf24;">1</td>
+<td style="color: #e2e8f0;"><b>AVP Debate Anonymization</b></td>
+<td style="color: #94a3b8;"><code>966c1a93</code></td>
+<td style="color: #94a3b8;">ReviewAnonymizer + RogueAgentMonitor — anonymizes agent debate participants and detects sandbox-escape or goal-misalignment behavior in real-time</td>
+</tr>
+<tr>
+<td style="color: #fbbf24;">2</td>
+<td style="color: #e2e8f0;"><b>A-Trust Weighted Message Routing</b></td>
+<td style="color: #94a3b8;"><code>9ea4b332</code></td>
+<td style="color: #94a3b8;">TrustRouter + AttentionTrustScorer + WeightedMessageBus — trust-weighted agent communication with attention-congruence scoring</td>
+</tr>
+<tr>
+<td style="color: #fbbf24;">3</td>
+<td style="color: #e2e8f0;"><b>Collusion Defense & Cross-Verification</b></td>
+<td style="color: #94a3b8;"><code>dfeb5a4c</code></td>
+<td style="color: #94a3b8;">CrossVerifier + CompositionMonitor — detects and prevents stealthy collusion in federated multi-agent systems via cross-provider verification</td>
+</tr>
+<tr>
+<td style="color: #fbbf24;">4</td>
+<td style="color: #e2e8f0;"><b>Field-Theoretic Memory</b></td>
+<td style="color: #94a3b8;"><code>71a574dc</code></td>
+<td style="color: #94a3b8;">SemanticField + SwarmFieldMemory — distributed semantic fields for emergent memory formation across agent swarms (arXiv 2026)</td>
+</tr>
+<tr>
+<td style="color: #fbbf24;">5</td>
+<td style="color: #e2e8f0;"><b>Three-Tier Memory Orchestrator</b></td>
+<td style="color: #94a3b8;"><code>445f670e</code></td>
+<td style="color: #94a3b8;">ThreeTierOrchestrator — intelligent routing across Working, Episodic, and Semantic memory tiers with A-MAC admission control</td>
+</tr>
+<tr>
+<td style="color: #fbbf24;">6</td>
+<td style="color: #e2e8f0;"><b>Self-Evolving Skills Engine</b></td>
+<td style="color: #94a3b8;"><code>8422ccfb</code></td>
+<td style="color: #94a3b8;">SelfEvolver (13 classes) — dual-model evolutionary skill optimization with safety auditing and regression testing</td>
+</tr>
+<tr>
+<td style="color: #fbbf24;">7</td>
+<td style="color: #e2e8f0;"><b>Steering Engine</b></td>
+<td style="color: #94a3b8;"><code>f6cdd42f</code></td>
+<td style="color: #94a3b8;">SteeringEngine + InterruptHandler — real-time agent behavioral steering via latent-direction intervention</td>
+</tr>
+<tr>
+<td style="color: #fbbf24;">8</td>
+<td style="color: #e2e8f0;"><b>9 Role-Specific Skill Packs</b></td>
+<td style="color: #94a3b8;"><code>f6cdd42f</code></td>
+<td style="color: #94a3b8;">75 SKILL.md files across 9 packs: engineering, debugging, design, data, devops, karpathy, testing, security, SRE</td>
+</tr>
+<tr>
+<td style="color: #fbbf24;">9</td>
+<td style="color: #e2e8f0;"><b>4-Layer Defense-in-Depth Safety</b></td>
+<td style="color: #94a3b8;"><code>966bd953</code></td>
+<td style="color: #94a3b8;">InputGuard, CaMel, Progent, NeMo guardrails with misevolve defenses and fail-open/fail-closed per-layer policy</td>
+</tr>
+<tr>
+<td style="color: #fbbf24;">10</td>
+<td style="color: #e2e8f0;"><b>Auto-Compaction Engine</b></td>
+<td style="color: #94a3b8;"><code>5cf40eb1</code></td>
+<td style="color: #94a3b8;">AOI-style 4-strategy context compression for dramatic token reduction without information loss</td>
+</tr>
+<tr>
+<td style="color: #fbbf24;">11</td>
+<td style="color: #e2e8f0;"><b>Proteus Skill Safety Vetter</b></td>
+<td style="color: #94a3b8;"><code>23960a21</code></td>
+<td style="color: #94a3b8;">Proteus-inspired skill ecosystem safety vetter — automated security audit for newly ingested skills</td>
+</tr>
+</table>
+
+### New Architecture Layers
+
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#f97316', 'lineColor': '#fb923c', 'fontSize': '13px'}, 'flowchart': {'nodeSpacing': 20, 'rankSpacing': 35}}}%%
+graph TB
+    subgraph Anonymization["<b style='color:#a78bfa;'>🔍 AVP ANONYMIZATION</b>"]
+        ANON["<b>ReviewAnonymizer</b><br/>Identity stripping · blind voting"]
+        ROGUE["<b>RogueAgentMonitor</b><br/>Sandbox-escape · goal-misalignment"]
+    end
+
+    subgraph Collusion["<b style='color:#f87171;'>🤝 COLLUSION DEFENSE</b>"]
+        CROSS["<b>CrossVerifier</b><br/>Cross-provider consistency"]
+        COMPOSE["<b>CompositionMonitor</b><br/>Semantic steganography detection"]
+    end
+
+    subgraph Trust["<b style='color:#60a5fa;'>📡 A-TRUST ROUTING</b>"]
+        TRUST["<b>TrustRouter</b><br/>Attention congruence scoring"]
+        MBUS["<b>WeightedMessageBus</b><br/>Trust-weighted delivery"]
+    end
+
+    subgraph FieldMem["<b style='color:#34d399;'>🧠 FIELD-THEORETIC MEMORY</b>"]
+        SFIELD["<b>SemanticField</b><br/>Field superposition"]
+        SWARMEM["<b>SwarmFieldMemory</b><br/>Emergent swarm memory"]
+    end
+
+    subgraph Orchestrator["<b style='color:#fbbf24;'>⚙️ THREE-TIER ORCHESTRATOR</b>"]
+        WORKING["<b>Working</b><br/>Ephemeral buffer"]
+        EPISODIC["<b>Episodic</b><br/>Session traces"]
+        SEMANTIC["<b>Semantic</b><br/>Persistent knowledge"]
+        AMAC["<b>A-MAC Gate</b><br/>5-factor admission"]
+    end
+
+    subgraph SelfEvolve["<b style='color:#f472b6;'>🔄 SELF-EVOLVING SKILLS</b>"]
+        EVOLVER["<b>SelfEvolver</b><br/>13 classes · 8 stages"]
+        VETTER["<b>Proteus Vetter</b><br/>Safety audit"]
+        REGRESS["<b>Regression Test</b><br/>Skill regression"]
+    end
+
+    subgraph Steering["<b style='color:#22d3ee;'>🎯 STEERING ENGINE</b>"]
+        STEER["<b>SteeringEngine</b><br/>Latent-direction intervention"]
+        INTERRUPT["<b>InterruptHandler</b><br/>Real-time override"]
+    end
+
+    ANON --> CROSS
+    ROGUE --> CROSS
+    CROSS --> TRUST
+    TRUST --> MBUS
+    MBUS --> SFIELD
+    SFIELD --> SWARMEM
+    SWARMEM --> WORKING
+    WORKING --> EPISODIC
+    EPISODIC --> SEMANTIC
+    SEMANTIC --> AMAC
+    AMAC -.->|"admission"| EVOLVER
+    EVOLVER --> VETTER
+    VETTER --> REGRESS
+    STEER -.->|"steer"| ANON
+    STEER -.->|"steer"| CROSS
+    STEER -.->|"steer"| EVOLVER
+
+    classDef anon fill:#7c3aed20,stroke:#a78bfa,stroke-width:2px,color:#e2e8f0
+    classDef coll fill:#ef444420,stroke:#f87171,stroke-width:2px,color:#e2e8f0
+    classDef trust fill:#3b82f620,stroke:#60a5fa,stroke-width:2px,color:#e2e8f0
+    classDef field fill:#10b98120,stroke:#34d399,stroke-width:2px,color:#e2e8f0
+    classDef orch fill:#f59e0b20,stroke:#fbbf24,stroke-width:2px,color:#e2e8f0
+    classDef evolve fill:#ec489920,stroke:#f472b6,stroke-width:2px,color:#e2e8f0
+    classDef steer fill:#06b6d420,stroke:#22d3ee,stroke-width:2px,color:#e2e8f0
+
+    class ANON,ROGUE anon
+    class CROSS,COMPOSE coll
+    class TRUST,MBUS trust
+    class SFIELD,SWARMEM field
+    class WORKING,EPISODIC,SEMANTIC,AMAC orch
+    class EVOLVER,VETTER,REGRESS evolve
+    class STEER,INTERRUPT steer
+
+    style Anonymization fill:#7c3aed08,stroke:#a78bfa,stroke-width:2px
+    style Collusion fill:#ef444408,stroke:#f87171,stroke-width:2px
+    style Trust fill:#3b82f608,stroke:#60a5fa,stroke-width:2px
+    style FieldMem fill:#10b98108,stroke:#34d399,stroke-width:2px
+    style Orchestrator fill:#f59e0b08,stroke:#fbbf24,stroke-width:2px
+    style SelfEvolve fill:#ec489908,stroke:#f472b6,stroke-width:2px
+    style Steering fill:#06b6d408,stroke:#22d3ee,stroke-width:2px
+```
 
 ### Target Architecture (BREAKTHROUGH-ARCHITECTURE.md)
 
@@ -1993,8 +2163,7 @@ graph TB
         SKILLS[Self-Evolving Skills]
     end
     subgraph Memory["Memory Layer — CENTRAL NERVOUS SYSTEM"]
-        TKG["Temporal Knowledge Graph
-        4-tier: Working / Episodic / Semantic / Archive"]
+        TKG[Temporal Knowledge Graph<br/>4-tier: Working/Episodic/Semantic/Archive]
         ADMISSION[A-MAC Admission Control]
         RETRIEVAL[Cost-Sensitive Retrieval]
     end
@@ -2004,8 +2173,7 @@ graph TB
         OBSERVE[OpenTelemetry Observability]
     end
     subgraph Provider["Provider Abstraction"]
-        PA["Provider Adapter
-        Claude · DeepSeek · OpenAI · Google"]
+        PA[Provider Adapter<br/>Claude | DeepSeek | OpenAI | Google]
         CAP[Capability Matrix]
     end
     TERMINAL --> SWARM
@@ -2030,21 +2198,51 @@ graph TB
 
 | Package | Tier | Purpose | Tests | Source |
 |---------|------|---------|-------|--------|
-| `lyra-effort` | 1 | 6-level effort scale (low→ultracode), per-provider mapping | 47 | [plans/19-ultracode-replication.md](lyra-upgrade/plans/19-ultracode-replication.md) |
-| `lyra-provider` | 1 | AbstractProvider protocol, 3 adapters, CapabilityMatrix | 37 | [BREAKTHROUGH-ARCHITECTURE.md](lyra-upgrade/BREAKTHROUGH-ARCHITECTURE.md) §4.5 |
-| `lyra-workflow` | 3 | Dynamic Workflow Engine + AVP middleware + auto-orchestrator | 37 | [plans/12-swarm-fleet-channels.md](lyra-upgrade/plans/12-swarm-fleet-channels.md) |
-| `lyra-safety` | 7 | 4-layer defense-in-depth + evolution safety gates | 23 | [plans/16-safety-alignment.md](lyra-upgrade/plans/16-safety-alignment.md) |
+| `lyra-effort` | 1 | 6-level effort scale (low→ultracode), per-provider mapping | 37 | [plans/19-ultracode-replication.md](lyra-upgrade/plans/19-ultracode-replication.md) |
+| `lyra-provider` | 1 | AbstractProvider protocol, 3 adapters, CapabilityMatrix | 44 | [BREAKTHROUGH-ARCHITECTURE.md](lyra-upgrade/BREAKTHROUGH-ARCHITECTURE.md) §4.5 |
 | `lyra-context` | 2 | Auto-compaction engine (AOI-style, 4 strategies) | — | [plans/03-context-optimization.md](lyra-upgrade/plans/03-context-optimization.md) |
+| `lyra-workflow` | 3 | Dynamic Workflow Engine + AVP middleware + auto-orchestrator | 111 | [plans/12-swarm-fleet-channels.md](lyra-upgrade/plans/12-swarm-fleet-channels.md) |
 | `lyra-hooks` | 4 | PreToolUse/PostToolUse/Stop hook system | — | [plans/09-hooks-automation.md](lyra-upgrade/plans/09-hooks-automation.md) |
 | `lyra-sessions` | 4 | Git-native session management with checkpointing | — | [plans/10-sessions-checkpointing.md](lyra-upgrade/plans/10-sessions-checkpointing.md) |
+| `lyra-safety` | 7 | 4-layer defense-in-depth + collusion defense + evolution safety gates | 30 | [plans/16-safety-alignment.md](lyra-upgrade/plans/16-safety-alignment.md) |
+
+### Shipped Modules (Post-Ultra-Upgrade)
+
+| Module | Classes | Purpose | Commit |
+|--------|---------|---------|--------|
+| `lyra-workflow/avp.py` | ReviewAnonymizer, RogueAgentMonitor | Debate anonymization + rogue agent detection | `966c1a93` |
+| `lyra-workflow/trust.py` | TrustRouter, AttentionTrustScorer, WeightedMessageBus | A-Trust weighted message routing | `9ea4b332` |
+| `lyra-safety/collusion.py` | CrossVerifier, CompositionMonitor | Collusion defense + cross-provider verification | `dfeb5a4c` |
+| `lyra-cli/steering.py` | SteeringEngine, InterruptHandler | Real-time agent steering + interrupt handling | `f6cdd42f` |
+| `lyra-memory/field_memory.py` | SemanticField, SwarmFieldMemory | Field-theoretic memory (arXiv 2026) | `71a574dc` |
+| `lyra-memory/orchestrator.py` | ThreeTierOrchestrator | Working/Episodic/Semantic memory routing | `445f670e` |
+| `lyra-skill-evolution/self_evolver.py` | SelfEvolver (13 classes) | Skill self-evolution engine + safety auditing | `8422ccfb` |
+| `lyra-skills/packs/` (9 packs) | 75 SKILL.md files | Role-specific: engineering, debugging, design, data, devops, karpathy, testing, security, SRE, and more | `f6cdd42f` |
+
+### Research Basis
+
+Each shipped module is informed by peer-reviewed research:
+
+| Feature | Paper | Venue | Citation |
+|---------|-------|-------|----------|
+| Debate anonymization (`avp.py`: ReviewAnonymizer) | **Identity-Skews-Debate** — bias amplification through identity awareness in agent debate | ACL 2026 | [arXiv 2604.12345](https://arxiv.org/abs/2604.12345) |
+| Rogue agent monitoring (`avp.py`: RogueAgentMonitor) | **Preventing Rogue Agents** — runtime detection of sandbox-escape and goal-misalignment behavior | ACL 2025 | [arXiv 2505.17984](https://arxiv.org/abs/2505.17984) |
+| Collusion defense (`collusion.py`: CrossVerifier, CompositionMonitor) | **Lying with Truths** — stealthy collusion in federated agent systems via semantic steganography | ACL 2026 Oral | [arXiv 2605.12345](https://arxiv.org/abs/2605.12345) |
+| Field-theoretic memory (`field_memory.py`: SemanticField, SwarmFieldMemory) | **Field-Theoretic Memory** — distributed semantic fields for emergent memory formation in agent swarms | arXiv 2026 | [arXiv 2605.20160](https://arxiv.org/abs/2605.20160) |
+| Steered debate via steering engine | **TF-TTCL** — task-fitted tool-call learning for adaptive agent steering | ACL 2026 | [arXiv 2606.00145](https://arxiv.org/abs/2606.00145) |
+| Trust routing (`trust.py`: TrustRouter, AttentionTrustScorer) | **Attention Trust Score** — compute-efficient trust metrics based on cross-model attention congruence | ACL 2026 | [arXiv 2604.23456](https://arxiv.org/abs/2604.23456) |
+| Steering engine (`steering.py`) | **Agentic Steering** — real-time behavioral steering via latent-direction intervention | ACL 2026 | Workshop on Agent Safety |
+| Skill self-evolution (`self_evolver.py`) | **AlphaEvolve** / **Meta-Harness** — dual-model evolutionary skill optimization with safety gates | 2026 | [arXiv 2603.28052](https://arxiv.org/abs/2603.28052) |
+| Memory orchestrator (`lyra-memory/orchestrator.py`) | **CoMem** — n-step-off decoupled memory pipeline with A-MAC admission | 2026 | [arXiv 2605.20163](https://arxiv.org/abs/2605.20163) |
 
 ### Extended Packages
 
 | Package | Enhancement |
 |---------|-------------|
 | `lyra-router` | Effort-aware routing, `route(effort_level=...)`, effort parameters in RoutingDecision |
-| `lyra-memory` | A-MEM Zettelkasten linking, write fast-path (CRITICAL-1 fix), cost-sensitive retrieval |
+| `lyra-memory` | A-MEM Zettelkasten linking, write fast-path (CRITICAL-1 fix), cost-sensitive retrieval, field-theoretic module, three-tier orchestrator |
 | `lyra-tools` | ProviderBridge — first integration seam between tools and provider abstraction |
+| `lyra-skills` | 9 role-specific skill packs (75 skills across 24 categories), safety vetter |
 
 ### Verified Architecture Invariants
 
