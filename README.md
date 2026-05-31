@@ -1996,7 +1996,8 @@ graph TB
         SKILLS[Self-Evolving Skills]
     end
     subgraph Memory["Memory Layer — CENTRAL NERVOUS SYSTEM"]
-        TKG[Temporal Knowledge Graph<br/>4-tier: Working/Episodic/Semantic/Archive]
+        TKG["Temporal Knowledge Graph
+        4-tier: Working / Episodic / Semantic / Archive"]
         ADMISSION[A-MAC Admission Control]
         RETRIEVAL[Cost-Sensitive Retrieval]
     end
@@ -2006,7 +2007,8 @@ graph TB
         OBSERVE[OpenTelemetry Observability]
     end
     subgraph Provider["Provider Abstraction"]
-        PA[Provider Adapter<br/>Claude | DeepSeek | OpenAI | Google]
+        PA["Provider Adapter
+        Claude · DeepSeek · OpenAI · Google"]
         CAP[Capability Matrix]
     end
     TERMINAL --> SWARM
