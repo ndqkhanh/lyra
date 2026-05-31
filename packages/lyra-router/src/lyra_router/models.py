@@ -78,6 +78,10 @@ class RoutingDecision:
         tier_used: Which router tier made the decision (1=rule, 2=semantic, 3=neural).
         budget_regime: The budget regime when this decision was made.
         latency_ms: Time spent in the routing cascade (ms).
+        effort_level: The effort level used for this decision (low→ultracode).
+        effort_budget_tokens: Token budget from the effort mapping.
+        effort_instruction: Prompt-level thinking instruction (for providers without budget_tokens).
+        effort_reasoning: OpenAI reasoning_effort value.
     """
 
     model: str
@@ -89,6 +93,10 @@ class RoutingDecision:
     tier_used: int = 1
     budget_regime: BudgetRegime = BudgetRegime.HIGH
     latency_ms: float = 0.0
+    effort_level: str = ""
+    effort_budget_tokens: int = 0
+    effort_instruction: str = ""
+    effort_reasoning: str = ""
 
 
 @dataclass(frozen=True)

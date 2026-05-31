@@ -908,20 +908,116 @@ class VoiceInterface:
 # Public API
 # ---------------------------------------------------------------------------
 
+from lyra_voice.providers import (
+    EnergyVAD,
+    GapBasedTurn,
+    KokoroTTS,
+    SileroVAD,
+    SmartTurn,
+    STTConfig,
+    STTProvider,
+    STTProviderKind,
+    STTResult,
+    TTSConfig,
+    TTSProvider,
+    TTSProviderKind,
+    TurnConfig,
+    TurnDecision,
+    TurnTakingKind,
+    TurnTakingProvider,
+    VADConfig,
+    VADProvider,
+    VADProviderKind,
+    VADSegment,
+    VoiceLanguage,
+    VoicePipelineConfig,
+    VoiceProviderRegistry,
+    WhisperSTT,
+)
+from lyra_voice.pipeline import (
+    InteractionMode,
+    PipelineEvent,
+    PipelineState,
+    VoicePipeline,
+    VoicePipelineStats,
+    VoiceTurn,
+)
+from lyra_voice.sfx import (
+    BUILTIN_PACKS,
+    HOOK_TO_SFX,
+    SFXAsset,
+    SFXCategory,
+    SFXManager,
+    VoicePack,
+)
+from lyra_voice.voice_hooks import (
+    DEFAULT_HOOK_MAPPINGS,
+    HookEvent,
+    PlaybackMode,
+    VoiceHookManager,
+    VoiceHookMapping,
+    VoiceHookStats,
+)
+
 __version__ = "0.1.0"
 
 __all__ = [
     # Enums
+    "HookEvent",
+    "PlaybackMode",
+    "SFXCategory",
+    "VADMode",
     "VoiceCommandAction",
     "WakeWordModel",
-    "VADMode",
     # Data types
-    "WakeWordConfig",
+    "SFXAsset",
     "VoiceCommand",
-    "ParsedCommand",
-    "VADResult",
-    "VoiceSession",
     "VoiceConfig",
+    "VoiceHookMapping",
+    "VoiceHookStats",
+    "VoicePack",
+    "VoiceSession",
+    "WakeWordConfig",
+    # SFX
+    "BUILTIN_PACKS",
+    "HOOK_TO_SFX",
+    "SFXManager",
+    # Voice Hooks
+    "DEFAULT_HOOK_MAPPINGS",
+    "VoiceHookManager",
     # Main module
     "VoiceInterface",
+    # Provider abstractions
+    "EnergyVAD",
+    "GapBasedTurn",
+    "KokoroTTS",
+    "SileroVAD",
+    "SmartTurn",
+    "STTProvider",
+    "TTSProvider",
+    "TurnTakingProvider",
+    "VADProvider",
+    "VoiceProviderRegistry",
+    "WhisperSTT",
+    # Pipeline
+    "InteractionMode",
+    "PipelineEvent",
+    "PipelineState",
+    "VoicePipeline",
+    "VoicePipelineConfig",
+    "VoicePipelineStats",
+    "VoiceTurn",
+    # Provider types
+    "STTConfig",
+    "STTProviderKind",
+    "STTResult",
+    "TTSConfig",
+    "TTSProviderKind",
+    "TurnConfig",
+    "TurnDecision",
+    "TurnTakingKind",
+    "VADConfig",
+    "VADProviderKind",
+    "VADSegment",
+    "VoiceLanguage",
 ]

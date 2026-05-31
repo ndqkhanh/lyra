@@ -7,7 +7,7 @@ name = "lyra-router"
 version = "0.1.0"
 description = "Intelligent agent dispatch — capability matching, load balancing, A/B experimentation"
 requires-python = ">=3.11"
-dependencies = ["lyra-core", "lyra-orchestration"]
+dependencies = ["lyra-core", "lyra-orchestration", "lyra-effort"]
 [project.optional-dependencies]
 dev = ["pytest>=7.0"]
 [tool.setuptools.packages.find]
