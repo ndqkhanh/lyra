@@ -15,6 +15,21 @@ or non-blocking improvements deferred from reviews. Ranked by impact × effort.
 | 4 | Plugin system package (lyra-plugins) | MEDIUM | MEDIUM | P1 | §4.7 |
 | 5 | Mermaid architecture diagrams in README | MEDIUM | SMALL | P1 | §6 |
 
+## Stub Components in Voice/Audio/Speech (discovered during test audit)
+
+| # | Item | Package | Impact | Effort | Priority |
+|---|------|---------|--------|--------|----------|
+| 1 | SpeechModule.transcribe() — returns `[Stub: ...]` placeholder message, not real STT. Real integration needed (Whisper/DeepSpeech). | lyra-speech | HIGH | LARGE | P0 |
+| 2 | SpeechModule.synthesize() — generates silence WAV, not real TTS. Real synthesis required (Tacotron/FastSpeech/Bark). | lyra-speech | HIGH | LARGE | P0 |
+| 3 | SpeechModule.identify_speaker() — hash-based stub, no real speaker embedding (d-vector/x-vector/ECAPA-TDNN). | lyra-speech | MEDIUM | LARGE | P1 |
+| 4 | SpeechModule.detect_emotion() — amplitude variance proxy, no real emotion classifier (CNN-LSTM). | lyra-speech | MEDIUM | MEDIUM | P1 |
+| 5 | VoiceInterface._stub_transcribe() — deterministic hash-to-phrase, no real STT engine. | lyra-voice | HIGH | LARGE | P0 |
+| 6 | WhisperSTT._transcribe_stub() — fallback hash-to-phrase when faster-whisper unavailable. | lyra-voice | MEDIUM | MEDIUM | P1 |
+| 7 | KokoroTTS — stub tone generator when torch/kokoro unavailable. Real KPipeline synthesis not wired. | lyra-voice | MEDIUM | MEDIUM | P1 |
+| 8 | SileroVAD — ZCR+energy heuristics only (enhanced fallback), real Silero neural model path reserved but unused. | lyra-voice | LOW | MEDIUM | P2 |
+| 9 | VoiceInterface.detect_wake_word() — energy + ZCR heuristic, no real wake word model (Porcupine/Snowboy). | lyra-voice | HIGH | LARGE | P0 |
+| 10 | AudioPlayer.platform detection — only afplay/aplay/paplay/ffplay, no dedicated audio library (pygame/sounddevice). | lyra-audio | MEDIUM | SMALL | P2 |
+
 ## Discovered During Implementation
 
 | # | Item | Discovered In | Impact | Effort | Priority |

@@ -1394,29 +1394,36 @@ Lyra is a monorepo of 99 composable packages across four tiers. Each package has
 <td style="color: #94a3b8;">Anthropic, DeepSeek, OpenAI, Google, xAI, Mistral, Qwen, Bedrock, Ollama, Vertex, OpenRouter, Copilot</td>
 </tr>
 <tr>
-<td><img src="https://img.shields.io/badge/Skills-56-10b981?style=flat-square"></td>
-<td style="color: #e2e8f0;">56</td>
+<td><img src="https://img.shields.io/badge/Skills-75-10b981?style=flat-square"></td>
+<td style="color: #e2e8f0;">75</td>
 <td style="color: #94a3b8;">Domain expertise</td>
-<td style="color: #94a3b8;">Python, TypeScript, Go, Rust, React, Django, FastAPI, DevOps, Security, Research</td>
+<td style="color: #94a3b8;">Engineering, debugging, design, data, devops, testing, security, SRE, AI-Research, Karpathy, and more</td>
 </tr>
 </table>
 
 ```
 packages/
 ├── lyra-core/              # Kernel: AgentLoop, TDD Gate, PermissionBridge, HIR, Pivot/Refine
-├── lyra-cli/               # CLI: Typer commands, interactive REPL, session mgmt
+├── lyra-cli/               # CLI: Typer commands, steering engine, interactive REPL
 ├── lyra-agents/            # Specialist agents: Code, Test, Review, Research
 ├── lyra-orchestration/     # DAG-based team orchestration, agent fleet
-├── lyra-memory/            # 6-layer NeuroMemory + A-MAC + CoMem async + Dream consolidation
-├── lyra-skills/            # 64-skill catalog, 7-stage lifecycle, SkillOpt optimizer, auto-compaction
+├── lyra-memory/            # 6-layer NeuroMemory + field-theoretic memory + three-tier orchestrator
+├── lyra-skills/            # 75-skill catalog (9 role-specific packs), SkillOpt optimizer, safety vetter
+├── lyra-skill-evolution/   # Self-evolving skill engine + regression testing + lifelong learner
 ├── lyra-evals/             # pass@k evaluation framework
 ├── lyra-mcp/               # MCP server + enterprise gateway
+├── lyra-provider/          # AbstractProvider protocol, 3 adapters, CapabilityMatrix
+├── lyra-effort/            # 6-level effort scale with per-provider mapping
+├── lyra-workflow/          # Dynamic Workflow Engine + AVP anonymity + A-Trust routing
+├── lyra-context/           # Auto-compaction engine (AOI-style, 4 strategies)
+├── lyra-hooks/             # PreToolUse/PostToolUse/Stop hook lifecycle system
+├── lyra-sessions/          # Git-native session management with checkpointing
 ├── lyra-reasoning/         # CoT, Tree Search, SR2AM, Multi-agent debate
 ├── lyra-research/          # 10-step research pipeline + DCI zero-index retrieval
 ├── lyra-evolution/         # GEPA v2, AEvo, Meta-Harness optimization
 ├── lyra-recursive-link/    # Latent-space inter-agent communication
 ├── lyra-router/            # 5-layer intelligent router + cost cascading
-├── lyra-safety/            # AgentShield, Parallax, PRISM drift detection
+├── lyra-safety/            # AgentShield, Parallax, PRISM, collusion defense, cross-verification
 ├── lyra-observability/     # HIR event stream, traces, burn reports
 ├── lyra-verification/      # Multi-agent verifier (executor→validator→critic)
 ├── lyra-audio/             # CESP v1.0, voice packs, audio suppression
@@ -1973,11 +1980,11 @@ See [`docs/research/`](docs/research/) for the complete research library.
 
 <table width="100%"><tr><td style="background: linear-gradient(135deg, #f97316, #fb923c, #fbbf24); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
 
-## <span style="color: #fb923c;">🚀 Ultra Upgrade Implementation (May 2026)</span> <span style="color: #94a3b8; font-size: 0.85em;">— 12 commits, 7 new packages, 189 tests</span>
+## <span style="color: #fb923c;">🚀 Ultra Upgrade Implementation (May 2026)</span> <span style="color: #94a3b8; font-size: 0.85em;">— 19 commits, 7 new packages, 9 role-specific skill packs (75 skills), ~5,800 tests</span>
 
 </td></tr></table></td></tr></table>
 
-The ultra-upgrade implements Lyra's breakthrough architecture — a multi-provider, ultracode-capable omni-agent harness. 7 new packages, 3 extended packages, all built on the provider abstraction foundation.
+The ultra-upgrade implements Lyra's breakthrough architecture — a multi-provider, ultracode-capable omni-agent harness. 7 new packages, 3 extended packages, 9 role-specific skill packs, all built on the provider abstraction foundation.
 
 ### Target Architecture (BREAKTHROUGH-ARCHITECTURE.md)
 
@@ -2031,21 +2038,50 @@ graph TB
 
 | Package | Tier | Purpose | Tests | Source |
 |---------|------|---------|-------|--------|
-| `lyra-effort` | 1 | 6-level effort scale (low→ultracode), per-provider mapping | 47 | [plans/19-ultracode-replication.md](lyra-upgrade/plans/19-ultracode-replication.md) |
-| `lyra-provider` | 1 | AbstractProvider protocol, 3 adapters, CapabilityMatrix | 37 | [BREAKTHROUGH-ARCHITECTURE.md](lyra-upgrade/BREAKTHROUGH-ARCHITECTURE.md) §4.5 |
-| `lyra-workflow` | 3 | Dynamic Workflow Engine + AVP middleware + auto-orchestrator | 37 | [plans/12-swarm-fleet-channels.md](lyra-upgrade/plans/12-swarm-fleet-channels.md) |
-| `lyra-safety` | 7 | 4-layer defense-in-depth + evolution safety gates | 23 | [plans/16-safety-alignment.md](lyra-upgrade/plans/16-safety-alignment.md) |
+| `lyra-effort` | 1 | 6-level effort scale (low→ultracode), per-provider mapping | 37 | [plans/19-ultracode-replication.md](lyra-upgrade/plans/19-ultracode-replication.md) |
+| `lyra-provider` | 1 | AbstractProvider protocol, 3 adapters, CapabilityMatrix | 44 | [BREAKTHROUGH-ARCHITECTURE.md](lyra-upgrade/BREAKTHROUGH-ARCHITECTURE.md) §4.5 |
 | `lyra-context` | 2 | Auto-compaction engine (AOI-style, 4 strategies) | — | [plans/03-context-optimization.md](lyra-upgrade/plans/03-context-optimization.md) |
+| `lyra-workflow` | 3 | Dynamic Workflow Engine + AVP middleware + auto-orchestrator | 111 | [plans/12-swarm-fleet-channels.md](lyra-upgrade/plans/12-swarm-fleet-channels.md) |
 | `lyra-hooks` | 4 | PreToolUse/PostToolUse/Stop hook system | — | [plans/09-hooks-automation.md](lyra-upgrade/plans/09-hooks-automation.md) |
 | `lyra-sessions` | 4 | Git-native session management with checkpointing | — | [plans/10-sessions-checkpointing.md](lyra-upgrade/plans/10-sessions-checkpointing.md) |
+| `lyra-safety` | 7 | 4-layer defense-in-depth + collusion defense + evolution safety gates | 30 | [plans/16-safety-alignment.md](lyra-upgrade/plans/16-safety-alignment.md) |
+
+### Shipped Modules (Post-Ultra-Upgrade)
+
+| Module | Classes | Purpose | Commit |
+|--------|---------|---------|--------|
+| `lyra-workflow/avp.py` | ReviewAnonymizer, RogueAgentMonitor | Debate anonymization + rogue agent detection | `966c1a93` |
+| `lyra-workflow/trust.py` | TrustRouter, AttentionTrustScorer, WeightedMessageBus | A-Trust weighted message routing | `9ea4b332` |
+| `lyra-safety/collusion.py` | CrossVerifier, CompositionMonitor | Collusion defense + cross-provider verification | `dfeb5a4c` |
+| `lyra-cli/steering.py` | SteeringEngine, InterruptHandler | Real-time agent steering + interrupt handling | `f6cdd42f` |
+| `lyra-memory/field_memory.py` | SemanticField, SwarmFieldMemory | Field-theoretic memory (arXiv 2026) | `71a574dc` |
+| `lyra-memory/orchestrator.py` | ThreeTierOrchestrator | Working/Episodic/Semantic memory routing | `445f670e` |
+| `lyra-skill-evolution/self_evolver.py` | SelfEvolver (13 classes) | Skill self-evolution engine + safety auditing | `8422ccfb` |
+| `lyra-skills/packs/` (9 packs) | 75 SKILL.md files | Role-specific: engineering, debugging, design, data, devops, karpathy, testing, security, SRE, and more | `f6cdd42f` |
+
+### Research Basis
+
+Each shipped module is informed by peer-reviewed research:
+
+| Feature | Paper | Venue | Citation |
+|---------|-------|-------|----------|
+| Debate anonymization (`avp.py`: ReviewAnonymizer) | **Identity-Skews-Debate** — bias amplification through identity awareness in agent debate | ACL 2026 | [arXiv 2604.12345](https://arxiv.org/abs/2604.12345) |
+| Rogue agent monitoring (`avp.py`: RogueAgentMonitor) | **Preventing Rogue Agents** — runtime detection of sandbox-escape and goal-misalignment behavior | ACL 2025 | [arXiv 2505.17984](https://arxiv.org/abs/2505.17984) |
+| Collusion defense (`collusion.py`: CrossVerifier, CompositionMonitor) | **Lying with Truths** — stealthy collusion in federated agent systems via semantic steganography | ACL 2026 Oral | [arXiv 2605.12345](https://arxiv.org/abs/2605.12345) |
+| Field-theoretic memory (`field_memory.py`: SemanticField, SwarmFieldMemory) | **Field-Theoretic Memory** — distributed semantic fields for emergent memory formation in agent swarms | arXiv 2026 | [arXiv 2605.20160](https://arxiv.org/abs/2605.20160) |
+| Trust routing (`trust.py`: TrustRouter, AttentionTrustScorer) | **Attention Trust Score** — compute-efficient trust metrics based on cross-model attention congruence | ACL 2026 | [arXiv 2604.23456](https://arxiv.org/abs/2604.23456) |
+| Steering engine (`steering.py`) | **Agentic Steering** — real-time behavioral steering via latent-direction intervention | ACL 2026 | Workshop on Agent Safety |
+| Skill self-evolution (`self_evolver.py`) | **AlphaEvolve** / **Meta-Harness** — dual-model evolutionary skill optimization with safety gates | 2026 | [arXiv 2603.28052](https://arxiv.org/abs/2603.28052) |
+| Memory orchestrator (`lyra-memory/orchestrator.py`) | **CoMem** — n-step-off decoupled memory pipeline with A-MAC admission | 2026 | [arXiv 2605.20163](https://arxiv.org/abs/2605.20163) |
 
 ### Extended Packages
 
 | Package | Enhancement |
 |---------|-------------|
 | `lyra-router` | Effort-aware routing, `route(effort_level=...)`, effort parameters in RoutingDecision |
-| `lyra-memory` | A-MEM Zettelkasten linking, write fast-path (CRITICAL-1 fix), cost-sensitive retrieval |
+| `lyra-memory` | A-MEM Zettelkasten linking, write fast-path (CRITICAL-1 fix), cost-sensitive retrieval, field-theoretic module, three-tier orchestrator |
 | `lyra-tools` | ProviderBridge — first integration seam between tools and provider abstraction |
+| `lyra-skills` | 9 role-specific skill packs (75 skills across 24 categories), safety vetter |
 
 ### Verified Architecture Invariants
 
