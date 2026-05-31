@@ -1034,7 +1034,7 @@ class TestSafetyAudit:
     ) -> None:
         skill = Skill(
             skill_id="key_skill",
-            content={"config": {"api_key": "sk-live-1234567890abcdef"}},
+            content={"config": {"api_key": "sk-live-1234567890abcdefghijklmnopqrstuvwxyz"}},
         )
         report = evolver.audit_skill_safety(skill)
         exfil_findings = [
