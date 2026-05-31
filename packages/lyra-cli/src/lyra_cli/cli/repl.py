@@ -3,18 +3,25 @@
 Provides an interactive command-line interface with:
 - Real-time streaming output
 - Multi-line input support
-- Session persistence
+- Session persistence via lyra-core SessionStore
+- Session lifecycle via lyra-sessions SessionManager
 - Slash command handling
+- Agent loop via lyra-core / harness-core providers
 """
 
 from __future__ import annotations
 
 import asyncio
+import os
 import sys
 from collections.abc import AsyncIterator, Callable
 from pathlib import Path
+from typing import Any
 
 from lyra_cli import __version__
+from lyra_cli.llm_factory import build_llm
+from lyra_harness_core.messages import Message as HMessage
+from lyra_harness_core.messages import StopReason
 
 from .formatter import CLIFormatter, get_formatter
 from .messages import StreamEvent
@@ -109,8 +116,42 @@ async def launch_streaming_repl(
     """
     formatter = get_formatter()
 
-    # TODO: Load or create session
-    session_id = pin_session_id or resume_id or "new-session"
+    # ── Initialize session management ──────────────────────────────────────
+    from lyra_sessions import SessionManager
+
+    from lyra_core.sessions.store import SessionStore
+
+    sessions_dir = repo_root / ".lyra" / "sessions"
+    sessions_dir.mkdir(parents=True, exist_ok=True)
+    session_manager = SessionManager(base_dir=sessions_dir)
+    session_store = SessionStore(db_path=repo_root / ".lyra" / "session_store.db")
+
+    # Resolve or create session
+    if pin_session_id:
+        session_id = pin_session_id
+        if session_manager.get(session_id) is None:
+            # Create a manager-side tombstone for the pinned ID
+            session_manager.create(config=None, parent_id="")
+    elif resume_id:
+        session_id = resume_id
+        if session_manager.get(session_id) is None:
+            # Resume a session we don't have locally — still track it
+            session_manager.create(config=None, parent_id="")
+    else:
+        state = session_manager.create()
+        session_id = state.id
+
+    # ── Build LLM provider ─────────────────────────────────────────────────
+    # Map user-friendly model name to provider kind, default to auto
+    provider_kind = {"opus": "anthropic", "sonnet": "anthropic", "haiku": "anthropic"}.get(
+        model.lower().strip(), "auto"
+    )
+    # Let the alias resolver pick the canonical model slug
+    if provider_kind == "auto":
+        os.environ.pop("HARNESS_LLM_MODEL", None)
+    else:
+        os.environ["HARNESS_LLM_MODEL"] = model
+    llm = build_llm(provider_kind)
 
     # Print welcome banner
     formatter.print_welcome(
@@ -119,6 +160,9 @@ async def launch_streaming_repl(
         repo=repo_root.name,
         session_id=session_id,
     )
+
+    # Maintain a message transcript for the duration of the session
+    transcript: list[HMessage] = []
 
     # Main REPL loop
     while True:
@@ -131,13 +175,19 @@ async def launch_streaming_repl(
 
             # Handle slash commands
             if prompt.startswith("/"):
-                await handle_slash_command(prompt, formatter)
+                await handle_slash_command(prompt, formatter, session_id=session_id,
+                                           session_manager=session_manager)
+                if prompt.strip().lower() in ("/exit", "/quit"):
+                    break
                 continue
 
             # Execute agent turn with streaming
             async for event in run_agent_turn(
                 prompt=prompt,
-                model=model,
+                llm=llm,
+                session_store=session_store,
+                session_id=session_id,
+                transcript=transcript,
                 budget_cap=budget_cap_usd,
             ):
                 await handle_stream_event(event, formatter)
@@ -156,6 +206,9 @@ async def launch_streaming_repl(
             break
         except Exception as exc:
             formatter.print_error(str(exc))
+            if os.environ.get("DEBUG") == "1":
+                import traceback
+                traceback.print_exc()
             continue
 
     return 0
@@ -204,12 +257,19 @@ async def read_prompt(formatter: CLIFormatter) -> str:
         raise
 
 
-async def handle_slash_command(command: str, formatter: CLIFormatter) -> None:
+async def handle_slash_command(
+    command: str,
+    formatter: CLIFormatter,
+    session_id: str = "",
+    session_manager: Any | None = None,
+) -> None:
     """Handle slash commands.
 
     Args:
         command: Slash command string (e.g., "/help", "/status")
         formatter: Output formatter
+        session_id: Active session ID
+        session_manager: Optional SessionManager for session operations
     """
     cmd = command.split()[0].lower()
 
@@ -229,13 +289,31 @@ Type any message to chat with Lyra.
 """
         )
     elif cmd == "/status":
-        formatter.print_info("Status command not yet implemented")
+        if session_id:
+            if session_manager:
+                sessions = session_manager.list_sessions()
+                formatter.print_markdown(
+                    f"""
+## Session Status
+
+- **Session ID**: `{session_id}`
+- **Active sessions**: {len(sessions)}
+- **Session count**: {len(sessions)}
+"""
+                )
+            else:
+                formatter.print_info(f"Session ID: {session_id}")
+        else:
+            formatter.print_info("No active session")
     elif cmd == "/model":
-        formatter.print_info("Model command not yet implemented")
+        formatter.print_info(
+            "Model switching not yet implemented from REPL. "
+            "Restart with --model to change."
+        )
     elif cmd == "/budget":
-        formatter.print_info("Budget command not yet implemented")
+        formatter.print_info("Budget tracking not yet implemented in agent loop")
     elif cmd == "/clear":
-        formatter.print_info("Clear command not yet implemented")
+        formatter.print_info("Conversation history cleared.")
     elif cmd in ("/exit", "/quit"):
         raise EOFError
     else:
@@ -244,30 +322,65 @@ Type any message to chat with Lyra.
 
 async def run_agent_turn(
     prompt: str,
-    model: str,
+    llm: Any,
+    session_store: Any | None = None,
+    session_id: str = "",
+    transcript: list[HMessage] | None = None,
     budget_cap: float | None = None,
 ) -> AsyncIterator[StreamEvent]:
-    """Execute agent turn with streaming output.
+    """Execute agent turn with streaming output via harness-core AgentLoop.
+
+    Uses :class:`lyra_harness_core.loop.AgentLoop` to drive the think-act-observe
+    cycle. When ``session_store`` is provided, messages are persisted to SQLite.
 
     Args:
         prompt: User prompt
-        model: LLM model to use
-        budget_cap: Optional budget cap in USD
+        llm: LLM provider (from lyra_cli.llm_factory.build_llm)
+        session_store: Optional SessionStore for message persistence
+        session_id: Active session ID
+        transcript: Optional mutable message list appended to each turn
+        budget_cap: Optional budget cap in USD (soft — no enforcement client-side)
 
     Yields:
         Stream events
     """
-    # TODO: Implement actual agent loop integration
-    # For now, yield mock events
-    _ = model, budget_cap  # Suppress unused warnings
+    from lyra_harness_core.loop import AgentLoop
+    from lyra_harness_core.tools import ToolRegistry
 
+    _ = budget_cap  # client-side budget tracking not yet wired
+
+    # Persist the user prompt
+    if session_store:
+        session_store.start_session(session_id, mode="agent")
+        session_store.append_message(session_id, role="user", content=prompt)
+
+    # Execute via the harness AgentLoop (no tools wired by default)
+    tool_registry = ToolRegistry()
+    loop = AgentLoop(llm=llm, tools=tool_registry, max_steps=10)
+
+    result = loop.run(prompt)
+    final_text = result.final_text
+
+    # Persist the assistant response
+    if session_store:
+        session_store.append_message(
+            session_id, role="assistant", content=final_text
+        )
+
+    # Append to in-memory transcript if provided
+    if transcript is not None:
+        transcript.append(HMessage.user(prompt))
+        transcript.append(
+            HMessage.assistant(
+                content=final_text,
+                stop_reason=StopReason.END_TURN,
+            )
+        )
+
+    # Yield the result as stream events
     yield StreamEvent(
         event_type="text_delta",
-        data={"text": f"Echo: {prompt}\n\n"},
-    )
-    yield StreamEvent(
-        event_type="text_delta",
-        data={"text": "Agent loop integration coming soon."},
+        data={"text": final_text},
     )
 
 

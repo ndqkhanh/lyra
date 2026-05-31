@@ -88,8 +88,8 @@ class TestExceptions:
     def test_nested_exception_catch_base(self) -> None:
         try:
             raise SpanError("nested")
-        except OtelTracerError:
-            assert True
+        except OtelTracerError as e:
+            assert str(e) == "nested"
 
     def test_exception_catch_all_base(self) -> None:
         errors = [
