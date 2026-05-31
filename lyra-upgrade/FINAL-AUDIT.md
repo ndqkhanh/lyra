@@ -106,6 +106,45 @@ Existing README needs Mermaid architecture diagrams and inspiration links. Not i
 | lyra-safety | 23 | 23 | 0 |
 | **Total** | **189** | **189** | **0** |
 
+### Independent QA Audit (Test Plan Coverage) — May 31
+
+An independent QA auditor mapped test-plan.md categories to actual test files:
+
+| Test-Plan Category | Coverage | Location |
+|--------------------|----------|----------|
+| Deep Research | ✅ COVERED | `lyra-research/tests/` (multi-hop, hypothesis, citation, e2e) |
+| Adversarial Review | ✅ COVERED | `lyra-research/tests/test_adversarial_reviewer.py` |
+| Workflow Orchestration | ✅ COVERED | `lyra-workflow/tests/test_workflow.py` (37 tests) |
+| Auto Research | ✅ COVERED | `lyra-autoresearch/tests/` |
+| Scientist Research | ⚠️ PARTIAL | Integration test deferred |
+| Memory + Router | ✅ COVERED | `lyra-router/tests/test_effort_integration.py` |
+| Voice + Agent | ⚠️ PARTIAL | `lyra-voice/tests/` exist but not provider-integrated |
+| Benchmarks | ❌ DEFERRED | SWE-bench, τ-bench, GAIA not automated |
+
+### Independent Provider Compatibility Audit — May 31
+
+| Package | Score | Detail |
+|---------|-------|--------|
+| `lyra-tools` | PARTIAL | ProviderBridge exists but is not wired; model_routing.py is Claude-only |
+| `lyra-skills` | PARTIAL | ProviderSkillBridge exists but not called in loader flow |
+| `lyra-mcp` | PARTIAL | toolspec.py produces Anthropic-only schemas |
+| `lyra-plugins` | PARTIAL | No provider import; sandbox is provider-agnostic by design |
+| `lyra-permissions` | ✅ FULL | No provider-specific code (pure policy) |
+| `lyra-voice` | ✅ FULL | Providers are abstract (STT/TTS provider model) |
+
+### Independent Architecture Invariant Audit — May 31
+
+An independent architect auditor checked each invariant against actual source files:
+
+| Invariant | Verdict | Evidence |
+|-----------|---------|----------|
+| TKG as single integration point | ❌ NOT WIRED | Zero imports of TKG/lyra_memory in lyra-effort, lyra-provider, lyra-workflow, lyra-safety |
+| AVP as universal middleware | ⚠️ PARTIAL | AVP built (306 lines) but not imported by any other package |
+| Provider heterogeneity at boundary | ✅ PASS | lyra-provider correctly encapsulates provider differences |
+| Ultracode = xhigh + orchestration | ✅ PASS | Enforced in EffortManager.map_effort() |
+
+The TKG wiring gap is the #1 deferred item in impl-backlog.md.
+
 ---
 
 ## Architecture Conformance
