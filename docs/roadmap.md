@@ -545,27 +545,31 @@ Success metrics at v1.7: ≥ 80% skill-trigger recall on curated eval set, ≥ 9
 
 See [`roadmap-v1.5-v2.md`](roadmap-v1.5-v2.md) for the full phase list, red tests, DoDs, trade-offs, and source citations.
 
-## Where we actually are (post-v7.0.0)
+## Where we actually are (post-v7.2.1)
 
-The phases above describe the *original plan*. Lyra has since shipped major versions through v7.0.0, absorbing the v1.5/v1.7/v2 phases into production releases. This is the live status as of **v7.0.0** (2026-05-27):
+The phases above describe the *original plan*. Lyra has since shipped major versions through v7.2.1. This is the live status as of **v7.2.1** (2026-05-31):
 
 | Release        | Date         | Theme                                                                      | Status   |
 |----------------|--------------|----------------------------------------------------------------------------|----------|
 | v2.0 – v2.5    | 2026-Q1      | Provider catalogue, MCP autoload, FTS5 session store, cron daemon, ACP server, plugin discovery | shipped  |
 | **v2.6.0**     | 2026-04-23   | "Production-Ready" rewrite of the audit corpus (34 issues found, 34 fixed) | shipped  |
-| **v2.7.0**     | 2026-04-26   | Honest-rebuild slash commands: real `/evals`, real `/compact`, LifecycleBus → HIR + OTel, real `git worktree`-isolated `/spawn`, `_LyraCoreLLMAdapter` provider bridge | shipped  |
-| **v2.7.1**     | 2026-04-27   | DeepSeek small/smart split. Two-tier model routing. `/model fast`/`smart` slash UX. | shipped  |
-| **v3.0.0**     | 2026-05-12   | Agent base class, PrimaryAgent orchestrator, STM/LTM memory, task/result models, skill registry | shipped  |
-| **v4.0.0**     | 2026-05-18   | Multi-agent coordination, memory consolidation, hook engine, rule engine, ECC integration | shipped  |
-| **v5.0.0**     | 2026-05-24   | 96 composable packages, monorepo migration, 8-level memory, AgentShield, TokenObservatory, deep reasoning, 10-step research pipeline, GEPA self-evolution | shipped  |
-| **v6.0.0**     | 2026-05-25   | Single-provider model routing, 11 provider families, config schema v4, session provider tracking | shipped  |
-| **v7.0.0**     | 2026-05-27   | **Current.** Phase 1-5: Safety governance (4-gate), compound intelligence (task decomposer, 5-slot router, latent bridge), self-improvement (4-gate skill validation), production hardening (tool pipelines, hot reload, benchmarks), NeuroMemory (A-MAC + Dream consolidation, 20 ICLR MemAgent papers), Skills v2 (56 skills, 14 packs), MCP protocol integration, production consolidation (UI components, model router v2, continual learning, evolution restructure, lyra-integrity, lyra-tools). Plans 19-28 integrated. | **shipped (current)** |
+| **v2.7.0**     | 2026-04-26   | Slash commands, HIR + OTel, git worktree `/spawn`, provider bridge | shipped  |
+| **v2.7.1**     | 2026-04-27   | DeepSeek split, two-tier model routing, `/model fast`/`smart` UX | shipped  |
+| **v3.0.0**     | 2026-05-12   | Agent base class, PrimaryAgent orchestrator, STM/LTM memory, skill registry | shipped  |
+| **v4.0.0**     | 2026-05-18   | Multi-agent coordination, memory consolidation, hook engine, rule engine | shipped  |
+| **v5.0.0**     | 2026-05-24   | 96 packages, monorepo, 8-level memory, AgentShield, deep reasoning, GEPA | shipped  |
+| **v6.0.0**     | 2026-05-25   | Model routing, 11 provider families, config schema v4 | shipped  |
+| **v7.0.0**     | 2026-05-27   | Safety governance, compound intelligence, self-improvement, NeuroMemory, Skills v2, MCP integration | shipped |
+| **v7.1.0**     | 2026-05-27   | Agent Fleet (fan-out + squads), RecursiveLink latent comms (75.6% token reduction), Dream consolidation, Phase 3-4 completion | shipped |
+| **v7.2.1**     | 2026-05-31   | **Current. Ultra-Upgrade: 9 tiers shipped.** 9 new packages (`lyra-effort`, `lyra-provider`, `lyra-workflow`, `lyra-safety`, `lyra-context`, `lyra-hooks`, `lyra-sessions`, `lyra-plugins` + bridges). Multi-provider abstraction layer, 6-level effort scale (ultracode = xhigh + orchestration), Dynamic Workflow Engine + AVP middleware, A-MEM Zettelkasten linking, CRITICAL-1 fix (write fast-path), 4-layer defense-in-depth, auto-compaction. 189 new tests, 6 expert review gates, independent audit. 104 packages total. | **shipped (current)** |
 
-Test count at v7.0.0: **lyra-cli 1000+ passed**, **lyra-core 800+ passed**, plus lyra-memory, lyra-skills, lyra-mcp, lyra-evolution, lyra-model-router, lyra-reasoning, lyra-production, lyra-continual, lyra-integrity, lyra-tools tests.
+Test count at v7.2.1: **189 new tests** (lyra-effort: 47, lyra-provider: 37, lyra-workflow: 37, lyra-safety: 23, lyra-memory-tier2: 32, lyra-router-integration: 13), plus existing suites in lyra-cli, lyra-core, lyra-memory, lyra-skills, lyra-mcp, lyra-voice, lyra-research, lyra-evolution, lyra-model-router, lyra-reasoning, lyra-production, lyra-continual, lyra-integrity, lyra-tools.
 
 ### Next up
 
-* **v7.1 — Meta-Harness self-optimization.** Lyra optimizes its own harness code against user repositories (Plan 13.4).
-* **v7.2 — RecursiveLink latent comms.** Latent-space agent communication with 75.6% token reduction (Plan 13.2).
-* **v7.3 — Parallax safety hardening.** Full cognitive-executive separation with cross-model verification (Plan 13.3).
-* **v8.0 — Fleet federation.** Cross-instance agent orchestration with zero-trust mTLS.
+See [`lyra-upgrade/impl-backlog.md`](../lyra-upgrade/impl-backlog.md) for ranked priority items:
+* **P0**: Wire `lyra_provider` into all capability packages (tools, MCP, skills, voice)
+* **P0**: End-to-end test-plan.md execution with live provider APIs
+* **P1**: GoogleProvider + OpenWeightsProvider full adapters
+* **P1**: AVP universal middleware wiring into tool execution path
+* **P2**: Mermaid diagrams in additional docs, DeepSeek streaming stream_options

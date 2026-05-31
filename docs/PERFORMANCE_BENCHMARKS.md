@@ -540,8 +540,8 @@ compressed = token_juice.compress(
 
 ```json
 {
-  "benchmark_suite": "lyra-v7.1.0",
-  "date": "2026-05-28",
+  "benchmark_suite": "lyra-v7.2.1",
+  "date": "2026-05-31",
   "environment": {
     "hardware": "M2 Max, 32GB RAM",
     "os": "macOS 14.5",

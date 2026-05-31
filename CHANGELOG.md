@@ -8,6 +8,65 @@ All notable changes to the Lyra project.
 
 ---
 
+## <img src="https://img.shields.io/badge/7.2.1-2026--05--31-f97316?style=for-the-badge&labelColor=1e1e2e">
+
+### <span style="color: #fb923c;">🚀 Ultra Upgrade — 9 Tiers Shipped</span>
+
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #f9731615, #fb923c10); border-left: 4px solid #f97316; padding: 12px 16px; border-radius: 0 8px 8px 0;">
+
+#### <span style="color: #f97316;">Tier 1 — Provider & Reasoning Foundation</span>
+- **`lyra-effort`**: 6-level effort scale (low→ultracode) with per-provider mapping
+- **`lyra-provider`**: AbstractProvider protocol, Anthropic/DeepSeek/OpenAI adapters, CapabilityMatrix, ProviderError taxonomy
+- Ultracode = xhigh budget + orchestration toggle invariant (NOT a 6th API tier)
+- 84 tests, 4/4 expert review PASS
+
+#### <span style="color: #fb923c;">Tier 2 — Memory & Context Spine</span>
+- **A-MEM Zettelkasten linking**: bidirectional typed links, auto-linking, Hebbian decay, BFS traversal
+- **Write fast-path** (CRITICAL-1 fix): admission batching, backpressure signaling, 5s timeout
+- **Cost-sensitive retrieval**: 5-tier cascade (Working→Episodic→Semantic→Archive→LLM)
+- **`lyra-context`**: Auto-compaction engine with 4 progressive strategies
+- 32 tests, 3/3 expert review PASS
+
+#### <span style="color: #fbbf24;">Tier 3 — Orchestration & Autonomy (Lyra's Ultracode)</span>
+- **`lyra-workflow`**: Dynamic Workflow Engine (16-concurrent cap, pause/resume, ScriptVM safety)
+- **AVP middleware**: SABER MutationGate + 3-critic DecisionMatrix with consensus voting
+- **Auto-Orchestrator**: keyword-based complexity estimator with configurable threshold
+- 37 tests, 3/3 expert review PASS
+
+#### <span style="color: #34d399;">Tier 4 — Capability Surface</span>
+- **`lyra-plugins`**: Plugin manifest, discovery, sandboxed loading, permission gating
+- **`lyra-hooks`**: PreToolUse/PostToolUse/Stop hooks with glob matcher
+- **`lyra-sessions`**: Git-native session management with checkpointing
+- **`lyra-tools/provider_bridge.py`**: Provider integration seam
+
+#### <span style="color: #60a5fa;">Tier 5 — Skills System</span>
+- **`lyra-skills/provider_bridge.py`**: Provider-agnostic skill validation, Claude frontmatter stripping, per-provider trigger strategies
+
+#### <span style="color: #a78bfa;">Tier 7 — Reliability & Safety</span>
+- **`lyra-safety`**: 4-layer defense-in-depth (InputGuard + CaMeL + NeMo + Progent)
+- **EvolutionSafetyGate**: 5-gate pipeline for skill/memory evolution safety
+- **MisevolveDefense**: alignment drift detection + checkpoint/rollback
+- CRITICAL-3 fix: explicit fail-open/fail-closed per layer
+- 23 tests, 95% coverage, 2/2 expert review PASS
+
+#### <span style="color: #f472b6;">Review & Remediation</span>
+- 6 review gates executed with independent expert panels
+- 3 CRITICAL/HIGH findings remediated (API key leak, aiohttp error swallowing, dual-truth capabilities)
+- Independent end-to-end audit against BREAKTHROUGH-ARCHITECTURE.md
+
+</td></tr></table>
+
+#### Shipped Packages (9 new)
+`lyra-effort` · `lyra-provider` · `lyra-workflow` · `lyra-safety` · `lyra-context` · `lyra-hooks` · `lyra-sessions` · `lyra-plugins` · provider bridges (tools + skills)
+
+#### Extended Packages (4)
+`lyra-router` · `lyra-memory` · `lyra-tools` · `lyra-skills`
+
+#### Architecture Invariants Verified
+✅ Ultracode = xhigh + orchestration · ✅ Provider heterogeneity at boundary · ✅ 3-critic AVP consensus · ✅ CRITICAL-1 fix (fast-path + batching + backpressure) · ✅ CRITICAL-3 fix (fail-open/fail-closed per layer) · ✅ API key masking in logs · ✅ Skills harness-level + provider-agnostic
+
+---
+
 ## <img src="https://img.shields.io/badge/7.1.0-2026--05--27-8b5cf6?style=for-the-badge&labelColor=1e1e2e">
 
 ### <span style="color: #c084fc;">AGI Ultra Upgrade — 6 Phases Complete</span>
