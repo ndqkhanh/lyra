@@ -164,29 +164,29 @@ graph TB
 %%{init: {'theme': 'dark', 'themeVariables': {'actorBkg': '#1e293b', 'actorBorder': '#6366f1', 'actorTextColor': '#e2e8f0', 'signalColor': '#94a3b8', 'signalTextColor': '#e2e8f0', 'labelBoxBkgColor': '#1e293b', 'labelBoxBorderColor': '#6366f1', 'noteBkgColor': '#1e293b', 'noteBorderColor': '#fbbf24', 'activationBkgColor': '#7c3aed30', 'activationBorderColor': '#8b5cf6'}, 'sequence': {'mirrorActors': false, 'boxMargin': 10}}}%%
 sequenceDiagram
     actor User
-    participant CLI as <b>🖥 Lyra CLI</b>
-    participant Voice as <b>🔊 Voice</b>
-    participant Engine as <b>⚙️ AgentLoop</b>
-    participant CogExec as <b>🛡️ COS Split</b>
-    participant Router as <b>🔀 Router</b>
-    participant Perms as <b>🔐 Permissions</b>
-    participant HIR as <b>📊 HIR</b>
-    participant Agent as <b>🤖 Specialist</b>
-    participant RecLink as <b>🔗 RecursiveLink</b>
-    participant LLM as <b>🧠 LLM</b>
-    participant Tools as <b>🔧 ToolKernel</b>
-    participant Mem as <b>💾 Memory</b>
-    participant Verifier as <b>✅ Verifier</b>
-    participant Drift as <b>📈 PRISM</b>
+    participant CLI as 🖥 Lyra CLI
+    participant Voice as 🔊 Voice
+    participant Engine as ⚙️ AgentLoop
+    participant CogExec as 🛡️ COS Split
+    participant Router as 🔀 Router
+    participant Perms as 🔐 Permissions
+    participant HIR as 📊 HIR
+    participant Agent as 🤖 Specialist
+    participant RecLink as 🔗 RecursiveLink
+    participant LLM as 🧠 LLM
+    participant Tools as 🔧 ToolKernel
+    participant Mem as 💾 Memory
+    participant Verifier as ✅ Verifier
+    participant Drift as 📈 PRISM
 
-    rect rgb(124, 58, 237, 0.15)
+    rect rgba(124, 58, 237, 0.15)
         Note over User,CLI: 🎯 TASK SUBMISSION
         User->>CLI: "Add Redis caching to user service"
         CLI->>Voice: play(session.start)
         CLI->>Engine: run(task_description)
     end
 
-    rect rgb(59, 130, 246, 0.15)
+    rect rgba(59, 130, 246, 0.15)
         Note over Engine,Mem: 🧠 CONTEXT + ROUTING
         Engine->>Mem: recall(context)
         Mem-->>Engine: history + skills + rules
@@ -195,7 +195,7 @@ sequenceDiagram
         Router-->>Engine: ModelSelection(coding, sonnet)
     end
 
-    rect rgb(239, 68, 68, 0.15)
+    rect rgba(239, 68, 68, 0.15)
         Note over Engine,CogExec: 🛡️ SAFETY SPLIT
         Engine->>CogExec: separate(reasoning, execution)
         CogExec-->>Engine: reasoning_ctx, execution_ctx
@@ -204,35 +204,32 @@ sequenceDiagram
     Engine->>Engine: plan(steps)
     Engine->>HIR: emit(plan.created)
 
-    rect rgb(245, 158, 11, 0.15)
+    rect rgba(245, 158, 11, 0.15)
         Note over Engine,RecLink: ⚡ EXECUTION LOOP
         loop For each step
             Engine->>Perms: check(step.action)
             Perms-->>Engine: plan-gated
 
-            par Parallel agents
-                Engine->>Agent: dispatch(step_a)
-                Engine->>Agent: dispatch(step_b)
-                Agent->>LLM: prompt + tools
-                LLM-->>Agent: response
-                Agent->>Tools: execute
-                Tools-->>Agent: result
-                Agent-->>Engine: step_complete
-            end
+            Engine->>Agent: dispatch(step)
+            Agent->>LLM: prompt + tools
+            LLM-->>Agent: response
+            Agent->>Tools: execute
+            Tools-->>Agent: result
+            Agent-->>Engine: step_complete
 
             Agent->>RecLink: share_latent_state
             RecLink-->>Agent: compressed_context
         end
     end
 
-    rect rgb(16, 185, 129, 0.15)
+    rect rgba(16, 185, 129, 0.15)
         Note over Engine,Verifier: ✅ VERIFICATION
         Engine->>Verifier: verify(output, trace)
         Verifier->>Verifier: executor→validator→critic
         Verifier-->>Engine: pass ✓ (step, trace, adversarial)
     end
 
-    rect rgb(139, 92, 246, 0.15)
+    rect rgba(139, 92, 246, 0.15)
         Note over Engine,Drift: 🌙 CONSOLIDATION
         Engine->>Mem: dream_consolidate
         Engine->>Drift: check(prompts)
