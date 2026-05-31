@@ -455,6 +455,29 @@ def _anthropic_available() -> bool:
     return True
 
 
+def _deepseek_available() -> bool:
+    """True iff a DeepSeek run would be viable without crashing.
+
+    Checks ``DEEPSEEK_API_KEY`` and that the ``deepseek`` preset is
+    registered and configured.  Unlike ``_anthropic_available()`` the
+    import is handled by the preset; this function only verifies the
+    credential is present and the preset table knows about DeepSeek.
+
+    This function is the first-class detection layer for DeepSeek,
+    mirroring :func:`_anthropic_available`.  It lets the explicit
+    ``--llm deepseek`` branch fail-loud with a clear message rather
+    than silently falling through the auto cascade.
+    """
+    if not os.environ.get("DEEPSEEK_API_KEY", "").strip():
+        return False
+    from .providers.openai_compatible import preset_by_name
+
+    preset = preset_by_name("deepseek")
+    if preset is None:
+        return False
+    return preset.configured()
+
+
 def _build_mock(task_hint: str | None, session_id: str | None) -> MockLLM:
     sid = session_id or "01HMOCK0000000000000000000"
     task = task_hint or ""
@@ -574,6 +597,29 @@ def build_llm(
         model = os.environ.get("HARNESS_LLM_MODEL", "claude-3-5-sonnet-latest")
         _emit_provider_selected("anthropic", model, is_local=False)
         os.environ["LYRA_ACTIVE_PROVIDER"] = "anthropic"
+        return llm
+
+    # -- explicit DeepSeek ----------------------------------------------
+    if kind == "deepseek":
+        if not _deepseek_available():
+            hint = missing_credential_hint(asking="deepseek")
+            msg = "deepseek: DEEPSEEK_API_KEY not set"
+            if hint:
+                msg = f"{msg} - {hint}"
+            raise RuntimeError(msg)
+        deepseek_preset = preset_by_name("deepseek")
+        if deepseek_preset is None:
+            raise RuntimeError(
+                "deepseek: preset not found in the provider registry. "
+                "This should not happen — the ``deepseek`` preset is "
+                "built into the CLI."
+            )
+        llm = deepseek_preset.build(
+            provider_routing=_provider_routing_for_preset("deepseek")
+        )
+        model = deepseek_preset.read_model()
+        _emit_provider_selected("deepseek", model, is_local=False)
+        os.environ["LYRA_ACTIVE_PROVIDER"] = "deepseek"
         return llm
 
     # -- explicit Gemini ------------------------------------------------
@@ -885,6 +931,12 @@ def describe_selection(kind: str = "auto") -> str:
     if kind == "anthropic":
         model = os.environ.get("HARNESS_LLM_MODEL", "claude-3-5-sonnet-latest")
         return f"anthropic · {model}"
+
+    if kind == "deepseek":
+        deepseek_preset = preset_by_name("deepseek")
+        if deepseek_preset is not None:
+            return f"deepseek · {deepseek_preset.read_model()}"
+        return "deepseek · unknown (preset not found)"
 
     if kind == "gemini":
         model = (
