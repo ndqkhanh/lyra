@@ -382,16 +382,31 @@ class FleetSupervisor:
             pass
 
     def _create_worktree(self, session_id: str) -> str:
-        """Create a git worktree for isolated file editing."""
-        worktree_dir = Path(".claude") / "worktrees" / session_id
-        worktree_dir.mkdir(parents=True, exist_ok=True)
-        # In production, this runs `git worktree add` with the session's branch
-        return str(worktree_dir.absolute())
+        """Create a git worktree for isolated file editing.
+
+        Delegates to WorktreeIsolation for full worktree lifecycle:
+        - Git worktree on branch worktree-<session_id>
+        - .worktreeinclude propagation of env/secret files
+        - Non-destructive cleanup (STASH default)
+        - Non-git VCS fallback via hooks
+        """
+        from .worktree_isolate import WorktreeConfig, WorktreeIsolation
+
+        iso = WorktreeIsolation()
+        cfg = WorktreeConfig(
+            name=session_id,
+            include_patterns=[".env", ".env.local", ".envrc", "*.secret", "*.key", "credentials.*"],
+        )
+        status = iso.create(name=session_id, config=cfg)
+        return str(status.path.absolute())
 
     def _cleanup_worktree(self, worktree_path: str) -> None:
-        """Remove a session's worktree."""
-        # In production, this runs `git worktree remove`
-        pass
+        """Remove a session's worktree — non-destructive (STASH by default)."""
+        from .worktree_isolate import CleanupAction, WorktreeIsolation
+
+        iso = WorktreeIsolation()
+        name = Path(worktree_path).name
+        iso.remove(name, action=CleanupAction.STASH, force=True)
 
     # -- Persistence ---------------------------------------------------------
 
