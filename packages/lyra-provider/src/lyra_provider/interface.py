@@ -219,6 +219,19 @@ class ProviderConfig:
     max_concurrent: int = 50
     extra: dict[str, Any] = field(default_factory=dict)
 
+    def __repr__(self) -> str:
+        """Mask API key to prevent credential leaks in logs/debug output."""
+        masked = (
+            self.api_key[:8] + "..." + self.api_key[-4:]
+            if len(self.api_key) > 12 else "***"
+        )
+        return (
+            f"ProviderConfig(provider={self.provider!r}, api_key={masked!r}, "
+            f"base_url={self.base_url!r}, default_model={self.default_model!r}, "
+            f"max_retries={self.max_retries}, timeout_seconds={self.timeout_seconds}, "
+            f"max_concurrent={self.max_concurrent})"
+        )
+
 
 # ────────────────────────────────────────────────────────────────────
 # Abstract Provider Protocol

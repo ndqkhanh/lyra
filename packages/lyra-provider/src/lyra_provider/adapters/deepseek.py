@@ -383,6 +383,13 @@ class DeepSeekProvider(AbstractProvider):
                     "Content-Type": "application/json",
                 },
             ) as response:
+                if response.status >= 400:
+                    error_text = await response.text()
+                    raise ProviderError(
+                        code=ErrorCode.PROVIDER_ERROR,
+                        message=f"HTTP {response.status}: {error_text[:500]}",
+                        provider="deepseek",
+                    )
                 data = await response.json()
 
         elapsed = (time.perf_counter() - start) * 1000

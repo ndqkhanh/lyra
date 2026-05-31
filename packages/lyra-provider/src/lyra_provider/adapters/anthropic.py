@@ -404,6 +404,13 @@ class AnthropicProvider(AbstractProvider):
                     "anthropic-version": "2023-06-01",
                 },
             ) as response:
+                if response.status >= 400:
+                    error_text = await response.text()
+                    raise ProviderError(
+                        code=ErrorCode.PROVIDER_ERROR,
+                        message=f"HTTP {response.status}: {error_text[:500]}",
+                        provider="anthropic",
+                    )
                 data = await response.json()
 
         elapsed = (time.perf_counter() - start) * 1000

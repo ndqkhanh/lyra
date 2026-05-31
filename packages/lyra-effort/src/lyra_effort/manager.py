@@ -23,7 +23,16 @@ from .models import (
 logger = logging.getLogger(__name__)
 
 # ────────────────────────────────────────────────────────────────────
-# Per-provider capability declarations
+# Per-provider EFFORT-SPECIFIC capability declarations
+#
+# These complement (do NOT duplicate) lyra_provider.CapabilityMatrix:
+# - CapabilityMatrix: general features (tool_calling, vision, streaming)
+# - _PROVIDER_CAPABILITIES: effort-specific features (budget_tokens,
+#   reasoning_effort, max_effort_level)
+#
+# The two are intentionally separate concerns. EffortManager queries
+# CapabilityMatrix for general features, and _PROVIDER_CAPABILITIES
+# for effort-specific clamping.
 # ────────────────────────────────────────────────────────────────────
 
 _PROVIDER_CAPABILITIES: dict[str, ProviderEffortCapability] = {
@@ -319,6 +328,34 @@ class EffortManager:
     def list_providers(cls) -> list[str]:
         """Return all known provider identifiers."""
         return list(_PROVIDER_CAPABILITIES.keys())
+
+    @classmethod
+    def validate_against_capability_matrix(cls) -> dict[str, list[str]]:
+        """
+        Cross-validate effort capabilities against lyra_provider.CapabilityMatrix.
+
+        Returns a dict of provider → list of discrepancies (empty if aligned).
+        This ensures the two capability systems stay in sync.
+        """
+        discrepancies: dict[str, list[str]] = {}
+        try:
+            from lyra_provider import get_capability_matrix  # Lazy import
+            matrix = get_capability_matrix()
+
+            for provider, effort_cap in _PROVIDER_CAPABILITIES.items():
+                general_cap = matrix.get(provider)
+                if general_cap is None:
+                    discrepancies[provider] = [f"Provider '{provider}' in effort caps but not in CapabilityMatrix"]
+                    continue
+
+                # Cross-check reasoning_budget support
+                if effort_cap.supports_budget_tokens and not general_cap.reasoning_budget:
+                    discrepancies.setdefault(provider, []).append(
+                        "Effort caps say budget_tokens=True, CapabilityMatrix says reasoning_budget=False"
+                    )
+        except ImportError:
+            pass  # lyra_provider not installed — validation skipped
+        return discrepancies
 
     # ── Internal helpers ───────────────────────────────────────────
 
