@@ -58,158 +58,156 @@ export function App() {
 
   const [showCommandPalette, setShowCommandPalette] = useState(false)
   const [showAgentTree, setShowAgentTree] = useState(false)
+  const [ready, setReady] = useState(false)
 
+  // Defer ALL initialisation past the first paint so zustand store
+  // mutations don't synchronously re-render StatusBar while App is
+  // still rendering (the "Cannot update App while rendering StatusBar"
+  // React warning).  The `ready` guard + setTimeout(0) break the
+  // synchronous subscriber chain.
   useEffect(() => {
-    const sessionId = 'default'
-    createSession(sessionId)
+    const id = setTimeout(() => {
+      const sessionId = 'default'
+      createSession(sessionId)
 
-    const lyraModel = process.env['LYRA_MODEL']
-    if (lyraModel) {
-      setModelAndProvider(lyraModel, 'anthropic')
-    }
+      const lyraModel = process.env['LYRA_MODEL']
+      if (lyraModel) {
+        setModelAndProvider(lyraModel, 'anthropic')
+      }
 
-    const existingTransport = useUIStore.getState().transport
-    const transport = existingTransport ?? new LocalTransport()
-    if (!existingTransport) {
-      setTransport(transport)
-    }
-    transport.setSessionId(sessionId)
+      const existingTransport = useUIStore.getState().transport
+      const transport = existingTransport ?? new LocalTransport()
+      if (!existingTransport) {
+        setTransport(transport)
+      }
+      transport.setSessionId(sessionId)
 
-    const unsubscribeMessage = transport.onMessage((message) => {
-      useUIStore.getState().addMessage(sessionId, message)
-    })
+      transport.onMessage((message) => {
+        useUIStore.getState().addMessage(sessionId, message)
+      })
 
-    const unsubscribeStreamChunk = transport.onStreamChunk((chunk) => {
-      if (chunk.done) {
-        useUIStore.getState().commitStreamingMessage(sessionId)
-      } else if (chunk.type === 'tool-call') {
-        useUIStore.getState().addToolCall(sessionId, {
-          id: `tool-${Date.now()}`,
-          name: chunk.content,
-          args: typeof chunk.metadata?.tool_args === 'string' ? chunk.metadata.tool_args : undefined,
-          status: 'running',
-          startTime: Date.now(),
-        })
-      } else if (chunk.type === 'tool-result') {
-        const session = useUIStore.getState().sessions.get(sessionId)
-        if (session) {
-          const runningTool = [...session.activeTools].reverse().find(t => t.status === 'running')
-          if (runningTool) {
-            useUIStore.getState().updateToolCall(sessionId, runningTool.id, 'success')
+      transport.onStreamChunk((chunk) => {
+        if (chunk.done) {
+          useUIStore.getState().commitStreamingMessage(sessionId)
+        } else if (chunk.type === 'tool-call') {
+          useUIStore.getState().addToolCall(sessionId, {
+            id: `tool-${Date.now()}`,
+            name: chunk.content,
+            args: typeof chunk.metadata?.tool_args === 'string' ? chunk.metadata.tool_args : undefined,
+            status: 'running',
+            startTime: Date.now(),
+          })
+        } else if (chunk.type === 'tool-result') {
+          const session = useUIStore.getState().sessions.get(sessionId)
+          if (session) {
+            const runningTool = [...session.activeTools].reverse().find(t => t.status === 'running')
+            if (runningTool) {
+              useUIStore.getState().updateToolCall(sessionId, runningTool.id, 'success')
+            }
+          }
+        } else {
+          useUIStore.getState().updateStreamingMessage(sessionId, chunk.content)
+        }
+      })
+
+      transport.onStreamEvent((event) => {
+        if (event.kind === 'thinking_start') {
+          useUIStore.getState().startThinking(sessionId)
+        } else if (event.kind === 'thinking_end') {
+          useUIStore.getState().endThinking(sessionId)
+        }
+      })
+
+      transport.onError((error) => {
+        logger.error('App', 'Transport error:', error.message)
+        useUIStore.getState().cancelStreaming(sessionId)
+        setTimeout(() => {
+          useUIStore.getState().addMessage(sessionId, {
+            id: `error-${Date.now()}`,
+            role: 'system',
+            content: `Error: ${error.message}`,
+            timestamp: Date.now()
+          })
+        }, 0)
+      })
+
+      const connectWithRetry = async (maxRetries = config.retryConfig.maxRetries, delay = config.retryConfig.initialDelay) => {
+        for (let i = 0; i < maxRetries; i++) {
+          try {
+            await transport.connect()
+            logger.info('App', 'Transport connected successfully')
+            return
+          } catch (error) {
+            logger.error('App', `Connection attempt ${i + 1}/${maxRetries} failed:`, error)
+            if (i < maxRetries - 1) {
+              await new Promise(resolve => setTimeout(resolve, delay))
+            } else {
+              useUIStore.getState().addMessage(sessionId, {
+                id: `error-${Date.now()}`,
+                role: 'system',
+                content: `Failed to connect after ${maxRetries} attempts. Please check your connection and ensure the Lyra server is running.`,
+                timestamp: Date.now()
+              })
+            }
           }
         }
-      } else {
-        useUIStore.getState().updateStreamingMessage(sessionId, chunk.content)
       }
-    })
 
-    const unsubscribeStreamEvent = transport.onStreamEvent((event) => {
-      if (event.kind === 'thinking_start') {
-        useUIStore.getState().startThinking(sessionId)
-      } else if (event.kind === 'thinking_end') {
-        useUIStore.getState().endThinking(sessionId)
-      }
-    })
+      connectWithRetry().catch((error) => {
+        logger.error('App', 'Connection failed:', error)
+      })
 
-    const unsubscribeError = transport.onError((error) => {
-      logger.error('App', 'Transport error:', error.message)
-
-      // Cancel streaming first to ensure clean state
-      useUIStore.getState().cancelStreaming(sessionId)
-
-      // Then add error message after a tick to ensure state is settled
-      setTimeout(() => {
-        useUIStore.getState().addMessage(sessionId, {
-          id: `error-${Date.now()}`,
-          role: 'system',
-          content: `Error: ${error.message}`,
-          timestamp: Date.now()
-        })
-      }, 0)
-    })
-
-    const connectWithRetry = async (maxRetries = config.retryConfig.maxRetries, delay = config.retryConfig.initialDelay) => {
-      for (let i = 0; i < maxRetries; i++) {
+      const fetchProviders = async (retries = 0, maxRetries = 5) => {
         try {
-          await transport.connect()
-          logger.info('App', 'Transport connected successfully')
-          return
-        } catch (error) {
-          logger.error('App', `Connection attempt ${i + 1}/${maxRetries} failed:`, error)
-          if (i < maxRetries - 1) {
-            await new Promise(resolve => setTimeout(resolve, delay))
+          const resp = await fetch(`${config.apiUrl}/providers`)
+          if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
+          const data = await resp.json() as unknown
+          if (isProvidersResponse(data)) {
+            setProviders(data.providers)
+            logger.info('App', 'Providers fetched successfully')
           } else {
-            // Show error to user after all retries exhausted
+            throw new Error('Invalid providers response format')
+          }
+        } catch (error) {
+          logger.error('App', `Provider fetch failed (attempt ${retries + 1}/${maxRetries}):`, error)
+          if (retries < maxRetries) {
+            const delay = Math.min(config.fetchIntervals.providers * Math.pow(config.retryConfig.backoffMultiplier, retries), 30000)
+            setTimeout(() => fetchProviders(retries + 1, maxRetries), delay)
+          } else {
+            logger.error('App', 'Provider fetch failed after max retries')
             useUIStore.getState().addMessage(sessionId, {
               id: `error-${Date.now()}`,
               role: 'system',
-              content: `Failed to connect after ${maxRetries} attempts. Please check your connection and ensure the Lyra server is running.`,
+              content: `Failed to load providers. Please ensure the Lyra server is running at ${config.apiUrl}.`,
               timestamp: Date.now()
             })
           }
         }
       }
-    }
 
-    connectWithRetry().catch((error) => {
-      logger.error('App', 'Connection failed:', error)
+      const fetchSettings = async () => {
+        try {
+          const resp = await fetch(`${config.apiUrl}/settings`)
+          if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
+          const data = await resp.json() as unknown
+          if (isSettingsResponse(data)) {
+            setModelAndProvider(data.last_model, data.last_provider)
+            logger.info('App', 'Settings loaded successfully')
+          }
+        } catch (error) {
+          logger.error('App', 'Failed to fetch settings:', error)
+        }
+      }
+
+      setTimeout(() => {
+        fetchProviders()
+        fetchSettings()
+      }, 1000)
+
+      setReady(true)
     })
 
-    const fetchProviders = async (retries = 0, maxRetries = 5) => {
-      try {
-        const resp = await fetch(`${config.apiUrl}/providers`)
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
-        const data = await resp.json() as unknown
-        if (isProvidersResponse(data)) {
-          setProviders(data.providers)
-          logger.info('App', 'Providers fetched successfully')
-        } else {
-          throw new Error('Invalid providers response format')
-        }
-      } catch (error) {
-        logger.error('App', `Provider fetch failed (attempt ${retries + 1}/${maxRetries}):`, error)
-        if (retries < maxRetries) {
-          const delay = Math.min(config.fetchIntervals.providers * Math.pow(config.retryConfig.backoffMultiplier, retries), 30000)
-          setTimeout(() => fetchProviders(retries + 1, maxRetries), delay)
-        } else {
-          logger.error('App', 'Provider fetch failed after max retries')
-          useUIStore.getState().addMessage(sessionId, {
-            id: `error-${Date.now()}`,
-            role: 'system',
-            content: `Failed to load providers. Please ensure the Lyra server is running at ${config.apiUrl}.`,
-            timestamp: Date.now()
-          })
-        }
-      }
-    }
-
-    const fetchSettings = async () => {
-      try {
-        const resp = await fetch(`${config.apiUrl}/settings`)
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
-        const data = await resp.json() as unknown
-        if (isSettingsResponse(data)) {
-          setModelAndProvider(data.last_model, data.last_provider)
-          logger.info('App', 'Settings loaded successfully')
-        }
-      } catch (error) {
-        logger.error('App', 'Failed to fetch settings:', error)
-        // Settings are optional, so we don't show an error to the user
-      }
-    }
-
-    setTimeout(() => {
-      fetchProviders()
-      fetchSettings()
-    }, 1000)
-
-    return () => {
-      unsubscribeMessage()
-      unsubscribeStreamChunk()
-      unsubscribeStreamEvent()
-      unsubscribeError()
-      transport.disconnect()
-    }
+    return () => clearTimeout(id)
   }, [createSession, setModelAndProvider, setTransport, setProviders, setDisplayMode])
 
   const handleCommandPalette = useCallback((command: string) => {
@@ -266,7 +264,7 @@ export function App() {
     }
   })
 
-  if (!activeSessionId) {
+  if (!ready || !activeSessionId) {
     return null
   }
 
