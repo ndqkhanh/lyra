@@ -80,6 +80,8 @@ class AutoCompactor:
 
     def should_compact(self, current_tokens: int) -> bool:
         """Check whether compaction should be triggered."""
+        if self.max_tokens <= 0:
+            return False
         return (current_tokens / self.max_tokens) >= self.threshold
 
     def compact(self, items: list[dict[str, Any]], current_tokens: int) -> CompactResult:

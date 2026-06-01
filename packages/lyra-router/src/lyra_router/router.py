@@ -355,6 +355,7 @@ class ModelRouter:
             effort_budget_tokens=effort_mapping.budget_tokens,
             effort_instruction=effort_mapping.thinking_instruction,
             effort_reasoning=effort_mapping.reasoning_effort,
+            orchestration_enabled=effort_mapping.orchestration_enabled,
         )
 
     def _pick_any_model(self) -> ModelAssignment:

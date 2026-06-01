@@ -97,6 +97,7 @@ class RoutingDecision:
     effort_budget_tokens: int = 0
     effort_instruction: str = ""
     effort_reasoning: str = ""
+    orchestration_enabled: bool = False
 
 
 @dataclass(frozen=True)

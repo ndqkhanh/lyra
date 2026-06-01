@@ -117,14 +117,14 @@ class ProviderRegistry:
             return None
 
         if idx == 0:
-            return self.get_best_model_for_tier(tier)
+            return self.get_best_model_for_tier(tier, require_key=False)
 
         # Try each lower tier until we find an available model
         for fallback_idx in range(idx - 1, -1, -1):
-            candidate = self.get_best_model_for_tier(tier_order[fallback_idx])
+            candidate = self.get_best_model_for_tier(tier_order[fallback_idx], require_key=False)
             if candidate:
                 return candidate
-        return self.get_best_model_for_tier(tier)
+        return self.get_best_model_for_tier(tier, require_key=False)
 
     # ── Built-in providers (May 2026 pricing) ─────────────────────
 

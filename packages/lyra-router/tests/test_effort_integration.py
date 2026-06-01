@@ -94,9 +94,24 @@ class TestEffortMappingInDecision:
         router = ModelRouter()
         decision = router.route("implement auth", effort_level="xhigh")
         # Anthropic models get empty instruction (they use native budget_tokens)
-        # But if the router selects a non-Anthropic model, this may be non-empty
+        # If the router selects a non-Anthropic model, this may be non-empty
         # Just check the field exists and is a string
         assert isinstance(decision.effort_instruction, str)
+
+    def test_ultracode_decision_has_orchestration_enabled(self) -> None:
+        """Ultracode decision must have orchestration_enabled=True."""
+        router = ModelRouter()
+        decision = router.route("audit everything", effort_level="ultracode")
+        assert decision.orchestration_enabled is True
+
+    def test_non_ultracode_decisions_have_orchestration_disabled(self) -> None:
+        """Non-ultracode decisions must have orchestration_enabled=False."""
+        router = ModelRouter()
+        for level in ("low", "medium", "high", "xhigh", "max"):
+            decision = router.route("some task", effort_level=level)
+            assert decision.orchestration_enabled is False, (
+                f"Expected orchestration_enabled=False for {level}"
+            )
 
 
 class TestRouterWithCustomEffort:

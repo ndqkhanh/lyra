@@ -11,7 +11,10 @@ with Dynamic Effort Calibration (§3.2 Breakthrough).
 
 from __future__ import annotations
 
+import json
 import logging
+import os
+from pathlib import Path
 from .models import (
     EffortConfig,
     EffortLevel,
@@ -328,6 +331,105 @@ class EffortManager:
     def list_providers(cls) -> list[str]:
         """Return all known provider identifiers."""
         return list(_PROVIDER_CAPABILITIES.keys())
+
+    # ── Session persistence ──────────────────────────────────────────
+
+    @staticmethod
+    def _config_path() -> Path:
+        """Return the path to the .lyra/config.json file."""
+        # Walk up from cwd to find project root with .lyra dir
+        cwd = Path.cwd()
+        for parent in [cwd] + list(cwd.parents):
+            lyra_dir = parent / ".lyra"
+            if lyra_dir.is_dir():
+                return lyra_dir / "config.json"
+        # Fallback: create .lyra in cwd
+        lyra_dir = cwd / ".lyra"
+        lyra_dir.mkdir(parents=True, exist_ok=True)
+        return lyra_dir / "config.json"
+
+    def save(self, path: str | os.PathLike | None = None) -> None:
+        """
+        Persist the current effort configuration to JSON.
+
+        Respects ``is_persistent`` — ``max`` and ``ultracode`` are session-only
+        and are NOT saved. They are restored as ``high`` on next load.
+
+        Args:
+            path: Explicit file path. Uses ``.lyra/config.json`` if None.
+        """
+        config_path = Path(path) if path else self._config_path()
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+
+        level = self._config.current_level
+        # Non-persistent levels are saved as "high" on disk;
+        # orchestration is only persisted for persistent levels
+        if level.is_persistent:
+            save_level = level
+            save_enabled = self._config.orchestration.enabled
+        else:
+            save_level = EffortLevel.HIGH
+            save_enabled = False
+
+        data = {
+            "effort_level": save_level.value,
+            "orchestration_enabled": save_enabled,
+            "orchestration_auto_trigger_threshold": self._config.orchestration.auto_trigger_threshold,
+            "keyword_trigger_enabled": self._config.orchestration.keyword_trigger_enabled,
+        }
+
+        config_path.write_text(json.dumps(data, indent=2))
+        logger.info("Effort config saved to %s (level=%s)", config_path, save_level.value)
+
+    @classmethod
+    def load(cls, path: str | os.PathLike | None = None) -> EffortManager:
+        """
+        Load an EffortManager from a persisted config file.
+
+        If the file is missing or malformed, returns a default ``HIGH`` manager.
+
+        Args:
+            path: Explicit file path. Uses ``.lyra/config.json`` if None.
+
+        Returns:
+            An EffortManager restored from the saved config, or a fresh
+            default if no config exists.
+        """
+        from .models import OrchestrationConfig
+
+        config_path = Path(path) if path else cls._config_path()
+
+        if not config_path.exists():
+            logger.info("No effort config at %s — using HIGH default", config_path)
+            return cls()
+
+        try:
+            raw = json.loads(config_path.read_text())
+        except (json.JSONDecodeError, OSError) as exc:
+            logger.warning("Failed to read effort config %s: %s — using default", config_path, exc)
+            return cls()
+
+        try:
+            level = EffortLevel(raw.get("effort_level", "high"))
+        except ValueError:
+            level = EffortLevel.HIGH
+
+        # Non-persistent levels restored as high
+        if not level.is_persistent:
+            level = EffortLevel.HIGH
+
+        orchestration = OrchestrationConfig(
+            enabled=raw.get("orchestration_enabled", False),
+            auto_trigger_threshold=raw.get("orchestration_auto_trigger_threshold", "medium"),
+            keyword_trigger_enabled=raw.get("keyword_trigger_enabled", True),
+        )
+
+        config = EffortConfig(
+            current_level=level,
+            orchestration=orchestration,
+        )
+        logger.info("Effort config loaded from %s (level=%s)", config_path, level.value)
+        return cls(config=config)
 
     @classmethod
     def validate_against_capability_matrix(cls) -> dict[str, list[str]]:

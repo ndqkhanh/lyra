@@ -42,10 +42,22 @@ from .engine import (
     WorkflowStatus,
 )
 from .orchestrator import AutoOrchestrator
+from .trust import (
+    AgentTrustProfile,
+    TrustDimension,
+    TrustEvaluator,
+    TrustEvaluation,
+    TrustHistory,
+    TrustScore,
+    TrustWeightedRouter,
+    WeightedMessage,
+    trust_from_critic_verdicts,
+)
 
 __all__ = [
     "AdversarialVerifier",
     "AgentTask",
+    "AgentTrustProfile",
     "AutoOrchestrator",
     "Claim",
     "CriticVerdict",
@@ -53,9 +65,17 @@ __all__ = [
     "MutationGate",
     "PauseResumeSerializer",
     "ScriptVM",
+    "TrustDimension",
+    "TrustEvaluator",
+    "TrustEvaluation",
+    "TrustHistory",
+    "TrustScore",
+    "TrustWeightedRouter",
     "Verdict",
+    "WeightedMessage",
     "WorkflowEngine",
     "WorkflowPhase",
     "WorkflowScript",
     "WorkflowStatus",
+    "trust_from_critic_verdicts",
 ]

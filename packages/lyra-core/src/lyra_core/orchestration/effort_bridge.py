@@ -50,6 +50,7 @@ class EffortBridge:
 
     effort_level: EffortLevel
     orchestrator: AutoOrchestrator | None = None
+    _orchestration_provider: str = ""  # Provider label for provider-aware degradation
 
     def __post_init__(self) -> None:
         if self.effort_level.orchestration_enabled and self.orchestrator is None:
@@ -63,7 +64,8 @@ class EffortBridge:
             return False
         if self.orchestrator is None:
             return False
-        return self.orchestrator.evaluate(prompt).should_orchestrate
+        provider = self._orchestration_provider or None
+        return self.orchestrator.evaluate(prompt, provider=provider).should_orchestrate
 
     def evaluate(self, prompt: str) -> OrchestrationDecision:
         """Evaluate task complexity and decide whether to auto-orchestrate."""
@@ -81,7 +83,8 @@ class EffortBridge:
                 complexity=TaskComplexity.TRIVIAL,
                 reasoning="No orchestrator configured",
             )
-        return self.orchestrator.evaluate(prompt)
+        provider = self._orchestration_provider or None
+        return self.orchestrator.evaluate(prompt, provider=provider)
 
     def plan_workflow(
         self,
