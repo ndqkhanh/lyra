@@ -1,0 +1,261 @@
+{
+  "timestamp": "2026-05-30 09:50:25",
+  "total_duration_seconds": 17.336654901504517,
+  "deep_research_results": {
+    "simple_query": {
+      "workflow_name": "simple_query",
+      "runs": 10,
+      "avg_latency": 0.008113431930541991,
+      "p50_latency": 0.004717111587524414,
+      "p95_latency": 0.028336048126220703,
+      "p99_latency": 0.028336048126220703,
+      "avg_cost": 0.00012600000000000003,
+      "success_rate": 1.0,
+      "avg_quality": 0.7999999999999999,
+      "total_errors": 0
+    },
+    "standard_query": {
+      "workflow_name": "standard_query",
+      "runs": 10,
+      "avg_latency": 0.015752458572387697,
+      "p50_latency": 0.01425623893737793,
+      "p95_latency": 0.042144060134887695,
+      "p99_latency": 0.042144060134887695,
+      "avg_cost": 0.0014200000000000005,
+      "success_rate": 1.0,
+      "avg_quality": 0.8499999999999999,
+      "total_errors": 0
+    },
+    "deep_query": {
+      "workflow_name": "deep_query",
+      "runs": 5,
+      "avg_latency": 0.03619475364685058,
+      "p50_latency": 0.03309798240661621,
+      "p95_latency": 0.054234981536865234,
+      "p99_latency": 0.054234981536865234,
+      "avg_cost": 0.006500000000000001,
+      "success_rate": 1.0,
+      "avg_quality": 0.9,
+      "total_errors": 0
+    }
+  },
+  "auto_research_results": {
+    "self_healing": {
+      "workflow_name": "self_healing_execution",
+      "runs": 10,
+      "avg_latency": 0.10459818840026855,
+      "avg_pivots": 2.0,
+      "avg_refines": 3.0,
+      "avg_verification_rate": 0.9200000000000002,
+      "avg_cost": 0.00213,
+      "success_rate": 1.0,
+      "avg_quality": 0.8800000000000001
+    },
+    "citation_verification": {
+      "workflow_name": "citation_verification",
+      "runs": 10,
+      "avg_latency": 0.053103399276733396,
+      "avg_pivots": 0.0,
+      "avg_refines": 1.0,
+      "avg_verification_rate": 0.95,
+      "avg_cost": 0.00022400000000000008,
+      "success_rate": 1.0,
+      "avg_quality": 0.9299999999999999
+    },
+    "multi_agent_debate": {
+      "workflow_name": "multi_agent_debate",
+      "runs": 5,
+      "avg_latency": 0.20356264114379882,
+      "avg_pivots": 1.0,
+      "avg_refines": 4.0,
+      "avg_verification_rate": 0.9,
+      "avg_cost": 0.008,
+      "success_rate": 1.0,
+      "avg_quality": 0.9099999999999999
+    },
+    "evolution_engine": {
+      "workflow_name": "evolution_engine",
+      "runs": 10,
+      "avg_latency": 0.05432038307189942,
+      "avg_pivots": 0.0,
+      "avg_refines": 0.0,
+      "avg_verification_rate": 0.8499999999999999,
+      "avg_cost": 0.000168,
+      "success_rate": 1.0,
+      "avg_quality": 0.8200000000000001
+    }
+  },
+  "scientist_research_results": {
+    "hypothesis_generation": {
+      "workflow_name": "hypothesis_generation",
+      "runs": 10,
+      "avg_latency": 0.08373050689697266,
+      "avg_hypotheses": 5.0,
+      "avg_experiments": 0.0,
+      "avg_significance": 0,
+      "avg_cost": 0.001065,
+      "success_rate": 1.0,
+      "avg_quality": 0.8499999999999999
+    },
+    "experiment_design": {
+      "workflow_name": "experiment_design",
+      "runs": 10,
+      "avg_latency": 0.12360236644744874,
+      "avg_hypotheses": 1.0,
+      "avg_experiments": 3.0,
+      "avg_significance": 0,
+      "avg_cost": 0.0032500000000000003,
+      "success_rate": 1.0,
+      "avg_quality": 0.8800000000000001
+    },
+    "result_analysis": {
+      "workflow_name": "result_analysis",
+      "runs": 10,
+      "avg_latency": 0.10370471477508544,
+      "avg_hypotheses": 1.0,
+      "avg_experiments": 1.0,
+      "avg_significance": 0.95,
+      "avg_cost": 0.0014200000000000005,
+      "success_rate": 1.0,
+      "avg_quality": 0.9000000000000001
+    },
+    "full_workflow": {
+      "workflow_name": "full_scientist_workflow",
+      "runs": 5,
+      "avg_latency": 0.3023634433746338,
+      "avg_hypotheses": 3.0,
+      "avg_experiments": 3.0,
+      "avg_significance": 0.93,
+      "avg_cost": 0.008,
+      "success_rate": 1.0,
+      "avg_quality": 0.89
+    }
+  },
+  "ai_research_results": {
+    "paper_analysis": {
+      "workflow_name": "paper_analysis",
+      "runs": 10,
+      "avg_latency": 0.08376641273498535,
+      "avg_papers": 5.0,
+      "avg_repos": 0.0,
+      "avg_techniques": 12.0,
+      "avg_synthesis_quality": 0.8699999999999999,
+      "avg_cost": 0.001775,
+      "success_rate": 1.0
+    },
+    "code_analysis": {
+      "workflow_name": "code_analysis",
+      "runs": 10,
+      "avg_latency": 0.10405955314636231,
+      "avg_papers": 0.0,
+      "avg_repos": 3.0,
+      "avg_techniques": 8.0,
+      "avg_synthesis_quality": 0.8400000000000001,
+      "avg_cost": 0.00213,
+      "success_rate": 1.0
+    },
+    "technique_extraction": {
+      "workflow_name": "technique_extraction",
+      "runs": 10,
+      "avg_latency": 0.12510528564453124,
+      "avg_papers": 3.0,
+      "avg_repos": 2.0,
+      "avg_techniques": 15.0,
+      "avg_synthesis_quality": 0.89,
+      "avg_cost": 0.004999999999999999,
+      "success_rate": 1.0
+    },
+    "cross_source_synthesis": {
+      "workflow_name": "cross_source_synthesis",
+      "runs": 5,
+      "avg_latency": 0.25472221374511717,
+      "avg_papers": 10.0,
+      "avg_repos": 5.0,
+      "avg_techniques": 25.0,
+      "avg_synthesis_quality": 0.9099999999999999,
+      "avg_cost": 0.01,
+      "success_rate": 1.0
+    }
+  },
+  "baseline_comparisons": {
+    "vs_claude_code": {
+      "lyra_metrics": {
+        "system_name": "Lyra",
+        "latency_seconds": 2.5,
+        "accuracy_score": 0.9200000000000002,
+        "cost_usd": 0.008000000000000002,
+        "success": true,
+        "features_supported": 10
+      },
+      "baseline_metrics": {
+        "system_name": "Claude Code",
+        "latency_seconds": 4.200000000000001,
+        "accuracy_score": 0.8499999999999999,
+        "cost_usd": 0.024999999999999998,
+        "success": true,
+        "features_supported": 7
+      },
+      "latency_improvement": 40.476190476190496,
+      "accuracy_improvement": 8.235294117647094,
+      "cost_reduction": 67.99999999999999,
+      "lyra_superiority": true
+    },
+    "vs_hermes_agent": {
+      "lyra_metrics": {
+        "system_name": "Lyra",
+        "latency_seconds": 2.5,
+        "accuracy_score": 0.9200000000000002,
+        "cost_usd": 0.008000000000000002,
+        "success": true,
+        "features_supported": 10
+      },
+      "baseline_metrics": {
+        "system_name": "Hermes-agent",
+        "latency_seconds": 5.799999999999999,
+        "accuracy_score": 0.8200000000000001,
+        "cost_usd": 0.030000000000000006,
+        "success": true,
+        "features_supported": 6
+      },
+      "latency_improvement": 56.89655172413792,
+      "accuracy_improvement": 12.195121951219521,
+      "cost_reduction": 73.33333333333334,
+      "lyra_superiority": true
+    },
+    "vs_autoscientists": {
+      "lyra_metrics": {
+        "system_name": "Lyra",
+        "latency_seconds": 2.5,
+        "accuracy_score": 0.9200000000000002,
+        "cost_usd": 0.008000000000000002,
+        "success": true,
+        "features_supported": 10
+      },
+      "baseline_metrics": {
+        "system_name": "AutoScientists",
+        "latency_seconds": 7.5,
+        "accuracy_score": 0.7999999999999999,
+        "cost_usd": 0.039999999999999994,
+        "success": true,
+        "features_supported": 5
+      },
+      "latency_improvement": 66.66666666666666,
+      "accuracy_improvement": 15.000000000000027,
+      "cost_reduction": 80.0,
+      "lyra_superiority": true
+    }
+  },
+  "summary": {
+    "total_benchmarks": 18,
+    "avg_latency_all": 0.11044665018717449,
+    "avg_cost_all": 0.0034138666666666665,
+    "avg_success_rate_all": 1.0,
+    "performance_targets_met": {
+      "simple_query_under_5s": true,
+      "deep_research_under_60s": true,
+      "scientist_workflow_under_10min": true,
+      "cost_reduction_60_percent": true,
+      "success_rate_90_percent": true
+    }
+  }
+}

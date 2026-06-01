@@ -1,0 +1,30 @@
+[
+  {
+    "id": "32770e6e8bd3",
+    "generation": 0,
+    "score": 0.774,
+    "status": "promoted",
+    "created_at": 1780307656.326733
+  },
+  {
+    "id": "d8ad405bdee5",
+    "generation": 1,
+    "score": 1.0,
+    "status": "promoted",
+    "created_at": 1780307656.326931
+  },
+  {
+    "id": "6754ce1df455",
+    "generation": 0,
+    "score": 0.778,
+    "status": "promoted",
+    "created_at": 1780307656.327143
+  },
+  {
+    "id": "ece8642384d2",
+    "generation": 1,
+    "score": 1.0,
+    "status": "promoted",
+    "created_at": 1780307656.3273249
+  }
+]
