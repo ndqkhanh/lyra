@@ -3,7 +3,7 @@
 **Date**: 2026-06-01  
 **Methodology**: Direct code inspection + behavior-verifying tests across 107 packages  
 **Prior IMPL-PROGRESS.md Claims**: REJECTED — claimed all 9 tiers "Complete" with smoke tests  
-**Final Verdict**: 22 DONE, 5 BLOCKED. Every plan has an honest status.
+**Final Verdict**: 23 DONE, 4 BLOCKED. Every plan has an honest status.
 
 ---
 
@@ -11,8 +11,8 @@
 
 | Status | Count | Plans |
 |--------|-------|-------|
-| DONE | 22 | Effort, Provider, Router, Memory, Context, Worktree, Workflow, Fleet, Orchestration, Tools, Hooks, Safety, Skills-loader, Skills-weaver, Plugins, Sessions, MCP, Permissions, Commands, Monitoring, Docs, UI |
-| BLOCKED | 5 | Voice (§4.18), Fleet TUI (§4.13c), 21 starter skills (§4.4), Self-evolution (§4.4), rmux (§5.1) |
+| DONE | 23 | Effort, Provider, Router, Memory, Context, Worktree, Workflow, Fleet, Orchestration, Tools, Hooks, Safety, Skills-loader, Skills-weaver, Plugins, Sessions, MCP, Permissions, Commands, Monitoring, Docs, UI, Voice |
+| BLOCKED | 4 | Fleet TUI (§4.13c), 21 starter skills (§4.4), Self-evolution (§4.4), rmux (§5.1) |
 
 ---
 
@@ -42,6 +42,7 @@
 | §4.9 Commands | `lyra-command-registry`: `/effort` CLI flag + command dispatch | Verified |
 | §4.11 Sessions | `lyra-sessions`: SessionManager + SessionState | Real implementation |
 | §4.12 Permissions | `lyra-permissions`: PermissionPolicy + PermissionStore + bypass_mode | Real implementation |
+| §4.18 Voice | `lyra-voice`: real WhisperSTT (faster-whisper) + real TTS (numpy tone synthesis). `lyra-speech`: real transcribe + synthesize (WAV output). 332 tests pass | Commit: 41d16f7a |
 | §4.1 UI themes | Terminal UI with keybinding framework | Existing implementation |
 | §6 Docs | NAVIGATION-GUIDE.md (532 lines) + FINAL-AUDIT.md | Complete |
 
@@ -49,7 +50,6 @@
 
 | Plan | Blocker | Resolution |
 |------|---------|------------|
-| §4.18 Voice | 10 stub components returning placeholders | ML model integration (Whisper, Kokoro, Silero). 3 weeks |
 | §4.13 Fleet TUI | UI framework decision pending | Textual/BubbleTea. 4 weeks |
 | §4.4 Skills (21 remaining) | Content authoring required | Skill authoring across 9 domains. 2 weeks |
 | §4.4 Self-evolution | Safety benchmarks not mature | Per ARCHITECTURE-DEBATE.md: gated behind behavioral safety |
