@@ -21,12 +21,21 @@ architectural insight from Claude Code's dynamic workflows.
 
 from __future__ import annotations
 
+import asyncio
 import threading
 import time
 import uuid
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
+
+from lyra_provider.interface import (
+    AbstractProvider,
+    ChatRequest,
+    Message,
+    MessageRole,
+    ProviderError,
+)
 
 
 class WorkflowStatus(str, Enum):
@@ -269,7 +278,15 @@ class WorkflowEngine:
     MAX_TOTAL_AGENTS: int = 1000
     BACKPRESSURE_QUEUE_DEPTH: int = 48  # Signal slow_down at this depth
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        *,
+        default_provider: AbstractProvider | None = None,
+        provider_registry: Any = None,  # ProviderRegistry from lyra-router
+        pricing: dict[str, dict[str, Any]] | None = None,
+        max_tokens: int = 4096,
+        temperature: float = 0.7,
+    ) -> None:
         self._workflows: dict[str, WorkflowScript] = {}
         self._statuses: dict[str, WorkflowStatus] = {}
         self._running: set[str] = set()
@@ -280,6 +297,13 @@ class WorkflowEngine:
         self._total_cost: float = 0.0
         self._started_at: dict[str, float] = {}
         self._vm = ScriptVM()
+
+        # Provider dispatch
+        self._default_provider = default_provider
+        self._provider_registry = provider_registry
+        self._pricing = pricing or {}
+        self._default_max_tokens = max_tokens
+        self._default_temperature = temperature
 
     # ── Public API ─────────────────────────────────────────────────
 
@@ -447,24 +471,47 @@ class WorkflowEngine:
 
     def _run_task(self, task: AgentTask) -> None:
         """
-        Execute a single agent task.
+        Execute a single agent task via the provider adapter layer.
 
-        In production, this dispatches to the provider adapter layer.
-        For now, tasks are executed synchronously (the caller handles
-        concurrency via threading).
+        Dispatches through AbstractProvider.chat() with the task prompt
+        and model configuration. Token usage and cost are extracted from
+        the actual provider response, not estimated.
         """
         task.status = AgentTaskStatus.RUNNING
         task.started_at = time.time()
 
         try:
-            # Task execution is provider-mediated — in production this
-            # calls through AbstractProvider.chat() with the task prompt
-            # and model configuration.
+            # Resolve provider for this task's model
+            provider = self._resolve_provider(task.model)
+
+            # Build canonical chat request
+            request = ChatRequest(
+                messages=[Message(role=MessageRole.USER, content=task.prompt)],
+                model=task.model,
+                max_tokens=self._default_max_tokens,
+                temperature=self._default_temperature,
+            )
+
+            # Dispatch to provider (sync bridge for background thread)
+            response = self._run_async(provider.chat(request))
+
+            # Extract real usage data from provider response
+            task.result = response.content
+            task.tokens_used = (
+                response.usage.input_tokens + response.usage.output_tokens
+                if response.usage
+                else 0
+            )
+            task.cost_usd = self._estimate_cost(
+                provider=provider.provider_name,
+                model=task.model,
+                input_tokens=response.usage.input_tokens if response.usage else 0,
+                output_tokens=response.usage.output_tokens if response.usage else 0,
+            )
             task.status = AgentTaskStatus.COMPLETED
             task.completed_at = time.time()
-            task.tokens_used = len(task.prompt.split()) * 2  # Rough estimate
-            task.cost_usd = task.tokens_used * 0.000001  # Rough cost
-        except Exception as e:
+
+        except ProviderError as e:
             task.error = str(e)
             if task.retries < task.max_retries:
                 task.status = AgentTaskStatus.RETRYING
@@ -472,3 +519,65 @@ class WorkflowEngine:
             else:
                 task.status = AgentTaskStatus.FAILED
                 task.completed_at = time.time()
+        except Exception as e:
+            task.error = f"{type(e).__name__}: {e}"
+            if task.retries < task.max_retries:
+                task.status = AgentTaskStatus.RETRYING
+                task.retries += 1
+            else:
+                task.status = AgentTaskStatus.FAILED
+                task.completed_at = time.time()
+
+    def _resolve_provider(self, model: str) -> AbstractProvider:
+        """Resolve the provider adapter for a model name.
+
+        Uses the provider registry if available, otherwise falls back
+        to the default provider configured in the engine.
+        """
+        if self._provider_registry:
+            return self._provider_registry.resolve(model)
+        if self._default_provider:
+            return self._default_provider
+        raise RuntimeError(
+            f"No provider configured for model '{model}'. "
+            "Pass providers= to WorkflowEngine or set a default provider."
+        )
+
+    @staticmethod
+    def _run_async(coro: Any) -> Any:
+        """Run an async coroutine from a synchronous context.
+
+        Uses asyncio.run() in a new event loop. Safe because workflow
+        tasks execute in dedicated background threads, not the main
+        event loop.
+        """
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            return asyncio.run(coro)
+        # If we're already in an event loop, use a thread
+        import concurrent.futures
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(asyncio.run, coro)
+            return future.result()
+
+    def _estimate_cost(
+        self,
+        provider: str,
+        model: str,
+        input_tokens: int,
+        output_tokens: int,
+    ) -> float:
+        """Estimate cost from provider pricing data.
+
+        Falls back to a conservative default if pricing data is unavailable.
+        """
+        pricing = self._pricing.get(provider, {}).get(model)
+        if pricing:
+            return (
+                input_tokens * pricing.input_per_1m / 1_000_000
+                + output_tokens * pricing.output_per_1m / 1_000_000
+            )
+        # Conservative fallback: $0.01/1M input, $0.03/1M output
+        return input_tokens * 0.00000001 + output_tokens * 0.00000003
