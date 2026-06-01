@@ -76,6 +76,23 @@ Per-tier expert panel reviews with signed-off verdicts from Senior Architect, Se
 | `impl-decisions.md` | Architecture decisions made during implementation |
 | `impl-backlog.md` | Deferred enhancements ranked by impact×effort |
 
+### 📖 07-architecture-deep-dives/ — Architecture Explained Deeply
+
+Standalone deep-dive documents explaining each major architecture decision. Each doc includes: executive summary, step-by-step mechanisms, trade-off analysis, architecture diagrams, (B) breakthrough, and cited sources.
+
+| File | Topic | Lines |
+|------|-------|-------|
+| `01-ultracode-replication.md` | Claude Code effort + orchestration stack replicated across providers | 883 |
+| `02-memory-architecture.md` | 4-tier Temporal Knowledge Graph with A-MAC + A-MEM | 1,109 |
+| `03-provider-abstraction.md` | Normalizing Anthropic/OpenAI/DeepSeek/Google through one interface | 250 |
+| `04-fleet-supervisor.md` | Per-user daemon for detached background sessions | 234 |
+| `05-workflow-engine.md` | Code-driven, background, resumable orchestration engine | 800 |
+| `06-skills-system.md` | Complete skills pipeline: curator → loader → generator → evolver | 1,361 |
+| `07-voice-pipeline.md` | Flagship voice mode: STT → Agent → TTS with provider-swappable components | 1,148 |
+| `08-safety-security.md` | 4-layer defense: Input Guard → NEMO → Runtime Monitor → Evolution Guard | 640 |
+| `09-model-router.md` | 3-tier intelligent routing: Rule → Semantic → NeuralUCB | 1,035 |
+| `10-worktree-isolation.md` | Git-worktree isolation for safe parallel editing | 645 |
+
 ### 📦 06-deliverables/ — Final Deliverables
 
 | File | Description |
@@ -98,6 +115,7 @@ lyra-upgrade/
 ├── 04-research/               Source ledger, findings, research notes, downloaded papers
 ├── 05-tracking/               Progress tracking, audit, decisions, backlog
 ├── 06-deliverables/           Navigation guide, test plan, feature parity matrix
+├── 07-architecture-deep-dives/ Deep explanation docs for each architecture decision (10 files, 8,105 lines)
 └── .archive/                  Superseded docs, phase research, duplicates (historical)
 ```
 
