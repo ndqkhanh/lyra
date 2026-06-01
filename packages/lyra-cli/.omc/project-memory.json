@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "python -m pytest --collect-only packages/lyra-core/tests/ packages/lyra-agent-swarm/tests/ packages/lyra-science-pipeline/tests/ packages/lyra-research/tests/ -q 2>&1 | tail -5",
+    "testCommand": "python -m pytest packages/lyra-cli/tests/skills/test_specialized_skills_part1.py packages/lyra-cli/tests/skills/test_specialized_skills_part2.py -v 2>&1 | tail -5",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}

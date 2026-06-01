@@ -1,7 +1,7 @@
 {
   "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"git commit -m \\\"feat: add native ANTHROPIC_BASE_URL support\\n\\nBREAKING CHANGE: Native support for custom Anthropic endpoints\\n\\nChanges:\\n- harness_core.models.AnthropicLLM now accepts ba...",
-  "error": "Exit code 1\nOn branch main\nYour branch is up to date with 'origin/main'.\n\nChanges not staged for commit:\n  (use \"git add/rm <file>...\" to update what will be committed)\n  (use \"git restore <file>...\" to discard changes in working directory)\n\tmodified:   ../packages/lyra-cli/src/lyra_cli/__init__.py\n\tmodified:   ../packages/lyra-cli/src/lyra_cli/commands/skill.py\n\tmodified:   ../packages/lyra-cli/src/lyra_cli/commands/tui.py\n\tmodified:   ../packages/lyra-cli/src/lyra_cli/daemon_cmd.py\n\tmodified: ...",
-  "timestamp": "2026-05-15T01:51:25.921Z",
-  "retry_count": 2
+  "tool_input_preview": "{\"command\":\"REPO=/Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra && cd $REPO && python -m pytest packages/lyra-harness-core/tests/test_slash_commands.py -v 2>&1\",\"timeout\"...",
+  "error": "Exit code 1\n============================= test session starts ==============================\nplatform darwin -- Python 3.11.8, pytest-9.0.2, pluggy-1.6.0 -- /Users/khanhnguyen/miniconda3/bin/python\ncachedir: .pytest_cache\nbenchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)\nrootdir: /Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-h...",
+  "timestamp": "2026-05-30T11:44:45.450Z",
+  "retry_count": 1
 }

@@ -25,7 +25,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": "python -m pytest /Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-research/tests/ -q --tb=line 2>&1 | tail -3",
+    "testCommand": "python -m pytest tests/test_multi_agent_debate.py::TestMultiAgentDebate::test_debate_consensus_detection tests/test_multi_agent_debate.py::TestFullDebateSession::test_complete_debate_cycle tests/test_multi_hop_engine.py::TestQueryRefinement::test_initial_query_normalization -xvs 2>&1 | tail -80",
     "lintCommand": "ruff check",
     "devCommand": null,
     "scripts": {}
@@ -111,9 +111,33 @@
       "type": "file"
     },
     {
+      "path": "src/lyra_research/skills.py",
+      "accessCount": 3,
+      "lastAccessed": 1780110805450,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_evolution_learning.py",
+      "accessCount": 3,
+      "lastAccessed": 1780110826922,
+      "type": "file"
+    },
+    {
       "path": "src/lyra_research/orchestrator.py",
       "accessCount": 2,
       "lastAccessed": 1780041269518,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_deepseek_integration.py",
+      "accessCount": 2,
+      "lastAccessed": 1780110049296,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_source_chaining.py",
+      "accessCount": 2,
+      "lastAccessed": 1780110068490,
       "type": "file"
     },
     {
@@ -150,6 +174,54 @@
       "path": "tests/test_research_daemon.py",
       "accessCount": 1,
       "lastAccessed": 1780038345429,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/sources.py",
+      "accessCount": 1,
+      "lastAccessed": 1780110031643,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_multi_agent_debate.py",
+      "accessCount": 1,
+      "lastAccessed": 1780110848680,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/multi_perspective.py",
+      "accessCount": 1,
+      "lastAccessed": 1780110860815,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/models/model_router.py",
+      "accessCount": 1,
+      "lastAccessed": 1780111060931,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/deepseek_router.py",
+      "accessCount": 1,
+      "lastAccessed": 1780111060997,
+      "type": "file"
+    },
+    {
+      "path": "src/lyra_research/models/cost_optimizer.py",
+      "accessCount": 1,
+      "lastAccessed": 1780111061050,
+      "type": "file"
+    },
+    {
+      "path": "lyra_research/feynman.py",
+      "accessCount": 1,
+      "lastAccessed": 1780111597985,
+      "type": "file"
+    },
+    {
+      "path": "lyra_research/falsification.py",
+      "accessCount": 1,
+      "lastAccessed": 1780111648638,
       "type": "file"
     }
   ],
