@@ -3,7 +3,7 @@
  * and spinner configuration driven by the active skin.
  */
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { useUIStore, DEFAULT_WAITING_FACES, DEFAULT_THINKING_FACES, DEFAULT_THINKING_VERBS } from '@lyra/ui-core'
 
 export function usePersonality() {
@@ -18,10 +18,17 @@ export function usePersonality() {
   const [faceIndex, setFaceIndex] = useState(0)
   const [verbIndex, setVerbIndex] = useState(0)
 
+  // Use refs so tick stays referentially stable — avoids cascading
+  // re-renders when the skin-derived arrays change identity on each read.
+  const facesRef = useRef(thinkingFaces)
+  const verbsRef = useRef(thinkingVerbs)
+  facesRef.current = thinkingFaces
+  verbsRef.current = thinkingVerbs
+
   const tick = useCallback(() => {
-    setFaceIndex(n => (n + 1) % thinkingFaces.length)
-    setVerbIndex(n => (n + 1) % thinkingVerbs.length)
-  }, [thinkingFaces.length, thinkingVerbs.length])
+    setFaceIndex(n => (n + 1) % facesRef.current.length)
+    setVerbIndex(n => (n + 1) % verbsRef.current.length)
+  }, []) // stable — never changes
 
   return {
     currentFace: thinkingFaces[faceIndex]!,

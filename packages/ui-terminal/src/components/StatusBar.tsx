@@ -57,6 +57,9 @@ export const StatusBar = React.memo(function StatusBar({
   const sessionStartRef = useRef<number>(Date.now())
   const [sessionDuration, setSessionDuration] = useState(0)
   const lastFaceTickRef = useRef<number>(Date.now())
+  // Stable ref for tick so the effect doesn't re-subscribe when tick changes identity
+  const tickRef = useRef(tick)
+  tickRef.current = tick
 
   // Combined timer for session duration and streaming elapsed (1 second interval)
   useEffect(() => {
@@ -73,14 +76,14 @@ export const StatusBar = React.memo(function StatusBar({
         // Update face animation every 2.5 seconds
         if (now - lastFaceTickRef.current >= UI_TIMING.FACE_TICK_MS) {
           setFaceIdx(n => (n + 1) % FACES.length)
-          tick()
+          tickRef.current()
           lastFaceTickRef.current = now
         }
       }
     }, UI_TIMING.SESSION_DURATION_UPDATE_MS)
 
     return () => clearInterval(id)
-  }, [isStreaming, tick])
+  }, [isStreaming])
 
   // Reset streaming state when streaming stops
   useEffect(() => {
