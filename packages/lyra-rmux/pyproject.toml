@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lyra-rmux"
+version = "0.1.0"
+description = "MIT-compatible Python PTY multiplexer (clean-room)"
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.11"
+keywords = ["pty", "multiplexer", "terminal", "tui"]
+
+[project.scripts]
+"lyra-rmux" = "lyra_rmux.cli:main"
+"lyra-rmuxd" = "lyra_rmux.daemon:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
