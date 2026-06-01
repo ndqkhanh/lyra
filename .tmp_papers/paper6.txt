@@ -1,0 +1,1677 @@
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+MEMGRAD: A MEMORY-GUIDED OPTIMIZATION
+OF AGENTIC SOFTWARE DEVELOPMENT VIA AB-
+STRACTED TEXTUAL GRADIENTS
+AnishNatekar,AshutoshRanjan,VivekSrivastava&ShirishKarande
+TCSResearch,India
+{anish.natekar,ashutosh.ranjan2}@tcs.com
+{srivastava.vivek2,shirish.karande}@tcs.com
+ABSTRACT
+Agentic systems built on large language models increasingly operate in settings
+thatdemandstablereasoning,effectivecollaboration,andreliableadaptation. Ex-
+isting optimization methods offer valuable signals through prompting strategies,
+alignment techniques, decentralized coordination, and experiential retrieval, but
+theydonottranslatefeedbackgatheredacrossmultipletrajectoriesintopersistent
+improvementsinagentbehavior.WeintroduceMemGrad,amemory-guidedopti-
+mizationframeworkthatusestextualgradientstotransformbatchesofbehavioral
+feedbackintocoherentandinterpretableimprovementdirections. Thesegradients
+supportaretrospective–prospectivememorystructure:retrospectivememorycap-
+tures recurring patterns and common failure modes, while prospective memory
+encodesgradient-derivedstrategiesthatguidefuturereasoningandcoordination.
+Theframeworkalsoupdatessystempromptssothatagentsinternalizetheseim-
+provementswithoutmodelfine-tuning.AppliedtoAgileCoder,amulti-agentsoft-
+waredevelopmentframework,ourapproachimprovestasksuccess,reasoningsta-
+bility,andalignmentwithuserintent.Theseresultsshowthattext-based,memory-
+centeredoptimizationprovidesapracticalandscalableroutetowardmorereliable
+agenticsystems.
+1 INTRODUCTION
+Buildingrobustagenticsystemsforcomplex,long-horizontasksrequiresmorethanstrongersingle-
+shotreasoning. Itrequiresmechanismsthat(i)extractrichbehavioralsignalsfromexecution,(ii)
+aggregate and abstract these signals across trajectories, roles, and time, and (iii) translate them
+into persistent updates to system policy and memory. Although recent methods improve deliber-
+atereasoning(e.g., chain-of-thought)(Weietal.,2022),enablestructuredperception–actionloops
+(e.g., ReAct) (Yao et al., 2022), and align behavior through preference optimization (e.g., RLHF
+and Constitutional AI) (Ouyang et al., 2022; Bai et al., 2022), they do not provide a unified way
+to convert batched, trajectory-level feedback into durable, role-aware improvements. At the same
+time, textual optimization primitives such as textual gradients (Yuksekgonul et al., 2024) offer in-
+terpretable,language-nativeupdatesignals,buttheiruseformulti-agent,long-horizonadaptationis
+stillnotwellunderstood. WepresentadetaileddiscussionontherelatedworksinSectionAinthe
+Appendix.
+Inrealisticsettings, naturalfeedback appearsasastreamofheterogeneoustextualsignals(forex-
+ample, code review comments, test logs, bug reports, and acceptance notes) collected across mul-
+tipledecisionpointsandtrajectories. Thisfeedbackismulti-granular(rangingfromline-levelcor-
+rections to system-level design issues), multi-role (including programmers, reviewers, testers, and
+productowners), andmulti-instance(reoccurringwithcontext-specificvariations). Reducingsuch
+informationtoscalarrewardsorisolatedcritiquesremovesthestructureneededtogeneralizecorrec-
+tionsacrosstasks. Moreover,improvementsmustpersistwithoutmodifyingmodelweights,instead
+influencingfuturebehaviorthroughmemoryandpromptupdatesthatdependonbothroleandcon-
+text(Madaanetal.,2023;Shinnetal.,2023;Packeretal.,2023). Thecentralchallengeistherefore
+1
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+A MemGrad: Memory-Guided Optimization
+User Query Optimization
+Sudoku
+Requirements: Abstractor
+1. .…..
+2. ……
+R e
+T
+q
+ic
+u
+-
+i
+T
+r
+a
+e
+c
+m
+-T
+e
+o
+n
+e
+ts: Code Bases
+1. .…..
+2. ……
+Minesweeper
+Requirements: Batch Feedback
+1. .….. Role-Based Textual
+2. …… RoleG-Braasdeide nTetxtual
+Software Development Beta Tester Gradient
+B Memory Management C Feedback Abstraction
+1. The game raises a Code Reviewer
+TypeError because ….. 1. User confusion due to unclear
+1.Ambiguous or Ambiguous 2. The Guess The Number commands usage
+partially requirements: [Add Game initializer 2. Error paths terminate
+specified explicit acceptance expects…. interaction prematurely
+r l e e q a u d i i r n e g m e t n o t s r ework c c r o i n t c e r r e i t a e w e i x t a h m ples; 3. A va d l d id s a tr ti i o ct n p t a o r s a u m rf e a te c r e 1. lacks S o a f c t o w m a p re le T t e e s u t n E i n t g -l i e n v e e e l r
+2.Weak input confirm user flows unsupported… evaluation of core
+validation and with the Product 4.Verify import targets functionalities.
+p p o r o o r p a e g r a r t o i r o n O i w m n p e l r e m b e e n f t o a r t e i on] 5. a En n s d u m re o t d h u e l e e n p v a i t r h o s n t m o… ent 2. T im he p o ap rt p f l l i o c w at i r o e n m s a t i a n r t u u n p t e a s n t d e d.
+reference…. Role-Based Textual
+Retrospective Memory Prospective Memory Feedback Gradient
+Figure 1: Overview of the MemGrad framework. Starting from a user query, agents collabora-
+tivelygenerateartifactsandreceivebatchfeedbackfromexecutiontraces. Thisfeedbackisdecom-
+posedintofeedback–resolutionpairsandroutedtorole-specificclusters,whereitisabstractedinto
+compact textual gradients. These gradients update a dual memory system comprising retrospec-
+tive memory (capturing recurring failure patterns) and prospective memory (encoding actionable
+improvement strategies) as shown in (B). The abstracted gradients (as shown in C) further drive
+prompt optimization, enabling agents to incorporate persistent, role-aware improvements without
+parameterupdates,resultinginmorestableandeffectivelong-horizonbehavior.
+totransformbatchedtextualfeedbackintocompact,role-aware,andactionablerepresentationsthat
+updatebothmemoryandpolicy.
+A multi-agent software engineering workflow illustrates this challenge. Over a sprint, a batch of
+tickets generates multiple trajectories: the programmer edits code, the reviewer flags API misuse,
+thetesterreportsflakyintegrationfailures,andtheproductownernotesunmetacceptancecriteria.
+These failures are heterogeneous (for example, cross-module inconsistencies, missing edge-case
+validation,nondeterministictests),distributedacrossfilesandcommits,andoftenrecurwithsmall
+variations. An effective optimization mechanism must (i) route feedback to the correct role, (ii)
+abstract recurring patterns (for example, “improper error handling for I/O operations”), and (iii)
+storeboththecue(“duringfileI/Owrapperdesign”)andtheintention(“validatereturncodes,apply
+backoffretries,surfacetypederrors”)sothatfutureactionsintegratethesecorrectionsautomatically.
+We introduce MemGrad, a memory-guided optimization framework that uses textual gradi-
+ents(Yuksekgonuletal.,2024)toconnectbatchedbehavioralfeedbackwithrole-conditionedmem-
+oryandprompt updates. MemGrad operatesalongthreeprinciples. First, itaggregatesfeedback
+from multiple trajectories and abstracts it into textual gradients that express high-level improve-
+ment directions rather than isolated fixes. Second, it updates agent memory using a retrospec-
+tive–prospective structure that stores distilled failure patterns along with improvement heuristics,
+enablingconsistentadaptationacrossfutureinteractions(Tanetal.,2025). Third,itoptimizessys-
+tempromptssothateachagent’spolicyincorporatesbothuserinstructionsandgradient-informed
+memoryupdates(referFigure1).
+We evaluate MemGrad on AgileCoder (Nguyen et al., 2025), a multi-agent software development
+frameworkinvolvingAgile-stylesprints,dynamiccode-graphmodifications,andabeta-testingpro-
+tocolthatgeneratestrajectory-leveltextualcritiques. Thisenvironmentstresseslong-horizoncoor-
+dination,rolespecialization,andrecurringfailurepatterns,makingitanidealsettingtotestbatched
+feedback abstraction and memory-conditioned optimization. We report results on end-to-end task
+success,humanevaluationandsuccessrateofunit-testcases,andanalyzethecontributionsofrole-
+basedrouting,feedbackabstraction,dual-storememory,andpromptoptimization.
+2
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+2 PRELIMINARIES
+2.1 TEXTGRAD
+TextGradextendsautomaticdifferentiationtonaturallanguagesystemsbytreatingtextualartifacts
+(e.g., prompts, code snippets, intermediate outputs) as variables in a computation graph. The op-
+timizationprocessbeginswithaforwardpassinwhichavariablexproducesanoutputy = f(x)
+and a textual loss is computed via tg.TextLoss (Eq. (12) in Figure 7). This loss is itself a
+natural-languagecritiquedescribingdeficienciesofthecurrentoutputrelativetoaspecification.
+Thebackwardpassthenconvertsthiscritiqueintoatextualgradient,asshowninEq.(13)inFigure
+7.TextGradproducesastructurednatural-languagegradientthatspecifieshowxshouldbemodified
+toreducetheloss. Intuitively,thetextualgradientservesasaimprovementsignalinlanguagespace.
+The update step (Eq. (14) in Figure 7) applies Textual Gradient Descent (TGD), which rewrites
+the current x conditioned on this feedback, analogous to how stochastic gradient descent adjusts
+parametersalongthenegativegradientdirection.
+Inminibatchsettings,multiplelossesareaggregatedusingtg.sum(Eq.(15)inFigure7),andtheir
+correspondingtextualgradientsarecomposedaccordingtothebackwardruleshowninEq.(16)in
+Figure7. Operationally, thisresultsinconcatenationofgradientsignalsfromeachbatchelement,
+preserving detailed instance-level feedback. While this design maintains fidelity to individual cri-
+tiques, the size and verbosity of the resulting gradient object grow with batch size and trajectory
+length. In complex agentic systems involving long-horizon interactions and heterogeneous feed-
+backsources,suchunstructuredaggregationcanintroduceredundancy,interference,andinstability,
+motivating mechanisms that structure and abstract textual gradients prior to propagation (Foerster
+etal.,2018;Zhouetal.,2025).
+2.2 AGILECODER
+AgileCoder instantiates professional Agile methodology within a multi-agent LLM framework by
+assigning agents to specialized roles such as Product Manager, Developer, Reviewer, and Tester.
+Developmentproceedsthroughiterativesprints,eachcomprisingrequirementanalysis,implemen-
+tation,testing,debugging,andreview.Withinasprint,agentsexchangeartifacts(e.g.,specifications,
+codepatches,andtestresults),andexecutionfeedbackgeneratedduringtestingisusedtorevisethe
+current repository state. Across successive sprints, refined artifacts are inherited and further im-
+proved, while a dynamic code graph maintains repository-level dependencies to support targeted
+debuggingandcontext-awareretrieval.
+AgileCoder’s feedback loop focuses on artifacts: tests and critiques trigger small code fixes that
+propagatethroughsprint-to-sprintinheritance. Thisprocessdoesnotconvertfeedbackintopersis-
+tent updates to agent behavior or accumulate generalizable tendencies across batches. In contrast,
+ourapproachinterpretsfeedbackastextualgradients,aggregatesthemacrosstrajectories,andstores
+theirissue–gradientstructureinrole-specificmemories.Thesememoriescapturebothrecurringfail-
+urepatternsandtheirforward-lookingcorrections,enablingupdatestorole-conditionedprompts.As
+aresult,improvementoccursnotonlywithintheartifactsbutalsointheagents’underlyingpolicies.
+3 OUR APPROACH
+3.1 FEEDBACKABSTRACTION
+Weconsideramulti-agentsoftwaredevelopmentframeworkinspiredbyAgileCoder(Section3.2),
+whereateamofrole-specializedagents(programmer,codereviewer,softwaretestengineer,product
+owner)developssoftwareinresponsetoabatchofqueriesQ={q(1),...,q(B)}.
+Foreachqueryq ∈ Q(wedropthesuperscriptforeaseofreading), theteamproducesasoftware
+artifactS(q). Executingtheartifactunderabeta-testingspecificationE producesatrajectoryτ(q),
+whichisevaluatedtoproduceatextualloss
+L(q)=tg.TextLoss(τ(q);E) (1)
+The prompt for Beta-Tester is presented in the Appendix (see Figure 20). We compute a loss for
+everytrajectoryinthebatch,yieldingL ={L(q)|q ∈Q}.
+batch
+3
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+ThepromptforTextLossisprovidedintheAppendix(seeFigure21).Eachtrajectory-levellossL(q)
+maydescribemultipleindependentfailuremodes. Wethereforeextractasetoffeedbackstatements
+F fromthelossL(q),whereeachfeedbackF capturesadeficiencyinthegeneratedartifactS(q).
+Foreveryextractedfeedback,wecomputeatextualgradient ∂L(q) whichwecallasresolution. A
+∂F
+resolutionprovidesastructurednatural-languageinstructiondescribinghowtheissueidentifiedby
+F shouldbecorrected.
+ThisoperationisimplementedthroughaTextGradDecomposerclasswhichispresentedinthe
+Appendix(seeFigure22):
+(cid:26)(cid:18) (cid:19)(cid:27)
+(cid:0) (cid:1) ∂L(q)
+TextGradDecomposer L(q) −→ F, (2)
+∂F
+A single loss L(q) can therefore yield multiple feedback–resolution pairs, since a trajectory often
+revealsseveraldistinctproblems.Aggregatingtheseacrossthebatchgivesthecollectionoffeedback
+statements and their associated resolutions {F, ∂L(q)}batch, which serves as the complete set of
+∂F
+improvementsignalsforthattrainingstep.
+Role-Based Gradient Routing. To distribute improvement signals by agent role, each feedback
+statementisassignedtotherolewhosedescriptionismostsemanticallyalignedwithit. Letϕ(·)be
+atextencoderandRthesetofroles. Wedefinetheroleassignmentfunction
+(cid:0) (cid:1)
+assignRole(F)=argmaxcos ϕ(F), ϕ(r)
+r∈R
+whichselectstherolewhoseembeddingisclosesttothatofthefeedback.
+Thisassignmentinducesrole-specificclustersbycollectingallfeedback–resolutionpairsassociated
+withagivenrole:
+(cid:110) ∂L(q) (cid:12) (cid:111)
+Cluster(r)= (F, (cid:12)assignRole(F)=r (3)
+∂F (cid:12)
+Each cluster therefore contains the feedback and its corresponding resolution for which role r is
+responsible.
+Role-Level Gradient Abstraction. Multiple trajectory-level losses may generate overlapping
+or semantically redundant feedbacks for the same role, the raw cluster Cluster(r) can be-
+come verbose and repetitive. We therefore compress each role-conditioned cluster using a
+RoleBasedAbstractorclass(seeFigure23):
+(cid:18) (cid:19)
+RoleBasedAbstractor (cid:0) Cluster(r)) −→ F¯ , ∂L role (4)
+r ∂F¯
+r
+This class is presented in the Appendix (see Figure 21). Here, F¯ denotes a generalized, non-
+r
+redundant feedback that summarizes recurring failure patterns associated with role r, while ∂Lrole
+∂¯ir
+represents the corresponding abstracted resolution capturing the corrective direction. Here, L
+role
+denotesthefeedback-accumulatedlossforrolercomputedovertheentirebatch(referFigures1(C)
+and2).
+3.2 MEMORYUPDATION
+To make improvements persist across long-horizon agent runs, we maintain an explicit memory
+state that separates (i) what went wrong from (ii) what to do next. This split is motivated by the
+classical distinction where prospective memory concerns reinstating an intention when the appro-
+priatecontextorcueisencountered,whereasretrospectivememoryconcernsrecallingpastcontent
+andevents(Uttletal.,2018). Priorworkfurtherdecomposesprospectivememoryintosubdomains
+(e.g.,episodicevent-cuedvs. vigilance/monitoring),highlightingthatfuture-orientedbehaviorben-
+efitsfromcompact,cue-likerepresentationsratherthancontinuouslymaintainedverboseplans(Uttl
+etal.,2018;Einstein&McDaniel,2005;Graf&Uttl,2001).
+4
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+ℒ batch Feedback-Resolution Pair Role Based Clusters
+1. The logs show repeated confusion 1.No post-game 1.Add a Product Owner
+d e u n r c i o n u g n t s e e r e e d d e c n o t n r s y t , a n w t h e “ r i e n v u a s l e i r d s seed” engagement or lightweight 1.Lack of clarity 1.Provide explicit
+messages without understanding why… feedback post-game in onboarding examples of
+leading to over a dozen failed attempts collection. feedback or about seed acceptable input
+and getting stuck in a loop. Error 2.Users survey prompt. input types types in
+messages lacked guidance, users misunderstand 2.Provide a simple prompts.
+c f o a u l l l d b n a ’ c t k e o s p c t a i p o e n s t h l e i k c e y c “ l h e e , l p a ” n d o r n o “ exit” o “ r h e o l v p e ” r u c s o e m m t a h n e d . t f u o t r o r n i e a w l p m l o a d y e e rs. Programmer
+were available. Overall onboarding
+a w b u r a u s o s i a u l b n i t i d n l s q i s u u t e f i y e f c d i k s c l c i i y o n e … r p n e u t r . t , e s w a u a n l s d t i u u n n s g c e l r i e n a f r r a , u s l t t o e r w s a t t i i n o g n 3.R “ s o e h h n p e o b e l w o t p s a i ” r t u d i u n i v s c n e a l g g e . e a r 3.T r i f r e l o a q l r c u e k e g U s a X h t l e s i l m n p a o s n v i d e g s h ts. 1.U i i a e s n n f n e p t d r a u e s t r . g r e e l t t p o h s e o e t p s i g t t a u i m c v e k e 1.I i s r i m n y e n p p s p v l u t e a e t e a l m m t i -h e e d n t d a - n i t h a d n a t l p i u r p t n o r g b e l u v o s e o t n p t s s .
+4.Critical errors 4.Add friendly
+2. The logs show the user repeatedly such as missing error handling Code Reviewer
+typing “help” instead of making moves, files are not for missing
+indicating unclear instructions and handled files and 1.No post-game 1.Add a lightweight
+poor transition from viewing the board gracefully critical feedback/engagem post-game
+t la o ck se e l d e c e t x i p n l g a n a a t c i e o l n l s … , I m l a l k e i g n a g l u m s o e v r e s s 5.I g n ui su da ff nc i e c i f e o n r t 5. f Pr ai ov lu id re e s an e u n se t r t s o e n c t a i p m t e u n r t e . f s e u e r d v b e a y c k p r o o r m pt.
+repeat mistakes, and draw-state
+messaging was unclear. The experience new users onboarding
+lacked helpful feedback, tutorials, or during walkthrough Software Tester
+guidance, leading to confusion and onboarding after the
+repetitive behavior until welcome message 1.Insufficient 1.Develop additional
+disengagement… testing tests for a wide
+covering range of seed-input
+various scenarios, including
+seed-input edge cases.
+scenarios.
+Figure2: FeedbackAbstraction: ExampleofrawlossesinL (left),followedbythegeneration
+batch
+of feedback–resolution pairs (center), and the role-based distribution of the feedback–resolution
+pairs(right).
+In our setting, each trajectory-level critique L(q) is decomposed into role-conditioned feed-
+back–resolution(asdiscussedinSection3.1).Westorethisnon-abstractedpairsdirectlyinmemory,
+allowing us to maintain detailed instance-level structure and richer contextual variation. (see Fig-
+ures1(A)and(B)).
+LetM andM denotetheretrospectiveandprospectivememorystoresassociatedwithrole
+ret,r pro,r
+r, respectively, both initialized as empty. Retrospective memory records concrete failure patterns
+observedacrosstrajectories,whileprospectivememoryrecordsfuture-orientedcorrectiveintentions.
+Memoryisupdatedviathefollowingwriteoperations:
+M ←Write(M {F |assignRole(F)=r}) (5)
+ret,r ret,r
+(cid:18) (cid:26)(cid:18) (cid:19)(cid:12) (cid:27)(cid:19)
+∂L(q) (cid:12)
+M pro,r ←Write M pro,r F, ∂F (cid:12) (cid:12) assignRole(F)=r (6)
+Storingboththefeedbackanditsassociatedresolutioninprospectivememoryallowsthefeedback
+to serve as a triggering cue, while the resolution specifies the corrective action linked to that cue.
+Because a broad feedback can appear in different forms across tasks, it may accumulate multiple
+resolutionovertime. Formally,foranfeedbackF,wemaintaintheset
+M = (cid:8) F : (cid:2)∂L(q1), ∂L(q2), ... (cid:3)(cid:9) (7)
+pro,r ∂F ∂F
+which contains all resolution associated with F across trajectories. This captures how the same
+failure may call for different responses depending on context. We present example of how the
+memorylooksinFigure3(seeFigure14,15and16intheAppendixforadditionalexamples).
+3.3 OPTIMIZATIONANDINFERENCE
+Following Equation 4, we obtain abstracted role-conditioned feedback–resolution pair
+(cid:16) (cid:17)
+( F¯ r , ∂ ∂ L F¯ ro r le ). We use the abstracted feedback–resolution pair as input to a TextGrad-style back-
+ward operator to obtain a prompt-level gradient for role r. The prompt for backward operator is
+presentedintheFigure17. Concretely,wecompute
+(cid:18) (cid:18) (cid:19)(cid:19)
+∂L ∂L
+role = ∇ p , F¯ , role (8)
+∂p LLM r r ∂F¯
+r r
+5
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+RetrospectiveMemory
+FEEDBACK
+1. Ambiguousorpartiallyspecifiedrequirementsleadingtorework.
+2. Weakinputvalidationandpoorerrorpropagation.
+3. Missingorinsufficientunit/integrationtests;lowmeaningfulcoverage.
+4. Tightcouplingandunclearmoduleboundariesthathinderchange.
+5. Performancebottlenecksduetoinefficientalgorithmsordatastructures.
+6. Inadequateloggingandobservability,makingdefectshardtodiagnose.
+ProspectiveMemory
+FEEDBACK-RESOLUTIONPAIRS
+1. Ambiguous requirements: [Add explicit acceptance criteria with concrete examples; confirm
+userflowswiththeProductOwnerbeforeimplementation]
+2. Weak input validation and error propagation: [Introduce a centralized validation mod-
+ule/schemas;validateatboundaries(API/CLI)andinthedomain;addnegativetestsforinvalid,
+empty,andlargeinputs]
+3. Missing/insufficienttests:[addunittestsforcorepathsandedgecases]
+4. Tightcouplingandunclearboundaries: [Refactorintocohesivemodules;introduceinterfaces/-
+ports]
+5. Performancebottlenecks:[batchI/Owherepossible]
+6. Inadequatelogging/observability:[defineloglevels;logkeyinputs/outcomes]
+Figure3: IllustrationofretrospectiveandprospectivememoryintheProgrammerAgent.
+(cid:16) (cid:17)
+where∇ LLM appliestheTextGradbackwardoperationto F¯ r , ∂ ∂ L F¯ ro r le toproduceatextualgradient
+indicatinghowp shouldbeupdated. Therole-specificsystempromptisthenupdatedusingTextual
+r
+GradientDescent:
+(cid:18) (cid:19)
+∂L
+p(t+1) ← TGD.step p(t), role (9)
+r r ∂p
+r
+The optimized system prompt by our our method and TextGrad is presented in the Figure 4 (refer
+totheFigure10,11,and12intheAppendixforoptimizedsystempromptofotheragents). Simul-
+taneously,thefeedback–directivepairsarewrittenintomemorystoresasshowninEquation5and
+6.
+After T optimization steps, the learned agent configuration is defined by the optimized prompts
+{p(T)}andtheconsolidatedmemorystores{M(T) ,M(T) }.
+r ret,r pro,r
+Inference with Memory-Conditioned Prompts. During test-time execution, the system is
+frozen.When an agent with role r is about to execute an action a, it retrieves relevant retrospec-
+tive cues by embedding the current query and matching it against entries stored in retrospective
+memory,selectingthetop-kmostsimilarelementsbasedonasimilaritymetric.
+F (a) = Retrieve(M , a) (10)
+r ret,r
+Giventheretrievedfeedback,theagentthenperformsasecondretrievalstepoverprospectivemem-
+ory to obtain corresponding resolutions. Specifically, the agent retrieves resolution-level guidance
+thataddressestheidentifiedissues:
+Re (a)=Retrieve(M , F (a)) (11)
+r pro,r r
+The agent’s system prompt (p ) is augmented with both the retrospective feedback cues and the
+r
+retrieved prospective resolutions, yielding a memory-conditioned prompt p˜ . The prompt for the
+r
+6
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+BasePrompt
+YouareProgrammer. wearebothworkingatAgileCoder. Weshareacommoninterestincollaborating
+tosuccessfullycompleteataskassignedbyanewcustomer. Youcanwrite/createcomputersoftwareor
+applicationsbyprovidingaspecificprogramminglanguagetothecomputer.Youhaveextensivecomput-
+ingandcodingexperienceinmanyvarietiesofprogramminglanguagesandplatforms,suchasPython,
+Java, C, C++, HTML, CSS, JavaScript, XML, SQL, PHP, etc, Here is a new customer’s task: task.To
+completethetask,youmustwritearesponsethatappropriatelysolvestherequestedinstructionbasedon
+yourexpertiseandcustomer’sneeds.
+TextGrad
+YouareProgrammer. Inalignmentwiththegoalofcreatinganengagingandfunctionalsoftwareexperi-
+ence,thefollowingsoftwaredesignprinciplesshouldbeprioritized.Developmentshouldfocusonbuild-
+ing a deterministic, reliable system that responds predictably to user actions while maintaining a clear
+andconsistentinternalstate.Thesystemmustrepresentitscorestateaccuratelyandenforcewell-defined
+rules for state transitions. Only valid inputs should be accepted, and invalid inputs should be rejected
+without altering the system state. Clear feedback must be provided to users for both valid and invalid
+actions, ensuringtransparencyandeaseofuse. Corelogicshouldbeimplementedinacentralizedand
+well-encapsulatedcomponenttoensurecorrectnessandmaintainability. Thesystemshouldalsoprovide
+user feedback for invalid inputs, ensure the system state remains unchanged after such inputs, and log
+invalid interaction attempts for diagnostic purposes. Robust error handling should be implemented to
+gracefully manage unexpected conditions, with detailed error messages that describe the nature of the
+issueandpotentialcorrectiveactions. Allsignificantevents,statechanges,anderrorsshouldbelogged
+tofacilitatedebuggingandpost-executionanalysis. Thesystemshouldhandleinvalidinputsgracefully
+withoutcrashing,providesuggestionsforvalidinputs,andensurestabilityacrossrepeatedinteractions.
+The system should log events, state changes, and errors comprehensively after each user interaction to
+supporttraceabilityanddebugging.......
+MemGrad
+Youareanadvancedprogrammingassistanttaskedwithbuildingaturn-based,CLI-basedgamewithan
+engaging,user-friendlyexperiencegroundedinrobustlogicanddefensiveerrorhandling. Adoptastruc-
+tured,user-centereddevelopmentapproachthatemphasizesclarity,modularity,andcontinuousfeedback
+throughoutthelifecycleofasoftwaresystem.Clearlydefinecoreobjectives,rules,andsuccessorfailure
+conditionswhiledesigninginteractionsthatencourageengagementandmeaningfuluserresponses.Incor-
+poratestronginputvalidationwithinformative,user-friendlyfeedbacktopreventerrorsandguidecorrect
+usage. Maintainthoroughdocumentationandclearin-codecommentarytoexplainfunctionality,design
+decisions,andinteractionflowsforfuturemaintainability.Applyproactiveerrorhandlingthatanticipates
+commonusermistakesandcommunicatesissueswithoutfrustration. Designthesystemusingmodular
+componentswithwell-definedresponsibilitiestosupportscalability,testing,andcollaboration. Establish
+focusedtestingprotocolsanditerativefeedbackmechanismsthatintegraterealuserinsightsintoeachde-
+velopmentcycle,andensurethatvisualorinterfaceelementsconsistentlyreflectsystemstatechangesin
+aclearandintuitivemannertoreinforceusabilityandengagement.
+Figure 4: Optimization of system prompt for the Programmer agent: (A) the original system
+prompt,(B)thepromptoptimizedusingTextGrad,wherecoloredsegmentsindicateredundantor
+overlappinginstructionsintroducedduringoptimization(shortenedforreadability;fullversion
+inFigure9),and(C)thepromptoptimizedusingMemGrad.
+retrieval from prospective memory is provided in the Appendix (see Figure 19). Each agent exe-
+cutesitsactionconditionedontheaugmentedpromptp˜ ,therebyproactivelyintegratingpreviously
+r
+learnedremedies. Allrolesperformthisretrieval–augmentationstepbeforeproducingtheiroutputs,
+andthecoordinatedexecutionofmemory-conditionedagentsyieldsthefinalartifact.
+4 EXPERIMENTAL SETUP
+DatasetandTaskSetup. Wecurateasetof30command-linegamesastaskstobeimplemented
+byAgileCoder. InspiredbytheAgileCoderframework,weadoptseveralgamesfromitsProjectDev
+datasetthatsupportcommand-lineinteraction,andadditionallygeneratenewgamestofurtheraug-
+7
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+LightsOut Sudoku(4×4)
+Togglea 5×5gridwhere amoveflipsthe Fill a 4×4 Sudoku with digits 1–4 respect-
+selectedcellanditsorthogonalneighbors; ing row, column, and 2×2 constraints; er-
+turnalllightsoffwithinthemovecap. rorscountedtoacap.
+– Usea5×5binarygridwithcompacttextren- – Provide a deterministic starting 4×4 puzzle
+dering. (fixed/seeded).
+– Seedorfixtheinitialgriddeterministically. – Accept moves (row,col,value) with 0-
+– Accept zero-based (row,col) with 0 ≤ basedindicesandvaluein{1,2,3,4}.
+row,col<5. – Rejectplacementsonnon-emptycells.
+– Reject out-of-bounds inputs without using a – Validate row, column, and 2×2 subgrid con-
+move. straints.
+– Fliptheselectedcellandorthogonalneighbors – Oninvalidmoves,reporterrorandincrementvi-
+only. olationcount.
+– Renderthefullgridaftereachmove. – Onvalidmoves,updategridandrendercom-
+– Trackanddisplaymovecountandremaining pactly.
+moves. – Trackfilledcellsandremainingempties.
+– Endimmediatelywhenallcellsareoff. – Terminatewhenallcellsvalidlyfilled.
+– End when the move cap is reached if not – Terminatewhenviolationcapisreached(fail-
+solved. ure).
+– Refuseinputsaftertermination. – Ignoreinputsaftertermination.
+Figure5: Datasetexample: Representativegamesfromtheevaluationtestset. Foreachgame,we
+presentthespecificrequirementsforgamecreation.
+mentanddiversifyourdataset. Fromthisdataset,10samplesareusedfortrainingthesystem,and
+theremaining20arereservedfortesting. Anexampleillustratingthestructureofthesamplesinthe
+datasetisshowninFigure5andfulldetailsarepresentedintheAppendix(referSectionB).
+System and Training. Our system follows the AgileCoder paradigm, employing four collabo-
+rative agents that operate across successive development phases to synthesize, refine, and validate
+softwareartifacts. Theseagentsinclude: productowner,programmer,codereviewer,andsoftware
+testengineer. Toenableartifact-levellosscomputationandprovideexecutablefeedbacksignals,we
+introduceanadditionalBeta-Testeragentthatrunseachgeneratedgameandlogsallsalientactions
+andoutcomes(referFigures20and21intheAppendix). Theseexecutionlogsareanalyzedtocom-
+putethelossandderivefeedback–resolutionpairs,whicharestoredinmemorytoguidesubsequent
+iterations. Trainingisconductedfortwoepochswithabatchsizeoffive,afterwhichtheoptimized
+systempromptandthepopulatedmemoryareusedtogenerategamesfortheheld-outtestset. We
+useGPT-4ominiforallourexperiments.Inallcomponentsrequiringembeddinggeneration,textual
+inputsareencodedusingthetext-embedding-3-smallmodel
+EvaluationProtocol. Attesttime,thesystemisevaluatedundertwocomplementarysetups,and
+we report the final score as the average of both evaluations. In the first setup, the software test
+engineer agent generates unit-test cases based on the requirements provided for the target game,
+and performance is measured as the percentage of test cases successfully passed (example is pre-
+sentedintheFigure8intheAppendix). Inthesecondsetup, ahumansoftwareengineerinteracts
+withthegeneratedgameandverifiestheextenttowhichthespecifiedrequirements(providedasa
+query)aresatisfied;thepercentageoffulfilledrequirementsisrecorded. Forthehuman-evaluation
+setup, each game is played twice by a human evaluator, and the better-performing run is selected
+astherepresentativescoreforthatgame. Wereporttheunit-testcaseperformanceandthehuman
+requirement-fulfillmentperformance. WecompareMemGradagainstAgileCoderwithandwithout
+TextGradasthebaseline.
+5 RESULTS AND ANALYSIS
+1. Memory improves long horizon performance: Figures 6, 26, and 27 show that MemGrad
+outperformsTextGradacrossmostevaluatedgames,withtheperformancegapwideningasgame
+complexityincreases. WhileTextGradremainscompetitiveontaskssuchas8-Puzzle,Chessand
+8
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+60
+50
+40
+30
+20
+10
+0
+AgileCoder TextGrad MemGrad Memgrad
+without Memory
+)%(
+egarevA
+70
+48.3% 60
+50
+35.4%
+40
+24.1%
+30
+15.3% 20
+10
+0
+AgileCoder TextGrad MemGrad Memgrad
+without Memory
+(a) Performance score from the proportion of test
+casessuccessfullypassed.
+)%(
+egarevA
+63.5% 65.5%
+58.0% 56.0%
+(b) Performance score from requirements satisfied
+duringhumangameplay.
+Figure6: QuantitativeResults. Wepresenttheaveragescoreachievedwhenevaluatingonatest
+setof20games. WecompareMemGradagainstAgileCoderwithandwithoutTextGrad,aswellas
+AgileCoderaugmentedwithMemGradbutwithoutmemory.
+Nim,itsperformancedeterioratesonothergamesthatrequiresustainedstatetracking.TextGrad-
+generated games also tend to be less user-friendly. For example, in Figures 24 and 25 , the
+Mastermind game reveals the secret code at the start, fails to prompt the user for a seed, and
+does not communicate the number of steps in advance. MemGrad, in contrast, satisfies these
+usability criteria consistently. These results suggest that memory-driven optimization enables
+morereliableanddurableimprovementsinbothgameplaycorrectnessanduserexperience.
+2. Abstraction stablizes prompts and gradients: Directly accumulating raw losses can produce
+largegradients,asshowninFigure13intheAppendix.Thisleadstounstableupdatesandexces-
+sivelylongprompts(seeFigures4and9).Moreover,thesystempromptstartscarryingredundant
+instruction,forexample,repetitiveinstructionproperinvalidinputhandling.MemGradmitigates
+thisissuebyabstractingfeedbackbeforeusingitasagradientsignal,preventinggradientexplo-
+sionduringoptimization. Theabstractedgradientscompressrepeatedfeedbackandresolutions
+intoconcisesignals,enablingmorestableupdatesandproducingpromptsthataremoreeffective
+forimplementingtheuserrequirements.
+3. Rolebasedclusteringimprovesoptimizationbalance: Figure4,10,11,and12suggeststhat
+aggregating feedback without role-based clustering dilutes the learning signal for agents that
+participatelessfrequently. Forexample,inTable1oftheAppendixitcanbeseenthatSoftware
+TestEngineerandCodeReviewerparticipatelessfrequentlythantheothertwo. Thustheimpact
+on their system prompt by TextGrad is minimal. On the other hand, by distributing the losses
+andgradientsattherolelevel,MemGradensuresthateachagentreceivesafocusedandrelevant
+updatesignal. Thus,resultinginmorebalancedlearningandimprovedoverallperformance.
+4. Efficientperformancegainswithminimalcostoverhead:
+Overalltokenusageandmonetarycostremainminimalforbothmethods,withtotalexpenditure
+stayingwellbelowonedollarevenafterthreefulltrainingepochs.WhileMemGradincursamin-
+imalincreaseintokenusagecomparedtoTextGrad(2.92Mvs. 2.29Mtokens),theresultingcost
+differenceissmallapproximately0.08dollorundertheGPT-4o-mini. Despitethisminimalin-
+creaseincomputationaloverhead,MemGradconsistentlyachieveshigherevaluationscoresthan
+TextGrad, demonstrating that the performance improvements are obtained efficiently without a
+meaningfulriseincost.
+6 CONCLUSION
+This work demonstrates that structured textual feedback combined with explicit memory enables
+multi-agent systems to adapt more reliably over long time horizons. By organizing feedback, ab-
+stracting recurring patterns, and retaining actionable guidance in persistent memory, agents can
+learnfrompriorexperienceandreducerepeatederrors. OurfindingsindicatethatMemGradoffers
+a foundation for building adaptive, interpretable, and robust agentic systems across diverse tasks,
+withclearimplicationsforreal-worldapplications.
+9
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+REFERENCES
+Yuntao Bai, Saurav Kadavath, Sandipan Kundu, Amanda Askell, Jackson Kernion, Andy Jones,
+AnnaChen,AnnaGoldie,AzaliaMirhoseini,CameronMcKinnon,etal.Constitutionalai:Harm-
+lessnessfromaifeedback. arXivpreprintarXiv:2212.08073,2022.
+GillesOEinsteinandMarkAMcDaniel.Prospectivememory:Multipleretrievalprocesses.Current
+DirectionsinPsychologicalScience,14(6):286–290,2005.
+Jakob Foerster, Gregory Farquhar, Triantafyllos Afouras, Nantas Nardelli, and Shimon Whiteson.
+Counterfactualmulti-agentpolicygradients. InProceedingsoftheAAAIconferenceonartificial
+intelligence,volume32,2018.
+Peter Graf and Bob Uttl. Prospective memory: A new focus for research. Consciousness and
+cognition,10(4):437–450,2001.
+Sirui Hong, Mingchen Zhuge, Jonathan Chen, Xiawu Zheng, Yuheng Cheng, Jinlin Wang, Ceyao
+Zhang, Zili Wang, Steven Ka Shing Yau, Zijuan Lin, et al. Metagpt: Meta programming for a
+multi-agentcollaborativeframework. InThetwelfthinternationalconferenceonlearningrepre-
+sentations,2023.
+Omar Khattab, Arnav Singhvi, Paridhi Maheshwari, Zhiyuan Zhang, Keshav Santhanam, Sri
+Vardhamanan, Saiful Haq, Ashutosh Sharma, Thomas T Joshi, Hanna Moazam, et al. Dspy:
+Compiling declarative language model calls into self-improving pipelines. arXiv preprint
+arXiv:2310.03714,2023.
+YilongLi,ChenQian,YuXia,RuijieShi,YufanDang,ZihaoXie,ZimingYou,WeizeChen,Cheng
+Yang,WeichuanLiu,etal. Cross-taskexperientiallearningonllm-basedmulti-agentcollabora-
+tion. arXivpreprintarXiv:2505.23187,2025.
+Aman Madaan, Niket Tandon, Prakhar Gupta, Skyler Hallinan, Luyu Gao, Sarah Wiegreffe, Uri
+Alon, Nouha Dziri, Shrimai Prabhumoye, Yiming Yang, et al. Self-refine: Iterative refinement
+withself-feedback.AdvancesinNeuralInformationProcessingSystems,36:46534–46594,2023.
+MinhHuynhNguyen,ThangPhanChau,PhongXNguyen,andNghiDQBui.Agilecoder:Dynamic
+collaborativeagentsforsoftwaredevelopmentbasedonagilemethodology. In2025IEEE/ACM
+Second International Conference on AI Foundation Models and Software Engineering (Forge),
+pp.156–167.IEEE,2025.
+LongOuyang,JeffreyWu,XuJiang,DiogoAlmeida,CarrollWainwright,PamelaMishkin,Chong
+Zhang, Sandhini Agarwal, Katarina Slama, Alex Ray, et al. Training language models to fol-
+lowinstructionswithhumanfeedback. Advancesinneuralinformationprocessingsystems, 35:
+27730–27744,2022.
+Charles Packer, Vivian Fang, Shishir G Patil, Kevin Lin, Sarah Wooders, and Joseph E Gonzalez.
+Memgpt: Towardsllmsasoperatingsystems. CoRR,2023.
+ChenQian,WeiLiu,HongzhangLiu,NuoChen,YufanDang,JiahaoLi,ChengYang,WeizeChen,
+YushengSu,XinCong,etal. Chatdev: Communicativeagentsforsoftwaredevelopment. InPro-
+ceedingsofthe62ndAnnualMeetingoftheAssociationforComputationalLinguistics(Volume
+1: LongPapers),pp.15174–15186,2024.
+RafaelRafailov,ArchitSharma,EricMitchell,ChristopherDManning,StefanoErmon,andChelsea
+Finn. Directpreferenceoptimization:Yourlanguagemodelissecretlyarewardmodel. Advances
+inneuralinformationprocessingsystems,36:53728–53741,2023.
+Timo Schick, Jane Dwivedi-Yu, Roberto Dess`ı, Roberta Raileanu, Maria Lomeli, Eric Hambro,
+Luke Zettlemoyer, Nicola Cancedda, and Thomas Scialom. Toolformer: Language models can
+teach themselves to use tools. Advances in Neural Information Processing Systems, 36:68539–
+68551,2023.
+NoahShinn,FedericoCassano,AshwinGopinath,KarthikNarasimhan,andShunyuYao.Reflexion:
+Languageagentswithverbalreinforcementlearning.AdvancesinNeuralInformationProcessing
+Systems,36:8634–8652,2023.
+10
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+Zhen Tan, Jun Yan, I-Hung Hsu, Rujun Han, Zifeng Wang, Long Le, Yiwen Song, Yanfei Chen,
+Hamid Palangi, George Lee, et al. In prospect and retrospect: Reflective memory management
+for long-term personalized dialogue agents. In Proceedings of the 63rd Annual Meeting of the
+AssociationforComputationalLinguistics(Volume1: LongPapers),pp.8416–8439,2025.
+BobUttl,CarmelaAWhite,KelseyCnudde,andLauraMGrant.Prospectivememory,retrospective
+memory,andindividualdifferencesincognitiveabilities,personality,andpsychopathology.PLoS
+One,13(3):e0193806,2018.
+Guanzhi Wang, Yuqi Xie, Yunfan Jiang, Ajay Mandlekar, Chaowei Xiao, Yuke Zhu, Linxi Fan,
+andAnimaAnandkumar. Voyager: Anopen-endedembodiedagentwithlargelanguagemodels.
+arXivpreprintarXiv:2305.16291,2023.
+JasonWei,XuezhiWang,DaleSchuurmans,MaartenBosma,FeiXia,EdChi,QuocVLe,Denny
+Zhou,etal. Chain-of-thoughtpromptingelicitsreasoninginlargelanguagemodels. Advancesin
+neuralinformationprocessingsystems,35:24824–24837,2022.
+Chengrun Yang, Xuezhi Wang, Yifeng Lu, Hanxiao Liu, Quoc V Le, Denny Zhou, and Xinyun
+Chen.Largelanguagemodelsasoptimizers.InTheTwelfthInternationalConferenceonLearning
+Representations,2023.
+Yingxuan Yang, Huacan Chai, Shuai Shao, Yuanyi Song, Siyuan Qi, Renting Rui, and Weinan
+Zhang. Agentnet: Decentralized evolutionary coordination for llm-based multi-agent systems.
+arXivpreprintarXiv:2504.00587,2025.
+Shunyu Yao, Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik R Narasimhan, and Yuan
+Cao. React: Synergizingreasoningandactinginlanguagemodels. InTheeleventhinternational
+conferenceonlearningrepresentations,2022.
+Mert Yuksekgonul, Federico Bianchi, Joseph Boen, Sheng Liu, Zhi Huang, Carlos Guestrin, and
+James Zou. Textgrad: Automatic” differentiation” via text. arXiv preprint arXiv:2406.07496,
+2024.
+PeiyanZhang,HaiboJin,LeyangHu,XinnuoLi,LiyingKang,ManLuo,YangqiuSong,andHao-
+hanWang.Revolve:Optimizingaisystemsbytrackingresponseevolutionintextualoptimization.
+arXivpreprintarXiv:2412.03092,2024.
+Zijian Zhou, Ao Qu, Zhaoxuan Wu, Sunghwan Kim, Alok Prakash, Daniela Rus, Jinhua Zhao,
+BryanKianHsiangLow,andPaulPuLiang.Mem1:Learningtosynergizememoryandreasoning
+forefficientlong-horizonagents. arXivpreprintarXiv:2506.15841,2025.
+11
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+A RELATED WORK
+Optimizationinlanguagespace. TextGradformalizesnatural-languagefeedbackastextualgra-
+dientsandoffersaPyTorch-likeAPItooptimizeprompts,solutions,code,andothervariables(Yuk-
+sekgonul et al., 2024). REVOLVE stabilizes iterative textual optimization by tracking response
+evolution across steps (Zhang et al., 2024). DSPy compiles declarative language-model programs
+intoself-improvingpipelinesviaacompilerthatlearnsdemonstrationsandtunesmulti-stagegraphs
+(Khattabetal.,2023). OPROtreatslargelanguagemodelsasderivative-freeoptimizersthatitera-
+tivelyproposeimprovedinstructionsorsolutions(Yangetal.,2023). DPOdirectlyoptimizespoli-
+cies from preference data, simplifying alignment relative to RLHF (Rafailov et al., 2023). Mem-
+Grad differs by aggregating batch-level behavioral feedback into textual gradients that co-update
+retrospectiveandprospectivememoryandsystemprompts,providingapersistent,interpretabletar-
+getthatcanbescheduledbycontrollerslikeREVOLVEorserveasanendpointforcompiler-style
+tuningandderivative-freesearch(Yuksekgonuletal.,2024;Zhangetal.,2024).
+Self-improvementwithoutweightupdates. Self-Refineiterativelycritiquesandrevisesoutputs
+withoutsupervisedtrainingorRL(Madaanetal.,2023),andReflexionintroducesverbalreinforce-
+mentwithepisodicreflectivememorytoguidefuturetrials(Shinnetal.,2023). MemGradinherits
+the interpretability and parameter-free benefits of these approaches but abstracts across batches
+of trajectories into structured gradients and writes them into a retrospective–prospective memory,
+ratherthanrefiningsingleoutputsorstoringadhocreflections.
+Acting,tools,andpersistentstate. ReActinterleaveschain-of-thoughtwithenvironmentactions
+for grounded decision making (Yao et al., 2022); Toolformer self-learns API usage to calculators,
+search, and other tools from few demonstrations (Schick et al., 2023). MemGPT implements OS-
+stylevirtualcontextmanagementwithmulti-tiermemoryandinterruptsforlong-horizoninteraction
+(Packer et al., 2023), while Voyager demonstrates open-ended lifelong learning with an automatic
+curriculumandatransferableskilllibrary(Wangetal.,2023). MemGradisorthogonaltoplanning
+andtoolsandinsteadmakesimprovementspersistentbyupdatingmemoryandpromptsusingbatch-
+abstractedtextualgradients.
+Multi-agentsoftwareengineeringandorchestration. AgileCoderstructurescollaborativesoft-
+ware development into Agile-style sprints with specialized roles and a dynamic code-dependency
+graph (Nguyen et al., 2025). MetaGPT encodes standardized operating procedures to guide role-
+basedcollaboration(Hongetal.,2023),whileChatDevcoordinatesagentsthroughstagedprocesses
+ofdesign,coding,testing,anddocumentation(Qianetal.,2024). Beyondtheseworkflow-oriented
+systems, AgentNet explores decentralized coordination over a dynamically evolving DAG with
+retrieval-based agent memories (Yang et al., 2025), and MAEL focuses on cross-task transfer by
+maintaining per-agent experience pools containing high-reward exemplars (Li et al., 2025). Our
+workiscomplementarytotheseapproaches: MemGradaimstodistillpatternspresentinbatchesof
+agenttrajectoriesintotextualgradientsthatupdatememoryandprompts. IncontextssuchasAg-
+ileCoder,thisenablesrole-specificretrospectiveandprospectivecuesintheagent’smemory. More
+broadly,MemGradoffersadistinctmechanismforshapingagentbehaviorthroughaggregatefeed-
+back, without modifying the internal retrieval or coordination strategies of systems like MAEL or
+AgentNet.
+B EVALUATION SETUP
+Theevaluationprocessisconductedusingbothmanualinspectionandautomatedunittestcasesto
+ensurethecorrectnessandreliabilityoftheevaluationresults. Foreachtask,werunamethodtwo
+timesusingthesameprompt, producingaprogramforeachrun. Foreachgeneratedprogram, we
+attempt to execute this program. If the program is executable, we evaluate it against all expected
+requirements. Thefinalscoreisdeterminedbythepercentageofrequirementstheprogrammeets.
+Wepresentthegamesalongwiththeircorrespondingrequirementsforboththetrainingandtestsets.
+B.1 TRAINSET
+• GuesstheNumber
+12
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+Forward Backward Update
+Forward: TextualLossGivenanoptimizablevariablex(e.g.,apromptorcodesnippet)
+andoutputy =f(x),TextGraddefines:
+L=tg.TextLoss(y,spec) (12)
+Examplelossoutput(schematic):
+“The solution fails on edge cases (empty input, overflow). The algorithm is
+O(n2)andmaytimeout. Clarifyinvariantsandhandlethecasewhenkisnot
+found.”
+Backward:TextualGradientTextGradconvertsthecritiqueintoatextualgradientforx:
+∂L
+=∇ (x,y,L) (13)
+LLM
+∂x
+where ∇ denotes an LLM prompted to produce directional feedback. A minimal
+LLM
+gradient-prompttemplateis:
+“Givenvariablex,outputy = f(x),andcritiqueL,describepreciselyhowx
+shouldbemodifiedtoreduceL.”
+Examplegradient(schematic):
+“Modifyxto:(i)explicitlyhandleemptyinputandmissingk;(ii)replacenested
+loopswithaprefix-balancemethodtoachieveO(n);(iii)documenttheinvariant
+forbalance.”
+Update: TextualGradientDescentTextGradappliesarewriteupdateconditionedonthe
+textualgradient:
+(cid:18) (cid:19)
+∂L
+x(t+1) ←TGD.step x(t), (14)
+∂x
+Minibatchaggregationviatg.sum. Forlosses{L }B :
+b b=1
+L=tg.sum(L ,...,L ) (15)
+1 B
+(cid:18) (cid:19) (cid:26) (cid:27) (cid:26) (cid:27)
+∂L ∂L ∂L ∂L ∂L
+=tg.sum 1,..., B ≈ 1 ∥···∥ B (16)
+∂x ∂x ∂x ∂x ∂x
+Figure 7: Illustration of TextGrad’s forward textual loss (Eq. 12), backward textual gradient con-
+struction(Eq.13),andupdateviaTGD(Eq.14).Minibatchcompositionusestg.sum(Eq.15–16).
+– Fixedintegerrange(e.g.,1–100)
+– Deterministicsecretnumberviaseed
+– Acceptintegerguesseswithinrangeonly
+– Rejectinvalidinputswithoutconsumingattempts
+– Feedback: higher/lower/correct
+– Attemptsconsumedonlyonvalidguesses
+– Trackremainingattempts
+– Terminateoncorrectguessorattemptcap
+– Rejectinputsaftertermination
+• TicTacToe
+– 3x3boardrenderedeachturn
+– Acceptmovesasindexor(row,col)
+– Rejectinvalidoroccupiedcellswithoutconsumingturn
+– Alternateturnswithdeterministicopponent
+– Detectwin(rows,columns,diagonals)
+– Detectdrawafter9moves
+– Terminateonwinordraw
+13
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+– Rejectinputsaftertermination
+• BullsandCows(3-digit)
+– Deterministic3-digitsecretwithdistinctdigits
+– Acceptonlyvalid3-digitguesseswithdistinctdigits
+– Rejectinvalidguesseswithoutconsumingattempts
+– Computebulls(correctdigitandposition)
+– Computecows(correctdigit,wrongposition)
+– Trackattemptsandremainingguesses
+– Terminateon3bullsorattemptcap
+– Rejectinputsaftertermination
+• 2048(Move-Limited)
+– Standard4x4grid
+– Deterministictilemovementandmerging
+– Acceptdirections: up/down/left/right
+– Rejectinvalidcommandswithoutconsumingmoves
+– Seededdeterministictilespawning
+– Rendergridaftereachmove
+– Terminateonwin(2048),loss,ormovecap
+– Rejectinputsaftertermination
+• Minesweeper(Micro)
+– Smallgrid(e.g.,6x6)withseededmineplacement
+– Actions: revealorflag
+– Rejectinvalidactionswithoutconsumingmoves
+– Auto-expandzerocells
+– Renderboardwithhidden/flaggedstates
+– Terminateonminerevealorvictory
+– Enforcemovecap
+– Rejectinputsaftertermination
+• Hangman(ShortWords)
+– Seededwordlist(4–6letters)
+– Deterministicwordselection
+– Acceptsinglealphabeticletterguesses
+– Rejectinvalidorrepeatedguesses
+– Revealallcorrectletterpositions
+– Trackremaininglives
+– Terminateonsuccessorlifeexhaustion
+– Rejectinputsaftertermination
+• Snake(Turn-BasedTiny)
+– Smallgrid(e.g.,6x6)
+– Deterministicsnakeandfoodplacement
+– AcceptU/D/L/Rcommands
+– Movesnakeeachturn
+– Detectwallandself-collision
+– Growsnakeandupdatescoreonfood
+– Terminateoncollisionormovecap
+– Rejectinputsaftertermination
+• ChainReaction(TinyGrid)
+– Smallgrid(e.g.,4x4)
+– Trackcellownershipandcounters
+14
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+– Deterministicoverflowpropagation
+– Alternateturnswithdeterministicopponent
+– Rejectillegalplacementswithoutconsumingturn
+– Detectwin/lossbycellownership
+– Terminateonwin,loss,ormovecap
+– Rejectinputsaftertermination
+• Othello(SmallBoard)
+– 6x6boardwithstandardinitiallayout
+– Validatemovesinall8directions
+– Flipcaptureddiscsdeterministically
+– Enforceforcedpassifnolegalmoves
+– Alternateturnswithdeterministicopponent
+– Detectterminationwhennomovesremain
+– Computefinaldisccounts
+– Rejectinputsaftertermination
+• Tetris(Turn-BasedMicro)
+– Smallgrid(e.g.,6x10)
+– Deterministictetrominosequence
+– Acceptmovementandrotationcommands
+– Rejectillegalmovesorrotations
+– Applygravityeachturn
+– Lockpiecesandclearfulllines
+– Detecttop-outcondition
+– Terminateontop-outormovecap
+– Rejectinputsaftertermination
+B.2 TESTSET
+• RockPaperScissors(Best-of-5)
+– Acceptonlyrock,paper,orscissors(case-insensitive)
+– Useseededdeterministicopponentmoves
+– Computeoutcomesusingstandardrules
+– Displayper-roundopponentmoveandresult
+– Maintainanddisplayrunningscores
+– Counttiesasroundswithoutscorechange
+– Endearlyonreaching3wins
+– Endafterexactly5roundsotherwise
+– Printfinalresultandscores
+– Rejectinputaftertermination
+• CoinTossPredictor(Streak)
+– AcceptonlyHorT(case-insensitive)
+– Generateflipsdeterministicallyfromseed
+– Incrementstreakoncorrectprediction
+– Resetstreakonincorrectprediction
+– Tracklongeststreak
+– Showflipandcorrectnesseachstep
+– Terminateontargetstreakormovecap
+– Printfinalsummary
+– Rejectinputaftertermination
+• DiceSumGuess
+15
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+– Acceptintegerguessesinrange[2,12]
+– Rejectinvalidinputswithoutusingattempts
+– Rolltwodicedeterministically
+– Compareguesstotruesum
+– Returnlow,high,orcorrect
+– Consumeattemptsonlyforvalidguesses
+– Terminateoncorrectguessorattemptcap
+– Printendsummary
+– Ignoreinputaftertermination
+• WordScramble(Tiny)
+– Usefixedlistof3–5letterwords
+– Deterministicallyselectandscrambleword
+– Displayscrambledword
+– Acceptalphabeticfull-wordguessesonly
+– Rejectwrong-lengthguesseswithoutpenalty
+– Case-insensitiveexactmatch
+– Consumeattemptsonlyonvalidguesses
+– Revealoriginalwordatend
+– Rejectinputaftertermination
+• QuizGame(MCQ)
+– LoadfixedMCQbankwithonecorrectoption
+– Presentquestionsindeterministicorder
+– AcceptonlyA/B/C/Dinputs
+– Rejectinvalidinputwithoutadvancing
+– Provideimmediatecorrectnessfeedback
+– Incrementscoreonlyoncorrectanswers
+– Advanceexactlyonequestionperanswer
+– Terminateafterfinalquestion
+– Printfinalscoresummary
+• FlashcardTrainer
+– Usepredefinedsmalldeck
+– Deterministiccardorder
+– Acceptstringanswersonly
+– Case-insensitivetrimmedexactmatch
+– Provideper-cardfeedback
+– Advanceaftereachvalidanswer
+– Trackcorrect/incorrecttotals
+– Terminateafterlastcard
+– Rejectinputaftertermination
+• Nim(Take-Away)
+– Initializesinglepile(default15)
+– Acceptremovalsin{1,2,3}
+– Rejectillegalremovalswithoutconsumingturn
+– Updatepilesizecorrectly
+– Supportsoloordeterministicopponent
+– Alternateturnsinversusmode
+– Declarewinnercorrectly
+– Terminateonzeropileormovecap
+– Ignoreinputaftertermination
+16
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+• LightsOut
+– Use5x5binarygrid
+– Deterministicinitialconfiguration
+– Acceptvalid(row,col)coordinates
+– Rejectout-of-boundsmoves
+– Flipcellandorthogonalneighbors
+– Rendergridaftereachmove
+– Trackremainingmoves
+– Terminateonalllightsofformovecap
+– Rejectinputaftertermination
+• Sudoku(4x4)
+– Deterministicstartingpuzzle
+– Accept(row,col,value)moves
+– Rejectmovesonfilledcells
+– Enforcerow,column,andsubgridconstraints
+– Countviolationsoninvalidmoves
+– Updateandrendergridonvalidmoves
+– Trackremainingemptycells
+– Terminateoncompletionorviolationcap
+– Ignoreinputaftertermination
+• ConnectFour(Turn-Capped)
+– Usesmallgrid(e.g.,6x7)
+– Acceptvalidcolumnindices
+– Rejectfull-columnmoves
+– Applygravitycorrectly
+– Alternateturnswithdeterministicopponent
+– Detectwinsinalldirections
+– Terminateimmediatelyonwin
+– Terminateasdrawonturncap
+– Rejectinputaftertermination
+• Mastermind
+– Fixedalphabetandcodelength4
+– Deterministicsecretgeneration
+– Acceptvalid-lengthguessesonly
+– Rejectinvalidguesseswithoutattemptuse
+– Computeexactandpartialmatches
+– Handleduplicatescorrectly
+– Trackremainingguesses
+– Terminateonsolveorguesscap
+– Revealcodeatend
+• Battleship(Micro)
+– Deterministicshipplacement(sizes2and3)
+– Acceptvalidgridcoordinates
+– Rejectrepeatedorinvalidshots
+– Resolvemiss,hit,andsunk
+– Trackshiphealth
+– Renderfog-of-wargrid
+– Terminatewhenallshipssunk
+– Endonmovecapifunsolved
+17
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+– Reveallayoutaftertermination
+• 8-Puzzle(Sliding)
+– Deterministicsolvablestartstate
+– AcceptU/D/L/Rmoves
+– Rejectillegalmoves
+– Swapblankwithadjacenttile
+– Renderboardaftereachmove
+– Trackremainingmoves
+– Terminateongoalstate
+– Endonmovecap
+– Ignoreinputaftertermination
+• Checkers(MinimalRuleset)
+– Initialize6x6board
+– Acceptdiagonalmovesonly
+– Validatemenandkingmovement
+– Supportsinglecaptures
+– Promotetokingonlastrank
+– Alternateturnswithdeterministicopponent
+– Rejectillegalmoves
+– Terminateonnomovesorturncap
+– Ignoreinputaftertermination
+• Caro(GomokuSmallBoard)
+– Use9x9board
+– Acceptvalidplacements
+– Rejectoccupiedorinvalidcells
+– Alternateturnswithdeterministicopponent
+– Detectexact5-in-a-row
+– Renderboardaftereachmove
+– Terminateimmediatelyonwin
+– Endasdrawonturncap
+– Ignoreinputaftertermination
+• Text-BasedMaze(Tiny)
+– Deterministicmazelayout
+– AcceptN/S/E/Wcommands
+– Rejectblockedorinvalidmoves
+– Updatepositioncorrectly
+– Renderpositionormap
+– Trackremainingsteps
+– Detectgoalcell
+– Terminateonsuccessorstepcap
+– Ignoreinputaftertermination
+• Sokoban(MicroWarehouse)
+– Deterministictinylevel
+– AcceptN/S/E/Wcommands
+– Allowpushingoneboxonly
+– Rejectillegalpushes
+– Updateplayerandboxpositions
+– Trackboxesontargets
+– Rendergridaftermoves
+18
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+– Terminateonsolveormovecap
+– Rejectinputaftertermination
+• Hex(SmallBoard)
+– Use5x5hexgrid
+– Acceptvalidplacements
+– Rejectoccupiedorinvalidcells
+– Alternateturnswithdeterministicopponent
+– Checkconnectivityaftereachmove
+– Detectcorrectplayerwincondition
+– Terminateimmediatelyonwin
+– Endasdrawonturncap
+– Ignoreinputaftertermination
+• ChessEndgameTrainer(K+RvsK)
+– InitializeK+RvsKpositions
+– Validaterookandkingmoves
+– Preventillegalorself-checkmoves
+– Deterministicblackreplies
+– Detectcheck,mate,andstalemate
+– Optional50-moverule
+– Renderboardaftereachmove
+– Terminateonmate,stalemate,orcap
+– Ignoreinputaftertermination
+• Nonogram(5x5)
+– Fixedrowandcolumnclues
+– Startwithunknowngrid
+– Acceptvalidmarkingcommands
+– Rejectinvalidcoordinates
+– Preventbasiccontradictions
+– Rendergridaftereachmove
+– Trackremainingmoves
+– Detectexactcluesatisfaction
+– Terminateoncompletionormovecap
+19
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+Mastermind: AdditionalTestCases
+import pytest
+from mastermind_game import MastermindGame
+def test_generate_code():
+game = MastermindGame(seed=1)
+assert game.secret_code == "BDAF"
+def test_validate_guess():
+game = MastermindGame()
+assert game.validate_guess("ABCD") is True
+assert game.validate_guess("AB") is False
+assert game.validate_guess("ABXYZ") is False
+def test_give_feedback():
+game = MastermindGame(seed=1)
+game.secret_code = "ABCD"
+assert game.give_feedback("ABCD") == (4, 0)
+assert game.give_feedback("ADEF") == (1, 0)
+assert game.give_feedback("EFGH") == (0, 0)
+def test_fixed_code_length():
+game = MastermindGame()
+assert len(game.secret_code) == 4
+def test_secret_uses_fixed_alphabet():
+game = MastermindGame(seed=1)
+allowed = set("ABCDEF")
+assert all(ch in allowed for ch in game.secret_code)
+def test_deterministic_secret_generation_same_seed():
+game1 = MastermindGame(seed=7)
+game2 = MastermindGame(seed=7)
+assert game1.secret_code == game2.secret_code
+def test_deterministic_secret_generation_different_seed():
+game1 = MastermindGame(seed=1)
+game2 = MastermindGame(seed=2)
+assert game1.secret_code != game2.secret_code
+def test_reject_invalid_guess_without_attempt_use():
+game = MastermindGame(seed=1)
+before = game.remaining_guesses
+assert game.validate_guess("AB") is False
+assert game.remaining_guesses == before
+def test_reject_invalid_alphabet_guess():
+game = MastermindGame()
+assert game.validate_guess("WXYZ") is False
+Figure8: Exampleunittestcasesusedforevaluation: Wepresentrepresentativeunittestsforthe
+Mastermind game, illustrating how deterministic behavior, input validation, and feedback correct-
+nessareverifiedduringevaluation.
+20
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+PhaseName ParticipatingAgent
+1. ProductBacklogCreating ProductOwner
+2. ProductBacklogReview ProductOwner
+3. ProductBacklogModification ProductOwner
+4. SprintBacklogReview ProductOwner
+5. SprintBacklogModification ProductOwner
+6. SprintBacklogCreating ProductOwner
+7. NextSprintBacklogCreating ProductOwner
+8. SprintReview ProductOwner
+9. Coding Programmer
+10. CodeFormatting Programmer
+11. CodeReviewModification Programmer
+12. CodeReviewComment CodeReviewer
+13. TestingPlan SoftwareTestEngineer
+Table1: DifferentphasesintheAgileCoderframeworkandagentsthatfunctionduringthatphase.
+21
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+BasePrompt
+YouareProgrammer. wearebothworkingatAgileCoder. Weshareacommoninterestincollaborating
+tosuccessfullycompleteataskassignedbyanewcustomer. Youcanwrite/createcomputersoftwareor
+applicationsbyprovidingaspecificprogramminglanguagetothecomputer.Youhaveextensivecomput-
+ingandcodingexperienceinmanyvarietiesofprogramminglanguagesandplatforms,suchasPython,
+Java, C, C++, HTML, CSS, JavaScript, XML, SQL, PHP, etc, Here is a new customer’s task: task.To
+completethetask,youmustwritearesponsethatappropriatelysolvestherequestedinstructionbasedon
+yourexpertiseandcustomer’sneeds.
+TextGrad
+Yourtaskistodeveloparobust,fullyfunctional,anduser-friendlyimplementationofthegameOthello
+(Reversi). Thecodeshouldfocusonprovidinganengagingexperienceforuserswhileensuringproac-
+tive error handling and comprehensive documentation. Throughout development, you should actively
+seekuserfeedbackthroughstructuredmethodssuchassurveys,interviews,anditerativeplaytesting,us-
+ing these insights to refine gameplay mechanics, particularly help functionalities and user interactions.
+Acomprehensivehelpsystemmustbeimplementedtoclearlyexplainavailablecommandsandaddress
+commonuserfrustrationsandinputexpectations,adaptingdynamicallyovertimebasedonuserbehav-
+iorand newlyintroducedfeatures. Helpcontent shouldremaincontextual, inclusive, andaccessible to
+userswithdiverseneeds.Inputhandlingmustberobust,withamodularvalidationsystemindependentof
+coregameplaylogic,ensuringonlyvalidinputsareacceptedwhileprovidingclearandconstructiveerror
+messages; repeatedinvalidactionsshouldbeloggedtosupportcontinuousrefinementoftheuserexpe-
+rience. Errorhandlingshouldprovidestandardized,user-friendlyguidancethathelpsplayersunderstand
+and correct mistakes, while backend logging identifies recurring issues. The codebase should include
+detailed comments explaining design choices, class responsibilities, and method usage, complemented
+byahigh-levelarchitecturaldocumentoutliningcodingstandardsandbestpracticestoensurelong-term
+maintainability.Amodulardesignphilosophyshouldguidethestructureofthesystem,breakingfunction-
+alityintofocused,reusablecomponentsthatencouragescalabilityandfollowestablisheddesignpatterns.
+Developmentshouldfollowatest-drivenapproach, incorporatingunit, integration, anduseracceptance
+teststoensurerobustnessacrossedgecasesandreal-worldscenarios. Userengagementcanbeenhanced
+byincorporatinginteractiveelementswithinthehelpsystemthatevolveinresponsetouserqueriesand
+collectedfeedback. AccessibilityconsiderationsmustbeincorporatedbyadheringtoWCAGguidelines,
+usingappropriatecolorcontrastsandsimple,clearlanguage. Thesystemshouldincludemechanismsfor
+playerstoprovidedirectin-gamefeedback,enablinginformeddecision-makingdrivenbyactualuserbe-
+havior.Tosupportlongevity,versioningshouldbemaintainedforhelpcontentandcodepractices,withan
+emphasisonanticipatingfutureuserrequirementsandemergingtechnologies. Clear,measurablesuccess
+criteria—suchastestperformance,usersatisfactionratings,errorrates,andfeedbackmetrics—shouldbe
+defined to objectively evaluate implementation quality. Collaborative development practices, including
+peercodereviewsandpairprogramming,shouldbeencouragedtopromotesharedownershipandearly
+detection of issues. Finally, performance optimization should be integrated throughout development to
+ensurethatthecodebaseremainsefficientandresponsiveastheuserbaseexpands. Implementingthese
+guidelines will result in an Othello game that is not only functional and maintainable but also deeply
+engagingandsupportiveforusers,withacleanarchitecture,thoroughtesting,andastronghelpsystem
+alignedwithbestpracticesinsoftwaredevelopmentanduserinteraction.
+MemGrad
+Youareanadvancedprogrammingassistanttaskedwithbuildingaturn-based,CLI-basedgamewithan
+engaging,user-friendlyexperiencegroundedinrobustlogicanddefensiveerrorhandling. Beginbyclar-
+ifyinggoalsandspecssoinputsarehandledcleanlyandplayersreceiveimmediate,contextualfeedback
+after each action. Structure the code with clear classes/modules and focused functions for setup, com-
+mands,corerules,andanyeventorcollisionlogic,andmanagegamestateexplicitlywithdeterministic
+initialization,updates,resets,andtrackingofscores/progressandentitypositions. Designalgorithmsfor
+efficiencytoavoidunnecessarywork,especiallyincoreloopsandvalidationpaths.Integratetestingfrom
+day one—unit (plus integration or acceptance where useful) that covers normal flows and edge cases,
+particularlyaroundinputhandling. Maintainthoroughdocstringsandinlinecommentsexplainingeach
+class/function’s purpose, inputs, outputs, side effects, and core logic, alongside a concise architecture
+overviewandcodingstandards. Iterateregularlybasedontestoutcomesanduserfeedbacktorefineme-
+chanicsandprompts,andpresentgamestateclearlyintextwithreadablesymbols,minimalflicker,and
+accessibility-friendlychoices(simplelanguage,adequatecontrastifusingANSIcolors).
+Figure9:OptimizationofsystempromptfortheProgrammeragent:Wepresent(A)theoriginal
+systempromptoftheagent,(B)thepromptoptimizedusingTextGrad,and(C)thepromptoptimized
+usingMemGrad.
+22
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+BasePrompt
+YouaretheCodeReviewer. WebothworkatAgileCoderandshareacommongoalofcollaboratingto
+successfullycompleteataskassignedbyanewcustomer. Youcanhelpprogrammersassesssourcecode
+fortroubleshooting, fixbugstoimprovecodequalityandrobustness, andproposeenhancements. Here
+isthenewcustomer’stask: task. Tocompletethetask,writearesponsethatappropriatelyaddressesthe
+requestedinstructionbasedonyourexpertiseandthecustomer’sneeds.
+TextGrad
+You are the Code Reviewer. Furnish clear, actionable, and constructive feedback that fosters growth,
+guaranteesaccuracy,andupholdsintegrityinyourcritiquesofthesubmittedcode.
+MemGrad
+YouaretheCodeReviewer. Duringthecodereviewprocess, provideconstructiveandinsightfulfeed-
+backthatstrengthensthecodebase.Yourcommentsshouldbeclear,specific,andactionable,focusingon
+helpingtheprogrammerunderstandwhattoimproveandwhy. Deliverfeedbackinasupportiveandcol-
+laborativetonetoencourageopencommunication,sharedlearning,andcontinuousimprovementwithin
+theteam.
+Figure 10: Optimization of system prompt for the Code Reviewer agent: We present (A) the
+originalsystempromptoftheagent,(B)thepromptoptimizedusingTextGrad,and(C)theprompt
+optimizedusingMemGrad.
+BasePrompt
+YouareaSoftwareTestEngineer. WearebothworkingatAgileCoderandshareacommoninterestin
+collaboratingtosuccessfullycompleteataskassignedbyanewcustomer. Youcanusethesoftwareas
+intended to analyze its functional properties, design manual and automated test procedures to evaluate
+eachsoftwareproduct,buildandimplementsoftwareevaluationtestprograms,andruntestprogramsto
+ensurethattestingprotocolsevaluatethesoftwarecorrectly. Hereisthenewcustomer’stask: task. To
+completethetask,youmustwritearesponsethatappropriatelysolvestherequestedinstructionbasedon
+yourexpertiseandthecustomer’sneeds.
+TextGrad
+YouareaSoftwareTestEngineer. WearebothworkingatAgileCoder. YouarecurrentlyintheTesting-
+Planphase. Yourprimaryobjectiveistodevelopacomprehensivetestingstrategythatincludesrigorous
+evaluationprocedures. Ensurethatyouaddressallnecessaryrequirementsandcriteriatodeliverathor-
+oughassessmentoftheproject’sfunctionalityandperformance
+MemGrad
+AsaSoftwareTestEngineeratAgileCoder,Iwillcreateastructuredtestingplanthatdefinesclearob-
+jectives,includingverifyingthatthesoftwarebehavescorrectly,handleserrorsgracefully,andprovidesa
+smoothuserexperience. Theplanwilloutlinemeasurablesuccesscriteria,suchasmeetingallfunctional
+requirements,havingnocriticalbugs,andensuringthatcorefeaturesworkreliablyacrossdifferentsce-
+narios. Iwillalsodescribehowtestresultswillbedocumented,includinglogsofwhatwastested,any
+issuesfound,andthefinalstatusofeachtest. Thisdocumentationwillhelptheteammakeinformedde-
+cisionsateverystageofdevelopmentandensurethatallimportantaspectsoftesting—functionalchecks,
+edgecases,usability,andstability—arefullycovered.
+Figure 11: Optimization of system prompt for the Software Test Engineer agent: We present
+(A)theoriginalsystempromptoftheagent,(B)thepromptoptimizedusingTextGrad,and(C)the
+promptoptimizedusingMemGrad.
+23
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+BasePrompt
+YouaretheProductOwner. WearebothworkingatAgileCoderandshareacommoninterestincollab-
+oratingtosuccessfullycompleteataskassignedbyanewcustomer. AgileCoderusesAgileScrumfor
+softwaredevelopment. Youareresponsibleformaximizingthevaluedeliveredbytheteambyensuring
+thattheteambacklogisalignedwithcustomerandstakeholderneeds. Hereisthenewcustomer’stask:
+task. Tocompletethetask,youmustwritearesponsethatappropriatelysolvestherequestedinstruction
+basedonyourexpertiseandthecustomer’sneeds.
+TextGrad
+You are the Product Owner. To create a comprehensive and actionable product for the given user task
+inthephase, youshouldexploretheuser’smotivations, emotions, andanticipatedexperiencesforeach
+userstory,clearlyarticulatingintent,personas,andpainpoints.Eachfeaturemusthavemeasurablegoals
+andacceptancecriteriareflectingquantifiableoutcomessuchasengagement, errorreduction, andsatis-
+faction. Break down each story into manageable subtasks with roles, responsibilities, edge cases, and
+error-handlingguidance. Writeeachbacklogitemintheuserstoryformat“Asa[typeofuser], Iwant
+[feature]sothat[benefit].”PrioritizeallitemsusingastructuredmethodandlabelthemasHigh,Medium,
+or Low based on expected user impact. Identify dependencies between tasks to improve planning and
+workflowefficiency. Describetestingstrategiesforeachtaskandoutlinehowiterativefeedbackwillbe
+integrated throughout development. Ensure accessibility considerations are included in each story and
+designfeaturesthataccommodatediverseabilities. Emphasizeiterativedevelopment,usingfeedbackto
+continuously refine user stories and mechanics. Use visual story-mapping techniques to represent user
+journeysandhighlightimportantinteractions. Maintaincleardocumentationofdecisionsandprocesses
+tosupporttransparencyandknowledgesharing. Includetasksforpost-sprintreviewstocapturelessons
+learnedandpromotecontinuousimprovement.Byfollowingtheseguidelines,theresultingproductback-
+log will be user-centered, structured, actionable, and aligned with project objectives, enabling iterative
+enhancementsandimprovedusersatisfaction.
+MemGrad
+YouaretheProductOwner.Createacomprehensiveproductforthetaskathand,focusingondeveloping
+aprojectthateffectivelymeetsuserexpectationsandfostersanengaginggameexperience. Eachback-
+logitemshouldincludedetaileduserstoriesthatoutlinefeatureswhileelaboratingonusermotivations,
+behaviors, and expectations. The user stories should emphasize interactive elements that enhance en-
+gagement,suchasdynamicvisualcuesorexcitinggameplaymechanicsatprogramlaunch,tobuilduser
+investmentinthegame. Incorporatemeasurableacceptancecriteriaforallitems,definingsuccessmet-
+ricssuchasusersatisfactionandengagementratestoshowhowwellfeaturesmeetuserneeds. Outline
+mechanismsforcollectinguserfeedbackthroughoutdevelopmenttoensuretheimplementationremains
+adaptableandalignedwithrealuserexperiences.Prioritizethebacklogbasedonuservalue,categorizing
+itemsasMustHave,ShouldHave,andCouldHave,andrecommendastructuredmethodforrankingur-
+gencyandimportancebasedonpotentialuserimpactandgameplayflow.Considerdiverseuserpathways
+thatreflectdifferentskilllevelstoensureinclusivityandaccommodateawiderangeofplayers. Thisap-
+proachwillenhanceengagementandsatisfactionwhileensuringtheoveralldevelopmentprocessremains
+user-centeredandinclusive,ultimatelysupportingaricherfinalgameexperience.
+Figure 12: Optimization of system prompt for the Product Owner agent: We present (A) the
+originalsystempromptoftheagent,(B)thepromptoptimizedusingTextGrad,and(C)theprompt
+optimizedusingMemGrad.
+24
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+TextGrad
+Your task is to develop a robust, fully functional, and user-friendly implementation of the game. The
+codeshouldfocusonprovidinganengagingexperienceforuserswhileensuringproactiveerrorhandling
+andcomprehensivedocumentation. KeyRequirements: Activelyseekuserfeedbackthroughstructured
+methods like surveys, interviews, and iterative playtesting throughout development, and use this feed-
+backtorefinegameplaymechanics,especiallyforhelpfunctionalitiesanduserinteractions. Implement
+acomprehensivehelpsystemthatclearlyexplainsavailablecommandsandaddressespotentialuserfrus-
+trationsandinputexpectations,designingthehelpsystemtodynamicallyadaptbasedonuserinteractions
+andlearningfromuserqueriesovertime. Createhelpcontentthatresonateswithusercontext,allowing
+forseamlessupdatesasnewfeaturesareintroduced,andensurethiscontentisinclusiveandaccessible,
+accommodatingdiverseuserneeds. Developarobustinputvalidationsystemthatismodularandinde-
+pendentfromgameplaylogic,ensuringthatonlyvalidinputsareacceptedwhileprovidingclearfeedback
+foranyerrors,andimplementloggingforrepeatedinvalidactionstocontinuallyrefineuserexperience.
+Designuser-friendlyerrormessagesthatguideplayersinunderstandingmistakes, providestandardized
+formatsacrosstheapplicationforconsistency,andincorporateerrorloggingtohelpidentifycommonuser
+frustrations.Includedetailedcommentsinthecodeexplainingclasspurposes,methodusages,anddesign
+decisions,andcreateahigh-leveldocumentoutliningarchitecturedecisions,codingstandards,andbest
+practicesalongside traditional documentationtoimprove maintainability. Structure thecodeina mod-
+ular way, breaking functionality into focused classes and functions, and encourage the development of
+reusablecomponentswithclearresponsibilities,utilizingdesignpatternsthatfacilitatefuturescalability
+and enhancements. Adopt a test-driven development (TDD) approach, where comprehensive unit tests
+arewrittenalongsideorbeforeimplementation,includingintegrationanduseracceptanceteststoensure
+robustnessagainstedgecasesandreal-worldusagescenarios.Considerincorporatinginteractiveelements
+withinthehelpsystemthatevolvebasedonuserqueriesandfeedback,implementingfeedbackloopsto
+enhance user interaction capabilities. Ensure that your help content and gameplay are compliant with
+WCAG(WebContentAccessibilityGuidelines)tofacilitateusebyindividualswithdisabilities, imple-
+mentingcolorcontrastsandsimplelanguageusageforbetteraccessibility. Buildmechanismsforusers
+toprovideinsightsdirectlywithinthegameplaycontext,enablingdeveloperstomakeinformeddecisions
+basedonactualplayerexperiencesandbehaviors. Maintainversioninginformationforallaspectsofthe
+helpcontentandcodingpractices,anddesignwithgrowthinmindbyanticipatingfutureuserrequirements
+andemergingtechnologiestoensurelastingrelevance.Defineclear,measurablesuccesscriteriaforfunc-
+tionalityanduserexperience,suchasuserratingsduringplaytests,acceptableerrorrates,andfeedback
+metrics,allowingforanobjectiveevaluationofimplementationquality. Fosteracultureofcollaboration
+throughregularpeercodereviewsandpairprogrammingsessions, encouragingknowledgesharingand
+earlyissuedetection.Integrateperformanceconsiderationsthroughoutthedevelopmentprocesstoensure
+thatthecodebaseremainsefficientandresponsiveastheuserbasegrows.Implementingtheseguidelines
+willensureyourgameisnotonlyfunctionalandmaintainablebutalsodeliversatrulyengagingandsup-
+portive experience for users, with a well-organized codebase, thorough testing, and a help system that
+reflectsbestpracticesinsoftwaredevelopmentanduserinteraction.
+MemGrad
+Theprimaryobjectiveistodeliveranengaginganduser-friendlyexperiencewhileensuringrobustgame
+logic and well-engineered error handling. The implementation should accurately reflect the game re-
+quirements,effectivelyhandleuserinputs,andprovideimmediateandinformativefeedbackthatsupports
+strategicgameplay.Errorhandlingmustbeintegratedthroughoutthesystemtomanageunexpectedinputs
+orinvalidstates, withclearcommunicationtotheuserwhenevercorrectiveactionisneeded. Thecode
+shouldfollowamodularstructurewithclearlydefinedclassesandfunctionsthathandlegamesetup,user
+commands,coregamelogic,andcollisiondetection. Gamestatemanagementmustbeexplicitandwell
+organized,includingproperinitialization,resetting,andtrackingofscores,snakeposition,andallrelevant
+variables. Performanceconsiderationsshouldguidedesigndecisions,particularlyinfoodspawningand
+collisiondetectionlogic,toensuresmoothandefficientexecution. Atestingframeworkshouldbeincor-
+poratedfromtheoutset,withunittestscoveringallmajorfunctionalitiesandedgecases,especiallythose
+involvinguserinput. Thoroughinlinedocumentationmustaccompanythecode,explainingthepurpose,
+inputs,outputs,andinternallogicofeachcomponenttosupportclarityandmaintainability.Development
+shouldfollowaniterativeapproachinformedbyuserfeedbackandtestingresults,enablingcontinuousre-
+finementofgameplaymechanics.Althoughthegameoperatesinacommand-lineenvironment,attention
+shouldbegiventoclearandexpressivevisualrepresentationofthegamestatetoenhanceuserengage-
+ment.Byadheringtotheseprinciples,theresultingimplementationwillprovideahigh-quality,functional,
+anduser-centeredturn-basedexperience.
+Figure13: TextualGradientcomputedforProgrammeragentusingBackwardEngine.
+25
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+RetrospectiveMemory
+FEEDBACK
+1. Vagueerrormessagesreducetraceability.
+2. Weakinputvalidationacrossentrypoints.
+3. Sparselogshinderdefectdiagnosis.
+4. Helpcontentishardtoaccessquickly.
+5. Inconsistentguidanceafterinvalidinputs.
+6. Minimalfeedbackonnear-correctcommands.
+ProspectiveMemory
+FEEDBACK-RESOLUTIONPAIRS
+1. Vagueerrormessages:[Standardizeerrorformat;addclearremediationhints]
+2. Weakinputvalidation:[Validateatboundaries;addnegativetests]
+3. Sparselogs:[Addstructuredloggingforkeyactionsandfailures]
+4. Hard-to-accesshelp:[Streamlinehelpdisplay;linkfromprompts]
+5. Inconsistentguidance:[Promptnextstepsafterinvalidinput]
+6. Minimal feedback on near-correct commands: [Acknowledge partial validity; suggest exact
+format]
+Figure14: IllustrationofretrospectiveandprospectivememoryintheCodeRevieweragent.
+RetrospectiveMemory
+FEEDBACK
+1. Commandrecognitionissuescausingfailedinteractions.
+2. Unclearfeedbackafterillegalmoves.
+3. Limiteduserinteractionbeyondexceptions.
+4. Insufficientdebugginginformationduringplaytesting.
+5. Usersconfusedbyunclearcommandusage.
+6. Nofeedbackonpartiallyvalidcommands.
+ProspectiveMemory
+FEEDBACK-RESOLUTIONPAIRS
+1. Commandrecognitionissues:[Improverecognitionandlistallowedcommandsclearly]
+2. Gameflowandfeedback:[Enhancemessagingforillegalmovestoguideusers]
+3. Limitedinteractionbeyondexceptions:[Implementuser-friendlyerrormessages/screens]
+4. Insufficientdebugginginformation:[Embedloggingfordetailederrorsduringtests]
+5. Unclearcommandusage:[Provideaconcisehelpmessagewithexamplesatstart]
+6. Nofeedbackonpartiallyvalidcommands:[Confirmhelpcommandandpromptthenextaction]
+Figure 15: Illustration of retrospective and prospective memory in the Software Test Engineer
+agent.
+26
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+RetrospectiveMemory
+FEEDBACK
+1. Onboardinglacksclear,conciseinstructions.
+2. Earlyfeedbackloopsarelimited.
+3. Errorsdonotreflectusercontextwell.
+4. Helpcontentlacksquick-startexamples.
+5. In-gamepromptsareinconsistentacrossflows.
+6. Accessibilitycuesareminimal.
+ProspectiveMemory
+FEEDBACK-RESOLUTIONPAIRS
+1. Onboardingclarity:[Provideashortquick-startguideatlaunch]
+2. Earlyfeedbackloops:[Addlightweightpromptsforuserfeedback]
+3. Context-awareerrors:[Tailormessagestouseractionsandnextsteps]
+4. Helpexamples:[Includecommandexamplesandcommonscenarios]
+5. Promptconsistency:[Unifytoneandstructureacrossprompts]
+6. Accessibilitycues:[Usesimplelanguageandclearvisual/textcues]
+Figure16: IllustrationofretrospectiveandprospectivememoryintheProductOwneragent.
+27
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+GradientCalculation
+BACKWARD ENGINE — GLOSSARY AND SYSTEM PROMPT
+GLOSSARYOFTAGS
+1. <LM SYSTEM PROMPT>: Thesystempromptforthelanguagemodel.
+2. <LM INPUT>: Theinputtothelanguagemodel.
+3. <LM OUTPUT>: Theoutputofthelanguagemodel.
+4. <OBJECTIVE FUNCTION>: Theobjectiveoftheoptimizationtask.
+5. <VARIABLE>: Specifiesthespanofthevariable.
+6. <ROLE>: Theroledescriptionofthevariable.
+BACKWARDENGINESYSTEMPROMPT
+You are part of an optimization system that improves a given text (i.e., the variable). You
+are the gradient (feedback) engine. Your only responsibility is to give intelligent and
+creative feedback and constructive criticism to variables, given an objective specified in
+<OBJECTIVE FUNCTION> </OBJECTIVE FUNCTION> tags. The variables may be
+solutionstoproblems,promptstolanguagemodels,code,oranyothertext-basedvariable.
+Pay attention to the role description of the variable and the context in which it is used. You
+should assume that the variable will be used in a similar context in the future. Only provide
+strategies,explanations,andmethodstochangeinthevariable. Donotproposeanewversion
+of the variable; that will be the job of the optimizer. Your only job is to send feedback and
+criticism(compute“gradients”).
+For instance, feedback can be in the form of “Since language models have the X failure
+mode...”, “AddingXcanfixthiserrorbecause...”, “RemovingXcanimprovetheobjective
+functionbecause...”, “ChangingXtoYwouldfixthemistake...”, aimedatthedownstream
+objective. Ifavariableisalreadyworkingwell(e.g.,theobjectivefunctionisperfect,anevalu-
+ationshowstheresponseisaccurate),youshouldnotgivefeedback.
+Figure17: Backwardenginesystempromptforgradientcalculation.
+Retrievingfeedbackfromretrospectivememory
+Accordingtothenewuser’staskandoursoftwaredesigns:
+1. Task: task
+2. Modality: modality
+3. ProgrammingLanguage: language
+Astheassistant role,extractfromtheretrospectivememorythemostrelevantfeedbackthatcan
+helpinperformingthistask.
+Figure18: Promptforretrievingfeedbackfromretrospectivememory.
+28
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+Retrievingresolutionsfromprospectivememory
+Accordingtothenewuser’staskandoursoftwaredesigns:
+1. Task: task
+2. Modality: modality
+3. ProgrammingLanguage: language
+As the assistant role, based on the feedback extracted, retrieve the corresponding resolutions
+fromtheprospectivememory.
+Figure19: Promptforretrievingresolutionsfromprospectivememory.
+BetaTester
+YouareaCLIBeta-Tester.
+Youwillbegiven:
+• Gamemetadataincludingname,description,andrequirements
+• Abriefsummaryofsessionmemory
+• Themostrecentterminaloutputsincethelastinput
+• Thecurrentrawpromptpassedtotheinputfunction
+Yourtaskistodecidethenextsinglelineauserwouldtype.
+Outputformat:
+• Youmayincludeoneoptionalnotelinewrappedinnotetagswithamaximumofabout
+twentywords
+• Youmustincludeexactlyoneactiontagcontainingthefinalsinglelineinput
+Rules:
+• Theactiontagmustcontainonlythenextinputwithnoadditionalcommentary
+• FollowtheexpectedCLIinputformatssuchasyorn,menunumbers,orrowcolumn
+pairs
+• Donotrepeatinputsthathavealreadyfailed
+• Ifunsure, usesafenavigationcommandssuchasmenu, back, help, orexitwhenap-
+propriate
+Figure 20: Prompt used to instruct the Beta Tester on providing realistic, single-line inputs that
+simulatenaturalplayerbehaviorduringgameplay.
+29
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+LossComputation
+YouhavedatacollectedfromaBetaTesterrunningaprogram
+1. Task: task
+2. Modality: modality
+3. ProgrammingLanguage: language
+AsaPlayTestingAnalyst,evaluatetheprogrambyreviewingthecode,thedoneundonetasks,
+thetestcasesummary,andthebetatestinglogs. Determinewhethertherequirementsaresatis-
+fied. Therequirementschecklistinthelogsmaybeincomplete,socross-checkthefulltrajec-
+toryandusereasonablejudgmenttoassesscompletenessandfeasibility. Identifyerrors,abnor-
+malbehavior,momentswheretheBetaTesterbotappearsstuck,usabilityissues,orlogicalin-
+consistencies. Referencespecificexamplesfromthelogs,code,tasks,ortestingsummary.Your
+outputmust:-Usedeclarativestatementstodescribeissues. Useimperativestatementstogive
+improvementinstructions. Includenocode. Overallexecutionqualityrubric:
+1. Severelybrokenorbarelyfunctional.
+2. Majorgapsorfrequentfailures.
+3. Mixed;multiplemissingorunstableparts.
+4. Mostlycorrect;severalissues.
+5. Fullyornearlyfullycorrect;minorissues.
+Figure21: PromptforlosscomputationfromatrajectorygeneratedbytheBetaTesterafterplaying
+thegame.
+TextGradDecomposer
+ExtractfeedbacktoresolutionpairsfromtheparagraphandreturnJSONstrictlyas:
+OUTPUTFORMAT
+• pairs
+– feedback...
+– resolution...
+– ...
+RULES
+1. Eachfeedbackmusthaveaconcreteandactionableresolutionthataddressesit.
+2. Exactlyoneresolutionperfeedback;choosethemostactionableandspecificifmulti-
+pleexist.
+3. Use imperative voice for resolution; keep both feedback and resolution concise but
+specific.
+4. NomarkdownandnocommentaryoutsidetheJSONpayload.
+Figure 22: TextGradDecomposer class designed to decompose loss into structured feed-
+back–resolutionpairsforoptimization.
+30
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+RoleBasedAbstractor
+You are abstracting multiple related issue to todo pairs into a single generalized pair. Return
+structuredoutputstrictlyas:
+Name: ShortthemetitleAbstractissue: Ageneralizedandpreciseproblemstatement. Ifmea-
+surable,includeakeyperformanceindicator. Abstracttodo: Onerecommendedplanthatmay
+includestepsandmayreferenceanownerpersonaifuseful. Tags: Alistofoptionaltaxonomy
+labels.
+Rules:
+• Preserve the core intent across all examples and avoid vendor or tool specific con-
+straintsunlessnecessary.
+• Keeptheoutputtestable,withacceptanceconditionseitherimpliedorexplicitlystated.
+• Beconcise,usingonetothreesentenceseachfortheissueandthetodo.
+Figure 23: RoleBasedAbstractor class that abstracts role-based clusters of feed-
+back–resolutionpairsintoasinglerepresentativeissueandresolution.
+31
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+TextGrad MemGrad
+1. Secretcode(fortestingpurposes): 1. Enter a seed for code genera-
+FAAF tion(mustbeanon-emptystring):
+12345 Welcome to Mastermind!
+2. Enteryourguess(or‘help’forin-
+You have 10 guesses to find the
+structions,‘quit’toexit):ABCD
+code.
+Exactmatches:0,Partialmatches:
+1 2. Enter your guess (4 characters
+fromA-F):ABCD
+3. Enteryourguess(or‘help’forin-
+Exactmatches:0,Partialmatches:
+structions,‘quit’toexit):DEFA
+1
+Exactmatches:0,Partialmatches:
+2 3. Enter your guess (4 characters
+fromA-F):GHIJ
+4. Enteryourguess(or‘help’forin-
+Invalid guess: Input contains in-
+structions,‘quit’toexit):aaaa
+validcharacters. OnlyA,B,C,D,
+Exactmatches:2,Partialmatches:
+E,Fareallowed.
+0
+4. Enter your guess (4 characters
+5. Enteryourguess(or‘help’forin-
+fromA-F):aaaa
+structions,‘quit’toexit):ABCDE
+Exactmatches:0,Partialmatches:
+Invalidinput. Pleaseenterexactly
+0
+4charactersfromAtoF.
+5. Enter your guess (4 characters
+6. Enteryourguess(or‘help’forin-
+fromA-F):ABCDE
+structions,‘quit’toexit):12
+Invalid guess: Input must be ex-
+Invalidinput. Pleaseenterexactly
+actly4characterslong.
+4charactersfromAtoF.
+6. Enter your guess (4 characters
+7. Enteryourguess(or‘help’forin-
+fromA-F):EFEF
+structions,‘quit’toexit):FAAF
+Exactmatches:1,Partialmatches:
+Exactmatches:4,Partialmatches:
+2
+0
+7. Enter your guess (4 characters
+8. Congratulations! You’ve guessed
+fromA-F):EEEE
+thecorrectcode.
+Exactmatches:1,Partialmatches:
+0
+8. Enter your guess (4 characters
+fromA-F):FEFE
+Exactmatches:2,Partialmatches:
+1
+9. Enter your guess (4 characters
+fromA-F):EEEE
+Exactmatches:1,Partialmatches:
+0
+10. Enter your guess (4 characters
+fromA-F):FFFF
+Exactmatches:2,Partialmatches:
+0
+11. Enter your guess (4 characters
+fromA-F):FFEE
+Exactmatches:2,Partialmatches:
+1
+12. Enter your guess (4 characters
+fromA-F):FFFE
+Exactmatches:3,Partialmatches:
+0
+13. Gameover! Thesecretcodewas:
+DFFE.
+Figure24: MastermindGame: Wepresentthegamesplayedbythehumanevaluatorforboththe
+TextGradandMemGradversions. TheTextGradversionrevealedthesecretcodeatthebeginning
+ofthegame,eventhoughitwasmeanttobeinferredthroughgameplay.
+32
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+TextGrad MemGrad
+1. Welcome to the 4x4 Sudoku 1. Welcome to 4x4 Sudoku! Type
+Game! ‘help’ for usage instructions or
+1..2 ‘exit’toquit.CurrentSudokugrid:
+..1. 1..3
+.1.. ..1.
+2..1 3..1
+.2..
+2. Enter your move in the format 2. Enter a move (row,col,value) or
+(row, col, value) or ‘help’ for ‘help’:help
+instructions:help Usage:Enteryourmoveinthefor-
+Invalid input format. Use mat(row,col,value)whererowand
+(row,col,value). colare0-indexed.
+1..2 Example: (0,1,2)toplace2atrow
+..1. 0, column1. Type‘exit’or‘quit’
+.1.. tostopplaying.
+2..1
+3. Enter a move (row,col,value) or
+‘help’:(1,1,3)
+3. Enter your move in the format Placed3at(1,1)
+(row, col, value) or ‘help’ for CurrentSudokugrid:
+instructions:1,1,2 1..3
+Invalid input format. Use .31.
+(row,col,value). 3..1
+1..2 .2..
+..1.
+4. Enter a move (row,col,value) or
+.1..
+‘help’: (6,6,1)Error: Indicesmust
+2..1
+be within 0-3 and value must be
+between1-4.
+4. Enter your move in the format
+5. Enter a move (row,col,value) or
+(row, col, value) or ‘help’ for
+‘help’:(0,1,4)
+instructions:(1,1,2)
+Placed4at(0,1)
+Moveaccepted:(1,1)→2.
+1..2 CurrentSudokugrid:
+.21. 14.3
+.1.. .31.
+2..1 3..1
+.2..
+5. Enter your move in the format 6. Enter a move (row,col,value) or
+(row, col, value) or ’help’ for in- ‘help’:(1,0,2)
+structions:(5,5,1) Placed2at(1,0)
+IndexError:listindexoutofrange CurrentSudokugrid:
+14.3
+231.
+3..1
+.2..
+7. Enter a move (row,col,value) or
+‘help’:(3,0,4)
+Placed4at(3,0)
+CurrentSudokugrid:
+14.3
+231.
+3..1
+42..
+8. Enter a move (row,col,value) or
+‘help’:exit
+Thankyouforplaying!
+Figure 25: Sudoku Game: We present the games played by the human evaluator for both the
+TextGradandMemGradversions. TheTextGradversionfailedtohandletheedgecasesefficiently.
+33
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+AgileCoder TextGrad MemGrad without Memory Memgrad
+8-Puzzle
+Battleship
+Caro
+Checkers
+Chess endgame Trainer
+Coin toss preditor
+Connect 4
+Dice Sum Game
+Flashcard Trainer
+Hex
+Lights Out
+Mastermind
+Nim
+Nonogram
+Quiz Game
+RPS
+Sokoban
+Sudoku
+Text-Based Maze
+Word Scramble
+0 20 40 60 80 100
+Average (%)
+Figure26: QuantitativeResult: Wepresenttheperformancescorecomputedfromtheproportion
+oftestcasessuccessfullypassed.
+34
+ICLR2026Workshop: MemoryforLLM-BasedAgenticSystems
+AgileCoder TextGrad MemGrad without Memory Memgrad
+8-Puzzle
+Battleship
+Caro
+Checkers
+Chess endgame Trainer
+Coin toss preditor
+Connect 4
+Dice Sum Game
+Flashcard Trainer
+Hex
+Lights Out
+Mastermind
+Nim
+Nonogram
+Quiz Game
+RPS
+Sokoban
+Sudoku
+Text-Based Maze
+Word Scramble
+0 20 40 60 80 100
+Average (%)
+Figure27: QuantitativeResult: Wepresenttheperformancescorecomputedfromthenumberof
+requirementssatisfiedduringhumangameplay.
+35
