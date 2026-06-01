@@ -43,27 +43,27 @@ def route_model(
     if budget not in ("minimal", "balanced", "premium"):
         return {"error": f"invalid budget: {budget}", "routed": False}
 
-    # Model routing logic
+    # Provider-agnostic tier aliases — resolved per active provider at dispatch time
     model_map = {
-        ("code", "low", "minimal"): "claude-haiku-4",
-        ("code", "medium", "balanced"): "claude-sonnet-4",
-        ("code", "high", "premium"): "claude-opus-4",
-        ("analysis", "low", "minimal"): "claude-haiku-4",
-        ("analysis", "medium", "balanced"): "claude-sonnet-4",
-        ("analysis", "high", "premium"): "claude-opus-4",
+        ("code", "low", "minimal"): "fast",        # → Haiku / GPT-4o-mini / DeepSeek Flash / Flash
+        ("code", "medium", "balanced"): "standard", # → Sonnet / GPT-4o / DeepSeek Pro / Pro
+        ("code", "high", "premium"): "deep",        # → Opus / o1 / DeepSeek Reasoner / Pro (thinking)
+        ("analysis", "low", "minimal"): "fast",
+        ("analysis", "medium", "balanced"): "standard",
+        ("analysis", "high", "premium"): "deep",
     }
 
     key = (task_type, complexity, budget)
-    model = model_map.get(key, "claude-sonnet-4")
+    model_tier = model_map.get(key, "standard")
 
     return {
-        "model": model,
+        "model_tier": model_tier,
         "task_type": task_type,
         "complexity": complexity,
         "budget": budget,
         "required_capabilities": required_capabilities or [],
         "routed": True,
-        "reasoning": f"Selected {model} for {complexity} {task_type} with {budget} budget",
+        "reasoning": f"Selected {model_tier} tier for {complexity} {task_type} with {budget} budget",
     }
 
 
@@ -82,30 +82,37 @@ def list_models(
         Dict with model catalog.
     """
     models = [
-        {
-            "id": "claude-opus-4",
-            "name": "Claude Opus 4",
-            "capabilities": ["code", "vision", "tools", "extended_thinking"],
-            "context_window": 200000,
-            "cost_tier": "premium",
-            "deprecated": False,
-        },
-        {
-            "id": "claude-sonnet-4",
-            "name": "Claude Sonnet 4",
-            "capabilities": ["code", "vision", "tools", "extended_thinking"],
-            "context_window": 200000,
-            "cost_tier": "balanced",
-            "deprecated": False,
-        },
-        {
-            "id": "claude-haiku-4",
-            "name": "Claude Haiku 4",
-            "capabilities": ["code", "vision", "tools"],
-            "context_window": 200000,
-            "cost_tier": "minimal",
-            "deprecated": False,
-        },
+        # Anthropic
+        {"id": "anthropic:claude-opus-4", "name": "Claude Opus 4", "tier": "deep",
+         "capabilities": ["code", "vision", "tools", "extended_thinking"],
+         "context_window": 200000, "cost_tier": "premium", "deprecated": False},
+        {"id": "anthropic:claude-sonnet-4", "name": "Claude Sonnet 4", "tier": "standard",
+         "capabilities": ["code", "vision", "tools", "extended_thinking"],
+         "context_window": 200000, "cost_tier": "balanced", "deprecated": False},
+        {"id": "anthropic:claude-haiku-4", "name": "Claude Haiku 4", "tier": "fast",
+         "capabilities": ["code", "vision", "tools"],
+         "context_window": 200000, "cost_tier": "minimal", "deprecated": False},
+        # OpenAI
+        {"id": "openai:gpt-4o", "name": "GPT-4o", "tier": "standard",
+         "capabilities": ["code", "vision", "tools"],
+         "context_window": 128000, "cost_tier": "balanced", "deprecated": False},
+        {"id": "openai:gpt-4o-mini", "name": "GPT-4o Mini", "tier": "fast",
+         "capabilities": ["code", "vision", "tools"],
+         "context_window": 128000, "cost_tier": "minimal", "deprecated": False},
+        # DeepSeek
+        {"id": "deepseek:deepseek-chat", "name": "DeepSeek V4", "tier": "standard",
+         "capabilities": ["code", "tools"],
+         "context_window": 64000, "cost_tier": "balanced", "deprecated": False},
+        {"id": "deepseek:deepseek-reasoner", "name": "DeepSeek Reasoner", "tier": "deep",
+         "capabilities": ["code", "tools"],
+         "context_window": 64000, "cost_tier": "premium", "deprecated": False},
+        # Google
+        {"id": "google:gemini-2.5-flash", "name": "Gemini Flash", "tier": "fast",
+         "capabilities": ["code", "vision", "tools"],
+         "context_window": 2000000, "cost_tier": "minimal", "deprecated": False},
+        {"id": "google:gemini-2.5-pro", "name": "Gemini Pro", "tier": "deep",
+         "capabilities": ["code", "vision", "tools", "extended_thinking"],
+         "context_window": 2000000, "cost_tier": "premium", "deprecated": False},
     ]
 
     # Filter by capabilities
