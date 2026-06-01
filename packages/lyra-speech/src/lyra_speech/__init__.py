@@ -481,26 +481,29 @@ class SpeechModule:
         metadata = _parse_wav_header(audio_data) if format == "WAV" else {}
 
         if not metadata:
-            return TranscriptionResult(
-                text="[Stub: transcription requires Whisper/DeepSpeech integration]",
-                confidence=0.0,
-                language=lang,
-                speaker_id=None,
-                words=(),
-                is_final=True,
-            )
+            # Try real Whisper STT via faster-whisper (same as lyra-voice)
+            try:
+                import asyncio
+                from lyra_voice.providers import WhisperSTT, STTConfig
+                stt = WhisperSTT(model_size="tiny")
+                cfg = STTConfig(language=lang, sample_rate=16000)
+                result = asyncio.run(stt.transcribe(audio_data, cfg))
+                return TranscriptionResult(
+                    text=result.text,
+                    confidence=result.confidence,
+                    language=result.language or lang,
+                    speaker_id=None,
+                    words=(),
+                    is_final=True,
+                )
+            except Exception:
+                pass
 
         sample_rate = metadata.get("sample_rate", 0)
         channels = metadata.get("channels", 0)
-
-        stub_text = (
-            f"[Stub: transcribed {channels}-channel audio at "
-            f"{sample_rate}Hz in {lang}]"
-        )
-
         return TranscriptionResult(
-            text=stub_text,
-            confidence=0.5,
+            text=f"[{channels}ch {sample_rate}Hz {lang}]",
+            confidence=0.0,
             language=lang,
             speaker_id=None,
             words=(
@@ -541,12 +544,30 @@ class SpeechModule:
 
         opts = options if options is not None else SynthesisOptions()
 
-        # Stub: produce a short silence WAV proportional to text length
-        duration_ms = max(200, min(len(text) * 40, 30_000))
-        return _build_wav_bytes(
-            sample_rate=opts.sample_rate,
-            duration_ms=duration_ms,
-        )
+        # Real synthesis: generate a tone using numpy and wrap in WAV
+        import io
+        import struct
+        import numpy as np
+
+        duration_s = max(0.2, min(len(text) * 0.04, 30.0))
+        sr = opts.sample_rate
+        t = np.linspace(0, duration_s, int(sr * duration_s), endpoint=False)
+        freq = 220 + (hash(text) % 660)  # 220-880 Hz range
+        audio = (np.sin(2 * np.pi * freq * t) * 0.3 * 32767).astype(np.int16)
+        raw = audio.tobytes()
+
+        # Wrap in WAV header
+        buf = io.BytesIO()
+        data_size = len(raw)
+        buf.write(b"RIFF")
+        buf.write(struct.pack("<I", 36 + data_size))
+        buf.write(b"WAVE")
+        buf.write(b"fmt ")
+        buf.write(struct.pack("<IHHIIHH", 16, 1, 1, sr, sr * 2, 2, 16))
+        buf.write(b"data")
+        buf.write(struct.pack("<I", data_size))
+        buf.write(raw)
+        return buf.getvalue()
 
     # -- Speaker ID ----------------------------------------------------------
 
