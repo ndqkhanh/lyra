@@ -3,6 +3,22 @@
 **Purpose**: Track work discovered during implementation that the plans missed,
 or non-blocking improvements deferred from reviews. Ranked by impact × effort.
 
+**Last Updated**: 2026-06-01 (Run 20)
+
+---
+
+## Run 20 Completed (Merged to Main)
+
+| # | Item | Commit | What Changed |
+|---|------|--------|--------------|
+| 1 | `_run_task()` placeholder → LLM dispatch | `1e013bb7` | Wired to AbstractProvider.chat() with real usage tracking |
+| 2 | Effort → Orchestration bridge | `537e94ab` | EffortBridge: ULTRACODE enables auto-orchestration |
+| 3 | COW isolation optimization | `3d7740ac` | APFS/overlayfs/btrfs/hardlinks with auto-fallback |
+| 4 | Security gate enforcement | `299b55bc` | Command-hashed approvals, tiered expiry, SQLite + audit log |
+| 5 | Provider-adaptive context compaction | `c8eef81a` | Strategy selection based on context window size |
+| 6 | Safety fail-open/closed definitions | `3e023b38` | Per-layer failure modes with circuit breaker |
+| 7 | Code-review starter skill | — | Example SKILL.md in .lyra/skills/code-review/ |
+
 ---
 
 ## Deferred from Plans (known scope gaps)
