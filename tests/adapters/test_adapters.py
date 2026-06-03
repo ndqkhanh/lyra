@@ -8,10 +8,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-# Add src to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
-from adapters.base import (
+from src.adapters.base import (
     AdapterFactory,
     ClaudeCodeAdapter,
     CursorAdapter,
