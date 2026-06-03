@@ -5,16 +5,19 @@
 
 ## Operating Principles
 
-1. **Tests First.** Every code change starts with a failing test. No test exists for the behavior you're about to change? Write one first.
+1. **Tests First.** Every change starts with a falsifiable test — whether that is code, a research claim, an architecture decision, or a planning assumption. No test exists for the behavior you are about to change? Write one first.
 2. **Evidence Over Assertion.** Run the command before claiming the fix. Verify before declaring success. Cross-model adversarial verification for all self-modifying operations.
 3. **Minimum Viable Diff.** The smaller the diff that makes the test pass, the easier the review. Three similar lines beats a premature abstraction.
 4. **Transparent Failure.** On error, print the specific blocked path or missing precondition; do not swallow. Persist failures to the error DB for cross-run evolution.
 5. **Immutable State.** Create new objects, never mutate. Pydantic models with `frozen=True` throughout.
-6. **Provider Agnostic.** The kernel has zero network dependencies. All provider clients live in `lyra-cli`.
+6. **Multi-Provider by Design.** The kernel has zero network dependencies — all provider clients live in `lyra-cli`. Lyra speaks Claude, DeepSeek, GPT, and open-weights (Llama, Qwen, Mistral) through a single abstraction. The same interface powers reasoning, research, voice STT/TTS, and verification — swap providers per task, not per system.
 7. **Package Isolation.** Each package has its own `pyproject.toml`, tests, and README. Compose, don't inherit.
-8. **Safety by Separation.** Reasoning and execution run in structurally separated contexts. No reasoning context can directly invoke tools. Every execution plan must pass an independent verification agent from a different model family.
-9. **Self-Evolution with Guardrails.** The harness can optimize itself, but every self-modification must pass adversarial review (ARIS 3-stage), cross-model generalization testing, and a canary deployment before full rollout. Auto-rollback on regression.
+8. **5-Layer Defense-in-Depth.** Safety is layered, not monolithic: (1) reasoning-execution separation — no reasoning context directly invokes tools; (2) guard system — LlamaFirewall + NeMo at every I/O boundary; (3) adversarial verification — anonymized, bias-corrected panel from a different model family; (4) sandbox isolation — OS-level + worktree containers; (5) collusion detection — channel monitoring for cross-agent attacks. Every plan passes an independent verifier, and every layer is independently testable.
+9. **Self-Improving Trajectory.** Lyra learns from every session — verified outcomes strengthen memory, trajectories feed skill evolution, and drift detection triggers re-optimization. Every self-modification passes ARIS 3-stage adversarial review, cross-model generalization testing, and canary deployment before rollout. Auto-rollback on regression. This is Phase 4: a system that improves itself.
 10. **Memory as a First-Class Citizen.** Every session contributes to a growing knowledge base via Dream 4-phase consolidation (Orient→Gather→Consolidate→Prune). ADD-only extraction prevents knowledge overwrite. Ebbinghaus forgetting curves govern retention.
+11. **Omni-Agent Breadth.** Lyra works across every domain a human engineer would: coding, research, architecture, design, SRE, project management, deep brainstorming, and adversarial review. The same core — evidence, tests, transparency — applies whether the deliverable is a pull request, an architecture document, a cost analysis, or a design critique.
+12. **Fleet-Capable Autonomy.** Lyra runs unattended, manages swarms of sub-agents through the supervisor daemon, and steers by exception. Background sessions produce cheap-row summaries; humans only peek or intervene when the fleet raises a flag. Triple-budget governance (time, token, cost) prevents runaway operations.
+13. **Voice-Capable.** Lyra speaks and listens — push-to-talk in Phase 3, full-duplex with barge-in and emotion by Phase 4. The STT/TTS/VAD pipeline is provider-swappable (Whisper, Kokoro, Azure, ElevenLabs) through the same abstraction that powers LLM routing.
 
 ## Project Context
 
@@ -140,33 +143,20 @@ Lyra is downstream of a substantial research ecosystem. Every novel technique tr
 - **CESP v1.0**: Cross-Environment Sound Protocol → `lyra_audio/cesp_engine.py` — 12 event categories, 6-layer pack hierarchy
 - **Audio Suppression**: Silent hours, meeting detection, spam throttling → `lyra_audio/audio_suppression.py`
 
-See [`docs/research/papers.md`](docs/research/papers.md) for the complete 79 paper absorption matrix.
-See [`docs/research/repos.md`](docs/research/repos.md) for the 50+ repository absorption matrix.
+See [`docs/research/papers/`](docs/research/papers/) for the complete 79 paper absorption matrix.
+See [`docs/research/repos/`](docs/research/repos/) for the 50+ repository absorption matrix.
 
 ## Plans
 
-Lyra's AGI breakthrough is planned across 17 ultra plans:
+Lyra's AGI breakthrough is informed by an extensive research corpus and implementation plans in `lyra-upgrade/`:
 
 | Plan | Focus |
 |------|-------|
-| [Plan 6](plans/LYRA_ULTRA_PLAN_6_OMNI_AGI_BREAKTHROUGH.md) | Master — 16 dimensions, 52-week roadmap |
-| [Plan 7](plans/LYRA_ULTRA_PLAN_7_SKILLS_ECOSYSTEM.md) | Skills — 80+ domain skills, curator, learner, evolver |
-| [Plan 8](plans/LYRA_ULTRA_PLAN_8_VOICE_AUDIO_SYSTEM.md) | Voice — fantasy packs, CESP pipeline, dictation |
-| [Plan 9](plans/LYRA_ULTRA_PLAN_9_TOOLS_UNIVERSE.md) | Tools — 200+ tools across 20 toolsets |
-| [Plan 10](plans/LYRA_ULTRA_PLAN_10_MODEL_ROUTER_V2.md) | Router — 5-layer intelligent cascading |
-| [Plan 11](plans/LYRA_ULTRA_PLAN_11_AUTONOMOUS_SYSTEMS.md) | Autonomous — goals, continuous mode, hooks |
-| [Plan 12](plans/LYRA_ULTRA_PLAN_12_AGENT_FLEET_SWARM.md) | Fleet — parallel fan-out, squads, colony, federation |
-| [**Plan 13**](plans/LYRA_ULTRA_PLAN_13_BREAKTHROUGH_SYNTHESIS.md) | **Breakthrough — 6 AGI gaps, meta-evolution, Parallax safety, Dream memory, SR2AM planning** |
-| [**Plan 21**](plans/LYRA_ULTRA_PLAN_21_SKILLS_ECOSYSTEM_EVOLUTION.md) | **Skills — SkillOpt text optimizer, AEvo meta-editing, 50+ domain skills, 18 modules** |
-| [**Plan 22**](plans/LYRA_ULTRA_PLAN_22_MEMORY_CONTEXT_BREAKTHROUGH.md) | **Memory — 5-tier hierarchy, Dream upgrade, BM25+Vector+RRF, temporal KGs** |
-| [**Plan 23**](plans/LYRA_ULTRA_PLAN_23_AGENT_AUTONOMY_FEDERATION.md) | **Autonomy — relay-race, triple-budget, zero-trust federation, compound architecture** |
-| [**Plan 24**](plans/LYRA_ULTRA_PLAN_24_UI_UX_VOICE_BREAKTHROUGH.md) | **UI/UX — 17+ themes, voice packs, keybinding engine, Warp block model** |
-| [**Plan 25**](plans/LYRA_ULTRA_PLAN_25_SAFETY_VERIFICATION_UPGRADE.md) | **Safety — MAVEN, spectral guardrails, zkAgent proofs, 10 benchmarks** |
-| [**Plan 26**](plans/LYRA_ULTRA_PLAN_26_TOOLS_INTEGRATION_ECOSYSTEM.md) | **Tools — 200+ tools, plugin system, MCP gateway, 71 slash commands, channels** |
-| [**Plan 27**](plans/LYRA_ULTRA_PLAN_27_MEMAGENT_BREAKTHROUGH_MEMORY.md) | **Memory — 8-layer cognitive stack, 20 ICLR papers, active reconstruction, agentic Zettelkasten, neuroscience grounding, MemGrad optimization** |
-| [**Plan 28**](plans/LYRA_ULTRA_PLAN_28_PLUGIN_ECOSYSTEM.md) | **Plugin — Sound effects system, 12 curated themes, plugin architecture** |
-| [**Plan 20**](plans/LYRA_ULTRA_PLAN_20_OPEN_ENDED_LEARNER.md) | **Learning — Open-ended learner, Agent Arena challenge platform** |
-| [**Plan 19**](plans/LYRA_ULTRA_PLAN_19_CHALLENGE_EVALUATION.md) | **Evals — Challenge evaluation engine, multi-metric framework, adversarial generation** |
+| [MASTER-PLAN.md](lyra-upgrade/MASTER-PLAN.md) | 4-phase, 9-month prioritized roadmap |
+| [BREAKTHROUGH-ARCHITECTURE.md](lyra-upgrade/BREAKTHROUGH-ARCHITECTURE.md) | Unified next-generation design |
+| [BASELINE.md](lyra-upgrade/BASELINE.md) | Honest as-built capability assessment |
+| [SYNTHESIS.md](lyra-upgrade/SYNTHESIS.md) | Cross-theme research synthesis |
+| [lyra-upgrade/plans/](lyra-upgrade/plans/) | 24 detailed workstream implementation plans |
 
 ## Dangerous Operations
 
@@ -183,3 +173,7 @@ The following must never run without explicit human approval:
 - **Self-modification of harness code** without ARIS 3-stage adversarial review + cross-model generalization testing
 - **Disabling cognitive-executive separation** without multi-agent consensus
 - **Bypassing Dream consolidation** (risks permanent knowledge loss)
+- **Activating voice pipeline** without explicit user consent to audio capture
+- **Deploying self-evolved skills** to production without safety validator approval
+- **Running unattended fleet operations** with collusion detection disabled
+- **Disabling any of the five safety layers** without explicit human override and logged justification

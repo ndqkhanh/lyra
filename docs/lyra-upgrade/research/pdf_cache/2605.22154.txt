@@ -1,0 +1,1487 @@
+--- PAGE 1 ---
+IdleSpec: Exploiting Idle Time via Speculative
+Planning for LLM Agents
+Daewon Choi1
+Kyunghyun Park1
+Woomin Song1
+Saket Dingliwal3†
+Sai Muralidhar Jayanthi2
+Jinwoo Shin1
+Aram Galstyan2
+1KAIST
+2Amazon AGI
+3Together AI
+Abstract
+Large language model (LLM)-based agents solve complex tasks by leveraging
+multi-step reasoning with iterative tool calls and environment interactions, which
+incur idle time while waiting for observations. Despite the prevalence of idle time
+in most agentic scenarios, existing works treat it as an unavoidable overhead or
+propose restricted solutions that overlook varying computational budgets across
+different tool calls and future observation uncertainty, thereby leading to subopti-
+mal utilization of idle time. In this paper, we introduce IdleSpec, a scalable and
+generic inference approach that leverages idle-time computation to improve agent
+performance while minimizing latency overhead. Specifically, IdleSpec iteratively
+generates plan candidates during idle periods and, once observations become avail-
+able, aggregates them to guide the next reasoning step. For effective plan generation
+under observation uncertainty, IdleSpec samples between complementary drafting
+strategies (i.e., progressive and recovery) from a learned distribution that is updated
+via posterior feedback. Our experiments demonstrate that IdleSpec significantly
+improves agent performance in various agentic scenarios by effectively utilizing
+idle time. In particular, on the GAIA and FRAMES, IdleSpec achieves 55.6%
+average accuracy with Gemini-2.5-Flash, surpassing the vanilla baseline without
+idle-time usage by 5.1%. Furthermore, for MLE-Bench, which involves substantial
+delay from code executions, IdleSpec achieves performance gains of up to 9.1% on
+the Any Medal rate, highlighting its generalizability to long-horizon tasks.
+1
+Introduction
+Large language model (LLM)-based agents [1, 2] have shown remarkable progress across diverse
+domains, including general problem solving [3, 4], web navigation [5, 6], code generation [7, 8], and
+scientific research [9], by actively leveraging external tools such as web search, code interpreters [10],
+and even other agents [11, 12]. Such agents commonly follow a multi-step reasoning loop [1] in which
+the agent iteratively reasons, invokes tools, and incorporates the resulting observations, incurring
+frequent waiting time at each step, referred to as idle time. Despite its prevalence in agent execution,
+the potential of idle time for scaling performance remains largely underexplored, as existing works
+mainly target efficiency (e.g., asynchronously invoking independent tool calls [13]). Lin et al. [14]
+first treat idle periods as an opportunity for additional computation that produces auxiliary context,
+but their design targets LLM–user interactions and remains suboptimal for agentic settings: it ignores
+variation in tool-call durations, utilizing only 13.7% of the total idle time on GAIA (see Figure 4),
+and relies on the assumption of predictable future queries, which rarely holds when tool observations
+are inherently uncertain, often degrading performance (see Sleep-time Compute in Table 1).
+†Work done at Amazon.
+Preprint.
+arXiv:2605.22154v1  [cs.AI]  21 May 2026
+
+--- PAGE 2 ---
+Draft Aggregation at Test Time (Section 3.2)
+LLM Agent
+Waiting Observation .. 
+(e.g., Tool Call / Sub-Agent / Code Execution..)
+Strategy Sampling with Posterior Updates
+(Section 3.3) 
+Drafting during Idle Time (Section 3.1)
+“Stop Drafting!”
+Observation
+Plan Candidate Set
+Forecast
+(Progressive or Recovery?) 
+…
+or
+Plan Generation
+Select Strategy from a Distribution
+Progressive
+Recovery
+Plan Aggregation
+& Action Generation
+Figure 1: Overview of IdleSpec. (a) Idle-Time Drafting: during tool execution, the agent iteratively
+drafts plan candidates by sampling between Progressive and Recovery strategies, and terminates
+drafting once the observation arrives. (b) Draft Aggregation: the agent aggregates the candidates
+with the observation into a refined action and forecasts whether the trajectory is on track or requires
+recovery. (c) Posterior Update: the forecast signal updates the strategy distribution, biasing future
+drafts toward strategies effective in the current context.
+This raises a key question: How can we develop a robust, generalizable solution for exploiting
+idle time arising from agentic interactions to improve agent performance on complex tasks? This
+naturally leads us to analyze idle time across diverse agentic scenarios and explore effective strategies
+for leveraging it. Our analysis yields the following key observations:
+• Reasoning budgets for idle time are substantial but highly variable across tool calls. We
+observe that the available reasoning budget during idle time is sufficiently large across diverse
+benchmarks—including tool-augmented reasoning (GAIA), multi-hop search (FRAMES),
+and execution-heavy environments (MLE-Bench)—providing additional computation to
+improve performance. However, the amount of available budget varies significantly across
+individual tool calls.
+• Planning is more effective than other agent strategies during idle time. Among representative
+agent strategies, i.e., summarization, reflection, and planning, we find that planning yields
+the most consistent performance improvements when generated during idle time.
+Motivated by these findings, we propose IdleSpec (Exploiting Idle Time via Speculative Planning),
+a scalable inference framework that exploits idle time via speculative planning; see the overview
+in Figure 1. Specifically, we adopt a simple yet effective two-phase strategy: (a) during idle time,
+the agent iteratively generates candidate plans; (b) once observations arrive, these candidates are
+aggregated and conditioned to guide subsequent reasoning. For higher utilization of idle time, the
+agent iteratively drafts candidates until an observation becomes available and terminates immediately
+upon observation arrival, thereby enabling higher utilization of idle time.
+The key challenge of planning during idle time lies in handling observation uncertainty. Since
+observations are not yet available during idle periods, generated plans may become invalid or
+suboptimal once the observation becomes available. To mitigate this uncertainty, we design a
+drafting strategy distribution that dynamically samples between two complementary strategies:
+Progressive, which assumes favorable observations and emphasizes exploitation, and Recovery,
+which explores alternative solution paths assuming potential failure from observation. By generating
+both forward-progressing and recovery-oriented drafts through sampling, the agent improves coverage
+over plausible future observations. Furthermore, this strategy distribution is updated via posterior
+feedback, whereby the agent evaluates its current progress and forecasts the most suitable drafting
+strategy for subsequent idle periods. This adaptive update enables the drafting behavior to be adjusted
+during inference, resulting in robust performance across diverse execution contexts.
+2
+
+--- PAGE 3 ---
+To validate the effectiveness and generality of IdleSpec, we conduct extensive experiments across
+three diverse agentic benchmarks: tool-augmented reasoning, multi-hop search, and long-horizon
+interactive tasks. We first evaluate IdleSpec on the GAIA benchmark [3], which requires diverse
+capabilities including web search, file inspection, and code execution, and on FRAMES [15], which
+requires multi-hop search via repeated agent-as-tool invocations. We show that IdleSpec consistently
+improves performance across various LLM backbones, e.g., surpassing the vanilla baseline by 4.6%
+and 6.8% in average accuracy on Gemma4-E4B and Qwen3.5-4B, respectively. The performance
+gains are also more consistent than those of prior idle-time approaches [14], which exhibit lower
+utilization of total idle time and, in some cases, even degrade baseline performance. Next, we verify
+the generality of IdleSpec on MLE-Bench [8], a benchmark that involves substantial idle time due
+to code execution for machine learning engineering scripts. In this setting, IdleSpec significantly
+outperforms all baselines, highlighting its applicability to complex, long-horizon interactive tasks.
+Contributions. Our contributions are as follows:
+• We conduct a systematic analysis of idle time in LLM-based agents across diverse agentic
+scenarios, showing that idle periods are substantial but vary significantly across tool calls.
+We further establish that planning yields more effective use of idle-time computation than
+other agentic strategies such as summarization and reflection.
+• We propose IdleSpec, a scalable inference-time framework that exploits idle time in agentic
+interactions via speculative planning. IdleSpec iteratively and adaptively generates candidate
+plans by sampling from a strategy distribution, and aggregates them once the observations
+for the next step become available.
+• We validate IdleSpec across three diverse agentic benchmarks, i.e., GAIA, FRAMES,
+and MLE-Bench, spanning tool-augmented reasoning, multi-hop search, and long-horizon
+interactive tasks, and demonstrate consistent performance gains over existing baselines.
+2
+Related Works
+LLM Agents. Large language models (LLMs) have demonstrated strong reasoning capabilities
+through multi-step reasoning paradigms such as Chain-of-Thought (CoT) [16], enabling them to solve
+increasingly complex tasks. Building on this, existing works [1, 2, 17, 10] have considered LLMs as
+sequential decision-making policies, referred to as agents, that interact with external environments.
+These approaches formalize agent execution as an iterative reason–act–observe loop, where the agent
+reasons about the next action, invokes external tools, and conditions on the resulting observations to
+guide subsequent steps. Several studies [18, 19, 10] have further shown that LLMs can be augmented
+to invoke external tools such as web search, code execution, and databases, thereby extending their
+capabilities beyond training knowledge. More recently, the definition of tools has been generalized to
+include other agents, enabling task decomposition [20, 21], and intermediate result verification [22].
+For example, recent works [11, 12] treat agents themselves as callable tools, allowing LLM agents
+to coordinate with specialized sub-agents on a per-task basis. Despite these advances in tool usage
+within agentic workflows, most existing approaches treat the time spent waiting for observations
+as an unavoidable delay. In this work, we view this waiting period as an opportunity for additional
+computation to improve performance and propose a novel inference-time method called IdleSpec.
+Idle Time in LLM Agents. As LLM agents interact with tools and external environments, execution
+time is often dominated not by LLM inference itself, but by tool execution and environment response
+delays. To leverage this delay, most existing works [13, 23, 24] focus on improving system efficiency
+by overlapping independent computations or through system-level execution management. For
+instance, Gim et al. [13] and Biswas et al. [24] explore asynchronous and non-blocking function-
+calling mechanisms that allow LLM inference to proceed without waiting for tool execution to
+complete, while Li et al. [23] observes that frequent tool invocations incur significant overhead due to
+cache eviction and rescheduling between turns, and proposes cache-aware scheduling. A parallel line
+of work targets latency reduction through speculation: Ye et al. [25] and Nichols et al. [26] introduce
+predict-and-verify paradigms in which a fast speculator executes likely-correct actions or tool calls
+that a slower target model verifies, while Hua et al. [27] applies the same two-model speculation
+pattern to multi-step planning. These methods can be viewed as single-mode speculation: they assume
+the current trajectory will succeed and commit to a single speculative continuation along that path. In
+contrast, IdleSpec models the inherent uncertainty of future observations through complementary
+3
+
+--- PAGE 4 ---
+85
+95
+81.0%
+89.7%
+92.6%
+GAIA
+FRAMES
+MLE-Bench
+Benchmark
+5
+15
+19.00%
+10.27%
+7.40%
+Time share (%)
+Reasoning (%)
+Idle (%)
+(a) Idle vs. Reasoning Share
+0
+20
+40
+60
+80
+Tool execution time (s)
+0
+20
+40
+60
+Number of tool calls
+Mean reasoning (7.0s)
+(b) Tool Execution Time
+Level1
+Level2
+Level3
+Avg
+GAIA Difficulty
+0
+20
+40
+60
+Accuracy (%)
+Vanilla
++Summ.
++Refl.
++Plan.
+(c) Idle-Time Strategies
+Figure 2: How Can We Leverage Idle Time in LLM Agents? (a) Reasoning time vs. tool execution
+time (i.e., idle time) across benchmarks. (b) Histogram of per-call tool execution times. (c) Accuracy
+of three idle-time strategies (Summarization, Reflection, Planning) vs. vanilla.
+progressive and recovery drafts, and exploits idle time to improve task performance rather than to
+amortize already-required computation. Recent work on Sleep-Time Compute [14] partially addresses
+this performance gap by treating idle periods as opportunities for pre-computation that generates
+auxiliary context. However, it does not explicitly account for the highly variable idle-time budgets in
+agent executions and relies on the restrictive assumption that future query patterns are predictable,
+which rarely holds in agentic scenarios where tool-call observations are inherently uncertain. In this
+paper, we propose a robust solution that effectively exploits idle time to improve agent performance
+and can be seamlessly applied across diverse, realistic agentic scenarios.
+3
+How Can We Leverage Idle Time in LLM Agents?
+In this section, we investigate the following key questions: how much reasoning budget is available
+during idle time, and which strategies are effective for utilizing it. To this end, we conduct experiments
+on three benchmarks: (i) GAIA, in which agents invoke diverse external tools such as web search,
+file readers, and multimodal parsers; (ii) FRAMES, which contains multi-hop questions requiring
+long chain of sequential search-based tool calls; and (iii) MLE-Bench, which involves ML workloads
+(model training, evaluation) that produce substantial environment response delays.
+3.1
+Source of Idle Time
+To quantify the reasoning budget available during idle time, we visualize the ratio of tool execution
+to reasoning time. As shown in Figure 2a, tool execution dominates the total execution time (e.g., it
+is more than 12.5x larger than reasoning time in MLE-Bench), leaving a substantial reasoning budget
+unused. Beyond this aggregate gap, the per-call statistics in Figure 2b reveal that idle durations are
+highly heterogeneous within a single trajectory, ranging from shorter than a single reasoning step (the
+dashed line) to more than 10x longer. The long tail of this distribution accounts for the majority of
+total idle time and is large enough to support multiple rounds of speculative computation, making it
+the opportunity for idle-time exploitation.
+3.2
+Strategies for Idle Time
+To identify effective idle-time strategies, we compare three representatives against a vanilla baseline
+without idle-time computation: (i) summarization, which compresses the interaction history; (ii)
+reflection, which evaluates the current action based on past trajectories; and (iii) planning, which
+generates candidate plans conditioned on plausible future observations. As shown in Figure 2c,
+only planning consistently matches or exceeds the baseline across all difficulty levels, achieving
+the highest average accuracy, while summarization and reflection fail to deliver consistent gains
+and even degrade performance (e.g., a notable accuracy drop for reflection on GAIA Level 3).
+We attribute this to differences in how each method handles observation uncertainty during idle
+time. Summarization and reflection must commit to an incomplete interpretation of the trajectory
+before future observations arrive (e.g., reflection misjudging a valid action as erroneous), which then
+propagates into subsequent decisions. Planning avoids this by admitting a conditional formulation
+over possible future observations (e.g., if A holds, execute X; otherwise Y), making idle-time compute
+resilient to this uncertainty.
+4
+
+--- PAGE 5 ---
+4
+IdleSpec: Exploiting Idle Time via Speculative Planning for LLM Agents
+In this section, we propose IdleSpec, a novel inference framework that exploits idle time in LLM
+agents via speculative planning. We design a two-phase strategy: it drafts two complementary types
+(i.e., progressive and recovery) of plan candidates during idle periods (Section 4.1), and aggregates
+them once observations arrive and uses them for subsequent reasoning (Section 4.2). To ensure
+effective drafting under observation uncertainty, we propose adaptive drafting strategy sampling with
+posterior updates (Section 4.3). The overall framework is illustrated in Figure 1.
+4.1
+Drafting during Idle Time
+Progressive Drafting.
+The agent assumes that the forthcoming observation will be successfully
+obtained and will contribute to task success. Under this assumption, the agent proactively drafts the
+next plan to be executed once the observation becomes available, focusing on forward progress.
+Progressive Drafting Prompt
+You are an expert AI assistant tasked with generating the most effective and efficient NEXT ACTION
+STEP to take after the current action step completes and its observation becomes available.
+The current action step is running in parallel. You will not see the observation yet; assume it will arrive
+and will be used to decide the next step.
+Recovery Drafting.
+The agent prepares for the case in which the forthcoming observation shows
+no progress (e.g., the tool returns an empty or off-target result). Under this assumption, the agent
+drafts an alternative plan that pursues the same sub-goal from a different angle.
+Recovery Drafting Prompt
+You are an expert AI assistant tasked with generating a RECOVERY strategy while the current action
+step is executing.
+Assume that the current action step fails to make progress or gets stuck. Propose EXACTLY one distinct
+recovery plan that takes a different approach from what has already been tried.
+Idle-aware Iterative Drafting.
+As shown in Figure 2a, idle time varies across tools and envi-
+ronments, making the appropriate number of plan candidates highly variable. To address this, we
+design drafting as an iterative procedure that runs concurrently with tool execution and terminates
+immediately once the tool response becomes available. While waiting for the observation, the agent
+repeatedly generates plan candidates at each iteration. These drafts are accumulated over time and
+fed back into the prompt at each iteration, allowing the model to condition on previously generated
+plans. This design enables the agent to generate diverse plan candidates, while reducing unnecessary
+drafting cost. Once the tool execution completes, drafting halts and the accumulated candidates are
+finalized. As a result, the final candidate set Dfinal is given by:
+Dfinal = Dprog ∪Drec,
+(1)
+where Dprog is the candidate set from progressive drafting and Drec is from recovery drafting.
+4.2
+Draft Aggregation at Test Time
+Once the observation becomes available, the agent proceeds to the next reasoning step by aggregating
+the candidate set Dfinal for guidance.
+Aggregation. Given the plan candidate set Dfinal, the agent aggregates the generated drafts by
+conditioning its next reasoning step on the entire set. Importantly, the agent is not required to strictly
+follow any individual candidate; the plans are treated as reference points that may guide the next
+reasoning step. This careful design is crucial because drafts generated during idle time are produced
+under observation uncertainty; we observe that directly forcing such raw plans can lead to suboptimal
+performance (see Table 6b in Section 5.2).
+5
+
+--- PAGE 6 ---
+Aggregation Prompt
+The following are candidate plans generated for the next step:
+Plan 1: {candidate plan 1}
+Plan 2: {candidate plan 2}
+...
+Plan N: {candidate plan N}
+Based on the observation, you may use these plans as starting points, but you are free to synthesize a
+different or improved next step if none of them fit well.
+4.3
+Strategy Sampling with Posterior Updates
+We now describe how the agent decides which drafting strategy (i.e., progressive and recovery) to
+use at each idle-time iteration. Effective drafting under observation uncertainty requires covering a
+diverse set of plausible future situations, while still concentrating computation on the strategy most
+likely to be useful for the current trajectory. To balance these two objectives, we propose a simple
+yet effective strategy-selection mechanism based on Thompson sampling [28]: we derive a forecast
+signal from each observation and use posterior sampling to adaptively select the strategies.
+Forecast.
+At the end of each step, once the observation is available, the agent produces a forecast
+for the subsequent idle period. The forecast outputs a binary signal ℓ∈{PROG, REC}, indicating
+which drafting strategy is more promising: progressive (continuing along the current trajectory)
+or recovery (mitigating potential future failures). The forecast prompt is provided in Appendix C
+(Figure 7).
+Probabilistic Model.
+Let p ∈[0, 1] denote the probability that the forecast favors the progressive
+strategy,
+p = Pr(ℓ= PROG),
+(2)
+and place a Beta prior over p,
+p ∼Beta(α, β),
+(3)
+where α and β count past forecast signals corresponding to PROG and REC, respectively. We initialize
+α = β = 1 to reflect a uniform prior in the absence of any forecast feedback. After each forecast
+signal ℓ, we update the posterior by incrementing the count corresponding to ℓ:
+(α, β) ←
+(α + 1, β),
+if ℓ= PROG,
+(α, β + 1),
+if ℓ= REC.
+(4)
+Adaptive Strategy Sampling.
+At each drafting iteration, we draw a preference value ˆp ∼
+Beta(α, β) and select the drafting strategy as s = PROG if ˆp > 0.5 and s = REC otherwise.
+The posterior is held fixed throughout the upcoming idle period and updated again once the next
+observation arrives. This procedure naturally allocates more idle-time computation to the strategy
+that the forecast favors, while retaining stochastic exploration to handle uncertainty and preference
+shifts during execution.
+5
+Experiments
+We design experiments to answer the following questions:
+• RQ1: Does IdleSpec improve task performance on general agentic benchmarks (GAIA, FRAMES)
+across diverse LLM backbones? (Table 1 in Section 5.1)
+• RQ2: Does IdleSpec generalize to execution-heavy environments with substantial tool-execution
+times (MLE-Bench)? (Table 2 in Section 5.1)
+• RQ3: How efficiently does IdleSpec utilize idle time, is it compatible with other test-time scaling
+methods, and which design choices matter? (Figure 3 and Tables 3, 4, 5, 6 in Section 5.2)
+6
+
+--- PAGE 7 ---
+Table 1: Results on General Agent Benchmarks. We report accuracy (%) on GAIA and FRAMES.
+Bold and underline indicate best and runner-up results, respectively.
+Method
+Use idle?
+GAIA Level1
+GAIA Level2
+GAIA Level3
+FRAMES
+Average
+Gemma4-E4B
+Vanilla
+✗
+36.5±3.6
+25.6±0.9
+11.5±0.0
+50.0±5.3
+30.9
++Sequential Revision
+✗
+39.6±1.5
+26.4±1.5
+9.0±4.8
+53.3±7.0
+32.1
++Sleep-time Compute
+✓
+41.5±4.1
+23.6±3.8
+9.0±4.8
+50.0±5.3
+31.0
++ IdleSpec (Ours)
+✓
+43.4±2.7
+28.3±2.1
+14.1±3.5
+56.0±3.5
+35.5
+Qwen3.5-4B
+Vanilla
+✗
+37.7±7.6
+26.4±2.7
+11.5±7.7
+57.3±6.4
+33.2
++Sequential Revision
+✗
+41.5±5.0
+27.9±3.1
+11.5±7.7
+56.0±4.0
+34.2
++Sleep-time Compute
+✓
+36.5±2.9
+21.3±4.7
+9.0±4.4
+50.7±1.2
+29.4
++ IdleSpec (Ours)
+✓
+40.9±3.9
+31.8±3.6
+21.8±5.9
+65.3±4.2
+40.0
+Gemini-2.5-Flash
+Vanilla
+✗
+62.3±2.0
+39.9±3.6
+25.6±9.7
+74.0±2.0
+50.5
++Sequential Revision
+✗
+61.6±3.9
+42.3±1.8
+21.8±4.4
+76.7±1.2
+50.6
++Sleep-time Compute
+✓
+62.9±2.9
+44.2±2.0
+20.5±5.9
+72.7±1.2
+50.1
++ IdleSpec (Ours)
+✓
+66.0±3.8
+46.5±4.2
+32.1±4.4
+78.0±4.0
+55.6
+Table 2: Results on MLE-Bench Lite. We report the percentage of tasks that yield a submission,
+a valid submission, an above-median score, and each Kaggle medal tier (Bronze/Silver/Gold). All
+methods are evaluated under the standard 24-hour wall-clock budget per task, using Gemini-2.5-Flash
+as the backbone. Bold and underline indicate best and runner-up results, respectively.
+Method
+Use idle?
+Made
+Submission
+(%)
+Valid
+Submission
+(%)
+Above
+Median
+(%)
+Any Medal (%)
+Bronze
+Silver
+Gold
+Total
+Vanilla
+✗
+86.4
+77.3
+40.1
+9.1
+9.1
+18.2
+36.4
++Sequential Revision
+✗
+90.1
+81.8
+50.0
+13.6
+9.1
+18.2
+40.9
++Sleep-time Compute
+✓
+90.1
+81.8
+59.1
+13.6
+9.1
+13.6
+36.4
++ IdleSpec (Ours)
+✓
+95.5
+86.4
+59.1
+13.6
+13.6
+18.2
+45.5
+Datasets. We evaluate IdleSpec on three benchmarks: GAIA [3] (general agent, full 165-task valida-
+tion split), FRAMES [15] (multi-hop QA, 50 samples), and MLE-Bench Lite [8] (ML engineering,
+24-hour budget per task).
+Models. Our experiments primarily use the proprietary model Gemini-2.5-Flash. In addition, we
+consider Gemma4-E4B and Qwen3.5-4B to validate IdleSpec with recent small open-source models.
+Baselines. To evaluate the effect of idle-time utilization, we include a vanilla baseline that performs
+no additional computation during idle time. Additionally, we include Sequential Revision [29], which
+performs revision step after each new observation. To compare against approaches that utilize idle
+time, we consider Sleep-Time Compute [14], which generates auxiliary contexts during idle periods
+via naive prompting and reuses them at test time.1
+5.1
+Main Results
+Results on General Agent Benchmarks. We evaluate IdleSpec on the GAIA and FRAMES
+benchmarks, which involve a diverse tool suite (e.g., text and audio processing, search agents) to
+solve complex multi-hop reasoning problems. As shown in Table 1, IdleSpec consistently improves
+task success rates over all baselines across both benchmarks and across all three GAIA difficulty
+levels. IdleSpec achieves the highest average accuracy on every backbone, improving over Vanilla by
+1More details including implementation details, evaluation protocols are provided in Appendix A.
+7
+
+--- PAGE 8 ---
+1.00x
+1.25x
+1.50x
+Relative Latency (vs. Vanilla)  
+20
+24
+28
+32
+Accuracy (%)  
+Better
+Vanilla
++Sleep-Time Compute
++Sequential Revision
++Planning
++IdleSpec (Ours)
+Figure 3: Latency–Accuracy Trade-off.
+All measurements were performed on
+vLLM using an NVIDIA A6000 GPU.
+Table 3: Idle-Time vs. Test-Time Token Usage. Accu-
+racy (%) and output token usage during idle time and
+test time on GAIA Level 2 using Qwen3.5-4B.
+Method
+Accuracy
+Tokens (Idle / Test)
+Vanilla
+26.4
+(- / 7126)
++Sequential Revision
+27.9
+(- / 11354)
++Planning
+32.2
+(- / 12234)
++Sleep-time Compute
+21.3
+(3393 / 7048)
++ IdleSpec (Ours)
+31.8
+(5284 / 5966)
+4.6% on Gemma4-E4B (30.9 →35.5), 6.8% on Qwen3.5-4B (33.2 →40.0), and 5.1% on Gemini-
+2.5-Flash (50.5 →55.6). The gains are most pronounced on the harder Levels 2 and 3, suggesting
+that idle-time speculation is most beneficial when the underlying reasoning task is difficult. In
+contrast, Sleep-Time Compute exhibits limited or inconsistent improvements and, in some cases, even
+degrades performance. In particular, this degradation is especially pronounced with smaller open-
+source models such as Qwen3.5-4B: because Sleep-Time Compute freely pre-generates auxiliary
+context based on assumed future queries, hallucinations introduced at this stage mislead subsequent
+reasoning. IdleSpec avoids this failure mode through dual drafting that covers both progressive and
+recovery scenarios, guiding the agent toward correct trajectories. We provide qualitative examples of
+both behaviors in Appendix B.6.
+Results on MLE-Bench. We further evaluate IdleSpec on MLE-Bench, which features long-horizon
+interactions and execution-heavy steps involving repeated code execution and model training. As
+shown in Table 2, Sleep-Time Compute matches IdleSpec on the Above-Median metric but lowers
+the Gold-medal rate relative to Vanilla (13.6% vs. 18.2%) and yields no improvement in total medals
+— consistent with our earlier observation that naively pre-generated context can mislead reasoning
+under observation uncertainty. In contrast, IdleSpec achieves the best results across nearly all metrics,
+raising the submission rate from 86.4% to 95.5%, the valid submission rate from 77.3% to 86.4%,
+and the overall medal rate from 36.4% to 45.5%, with consistent gains across Bronze, Silver, and
+Gold tiers. Because MLE-Bench involves long-running tool calls such as model training, a non-trivial
+portion of the 24-hour wall-clock budget is otherwise spent waiting. IdleSpec converts this wasted
+idle time into useful LLM computation, generating diverse solution paths that translate into more
+valid submissions and more medal-tier solutions within the same time budget, highlighting that
+IdleSpec generalizes to execution-heavy agentic workloads.
+5.2
+More Analysis
+Efficiency Analysis. We analyze the efficiency of IdleSpec by comparing it against the original
+baselines (Sequential Revision and Sleep-Time Compute) and an additional test-time scaling baseline,
+Planning, which generates a new plan after each tool-call observation before the next step. As shown
+in Figure 3, Sequential Revision and Planning improve accuracy by spending more tokens at test
+time, but this directly inflates end-to-end latency: Sequential Revision and Planning are about 1.30×
+and 1.33× slower than Vanilla, respectively. IdleSpec, in contrast, achieves a Pareto improvement: it
+outperforms Sequential Revision and matches Planning’s accuracy while keeping latency close to
+Vanilla, as most of its additional token computation is carried out during idle periods (Table 3).
+Compatibility with Test-Time Scaling. We investigate whether IdleSpec is complementary to
+existing test-time scaling methods, under the hypothesis that the two operate along orthogonal axes
+and can be seamlessly combined: IdleSpec scales computation along the idle-time axis, while existing
+test-time scaling methods scale along the test-time axis. Since IdleSpec leaves the test-time procedure
+itself untouched, it can be layered on top of any such method without modification. To verify this,
+we combine IdleSpec with the two test-time scaling baselines introduced above Sequential Revision
+and Planning, while leaving each baseline’s test-time procedure unchanged. As shown in Table 4,
+8
+
+--- PAGE 9 ---
+Table 4: Compatibility with Test-Time Scal-
+ing. Accuracy (%) on GAIA Level 2 with
+Qwen3.5-4B. IdleSpec yields consistent gains
+when combined with existing test-time scal-
+ing methods.
+Method
+Use Idle?
+Accuracy
+Sequential Revision
+✗
+27.9
++ IdleSpec
+✓
+32.2
+Planning
+✗
+32.2
++ IdleSpec
+✓
+35.3
+Table 5: Effect of Idle-Time Length on Ac-
+curacy (%). GAIA samples are binned by
+their ultra-short ratio (the fraction of tool calls
+shorter than the reasoning step) with Gemini-
+2.5-Flash.
+Idle-time availability increases
+from High to Low.
+Method
+High
+Medium
+Low
+Vanilla
+50.0
+39.0
+39.0
++ IdleSpec
+50.0
+45.0
+46.0
+Table 6: Ablation Studies. Accuracy (%) on GAIA and FRAMES when selectively ablating
+individual components of IdleSpec. (a) Drafting strategy on GAIA Level 1–3 using Gemini-2.5-Flash;
+(b, c) aggregation and selection strategies on FRAMES using Qwen3.5-4B.
+(a) Drafting Strategy
+Prog.
+Rec.
+L1
+L2
+L3
+Avg.
+✓
+✗
+62.9
+44.2
+26.9
+44.7
+✗
+✓
+60.4
+43.4
+28.2
+44.0
+✓
+✓
+66.0
+46.5
+32.1
+48.2
+(b) Aggregation
+Method
+Acc.
+Best-of-N
+59.3
+Mandatory
+57.3
+Ref. (Ours)
+65.3
+(c) Selection
+Method
+Acc.
+Random
+63.3
+Forecast-Direct
+60.7
+Adapt. (Ours)
+65.3
+IdleSpec yields consistent gains on top of both baselines, improving Sequential Revision from 27.9%
+to 32.2% and Planning from 32.2% to 35.3%. This gain likely arises because the progressive and
+recovery drafts generated during idle periods pre-expand the search space available at test time, which
+the test-time scaling method leverages to produce better-informed revisions and plan updates.
+Effect of Idle-Time Length. We analyze how the available idle time per step affects IdleSpec. We
+define the ultra-short ratio of a sample as the fraction of its tool calls whose execution time is shorter
+than a single LLM reasoning step. On GAIA, this ratio averages 25–27% across the three difficulty
+levels (Appendix B.2, Table 7), indicating that most tool calls leave enough idle time for speculative
+drafting. Binning GAIA samples by ultra-short ratio into High (>0.75, least idle time), Medium
+(0.25–0.75), and Low (<0.25, most idle time) groups (Table 5), we find that IdleSpec matches the
+vanilla baseline on the High group, where little usable idle time is available, but delivers gains of 6.0
+% and 7.0 % on the Medium and Low groups, respectively.
+Ablation Study. We ablate the three key design choices of IdleSpec — drafting strategy, aggregation
+scheme, and selection rule. First, Table 6a shows that using only progressive or only recovery drafts
+underperforms, with recovery-only being especially harmful as the agent keeps switching plans
+without sufficient forward progress; sampling between the two yields the best results by balancing
+exploitation and exploration. Second, Table 6b shows that simple aggregation schemes such as
+Best-of-N (selecting a single plan) and Mandatory Selection (enforcing all drafted plans) yield limited
+gains, whereas treating draft candidates as references rather than strict constraints significantly
+improves accuracy. Third, Table 6c shows that other selection rules (Random and Forecast-Direct)
+underperform, while the proposed adaptive selection achieves the highest accuracy.
+6
+Conclusion
+In this work, we explore idle time, arising naturally from tool calls, as an underexploited computational
+resource to improve agent performance with minimal latency overhead. Specifically, we introduce
+IdleSpec, which employs two complementary drafting strategies during tool execution. By adaptively
+selecting between these strategies and aggregating drafts once observations arrive, IdleSpec effectively
+utilizes idle time under observation uncertainty. Extensive experiments across diverse agentic
+benchmarks demonstrate that IdleSpec generalizes to a wide range of tool-augmented scenarios. We
+hope this work draws attention to idle-time utilization as a promising direction for building more
+capable LLM agents with minimal latency overhead.
+9
+
+--- PAGE 10 ---
+References
+[1] Shunyu Yao, Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik R Narasimhan, and
+Yuan Cao. ReAct: Synergizing reasoning and acting in language models. In The Eleventh
+International Conference on Learning Representations, 2023.
+[2] Vishnu Sarukkai, Zhiqiang Xie, and Kayvon Fatahalian. Self-generated in-context examples
+improve LLM agents for sequential decision-making tasks. arXiv preprint arXiv:2505.00234,
+2025.
+[3] Grégoire Mialon, Clémentine Fourrier, Thomas Wolf, Yann LeCun, and Thomas Scialom.
+GAIA: a benchmark for general AI assistants. In The Twelfth International Conference on
+Learning Representations, 2024.
+[4] Long Phan, Alice Gatti, Ziwen Han, Nathaniel Li, Josephina Hu, Hugh Zhang, Chen Bo Calvin
+Zhang, Mohamed Shaaban, John Ling, Sean Shi, et al. Humanity’s last exam. arXiv preprint
+arXiv:2501.14249, 2025.
+[5] Shuyan Zhou, Frank F Xu, Hao Zhu, Xuhui Zhou, Robert Lo, Abishek Sridhar, Xianyi Cheng,
+Tianyue Ou, Yonatan Bisk, Daniel Fried, et al. WebArena: A realistic web environment for
+building autonomous agents. arXiv preprint arXiv:2307.13854, 2023.
+[6] Xiang Deng, Yu Gu, Boyuan Zheng, Shijie Chen, Sam Stevens, Boshi Wang, Huan Sun, and
+Yu Su. Mind2web: Towards a generalist agent for the web. Advances in Neural Information
+Processing Systems, 36:28091–28114, 2023.
+[7] Carlos E Jimenez, John Yang, Alexander Wettig, Shunyu Yao, Kexin Pei, Ofir Press, and Karthik
+Narasimhan. SWE-bench: Can language models resolve real-world GitHub issues? arXiv
+preprint arXiv:2310.06770, 2023.
+[8] Jun Shern Chan, Neil Chowdhury, Oliver Jaffe, James Aung, Dane Sherburn, Evan Mays, Giulio
+Starace, Kevin Liu, Leon Maksin, Tejal Patwardhan, et al. MLE-bench: Evaluating machine
+learning agents on machine learning engineering. arXiv preprint arXiv:2410.07095, 2024.
+[9] Chris Lu, Cong Lu, Robert Tjarko Lange, Jakob Foerster, Jeff Clune, and David Ha. The
+AI scientist: Towards fully automated open-ended scientific discovery.
+arXiv preprint
+arXiv:2408.06292, 2024.
+[10] Kechi Zhang, Jia Li, Ge Li, Xianjie Shi, and Zhi Jin. CodeAgent: Enhancing code generation
+with tool-integrated agent systems for real-world repo-level coding challenges. arXiv preprint
+arXiv:2401.07339, 2024.
+[11] Yanfei Zhang. Agent-as-Tool: A study on the hierarchical decision making with reinforcement
+learning. arXiv preprint arXiv:2507.01489, 2025.
+[12] Pengcheng Jiang, Jiacheng Lin, Zhiyi Shi, Zifeng Wang, Luxi He, Yichen Wu, Ming Zhong,
+Peiyang Song, Qizheng Zhang, Heng Wang, et al. Adaptation of agentic AI: A survey of
+post-training, memory, and skills. arXiv preprint arXiv:2512.16301, 2025.
+[13] In Gim, Seung-seob Lee, and Lin Zhong. Asynchronous LLM function calling. arXiv preprint
+arXiv:2412.07017, 2024.
+[14] Kevin Lin, Charlie Snell, Yu Wang, Charles Packer, Sarah Wooders, Ion Stoica, and Joseph E.
+Gonzalez. Sleep-time compute: Beyond inference scaling at test-time, 2025. URL https:
+//arxiv.org/abs/2504.13171.
+[15] Satyapriya Krishna, Kalpesh Krishna, Anhad Mohananey, Steven Schwarcz, Adam Stambler,
+Shyam Upadhyay, and Manaal Faruqui. Fact, fetch, and reason: A unified evaluation of
+retrieval-augmented generation, 2024. URL https://arxiv.org/abs/2409.12941.
+[16] Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Fei Xia, Ed Chi, Quoc V Le,
+Denny Zhou, et al. Chain-of-thought prompting elicits reasoning in large language models.
+Advances in neural information processing systems, 35:24824–24837, 2022.
+10
+
+--- PAGE 11 ---
+[17] Mrinal Rawat, Ambuje Gupta, Rushil Goomer, Alessandro Di Bari, Neha Gupta, and Roberto
+Pieraccini. Pre-Act: Multi-step planning and reasoning improves acting in LLM agents. arXiv
+preprint arXiv:2505.09970, 2025.
+[18] Timo Schick, Jane Dwivedi-Yu, Roberto Dessì, Roberta Raileanu, Maria Lomeli, Eric Hambro,
+Luke Zettlemoyer, Nicola Cancedda, and Thomas Scialom. Toolformer: Language models
+can teach themselves to use tools. Advances in Neural Information Processing Systems, 36:
+68539–68551, 2023.
+[19] Changle Qu, Sunhao Dai, Xiaochi Wei, Hengyi Cai, Shuaiqiang Wang, Dawei Yin, Jun Xu,
+and Ji-Rong Wen. Tool learning with large language models: A survey. Frontiers of Computer
+Science, 19(8):198343, 2025.
+[20] Adam Fourney, Gagan Bansal, Hussein Mozannar, Cheng Tan, Eduardo Salinas, Friederike
+Niedtner, Grace Proebsting, Griffin Bassman, Jack Gerrits, Jacob Alber, et al. Magentic-One:
+A generalist multi-agent system for solving complex tasks. arXiv preprint arXiv:2411.04468,
+2024.
+[21] Wentao Zhang, Ce Cui, Yilei Zhao, Yang Liu, and Bo An. AgentOrchestra: A hierarchical
+multi-agent framework for general-purpose task solving. arXiv preprint arXiv:2506.12508,
+2025.
+[22] Shalev Lifshitz, Sheila A McIlraith, and Yilun Du. Multi-agent verification: Scaling test-time
+compute with multiple verifiers. arXiv preprint arXiv:2502.20379, 2025.
+[23] Hanchen Li, Runyuan He, Qiuyang Mang, Qizheng Zhang, Huanzhi Mao, Xiaokun Chen,
+Hangrui Zhou, Alvin Cheung, Joseph Gonzalez, and Ion Stoica. Continuum: Efficient and robust
+multi-turn LLM agent scheduling with KV cache time-to-live. arXiv preprint arXiv:2511.02230,
+2025.
+[24] Anish Biswas, Kanishk Goel, Jayashree Mohan, Alind Khare, Anjaly Parayil, Ramachandran
+Ramjee, and Chetan Bansal. Sutradhara: An intelligent orchestrator-engine co-design for
+tool-based agentic inference. arXiv preprint arXiv:2601.12967, 2026.
+[25] Naimeng Ye, Arnav Ahuja, Georgios Liargkovas, Yunan Lu, Kostis Kaffes, and Tianyi Peng.
+Speculative actions: A lossless framework for faster AI agents. In The Fourteenth International
+Conference on Learning Representations, 2026. URL https://openreview.net/forum?
+id=P0GOk5wslg.
+[26] Daniel Nichols, Prajwal Singhania, Charles Jekel, Abhinav Bhatele, and Harshitha Menon.
+Optimizing agentic language model inference via speculative tool calls.
+arXiv preprint
+arXiv:2512.15834, 2025.
+[27] Wenyue Hua, Mengting Wan, Jagannath Shashank Subramanya Sai Vadrevu, Ryan Nadel,
+Yongfeng Zhang, and Chi Wang. Interactive speculative planning: Enhance agent efficiency
+through co-design of system and user interface. In The Thirteenth International Conference on
+Learning Representations, 2025. URL https://openreview.net/forum?id=BwR8t91yqh.
+[28] Shipra Agrawal and Navin Goyal. Analysis of thompson sampling for the multi-armed bandit
+problem. In Shie Mannor, Nathan Srebro, and Robert C. Williamson, editors, Proceedings
+of the 25th Annual Conference on Learning Theory, volume 23 of Proceedings of Machine
+Learning Research, pages 39.1–39.26, Edinburgh, Scotland, 25–27 Jun 2012. PMLR. URL
+https://proceedings.mlr.press/v23/agrawal12.html.
+[29] King Zhu, Hanhao Li, Siwei Wu, Tianshun Xing, Dehua Ma, Xiangru Tang, Minghao Liu, Jian
+Yang, Jiaheng Liu, Yuchen Eleanor Jiang, et al. Scaling test-time compute for LLM agents.
+arXiv preprint arXiv:2506.12928, 2025.
+[30] He Zhu, Tianrui Qin, King Zhu, Heyuan Huang, Yeyi Guan, Jinxiang Xia, Yi Yao, Hanhao Li,
+Ningning Wang, Pai Liu, et al. OAgents: An empirical study of building effective agents. arXiv
+preprint arXiv:2506.15741, 2025.
+11
+
+--- PAGE 12 ---
+[31] Xingyao Wang, Boxuan Li, Yufan Song, Frank F. Xu, Xiangru Tang, Mingchen Zhuge, Jiayi
+Pan, Yueqi Song, Bowen Li, Jaskirat Singh, Hoang H. Tran, Fuqiang Li, Ren Ma, Mingzhang
+Zheng, Bill Qian, Yanjun Shao, Niklas Muennighoff, Yizhe Zhang, Binyuan Hui, Junyang Lin,
+Robert Brennan, Hao Peng, Heng Ji, and Graham Neubig. OpenHands: An open platform for
+AI software developers as generalist agents. In The Thirteenth International Conference on
+Learning Representations, 2025. URL https://openreview.net/forum?id=OJd3ayDDoF.
+12
+
+--- PAGE 13 ---
+A
+Additional Experimental Details
+A.1
+Datasets
+We use three benchmarks that span complementary types of agentic execution: tool-using question
+answering (GAIA), multi-hop search (FRAMES), and machine-learning engineering (MLE-Bench).
+Below we describe the protocol for each.
+GAIA and FRAMES.
+For GAIA, we evaluate on the full validation split across Levels 1–3,
+comprising 53, 86, and 26 tasks for Level 1, Level 2, and Level 3, respectively (165 tasks in total). For
+FRAMES [15], a multi-hop question answering benchmark in which agents are repeatedly invoked
+as tools to perform sequential search-based reasoning, we use the first 50 samples for evaluation; this
+setup induces non-trivial idle periods on the orchestrator side. We use the same agent stack and tool
+budgets across all methods. For open-source models (Qwen3.5-4B and Gemma4-E4B), inference
+is served through 16 vLLM replicas on NVIDIA A6000 GPUs behind a load-balancing proxy; for
+Gemini-2.5-Flash, we use the official Vertex AI API.
+MLE-Bench.
+We evaluate on MLE-Bench Lite [8], i.e., the benchmark’s Low-complexity split,
+which consists of 22 competitions. We follow the standard MLE-Bench Lite protocol with a 24-hour
+wall-clock budget per task for all methods. Each run starts from the same initial task state and
+follows the benchmark’s standard interaction protocol. For every task, we report (i) whether the agent
+produces a submission (Made Submission), (ii) whether the submission is accepted as valid by the
+benchmark (Valid Submission), and (iii) the achieved leaderboard tier (Above Median, Bronze, Silver,
+Gold, and Any Medal), computed using MLE-Bench’s evaluation rules. All methods use Gemini-2.5-
+Flash as the agent backbone (via the Vertex AI API), the same budget and stopping criteria, and an
+identical software stack: a single GPU (NVIDIA RTX 3090) and 4 CPUs are provisioned to the agent
+for code execution and local tool use, with dependency versions held fixed across methods.
+A.2
+Architectures
+Across all experiments, we consider Gemini-2.5-Flash2, Qwen3.5-4B3, or Gemma4-E4B4. For agent
+frameworks, we use OAgents [30] for GAIA and FRAMES, which provides a standard tool suite
+including text and audio processing, web browsing, and specialized sub-agents such as a dedicated
+web agent. For MLE-Bench, we use OpenHands [31], which supports code generation and execution
+in interactive environments.
+A.3
+Evaluation Protocol
+By default, we use standard decoding with temperature 0.6 and top-p 1.0. For Gemma4-E4B, we
+instead follow the recommended configuration on its official model card: temperature 1.0, top-p 0.95,
+and top-k 64. For GAIA and FRAMES, we report the mean across three random seeds for every
+(method, model) configuration. For MLE-Bench, we report results from a single seed since each run
+already spans the standard 24-hour budget per task, which provides sufficient stability.
+A.4
+Implementation Details
+IdleSpec.
+We cap the number of candidate plans retained per idle window at K=5 across all
+experiments to prevent context-window overflow and keep the aggregation cost bounded; When
+a tool call returns before a draft finishes generating, the in-flight generation is interrupted and the
+partial draft is discarded. IdleSpec uses four prompts: a progressive drafting prompt (Figure 5); a
+recovery drafting prompt (Figure 6); a forecast prompt (Figure 7); an aggregation prompt (Figure 8).
+All prompt templates are collected in Appendix C.
+Baselines.
+We compare IdleSpec against two baselines: Sequential Revision (Figure 9), which
+reflects on the latest observation to propose the next step, and Sleep-Time Compute (Figure 10), which
+2https://docs.cloud.google.com/vertex-ai/generative-ai/docs/models/gemini/2-5-flash
+3https://huggingface.co/Qwen/Qwen3.5-4B
+4https://huggingface.co/google/gemma-4-E4B
+13
+
+--- PAGE 14 ---
+performs free-form inference over a partially revealed problem during idle periods. We use the prompt
+released in the original Sleep-Time Compute repository5, adapted from its original math-oriented
+template via a minimal modification: we apply the instruction “The original prompt is designed for
+mathematical problem solving. Please minimally adapt it to better support {task}.”, where {task} is
+replaced with “general agent problem” for GAIA and “machine learning engineering” for MLE-
+Bench. This adaptation introduces only small wording changes (e.g., replacing math-specific terms
+such as “calculations” with task-relevant terms like “commands” in MLE-Bench), while preserving
+the overall structure of the original prompt. A sensitivity analysis confirming that this baseline is
+robust to such phrasing variations is provided in Appendix B.5.
+A.5
+Algorithm Pseudocode
+Algorithm 1 IdleSpec: Exploiting Idle Time via Speculative Planning for LLM Agents
+Require: Task T , initial state s0, language model M, candidate cap K
+1: Initialize Beta posterior (α, β) ←(1, 1)
+▷uniform prior over p = Pr(ℓ=PROG)
+2: Initialize empty draft buffer D ←∅
+3: s ←s0
+4: while task not finished do
+5:
+Send (s, D) to Main API and obtain next action
+6:
+Clear draft buffer D ←∅
+7:
+Execute the returned action
+8:
+while action execution in progress do
+▷Drafting phase (in idle time)
+9:
+Sample preference ˆp ∼Beta(α, β)
+10:
+Select drafting strategy s∗←PROG if ˆp > 0.5, else REC
+11:
+if s∗= PROG then
+12:
+Generate progressive draft under observation uncertainty
+13:
+else
+14:
+Generate recovery draft conditioned on the current action step
+15:
+end if
+16:
+if |D| < K then
+17:
+Append generated draft to D
+18:
+end if
+19:
+end while
+20:
+Receive observation o
+21:
+Ignore any in-flight idle draft responses and finalize D
+▷Forecast phase
+22:
+Send (T , s, o) to Forecast API and obtain ℓ∈{PROG, REC}
+23:
+Update posterior (α, β) with ℓusing Eq. (4)
+24:
+s ←s ∥(action, o)
+▷append step to trajectory
+25: end while
+A.6
+Broader Impact
+IdleSpec reframes idle time during tool execution as a usable computational resource. On the positive
+side, it improves the achievable accuracy of agent systems within a fixed wall-clock budget without
+modifying the underlying model, which can lower the latency cost of capable agent execution and
+improve accessibility for latency-sensitive deployments.
+On the negative side, the accuracy gains come from additional compute spent during the idle window
+(Appendix A.7). Although end-to-end latency is unchanged, the underlying hardware is not free
+during idle periods, so this overhead translates into higher aggregate energy consumption and carbon
+footprint per task at scale.
+A.7
+Limitations
+While IdleSpec demonstrates consistent gains across diverse agentic scenarios, its effectiveness
+depends on the presence of sufficient idle time during tool execution. When tool calls return faster
+5https://github.com/letta-ai/sleep-time-compute
+14
+
+--- PAGE 15 ---
+0
+10
+20
+30
+40
+50
+ITU (%)  
+8
+4
+0
+4
+8
+12
+ Acc. (pp)  
+L1
+L2
+L3
+L1
+L2
+L3
+Sleep-Time Compute
+IdleSpec (Ours)
+Figure 4: Idle-Time Utilization (ITU) vs. Accuracy Gain
+(∆). GAIA with Qwen3.5-4B, one point per difficulty level.
+Table 7: Ultra-Short Idle-Time Ratio.
+Average fraction of tool calls per task
+whose execution time is shorter than a
+single LLM reasoning step on GAIA.
+The reasoning-step duration used as the
+threshold is measured from Gemini-2.5-
+Flash.
+Level
+Ultra-short ratio
+1
+0.25
+2
+0.26
+3
+0.27
+than a single LLM reasoning step, IdleSpec falls back to the vanilla baseline. In addition, although
+IdleSpec adds only minimal end-to-end latency overhead, the speculative drafting consumes additional
+LLM tokens during the idle window, which translates into higher per-task compute and monetary
+cost when running on metered APIs. For deployments where token cost rather than latency is the
+binding constraint, this trade-off should be considered explicitly.
+A.8
+Future Work
+We identify several promising directions for future work. A particularly compelling avenue is to
+decouple idle-time computation from the primary proprietary model by leveraging a small, special-
+ized local model during idle periods. This setup may substantially reduce API inference cost and
+energy consumption while preserving the performance gains of the proprietary model on the critical
+path. More elaborate scheduling policies for idle time are also an interesting direction, including
+dynamically allocating speculative budgets based on task uncertainty or difficulty. Furthermore,
+extending IdleSpec beyond ReAct-style frameworks remains an open direction, including complex
+multi-agent paradigms and asynchronous or parallel tool-calling settings. Even when multiple tool
+calls are issued concurrently, the agent typically remains idle until the slowest call returns, and
+reasoning chains with sequential dependencies—such as multi-hop retrieval in GAIA or iterative
+code-debugging in MLE-Bench—can rarely be fully parallelized.
+B
+Additional Analysis
+B.1
+Idle-Time Utilization vs. Accuracy
+Definition.
+For a task (episode) with K tool-call steps, let t(k)
+idle denote the tool execution duration
+of step k (during which the agent is otherwise idle), and let t(k)
+LLM-on-idle ≤t(k)
+idle denote the portion of
+that interval actually spent on LLM computation (e.g., issuing requests, waiting on responses, and
+consuming generated drafts). We define the per-task idle-time utilization as
+ITUtask =
+PK
+k=1 t(k)
+LLM-on-idle
+PK
+k=1 t(k)
+idle
+∈[0, 1],
+(5)
+so that a method that performs no idle-time computation has ITUtask = 0, while perfect overlap of
+LLM work with the idle interval yields ITUtask = 1. We report the average of ITUtask over all tasks
+(and seeds, when applicable) for each (method, benchmark) configuration.
+Figure 4 illustrates the relationship between idle-time utilization and the resulting accuracy gain over
+the vanilla baseline on GAIA with Qwen3.5-4B. IdleSpec reaches 34.6% idle-time utilization on
+average and turns it into consistent positive gains across all three difficulty levels (up to +10.3 points
+on Level 3), whereas Sleep-Time Compute utilizes only 13.2% of the available idle time and even
+degrades accuracy at every level. This indicates that performance improvements are not solely driven
+by how much idle time is used but also by how it is exploited, and reflects the fact that Sleep-Time
+Compute does not account for variation in tool-call durations.
+15
+
+--- PAGE 16 ---
+B.2
+Ultra-Short Idle-Time Ratio
+The body’s analysis of idle-time length (Section 5.2) bins GAIA samples by their ultra-short ratio:
+the fraction of a sample’s tool calls whose execution time is shorter than a single LLM reasoning step.
+Table 7 reports the average ultra-short ratio per GAIA difficulty level (25–27% across Levels 1–3),
+confirming that most tool calls leave usable idle time for speculative drafting. The accuracy impact of
+binning by this ratio is reported in the body as Table 5.
+B.3
+Extended Efficiency Analysis
+We conduct an extended cost analysis on the full GAIA dataset with Gemini-2.5-Flash to characterize
+the wall-clock and token cost of IdleSpec relative to the vanilla baseline. To obtain stable per-task
+latency measurements, all numbers in this table come from a single fixed seed run in an isolated
+environment (no co-located workloads, fixed concurrency, identical tool stack across methods).
+Table 8 reports the results across the three GAIA difficulty levels: IdleSpec matches the vanilla
+baseline in end-to-end latency at every level, while delivering consistent accuracy gains (up to +7.7
+points on Level 3).
+Like other test-time scaling approaches, IdleSpec spends additional computation to improve task
+performance. The key distinction is where this computation is placed: by scheduling drafting onto
+otherwise wasted idle periods rather than serializing it on the critical path, IdleSpec turns idle time
+into accuracy gains with only minimal end-to-end latency overhead, attaining accuracy comparable
+to test-time scaling methods while substantially shortening wall-clock time (Table 3).
+Table 8: Extended Efficiency Analysis on the Full GAIA Dataset with Gemini-2.5-Flash (single
+fixed seed, isolated environment). Per-task wall-clock latency in seconds. IdleSpec matches the
+vanilla baseline in latency while consistently improving accuracy across all three difficulty levels.
+Level
+Method
+Accuracy (%)
+Latency (s)
+Level 1
+Vanilla
+64.2
+107
++ IdleSpec
+66.0
+99
+Level 2
+Vanilla
+41.9
+191
++ IdleSpec
+46.5
+196
+Level 3
+Vanilla
+26.9
+374
++ IdleSpec
+34.6
+376
+Table 9: Generalization to Other Agent Frame-
+works. Accuracy (%) on the full GAIA dataset
+with Gemini-2.5-Flash, when integrating IdleSpec
+into SmolAgents.
+Method
+Level 1
+Level 2
+Level 3
+Avg.
+SmolAgents
+60.4
+45.3
+19.2
+41.6
++ IdleSpec
+68.0
+47.8
+30.8
+48.9
+Table 10: Sensitivity Analysis of Prompt
+Design (single fixed seed). GAIA average ac-
+curacy (%) of the Sleep-Time Compute under
+three prompt variants on Gemini-2.5-Flash.
+Prompt Variant
+Average.
+Version 1 (Original)
+44.5
+Version 2
+44.0
+Version 3
+44.0
+B.4
+Generalization to Other Agent Frameworks
+To assess whether the benefits of IdleSpec extend beyond a single agent implementation, we employ
+it in another agent stack, SmolAgents6, a widely used framework designed for flexibility and min-
+imalism. We re-implement the drafting, forecast, and aggregation modules within smolagents’s
+execution loop without changing any prompts or hyperparameters, and evaluate the resulting agent on
+the full GAIA dataset with Gemini-2.5-Flash. Table 9 shows that IdleSpec improves accuracy across
+all three difficulty levels in this stack, raising average accuracy from 41.6% to 48.9% (+7.3 points)
+and yielding the largest gain on Level 3 (+11.6 points). The pattern of improvement closely mirrors
+6https://github.com/huggingface/smolagents
+16
+
+--- PAGE 17 ---
+that observed on the OAgents stack, indicating that the gains arise from the general principle of over-
+lapping speculative reasoning with idle time rather than from any framework-specific implementation
+choice.
+B.5
+Sensitivity Analysis of Prompt Design
+Because the Sleep-Time Compute baseline relies on a prompt adapted from a math-oriented template
+(Appendix A.4), we run a sensitivity analysis to confirm that our reported numbers do not hinge
+on the particular adaptation we use. We construct three prompt variants by re-running the same
+minimal-adaptation procedure with different model families (Claude and Gemini) as the rewriter, and
+re-evaluate the Sleep-Time Compute baseline under each. Table 10 shows that the GAIA average
+stays within a 0.5-point band across the three variants (44.0–44.5%), confirming that the comparison
+against Sleep-Time Compute reported in the main paper is robust to the choice of prompt adaptation.
+B.6
+Qualitative Analysis
+We present two FRAMES tasks (Qwen3.5-4B, seed 0) on which both Vanilla and Sleep-Time
+Compute fail while IdleSpec succeeds. For each task we summarize the trajectory of every method
+in compact form (tool-call sketch, key observation, final answer) and highlight where Vanilla and
+Sleep-Time Compute diverge from the correct chain.
+Example 1: frames_3 (Compositional Sports–Temporal Reasoning).
+“As of August 1, 2024,
+which country were holders of the FIFA World Cup the last time the UEFA Champions League
+was won by a club from London?” Gold answer: France. The required chain is: (i) most recent
+London-club Champions League winner →Chelsea, May 2021; (ii) FIFA World Cup holder on that
+date →France, because France won the 2018 tournament and remained the reigning holder until
+Argentina won in December 2022 — i.e., on Chelsea’s May 2021 victory date, the trophy was still
+held by France.
+VANILLA (Pred: Argentina / GT: France)
+1. search_agent("List of UEFA Champions League winners by London clubs,
+years won, most recent victory before 2024") →“Chelsea FC ... most recent
+victory 2021.”
+2. search_agent("Which country won the FIFA World Cup in 2021?")
+→
+“No
+country won the FIFA World Cup in 2021 . . . the 2022 winner was Argentina.”
+3. final_answer("Argentina").
+Failure Mode. Vanilla collapses “World Cup holder at the time of the 2021 Champions League final”
+into “World Cup winner of 2021” and is then misled by the search agent’s correction (“... the 2022
+winner was Argentina”), committing to that without re-deriving who actually held the trophy on the
+date of the Chelsea win.
+SLEEP-TIME COMPUTE (Pred: England / GT: France)
+1-4. Four interchangeable list-the-winners queries (search_agent, web_search, wiki); all
+return empty observations.
+5. search_agent("Which London clubs have won the UEFA Champions League
+and in which years") →“Chelsea: 2012, 2021. Manchester United: 1968, 1999, 2008.”
+6. final_answer("England").
+The pre-computed inference produced by the sleep-time worker before step 6 is itself the source of the
+wrong commit:
+“Chelsea won the Champions League in 2012 and 2021 (specifically May 29, 2021).
+[...] Chelsea is a club located in London, England. Therefore, the country
+associated with the winning club is England (or United Kingdom). [...] The
+country is England.”
+Failure Mode. The sleep-time pre-computation reframes the task from “country that held the World
+Cup at the time of the 2021 Chelsea win” into “country in which the winning club is located,” and
+17
+
+--- PAGE 18 ---
+concludes the wrong country in advance. The executor, anchored to that pre-computed answer, never
+fires the World Cup hop and submits “England” — the failure is committed inside the sleep-time context,
+not in the executor’s tool use.
+IDLESPEC (Pred: France / GT: France)
+1. search_agent("When did Chelsea FC last win the UEFA Champions
+League?") →“Chelsea FC last won the UEFA Champions League in 2021.”
+2. search_agent("Who won the FIFA World Cup in 2022?") →“Argentina won the
+2022 FIFA World Cup... December 18, 2022.”
+At this idle window (after the 2022 observation), the sleep-time worker drafted two progressive and
+three recovery candidate plans in parallel. Two recovery plans flagged the exact failure that Vanilla and
+Sleep-Time Compute fall into:
+Recovery #0. “Re-evaluate the question’s intent: determine if ‘holders of the FIFA
+World Cup’ refers to the winner of the World Cup in that specific year (which would
+be none) or the winner of the World Cup ending on or before that date (i.e.,
+the 2018 tournament). Search for the FIFA World Cup winner of the last World
+Cup prior to or on the date of the 2021 Champions League victory to see which
+interpretation yields a valid answer.”
+Recovery #2. “Search for the FIFA World Cup winner of the tournament that
+concluded prior to August 1, 2024 [. . . ] specifically identifying the 2018 winner
+(France) to confirm the correct ‘holder’ status relative to the 2021 Champions
+League victory.”
+The actual observation matches both recovery assumptions (the 2022 winner does not satisfy “holder at
+the time of the 2021 Chelsea win”), so the executor adopts that gate in its next steps:
+3. search_agent("Who is the current holder of the FIFA World Cup as of
+August 1, 2024?") →“Argentina is the reigning FIFA World Cup holder...” (verifies
+that “current” holder ̸= holder at the time of the 2021 Chelsea win).
+4. search_agent("Who won the 2018 FIFA World Cup?") →“France” (executes the re-
+covery plan).
+5. final_answer("France").
+Why This Works. The injected recovery plans encode the missing semantic gate — “holder at the
+time of 2021, not winner of 2021” — and the executor’s next thought adopts the cross-check before
+committing. Vanilla collapses this gate (commits to Argentina from a 2022 hop), and Sleep-Time
+Compute never reaches the World Cup hop at all because its pre-computed inference already concluded
+the answer was the country of the club.
+Example 2: frames_25 (Date Arithmetic).
+“What was the age difference between Mike Tyson
+and Tyson Fury on the respective days on which they lost their first ever fights? Represent the figure
+in years only.” Gold answer: 12 years.
+VANILLA (Pred: 12.74 / GT: 12)
+1-4. Search for both fighters’ first-loss dates and birthdates: Tyson (1966-06-30, lost 1990-02-11),
+Fury (1988-08-12, lost 2024-05-18).
+5-6. Compute fractional ages: Tyson 23.619 years, Fury 36.356 years.
+7. final_answer(round(12.736481861738536, 2)) →12.74.
+Failure Mode. Reasoning is correct but the answer is reported as a fractional year rather than an
+integer-year difference; the question explicitly says “represent the figure in years only,” which the judge
+interprets as integer years. Vanilla never re-checks the formatting requirement before committing.
+SLEEP-TIME COMPUTE (Pred: 11 / GT: 12)
+1-8. Tool calls retrieve Tyson’s first-loss date (Feb 11, 1990) and various candidate Fury loss dates
+from search.
+18
+
+--- PAGE 19 ---
+The pre-computed inference produced by the sleep-time worker before the final action is the source of
+the wrong answer:
+“Mike Tyson’s Birth Date: March 6, 1966. ... Tyson Fury’s First Loss Date:
+Confirmed as March 24, 2023 (vs. Dmitry Bivol). Note: The previous search results
+mentioned May 18, 2024 (vs. Usyk), but that was the rematch or a subsequent loss.
+... Age: 23 years ... Age: 34 years ... Age_Fury (34) - Age_Tyson (23) = 11
+years.”
+Failure Mode. The sleep-time pre-computation hallucinates two facts. (i) Mike Tyson’s birthdate is
+reported as March 6, 1966 — the actual date is June 30, 1966; the correct value was returned by an
+earlier search but is silently overwritten in the sleep-time context. (ii) Tyson Fury never lost to Bivol;
+the May 18, 2024 Usyk fight was actually his first professional loss, but the sleep-time worker reasons
+it away as “a rematch or subsequent loss” to fit a fabricated 2023 Bivol date. The executor inherits both
+errors and the pre-computed final difference of 11 years, and submits 11 verbatim.
+IDLESPEC (Pred: 12 / GT: 12)
+1-7. Tool calls retrieve and verify both first-loss dates (Tyson Feb 11, 1990; Fury May 18, 2024)
+and both birthdates (Tyson June 30, 1966; Fury August 12, 1988).
+At this idle window, the sleep-time worker drafts plans that explicitly fix the arithmetic template and the
+formatting requirement:
+Progressive #0. “Once the verification confirms May 18, 2024 as the first loss
+date, calculate the exact ages of both fighters on those respective dates using their
+verified birth dates (June 30, 1966 for Tyson; August 12, 1988 for Fury). Compute
+the difference between the two ages and provide the final answer in years only,
+ensuring the calculation accounts [for whether the birthday has passed].”
+The plan pins three things that the other two methods miss: (a) the correct Tyson birthdate (June 30, not
+the hallucinated March 6 used by Sleep-Time Compute), (b) a symmetric “compute integer age on each
+loss date” template, and (c) the explicit “in years only” formatting requirement.
+8. Final code applies the template verbatim, prints integer ages 22 and 34, and submits
+final_answer(12).
+Why This Works. The injected plan turns the failure modes of the other two methods into pinned
+constraints in the executor’s context: the pre-verified birthdates close the door on Sleep-Time Compute’s
+hallucination, and the explicit “years only” instruction closes the door on Vanilla’s float-precision
+formatting. Neither gate is created mid-step; both come from plans drafted in the prior idle window.
+Example 3: GAIA 56137764 (Pivoting to a Different Retrieval Strategy).
+“Which contributor
+to the version of OpenCV where support was added for the Mask-RCNN model has the same name
+as a former Chinese head of government when the names are transliterated to the Latin alphabet?”
+Gold answer: Li Peng (Premier of the PRC, 1987–1998). The required chain is: (i) identify the
+OpenCV release that added Mask-RCNN →4.0.0; (ii) retrieve the full contributor list for that release;
+(iii) retrieve the list of former Chinese premiers/presidents in standard Pinyin; (iv) cross-reference the
+two lists. The trap is that a casual reading of the question pulls the agent toward “find the commit
+author of the Mask-RCNN PR,” which is a strict subset of the contributor list and which does not
+contain the gold answer.
+VANILLA (Pred: Vadim Pisarevsky / GT: Li Peng; 16 steps)
+1-3. search_agent for “OpenCV Mask-RCNN commit author” returns “Dmitry Lychak.” The
+agent commits to the framing “find the single PR/commit author whose name matches a
+Chinese premier.”
+4-13 Eleven further search_agent calls, each a slight variant of “OpenCV Mask-RCNN commit
+author / PR / release-notes,” return mutually inconsistent names: “Sunita Nayak,” “Alexander
+Mordvintsev,” “Tim M.,” “dkurt (Dmitry Kurtaev),” “Dmitry Khitrov.” The Thought field
+repeatedly says “conflicting information ...
+let me try a different approach,” but each
+“different approach” is another commit-author search.
+19
+
+--- PAGE 20 ---
+14-16. The agent gives up on the search and falls back to prior knowledge, submitting
+final_answer("Vadim Pisarevsky") — a well-known OpenCV co-founder, but never a
+Chinese premier.
+Failure Mode. Vanilla locks in the wrong task framing on step 1 (“find the commit author”) and never
+widens the retrieval to the full contributor set. Each of the 11 follow-up searches reuses the same
+template; the conflicting answers are read as “the search agent is unreliable” rather than as a signal that
+the framing itself is wrong, so the agent stays inside the same approach until step exhaustion forces a
+hallucinated commit.
+SLEEP-TIME COMPUTE (Pred: Li Peng / GT: Li Peng; 9 steps)
+1. search_agent("OpenCV Mask-RCNN support added version contributor")
+→
+partial release-note information.
+The pre-computed sleep-time inference at this point speculatively enumerates plausible Chinese premier
+names alongside OpenCV-related names, producing a long “maybe the matching contributor is one of:
+Li Peng, Li Keqiang, Zhou Enlai, ...” paragraph. The executor copies that enumeration directly into
+the next query:
+2-8. search_agent("OpenCV Mask-RCNN contributor Li Keqiang Li Peng Zhou
+Enlai") and several variants. After enough such queries, “Li Peng” is confirmed to appear
+in the OpenCV 4.0.0 contributor list.
+9. final_answer("Li Peng").
+Mode. Sleep-Time Compute happens to land on the gold answer in 2 of 3 seeds because its pre-
+inference dumps a list of candidate Chinese names into context and the executor gets to verify them by
+name-matching. The mechanism is search-by-guessing rather than a structured pivot: across seeds, the
+same prompt sometimes lists the right names, sometimes does not (seed 2 returns “Unable to determine”
+after 16 steps).
+IDLESPEC (Pred: Li Peng / GT: Li Peng; 5 steps)
+1. search_agent("OpenCV version added Mask-RCNN model support") →“Mask-
+RCNN was added in OpenCV 4.0.0.”
+At the idle window during step 1’s search execution, the sleep-time worker frames the next sub-goal as
+“retrieve the contributor list of that release” rather than “find the Mask-RCNN commit author” — so the
+alternative framing that traps Vanilla is never even drafted. The selected plan reads:
+Progressive #0. “Once the search agent returns the specific OpenCV version
+number, the next sub-goal is to search for the list of contributors or authors
+specifically for that release version. After obtaining the contributor list, verify
+that the data includes names in a standard transliterated format (e.g., Pinyin) to
+facilitate comparison with former Chinese heads of government before proceeding
+to the cross-referencing step.”
+This is the single decisive intervention of the run: it flips the retrieval scope from “the commit author”
+(Vanilla’s permanent trap) to “the full contributor set,” before the executor commits to its second action.
+The executor follows the plan exactly:
+2. search_agent("OpenCV 4.0.0 contributors list") →broad list including “Alexan-
+der Alekhin, Dmitry Kurtaev, Hamdi Sahloul, Maksim Shabunin, . . . , Li Peng, . . . ”
+3. search_agent("list of former Chinese prime ministers premier names
+transliterated to Latin alphabet") →Pinyin list.
+At the next idle window (during step 3’s search), the selected plan closes the task with an explicit
+string-match-then-commit gate, and even pre-enumerates the right candidate name:
+Progressive #3. “Perform a case-insensitive string match between these names
+and the OpenCV 4.0.0 contributor list, specifically checking names like “Li Peng”,
+“Wu Zhiwen,” “Kuang Fangjun.” If a match is found, verify it against the original
+contributor list, then use final_answer to provide the matching name.”
+4. Inline cross-reference between the two lists prints “Li Peng” as the unique match.
+5. final_answer("Li Peng").
+20
+
+--- PAGE 21 ---
+Why This Works. The decisive contribution is the first idle window’s plan, which widens retrieval
+scope before the second action is chosen — once the executor’s step 2 query is “contributors list of
+4.0.0” instead of “commit author of the Mask-RCNN PR,” the cross-reference and commit steps follow
+on a short straight path. The next two idle windows then narrow the corridor (cross-reference axis, then
+commit gate) so no post-evidence loop is possible. Across all three seeds IdleSpec converges to “Li
+Peng” (3/3); Sleep-Time Compute converges by guessing and is correct only 2/3, while Vanilla never
+escapes the commit-author framing (0/3).
+21
+
+--- PAGE 22 ---
+C
+Prompt Templates
+We provide here the full text of the prompts referenced in Appendix A.4. Figures 5–8 list the
+four prompts used by IdleSpec (progressive drafting, recovery drafting, forecast, aggregation), and
+Figures 9–10 list the prompts used by the Sequential Revision and Sleep-Time Compute baselines.
+Progressive drafting prompt
+You are an expert AI assistant tasked with generating the most effective and efficient NEXT ACTION
+STEP to take after the current action step completes and its observation becomes available.
+The current action step is running in parallel. You will not see the observation yet; assume it will arrive
+and will be used to decide the next step.
+If plan_history is non-empty, target a different sub-goal from those already proposed.
+Plan history: [{prior draft 1}, ..., {prior draft K}]
+Figure 5: Progressive drafting prompt used by IdleSpec to speculatively generate the next action
+while the current tool call is in flight.
+Recovery drafting prompt
+You are an expert AI assistant tasked with generating a RECOVERY strategy while the current action
+step is executing.
+Assume that the current action step fails to make progress or gets stuck. Propose EXACTLY one distinct
+recovery plan that takes a different approach from what has already been tried.
+If plan_history is non-empty, choose a meaningfully different angle — different evidence source,
+different verification strategy, or different decomposition.
+Plan history: [{prior draft 1}, ..., {prior draft K}]
+Figure 6: Recovery drafting prompt used by IdleSpec to draft an alternative plan that diverges from
+the current trajectory in case the in-flight step fails.
+Forecast prompt
+You are a forecast module that evaluates whether the agent’s current action step is making forward
+progress toward solving the Task, and decides which strategy the agent should take next.
+The goal is to assess the current progress state and output a single decision: whether the agent should
+continue with a PROGRESSIVE strategy or switch to a RECOVERY strategy.
+STRATEGY SEMANTICS:
+• PROGRESSIVE: The agent is making meaningful forward progress. Assume the current
+trajectory is valid and focus on exploitation by continuing or refining the existing plan with
+minimal deviation.
+• RECOVERY: The agent appears stalled, misguided, or unproductive. Assume the current
+trajectory may be flawed and encourage exploration by deviating from the existing plan,
+considering alternative approaches or corrective actions not previously explored.
+Figure 7: Forecast prompt used by IdleSpec after the observation arrives to choose between the
+progressive and recovery candidates.
+22
+
+--- PAGE 23 ---
+Aggregation prompt
+The following are candidate plans generated for the next step:
+Plan 1: {candidate plan 1}
+Plan 2: {candidate plan 2}
+...
+Plan N: {candidate plan N}
+Based on the observation, you may use these plans as starting points, but you are free to synthesize a
+different or improved next step if none of them fit well.
+Figure 8: Aggregation prompt that consumes the candidate plans together with the just-arrived
+observation and produces the final next step.
+Sequential Revision
+You are an expert AI assistant tasked with reflecting on the latest action’s Observation to propose the
+most effective NEXT STEP.
+You will be provided with:
+• the user’s instructions
+• the current action and its Observation
+• recent action/observation history
+Your goal is to produce a concise, actionable reflection that helps the agent decide what to do next.
+Figure 9: Sequential Revision prompt. The model reflects on the executed action and its observation
+to propose the next step.
+Sleep-Time Compute
+You will be given part of a complex problem or task scenario. You will receive the rest of the problem
+later.
+Make as many inferences as possible about the part of the problem you are given so as to help yourself
+resolve the full problem more quickly once it is given to you later.
+You should try to predict possible ways the rest of the scenario might go and generate insights, structural
+frameworks, or intermediate steps that could be helpful for reaching the final goal more quickly once
+the rest of the problem is given.
+Figure 10: Sleep-Time Compute prompt. The model is asked to pre-compute inferences and
+intermediate insights from a partially revealed problem during idle periods, which can later be
+reused once the full problem becomes available.
+23

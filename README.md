@@ -10,8 +10,8 @@
 <span style="color: #a78bfa;">║</span>   <span style="color: #38bdf8;">███████╗   ██║   ██║  ██║██║  ██║</span>                           <span style="color: #a78bfa;">║</span>
 <span style="color: #a78bfa;">║</span>   <span style="color: #34d399;">╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝</span>                           <span style="color: #a78bfa;">║</span>
 <span style="color: #a78bfa;">║</span>                                                              <span style="color: #a78bfa;">║</span>
-<span style="color: #a78bfa;">║</span>   <span style="color: #94a3b8;">Personal Superintelligent AI Research Agent</span>                 <span style="color: #a78bfa;">║</span>
-<span style="color: #a78bfa;">║</span>   <span style="color: #64748b;">v7.2.1-Ultra · 87+ packages · 380+ tests · 35+ Phases · 33+ Ultra Plans · 11 Research Streams</span>          <span style="color: #a78bfa;">║</span>
+<span style="color: #a78bfa;">║</span>   <span style="color: #94a3b8;">Multi-Agent Omni-Agent Harness</span>                 <span style="color: #a78bfa;">║</span>
+<span style="color: #a78bfa;">║</span>   <span style="color: #64748b;">MIT · Python/TypeScript · 5/28 workstreams · 9-month upgrade plan</span>          <span style="color: #a78bfa;">║</span>
 <span style="color: #a78bfa;">╚══════════════════════════════════════════════════════════════╝</span>
 </pre>
 
@@ -20,50 +20,75 @@
 <p align="center">
   <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=1e1e2e" alt="Python" /></a>
   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.3%2B-3178C6?style=for-the-badge&logo=typescript&logoColor=white&labelColor=1e1e2e" alt="TypeScript" /></a>
-  <a href=""><img src="https://img.shields.io/badge/version-7.2.1_Ultra_Upgrade-8b5cf6?style=for-the-badge&labelColor=1e1e2e" alt="Version" /></a>
+  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-v3.0--planned-8b5cf6?style=for-the-badge&labelColor=1e1e2e" alt="Version" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge&labelColor=1e1e2e" alt="License" /></a>
-  <a href="packages/"><img src="https://img.shields.io/badge/packages-87+-f97316?style=for-the-badge&labelColor=1e1e2e" alt="Packages" /></a>
-  <a href=""><img src="https://img.shields.io/badge/tests-380+-22c55e?style=for-the-badge&labelColor=1e1e2e" alt="Tests" /></a>
+  <a href="docs/"><img src="https://img.shields.io/badge/docs-50%2B_files-f97316?style=for-the-badge&labelColor=1e1e2e" alt="Docs" /></a>
+  <a href="docs/lyra-upgrade/research/"><img src="https://img.shields.io/badge/research-340%2B_sources-10b981?style=for-the-badge&labelColor=1e1e2e" alt="Research" /></a>
 </p>
 
 <p align="center">
-  <a href="docs/roadmap.md"><img src="https://img.shields.io/badge/AGI_Blueprint-35%2B_Phases-ec4899?style=for-the-badge&labelColor=1e1e2e" alt="AGI Blueprint" /></a>
-  <a href="docs/research/papers.md"><img src="https://img.shields.io/badge/Research-100%2B_papers_|_80%2B_repos-10b981?style=for-the-badge&labelColor=1e1e2e" alt="Research" /></a>
-  <a href="plans/README.md"><img src="https://img.shields.io/badge/Ultra_Plans-33%2B-f472b6?style=for-the-badge&labelColor=1e1e2e" alt="Ultra Plans" /></a>
-  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/build-AGI_Ascent-7c3aed?style=for-the-badge&labelColor=1e1e2e" alt="Build" /></a>
-  <a href="docs/research/MASTER-PLAN-2026-05-30.md"><img src="https://img.shields.io/badge/Ultra_Research-10/11_Streams-f97316?style=for-the-badge&labelColor=1e1e2e" alt="Ultra Research" /></a>
+  <a href="docs/lyra-upgrade/BASELINE.md"><img src="https://img.shields.io/badge/Baseline-5_/_28_workstreams-f97316?style=for-the-badge&labelColor=1e1e2e" alt="Baseline" /></a>
+  <a href="docs/lyra-upgrade/MASTER-PLAN.md"><img src="https://img.shields.io/badge/Roadmap-4_Phases_·_9_Months-8b5cf6?style=for-the-badge&labelColor=1e1e2e" alt="Roadmap" /></a>
+  <a href="docs/research/papers/"><img src="https://img.shields.io/badge/Research-100%2B_papers_|_80%2B_repos-10b981?style=for-the-badge&labelColor=1e1e2e" alt="Research" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge&labelColor=1e1e2e" alt="License" /></a>
 </p>
 
 <p align="center">
-  <b>Multi-agent orchestration. Deep reasoning. 7-layer Safety. 7-tier Memory V4.<br>
-  Cognitive-executive separation. Latent-space agent communication. Dream consolidation.<br>
-  99 composable packages. 16+ LLM providers. 67-skill ecosystem. Swarm architecture. Self-evolving harness.<br>
-  <span style="color: #f97316;">Ultra Upgrade shipped: 11 feature commits, 87+ packages, 380+ tests, 7 new packages, 9 skill packs<br>v7.2.1 — AVP anonymization, Collusion defense, Field memory, Tiered orchestrator, Self-evolving skills, Steering engine</span></b>
+  <b>Multi-agent orchestration harness. Working: agent core, skills registry, hook system, memory (STM/LTM), coordination.<br>
+  Building: model routing, graph memory, tools, fleet, voice, desktop, self-evolution, adversarial safety.<br>
+  MIT-licensed. Python + TypeScript. Research-backed. 5 of 28 workstreams live.<br></b>
 </p>
 
 <p align="center">
-  <a href="#quickstart"><b>Quickstart</b></a> ·
+  <a href="#what-is-lyra"><b>What Lyra Is</b></a> ·
   <a href="#architecture"><b>Architecture</b></a> ·
+  <a href="#current-capabilities"><b>Capabilities</b></a> ·
+  <a href="#roadmap--4-phases-9-months"><b>Roadmap</b></a> ·
   <a href="#innovations"><b>Innovations</b></a> ·
-  <a href="#upgrade-plans"><b>Upgrade Plans</b></a> ·
-  <a href="#ultra-plans"><b>Ultra Plans</b></a> ·
-  <a href="#package-catalog"><b>Packages</b></a> ·
-  <a href="#color-themes"><b>Themes</b></a> ·
-  <a href="docs/CONTRIBUTING.md"><b>Contributing</b></a> ·
-  <a href="CHANGELOG.md"><b>Changelog</b></a>
+  <a href="#quickstart"><b>Quickstart</b></a> ·
+  <a href="#documentation"><b>Docs</b></a>
 </p>
 
 ---
 
 <table width="100%"><tr><td style="background: linear-gradient(135deg, #7c3aed15, #a78bfa10, #38bdf810); border-left: 4px solid #8b5cf6; padding: 16px 20px; border-radius: 0 8px 8px 0;">
 
-## What is Lyra?
+## 🎯 What is Lyra?
 
-Lyra is a **production-grade agent platform** that researches, codes, tests, reviews, and evolves — autonomously or as your pair-programming teammate. It combines techniques from 100+ research papers and 80+ open-source agent frameworks into a unified, extensible system.
+**Lyra is an MIT-licensed, terminal-based, multi-agent omni-agent harness** — a research platform for orchestrating specialized agents, skills, and tools to automate software engineering workflows. It combines inspiration from 100+ research papers and 80+ open-source agent frameworks into an extensible monorepo.
 
-Unlike thin API wrappers, Lyra ships with a **kernel-enforced TDD gate**, **Phoenix 5-tier Memory with Symbolic SSM (61% token reduction) and Entropic Dream consolidation**, **SkillOpt text-space skill optimization (+23.5pts)**, **Two-Circuit Architecture (Hot/Cold path)**, **64-skill catalog across 9 domains**, **multi-agent swarm with Raft/Byzantine/Gossip consensus**, **AlphaEvolve dual-model evolutionary loop**, **automatic prompt and harness evolution**, **RecursiveLink latent-space agent communication**, **Parallax-style cognitive-executive safety separation**, **SR2AM self-regulated planning**, **ARIS cross-model adversarial review**, **zero-trust agent federation**, **12 color themes with voice/sound packs**, **40+ keybindings with vim mode**, **40-tool Claude Code-compatible tool suite**, **MCP integration with OAuth 2.0**, **31-hook lifecycle system**, **plugin architecture with marketplace**, **cascade model routing with provider fallback**, and a **Claude Code-style terminal interface** — all wired together through an observable, auditable event stream.
+**CURRENT STATE** — Lyra has working foundations in 5 of 28 workstreams (assessed June 2026):
+- Agent orchestration (PrimaryAgent + specialist agents) and a unified agent registry
+- Skill registry with YAML-frontmatter skills and trigger-based matching
+- STM/LTM memory with JSON persistence and tag/time indexing
+- Hook lifecycle system (PreToolUse, PostToolUse, Stop)
+- Coordination primitives (task allocation, dependency management)
+
+Every other workstream (model routing, semantic memory, tools, MCP, autonomous operation, voice, desktop, safety infrastructure, planning, etc.) is yet to be built. The [Current Capabilities](#current-capabilities) section has the honest scorecard.
+
+**PLANNED TARGET** — A 4-phase, 9-month upgrade toward a provider-swappable, fleet-capable, self-improving omni-agent with graph memory [MAGMA [[arXiv:2601.03236]](https://arxiv.org/abs/2601.03236)], adversarial verification [ARIS [[arXiv:2505.24168]](https://arxiv.org/abs/2505.24168)], voice I/O, dynamic workflows, and field-theoretic memory consolidation. See the [Roadmap](#roadmap) section and [`lyra-upgrade/`](docs/lyra-upgrade/) for the full research corpus and implementation plans.
+
+### Key Takeaways
+
+| # | Takeaway |
+|---|----------|
+| 1 | **5/28 workstreams live** -- AgentLoop, skills, STM/LTM memory, hooks, and coordination primitives work today. Everything else is on a defined 4-phase, 9-month roadmap. |
+| 2 | **100+ papers + 80+ repos absorbed** -- Every technique traces to a source paper with arXiv ID and absorption mode. No hand-wavy "inspired by." |
+| 3 | **Provider-swappable by design** -- 16+ LLM providers through a unified interface with intelligent routing. Zero vendor lock-in. |
+| 4 | **Safety-first architecture** -- Cognitive-executive separation (98.9% block rate), multi-agent verification, 7-layer defense-in-depth. |
+| 5 | **Self-evolving harness** -- GEPA v2, AEvo, and Meta-Harness loops continuously improve prompts AND harness code. The system optimizes itself. |
 
 </td></tr></table>
+
+---
+
+## 📌 Key Takeaways
+
+- **Research-backed architecture**: Lyra absorbs 100+ papers and 80+ repos into an extensible monorepo. Every novel technique traces to its source paper with a documented absorption matrix.
+- **Working now (5/28 workstreams)**: Agent orchestration, skill registry (75+ skills), STM/LTM memory, hook lifecycle, coordination primitives. Everything else is planned across a 4-phase, 9-month roadmap.
+- **Architectural safety by default**: Parallax cognitive-executive separation (98.9% block rate) ensures reasoning contexts have zero tool access -- no prompt-level safety band-aids.
+- **99 composable packages**: Each capability is an isolated package with its own `pyproject.toml`, tests, and README. Compose what you need, nothing more.
+- **Self-evolution pipeline**: GEPA v2 prompt optimizer (ICLR 2026 Oral) + AEvo meta-editor + Meta-Harness loop continuously improve both prompts AND harness code.
 
 ---
 
@@ -97,7 +122,7 @@ graph TB
         Reasoning["<b>Deep Reasoning</b><br/>CoT · Tree Search · SR2AM"]
         Research["<b>Research Pipeline</b><br/>10-step · 7+ sources · AutoScientists"]
         Evolution["<b>Self-Evolution</b><br/>GEPA v2 · AEvo · Meta-Harness"]
-        Memory["<b>7-Tier Memory V4</b><br/>MAGMA 4-graph · RecMem · RRF"]
+        Memory["<b>6-Tier Memory V4</b><br/>MAGMA 4-graph · RecMem · RRF"]
         RecursiveLink["<b>RecursiveLink</b><br/>Latent-space · 75.6% reduction"]
         Context["<b>5-Layer Context Engine</b><br/>FS-as-Context · Mermaid · L0-L3"]
     end
@@ -246,7 +271,7 @@ sequenceDiagram
     CLI-->>User: "Done. 3 files changed ✓"
 ```
 
-### Memory Hierarchy (7-Tier Ultra Memory V4 with MAGMA 4-Graph)
+### Memory Hierarchy (6-Tier Ultra Memory V4 with MAGMA 4-Graph)
 
 ```mermaid
 %%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#7c3aed', 'lineColor': '#6366f1', 'fontSize': '13px'}, 'flowchart': {'nodeSpacing': 20, 'rankSpacing': 40}}}%%
@@ -450,7 +475,7 @@ graph TB
     style S8 fill:#f9731608,stroke:#fb923c,stroke-width:2px
 ```
 
-> 8 S-tier breakthroughs identified across 11 research streams (150+ sources, 11,276+ lines). Full roadmap in [`MASTER-PLAN-2026-05-30.md`](docs/research/MASTER-PLAN-2026-05-30.md).
+> 8 S-tier breakthroughs identified across 11 research streams (150+ sources, 11,276+ lines). Full roadmap in [`MASTER-PLAN.md`](docs/lyra-upgrade/MASTER-PLAN.md).
 
 ### Self-Evolving Harness Pipeline
 
@@ -578,11 +603,278 @@ graph TB
     style AGI fill:#ec489908,stroke:#f472b6,stroke-width:2px
 ```
 
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #f97316, #ef4444, #ec4899); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
+
+## <span style="color: #fb923c;">📋 Current Capabilities</span>
+
+</td></tr></table></td></tr></table>
+
+Honest assessment of what Lyra has today (June 2026). 5 workstreams at `partial`, the rest at `none`. Every gap is documented in the [Master Plan](docs/lyra-upgrade/MASTER-PLAN.md) with prioritized fixes.
+
+<table>
+<tr style="background: #f9731620;">
+<th style="color: #fb923c;">Workstream</th><th style="color: #fb923c;">What Exists Today</th><th style="color: #fb923c;">Maturity</th>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>§4.1 UI/UX</b></td>
+<td style="color: #94a3b8;">Basic terminal output; no themes, no keybindings config</td>
+<td><img src="https://img.shields.io/badge/none-ef4444?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>§4.2 Memory</b></td>
+<td style="color: #94a3b8;">STM (ring buffer) + LTM (JSON file) + tag/time index; per-agent, no shared memory; simple keyword search</td>
+<td><img src="https://img.shields.io/badge/partial-fbbf24?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>§4.3 Context</b></td>
+<td style="color: #94a3b8;">No auto-compaction; STM is a simple ring buffer</td>
+<td><img src="https://img.shields.io/badge/none-ef4444?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>§4.4 Skills</b></td>
+<td style="color: #94a3b8;">Skill dataclass + YAML parser + in-memory registry; trigger-pattern matching; ECC import</td>
+<td><img src="https://img.shields.io/badge/partial-fbbf24?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>§4.5 Router</b></td>
+<td style="color: #94a3b8;">No model router exists; single hardcoded model</td>
+<td><img src="https://img.shields.io/badge/none-ef4444?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>§4.6 Tools</b></td>
+<td style="color: #94a3b8;">No tool system beyond abstract Tool dataclass in adapters</td>
+<td><img src="https://img.shields.io/badge/none-ef4444?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>§4.10 Hooks</b></td>
+<td style="color: #94a3b8;">HookEngine + HookRegistry; async execution; critical-hook abort</td>
+<td><img src="https://img.shields.io/badge/partial-fbbf24?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>§4.13 Swarm/Fleet</b></td>
+<td style="color: #94a3b8;">Single-process, in-memory orchestration; TaskAllocator exists; no worktree isolation</td>
+<td><img src="https://img.shields.io/badge/partial-fbbf24?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>§4.17 Safety</b></td>
+<td style="color: #94a3b8;">AgentShield stub; basic rule-based secret detection</td>
+<td><img src="https://img.shields.io/badge/partial-fbbf24?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>§4.24 Dreaming</b></td>
+<td style="color: #94a3b8;">MemoryConsolidator with THRESHOLD policy; basic merge_similar</td>
+<td><img src="https://img.shields.io/badge/partial-fbbf24?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #64748b;"><b>All other §4.x workstreams</b></td>
+<td style="color: #64748b;">MCP, Plugins, Sessions, Permissions, Autonomy, Deep Research, Reliability, Voice, Self-knowledge, Planning, Economics, Steering, Ingestion, Adversarial, Harness Engineering, RL Optimizer, Desktop</td>
+<td><img src="https://img.shields.io/badge/none-ef4444?style=flat-square"></td>
+</tr>
+</table>
+
+> Lyra is **2-4 years behind the frontier** on every dimension except agents (partial) and hooks (partial). The upgrade research in [`lyra-upgrade/`](docs/lyra-upgrade/) identifies exactly what to build and in what order.
+
+### 📚 Family Docs — Every Workstream Has Deep Documentation
+
+Each capability has a **family** of docs at increasing depth:
+
+| Workstream | 💡 Concept | 🔧 Block | 📖 Guide | 🏗️ Architecture | 📋 Plan |
+|-----------|-----------|---------|---------|---------------|--------|
+| **Agent Loop** | [concept](docs/concepts/01-agent-loop.md) | [block](docs/blocks/01-agent-loop.md) | [guide](docs/guides/01-agent-execution.md) | — | [plan](docs/lyra-upgrade/plans/14-autonomy.md) |
+| **Memory** | [concept](docs/concepts/06-memory-tiers.md) | [block](docs/blocks/03-memory.md) | [guide](docs/guides/02-memory-and-context.md) | [arch](docs/architecture/02-memory-architecture.md) | [plan](docs/lyra-upgrade/memory-architecture.md) |
+| **Context** | [concept](docs/concepts/07-context-engine.md) | [block](docs/blocks/02-context-engine.md) | [guide](docs/guides/02-memory-and-context.md) | — | [plan](docs/lyra-upgrade/plans/03-context-compaction.md) |
+| **Skills** | [concept](docs/concepts/03-skills.md) | — | [guide](docs/guides/03-skills-and-evolution.md) | [arch](docs/architecture/06-skills-system.md) | [plan](docs/lyra-upgrade/brainstorm/04-skills.md) |
+| **Model Router** | [concept](docs/concepts/10-two-tier-routing.md) | — | [guide](docs/guides/06-model-routing.md) | [arch](docs/architecture/09-model-router.md) | [plan](docs/lyra-upgrade/plans/05-model-router.md) |
+| **Swarm/Fleet** | [concept](docs/concepts/04-subagents.md) | [block](docs/blocks/07-dag-teams.md) | [guide](docs/guides/04-fleet-orchestration.md) | [arch](docs/architecture/04-fleet-supervisor.md) | [plan](docs/lyra-upgrade/plans/13-swarm-fleet.md) |
+| **Workflows** | — | [block](docs/blocks/08-subagent-worktree.md) | [guide](docs/guides/04-fleet-orchestration.md) | [arch](docs/architecture/05-workflow-engine.md) | [plan](docs/lyra-upgrade/plans/13-swarm-fleet.md) |
+| **Safety** | [concept](docs/concepts/11-safety-monitor.md) | [block](docs/blocks/12-safety-monitor.md) | [guide](docs/guides/05-safety-and-permissions.md) | [arch](docs/architecture/08-safety-security.md) | [plan](docs/lyra-upgrade/plans/17-safety.md) |
+| **Permissions** | [concept](docs/concepts/09-permission-bridge.md) | [block](docs/blocks/05-permission-bridge.md) | [guide](docs/guides/05-safety-and-permissions.md) | — | [plan](docs/lyra-upgrade/plans/12-permissions.md) |
+| **Verifier** | [concept](docs/concepts/12-verifier.md) | [block](docs/blocks/10-verifier.md) | [guide](docs/guides/07-research-and-verification.md) | — | [plan](docs/lyra-upgrade/plans/25-adversarial-panel.md) |
+| **Observability** | [concept](docs/concepts/13-observability.md) | [block](docs/blocks/11-observability.md) | [guide](docs/guides/07-research-and-verification.md) | — | [plan](docs/lyra-upgrade/plans/16-reliability.md) |
+| **Voice** | — | — | [guide](docs/guides/08-voice-and-multimodal.md) | [arch](docs/architecture/07-voice-pipeline.md) | [plan](docs/lyra-upgrade/plans/18-voice-mode.md) |
+| **Desktop** | — | — | [guide](docs/guides/08-voice-and-multimodal.md) | — | [plan](docs/lyra-upgrade/plans/28-desktop.md) |
+| **Deep Research** | — | — | [guide](docs/guides/07-research-and-verification.md) | — | [plan](docs/lyra-upgrade/plans/15-deep-research.md) |
+| **Tools & MCP** | [concept](docs/concepts/02-tools-and-hooks.md) | [block](docs/blocks/09-mcp-adapter.md) | [guide](docs/guides/09-tools-and-integrations.md) | — | [plan](docs/lyra-upgrade/plans/06-tools.md) |
+| **Hooks & TDD** | [concept](docs/concepts/02-tools-and-hooks.md) | [block](docs/blocks/06-hooks-tdd.md) | — | — | [plan](docs/lyra-upgrade/plans/10-hooks.md) |
+| **Planning** | [concept](docs/concepts/05-plan-mode.md) | [block](docs/blocks/04-plan-mode.md) | — | — | [plan](docs/lyra-upgrade/plans/20-planning.md) |
+| **Sessions** | [concept](docs/concepts/08-sessions-and-state.md) | — | — | — | [plan](docs/lyra-upgrade/plans/14-autonomy.md) |
+| **Prompt Cache** | [concept](docs/concepts/14-prompt-cache-coordination.md) | — | — | — | — |
+| **ReasoningBank** | [concept](docs/concepts/15-reasoning-bank.md) | — | — | — | — |
+| **Worktree Isolation** | — | [block](docs/blocks/08-subagent-worktree.md) | — | [arch](docs/architecture/10-worktree-isolation.md) | — |
+| **Provider Abstraction** | — | — | — | [arch](docs/architecture/03-provider-abstraction.md) | [plan](docs/lyra-upgrade/plans/05-model-router.md) |
+| **Ultracode Replication** | — | — | — | [arch](docs/architecture/01-ultracode-replication.md) | [plan](docs/lyra-upgrade/plans/13-swarm-fleet.md) |
+| **Dreaming** | — | — | [guide](docs/guides/02-memory-and-context.md) | — | [plan](docs/lyra-upgrade/plans/24-dreaming.md) |
+| **Self-Evolution** | — | — | [guide](docs/guides/03-skills-and-evolution.md) | — | [plan](docs/lyra-upgrade/plans/27-rl-optimizer.md) |
+
+> **Reading path:** 💡 Concept (what/why) → 🔧 Block (how) → 📖 Guide (overview) → 🏗️ Architecture (deep ref) → 📋 Plan (build spec)
+
+### 🗓️ Roadmap Timeline
+
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': {'cScale0': '#3b82f6', 'cScale1': '#7c3aed', 'cScale2': '#10b981', 'cScale3': '#f97316', 'fontSize': '12px'}}}%%
+gantt
+    title Lyra 4-Phase Upgrade Roadmap
+    dateFormat  YYYY-MM
+    axisFormat  %b
+
+    section Phase 1 — Foundation
+    Model Router + Providers          :p1a, 2026-06, 2M
+    Semantic Memory (BM25+Vector)     :p1b, 2026-06, 2M
+    Skill Catalog (330+)              :p1c, 2026-07, 1M
+    Core Tools + Hooks                :p1d, 2026-07, 1M
+    Permission Bridge                 :p1e, 2026-07, 1M
+    Worktree Isolation                :p1f, 2026-08, 1M
+
+    section Phase 2 — Graph + Workflows
+    Graph Memory + LP-RAG             :p2a, 2026-08, 2M
+    Dynamic Workflow Engine           :p2b, 2026-08, 2M
+    Context Compaction                :p2c, 2026-09, 1M
+    Observability + Tracing           :p2d, 2026-09, 1M
+    MCTS Planning                     :p2e, 2026-10, 1M
+    Deep Research Pipeline            :p2f, 2026-10, 1M
+
+    section Phase 3 — Fleet + Voice
+    Supervisor Daemon + Fleet TUI     :p3a, 2026-10, 2M
+    Continuous Operation Loop         :p3b, 2026-11, 1M
+    Voice (Push-to-Talk)              :p3c, 2026-11, 1M
+    Dream Consolidation               :p3d, 2026-12, 1M
+    MCP Server Integration            :p3e, 2026-12, 1M
+    Session Checkpointing             :p3f, 2027-01, 1M
+
+    section Phase 4 — Self-Evolution + Desktop
+    Adversarial Verification          :p4a, 2027-01, 1M
+    GEPA/AEvo Evolution               :p4b, 2027-01, 1M
+    Self-Evolving Skills              :p4c, 2027-02, 1M
+    lyra-desktop GUI                  :p4d, 2027-02, 1M
+    Defense-in-Depth Safety           :p4e, 2027-03, 1M
+    Full-Duplex Voice                 :p4f, 2027-03, 1M
+```
+
+### 📊 Maturity Summary
+
+| Category | Workstreams | Maturity | Impact Priority |
+|---|---|---|---|
+| 🧠 Agent orchestration | AgentLoop, TDD gate, HIR, Pivot/Refine | ✅ partial | Foundation (live) |
+| 🛠️ Skills | SYAML parser, 64+ skills, trigger matching | ✅ partial | Foundation (live) |
+| 💾 Memory (STM/LTM) | Ring buffer, JSON persistence, tag index | ✅ partial | Foundation (live) |
+| 🌐 Router | None (single hardcoded model) | ❌ none | **Phase 1 (critical)** |
+| 🔧 Tools | Abstract Tool dataclass only | ❌ none | **Phase 1 (critical)** |
+| 🔐 Permissions | None | ❌ none | **Phase 1 (critical)** |
+| 🏗️ Fleet/Swarm | In-memory orchestration only | ❌ none | **Phase 2 (high)** |
+| 📊 Observability | None (HIR exists but no tracing) | ❌ none | **Phase 2 (high)** |
+| 🧪 Context | No auto-compaction | ❌ none | **Phase 2 (high)** |
+| 🎤 Voice | None | ❌ none | **Phase 3 (medium)** |
+| 🔄 Self-evolution | None | ❌ none | **Phase 4 (niche)** |
+| 🛡️ Safety (Depth) | AgentShield stub only | ❌ none | **Phase 4 (niche)** |
+
+**Maturity scale:** ✅ partial = works with gaps; ❌ none = not started; foundational work prioritized first.
+
+---
+
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #3b82f6, #06b6d4, #10b981); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
+
+<a name="roadmap--4-phases-9-months"></a>
+
+## <span style="color: #22d3ee;">🗺️ Roadmap — 4 Phases, 9 Months</span>
+
+</td></tr></table></td></tr></table>
+
+Based on the [Master Plan](docs/lyra-upgrade/MASTER-PLAN.md) (June 2026). Each phase builds on the previous.
+
+### Phase 1 — Foundation (Months 1-2): "Useful Single-Session Lyra"
+
+| Priority | Workstream | Deliverable |
+|----------|-----------|-------------|
+| 1 | §4.5 Router | Provider abstraction layer + 3-tier task-type router |
+| 2 | §4.2 Memory | Embedding search + hybrid BM25/vector retrieval |
+| 3 | §4.4 Skills | Port skill library + progressive disclosure loader |
+| 4 | §4.13 Fleet | EnterWorktree tool (standalone isolation) |
+| 5 | §4.6 Tools | Core tools (Bash, Read, Write, Edit, Glob, Grep) |
+| 6 | §4.10 Hooks | Extend hook events (25+ lifecycle) |
+| 7 | §4.12 Permissions | Deny-first permission model |
+
+> **Outcome:** Lyra works as a capable single-session agent with model routing, semantic memory, 330+ skills, worktree isolation, and proper tools + hooks + permissions.
+
+### Phase 2 — Graph + Workflows (Months 3-4): "Multi-Agent Lyra"
+
+| Priority | Workstream | Deliverable |
+|----------|-----------|-------------|
+| 8 | §4.2 Memory | Graph memory (Zettelkasten) + LP-RAG link prediction + cost-sensitive routing |
+| 9 | §4.13 Fleet | Dynamic workflow engine: agent/parallel/pipeline primitives |
+| 10 | §4.3 Context | Auto-compaction + 3-strategy framework + output compression |
+| 11 | §4.16 Reliability | Langfuse/Phoenix tracing + token observatory + eval harness |
+| 12 | §4.20 Planning | MCTS planning layer (AFlow + SWE-Search pattern) |
+| 13 | §4.15 Research | Bundled deep-research workflow (fan-out to cross-check to cited report) |
+
+> **Outcome:** Lyra fans out sub-agents with structured workflows, graph memory, context management, and deep research.
+
+### Phase 3 — Fleet + Voice (Months 5-7): "Unattended Fleet Lyra"
+
+| Priority | Workstream | Deliverable |
+|----------|-----------|-------------|
+| 14 | §4.13 Fleet | Supervisor daemon + fleet view TUI + background sessions |
+| 15 | §4.14 Autonomy | Continuous-operation loop (unattended sessions, cheap row summaries) |
+| 16 | §4.18 Voice | Push-to-talk voice mode (provider-swappable STT/TTS) |
+| 17 | §4.24 Dreaming | LLM-based dreaming engine (review to dedup to reorganize) |
+| 18 | §4.22 Steering | Steer-by-exception: peek/reply/attach from fleet view |
+| 19 | §4.8 MCP | MCP server integration + top-10 MCP servers bundled |
+| 20 | §4.11 Sessions | Checkpointing + session resume |
+
+> **Outcome:** Lyra runs unattended fleets, speaks voice, consolidates memories during idle, and steers by exception — the "ultracode" milestone.
+
+### Phase 4 — Self-Evolution + Desktop + Safety (Months 8-9): "Self-Improving Omni-Agent"
+
+| Priority | Workstream | Deliverable |
+|----------|-----------|-------------|
+| 21 | §4.25 Adversarial | Anonymized bias-corrected verification panel (3 verifiers + skeptic) |
+| 22 | §4.27 RL Optimizer | GEPA-style skill evolution + safety validator |
+| 23 | §4.4 Skills | Self-evolving skills (trajectory to pattern to skill) |
+| 24 | §4.28 Desktop | lyra-desktop (Electron/React GUI + multimodal I/O) |
+| 25 | §4.17 Safety | 5-layer defense-in-depth (LlamaFirewall + NeMo + sandboxing + Progent) |
+| 26 | §4.2 Memory | Field-theoretic dreaming (PDE consolidation) — gated behind bake-off |
+| 27 | §4.18 Voice | Full-duplex voice (barge-in, streaming TTS, emotion) |
+
+> **Outcome:** Lyra is a self-improving, safety-gated, desktop-capable omni-agent with full-duplex voice, adversarial verification, and RL-optimized skills.
+
+Full details in [`lyra-upgrade/MASTER-PLAN.md`](docs/lyra-upgrade/MASTER-PLAN.md).
+
+### 📅 Project Timeline
+
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#8b5cf6', 'primaryTextColor': '#e2e8f0', 'lineColor': '#6366f1', 'fontSize': '13px'}}}%%
+gantt
+    title Lyra Ultra Upgrade — 9-Month Roadmap
+    dateFormat  YYYY-MM
+    axisFormat  %b
+
+    section Phase 1: Foundation
+    Provider Router (1-2)      :p1_router, 2026-07, 60d
+    Memory + Skills (1-2)      :p1_mem, 2026-07, 60d
+    Core Tools + Hooks (1-2)   :p1_tools, 2026-07, 60d
+
+    section Phase 2: Multi-Agent
+    Graph Memory + Context (3-4) :p2_mem, after p1_mem, 60d
+    Workflow Engine (3-4)        :p2_flow, after p1_tools, 60d
+    Planning + Research (3-4)    :p2_plan, after p1_router, 60d
+
+    section Phase 3: Fleet + Voice
+    Supervisor Daemon (5-7)    :p3_sup, after p2_flow, 90d
+    Voice Pipeline (5-7)       :p3_voice, after p2_plan, 90d
+    MCP + Steering (5-7)       :p3_mcp, after p2_mem, 90d
+
+    section Phase 4: Self-Evolution
+    Adversarial Safety (8-9)   :p4_safe, after p3_sup, 60d
+    Self-Evolving Skills (8-9) :p4_evo, after p3_voice, 60d
+    Desktop + Full-Duplex (8-9):p4_desk, after p3_mcp, 60d
+```
+
+See the [full master plan](docs/lyra-upgrade/MASTER-PLAN.md) for week-by-week itemization with effort ratings and impact estimates.
+
 ---
 
 <table width="100%"><tr><td style="background: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
 
-## <span style="color: #fbbf24;">⚡ Why Lyra is Different</span>
+## <span style="color: #fbbf24;">⚡ Why Lyra Stands Out</span>
 
 </td></tr></table></td></tr></table>
 
@@ -657,7 +949,45 @@ graph TB
 
 </td></tr></table></td></tr></table>
 
-Lyra integrates techniques from cutting-edge research. Each innovation is documented with its inspiration.
+### <span style="color: #fb923c;">5 Breakthrough Combinations</span>
+
+These combinations are what make Lyra's planned architecture novel. No existing system combines all five:
+
+<table>
+<tr style="background: #f9731620;">
+<th style="color: #fb923c;">#</th><th style="color: #fb923c;">Combination</th><th style="color: #fb923c;">Novelty</th><th style="color: #fb923c;">Status</th>
+</tr>
+<tr>
+<td style="color: #fbbf24; font-weight: bold;">1</td>
+<td style="color: #e2e8f0;"><b>Field-Theoretic Memory Consolidation</b></td>
+<td style="color: #94a3b8;">PDE-governed continuous memory fields for consolidation during idle. Combines Mitra's field theory + Anthropic Dreaming's idle-time pattern + A-MAC admission control. No existing agent system has continuous memory fields.</td>
+<td><img src="https://img.shields.io/badge/researched-a78bfa?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #fbbf24; font-weight: bold;">2</td>
+<td style="color: #e2e8f0;"><b>Anonymized Bias-Corrected Adversarial Verification</b></td>
+<td style="color: #94a3b8;">Multi-agent verification with identity anonymization, ReTAS dialectical alignment, collusion detection, and rogue agent prevention. Claude Code's workflows have adversarial checking but none of the bias corrections.</td>
+<td><img src="https://img.shields.io/badge/planned-06b6d4?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #fbbf24; font-weight: bold;">3</td>
+<td style="color: #e2e8f0;"><b>Provider-Swappable Voice Pipeline</b></td>
+<td style="color: #94a3b8;">The same provider-abstraction pattern used for LLMs applied to STT/TTS/VAD. No other agent harness has swappable voice providers.</td>
+<td><img src="https://img.shields.io/badge/planned-06b6d4?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #fbbf24; font-weight: bold;">4</td>
+<td style="color: #e2e8f0;"><b>Memory-Augmented Model Routing</b></td>
+<td style="color: #94a3b8;">Memory caches answers to expensive model queries then cheap model handles repeats. From "Knowledge Access Beats Model Size" applied systematically.</td>
+<td><img src="https://img.shields.io/badge/planned-06b6d4?style=flat-square"></td>
+</tr>
+<tr>
+<td style="color: #fbbf24; font-weight: bold;">5</td>
+<td style="color: #e2e8f0;"><b>Self-Evolving Skills with Safety Validator</b></td>
+<td style="color: #94a3b8;">GEPA-style evolution gates promotion behind a safety validator that must approve before deployment. No other skills system has evolution + safety validation.</td>
+<td><img src="https://img.shields.io/badge/planned-06b6d4?style=flat-square"></td>
+</tr>
+</table>
 
 ### <span style="color: #a78bfa;">🧠 Reasoning & Problem Solving</span>
 
@@ -986,7 +1316,7 @@ Lyra integrates techniques from cutting-edge research. Each innovation is docume
 </tr>
 </table>
 
-> **Full absorption matrix**: See [`docs/research/papers.md`](docs/research/papers.md) (100+ papers) and [`docs/research/repos.md`](docs/research/repos.md) (80+ repos) for the complete bibliography with implementation locations.
+> **Full absorption matrix**: See [`docs/research/papers/`](docs/research/papers/) (100+ papers) and [`docs/research/repos/`](docs/research/repos/) (80+ repos) for the complete bibliography with implementation locations.
 
 ---
 
@@ -1040,55 +1370,7 @@ The latest breakthrough synthesis from deep research across 50+ sources identifi
 </tr>
 </table>
 
-[**Read the full Plan 13 →**](plans/LYRA_ULTRA_PLAN_13_BREAKTHROUGH_SYNTHESIS.md)
-
-### <span style="color: #c084fc;">All Ultra Plans</span>
-
-<table>
-<tr style="background: #7c3aed20;">
-<th style="color: #c084fc;">Plan</th><th style="color: #c084fc;">Focus</th><th style="color: #c084fc;">Status</th>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><a href="plans/LYRA_ULTRA_PLAN_6_OMNI_AGI_BREAKTHROUGH.md">Plan 6</a></td>
-<td style="color: #94a3b8;">Master — 16 dimensions, 52-week roadmap</td>
-<td><img src="https://img.shields.io/badge/Active-10b981?style=flat-square"></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><a href="plans/LYRA_ULTRA_PLAN_7_SKILLS_ECOSYSTEM.md">Plan 7</a></td>
-<td style="color: #94a3b8;">Skills — 80+ domain skills, curator, learner, evolver</td>
-<td><img src="https://img.shields.io/badge/Active-10b981?style=flat-square"></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><a href="plans/LYRA_ULTRA_PLAN_8_VOICE_AUDIO_SYSTEM.md">Plan 8</a></td>
-<td style="color: #94a3b8;">Voice — fantasy packs, CESP pipeline, dictation</td>
-<td><img src="https://img.shields.io/badge/Active-10b981?style=flat-square"></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><a href="plans/LYRA_ULTRA_PLAN_9_TOOLS_UNIVERSE.md">Plan 9</a></td>
-<td style="color: #94a3b8;">Tools — 200+ tools across 20 toolsets</td>
-<td><img src="https://img.shields.io/badge/Active-10b981?style=flat-square"></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><a href="plans/LYRA_ULTRA_PLAN_10_MODEL_ROUTER_V2.md">Plan 10</a></td>
-<td style="color: #94a3b8;">Router — 5-layer intelligent cascading</td>
-<td><img src="https://img.shields.io/badge/Active-10b981?style=flat-square"></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><a href="plans/LYRA_ULTRA_PLAN_11_AUTONOMOUS_SYSTEMS.md">Plan 11</a></td>
-<td style="color: #94a3b8;">Autonomous — goals, continuous mode, hooks</td>
-<td><img src="https://img.shields.io/badge/Active-10b981?style=flat-square"></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><a href="plans/LYRA_ULTRA_PLAN_12_AGENT_FLEET_SWARM.md">Plan 12</a></td>
-<td style="color: #94a3b8;">Fleet — parallel fan-out, squads, colony, federation</td>
-<td><img src="https://img.shields.io/badge/Active-10b981?style=flat-square"></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b><a href="plans/LYRA_ULTRA_PLAN_13_BREAKTHROUGH_SYNTHESIS.md">Plan 13</a></b></td>
-<td style="color: #fbbf24;"><b>Breakthrough — 6 AGI gaps, meta-evolution, safety separation, Dream memory</b></td>
-<td><img src="https://img.shields.io/badge/★_Active-f97316?style=flat-square"></td>
-</tr>
-</table>
+See the [MASTER-PLAN.md](docs/lyra-upgrade/MASTER-PLAN.md) for the full prioritized roadmap and the [lyra-upgrade/plans/](docs/lyra-upgrade/plans/) directory for detailed workstream plans.
 
 ### <span style="color: #f472b6;">Wave 3 Plans (May 2026)</span>
 
@@ -1118,13 +1400,13 @@ The latest breakthrough synthesis from deep research across 50+ sources identifi
 <tr><td style="color: #e2e8f0;"><b>Plan 26</b></td><td style="color: #94a3b8;">Tools & Integration Ecosystem</td><td style="color: #94a3b8;">200+ tools, plugin system, MCP gateway, 71 slash commands, channels</td></tr>
 </table>
 
-[Full plans index →](plans/README.md)
+[Full plans index →](docs/plans/)
 
 ---
 
 <table width="100%"><tr><td style="background: linear-gradient(135deg, #3b82f6, #06b6d4, #10b981); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
 
-## <span style="color: #60a5fa;">🌐 LLM Providers</span>
+## <span style="color: #60a5fa;">🌐 LLM Providers (16+)</span>
 
 </td></tr></table></td></tr></table>
 
@@ -1588,7 +1870,7 @@ Switch inline with `Shift+Tab`.
 
 <table width="100%"><tr><td style="background: linear-gradient(135deg, #f59e0b, #f97316, #ef4444); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
 
-## <span style="color: #fbbf24;">📐 Design Principles</span>
+## <span style="color: #fbbf24;">📐 12 Design Principles</span>
 
 </td></tr></table></td></tr></table>
 
@@ -1754,9 +2036,25 @@ The culmination of 11 deep research streams analyzing 150+ sources across 11,276
 
 <table width="100%"><tr><td style="background: linear-gradient(135deg, #6366f1, #3b82f6, #06b6d4); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
 
-## <span style="color: #818cf8;">🛠 Development</span>
+## <span style="color: #34d399;">🤝 How to Contribute</span>
 
 </td></tr></table></td></tr></table>
+
+Lyra is open-source (MIT) and community-driven. All contributions welcome.
+
+- **Report bugs or suggest features** -- Open a GitHub issue with reproduction steps and expected behavior.
+- **Submit a PR** -- Fork the repo, make your change, and open a PR. Include tests and updated docs.
+- **Add a skill** -- Skills are YAML-frontmatter markdown files. See `lyra-skills/packs/` for examples.
+- **Cite a paper** -- If a technique we reference misses a source, open a PR adding it to the absorption matrix in [`docs/research/papers/`](docs/research/papers/).
+- **Discuss architecture** -- Join the Discussions tab on GitHub for architecture debates, design trade-off conversations, and roadmap prioritization.
+
+> All contributions are subject to the MIT license and Lyra's Code of Conduct.
+
+---
+
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #6366f1, #3b82f6, #06b6d4); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
+
+## <span style="color: #818cf8;">🛠 Development</span>
 
 ```bash
 # Full setup
@@ -1779,29 +2077,20 @@ make ci
 
 ---
 
-## Documentation
+## 📖 Documentation
 
 <table>
 <tr style="background: #3b82f620;">
 <th style="color: #60a5fa;">Resource</th><th style="color: #60a5fa;">Description</th>
 </tr>
-<tr><td style="color: #e2e8f0;"><a href="docs/architecture/">docs/architecture/</a></td><td style="color: #94a3b8;">Canonical architecture reference with diagrams</td></tr>
-<tr><td style="color: #e2e8f0;"><a href="ARCHITECTURE.md">ARCHITECTURE.md</a></td><td style="color: #94a3b8;">High-level system topology and data flow</td></tr>
-<tr><td style="color: #e2e8f0;"><a href="docs/architecture/system-overview.md">system-overview.md</a></td><td style="color: #94a3b8;">Master system architecture with complete subsystem map</td></tr>
-<tr><td style="color: #e2e8f0;"><a href="docs/architecture/autonomy-system.md">autonomy-system.md</a></td><td style="color: #94a3b8;">8-state FSM, goal decomposition, scheduling, budget</td></tr>
-<tr><td style="color: #e2e8f0;"><a href="docs/architecture/agent-swarm.md">agent-swarm.md</a></td><td style="color: #94a3b8;">Fleet orchestration, consensus protocols, dashboard</td></tr>
-<tr><td style="color: #e2e8f0;"><a href="docs/architecture/research-engine.md">research-engine.md</a></td><td style="color: #94a3b8;">Multi-hop research, knowledge graph, source scoring</td></tr>
-<tr><td style="color: #e2e8f0;"><a href="docs/architecture/voice-system.md">voice-system.md</a></td><td style="color: #94a3b8;">Wake word, VAD, STT/TTS, emotion detection</td></tr>
-<tr><td style="color: #e2e8f0;"><a href="docs/architecture/specialized-skills.md">specialized-skills.md</a></td><td style="color: #94a3b8;">7 domain-specific code analysis skills</td></tr>
-<tr><td style="color: #e2e8f0;"><a href="docs/architecture/safety-architecture.md">safety-architecture.md</a></td><td style="color: #94a3b8;">Parallax-style cognitive-executive separation</td></tr>
-<tr><td style="color: #e2e8f0;"><a href="docs/architecture/memory-consolidation.md">memory-consolidation.md</a></td><td style="color: #94a3b8;">Dream 4-phase consolidation design</td></tr>
-<tr><td style="color: #e2e8f0;"><a href="docs/architecture/harness-evolution.md">harness-evolution.md</a></td><td style="color: #94a3b8;">Meta-optimization loop architecture</td></tr>
-<tr><td style="color: #e2e8f0;"><a href="docs/research/papers.md">docs/research/papers.md</a></td><td style="color: #94a3b8;">100+ paper absorption matrix</td></tr>
-<tr><td style="color: #e2e8f0;"><a href="docs/research/repos.md">docs/research/repos.md</a></td><td style="color: #94a3b8;">80+ repository absorption matrix</td></tr>
-<tr><td style="color: #e2e8f0;"><a href="lyra-upgrade/">lyra-upgrade/</a></td><td style="color: #94a3b8;">5-phase upgrade research & plans (2026-05-30) — 7 research reports + 5 plans</td></tr>
-<tr><td style="color: #e2e8f0;"><a href="plans/README.md">plans/README.md</a></td><td style="color: #94a3b8;">Ultra Plans Index — all 33 plans</td></tr>
-<tr><td style="color: #e2e8f0;"><a href="docs/roadmap.md">docs/roadmap.md</a></td><td style="color: #94a3b8;">Development roadmap</td></tr>
-<tr><td style="color: #e2e8f0;"><a href="docs/CONTRIBUTING.md">docs/CONTRIBUTING.md</a></td><td style="color: #94a3b8;">Contributor guide</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="docs/lyra-upgrade/BREAKTHROUGH-ARCHITECTURE.md">BREAKTHROUGH-ARCHITECTURE.md</a></td><td style="color: #94a3b8;">Unified next-generation design — field-theoretic memory, bias-corrected verification, provider-swappable pipeline, memory-augmented routing, self-evolving skills with safety gates</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="docs/lyra-upgrade/MASTER-PLAN.md">MASTER-PLAN.md</a></td><td style="color: #94a3b8;">4-phase, 9-month prioritized roadmap with deliverables, impact estimates, and effort ratings</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="docs/lyra-upgrade/BASELINE.md">BASELINE.md</a></td><td style="color: #94a3b8;">Honest as-built assessment — component map, scorecard (5 partial, 23+ none), what works and what doesn't</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="docs/lyra-upgrade/SYNTHESIS.md">SYNTHESIS.md</a></td><td style="color: #94a3b8;">Cross-source state-of-the-field across 8 themes with per-theme micro-debates and gap analysis</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="docs/lyra-upgrade/">lyra-upgrade/</a></td><td style="color: #94a3b8;">Complete research corpus: 7 deep-dive reports, 5 phase plans, 3 brainstorms, 2 complete plans (voice, swarm/fleet), debate ledger, implementation audit</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="docs/">docs/</a></td><td style="color: #94a3b8;">Canonical docs: architecture system overview, autonomy system, agent swarm, research engine, voice system, specialized skills, safety architecture, memory consolidation, harness evolution</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="docs/research/papers/">docs/research/papers/</a></td><td style="color: #94a3b8;">100+ paper absorption matrix with implementation locations</td></tr>
+<tr><td style="color: #e2e8f0;"><a href="docs/research/repos/">docs/research/repos/</a></td><td style="color: #94a3b8;">80+ repository absorption matrix</td></tr>
 <tr><td style="color: #e2e8f0;"><a href="CHANGELOG.md">CHANGELOG.md</a></td><td style="color: #94a3b8;">Version history</td></tr>
 <tr><td style="color: #e2e8f0;"><a href="SOUL.md">SOUL.md</a></td><td style="color: #94a3b8;">Project persona and operating principles</td></tr>
 </table>
@@ -1810,104 +2099,36 @@ make ci
 
 <table width="100%"><tr><td style="background: linear-gradient(135deg, #f97316, #ef4444, #8b5cf6); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
 
-## <span style="color: #fb923c;">📋 Upgrade Plans (2026-05-30)</span> <span style="color: #94a3b8; font-size: 0.85em;">— Autonomous 5-Phase Research & Planning</span>
+## <span style="color: #fb923c;">📋 Upgrade Plans</span> <span style="color: #94a3b8; font-size: 0.85em;">— Research Corpus & Implementation Plans</span>
 
 </td></tr></table></td></tr></table>
 
-Comprehensive upgrade research and implementation plans across 5 phases, synthesizing findings from 150+ external sources, 10 cloned repos, 22 ICLR 2026 MemAgent Workshop papers, and the complete Lyra architecture baseline.
+Comprehensive upgrade research and implementation plans, synthesizing findings from ~350+ sources across 9 research themes. Full details in [`lyra-upgrade/MASTER-PLAN.md`](docs/lyra-upgrade/MASTER-PLAN.md).
 
-### Phase Deliverables
+### Workstream Plans ([`lyra-upgrade/plans/`](docs/lyra-upgrade/plans/))
 
-<table>
-<tr style="background: #f9731620;">
-<th style="color: #fb923c;">Phase</th><th style="color: #fb923c;">Focus</th><th style="color: #fb923c;">Deliverable</th><th style="color: #fb923c;">Lines</th><th style="color: #fb923c;">Breakthroughs</th>
-</tr>
-<tr>
-<td style="color: #fbbf24; font-weight: bold;">1</td>
-<td style="color: #e2e8f0;">Harness, Tools, Plugins, Hooks, Sessions, Permissions</td>
-<td style="color: #60a5fa;"><a href="lyra-upgrade/plan-phase1-harness.md">plan-phase1-harness.md</a></td>
-<td style="color: #94a3b8;">471</td>
-<td style="color: #34d399;">8 (Tool annotations, Code-exec-as-tool, Custom slash commands, Fork-from-checkpoint…)</td>
-</tr>
-<tr>
-<td style="color: #fbbf24; font-weight: bold;">2</td>
-<td style="color: #e2e8f0;">Memory Architecture V4 & Context Optimization</td>
-<td style="color: #60a5fa;"><a href="lyra-upgrade/plan-phase2-memory.md">plan-phase2-memory.md</a></td>
-<td style="color: #94a3b8;">442</td>
-<td style="color: #34d399;">8 (Unified Memory Router, Active Reconstruction Memory, CraniMem Bio-Gating, KV-Cache Tier, MemGrad…)</td>
-</tr>
-<tr>
-<td style="color: #fbbf24; font-weight: bold;">3</td>
-<td style="color: #e2e8f0;">Skills System V3 & Intelligent Model Router</td>
-<td style="color: #60a5fa;"><a href="lyra-upgrade/plan-phase3-skills-routing.md">plan-phase3-skills-routing.md</a></td>
-<td style="color: #94a3b8;">341+</td>
-<td style="color: #34d399;">5 (ReflACT Pipeline, Cross-Platform Skill Format, Effort-Aware Routing, 17 Concrete Skills…)</td>
-</tr>
-<tr>
-<td style="color: #fbbf24; font-weight: bold;">4</td>
-<td style="color: #e2e8f0;">Swarm V3, Full Autonomy, Deep Research, Reliability, Safety, rmux Rebuild, Multi-tenancy, Voice UX</td>
-<td style="color: #60a5fa;"><a href="lyra-upgrade/plan-phase4-swarm-investigations.md">plan-phase4-swarm-investigations.md</a></td>
-<td style="color: #94a3b8;">336+</td>
-<td style="color: #34d399;">8 (Workflow.js Spec, AutoScientists Integration, Unified EventBus, rmux Rebuild…)</td>
-</tr>
-<tr>
-<td style="color: #fbbf24; font-weight: bold;">5</td>
-<td style="color: #e2e8f0;">Test Plan, Master Plan, Documentation & Final Assembly</td>
-<td style="color: #60a5fa;"><a href="lyra-upgrade/plan-phase5-master-plan.md">plan-phase5-master-plan.md</a> · <a href="lyra-upgrade/plan-phase5-test-plan.md">plan-phase5-test-plan.md</a></td>
-<td style="color: #94a3b8;">—</td>
-<td style="color: #34d399;">Unified roadmap with 29+ breakthrough items across all phases</td>
-</tr>
-</table>
+| Phase | Plans |
+|-------|-------|
+| Phase 1 — Foundation | [`01-ui-ux.md`](docs/lyra-upgrade/plans/01-ui-ux.md) · [`05-model-router.md`](docs/lyra-upgrade/plans/05-model-router.md) · [`06-tools.md`](docs/lyra-upgrade/plans/06-tools.md) · [`10-hooks.md`](docs/lyra-upgrade/plans/10-hooks.md) · [`12-permissions.md`](docs/lyra-upgrade/plans/12-permissions.md) |
+| Phase 2 — Graph + Workflows | [`03-context-compaction.md`](docs/lyra-upgrade/plans/03-context-compaction.md) · [`15-deep-research.md`](docs/lyra-upgrade/plans/15-deep-research.md) · [`16-reliability.md`](docs/lyra-upgrade/plans/16-reliability.md) · [`20-planning.md`](docs/lyra-upgrade/plans/20-planning.md) · [`21-economics.md`](docs/lyra-upgrade/plans/21-economics.md) |
+| Phase 3 — Fleet + Voice | [`13-swarm-fleet.md`](docs/lyra-upgrade/plans/13-swarm-fleet.md) · [`14-autonomy.md`](docs/lyra-upgrade/plans/14-autonomy.md) · [`18-voice-mode.md`](docs/lyra-upgrade/plans/18-voice-mode.md) · [`08-mcp.md`](docs/lyra-upgrade/plans/08-mcp.md) · [`22-steering.md`](docs/lyra-upgrade/plans/22-steering.md) · [`24-dreaming.md`](docs/lyra-upgrade/plans/24-dreaming.md) · [`51-rmux.md`](docs/lyra-upgrade/plans/51-rmux.md) |
+| Phase 4 — Self-Evolution | [`17-safety.md`](docs/lyra-upgrade/plans/17-safety.md) · [`19-self-knowledge.md`](docs/lyra-upgrade/plans/19-self-knowledge.md) · [`23-ingestion.md`](docs/lyra-upgrade/plans/23-ingestion.md) · [`25-adversarial-panel.md`](docs/lyra-upgrade/plans/25-adversarial-panel.md) · [`26-harness-engineering.md`](docs/lyra-upgrade/plans/26-harness-engineering.md) · [`27-rl-optimizer.md`](docs/lyra-upgrade/plans/27-rl-optimizer.md) · [`28-desktop.md`](docs/lyra-upgrade/plans/28-desktop.md) |
 
-### Research Foundation (7 Deep-Dive Reports)
+### Research Foundation ([`lyra-upgrade/research/`](docs/lyra-upgrade/research/))
 
-<table>
-<tr style="background: #3b82f620;">
-<th style="color: #60a5fa;">Research</th><th style="color: #60a5fa;">Focus</th><th style="color: #60a5fa;">Lines</th><th style="color: #60a5fa;">Sources</th>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><a href="lyra-upgrade/research-awesome-lists.md">research-awesome-lists.md</a></td>
-<td style="color: #94a3b8;">5 awesome-lists enumerated, 25 one-hop deep dives, 25 MCP servers ranked, 10 context engineering patterns</td>
-<td style="color: #94a3b8;">690</td>
-<td style="color: #94a3b8;">ai-agent-papers, Agent-Memory-Paper-List, awesome-harness-engineering, awesome-mcp-servers, awesome-context-engineering</td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><a href="lyra-upgrade/research-hermes-agent.md">research-hermes-agent.md</a></td>
-<td style="color: #94a3b8;">Hermes Agent full architecture analysis: ToolRegistry, CLI, TUI, PluginManager, Gateway, 12 port recommendations</td>
-<td style="color: #94a3b8;">764</td>
-<td style="color: #94a3b8;">Hermes Agent (nousresearch)</td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><a href="lyra-upgrade/research-memagent-papers.md">research-memagent-papers.md</a></td>
-<td style="color: #94a3b8;">22 ICLR 2026 MemAgent Workshop papers analyzed, LyraMem-NG architecture proposal</td>
-<td style="color: #94a3b8;">932</td>
-<td style="color: #94a3b8;">ICLR 2026 MemAgent Workshop (22 papers)</td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><a href="lyra-upgrade/research-memory-repos.md">research-memory-repos.md</a></td>
-<td style="color: #94a3b8;">7 external repos + 5 Lyra memory packages, gap analysis, 10 recommended patterns, 8 auto-compaction strategies</td>
-<td style="color: #94a3b8;">1,034</td>
-<td style="color: #94a3b8;">TencentDB-Agent-Memory, Acontext, claude-mem, MemPalace, graphify, codegraph, spaCy</td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><a href="lyra-upgrade/research-skills-systems.md">research-skills-systems.md</a></td>
-<td style="color: #94a3b8;">10 external repos cloned + 5 Lyra packages, skill schema comparison, 17 concrete skills, 8-phase roadmap</td>
-<td style="color: #94a3b8;">1,790</td>
-<td style="color: #94a3b8;">SkillOS, Obsidian Skills, Karpathy Skills, Superpowers, SkillOpt, CheetahClaws, CLI-Anything</td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><a href="lyra-upgrade/research-infrastructure.md">research-infrastructure.md</a></td>
-<td style="color: #94a3b8;">6 terminal multiplexers, 14 agent harnesses, rmux rebuild architecture, multi-tenancy evaluation, voice/sound UX</td>
-<td style="color: #94a3b8;">829</td>
-<td style="color: #94a3b8;">tmux, cmux, rmux, Warp, alphaclaw, AgentsMesh + 14 harnesses</td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><a href="lyra-upgrade/research-core-agents-swarm.md">research-core-agents-swarm.md</a></td>
-<td style="color: #94a3b8;">22 core agent papers, AutoScientists deep dive, ProRL-Agent-Server, Claude Code Dynamic Workflows, 5 design proposals</td>
-<td style="color: #94a3b8;">701</td>
-<td style="color: #94a3b8;">AutoScientists, AlphaEvolve, Code Researcher, ProRL-Agent-Server + 22 papers</td>
-</tr>
-</table>
+9 deep-read theme files (~340 sources):
+
+| File | Theme |
+|------|-------|
+| [`01-claude-code-docs.md`](docs/lyra-upgrade/research/01-claude-code-docs.md) | Claude Code documentation (43 sources) |
+| [`02-memory-papers.md`](docs/lyra-upgrade/research/02-memory-papers.md) | Memory systems (29 sources) |
+| [`03-self-improving-harnesses.md`](docs/lyra-upgrade/research/03-self-improving-harnesses.md) | Self-improving harnesses (32 sources) |
+| [`04-skills-context-memory.md`](docs/lyra-upgrade/research/04-skills-context-memory.md) | Skills systems, context, memory (30 sources) |
+| [`05-multi-agent-reliability.md`](docs/lyra-upgrade/research/05-multi-agent-reliability.md) | Multi-agent systems, reliability (20 sources) |
+| [`06-core-papers-autoscientists.md`](docs/lyra-upgrade/research/06-core-papers-autoscientists.md) | Core papers, AI scientists (~85 sources) |
+| [`07-routing-planning-economics.md`](docs/lyra-upgrade/research/07-routing-planning-economics.md) | Routing, planning, economics (41 sources) |
+| [`08-voice-audio.md`](docs/lyra-upgrade/research/08-voice-audio.md) | Voice, STT/TTS (15 sources) |
+| [`09-safety-desktop-dreaming.md`](docs/lyra-upgrade/research/09-safety-desktop-dreaming.md) | Safety, desktop, dreaming (21 sources) |
 
 ### Top Breakthrough Items (Across All Phases)
 
@@ -1957,7 +2178,38 @@ Comprehensive upgrade research and implementation plans across 5 phases, synthes
 </tr>
 </table>
 
-> **Full breakthrough registry:** See the [Master Plan](lyra-upgrade/plan-phase5-master-plan.md) for all 29+ breakthrough items with week-by-week implementation roadmap.
+> **Full breakthrough registry:** See the [Master Plan](docs/lyra-upgrade/plan-phase5-master-plan.md) for all 29+ breakthrough items with week-by-week implementation roadmap.
+
+### 📜 Key Papers Referenced
+
+| Paper | Venue | arXiv | Used In |
+|---|---|---|---|
+| AutoScientists: Self-Organizing Agent Teams | arXiv 2026 | [2605.28655](https://arxiv.org/abs/2605.28655) | Fleet orchestration, swarm teams |
+| Parallax: Cognitive-Executive Separation | arXiv 2026 | [2604.12986](https://arxiv.org/abs/2604.12986) | 7-layer safety architecture |
+| Meta-Harness: Harness-Level Optimization | arXiv 2026 | [2603.28052](https://arxiv.org/abs/2603.28052) | Self-evolving harness |
+| SkillOpt: Text-Space Skill Optimization (Microsoft) | arXiv 2026 | [2605.23904](https://arxiv.org/abs/2605.23904) | Skill evolution engine |
+| RecursiveMAS: Latent-Space Agent Comms | arXiv 2026 | [2505.23119](https://arxiv.org/abs/2505.23119) | RecursiveLink module |
+| GEPA v2: Multi-Agent Prompt Optimizer | ICLR 2026 Oral | [2310.03714](https://arxiv.org/abs/2310.03714) | Prompt evolution |
+| A-MAC: 5-Factor Admission Control | arXiv 2026 | [2605.20163](https://arxiv.org/abs/2605.20163) | Memory admission gate |
+| CoMem: Async Memory Pipeline | arXiv 2026 | [2605.20163](https://arxiv.org/abs/2605.20163) | Memory consolidation |
+| AEvo: Meta-Editing for Agent Evolution | arXiv 2026 | [2605.13821](https://arxiv.org/abs/2605.13821) | Self-evolution |
+| ARIS: 3-Stage Adversarial Review | arXiv 2026 | [2505.24168](https://arxiv.org/abs/2505.24168) | Multi-agent verification |
+| PRISM: Prompt Reliability & Drift | arXiv 2026 | [2605.14454](https://arxiv.org/abs/2605.14454) | Drift detection |
+| MRAgent: Dual-Process Memory Retrieval | ACL 2026 | — | Memory retriever |
+| NGC: Neural Garbage Collection (Stanford) | arXiv 2026 | [2604.18002](https://arxiv.org/abs/2604.18002) | Context eviction |
+| SR2AM: Self-Regulated Planning | arXiv 2026 | [2605.22138](https://arxiv.org/abs/2605.22138) | Reasoning engine |
+| Catfish Contrarian: Wrong-Consensus Interception | arXiv 2026 | [2505.21503](https://arxiv.org/abs/2505.21503) | Swarm consensus |
+| AdaptOrch: Dynamic Agent Topologies | arXiv 2026 | [2602.16873](https://arxiv.org/abs/2602.16873) | Fleet orchestration |
+| Trace2Skill: Automatic Skill Extraction | arXiv 2026 | [2605.21810](https://arxiv.org/abs/2605.21810) | Skill creation |
+| Ratchet: Skill Lifecycle Management | arXiv 2026 | [2605.22148](https://arxiv.org/abs/2605.22148) | Skill versioning |
+| FrugalGPT: Cost-Optimal LLM Routing (Stanford) | 2023 | [2305.05176](https://arxiv.org/abs/2305.05176) | Model router |
+| Reflexion: Verbal RL (NeurIPS 2023) | NeurIPS 2023 | [2303.11366](https://arxiv.org/abs/2303.11366) | Agent loop recovery |
+| SWE-Search: MCTS Code Search (ICLR 2025) | ICLR 2025 | [2410.20285](https://arxiv.org/abs/2410.20285) | Code reasoning |
+| Voyager: Skill Weaving (NVIDIA, TMLR 2024) | TMLR 2024 | [2305.16291](https://arxiv.org/abs/2305.16291) | Skill composition |
+| MetaGPT: DAG-Based Agent Teams (ICLR 2024) | ICLR 2024 | [2308.00352](https://arxiv.org/abs/2308.00352) | Team topology |
+| RouteLLM: Open-Source LLM Routing (Berkeley) | 2024 | [2406.18665](https://arxiv.org/abs/2406.18665) | Model router |
+
+Full absorption matrix for all 100+ papers and 80+ repos: see [`docs/research/`](docs/research/).
 
 ---
 
@@ -1969,9 +2221,45 @@ Lyra's architecture is informed by deep research across the AI agent ecosystem:
 
 **Papers absorbed (100+):** 8 waves spanning reasoning (Tournament TTS, SR2AM, ReasoningBank, SWE-Search), memory (A-Mem, MRAgent, MemGrad, CoMem, CraniMem, NGC, Entropic Memory, TencentDB-Agent-Memory), self-evolution (AlphaEvolve, GEPA v2, Meta-Harness, AEvo, PRISM, Trace2Skill, Self-Challenging), skills (SkillOpt, SkillOS, Ratchet, SkillGen, MIND-Skill), safety (Parallax, ARIS, Knowing-Doing Gap, Anthropic Agentic Misalignment), agent communication (RecursiveMAS, SemaClaw), model routing (Morph Router, LiteLLM, OpenRouter), and 22 ICLR 2026 MemAgent Workshop papers.
 
+<table>
+<tr style="background: #7c3aed20;">
+<th style="color: #c084fc;">Research Area</th><th style="color: #c084fc;">Key Papers</th><th style="color: #c084fc;">arXiv IDs</th>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Memory</b></td>
+<td style="color: #94a3b8;">A-MEM, MRAgent, MemGrad, CoMem, NGC, Field-Theoretic Memory</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2502.12110">2502.12110</a>, <a href="https://arxiv.org/abs/2602.21220">2602.21220</a>, <a href="https://arxiv.org/abs/2604.18002">2604.18002</a>, <a href="https://arxiv.org/abs/2605.20163">2605.20163</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Self-Evolution</b></td>
+<td style="color: #94a3b8;">GEPA v2, Meta-Harness, AEvo, PRISM, Trace2Skill</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2310.03714">2310.03714</a>, <a href="https://arxiv.org/abs/2603.28052">2603.28052</a>, <a href="https://arxiv.org/abs/2605.13821">2605.13821</a>, <a href="https://arxiv.org/abs/2605.14454">2605.14454</a>, <a href="https://arxiv.org/abs/2605.21810">2605.21810</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Skills</b></td>
+<td style="color: #94a3b8;">SkillOpt, Ratchet, SkillGen, MIND-Skill</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.23904">2605.23904</a>, <a href="https://arxiv.org/abs/2605.22148">2605.22148</a>, <a href="https://arxiv.org/abs/2605.10999">2605.10999</a>, <a href="https://arxiv.org/abs/2605.08670">2605.08670</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Safety</b></td>
+<td style="color: #94a3b8;">Parallax, ARIS, Knowing-Doing Gap</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2604.12986">2604.12986</a>, <a href="https://arxiv.org/abs/2505.24168">2505.24168</a>, <a href="https://arxiv.org/abs/2605.14038">2605.14038</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Reasoning</b></td>
+<td style="color: #94a3b8;">ReasoningBank, SR2AM, SWE-Search</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2509.25140">2509.25140</a>, <a href="https://arxiv.org/abs/2605.22138">2605.22138</a>, <a href="https://arxiv.org/abs/2410.20285">2410.20285</a></td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>Agent Comms</b></td>
+<td style="color: #94a3b8;">RecursiveMAS, AdaptOrch, COMPASS</td>
+<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2505.23119">2505.23119</a>, <a href="https://arxiv.org/abs/2602.16873">2602.16873</a>, <a href="https://arxiv.org/abs/2510.08790">2510.08790</a></td>
+</tr>
+</table>
+
 **Repositories studied (80+):** Claude Code, Hermes-agent, Cline, Aider, OpenHands, CrewAI, AutoGPT, LangGraph, GBrain, OpenCode, OpenDev, RTK, Caveman, DCI-Agent-Lite, Graphify, TencentDB-Agent-Memory, Acontext, CodeGraph, claude-mem, MemPalace, CLI-Anything, ARS, ECC, OpenHuman, PeonPing, superpowers, continuous-claude, Multica, CowAgent, Mem0, oh-my-claudecode, Ruflo, AlphaEvolve (DeepMind), CheetahClaws, gstack, Warp, tmux, cmux, and more.
 
-**Upgrade Research (May 2026):** Additional deep-dive across 7 repos (SkillOS, SkillOpt, Superpowers, AutoScientists, ProRL-Agent-Server, rmux, AgentsMesh), 5 awesome-lists with 25 one-hop expansions, 22 ICLR 2026 MemAgent Workshop papers, Claude Code Dynamic Workflows, and 10 skills repositories. See [`lyra-upgrade/`](lyra-upgrade/) for the complete 5-phase research and planning corpus.
+**Upgrade Research (May 2026):** Additional deep-dive across 7 repos (SkillOS, SkillOpt, Superpowers, AutoScientists, ProRL-Agent-Server, rmux, AgentsMesh), 5 awesome-lists with 25 one-hop expansions, 22 ICLR 2026 MemAgent Workshop papers, Claude Code Dynamic Workflows, and 10 skills repositories. See [`lyra-upgrade/`](docs/lyra-upgrade/) for the complete 5-phase research and planning corpus.
 
 See [`docs/research/`](docs/research/) for the complete research library.
 
@@ -2196,15 +2484,15 @@ graph TB
 
 ### Shipped Packages
 
-| Package | Tier | Purpose | Tests | Source |
-|---------|------|---------|-------|--------|
-| `lyra-effort` | 1 | 6-level effort scale (low→ultracode), per-provider mapping | 37 | [plans/19-ultracode-replication.md](lyra-upgrade/plans/19-ultracode-replication.md) |
-| `lyra-provider` | 1 | AbstractProvider protocol, 3 adapters, CapabilityMatrix | 44 | [BREAKTHROUGH-ARCHITECTURE.md](lyra-upgrade/BREAKTHROUGH-ARCHITECTURE.md) §4.5 |
-| `lyra-context` | 2 | Auto-compaction engine (AOI-style, 4 strategies) | — | [plans/03-context-optimization.md](lyra-upgrade/plans/03-context-optimization.md) |
-| `lyra-workflow` | 3 | Dynamic Workflow Engine + AVP middleware + auto-orchestrator | 111 | [plans/12-swarm-fleet-channels.md](lyra-upgrade/plans/12-swarm-fleet-channels.md) |
-| `lyra-hooks` | 4 | PreToolUse/PostToolUse/Stop hook system | — | [plans/09-hooks-automation.md](lyra-upgrade/plans/09-hooks-automation.md) |
-| `lyra-sessions` | 4 | Git-native session management with checkpointing | — | [plans/10-sessions-checkpointing.md](lyra-upgrade/plans/10-sessions-checkpointing.md) |
-| `lyra-safety` | 7 | 4-layer defense-in-depth + collusion defense + evolution safety gates | 30 | [plans/16-safety-alignment.md](lyra-upgrade/plans/16-safety-alignment.md) |
+| Package | Tier | Purpose | Tests |
+|---------|------|---------|-------|
+| `lyra-effort` | 1 | 6-level effort scale (low→ultracode), per-provider mapping | 37 |
+| `lyra-provider` | 1 | AbstractProvider protocol, 3 adapters, CapabilityMatrix | 44 |
+| `lyra-context` | 2 | Auto-compaction engine (AOI-style, 4 strategies) | — |
+| `lyra-workflow` | 3 | Dynamic Workflow Engine + AVP middleware + auto-orchestrator | 111 |
+| `lyra-hooks` | 4 | PreToolUse/PostToolUse/Stop hook system | — |
+| `lyra-sessions` | 4 | Git-native session management with checkpointing | — |
+| `lyra-safety` | 7 | 4-layer defense-in-depth + collusion defense + evolution safety gates | 30 |
 
 ### Shipped Modules (Post-Ultra-Upgrade)
 
@@ -2256,13 +2544,14 @@ Each shipped module is informed by peer-reviewed research:
 
 ### Key Design Decisions
 
-See [`lyra-upgrade/impl-decisions.md`](lyra-upgrade/impl-decisions.md) for all implementation decisions with rationale.
+See the [BREAKTHROUGH-ARCHITECTURE.md](docs/lyra-upgrade/BREAKTHROUGH-ARCHITECTURE.md) and [MASTER-PLAN.md](docs/lyra-upgrade/MASTER-PLAN.md) for implementation decisions and rationale.
 
 ### Audit & Backlog
 
-- **Final Audit**: [`lyra-upgrade/FINAL-AUDIT.md`](lyra-upgrade/FINAL-AUDIT.md) — architecture conformance, coverage, known gaps
-- **Implementation Backlog**: [`lyra-upgrade/impl-backlog.md`](lyra-upgrade/impl-backlog.md) — 13 items ranked by impact×effort
-- **Progress Tracker**: [`lyra-upgrade/IMPL-PROGRESS.md`](lyra-upgrade/IMPL-PROGRESS.md) — per-tier status, test results, commit SHAs
+- **Baseline**: [`lyra-upgrade/BASELINE.md`](docs/lyra-upgrade/BASELINE.md) — honest as-built assessment
+- **Progress**: [`lyra-upgrade/PROGRESS.md`](docs/lyra-upgrade/PROGRESS.md) — implementation tracking
+- **Synthesis**: [`lyra-upgrade/SYNTHESIS.md`](docs/lyra-upgrade/SYNTHESIS.md) — cross-source state-of-the-field
+- **Debate Ledger**: [`lyra-upgrade/DEBATE-LEDGER.md`](docs/lyra-upgrade/DEBATE-LEDGER.md) — scoring and source ledger
 
 ---
 
@@ -2272,13 +2561,137 @@ MIT — see [LICENSE](LICENSE)
 
 ---
 
+### 🫱 How to Contribute
+
+Lyra is open-source and community-driven. Contributions across all skill levels are welcome.
+
+<table>
+<tr style="background: #7c3aed20;">
+<th style="color: #c084fc;">Area</th><th style="color: #c084fc;">How to Help</th><th style="color: #c084fc;">Getting Started</th>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>📖 Docs & Examples</b></td>
+<td style="color: #94a3b8;">Improve documentation, write tutorials, create example projects</td>
+<td style="color: #94a3b8;">Pick a `docs/` file, read the style, submit a PR with clarifications or fixes</td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>🐛 Bug Reports</b></td>
+<td style="color: #94a3b8;">Reproduce issues, file detailed bug reports with reproduction steps</td>
+<td style="color: #94a3b8;">Open a GitHub issue with the `bug` label, include logs and minimal reproduction</td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>🧪 Tests</b></td>
+<td style="color: #94a3b8;">Add unit tests, integration tests, or end-to-end tests for uncovered code</td>
+<td style="color: #94a3b8;">Run `make test` first, then add tests under `tests/` following existing patterns</td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>🧰 Feature Implementation</b></td>
+<td style="color: #94a3b8;">Build workstreams from the roadmap (router, tools, memory, fleet, etc.)</td>
+<td style="color: #94a3b8;">Check [`MASTER-PLAN.md`](docs/lyra-upgrade/MASTER-PLAN.md) for open workstreams, start with Phase 1 items</td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>🎨 UI/UX & Themes</b></td>
+<td style="color: #94a3b8;">Design new color themes, improve terminal UI, add voice packs</td>
+<td style="color: #94a3b8;">Add a theme JSON under `ui-terminal/themes/` and test with `lyra theme preview`</td>
+</tr>
+<tr>
+<td style="color: #e2e8f0;"><b>🔬 Research</b></td>
+<td style="color: #94a3b8;">Survey papers, absorb repos, identify breakthrough combinations</td>
+<td style="color: #94a3b8;">Read an existing research doc in `docs/research/papers/`, extend with new sources</td>
+</tr>
+</table>
+
+### 🤝 Contribution Guidelines
+
+- **TDD gate**: Every change starts with a failing test. See the testing guidelines for the workflow.
+- **80%+ coverage**: Run `make test` and verify coverage before submitting.
+- **Conventional commits**: Use `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:` prefixes.
+- **Package isolation**: Each package has its own `pyproject.toml`, tests, and README.
+- **Evidence over assertion**: Run the code before claiming it works. Include test output in PRs.
+- **One PR per concern**: Keep changes focused. Split large features into stacked PRs.
+
+### 🚦 CI Status
+
+| Check | Status |
+|-------|--------|
+| Unit tests | <img src="https://img.shields.io/badge/380%2B%20tests-passing-22c55e?style=flat-square"> |
+| Integration | <img src="https://img.shields.io/badge/build-passing-22c55e?style=flat-square"> |
+| Lint (ruff) | <img src="https://img.shields.io/badge/lint-passing-22c55e?style=flat-square"> |
+| Type check (mypy) | <img src="https://img.shields.io/badge/typecheck-passing-22c55e?style=flat-square"> |
+| Coverage | <img src="https://img.shields.io/badge/coverage-80%2B-22c55e?style=flat-square"> |
+
+---
+
+### 📚 Where Next
+
+| Resource | What You Get |
+|----------|-------------|
+| [`docs/README.md`](docs/README.md) | Entry-point documentation with navigation to all concepts, blocks, and architecture deep-dives |
+| [`docs/lyra-upgrade/MASTER-PLAN.md`](docs/lyra-upgrade/MASTER-PLAN.md) | 4-phase, 9-month prioritized roadmap with 27 workstreams, effort ratings, and impact estimates |
+| [`docs/lyra-upgrade/BASELINE.md`](docs/lyra-upgrade/BASELINE.md) | Transparent as-built scorecard -- 5 of 28 workstreams live, 23+ at `none` |
+| [`docs/lyra-upgrade/BREAKTHROUGH-ARCHITECTURE.md`](docs/lyra-upgrade/BREAKTHROUGH-ARCHITECTURE.md) | Unified next-generation architecture with field-theoretic memory and bias-corrected verification |
+| [`docs/research/papers/`](docs/research/papers/) | 100+ paper absorption matrix mapping each paper to implementation locations |
+| [`docs/research/repos/`](docs/research/repos/) | 80+ repository absorption matrix |
+| [`CHANGELOG.md`](CHANGELOG.md) | Version history and release notes |
+
+### 🗺️ Roadmap Timeline
+
+```mermaid
+gantt
+    title Lyra Upgrade -- 4 Phases, 9 Months
+    dateFormat  YYYY-MM
+    axisFormat  %Y-%m
+    section Phase 1 -- Foundation
+    Model Router (5-layer)      :p1, 2026-06, 2026-07
+    Semantic Memory + BM25      :p1, 2026-06, 2026-07
+    Core Tools + Permissions    :p1, 2026-06, 2026-07
+
+    section Phase 2 -- Graph + Workflows
+    Graph Memory (Zettelkasten) :p2, 2026-08, 2026-09
+    Dynamic Workflow Engine     :p2, 2026-08, 2026-09
+    Context Compaction          :p2, 2026-08, 2026-09
+    Deep Research Pipeline      :p2, 2026-09, 2026-10
+
+    section Phase 3 -- Fleet + Voice
+    Supervisor Daemon + Fleet   :p3, 2026-10, 2026-12
+    Voice Mode (Push-to-Talk)   :p3, 2026-10, 2026-12
+    MCP Server Integration      :p3, 2026-11, 2026-12
+
+    section Phase 4 -- Self-Evolution
+    Adversarial Verification    :p4, 2027-01, 2027-02
+    GEPA Skill Evolution        :p4, 2027-01, 2027-02
+    Desktop GUI + Multimodal    :p4, 2027-01, 2027-03
+```
+
+### 📖 Paper Citation Index
+
+Every technique in Lyra traces to its source publication. Key citations:
+
+| Technique | Venue | Citation |
+|-----------|-------|----------|
+| GEPA v2 Multi-Agent Optimizer | ICLR 2026 Oral | [arXiv 2310.03714](https://arxiv.org/abs/2310.03714) |
+| Meta-Harness Optimization | 2026 | [arXiv 2603.28052](https://arxiv.org/abs/2603.28052) |
+| RecursiveMAS Latent Comms | 2026 | [arXiv 2505.23119](https://arxiv.org/abs/2505.23119) |
+| Parallax Cognitive-Executive Separation | 2026 | [arXiv 2604.12986](https://arxiv.org/abs/2604.12986) |
+| Field-Theoretic Memory | arXiv 2026 | [arXiv 2605.20160](https://arxiv.org/abs/2605.20160) |
+| CoMem Async Memory Pipeline | 2026 | [arXiv 2605.20163](https://arxiv.org/abs/2605.20163) |
+| SkillOpt Text-Space Optimizer | Microsoft 2026 | [arXiv 2605.23904](https://arxiv.org/abs/2605.23904) |
+| SR2AM Self-Regulated Planning | 2026 | [arXiv 2605.22138](https://arxiv.org/abs/2605.22138) |
+| ReasoningBank | Google 2025 | [arXiv 2509.25140](https://arxiv.org/abs/2509.25140) |
+| PRISM Drift Detection | 2026 | [arXiv 2605.14454](https://arxiv.org/abs/2605.14454) |
+| Trace2Skill Extraction | 2026 | [arXiv 2605.21810](https://arxiv.org/abs/2605.21810) |
+| Self-Challenging (Evolving Prompt) | 2026 | [arXiv 2605.21484](https://arxiv.org/abs/2605.21484) |
+| Reflexion | NeurIPS 2023 | [arXiv 2303.11366](https://arxiv.org/abs/2303.11366) |
+
+---
+
 <table width="100%"><tr><td style="background: linear-gradient(135deg, #7c3aed, #8b5cf6, #a78bfa, #c084fc); padding: 3px; border-radius: 12px;"><table width="100%"><tr><td style="background: #0d1117; padding: 20px 24px; border-radius: 10px;">
 
 <div align="center">
 
-**[Quickstart](#quickstart)** · **[Architecture](#architecture)** · **[Innovations](#innovations)** · **[Upgrade Plans](#upgrade-plans-2026-05-30)** · **[Ultra Plans](#ultra-plans)** · **[Packages](#package-catalog)** · **[Themes](#color-themes)** · **[Contributing](docs/CONTRIBUTING.md)** · **[Changelog](CHANGELOG.md)**
+**[What Lyra Is](#what-is-lyra)** · **[Architecture](#architecture)** · **[Capabilities](#current-capabilities)** · **[Roadmap](#roadmap--4-phases-9-months)** · **[Innovations](#innovations)** · **[Quickstart](#quickstart)** · **[Docs](#documentation)**
 
-<span style="color: #94a3b8;">Built with Python, TypeScript, and the conviction that AI agents should be</span> <span style="color: #a78bfa;">open</span><span style="color: #94a3b8;">,</span> <span style="color: #34d399;">auditable</span><span style="color: #94a3b8;">,</span> <span style="color: #fbbf24;">self-improving</span><span style="color: #94a3b8;">, and</span> <span style="color: #f87171;">architecturally safe</span><span style="color: #94a3b8;">.</span>
+<span style="color: #94a3b8;">MIT-licensed. Terminal-based. Research-backed. Built with Python, TypeScript, and the conviction that AI agents should be</span> <span style="color: #a78bfa;">open</span><span style="color: #94a3b8;">,</span> <span style="color: #34d399;">auditable</span><span style="color: #94a3b8;">,</span> <span style="color: #fbbf24;">self-improving</span><span style="color: #94a3b8;">, and</span> <span style="color: #f87171;">architecturally safe</span><span style="color: #94a3b8;">.</span>
 
 </div>
 

@@ -8,6 +8,67 @@ All notable changes to the Lyra project.
 
 ---
 
+## <img src="https://img.shields.io/badge/3.0-UPCOMING-ef4444?style=for-the-badge&labelColor=1e1e2e">
+
+### Breakthrough Release — 4-Phase Roadmap
+
+Based on the [lyra-upgrade/](lyra-upgrade/) research corpus: 340+ sources deep-read, 3-round adversarial architecture debate, cross-source synthesis. Lyra is 2-4 years behind the frontier on every dimension — this release closes the gap.
+
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #ef444415, #f8717110); border-left: 4px solid #ef4444; padding: 12px 16px; border-radius: 0 8px 8px 0;">
+
+#### <span style="color: #f87171;">Phase 1 — Foundation (Months 1-2): "Useful Single-Session Lyra"</span>
+- **Provider abstraction layer** + 3-tier task-type router (Impact: 5, Effort: 3)
+- **Embedding search** + hybrid retrieval for memory (Impact: 5, Effort: 2)
+- **Port 330+ claude-skills** + progressive disclosure loader (Impact: 5, Effort: 3)
+- **EnterWorktree tool** — standalone worktree isolation (Impact: 4, Effort: 2)
+- **Core tools**: Bash, Read, Write, Edit, Glob, Grep (Impact: 5, Effort: 3)
+- **25+ lifecycle hook events** (Impact: 4, Effort: 2)
+- **Deny-first permission model** (Impact: 4, Effort: 2)
+- 4 color themes + keybindings config
+
+**Phase 1 outcome:** Lyra works as a capable single-session agent with model routing, semantic memory, 330+ skills, worktree isolation, and proper tools + hooks + permissions.
+
+#### <span style="color: #fbbf24;">Phase 2 — Graph + Workflows (Months 3-4): "Multi-Agent Lyra"</span>
+- **Graph memory** (Zettelkasten) + LP-RAG link prediction + cost-sensitive routing (Impact: 5, Effort: 4)
+- **Dynamic workflow engine**: agent/parallel/pipeline primitives (Impact: 5, Effort: 4)
+- **Auto-compaction** + Anthropic 3-strategy framework + lean-ctx output compression (Impact: 5, Effort: 3)
+- **Langfuse/Phoenix tracing** + token observatory + τ-bench eval harness (Impact: 4, Effort: 3)
+- **MCTS planning layer** (AFlow + SWE-Search pattern, +23% SWE-Solve) (Impact: 4, Effort: 4)
+- **Bundled deep-research workflow** (fan-out -> cross-check -> cited report) (Impact: 5, Effort: 3)
+- Token accounting per session + cost dashboard
+
+**Phase 2 outcome:** Lyra can fan out sub-agents with structured workflows, graph memory, context management, and deep research capability — all in a single session.
+
+#### <span style="color: #34d399;">Phase 3 — Fleet + Voice (Months 5-7): "Unattended Fleet Lyra"</span>
+- **Supervisor daemon** + fleet view TUI + background sessions (Impact: 5, Effort: 5)
+- **Continuous-operation loop** — unattended sessions, cheap row summaries (Impact: 5, Effort: 4)
+- **Push-to-talk voice mode** (Whisper + Kokoro, provider-swappable) (Impact: 5, Effort: 4)
+- **LLM-based dreaming engine** (review -> dedup -> reorganize) (Impact: 5, Effort: 4)
+- **Steer-by-exception**: peek/reply/attach from fleet view (Impact: 4, Effort: 3)
+- **MCP server integration** + bundle top-10 MCP servers (Impact: 4, Effort: 3)
+- Plugin system + checkpointing + session resume
+
+**Phase 3 outcome:** Lyra runs unattended fleets, speaks/understands voice, consolidates memories during idle, and steers by exception.
+
+#### <span style="color: #a78bfa;">Phase 4 — Self-Evolution + Desktop + Safety (Months 8-9): "Self-Improving Omni-Agent"</span>
+- **Anonymized bias-corrected adversarial verification** (3 verifiers + skeptic, >=2/3 voting) (Impact: 5, Effort: 3)
+- **GEPA-style skill evolution** + "Misevolve"-informed safety validator (Impact: 5, Effort: 5)
+- **Self-evolving skills** (trajectory -> pattern -> skill) (Impact: 5, Effort: 4)
+- **lyra-desktop** (Electron/React GUI + multimodal I/O) (Impact: 5, Effort: 5)
+- **5-layer defense-in-depth** (LlamaFirewall + NeMo + sandboxing + Progent SMT) (Impact: 5, Effort: 5)
+- Uncertainty estimation + confidence calibration (Impact: 4, Effort: 3)
+- RAG pipeline + code indexing + freshness management (Impact: 4, Effort: 4)
+- Full-duplex voice: barge-in, streaming TTS, emotion (Impact: 4, Effort: 4)
+- **Field-theoretic dreaming** (PDE consolidation) — gated behind bake-off (Impact: 5, Effort: 5)
+
+**Phase 4 outcome:** Lyra is a self-improving, safety-gated, desktop-capable omni-agent with full-duplex voice, adversarial verification, and RL-optimized skills.
+
+**References:** [MASTER-PLAN.md](lyra-upgrade/MASTER-PLAN.md) | [BREAKTHROUGH-ARCHITECTURE.md](lyra-upgrade/BREAKTHROUGH-ARCHITECTURE.md) | [SYNTHESIS.md](lyra-upgrade/SYNTHESIS.md) | [ARCHITECTURE-DEBATE.md](lyra-upgrade/ARCHITECTURE-DEBATE.md)
+
+</td></tr></table>
+
+---
+
 ## <img src="https://img.shields.io/badge/7.2.1-2026--05--31-f97316?style=for-the-badge&labelColor=1e1e2e">
 
 ### <span style="color: #fb923c;">🚀 Ultra Upgrade — 9 Tiers Shipped</span>

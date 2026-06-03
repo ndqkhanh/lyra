@@ -1,0 +1,597 @@
+--- PAGE 1 ---
+ARAG: Agentic Retrieval Augmented Generation for
+Personalized Recommendation
+Reza Yousefi Maragheh∗
+Reza.YousefiMaragheh@walmart.com
+Walmart Global Tech
+Sunnyvale, California, USA
+Pratheek Vadla∗
+Pratheek.Vadla@walmart.com
+Walmart Global Tech
+Bellevue, Washington, USA
+Priyank Gupta∗
+Priyank.Gupta@walmart.com
+Walmart Global Tech
+Bellevue, Washington, USA
+Kai Zhao∗
+Kai.Zhao@walmart.com
+Walmart Global Tech
+Sunnyvale, California, USA
+Aysenur Inan∗
+Aysenur.Inan@walmart.com
+Walmart Global Tech
+Sunnyvale, California, USA
+Kehui Yao∗
+Kehui.Yao@walmart.com
+Walmart Global Tech
+Bellevue, Washington, USA
+Jianpeng Xu
+Jianpeng.Xu@walmart.com
+Walmart Global Tech
+Sunnyvale, California, USA
+Praveen Kanumala
+Praveen.Kanumala@walmart.com
+Walmart Global Tech
+Sunnyvale, California, USA
+Jason Cho
+Jason.Cho@walmart.com
+Walmart Global Tech
+Sunnyvale, California, USA
+Sushant Kumar
+Sushant.Kumar@walmart.com
+Walmart Global Tech
+Sunnyvale, California, USA
+Abstract
+Retrieval-Augmented Generation (RAG) has shown promise in en-
+hancing recommendation systems by incorporating external con-
+text into large language model prompts. However, existing RAG-
+based approaches often rely on static retrieval heuristics and fail
+to capture nuanced user preferences in dynamic recommendation
+scenarios. In this work, we introduce ARAG, an Agentic Retrieval-
+Augmented Generation framework for Personalized Recommenda-
+tion, which integrates a multi-agent collaboration mechanism into
+the RAG pipeline. To better understand the long-term and session
+behavior of the user, ARAG leverages four specialized LLM-based
+agents: a User Understanding Agent that summarizes user prefer-
+ences from long-term and session contexts, a Natural Language
+Inference (NLI) Agent that evaluates semantic alignment between
+candidate items retrieved by RAG and inferred intent, a context
+summary agent that summarizes the findings of NLI agent, and an
+Item Ranker Agent that generates a ranked list of recommendations
+based on contextual fit. We evaluate ARAG accross three datasets.
+Experimental results demonstrate that ARAG significantly outper-
+forms standard RAG and recency-based baselines, achieving up to
+∗These authors contributed equally to this work.
+Permission to make digital or hard copies of all or part of this work for personal or
+classroom use is granted without fee provided that copies are not made or distributed
+for profit or commercial advantage and that copies bear this notice and the full citation
+on the first page. Copyrights for components of this work owned by others than the
+author(s) must be honored. Abstracting with credit is permitted. To copy otherwise, or
+republish, to post on servers or to redistribute to lists, requires prior specific permission
+and/or a fee. Request permissions from permissions@acm.org.
+SIGIR, Padova, Italy
+© 2025 Copyright held by the owner/author(s). Publication rights licensed to ACM.
+ACM ISBN 978-1-4503-XXXX-X/2025/07
+42.1% improvement in NDCG@5 and 35.5% in Hit@5. We also, con-
+duct an ablation study to analyse the effect by different components
+of ARAG. Our findings highlight the effectiveness of integrating
+agentic reasoning into retrieval-augmented recommendation and
+provide new directions for LLM-based personalization.
+CCS Concepts
+• Computing methodologies →Multi-agent planning; Natural
+language generation; Information extraction.
+Keywords
+Large Language Models, Personalization, Agentic Retrieval Aug-
+mented Generation
+ACM Reference Format:
+Reza Yousefi Maragheh, Pratheek Vadla, Priyank Gupta, Kai Zhao, Aysenur
+Inan, Kehui Yao, Jianpeng Xu, Praveen Kanumala, Jason Cho, and Sushant
+Kumar. 2025. ARAG: Agentic Retrieval Augmented Generation for Person-
+alized Recommendation. In Proceedings of ACM’s Special Interest Group on
+Information Retrieval (SIGIR). ACM, New York, NY, USA, 5 pages.
+1
+Introduction
+Adapting Retrieval-Augmented Generation (RAG) systems to rec-
+ommendation scenarios offers promising opportunities to enhance
+the accuracy and personalization of suggestions [3, 4]. In this con-
+text, RAG can be leveraged to augment traditional recommendation
+algorithms with real-time, diverse information retrieval. By incor-
+porating RAG, recommendation systems can go beyond relying
+solely on user preferences and item characteristics stored in a static
+database. Instead, they can dynamically fetch and consider addi-
+tional relevant data such as recent trends, user reviews, expert
+opinions, or even real-time market data [14]. This approach allows
+arXiv:2506.21931v2  [cs.IR]  11 Aug 2025
+
+--- PAGE 2 ---
+SIGIR, July 13-17, 2025, Padova, Italy
+Maragheh et al.
+Figure 1: ARAG framework: the User Understanding Agent summarizes long-term and session-level preferences; the NLI Agent
+scores each candidate for semantic alignment; the Context Summary Agent condenses NLI-filtered evidence into a focused
+context; and the Item Ranker Agent fuses these signals to produce the final personalized ranking.
+for more context-aware and up-to-date recommendations. For in-
+stance, a movie recommendation system using RAG could retrieve
+and analyze recent critic reviews, audience reactions, and current
+cultural trends to provide more timely and relevant suggestions.
+Moreover, RAG can help explain recommendations by retrieving
+and presenting supporting information, enhancing user trust and
+engagement [8]. The adaptive nature of RAG also enables recom-
+mendation systems to handle long-tail items or new users more
+effectively by drawing upon a broader knowledge base, potentially
+addressing common challenges like cold start problems in collabo-
+rative filtering [15].
+While RAG systems have shown promise in enhancing recom-
+mendation systems, there is significant room for improvement in
+their performance and effectiveness. The current limitations of RAG
+in recommendation contexts stem largely from their reliance on
+simplistic retrieval mechanisms, such as cosine similarity-based
+retrieval and embedding matching. These methods, while com-
+putationally efficient, often fall short in capturing the nuanced
+preferences and contexts that drive user behavior in recommen-
+dation scenarios [10, 13]. The complexity of user preferences and
+the multifaceted nature of items being recommended demand more
+sophisticated approaches to information retrieval and matching.
+A key area for advancement lies in developing RAG systems
+capable of better understanding and utilizing long-form user docu-
+ments to infer user context [2, 5, 12]. This involves moving beyond
+surface-level text matching to comprehend the implicit preferences,
+interests, and intentions embedded within user-generated content.
+Additionally, the ranking of the recall set of potential items requires
+more advanced algorithms that can weigh multiple factors simul-
+taneously, including relevance, diversity, novelty, and contextual
+appropriateness [7, 9, 16–18]. Future RAG systems for recommen-
+dations should incorporate more nuanced semantic understanding,
+and temporal dynamics to create a more holistic view of user prefer-
+ences and item characteristics [1, 6]. By addressing these challenges,
+RAG systems can evolve to provide more accurate, personalized,
+and contextually relevant recommendations, significantly enhanc-
+ing the user experience across various recommendation platforms.
+This paper presents ARAG: An Agentic Retrieval Augmented
+Generation framework for personalized recommendation. Building
+upon recent advancements in Agentic RAG across various domains,
+ARAG extends these principles to address the specific challenges
+of personalized recommendation systems. More specifically, under
+ARAG, and to better conduct the conversational ranking task, user
+long-term behavior is retrieved and passed through different agents
+to better adapt the rankings of documents.
+Through extensive experimentation, we assess the framework’s
+efficacy in improving these key aspects of recommendation sys-
+tems. The results demonstrate the potential of integrating agentic
+frameworks within the RAG paradigm for personalized recommen-
+dations, offering insights into how such an approach can enhance
+the accuracy and relevance of recommendations in various scenar-
+ios.
+2
+Methodology
+To better model user intent in personalized recommendation, we
+propose a multi-agent framework, ARAG, which introduces a set
+of specialized large language model (LLM) agents to refine context
+retrieval and item ranking. As shown in Figure 1, the input to the
+system consists of two components: (1) a long-term context cap-
+turing the user’s historical interactions, and (2) the current session,
+reflecting recent user behaviors. These interaction histories are used
+to retrieve a set of semantically relevant candidate items through
+embedding-based similarity. However, instead of relying solely on
+static retrieval scores, ARAG applies a reasoning-oriented agentic
+workflow to assess the contextual alignment of each candidate item.
+The workflow begins with the applying a regular RAG for retriev-
+ing the an initial set of larger recall set of items. Then, an NLI Agent
+evaluates whether each candidate item supports or aligns with this
+inferred user intent by analyzing its textual metadata (e.g., title,
+description, reviews). Then, a context summary agent summarizes
+the retrieved context by NLI agent. In parallel to this workflow, the
+
+--- PAGE 3 ---
+ARAG: Agentic Retrieval Augmented Generation for
+Personalized Recommendation
+SIGIR, July 13-17, 2025, Padova, Italy
+User Understanding Agent, generates a natural language summary
+of user preferences based on the session context. This helps with
+identifying generic long-term interests of the user. Finally, the Item
+Ranker Agent integrates these signals to produce a final ranked
+list of items, prioritizing those most relevant to both the user’s cur-
+rent and historical preferences. This agentic collaboration enables
+ARAG to perform fine-grained relevance assessment and produce
+recommendations that are both context-aware and semantically
+grounded.
+2.1
+Formal Problem Statement
+To formalize the methodology, the input to the system consists of
+two components: (i) A long-term context,𝐶lt, capturing the user’s
+historical interactions, and (ii) A current session, 𝐶st, reflecting
+recent user behaviors.
+We let
+u =  𝐶lt, 𝐶st
+
+denote the combined user context.
+Let I = {𝑖1, . . . ,𝑖𝑁} be the set of all candidate items, each having
+associated textual metadata 𝑇(𝑖) (e.g., title, description, reviews).
+Our goal is to produce a final ranking, or a permutation 𝜋over the
+I:
+𝜋= 𝑓Rank(u, I),
+which orders items by their relevance to the user’s context u.
+2.2
+ARAG framework
+In this subsection we formally introduce the components of ARAG.
+2.2.1
+Initial cosine similarity-based RAG. We use a RAG framework
+to obtain an initial subset I0 ⊆I of candidate items. Assume there
+is an embedding function:
+𝑓Emb :  I ∪{u} →R𝑑,
+which maps both items and user context into a shared𝑑-dimensional
+embedding space. We measure similarity between two embeddings
+via sim(·, ·), e.g., cosine similarity.
+The top-𝑘retrieved items are chosen by:
+I0 = argtop𝑘
+n
+sim 𝑓Emb(𝑖), 𝑓Emb(u)  𝑖∈I
+o
+.
+This yields an initial recall set of size 𝑘that will be refined by
+subsequent agents.
+2.2.2
+NLI Agent for Contextual Alignment. A Natural Language
+Inference (NLI) Agent evaluates each item 𝑖∈I0 to check how
+well its metadata 𝑇(𝑖) aligns with the user context. Let
+𝑠NLI(𝑖, u) = Φ 𝑇(𝑖), u,
+denote the alignment score produced by the NLI Agent, where Φ
+is an LLM-based function. A high score indicates that 𝑖strongly
+supports or matches the user’s interests.
+2.2.3
+Context Summary Agent. A Context Summary Agent (CSA)
+then summarizes the textual metadata of only those candidate items
+that the NLI Agent has deemed sufficiently aligned with the user
+context. Formally, define
+I+ = { 𝑖∈I0 | 𝑠NLI(𝑖, u) ≥𝜃},
+where 𝑠NLI(𝑖, u) is the NLI alignment score and 𝜃is a threshold
+above which an item is considered accepted. The Context Summary
+Agent then produces a concise summary,
+𝑆ctx = Ψ
+n
+𝑇(𝑖)
+ 𝑖∈I+o
+,
+where Ψ(·) is an LLM-driven summarization function operating on
+the textual metadata 𝑇(𝑖) of each accepted item.
+2.2.4
+User Understanding Agent. In parallel, the User Understand-
+ing Agent (UUA) synthesizes a high-level summary of the user’s
+preferences, based on the long-term context 𝐶lt and the current
+session 𝐶st:
+𝑆user = Ω u,
+where Ω(·) is an LLM-based reasoning function that generates a
+natural language description of the user’s generic interests and
+immediate goals.
+2.2.5
+Item Ranker Agent. Finally, the Item Ranker Agent (IRA)
+uses outputs 𝑆user and 𝑆ctx as context for ranking. Prompt for
+Ranker agent explicitly instructs the model to: (1) consider the
+user’s behavior in previous sessions, (2) consider the relevant part
+of the user history to the current ranking task, (3) examine the can-
+didate items, and (4) rank the items in descending order of purchase
+likelihood. For example, given a user summary indicating interest in
+vegan leather products, checkered bags, and stylish accessories, the
+ranker may prioritize items like the BUTIED Checkered Tote Shoul-
+der Handbag over the Dasein Hobo Handbag and Women’s Large
+Tote based on alignment with both material and style preferences.
+Formally, the model returns a permutation over the 𝑟candidate
+items:
+𝜋= 𝑓rank(𝑆user,𝑆ctx, I),
+𝜋= {𝑟1,𝑟2, . . . ,𝑟𝑁}
+where each 𝑟𝑗∈{1, 2, . . . , 𝑁} denotes the index of item in rank 𝑗
+in the final ranked list.
+As one can see under ARAG NLI, context summary, and user
+understanding agents collectively act as a memory moderation
+scheme for the final ranking task. These agents are utilized to make
+sure the user’s long-term and short-term behavioral context is
+properly integrated into the final ranking task.
+2.3
+Agent Collaboration Protocol
+To better explain the implementation workflow, we also clarify the
+collaboration protocol for agents in ARAG. ARAG is implemented
+as a blackboard-style multi-agent system [11] in which all agents
+read from and write to a shared, structured memory B. Each agent
+contributes a message object m containing a JSON schema {id, role,
+content, score, timestamp}, so that subsequent agents can reason
+not only over the raw user and item data, but also over the rationales
+produced by their peers.
+(1) Parallel inference. The User-Understanding Agent (UUA)
+and the NLI Agent are executed concurrently. The UUA writes
+a preference summary muser to B, while the NLI Agent
+writes a support/contradiction judgement vector mnli =
+
+𝑠NLI(𝑖, u)
+
+𝑖∈I0.
+(2) Cross-agent attention. The Context-Summary Agent (CSA)
+attends to both muser and mnli: it uses the user summary as a
+
+--- PAGE 4 ---
+SIGIR, July 13-17, 2025, Padova, Italy
+Maragheh et al.
+Performance of Benchmark Versus ARAG
+Clothing
+Electronics
+Home
+NDCG@5
+Hit@5
+NDCG@5
+Hit@5
+NDCG@5
+Hit@5
+Recency-based Ranking
+0.30915
+0.3945
+0.22482
+0.3035
+0.22443
+0.2988
+Vanilla RAG
+0.29884
+0.3792
+0.23817
+0.321
+0.22901
+0.3117
+Agentic RAG
+0.43937
+0.5347
+0.32853
+0.4201
+0.28863
+0.3834
+% Improvement
+42.12%
+35.54%
+37.94%
+30.87%
+25.60%
+22.68%
+Ablation Study
+Clothing
+Electronics
+Home
+NDCG@5
+HIT@5
+NDCG@5
+HIT@5
+NDCG@5
+HIT@5
+Vanilla RAG
+0.29884
+0.3792
+0.23817
+0.321
+0.22901
+0.3117
+ARAG w/o NLI & CSA
+0.3024
+0.3859
+0.2724
+0.3559
+0.2494
+0.3308
+ARAG w/o NLI
+0.3849
+0.4714
+0.296
+0.3878
+0.2732
+0.3582
+ARAG
+0.43937
+0.5347
+0.32853
+0.4201
+0.28863
+0.3834
+Table 1: Performance comparison of ARAG with benchmark models and ablation study on components of ARAG on Amazon
+datasets.
+relevance prior and the NLI scores as salience weights when
+composing 𝑆ctx, which it then records as mctx.
+(3) Final Ranking. The Item-Ranker Agent (IRA) consumes
+{ muser, mctx } and generates a ranked list 𝜋together with an
+explanation trace.
+The above steps provide a multi-agent, reasoning-oriented ap-
+proach that refines an initial set of retrieved items into a contextu-
+ally aligned recommendation list. By delegating specialized tasks
+(e.g., NLI, summarization, user understanding, and ranking) to dif-
+ferent large language model agents, ARAG enables: (i) Context
+Awareness: Both long-term and short-term user behaviors factor
+into the final ranking, (ii) Semantic Grounding: NLI and summariza-
+tion agents enhance interpretability and precision, and (iii) Person-
+alization: The final score reflects the user’s unique and evolving
+preferences, ensuring recommendations remain both relevant and
+adaptable.
+3
+Experiments
+3.1
+Dataset
+Our experiments utilize the widely-adopted Amazon Review dataset
+(He & McAuley, 2016), a large-scale collection of product reviews
+and metadata spanning multiple product categories on Amazon.com.
+This dataset contains millions of customer reviews, ratings, and
+product interactions across diverse categories including Electronics,
+Books, Clothing, and Home & Kitchen, making it particularly suit-
+able for evaluating cross-category recommendation performance.
+For our experiments, we selected a subset of user-item interactions
+from 10,000 randomly sampled users across these categories. Each
+review entry contains rich contextual information including times-
+tamps, ratings, textual feedback, and product metadata, providing
+comprehensive user preference signals. This dataset presents re-
+alistic challenges for recommendation systems, including sparse
+interaction matrices, shifting user preferences over time, and di-
+verse product taxonomies—making it an ideal testbed for evaluating
+the ARAG framework’s ability to leverage complex user contexts.
+3.2
+Benchmark Models
+The Recency model adopts a simple temporal heuristic, assuming
+that a user’s most recent interactions best reflect current prefer-
+ences. It appends these recent items directly to the LLM prompt
+without further filtering. This model operationalizes recency by
+directly appending the user’s most recent historical interactions to
+the large language model’s input prompt, without additional filter-
+ing or transformation mechanisms. By prioritizing chronologically
+recent user behavior over potentially more relevant but temporally
+distant interactions, this approach benefits from simplicity and
+computational efficiency.
+The Vanilla RAG (Retrieval-Augmented Generation) approach
+implements a more sophisticated information retrieval mechanism
+that moves beyond simple temporal ordering. This benchmark lever-
+ages embedding-based retrieval to identify semantically relevant
+items from the user’s interaction history, selecting items based on
+their embedding similarity rather than recency. After retrieving
+these relevant historical items, the model appends them to the LLM
+prompt to provide context for generating recommendations. For all
+the experiments, we used gpt-3.5-turbo (v0125), and set the temper-
+ature argument to 0 to increase repeatability of the experiments.
+3.3
+Results
+NDCG@5 and HIT@5 scores for ARAG as well as benchmark mod-
+els is presented in the first part of Table 1. The results demonstrate
+that the Agentic RAG approach significantly outperforms both
+Recency-based Ranking and Vanilla RAG frameworks across all
+datasets and metrics. Examining the NDCG@5 scores, Agentic RAG
+achieves 0.439, 0.329, and 0.289 on Amazon Clothing, Electronics,
+and Home respectively, compared to the next best performing ap-
+proach which ranges from 0.299 to 0.238. Similarly, Hit@5 metrics
+show consistent superiority with Agentic achieving 0.535, 0.420,
+and 0.383 across the three domains. These substantial improve-
+ments suggest that the agentic approach to retrieval provides a
+more effective mechanism for identifying and ranking relevant
+recommendations in conversational systems.
+
+--- PAGE 5 ---
+ARAG: Agentic Retrieval Augmented Generation for
+Personalized Recommendation
+SIGIR, July 13-17, 2025, Padova, Italy
+The improvement percentages quantify the magnitude of Agen-
+tic RAG’s performance gains, showing the most dramatic enhance-
+ment in the Clothing domain (42.12% for NDCG@5, 35.54% for
+Hit@5), followed by Electronics (37.94% and 30.87%) and Home
+(25.60% and 22.68%). This pattern suggests that the effectiveness of
+Agentic RAG may vary by domain characteristics, with potentially
+greater benefits in categories where item attributes and user prefer-
+ences are more diverse or complex. The consistency of improvement
+across all datasets validates that the agentic approach addresses fun-
+damental limitations in both recency-based and standard retrieval
+methods for conversational recommendation tasks.
+Interestingly, the comparative performance between Recency-
+based Ranking and Vanilla RAG varies by domain. In the Clothing
+category, Recency-based approaches outperform Vanilla RAG (0.309
+vs. 0.299 for NDCG@5), while the opposite holds for Electronics and
+Home categories. This observation points to domain-specific dy-
+namics in user recommendation patterns, where temporal recency
+may be more valuable in fashion-oriented categories compared to
+electronics or home goods. Despite these variations, the consistent
+superiority of Agentic RAG across all domains indicates that the
+intelligent, adaptive retrieval strategies employed by the agentic
+framework offer substantial advantages over both temporal and
+standard retrieval approaches in conversational recommendation
+scenarios.
+3.4
+Ablation Study
+The ablation study (second part of Table 1) highlights the incre-
+mental benefits of each component in our recommendation pipeline.
+Starting from the Vanilla RAG baseline, which yields modest NDCG@5
+scores of 0.299, 0.238, and 0.229 for Clothing, Electronics, and Home,
+adding the User Summary Agent leads to consistent gains across
+all domains—most notably in Electronics (14.4% improvement in
+NDCG@5) and Home (8.9%). These results confirm the importance
+of user preference summarization for enhancing context relevance
+beyond static embedding-based retrieval.
+Introducing the Context Summary Agent further boosts per-
+formance, especially in the Clothing domain (28.8% NDCG@5 im-
+provement), suggesting that item-level contextual understanding is
+critical in categories where compatibility and style matter. The com-
+plete Agentic RAG system, incorporating all components, achieves
+the best results, with up to 14% additional gains in NDCG@5 for
+Clothing. This confirms that semantic reasoning via natural lan-
+guage inference effectively bridges the gap between user intent
+and candidate item representation. Together, the agents provide
+complementary value, enabling state-of-the-art performance in
+conversational recommendation.
+4
+Conclusion
+ARAG reframes retrieval-augmented recommendation as a coor-
+dinated reasoning task among four specialized LLM agents. By
+separating the concerns of user understanding, semantic align-
+ment, context synthesis, and ranking, the framework converts a
+coarse embedding-based recall set into a finely filtered, semanti-
+cally grounded candidate list that directly reflects both long-term
+preferences and session intent. Extensive experiments on three
+benchmarks show that this agentic decomposition yields substan-
+tial accuracy gains while simultaneously providing transparent ra-
+tionales that enhance interpretability and user trust. These results
+demonstrate that agent-oriented orchestration inside the RAG loop
+is an effective, practical route to highly personalized, context-aware
+recommendation.
+References
+[1] Justin Chih-Yao Chen, Archiki Prasad, Swarnadeep Saha, Elias Stengel-Eskin,
+and Mohit Bansal. 2024. MAgICoRe: Multi-Agent, Iterative, Coarse-to-Fine
+Refinement for Reasoning. arXiv preprint arXiv:2409.12147 (2024).
+[2] Ziqiang Cui, Haolun Wu, Bowei He, Ji Cheng, and Chen Ma. 2024. Context
+Matters: Enhancing Sequential Recommendation with Context-aware Diffusion-
+based Contrastive Learning. In Proceedings of the 33rd ACM International Confer-
+ence on Information and Knowledge Management. 404–414.
+[3] Yashar Deldjoo, Zhankui He, Julian McAuley, Anton Korikov, Scott Sanner, Arnau
+Ramisa, René Vidal, Maheswaran Sathiamoorthy, Atoosa Kasirzadeh, and Silvia
+Milano. 2024. A review of modern recommender systems using generative models
+(gen-recsys). In Proceedings of the 30th ACM SIGKDD Conference on Knowledge
+Discovery and Data Mining. 6448–6458.
+[4] Dario Di Palma. 2023. Retrieval-augmented recommender system: Enhancing
+recommender systems with large language models. In Proceedings of the 17th
+ACM Conference on Recommender Systems. 1369–1373.
+[5] Thennakoon
+Mudiyanselage
+Anupama
+Udayangani
+Gunathilaka,
+Prab-
+hashrini Dhanushika Manage, Jinglan Zhang, Yuefeng Li, and Wayne Kelly. 2025.
+Addressing sparse data challenges in recommendation systems: A Systematic
+review of rating estimation using sparse rating data and profile enrichment
+techniques. Intelligent Systems with Applications (2025), 200474.
+[6] Sirui Hong, Xiawu Zheng, Jonathan Chen, Yuheng Cheng, Jinlin Wang, Ceyao
+Zhang, Zili Wang, Steven Ka Shing Yau, Zijuan Lin, Liyang Zhou, et al. 2023.
+Metagpt: Meta programming for multi-agent collaborative framework. arXiv
+preprint arXiv:2308.00352 3, 4 (2023), 6.
+[7] Zixuan Ke, Weize Kong, Cheng Li, Mingyang Zhang, Qiaozhu Mei, and Michael
+Bendersky. 2024. Bridging the preference gap between retrievers and llms. arXiv
+preprint arXiv:2401.06954 (2024).
+[8] Yuhan Li, Xinni Zhang, Linhao Luo, Heng Chang, Yuxiang Ren, Irwin King, and
+Jia Li. 2025. G-Refer: Graph Retrieval-Augmented Large Language Model for
+Explainable Recommendation. arXiv preprint arXiv:2502.12586 (2025).
+[9] Reza Yousefi Maragheh, Ramin Giahi, Jianpeng Xu, Lalitesh Morishetti, Shanu
+Vashishtha, Kaushiki Nag, Jason Cho, Evren Korpeoglu, Sushant Kumar, and
+Kannan Achan. 2022. Prospect-net: Top-k retrieval problem using prospect theory.
+In 2022 IEEE International Conference on Big Data (Big Data). IEEE, 3945–3951.
+[10] Matin Mortaheb, Mohammad A Amir Khojastepour, Srimat T Chakradhar, and
+Sennur Ulukus. 2025. Re-ranking the Context for Multimodal Retrieval Aug-
+mented Generation. arXiv preprint arXiv:2501.04695 (2025).
+[11] H Penny Nii. 1986. The blackboard model of problem solving and the evolution
+of blackboard architectures. AI magazine 7, 2 (1986), 38–38.
+[12] Lakshmanan Rakkappan and Vaibhav Rajan. 2019. Context-aware sequential
+recommendations withstacked recurrent neural networks. In The world wide web
+conference. 3172–3178.
+[13] Nicholas Rossi, Juexin Lin, Feng Liu, Zhen Yang, Tony Lee, Alessandro Magnani,
+and Ciya Liao. 2024. Relevance filtering for embedding-based retrieval. In Pro-
+ceedings of the 33rd ACM International Conference on Information and Knowledge
+Management. 4828–4835.
+[14] Weihang Su, Yichen Tang, Qingyao Ai, Zhijing Wu, and Yiqun Liu. 2024. DRAGIN:
+Dynamic Retrieval Augmented Generation based on the Information Needs of
+Large Language Models. arXiv preprint arXiv:2403.10081 (2024).
+[15] Junda Wu, Cheng-Chun Chang, Tong Yu, Zhankui He, Jianing Wang, Yupeng
+Hou, and Julian McAuley. 2024. Coral: Collaborative retrieval-augmented large
+language models improve long-tail recommendation. In Proceedings of the 30th
+ACM SIGKDD Conference on Knowledge Discovery and Data Mining. 3391–3401.
+[16] Zikun Ye, Reza Yousefi Maragheh, Lalitesh Morishetti, Shanu Vashishtha, Jason
+Cho, Kaushiki Nag, Sushant Kumar, and Kannan Achan. 2023. Seller-side Outcome
+Fairness in Online Marketplaces. arXiv preprint arXiv:2312.03253 (2023).
+[17] Reza Yousefi Maragheh, Xin Chen, James Davis, Jason Cho, Sushant Kumar,
+and Kannan Achan. 2020. Choice modeling and assortment optimization in the
+presence of context effects. Available at SSRN 3747354 (2020).
+[18] Yue Yu, Wei Ping, Zihan Liu, Boxin Wang, Jiaxuan You, Chao Zhang, Moham-
+mad Shoeybi, and Bryan Catanzaro. 2024. Rankrag: Unifying context ranking
+with retrieval-augmented generation in llms. Advances in Neural Information
+Processing Systems 37 (2024), 121156–121184.

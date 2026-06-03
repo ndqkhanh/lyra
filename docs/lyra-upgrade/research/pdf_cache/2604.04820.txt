@@ -1,0 +1,1258 @@
+--- PAGE 1 ---
+ANX: Protocol-First Design for AI Agent Interaction with a
+Supporting 3EX Decoupled Architecture
+Xu Mingze
+Hangzhou Ziyou Data Technology Co., Ltd., Hangzhou 310000, China
+mountcoding@gmail.com
+April 4th, 2026
+Abstract
+AI agents, autonomous digital actors, need agent-native protocols; existing methods include GUI automation
+and MCP-based skills, with defects of high token consumption, fragmented interaction, inadequate security, due to
+lacking a unified top-level framework and key components, each independent module flawed. To address these is-
+sues, we present ANX, an open, extensible, verifiable agent-native protocol and top-level framework integrating CLI,
+Skill, MCP, resolving pain points via protocol innovation, architectural optimization and tool supplementation. Its
+four core innovations: 1) Agent-native design (ANX Config, Markup, CLI) with high information density, flexibility
+and strong adaptability to reduce tokens and eliminate inconsistencies; 2) Human-agent interaction combining Skill’s
+flexibility for dual rendering as agent-executable instructions and human-readable UI; 3) MCP-supported on-demand
+lightweight apps without pre-registration; 4) ANX Markup-enabled machine-executable SOPs eliminating ambiguity
+for reliable long-horizon tasks and multi-agent collaboration. As the first in a series, we focus on ANX’s design,
+present its 3EX decoupled architecture with ANXHub and preliminary feasibility analysis and experimental vali-
+dation. ANX ensures native security: LLM-bypassed UI-to-Core communication keeps sensitive data out of agent
+context; human-only confirmation prevents automated misuse. Form-filling experiments with Qwen3.5-plus/GPT-4o
+show ANX reduces tokens by 47.3% (Qwen3.5-plus) and 55.6% (GPT-4o) vs MCP-based skills, 57.1% (Qwen3.5-
+plus) and 66.3% (GPT-4o) vs GUI automation, and shortens execution time by 58.1% and 57.7% vs MCP-based
+skills.
+Keywords: AI Agent, Protocol Architecture, Interaction Framework, Token Efficiency, Safe Interaction, Structured
+Semantics
+1
+Introduction
+1.1
+Background and Problem Statement
+AI agents are increasingly emerging as autonomous, goal-driven entities capable of performing complex digital tasks
+on behalf of humans, positioning them as the next generation of core internet users. This paradigm shift demands
+agent-native interaction frameworks rather than the traditional human-centric paradigms.
+However, existing ap-
+proaches remain fragmented without a unified top-level architecture to orchestrate them into a coherent ecosystem—a
+critical research gap addressed by the ANX (AI Native eX) protocol: a holistic agent-native framework designed to
+govern, unify, and elevate GUI automation, MCP, skill systems, and CLI execution under a single systematic paradigm.
+Graphical user interfaces (GUIs), human-designed by nature, incur exorbitant token costs, poor scalability, and
+inherent security flaws when automated for agents. MCP and skill-based CLIs offer incremental improvements but
+suffer from core limitations: pre-installation requirements, no use-and-go capability, separated human-agent interac-
+tion channels, overreliance on limited Markdown, and the lack of unified structured formats and sensitive data control
+mechanisms. Recent CLI-based explorations such as OpenCLI (Kasibatla et al., 2025) and SkillWeaver (Zheng et al.,
+2025) still remain browser-centric, plagued by DOM fragility, parsing barriers from page encryption, update-induced
+latency, and inconvenient device-bound sensitive data entry, compromising both usability and security.
+Natural language ambiguity further undermines the stability of LLM-based execution in complex standard operat-
+ing procedures (SOPs). Chain-of-Thought (Wei et al., 2022) fails to resolve this ambiguity, while Chain-of-Verification
+1
+arXiv:2604.04820v1  [cs.AI]  6 Apr 2026
+
+--- PAGE 2 ---
+(Dhuliawala et al., 2024) reduces hallucinations only at the cost of additional token overhead, without eliminating re-
+liance on unstructured natural language. Although AI agents outperform humans in routine task execution (Wang et al.,
+2025), their purely programmatic approaches lack quality and fail to support long-horizon, multi-step SOP scheduling
+and multi-agent collaboration—key capabilities for practical deployment.
+Most critically, security is not treated as a first-class concern in existing paradigms. Sensitive data (e.g., passwords,
+financial information) must traverse the agent’s context, creating inherent privacy risks and leakage vulnerabilities, as
+demonstrated by Rosenberg et al. (2025) in banking agent hallucination incidents. While recent optimizations like
+semantic tool discovery (Mudunuri et al., 2026) and CLI-based interfaces (Gao et al., 2026) boost efficiency, they
+remain piecemeal solutions that cannot simultaneously address the core challenges of efficiency, security, and semantic
+precision for agent interaction.
+ANX fills this void as a higher-order architectural paradigm that integrates, coordinates, and transcends these
+isolated tools. Treating GUI, MCP, CLI, and skill systems as functional execution units, ANX acts as a unifying
+governance framework that resolves their individual limitations, enabling systematic, secure, and efficient large-scale
+agent interaction.
+1.2
+Contributions
+This paper presents ANX (AI Native eX) – a co-designed protocol and architecture for agent-native interaction. The
+contributions are organized into two categories: protocol-level innovations and architecture-level innovations.
+Protocol Innovations (ANX Protocol)
+• Agent-Native Design (ANX Config, ANX Markup, ANX CLI) – Designed first for agents: ANX provides a
+unified, compatible, and extensible protocol that eliminates interface description inconsistency across platforms.
+ANX Markup is a compact structured encoding, more concise than natural language or plain Markdown, offering
+higher information density, significantly reducing token consumption, and improving processing efficiency. It
+is easy for agents to understand and operate, with elegant, composable mechanisms, rich expressiveness, and
+abundant built-in utilities to support diverse complex applications.
+• Human-Agent Shared Interaction – The same ANX definition can be directly rendered as a usable human
+interface within dialog boxes (e.g., embedded UI), fundamentally extending human-agent interaction paradigms.
+It can also be rendered as H5 or mini-program, serving as a conventional application. This enables a single
+protocol to seamlessly support both agent-driven and human-driven interactions – develop once, use everywhere,
+eliminating fragmentation and reducing development costs.
+• Create-on-Demand, Use-and-Go – Agents autonomously generate new ANX applications on-demand: con-
+cise, fast, dynamically parsed and hot-started. Functions load on-demand, lightweight with no download. Cre-
+ate, use, discard – no pre-registration. Zhang et al. (2025) systematically compare API-based and GUI-based
+LLM agents, revealing significant differences in architecture complexity, development workflow, and user inter-
+action models. In contrast, ANX eliminates this complexity: once an application is defined in ANX format, the
+3EX architecture automatically adapts it for agent use, requiring no intricate structure design or debugging.
+• Clear and Machine-Executable SOP Expression – ANX’s structured semantics (ANX Markup) eliminate nat-
+ural language ambiguity, making standard operating procedures (SOPs) unambiguous and machine-executable.
+This enables reliable transmission and execution of complex workflows, long-horizon task scheduling.
+Architecture Innovations (3EX Decoupled Architecture)
+• 3EX (Expression-Exchange-Execution) Layered Architecture with ANXHub – A general-purpose architec-
+ture designed for agents. It separates task specification (Expression), tool discovery and negotiation (Exchange),
+and execution (Execution) into independent, composable layers. This decoupling significantly reduces redun-
+dant steps, lowering the operational difficulty for agents – each layer has a clear responsibility, freeing agents
+from handling mixed concerns. In complex scenarios, 3EX achieves higher efficiency and lower cognitive load
+for agents. The architecture realizes the above protocol features. Unlike MCP’s local or directory-based tool
+indices, ANXHub is a massive application marketplace: it enables dynamic discovery of a vast ecosystem of
+ANX applications on-demand, with no pre-installation, no local binaries, and true use-and-go, eliminating virus
+risks at the source.
+2
+
+--- PAGE 3 ---
+• Embedded Security via Direct UI-to-Core Communication – ANX UI renders interactive forms directly in
+the user dialog that communicate directly with ANX Core, bypassing the LLM entirely. Sensitive data entered
+by the user never enters the agent’s context, achieving true data isolation. Human confirmation dialogs are
+rendered in ANX UI format and can only be completed by human action – the execution layer is designed such
+that confirmation operations cannot be delegated to the agent, eliminating the risk of automated misuse.
+• Stable Long-Horizon SOP Execution and Multi-Agent & Human Collaboration – Based on the 3EX ar-
+chitecture and ANX Markup’s structured semantics, ANX enables reliable scheduling of complex workflows.
+Multiple agents and humans can collaborate on a single SOP – each agent handles subtasks, while humans act
+as gatekeepers at critical steps (e.g., blocking approval), with consistent state managed by ANX Nodes and full
+security inheritance (human-only confirmation).
+Summary: By integrating these protocol and architecture innovations, ANX provides the first holistic solution
+that simultaneously addresses efficiency, security, stability, and multi-agent & human collaboration for agent-native
+interaction.
+1.3
+Paper Structure
+Section 2 reviews related work; Section 3 presents ANX architecture; Section 4 describes experimental methodology;
+Section 5 reports results and discussion; Section 6 concludes and outlines future directions.
+2
+Related Work: Four Dimensions of Agent Interaction Paradigms
+We categorize existing agent interaction approaches into four streams: GUI automation, tool-calling protocols, emerg-
+ing agent-native protocols, and multi-agent collaboration frameworks. To systematically assess their capabilities and
+limitations, we propose a four-dimensional evaluation framework: Protocol & Tooling, Discovery & Retrieval, Se-
+curity, and Collaboration (SOP & Multi-Agent). This analysis reveals critical gaps that motivate the design of ANX,
+which we present in Section 3.
+2.1
+GUI-Based Agent Approaches
+GUI-based agents simulate human operations through visual recognition (e.g., screen parsing, element detection).
+Strength: No website modification needed; highest generality. Limitation: Weak spatial-semantic alignment, high
+token cost, brittle to DOM changes, no security.
+2.2
+Tool-Calling Protocols: MCP and Extensions
+The Model Context Protocol (MCP) (Ding et al., 2025) standardizes tool invocation via JSON schemas. Strength:
+Declarative, composable interface. Limitation: Pre-installation required, token overhead for dynamic options, no data
+isolation. Extensions like semantic tool discovery (Mudunuri et al., 2026) improve retrieval but remain tool-centric.
+2.3
+Emerging Agent-Native Protocols
+• CHEQ (Rosenberg et al., 2025): human-in-the-loop confirmation. Strength: standardised confirmation. Limi-
+tation: no data isolation, agent sees sensitive data before confirmation.
+• VACP (St¨ahle et al., 2026): visual analytics context compression. Strength: reduces token consumption. Limi-
+tation: domain-specific.
+• FormFactory (Li et al., 2025): benchmark for form filling. Limitation: no protocol or architecture.
+None offer a holistic solution.
+3
+
+--- PAGE 4 ---
+2.4
+Agent Architecture and Governance
+Existing work (Ben Hassouna et al., 2026; Chen et al., 2025; Dochkina, 2026) focuses on agent internals (reasoning,
+memory, self-organization) rather than interaction paradigms, leaving protocol-level inefficiencies and security gaps
+unaddressed.
+2.5
+Four-Dimensional Evaluation Framework
+To enable a fair, multidimensional comparison, we define four orthogonal dimensions:
+1. Protocol & Tooling: task representation, tool discovery, runtime environment, robustness, token efficiency,
+use-and-go, shared specification, architectural decoupling.
+2. Discovery & Retrieval: discovery mechanism, scope, pre-installation, latency, dynamic updates, composability.
+3. Security: data isolation (LLM visibility), human confirmation, authentication, threat model, workflow integra-
+tion.
+4. Collaboration (SOP & Multi-Agent): SOP representation, determinism, dependencies/branching, multi-agent
+coordination, human-in-the-loop, scale, auditability, tool integration.
+2.5.1
+Protocol & Tooling Dimension
+Table 1: Protocol & Tooling Dimension: Comparison of Representative Approaches
+Dimension
+GUI Automation
+MCP
+OpenCLI
+SkillWeaver
+ANX
+Task Representation
+NL+vision
+JSON schema
+CLI commands
+Reusable APIs
+Structured
+ANX
+Markup
+Tool Discovery
+None (DOM)
+Pre-registered
+Pre-converted cat-
+alog
+Autonomous
+ex-
+ploration
+Dynamic semantic
+(ANXHub)
+Runtime Env.
+Browser+DOM
+Tool server
+Browser+CLI
+Browser+DOM
+ANX
+Core+CLI
+(no browser)
+Robustness
+Low (brittle)
+N/A
+Low (DOM-dep)
+Low (brittle UI)
+High (no DOM)
+Use-and-Go
+Yes
+No
+Yes (catalog)
+No
+Yes (dynamic)
+Token Efficiency
+Low
+Medium
+High
+Medium
+High
+Shared Spec
+For Human
+No
+For Agent
+For Agent
+Yes (native)
+Decoupling
+Monolithic
+Tool-centric
+Browser-centric
+Environment-bound
+3EX layered
+Discussion and Summary: The protocol & tooling dimension reveals a clear trade-off. GUI automation offers max-
+imum generality but suffers from high token consumption, DOM brittleness, and no built-in security. MCP provides
+a declarative tool interface but requires pre-installation and lacks dynamic discovery. OpenCLI enables zero-install
+CLI usage but remains browser-dependent. SkillWeaver allows autonomous skill discovery but relies on fragile UI
+sequences. ANX uniquely combines a compact structured task representation (ANX Markup), dynamic semantic
+discovery (ANXHub), a browser-free lightweight runtime (ANX Core+CLI), high efficiency through progressive dis-
+closure, high-density protocol, and layered architecture, native shared human-agent specification, and full architectural
+decoupling (3EX). These features together address the fragmentation and inefficiency that plague existing approaches.
+4
+
+--- PAGE 5 ---
+2.5.2
+Discovery & Retrieval Dimension
+Table 2: Discovery & Retrieval Dimension: Comparison of Representative Approaches
+Dimension
+Semantic Tool Discov-
+ery
+Skill Discovery
+MCP (Basic)
+ANX
+Discovery Mechanism
+Vector retrieval
+Autonomous
+explo-
+ration
+Pre-registered list
+Semantic
+vector
+(ANXHub)
+Discovery Scope
+Local tools
+Current environment
+Local tools
+Global marketplace
+Pre-installation Required
+Yes
+No (env-dep)
+Yes
+No (zero-install)
+Discovery Latency
+Low
+High
+Very low
+Medium (optimisable)
+Dynamic Updates
+Re-indexing
+Re-exploration
+Re-registration
+Real-time publish
+Applicable Scenarios
+Fixed toolset
+New environment
+Static toolset
+Open, dynamic
+Composability
+Low
+Medium
+Low
+High (SOP composi-
+tion)
+Discussion and Summary: Existing discovery mechanisms are either static (MCP’s pre-registered list), limited to
+local tools (semantic vector retrieval), or environment-specific and costly (skill discovery). None offer a global,
+real-time, zero-install marketplace. ANX introduces a semantic vector retrieval layer (ANXHub) that provides on-demand
+discovery from a massive application marketplace, with zero pre-installation, real-time updates, and high composabil-
+ity through SOP composition. While discovery latency is currently medium, it is optimisable; the key advantage is the
+ability to handle open, dynamic tasks across domains without prior registration.
+2.5.3
+Security Dimension
+Table 3: Security Dimension: Comparison of Representative Approaches
+Dimension
+CHEQ
+AIP
+AgentCrypt
+ANX
+Data Isolation (LLM sees?)
+Yes
+(data
+already
+seen)
+N/A (network)
+No
+(encrypted,
+but
+LLM sees)
+No (UI-to-Core, LLM
+never sees)
+Human Confirmation
+Dialog (bypassable?)
+No
+No
+Human-only, no exit
+Authentication
+None
+DID-based
+End-to-end
+encryp-
+tion
+User Token + trusted
+Core/Hub
+Workflow Integration
+Standalone
+Standalone
+Standalone
+Native integration
+Discussion and Summary: Security is largely overlooked in existing agent protocols. CHEQ provides a confir-
+mation dialog but does not prevent the agent from seeing sensitive data beforehand. AIP and AgentCrypt focus on
+network-layer or transport security, leaving the LLM context vulnerable. ANX introduces a fundamentally different
+approach: UI-to-Core direct communication via the chat dialog, ensuring that the LLM never sees raw sensitive data.
+Human confirmation is unbypassable (no programmatic exit), authentication is token-based with a trusted Core/Hub.
+Moreover, security is natively integrated into the workflow rather than being a standalone layer. This makes ANX the
+first protocol to provide application-level data isolation and hardened human-in-the-loop guarantees.
+5
+
+--- PAGE 6 ---
+2.5.4
+Collaboration Dimension (SOP & Multi-Agent)
+Table 4: Collaboration Dimension: SOP Scheduling & Multi-Agent Coordination
+Dimension
+COLLAB-LLM
+ANP
+A2A
+ANX
+SOP Representation
+Role-based task graph
+Agent Description +
+semantic
+Agent Card + work-
+flows
+SOP ANX Config
+Determinism
+Medium (dynamic)
+Medium (negotiation)
+Medium (task-based)
+High (state machine)
+Dependencies & Branching
+Implicit (communica-
+tion)
+Peer discovery + ne-
+gotiation
+Task delegation
+Explicit
+sources/tar-
+gets, conditional
+Multi-Agent Coordination
+Yes (≤8 agents)
+Yes (P2P)
+Yes (enterprise)
+Yes (scalable, ANX-
+Hub sync)
+Human-in-the-Loop
+No
+No
+No
+Yes (blocking, native)
+Workflow Scale
+Small
+Arbitrary
+Medium-large
+Arbitrary
++
+long-horizon
+Auditability
+Limited
+Limited (logs)
+Task-level
+Built-in (ANX Nodes)
+Tool Integration
+Separate
+Separate
+Separate
+Seamless (3EX)
+Discussion and Summary: Multi-agent collaboration protocols (COLLAB-LLM, ANP, A2A) provide valuable coor-
+dination mechanisms but lack several critical features: deterministic SOP execution, native human-in-the-loop, inte-
+grated security, and seamless tool integration. ANX addresses these through its SOP framework built on ANX Config
+with explicit sources/targets dependencies, conditional routing, and a state machine that ensures high determinism.
+Multi-agent coordination is handled by ANXHub (task decomposition and state synchronization) and scales beyond
+fixed limits. Human-in-the-loop is supported natively via blocking, unbypassable confirmation dialogs. Auditability
+is built-in through ANX Nodes, and tool integration is seamless thanks to the 3EX architecture. ANX thus provides a
+complete, production-ready foundation for long-horizon SOP execution and multi-agent collaboration.
+2.6
+Research Gaps and Open Challenges
+The comparative analysis reveals that no existing approach simultaneously addresses all four dimensions effectively:
+1. Protocol & Tooling Gap: Browser-centric (fragile, high token) or tool-centric (pre-installation). No compact,
+structured task representation with dynamic zero-install discovery.
+2. Discovery Gap: Existing discovery limited to local tools (MCP, semantic) or costly environment exploration
+(skill discovery). No global, real-time, zero-install marketplace.
+3. Security Gap: All surveyed methods either expose sensitive data to LLM context or lack application-level,
+unbypassable human confirmation. Network security does not protect against LLM leakage.
+4. Collaboration Gap: Multi-agent protocols (A2A, ANP, COLLAB-LLM) provide coordination but lack deter-
+ministic SOP execution, native human-in-the-loop, and integrated security.
+2.7
+Summary of Academic Contributions and Takeaway for Future Comparisons
+This chapter makes the following contributions that can be directly cited by other researchers:
+1. A four-dimensional evaluation framework (Protocol & Tooling, Discovery, Security, Collaboration) with
+explicit sub-dimensions. Researchers can use these dimensions to systematically compare any new agent inter-
+action system.
+2. A comparative taxonomy categorising existing approaches into four families: browser-centric (GUI, Open-
+CLI, SkillWeaver), tool-centric (MCP, semantic discovery), specialised security (CHEQ, AIP, AgentCrypt), and
+multi-agent collaboration (COLLAB-LLM, ANP, A2A). Each family is characterised by its strengths and inher-
+ent bottlenecks.
+6
+
+--- PAGE 7 ---
+3. Identification of four persistent open challenges: zero-friction skill adoption, real-time global discovery,
+privacy-preserving execution (LLM never sees sensitive data), and deterministic long-horizon SOP execution
+with integrated multi-agent and human-in-the-loop support.
+4. A clear, citation-ready conclusion: “To the best of our knowledge, no prior approach combines structured
+semantic task representation, dynamic global discovery, built-in data isolation (LLM never sees sensitive data),
+unbypassable human confirmation, and native deterministic SOP orchestration under a single protocol. This
+study presents the ANX protocol and its 3EX decoupled architecture, designed to achieve full coverage of
+capabilities across all four dimensions and address the aforementioned research gaps.”
+For researchers and practitioners who wish to position their work against the state of the art, we recommend using
+the four-dimensional framework and the taxonomy presented here as a reference. The tables and analysis above can
+be directly cited to support claims about the limitations of existing methods and the novelty of new contributions.
+Table 5: Summary of All Approaches across Four Dimensions (Simplified)
+Method
+Protocol & Tooling
+Discovery
+Security
+Collaboration
+GUI Automation
+NL+vision; brittle; high
+token
+None
+No isolation; LLM sees
+None
+MCP
+JSON
+schema;
+pre-install;
+medium
+token
+Pre-registered list
+No isolation; OAuth
+Sequential calls
+OpenCLI
+CLI;
+DOM-dep;
+zero-install
+Pre-converted catalog
+Device entry; no isola-
+tion
+None
+SkillWeaver
+Reusable APIs; brittle
+UI
+Autonomous
+explo-
+ration; env-dep
+No isolation
+None
+Semantic Discovery
+Vector retrieval; local
+Local
+tools;
+vector
+search
+None (retrieval)
+None
+Skill Discovery (gen.)
+Env-dep; no fixed pro-
+tocol
+Trial-error;
+high
+la-
+tency
+None
+None
+CHEQ
+Confirmation only
+None
+Dialog; agent sees data
+None
+AIP
+Network layer; no tasks
+DID-based discovery
+Comm
+security;
+no
+LLM iso
+None
+AgentCrypt
+Encryption only
+None
+E2E encrypt; LLM sees
+plain
+None
+COLLAB-LLM
+Role messaging; no dis-
+covery
+Pre-defined roles
+None
+Dynamic
+graph;
+≤8
+agents; 89%
+ANP
+P2P; DID-based
+Semantic;
+capability
+neg.
+DID auth; comm secu-
+rity
+Multi-agent discovery;
+no workflow
+A2A
+Agent Card; enterprise
+Agent Card metadata
+External OAuth; no iso-
+lation
+Task
+delegation;
+no
+SOP
+ANX
+Structured
+markup;
+ANXHub; no browser;
+high efficiency; shared
+spec; 3EX
+Global
+marketplace;
+zero-install;
+real-time;
+composable
+UI-to-Core; LLM never
+sees; human-only; user
+token; explicit threat
+SOP
+(sources/tar-
+gets);
+deterministic;
+scalable
+multi-agent;
+human-in-loop;
+au-
+ditable
+3
+ANX Protocol and Architecture
+ANX follows six core principles: decoupling, progressive disclosure, security by default, semantic precision, marketplace-driven
+extensibility, and verifiability. The following sections detail the protocol and architecture that realize these principles.
+3.1
+ANX Protocol: Structured Semantics
+The ANX protocol defines a family of structured, machine-readable formats that enable precise agent-system interac-
+tion.
+7
+
+--- PAGE 8 ---
+3.1.1
+ANX Markup and ANX Config
+ANX Markup is a hybrid structured encoding combining XML-like forms. It clearly defines task metadata, field at-
+tributes, validation rules, interaction elements, and security annotations. ANX Config provides a unified configuration
+format that simplifies setup and is equally accessible to humans and agents, enabling seamless co-use.
+ANX Config Format Example:
+{
+"protocol ": "ANX", "version ": "1.0.0" ,
+"kind ": "form",
+"title ": "Create Job Seeker
+Account",
+"items ": [
+{" nick ": "lastName", "kind ": "input "},
+{" nick ": "industry", "kind ": "options", "optionsSet ": {
+"dataset ": {" url_dataset ": "http :// localhost :7887/ dataset/industries "},
+"valueNick ": "id",
+"titleNick ": "name"
+}}
+]
+}
+Critically, when ANX Markup contains fields marked as ”type”: ”sensitive”, the rendering engine of the user
+interface (ANX UI) communicates directly with ANX Core, completely bypassing the LLM. This ensures that the
+agent never receives raw sensitive data; only a reference token is passed to the execution layer, achieving robust
+isolation.
+ANX Markup Format Example:
+<x form c_8193 >
+## Create Job Seeker
+Account
+Join us to discover
+more
+career
+opportunities
+<x input c_2354 >** lastName :** Mingze </x>
+<x options
+card_1675 >
+** industry :**
+<x 0> Please
+select
+industry </x>
+<x 1 it > Information
+Technology </x>
+<x 2 finance > Finance </x>
+</x>
+<x button
+c_2326 tap=" submit">
+[Create
+Account ](/ submit)
+</x>
+</x>
+3.1.2
+ANX CLI
+ANX CLI defines a lightweight, cross-platform command-line carrier that is independent of any specific user interface.
+The command format is:
+anx <cardKey > <action > params
+For example, executing a job application form filling:
+anx c_8193
+set_form
+’{" lastName ":" Mingze "," industry ":"it"}’
+ANX CLI eliminates the inconsistency of interface descriptions across different platforms, where each dialog
+system previously developed its own ad-hoc format. It provides a universal, compatible, and extensible protocol.
+8
+
+--- PAGE 9 ---
+3.1.3
+Dynamic Discovery Protocol
+The dynamic discovery protocol allows skills to be indexed rather than pre-installed into the agent’s local environment.
+Applications can be discovered and used on-demand without installation, providing true ”use-and-go” capability.
+Progressive disclosure of task-relevant information fundamentally avoids token explosion as the skill library scales.
+The protocol defines query semantics over a semantic index (realised by ANXHub in the architecture), returning only
+the top-k relevant tools for the current task.
+3.1.4
+ANX SOP Specification
+ANX SOP (Standard Operating Procedure) is a core application of ANX Markup for task scheduling. It adopts
+schema-based ANX Markup to explicitly define SOP steps, conditional logic, operation standards, and field con-
+straints. This resolves the natural language ambiguity that plagues traditional SOP descriptions.
+Code 3: provides a concrete SOP specification example for resume screening
+{
+"protocol ": "ANX", "version ": "1.0.0" ,
+"kind ": "sop", "title ": "Resume
+Screening",
+"steps ": [
+{" uuid ": "s1", "start ": true , "nick ": " CollectAndParse ", "kind ": "form",
+"items ": [
+{" name ": "resumeSources", "kind ": "input "},
+{" name ": "parsedInfo", "kind ": "textarea "}
+]},
+{" uuid ": "s2", "nick ": "AIDecision", "kind ": "condition", "sources ": ["s1"],
+"case ": [
+{" when ": "matchingScore
+>=80, no risks/flaws", "targets ": ["s3"]},
+{" when ": "matchingScore
+<80, or risks/flaws
+exist", "targets ": ["s4"]}
+]},
+{" uuid ": "s3", "nick ": " HighMatchProcess "},
+{" uuid ": "s4", "nick ": " LowMatchProcess "}
+]
+}
+Control Flow Semantics. ANX SOP uses two complementary mechanisms to define control flow: sources and
+targets. The sources field lists predecessor steps that must be completed before the current step can be scheduled,
+establishing static structural dependencies to ensure determinism, verifiability, and support for synchronisation and
+parallel patterns. The targets field provides a constrained set of candidate steps for dynamic routing, allowing the LLM
+to select appropriate branches based on runtime conditions. Together, they balance structural stability and adaptive
+decision-making.
+For step synchronisation with multiple sources, ANX SOP supports two joining strategies controlled by the
+sources join field:
+• all (default): The step executes only when all executed sources have completed. Unexecuted sources due to
+conditional routing are marked as skipped and do not block the workflow.
+• any: The step executes as soon as any one of its sources has completed.
+In case of overlapping declarations – when a step appears in the predecessor’s targets list and also lists the prede-
+cessor in its own sources – dynamic routing via targets takes precedence. The step is executed only if selected by the
+LLM, rather than being automatically triggered by the source dependency.
+3.2
+3EX Architecture
+The 3EX (Expression-Exchange-Execution) architecture is the runtime realisation of the ANX protocol. It separates
+task specification, tool discovery, and execution into three independent, composable layers, significantly reducing
+redundant steps and lowering the operational difficulty for agents.
+9
+
+--- PAGE 10 ---
+Figure 1: ANX 3EX (Expression-Exchange-Execution) Runtime Mechanism
+3.2.1
+Expression Layer
+The Expression layer uses ANX Markup to represent tasks in a structured way. It holds the task metadata, field def-
+initions, validation rules, and security annotations. This layer is responsible for producing a canonical, unambiguous
+description of what needs to be done.
+3.2.2
+Exchange Layer (ANXHub)
+The Exchange layer is implemented by ANXHub. Unlike MCP’s local or directory-based tool indices, ANXHub is a
+massive application marketplace that enables dynamic discovery of a vast ecosystem of ANX applications on-demand,
+with no pre-installation, no local binaries, and true use-and-go. ANXHub relies on semantic vector search technology
+to retrieve relevant skills from the skill index. This design avoids token explosion and ensures that baseline token
+consumption remains fixed regardless of the size of the skill library. In addition, ANXHub is responsible for task
+routing and cross-agent synchronization, laying the foundation for multi-agent collaborative work.
+3.2.3
+Execution Layer (ANX Core, ANX CLI, ANX Node)
+The Execution layer consists of:
+• ANX Core – a parser and execution engine that converts structured task specifications and retrieved tool infor-
+mation into platform-agnostic ANX CLI commands.
+• ANX CLI – the lightweight command carrier.
+• ANX Node – an execution container that runs the commands and streams back results and state feedback.
+Progressive disclosure is adopted in command generation: only the execution commands required for the current
+task step are generated, avoiding unnecessary token consumption.
+3.2.4
+Protocol State Machine
+The ANX protocol state machine defines the complete lifecycle of an interaction. It highlights two security-critical
+states:
+• WAITING UI – Sensitive data fields trigger this state; the UI component communicates directly with ANX
+Core, bypassing the LLM. The agent never sees the raw input.
+10
+
+--- PAGE 11 ---
+• CONFIRMING – Critical actions require explicit human confirmation. This state has no programmatic exit
+– completion requires human interaction, enforcing the security property that sensitive operations cannot be
+automated.
+Figure 2: ANX Protocol State Machine
+3.2.5
+Key Components and Interaction Flow
+Table 6: Main components of ANX
+Component
+Function
+ANXHub
+Semantic tool discovery, task routing, cross-agent sync
+ANX Markup
+Structured task representation; triggers direct UI-to-Core communication for sensitive fields
+ANX Core
+Parser, execution engine, CLI generation
+ANX CLI
+Lightweight command-line carrier
+ANX Node
+Execution node with state feedback
+ANX Config
+Global configuration for application or multi-agent & human deployments
+ANX UI
+Rendering engine that displays forms and confirmation dialogs, communicating directly with ANX Core
+Interaction Flow
+• Task Expression – Agent or human constructs ANX Markup.
+• Tool Discovery – ANXHub performs semantic search over the marketplace and returns top-k tools.
+• Command Generation – ANX Core generates ANX CLI commands.
+• Secure Data Handling – Sensitive fields render as embedded forms via ANX UI; the UI communicates directly
+with ANX Core, bypassing the LLM. The agent never sees raw input.
+• Human Confirmation – Critical actions trigger ANX UI confirmation dialogs that can only be completed by
+human interaction; no programmatic completion interface exists.
+11
+
+--- PAGE 12 ---
+• Execution – ANX CLI commands execute on ANX Nodes; results stream back.
+• Feedback – Agent receives structured results.
+3.3
+Security Mechanisms
+ANX ensures secure agent interaction through two core, non-overlapping mechanisms embedded in its 3EX archi-
+tecture and state machine: sensitive data isolation and human validation of critical operations. Future extensions
+will support low-sensitivity automation via encrypted Core storage and CLI requests, while high-sensitivity data and
+critical confirmations remain human-exclusive.
+3.3.1
+UI-to-Core Sensitive Data Isolation
+ANX achieves strict sensitive data isolation by architectural design: when ANX Markup marks fields as sensitive,
+ANX UI generates dedicated forms that transmit sensitive information to ANX Core via encrypted communication,
+effectively avoiding the risk of intermediate data being hijacked by the LLM. Additionally, when the LLM requests to
+view ANX Markup from ANX Core, the Core automatically shields all sensitive information in the markup, ensuring
+the LLM only accesses non-sensitive content. The agent receives only a non-sensitive reference token, with encrypted
+transmission further enhancing data confidentiality.
+Figure 3: ANX Sensitive Information Handling Mechanism
+3.3.2
+Human-Only Confirmation
+Building on the sensitive data isolation mechanism, ANX further ensures the security of sensitive operations by sup-
+porting the designation of human-exclusive completion. To prevent the LLM from simulating human operations and
+unauthorised execution, ANX constructs a trusted dialog box that connects directly to ANXHub to obtain a User
+Token – this User Token is exclusively managed by ANX UI and remains completely invisible to the LLM. When a
+Human-Validated Request is initiated for sensitive operations, it must carry the valid User Token; only after ANX Han-
+dler verifies the legitimacy of the User Token will the sensitive operation be executed. This mechanism is integrated
+into the protocol’s CONFIRMING state (with no programmatic exit), ensuring no agent-accessible bypass exists and
+users retain absolute control over high-risk actions.
+3.3.3
+Threat Model
+ANX’s built-in security mechanisms (direct UI-to-Core communication, human-only confirmation) mitigate core pri-
+vacy and automation risks, but its defence boundaries must be clarified. ANX does not defend against the following
+scenarios:
+• Unvalidated dialog credibility – If users fail to distinguish legitimate ANX UI dialogs from malicious imita-
+tions, sensitive operations may be misauthorised.
+12
+
+--- PAGE 13 ---
+Figure 4: ANX Human-Validated Handling Mechanism
+• Untrusted ANX Core – Using a tampered or untrusted ANX Core compromises UI-Core communication,
+leading to sensitive data leakage or unauthorised execution.
+• Non-official ANX Hub – Connecting to an untrusted ANX Hub risks malicious tool injection, task misrouting,
+or semantic information leakage.
+• LLM-induced social engineering – ANX cannot prevent LLMs from ignoring UI prompts and inducing users
+to manually send sensitive data directly to the LLM.
+ANX’s security guarantees depend on proper deployment: using a trusted ANX Core, the official ANX Hub, and
+verifying ANX UI dialog credibility.
+3.4
+ANX SOP Runtime and Multi-Agent Collaboration
+Building on ANX’s core security and architecture, ANX SOP emerges as a pivotal application of ANX Markup for task
+scheduling and execution, specifically designed to enable efficient multi-agent coordination. At its core, ANX SOP
+addresses a fundamental challenge in agent systems: natural language ambiguity in SOP transmission. Traditional
+unstructured natural language SOPs often lead to inconsistent task intent understanding among agents, resulting in
+low execution accuracy and poor stability. In contrast, ANX SOP leverages schema-based ANX Markup to explicitly
+define SOP steps, conditional logic, operation standards, and field constraints, ensuring agents receive unambiguous
+task instructions.
+Key Insights from Prior Work on SOPs
+ANX’s approach is validated by a landmark study by Grab (2025), which demonstrated that explicitly modeling
+SOPs as tree structures — using a depth-first search algorithm to navigate the overall workflow while limiting LLMs
+to executing individual actions — delivers exceptional efficiency and reliability in high-risk enterprise scenarios. Their
+results were particularly compelling:
+• 99.8% accuracy on account takeover investigation tasks
+• Reduced average processing time from 23 minutes to just 3 minutes
+• Automated 87% of cases
+The ANX protocol inherently incorporates this proven approach, with ANX Core parsing structured SOPs and
+driving the workflow. Building upon this foundation, ANX further extends capabilities through its unified protocol
+and 3EX architecture innovations, enabling longer-horizon SOP scheduling, sophisticated multi-agent collaboration,
+and seamless agent–human interaction.
+13
+
+--- PAGE 14 ---
+Moreover, ANX addresses a critical gap identified by Yuan et al. (2026) in current agent communication proto-
+cols: while transport and syntactic layers have matured, protocol-level semantic mechanisms remain severely limited,
+forcing semantic responsibilities into prompts and wrappers. ANX resolves this imbalance through the structured
+semantics of ANX Markup, achieving protocol-level semantic alignment and eliminating ambiguity.
+Figure 5: ANX SOP Mechanism
+Runtime Scheduling. ANX SOP’s scheduling leverages the synergistic interaction of the 3EX layers:
+• The Expression layer (ANX Markup) serves as the SOP definition carrier, supporting static step specification,
+dynamic conditional branch configuration, and step dependency setting to adapt to complex scenarios.
+• The Exchange layer (ANXHub) implements dynamic semantic tool discovery over the marketplace and un-
+dertakes task routing and cross-agent synchronization to decompose complex SOPs into parallel sub-tasks and
+coordinate agent execution.
+• The Execution layer (ANX Core) converts ANX Markup-structured SOPs into platform-agnostic ANX CLI
+commands, adopting progressive disclosure to generate only current-step execution commands for token effi-
+ciency.
+Security Inheritance. ANX SOP naturally inherits ANX’s built-in security mechanisms: for sensitive data in
+SOP steps, the core UI-Core direct communication mechanism (bypassing LLM) ensures robust data isolation, while
+critical steps trigger human-only confirmation dialogs to prevent automated misuse.
+Multi-Agent Collaboration. For multi-agent coordination, ANX Markup provides a unified semantic specifica-
+tion for interoperability, while ANXHub decomposes SOPs based on agent capabilities, assigns specialized sub-tasks,
+and synchronizes execution status in real time. This enables ANX SOP to handle large-scale complex SOPs beyond
+the capacity of single agents, significantly enhancing both scalability and execution efficiency.
+3.4.1
+Case Study: Multi-Agent and Human Collaboration for Resume Screening
+We illustrate ANX SOP’s support for structured multi-agent and human collaboration using a resume screening exam-
+ple. The workflow involves three roles: a Review Agent, an Action Agent, and an HR human.
+1
+⃝ANX Core computes a matching score (s1)
+The system reads the resume and outputs a matching score score. Automatic routing is performed based on the
+score:
+• score > 80 →directly proceed to s4 (Schedule Interview), executed by the Action Agent.
+• score < 60 →directly proceed to s3 (Politely Decline), executed by the Action Agent.
+14
+
+--- PAGE 15 ---
+• 60 ≤score < 80 →proceed to s2 (Manual Review), triggering a human-agent collaborative process.
+2
+⃝Manual review (s2). For 60 ≤score < 80:
+• The Review Agent performs supplementary analysis (e.g., skill match) and writes results into an ANX Node.
+• The system sends an OA approval request to the HR human via ANX UI, showing resume data, analysis, and
+”pass”/”reject” options.
+• The workflow blocks until HR chooses:
+– pass →trigger s4 (Action Agent schedules interview)
+– reject →trigger s3 (Action Agent sends decline)
+• Agents cannot simulate or bypass the human step.
+3
+⃝Centralised state management. All collaboration information (score, routing target, analysis results, approval
+status) is managed by ANX Nodes inside ANX Core. Each agent reads inputs from and writes outputs to its assigned
+Node. HR actions update the Node via ANX UI. Thus, roles communicate indirectly through ANX Core, not directly.
+Figure 6: Human & Multi-Agent Collaborative ANX SOP Mechanism
+Key aspects.
+• Agent-Agent: Review Agent and Action Agent share state via ANX Nodes; the former’s output feeds the HR
+interface, the latter executes final decisions.
+• Agent-Human: The 60–80 range forces a blocking approval step, keeping boundary cases under human control.
+The UI is human-only; workflow waits for HR action.
+Clarity: All conditions and target roles are explicitly defined in ANX Config, eliminating natural language ambi-
+guity.
+Thus, ANX SOP enables multiple agents and a human to work under a unified workflow: agents handle high-confidence
+tasks (auto-interview, auto-decline), humans handle boundary cases, and ANX Nodes ensure consistent, traceable state
+management.
+15
+
+--- PAGE 16 ---
+Table 7: Comparison of GUI-based Agents, MCP and ANX
+Dimension
+GUI-Based
+MCP
+ANX
+Architecture
+Monolithic
+Tool-centric
+3EX Decoupled
+Token (Task-Inc, avg)
+8.7k
+6.85k
+3.35k
+New
+Tool
+Discovery
+&
+Use-and-Go
+Visual, no
+Pre-load all, no
+Dynamic via ANXHub, yes
+Human-Agent Co-Use
+Yes (agent mimics)
+Agent-only
+Native shared
+Sensitive Data Protection
+None (agent sees all)
+None
+UI-to-Core, agent never sees
+Human Confirmation
+None
+None
+Human-only, no programmatic exit
+Semantic Precision
+Low (NL)
+Low–Medium
+(JSON+MD)
+High (structured ANX Markup)
+SOP & Multi-Agent
+Not supported
+Limited
+Built-in (long-horizon + collaboration)
+3.5
+Discussion
+*Averaged across Qwen3.5-plus and GPT-4o results from Tables 10 and 11.*
+The results clearly show that ANX’s combination of a structured protocol (ANX Markup, ANX Config, ANX
+CLI, dynamic discovery) and a decoupled architecture (3EX) achieves superior token efficiency, security, and SOP
+adaptability compared to both GUI-based automation and MCP. The architecture’s separation of concerns enables
+progressive disclosure and fixed baseline token consumption, while the protocol’s semantic precision eliminates natu-
+ral language ambiguity. The built-in security mechanisms (UI-to-Core and human-only confirmation) address funda-
+mental privacy gaps that existing paradigms leave open. Together, these innovations provide a holistic foundation for
+agent-native interaction.
+4
+Experimental Methodology
+4.1
+Research Questions
+RQ1 (Efficiency) – Does ANX reduce token consumption and execution time compared to GUI-based automation
+and MCP-based Skill on a form-filling task?
+RQ2 (Accuracy) – Does ANX’s structured semantics improve task completion accuracy compared to the two
+baselines?
+(Security evaluation and multi-step SOP evaluation are left as future work.)
+4.2
+Task Design
+We evaluate all three methods (GUI, MCP-based Skill, and ANX) on a single representative task: job account regis-
+tration form filling in a realistic business scenario.
+Unlike MCP-Universe (Luo et al., 2025) which provides a broad benchmark across diverse MCP servers, our
+experiment is designed to evaluate MCP’s limitations in a specific real-world complex scenario (i.e., dynamic form
+filling with remote option loading).
+Table 8: Experimental Task
+Task
+Description
+Complexity
+Form Filling
+10-field job form with two dynamic option fields (e.g., industry)
+loaded via URL. Sensitive handling disabled.
+Medium
+No multi-skill invocation, SOP workflow, or sensitive data handling is involved in this experiment.
+16
+
+--- PAGE 17 ---
+4.3
+Experimental Setup
+Framework: OpenClaw Agent (Dockerized). A baseline of 13.2k tokens is consumed by system prompts and core
+skills before any task-specific execution.
+Models:
+• Qwen3.5-plus (1M context, temperature 0.7)
+• GPT-4o (128K context, temperature 0.7)
+Table 9: Three compared methods (same business scenario)
+Method
+Backend / Skill Used
+Description
+GUI-based
+Au-
+tomation
+OpenClaw
+Agent
+built-in
+Playwright + Chromium
+The agent visually parses the rendered web page, extracts DOM ele-
+ments, and simulates human inputs (keyboard/mouse) to fill and submit
+the form. No custom skill is used.
+MCP-based Skill
+Model
+Context
+Protocol
+with Job Form Skill
+The agent uses declarative field definitions.
+Dynamic options are
+pre-fetched and exposed as tool inputs. The agent calls the job form
+tool with a JSON payload of 10 fields. The tool executes and returns a
+confirmation.
+ANX-based Skill
+ANX protocol + 3EX archi-
+tecture (ANX Markup, ANX
+CLI, ANX Core, ANXHub)
+The agent generates an ANX Markup form definition. ANX Core com-
+piles it into an anx CLI command. Dynamic options are resolved via the
+URL specified in the markup. Execution runs on ANX Node.
+All runs are executed in isolated Docker containers with fully reset context (30 repetitions per method per model).
+The design of both MCP-based and ANX-based skills follows the token-efficient skill representation principles of
+SkillReducer (Gao et al., 2026).
+4.4
+Evaluation Metrics & Statistical Analysis
+Metrics:
+• Total Token Consumption
+• Task-Incremental Token (total minus 13.2k baseline)
+• Execution Time (end-to-end, seconds)
+• Task Accuracy (successful completion rate)
+Statistical validation: Independent two-sample t-tests (α = 0.05) with Bonferroni correction, applied separately
+for each model. For each method and model, we repeat the experiment 30 times (n = 30). Each repetition runs in
+a fresh Docker container with no shared state. After Bonferroni correction (3 comparisons: GUI vs. MCP, GUI vs.
+ANX, MCP vs. ANX), only p < 0.0167 is considered statistically significant.
+4.5
+Experimental Case and Procedure
+To empirically evaluate the performance of ANX against GUI-based agents and MCP across the designed task, this
+section details the experimental case, workflow visualization, and standardized execution procedure. Taking the form
+filling task as the representative experimental case, we illustrate the implementation details of each method, while
+providing visual comparisons of their workflows. The unified procedure was strictly followed for all tasks, models,
+and methods to ensure experimental validity and reproducibility.
+Procedure:
+1. Setup: Initialize Docker container with fresh context 2. Baseline: Load system prompts and core skills (13.2k
+tokens) 3. Task Execution: Run the form filling task using the specified method 4. Measurement: Record token
+consumption, execution time, and task completion status 5. Repeat: Repeat steps 1-4 for 30 iterations per method per
+model 6. Analysis: Apply statistical tests to compare performance across methods
+17
+
+--- PAGE 18 ---
+Figure 7: Create Job Account Form Example
+Figure 8: GUI Flow
+Figure 9: MCP Flow
+Figure 10: ANX Flow
+18
+
+--- PAGE 19 ---
+5
+Results and Discussion
+5.1
+RQ1: Efficiency
+Results for both Qwen3.5-plus and GPT-4o are presented in Tables 10 and 11, respectively, detailing token consump-
+tion and execution time.
+Table 10: Qwen3.5-plus Token Consumption and Execution Time
+Method
+Total Token (k)
+Baseline (k)
+Task-Inc Token (k)
+Execution Time (s)
+GUI
+22.3 ± 2.6
+13.2
+9.1 ± 2.6
+33.2 ± 9.5
+MCP-based Skill
+20.6 ± 2.0
+13.2
+7.4 ± 2.0
+30.8 ± 8.2
+ANX
+17.1 ± 1.6
+13.2
+3.9 ± 1.6
+12.9 ± 2.7
+Table 11: GPT-4o Token Consumption and Execution Time
+Method
+Total Token (k)
+Baseline (k)
+Task-Inc Token (k)
+Execution Time (s)
+GUI
+21.5 ± 2.8
+13.2
+8.3 ± 2.8
+48.2 ± 12.2
+MCP-based Skill
+19.5 ± 2.1
+13.2
+6.3 ± 2.1
+39.0 ± 9.1
+ANX
+16.0 ± 1.0
+13.2
+2.8 ± 1.0
+16.5 ± 4.8
+For Qwen3.5-plus, the reduction in task-incremental tokens with ANX compared to MCP-based Skill was 3.5k
+(95% CI: [2.56k, 4.44k], t(55.3)=7.48, p < 0.001), and execution time was reduced by 17.9s (95% CI: [14.71s, 21.09s],
+t(38.6)=11.36, p < 0.001). For GPT-4o, the reduction in task-incremental tokens was 3.5k (95% CI: [2.645k, 4.355k],
+t(44.6)=8.24, p < 0.001), and execution time was reduced by 22.5s (95% CI: [18.72s, 26.28s], t(45.9)=11.98, p <
+0.001). All comparisons remained significant after Bonferroni correction (α=0.0167).
+5.2
+Discussion
+The results in Tables 10 and 11 demonstrate clear efficiency advantages of ANX over both the MCP-based Skill and
+GUI automation for the job account registration form-filling task.
+Token consumption. ANX reduces task-incremental token consumption by 47.3% (Qwen3.5-plus) and 55.6%
+(GPT-4o) compared to the MCP-based Skill, and by 57.1% and 66.3% compared to GUI. The primary reason is that
+ANX delegates form rendering and dynamic option resolution to ANX Core and the CLI layer, rather than forcing the
+LLM to handle these details. In the GUI baseline, the LLM must process the entire DOM tree and generate low-level
+browser actions (clicks, key presses), leading to high token usage. The MCP-based Skill improves over GUI by using
+a declarative tool schema, but it still requires the LLM to actively load and pass dynamic option sets (e.g., the industry
+dropdown from a remote dataset) as part of the tool call payload. ANX avoids this by specifying only a URL in the
+ANX Markup; ANX Core automatically fetches the options at execution time, eliminating token overhead for dynamic
+data loading. This advantage is consistent across both LLM models.
+Execution time. ANX also achieves the lowest end-to-end execution time: 12.9 s (Qwen) and 16.5 s (GPT-4o),
+compared to 30.8 s and 39.0 s for the MCP-based Skill, and 33.2 s and 48.2 s for GUI. The GUI baseline suffers
+from slow DOM parsing, sequential element interaction, and page load waits. The MCP-based Skill reduces time by
+bypassing visual rendering, but still incurs overhead from serializing and transmitting the full JSON payload, including
+dynamically loaded options. ANX’s CLI execution and direct ANX Node invocation minimize serialization overhead
+and eliminate round-trips for dynamic option fetching, as the Core handles resolution locally.
+Generality across models. The relative efficiency gains are similar for Qwen3.5-plus and GPT-4o, indicating that
+ANX’s architecture—not model-specific optimization—is the driving factor.
+Accuracy considerations. While we focused on efficiency metrics in this evaluation, ANX’s structured semantics
+also contribute to improved task completion accuracy. The clear, machine-executable ANX Markup eliminates natural
+language ambiguity, reducing the likelihood of execution errors. This is particularly important for complex tasks with
+multiple steps or conditional logic.
+19
+
+--- PAGE 20 ---
+Practical implications. The token efficiency gains translate directly to cost savings, especially for models like
+GPT-4o where token usage is a significant cost factor. Additionally, the reduced execution time improves user experi-
+ence by providing faster task completion, which is crucial for interactive applications.
+In summary, for the evaluated form-filling scenario with dynamic options, ANX’s combination of structured
+markup (ANX Markup), decoupled execution (3EX), and CLI-based command generation delivers substantial im-
+provements in both token efficiency and runtime. The advantage is rooted in shifting dynamic data resolution from the
+LLM’s context to the execution layer, a design that avoids the pre-loading and active option handling required by the
+MCP-based Skill.
+6
+Conclusion and Future Work
+6.1
+Conclusion
+This paper represents the first in the ANX (AI Native eX) series, focusing on introducing the core protocol design and
+3EX decoupled architecture. As the inaugural work in this series, it lays the foundation for agent-native interaction by
+presenting a comprehensive framework that addresses the key challenges of efficiency, security, and collaboration in
+AI agent systems.
+ANX (AI Native eX) is a three-layer protocol architecture that introduces the 3EX (Expression-Exchange-Execution)
+decoupled framework—separating task specification, tool discovery, and execution into independent layers. This ar-
+chitectural foundation enables three core innovations:
+ANX provides a scalable, secure, cost-effective foundation for AI agent deployment in human-machine collabo-
+ration scenarios. At this stage, experimental validation is limited to specific task scenarios with a constrained dataset,
+and further large-scale evaluations are still needed to verify the protocol’s stability and efficiency in complex, cross-
+platform environments.
+6.2
+Future Work
+We have proposed and initially demonstrated the feasibility of the ANX framework, and we are excited to share it with
+the community. However, we acknowledge that more work and more rigorous experiments are needed to fully validate
+its capabilities. Moving forward, we will focus on the following seven key directions to address these limitations and
+further advance the ANX protocol:
+• Multi-Agent Coordination – Extend to hybrid protocols (Dochkina, 2026) and incorporate dynamic agent elim-
+ination (Wang et al., 2025) to optimize token efficiency and task performance. Our current ANXHub implements task
+routing primitives; full evaluation with multiple agents is left for future work.
+• Sensitive Data and Sensitive Operation Research – Further investigate ANX’s UI-to-Core isolation and human-
+only confirmation mechanisms through systematic experiments (e.g., adversarial attacks, information leakage tests).
+Strengthen security by addressing remaining vulnerabilities such as UI spoofing, untrusted Core/Hub, and LLM-
+induced social engineering. Explore the trade-off between security and usability: evaluate the overhead of human
+confirmations and sensitive field redaction, and design adaptive policies that reduce user friction while maintaining
+strong guarantees for high-risk operations.
+• ANXHub vs. SkillHub Discovery and Download – Conduct a systematic comparison between ANXHub (dy-
+namic marketplace, use-and-go, no installation) and traditional SkillHub / MCP-style tool indices (pre-registration,
+local binaries) across four key dimensions: timeliness (cold-start latency, update propagation), security (supply chain
+attacks, virus risks, dependency vulnerabilities), convenience (zero-install vs. pre-download, dynamic vs. static dis-
+covery), and token consumption (progressive disclosure in ANXHub vs. pre-loaded schemas in SkillHub). Evaluate
+under realistic network conditions, varying skill library sizes, and concurrent request scenarios to quantify the practical
+advantages of ANX’s Exchange layer.
+• Enterprise AI Carrier & Weakly-Decentralized ANXHub – Investigate AI Carrier-based enterprise archi-
+tecture, enabling organizations to deploy their own ANXHub instances with federated trust models, multi-Hub trust
+policies, and semantic discovery optimization, achieving weak centralization while reducing dependency on a single
+official Hub.
+• Complex and Compute-Intensive Scenarios – Extend ANX to handle more complex task graphs (e.g., 50+
+steps with nested branches) and compute-intensive scenarios (e.g., real-time data processing, large-scale simulations),
+evaluating the scalability and resource efficiency of the 3EX architecture under high load.
+20
+
+--- PAGE 21 ---
+• Skill Growing – Integrate with skill-growing paradigms (Chen et al., 2026) to enable adaptive skill learning and
+dynamic schema evolution.
+• Traceability – Develop richer traceability mechanisms (Peng, 2026) to track interaction lifecycles and enable
+auditability for regulatory compliance.
+• Lightweight Specialized Models for ANX Protocol – Following the success of fine-tuned models for API
+calling (Gorilla, Patil et al., 2024), we plan to train smaller models specialized for ANX protocol tasks (e.g., ANX
+Markup to CLI compilation), enabling lower-cost deployment and faster inference.
+6.3
+Final Remarks
+We welcome researchers, engineers, and industrial partners to join the development of the ANX protocol, contribute
+to its iteration, and jointly build a more open, reliable, and unified ecosystem for AI-native applications.
+References
+Anthropic. (2024). Model Context Protocol (MCP). https://github.com/modelcontextprotocol. Ac-
+cessed: 2026-04-05.
+Ben Hassouna, A., Chaari, H., & Belhaj, I. (2026). LLM-Agent-UMF: LLM-based Agent Unified Modeling
+Framework. Information Fusion, 127, 103865.
+Chen, Q., et al. (2025). Integrated Design and Governance of Agentic AI Systems through Adaptive Information
+Modulation. arXiv preprint arXiv:2409.10372v4.
+Chen, J., Li, Z., Jiang, Y., et al. (2026). The Era of Skill Growing Agents: Shift from Task Execution to Skill
+Growth. TechRxiv. Preprint. doi:10.36227/techrxiv.177041975.54183859
+Dhuliawala, S., Komeili, M., Xu, J., Raileanu, R., Li, X., Celikyilmaz, A., & Weston, J. (2024). Chain-of-
+Verification Reduces Hallucination in Large Language Models. In Findings of the Association for Computational
+Linguistics: ACL 2024 (pp. 3563–3578). Bangkok, Thailand: ACL.
+Ding, Z., et al. (2025). Network and Systems Performance Characterization of MCP-Enabled LLM Agents. arXiv
+preprint arXiv:2511.07426.
+Dochkina, V. (2026). Drop the Hierarchy and Roles: How Self-Organizing LLM Agents Outperform Designed
+Structures. arXiv preprint arXiv:2603.28990.
+Gao, Y., Li, Z., Yuanyuanyuan, et al. (2026). SkillReducer: Optimizing LLM Agent Skills for Token Efficiency.
+arXiv preprint arXiv:2603.29919v1.
+Grab Engineering. (2025). Introducing the SOP-driven LLM agent frameworks. Grab Engineering Blog. https:
+//engineering.grab.com/introducing-the-sop-drive-llm-agent-framework. Accessed: 2026-04-06.
+Kasibatla, S. R., et al. (2025). The Command Line GUIde: Graphical Interfaces from Man Pages via AI. In
+Proceedings of the IEEE Symposium on Visual Languages and Human-Centric Computing (VL/HCC) (pp. 1–5). IEEE.
+Li, B., Wang, Y., Fei, H., et al. (2025). FormFactory: An Interactive Benchmarking Suite for Multimodal Form-
+Filling Agents. arXiv preprint arXiv:2506.01520v1.
+Luo, Z., et al. (2025). MCP-Universe: Benchmarking Large Language Models with Real-World Model Context
+Protocol Servers. arXiv preprint arXiv:2508.14704.
+Mudunuri, S., et al. (2026). Semantic Tool Discovery for Large Language Models: A Vector-Based Approach to
+MCP Tool Selection. arXiv preprint arXiv:2603.20313.
+Patil, S. G., Zhang, T., Wang, X., & Gonzalez, J. E. (2024). Gorilla: Large Language Model Connected with
+Massive APIs. In Advances in Neural Information Processing Systems, Vol. 37 (pp. 126544–126565). NeurIPS.
+21
+
+--- PAGE 22 ---
+Peng, Z. (2026). “What Did It Actually Do?”: Understanding Risk Awareness and Traceability for Computer-Use
+Agents. arXiv preprint arXiv:2603.28551.
+Rosenberg, J., White, P., & Jennings, C. F. (2025). CHEQ: A Protocol for Confirmation AI Agent Decisions with
+Human in the Loop (HITL). IETF Internet-Draft draft-rosenberg-aiproto-cheq-00. https://datatracker.ietf.
+org/doc/draft-rosenberg-aiproto-cheq/00/.
+St¨ahle, T., et al. (2026). VACP: Visual Analytics Context Protocol. arXiv preprint arXiv:2603.29322.
+Wang, Z., Wang, Y., Liu, X., et al. (2025). AgentDropout: Dynamic Agent Elimination for Token-Efficient
+and High-Performance LLM-Based Multi-Agent Collaboration. In Proceedings of the 63rd Annual Meeting of the
+Association for Computational Linguistics (ACL 2025) (pp. 24013–24035). ACL.
+Wang, Z. Z., Shao, Y., Shaikh, O., et al. (2025). How Do AI Agents Do Human Work? Comparing AI and Human
+Workflows Across Diverse Occupations. Carnegie Mellon University & Stanford University. Technical report.
+Wei, J., Wang, X., Schuurmans, D., Bosma, M., Ichter, F., Chi, E. H., Le, Q. V., & Zhou, D. (2022). Chain-
+of-Thought Prompting Elicits Reasoning in Large Language Models. In Advances in Neural Information Processing
+Systems, Vol. 35. NeurIPS.
+Xie, T., Ran, D.-Z., Cao, Y., et al. (2026). From User Operations to Agentic Automation: Toward Intent-Oriented
+Software in the LLM Era. Journal of Computer Science and Technology, 41(2), 1–18.
+Yuan, D., et al. (2026). Beyond Message Passing: Toward Semantically Aligned Agent Communication. arXiv
+preprint arXiv:2604.02369.
+Zhang, C., He, S., Li, L., Qin, S., Kang, Y., Lin, Q., Rajmohan, S., & Zhang, D. (2025). API Agents vs. GUI
+Agents: Divergence and Convergence. arXiv preprint arXiv:2503.11069v2.
+Zheng, B., Fatemi, M. Y., Jin, X., Wang, Z. Z., Gandhi, A., Song, Y., Gu, Y., Srinivasa, J., Liu, G., Neubig,
+G., et al. (2025). SkillWeaver: Web Agents Can Self-Improve by Discovering and Honing Skills. arXiv preprint
+arXiv:2504.07079.
+Appendix
+Full ANX Markup schemas, experimental scripts, and detailed results are maintained in the open-source repository:
+• Core implementation: https://github.com/mountorc/anx-core
+• Protocol specification: https://github.com/mountorc/anx-protocol
+Acknowledgements
+We thank Wang Xin for inspiring discussions and constructive feedback on the conception and terminology refinement
+of this work.
+22

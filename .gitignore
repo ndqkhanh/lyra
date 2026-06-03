@@ -1,77 +1,68 @@
-*.pyc
+
 __pycache__/
-*.py[cod]
-*$py.class
-
-# Virtual environments
-venv/
-env/
-ENV/
-.venv
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-.tox/
-
-# Distribution
-dist/
-build/
-*.egg-info/
-
-# Environment
-.env
-.env.local
-
-# Logs
-*.log
-logs/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Tool caches
-.frg/
-.omc/
-node_modules/
-
-# Lyra session data (local only)
-# Keep policy, cron structure, and example files, exclude everything else
-.lyra/*
+!.lyra/cron/
+!.lyra/cron/.gitkeep
 !.lyra/policy.yaml
 !.lyra/settings.json.example
-!.lyra/cron/
+.claude-flow/
+.claude/
+.claude/worktrees/
+.coverage
+.dmypy.json
+.DS_Store
+.env
+.env.local
+.frg/
+.idea/
+.lyra/*
 .lyra/cron/*
-!.lyra/cron/.gitkeep
+.mypy_cache/
+.omc/
+.pytest_cache/
 .research/
-
+.ruff-errors.txt
+.swarm/
+.tox/
+.venv
+.vscode/
+*.benchmark
+*.egg-info/
+*.log
+*.py[cod]
+*.pyc
+*.swo
+*.swp
+*~
+*$py.class
+# Distribution
 # Docs/archive/plans — ignore binaries, generated, and transient files only
-docs/*.pdf
+# Environment
+# Generated / transient
+# IDE
+# Keep policy, cron structure, and example files, exclude everything else
+# Logs
+# Lyra session data (local only)
+# Mypy
+# OS
+# Testing
+# Tool caches
+# Virtual environments
+archive/dist/
+archive/htmlcov/
+build/
+coverage.json
+dist/
+dmypy.json
 docs/.env*
-docs/research/repos/
+docs/*.pdf
 docs/research/*-repo
 docs/research/*-repo/
-archive/htmlcov/
-archive/dist/
-
-# Generated / transient
-.swarm/
-.claude-flow/
+docs/research/repos/
+env/
+ENV/
+htmlcov/
+logs/
+node_modules/
 ProRL-Agent-Server/
-.ruff-errors.txt
-coverage.json
-*.benchmark
+Thumbs.db
+venv/

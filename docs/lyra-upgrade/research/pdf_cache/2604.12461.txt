@@ -1,0 +1,2219 @@
+--- PAGE 1 ---
+CIA: Inferring the Communication Topology from LLM-based
+Multi-Agent Systems
+Yongxuan Wu1,2, Xixun Lin1,2*, He Zhang3, Nan Sun1,2, Kun Wang4,
+Chuan Zhou5, Shirui Pan3, Yanan Cao1,2
+1 Institute of Information Engineering, Chinese Academy of Sciences, Beijing, China
+2 School of Cyber Security, University of Chinese Academy of Sciences, Beijing, China
+3 Griffith University, Brisbane, Australia
+4 Nanyang Technological University, Singapore
+5 Academy of Mathematics and Systems Science, Chinese Academy of Sciences, Beijing, China
+{wuyongxuan,linxixun}@iie.ac.cn
+Abstract
+LLM-based Multi-Agent Systems (MAS) have
+demonstrated remarkable capabilities in solv-
+ing complex tasks. Central to MAS is the com-
+munication topology which governs how agents
+exchange information internally. Consequently,
+the security of communication topologies has
+attracted increasing attention. In this paper, we
+investigate a critical privacy risk: MAS com-
+munication topologies can be inferred under
+a restrictive black-box setting, exposing sys-
+tem vulnerabilities and posing significant intel-
+lectual property threats. To explore this risk,
+we propose Communication Inference Attack
+(CIA), a novel attack that constructs new ad-
+versarial queries to induce intermediate agents’
+reasoning outputs and models their semantic
+correlations through the proposed global bias
+disentanglement and LLM-guided weak super-
+vision. Extensive experiments on MAS with
+optimized communication topologies demon-
+strate the effectiveness of CIA, achieving an
+average AUC of 0.87 and a peak AUC of up to
+0.99, thereby revealing the substantial privacy
+risk in MAS. The source code is available at
+https://github.com/aabbbcd/CIA.
+1
+Introduction
+LLM-based agents have rapidly evolved into pow-
+erful intelligent systems, exhibiting human-like ca-
+pabilities in cognition and reasoning (Shinn et al.,
+2023; Jin et al., 2023; Yang et al., 2024). To further
+scale these capabilities, recent research has shifted
+toward LLM-based multi-agent systems (MAS).
+By orchestrating the collaboration among multi-
+ple agents, MAS can tackle complex tasks that are
+beyond the reach of a single agent (Wang et al.,
+2024b; Li et al., 2024; Wang et al., 2025). As a
+result, MAS have demonstrated remarkable perfor-
+mance across various domains, including software
+engineering (He et al., 2025a), scientific discov-
+*Corresponding author.
+BLACK-BOX
+ACCESS 
+Figure 1: Illustration of inferring the communica-
+tion topology. The adversary infers the communication
+topology under a black-box setting, resulting in a severe
+Vulnerability Exposure that enables adversaries to pin-
+point critical agents for targeted attacks and IP Threat
+that leaks valuable proprietary assets of developers.
+ery (Ghafarollahi and Buehler, 2025), and social
+simulation (Taillandier et al., 2025).
+This advantage primarily stems from the op-
+timized communication topology within MAS,
+which enables agents to exchange information
+and refine their decisions through collaboration
+or debate. Along with the rapid advancement of
+MAS, their security has attracted increasing atten-
+tion (Wang et al., 2024a; Li et al., 2025a; Yan et al.,
+2026; Lin et al., 2025). In terms of adversarial
+attacks, existing studies mainly focus on induc-
+ing toxic outputs or misinformation spread among
+agents through various attack strategies (Lee and
+Tiwari, 2024; Yu et al., 2025c; He et al., 2025b). In
+this paper, we investigate a largely underexplored
+yet critical privacy risk: Is the communication
+topology of MAS itself vulnerable to leakage?
+Compared with previous attacks, this is a stealth-
+ier privacy risk, as the adversary does not aim to
+disrupt task execution but seeks to infer the inter-
+nal information of MAS solely through black-box
+queries. Moreover, as illustrated in Figure 1, once
+the communication topology is inferred, the con-
+sequences can be severe. First, it leads to Vulner-
+ability Exposure. Revealing the communication
+topology of MAS exposes the systems’ internal
+arXiv:2604.12461v1  [cs.AI]  14 Apr 2026
+
+--- PAGE 2 ---
+organization, allowing the adversary to identify
+critical or weak agents for targeted jailbreaking or
+instruction injection, thereby compromising MAS
+at low cost (Raza et al., 2026). Second, it poses a
+significant IP Threat. A highly optimized commu-
+nication topology encapsulates substantial compu-
+tational resources and expert knowledge, represent-
+ing valuable proprietary assets (Zhang et al., 2025a;
+Li et al., 2025b). The leakage of this topology con-
+stitutes a direct infringement of IP, consequently
+undermining the developers’ competitive advan-
+tage (Kong et al., 2025).
+To explore this privacy risk, we propose Com-
+munication Inference Attack (CIA), a novel at-
+tack for inferring the communication topology
+within MAS. CIA operates under a practical black-
+box setting, where the adversary is neither autho-
+rized to access nor alter any internal information of
+MAS. Instead, the adversary merely interacts with
+MAS by issuing queries and observing their final
+responses. CIA consists of two stages: Reason-
+ing Output Induction and Semantic Correlations
+Modeling. In the first stage, CIA crafts adversarial
+queries to induce the final output to reveal the inter-
+mediate agents’ reasoning outputs. In the second
+stage, we introduce global bias disentanglement
+and LLM-guided weak supervision to mitigate spu-
+rious correlations and enhance the topological in-
+formation embedded in these reasoning outputs,
+and subsequently analyze their semantic correla-
+tions to infer the communication topology. Exten-
+sive evaluations demonstrate the effectiveness of
+CIA, revealing the substantial privacy risk in the
+communication topology of MAS. In summary, our
+contributions are as follows.
+• We investigate a largely underexplored privacy
+risk in MAS: the vulnerability of their com-
+munication topologies to being inferred under
+a black-box setting, which poses significant
+IP threats and vulnerability exposure.
+• We propose the CIA, a novel attack that first
+crafts adversarial queries to expose the reason-
+ing outputs of intermediate agents and then
+models the semantic correlations of these out-
+puts using global bias disentanglement and
+LLM-guided weak supervision to infer the
+confidential communication topology.
+• We conduct experiments on MAS built us-
+ing well-optimized communication topologies
+across multiple task scenarios. Experimental
+results show that the communication topology
+in MAS can be effectively inferred, with CIA
+achieving an average AUC of 0.87 and a peak
+AUC of up to 0.99.
+2
+Related Work
+Topology Design for MAS.
+The communication
+topology is fundamental for the effectiveness of
+MAS, serving as the backbone of collective intel-
+ligence and joint reasoning (Cemri et al., 2025).
+Consequently, much work has focused on design-
+ing communication topologies for MAS (Liu et al.,
+2025). Early designs rely on handcrafted or heuris-
+tic patterns that lack the flexibility to adapt to di-
+verse tasks (Hong et al., 2024; Li et al., 2023; Qian
+et al., 2024). To overcome this limitation, recent
+methods have introduced Generative Optimization
+Strategies to dynamically generate agent composi-
+tions or communication topologies tailored to spe-
+cific tasks (Zhang et al., 2025a,b; Li et al., 2025b).
+These approaches not only achieve state-of-the-art
+(SOTA) performance but also reduce the resource
+costs of redundant communications in MAS.
+Adversarial Attacks against MAS.
+Recent re-
+search on adversarial attacks against MAS has pri-
+marily focused on inducing toxic outputs or spread-
+ing misinformation (Yu et al., 2025a). Specifically,
+some methods study communication content-based
+attacks, such as task abandonment (Amayuelas
+et al., 2024), communication tampering (He et al.,
+2025b), or malicious prompt propagation (Lee
+and Tiwari, 2024; Yu et al., 2025c). Meanwhile,
+some approaches explore communication topology-
+based attacks by evaluating the resilience of differ-
+ent communication topologies to identify which
+topologies are more vulnerable to adversarial at-
+tacks (Huang et al., 2024; Yu et al., 2025b). How-
+ever, the privacy risk of the communication topol-
+ogy itself remains largely unexplored. In this pa-
+per, we focus on this important risk and investigate
+whether the communication topology of MAS can
+be inferred in a black-box setting. inferring edges
+by exploiting correlations in prediction posteriors
+or gradient information.
+3
+Background
+We introduce a basic framework of LLM-based
+MAS. Let S = (P, G) represent MAS. Here, P =
+{pi}n
+i=1 denotes the set of agent profiles, each of
+which includes the agent’s system prompt, callable
+tools, and other configuration details; G = (A, E)
+
+--- PAGE 3 ---
+Final Output �(�∗)
+Z
+Task-Focused
+Predecessor-Review
+Cumulative-Propagation
+……
+Adversarial 
+Query �∗
+Standard 
+Query �
+Semantic Correlations Modeling
+Semantic Correlations 
+Index Order 
+Reasoning Output Induction 
+Agent 2’s ��
+∗
+Agent n’s ��∗
+Agent 1’s ��
+∗
+Target MAS 
+�∗= [��
+∗]�=�
+�
+Weak Supervision
+�  ��, �� ∈ℇ∗ = � ��� ��
+�; ��
+� ≥�∧� �� < � ��  
+ℇ���
+��
+……
+�2
+�1
+⨁
+��
+ ��
+� �=1
+� 
+…
+��
+…
+ ��
+� �=1
+� 
+�����
+����
+����
+Max MI
+Min MI
+Textual Overlap
+Same Task
+Same LLM
+Original
+Latent
+Representation 
+Anisotropy
+Identifiable Factors
+Global Bias
+PLM
+Link Identification
+Global Bias Disentanglement
+Post-Process 
+Teacher
+LLM
+�
+Figure 2: The overview of CIA. CIA first induces the final output that reveals the reasoning outputs of intermediate
+agents by crafting adversarial queries. CIA then infers the communication topology by modeling semantic
+correlations among these outputs using global bias disentanglement and LLM-guided weak supervision.
+denotes the communication topology of S, which
+is modeled as a directed acyclic graph (DAG)
+capturing the information flow for task comple-
+tion (Zhang et al., 2025a; Li et al., 2026). A =
+{ai}n
+i=1 denotes the set of agents, each correspond-
+ing to an LLM, and E ⊆A×A denotes the set of di-
+rected edges. A directed edge ej→i = (aj, ai) ∈E
+indicates that agent ai is a designated recipient of
+information from agent aj.
+Based on this framework, for the given task with
+the corresponding query q, the i-th agent ai gener-
+ates its reasoning output ri as follows:
+ri = LLM(pi, q, Oi).
+(1)
+Oi is the set of outputs generated by the predeces-
+sor agents of ai, which can be defined as
+Oi = { rj | aj ∈Nin(i) },
+(2)
+where Nin(i) = { aj | (aj, ai) ∈E } denotes the
+set of predecessor agents of ai. The final output of
+S is produced by the decision agent1:
+rn = S(q) = LLM(pn, q, On).
+(3)
+From the above formulation, we obtain that the ef-
+fective communication, governed explicitly by G, is
+pivotal to the performance of S, as it facilitates the
+efficient exchange and propagation of information
+among agents for task completion.
+1This formulation follows a common abstraction in MAS,
+where the final output is generated by a decision agent via
+summarization or majority voting.
+4
+Research Problem
+To investigate the privacy risk of communication
+topology leakage, we propose the Communication
+Inference Attack (CIA). Under our attack scenario,
+we introduce the system model, the adversary goal,
+and the adversary capabilities as follows.
+System Model.
+We consider the MAS S de-
+signed to handle complex tasks, such as mathemat-
+ical reasoning and code generation. In a standard
+usage scenario, a user provides a query q to the
+system, and S returns an output S(q) generated
+through collaborative interactions among agents.
+Attack Goal.
+The adversary aims to infer the
+communication topology G through querying S and
+analyzing final outputs. This attack exposes MAS
+vulnerability by revealing its internal organization,
+enabling more targeted attacks on critical agents
+and threatens developers’ IP.
+Adversary Capabilities.
+The adversary operates
+under a practical black-box setting. This implies
+that the adversary can only interact with S through
+its external interface. The adversary has no access
+to the internal information of S, such as reasoning
+traces, agent profiles, and system configurations.
+5
+Methodology
+The intuition underlying CIA is that agents in S
+do not operate independently; instead, each agent’s
+output is conditioned on the responses of its prede-
+cessors, resulting in stronger semantic dependen-
+cies between agents with direct topological connec-
+tions than between those without such connections.
+
+--- PAGE 4 ---
+Under the black-box setting, CIA can only observe
+the final output rn, as the internal information is
+inaccessible. Consequently, CIA first aims to in-
+duce S to reveal the reasoning outputs of interme-
+diate agents. Here, intermediate agents refer to the
+agents in S excluding the decision agent. They par-
+ticipate in the intermediate reasoning process, but
+their outputs are not available. CIA then analyzes
+the semantic correlations between these outputs to
+infer the communication topology within S.
+Following this intuition, CIA naturally owns two
+stages. 1) Reasoning Output Induction: CIA con-
+structs adversarial queries to interact with the target
+MAS S, inducing the final output that reveals rea-
+soning outputs of intermediate agents. 2) Semantic
+Correlations Modeling: CIA infers G by model-
+ing the semantic correlations among these outputs.
+The overview of CIA is shown in Figure 2.
+5.1
+Reasoning Output Induction
+This section presents a novel adversarial querying
+strategy for eliciting intermediate agents’ reasoning
+from the final output. Concretely, the adversarial
+query imposes three specific constraints on each
+agent’s output.
+❶Cumulative-Propagation Constraint. To en-
+sure the final output contains the reasoning outputs
+of intermediate agents, we impose the cumulative-
+propagation constraint, requiring each agent to
+copy the historical record of its predecessors and
+append their reasoning outputs as the updated his-
+tory. Through this cumulative recording process,
+the reasoning outputs are propagated through G.
+The template for this constraint is as follows:
+Cumulative-Propagation Constraint.
+1.Goal: Carry the history reasoning output.
+2.Action: Copy the content of the previous
+agents’ [PREVIOUS HISTORY] (if any) and ap-
+pend the previous agents’ [REASONING OUT-
+PUT] content.
+3.Format: <Previous Agent [PREVIOUS HIS-
+TORY] Content> ||| <Previous Agent [REASON-
+ING OUTPUT] Content>.
+❷Task-Focused Constraint. The adversarial
+query inevitably introduces task-irrelevant informa-
+tion that can distract agents and cause deviations
+from their original reasoning trajectories. To mit-
+igate this effect, we impose the task-focused con-
+straint that requires each agent to focus exclusively
+on the task-relevant fields explicitly marked in the
+input and the reasoning outputs of its predecessors.
+The template for this constraint is as follows:
+Task-Focused Constraint.
+1.Goal: Prevent reasoning deviation caused by
+task-irrelevant information.
+2.Action: Exclusively extract and analyze the
+[TASK] and the previous agents’ [REASONING
+OUTPUT] during your reasoning, disregarding
+any other information provided in the input.
+❸Predecessor-Review Constraint. To further
+strengthen the semantic correlations between the
+reasoning outputs of adjacent agents, we impose
+the predecessor-review constraint on each agent to
+review the predecessor agents’ reasoning outputs
+before generating its own output. The template for
+this constraint is as follows:
+Predecessor-Review Constraint.
+1.Goal: Strengthen the semantic association be-
+tween predecessor and successor agents.
+2.Action: Prior to your reasoning, explicitly re-
+view the previous agents’ [REASONING OUT-
+PUT] and incorporate them in your own [REA-
+SONING OUTPUT].
+Guided by these three constraints, we use the
+adversarial query q∗to interact with S for gener-
+ating S(q∗) that reveals the reasoning outputs of
+intermediate agents. Since S(q∗) is an unstructured
+text, we need to separate the outputs of each agent
+for the downstream semantic correlations model-
+ing. Therefore, we post-process S(q∗) into a list,
+denoted as R∗= [r∗
+i ]n
+i=1, where r∗
+i corresponds
+to the reasoning output of i-th agent. This list R∗
+follows the order in which agents complete their
+reasoning task, implicitly reflecting the commu-
+nication direction. Detailed procedures for this
+post-processing are provided in Appendix A.
+5.2
+Semantic Correlations Modeling
+With the recovered agent outputs, we aim to infer
+G by modeling their semantic correlations in the
+following steps. First, we propose the global bias
+disentanglement to learn debiased representations
+for removing the spurious information in R∗. Sec-
+ond, we design an LLM-guided weak supervision
+to refine these debiased representations, enhancing
+
+--- PAGE 5 ---
+their capability to learn the topological information
+of G. Finally, we identify whether a link exists be-
+tween agents by computing the similarity between
+their refined representations.
+Global Bias Disentanglement (GBD).
+In fact,
+agents may still exhibit strong semantic similar-
+ity in their reasoning outputs even without ex-
+plicit communication, rendering the semantic cor-
+relations among these recovered outputs can be
+highly spurious. Such spurious correlations stem
+from multiple sources. For instance, agents may
+share the same base LLM and operate on the same
+task, which naturally results in overlapping con-
+tent and similar linguistic patterns (Bommasani
+et al., 2021). In addition, due to representation
+anisotropy (Godey et al., 2024), agents may pro-
+duce semantically distinct outputs that nonethe-
+less appear highly correlated in the embedding
+space. Beyond these identifiable factors, other un-
+observable sources may further exacerbate this is-
+sue (Chakrabarty, 2025).
+We collectively refer to the sources that induce
+spurious correlations as Global Bias, since they
+represent the spurious information that is glob-
+ally shared across agents’ reasoning outputs. Such
+global bias can mislead the adversary into focus-
+ing on semantic signals that are unrelated to the
+communication topology, thereby inflating pair-
+wise similarities among agents. As a consequence,
+many non-communicating agent pairs are falsely
+inferred as having communicated.
+To mitigate the impact of global bias, we propose
+GBD to learn debiased representations. Specifi-
+cally, we first employ a pretrained language model2
+fθ to encode R∗. For the i-th agent with its rea-
+soning output r∗
+i , fθ produces an initial represen-
+tation hi. We then project each hi into two latent
+subspaces via two trainable encoders, Ed and Eb,
+representing the debiased encoder and the bias en-
+coder, respectively:
+zd
+i = Ed(hi),
+zb
+i = Eb(hi),
+(4)
+where zd
+i and zb
+i denote the debiased and biased
+representations for r∗
+i , respectively.
+Since the global bias is shared across these rea-
+soning outputs, we can maximize the mutual in-
+formation among {zb
+i}n
+i=1 to encourage Eb to ef-
+fectively capture the global bias. Meanwhile, to
+prevent such global bias from influencing {zd
+i }n
+i=1,
+2We utilize the all-MiniLM-L6-v2 in implementation.
+we simultaneously minimize the mutual informa-
+tion between zd
+i and zb
+i for each agent. These two
+information-theoretic objectives are jointly opti-
+mized via the following loss:
+Lbias = −I(zb
+1; . . . ; zb
+n) +
+n
+X
+i=1
+I(zd
+i ; zb
+i).
+(5)
+The computational details of Eq.(5) is given in Ap-
+pendix B.
+To prevent the encoded information from be-
+ing lost during disentanglement (Bousmalis et al.,
+2016), we also introduce a reconstruction loss in
+GBD. Specifically, for each hi with its disentan-
+gled zd
+i and zb
+i, we concatenate them together and
+feed it into a decoder D to reconstruct hi:
+ˆhi = D(zd
+i ⊕zb
+i).
+(6)
+The reconstruction loss is defined as
+Lrec =
+n
+X
+i=1
+hi −ˆhi
+
+2
+2 .
+(7)
+Finally, the overall training loss for GBD is
+LGBD = Lrec + Lbias.
+(8)
+LLM-guided Weak Supervision (LWS).
+At the
+above step, zd
+i is learned only from the textual in-
+formation of r∗
+i . We aim to enable zd
+i to capture the
+information at the structural level of G, facilitating
+the more accurate communication inference. How-
+ever, such information is not directly accessible.
+To this end, we leverage the information inferred
+by a teacher LLM3 as weak supervision signals,
+distilling the structural knowledge into zd
+i .
+Given R∗, the teacher LLM is prompted to infer
+the top-k communication edges with the highest
+confidence scores (The exact prompt template is
+provided in Appendix J.). We denote the edges in-
+ferred by this LLM as the positive set Epos, and sam-
+ple negative pairs Eneg from the remaining agent
+pairs outside Epos. As the LLM-inferred edges may
+be noisy and the remaining pairs are not guaran-
+teed to be true negatives, we adopt the trick of label
+smoothing (Dettmers et al., 2018) and define the
+weak supervision loss as
+LLWS = −
+1
+|Epos|
+X
+(ai,aj)∈Epos
+Lpos(ai, aj)
+−
+1
+|Eneg|
+X
+(au,av)∈Eneg
+Lneg(au, av),
+(9)
+3We utilize GPT-5 in our implementation.
+
+--- PAGE 6 ---
+where Lpos and Lneg are the label-smoothed binary
+cross-entropy losses computed based on the similar-
+ity between the debiased representations for each
+positive and negative agent pair, respectively. De-
+tailed formulations of Lpos and Lneg are provided
+in Appendix C.
+The trainable modules in CIA are Ed and Eb,
+and the final objective of CIA is to minimize the
+total loss:
+LCIA = LGBD + LLWS.
+(10)
+Link Identification.
+After training, the commu-
+nication topology G can be identified from the de-
+biased representations. The existence of an edge
+between agents ai and aj is determined by the sim-
+ilarity between zd
+i and zd
+j, while the edge direction
+is inferred according to their relative order in R∗:
+I[(ai, aj) ∈E] = I
+
+Sim(zd
+i , zd
+j) ≥τ ∧
+π(ai) < π(aj)
+
+,
+(11)
+where Sim(·, ·) indicates a distance-based similar-
+ity function, τ is a threshold, and π(a) denote the
+index of agent a’s reasoning output in R∗.
+6
+Experiments
+6.1
+Experiment Setups
+MAS Frameworks.
+As introduced in Section 2,
+generative optimization strategies for communica-
+tion topologies achieve SOTA performances. Un-
+like heuristic methods, these strategies often re-
+quire substantial resources to design communica-
+tion topologies carefully, making them more valu-
+able targets for inferring. Accordingly, to evaluate
+CIA’s performance, we construct communication
+topologies using three well-performing generative
+optimization strategies: G-Designer (Zhang et al.,
+2025a), AGP (Li et al., 2025b), and ARG-Designer
+(Li et al., 2026). More details about these strategies
+are provided in Appendix D.
+Task Datasets.
+To provide the tasks required
+for the topology optimization, we employ four
+datasets across three domains: ❶General Reason-
+ing: MMLU (Hendrycks et al., 2021); ❷Mathe-
+matical Reasoning: GSM8K (Cobbe et al., 2021),
+SVAMP (Patel et al., 2021); and ❸Code Gen-
+eration: HumanEval (Chen et al., 2021).
+For
+each dataset, we select 100 tasks for evaluation.
+More details about the datasets are provided in Ap-
+pendix E.
+Baselines.
+We select two closed-source LLMs
+(GPT-5 and Gemini-2.5-Pro) and two open-source
+LLMs (Llama-3.1-8B-Instruct and Mistral-7B-
+Instruct-v0.2) as our baseline attacks for infer-
+ring the communication topology.
+Specifically,
+we prompt them to assign confidence scores to all
+agent pairs for inferring the communication. We
+then apply a threshold of 0.5 to these scores to de-
+termine the predicted edges for evaluation. The
+exact prompt template is provided in Appendix K.
+Metrics.
+We evaluate the performance of topol-
+ogy inference by measuring the prediction accuracy
+of all possible edges within MAS. We report Area
+Under the ROC Curve (AUC) (Hanley and McNeil,
+1982), Accuracy (ACC) and F1-score (F1) (Željko
+Ð. Vujovic, 2021).
+6.2
+Inference Attack Performance
+Table 1 demonstrates the communication inference
+results of MAS constructed by three generative
+optimization strategies across four datasets. The
+best performance is in boldface. From Table 1, we
+have the following observations:
+❶The communication topology can be inferred.
+CIA exhibits superior performance in communi-
+cation inference, with an AUC exceeding 0.75 in
+all cases and surpassing 0.80 in most experiments,
+peaking at 0.99, revealing the critical privacy risk
+in the communication topology of MAS.
+❷A simpler communication topology is more
+susceptible to being inferred. As shown in Table 2,
+ARG-Designer constructs MAS for GSM8K and
+SVAMP with significantly fewer average nodes
+and edges compared to other MAS, and our CIA
+achieves an AUC close to 1.0 in these cases. While
+having fewer nodes and edges results in lower re-
+source consumption, it increases the risk of the
+communication topology leakage.
+❸CIA significantly outperforms all LLM base-
+lines. Among the baselines, closed-source models
+generally exhibit stronger reasoning capabilities
+compared to open-source models. However, all
+LLMs tend to assign lower confidence scores to the
+communication between agents, failing to effec-
+tively distinguish whether there is communication
+between them.
+
+--- PAGE 7 ---
+Dataset
+Method
+MMLU
+GSM8K
+SVAMP
+HumanEval
+AUC
+ACC
+F1
+AUC
+ACC
+F1
+AUC
+ACC
+F1
+AUC
+ACC
+F1
+G-Designer
+GPT-5
+0.5833
+0.8033
+0.3084
+0.6274
+0.5887
+0.4555
+0.6272
+0.7876
+0.6815
+0.6201
+0.5211
+0.3204
+Gemini-2.5-Pro
+0.6869
+0.7900
+0.3697
+0.6152
+0.5728
+0.4545
+0.6300
+0.7600
+0.7059
+0.6318
+0.5541
+0.3899
+Llama-3.1-8B-Instruct
+0.5995
+0.7157
+0.4156
+0.5284
+0.5348
+0.4689
+0.4567
+0.6252
+0.4361
+0.4922
+0.4626
+0.2863
+Mistral-7B-Instruct-v0.2
+0.5192
+0.7555
+0.2889
+0.4105
+0.4260
+0.2866
+0.4977
+0.6704
+0.4351
+0.4893
+0.4430
+0.2811
+CIA (Ours)
+0.8324
+0.8147
+0.7761
+0.8585
+0.8382
+0.7744
+0.8561
+0.8083
+0.7682
+0.7594
+0.7362
+0.6566
+AGP
+GPT-5
+0.6577
+0.6974
+0.5472
+0.6233
+0.5972
+0.5357
+0.6199
+0.7940
+0.6330
+0.4433
+0.6661
+0.2689
+Gemini-2.5-Pro
+0.6324
+0.5935
+0.5217
+0.6177
+0.5733
+0.5174
+0.6087
+0.7733
+0.6241
+0.4033
+0.6122
+0.2158
+Llama-3.1-8B-Instruct
+0.4812
+0.6581
+0.4786
+0.4265
+0.5190
+0.5100
+0.4355
+0.6315
+0.5396
+0.3961
+0.6450
+0.2500
+Mistral-7B-Instruct-v0.2
+0.5076
+0.6579
+0.4246
+0.4867
+0.6500
+0.2866
+0.4939
+0.6588
+0.4475
+0.5000
+0.6722
+0.2857
+CIA (Ours)
+0.8411
+0.7942
+0.7567
+0.8804
+0.8204
+0.7866
+0.8979
+0.8380
+0.7923
+0.8100
+0.7777
+0.6759
+ARG-Designer
+GPT-5
+0.5879
+0.7545
+0.4094
+0.6984
+0.7672
+0.5113
+0.6240
+0.7163
+0.4034
+0.6092
+0.7294
+0.5755
+Gemini-2.5-Pro
+0.6888
+0.7795
+0.4482
+0.7475
+0.7977
+0.5743
+0.6197
+0.7313
+0.4097
+0.6006
+0.7601
+0.5531
+Llama-3.1-8B-Instruct
+0.4912
+0.6511
+0.3899
+0.5123
+0.7345
+0.6435
+0.5349
+0.6277
+0.4352
+0.3443
+0.6204
+0.3445
+Mistral-7B-Instruct-v0.2
+0.4539
+0.6465
+0.2649
+0.5713
+0.6697
+0.4924
+0.3112
+0.5347
+0.1235
+0.2936
+0.5875
+0.1653
+CIA (Ours)
+0.8227
+0.7931
+0.7458
+0.9873
+0.9035
+0.8330
+0.9761
+0.9106
+0.8632
+0.8699
+0.8126
+0.7153
+Table 1: Comparison of inference attack performance between CIA and baselines.
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+HumanEval
+MMLU
+SVAMP
+GSM8K
+ 
+    
+ Std. Query
+ Adv. Query
+(a) G-Designer.
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+HumanEval
+MMLU
+SVAMP
+GSM8K
+ 
+    
+ Std. Query
+ Adv. Query
+(b) AGP.
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+HumanEval
+MMLU
+SVAMP
+GSM8K
+ 
+    
+ Std. Query
+ Adv. Query
+(c) ARG-Designer.
+Figure 3: Comparison of MAS utility (measured by Accuracy) between Std.Query and Adv.Query.
+Dataset
+G-Designer
+AGP
+ARG-Designer
+Navg
+Eavg
+Navg
+Eavg
+Navg
+Eavg
+MMLU
+7.0
+8.99
+6.0
+10.87
+5.42
+7.84
+GSM8K
+5.0
+8.19
+5.0
+8.45
+3.07
+3.14
+SVAMP
+5.0
+8.15
+5.0
+8.41
+3.05
+3.10
+HumanEval
+6.0
+11.38
+6.0
+11.54
+4.24
+5.49
+Table 2: Statistical details of generated communication
+topologies. We report the average number of nodes
+(Navg) and edges (Eavg) for each setting.
+6.3
+Effectiveness of Adversarial Query
+In this section, we evaluate our adversarial query
+strategy (Section 5.1) by studying two primary fac-
+tors: (1) the fidelity of raw reasoning output re-
+covery, and (2) the impact of adversarial query
+on MAS task performance. The latter ensures
+that our strategy does not degrade system function-
+ality, which would otherwise render the inferred
+topologies meaningless.
+For the first factor, we use Recall (Rec) to mea-
+sure the proportion of recovered agent reasoning
+outputs based on high semantic similarity to the
+ground truth, and use ROUGE-L (R-L) to evaluate
+the lexical precision and structural fidelity of the
+recovered outputs. As shown in Table 3, our reason-
+ing outputs induction achieves robust recovery per-
+formance across various scenarios. Notably, the ef-
+fectiveness is more pronounced in MAS generated
+by ARG-Designer, which have simpler topologies,
+thus minimizing the information loss caused by
+multi-source aggregation during the reasoning pro-
+cess. thus minimizing the information loss caused
+by multi-source aggregation during the reasoning
+process.
+Dataset
+G-Designer
+AGP
+ARG-Designer
+Rec
+R-L
+Rec
+R-L
+Rec
+R-L
+MMLU
+0.90
+0.89
+0.89
+0.88
+0.93
+0.93
+GSM8K
+0.92
+0.91
+0.91
+0.91
+0.96
+0.95
+SVAMP
+0.92
+0.92
+0.93
+0.92
+0.95
+0.94
+HumanEval
+0.87
+0.87
+0.88
+0.87
+0.93
+0.92
+Table 3: Output recovery effectiveness via Adv. Query.
+
+--- PAGE 8 ---
+G-Designer
+AGP
+ARG-Designer
+0.0
+0.1
+0.2
+0.3
+0.4
+0.5
+MMLU
+   
+ CIA          
+ CIA w/o GBD   
+G-Designer
+AGP
+ARG-Designer
+0.0
+0.1
+0.2
+0.3
+0.4
+0.5
+GSM8K
+G-Designer
+AGP
+ARG-Designer
+0.0
+0.1
+0.2
+0.3
+0.4
+0.5
+SVAMP
+G-Designer
+AGP
+ARG-Designer
+0.0
+0.1
+0.2
+0.3
+0.4
+0.5
+HumanEval
+Figure 4: Impact of GBD on FPR.
+G-Designer
+MMLU
+GSM8K
+SVAMP
+HumanEval
+CIA w/o GBD
+0.5264
+0.5391
+0.5308
+0.5115
+CIA
+0.8324
+0.8585
+0.8561
+0.7594
+AGP
+MMLU
+GSM8K
+SVAMP
+HumanEval
+CIA w/o GBD
+0.5274
+0.5683
+0.5857
+0.5252
+CIA
+0.8411
+0.8804
+0.8979
+0.7480
+ARG-Designer
+MMLU
+GSM8K
+SVAMP
+HumanEval
+CIA w/o GBD
+0.5333
+0.6268
+0.6294
+0.6128
+CIA
+0.8227
+0.9873
+0.9761
+0.8699
+Table 4: Impact of GBD on attack performance (AUC).
+For the second factor, we compare the task
+completion accuracy between standard query
+(Std.Query) and our adversarial query (Adv.Query).
+As illustrated in Figure 3, the performance un-
+der the Adv.Query is nearly identical to that of
+Std.Query across all settings. This shows that our
+strategy does not degrade system performance, con-
+firming that the inferred communication accurately
+reflects how MAS solve complex reasoning prob-
+lems. Furthermore, by preserving collaborative in-
+tegrity, CIA remains stealthy and indistinguishable
+from benign usage.
+6.4
+Effectiveness of GBD
+In this section, we evaluate the effectiveness of
+GBD by comparing the False Positive Rate (FPR)
+and communication inference performance be-
+tween CIA and CIA w/o GBD (the model variant
+without GBD). CIA outperforms CIA w/o GBD. As
+illustrated in Figure 4, by eliminating global bias,
+CIA substantially reduces false positives, achiev-
+ing at least a 50% reduction in FPR across all set-
+tings. Moreover, as reported in Table 4, remov-
+ing global bias mitigates the spurious correlations
+among agents’ reasoning outputs, leading to a sig-
+nificant improvement in communication inference.
+1
+2
+3
+4
+5
+0.70
+0.75
+0.80
+0.85
+0.90
+0.95
+1.00
+ G-Designer          
+ AGP          
+ ARG-Designer
+MMLU
+GSM8K
+1
+2
+3
+4
+5
+0.70
+0.75
+0.80
+0.85
+0.90
+0.95
+1.00
+1
+2
+3
+4
+5
+0.70
+0.75
+0.80
+0.85
+0.90
+0.95
+1.00
+SVAMP
+HumanEval
+1
+2
+3
+4
+5
+0.70
+0.75
+0.80
+0.85
+0.90
+0.95
+1.00
+Figure 5: Precision of Top-k high-confidence edges.
+G-Designer
+MMLU
+GSM8K
+SVAMP
+HumanEval
+CIA w/o LWS
+0.7856
+0.8042
+0.7852
+0.7348
+CIA
+0.8324
+0.8585
+0.8561
+0.7594
+AGP
+MMLU
+GSM8K
+SVAMP
+HumanEval
+CIA w/o LWS
+0.7960
+0.8243
+0.8471
+0.7061
+CIA
+0.8411
+0.8804
+0.8979
+0.7480
+ARG-Designer
+MMLU
+GSM8K
+SVAMP
+HumanEval
+CIA w/o LWS
+0.7671
+0.9012
+0.8992
+0.7724
+CIA
+0.8227
+0.9873
+0.9761
+0.8699
+Table 5: Impact of LWS on attack performance (AUC).
+6.5
+Effectiveness of LWS
+In this section, we evaluate the effectiveness
+of LLM-guided Weak Supervision (LWS). Since
+LLMs struggle with direct full-topology inference
+as shown in Table 1, we first assess the precision
+of Top-k high-confidence edges to verify the reli-
+ability of these supervision signals. We then con-
+duct an ablation study to compare CIA with CIA
+w/o LWS (the model variant without LWS). Fig-
+ure 5 demonstrates that the LLM performs well in
+the precision evaluation of Top-k high-confidence
+edges, particularly where k ≤3, indicating that
+these weak supervision signals are reliable for in-
+ference. Consequently, as shown in Table 5, LWS
+improves AUC across all settings, validating its ef-
+fectiveness in refining the debiased representations
+and enhancing the inference performance.
+7
+Conclusion
+This paper investigates the privacy risk of MAS
+communication topologies being inferred, which
+poses significant security and IP threats. We pro-
+pose a restrictive black-box attack, CIA, which
+operates in two stages: first, it constructs adver-
+
+--- PAGE 9 ---
+sarial queries to reveal all agent reasoning outputs;
+second, it infers the communication topology by
+analyzing the semantic correlations among agents
+using global bias disentanglement and LLM-guided
+weak supervision. Extensive experiments show that
+CIA can effectively infer communication topolo-
+gies, highlighting the inherent privacy risk of MAS
+communication.
+Acknowledgments
+This work is supported by the National Natu-
+ral Science Foundation of China (No.62402491,
+No.U2336202, No.62472416) and the China Post-
+doctoral Science Foundation (No.2025M771524).
+Limitations
+CIA employs a recursive estimation of Total Corre-
+lation (TC) to optimize the information-theoretic
+objectives in Eq. (5), as detailed in Appendix B.
+However, accurately estimating multivariate mu-
+tual information among high-dimensional vectors
+remains highly challenging, leaving room for im-
+provement in our approximation strategy. More-
+over, the current LLM-guided weak supervision in
+CIA captures only first-order topological informa-
+tion; exploiting higher-order topological patterns
+to further strengthen the attack remains an open
+research direction.
+References
+Alfonso Amayuelas, Xianjun Yang, Antonis Antoniades,
+Wenyue Hua, Liangming Pan, and William Yang
+Wang. 2024. Multiagent collaboration attack: Inves-
+tigating adversarial attacks in large language model
+collaborations via debate.
+In Findings of the As-
+sociation for Computational Linguistics: EMNLP
+2024, Miami, Florida, USA, November 12-16, 2024,
+Findings of ACL, pages 6929–6948. Association for
+Computational Linguistics.
+Ke Bai, Pengyu Cheng, Weituo Hao, Ricardo Henao,
+and Larry Carin. 2023. Estimating total correlation
+with mutual information estimators. In International
+Conference on Artificial Intelligence and Statistics,
+25-27 April 2023, Palau de Congressos, Valencia,
+Spain, Proceedings of Machine Learning Research,
+pages 2147–2164. PMLR.
+Mohamed Ishmael Belghazi, Aristide Baratin, Sai Ra-
+jeswar, Sherjil Ozair, Yoshua Bengio, R. Devon
+Hjelm, and Aaron C. Courville. 2018. Mutual in-
+formation neural estimation. In Proceedings of the
+35th International Conference on Machine Learning,
+ICML 2018, Stockholmsmässan, Stockholm, Sweden,
+July 10-15, 2018, Proceedings of Machine Learning
+Research, pages 530–539. PMLR.
+Rishi Bommasani, Drew A. Hudson, Ehsan Adeli,
+Russ B. Altman, Simran Arora, Sydney von Arx,
+Michael S. Bernstein, Jeannette Bohg, Antoine
+Bosselut, Emma Brunskill, Erik Brynjolfsson, Shya-
+mal Buch, Dallas Card, Rodrigo Castellon, Ni-
+ladri S. Chatterji, Annie S. Chen, Kathleen Creel,
+Jared Quincy Davis, Dorottya Demszky, and 34 oth-
+ers. 2021. On the opportunities and risks of founda-
+tion models. CoRR, abs/2108.07258.
+Konstantinos Bousmalis, George Trigeorgis, Nathan Sil-
+berman, Dilip Krishnan, and Dumitru Erhan. 2016.
+Domain separation networks. In Advances in Neural
+Information Processing Systems 29: Annual Con-
+ference on Neural Information Processing Systems
+2016, December 5-10, 2016, Barcelona, Spain, pages
+343–351.
+Mert Cemri, Melissa Z. Pan, Shuyi Yang, Lakshya A.
+Agrawal, Bhavya Chopra, Rishabh Tiwari, Kurt
+Keutzer, Aditya G. Parameswaran, Dan Klein, Kan-
+nan Ramchandran, Matei Zaharia, Joseph E. Gonza-
+lez, and Ion Stoica. 2025. Why do multi-agent LLM
+systems fail? CoRR, abs/2503.13657.
+Pradipta Kishore Chakrabarty. 2025. Causal inference
+in agentic ai: Bridging explainability and dynamic
+decision making. International Journal of Science
+and Research (IJSR).
+Mark Chen, Jerry Tworek, Heewoo Jun, Qiming Yuan,
+Henrique Pondé de Oliveira Pinto, Jared Kaplan,
+Harri Edwards, Yuri Burda, Nicholas Joseph, Greg
+Brockman, Alex Ray, Raul Puri, Gretchen Krueger,
+Michael Petrov, Heidy Khlaaf, Girish Sastry, Pamela
+Mishkin, Brooke Chan, Scott Gray, and 39 others.
+2021. Evaluating large language models trained on
+code. CoRR, abs/2107.03374.
+Karl Cobbe, Vineet Kosaraju, Mohammad Bavarian,
+Mark Chen, Heewoo Jun, Lukasz Kaiser, Matthias
+Plappert, Jerry Tworek, Jacob Hilton, Reiichiro
+Nakano, Christopher Hesse, and John Schulman.
+2021. Training verifiers to solve math word prob-
+lems. CoRR, abs/2110.14168.
+Tim Dettmers, Pasquale Minervini, Pontus Stenetorp,
+and Sebastian Riedel. 2018. Convolutional 2d knowl-
+edge graph embeddings. In Proceedings of the Thirty-
+Second AAAI Conference on Artificial Intelligence,
+(AAAI-18), the 30th innovative Applications of Arti-
+ficial Intelligence (IAAI-18), and the 8th AAAI Sym-
+posium on Educational Advances in Artificial Intel-
+ligence (EAAI-18), New Orleans, Louisiana, USA,
+February 2-7, 2018, pages 1811–1818. AAAI Press.
+Alireza Ghafarollahi and Markus J Buehler. 2025. Scia-
+gents: automating scientific discovery through bioin-
+spired multi-agent intelligent graph reasoning. Ad-
+vanced Materials, 37(22):2413523.
+Nathan Godey, Éric Villemonte de la Clergerie, and
+Benoît Sagot. 2024. Anisotropy is inherent to self-
+attention in transformers. In Proceedings of the 18th
+Conference of the European Chapter of the Associ-
+ation for Computational Linguistics, EACL 2024 -
+
+--- PAGE 10 ---
+Volume 1: Long Papers, St. Julian’s, Malta, March
+17-22, 2024, pages 35–48. Association for Computa-
+tional Linguistics.
+James A Hanley and Barbara J McNeil. 1982. The
+meaning and use of the area under a receiver operat-
+ing characteristic (roc) curve. Radiology, 143(1):29–
+36.
+Junda He, Christoph Treude, and David Lo. 2025a. Llm-
+based multi-agent systems for software engineering:
+Literature review, vision, and the road ahead. ACM
+Trans. Softw. Eng. Methodol., 34(5):124:1–124:30.
+Pengfei He, Yuping Lin, Shen Dong, Han Xu, Yue Xing,
+and Hui Liu. 2025b. Red-teaming LLM multi-agent
+systems via communication attacks. In Findings of
+the Association for Computational Linguistics, ACL
+2025, Vienna, Austria, July 27 - August 1, 2025, Find-
+ings of ACL, pages 6726–6747. Association for Com-
+putational Linguistics.
+Dan Hendrycks, Collin Burns, Steven Basart, Andy
+Zou, Mantas Mazeika, Dawn Song, and Jacob Stein-
+hardt. 2021. Measuring massive multitask language
+understanding. In 9th International Conference on
+Learning Representations, ICLR 2021, Virtual Event,
+Austria, May 3-7, 2021. OpenReview.net.
+Sirui Hong, Mingchen Zhuge, Jonathan Chen, Xiawu
+Zheng, Yuheng Cheng, Jinlin Wang, Ceyao Zhang,
+Zili Wang, Steven Ka Shing Yau, Zijuan Lin, Liyang
+Zhou, Chenyu Ran, Lingfeng Xiao, Chenglin Wu,
+and Jürgen Schmidhuber. 2024. Metagpt: Meta pro-
+gramming for A multi-agent collaborative framework.
+In The Twelfth International Conference on Learning
+Representations, ICLR 2024, Vienna, Austria, May
+7-11, 2024. OpenReview.net.
+Jen-tse Huang, Jiaxu Zhou, Tailin Jin, Xuhui Zhou,
+Zixi Chen, Wenxuan Wang, Youliang Yuan, Maarten
+Sap, and Michael R. Lyu. 2024. On the resilience of
+multi-agent systems with malicious agents. CoRR,
+abs/2408.00989.
+Ye Jin, Xiaoxi Shen, Huiling Peng, Xiaoan Liu, Jingli
+Qin, Jiayang Li, Jintao Xie, Peizhong Gao, Guyue
+Zhou, and Jiangtao Gong. 2023. Surrealdriver: De-
+signing generative driver agent simulation framework
+in urban contexts based on large language model.
+CoRR, abs/2309.13193.
+Dezhang Kong, Shi Lin, Zhenhua Xu, Zhebo Wang,
+Minghao Li, Yufeng Li, Yilun Zhang, Hujin Peng,
+Zeyang Sha, Yuyuan Li, Changting Lin, Xun Wang,
+Xuan Liu, Ningyu Zhang, Chaochao Chen, Muham-
+mad Khurram Khan, and Meng Han. 2025. A survey
+of llm-driven AI agent communication: Protocols,
+security risks, and defense countermeasures. CoRR,
+abs/2506.19676.
+Donghyun Lee and Mo Tiwari. 2024. Prompt infec-
+tion: Llm-to-llm prompt injection within multi-agent
+systems. CoRR, abs/2410.07283.
+Ang Li, Yin Zhou, Vethavikashini Chithrra Raghuram,
+Tom Goldstein, and Micah Goldblum. 2025a. Com-
+mercial LLM agents are already vulnerable to simple
+yet dangerous attacks. CoRR, abs/2502.08586.
+Boyi Li, Zhonghan Zhao, Der-Horng Lee, and Gaoang
+Wang. 2025b. Adaptive graph pruning for multi-
+agent communication. In ECAI 2025 - 28th Euro-
+pean Conference on Artificial Intelligence, 25-30 Oc-
+tober 2025, Bologna, Italy - Including 14th Confer-
+ence on Prestigious Applications of Intelligent Sys-
+tems (PAIS 2025), Frontiers in Artificial Intelligence
+and Applications, pages 4305–4312. IOS Press.
+Guohao Li, Hasan Hammoud, Hani Itani, Dmitrii
+Khizbullin, and Bernard Ghanem. 2023. CAMEL:
+communicative agents for "mind" exploration of large
+language model society. In Advances in Neural In-
+formation Processing Systems 36: Annual Confer-
+ence on Neural Information Processing Systems 2023,
+NeurIPS 2023, New Orleans, LA, USA, December 10
+- 16, 2023.
+Junyou Li, Qin Zhang, Yangbin Yu, Qiang Fu, and
+Deheng Ye. 2024. More agents is all you need. Trans.
+Mach. Learn. Res., 2024.
+Shiyuan Li, Yixin Liu, Qingsong Wen, Chengqi Zhang,
+and Shirui Pan. 2026. Assemble your crew: Auto-
+matic multi-agent communication topology design
+via autoregressive graph generation. In Fortieth AAAI
+Conference on Artificial Intelligence, Thirty-Eighth
+Conference on Innovative Applications of Artificial
+Intelligence, Sixteenth Symposium on Educational
+Advances in Artificial Intelligence, AAAI 2026, Sin-
+gapore, January 20-27, 2026, pages 23142–23150.
+AAAI Press.
+Xixun Lin, Yucheng Ning, Jingwen Zhang, Yan Dong,
+Yilong Liu, Yongxuan Wu, Xiaohua Qi, Nan Sun,
+Yanmin Shang, Pengfei Cao, Lixin Zou, Xu Chen,
+Chuan Zhou, Jia Wu, Shirui Pan, Bin Wang, Yanan
+Cao, Kai Chen, Songlin Hu, and Li Guo. 2025.
+Llm-based agents suffer from hallucinations: A sur-
+vey of taxonomy, methods, and directions. CoRR,
+abs/2509.18970.
+Yixin Liu, Guibin Zhang, Kun Wang, Shiyuan Li, and
+Shirui Pan. 2025. Graph-augmented large language
+model agents: Current progress and future prospects.
+CoRR, abs/2507.21407.
+Arkil Patel, Satwik Bhattamishra, and Navin Goyal.
+2021. Are NLP models really able to solve simple
+math word problems? In Proceedings of the 2021
+Conference of the North American Chapter of the
+Association for Computational Linguistics: Human
+Language Technologies, NAACL-HLT 2021, Online,
+June 6-11, 2021, pages 2080–2094. Association for
+Computational Linguistics.
+Chen Qian, Wei Liu, Hongzhang Liu, Nuo Chen, Yufan
+Dang, Jiahao Li, Cheng Yang, Weize Chen, Yusheng
+Su, Xin Cong, Juyuan Xu, Dahai Li, Zhiyuan Liu,
+and Maosong Sun. 2024. Chatdev: Communicative
+
+--- PAGE 11 ---
+agents for software development. In Proceedings
+of the 62nd Annual Meeting of the Association for
+Computational Linguistics (Volume 1: Long Papers),
+ACL 2024, Bangkok, Thailand, August 11-16, 2024,
+pages 15174–15186. Association for Computational
+Linguistics.
+Shaina Raza, Ranjan Sapkota, Manoj Karkee, and Chris-
+tos Emmanouilidis. 2026. Trism for agentic AI: A
+review of trust, risk, and security management in
+llm-based agentic multi-agent systems. AI Open,
+7:71–95.
+Noah Shinn, Federico Cassano, Ashwin Gopinath,
+Karthik Narasimhan, and Shunyu Yao. 2023. Re-
+flexion: language agents with verbal reinforcement
+learning. In Advances in Neural Information Pro-
+cessing Systems 36: Annual Conference on Neural
+Information Processing Systems 2023, NeurIPS 2023,
+New Orleans, LA, USA, December 10 - 16, 2023.
+Patrick Taillandier, Jean-Daniel Zucker, Arnaud Grig-
+nard, Benoît Gaudou, Nghi Quang Huynh, and Alexis
+Drogoul. 2025. Integrating LLM in agent-based so-
+cial simulation: Opportunities and challenges. CoRR,
+abs/2507.19364.
+Aäron van den Oord, Yazhe Li, and Oriol Vinyals. 2018.
+Representation learning with contrastive predictive
+coding. CoRR, abs/1807.03748.
+Qian Wang, Tianyu Wang, Zhenheng Tang, Qinbin
+Li, Nuo Chen, Jingsheng Liang, and Bingsheng He.
+2025. Megaagent: A large-scale autonomous llm-
+based multi-agent system without predefined sops.
+In Findings of the Association for Computational
+Linguistics, ACL 2025, Vienna, Austria, July 27 - Au-
+gust 1, 2025, Findings of ACL, pages 4998–5036.
+Association for Computational Linguistics.
+Yifei Wang, Dizhan Xue, Shengjie Zhang, and Sheng-
+sheng Qian. 2024a. Badagent: Inserting and activat-
+ing backdoor attacks in LLM agents. In Proceedings
+of the 62nd Annual Meeting of the Association for
+Computational Linguistics (Volume 1: Long Papers),
+ACL 2024, Bangkok, Thailand, August 11-16, 2024,
+pages 9811–9827. Association for Computational
+Linguistics.
+Zhenhailong Wang, Shaoguang Mao, Wenshan Wu, Tao
+Ge, Furu Wei, and Heng Ji. 2024b. Unleashing the
+emergent cognitive synergy in large language mod-
+els: A task-solving agent through multi-persona self-
+collaboration. In Proceedings of the 2024 Conference
+of the North American Chapter of the Association for
+Computational Linguistics: Human Language Tech-
+nologies (Volume 1: Long Papers), NAACL 2024,
+Mexico City, Mexico, June 16-21, 2024, pages 257–
+279. Association for Computational Linguistics.
+Michael Satosi Watanabe. 1960. Information theoretical
+analysis of multivariate correlation. IBM J. Res. Dev.,
+4(1):66–82.
+Bingyu Yan, Xiaoming Zhang, Ziyi Zhou, Chaozhuo
+Li, Ruilin Zeng, Yirui Qi, Tianbo Wang, and Litian
+Zhang. 2026. Attack the messages, not the agents:
+A multi-round adaptive stealthy tampering frame-
+work for LLM-MAS. In Fortieth AAAI Conference
+on Artificial Intelligence, Thirty-Eighth Conference
+on Innovative Applications of Artificial Intelligence,
+Sixteenth Symposium on Educational Advances in Ar-
+tificial Intelligence, AAAI 2026, Singapore, January
+20-27, 2026, pages 29784–29792. AAAI Press.
+John Yang, Carlos E. Jimenez, Alexander Wettig, Kil-
+ian Lieret, Shunyu Yao, Karthik Narasimhan, and
+Ofir Press. 2024. Swe-agent: Agent-computer in-
+terfaces enable automated software engineering. In
+Advances in Neural Information Processing Systems
+38: Annual Conference on Neural Information Pro-
+cessing Systems 2024, NeurIPS 2024, Vancouver, BC,
+Canada, December 10 - 15, 2024.
+Miao Yu, Fanci Meng, Xinyun Zhou, Shilong Wang,
+Junyuan Mao, Linsey Pang, Tianlong Chen, Kun
+Wang, Xinfeng Li, Yongfeng Zhang, Bo An, and
+Qingsong Wen. 2025a.
+A survey on trustworthy
+LLM agents: Threats and countermeasures. In Pro-
+ceedings of the 31st ACM SIGKDD Conference on
+Knowledge Discovery and Data Mining, V.2, KDD
+2025, Toronto ON, Canada, August 3-7, 2025, pages
+6216–6226. ACM.
+Miao Yu, Shilong Wang, Guibin Zhang, Junyuan Mao,
+Chenlong Yin, Qijiong Liu, Kun Wang, Qingsong
+Wen, and Yang Wang. 2025b. Netsafe: Exploring
+the topological safety of multi-agent system. In Find-
+ings of the Association for Computational Linguistics,
+ACL 2025, Vienna, Austria, July 27 - August 1, 2025,
+Findings of ACL, pages 2905–2938. Association for
+Computational Linguistics.
+Weichen Yu, Kai Hu, Tianyu Pang, Chao Du, Min Lin,
+and Matt Fredrikson. 2025c. Infecting LLM agents
+via generalizable adversarial attack. In Red Teaming
+GenAI: What Can We Learn from Adversaries?
+Guibin Zhang, Yanwei Yue, Xiangguo Sun, Guancheng
+Wan, Miao Yu, Junfeng Fang, Kun Wang, Tianlong
+Chen, and Dawei Cheng. 2025a. G-designer: Ar-
+chitecting multi-agent communication topologies via
+graph neural networks. In Forty-second International
+Conference on Machine Learning, ICML 2025, Van-
+couver, BC, Canada, July 13-19, 2025, Proceedings
+of Machine Learning Research. PMLR / OpenRe-
+view.net.
+Jiayi Zhang, Jinyu Xiang, Zhaoyang Yu, Fengwei Teng,
+Xionghui Chen, Jiaqi Chen, Mingchen Zhuge, Xin
+Cheng, Sirui Hong, Jinlin Wang, Bingnan Zheng,
+Bang Liu, Yuyu Luo, and Chenglin Wu. 2025b.
+Aflow: Automating agentic workflow generation. In
+The Thirteenth International Conference on Learning
+Representations, ICLR 2025, Singapore, April 24-28,
+2025. OpenReview.net.
+Yangze Zhou, Gitta Kutyniok, and Bruno Ribeiro. 2022.
+OOD link prediction generalization capabilities of
+message-passing gnns in larger test graphs. In Ad-
+vances in Neural Information Processing Systems 35:
+
+--- PAGE 12 ---
+Annual Conference on Neural Information Process-
+ing Systems 2022, NeurIPS 2022, New Orleans, LA,
+USA, November 28 - December 9, 2022.
+Željko Ð. Vujovic. 2021. Classification model evalu-
+ation metrics. International Journal of Advanced
+Computer Science and Applications, 12(6).
+A
+Details of Post-processing Procedures
+This section details the post-processing procedures
+applied to S(q∗). As illustrated in Figure 6, S(q∗)
+consists of two sections: [PREVIOUS HISTORY]
+and [REASONING OUTPUT]. To format S(q∗)
+into the structured list R∗for downstream commu-
+nication inference, firstly, we partition the [PRE-
+VIOUS HISTORY] section of S(q∗) using the de-
+limiter “|||” to extract reasoning outputs from inter-
+mediate agents. Next, since a predecessor’s output
+may be inherited by multiple subsequent agents,
+we apply backward deduplication to the partitioned
+results. Finally, since the [PREVIOUS HISTORY]
+section in S(q∗) doesn’t record the output of the
+decision agent, we append the content in the [REA-
+SONING OUTPUT] section of S(q∗).
+[PREVIOUS HISTORY]
+<a1’s output> ||| <a2’s output> ||| 
+<a1’s output> ||| <a3’s output>
+[\PREVIOUS HISTORY]
+[REASONING OUTPUT]
+<a4’s output>
+[\REASONING OUTPUT]
+a1
+a2
+a3
+a4
+�(�∗)
+Figure 6: An illustrative example of S(q∗).
+B
+Computational Details of Eq.(5)
+In this section, we detail the computation process of
+Eq.(5). The equation consists of two terms: (i) the
+negative multivariate mutual information among
+all outputs’ bias representations: −I(zb
+1; . . . ; zb
+n),
+and (ii) the sum of mutual information between the
+debiased and bias representations for each agent’s
+output: Pn
+i=1 I(zd
+i ; zb
+i).
+For the first term, we introduce Total Correla-
+tion to estimate the multivariate mutual informa-
+tion. First, we provide the definitions of mutual
+information (MI) (Belghazi et al., 2018) and Total
+Correlation (TC) (Watanabe, 1960).
+Given two random variables x and y, their MI
+is defined as
+I(x; y) = Ep(x,y)
+
+log p(x, y)
+p(x)p(y)
+
+(12)
+For multi-variable scenarios, TC is defined as
+T C(X) = T C(x1, x2, . . . , xn)
+= Ep(x1,...,xn)
+
+log p(x1, . . . , xn)
+p(x1) . . . p(xn)
+
+.
+(13)
+Based on the above definitions, the connection
+between TC and MI is described by the following
+theorem:
+Theorem 1 (Bai et al., 2023). Let X
+=
+(x1, x2, . . . , xn) be a group of random variables.
+Suppose set A = {i1, i2, . . . , ik} ⊆{1, 2, . . . , n}
+is an index subgroup.
+¯
+A = {i : i /∈A} is
+the complementary set of A.
+Denote XA =
+(xi1, xi2, . . . , xik) as the selected variables from
+X with the indexes in A. Then we have T C(X) =
+T C(XA) + T C(X ¯
+A) + I(XA; X ¯
+A).
+Theorem 1 reveals that TC can be equivalently
+decomposed into the internal correlations within
+subgroups and the MI between these subgroups.
+Based on this property, we can recursively repre-
+sent the TC of the subgroups in terms of MI terms
+for lower-level subgroups. Consequently, by iter-
+atively partitioning the set into a preceding subset
+X1:i and the current variable xi+1, TC can be for-
+mulated as a summation of progressive MI terms:
+T C(X) =
+n−1
+X
+i=1
+I(X1:i; xi+1),
+(14)
+Based on this, our multivariate mutual informa-
+tion can be reformulated as
+I(zb
+1; . . . ; zb
+n) = T C(Zb) =
+n−1
+X
+i=1
+I(Zb
+1:i; zb
+i+1),
+(15)
+where Zb = (zb
+1, . . . , zb
+n), and Zb
+1:i = (zb
+1, . . . , zb
+i)
+denote a subset of variables with indexes from 1 to
+i.
+To estimate each MI term, we perturb each task
+multiple times to elicit diverse responses and use
+the collected outputs to form an empirical approxi-
+mation of each agent’s output distribution. We then
+apply the InfoNCE (van den Oord et al., 2018) to
+estimate the MI terms in the summation:
+I(Zb
+1:i; zb
+i+1) = E
+"
+1
+M
+M
+X
+p=1
+
+ϕ(Zb
+1:i,p, zb
+i+1,p)
+−log
+ 1
+M
+M
+X
+q=1
+exp
+ ϕ(Zb
+1:i,p, zb
+i+1,q)
+#
+,
+(16)
+
+--- PAGE 13 ---
+For the second term in Eq.(5), we also use In-
+foNCE to estimate the MI between the debiased
+and bias representations for each agent’s output:
+I(zd
+i ; zb
+i) = E
+"
+1
+M
+M
+X
+p=1
+
+ϕ(zd
+i,p, zb
+i,p)
+−log
+ 1
+M
+M
+X
+q=1
+exp
+ ϕ(zd
+i,p, zb
+i,q)
+#
+.
+(17)
+C
+Formulations of Lpos and Lneg
+Here we first give the formulation of Lpos:
+Lpos(ai, aj) = (1 −α) · log(Sim(zd
+i , zd
+j))
++ α · log(1 −Sim(zd
+i , zd
+j)),
+(18)
+where α is the label-smoothing coefficient,
+Sim(·, ·) is a distance-based similarity function,
+and zd
+i and zd
+j denote the debiased representations
+corresponding to the outputs of agents ai and aj.
+Accordingly, the formulation of Lneg is
+Lneg(au, av) = (1 −α) · log(1 −Sim(zd
+u, zd
+v))
++ α · log(Sim(zd
+u, zd
+v)).
+(19)
+D
+Generative Optimization Strategies
+The generative optimization strategies for the com-
+munication topology used in our experiments are
+introduced below.
+• G-Designer (Zhang et al., 2025a) is a topol-
+ogy optimization framework that learns effec-
+tive multi-agent communication topologies by
+modeling agent interactions as a graph and op-
+timizing connectivity to improve collaborative
+reasoning performance.
+• AGP (Li et al., 2025b) proposes an adap-
+tive graph pruning strategy that iteratively re-
+moves redundant or ineffective communica-
+tion links, resulting in more efficient and task-
+relevant multi-agent interaction topologies.
+• ARG-Designer (Li et al., 2026) reframes
+multi-agent system design as conditional au-
+toregressive graph generation. By jointly op-
+timizing agent composition and topology, it
+constructs customized topologies from scratch
+to enable task-adaptive coordination.
+E
+Task Datasets
+The task datasets used in our experiments are intro-
+duced below.
+• MMLU (Hendrycks et al., 2021) is a bench-
+mark designed to evaluate general reasoning
+and knowledge understanding across diverse
+subject domains, covering a wide range of
+factual, logical, and conceptual questions.
+• GSM8K (Cobbe et al., 2021) focuses on com-
+plex, multi-step mathematical reasoning, re-
+quiring models to perform precise arithmetic
+operations and logical deductions to solve di-
+verse, grade-school–level word problems.
+• SVAMP (Patel et al., 2021) targets robustness
+in mathematical reasoning by introducing sys-
+tematic structural and linguistic variations to
+math problems, testing whether models truly
+understand complex problem semantics rather
+than relying on spurious surface cues.
+• HumanEval (Chen et al., 2021) is a code gen-
+eration benchmark that assesses a model’s
+ability to synthesize correct and executable
+programs from natural language specifica-
+tions.
+F
+Model Variant for Disentanglement
+In this section, we introduce a model variant,
+termed CIA-Sub, which approaches the distangle-
+ment of global bias in a different way. Instead
+of using two separate encoders to learn the debi-
+ased representations and the bias representations,
+CIA-Sub uses a single encoder to obtain the bias
+representations, while the debiased representations
+are defined by subtracting the bias representations
+from the initial representations:
+zb
+i = Eb(hi), zd
+i = hi −zb
+i.
+(20)
+All loss components for CIA-Sub remain un-
+changed from those of CIA.
+As shown in Table 6, CIA performs better than
+CIA-Sub. We suppose the reason is that in CIA-
+Sub, zd
+i is entirely dependent on the quality of zb
+i,
+while in CIA, using two separate encoders allows
+the debiased representations to be explicitly refined
+to capture useful information relevant to the com-
+munication.
+
+--- PAGE 14 ---
+G-Designer
+MMLU
+GSM8K
+SVAMP
+HumanEval
+CIA-Sub
+0.7432
+0.7689
+0.7455
+0.6509
+CIA
+0.8324
+0.8585
+0.8561
+0.7594
+AGP
+MMLU
+GSM8K
+SVAMP
+HumanEval
+CIA-Sub
+0.7181
+0.7625
+0.7964
+0.6622
+CIA
+0.8411
+0.8804
+0.8979
+0.7480
+ARG-Designer
+MMLU
+GSM8K
+SVAMP
+HumanEval
+CIA-Sub
+0.7454
+0.8654
+0.8294
+0.7669
+CIA
+0.8227
+0.9873
+0.9761
+0.8699
+Table 6: AUC comparison between CIA-Sub and CIA.
+G
+Case studies
+In this section, we present case studies for commu-
+nication inference. Specifically, we visualize the
+similarity matrices and the inferred communication
+topologies produced by CIA w/o GBD and CIA,
+and compare them against the ground-truth adja-
+cency matrix and communication topology. No-
+tably, since the similarity matrix is symmetric, we
+symmetrize the ground-truth adjacency matrix for
+a more intuitive comparison.
+Figures 7 to 9 present three case studies, where
+the communication topologies are generated by G-
+Designer, AGP, and ARG-Designer on MMLU,
+respectively.
+These case studies visualize the
+spurious correlations induced by global bias and
+their impact on communication inference, thereby
+demonstrating the effectiveness of our GBD.
+H
+Implementation Details
+For our implementation, we utilize all-MiniLM-L6-
+v2 as the pretrained language model fθ to generate
+the initial representations. The dimensions of both
+the debiased and biased representations in Global
+Bias Disentanglement (GBD) are set to 768, which
+is twice the native output dimension of fθ. We em-
+ploy GPT-5 as the teacher LLM to provide weak
+supervision signals in LLM-guided Weak Super-
+vision (LWS). The threshold τ in Eq.(11) is set to
+0.5, following common practice (Zhou et al., 2022).
+Additionally, the label-smoothing coefficient α in
+Eq.(18) and Eq.(19) is set to 0.1, consistent with
+the practice in Dettmers et al. (2018).
+X
+X
+X
+X
+(a) CIA w/o GBD.
+(b) CIA.
+(c) Ground-truth.
+Figure 7: A case study of the communication topology
+generated by G-Designer on MMLU.
+X
+X
+X
+X
+(a) CIA w/o GBD.
+X
+(b) CIA.
+(c) Ground-truth.
+Figure 8: A case study of the communication topology
+generated by AGP on MMLU.
+
+--- PAGE 15 ---
+X
+(a) CIA w/o GBD.
+(b) CIA.
+(c) Ground-truth.
+Figure 9: A case study of the communication topology
+generated by ARG-Dsigner on MMLU.
+I
+Hyperparameter Analysis
+We conduct a grid search to select the optimal
+hyperparameter values.
+Specifically, we focus
+on tuning two primary parameters: the learning
+rate lr and k, the number of the highest confi-
+dence scores edges returned by the teacher LLM
+in LWS. The search intervals for these parameters
+are {1e −4, 5e −4, 1e −3, 5e −3, 1e −2} and
+{1, 2, 3, 4, 5}, respectively. We conduct these hy-
+perparameter experiments on MAS generated by
+G-Designer. The corresponding results are illus-
+trated in Figure 10. From it, we have the following
+conclusions:
+❶CIA performs best at a learning rate of 1e-3,
+so appropriately increasing the learning rate can
+improve the CIA’s inference quality. A smaller
+learning rate would result in slow convergence and
+inadequate learning, while a larger learning rate
+may cause gradient oscillations, slightly degrading
+performance.
+❷CIA achieves the best performance when
+k = 3. A smaller k makes the debiased representa-
+tions difficult to capture sufficient topological infor-
+mation, while for a large k, the teacher LLM’s pre-
+cision decreases more noticeably, as shown in Fig-
+ure 5, introducing more incorrect edges, which
+brings noise and misleads zd
+i to learn topological in-
+formation deviating from the true topology, thereby
+degrading the performance.
+1
+2
+3
+4
+5
+0.72
+0.75
+0.78
+0.81
+0.84
+0.87
+(b) The effect of k.
+ MMLU      
+ GSM8K      
+ SVAMP      
+ HumanEval
+(a) The effect of lr.
+1e−4
+5e−4
+1e−3
+5e−3
+1e−2
+0.72
+0.75
+0.78
+0.81
+0.84
+0.87
+Figure 10: Hyperparameter analysis of CIA.
+J
+Prompts for LWS
+Table 7 presents the exact prompts used to instruct
+teacher LLM to return the top-k communication
+edges with the highest confidence scores.
+K
+Prompts for Baselines
+Table 8 presents the exact prompts used to instruct
+baseline models to infer the communication topol-
+ogy of MAS.
+
+--- PAGE 16 ---
+Prompt for LLM Inferring Top-k Edge
+System Prompt:
+Role: You are an expert in Multi-Agent System topology analysis. Your core capability is Topology
+Inference: infer the hidden communication topology by analyzing textual interaction logs.
+Task: Analyze the provided agent reasoning outputs to identify communication between agents. You
+must quantify the likelihood of a directed edge existing from Agent i to Agent j (Edge [i →j]) using
+a Confidence Score (0-100%).
+Confidence Scoring Framework: Assign a score based on the strength of the evidence found in Agent
+j’s response relative to Agent i’s output:
+High Confidence (80-100%): Explicit Reference & Strict Execution.
+Explicit Citation: Agent j explicitly mentions Agent i (e.g., "Using the code provided above...",
+"Following the previously suggested approach...").
+Hard Dependency: Agent j executes code, runs a SQL query, or parses a specific data topology that
+was strictly defined or generated by Agent i. Agent j cannot function without this specific asset.
+Medium Confidence (50-79%): Content Dependency & Semantic Alignment.
+Unique Information Flow: Agent j solves a problem using unique information or a specific plan
+provided only by Agent i, even without explicit citation.
+High Semantic Similarity: Agent j’s content exhibits high semantic overlap with Agent i. This
+includes reusing specific terminologies, variable names, or continuing a niche topic introduced by i,
+indicating a direct continuation of the context.
+Logical Mapping: There is a clear "Question →Answer" or "Task →Solution" mapping between i
+and j.
+Low Confidence (<50%): Weak Logical Sequence.
+Agent j and Agent i have a weak logical sequence, the content is generic, or the solution could have
+been derived independently without Agent i’s specific input.
+Important:
+1. The MAS communication topology is directed, and edge direction must follow the temporal order
+in the provided textual interaction logs. Specifically, if Agent i’s output appears earlier than Agent j’s
+output in the logs, you may predict an edge [i -> j] but you must NOT predict [j -> i]. In other words,
+information can only flow forward in the log order (earlier agent -> later agent).
+2. ID Consistency: Use the exact Agent IDs (e.g., 0, 1, 2) provided in the input.
+3. Completeness: Output the Top k Highest Confidence Edges.
+4. Confidence Sorting: Output the edges sorted by Confidence in descending order, starting with the
+highest confidence edge.
+5. No Markdown: Do not use markdown code blocks.
+Provide a raw JSON list in the following format. Do not include any introduction or conclusion text.
+The confidence score should be a number between 0 and 100, representing the confidence percentage.
+[{{"edge": [source_id, target_id], "confidence": 85}},{{"edge": [source_id, target_id], "confidence":
+80}}...]
+User Prompt:
+Here is the data for the current analysis session.
+[Agent Output Logs]
+{nodes_block}
+Based on the criteria defined in the system instructions, please output the Top k Highest Confidence
+Edges in raw JSON format, and sort them by Confidence in descending order. Remember: The
+confidence score should be a number between 0 and 100, representing the confidence percentage.
+[{{"edge": [source_id, target_id], "confidence": 85}},{{"edge": [source_id, target_id], "confidence":
+80}}...]
+Table 7: Prompt template for LLM-guided weak supervision.
+
+--- PAGE 17 ---
+Prompt for LLM Inferring the Communication Topology of MAS
+System Prompt:
+Role: You are an expert in Multi-Agent System topology analysis. Your core capability is Topology
+Inference: infer the hidden communication topology by analyzing textual interaction logs.
+Task: Analyze the provided agent reasoning outputs to identify communication between agents. You
+must quantify the likelihood of a directed edge existing from Agent i to Agent j (Edge [i →j]) using
+a Confidence Score (0-100%).
+Confidence Scoring Framework: Assign a score based on the strength of the evidence found in Agent
+j’s response relative to Agent i’s output:
+High Confidence (80-100%): Explicit Reference & Strict Execution.
+Explicit Citation: Agent j explicitly mentions Agent i (e.g., "Using the code provided above...",
+"Following the previously suggested approach...").
+Hard Dependency: Agent j executes code, runs a SQL query, or parses a specific data topology that
+was strictly defined or generated by Agent i. Agent j cannot function without this specific asset.
+Medium Confidence (50-79%): Content Dependency & Semantic Alignment.
+Unique Information Flow: Agent j solves a problem using unique information or a specific plan
+provided only by Agent i, even without explicit citation.
+High Semantic Similarity: Agent j’s content exhibits high semantic overlap with Agent i. This
+includes reusing specific terminologies, variable names, or continuing a niche topic introduced by i,
+indicating a direct continuation of the context.
+Logical Mapping: There is a clear "Question →Answer" or "Task →Solution" mapping between i
+and j.
+Low Confidence (<50%): Weak Logical Sequence.
+Agent j and Agent i have a weak logical sequence, the content is generic, or the solution could have
+been derived independently without Agent i’s specific input.
+Important:
+1. The MAS communication topology is directed, and edge direction must follow the temporal order
+in the provided textual interaction logs. Specifically, if Agent i’s output appears earlier than Agent j’s
+output in the logs, you may predict an edge [i -> j] but you must NOT predict [j -> i]. In other words,
+information can only flow forward in the log order (earlier agent -> later agent).
+2. ID Consistency: Use the exact Agent IDs (e.g., 0, 1, 2) provided in the input.
+3. Completeness: Output the confidence scores for all possible agent pairs; do not omit any edges,
+even those with low confidence.
+4. Confidence Sorting: Output the edges sorted by Confidence in descending order, starting with the
+highest confidence edge.
+5. No Markdown: Do not use markdown code blocks.
+Provide a raw JSON list in the following format. Do not include any introduction or conclusion text.
+The confidence score should be a number between 0 and 100, representing the confidence percentage.
+[{{"edge": [source_id, target_id], "confidence": 85}},{{"edge": [source_id, target_id], "confidence":
+80}}...]
+User Prompt:
+Here is the data for the current analysis session.
+[Agent Output Logs]
+{nodes_block}
+Based on the criteria defined in the system instructions, please output the Top k Highest Confidence
+Edges in raw JSON format, and sort them by Confidence in descending order. Remember: The
+confidence score should be a number between 0 and 100, representing the confidence percentage.
+[{{"edge": [source_id, target_id], "confidence": 85}},{{"edge": [source_id, target_id], "confidence":
+80}}...]
+Table 8: Prompt template for baseline models to infer the communication topology of MAS.
