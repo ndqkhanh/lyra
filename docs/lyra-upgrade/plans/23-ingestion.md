@@ -49,3 +49,31 @@ graph TD
 8. Citation tracking + grounding
 
 **Impact:** 4 | **Effort:** 4 | **Tier:** (B) Breakthrough
+
+## Evidence Synthesis
+
+| Source | Key Insight |
+|--------|------------|
+| SEMA-RAG (2605.17101) | Multi-agent RAG: Interpreter + Explorer + Arbiter → +6.46 acc pts across 5 benchmarks/5 backbones |
+| ClusterRAG (2605.18769) | Two-level retrieval (cluster + document), density-based user clustering for personalization |
+| MASS-RAG (2604.18509, ACL 2026 Findings) | Role-specialized agents for noisy/incomplete evidence; dedicated synthesis stage |
+| "Is Grep All You Need?" (2605.15184) | Grep often beats vector retrieval for code; harness matters more than retriever |
+| SpreadsheetAgent (2604.12282) | Incremental multimodal ingestion: code-exec results, images, LaTeX tables → structural sketch |
+| GraphRAG (2404.16130) | Entity + relation extraction → knowledge graph → multi-hop traversal |
+| MATA (2602.09642) | Small-model TableQA with complementary reasoning paths; minimizes expensive LLM calls |
+
+## Baseline Delta
+
+| Component | Change | Migration Cost |
+|-----------|--------|---------------|
+| lyra-knowledge-graph | EXTEND: GraphRAG entity extraction, freshness tracking | Low |
+| lyra-etl-pipeline | EXTEND: multimodal adapters (PDF, code, audio, spreadsheet) | Medium |
+| SEMA-RAG agents | ADD: Interpreter/Explorer/Arbiter retrieval pipeline | None |
+| Vector store integration | ADD: ChromaDB or Qdrant | Low |
+| Citation tracker | ADD: source chunk → claim mapping | Low |
+
+## Expert Review
+
+**Senior Data Engineer:** "SEMA-RAG's sufficiency-driven multi-round retrieval is the key insight. Single-round retrieval either misses evidence or returns too much. The Explorer agent keeps searching until it has enough — that's the difference between good and great retrieval."
+
+**Skeptic:** "grep beats vector retrieval for code. Lyra's first ingestion tool should be ripgrep, not ChromaDB." → ACCEPTED. Ship grep-first retrieval; add vector/graph retrieval as fallback when grep returns insufficient results.

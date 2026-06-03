@@ -1,104 +1,67 @@
-# Verifier
+# Verifier — What & Why
 
-> **Two-phase verification with cross-channel evidence that catches fabricated success.** | **Phase:** 1
+> Concept: A three-stage verification panel with adversarial skeptic review, anonymized judging, ReTAS (Retry-Triage-Assess-Scale) correction pipeline, and cross-channel evidence triangulation to catch fabricated success claims.
 
-## &#x1F914; What It Is
+## What It Is
 
-The verifier catches **fabricated success** -- the failure mode where an agent confidently reports the task is done but the tests do not actually pass, the file was never written, or the diff does not match the plan. Lyra's verifier is **two-phase with cross-channel evidence** because each phase alone can be fooled. A model will say "task complete" when the file was never written or the tests are a different version.
+The Verifier is Lyra's trust layer — the gate that every task completion must pass through. Before any result is marked complete, it runs a staged verification pipeline with three phases:
 
-**Jargon defined:**
-- **Fabricated success** -- When a model outputs "task complete" but the work was not actually done (e.g., it hallucinated writing a file or running tests)
-- **Cross-channel evidence** -- Comparing three independent records of what happened: the tool-call trace, the git diff, and the filesystem state
-- **HIR trace** -- Human-Interpretable Rank trace; a structured log of every tool call (action stream, not just text output)
-- **PRM** -- Process Reward Model; a per-step advisory signal estimating progress toward the plan goal
-
-## &#x1F9EA; How It Works
+1. **Phase 1 (Objective)** — Deterministic checks at zero LLM cost: acceptance tests pass (exit code 0 for all test suites), expected files exist (all files declared in the plan diff list are present on disk with correct content), forbidden patterns absent (no secrets, no debug code, no commented-out tests, no hardcoded IPs in changed files), coverage delta non-negative (coverage percentage did not decrease compared to baseline), typechecking passes without errors, linting is clean on changed files. This is the fast path: passes in <100ms for most tasks. If any check fails, the agent receives immediate structured feedback and can retry without invoking an LLM judge.
+2. **Phase 2 (Subjective)** — A blind judge LLM from a different model family (Gemini if the executor used Sonnet, DeepSeek if the executor used Opus, Qwen if the executor used GPT) scores output against a 5-criterion rubric. Each criterion is scored 0.0-1.0 with a minimum passing threshold of 0.7 per criterion: **correctness** (does the output do what the task asked — are requirements met?), **coverage** (are there untested paths, edge cases, or missing error handling?), **faithfulness** (does the output match the evidence — no hallucinated test results, no claimed changes that do not exist?), **style** (does it follow project conventions, naming patterns, and code organization?), **safety** (are there security concerns — injection vectors, hardcoded secrets, unsafe patterns?).
+3. **Phase 3 (Cross-Channel Reconciliation)** — Three independent evidence channels must agree: execution trace (HIR events recorded during execution — what did the agent actually do?), git diff (what files were actually changed on disk?), environment snapshot (what does the filesystem look like — content hashes of modified files, test exit codes, coverage metrics?). If the trace says "wrote helper.py with 50 lines" but the diff shows no changes to helper.py, the Verifier flags fabrication at maximum severity and the task is blocked from completion.
 
 ```mermaid
-sequenceDiagram
-    participant A as Agent
-    participant V as Verifier
-    participant P1 as Phase 1 (Cheap)
-    participant CC as Cross-Channel
-    participant P2 as Phase 2 (LLM Judge)
-    participant U as User
-
-    A->>V: Reports task complete
-    V->>P1: Run deterministic checks
-    P1->>P1: Acceptance tests pass?
-    P1->>P1: Expected files exist?
-    P1->>P1: Forbidden files untouched?
-    P1->>P1: Coverage not regressed?
-    alt Any check fails
-        P1-->>V: REJECT (concrete reason)
-        V-->>U: Verdict: failed
-    else All checks pass
-        P1-->>V: Phase 1 OK
-        V->>CC: Reconcile trace vs. diff vs. filesystem
-        alt Cross-channel mismatch
-            CC-->>V: REJECT (fabricated evidence)
-            V-->>U: Verdict: failed
-        else Channels agree
-            CC-->>V: Evidence consistent
-            V->>P2: Full diff + HIR trace + Phase 1 results
-            Note over P2: Different model family than generator
-            P2-->>V: Rubric verdict (accept/reject/needs-revision)
-            V-->>U: Final verdict
-        end
-    end
+flowchart TD
+    Task["Task Output"] --> P1["Phase 1: Objective Checks"]
+    P1 -->|Pass| P2["Phase 2: Blind LLM Judge<br/>Different model family"]
+    P1 -->|Fail| Reject["FAILED<br/>ReTAS Pipeline"]
+    P2 -->|Pass >= 0.7| P3["Phase 3: Cross-Channel<br/>Reconciliation"]
+    P2 -->|Fail| Reject
+    P3 -->|All 3 agree| Accept["ACCEPTED"]
+    P3 -->|2 of 3 agree| Warning["WARNING: Investigate"]
+    P3 -->|<=1 agree| Fabrication["FABRICATION FLAG"]
+    Fabrication --> Reject
+    Warning --> Accept
+    Reject --> Retry["Retry (1/4)"]
+    Reject --> Triage["Triage failure class"]
+    Reject --> Assess["Assess escalation"]
+    Reject --> Scale["Scale response"]
 ```
 
-**Phase 1** (objective, cheap) runs fast deterministic checks: acceptance tests pass (runs the test suite from the plan's acceptance test list and reports failures), expected files exist (checks files in the plan's expected list exist with correct content roles), forbidden files are untouched (compares git diff against the plan's forbidden list), coverage does not regress (checks coverage delta since baseline). No model calls -- just real subprocesses. If any check fails, Phase 2 does not run. This **cost-shaping** choice lets the expensive subjective phase exist at all.
+## Key Mechanisms
 
-**Phase 2** (subjective, expensive) only runs if Phase 1 passes. A **different-model-family LLM judge** receives the plan, the diff, the HIR trace, and Phase 1 results. The `EvaluatorFamily.must_differ` guard enforces the judge is a different provider family than the generator -- preventing **narrative collusion** (the same model grading its own output). The judge produces a rubric-scored verdict: accept, reject, or needs-revision, with per-criterion scores for correctness, style, simplicity, testability, and plan-diff match.
+- **3-Verifier Panel** — Executor (performs the work, is the primary agent being verified), Validator (a different-model-family LLM that scores the output blind — without seeing the Executor's identity or the full task context), Critic (reviews the validator's reasoning — actively tries to find flaws in the validator's judgment using an adversarial system prompt). Each uses a different model provider to minimize correlated failure: same-family models share training data and failure modes. The panel is assembled per verification pass and is independent for each step in the plan.
+- **Adversarial Skeptic** — The Critic does not just check correctness; it actively tries to find reasons the output is wrong. Its system prompt biases toward skepticism: "Assume the output is wrong until proven otherwise. Your job is to find flaws, not confirm success." This adversarial stance catches edge-case failures and logical gaps that a cooperative review would miss. The Critic also assesses the Verdict itself — is the Validator being too generous, too harsh, or overlooking a key detail?
+- **Anonymization** — The Validator and Critic receive fully anonymized output: file paths are hashed (SHA-256 truncated to 8 hex chars: `/app/src/auth/login.py` becomes `a1b2c3d4`), function names replaced with placeholders (`func_1`, `func_2`), code structure preserved but all identifiers obfuscated, line counts reported but content hidden for files exceeding 50 lines (replaced with summary statistics). This prevents the judge from short-cutting by recognizing known files or code patterns.
+- **ReTAS Pipeline** — A 4-stage correction pipeline activated on Phase 1 failure: **Retry** the same step with the Verifier failure report injected into context for the next attempt (max 4 retries per step), **Triage** the failure class (deterministic failure like test failure vs. subjective failure like low style score vs. fabrication flag like trace-diff mismatch vs. tool execution error), **Assess** escalation urgency (can this wait for human review or is the session blocked downstream?), **Scale** the response (automatic fix suggestion for deterministic failures, human escalation for fabrication flags, abort for three consecutive same-category failures).
+- **Triangulation** — Three evidence channels must agree: HIR trace (event stream showing what the agent did), git diff (staged/unstaged changes showing what actually changed), filesystem snapshot (content hashes of all modified files, test exit codes, coverage metrics). The Verifier computes a consistency score: all three agree = PASS (score 1.0), two agree = WARNING (score 0.66, treated as pass with investigation note), one or fewer agree = FABRICATION (score 0.0, blocked). The trace is the primary channel; the diff and snapshot provide independent cross-checks.
 
-**Cross-channel evidence** is the third check (nearly zero cost). Three independent records must agree: the **trace** (what tool calls were made with what args), the **diff** (what actually changed in git), and the **environment snapshot** (filesystem hashes and test results). If the trace says "wrote 50 lines to src/foo.py" but the diff shows no change, the verifier rejects -- the model fabricated its report.
+## Phase 1 Deterministic Checks
 
-The **PRM** is a per-step advisory signal estimating "is this step moving toward the plan?" It runs every step at negligible cost and surfaces in the trace and HUD. It does not gate the loop alone -- a hook can abort if PRM stays negative for N steps. When the **TDD gate** is active, the verifier checks for a proper RED-to-GREEN-to-REFACTOR cycle; tasks that pass verification but never had a failing test are downgraded to needs-revision.
+| Check | What It Verifies | Latency |
+|-------|-----------------|---------|
+| Test exit | All test suites return exit code 0 | ~1-30s |
+| File existence | All declared output files exist on disk | <1ms |
+| Forbidden patterns | No secrets, debug code, commented tests | <5ms |
+| Coverage delta | Coverage did not decrease | ~1-5s |
+| Typechecking | TypeScript/Python type checking passes | ~1-10s |
+| Linting | Linter is clean on changed files | ~1-5s |
 
-## &#x2699;&#xFE0F; Configuration Model
+## Why It Matters
 
-```toml
-[verifier]
-enabled = true
-phase1_timeout_ms = 5000
-cross_channel_strict = true
+Without verification, the agent is the sole judge of its own output. This creates an obvious and well-documented failure mode: the agent claims tests pass without running them, claims files were written that do not exist, or claims coverage improved when it actually regressed. Cross-channel triangulation is the key insight: when three independent evidence sources disagree, the most likely explanation is fabrication or hallucination. The ReTAS pipeline prevents cascading failures by catching errors at the step level rather than discovering them after the full task is "complete." The adversarial skeptic stance ensures that even well-intentioned models are not given a free pass. Using a different model family for the Validator eliminates correlated blind spots — if both Executor and Validator use the same family, they share failure modes.
 
-[verifier.rubric]
-correctness_weight = 0.35
-style_weight = 0.15
-simplicity_weight = 0.20
-testability_weight = 0.15
-plan_match_weight = 0.15
+## When to Use
 
-[verifier.evaluator]
-model = "claude-sonnet-4-20250514"
-must_differ = true  # Enforce different provider family than generator
+The Verifier runs automatically on every step completion. Review Verifier logs (`.lyra/sessions/<id>/verifier.jsonl`) to understand failure patterns and identify systematic issues.
 
-[verifier.tdd_gate]
-enabled = false
-min_red_phases = 1  # Task must have had at least one RED (failing test) phase
-```
+## When NOT to Use
 
-## &#x1F4CA; Real Numbers (Targets)
+Do not disable the Verifier for execution-phase steps that modify files. It can be skipped for planning-phase exploration (read-only tasks with no side effects). Do not skip cross-channel reconciliation for any task that writes files.
 
-| Metric | Phase 1 (Deterministic) | Phase 2 (LLM Judge) | Cross-Channel |
-|---|---|---|---|
-| Latency per run | ~50-200ms | ~2-5s | ~5-10ms |
-| Token cost | 0 (no model calls) | ~2K input + ~500 output | 0 |
-| Detection accuracy | 100% (deterministic) | ~85-90% target | ~99% target |
+## Related Documentation
 
-## &#x2705; When to Use
-
-The verifier runs automatically after task completion, especially when plan mode was used. Enable the TDD gate integration to downgrade results that never went through a RED phase. Use the PRM signal in the HUD to detect divergent trajectories early.
-
-## &#x274C; When NOT to Use
-
-Do not use the same model family for generation and verification. Phase 2 is expensive and only fires when Phase 1 passes; do not skip Phase 1. For read-only explorations where no state change occurred, verification may not add value.
-
-## &#x1F517; Where Next
-
-- **Block:** [Verifier Cross-Channel](../blocks/10-verifier.md) -- deep dive on evidence reconciliation
-- **Guide:** [Research and Verification](../guides/07-research-and-verification.md) -- practical verification workflows
-- **Concept:** [Safety Monitor](11-safety-monitor.md) -- the parallel observer that catches trajectory drift before verification
-- **Research:** [DeepSeek Math (PRM paper)](https://arxiv.org/abs/2402.03300) -- process reward model foundations; [Constitutional AI](https://arxiv.org/abs/2212.08073) -- rubric-based LLM judge design
+- **Block:** [Verifier](../blocks/10-verifier.md)
+- **Architecture:** [Multi-Agent Validation Layer 3](../architecture/11-architecture-overview.md#safety-architecture-6-layer-parallax-style)
+- **Plans:** [Adversarial Panel](../lyra-upgrade/plans/25-adversarial-panel.md)
+- **Papers:** ARIS 3-Stage Adversarial Review (2026, arXiv:2605.03042); Qwen PRM Process Reward Model (2025, arXiv:2501.07301); Knowing-Doing Gap Tool-Call Verification (2026, arXiv:2605.14038)

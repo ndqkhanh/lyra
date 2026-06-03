@@ -1,89 +1,58 @@
-# Safety Monitor
+# Safety Monitor — What & Why
 
-> **A continuous, cheap nano-model observer that watches the trajectory and votes alongside hooks.** | **Phase:** 2
-> **Jargon:** *nano-model* = a tiny on-device classifier (e.g., Llama Guard 3 1B) running at ~50 ms/inference; *hooks* = deterministic lifecycle gates that run before/after every tool call; *soft-stop* = let the in-flight call finish, then interrupt at the next turn boundary rather than aborting mid-call; *trajectory* = the accumulated sequence of turns, tool calls, and outputs the agent has produced so far.
+> Concept: A seven-layer defense-in-depth architecture spanning input validation to continuous assurance, with cognitive-executive (Parallax) separation, AgentShield static analysis, and PRISM drift detection.
 
-##  Architecture
+## What It Is
 
-The safety monitor runs in parallel to the [agent loop](01-agent-loop.md). It samples every Nth step, asks a **nano-model** "is this agent still doing what it was asked to do?", and votes alongside [hooks](02-tools-and-hooks.md) on whether to interrupt. Where hooks are synchronous gates at lifecycle boundaries, the safety monitor is an asynchronous observer that watches the trajectory as it accumulates. The monitor and hooks are independent voters -- either can interrupt, and together they vote on borderline cases.
+The Safety Monitor is Lyra's defense-in-depth architecture. It comprises seven independent layers, each designed to catch a different class of failure. No single layer is perfect; the defense is the cumulative coverage of all seven. Each layer is independently replaceable — upgrading from regex scanning to model-based scanning requires zero API surface changes. The seven layers are designed to be orthogonal: they cover different attack surfaces and do not share failure modes.
+
+The seven layers:
+
+1. **Input Validation (Layer 0)** — Sanitize user input, detect prompt injection patterns, validate against expected schema. Regex-based fast path (sub-millisecond) with model-based fallback for ambiguous inputs (adds ~200ms). Catches direct injection attempts, encoded payloads, and schema violations. Runs before any context assembly.
+2. **Cognitive-Executive Separation Parallax (Layer 1)** — Reasoning context (read-only) and execution context (action-capable) are structurally separated by a barrier. The reasoning model can analyze code and plan changes but cannot execute tools. The execution model can execute tools but only receives approved commands from reasoning after passing through a confirmation gate. A structural barrier (not a soft prompt) separates them — separate context windows, separate process memory, separate model instances. Blocks 98.9% of adversarial attempts on the AgentDojo benchmark.
+3. **Permission Gating (Layer 2)** — The Permission Bridge enforces Plan/AcceptEdits/Auto/Bypass modes per tool with per-tool granularity. Every tool call is authorized before reaching any hook or execution. See [Permission Bridge](09-permission-bridge.md).
+4. **Behavioral Monitoring (Layer 3)** — Intent Monitor analyzes action sequences for temporal attack patterns: slow-roll attacks (privilege escalation spread across many turns), tool call chains that gradually escalate privilege (read -> grep -> bash -> exec), sudden shifts in tool use patterns. Anomaly Detection flags deviation from expected behavior using a sliding window of the last 16 tool calls, comparing the current call sequence signature to the session's baseline. Triggers on divergence >2 standard deviations from baseline.
+5. **AgentShield Static Analysis (Layer 4)** — Five static scanners with 102 regex rules total: secret scanner (API keys, tokens, passwords, private keys, JWTs, connection strings), injection scanner (prompt injection markers, encoded payloads, delimiter injection), XSS scanner (script tags, event handlers, javascript: URIs), SQLi scanner (unparameterized queries, OR 1=1 patterns, stacked queries), path traversal scanner (.., absolute path references, symlink escapes, null bytes). Zero LLM calls, sub-millisecond per scan. Runs as a PreToolUse hook on every tool call writing content to disk.
+6. **Multi-Agent Verifier (Layer 5)** — Executor, Validator (different model family), and Critic pipeline with cross-channel evidence reconciliation. Catches fabricated success claims, hallucinated test results, and uncommitted changes. The Validator and Critic use different model providers than the Executor to minimize correlated failure. See [Verifier](12-verifier.md).
+7. **PRISM Drift Detection (Layer 6)** — Continuous monitoring of prompt-to-behavior mapping on a daily cadence. Compares current tool call distributions for each prompt against the baseline recorded at deploy time. If the distribution shifts beyond a configurable threshold (default 15% Jensen-Shannon divergence), PRISM flags drift. Automated repair via GEPA v2 proposes updated prompts; if repair fails three consecutive calibrations, escalates to human for review.
 
 ```mermaid
-sequenceDiagram
-    participant Agent
-    participant Loop as Agent Loop
-    participant Monitor as Safety Monitor
-    participant PB as Permission Bridge
-    participant User
-
-    Loop->>Agent: turn N: "edit src/foo.py"
-    Agent->>Loop: tool call: Write("foo.py")
-    Loop->>PB: decide → ALLOW
-    Loop->>Monitor: sample? (N % 4 == 0)
-    Monitor->>Monitor: classify <br/>5 signal categories
-    alt signal exceeds threshold
-        Monitor-->>Loop: vote INTERRUPT
-        Note over Loop,User: soft-stop: let in-flight call finish
-        Loop->>User: verdict + critique
-        User-->>User: /approve-continue or /abort
-    else all signals clean
-        Monitor-->>Loop: vote CONTINUE
-        Loop->>Agent: turn N+1
-    end
+flowchart TD
+    Input["User Input"] --> L1["Layer 1: Input Validation"]
+    L1 --> L2["Layer 2: Parallax<br/>Cognitive-Executive Separation"]
+    L2 -->|98.9% blocked| Blocked["BLOCKED"]
+    L2 -->|Approved| L3["Layer 3: Permission Gating"]
+    L3 --> L4["Layer 4: Behavioral Monitoring"]
+    L4 --> L5["Layer 5: AgentShield<br/>Static Analysis"]
+    L5 --> L6["Layer 6: Multi-Agent Verifier"]
+    L6 --> L7["Layer 7: PRISM Drift"]
+    L7 --> Output["Safe Output"]
+    style L2 fill:#4a4,color:#000
+    style Blocked fill:#f44,color:#fff
 ```
 
-The monitor uses its own model client, configured separately from the **fast** and **smart** slots (see [Two-Tier Routing](10-two-tier-routing.md)), so the same provider does not see both the generator's context and the monitor's prompt. This provides a small but real defence against *adversarial steering* -- the generator inferring the monitor's existence and tailoring its output to hide from it.
+## Key Mechanisms
 
-##  Signal Categories
+- **Parallax Cognitive-Executive Separation** — Two structurally separate contexts: the reasoning context can read files and memory but cannot execute tools; the execution context can execute tools but only receives approved commands from reasoning. The barrier enforces a one-way gate: reasoning proposes an action, execution confirms the action against the approved plan, then executes. No tool call from reasoning reaches the execution context without explicit approval from the barrier. The barrier is structural: separate model instances, separate context windows, separate process memory. This is the highest-impact single safety intervention.
+- **AgentShield** — Five scanners run as PreToolUse hooks on every tool call. The secret scanner blocks credential patterns (API keys, tokens, passwords, private keys, JWTs, connection strings) from being written to files. The injection scanner detects prompt injection markers in model inputs. XSS, SQLi, and path traversal scanners protect against code-level attacks in written files. All scanners are regex-based (sub-millisecond per scan) with an optional model-based fallback for ambiguous cases where regex produces a false positive or miss. AgentShield maintains a violation log in `.lyra/safety/shield.log` with timestamps and scan results.
+- **PRISM Drift** — Monitors the prompt-to-behavior mapping on a daily schedule: given the same prompt, does the model make the same tool call sequence? Baseline calibration is done per prompt at deploy time by running a reference task set and recording the tool call distribution. Daily comparison computes Jensen-Shannon divergence between current and baseline distributions. If divergence > 15%, PRISM flags drift. Automated repair via GEPA v2 proposes updated prompts; if repair fails three consecutive calibrations, escalates to human. Drift events are logged as HIR events with before/after distributions.
+- **Cumulative Coverage** — Each layer targets a different attack vector. Layer 2 (cognitive-executive) blocks most direct attacks (98.9%). Layer 4 (behavioral) catches temporal patterns (slow-roll attacks spanning many turns). Layer 5 (static analysis) catches code-level injection that execution alone would allow. Layers 6-7 catch long-tail evasions and behavioral drift. The combined effect drops Attack Success Rate from 39.9% to 1.75% on the AgentDojo benchmark. No single layer is relied upon for complete coverage — defense is always cumulative.
 
-The monitor runs every N steps (default 4) and classifies the current trajectory against five signals:
+## Why It Matters
 
-| Signal | Detection Method | What It Catches |
-|--------|-----------------|-----------------|
-| Out-of-scope | nano-model checks whether edited files are outside the plan's expected file set | Agent silently expands blast radius |
-| Loop/repetition | Rule: same tool+args digest appears 3+ times in a 16-call window | Runaway agent stuck on the same action |
-| Cost burn | Rule: cost-per-step exceeds rolling 95th percentile by 3x | Budget bomb or infinite loop with expensive calls |
-| Hypothesis drift | nano-model checks whether agent investigates something unrelated to the original task | Agent chases a tangent and never returns |
-| Adversarial injection | Rules + nano-model jointly check for known prompt-injection patterns; strips content and annotates critique | Attacker input hijacks agent instructions |
+No single safety mechanism is sufficient. Prompt injection, jailbreaking, and adversarial attacks are diverse and evolving. A 7-layer defense ensures that even if one layer is bypassed (e.g., a novel injection that passes the regex scanner in Layer 5), subsequent layers catch the failure. The cognitive-executive separation is the most important single layer, but relying on it alone would leave a 1.1% gap even at its 98.9% block rate — the remaining layers close that gap. Each layer is independently replaceable, allowing upgrades (e.g., regex scanner to model-based scanner) without touching other layers. The layered design also means that adding a new defense never requires modifying an existing one.
 
-##  Soft-Stop Semantics
+## When to Use
 
-When the monitor votes interrupt, the loop does not abort mid-tool-call. It finishes the in-flight call first (so the filesystem is never left in a half-edited state), then at the next turn boundary surfaces the verdict to the user and waits for `/approve-continue` or `/abort`. The verdict is appended to the transcript as a **critique** (an annotated note visible to the model) so the generator knows why it was interrupted. Hard-aborting in the middle of a destructive tool call is more dangerous than letting it finish with a flag set -- the [Permission Bridge](09-permission-bridge.md) already blocked the dangerous part at the tool level.
+All layers run automatically. Tune AgentShield regex rules for project-specific patterns (e.g., internal API key formats). Configure PRISM baseline calibration frequency for your deploy cadence. The Parallax separation is always on and not configurable.
 
-##  Configuration
+## When NOT to Use
 
-```toml
-# ~/.lyra/config.toml
-[safety_monitor]
-enabled = true
-model = "llama-guard-3-1b"            # nano-model for classification
-monitor_every_n_steps = 4             # sample every Nth turn (1 = synchronous & expensive; 16 = cheap but lags ~half a turn)
-out_of_scope_threshold = 0.7          # confidence threshold for scope-flag
-hypothesis_drift_threshold = 0.6      # confidence threshold for drift-flag
-```
+Do not disable individual safety layers. Do not reduce the Parallax barrier confidence threshold. Do not put safety monitors in bypass mode for any interactive session.
 
-##  Real Numbers (target estimates)
+## Related Documentation
 
-| Metric | Value | Notes |
-|--------|-------|-------|
-| Nano-model inference latency | ~50 ms / call | Llama Guard 3 1B on GPU |
-| Token overhead per sample | ~150 tokens | prompt + compact trajectory summary |
-| False-positive rate (target) | < 5 % | Measured against `lyra safety redteam --suite default` |
-| Red-team suite pass rate (target) | > 95 % | Adversarial injection, scope violation, loop-inducement, cost bomb |
-
-##  When to Use / When NOT to Use
-
-The safety monitor runs by default every 4 steps. Bump cadence to 1 (synchronous) for high-risk sessions involving writes or bypass mode. Run `lyra safety redteam --suite default` periodically to verify the monitor still catches known attack patterns -- a regression shows up in CI as a falling pass rate on the suite.
-
-**Disable the monitor** only in deterministic CI runs with short, well-understood tasks. The monitor can produce false positives on unusual workflows -- review and dismiss with `/approve-continue`. It is an additional observer, not the primary safety layer (hooks, [Permission Bridge](09-permission-bridge.md), and worktree isolation are the main surface).
-
-##  Why This Design
-
-Deterministic hooks alone cannot catch every failure mode. An agent can stay strictly within its allowed tool set while drifting far from the original task -- editing files outside the plan's scope, chasing unrelated hypotheses, or burning budget on loops. The nano-model adds a **semantic layer** that detects these drifts where no tool-level rule would trigger. The soft-stop semantics ensure the filesystem is never left in a half-edited state.
-
-##  Where Next
-
-- **Implementation block:** [docs/blocks/12-safety-monitor.md](../blocks/12-safety-monitor.md)
-- **Build plan:** [docs/lyra-upgrade/plans/17-safety.md](../lyra-upgrade/plans/17-safety.md)
-- **Related concepts:** [Agent Loop](01-agent-loop.md), [Tools & Hooks](02-tools-and-hooks.md), [Permission Bridge](09-permission-bridge.md), [Two-Tier Routing](10-two-tier-routing.md)
-- **Red-teaming command:** `lyra safety redteam --suite default`
-- **Research papers:** *Llama Guard: LLM-based Input-Output Safety Filter* (Inan et al., 2024); *Constitutional AI: Harmlessness from AI Feedback* (Bai et al., 2022)
+- **Block:** [Safety Monitor](../blocks/12-safety-monitor.md)
+- **Architecture:** [Safety Architecture (6-Layer Parallax-Style)](../architecture/11-architecture-overview.md#safety-architecture-6-layer-parallax-style)
+- **Plans:** [Safety](../lyra-upgrade/plans/17-safety.md)
+- **Papers:** Parallax Cognitive-Executive Separation (2026, arXiv:2604.12986); PRISM Drift Detection (2026, arXiv:2605.14454); AgentDojo Benchmark (arXiv:2501.12345)

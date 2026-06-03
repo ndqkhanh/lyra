@@ -52,3 +52,25 @@ graph TD
 MCP is provider-agnostic — tools are injected into the messages array, not through a provider-specific API. Works identically across Claude, DeepSeek, GPT, and open-weights.
 
 **Impact:** 4 | **Effort:** 3 | **Tier:** (A) Parity
+
+## Evidence Synthesis
+
+| Source | Key Insight |
+|--------|------------|
+| ANX Protocol (2604.04820) | 3EX decoupled architecture: definition/execution/rendering separate → 47-66% token reduction vs inline MCP |
+| Claude Code MCP docs (§3.1) | Dynamic tool discovery, OAuth 2.0, multi-transport (stdio/HTTP/SSE/WebSocket) |
+| awesome-mcp-servers (§3.3) | Top servers to bundle: filesystem, git, postgres, sqlite, web-search, memory, docker, github, slack |
+| Anthropic Code Execution with MCP (§3.19) | ~98.7% token reduction pattern by executing code in sandbox, returning only output |
+
+## Baseline Delta
+
+| Component | Change | Migration Cost |
+|-----------|--------|---------------|
+| mcp_bundling.py (526L) | KEEP — already solid MCP gateway | None |
+| ANX 3EX decoupling | ADD — definition caching, lazy execution | Low |
+| Server lifecycle | EXTEND — health checks, reconnect | Low |
+| Bundled top-10 | ADD — pre-configured server manifests | None |
+
+## Expert Review
+
+**Skeptic:** "MCP integration already works in Lyra (526-line mcp_bundling.py). Is ANX decoupling worth it?" → YES. The 47-66% token reduction is significant for multi-agent setups where every context token counts. Implementation is additive — doesn't change existing MCP infrastructure.

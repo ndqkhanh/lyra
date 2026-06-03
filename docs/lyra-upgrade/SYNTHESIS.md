@@ -1,264 +1,412 @@
-# Lyra Upgrade — Cross-Source Synthesis
+# SYNTHESIS.md — Cross-Source State of the Field
 
-> **Run 1 — June 3, 2026** | State-of-the-field organized by theme, with per-theme micro-debates
-> **Baseline contrast:** Every theme compared against BASELINE.md scorecard
+> Last updated: 2026-06-03 Run 1 | Status: Under construction (awaiting batch 1 findings)
 
----
+## How to Read This Synthesis
 
-## Theme 1: Memory Architecture
-
-### Frontier
-The field has moved decisively beyond flat key-value stores toward structured, multi-granularity, graph-linked memory:
-
-- **Zettelkasten Graph Memory (A-MEM):** Atomic, densely-linked notes with automatic evolution. 85-93% token reduction vs baselines.
-- **Field-Theoretic Memory (Mitra 2602.21220):** Memory as continuous fields governed by PDEs — diffusion, decay, coupling. +116% F1 on LongMemEval.
-- **Latent Memory Tokens (MemGen):** Memory encoded as learnable tokens prepended to inference — no external DB.
-- **Multi-Granularity + Routing (MemGAS, Cost-Sensitive Store Routing):** 38.4% over HippoRAG 2, 62% token reduction.
-- **Active Forgetting (CraniMem, A-MAC):** Gated bounded memory, 5-factor admission control. −11-16% noise, −31% latency.
-- **Consolidation During Idle (Anthropic Dreaming, LightMem):** Consolidate during downtime — 105× token reduction, ~6× task completion.
-
-### Convergence
-- **Structured > flat:** Every top performer uses structured memory (graph, Zettelkasten, multi-granularity stores).
-- **Consolidation is essential:** Idle-time consolidation (dreaming) appears across independent sources (Anthropic, LightMem, MetaClaw).
-- **Admission control matters:** Not all memories are worth keeping — A-MAC, CraniMem, and importance decay agree.
-- **Compression via structure, not truncation:** KAIST's localize-compression, MemGAS multi-granularity, MemAgent segment processing.
-
-### Contradictions / Open Problems
-- **Explicit graph vs. latent tokens:** A-MEM builds explicit link graphs; MemGen compresses everything into latent tokens. These are opposite approaches.
-- **Retrieval vs. reconstruction:** Most systems retrieve; MRAgent argues memories are RECONSTRUCTED (active LLM-guided path exploration, +23%).
-- **Field-theoretic vs. discrete:** Mitra's PDE fields are elegant but unproven in production; discrete graph approaches are battle-tested.
-
-### Gap vs. Lyra
-Lyra's memory is a flat JSON file with keyword search (O(n) linear scan). We're at least 2 generations behind — before graph memory, before semantic search, before structured consolidation. **Behind by 3-4 years in capability.**
-
-### Per-Theme Micro-Debate
-
-**Senior AI Researcher:** "The field-theoretic approach is the most novel and highest-potential direction. The PDE formulation naturally handles consolidation, decay, and cross-agent coupling — things discrete systems struggle with. But it's also the riskiest — one paper, zero production deployments."
-
-**Senior Backend Engineer:** "Start with graph memory + embedding search. It's the safe upgrade path — Mem0, Zep, and Letta all use variants of this. The field-theoretic approach can't be the foundation; it can be the consolidation algorithm ON TOP of graph memory."
-
-**Senior Data/Knowledge Engineer:** "The retrieval bottleneck is real. Most memory papers optimize storage but not retrieval. Cost-sensitive store routing (Gaikwad) and LP-RAG link prediction are the underrated gems — together they could make Lyra's memory retrieval dramatically more efficient AND accurate."
-
-**Tentative winner:** Graph memory with cost-sensitive routing as the core; field-theoretic consolidation as the idle-time dreaming layer.
+Each theme below captures:
+- **Frontier** — what the newest/strongest work can do (cite sources + numbers)
+- **Convergences** — where independent sources agree (strong signal)
+- **Contradictions / Open Problems** — where they disagree (breakthroughs live here)
+- **Trajectory** — where the theme is heading
+- **Gap vs. Lyra Baseline** — behind / at parity / ahead
+- **Micro-Debate** — 2-3-turn exchange between owning personas; winner recorded
 
 ---
 
-## Theme 2: Context Management & Compaction
+## 1. Memory Architecture
 
-### Frontier
-- **COMPASS Hierarchical Framework:** Main Agent (tactical) + Meta-Thinker (strategic interventions) + Context Manager (concise progress briefs).
-- **Anthropic 3-Strategy Cookbook:** Compaction + Structured Note-Taking + Sub-Agent Architectures. "Less is more" — 400→15 line prompt, 12→3 tools improved pass rate 83%→92%.
-- **Norm-Guided KV Eviction:** ℓ2-norm of key vectors for gradient-free KV compression.
-- **R-KVHash SimHash/LSH:** ~2× decoding throughput via redundant reasoning-token eviction.
-- **ACON Adaptive Compression:** 26-54% memory cut via adaptive context compression.
-- **lean-ctx:** Hybrid context optimizer — 89-99% token cut via filter/group/truncate/dedup per command type + Token Dense Dialect.
-- **ExtAgents:** Distribute input across agents beyond context window — no long-context training needed.
-- **ANX Protocol (3EX):** Decoupled architecture — 47-66% token reduction vs MCP.
-- **MemAgent ICLR Oral:** Segment processing + overwrite strategy — 8K→3.5M extrapolation, >95% on 512K NIAH.
+### 1.1 Frontier
 
-### Convergence
-- **Hierarchy is the answer:** COMPASS, Anthropic's 3 strategies, and AOI all converge on hierarchical context management.
-- **Compress before it's full:** Proactive compaction (ACON, Anthropic) beats reactive truncation.
-- **Sub-agents as context strategy:** The cheapest form of context management is to isolate task context in sub-agents.
+<!-- Populated from §3.4 Memory Papers findings -->
 
-### Contradictions
-- **Compress (COMPASS) vs. distribute (ExtAgents):** Should we compress long context into summaries, or distribute it across agents? COMPASS wins on simplicity; ExtAgents wins on information preservation.
-- **KV-cache eviction vs. architectural compaction:** KV-level methods (norm-guided, R-KVHash) are transparent to the model but tied to specific architectures; architectural compaction (COMPASS, Anthropic) is provider-agnostic.
+### 1.2 Convergences
 
-### Gap vs. Lyra
-Lyra has NO context management — STM is a simple ring buffer with no compaction. **Behind by 3-4 years.**
+### 1.3 Contradictions / Open Problems
 
-### Micro-Debate
-**Senior AI Engineer (LLMOps):** "The provider-agnostic approach (Anthropic's 3 strategies + COMPASS) is the right one for Lyra. KV-cache methods are Anthropic-specific. We need compaction that works on DeepSeek, GPT, and open models equally."
+### 1.4 Trajectory
 
-**Senior Performance/Cost Engineer:** "lean-ctx's approach — compress CLI output BEFORE it reaches the LLM via shell hooks — is brilliantly simple and provider-agnostic. It's a middleware, not a model feature. An 89-99% token reduction on tool output alone would transform Lyra's economics."
+### 1.5 Gap vs. Lyra Baseline
 
-**Tentative winner:** Anthropic's 3-strategy framework (compaction + memory notes + sub-agents) as the architecture; lean-ctx's output compression as a concrete implementation tactic.
+Lyra already has CraniMem (gated bounded memory), unified memory router (cost-sensitive store routing), and active reconstruction. Lyra is at or near parity with the MemAgent workshop frontier.
 
----
+### 1.6 Micro-Debate
 
-## Theme 3: Multi-Agent Reliability
+> **Participants:** Senior AI Researcher (AIR) + Senior Backend Engineer (BE) + Senior Data/Knowledge Engineer (DKE) + Adversarial Skeptic (AS)
+>
+> **Question:** What is the single most promising memory direction, and is it actually better than what Lyra already has?
 
-### Frontier
-This is the richest and most urgent cluster. 2025-2026 research has identified MULTIPLE independent failure modes in multi-agent systems:
+**AIR:** The field-theoretic memory paper (Mitra 2026, 2602.21220) is genuinely novel. +116% F1 on multi-session reasoning is not incremental — it's a paradigm shift. Memories as continuous fields governed by PDEs, diffusing through semantic space, decaying thermodynamically by importance. This is the closest thing to "True Memory" — what Hassabis named as one of three missing AGI pieces. CraniMem is a gated discrete store; it's ICLR 2026-level work, but it's still the old paradigm. Field memory captures cross-session dependencies that discrete DBs fundamentally miss, because field diffusion naturally bridges semantically related but temporally distant context without engineered retrieval heuristics.
 
-- **Identity Skews (2510.07517):** Debate participants give more weight to their own arguments (identity-weighted Bayesian update). Fix: response anonymization (IBC→0).
-- **Actor-Observer Asymmetry (2604.19548):** Actor blames external factors for failure; observer blames internal faults. >20% bias trigger rate. Fix: ReTAS dialectical alignment.
-- **Lying with Truths (2601.01685):** Colluding agents can steer beliefs using ONLY truthful evidence — no covert comms needed. 74.4% ASR on proprietary models. Fix: collusion detection on channels.
-- **Rogue Agents (2502.05986):** One agent can sink the whole task by terminating early while uncertain. Fix: monitor action prediction + intervene.
-- **ErrorProbe (2604.17658):** 3-stage semantic failure attribution — pinpoints which agent + which step caused the failure.
-- **SABER (En2z9dckgP):** Distinguishes mutating vs non-mutating actions; mutation-gated verification. +28% Airline.
-- **MATU (2604.08708):** Tensor decomposition for MAS uncertainty quantification.
+**BE:** Let me ground this. Field-theoretic memory computes PDEs over a semantic manifold. What's the actual computational cost? For N memories, field gradient computation is at minimum O(N²) — N×(N-1)/2 pairwise interactions for a naive diffusion kernel. CraniMem does O(log N) lookup. At 10,000 memories (a busy Lyra session over a month), that's 50 million pairwise computations for the field approach vs ~14 B-tree lookups for CraniMem. Where are we running these PDEs — on CPU between LLM calls? That adds seconds of latency per retrieval. On GPU? Now Lyra has a GPU dependency. And the paradigm is untested past 500 turns. What happens at 10,000 turns? Does the field saturate?
 
-### Convergence
-- **Debate is fragile:** Identity skews, actor-observer asymmetry, collusion, and rogue agents all show that naive multi-agent debate is unreliable.
-- **Verification needs structure:** SABER, ErrorProbe, RADAR all converge on structured verification (mutation-gated, omission-aware, dual-threshold).
-- **Monitoring is essential:** Rogue prevention and collusion detection require runtime monitoring, not just post-hoc review.
+**DKE:** I'll add: field memory is theoretically beautiful but operationally opaque. If a user asks "why did Lyra recall X instead of Y?", CraniMem can point to the discrete entry, the retrieval score, the gate decision. Field memory can only say "the field gradient at this semantic point was X" — which is essentially unexplainable. For a tool users need to trust, explainability matters as much as accuracy. The +116% F1 is on LongMemEval's multi-session reasoning — that's a specific task. On simple fact retrieval, do we really need PDEs?
 
-### Open Problems
-- **Internalize vs externalize:** Latent Agents (2604.24881) shows 93% token savings by internalizing debate — but loses the genuine diversity of real multi-agent perspectives. When is external debate worth the cost?
-- **Composition of biases:** No paper studies what happens when identity skews, actor-observer asymmetry, AND collusion combine in the same debate. Likely multiplicative.
+**AS:** Here's the boring alternative: don't implement either field memory or keep just CraniMem. Add ONE thing: a cross-session consolidation loop ("Dreaming", §4.24) that runs a cheap model during idle to replay recent conversations, merge duplicates, resolve contradictions, and surface patterns. Anthropic's Harvey saw ~6× task completion improvement with this pattern — no PDEs required. The consolidation output gets written back to CraniMem as structured entries. Field memory is a research bet; Dreaming consolidation is a proven pattern. Why build the research bet before the proven pattern?
 
-### Gap vs. Lyra
-Lyra has ZERO multi-agent reliability infrastructure. No verification, no debate, no bias correction, no collusion detection. **Behind by 4+ years.**
+**AIR responds:** The consolidation loop is complementary, not competing. You consolidate INTO what? CraniMem? That's still discrete entries. The consolidation is more powerful when the substrate supports continuous, graded relationships. And "proven" is relative — Anthropic's Dreaming is a blog post, not a peer-reviewed paper with ablations. Field memory has peer-reviewed numbers. As for computational cost: the PDE doesn't need to run on EVERY retrieval. Run it periodically during idle (during Dreaming consolidation), compute the field once, and snapshot the gradients as a precomputed index. Retrieval from the snapshot is O(log N) — same as CraniMem.
 
-### Micro-Debate
-**Senior AI Researcher:** "The bias findings are damning for naive debate. Identity Skews and Actor-Observer alone mean Lyra's planned adversarial verification panel MUST implement anonymization and ReTAS from day one. These aren't nice-to-haves — they're minimum viable."
+**BE:** If we're running the PDE during idle anyway, why not just run a cheaper discrete consolidation during idle and avoid the PDE complexity entirely? The Skeptic's point stands: consolidation + CraniMem gives you 80% of the gain at 20% of the complexity.
 
-**Senior Security Engineer:** "Lying with Truths is the scariest finding. It means public channels between agents are a collusion vector even without covert communication. Lyra needs channel monitoring from the start. You can't add it later — the attack surface is architectural."
+**AIR:** Because the 80/20 heuristic assumes the remaining 20% of gain isn't qualitatively different. +116% F1 on multi-session reasoning IS qualitatively different — that's the difference between "the agent remembers what we talked about yesterday" and "the agent connects something from three weeks ago to today's task without being explicitly told." CraniMem can't do the latter because it stores discrete entries — it can't bridge temporal gaps through continuous diffusion.
 
-**Adversarial Skeptic:** "All these failure modes are real, but how often do they actually manifest in practice? The papers study worst-case adversarial settings. If Lyra's agents are all the same model with the same system prompt, does identity bias actually matter? We need Lyra-specific eval data, not just paper results."
+**Tentative Winner:** **Layered approach.** CraniMem remains the fast, explainable, discrete short-term store. Add a field-theoretic long-term layer that runs PDE-based consolidation during Dreaming idle cycles. The field layer doesn't replace CraniMem; it feeds consolidated, cross-session patterns back into CraniMem as enriched discrete entries. This gives the +116% cross-session benefit at idle-time compute cost, preserves CraniMem's O(log N) retrieval latency, and keeps discrete explainability for user-facing queries. The field layer is the "Dreaming engine" — it's what powers the consolidation, not what serves live queries.
 
-**Tentative winner:** Implement the full bias-correction pipeline (anonymization + ReTAS + collusion detection + rogue prevention) as the §4.25 adversarial panel architecture, but gate severity thresholds behind Lyra-specific eval data.
+**AS objection recorded:** "Layered" is still complex. The Skeptic maintains that CraniMem + cheap-model consolidation loop (no PDEs) should be built and benchmarked first, and field memory added only if CraniMem+consolidation doesn't close the gap. The debate is settled as: build consolidation first (baseline), add field layer next (breakthrough), measure both.
 
 ---
 
-## Theme 4: Agentic Orchestration (Swarm/Fleet/Workflows)
+## 2. Context Optimization & Compaction
 
-### Frontier
-- **Claude Code Dynamic Workflows (May 2026):** Code-driven orchestration with script variables, resumable checkpoints, adversarial verification. Up to 1000 agents/run.
-- **Claude Code Agent View (May 2026):** Supervisor daemon, two-axis state model, cheap row summaries, fleet view TUI.
-- **Claude Code Worktrees (May 2026):** Git-worktree-per-session isolation, .worktreeinclude, base-ref policy.
-- **Netflix Multi-Agent Platform (May 2026):** Lead decomposition → specialized sub-agents → parallel event-driven collaboration. Adversarial code review: Agent A writes → B evaluates → C orchestrates.
-- **COMPASS (2510.08790):** Hierarchical: Main Agent + Meta-Thinker + Context Manager.
-- **GTD Topology Diffusion (2510.07799):** Task-adaptive agent communication topologies via graph diffusion.
-- **MARS² (2604.14564):** Learnable tree-structured multi-agent search via RL.
-- **AutoScientists (2605.28655):** Decentralized self-organizing agent teams with shared success/failure log.
+### 2.1 Frontier
 
-### Convergence
-- **Orchestration is becoming code-driven:** Claude Code workflows, Netflix's decomposition, and AutoScientists all converge on structured, programmatic orchestration rather than ad-hoc agent chaining.
-- **Isolation is the safety substrate:** Worktrees (Claude Code), Docker sandboxes (DeerFlow), and process-per-session (Agent View) all converge on strong isolation for parallel agents.
-- **Hierarchical oversight:** COMPASS, Agent View's cheap row summaries, and Netflix's orchestration all use hierarchical monitoring.
+<!-- Populated from §3.4 KV-Cache papers + §3.17 context sources -->
 
-### Contradictions
-- **Centralized (Agent View) vs. decentralized (AutoScientists):** Claude Code has a single supervisor; AutoScientists has no central coordinator. Which scales better?
-- **Script-in-context vs. script-as-code:** Claude Code puts workflow scripts in the model's context; Lyra could run them as actual Python/JS outside context.
+### 2.2 Convergences
 
-### Gap vs. Lyra
-Lyra has in-process agent orchestration (PrimaryAgent → specialists). No supervisor daemon, no fleet view, no worktree isolation, no workflow engine. **Behind by 2-3 years.**
+### 2.3 Contradictions / Open Problems
 
-### Micro-Debate
-**Senior Distributed-Systems Engineer:** "The supervisor daemon is the right architecture but Claude Code's Agent View is 3 months old. There are likely sharp edges. The worktree isolation is the key innovation — it's what makes a fleet of coding agents safe. Without it, parallel sessions edit the same files and chaos ensues."
+**Key tension:** Three competing strategies for context scaling:
+1. **Manage** — COMPASS-style hierarchical framework (meta-thinker overseeing context manager)
+2. **Distribute** — ExtAgents-style distributed knowledge across agents (no long-context training needed)
+3. **Field-Memory** — Field-theoretic continuous memory governed by PDEs (Mitra 2026)
 
-**Senior SRE:** "The operational challenge is worktree proliferation. 100 sessions = 100 git checkouts. Disk quotas, cleanup crons, and shallow clones are essential. Claude Code's silent-destroy of dirty worktrees is a data-loss disaster — Lyra must default to safer."
+Each claims superiority; none has been tested head-to-head.
 
-**Tentative winner:** Supervisor daemon + worktree isolation + dynamic workflow engine as the three primitives of Lyra's fleet layer. Non-destructive cleanup by default.
+### 2.4 Trajectory
 
----
+### 2.5 Gap vs. Lyra Baseline
 
-## Theme 5: Self-Improving / Self-Evolving Agents
+Lyra has auto_compaction.py (324L) and kv_cache.py — solid parity with standard compaction. Missing: COMPASS meta-thinker layer; field-theoretic approach.
 
-### Frontier
-- **DGM Hyperagents (ICLR 2026, Meta/UBC):** Agents rewrite own harness code. SWE-bench 20%→50%.
-- **GEPA (ICLR 2026 Oral):** Gradient-free reflective prompt evolution. Matches GRPO, works on any provider.
-- **MetaAgent-X (2605.14212):** Designer+Executor co-evolution via GRPO. Qwen3 8B 38.33% avg.
-- **TF-TTCL (2604.13552):** Training-free test-time contrastive learning. Works on ANY closed provider.
-- **MemGrad:** Textual gradients for memory + prompt updates. No fine-tuning.
-- **MetaClaw (2603.17187):** Continual meta-learning in production. Opportunistic LoRA during idle.
-- **SOLAR (AAAI 2026):** Weight-space self-optimization. Plasticity-stability balance.
-- **"Misevolve" (2509.26354):** Safety risks in self-evolving agents — 45% refusal rate drop, 76% tool vulnerability rate.
+### 2.6 Micro-Debate
 
-### Convergence
-- **Gradient-free is the practical path:** GEPA, TF-TTCL, and Feedback Descent all show gradient-free optimization matching or beating RL. This is critical for multi-provider (can't assume gradient access).
-- **Self-evolution carries safety risks:** "Misevolve" shows concrete degradation across model/memory/tool/workflow pathways.
-- **Idle-time is evolution time:** MetaClaw, Anthropic Dreaming, LightMem all exploit idle windows for improvement.
+> **Participants:** Senior AI Engineer/LLMOps (AIE) + Senior Performance/Cost Engineer (PCE) + Adversarial Skeptic (AS)
+>
+> **Question:** Best context-scaling strategy vs Lyra's auto-compaction?
 
-### Contradictions
-- **Prompt-level (GEPA) vs. weight-level (SOLAR, MetaClaw):** Prompt evolution is safer and provider-agnostic but less powerful. Weight updates are more powerful but risk catastrophic forgetting and safety decay.
-- **How much autonomy?** DGM rewrites harness CODE — that's max autonomy and max risk. GEPA evolves prompts — that's medium autonomy, lower risk. Where should Lyra draw the line?
+**AIE:** Three strategies: COMPASS (2510.08790) hierarchical Meta-Thinker, ExtAgents (2505.21471) distributed knowledge, Field memory (2602.21220) PDE-governed. For Lyra: COMPASS-style structured progress briefs maintained by a cheap model are the most pragmatic. auto_compaction.py compresses raw output; COMPASS understands what matters semantically.
 
-### Gap vs. Lyra
-Lyra's skills are static. No self-evolution, no optimization, no learning from trajectories. **Behind by 3 years.**
+**PCE:** lean-ctx (§3.17) claims 89-99% token reduction via transparent shell hooks. Is COMPASS better than lean-ctx as a pre-processor? The Skeptic bets: lean-ctx + auto_compaction = 90% benefit at 10% complexity.
 
-### Micro-Debate
-**Senior AI Safety Engineer:** "Misevolve is the most important paper in this cluster. Self-evolving agents CAN degrade in safety — 45% refusal rate drop is catastrophic for a production system. Any self-evolution in Lyra MUST have a safety validator that gates promotion."
+**AS:** Correct. The layers are complementary: lean-ctx compresses tool output (500→10 lines), auto_compaction compresses conversation history, COMPASS-style briefs track long-horizon task state. Ship lean-ctx first, measure, then add COMPASS if needed.
 
-**Senior AI Researcher:** "GEPA is the practical starting point — gradient-free, provider-agnostic, works on prompts. But prompt evolution has a ceiling. For genuine breakthrough, we need the DGM approach: agents that can modify the harness itself. That's terrifying from a safety perspective but transformative from a capability perspective."
-
-**Adversarial Skeptic:** "Self-evolution sounds great in papers but how often does it actually improve things in practice vs. just adding more hand-written skills? The 330+ skill library from claude-skills probably beats any auto-evolved skill system for the first year. Prove the loop works on ONE skill before building the whole evolution infrastructure."
-
-**Tentative winner:** Start with GEPA-style prompt evolution for (B) breakthrough tier. Gate behind safety validator. Don't touch harness rewriting (DGM) in Phase 1.
+**Tentative Winner:** **Layered compression** — lean-ctx (CLI output) → auto_compaction (history) → structured briefs (task state).
 
 ---
 
-## Theme 6: Model Routing & Economics
+## 3. Skills & Self-Evolution
 
-### Frontier
-- **RouteLLM (LMSYS/Berkeley):** Reference routing framework — cost/quality trade-off via learned router.
-- **BEST-Route (ICML 2025):** Routes model AND number of samples by difficulty.
-- **Knowledge Access Beats Model Size (2603.23013):** Memory lets cheap model answer repeats; expensive model handles first-time only.
-- **FrugalGPT (Stanford):** LLM cascade — cheap model first, escalate to expensive on low confidence.
-- **Diffusion LLMs Negative Result (2601.12979):** Do NOT route agentic/tool tasks to diffusion LMs — can't branch under temporal feedback, can't hold JSON schemas.
+### 3.1 Frontier
 
-### Convergence
-- **Cascading works:** FrugalGPT, RouteLLM, and Knowledge-Access all confirm that cheap→expensive cascading saves money without sacrificing quality.
-- **Memory is the router's friend:** Knowledge Access paper shows memory + router = cheaper repeat queries.
-- **Not all models fit all tasks:** The diffusion LM result is a strong negative signal — capability-aware routing is essential.
+<!-- Populated from §3.7 + §3.18 -->
 
-### Gap vs. Lyra
-Lyra has NO model router. Single hardcoded model per session. **Behind by 2-3 years.**
+### 3.2 Convergences
 
-### Micro-Debate
-**Senior AI Engineer (LLMOps):** "The simplest routing that works: cheap model for row summaries + monitoring, expensive model for reasoning + code, mid-tier for everything else. Three tiers, task-type-based. Don't over-engineer the router — a hand-crafted policy beats a learned router until you have 100K+ routing examples."
+### 3.3 Contradictions / Open Problems
 
-**Senior Performance/Cost Engineer:** "The 'Knowledge Access Beats Model Size' finding is the key to Lyra's economics. If memory can serve repeat queries, Lyra's per-session cost drops dramatically. Combine memory + routing: first-time query → expensive model, cache result → cheap model for repeats."
+**Key tension:** Prompt-only evolution vs. weight-level evolution vs. training-free evolution:
+- **GEPA** (ICLR 2026 Oral): gradient-free prompt evolution beats GRPO
+- **SEAL** (MIT): weight-level self-edits via RL
+- **TF-TTCL**: training-free, any provider (Explore-Reflect-Steer)
+- **Hyperagents/DGM-H**: self-rewriting harness, cross-domain transfer
 
-**Tentative winner:** Three-tier task-type router (cheap/mid/expensive) as (A) parity; memory-augmented routing (Knowledge Access) as (B) breakthrough.
+### 3.4 Trajectory
 
----
+### 3.5 Gap vs. Lyra Baseline
 
-## Theme 7: Voice & Multimodal
+Lyra has lyra-skill-evolution, lyra-skill-generator, lyra-skill-weaver, lyra-meta-evolution, lyra-policy-optimizer — strong baseline. Gap: SkillNet graph model not integrated; GEPA-style gradient-free evolution not wired.
 
-### Frontier
-- **Cascaded STT→LLM→TTS** is production-ready and dominant (Pipecat, LiveKit, TEN).
-- **Full-duplex models** (Moshi, OpenAI Realtime, CSM) are emerging but not yet matching cascaded quality on tool use.
-- **VI+EN ASR:** Whisper large-v3-turbo gets ~8% WER on VI, ~5% on EN. Room for improvement.
-- **Turn-taking:** Smart Turn semantic endpoint detection beats silence-based. Sub-200ms barge-in is achievable.
-- **Voice agents lose capability:** τ-Voice shows voice agents retain only 30-45% of text capability. 79-90% of failures from agent behavior (not ASR).
+### 3.6 Micro-Debate
 
-### Convergence
-- **Cascaded first, full-duplex later:** Every framework (Pipecat, LiveKit, TEN) uses cascaded as the default, full-duplex as experimental.
-- **Provider-swappable is the pattern:** Just like LLM providers, STT/TTS providers should be swappable.
-- **Latency budget: <2s E2E for Phase 1, <800ms for Phase 3.**
+> **Participants:** Senior AI Researcher (AIR) + Senior Backend (BE) + Senior AI Safety Engineer (SAF) + Adversarial Skeptic (AS)
 
-### Gap vs. Lyra
-Lyra has ZERO voice capability. **Greenfield.**
+**AIR:** 2026 is the year of self-improving agents. Hyperagents/DGM-H (2603.19461) shows meta-skills transfer across 4 domains. GEPA (ICLR 2026 Oral) shows gradient-free prompt evolution beats GRPO. TF-TTCL (2604.13552) works on ANY provider via Explore-Reflect-Steer. SkillNet (2603.04448) auto-generates skill packages with 5-dimension quality scoring. Lyra's lyra-evolution package is well-positioned but the meta-modification procedure isn't itself editable.
 
-### Micro-Debate
-**Senior Voice/Audio Engineer:** "Cascaded is the right Phase 1 choice. Full-duplex models like Moshi are exciting but the quality gap on tool use and Vietnamese is too large for production. The τ-Voice finding that 79-90% of voice failures are agent-behavior, not ASR, means we should invest in making the agent voice-aware before optimizing the audio pipeline."
+**SAF:** "Your Agent May Misevolve" (2509.26354) documents three self-evolution failure pathways: safety-alignment decay, tool-creation vulnerabilities, regressive evolution. DGM-H was tested in sandboxes. Lyra runs on users' machines. The safety risk of self-modification is too high for v1. But GEPA-style prompt evolution (gradient-free, non-weight-modifying) is safe — it only changes prompts, not code. TF-TTCL is also safe (training-free). Ship the safe evolution paths; gate the dangerous ones.
 
-**Senior UX Designer:** "Push-to-talk is the only safe default for Phase 1. Always-listening with wake word raises privacy concerns and false-trigger anxiety. Ship push-to-talk, measure usage, then decide on always-listening."
+**BE:** SkillNet's graph model (similarity/composition/dependency) is the highest-ROI. It auto-generates skill packages from GitHub repos, PDFs, conversation logs, or execution trajectories. That's an instant skill library bootstrap. No agent self-modification needed — just better skill curation.
 
-**Tentative winner:** Cascaded push-to-talk for Phase 1. Provider-swappable pipeline. Always-listening + full-duplex gated behind Phase 1 usage data.
+**AS:** Ship SkillNet graph + GEPA prompt evolution. Self-modifying meta-agent parked (Round 1 already decided). The incremental path: better skill curation → prompt optimization → (future) meta-agent when safety guardrails mature.
+
+**Tentative Winner:** **Safe evolution only.** SkillNet graph for curation (A), GEPA/TF-TTCL for prompt optimization (B), self-modification parked.
 
 ---
 
-## Theme 8: Safety & Alignment
+## 4. Model Routing & Economics
 
-### Frontier
-- **Defense-in-depth is the standard:** Anthropic's 5-layer safety, Netflix's 4-pillar platform, Meta's LlamaFirewall.
-- **Prompt injection is still unsolved:** AgentDojo shows inverse scaling (bigger models MORE vulnerable). CaMeL's dual-LLM architecture is promising (77% provable security) but expensive.
-- **Least-privilege is the direction:** Progent's SMT-based monotonic confinement reduces ASR from 39.9%→1.0%.
-- **"Misevolve" is the self-evolution safety wake-up call:** 45% refusal drop, 76% tool vulnerability.
+### 4.1 Frontier
 
-### Convergence
-- **Multiple independent guard layers:** Everyone converges on defense-in-depth.
-- **Runtime monitoring > static checks:** AgentDojo, CaMeL, Progent all emphasize runtime over pre-flight.
-- **Self-evolution needs safety gates:** "Misevolve" makes this non-negotiable.
+<!-- Populated from §3.14 + §3.22 -->
 
-### Gap vs. Lyra
-Lyra has basic rule-based secret detection and an AgentShield stub. No guardrail system, no sandboxing, no injection defense, no runtime monitoring. **Behind by 3-4 years.**
+### 4.2 Convergences
+
+### 4.3 Contradictions / Open Problems
+
+### 4.4 Trajectory
+
+### 4.5 Gap vs. Lyra Baseline
+
+Lyra has effort_router.py, phase_router.py, unified_memory_router.py, context_router.py, lyra-cost, lyra-sla — solid. Gap: DeepSeek reasoning budget mapping; Amdahl's law parallelism optimization.
+
+### 4.6 Micro-Debate
+
+> **Participants:** Senior AI Engineer/LLMOps (AIE) + Senior Performance/Cost Engineer (PCE) + Senior Software Architect (SA)
+
+**AIE:** The router must solve: which model for which task, which provider for which effort level, when to escalate. RouteLLM (2406.18665, LMSYS/Berkeley) provides the reference architecture: a lightweight router model that predicts which LLM will perform best for a given prompt. BEST-Route (2506.22716, ICML 2025) adds dynamic difficulty estimation — route simple tasks to cheap models, hard tasks to expensive ones. "Knowledge Access Beats Model Size" (2603.23013) shows memory lets cheap models handle repeat queries. Lyra's effort_router.py (329L) exists but doesn't have difficulty estimation or memory-cache routing.
+
+**PCE:** The economics: cheap model calls cost $0.0001-0.001/token; expensive models cost $0.01-0.05/token. A 100:1 cost ratio. If the router routes 80% of queries to the cheap model correctly, cost drops 80× with minimal accuracy loss. But misrouting 20% to the cheap model when the expensive was needed costs accuracy. The router's precision isn't the only thing — the cost of misrouting matters. BEST-Route's dynamic difficulty estimation is the key: it predicts not just "which model" but "how hard is this query." For Lyra: use the cheapest model for meta/monitoring (row summaries, health checks), mid-tier for routine tasks, top-tier for reasoning-heavy work.
+
+**SA:** The provider × effort matrix is the multi-provider challenge. Anthropic supports low→max on Opus 4.8. DeepSeek's effort mechanism is different (prompt-level, not API-level). The router needs per-provider capability declarations (like Claude Code's `_SUPPORTED_CAPABILITIES` env vars). Define a `ProviderCapability` enum and a `CapabilityMap` per provider. Route based on: task_type → model → provider with capability. Fallback chain: try Anthropic → try DeepSeek → try cheapest that supports the capability.
+
+**Tentative Winner:** **Cost-weighted routing with difficulty estimation.** Tier 0 (Haiku-class, meta/monitoring, <$0.001/call), Tier 1 (Sonnet-class, routine, $0.003/call), Tier 2 (Opus-class, reasoning, $0.015/call). Route by BEST-Route difficulty estimation + Knowledge Access memory cache for repeats.
 
 ---
 
-## Cross-Cutting Synthesis: What This Means for Lyra
+## 5. Swarm / Orchestration / Fleet
 
-1. **Lyra is 2-4 years behind the frontier on EVERY dimension except agents (partial) and hooks (partial).** The gap is largest in: memory architecture, context management, multi-agent reliability, and voice.
+### 5.1 Frontier
 
-2. **The 2026 consensus is clear on what works:** graph memory, hierarchical context, adversarial verification, gradient-free self-improvement, defense-in-depth safety, cascaded voice. These aren't speculative — they're the production standard.
+<!-- Populated from §3.12 + §3.1 Agent View -->
 
-3. **The breakthrough opportunities are at the intersections:** field-theoretic memory consolidation, anonymized bias-corrected debate, memory-augmented routing, provider-swappable voice pipeline. These are combinations no single system does.
+### 5.2 Convergences
 
-4. **Safety is the gating function for autonomy.** Every capability upgrade (self-evolution, fleet, workflows) must ship with its safety counterpart. "Misevolve" and "Lying with Truths" are the evidence.
+### 5.3 Contradictions / Open Problems
 
-5. **The "ultracode" stack (supervisor + worktree + workflow engine + adversarial verification) is the highest-leverage integration.** It touches fleet, autonomy, reliability, verification, and steering — and it's what makes Lyra a genuine multi-agent system rather than a single-agent orchestrator.
+**Key tensions:**
+1. **Explicit vs. Internalized Debate** — Latent Agents (2604.24881) claims 93% fewer tokens by distilling debate INTO the model; our explicit adversarial panels are costly. When should Lyra internalize?
+2. **Debate Reliability** — Multiple papers (Identity Skews, Actor-Observer Asymmetry, Lying with Truths, Preventing Rogue Agents, MATU) show debate is biased and fragile. Fixes exist (anonymization, ReTAS, monitoring) but add complexity.
+3. **Fleet vs. Swarm** — Agent View manages independent top-level sessions; channels enable inter-agent messaging; subagents spawn within a session. The boundary matters for safety.
+
+### 5.4 Trajectory
+
+### 5.5 Gap vs. Lyra Baseline
+
+Lyra has DAG workflow engine, adversarial verification, autonomy loop, fleet TUI, channels, colony patterns — strong for in-session orchestration. Gap: Agent View-style supervisor daemon (detached background sessions, two-axis state model, per-session autoscaling, cheap-model row summaries); worktree isolation auto-trigger.
+
+### 5.6 Micro-Debate
+
+> **Participants:** Senior Distributed-Systems Engineer (DSE) + Senior SRE + Senior Software Architect (SA) + Adversarial Skeptic (AS)
+>
+> **Question:** What is the single most impactful fleet/orchestration upgrade, and is it actually better than what Lyra already has?
+
+**DSE:** The Agent View supervisor daemon is the single highest-leverage port. Right now Lyra can spawn subagents within a session (workflow.py DAG engine), but it can't run independent detached sessions that survive terminal close. The supervisor daemon is the spine — it enables everything else: unattended autonomy (§4.14), steer-by-exception UX (§4.22), and true fleet parallelism (§4.13). Without it, Lyra's "fleet" is really just in-session fan-out. Claude Code's supervisor design is well-documented: per-user daemon, per-session process isolation, state on disk (roster.json + jobs/<id>/state.json), survives sleep/restart/auto-update, respawns idle sessions on demand. The two-axis state model (task-state × process-liveness) is the right abstraction.
+
+**SRE:** I want to stress-test the supervisor's failure modes. It's a single point of failure — if the supervisor goes down, ALL sessions go down. Claude Code handles this via daemon auto-restart with reconnection, but it's still a SPOF. Also: what happens when 50 background sessions each spawn 16 subagents? That's 800 processes — the supervisor needs backpressure. Lyra should build the supervisor with explicit resource governance: max concurrent sessions per user, per-session CPU/memory quotas, and graceful degradation when approaching limits. Claude Code's "stop idle after ~1h" is a start but it's reactive, not proactive.
+
+**SA:** The boundary between supervisor (session lifecycle), rmux (§5.1, PTY/detach), git-worktrees (per-session file isolation), and swarm/channels (inter-agent comms) needs to be crystal clear. Claude Code's design resolves this as:
+- Supervisor: owns session PROCESS lifecycle (spawn, stop, respawn, idle-timeout, memory-pressure eviction)
+- Worktrees: owns FILE isolation (auto-create before first edit, per-session branch, cleanup)
+- Terminal (implicit): PTY hosting for attached sessions; background sessions have no PTY
+- Channels/Teams: inter-agent messaging (separate from supervisor — sessions message each other, supervisor doesn't mediate)
+
+Lyra needs the same clean separation. The Skeptic will push the minimal-change alternative for each.
+
+**AS:** Let me push each one: (1) Supervisor: tmux + a thin JSON status file per pane. You don't need a daemon — tmux already detaches sessions. The "status file" gets written by a hook on session end. A simple script reads status files to render the fleet view. (2) Worktrees: just `git worktree add` before starting a session. No auto-trigger needed — it's one command the user runs. Or use a temp directory with a copy-on-write overlay (unionfs) that's lighter than a full worktree. (3) Terminal: tmux already does PTY hosting. rmux rebuild is about making it pretty, not building a new PTY layer. (4) Channels: file-based message passing (write to a known directory). No need for a message broker.
+
+My point: each of these "breakthroughs" has a 50-line shell script alternative. Prove the complexity of a daemon, a full worktree integration, and a message bus beats the shell script version on evidence.
+
+**DSE responds:** (1) tmux + status file: tmux can't respawn a stopped session from disk state. When a session has been idle for an hour and its process was killed, tmux has no mechanism to restart it from the saved transcript. The supervisor does this automatically on next peek/attach — that's the core value, not just process hosting. (2) Temp dir + unionfs: a copy-on-write overlay doesn't give you git branches — you can't `git push` from it, can't open a PR from it, can't merge it. Worktrees share git history, so `git fetch` serves all of them. The branch IS the audit trail. (3) File-based channels: file polling for inter-agent messages in a 100-agent fleet means either polling latency (seconds) or inotify complexity (OS-specific). A lightweight pub/sub bus (even in-process) is simpler, faster, and more reliable than file-based message passing.
+
+**SRE:** On the "50-line script" claim: a 50-line script that implements supervisor behavior (spawn, stop, respawn, idle-timeout, memory-pressure eviction, state persistence, reconnection across sleep/restart) doesn't exist in practice. The "simple" version grows to 500 lines the moment you handle edge cases: what if the status file is corrupt? What if two sessions write simultaneously? What if the machine sleeps mid-write? The daemon is 500 lines of careful state-machine code, not 50 lines of shell. The question is whether 500 lines of daemon is better than 500 lines of shell scripts that approximate it — and the daemon wins on reliability because it has a single-threaded event loop, not a flock of cron jobs.
+
+**Tentative Winner:** **Build the supervisor daemon, but with Skeptic-driven minimalism.** Layer 1 (MVP): supervisor process that spawns/stops/respawns sessions, persists state to JSON on disk, survives sleep. No worktree auto-trigger yet — user runs `claude --worktree` manually. Fleet view reads from disk (no daemon protocol needed). Layer 2: auto-worktree isolation. Layer 3: cheap-model row summaries. The Skeptic's "do the simplest thing first" wins as the implementation strategy, but the daemon itself beats the shell-script alternative once you count edge cases.
+
+**SA boundary resolution (carried into Architecture Debate Round 3):**
+- **Supervisor:** Session process lifecycle (spawn, monitor, stop, idle-timeout, memory-pressure)
+- **rmux (§5.1):** Terminal multiplexing (PTY hosting, detach/reattach, scrollback, tmux-like UI)
+- **Worktrees:** Per-session file isolation (EnterWorktree tool, .worktreeinclude env propagation, non-destructive cleanup)
+- **Channels/Swarm:** Inter-agent message passing (pub/sub, not mediated by supervisor)
+- No two reimplement each other. rmux provides the attach surface; supervisor decides WHAT to attach to.
+- **Non-destructive cleanup decision:** Lyra defaults to AUTO-STASH on dirty worktree removal, never silent-discard. User can configure to archive/confirm/prompt.
+- **Per-session quota:** Governed via §4.5 router (cheapest model for meta/monitoring) + explicit session-count limits (default: 10 concurrent, configurable).
+
+---
+
+## 6. Voice & Audio
+
+### 6.1 Frontier
+
+<!-- Populated from §3.13 -->
+
+### 6.2 Convergences
+
+### 6.3 Contradictions / Open Problems
+
+### 6.4 Trajectory
+
+### 6.5 Gap vs. Lyra Baseline
+
+Lyra has lyra-voice (pipeline, SFX, providers, hooks) and lyra-speech — partial. Gap: Full-duplex real-time pipeline (VAD→STT→LLM→TTS with barge-in); turn-taking; emotion/prosody; multilingual VI+EN; benchmark evaluation.
+
+### 6.6 Micro-Debate
+
+> **Participants:** Senior Voice/Audio Engineer (VAE) + Senior AI Engineer (AIE) + Senior UX Designer (UX)
+
+**VAE:** The cascaded pipeline (Whisper→LLM→Kokoro) is proven but takes 800-2750ms end-to-end. Moshi (2410.00037) achieves 160ms theoretical with full-duplex speech-to-speech — no cascaded latency sum. The breakthrough is Moshi's Inner Monologue: predict text tokens before audio tokens → free streaming ASR/TTS. But Moshi's codec is CC BY-NC-SA 4.0 (non-commercial). For MIT Lyra: train our own codec or use an Apache-licensed alternative. Smart Turn (pipecat-ai) gives barge-in for cascaded pipeline in the meantime.
+
+**AIE:** Training a speech-to-speech model is a 12+ week research project. Ship the cascaded pipeline first. Measure latency. If it feels sluggish (>1s E2E), invest in S2S. If <1s feels fine, the cascaded pipeline is good enough. Smart Turn barge-in makes latency less critical — users can interrupt.
+
+**UX:** Push-to-talk default. Always-listening is opt-in. VI+EN support is table stakes (Lyra's target market). Whisper large-v3 supports both but VI accuracy is lower than EN — test with real VI speech. Voice packs (Warcraft peon, etc.) are a delight feature, not MVP — ship them last.
+
+**Tentative Winner:** **Cascaded pipeline MVP, S2S gated on latency measurement.** Ship Smart Turn barge-in for natural interaction feel.
+
+---
+
+## 7. Reliability & Safety
+
+### 7.1 Frontier
+
+<!-- Populated from §3.15 + §3.16 + §3.12 reliability cluster -->
+
+### 7.2 Convergences
+
+### 7.3 Contradictions / Open Problems
+
+### 7.4 Trajectory
+
+### 7.5 Gap vs. Lyra Baseline
+
+Lyra has adversarial verification, safety governance, tool gating, gates (chain_of_note, kg_fact, retraction, dual_use), sandbox — strong. Gap: Collusion detection (Lying with Truths); Actor-Observer bias correction; MATU tensor UQ; response anonymization.
+
+### 7.6 Micro-Debate
+
+> **Participants:** Senior Security Engineer (SEC) + Senior AI Researcher (AIR) + Senior SRE + Adversarial Skeptic (AS)
+>
+> **Question:** What's the single most important reliability/safety upgrade, and is it actually better than what Lyra already has?
+
+**SEC:** The Lying with Truths attack (2601.01685) is the wake-up call. 74.4% attack success rate on proprietary models, >60% downstream deception cascade. Standard factuality checks are useless — every fragment is true. Lyra's channels are an open attack surface: any agent sharing a channel with other agents can be cognitively colluded. This isn't theoretical — it's an ACL 2026 Oral with a concrete Writer-Editor-Director framework. The fix: cross-source triangulation gate. Any claim synthesized from channel evidence must be verified against at least 2 independent sources before acceptance. Cost: 1-2 extra verification calls per claim. Benefit: breaks the single-channel collusion vector.
+
+**AIR:** The attack is real, but focusing on collusion defense misses the bigger picture. The cluster of papers together — Identity Skews (ACL 2026 Main), Actor-Observer Asymmetry, Preventing Rogue Agents — all point to the same thing: multi-agent debate/review is SYSTEMATICALLY biased and fragile. The individual fixes are known (anonymization, ReTAS, monitoring), but nobody has integrated them. The breakthrough is integrating ALL FOUR: anonymize the debate, apply dialectical alignment, monitor for rogue actions, AND cross-source triangulate channel evidence. One integrated verification panel architecture, not four separate patches.
+
+**SRE:** I'll add the operational angle. The Preventing Rogue Agents monitor (2502.05986) is a pre-execution guard — it watches agent confidence and intervenes BEFORE error propagation. The autonomy loop already has crash detection (reactive) but no confidence monitoring (predictive). Adding this is a 2-week task: wire the confidence signal from the model response into a gating decision. False positive = agent blocked unnecessarily (annoying). False negative = rogue action propagates (the current state). The 20% gain on GovSim suggests task interdependence amplifies the benefit — the more agents depend on each other, the more rogue prevention matters. Lyra's swarm IS interdependent.
+
+**AS:** Let me push the minimal-change alternative. Anonymization (2510.07517) is a prompt-level fix — it costs nothing in architecture, just strip identity markers from verification round prompts. Estimate: 50 lines of code to add anonymization to the existing adversarial verifier. That alone fixes the dominant debate pathology (sycophancy). ReTAS dialectical alignment adds token cost per verification round. The rogue monitor adds latency per agent action. The cross-source triangulation adds API calls. Before building the integrated architecture, ship anonymization as a one-line prompt change and MEASURE whether it improves Lyra's verification accuracy. If it does, do ReTAS next. If ReTAS helps, add the monitor. Incremental, measured, evidence-driven. Don't design the integrated architecture before proving each component earns its cost.
+
+**SEC responds to AS:** The incremental approach works for identity bias (anonymize → measure). It doesn't work for collusion defense — by the time you detect a collusion attack in production, the victim agent has already internalized the false belief AND propagated it to others (>60% cascade). You can't A/B test safety defenses the way you A/B test UX. Some defenses need to be in place BEFORE the attack, not measured after. Cross-source triangulation is one of those — it's a gate, not an optimization.
+
+**Tentative Winner:** **Incremental hardening with one exception.** Ship anonymization first (cheapest, highest-impact — 50 lines, fixes sycophancy). Ship ReTAS dialectical alignment second (moderate cost, fixes perspective asymmetry). Ship the rogue monitor third (predictive, prevents cascading failures). BUT: ship cross-source triangulation alongside anonymization — it's a safety gate, not an optimization, and the 74.4% attack success rate means it can't wait for A/B validation. The integrated architecture emerges from these four components working together, not from an upfront design.
+
+---
+
+## 8. Autonomy & Self-Knowledge
+
+### 8.1 Frontier
+
+### 8.2 Convergences
+
+### 8.3 Contradictions / Open Problems
+
+### 8.4 Trajectory
+
+### 8.5 Gap vs. Lyra Baseline
+
+### 8.6 Micro-Debate
+
+> **Participants:** Senior AI Researcher (AIR) + Senior SRE + Senior PM + Adversarial Skeptic (AS)
+
+**AIR:** The autonomy stack needs three layers: (1) self-knowledge — Lyra knows when it's failing (MATU tensor UQ, 2604.08708; Q-DAPS difficulty estimation, 2605.12398), (2) continuous operation — the supervisor daemon enables unattended sessions, and (3) auto-orchestration — the ultracode toggle lets Lyra decide to run workflows. Self-knowledge is the prerequisite: you can't safely run unattended if you don't know when you're wrong.
+
+**SRE:** Lyra's autonomy.py (449L) already has crash detection (3 crashes/300s window), watchdog health checks, and auto-repair. What's missing: calibrated confidence (the "I don't know" signal). MATU quantifies uncertainty for multi-agent systems via tensor decomposition of reasoning trajectories. Q-DAPS estimates question difficulty as entropy over candidate answers. These are usable uncertainty signals that don't require model internals (provider-agnostic). Add calibrated confidence → gate autonomy decisions.
+
+**PM:** The ultracode auto-orchestration toggle ships in Phase 1 of the architecture. Self-knowledge ships in Phase 2. Continuous autonomy (unattended) ships in Phase 3 (supervisor). The sequencing is deliberate: you can't run unattended without the supervisor; you shouldn't run unattended without calibrated confidence.
+
+**AS:** The simplest autonomy: a `/loop` command that runs a prompt every N minutes. No self-knowledge, no supervisor, no auto-orchestration. Just a cron-like trigger. Ship /loop first, measure whether users actually want unattended operation, THEN invest in the full autonomy stack.
+
+**Tentative Winner:** **Sequenced autonomy.** `/loop` as MVP (Skeptic wins — cheap, immediate), confidence calibration from MATU/Q-DAPS, supervisor-powered unattended sessions gated on safety guardrails.
+
+---
+
+## 9. Planning & Reasoning
+
+### 9.1 Frontier
+
+### 9.2 Convergences
+
+### 9.3 Contradictions / Open Problems
+
+### 9.4 Trajectory
+
+### 9.5 Gap vs. Lyra Baseline
+
+### 9.6 Micro-Debate
+
+> **Participants:** Senior Planning/Reasoning Specialist (PRS) + Senior AI Engineer (AIE) + Adversarial Skeptic (AS)
+
+**PRS:** The planning frontier: MCTS over agent workflows (AFlow, ICLR 2025), MCTS + in-trial/cross-trial memory (MC-DML, ICLR 2025), MCTS with value agent for repo-level SWE tasks (SWE-Search, ICLR 2025). The key insight: explicit search (MCTS/ToT) beats single-pass reasoning on complex tasks BUT costs 3-10× more tokens. The question is WHEN to plan. Q-DAPS (2605.12398) estimates question difficulty as entropy — when entropy is high, invoke planning. When entropy is low, single-pass is cheaper and equally good. This is the "planning trigger."
+
+**AIE:** MCTS costs tokens. AFlow's MCTS over workflows searches the space of agent compositions — each node evaluated by an agent roll-out. If each roll-out costs $0.50 and AFlow explores 20 nodes, that's $10 per plan. For a coding task that a single pass could solve for $0.50, the 20× cost is only justified if MCTS succeeds where single-pass fails. The trigger matters: plan only when difficulty warrants it.
+
+**AS:** Q-DAPS difficulty estimation is still a model call (cheap, but not free). A simpler trigger: if Lyra has failed the same task twice, invoke planning. Reactive, not predictive, but zero-cost and simple. Ship the reactive trigger first; add predictive difficulty estimation when you have calibration data.
+
+**Tentative Winner:** **Reactive planning trigger.** Fail twice → escalate to MCTS planning. Predictive trigger (Q-DAPS) added when calibration data exists. MCTS over workflows (AFlow pattern) as the planning engine.
+
+---
+
+## 10. Human Steering & UX
+
+### 10.1 Frontier
+
+### 10.2 Convergences
+
+### 10.3 Contradictions / Open Problems
+
+### 10.4 Trajectory
+
+### 10.5 Gap vs. Lyra Baseline
+
+### 10.6 Micro-Debate
+
+> **Participants:** Senior UX Designer (UX) + Senior Product Manager (PM) + Senior SRE + Adversarial Skeptic (AS)
+
+**UX:** The Agent View UX is the reference: peek without attach (Space), suggested reply (Tab), PR status indicators, state-grouped rows, filters (a:agent, s:state, #PR), Ctrl+T to pin. Lyra's fleet TUI (4 files) has none of this. The fleet view IS the steering surface — if users can't quickly see what needs them, they won't trust unattended operation. Ship the full peek/reply/attach/detach UX before shipping unattended sessions.
+
+**PM:** Two UX tiers. Minimum viable fleet view: state-grouped rows, peek panel, attach/detach. Delight tier: filters, pin, rename, suggested reply, cost-per-session display. Ship minimum viable in Phase 4 of the architecture; iterate to delight based on usage data.
+
+**SRE:** The "steer by exception" model (Claude Code's design) is the right one. Users shouldn't watch transcripts; they should watch states. When a session transitions to Needs-input or opens a PR, it surfaces. Otherwise, it stays out of the way. The cheap-model row summary is the enabler — users read one line, not 50 turns.
+
+**AS:** The simplest steering: a `lyra fleet status` command that prints a text table. No TUI, no peek panel, no keyboard shortcuts. Just a table of sessions with state and last output line. Ship that first (1 day of work), get feedback, THEN build the fancy TUI. The Skeptic bets users will ask for the fancy TUI organically — don't build it without demand.
+
+**Tentative Winner:** **Progressive disclosure of steering complexity.** Layer 1: `lyra fleet status` text table. Layer 2: state-grouped TUI with peek/attach. Layer 3: full Agent-View parity (filters, pin, suggested reply). Ship Layer 1 in Phase 3, Layer 2 in Phase 4.
+
+---
+
+## 11. Ingestion & Knowledge
+
+### 11.1 Frontier
+
+### 11.2 Convergences
+
+### 11.3 Contradictions / Open Problems
+
+### 11.4 Trajectory
+
+### 11.5 Gap vs. Lyra Baseline
+
+### 11.6 Micro-Debate
+
+> **Participants:** Senior Data/Knowledge Engineer (DKE) + Senior AI Researcher (AIR) + Adversarial Skeptic (AS)
+
+**DKE:** The ingestion stack needs: codebase indexing (repo-level retrieval), multimodal ingestion (PDF/image/audio), freshness tracking (when does indexed content become stale?), and incremental re-indexing. Lyra's knowledge graph (lyra-knowledge-graph) and ETL pipeline (lyra-etl-pipeline) exist but need hardening. Key sources: "Is Grep All You Need?" (2605.15184) — grep often beats vector retrieval for code search, so the harness matters more than the retriever. ClusterRAG (2605.18769) — two-level retrieval (cluster + document) for personalization. MASS-RAG (2604.18509, ACL 2026 Findings) — role-specialized agents for noisy/incomplete evidence.
+
+**AIR:** The grep paper validates Lyra's harness-first thesis for the search surface. The harness (which tool is invoked, how results are formatted) matters more than the underlying retrieval algorithm. For code: grep + ripgrep + AST search. For docs: hybrid dense+sparse with freshness scoring. For conversations: CraniMem. The ingestion architecture is a pipeline, not a single retriever.
+
+**AS:** The simplest ingestion: `grep` for code, file read for docs, CraniMem for memory. Ship that first. Add vector retrieval and multimodal only when grep fails. The Skeptic's bet: 80% of agent queries are answered by grep + file read + memory lookup.
+
+**Tentative Winner:** **Harness-first ingestion.** grep/ripgrep for code, CraniMem for memory, file read for docs. Vector/graph retrieval added as fallback when grep fails, not as primary path.
+
+---
+
+## Cross-Cutting Insights
+
+### The Harness > Model Consensus
+Multiple independent sources (OpenAI, Netflix, Anthropic, ThoughtWorks, the grep paper) converge on: the harness quality matters more than model selection for agent success. This validates Lyra's harness-first thesis (§3.28).
+
+### The Self-Evolution Frontier
+2026 is the year of self-improving agents: Hyperagents, Dr. Zero, MetaAgent-X, MetaClaw, SOLAR, SEAL, GEPA, TF-TTCL. The field is moving from prompt engineering to autonomous optimization. Lyra's lyra-evolution package is well-positioned.
+
+### The Memory Bottleneck
+Hassabis (Google DeepMind) names "True Memory" as one of three remaining AGI gaps. The ICLR 2026 MemAgent workshop shows a Cambrian explosion of memory architectures — but no clear winner yet. This is where Lyra's breakthrough should land.
+
+### The Multi-Agent Reliability Crisis
+A cluster of 5+ papers from different groups all find that multi-agent debate/review is systematically biased and fragile. This is a real problem for Lyra's adversarial verification panels. The fixes (anonymization, ReTAS, monitoring) are known but not integrated.

@@ -1,70 +1,67 @@
-# Subagents
+# Subagents — What & Why
 
-> **Scoped agent instances in isolated git worktrees with structured returns and explicit merge points.** | **Phase:** 1
+> Concept: Scoped, short-lived agent instances that run in isolated git worktrees for parallel execution, context reduction, and safe experimentation without file conflicts.
 
-## 🤖 What It Is
+## What It Is
 
-A **subagent** is a scoped agent instance running in its own git **worktree** -- a checked-out copy that shares the parent's `.git/` directory. Subagents let Lyra parallelize work across modules without losing the parent's coherence: no stomped edits, no surprise merges, and explicit **observation reduction** (the parent sees a summary, not the full transcript). They are the key building block for scaling Lyra beyond single-turn interactions, enabling decomposition of large tasks into independent strands that execute concurrently with their own budget, tool set, and filesystem sandbox.
+Subagents are lightweight, disposable agent processes spawned by the primary session. Each subagent gets its own isolated environment: a git worktree (true filesystem isolation via `git worktree add` on a detached branch), scoped tool access (FSSandbox restricts filesystem visibility to the worktree directory), a constrained token and cost budget, and a focused task description limited to what the subagent needs to accomplish.
 
-> **Jargon worktree** = a git worktree is an additional working directory linked to the same repository. Two agents can edit the same repo simultaneously with zero conflict. **FSSandbox** = a filesystem sandbox that permits reads everywhere but rejects writes outside declared globs.
+When the subagent completes, it returns a compact summary observation (JSON: what was changed, test results, any issues encountered). Its changes are merged back into the parent worktree via selective file copy (only files matching the task scope are copied, not the full worktree diff). If it fails, the worktree is discarded with `git worktree remove` and zero side effects on the parent or sibling subagents.
 
-## ⚙️ How It Works
-
-A `spawn()` call creates a subagent with a **purpose**, **scope** (filesystem globs limiting writes, e.g. `["tests/**", "src/auth/**"]`), **budgets** (max steps, max cost), **allowed tools**, and **return shape**. The orchestrator allocates a full worktree at `.lyra/worktrees/<session-id>/<n>`, configures an FSSandbox that rejects out-of-scope writes, then runs the subagent's own agent loop on the **smart model slot** (expensive reasoning). The parent drops back to the **fast slot** the moment the subagent returns.
-
-On completion, the orchestrator merges the sub-branch back into the session branch using three strategies: **fast-forward** (trivial when the sub-branch is a strict descendant), **three-way merge** (divergent but non-conflicting, auto-merge), or **conflict** (surfaced as a structured `MergeConflict` observation for human resolution). ContextVars for trace IDs, session IDs, and permission mode propagate from parent to subagent worker thread via `submit_with_context` -- without this, OpenTelemetry spans for subagent work would float orphaned.
-
-**Return shapes**: `observation` (default) = short structured summary from the subagent; `artifact` = a file the subagent produced, body in the artifact store; `raw_trace` = full transcript, rarely needed.
-
-## 🧠 Why This Design
-
-Without subagents, every task runs sequentially in the parent's context window -- costing tokens, risking interference between concurrent edits. Worktree isolation means two agents edit the same repository simultaneously without conflict. In-process multi-agent systems cannot provide this isolation.
-
-## ✅ When to Use vs. NOT to Use
-
-**Use** when work decomposes into independent strands: multi-perspective research, A/B experiments, long-running sub-tasks, or any task whose context would overflow the parent window (too many files read). **Skip** when overhead exceeds savings (tasks under 3-5 steps) or the result is needed inline -- worktree allocation, context assembly, and merge resolution cost ~200 ms that is wasted on trivial work.
-
-## 📋 Spawn Config (Example)
-
-```json
-{
-  "purpose": "Add JWT auth middleware to src/auth/",
-  "scope": ["src/auth/**", "tests/auth/**"],
-  "budgets": { "max_steps": 25, "max_cost_usd": 0.50 },
-  "allowed_tools": ["read", "grep", "glob", "edit", "write", "bash"],
-  "return_shape": "observation"
-}
-```
-
-## 🔄 Architecture (Sequence)
+This is the execution engine behind DAG Teams: each TaskNode in a wave gets its own subagent worktree. The subagent system comprises 13 files covering orchestration (SubagentOrchestrator), worktree management (WorktreeManager), filesystem sandboxing (FSSandbox), result merging (MergeEngine), and cache prewarming (CachePrewarmer).
 
 ```mermaid
 sequenceDiagram
-    participant Parent as Parent Agent
-    participant Orch as Orchestrator
-    participant WT as Worktree
+    participant P as Parent Session
+    participant O as SubagentOrchestrator
+    participant WM as WorktreeManager
     participant SA as Subagent
-    Parent->>Orch: spawn(purpose, scope, budget)
-    Orch->>WT: git worktree add session-branch
-    Orch->>SA: run with FSSandbox + narrowed tools
-    SA->>SA: agent loop (smart model slot)
-    SA-->>Orch: return observation summary
-    Orch->>WT: git merge into session-branch
-    Orch-->>Parent: return structured result
-    Note over Parent: Drops to fast slot
+    
+    P->>O: dispatch(task, budget)
+    O->>WM: create_worktree(task_id)
+    WM-->>O: worktree_path
+    O->>SA: spawn(task, path, budget)
+    SA->>SA: run(mini-loop)
+    SA-->>O: summary_observation
+    O->>WM: merge_back(path)
+    WM-->>P: merged_changes
+    O->>WM: remove_worktree(path)
 ```
 
-## 📊 Real Numbers
+## Key Mechanisms
 
-| Metric | Value | Notes |
-|--------|-------|-------|
-| Worktree allocation overhead | ~200 ms | `git worktree add` + branch creation (target) |
-| Token cost vs. in-process | ~60% fewer | Parent sees summary, not full transcript (target) |
-| Merge conflict rate | <5% | Scope isolation keeps conflicts rare (target) |
+- **Worktree Isolation** — Each subagent runs on a detached branch in `git worktree add`. The worktree provides true filesystem isolation: the subagent can read, write, create, and delete files within its designated directory without affecting the parent or sibling subagents. The WorktreeManager maintains a registry of active worktrees (hash map keyed by task ID), lifetime (created, active, merging, removing), and associated session PID for cleanup on crash. Hard limits on concurrent worktrees per session (default 8) prevent resource exhaustion.
+- **Parallel Dispatch** — The SubagentOrchestrator fans out independent tasks to multiple subagents simultaneously via async dispatch using Python's asyncio. Results are aggregated and merged only after all subagents in a wave complete. Failed subagents are retried up to a configurable max retries (default 2) before the wave is marked partially failed. The orchestrator tracks per-wave state: pending, running, completed, failed, merged.
+- **Channels** — Parent and subagent communicate via structured channels implemented as filesystem FIFO pipes: task description in (JSON with task string, tools whitelist, budget caps), summary observation out (JSON with changed files list, test results, duration, any errors). The parent can stream additional context mid-flight via an update channel (e.g., "we discovered module X is also affected"). The subagent can signal progress or request clarification via a status channel. Using FIFO pipes instead of network sockets avoids port conflicts and keeps the system network-independent.
+- **Budgeted Execution** — Each subagent has hard caps: max step count (default 15), max cost (default $0.20), max token budget (default 32K). The SubagentOrchestrator tracks aggregate fleet spend and enforces a per-wave budget cap. If a subagent exceeds any budget, the Agent Loop terminates it and the wave continues with remaining subagents. Budget is allocated at dispatch time from the session budget; unused budget is returned on completion.
+- **Cache Prewarming** — Before dispatching, the CachePrewarmer pre-populates the subagent worktree with the session's prompt cache prefix (SOUL.md + project context files). This is done by copying the cache-optimized prefix files into the worktree. Every subagent's first model call starts with a warm cache, reducing first-turn latency by ~60%. The prewarmer also copies frequently-read source files (based on recent access patterns) to avoid redundant reads across subagents.
 
-## 🔗 Where Next
+## Configuration
 
-- **Block detail:** [docs/blocks/10-subagent-worktree.md](../blocks/10-subagent-worktree.md)
-- **Fleet plan:** [docs/lyra-upgrade/plans/13-swarm-fleet.md](../lyra-upgrade/plans/13-swarm-fleet.md)
-- **Related concepts:** [Context Engine](./05-context-engine.md) | [Plan Mode](./02-plan-mode.md) | [Agent Loop](./01-agent-loop.md)
-- **Research:** ["Scaling Multi-Agent Systems"](https://arxiv.org/abs/2403.09722) -- parallels in agent isolation patterns
+```yaml
+subagents:
+  max_concurrent: 8       # max worktrees per session
+  max_steps: 15           # per subagent
+  max_cost_usd: 0.20      # per subagent
+  max_retries: 2          # per subagent before wave failure
+  stagger_ms: 100         # dispatch stagger for cache coordination
+```
+
+## Why It Matters
+
+Without subagents, all work runs sequentially in a single context window. Complex tasks that decompose into parallel subtrees (e.g., "add Redis caching to user service" — implement, test, document) are forced into serial execution, which multiplies wall-clock time and context fragmentation. Worktree isolation ensures that even if a subagent catastrophically fails (deletes files, corrupts state), the parent and all sibling worktrees remain untouched. This makes subagents safe for experimentation: try approach A and approach B in parallel, keep the winner.
+
+## When to Use
+
+Use subagents when the task can be decomposed into independent parallel subtrees: implement module A and B simultaneously, run tests in parallel, generate docs alongside implementation. Use subagents for experimental changes where the cost of failure is zero.
+
+## When NOT to Use
+
+Do not use subagents for tasks with shared mutable state (both modify the same function). Do not use for tasks faster than worktree creation overhead (~500ms). Do not use for tasks requiring tight coordination between parallel workstreams.
+
+## Related Documentation
+
+- **Block:** [Subagent Worktree](../blocks/08-subagent-worktree.md)
+- **Architecture:** [Fleet Topology](../architecture/11-architecture-overview.md#fleet-topology)
+- **Plans:** [Swarm Fleet](../lyra-upgrade/plans/13-swarm-fleet.md), [AgentsMesh](../lyra-upgrade/plans/52-agentsmesh.md)
+- **Papers:** MetaGPT SOP Role Topology (ICLR 2024, arXiv:2308.00352); DAG Teams SemaClaw (Midea 2026, arXiv:2604.11548); RecursiveLink Latent Comms (2026, arXiv:2604.25917)

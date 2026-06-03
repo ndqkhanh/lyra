@@ -379,3 +379,17 @@ UI/UX is provider-agnostic by design. The statusline model indicator shows the m
 
 ## 8. Changelog
 - Run 1: Initial plan — themes, keybindings, statusline, output styling, fleet view TUI
+
+## Expert Review
+
+**Mini-Debate Participants:** Senior UX Designer, Senior Backend Engineer, Adversarial Skeptic
+
+**Skeptic's challenge:** "Port Claude Code's implementation directly — don't invent something new unless the evidence proves it's better."
+
+**Resolution:** Parity port is the (A) tier baseline. Breakthrough enhancements must beat Claude Code's implementation on at least one measurable dimension (latency, token cost, multi-provider compatibility, UX simplicity) with cited evidence. Otherwise ship parity.
+
+**Sign-off:** Plan is feasible. Parity implementation is well-documented in Claude Code docs (§3.1). Breakthrough tier gated on evidence from batch research findings.
+
+## Changelog
+
+- Run 4 (2026-06-03): Added Expert Review section, Changelog

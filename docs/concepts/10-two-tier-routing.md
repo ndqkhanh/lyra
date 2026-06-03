@@ -1,121 +1,65 @@
-# ⚡ Two-Tier Routing
+# Model Routing — What & Why
 
-> **Every session has a fast slot and a smart slot. The fast slot handles loop turns; the smart slot handles planning, verification, and escalation.** | **Phase:** 1
+> Concept: A three-tier model router (Haiku/Sonnet/Opus) that classifies tasks by complexity, matches capabilities, optimizes cost, and learns from performance history. The BEST-Route framework estimates difficulty; memory-augmented routing uses past success rates per task category.
 
-## 🎯 What It Is
+## What It Is
 
-Every Lyra session has two model **slots**: fast and smart. The fast slot handles the bulk of in-loop turns (chat, coding, tool use). The smart slot is reserved for moments where extra reasoning pays for itself (planning, hard verification, **cascade** escalation). This is the most load-bearing cost-shaping pattern in the harness. The naive "always use the smart model" is 5-20x more expensive for daily coding. The opposite naive alternative -- "always use the fast model" -- produces low-quality plans and weak verification.
+The Model Router sits between the Agent Loop and the LLM provider, deciding which model serves each request. It is a three-tier system:
 
-### 📖 Jargon Buster
+1. **Haiku (fast slot)** — Haiku 4.5 for simple tasks: typo fixes, file reads, grep queries, single-command bash, status checks, and trivial lookups. Target latency ~1.2s. Cost ~$0.003 per turn. Best for tasks where speed matters more than reasoning depth.
+2. **Sonnet (smart slot)** — Sonnet 4.6 for standard development: coding, debugging, testing, multi-step workflows, code review, documentation generation. Target latency ~4.5s. Cost ~$0.03 per turn. The default slot for most sessions.
+3. **Opus (deep slot)** — Opus 4.5/4.7 for architectural decisions, plan generation (Opusplan pattern), safety-critical reasoning, adversarial verification, complex debugging, and research tasks. Target latency ~8-15s. Cost ~$0.15 per turn. Used sparingly for the tasks that need deep reasoning.
 
-- **Slot**: A logical assignment of a model (provider + model name + parameters) to a role.
-- **Cascade / Escalation**: When the fast model detects it cannot handle a turn and re-runs the same input on the smart model.
-- **Nats**: Natural-log units for log-probability. More negative = lower model confidence.
-- **Circuit-breaker**: A safety limit (default 8 escalations per session) that aborts the session when exceeded, preventing runaway cost.
-- **Verifier conflict check**: The rule that a response generator and its evaluator must be different model families, avoiding self-approval bias.
-
-## ⚙️ How It Works
-
-The role-to-slot mapping is explicit and configurable in `~/.lyra/config.toml`. Default mapping:
-
-| Role | Slot | Rationale |
-|------|------|-----------|
-| chat (loop step) | fast | High frequency, cheap per-turn |
-| plan | smart | Deep reasoning required |
-| verify-subjective | dedicated evaluator | Must differ from generator family |
-| summarize | fast | Lightweight aggregation |
-| extract-skill | smart | Precision needed |
-| safety-monitor | dedicated nano model | Cheap, frequent, isolated |
-
-Each role can be overridden per-session via `[models.roles]`.
-
-### 🔄 Cascade Flow
-
-The **cascade** is a controlled escalation path. If the fast model explicitly signals it cannot handle the turn -- via a special token (`<lyra:escalate reason="..."/>`) or low log-probability on action tokens (below **-2.5 nats**, indicating low confidence) -- the kernel re-runs the same turn on the smart model. The same context is replayed; the trace shows both calls and cost attribution accounts for both. Escalation is always detected by signal, never by silent retry.
+The router uses a five-layer decision pipeline: Task Classification (15 categories), Complexity Estimation (score 1-10), Capability Matching (required reasoning depth, tool types, context size), Cost Optimization (budget constraint, per-turn cost), and Performance History Lookup (past success rates per category-model pair). If confidence < 0.75 at any layer, the request escalates to the next tier.
 
 ```mermaid
-sequenceDiagram
-    actor User
-    participant Kernel
-    participant Fast as Fast Slot<br/>(e.g. Llama 3.3 70B)
-    participant Smart as Smart Slot<br/>(e.g. Claude Sonnet 4)
-
-    User->>Kernel: Send prompt
-    Kernel->>Fast: Route to fast role
-    Fast-->>Kernel: Normal response
-    Kernel->>User: Return
-
-    User->>Kernel: Send complex prompt
-    Kernel->>Fast: Route to fast role
-    Fast-->>Kernel: &#x26A0;&#xFE0F; Escalate (low confidence)
-    Kernel->>Smart: Re-run same turn
-    Smart-->>Kernel: Deep response
-    Kernel->>User: Return escalated
+flowchart TD
+    Task["Task Input"] --> Classify["1. Classify: 15 categories"]
+    Classify --> Estimate["2. Estimate: Score 1-10"]
+    Estimate --> Match["3. Match: Capabilities needed"]
+    Match --> Cost["4. Optimize: Cost vs budget"]
+    Cost --> History["5. History: Past success rates"]
+    History --> Decision{"Confidence >= 0.75?"}
+    Decision -->|Yes| Execute["Execute with selected model"]
+    Decision -->|No| Next["Escalate to next tier"]
+    Next --> Match
+    Execute --> Track["Track performance"]
+    Track --> Update["Update success-rate table"]
 ```
 
-## 📋 Configuration
+## Key Mechanisms
 
-A canonical production `~/.lyra/config.toml`:
+- **BEST-Route Difficulty Estimation** — Before routing, the task is classified into 15 categories (coding, debugging, research, planning, testing, review, documentation, configuration, deployment, monitoring, security, performance, architecture, learning, general) and scored 1-10 on complexity. The score considers: number of files likely affected (estimated from task description), tool types needed (read-only tools score lower, bash/edit tools score higher), reasoning depth required (0 = trivial lookup, 10 = novel algorithm design), ambiguities in the task description, and domain unfamiliarity (how common are the terms used?).
+- **Memory-Augmented Routing** — The router maintains a success-rate table per (task_category, model) pair, updated from Verifier outcomes (see [Verifier](12-verifier.md)). If a category historically succeeds at 95% on Sonnet but only 60% on Haiku, the router biases toward Sonnet even if the complexity score is low. The table is stored in L3 semantic memory and survives sessions. Categories with fewer than 10 samples use a prior (default 80% for Sonnet, 60% for Haiku, 85% for Opus).
+- **Cost Optimization** — Given the model selection, the router estimates cost per turn (based on typical token count for the task category) and compares against the session budget. If the budget is tight, it may route to a cheaper tier even for moderately complex tasks. If a task has high cost variance (e.g., "research" could cost $0.05 or $0.50 depending on depth), the router prefers a cheaper tier for the first turn and escalates if more turns are needed.
+- **Controlled Cascade** — If confidence < 0.75 at any layer, the request escalates to the next tier. Cascade is not a fallback: the request is re-evaluated at the higher tier from scratch with the full pipeline, not retried with the same analysis. The cascade threshold is configurable per session. A task that cascades to Opus does so within a single routing decision — the user does not see multiple model switches.
+- **Prompt Cache Awareness** — The router prefers keeping the same model for consecutive turns in the same session because switching models invalidates the prompt cache (different model, different cache key). If a model switch is necessary (e.g., a simple question requires unanticipated depth), the router factors the cache invalidation cost (~$0.03-0.15 for one full recomputation) into its decision. The router may choose to complete a task on the current model even if a better model exists, because the cache savings outweigh the capability difference.
 
-```toml
-[models.fast]
-provider = "groq"
-model   = "llama-3.3-70b-versatile"
-temperature = 0.2
-max_tokens  = 4096
+## Real Numbers
 
-[models.smart]
-provider = "anthropic"
-model   = "claude-sonnet-4-20250514"
-temperature = 0.1
-max_tokens  = 8192
+| Metric | Estimate | Notes |
+|--------|----------|-------|
+| Routing latency | ~50ms | All five layers, no LLM calls |
+| Haiku accuracy on simple tasks | ~95% | Verified against Sonnet baseline |
+| Cost savings vs always-Sonnet | ~40-60% | Depends on task mix |
+| Cache hit rate with model stability | 70-90% | Sustained after turn 2 |
+| Cascade rate to Opus | ~5-10% | Of all routing decisions |
 
-[models.roles]
-plan = "smart"
-"verify-subjective" = { provider = "openai", model = "gpt-4o" }
+## Why It Matters
 
-[routing]
-cascade_enabled = true
-cascade_circuit_breaker = 8        # abort session after 8 escalations
-cascade_allowed_roles = ["chat", "code", "tool-use"]
-```
+Without routing, every request uses the most expensive model. This is wasteful: >50% of requests are simple enough for Haiku. A fixed model selection ignores task complexity, cost budgets, and historical performance. The BEST-Route framework with memory-augmented routing learns which models work best for which tasks, adapting over time. The controlled cascade ensures that difficult tasks never get stuck on an insufficient model, while cost optimization prevents budget overruns. The cache awareness prevents unnecessary model switches that would invalidate the prompt cache.
 
-A common pattern is **fast on a cheap open-weights model** (e.g. Llama 3.3 70B via Groq) and **smart on a frontier model** (e.g. Claude Sonnet 4 via Anthropic). Many valid combinations exist -- mix providers freely.
+## When to Use
 
-## 📊 Real Numbers
+Routing runs automatically on every model call. Tune the confidence threshold per tier if your task mix is unusually simple or complex. Review the success-rate table periodically via `/route stats` for categories with persistent low accuracy.
 
-| Metric | Fast Slot | Smart Slot | Cascade |
-|--------|-----------|------------|---------|
-| **Latency (TTFT)** | ~300 ms (target) | ~1,500 ms (target) | Fast + Smart combined |
-| **Cost / 1M tokens** | ~$0.59 (Groq, Llama 3.3 70B) | ~$15.00 (Anthropic, Sonnet 4) | paid once per escalation |
-| **Escalation rate** | — | — | < 5% of turns (healthy) |
-| **Quality uplift on cascade** | — | +12-30% pass@1 (target) | — |
+## When NOT to Use
 
-**Cascade rate** is the key health metric. Much higher than 5% means the fast model is too weak; near 0% means smart capacity is underutilized. The circuit-breaker (default 8/session) prevents runaway cost.
+Do not disable the router entirely — the cost differential between Haiku and Opus is 50x. Do not manually set model per task unless you have specific evidence the router is wrong for that task category.
 
-## 🧠 Why This Design
+## Related Documentation
 
-Explicit slots beat implicit per-turn heuristic model selection because they provide:
-
-- **Predictable cost**: Budget per role, not per turn.
-- **Predictable quality**: Test against a fixed smart slot.
-- **Trace clarity**: `model.fast` vs `model.smart` is human-readable.
-- **Family discipline**: Clean separation for verifier conflict checks.
-
-The cascade signal lets the fast model escalate when it hits its limits, keeping the system honest without always paying the smart model's price.
-
-## ✅ When to Use
-
-On by default. Configure `[models.fast]` and `[models.smart]` in `~/.lyra/config.toml`. Use different provider families per slot. Monitor cascade rate -- below 5% is healthy.
-
-## ❌ When NOT to Use
-
-Do not disable cascade entirely in interactive sessions -- the fast model will never escalate and quality may suffer. In deterministic CI runs, set `cascade_enabled = false`. Never use the same model family for generator and verifier (creates self-approval bias).
-
-## 🔗 Where Next
-
-- **Block:** [03-dag-teams.md](../blocks/03-dag-teams.md)
-- **Plan:** [05-model-router.md](../lyra-upgrade/plans/05-model-router.md)
-- **Guide:** [configure-providers.md](../howto/configure-providers.md)
-- **Paper:** Chen et al., *"FrugalGPT: How to Use Large Language Models While Reducing Cost and Improving Performance"* (arXiv:2305.05176) -- foundational cascade/routing paper.
-- **Paper:** Lu et al., *"Routing to the Right Model: A Survey of LLM Routing Methods"* (arXiv:2504.01853) -- survey of confidence-based routing strategies.
+- **Block:** [Plan Mode](../blocks/04-plan-mode.md) (Opusplan routing within Plan Mode)
+- **Architecture:** [Intelligent Router Flow](../architecture/11-architecture-overview.md#intelligent-router-flow)
+- **Plans:** [Model Router](../lyra-upgrade/plans/05-model-router.md)
+- **Papers:** FrugalGPT Cascade Router (Stanford 2023, arXiv:2305.05176); RouteLLM Confidence Escalation (Berkeley 2024, arXiv:2406.18665)

@@ -1,262 +1,147 @@
-# DAG Teams
+# DAG Teams -- How It Works
 
-> Coordinates multi-agent workflows using a producer-consumer pipeline: LLM-based task decomposition into a DAG, deterministic wave scheduling, parallel subagent execution, and verification.
-> **Phase:** 3 | **Depends on:** Agent Loop, Subagent Worktree, Verifier
+> DAG-based team decomposition using topological sort and parallel wave detection. Two primitives (pipeline and parallel) for task execution. Cross-team communication channels for inter-agent coordination.
+> **Block:** 07 | **Phase:** 3 (Multi-Agent & Memory) | **Depends on:** Agent Loop, Subagent Worktree, Verifier
 
-## What It Is
+## DAG-Based Task Decomposition
 
-DAG Teams is Lyra's team orchestration subsystem. It implements agent team management, hybrid routing (LLM planning + deterministic scheduling), sprint pipelines, shared task coordination, and mailbox-based inter-agent communication. The core insight is to separate the creative work of task decomposition (done by an LLM Planner) from the mechanical work of scheduling and execution (done by deterministic code).
-
-## Architecture
-
-The system is organized into four phases — Planning, Scheduling, Execution, and Merge & Verify — with support feedback loops for replanning and plan rejection.
-
-```mermaid
-graph TD
-    subgraph "Planning Phase"
-        LLMP["LLM Planner<br/><i>task decomposition</i>"]
-        DB["DAG Builder<br/><i>validates structure</i>"]
-        PA["Plan Approver<br/><i>user / auto-approve</i>"]
-    end
-
-    subgraph "Scheduling Phase"
-        WS["Wave Scheduler<br/><i>topological sort</i>"]
-        TQ["Task Queue<br/><i>ready waves</i>"]
-    end
-
-    subgraph "Execution Phase"
-        SEP["Subagent Executor Pool<br/><i>max 8 parallel</i>"]
-        WT1["Worktree 1"]
-        WT2["Worktree 2"]
-        WT3["Worktree N"]
-        MB["Mailbox Bus<br/><i>inter-agent msgs</i>"]
-        OS["ObservationStore<br/><i>cross-wave data</i>"]
-    end
-
-    subgraph "Merge & Verify Phase"
-        MR["Merge & Resolve<br/><i>auto-resolve conflicts</i>"]
-        VR["Verifier<br/><i>test & validate</i>"]
-    end
-
-    UR["User Request"] -->|decompose| LLMP
-    LLMP -->|TaskNode list| DB
-    DB -->|validated DAG| PA
-    PA -->|approved| WS
-    PA -.reject.-> LLMP
-    WS -->|parallel waves| TQ
-    TQ -->|dispatch| SEP
-    SEP --> WT1 & WT2 & WT3
-    WT1 <--> MB
-    WT2 <--> MB
-    WT3 <--> MB
-    WT1 <--> OS
-    WT2 <--> OS
-    WT3 <--> OS
-    SEP -->|per-wave results| MR
-    MR -->|merged artifact| VR
-    VR -->|verified| Result(["Final Result"])
-    VR -.replan.-> LLMP
-```
-
-All four phases execute within a single orchestration loop. The LLM Planner and Wave Scheduler are hot-swappable components — alternative planners (e.g., ReAct, tree-of-thought) or schedulers (e.g., priority-based) can be injected without changing the pipeline.
-
-## Why This Design
-
-Pure LLM-driven orchestration is non-deterministic, hard to debug, and expensive. Fully deterministic scheduling can't handle the creative work of task decomposition. The two-phase separation (LLM for planning, code for scheduling) gives determinism where it matters (scheduling is a pure function) and intelligence where needed (decomposition is creative). Cost savings vs LLM-driven scheduling: ~$0.50-$2.00 per session.
-
-## Key Concepts
-
-| Concept | Definition |
-|---------|-----------|
-| **TaskNode** | Atomic unit of work with kind, description, scope files, dependency list, and cost estimate |
-| **TaskDAG** | Immutable directed acyclic graph of `TaskNode` instances; the fundamental planning artifact |
-| **Wave** | A maximal independent set of nodes at the same topological level — all execute in parallel |
-| **SubagentContext** | Isolated execution environment (git worktree + scoped tools + token budget) |
-| **Node-scoped tools** | Per-node-kind filtered tool sets (e.g., `LOCALIZE` receives Read/Grep; `EDIT` receives Write/Bash) |
-| **Mailbox** | Typed, asynchronous channel for subagents to broadcast findings mid-execution |
-| **ObservationStore** | Key-value bus for passing structured data from wave N to wave N+1 |
-
-## Module Layout
-
-```
-packages/lyra-core/src/lyra_core/teams/
-├── agent_teams.py       # Core team management and lifecycle
-├── hybrid_router.py     # LLM task decomposition + deterministic routing
-├── sprint_pipeline.py   # Sprint-based iterative execution
-├── mailbox.py           # Typed inter-agent message channels
-├── shared_tasks.py      # Coordinated cross-agent task list
-├── plan_approval.py     # Plan review, rejection, and approval gates
-├── registry.py          # Agent and team registration
-├── executor_adapter.py  # Subagent dispatch and worktree lifecycle
-├── dag_builder.py       # DAG construction and cycle detection
-├── wave_scheduler.py    # Topological wave partitioning
-└── cleanup.py           # Teardown and worktree cleanup
-```
-
-## API Example
-
-The DAG Teams subsystem exposes three primary entry points: the **DAG builder**, the **wave scheduler**, and the **team orchestrator**.
-
-### Python
+When the Agent Loop detects that a task exceeds single-agent capacity, it delegates to DAG Teams. The LLM Planner (Opus-class) decomposes the task into a `TaskDAG` -- an immutable directed acyclic graph of `TaskNode` instances:
 
 ```python
-from lyra_core.teams import (
-    TaskNode, TaskDAG, NodeKind,
-    WaveScheduler, DAGBuilder,
-    TeamOrchestrator,
-)
+@dataclass(frozen=True)
+class TaskNode:
+    id: str
+    kind: NodeKind          # LOCALIZE | EDIT | TEST_GEN | VERIFY | REFACTOR
+    description: str
+    scope_files: list[str]
+    depends_on: list[str]   # IDs of prerequisite nodes
+    estimated_cost_usd: float
 
-# --- Step 1: Build the DAG ---
-dag = DAGBuilder(session_id="sess_abc123").build(
-    user_request="Add OAuth2 login and write tests",
-    model="claude-sonnet-4-20250514",
-)
-
-# DAG is automatically validated for cycles, orphan nodes,
-# and cost estimates. Each node has a kind from the taxonomy.
-assert dag.nodes[0].kind == NodeKind.LOCALIZE
-assert len(dag.nodes) >= 4  # localize, edit, test_gen, verify
-
-# --- Step 2: Schedule waves ---
-scheduler = WaveScheduler(dag)
-waves: list[list[TaskNode]] = scheduler.partition()
-# Wave 0: [localize]                (no dependencies)
-# Wave 1: [edit, test_gen]          (depends on wave 0)
-# Wave 2: [verify]                  (depends on wave 1)
-
-# --- Step 3: Execute the team ---
-orchestrator = TeamOrchestrator(
-    dag=dag,
-    max_parallel_subagents=8,
-    worktree_base="/tmp/lyra-worktrees",
-    enable_observation_sharing=True,
-)
-result = orchestrator.run()
-
-assert result.status == "verified"
-assert result.merge_conflict_rate < 0.02
-print(f"Total cost: ${result.total_cost_usd:.2f}")
-print(f"Waves executed: {len(result.wave_results)}")
+@dataclass(frozen=True)
+class TaskDAG:
+    nodes: dict[str, TaskNode]
+    edges: list[tuple[str, str]]  # (from_id, to_id)
 ```
 
-### TypeScript
+The DAG must be acyclic (validated at build time). Cycles are rejected with a structured error identifying the circular dependency.
 
-```typescript
-import { DAGBuilder, WaveScheduler, TeamOrchestrator, NodeKind } from "@lyra/teams";
+## Topological Sort and Parallel Detection
 
-const dag = new DAGBuilder({ sessionId: "sess_abc123" }).build({
-  userRequest: "Add OAuth2 login and write tests",
-  model: "claude-sonnet-4-20250514",
-});
-
-const scheduler = new WaveScheduler(dag);
-const waves = scheduler.partition();
-
-const orchestrator = new TeamOrchestrator({
-  dag,
-  maxParallelSubagents: 8,
-  worktreeBase: "/tmp/lyra-worktrees",
-  enableObservationSharing: true,
-});
-const result = await orchestrator.run();
-
-console.log(`Status: ${result.status}, cost: $${result.totalCostUsd}`);
-```
-
-### Building a Custom TaskNode
+The `WaveScheduler` partitions the DAG into maximal parallel waves using topological sort:
 
 ```python
-from lyra_core.teams import TaskNode, NodeKind
-
-refactor_node = TaskNode(
-    id="refactor_auth_v2",
-    kind=NodeKind.REFACTOR,
-    description="Extract OAuth2 logic from auth.py into dedicated oauth.py module",
-    scope_files=["src/auth.py"],
-    depends_on=["localize_auth"],
-    estimated_cost_usd=0.15,
-)
+# Given: DAG with edges a→b, a→c, b→d, c→d
+# Topological order: [a, b, c, d]
+# Waves:
+wave_0 = [a]          # no dependencies
+wave_1 = [b, c]       # both depend on a
+wave_2 = [d]          # depends on b and c
 ```
 
-## Performance Characteristics
+**Wave properties:**
+- Every node in wave N has all its dependencies satisfied by waves 0 through N-1.
+- Nodes within a wave have no dependencies on each other (they are a maximal independent set).
+- All nodes in a wave execute in parallel, up to the configured concurrency limit (default: 8).
 
-| Metric | Value | Conditions |
-|--------|-------|------------|
-| **Parallel speedup** (3-node DAG) | 1.6x | vs. sequential execution |
-| **Parallel speedup** (8-node DAG) | 3.0x | vs. sequential execution |
-| **Planning overhead** | $0.15 -- $0.35 | LLM decomposition + DAG building |
-| **Merge coordination overhead** | $0.25 -- $0.55 | Wave assembly + conflict resolution |
-| **Total session overhead** | $0.40 -- $0.90 | Planning + merge (sum of above) |
-| **Merge conflict rate** | 1.2% of subagent runs | 90% auto-resolved by merge driver |
-| **Worktree creation** | 80 -- 120 ms | `git worktree add` on ext4 / APFS |
-| **Worktree size** | ~100 MB | Sparse checkout of project tree |
-| **Mailbox latency** (p95) | 15 ms | In-process `asyncio.Queue` |
-| **ObservationStore read** (p95) | 3 ms | In-memory dict, no serialization |
-| **Break-even DAG width** (time) | >= 3 | 3-node minimum to beat sequential |
-| **Break-even DAG width** (cost) | >= 5 | Accounting for LLM planning cost |
+The scheduling algorithm uses Kahn's algorithm (BFS-based topological sort) with O(V+E) complexity.
 
-## Design Decisions
+## Two Primitives: Pipeline and Parallel
 
-| Decision | Why | Alternative(s) Rejected |
-|----------|-----|------------------------|
-| LLM decomposes, code schedules | Scheduling as deterministic pure function enables replay, debug, and formal verification of timing | Pure LLM orchestration (non-deterministic, non-replayable, 2-3x cost) |
-| Git worktrees for subagent isolation | Native git tooling, sub-100ms creation, no daemon dependency | Docker containers (~2-5s startup), `subprocess` sandbox (no git integration), tmux (fragile) |
-| Node-scoped tool filtering | Least-privilege model; subagent can only Read a file, not Write it, reducing accidental corruption | Global tool access (costly token waste, higher incident rate) |
-| Max 8 parallel subagents | Matches common 8-core developer machine; avoids I/O thrashing | Unlimited parallelism (diminishing returns past 8, higher conflict rate) |
-| `ObservationStore` pub/sub | Decouples wave producers from consumers; no service restart on new observation type | Shared filesystem (race conditions), tight coupling via function calls (no cross-wave persistence) |
-| In-process asyncio for mailbox | Zero serialization overhead; sub-ms delivery | Redis/nats pub/sub (2-10ms latency, operational complexity) |
-| Wave-level feedback replanning | Failed wave retries without discarding prior work; partial replan costs $0.05-$0.15 | Full-DAG replan on any failure (wastes prior work, costs $0.15-$0.35 per replan) |
+DAG Teams exposes two primitives that compose:
 
-## References
+### Pipeline (Sequential)
 
-1. **SemaClaw: Semi-Open Agent Orchestration for Deterministic Multi-Agent Planning**
-   Carlsson et al., 2025. arXiv:2604.11548.
-   -> Introduces the two-phase LLM + DAG scheduling pattern adopted here.
+Node A must complete before Node B. Used for dependencies where the output of one step is the input of the next.
 
-2. **TaskMatrix: A Learned Question-Answering Agent for Complex Multi-Step Tasks**
-   Liang et al., 2023. arXiv:2312.04622.
-   -> Foundation for task decomposition using LLM planning.
+```
+Pipeline = PLAN → EXECUTE → VERIFY → CONSOLIDATE
+```
 
-3. **Chain-of-Thought Prompting Elicits Reasoning in Large Language Models**
-   Wei et al., 2022. arXiv:2201.11903.
-   -> Motivates LLM-based decomposition step used in the Planning Phase.
+### Parallel (Concurrent)
 
-4. **AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation**
-   Wu et al., 2023. arXiv:2308.08155.
-   -> Related work on conversation-based multi-agent coordination; differs by using explicit DAG instead of free-form dialogue.
+Nodes at the same wave level execute simultaneously. Used for independent sub-tasks.
 
-5. **Wave Scheduling for DAG-Based Parallel Execution**
-   Kwok & Ahmad, 1999. IEEE TPDS.
-   -> Theoretical foundation for topological wave partitioning used in the Wave Scheduler.
+```
+Parallel = [EDIT feature_x, EDIT feature_y, TEST feature_x, TEST feature_y]
+```
 
-## Integration Points
+Both primitives compose within a DAG: a pipeline can contain parallel steps, and a parallel step can contain nested pipelines.
 
-| Other Block | Connection | Data Flow |
-|-------------|-----------|-----------|
-| [Agent Loop](01-agent-loop.md) | The main loop invokes `TeamOrchestrator.run()` as a subroutine during the "plan -> execute -> verify" cycle | `AgentLoop` sends user request in; receives `TeamResult` (status, diff, cost) out |
-| [Subagent Worktree](08-subagent-worktree.md) | Each wave node is dispatched to an isolated worktree managed by `SubagentContext` | `ExecutorAdapter` calls `WorktreeManager.create()` and `WorktreeManager.destroy()` per wave |
-| [Verifier](10-verifier.md) | Merged wave output is handed to the Verifier for test execution and validation | `MergeResolve` produces `verified_artifact`; Verifier returns `VerificationReport(score, failures)` |
-| [Context Engine](05-context-engine.md) | DAG Builder consults the Context Engine to estimate file scope and dependency depth | `DAGBuilder.context_hint()` reads active file tree from Context Engine state |
-| [Hooks & TDD Gate](06-hooks-tdd-gate.md) | Plan approval gate can enforce TDD rules before subagent execution begins | `PlanApprover` calls `TDDGate.assert_tests_first()` on EDIT/TEST_GEN nodes |
-| [Safety Monitor](11-safety-monitor.md) | Each subagent's tool calls are monitored; high-risk operations trigger wave pause | `SafetyMonitor` publishes alert to `Mailbox`; scheduler pauses wave until resolution |
-| [Observability / HIR](12-observability-hir.md) | Wave boundaries and merge events emit structured logs to the HIR trace | Wave start/finish and merge conflict events write to `HIRWriter`
+```
+PLAN → [EDIT_x, EDIT_y] → [TEST_x, TEST_y] → VERIFY → CONSOLIDATE
+```
 
-## Deep Dive
+## Cross-Team Communication Channels
 
-### Dynamic Expansion
+Subagents within a wave communicate through two mechanisms:
 
-If a Localize node discovers more files than estimated, the system can trigger a replan with the expanded scope. Two approaches: full replan (safe but wastes work) or inline child-node spawning (efficient but complex).
+### Mailbox (Typed Async Channels)
 
-### Cross-Wave Observation Sharing
+In-process `asyncio.Queue` for subagents to broadcast findings mid-execution:
 
-Pass structured data from wave N to wave N+1 via `ObservationStore.publish/subscribe`. For example, a Localize wave finds API signatures; the Edit wave consumes them. Reduces redundant analysis and saves 15-30% tokens.
+```python
+# Subagent A publishes
+mailbox.publish("api_signatures", {"login": "/api/login", "callback": "/api/callback"})
 
-### Adaptive Parallelism
+# Subagent B subscribes and reads
+signatures = mailbox.consume("api_signatures")
+```
 
-Dynamically adjust wave width based on merge conflict rate. Recent high conflict rate -> reduce parallelism. Clean merges -> increase parallelism. Achieves 15-25% reduction in merge conflicts over time.
+Mailbox latency: <15ms p95. Zero serialization overhead (in-process only).
 
-## Where Next
+### ObservationStore (Cross-Wave Data Bus)
 
-- **Related blocks:** [Agent Loop](01-agent-loop.md) — start here for the main orchestration cycle; [Subagent Worktree](08-subagent-worktree.md) — execution isolation layer; [Verifier](10-verifier.md) — validation phase.
-- **Architecture deep-dive:** `docs/architecture/03-dag-teams.md` covers the full design rationale, constraint propagation, and formal properties of the DAG scheduler.
-- **Research:** [SemaClaw (arXiv 2604.11548)](https://arxiv.org/abs/2604.11548) — the two-phase LLM + DAG scheduling pattern that inspired this block.
+Key-value bus for passing structured data from wave N to wave N+1:
+
+```python
+# Wave 1: Localize node finds scope
+store.put("auth_module", {"files": ["src/auth.py"], "api_count": 12})
+
+# Wave 2: Edit node consumes find
+scope = store.get("auth_module")
+```
+
+This reduces redundant analysis by 15-30% token savings across waves.
+
+## Parallel Execution
+
+Each wave node is dispatched to an isolated subagent worktree (Block 08). The `SubagentOrchestrator` uses `ThreadPoolExecutor` with context variable propagation for trace ID continuity.
+
+```
+DAG Teams ──(wave specs)──> SubagentOrchestrator
+                │
+                ├── Worktree 1 (subagent A)
+                ├── Worktree 2 (subagent B)
+                └── Worktree N (subagent ...)
+```
+
+## Merge and Verify
+
+After each wave completes, results are merged and verified:
+
+1. **Auto-merge**: 90% of conflicts auto-resolved with git merge drivers
+2. **LLM-resolve**: 9.88% of conflicts resolved by Opus
+3. **Human-resolve**: 0.12% of conflicts escalated to the user
+
+The merged artifact then passes through verification (Block 10) before the next wave begins.
+
+## Performance
+
+| Metric | Value | Notes |
+|--------|-------|-------|
+| Parallel speedup (3-node) | 1.6x | vs sequential |
+| Parallel speedup (8-node) | 3.0x | vs sequential |
+| Planning overhead | $0.15-$0.35 | LLM decomposition |
+| Merge conflict rate | 1.2% | 90% auto-resolved |
+| Worktree creation | 80-120ms | git worktree add |
+| Break-even DAG width | >= 3 nodes | To beat sequential |
+
+## Related Documents
+
+- **Concepts:** [Subagents](../concepts/04-subagents.md), [Plan Mode](../concepts/05-plan-mode.md), [Memory Tiers](../concepts/06-memory-tiers.md)
+- **Architecture:** [Workflow Engine](../architecture/05-workflow-engine.md), [Worktree Isolation](../architecture/10-worktree-isolation.md), [Fleet Supervisor](../architecture/04-fleet-supervisor.md)
+- **Related blocks:** [Agent Loop](01-agent-loop.md), [Subagent Worktree](08-subagent-worktree.md), [Verifier](10-verifier.md), [Context Engine](02-context-engine.md)
+
+---
+
+*References: SemaClaw (arXiv:2604.11548), AutoGen (arXiv:2308.08155), Wave Scheduling (Kwok & Ahmad, IEEE TPDS 1999)*

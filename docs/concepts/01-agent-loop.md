@@ -1,101 +1,90 @@
-# 🔄 Agent Loop
+# Agent Loop — What & Why
 
-> **The kernel of Lyra -- assemble, think, act, persist, repeat.** | **Phase:** 1
+> Concept: The kernel execution cycle that drives every Lyra session — a deterministic plan, execute, verify, consolidate loop with Parallax cognitive-executive separation and subagent dispatch.
 
-## 🧠 What It Is
+## What It Is
 
-The agent loop is Lyra's core engine: deliberately small (<200 lines in `lyra_core.loop`) so its semantics fit in one person's head. Every Lyra session, in every mode, runs through this loop. **If you understand this page, you understand 80% of Lyra.**
+The Agent Loop is Lyra's central orchestrator. Every session, in every mode, runs through this loop. It is designed to be deliberately small (<200 lines in `lyra_core.loop`) so its semantics fit in one person's head, while remaining extensible through hooks, verifiers, and memory consolidation at loop boundaries.
 
-The loop has five stages:
-1. **Assemble** the transcript from SOUL.md (the agent's persona), plan summary, tool descriptions, and recent context
-2. **Call** the model with tools allowed by the current permission mode
-3. **Execute** each tool call through permission checking, pre-hooks, execution, and post-hooks
-4. **Detect** termination (five conditions)
-5. **Persist** session state on every step
+The loop has four phases:
 
-Everything else -- planning, verification, memory writes, skill extraction -- runs outside the loop at turn or session boundaries. **This is the load-bearing design choice:** keep the kernel small, push everything else to hooks and boundaries.
+1. **Plan** — Assemble the transcript from personality (SOUL.md), plan summary, tool descriptions, and recent context. Optionally run through Plan Mode for non-trivial tasks. The context engine builds the prompt; the model router selects the tier.
+2. **Execute** — Call the model with tools gated by the permission bridge. Each tool call passes through: permission bridge authorization, PreToolUse hooks (secret scanner, TDD gate, destructive-pattern checker), tool pool execution, and PostToolUse hooks (output truncation, annotation, redaction).
+3. **Verify** — Before marking a step complete, pass through the Verifier: deterministic checks (test output, file existence, coverage delta) then an independent LLM judge from a different model family with cross-channel evidence reconciliation.
+4. **Consolidate** — On session boundaries, write observations to memory tiers, emit HIR events, trigger Dream consolidation for offline pattern extraction, and update the Reasoning Bank with distilled lessons.
 
-## ⚙️ How It Works
-
-The loop is a single function that runs one step at a time. Each step first checks **preflight conditions** -- checks run before the model call:
-
-- **Compaction** -- If the transcript exceeds 85% of the max token budget, the context engine compresses older turns into a dense narrative while preserving SOUL.md, the active plan, and a keep-window of recent turns
-- **Cost check** -- If `session.cost_usd >= max_cost_usd`, the loop terminates
-- **Interrupt** -- If the user pressed Ctrl-C, `session.interrupted` is set
-
-Then the loop calls the model. For each tool call returned, four stages run:
-
-1. **Permission bridge** -- decides allow / ask / deny / park. The model never holds authorization keys, and every decision has a traceable reason. See [Permission Bridge](./04-permission-bridge.md).
-2. **Pre-hooks** -- deterministic Python that blocks dangerous actions: secret scanner blocks credential patterns; TDD gate blocks edits without prior tests; destructive-pattern checker blocks `rm -rf /`.
-3. **Tool pool** -- executes the call. Built-in tools (read, write, bash) and MCP-provided tools are indistinguishable to the loop. See [MCP Adapter](./14-mcp-adapter.md).
-4. **Post-hooks** -- annotate and reduce observations before they enter the transcript. A 500-line file read becomes first 50 + last 20 lines plus an artifact reference. A 10 KB log becomes last 80 lines + exit code + duration.
-
-### 🛑 Termination Conditions
-1. **Model signals done** -- `is_end_of_turn=True` (STOP hooks can veto; TDD gate blocks if tests are red)
-2. **Cost budget hit** -- `session.cost_usd >= max_cost_usd`
-3. **Step limit reached** -- `step >= max_steps` (default 50)
-4. **User interrupt** -- Ctrl-C sets `session.interrupted`
-5. **Stalemate** -- same tool call signature (hashed `tool_name + normalized_args`) appears >=3 times in a 16-call window. LLMs sometimes enter "read the same file forever" loops, and this cuts them off.
-
-## 🧩 Loop Architecture
+Everything else — planning, verification, memory writes, skill extraction, reasoning distillation — runs outside the loop at turn or session boundaries. **This is the load-bearing design choice:** keep the kernel small, push everything else to hooks and boundaries.
 
 ```mermaid
-sequenceDiagram
-    participant L as Agent Loop
-    participant M as LLM
-    participant T as Tool Pool
-    participant P as Persistence
-    L->>L: 1. Assemble transcript
-    L->>M: 2. Call model
-    M-->>L: 3. Response + tool calls
-    loop For each tool call
-        L->>L: Permission bridge
-        L->>L: Pre-hooks
-        L->>T: Execute tool
-        T-->>L: Observation
-        L->>L: Post-hooks
-    end
-    L->>L: 4. Check termination
-    L->>P: 5. Persist state
+flowchart TD
+    U["User Prompt"] --> Plan["1. Plan<br/>Assemble transcript"]
+    Plan --> PB["Permission Bridge"]
+    PB --> PreH["PreToolUse Hooks"]
+    PreH --> Exec["2. Execute<br/>Tool Pool"]
+    Exec --> PostH["PostToolUse Hooks"]
+    PostH --> V{"3. Verify?"}
+    V -->|Pass| Done["Step Complete"]
+    V -->|Fail| Retry["Retry/Refine"]
+    Done --> End{"Session End?"}
+    End -->|No| Plan
+    End -->|Yes| Consol["4. Consolidate<br/>Memory + HIR + Dream"]
 ```
 
-## 📦 Configuration Model
+## Key Mechanisms
 
-```python
-@dataclass
-class AgentLoopConfig:
-    max_steps: int = 50            # Max tool calls per turn (safety limit)
-    max_cost_usd: float = 0.50     # Cost budget per session
-    max_tokens: int = 128_000      # Context window (Sonnet 4.6 default)
-    compaction_threshold: float = 0.85  # Trigger compaction at 85% of max_tokens
-    keep_window: int = 5           # Recent turns preserved during compaction
-    permission_mode: str = "ask"   # "allow" | "ask" | "deny" | "park"
-    tdd_gate_enabled: bool = False # Require tests before code changes
-```
+- **Plan-Execute-Verify-Consolidate** — The four-phase kernel is the same for every session. Plan Mode gates non-trivial work; the Verifier gates completion; consolidation runs at session end. Each phase is independently replaceable via configuration.
+- **Parallax Cognitive-Executive Separation** — Reasoning context (read-only) and execution context (action-capable) are structurally separated by a barrier. The barrier blocks 98.9% of adversarial attempts. See [Safety Monitor](11-safety-monitor.md) for the full architecture.
+- **Subagent Dispatch** — For tasks that decompose into parallel subtrees, the loop spawns subagents in isolated git worktrees via the FleetOrchestrator. Each subagent runs its own mini-loop with a constrained budget. See [Subagents](04-subagents.md).
+- **Turn Boundaries** — Everything outside the kernel loop (planning, memory writes, skill extraction, verification) runs at turn or session boundaries, keeping the kernel small and predictable.
+- **Stalemate Detection** — The loop monitors a 16-call sliding window. If the same tool call signature (hashed tool_name + normalized_args) appears 3+ times, the loop terminates with a stalemate error. This prevents the model from entering infinite "read the same file" loops.
 
-## 📊 Real Numbers
+## Termination Conditions
+
+The loop terminates on any of five conditions:
+1. Model signals `is_end_of_turn=True` (Stop hooks can veto; TDD gate blocks if tests are red).
+2. Cost budget hit: `session.cost_usd >= max_cost_usd`.
+3. Step limit reached: `step >= max_steps` (default 50).
+4. User interrupt: Ctrl-C sets `session.interrupted`.
+5. Stalemate: same tool call 3+ times in a 16-call window.
+
+## Real Numbers
 
 | Metric | Estimate | Notes |
 |--------|----------|-------|
 | Turn latency | ~3-8s | Model-dependent; target <15s |
 | Cost per turn | ~$0.02-0.08 | Sonnet 4.6, varies with context length |
-| Compaction trigger | >=85% | Configurable via config field |
+| Compaction trigger | >=85% | Configurable |
 | Stalemate detection | >=3 identical calls | Over 16-call sliding window |
 
-## 💡 Why This Design
+## Configuration Model
 
-A loop-free agent cannot be made predictable, observable, or safe. By centralizing assembly, tool execution, permission checking, and persistence into one small kernel, Lyra guarantees every model interaction follows the same safety path and every decision is recorded in the same trace format. Ad-hoc per-task loops or prompt-only workflows lack determinism and auditability. Keeping the kernel small means custom safety policies can be added via hooks without touching the core path. See [Hooks and TDD Gate](./05-hooks-and-tdd-gate.md).
+```python
+@dataclass
+class AgentLoopConfig:
+    max_steps: int = 50
+    max_cost_usd: float = 0.50
+    max_tokens: int = 128_000
+    compaction_threshold: float = 0.85
+    keep_window: int = 5
+    permission_mode: str = "ask"
+    tdd_gate_enabled: bool = False
+```
 
-## ❓ When to Use
+## Why It Matters
 
-Every Lyra session runs through the agent loop. Use it as-is for standard sessions. Extend via hooks for custom policies. For multi-turn tasks requiring planning, use [Plan Mode](./02-plan-mode.md) which feeds its output into the loop.
+A loop-free agent cannot be made predictable, observable, or safe. By centralizing assembly, tool execution, permission checking, and verification into one small kernel, Lyra guarantees every model interaction follows the same safety path and every decision is recorded in the same trace format. Ad-hoc per-task loops or prompt-only workflows lack determinism and auditability. Keeping the kernel small means custom safety policies can be added via hooks without touching the core path.
 
-## 🚫 When NOT to Use
+## When to Use
 
-Do not modify the loop's internal assembly or termination logic directly -- customize via hooks, not rewrites. Never run without the permission bridge enabled -- it is Lyra's load-bearing safety primitive. The loop is not designed for real-time responses; each turn requires at least one model round-trip (~3-8s).
+Every Lyra session runs through the agent loop. Use it as-is for standard sessions. Extend via hooks for custom policies. For multi-turn tasks requiring planning, use Plan Mode which feeds its output into the loop.
 
-## 🔗 Where Next
+## When NOT to Use
 
-- **Block:** [Agent Loop implementation](../blocks/01-agent-loop.md)
-- **Concepts:** [Plan Mode](./02-plan-mode.md) · [Permission Bridge](./04-permission-bridge.md) · [Hooks](./05-hooks-and-tdd-gate.md) · [Context Engine](./06-context-engine.md) · [MCP Adapter](./14-mcp-adapter.md)
-- **Plans:** [Autonomy](../lyra-upgrade/plans/14-autonomy.md) · **Paper:** [Chain-of-Thought (Wei et al., 2022)](https://arxiv.org/abs/2201.11903)
+Do not modify the loop's internal assembly or termination logic directly — customize via hooks, not rewrites. Never run without the permission bridge enabled. The loop is not designed for real-time responses; each turn requires at least one model round-trip (~3-8s).
+
+## Related Documentation
+
+- **Block:** [Agent Loop Implementation](../blocks/01-agent-loop.md)
+- **Architecture:** [System Topology](../architecture/11-architecture-overview.md#system-topology-target-architecture)
+- **Plans:** [Autonomy](../lyra-upgrade/plans/14-autonomy.md)
+- **Papers:** Chain-of-Thought (Wei et al., 2022, arXiv:2201.11903); Parallax cognitive-executive separation (2026, arXiv:2604.12986)

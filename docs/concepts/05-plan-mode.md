@@ -1,76 +1,66 @@
-# :clipboard: Plan Mode
+# Plan Mode — What & Why
 
-> **Non-trivial tasks become a human-readable plan artifact before a single file is touched. | Phase: 1**
+> Concept: A structured pre-execution phase that converts non-trivial tasks into approvable plan artifacts before any tool execution begins. The human approval gate is the primary safety boundary.
 
-## :bulb: What It Is
+## What It Is
 
-Plan mode is Lyra's default entry point for non-trivial tasks. Rather than editing immediately, Lyra produces a plan artifact at `.lyra/plans/<session-id>.md` and waits for approval. This catches misunderstandings early and creates the contract used by the **verifier** (cross-checks final diff against the plan), the **skill extractor** (generates reusable procedures from completed steps), and cross-session continuity via the **goal hash** (SHA-256 of the task description).
+Plan Mode is Lyra's structured planning phase that runs before the Agent Loop enters execution. When a task is classified as non-trivial (the planner estimates 3+ steps or multi-file impact), the system enters Plan Mode:
 
-## :repeat: Flow
+1. **Analyze** — The model reads the task, explores the codebase (read, grep, LSP), and identifies the scope of changes needed.
+2. **Structure** — A plan is produced: ordered steps, files to modify, functions to change, estimated effort per step, risk assessment, and verification criteria.
+3. **Present** — The plan is rendered as a diff-able markdown artifact (`.plan.md`) written to the session directory. The user sees the full plan with checkboxes per step.
+4. **Approve** — The user approves, requests changes, or rejects. Planning-phase tools (read, search, grep, LSP) are allowed; execution tools (write, bash, edit) are blocked until approval.
+5. **Execute** — On approval, the plan feeds into the Agent Loop as a constraint. Each step is verified independently before the next begins. Every checkmark is linked to a Verifier pass.
+
+The plan artifact survives session resume. A resumed session with an incomplete plan picks up at the last unverified step.
 
 ```mermaid
 flowchart TD
-    A[Task arrives] --> B{Heuristic<br>Classifier}
-    B -->|Trivial| C[Skip plan,<br>execute directly]
-    B -->|Non-trivial| D[Plan mode: read-only tools]
-    D --> E[Smart model scans repo,<br>writes plan artifact]
-    E --> F[5-section plan at<br>.lyra/plans/&lt;id&gt;.md]
-    F --> G{Approval path?}
-    G -->|Interactive| H[Read, /approve or /reject]
-    G -->|--auto-approve| I[Immediate approval]
-    G -->|CI-signed| J[HMAC verified against<br>$LYRA_APPROVAL_SECRET]
-    H --> K{Accepted?}
-    J -->|Pass| L[Flip permission mode]
-    I --> L
-    K -->|Yes| L
-    K -->|No| D
-    L --> M[Risk-based permissions:<br>default / acceptEdits]
-    M --> N[Agent loop with<br>L2 plan summary]
+    Task["Task Input"] --> Classify{"3+ steps or<br/>multi-file?"}
+    Classify -->|No| Direct["Execute directly"]
+    Classify -->|Yes| Analyze["Analyze codebase"]
+    Analyze --> Structure["Structure plan"]
+    Structure --> Present["Show plan to user"]
+    Present --> Approve{"User approves?"}
+    Approve -->|No| Revise["Revise plan"]
+    Revise --> Present
+    Approve -->|Yes| Execute["Execute steps"]
+    Execute --> Verify["Verify each step"]
+    Verify --> Complete["Task complete"]
 ```
 
-## :gear: How It Works
+## Key Mechanisms
 
-A **heuristic classifier** (`lyra_core/plan/heuristics.py`) scores each task on five weighted signals: multi-file mentions (0.7), complexity keywords like "refactor" (0.8), length > 200 chars (0.4), repo > 1,000 files (0.2), and prior task needing > 5 tool calls (0.3). Crossing 0.6 activates plan mode; skip with `--no-plan`.
+- **Opusplan Pattern** — For maximum planning quality, the plan step is routed to Opus regardless of the session's active model. Opus produces deeper decomposition, more accurate effort estimation, and better risk identification. The cost premium for planning with Opus (~$0.10 per plan) is recovered many times over in reduced execution waste.
+- **Human Approval Gate** — No execution starts without explicit user approval. The gate is enforced by the Permission Bridge: planning tools are allowed; execution tools are denied until the user sends the approval signal. This is Lyra's primary safety boundary — the human decides what to do, the agent figures out how.
+- **Plan Artifact** — Written as `plan.md` with YAML frontmatter (session id, model used, estimated cost, risk level) and markdown body with numbered steps and `[ ]` checkboxes. Each step references specific files, functions, and verification criteria. The artifact persists in `.lyra/sessions/<id>/plan.md`.
+- **Step-Level Verification** — After the plan is approved, each completed step is verified independently by the Verifier before the next step begins. If step 3 fails verification, steps 4+ do not execute. This prevents compounding errors across steps and limits the blast radius of a bad step.
+- **Skip Classification** — The planner evaluates whether Plan Mode is needed. Simple tasks (typo fix, single file read, one-line change) skip Plan Mode and execute directly. The threshold is configurable via `plan_mode_threshold` (default: 3+ steps or multi-file changes).
 
-The **smart model** (expensive reasoning slot) reads the repo with write tools denied and writes a five-section plan: (1) **Acceptance tests** -- verifier entry points, (2) **Expected files** -- to create or modify, (3) **Forbidden files** -- must stay untouched, (4) **Steps** -- work sequence absorbed by the skill extractor, (5) **Goal hash** -- SHA-256 proving plan continuity across sessions.
+## Real Numbers
 
-**Approval** has three paths, each unlocking write permissions on approval: **Interactive** -- read at the terminal, type `/approve` or `/reject` (revision loop); **`--auto-approve`** -- immediate, for trusted CI; **CI-signed** -- HMAC of (plan path, goal hash, session ID) verified against the `LYRA_APPROVAL_SECRET` env variable.
+| Metric | Estimate | Notes |
+|--------|----------|-------|
+| Planning time | ~5-10s | Opus model, includes codebase exploration |
+| Plan artifact size | ~1-3 KB | Steps, files, risk assessment |
+| Cost per plan | ~$0.08-0.12 | Opus model call |
+| Skip rate | ~40-60% | Simple tasks bypass Plan Mode |
 
-On approval, permissions flip based on **plan risk**: low-risk plans go to `default`, medium-risk to `acceptEdits`, high-risk (10+ files or bash steps) stay in `default` with more confirmation prompts. The agent loop receives a compressed L2 summary (acceptance tests, expected files, step list) while the full artifact stays in the artifact store.
+## Why It Matters
 
-## :card_file_box: Configuration
+Without Plan Mode, the model begins executing immediately on every task. For simple requests this is fine. For multi-step tasks, unplanned execution leads to wasted tool calls, context thrashing, and user surprise. Plan Mode converts execution from a free-form dialog into a structured contract: the user sees what will happen before it happens, and can redirect before cost is incurred. The human approval gate is the single most effective safety measure because it involves the human in every non-trivial decision.
 
-```python
-# lyra_core/config/plan.py
-PLAN_HEURISTICS = {
-    "multi_file_weight": 0.7,
-    "complexity_keywords_weight": 0.8,
-    "length_threshold_chars": 200,
-    "repo_size_threshold": 1000,
-    "prev_task_tool_call_threshold": 5,
-    "activation_threshold": 0.6,
-}
-```
+## When to Use
 
-## :bar_chart: Real Numbers
+Use Plan Mode for any task that requires 3+ steps or changes multiple files: implementing features, refactoring, debugging complex issues, multi-file edits. Plan Mode is also useful for unfamiliar codebases where the model needs to explore before committing to a plan.
 
-| Metric | Value | Source |
-|--------|-------|--------|
-| Plan generation latency | 8-15 s | target |
-| Token cost per plan (Opus output) | ~3,000 tokens | target |
-| Misunderstandings caught before coding | ~40% of non-trivial tasks | target |
+## When NOT to Use
 
-## :white_check_mark: When to Use
+Skip Plan Mode for trivial tasks (typo fixes, single-command operations, file reads). Skip Plan Mode when the task is urgent and the user is actively guiding the agent step by step (the user is already doing the planning).
 
-Plan mode is the **default** for any non-trivial task -- the heuristic catches it automatically. Use `--no-plan` for trivial tasks like single-line renames. Ideal for collaborative workflows where a human must approve the approach before execution.
+## Related Documentation
 
-## :no_entry_sign: When NOT to Use
-
-Skip for quick questions or read-only exploration -- the trivial-task heuristic handles those. Not needed for repetitive background tasks. Avoid relying on plan mode as a substitute for thorough requirements gathering.
-
-## :link: Where Next
-
-- **Block deep-dive:** [docs/blocks/02-plan-mode.md](../blocks/02-plan-mode.md)
-- **Planning system design:** [docs/lyra-upgrade/plans/20-planning.md](../lyra-upgrade/plans/20-planning.md)
-- **Related concepts:** [Verifier](./09-verifier.md), [Skill Engine](./10-skill-engine.md), [Agent Loop](./01-agent-loop.md)
-- **Research:** [Chain-of-Thought Prompting Elicits Reasoning](https://arxiv.org/abs/2201.11903) (Wei et al., 2022)
+- **Block:** [Plan Mode](../blocks/04-plan-mode.md)
+- **Architecture:** [Data Flow](../architecture/11-architecture-overview.md#data-flow)
+- **Plans:** [Planning](../lyra-upgrade/plans/20-planning.md)
+- **Papers:** Chain-of-Thought (Wei et al., 2022, arXiv:2201.11903); SR2AM Planning (2026, arXiv:2605.22138)

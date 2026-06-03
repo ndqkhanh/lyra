@@ -20,3 +20,29 @@ Lyra tracks every token spent — per session, per agent, per workflow — so yo
 Pricing tiers auto-detected from provider config. Cache-hit strategy works across Anthropic (native prompt cache) and DeepSeek (KV-cache reuse). Speculative decoding limited to Anthropic (both draft + target same provider).
 
 **Impact:** 3 | **Effort:** 2 | **Tier:** (A) Parity
+
+## Evidence Synthesis
+
+| Source | Key Insight |
+|--------|------------|
+| Claude Code Costs docs (§3.1) | Per-session, per-workflow token tracking; Haiku-class model for meta/monitoring |
+| Prompt Caching (Anthropic docs) | 90% cache-hit rate achievable with static prefix design; 5-min TTL management |
+| FrugalGPT (2305.05176) | LLM cascade: route simple queries to cheap models → 98% cost reduction at same accuracy |
+| Cost-Augmented MCTS (2505.14656) | Budget-aware search — MCTS that respects token budgets as a constraint |
+| IdleSpec (2605.22154) | Speculative planning during tool-waiting time → 2-3× agent loop speedup |
+| Amdahl's Law | Parallelism stops paying when coordination overhead > speedup; auto-tune fleet concurrency |
+
+## Baseline Delta
+
+| Component | Change | Migration Cost |
+|-----------|--------|---------------|
+| lyra-cost (package) | EXTEND: per-workflow, per-agent, per-session tracking | Low — existing cost tracking |
+| Prompt-cache strategy | ADD: static prefix design, 5-min TTL management | Low — provider-level config |
+| Token budgets | ADD: budget.total/spent/remaining API for workflow scripts | None — new |
+| Cost dashboard | ADD: `/cost` command | Low — new slash command |
+
+## Expert Review
+
+**Senior Performance Engineer:** "The biggest cost lever is routing 80% of queries to cheap models. A $0.0001/call Haiku handles meta/monitoring; $0.003 Sonnet handles routine tasks; $0.015 Opus handles reasoning. The router doubles as a cost optimizer."
+
+**Skeptic:** "Budget API (`budget.remaining()`) is clever but unused if users don't set budgets. Default to a daily cost cap ($50) that warns at 80% and stops at 100%." → ADOPTED.

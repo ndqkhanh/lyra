@@ -1,97 +1,63 @@
-# Context Engine
+# Context Engine — What & Why
 
-> **What the model sees each turn -- assembled, cached, and compacted for maximum signal per token.** | **Phase:** 2
+> Concept: The five-layer assembly pipeline that builds the model's context window from personality, memory, plans, tools, and conversation history. Designed for prompt caching, compression, and SOUL inviolability.
 
-## &#x1F4A1; What It Is
+## What It Is
 
-The context engine builds the transcript the LLM sees on every turn. It organizes content into **five layers** that align with provider prompt-caching APIs (Anthropic `cache_control`, OpenAI implicit prefix, Gemini `cachedContent`). The goal: keep stable content cached across turns, keep dynamic content small, and **never let persona drift** degrade behavior.
+The Context Engine is the assembly pipeline that constructs every model request. It is prompt-cache-aware from the ground up: the static prefix (SOUL.md + system prompt) is designed to never change between turns, maximizing cache hit rate on the provider side.
 
-**Key terms defined:**
-- **Prompt caching** -- reusing a computed prefix across API calls so you pay once and hit many times; 90%+ hit rates cut cost by ~5x.
-- **Compaction** -- compressing old turns into a dense summary when the transcript exceeds 85% of max tokens.
-- **Persona drift** -- the agent slowly losing its character/constraints after many turns; the dominant long-session failure mode.
-- **Observation reduction** -- truncating large tool outputs (head + tail + elided middle) before they enter the transcript; full payload stays in artifact storage.
+The five layers are assembled in fixed order, each separated by a structured delimiter (`<LAYER_N>`):
 
-## &#x2699;&#xFE0F; How It Works
+1. **SOUL (Layer 0)** — The agent's persona and operating principles. Never compacted, never truncated, never modified. Occupies the first position in every context assembly. Guaranteed to fit within the context window regardless of other layers. Typically ~2-5 KB.
+2. **Project Context (Layer 1)** — Architecture docs, plans, and conventions relevant to the current repository. Sourced from project memory, wiki pages, and recently modified files. Changes only when the project is switched. Typically ~5-15 KB.
+3. **Session State (Layer 2)** — Active plan artifact, pending verifications, checkpoint data, cost tracker, and mode settings. Changes at turn boundaries as state updates. Typically ~1-3 KB.
+4. **Plan Artifact (Layer 3)** — The current plan steps and completion status with checkboxes. Empty if no active plan. Written as a markdown artifact. Typically ~1-3 KB when present.
+5. **Conversation (Layer 4)** — Recent turns, tool observations, and an elastic history window. This is the only layer that grows unboundedly and requires compression. The keep-window preserves the last N turns (default 5), and older turns are compressed via Lean-Ctx or Mermaid compression.
+
+The assembly is deterministic: given the same state, the same context string is produced. This is critical for prompt caching — the cache key is computed from the first three layers (SOUL + project + state), and any change invalidates the cache.
 
 ```mermaid
-flowchart TB
-    subgraph L1["L1 - CACHED_PREFIX (5-12 KB)"]
-        SP["System prompt & tool schemas"]
-    end
-    subgraph L2["L2 - CACHED_MID (3-8 KB)"]
-        SOUL["SOUL.md (never compacted)"]
-        PLAN["Plan summary + todos"]
-        SKILLS["Skill & MCP descriptions"]
-    end
-    subgraph L3["L3 - DYNAMIC (40-60 KB)"]
-        TURNS["Recent turns & critique"]
-    end
-    subgraph L4["L4 - COMPACTED"]
-        SUM["Narrative summary of old L3"]
-    end
-    subgraph L5["L5 - MEMORY_REFS"]
-        TOOLS["search / timeline / get"]
-    end
-
-    L1 --> L2 --> L3
-    L3 -->|"exceeds 85% budget"| L4
-    L3 -.->|"on-demand via tools"| L5
+flowchart LR
+    SOUL["0. SOUL<br/>Inviolable, never compacted"] --> Proj["1. Project<br/>Context"]
+    Proj --> State["2. Session<br/>State"]
+    State --> PlanArt["3. Plan<br/>Artifact"]
+    PlanArt --> Conv["4. Conversation<br/>History"]
+    style SOUL fill:#4a4,color:#000
 ```
 
-Assembly always builds in fixed order (L1 ... L5) so **prompt cache prefixes stay stable**. Cache breakpoints are marked explicitly for Anthropic (90%+ hit rates) and implicitly for OpenAI/DeepSeek/Gemini. SOUL.md (~2 KB default) lives in L2 and is **never compacted** -- it is the root guard against persona drift. On compaction, a cheap model (e.g. Haiku) summarizes old L3 turns while preserving file-line anchors, failing test names, and unresolved questions. Raw output bodies are stripped and hash-addressed as artifacts (retrievable via `view <hash>`).
+## Key Mechanisms
 
-## &#x1F4CB; Data Model / Config
+- **5-Layer Assembly** — Layers are assembled in fixed order with the longest-lived (SOUL) first. Each layer is separated by a structured delimiter. The assembly is deterministic: given the same state, the same context string is produced. Prompt caching works because layers 0-2 rarely change between turns, giving 70-90% cache hit rates sustained after turn 2. The context engine tracks layer hashes to detect which layers changed between previous and current assembly.
+- **Filesystem-as-Context** — The filesystem is the primary context store. SOUL.md, plans, session state, and skill bodies all live as markdown files. The context engine reads from these files rather than maintaining a separate in-memory store. This makes context debuggable with standard tools (grep, less, diff) and means context survives crashes without a database. File reads are cached in an LRU cache (TTL 5 seconds) to avoid redundant I/O on repeated assemblies.
+- **Mermaid Compression** — When context approaches the compaction threshold (85% of max tokens, configurable), the engine compresses older conversation turns into dense Mermaid diagrams. The diagram summarizes key decisions, tool calls, and outcomes as a flowchart. Lossy but meaningful: the model can read the flow but loses exact command outputs and error messages. Compression runs as a PostToolUse hook when the token count exceeds the threshold. Savings: ~60-80% vs raw conversation for the compressed range.
+- **Lean-Ctx** — A lightweight compaction strategy that runs at every turn, not just at the compaction threshold: discard redundant tool observations (identical consecutive bash calls), truncate file reads to first 50 + last 20 lines with artifact references, collapse identical consecutive tool calls into a summary line, strip diagnostic output that matches known patterns (backtrace noise, verbose compiler output). Savings: ~30-50% per turn vs unprocessed conversation.
+- **SOUL Inviolability** — SOUL.md occupies the first position in every context assembly and is never compacted, truncated, or modified. If the remaining layers exceed the context window, only the conversation layer (Layer 4) is compressed. This guarantees the agent's persona and operating principles are always fully visible. The SOUL layer has a hard reservation: it always gets its full token allocation before other layers are considered.
 
-```python
-from lyra_core.context import ContextAssembler, ContextLayer
+## Real Numbers
 
-config = {
-    "layers": {
-        "cached_prefix":  {"max_tokens": 12_000, "cache_control": "ephemeral"},
-        "cached_mid":     {"max_tokens": 8_000,  "cache_control": "ephemeral"},
-        "dynamic":        {"max_tokens": 60_000, "compactable": True},
-        "compacted":      {"max_tokens": 20_000, "compression_ratio": 0.65},
-        "memory_refs":    {"max_tokens": 5_000,  "progressive": True},
-    },
-    "compaction_trigger_pct": 0.85,
-    "soul_max_tokens": 2_048,
-    "soul_never_compacted": True,
-    "observation_reduction": {
-        "code_files": "head_50 + tail_20 + hash_ref",
-        "bash_logs":  "last_80_lines + exit_code",
-        "web_fetch":  "title + first_500_words",
-    },
-}
+| Metric | Estimate | Notes |
+|--------|----------|-------|
+| Prompt cache hit rate | 70-90% | Sustained after turn 2 |
+| Lean-ctx savings per turn | ~30-50% | vs raw unprocessed conversation |
+| Mermaid compression savings | ~60-80% | vs raw conversation for compressed range |
+| Assembly time | <5ms | Deterministic, hot files cache-hit |
+| SOUL layer size | ~2-5 KB | Never compacted, always included |
 
-assembler = ContextAssembler(soul_text="path/to/SOUL.md", config=config)
-transcript = assembler.assemble(max_tokens=200_000)
-```
+## Why It Matters
 
-## &#x1F4CA; Real Numbers
+Without a context engine, every model call begins with a raw dump of everything the system knows. This wastes tokens, destroys prompt caching, and makes the model's behavior non-deterministic. The 5-layer pipeline ensures every model call sees the same consistent structure: personality first, then relevant context, then current state, then conversation. Prompt caching works because layers 0-2 rarely change between turns, giving 70-90% cache hit rates. Lean-ctx and Mermaid compression keep the window from filling even in long sessions. SOUL inviolability guarantees the agent's identity and operating principles are always fully visible.
 
-| Metric | Value | Notes |
-|--------|-------|-------|
-| L1 cache hit rate | 99.2% | system prompt -- stable across sessions |
-| L2 cache hit rate | 89.4% | SOUL + plan -- stable mid-session |
-| Cost per 100-turn session | $17.63 layered vs $75 flat | 76% reduction from caching + compaction (target) |
-| Compaction quality | 88% precision at 65% compression | key facts survive; 95% cost savings on old turns (target) |
-| Assembly latency | 5-15ms cold / 2-5ms warm | dominated by JSON serialization |
+## When to Use
 
-## &#x1F914; Why This Design
+The Context Engine runs automatically on every model call. Tune the compaction threshold and keep_window through config if your sessions are consistently longer or shorter than default. Monitor the prompt cache hit rate via `/observatory cache` to verify effective prefix stability.
 
-Without the context engine, every turn either overflows the token window or forgets critical information. The layered approach keeps the persona immutable, the prefix cached (90%+ hit rate), output bodies compressed (head + tail + hash), and memory accessible on demand via three small tools (`search`, `timeline`, `get`). This follows the [Anthropic 3-strategy framework](https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching): **compaction** for long dialogue, **clearing** for bulky tool output, **sub-agents** for cross-session knowledge.
+## When NOT to Use
 
-## &#x2705; When to Use / When NOT to Use
+Do not disable layers (SOUL in particular). Do not customize the assembly order — it is designed so that the most stable content comes first for cache optimization. Do not inject content between layers; use the appropriate layer slot.
 
-- **Use:** Runs automatically every turn. Monitor hit rate with `/cost` -- healthy: 80%+ L1+L2.
-- **Dont:** Reorder the five layers -- cache hit rates depend on the fixed prefix.
-- **Dont:** Put SOUL.md outside L2 -- breaks the never-compact guarantee.
-- **Dont:** Bypass compaction by constructing transcripts manually.
+## Related Documentation
 
-## &#x1F517; Where Next
-
-- **Concept:** [Agent Loop](01-agent-loop.md), [Memory Tiers](06-memory-tiers.md), [Prompt-Cache Coordination](14-prompt-cache-coordination.md)
-- **Block:** [docs/blocks/02-context-engine.md](../blocks/02-context-engine.md)
-- **Plan:** [docs/lyra-upgrade/plans/03-context-compaction.md](../lyra-upgrade/plans/03-context-compaction.md)
-- **Research:** [COMPASS: Hierarchical Context (arXiv 2510.08790)](https://arxiv.org/abs/2510.08790), [Neuro-Compaction (Stanford 2026)](https://arxiv.org/abs/2604.18002)
+- **Block:** [Context Engine](../blocks/02-context-engine.md)
+- **Architecture:** [Context Assembly / Data Flow](../architecture/11-architecture-overview.md#data-flow)
+- **Plans:** [Context Compaction](../lyra-upgrade/plans/03-context-compaction.md)
+- **Papers:** NGC: Neural Graph Compression for Agent Context (Stanford 2026, arXiv:2604.18002); Prompt Cache: Modular Attention Reuse (2024, arXiv:2311.04934)
