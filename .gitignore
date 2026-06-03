@@ -63,6 +63,7 @@ ENV/
 htmlcov/
 logs/
 node_modules/
+packages/lyra-pentest
 ProRL-Agent-Server/
 Thumbs.db
 venv/
