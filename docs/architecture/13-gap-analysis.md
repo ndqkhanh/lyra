@@ -1,6 +1,6 @@
 # Gap Analysis: Current Lyra vs AGI Target State
 
-> Generated 2026-05-26 from comprehensive codebase survey (100+ packages, ~500K+ lines) and 7-domain synthesis.
+> Generated 2026-05-26 from comprehensive codebase survey (40 modules, src/lyra/) and 7-domain synthesis.
 
 ## Executive Summary
 

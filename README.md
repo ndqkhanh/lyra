@@ -982,7 +982,7 @@ See the [full master plan](docs/lyra-upgrade/MASTER-PLAN.md) for week-by-week it
 </tr>
 <tr>
 <td width="50" align="center" style="background: #f9731620;">🧩</td>
-<td style="background: #0d1117;"><b style="color: #fb923c;">99 composable packages (87+ shipped)</b></td>
+<td style="background: #0d1117;"><b style="color: #fb923c;">40 modules in src/lyra/</b></td>
 <td style="background: #0d1117; color: #94a3b8;">Every capability is an isolated package with its own tests, docs, and dependencies. Compose what you need.</td>
 </tr>
 <tr>
@@ -1721,7 +1721,7 @@ Switch themes with `lyra theme set <name>` or via the interactive picker (`Ctrl+
 
 </td></tr></table></td></tr></table>
 
-Lyra is a monorepo of 99 composable packages across four tiers. Each package has its own `pyproject.toml`, tests, and README.
+Lyra is a single-package Python project with 40 modules under src/lyra/. See STRUCTURE.md for the full module map.
 
 <table>
 <tr style="background: #10b98120;">

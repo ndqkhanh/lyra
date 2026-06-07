@@ -47,7 +47,7 @@ Lyra is built on a **7-layer architecture** with clear separation of concerns:
 4. **Transparent Failure** — Clear error messages, no silent failures
 5. **Immutable State** — Create new objects, never mutate
 6. **Provider Agnostic** — Zero vendor lock-in
-7. **Package Isolation** — 99 composable packages
+7. **Package Isolation** — 40 modules
 8. **HIR Audit Trail** — Every action logged as JSONL
 9. **Safety by Separation** — Cognitive-executive split
 10. **Continuous Self-Improvement** — Meta-optimization loop
