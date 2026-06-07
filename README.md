@@ -13,14 +13,14 @@
 <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-v8.0-8b5cf6?style=flat-square&labelColor=111827" /></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-22c55e?style=flat-square&labelColor=111827" /></a>
 <a href="docs/lyra-upgrade/AUDIT.md"><img src="https://img.shields.io/badge/audit-PASS-22c55e?style=flat-square&labelColor=111827" /></a>
-<a href="docs/lyra-upgrade/"><img src="https://img.shields.io/badge/research-325_papers_|_40_books_|_83_repos-8b5cf6?style=flat-square&labelColor=111827" /></a>
+<a href="docs/lyra-upgrade/"><img src="https://img.shields.io/badge/research-329_papers_|_40_books_|_83_repos-8b5cf6?style=flat-square&labelColor=111827" /></a>
 
 <br><br>
 
 <b style="color: #cbd5e1; font-size: 14px;">
-Multi-agent orchestration harness with fleet supervisor, 3-tier memory, model routing,<br>
-skills ecosystem, voice mode, adversarial verification &amp; self-evolving architecture.<br>
-Backed by <b>325 papers, 40 books, 83 repos</b>. Independently audited.
+Your Terminal, Supercharged with AI Agents.<br>
+Fleet orchestration, 3-tier memory, adversarial verification &amp; self-evolving skills —<br>
+MIT-licensed, terminal-native, and backed by <b>329 papers, 40 books, 83 repos</b>.
 </b>
 
 <br>
@@ -48,7 +48,7 @@ Backed by <b>325 papers, 40 books, 83 repos</b>. Independently audited.
 - See [STRUCTURE.md](STRUCTURE.md) for the full module map and 14 new production modules.
 
 
-**RESEARCH-BACKED** — 325 papers, 40 books, 83 repos deep-read across 7 phases. 13 thematic syntheses, 16 workstream plans with breakthrough proposals, 14 new production modules. Phase 6 audit: PASS. See [`docs/lyra-upgrade/`](docs/lyra-upgrade/) for the full research corpus.
+**RESEARCH-BACKED** — 329 papers (312 deep-read + 17 failed/unrecoverable), 40 books, 83 repos cloned (40 deep-read with reverse prompts) across 7 phases. 13 thematic syntheses, 16 workstream plans with breakthrough proposals, 14 new production modules. Phase 6 audit: PASS. See [`docs/lyra-upgrade/`](docs/lyra-upgrade/) for the full research corpus.
 
 
 ---
@@ -56,7 +56,6 @@ Backed by <b>325 papers, 40 books, 83 repos</b>. Independently audited.
 
 ## <span style="color: #c084fc;">🆚 How Lyra Compares</span>
 
-</td></tr></table></td></tr></table>
 
 <table width="100%">
 <tr style="background: #1e293b;"><th style="color: #e2e8f0; padding: 8px 12px; text-align: left;">Feature</th><th style="color: #a78bfa; padding: 8px 12px; text-align: center;">Lyra</th><th style="padding: 8px 12px; text-align: center;">Claude Code</th><th style="padding: 8px 12px; text-align: center;">Codex CLI</th><th style="padding: 8px 12px; text-align: center;">Aider</th><th style="padding: 8px 12px; text-align: center;">OpenCode</th><th style="padding: 8px 12px; text-align: center;">Goose</th></tr>
@@ -72,7 +71,7 @@ Backed by <b>325 papers, 40 books, 83 repos</b>. Independently audited.
 <tr style="background: #1e293b;"><td style="color: #e2e8f0; padding: 6px 12px;">Adversarial Verification</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">✅ 5-lens panel</td><td style="color: #eab308; text-align: center; padding: 6px 12px;">Workflows</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">❌</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">❌</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">❌</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">❌</td></tr>
 </table>
 
-> **Lyra is the only open-source harness with ALL of: provider-agnostic routing, multi-agent swarm, 3-tier memory, self-evolving skills, voice mode, worktree isolation, desktop GUI, self-hosted remote access, AND adversarial verification.** Research-backed: 323 papers, 40 books, 81 repos deep-read. Phase 6 audited: PASS.
+> **Lyra is the only open-source harness with ALL of: provider-agnostic routing, multi-agent swarm, 3-tier memory, self-evolving skills, voice mode, worktree isolation, desktop GUI, self-hosted remote access, AND adversarial verification.** Research-backed: 329 papers, 40 books, 83 repos deep-read. Phase 6 audited: PASS.
 
 
 
@@ -81,7 +80,6 @@ Backed by <b>325 papers, 40 books, 83 repos</b>. Independently audited.
 
 ## <span style="color: #818cf8;">🏗 Architecture</span>
 
-</td></tr></table></td></tr></table>
 
 ### System Topology
 
@@ -179,7 +177,14 @@ graph TB
 
 ## 📐 Design Principles
 
-
+| Principle | What It Means |
+|-----------|---------------|
+| **Absorb, don't reinvent** | Mine 329 papers + 40 books + 83 repos before writing new code. Every feature is research-backed. |
+| **Harness is the product** | Lyra's five-primitive spec (Agent, Loop, Tool, Memory, Provider) is the differentiator — not any one model. |
+| **Provider-agnostic from day one** | Router works with Anthropic, OpenAI, DeepSeek, Google, and any OpenAI-compatible API. No lock-in. |
+| **Safety by design, not by patch** | 5-layer defense-in-depth: Tool Gate → Safety Pipeline → Evolution Guard → Self-Knowledge → Audit Trail. |
+| **Self-evolution with guardrails** | Agents improve their own skills, memory, and prompts — but a frozen evaluator and mutation bounds prevent misevolution. |
+| **Evidence over assertion** | Every claim is traced to a paper, repo, or test. No hand-waving. The audit proves it. |
 
 
 
@@ -188,7 +193,6 @@ graph TB
 
 ## <span style="color: #4ade80;">⚡ Quickstart</span>
 
-</td></tr></table></td></tr></table>
 
 ```bash
 # 1. Clone and install
@@ -214,19 +218,17 @@ cd src/ui/desktop && npm install && npm run dev
 ---
 
 
-## <span style="color: #34d399;">🤝 How to Contribute</span>
+## <span style="color: #34d399;">🤝 Community &amp; Contribute</span>
 
-</td></tr></table></td></tr></table>
+Lyra is open-source (MIT) and community-driven. Jump in:
 
-Lyra is open-source (MIT) and community-driven. All contributions welcome.
+- **🐛 Report a bug** — [Open an issue](https://github.com/ndqkhanh/lyra/issues) with reproduction steps
+- **💡 Propose a feature** — Start a [GitHub Discussion](https://github.com/ndqkhanh/lyra/discussions) to debate before coding
+- **📖 Improve docs** — PRs that clarify, correct, or expand documentation are always welcome
+- **🔬 Cite research** — Add missing papers to the [absorption matrix](docs/research/papers/)
+- **🧪 Write tests** — Coverage is tracked; 80%+ minimum
 
-- **Report bugs or suggest features** -- Open a GitHub issue with reproduction steps and expected behavior.
-- **Submit a PR** -- Fork the repo, make your change, and open a PR. Include tests and updated docs.
-- **Add a skill** -- Skills are YAML-frontmatter markdown files. See `lyra-skills/packs/` for examples.
-- **Cite a paper** -- If a technique we reference misses a source, open a PR adding it to the absorption matrix in [`docs/research/papers/`](docs/research/papers/).
-- **Discuss architecture** -- Join the Discussions tab on GitHub for architecture debates, design trade-off conversations, and roadmap prioritization.
-
-> All contributions are subject to the MIT license and Lyra's Code of Conduct.
+See the [full contribution guide](#-how-to-contribute-1) below for area-specific onboarding.
 
 
 
@@ -375,4 +377,3 @@ Lyra is open-source and community-driven. Contributions across all skill levels 
 
 </div>
 
-</td></tr></table></td></tr></table>

@@ -35,19 +35,13 @@ Imagine Lyra is a personal assistant who can read your email, edit files, and ru
 **Everyday analogy:** A building with three types of doors. Some doors are locked (DENY) -- the supply closet, the server room. Some doors require you to ask security (ASK) -- the boss's office, the safe. Some doors are always open (ALLOW) -- the break room, the bathroom. The building has different rules for different badges (sessions): a visitor cannot enter the server room even if they ask, but an IT admin can. Some badges (plan mode) can only enter the break room and bathroom -- no work areas.
 
 ```mermaid
-graph TD
-    A["Agent wants to call a tool"] --> B["Permission Manager checks rules"]
-    B --> C{"Is there a session override<br/>for this tool?"}
-    C -->|"Yes"| D["Use session-level rule"]
-    C -->|"No"| E{"Is the tool registered<br/>to a named policy?"}
-    E -->|"Yes"| F["Look up the policy tree<br/>and inherited rules"]
-    E -->|"No"| G["Use the global default"]
-    D --> H{"What's the verdict?"}
-    F --> H
-    G --> H
-    H -->|"ALLOW"| I["Tool runs"]
-    H -->|"DENY"| J["Tool blocked with reason"]
-    H -->|"ASK"| K["Prompt user for decision"]
+graph LR
+    A["Agent requests<br/>tool access"] --> B["Permission Manager<br/>resolves level"]
+    B --> C{"Rule says?"}
+    C -->|"ALLOW"| D["Tool runs"]
+    C -->|"DENY"| E["Tool blocked<br/>with reason"]
+    C -->|"ASK"| F["User prompted<br/>for decision"]
+    B -.-> G["Lookup order:<br/>Session override ><br/>Named policy ><br/>Global default"]
 ```
 
 **Working Flow story:** You are running a Lyra session in a project directory. You ask Lyra to "find all TODO comments and list them." Lyra decides to call `Grep` with the pattern `TODO` and a project path.
@@ -241,4 +235,7 @@ Lyra's permissions module provides a functional foundation for tool-level access
 - **SMT-based policy comparison:** Using a Satisfiability Modulo Theories solver (Z3) to deterministically decide whether a proposed policy update expands or narrows the allowed action space. From Progent (arXiv:2504.11703v3).
 - **Symlink-aware path checking:** When evaluating file access, checking both the unresolved symlink path AND the resolved target path against allowed directories. A path is blocked if either falls outside allowed bases.
 - **Tool-level granularity:** Permission rules that check the tool name (e.g., "Bash") but not the specific arguments passed to the tool. Contrast with parameter-level gating.
+- **ASR (Attack Success Rate):** The percentage of security test cases where an attacker successfully achieves their goal (e.g., exfiltrating data, hijacking the agent). Lower is better.
+- **LLM (Large Language Model):** A type of AI model trained on vast amounts of text, capable of understanding and generating human-like language. Lyra uses LLMs as its reasoning core.
+- **Utility impact / utility cost:** The reduction in the agent's ability to complete benign tasks correctly when a security defense is active. A 10pp (percentage point) utility cost means the agent succeeds 10% fewer legitimate tasks.
 - **Tool-to-policy mapping:** The association between a tool name and the named policy that governs its access level.

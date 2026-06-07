@@ -21,13 +21,13 @@ lyra/
 │   └── lyra-upgrade/      # Research corpus & workstream plans
 │       ├── notes/papers/  # 323 paper rigor notes
 │       ├── notes/books/   # 40 book chapter notes
-│       ├── notes/web/     # 11 web deep-dives
+│       ├── notes/web/     # 40 web deep-dives
 │       ├── synthesis/     # 13 thematic syntheses
 │       ├── plans/         # 16 workstream plans
 │       ├── repos/         # 81 cloned repos
 │       ├── AUDIT.md       # Phase 6 independent audit (PASS)
 │       ├── FINAL_REPORT.md # Executive summary + 8 breakthroughs
-│       ├── PROGRESS.md    # Reconciled manifest (313 read + 10 failed)
+│       ├── PROGRESS.md    # Reconciled manifest (312 read + 17 failed)
 │       └── RESEARCH_LOG.md # Full run log
 ├── scripts/               # Build & utility scripts
 ├── pyproject.toml         # Python build config

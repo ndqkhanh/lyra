@@ -12,7 +12,7 @@ All notable changes to the Lyra project.
 
 ### Deep Research Complete + Breakthrough Build — 10 New Modules, 90 Tests, 475 Artifacts
 
-**Research:** 323 papers deep-read (306 read + 17 failed honestly) · 40 AI-agent books · 81 repos cloned · 11 web deep-dives · 13 thematic syntheses · 16 workstream plans · Phase 6 audit PASS
+**Research:** 329 papers (312 deep-read + 17 failed) · 40 books · 83 repos cloned (40 deep-read with reverse prompts) · 40 web notes · 13 syntheses · 16 plans · Phase 6 audit PASS
 
 **New Production Modules:**
 - `memory/admission_control.py` — A-MAC 5-factor memory gate (MemAgent ICLR 2026)

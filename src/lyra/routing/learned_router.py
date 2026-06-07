@@ -4,7 +4,7 @@ Learned multi-head model router (BEST-Route architecture).
 References
 ----------
 - BEST-Route: Adaptive LLM Routing with Test-Time Optimal Compute
-  Ding et al., ICML 2025, arXiv:2506.22716v1
+  Ding et al., arXiv:2506.22716v1
 - RouteLLM: Learning to Route LLMs with Preference Data
   Ong et al., ICLR 2025, arXiv:2406.18665v4
 - Training Verifiers to Solve Math Word Problems (GSM8K)
@@ -303,7 +303,7 @@ class LearnedRouter:
 
     References
     ----------
-    BEST-Route (Ding et al., ICML 2025, arXiv:2506.22716v1)
+    BEST-Route (Ding et al., arXiv:2506.22716v1)
     RouteLLM (Ong et al., ICLR 2025, arXiv:2406.18665v4)
     FrugalGPT (Chen et al., ICML 2023, arXiv:2305.05176v1)
     """

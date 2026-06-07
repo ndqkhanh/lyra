@@ -8,9 +8,9 @@ Complete deep-research corpus backing every Lyra design decision. All artifacts 
 |-----------|----------|
 | [`plans/`](plans/) | 16 workstream plans — each with breakthrough proposal + Skeptic objection |
 | [`synthesis/`](synthesis/) | 13 thematic syntheses — head-to-head technique comparisons |
-| [`notes/papers/`](notes/papers/) | 323 paper rigor notes (313 read + 10 failed honestly) |
+| [`notes/papers/`](notes/papers/) | 329 paper rigor notes (312 read + 17 failed) |
 | [`notes/books/`](notes/books/) | 40 book chapter-level + best-practices notes |
-| [`notes/web/`](notes/web/) | 11 web deep-dives (6 Claude Code docs + 5 repos with reverse prompts) |
+| [`notes/web/`](notes/web/) | 40 web deep-dives (32 repo deep-dives + 5 Claude Code architecture + 3 other) |
 | [`repos/`](repos/) | 81 GitHub repos cloned (top 5 deep-dived) |
 
 ## Key Documents
@@ -19,7 +19,7 @@ Complete deep-research corpus backing every Lyra design decision. All artifacts 
 |----------|---------|
 | [`AUDIT.md`](AUDIT.md) | Phase 6 independent audit — PASS (Coverage ✓ Rigor ✓ Citations ✓ Breakthroughs ✓) |
 | [`FINAL_REPORT.md`](FINAL_REPORT.md) | Executive summary + 8 ranked breakthrough recommendations |
-| [`PROGRESS.md`](PROGRESS.md) | Reconciled manifest — 313 read, 10 failed, 40 books, 11 web, 81 repos |
+| [`PROGRESS.md`](PROGRESS.md) | Reconciled manifest — 312 read, 17 failed, 40 books, 40 web, 83 repos |
 | [`RESEARCH_LOG.md`](RESEARCH_LOG.md) | Full run log with 7 phase checkpoints + remediation |
 | [`master-prompt.md`](master-prompt.md) | The binding research prompt (§0–§9) — 3 write-backs complete |
 

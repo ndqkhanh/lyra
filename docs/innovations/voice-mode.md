@@ -34,7 +34,7 @@ Lyra's Voice Mode makes the following contributions:
 
 7. **Benchmark framework.** A `MetricCollector` records per-stage latency samples and computes p50/p95/p99 with a `ContinuousMonitor` for production observation. FDB-v3 metrics (Tool Selection F1, Self-Correction Pass@1, Turn-Take Reliability) are reported alongside targets from the FDB-v3 cascaded baseline. A `TauVoiceBridge` provides an extensible interface for external benchmark harnesses. Code path: `src/lyra/voice/benchmarks.py`.
 
-**Intuition callout:** Think of Lyra's voice as a team of specialists connected by a conveyor belt. A listener (capture) hears you, a gatekeeper (VAD) decides if you are talking, a transcriber (STT) writes down your words, a thinker (router + LLM) figures out the answer, a safety checker filters the reply, a speaker (TTS) reads it aloud, and an interrupt handler lets you cut in at any time. Tier A connects this conveyor belt with off-the-shelf specialists. Tier B replaces the whole belt with a single super-specialist that can listen and speak simultaneously.
+**Intuition callout:** Think of Lyra's voice as a team of specialists connected by a conveyor belt. A listener (capture) hears you, a gatekeeper (VAD) decides if you are talking, a transcriber (STT) writes down your words, a thinker (router + LLM) figures out the answer, a planned safety checker will eventually filter the reply, a speaker (TTS) reads it aloud, and an interrupt handler lets you cut in at any time. Tier A connects this conveyor belt with off-the-shelf specialists. Tier B replaces the whole belt with a single super-specialist that can listen and speak simultaneously.
 
 ## How it works -- the simple version
 
@@ -42,7 +42,7 @@ Lyra's Voice Mode makes the following contributions:
 
 Imagine you are speaking to a human interpreter who sits in a soundproof booth. You speak into a microphone. The interpreter hears you, writes down your words, thinks about the best response, and speaks the answer into a headset you wear. If you interrupt halfway through the answer, the interpreter stops, listens to your correction, and adjusts the response.
 
-Lyra's Voice Mode works the same way. The microphone is the `AudioCapture` module. The interpreter's ears are the VAD (Voice Activity Detector), which decides when you are speaking vs. silent. The note-taking is STT (Speech-to-Text). The thinking is the LLM (Language Model) routed through the `VoiceAgentRouter`. The speaking is TTS (Text-to-Speech). And the ability to interrupt is "barge-in," handled by the `FullDuplexHandler` with its `SemanticEndpointer`, which distinguishes a genuine interruption from a cough or a filled pause ("um", "uh").
+Lyra's Voice Mode works the same way. The microphone is the audio capture module. The interpreter's ears are the VAD (Voice Activity Detector), which decides when you are speaking vs. silent. The note-taking is STT (Speech-to-Text). The thinking is the LLM (Language Model) routed through the agent router. The speaking is TTS (Text-to-Speech). And the ability to interrupt is "barge-in," handled by the turn-taking handler with its semantic endpointing system, which distinguishes a genuine interruption from a cough or a filled pause ("um", "uh").
 
 **Simple flow diagram:**
 
@@ -68,8 +68,7 @@ graph LR
     MIC[Microphone] --> VAD[Voice Activity Detector]
     VAD --> STT[Speech-to-Text]
     STT --> ROUTER[Agent Router]
-    ROUTER --> SAFETY[Safety Check]
-    SAFETY --> TTS[Text-to-Speech]
+    ROUTER --> TTS[Text-to-Speech]
     TTS --> SPKR[Speaker]
 
     VAD -.->|Barge-in detected| TTS
@@ -92,9 +91,9 @@ Total round-trip: several seconds, dominated by the LLM reasoning time and the T
 
 ## Use Cases
 
-**Scenario 1: Hands-free code exploration during a commute.** A developer on a train opens Lyra in voice mode, holds the spacebar, and says "Summarize the changes in the last three commits of the auth branch. Which files changed the most?" Lyra transcribes the request, routes it through the orchestrator, runs the required git commands, and reads back the summary. The developer never touches the keyboard. The cascaded pipeline handles the end-to-end voice interaction despite background noise, and if the train rumbles loud enough to trigger a false VAD detection, the semantic endpointing in the `FullDuplexHandler` classifies it as noise rather than a genuine interruption.
+**Scenario 1: Hands-free code exploration during a commute.** A developer on a train opens Lyra in voice mode, holds the spacebar, and says "Summarize the changes in the last three commits of the auth branch. Which files changed the most?" Lyra transcribes the request, routes it through the orchestrator, runs the required git commands, and reads back the summary. The developer never touches the keyboard. The cascaded pipeline handles the end-to-end voice interaction despite background noise, and if the train rumbles loud enough to trigger a false VAD detection, the semantic endpointing in the turn-taking handler classifies it as noise rather than a genuine interruption.
 
-**Scenario 2: Accessibility for a developer with RSI.** A developer with repetitive strain injury navigates the codebase entirely by voice: "Open the API router module. Find the rate limiter middleware. Change the default limit from 100 to 200." Lyra's voice pipeline transcribes each command, the orchestrator executes the edits, and Lyra reads back confirmation. The bilingual pipeline detects Vietnamese-English code-switching when the developer says "Sua cai rate limiter trong auth module" (Fix the rate limiter in the auth module) -- the `HeuristicLanguageDetector` classifies this as MIXED, and the `BilingualRouter` selects the appropriate voice persona for each language segment.
+**Scenario 2: Accessibility for a developer with RSI.** A developer with repetitive strain injury navigates the codebase entirely by voice: "Open the API router module. Find the rate limiter middleware. Change the default limit from 100 to 200." Lyra's voice pipeline transcribes each command, the orchestrator executes the edits, and Lyra reads back confirmation. The bilingual pipeline detects Vietnamese-English code-switching when the developer says "Sua cai rate limiter trong auth module" (Fix the rate limiter in the auth module) -- the language detector classifies this as MIXED, and the bilingual router selects the appropriate voice persona for each language segment.
 
 **Scenario 3: Rapid architecture brainstorming.** During a design discussion, an engineer sketches ideas faster than they can type. Lyra's voice pipeline transcribes as they speak, routes each idea through the LLM for structuring, and outputs organized notes. When the engineer says "Actually, drop the caching idea and add a fallback strategy instead," the barge-in handler stops the previous response mid-stream, captures the correction, and the pipeline adjusts its output.
 

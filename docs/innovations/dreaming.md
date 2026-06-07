@@ -9,7 +9,7 @@ Lyra's Dreaming Engine is an automatic background process that tidies up your ag
 
 ## Abstract
 
-AI agents accumulate memory entries during active sessions but lack mechanisms for cross-session consolidation, leading to duplication, contradiction, and degraded retrieval quality over time. Lyra's Dreaming Engine introduces a tiered background consolidation system that operates during idle periods. The engine implements a three-path architecture: a Fast Dream path (implemented) that merges exact and near-duplicate memories via MD5 hashing and SimHash, detects contradictions through keyword-signal and pluggable LLM analysis, prunes outdated or low-importance entries, and discovers tags-based cross-session patterns; a Field-Theoretic path (implemented) that projects memories as continuous scalar fields on a semantic manifold and evolves them via reaction-diffusion PDEs with free-energy minimization, enabling associative recall and multi-agent coupling; and a Deep Dream path (planned) that deploys a secondary observer LLM to discover latent patterns across session logs, along with Memory Files (planned) for topic-organized wiki-style storage. Drawing on evidence from Mem0 V3's ADD-only production pipeline (LoCoMo 91.6), claude-mem's observer compression (98% token reduction), TencentDB-Agent-Memory's layered semantic pyramid (+51.5% WideSearch), and field-theoretic memory (Mitra, +116% LongMemEval F1), the Dreaming Engine targets Harvey-like ~6x task completion improvement through consolidated cross-session memory. The engine never modifies original memories -- all consolidation outputs are auditable and reviewable before acceptance.
+AI agents accumulate memory entries during active sessions but lack mechanisms for cross-session consolidation, leading to duplication, contradiction, and degraded retrieval quality over time. Lyra's Dreaming Engine introduces a tiered background consolidation system that operates during idle periods. The engine implements a three-path architecture: a Fast Dream path (implemented) that merges exact and near-duplicate memories via MD5 hashing (exact dedup), detects contradictions through keyword-signal and pluggable LLM analysis, prunes outdated or low-importance entries, and discovers tags-based cross-session patterns; a Field-Theoretic path (implemented) that projects memories as continuous scalar fields on a semantic manifold and evolves them via reaction-diffusion PDEs with free-energy minimization, enabling associative recall and multi-agent coupling; and a Deep Dream path (planned) that deploys a secondary observer LLM to discover latent patterns across session logs, along with Memory Files (planned) for topic-organized wiki-style storage. Drawing on evidence from Mem0 V3's ADD-only production pipeline (LoCoMo 91.6), claude-mem's observer compression (98% token reduction), TencentDB-Agent-Memory's layered semantic pyramid (+51.5% WideSearch), and field-theoretic memory (Mitra, +116% LongMemEval F1), the Dreaming Engine targets Harvey-like ~6x task completion improvement through consolidated cross-session memory. The engine never modifies original memories -- all consolidation outputs are auditable and reviewable before acceptance.
 
 ## Introduction
 
@@ -17,17 +17,17 @@ Every active session with Lyra writes new facts into memory. Over time, these ac
 
 **Intuition callout:** Think of the Dreaming Engine as a quiet librarian who works the night shift. During the day, patrons (agent sessions) scatter books (memories) across tables, sometimes the same book on two tables, sometimes with notes that contradict each other. The librarian does not interrupt anyone. At night, the librarian shelves duplicates, reconciles conflicting annotations, stamps "OUTDATED" on old editions, and leaves a summary card on the reference desk. In the morning, the first patron finds a tidy library instead of a pile.
 
-Existing approaches to memory consolidation fall into three camps: ADD-only pipelines that accumulate indefinitely and rely on retrieval-time fusion (Mem0 V3), observer-based compression that uses a secondary LLM to distill session logs (claude-mem), and PDE-governed continuous fields that evolve memories via thermodynamic equations (Mitra, Du & Zhao). Each addresses part of the problem. Lyra's contribution is a tiered architecture that combines all three into a single engine with source-aware routing -- fast algorithmic dedup for the 90% case, observer-based deep analysis for the 9%, and field-theoretic evolution for the 1% where continuous dynamics matter.
+Existing approaches to memory consolidation fall into three camps: ADD-only pipelines that accumulate indefinitely and rely on retrieval-time fusion (Mem0 V3), observer-based compression that uses a secondary LLM to distill session logs (claude-mem), and PDE-governed continuous fields that evolve memories via thermodynamic equations (Mitra). Each addresses part of the problem. Lyra's contribution is a tiered architecture that combines all three into a single engine with source-aware routing -- fast algorithmic dedup for the 90% case, observer-based deep analysis for the 9%, and field-theoretic evolution for the 1% where continuous dynamics matter.
 
 **Contributions:**
 
-1. **Tiered dream architecture** -- Fast path (algorithmic hash + SimHash dedup, temporal invalidation, confidence-weighted contradiction resolution) for cheap, frequent consolidation; deep path (observer LLM) for cross-session pattern discovery; field-theoretic path (PDE evolution) for continuous memory dynamics. Each tier routes to the appropriate compute model.
+1. **Tiered dream architecture** -- Fast path (algorithmic MD5 hash dedup, temporal invalidation, confidence-weighted contradiction resolution) for cheap, frequent consolidation; deep path (observer LLM) for cross-session pattern discovery; field-theoretic path (PDE evolution) for continuous memory dynamics. Each tier routes to the appropriate compute model.
 
 2. **Immutable-at-fact-level consolidation** -- The engine never mutates original memories. All actions produce a reviewable DreamBank that can be partially accepted, reverted, or rejected. This follows the Mem0 V3 reliability lesson: ADD-only at the storage tier, fusion at the retrieval tier [notes/web/mem0ai__mem0.md, SS4 Losses].
 
 3. **Field-theoretic memory with PDE operators** -- Full implementation of reaction-diffusion consolidation (diffusion to spread activation semantically, importance-weighted thermodynamic decay, multi-agent field coupling via PDE source terms) as described in Mitra (2026, arXiv 2602.21220) [notes/papers/2602.21220v1.md].
 
-4. **LightMem fast consolidation** -- A dedicated light-weight consolidation path that runs only exact dedup and low-importance pruning, designed for sub-cent cost and sub-second latency [notes/papers/2603.17187v1.md].
+4. **LightMem fast consolidation** -- A dedicated light-weight consolidation path that runs only exact dedup and low-importance pruning, designed for sub-cent cost and sub-second latency. The engine carries aspirational target metrics (105x token reduction, 309x fewer API calls) coded as constants, inspired by the LightMem class of approaches [notes/papers/2604.07798v3.md; notes/papers/2603.17187v1.md].
 
 ## How it works -- the simple version
 
@@ -83,7 +83,7 @@ flowchart LR
 
 ## Related Work
 
-Lyra's Dreaming Engine builds on findings from eight research systems spanning production memory layers, neurocognitive consolidation, and PDE-governed fields. The table below compares each related system against Lyra across four dimensions: consolidation mechanism, whether memories are mutated in-place, computational cost, and benchmark performance.
+Lyra's Dreaming Engine builds on findings from seven research systems spanning production memory layers, neurocognitive consolidation, and PDE-governed fields. The table below compares each related system against Lyra across four dimensions: consolidation mechanism, whether memories are mutated in-place, computational cost, and benchmark performance.
 
 | System | Consolidation | Mutates originals? | Cost | Benchmark |
 |--------|--------------|-------------------|------|-----------|
@@ -92,7 +92,6 @@ Lyra's Dreaming Engine builds on findings from eight research systems spanning p
 | TencentDB | L0-L3 semantic pyramid | Append-only lower layers | 32K lines TS | +51.5% WideSearch [notes/web/Tencent__TencentDB-Agent-Memory.md] |
 | Letta/MemGPT | Compaction at 90% threshold | Summarizes in-context | Variable | 3-tier architecture [notes/web/letta-ai__letta.md] |
 | A-MEM | Evolution via LLM re-link | Yes (evolves neighbor notes) | ~1,200 tok/op | Multi-Hop F1 45.85 [notes/papers/2502.12110v1.md] |
-| Entropic Memory | Free-energy minimization | Implicit (PDE dynamics) | 19.8ms/op | SR=0.28 at 50% noise [notes/papers/2605.27276v2.md] |
 | Field-Theoretic | Reaction-diffusion PDE | Implicit (field dynamics) | 7.02MB overhead | +116% LongMemEval F1 [notes/papers/2602.21220v1.md] |
 | Lyra Dreaming | Tiered: fast+deep+field | No (DreamBank review) | Fast <$0.05; deep ~$0.10 | Targets Harvey ~6x improvement (not yet measured) |
 
@@ -106,11 +105,13 @@ Lyra's Dreaming Engine builds on findings from eight research systems spanning p
 
 **A-MEM** (arXiv 2502.12110v1, ICLR 2026 MemAgent Workshop) -- Zettelkasten-inspired note construction with automatic linking and LLM-driven memory evolution. The ablation showing a 14.6 F1 drop without evolution validates that consolidation directly improves retrieval. Lyra takes the structured note model (keywords + tags + context + embedding) for planned Memory Files but avoids the mutation-in-place approach that causes Mem0 V2's failure mode [notes/papers/2502.12110v1.md].
 
-**Entropic Memory** (Du & Zhao, ICLR 2026) and **Field-Theoretic Memory** (Mitra, arXiv 2602.21220v1) -- Both model memory as continuous fields governed by thermodynamic principles. Entropic uses free-energy minimization F = E + lambda*S to balance utility (E) against entropy (S). Field-Theoretic uses reaction-diffusion PDEs on a 2D semantic manifold, achieving +116% LongMemEval F1 and near-perfect multi-agent collective intelligence at 8 agents. Lyra's FieldMemory class implements both: free-energy computation from Entropic and PDE integration from Field-Theoretic, with a full grid-based solver and pairwise graph Laplacian [notes/papers/2602.21220v1.md; notes/papers/2605.27276v2.md].
+**Field-Theoretic Memory** (Mitra, arXiv 2602.21220v1) -- Models memory as continuous fields governed by thermodynamic principles via reaction-diffusion PDEs on a 2D semantic manifold, achieving +116% LongMemEval F1 and near-perfect multi-agent collective intelligence at 8 agents. The free-energy formulation F = E + lambda*S (balancing utility against entropy) used in Lyra's FieldMemory class is grounded in the thermodynamics-of-memory literature that Mitra builds on; the specific PDE integration, graph Laplacian, and multi-agent coupling are from Mitra [notes/papers/2602.21220v1.md].
 
 **Managing Memory for AI Agents** (O'Reilly, Oct 2025) -- The book identifies six key convergences that validate Lyra's approach: importance scoring as the universal primitive, three-tier memory as the consensus architecture, LLM-driven extraction beating heuristic, cascading systems where agents choose what to promote, checkpointing as table-stakes, and macro-level evidence for shared memory value (NBER call center study showing 34% novice improvement) [notes/books/managing-memory-for-ai-agents-chapters.md].
 
-**LightMem / MetaClaw** (arXiv 2603.17187v1) -- Dual-architecture fast consolidation path (<$0.01 per dream) with opportunistic LoRA fine-tuning during idle windows. Lyra's `light_consolidate()` method directly implements the fast path pattern [notes/papers/2603.17187v1.md].
+**LightMem** (arXiv 2604.07798v3) -- Online-offline decoupled memory system using Small Language Models (SLMs) for high-frequency operations. Lyra borrows the idea of separating online (time-critical) from offline (consolidation) processing [notes/papers/2604.07798v3.md].
+
+**MetaClaw** (arXiv 2603.17187v1) -- Continual meta-learning framework with dual-timescale adaptation: fast skill-evolution via prompt injection (gradient-free) and slow RL-based weight optimization during idle windows. Lyra's `light_consolidate()` method mirrors MetaClaw's lightweight consolidation concept [notes/papers/2603.17187v1.md].
 
 ## Method
 
@@ -136,7 +137,7 @@ The data model uses three core types:
 
 4. **Pattern discovery** (`_discover_patterns`, line 607) -- Groups memories by shared tags (excluding dream-meta tags). Groups with >= 3 members generate a PATTERN entry describing the cross-session connection. The importance of the pattern is the average importance of its constituent memories. This is a heuristic approach; the planned Deep Dream path will use an LLM observer for more sophisticated analysis.
 
-5. **LightMem fast path** (`light_consolidate`, line 664) -- A stripped-down consolidation that runs only exact dedup and importance-based pruning. Designed for sub-cent operation (no LLM calls, only hash operations) and sub-second latency. It produces a DreamBank with confidence 0.98 for merges and 0.95 for prunes, and tracks the LightMem target metrics (105x token reduction, 309x fewer API calls) [notes/papers/2603.17187v1.md].
+5. **LightMem fast path** (`light_consolidate`, line 664) -- A stripped-down consolidation that runs only exact dedup and importance-based pruning. Designed for sub-cent operation (no LLM calls, only hash operations) and sub-second latency. It produces a DreamBank with confidence 0.98 for merges and 0.95 for prunes, and tracks aspirational performance targets (105x token reduction, 309x fewer API calls) coded as constants [notes/papers/2604.07798v3.md].
 
 **Apply and revert** (`apply_dream`, line 498; `revert_dream`, line 566) -- `apply_dream` commits DreamBank actions to long-term memory: merged entries become new consolidated SEMANTIC memories, suppressed contradictions are deleted, pruned entries are deleted, and pattern summaries are added as cross-session memories. `revert_dream` reverses the last apply by searching for entries created with matching `dream_entry_id` context markers and deleting them. Every application is auditable via the DreamBank's stored metadata.
 
@@ -152,7 +153,7 @@ where D is the diffusion coefficient, lambda is the thermodynamic decay rate, I 
 
 **PDE operators** (lines 167-224):
 - `_pairwise_laplacian`: Graph Laplacian on the set of memory embeddings, weighted by RBF similarity. This is the discrete version of the Laplacian operator, spreading activation across semantically neighboring memories.
-- `free_energy`: F = E + lambda_S * T * S, where E is internal energy (-importance) and S is Shannon entropy of the embedding. This follows Du & Zhao's Entropic Memory formulation for consolidation via free-energy minimization [notes/papers/2605.27276v2.md].
+- `free_energy`: F = E + lambda_S * T * S, where E is internal energy (-importance) and S is Shannon entropy of the embedding. This follows the thermodynamics-of-memory principle (free-energy minimization for consolidation) as described in Mitra [notes/papers/2602.21220v1.md].
 
 **PDE integration** (`step`, line 405; `consolidate`, line 498) -- Forward Euler integration with configurable time step (default dt=0.01). The `consolidate()` method runs up to 100 steps, stopping early when free-energy change falls below 1e-4. After consolidation, points whose importance has decayed below 0.05 are pruned (field-equivalent of forgetting). The embedding model is currently a random projection (placeholder) -- in production this would use sentence-transformers or similar.
 
@@ -210,7 +211,7 @@ graph TB
         
         subgraph "Fast Path"
             D1[MD5 hash dedup]
-            D2[SimHash near-dedup]
+            D2[Cosine similarity near-dedup<br/>(planned)]
             D3[Keyword contradiction<br/>detection]
             D4[Temporal prune of<br/>old / low-importance]
         end
@@ -268,7 +269,7 @@ FieldMemory configuration:
 
 ### Model routing and provider dependency
 
-Fast Dream path uses no LLM -- purely algorithmic (MD5 hash, SimHash, temporal checks). The contradiction checker is optional and pluggable. FieldMemory uses NumPy/JAX for PDE computation, not LLMs. Only the planned Deep Dream path requires an LLM (Sonnet-class via the observer pattern). This multi-model design follows the evidence: Mem0 V3 validates that algorithmic dedup handles the 90% case, and the 18-LLM-provider abstraction in Mem0's factory pattern demonstrates that provider choice should be configurable per dream tier [notes/web/mem0ai__mem0.md, §2 Provider architecture].
+Fast Dream path uses no LLM -- purely algorithmic (MD5 hash, temporal checks, configurable cosine similarity threshold). The contradiction checker is optional and pluggable. FieldMemory uses NumPy/JAX for PDE computation, not LLMs. Only the planned Deep Dream path requires an LLM (Sonnet-class via the observer pattern). This multi-model design follows the evidence: Mem0 V3 validates that algorithmic dedup handles the 90% case, and the 18-LLM-provider abstraction in Mem0's factory pattern demonstrates that provider choice should be configurable per dream tier [notes/web/mem0ai__mem0.md, §2 Provider architecture].
 
 ## Debate (Trade-offs)
 
@@ -277,7 +278,7 @@ The dreaming design was subjected to review across four personas. The following 
 | Decision | Win | Cost | Resolution |
 |----------|-----|------|------------|
 | ADD-only, never mutate originals | Avoids Mem0 V2 race conditions; auditable history | Storage grows; must rely on retrieval-time relevance | Accepted. Storage is cheap; retrieval-time fusion is proven (Mem0 V3: LoCoMo 91.6) |
-| Fast path is algorithmic, no LLM | Sub-cent per dream; always runs; no latency spike | Misses semantic near-duplicates that SimHash cannot catch (threshold-dependent) | Accepted. Near-duplicate misses are acceptable for the 90% case; deep path catches the rest |
+| Fast path is algorithmic, no LLM | Sub-cent per dream; always runs; no latency spike | Misses semantic near-duplicates that cosine-similarity threshold cannot catch | Accepted. Near-duplicate misses are acceptable for the 90% case; deep path catches the rest |
 | Observer LLM for deep analysis | Captures semantic patterns, recurring errors, knowledge gaps | ~$0.10-0.50 per deep dream; observer latency | Planned with budget slider (default: $0.10/dream) -- only fires when fast path finds >= 3 candidates |
 | Field-theoretic PDE consolidation | Continuous dynamics for associative recall; multi-agent coupling via PDE terms | 7.02MB overhead (random placeholder embeddings); JAX/GPU requirement | Gated behind bake-off: ships only if it beats LLM-based dreaming on quality-per-dollar |
 | Human review before apply | Prevents incorrect merges | Requires user attention | Two modes: auto-apply at confidence > 0.9, or full review queue |
@@ -293,9 +294,9 @@ The dreaming design was subjected to review across four personas. The following 
 
 ## Conclusion
 
-**What exists today.** The core Dreaming Engine is implemented in `src/lyra/memory/dream_engine.py` (780 lines) with full six-phase consolidation: exact dedup via MD5 hash, SimHash near-dedup, keyword-based contradiction detection with pluggable LLM support, temporal and importance-based pruning, tag-based pattern discovery, and a reviewable DreamBank with apply/revert. The FieldMemory implementation in `src/lyra/memory/field_theoretic.py` (805 lines) provides PDE-governed memory evolution with graph Laplacian diffusion, thermodynamic decay, free-energy minimization, multi-agent field coupling, and associative recall via field proximity. The MemoryConsolidator in `src/lyra/memory/memory_consolidation.py` (346 lines) handles short-term to long-term promotion with periodic, threshold, and immediate policies.
+**What exists today.** The core Dreaming Engine is implemented in `src/lyra/memory/dream_engine.py` (780 lines) with full six-phase consolidation: exact dedup via MD5 hash, keyword-based contradiction detection with pluggable LLM support, temporal and importance-based pruning, tag-based pattern discovery, and a reviewable DreamBank with apply/revert. Near-duplicate detection via cosine similarity (configurable threshold) is designed but gated behind a planned vector embedding pipeline. The FieldMemory implementation in `src/lyra/memory/field_theoretic.py` (805 lines) provides PDE-governed memory evolution with graph Laplacian diffusion, thermodynamic decay, free-energy minimization, multi-agent field coupling, and associative recall via field proximity. The MemoryConsolidator in `src/lyra/memory/memory_consolidation.py` (346 lines) handles short-term to long-term promotion with periodic, threshold, and immediate policies.
 
-**Measured results.** No formal benchmarks have been run against the Dreaming Engine. The code carries performance targets (Harvey ~6x task completion, LightMem 105x token reduction, Mem0 V3 LoCoMo 91.6, Field-Theoretic +116% LongMemEval F1, TencentDB +51.5% WideSearch) as aspirational goals, not measured outcomes. Establishing these benchmarks is the primary remaining work item. The one concrete operational parameter is the default 300-second idle threshold, modeled on Anthropic Dreaming's pattern.
+**Measured results.** No formal benchmarks have been run against the Dreaming Engine. The code carries performance targets (Harvey ~6x task completion, LightMem 105x token reduction target, Mem0 V3 LoCoMo 91.6, Field-Theoretic +116% LongMemEval F1, TencentDB +51.5% WideSearch) as aspirational goals, not measured outcomes. Establishing these benchmarks is the primary remaining work item. The one concrete operational parameter is the default 300-second idle threshold, modeled on Anthropic Dreaming's pattern.
 
 **Limitations (numbered, honest):**
 
@@ -322,19 +323,20 @@ The dreaming design was subjected to review across four personas. The following 
 - **Deep Dream**: The planned LLM-based observer path that analyzes session logs for cross-session patterns, recurring errors, and knowledge gaps.
 - **DreamBank**: A reviewable collection of consolidation actions (merges, contradictions, prunes, patterns) produced by a single dream cycle.
 - **Dreaming Engine**: The system that runs memory consolidation during idle time, implementing the AutoDream pattern.
-- **Fast Dream**: The always-running consolidation path using algorithmic techniques (MD5 hash, SimHash, temporal checks) without LLM calls.
+- **Fast Dream**: The always-running consolidation path using algorithmic techniques (MD5 hash, temporal checks) without LLM calls. Near-duplicate detection (e.g., cosine similarity on embeddings) is planned for a future phase.
 - **Field-Theoretic Memory**: A memory model where memories are continuous scalar fields on a semantic manifold, evolving via partial differential equations (reaction-diffusion).
 - **Free energy**: A thermodynamic quantity F = E + lambda*S that balances internal energy (E, approximated by negative importance) against entropy (S, information content of the embedding). Minimization drives consolidation.
 - **Graph Laplacian**: A matrix operator defined on a graph that measures how a function varies at each vertex relative to its neighbors. Used in FieldMemory to compute semantic diffusion.
 - **Harvey target**: The ~6x task completion improvement observed by Harvey, a legal AI, after introducing cross-session dreaming consolidation.
-- **LightMem**: A dual-architecture fast consolidation path with 105x token reduction and 309x fewer API calls, achieved by using only algorithmic (non-LLM) operations [notes/papers/2603.17187v1.md].
+- **LightMem**: A lightweight memory consolidation approach that decouples online and offline processing. Lyra's engine carries aspirational performance targets (105x token reduction, 309x fewer API calls) inspired by this class of approaches [notes/papers/2604.07798v3.md].
 - **MD5 hash dedup**: A technique that computes the MD5 hash of memory content to detect exact duplicates. The hash is a short string that uniquely identifies the content.
 - **Memory Files**: Planned topic-organized wiki-like Markdown documents that serve as user-readable, user-editable persistent memory storage.
 - **Multi-agent coupling**: A PDE mechanism where multiple agent fields interact via source terms proportional to the difference between fields, enabling shared collective memory.
 - **Observer pattern**: A consolidation architecture using a secondary LLM (the "observer") to analyze session logs and produce compressed memory entries.
 - **Progressive disclosure**: A context injection strategy that shows information in tiers: titles (timeline) first, then full details on demand, then summary. Saves token budget by filtering before loading.
 - **Reaction-diffusion PDE**: A partial differential equation of the form dphi/dt = D*Laplacian(phi) - lambda*phi + S, combining diffusion (spreading activation) with reaction (decay) and sources (new memory injection).
-- **SimHash**: A locality-sensitive hashing algorithm that maps similar content to nearby hash values, enabling efficient near-duplicate detection.
+- **Retrieval-time relevance ranking**: A strategy where memories are not deduplicated or merged at write time; instead, duplicates are tolerated in storage and a relevance-scoring function (e.g., cosine similarity, recency weighting, importance scaling) picks the best results at query time. This is the Mem0 V3 approach — simpler and more reliable than in-place merging — and Lyra relies on it for the Fast Dream path.
+- **Cosine similarity threshold**: A configurable threshold (default 0.85) for detecting near-duplicate memories based on embedding vector similarity. Currently designed into the DreamEngine config but dependent on a planned vector embedding pipeline to be active.
 - **Source term**: The S(x,y,t) term in the reaction-diffusion PDE that injects new memory activations into the semantic field.
 - **Thermodynamic decay**: The lambda*phi term in the PDE that models gradual forgetting as exponential decay of memory activation, analogous to thermodynamic dissipation.
 - **Warm-up scheduling**: A triggering strategy where the first dream cycle fires aggressively (after 1 session) and subsequent thresholds double until reaching a steady-state value, ensuring early consolidation while preventing thrash.

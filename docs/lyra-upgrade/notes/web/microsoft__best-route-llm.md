@@ -2,7 +2,7 @@
 
 ## 1. Headline Feature & Mechanism
 
-**BEST-Route: Adaptive LLM Routing with Test-Time Optimal Compute** (ICML 2025) -- a learned router that selects between multiple small language model (SLM) variants with varying best-of-N sampling depths and a single large language model (LLM), achieving a Pareto-optimal cost-performance tradeoff at inference time.
+**BEST-Route: Adaptive LLM Routing with Test-Time Optimal Compute** (arXiv 2506.22716v1) -- a learned router that selects between multiple small language model (SLM) variants with varying best-of-N sampling depths and a single large language model (LLM), achieving a Pareto-optimal cost-performance tradeoff at inference time.
 
 The core mechanism is a small N-class reranker (DeBERTa-v3-small, ~44M parameters) trained to predict which candidate model (e.g., llama-31-8b @ bo1, bo2, ..., bo5, gpt-4o @ bo1) will produce the highest-quality response for a given prompt. The key insight: instead of always routing to a single model, BEST-Route considers multiple sampling depths (cost levels) of cheap SLMs and only falls back to expensive LLMs when necessary.
 
@@ -68,7 +68,7 @@ From the results interpretation notebook and README:
   - **sel.acc**: Accuracy of picking the top-ranked candidate.
   - **oracle**: Same metrics if using ground-truth scores (upper bound).
 
-The ICML 2025 paper (not directly in the repo) reports that BEST-Route achieves approximately **40-70% cost savings** vs always using GPT-4o, while maintaining **>95% of GPT-4o quality** on held-out evaluations. These numbers come from the paper, not the repo's evaluation scripts.
+The arXiv 2506.22716v1 paper (not directly in the repo) reports that BEST-Route achieves approximately **40-70% cost savings** vs always using GPT-4o, while maintaining **>95% of GPT-4o quality** on held-out evaluations. These numbers come from the paper, not the repo's evaluation scripts.
 
 **Training hyperparameters**:
 - Router: DeBERTa-v3-small (~44M params)

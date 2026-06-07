@@ -8,9 +8,18 @@
 
 Every time Lyra calls an AI model, it picks the right provider and price tier automatically. A simple lookup or status check goes to a cheap model (Haiku, 0.25 cents per million tokens). A deep architecture debate goes to the most powerful model (Opus, $15 per million tokens). The system remembers past questions, so if a repeat query comes in it can answer from memory at 96% reduced cost. Four provider backends (Anthropic, OpenAI, DeepSeek, Google) are wired behind a single interface -- the rest of Lyra never sees which provider is being used. The learned model routing and cross-agent memory features are designed but not yet deployed.
 
+**Key concepts in plain language:**
+
+- **Learned model routing** means the system learns from experience which model works best for each type of task. Over time, it gets better at predicting whether a cheap model will do a good job or the expensive model is required.
+- **Cross-agent memory** is a shared notebook that all Lyra sub-agents write to and read from. When one agent answers a question, that answer is saved; when another agent later gets the same question, it finds the old answer and skips the work. This saves cost and time.
+- **Failover** means if one AI provider goes down (e.g., their servers are overloaded), Lyra automatically switches to another provider without you noticing. It is like having a backup phone line that kicks in when the main line is busy.
+- **Cold-start** describes the period when the router has no past data to learn from -- the first few hundred queries, before the memory has filled up or the learned router has been trained. During cold-start, only the simple rule-based routing (static tiers) is available.
+- **Temporal reasoning** means questions that involve timing, order, or change over time -- for example "What happened first?" or "Summarize this quarter's progress compared to last quarter." The memory-augmented router stores flat snapshots that do not capture changes over time naturally, which can be a limitation.
+- **Agent workloads** refers to the mix of tasks that Lyra's autonomous AI agents handle during a session: calling tools, checking status, writing code, reviewing output, asking follow-up questions. These workloads are dominated by repeat patterns -- 40-60% of queries are near-duplicates of earlier ones.
+
 ## Abstract
 
-Lyra's Model Router provides a multi-provider abstraction layer that normalizes Anthropic, OpenAI, DeepSeek, and Google Gemini backends behind a single `ProviderBackend` protocol, then routes each query to the cheapest provider-and-model combination that meets the quality threshold. The router architecture combines three strategies: (1) a static three-tier router (cheap/standard/premium) with per-session cost tracking and cross-provider fallback chains, (2) a multi-head learned router (DeBERTa-v3-small, 44M parameters) that predicts match probability per (model, effort, sampling-depth) triple, targeting 40-60% cost reduction at under 1% quality drop following the BEST-Route paradigm (Ding et al., ICML 2025), and (3) memory-augmented compound routing that caches verbatim turn-pairs and routes repeat queries to cheap models with confidence gating, targeting 96% cost reduction on recalled queries (Knowledge Access, arXiv 2603.23013v1). The provider abstraction, static routing, and fallback chain are implemented today. The learned router and memory-augmented routing exist as operational data structures with cold-start fallbacks but require training data generation and vector-database integration respectively.
+Lyra's Model Router provides a multi-provider abstraction layer that normalizes Anthropic, OpenAI, DeepSeek, and Google Gemini backends behind a single `ProviderBackend` protocol, then routes each query to the cheapest provider-and-model combination that meets the quality threshold. The router architecture combines three strategies: (1) a static three-tier router (cheap/standard/premium) with per-session cost tracking and cross-provider fallback chains, (2) a multi-head learned router (DeBERTa-v3-small, 44M parameters) that predicts match probability per (model, effort, sampling-depth) triple, targeting 40-60% cost reduction at under 1% quality drop following the BEST-Route paradigm (Ding et al., arXiv 2506.22716v1), and (3) memory-augmented compound routing that caches verbatim turn-pairs and routes repeat queries to cheap models with confidence gating, targeting 96% cost reduction on recalled queries (Knowledge Access, arXiv 2603.23013v1). The provider abstraction, static routing, and fallback chain are implemented today. The learned router and memory-augmented routing exist as operational data structures with cold-start fallbacks but require training data generation and vector-database integration respectively.
 
 ## Introduction
 
@@ -33,7 +42,15 @@ Existing approaches fall into three camps. **Single-provider** systems (Claude C
 
 ### Everyday analogy
 
-Lyra's router works like a hotel's front desk. Every guest request (task) arrives at the front desk. The desk clerk classifies it: "Where is the pool?" goes to a junior bellhop (cheap model). "My credit card was overcharged" goes to a senior manager (expensive model). The front desk also keeps a log book of every question ever asked. If a guest asks "What time is checkout?" and the same question was asked yesterday, the clerk reads yesterday's answer from the log, hands it to the junior bellhop to verify, and only escalates to the senior manager if the junior bellhop seems unsure. Multiple hotel chains (providers) are available -- if one chain's phones are down, the clerk automatically calls the other.
+Lyra's router works like a hotel's front desk. Every guest request (task) arrives at the front desk. The desk clerk classifies it: "Where is the pool?" goes to a junior bellhop (cheap model). "My credit card was overcharged" goes to a senior manager (expensive model). The front desk also keeps a log book of every question ever asked. If a guest asks "What time is checkout?" and the same question was asked yesterday, the clerk reads yesterday's answer from the log, hands it to the junior bellhop to verify, and only escalates to the senior manager if the junior bellhop seems unsure. Multiple hotel chains (providers) are available -- if one chain's phones are down, the clerk automatically calls the other. This automatic switch is called **failover**.
+
+**What these terms mean in the hotel analogy:**
+
+- **Learned model routing**: After observing hundreds of guest requests, the desk clerk learns to predict which requests the junior bellhop can handle and which need the senior manager. No one needs to write rules for every possible request.
+- **Cross-agent memory**: The log book is shared among all front-desk shifts and departments. The concierge, the maintenance team, and the reservations desk all read from and write to the same log.
+- **Cold-start**: On the hotel's first day of operation, the log book is empty and the desk clerk has no experience. Every request goes to the senior manager by default. This is the cold-start period -- it takes time to fill the log book and learn patterns.
+- **Temporal reasoning**: "Show me how complaints changed after we renovated the lobby" is a temporal reasoning question. The log book captures each complaint as a snapshot, but does not naturally show how things evolved over time. The clerk would struggle with this type of question.
+- **Agent workloads**: Imagine dozens of employees (concierge, housekeeping, maintenance, billing) each handling guest requests independently. Their combined workload -- a mix of lookup, coordination, and judgement calls -- is analogous to Lyra's agent workloads.
 
 ### Simple diagram
 
@@ -87,7 +104,7 @@ Six hours later, the same "status of the CI pipeline" question arrives again. Th
 | System / Work | Provider Count | Routing Strategy | Memory-Aware | Cost Tracking | Best-of-N |
 |---|---|---|---|---|---|
 | **Lyra (this work)** | 4 (extensible) | Static 3-tier + Learned multi-head + Compound memory | Yes (turn-pair cache) | First-class per-session | Proxy RM with NSP fallback |
-| BEST-Route (Microsoft, ICML 2025) | N-way | Multi-head DeBERTa-44M + best-of-N | No | Proxy reward model | DeBERTa-v3-large RM |
+| BEST-Route (Microsoft, arXiv 2506.22716v1) | N-way | Multi-head DeBERTa-44M + best-of-N | No | Proxy reward model | DeBERTa-v3-large RM |
 | RouteLLM (LMSYS, ICLR 2025) | Binary (strong, weak) | Matrix factorization / SW ranking | No | Post-hoc calculation | No |
 | FrugalGPT (Stanford, ICML 2023) | 3 | Sequential cascade + DistilBERT scorer | Semantic cache only | Post-hoc | No |
 | Claude Code Effort (Anthropic) | 1 (Anthropic) | Per-model calibrated effort | Prompt caching only | Per-call display | No |
@@ -95,7 +112,7 @@ Six hours later, the same "status of the CI pipeline" question arrives again. Th
 
 **Lyra diverges from each source in specific ways.**
 
-From **BEST-Route** (Ding et al., ICML 2025, [paper note](../lyra-upgrade/notes/papers/2506.22716v1.md), [repo note](../lyra-upgrade/notes/web/microsoft__best-route-llm.md)): Lyra adopts the multi-head DeBERTa-v3-small architecture but adds effort-level routing as a third dimension (the BEST-Route router selects only model and sampling depth, not reasoning effort). Lyra also adds the static-tiers-as-fallback pattern so the system is usable before training data is collected.
+From **BEST-Route** (Ding et al., arXiv 2506.22716v1, [paper note](../lyra-upgrade/notes/papers/2506.22716v1.md), [repo note](../lyra-upgrade/notes/web/microsoft__best-route-llm.md)): Lyra adopts the multi-head DeBERTa-v3-small architecture but adds effort-level routing as a third dimension (the BEST-Route router selects only model and sampling depth, not reasoning effort). Lyra also adds the static-tiers-as-fallback pattern so the system is usable before training data is collected.
 
 From **RouteLLM** (Ong et al., ICLR 2025, [paper note](../lyra-upgrade/notes/papers/2406.18665v4.md)): Lyra uses the matrix-factorization preference model for cross-model generalization but extends it from binary to N-way routing. RouteLLM's finding that 1,500 golden-labeled samples yield +20% APGR informs Lyra's training-data-efficiency targets.
 
@@ -187,7 +204,7 @@ The following components are implemented and operational in `src/lyra/routing/`.
 
 | Lyra Effort | Anthropic | OpenAI | DeepSeek | Google |
 |---|---|---|---|---|
-| LOW | thinking=disabled, 1K tokens | reasoning_effort="low" | default sampling | default config |
+| LOW | thinking=1K | reasoning_effort="low" | default sampling | default config |
 | MEDIUM | thinking=4K | (no reasoning_effort) | default sampling | default config |
 | HIGH | thinking=16K | reasoning_effort="medium" | default sampling | default config |
 | XHIGH | thinking=32K | reasoning_effort="high" | default sampling | default config |
@@ -212,7 +229,7 @@ The following components are implemented and operational in `src/lyra/routing/`.
 - `MatrixFactorPreferenceModel`: RouteLLM-style matrix factorization for cross-model generalization. Currently returns uniform baseline -- not trained.
 - `LearnedRouter`: the router itself. Its `select()` method checks state: if `COLD_START`, falls back to `_static_fallback()` which picks the safest mid-tier candidate. If `ACTIVE`, scores candidates and picks the cheapest qualifying one. The `_score_candidates()` method raises `NotImplementedError` for the backbone path -- only the heuristic fallback path is implemented.
 - `generate_training_data()`: collects 20 responses per query per model configuration, scores with proxy reward model, records (query, model, effort, n, responses, best_score, avg_latency). This is operational and produces the training data format needed for backbone training.
-- `_default_candidates()`: builds the full 8-models x 3-effort-levels x 5-sampling-depths set (120 configurations).
+- `_default_candidates()`: builds 100 configurations (8 models with variable per-model effort levels, each x 5 sampling depths).
 
 **MemoryAugmentedRouter data model** (`src/lyra/routing/memory_router.py`). The compound routing strategy is implemented as operational data structures:
 - `MemoryStore` protocol: defines `hybrid_search()`, `store()`, `store_batch()`. The protocol is defined but no concrete implementation is provided (Milvus integration is not done).
@@ -262,7 +279,7 @@ The following components are designed but not deployed.
 - **Vector database operational overhead**: Milvus deployment, tiered storage management, TTL policies, pruning strategies.
 - **Cold-start period**: The memory-augmented router provides no benefit for the first ~1K queries. The learned router provides no benefit until training completes.
 - **Maintenance burden**: Four provider adapters to maintain as each provider's API evolves. Provider API breakage is the top risk in the risk register.
-- **Time-to-query overhead**: Static router overhead is negligible (<1ms). Learned router adds ~0.62s (BEST-Route measured overhead at n=20). Memory router adds <5ms for hybrid search.
+- **Time-to-query overhead**: Static router overhead is negligible (<1ms). Learned router adds ~0.62s (BEST-Route measured overhead at n=20; see paper note §Latency Overhead at `docs/lyra-upgrade/notes/papers/2506.22716v1.md`). Memory router adds <5ms for hybrid search.
 
 ### When the design loses
 
@@ -291,7 +308,7 @@ The router's big bet is that memory beats model size for agent workloads -- a ca
 
 **Measured results.** No measured production results exist because the router has not been deployed against live traffic. The following targets are derived from cited published results:
 - Static three-tier routing: immediate cost reduction on simple lookups (all tasks classified as simple_lookup route to Haiku at $0.25/M input tokens vs. Opus at $15/M).
-- Learned router target: 40-60% cost reduction at under 1% quality drop (extrapolated from BEST-Route results on 7-model pool, Ding et al., ICML 2025; see paper note at `docs/lyra-upgrade/notes/papers/2506.22716v1.md`).
+- Learned router target: 40-60% cost reduction at under 1% quality drop (extrapolated from BEST-Route results on 7-model pool, Ding et al., arXiv 2506.22716v1; see paper note at `docs/lyra-upgrade/notes/papers/2506.22716v1.md`).
 - Memory-augmented routing target: 96% cost reduction on recalled queries with 69% quality recovery of full-context large-model baseline (Knowledge Access, Liu et al., 2026; see paper note at `docs/lyra-upgrade/notes/papers/2603.23013v1.md`).
 - Projected total: >=40% per-session token cost reduction (plan estimate combining all three strategies).
 
@@ -329,7 +346,7 @@ The router's big bet is that memory beats model size for agent workloads -- a ca
 - **Static three-tier router**: The Phase 1 rule-based router that classifies tasks by type (simple_lookup, standard, complex_reasoning, etc.) and maps them to fixed effort levels and model tiers. No training required.
 - **Task type**: A classification label assigned by the router to each incoming query (simple_lookup, standard, complex_reasoning, research, code_generation, code_review, security_scan, debugging, agentic). Determines the effort level and model tier.
 - **Turn-pair**: A (query, response, success, confidence, cost, timestamp) tuple stored in the cross-agent memory for future reuse.
-- **BEST-Route**: A learned multi-head router architecture (Ding et al., ICML 2025) using a DeBERTa-v3-small backbone with KxN classification heads to predict which (model, sampling-depth) combination meets quality targets at minimum cost. Lyra adapts this for (model, effort, sampling-depth) routing.
+- **BEST-Route**: A learned multi-head router architecture (Ding et al., arXiv 2506.22716v1) using a DeBERTa-v3-small backbone with KxN classification heads to predict which (model, sampling-depth) combination meets quality targets at minimum cost. Lyra adapts this for (model, effort, sampling-depth) routing.
 - **Compositional routing**: Joint optimization of model selection across every step of an agent execution graph (orchestrator plan, sub-agent dispatch, tool calls, verification), rather than routing each individual LLM call independently.
 - **FrugalGPT**: A sequential LLM cascade strategy (Chen et al., ICML 2023) that routes every query through the cheapest model first, evaluates response reliability with a DistilBERT scorer, and escalates only when confidence is low.
 - **RouteLLM**: A binary routing framework (Ong et al., ICLR 2025) that routes between one strong model and one weak model using matrix-factorization preference learning trained on Chatbot Arena data.

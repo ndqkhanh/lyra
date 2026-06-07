@@ -10,7 +10,7 @@ Lyra Desktop is a graphical application that gives users a window-based alternat
 
 ## Abstract
 
-Lyra Desktop is an Electron-based graphical user interface that serves as a peer client to the existing CLI/TUI, both sharing a common agent-core API over HTTP/SSE on localhost. The architecture draws on the hermes-desktop reference architecture (Electron three-process model: main/preload/renderer, 24 feature screens) and follows the operator-abstraction pattern proven by UI-TARS-desktop, OSWORLD, and OpenHands, where the agent engine is decoupled from the UI surface. As currently implemented, the desktop provides a streaming ChatView with Markdown rendering and per-message token/cost estimation, a FleetView with two-axis state badges (task-state x process-liveness), a Sidebar with provider and session management, a SkillsHub with quality scoring and security-scan indicators, and a StatusBar with live connection monitoring. The Electron main process proxies all HTTP and SSE traffic through a sandboxed renderer (contextIsolation, sandbox: true, nodeIntegration: false). Novelty lies in the interchangeable-client architecture (CLI and Desktop as equal peers) and the planned integration of CER-style experience replay (dual-channel dynamics/skills memory, +51% relative improvement on WebArena) and accept-sequence dispatch (race-free cancellation from Crush). The implemented shell comprises 18 files (2 Electron, 8 React components, 2 hooks, 4 config, 2 style); the backend agent core, multimodal pipeline, voice surface, and CER buffer are deferred.
+Lyra Desktop is an Electron-based graphical user interface that serves as a peer client to the existing CLI/TUI, both sharing a common agent-core API over HTTP/SSE on localhost. The architecture draws on the hermes-desktop reference architecture (Electron three-process model: main/preload/renderer, 12 feature screens) and follows the operator-abstraction pattern proven by UI-TARS-desktop, OSWORLD, and OpenHands, where the agent engine is decoupled from the UI surface. As currently implemented, the desktop provides a streaming ChatView with Markdown rendering and per-message token/cost estimation, a FleetView with two-axis state badges (task-state x process-liveness), a Sidebar with provider and session management, a SkillsHub with quality scoring and security-scan indicators, and a StatusBar with live connection monitoring. The Electron main process proxies all HTTP and SSE traffic through a sandboxed renderer (contextIsolation, sandbox: true, nodeIntegration: false). Novelty lies in the interchangeable-client architecture (CLI and Desktop as equal peers) and the planned integration of CER-style experience replay (dual-channel dynamics/skills memory, +51% relative improvement on WebArena) and accept-sequence dispatch (race-free cancellation from Crush). The implemented shell comprises 18 files (2 Electron, 8 React components, 2 hooks, 4 config, 2 style); the backend agent core, multimodal pipeline, voice surface, and CER buffer are deferred.
 
 ## Introduction
 
@@ -66,15 +66,15 @@ graph TB
 
 Suppose you type "Summarize the key findings from the Q2 report." Here is what happens step by step:
 
-1. You press Enter. The React app in the renderer process creates a streaming connection via `window.lyraAPI.connectSSE()`.
-2. The preload bridge (a thin typed API) relays the request to the Electron main process through IPC.
-3. The main process sends an HTTP POST to the agent core at `http://127.0.0.1:8580/chat/{session-id}/stream`. It reads the server-sent events (SSE) stream line by line.
-4. Each `data:` line from the SSE stream is forwarded to the renderer as an IPC message `sse:data`. The renderer's `useLyraAPI` hook appends each chunk to the assistant message.
-5. The `ChatView` component re-renders on every chunk, so you see the response appear word by word -- no waiting for the full reply.
-6. When the stream ends (chunk with `done: true`), the message is finalized and token/cost estimates are shown below it.
+1. You press Enter. The frontend web app creates a streaming connection to the backend.
+2. A secure bridge relays the request to the Electron main process, which has access to the network.
+3. The main process sends an HTTP POST to the agent core at `http://127.0.0.1:8580/chat/{session-id}/stream` and reads the real-time data stream line by line.
+4. Each chunk of text from the stream is forwarded to the frontend, where it is appended to the assistant's response message.
+5. The chat window re-renders its content on every chunk, so you see the response appear word by word -- no waiting for the full reply.
+6. When the stream ends, the message is finalized and token/cost estimates are shown below it.
 7. A status bar at the bottom updates live: connection status (green dot when connected), streaming indicator, session count, and cumulative cost.
 
-If you want to stop the response mid-stream, clicking the "Stop" button cancels the underlying AbortController, which terminates the SSE connection.
+If you want to stop the response mid-stream, clicking the "Stop" button cancels the in-flight request to the backend.
 
 ## Use Cases
 
@@ -272,7 +272,7 @@ The following are **built and functional** as of the current codebase:
 - Concurrent dev mode: `concurrently` runs Vite dev server + Electron.
 
 **Python-side desktop utilities** (`src/lyra/desktop/__init__.py`, `src/lyra/desktop/enhance.py`):
-- `DesktopConfig` dataclass: frozen (immutable), with `merge()` and `to_dict()`/`from_dict()` serialization. Stores theme, font size, virtual desktop flags, window snapping, default window dimensions, animation toggle.
+- `DesktopConfig` dataclass: mutable (only `WindowGeometry` is `frozen=True`), with `merge()` and `to_dict()`/`from_dict()` serialization. Stores theme, font size, virtual desktop flags, window snapping, default window dimensions, animation toggle.
 - `WindowManager`: stub class with create/move/resize/focus/close operations on an in-memory window registry. Returns UUID-based window IDs.
 - `VirtualDesktopManager`: stub class for virtual desktop management with create/remove/assign-window/switch-desktop operations.
 - `WindowPosition` and `WindowState` enums with predefined values.
@@ -343,7 +343,7 @@ Lyra Desktop exists today as a functional Electron + React shell with 18 source 
 
 **Measured results** (from codebase inspection):
 - Shell built and functional with 12 React/TypeScript source files (App, 6 components, 2 hooks, 1 theme, 1 global types, 1 entry point) + 2 Electron files (main, preload).
-- SSE streaming with chunk-level rendering achieves sub-100ms perceived latency (chunks forwarded as they arrive from the agent core).
+- SSE streaming with chunk-level rendering targets sub-100ms perceived latency (chunks forwarded as they arrive from the agent core). **Note:** this is a design target -- actual latency depends on the agent-core API backend, which does not yet exist.
 - Health checking at 10s intervals, session polling at 5s intervals.
 - Cross-platform build targets configured for macOS (dmg, zip), Windows (nsis, zip), Linux (AppImage, deb).
 
