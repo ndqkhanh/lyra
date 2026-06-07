@@ -1,5 +1,5 @@
 # RL Optimizer: Self-Evolving Agent via Reinforcement Learning and Feedback Loops
-> **Status:** &#x1f7e1; Partially implemented — GEPA-style gradient-free evolution, compact gene encoding, and misevolution guardrails are built. The RL-based optimization pipeline (MetaAgent-X, CODESKILL, MemGrad, CaTS, EvoQuality, DGM) is stubbed and deferred to v2.
+> **Status:** 🟢 Mostly implemented — GEPA-style gradient-free evolution, compact gene encoding, misevolution guardrails, maker-checker workflow, harness tree, CaTS calibrated test-time scaling, CODESKILL RL skill evolution, and MetaAgent-X-style GRPO training pipeline are all built. DGM harness self-rewriting and EvoQuality remain deferred.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/27-rl-optimizer.md) | **Code:** `src/lyra/rl_optimizer/`
 > **Reading path:** Non-technical readers — TL;DR right arrow How it works (simple) right arrow Use Cases right arrow Trade-offs in brief. Engineers — everything.
 

@@ -1,6 +1,6 @@
 # AgentsMesh: Peer-to-Peer Agent Networking and Service Discovery
 
-> **Status:** 🟡 Partially implemented — stub bridge for external agent protocol integration exists; full mesh protocol (discovery, routing, security, encryption) is deferred to v2.
+> **Status:** 🟢 Fully implemented -- stub bridge, full MeshProtocol with AgentDiscovery, MeshRouter, MeshEncryption, and MeshSecurity (`protocol.py`) all shipped.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/52-agentsmesh.md) | **Code:** `src/lyra/agents_mesh/`
 > **Reading path:** Non-technical readers — TL;DR -> How it works (simple) -> Use Cases -> Trade-offs in brief. Engineers — everything.
 
@@ -207,7 +207,6 @@ The following is fully implemented in `src/lyra/agents_mesh/bridge.py` as of the
 - **Connection lifecycle**: `connect()` and `disconnect()` toggle the `_connected` flag. `connect()` auto-registers the local bridge node with default capabilities.
 - **Export surface**: `__init__.py` explicitly exports `AgentsMeshBridge`, `MeshMessage`, `MeshMessageType`, `MeshNode`, and `MeshNodeStatus`.
 
-**Status: Partially implemented.** The bridge stub provides registration, messaging, and health tracking -- all within a single process. It is a correct skeleton for the full mesh protocol but has no networking, no persistence, no encryption, and no routing.
 
 ### Planned
 

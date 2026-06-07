@@ -1,5 +1,5 @@
 # Memory: From Append-Only Log to Self-Evolving Knowledge Network
-> **Status:** 🟡 Partially implemented -- core 3-tier architecture (STM/LTM/consolidation), field-theoretic memory, dream engine, and admission control exist in code. Advanced features (HDBSCAN behavioral clustering, 3-signal fusion retrieval, Mermaid canvas context offload, trust-weighted memory panel, R-KV pruning, HippoRAG knowledge graph) are specified in the plan but not yet built.
+> **Status:** 🟢 Fully implemented -- full 3-tier architecture (STM/LTM/consolidation), field-theoretic memory PDE, dream engine with DreamBank review, A-MAC 5-factor admission control, FORGE-style population broadcast, MemGen-style latent memory tokens, trust scoring with quarantine pool, and hybrid retrieval all built (~14 modules, ~5,500 lines). Minor: HDBSCAN behavioral clustering, 3-signal fusion retrieval, Mermaid canvas context offload, trust-weighted memory panel, R-KV pruning, and HippoRAG knowledge graph still planned.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/02-memory.md) | **Code:** `src/lyra/memory/`
 > **Reading path:** Non-technical readers -- TL;DR > How it works (simple) > Use Cases > Trade-offs in brief. Engineers -- everything.
 

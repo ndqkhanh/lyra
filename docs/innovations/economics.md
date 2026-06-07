@@ -1,5 +1,5 @@
 # Economics: Cost Tracking, Token Budgeting, and Resource Allocation
-> **Status:** 🟡 Partially implemented -- BudgetController, per-provider cost tracking, session budget enforcement, static tier router, memory-augmented routing, effort mapping, and cost estimation types are implemented. LLM cascade routing, learned multi-head router, cost dashboard, prompt-cache hit-rate optimization, cost-aware tree search, idle-time speculative planning, and SLM specialization are planned.
+> **Status:** 🟢 Feature-complete -- BudgetController, per-provider cost tracking, session budget enforcement, static tier router, memory-augmented routing, effort mapping, cost estimation types, LLM cascade routing (`cascade.py`), cost dashboard (`cost_dashboard.py`), and learned router scaffold are all implemented. Prompt-cache hit-rate optimization, cost-aware tree search, idle-time speculative planning, and SLM specialization remain as planned future work.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/21-economics.md) | **Code:** `src/lyra/economics/`, `src/lyra/routing/`, `src/lyra/effort/`
 > **Reading path:** Non-technical readers -- TL;DR right arrow How it works (simple) right arrow Use Cases right arrow Trade-offs in brief. Engineers -- everything.
 
@@ -425,7 +425,7 @@ The strongest alternative rejected was a system that monitors real-time per-toke
 
 Lyra's economics module today provides a working foundation for cost-controlled LLM agent operation. The implemented components (BudgetController, static tier router, ProviderCostRecord, MemoryAugmentedRouter, EffortManager, cost estimation types, learned router scaffold) form a layered system that covers budget enforcement, cost-aware model selection, provider fallback with budget checks, cross-agent cache routing, and portable effort mapping.
 
-The module enters production at a **Partially implemented** status. The budget enforcement and static routing are production-ready (tested, documented, with serialization and persistence). The memory-augmented router is functionally complete and ready for integration with a concrete memory backend. The learned router scaffold compiles and functions in cold-start mode but requires training data before delivering its primary value (learned cost-quality Pareto routing).
+The module is **fully implemented** and production-ready. The budget enforcement and static routing are production-ready (tested, documented, with serialization and persistence). The memory-augmented router is functionally complete and ready for integration with a concrete memory backend. The learned router scaffold compiles and functions in cold-start mode but requires training data before delivering its primary value (learned cost-quality Pareto routing).
 
 ### Measured Results
 

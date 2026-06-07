@@ -1,5 +1,5 @@
 # Hooks: Lifecycle Event System for Pre/Post Tool Execution
-> **Status:** 🟡 Partially implemented — interceptor pipeline (6 events, 3 built-in handlers, sequential pre-hooks, parallel post-hooks) exists; YAML config, hot-reload, 25+ events, and 6 handler types are planned.
+> **Status:** 🟢 Fully implemented -- interceptor pipeline (6 events), YAML config loading, hot-reload, 25+ extended events, 6 additional handler types (`config_loader.py`, `extended_events.py`) all shipped.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/10-hooks.md) | **Code:** `src/lyra/hooks/`
 > **Reading path:** Non-technical readers — TL;DR -> How it works (simple) -> Use Cases -> Trade-offs in brief. Engineers -- everything.
 

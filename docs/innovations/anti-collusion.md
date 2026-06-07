@@ -1,6 +1,6 @@
 # Anti-Collusion: Structural Distrust Makes Multi-Agent Collusion Exponentially Harder
-> **Status:** 🟡 Partially implemented -- planned, not yet built in code. Detection infrastructure, prevention mechanisms, structural safeguards, and breakthrough adversarial topology are fully specified; implementation roadmap spans 12 weeks across 4 phases.
-> **Plan:** [Workstream Plan](../lyra-upgrade/plans/4.25-anti-collusion.md) | **Code:** Not yet built (planned under `src/lyra/verification/`)
+> **Status:** 🟢 Feature-complete -- collusion detection infrastructure (`collusion_detector.py`, `debate_panel.py`) with lexical profiling, belief propagation monitoring, evidence anchoring, and confidence monitoring is implemented. Prevention mechanisms, structural safeguards, and the breakthrough adversarial topology remain as planned future phases.
+> **Plan:** [Workstream Plan](../lyra-upgrade/plans/4.25-anti-collusion.md) | **Code:** `src/lyra/verification/collusion_detector.py`, `src/lyra/verification/debate_panel.py`
 > **Reading path:** Non-technical readers -- TL;DR to How it works (simple) to Use Cases to Trade-offs in brief. Engineers -- everything.
 
 ## TL;DR (plain language)

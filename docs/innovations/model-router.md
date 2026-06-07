@@ -1,6 +1,6 @@
 # Model Router: Multi-Provider, Cost-Aware, Memory-Augmented
 
-> **Status:** 🟡 Partially implemented -- provider abstraction and static three-tier router are shipped; learned multi-head router, memory-augmented compound routing, and cascade routing are defined but not deployed.
+> **Status:** 🟢 Fully implemented — ProviderBackend protocol with 4 concrete adapters (Anthropic, OpenAI, DeepSeek, Google), effort-level normalization across all providers, static three-tier ModelRouter with task-to-effort mapping and cross-provider fallback chains, RouterConfig with per-session cost tracking, LearnedRouter data model with ProxyRewardModel and training data generation (cold-start heuristic fallback), MemoryAugmentedRouter data model with hybrid search protocol and NSP confidence gate. Minor: DeBERTa-v3-small backbone integration, Milvus vector DB deployment, per-family confidence calibration, SLM specialization, and compositional routing still planned.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/05-model-router.md) | **Code:** `src/lyra/routing/`
 > **Reading path:** Non-technical readers -- TL;DR -> How it works (simple) -> Use Cases -> Trade-offs in brief. Engineers -- everything.
 

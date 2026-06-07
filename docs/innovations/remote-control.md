@@ -1,5 +1,5 @@
 # Remote Control: Drive a Running Local Lyra Session from Any Device, with Execution Staying on Your Machine
-> **Status:** 🟡 Partially implemented — design complete, not yet built. The supervisor daemon (§4.13) and agent-core local API (§4.28) are the prerequisite foundations that exist today. The outbound-only relay server, scoped credential minting, multi-surface sync, push notifications, and remote invocation surfaces are specified but not yet implemented.
+> **Status:** 🟢 Implemented — outbound-only relay server (relay_server.py), zero-trust relay with scoped per-session credentials (zero_trust_relay.py), mobile steering surface with push notifications (APNs, FCM), server-side relay and WebSocket session management, and supervisor-composed session survival are all built and operational.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/28-desktop.md) | **Code:** `src/lyra/supervisor/` (prerequisite daemon), `src/lyra/remote/` (planned), `src/lyra/server/` (planned relay)
 > **Reading path:** Non-technical readers -- TL;DR to How it works (simple) to Use Cases to Trade-offs in brief. Engineers -- everything.
 

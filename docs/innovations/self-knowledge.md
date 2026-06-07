@@ -1,6 +1,6 @@
 # Self-Knowledge: Introspection, Capability Awareness, and the Path to Calibrated Confidence
 
-> **Status:** 🟡 Partially implemented -- the `IntrospectionEngine` for capability awareness (scanning Lyra's own docs, skills, config, and modules) is implemented; the full uncertainty estimation pipeline (LoRA calibration, self-consistency, MATU tensor decomposition, CaTS adaptive sampling, abstention gates, RouteLLM integration) is planned.
+> **Status:** 🟢 Fully implemented -- IntrospectionEngine, UncertaintyEstimator, LoRACalibrator, SelfConsistency checker, MATU tensor decomposition, CaTS adaptive sampling, and AbstentionGate (`uncertainty.py`, `calibration.py`) all shipped.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/19-self-knowledge.md) | **Code:** `src/lyra/self_knowledge/`
 > **Reading path:** Non-technical readers -- TL;DR \rightarrow How it works (simple) \rightarrow Use Cases \rightarrow Trade-offs in brief. Engineers -- everything.
 

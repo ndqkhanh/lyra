@@ -3,20 +3,39 @@ WorktreeManager: git worktree isolation for parallel agent sessions.
 
 Each session gets its own worktree and branch. Supports configurable
 base-ref policies (FRESH from origin/main, HEAD from current HEAD).
+
+For non-git repositories a copy-on-write fallback (:meth:`create_fallback`)
+provides directory-level isolation using symlinks for space efficiency
+and copies for files that change.
+
+Session binding (:meth:`bind_session` / :meth:`unbind_session`) tracks
+which session id is associated with which worktree, allowing ``auto-switch``
+semantics.
 """
 
 from __future__ import annotations
 
 import logging
+import os
+import shutil
 import subprocess
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Optional
 
-logger = logging.getLogger(__name__)
+import structlog
+
+from lyra.worktree.lyrainclude import LyraInclude
+
+logger = structlog.get_logger(__name__)
 
 BaseRefPolicy = Literal["fresh", "head"]
+
+
+# ---------------------------------------------------------------------------
+# Exceptions
+# ---------------------------------------------------------------------------
 
 
 class WorktreeError(Exception):
@@ -35,6 +54,15 @@ class WorktreeSwitchError(WorktreeError):
     """Raised when switching to a worktree fails."""
 
 
+class WorktreeFallbackError(WorktreeError):
+    """Raised when the non-git fallback worktree mechanism fails."""
+
+
+# ---------------------------------------------------------------------------
+# Data types
+# ---------------------------------------------------------------------------
+
+
 @dataclass
 class WorktreeInfo:
     """Information about a tracked worktree."""
@@ -47,11 +75,29 @@ class WorktreeInfo:
 
 
 @dataclass
+class SessionBindInfo:
+    """Information about a session-bound worktree (git or fallback)."""
+
+    session_id: str
+    worktree_path: Path
+    is_fallback: bool = False
+    base_dir: Optional[Path] = None
+
+
+# ---------------------------------------------------------------------------
+# WorktreeManager
+# ---------------------------------------------------------------------------
+
+
+@dataclass
 class WorktreeManager:
     """Manages git worktrees for isolated agent sessions.
 
     Each session gets a dedicated branch and worktree directory,
     enabling parallel agent runs without interfering with each other.
+
+    For non-git repos, :meth:`create_fallback` provides directory-level
+    isolation with copy-on-write semantics.
 
     Usage::
 
@@ -64,13 +110,34 @@ class WorktreeManager:
     repo_root: Path
     worktrees_dir: Path = field(init=False)
     _worktrees: dict[str, WorktreeInfo] = field(default_factory=dict, init=False, repr=False)
+    _session_binds: dict[str, SessionBindInfo] = field(default_factory=dict, init=False, repr=False)
 
     def __post_init__(self) -> None:
         self.worktrees_dir = self.repo_root / ".claude" / "worktrees"
         self._refresh_tracked()
 
     # ------------------------------------------------------------------
-    # Public API
+    # Git check
+    # ------------------------------------------------------------------
+
+    def is_git_repo(self) -> bool:
+        """Check whether ``repo_root`` is a git repository.
+
+        Returns ``True`` if the directory contains a valid ``.git`` entry
+        and ``git rev-parse`` succeeds.
+        """
+        try:
+            result = subprocess.run(
+                ("git", "-C", str(self.repo_root), "rev-parse", "--git-dir"),
+                capture_output=True,
+                check=True,
+            )
+            return bool(result.stdout.decode().strip())
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            return False
+
+    # ------------------------------------------------------------------
+    # Public API -- git worktrees
     # ------------------------------------------------------------------
 
     def create(
@@ -99,6 +166,11 @@ class WorktreeManager:
         """
         if session_id in self._worktrees:
             raise WorktreeCreateError(f"Session '{session_id}' already has a worktree")
+
+        if not self.is_git_repo():
+            raise WorktreeCreateError(
+                f"Cannot create git worktree: '{self.repo_root}' is not a git repository"
+            )
 
         branch_name = _sanitize_branch(f"lyra-session-{session_id}-{uuid.uuid4().hex[:8]}")
         worktree_path = self.worktrees_dir / _sanitize_path(session_id)
@@ -186,6 +258,7 @@ class WorktreeManager:
             ) from exc
 
         del self._worktrees[session_id]
+        self._session_binds.pop(session_id, None)
 
     def list_worktrees(self) -> list[WorktreeInfo]:
         """Return a list of all tracked worktrees."""
@@ -205,6 +278,196 @@ class WorktreeManager:
             if len(parts) >= 2:
                 worktrees.append({"path": parts[0], "branch": parts[1]})
         return worktrees
+
+    # ------------------------------------------------------------------
+    # Public API -- non-git fallback
+    # ------------------------------------------------------------------
+
+    def create_fallback(self, session_id: str, base_dir: Optional[Path] = None) -> SessionBindInfo:
+        """Create a copy-on-write worktree for a non-git repository.
+
+        Creates a snapshot of ``repo_root`` (or *base_dir*) into a dedicated
+        directory under the worktrees tree. Files are symlinked by default
+        for space efficiency; when a session modifies a file, the link is
+        replaced with an independent copy (copy-on-write semantics provided
+        by the session, not enforced here).
+
+        If a ``.lyrainclude`` file exists, only matching files are brought
+        into the snapshot (the same filter used for git worktrees).
+
+        Parameters
+        ----------
+        session_id:
+            Unique identifier for the session.
+        base_dir:
+            Directory to snapshot. Defaults to ``repo_root``.
+
+        Returns
+        -------
+        SessionBindInfo describing the isolated directory.
+
+        Raises
+        ------
+        WorktreeFallbackError
+            If creation fails.
+        """
+        if session_id in self._session_binds:
+            raise WorktreeFallbackError(f"Session '{session_id}' already has a bound worktree")
+
+        source = base_dir.resolve() if base_dir else self.repo_root.resolve()
+        if not source.is_dir():
+            raise WorktreeFallbackError(f"Base directory does not exist: {source}")
+
+        worktree_path = self.worktrees_dir / _sanitize_path(session_id)
+        try:
+            worktree_path.mkdir(parents=True, exist_ok=True)
+        except OSError as exc:
+            raise WorktreeFallbackError(
+                f"Failed to create fallback directory for session '{session_id}': {exc}"
+            ) from exc
+
+        # Load lyrainclude to decide what to include
+        inc = LyraInclude.load(self.repo_root)
+
+        # Populate the fallback directory
+        self._populate_fallback(source, worktree_path, inc)
+
+        bind_info = SessionBindInfo(
+            session_id=session_id,
+            worktree_path=worktree_path.resolve(),
+            is_fallback=True,
+            base_dir=source,
+        )
+        self._session_binds[session_id] = bind_info
+
+        logger.info(
+            "created fallback worktree for session %s at %s",
+            session_id,
+            worktree_path,
+        )
+        return bind_info
+
+    def cleanup_fallback(self, session_id: str, force: bool = False) -> None:
+        """Remove a fallback worktree for *session_id*.
+
+        Parameters
+        ----------
+        session_id:
+            Session to clean up.
+        force:
+            If True, remove even if dirty (no-op for fallback; always
+            removed). Kept for API compatibility with :meth:`cleanup`.
+
+        Raises
+        ------
+        WorktreeFallbackError
+            If the session has no fallback worktree.
+        """
+        bind = self._session_binds.get(session_id)
+        if bind is None or not bind.is_fallback:
+            raise WorktreeFallbackError(f"Session '{session_id}' has no fallback worktree")
+
+        try:
+            shutil.rmtree(bind.worktree_path)
+        except OSError as exc:
+            raise WorktreeFallbackError(
+                f"Failed to remove fallback worktree for session '{session_id}': {exc}"
+            ) from exc
+
+        del self._session_binds[session_id]
+        logger.info("removed fallback worktree for session %s", session_id)
+
+    def list_fallbacks(self) -> list[SessionBindInfo]:
+        """Return all active fallback worktrees."""
+        return [b for b in self._session_binds.values() if b.is_fallback]
+
+    # ------------------------------------------------------------------
+    # Public API -- session binding
+    # ------------------------------------------------------------------
+
+    def bind_session(self, session_id: str, worktree_path: Path) -> SessionBindInfo:
+        """Bind a *session_id* to an arbitrary worktree path.
+
+        This is useful for auto-binding after a worktree has been created
+        externally, allowing the manager to track it regardless of whether
+        it is a git worktree or a fallback directory.
+
+        Parameters
+        ----------
+        session_id:
+            Session identifier to bind.
+        worktree_path:
+            Absolute path to the worktree directory.
+
+        Returns
+        -------
+        SessionBindInfo for the bound session.
+
+        Raises
+        ------
+        WorktreeError
+            If the session is already bound or the path does not exist.
+        """
+        if session_id in self._session_binds:
+            raise WorktreeError(f"Session '{session_id}' is already bound")
+
+        resolved = worktree_path.resolve()
+        if not resolved.is_dir():
+            raise WorktreeError(f"Worktree path does not exist: {resolved}")
+
+        is_git = (resolved / ".git").exists()
+        bind_info = SessionBindInfo(
+            session_id=session_id,
+            worktree_path=resolved,
+            is_fallback=not is_git,
+            base_dir=self.repo_root if not is_git else None,
+        )
+        self._session_binds[session_id] = bind_info
+
+        # Also track in the git worktree dict if applicable
+        if is_git and session_id not in self._worktrees:
+            self._worktrees[session_id] = WorktreeInfo(
+                session_id=session_id,
+                branch_name=f"lyra-session-{session_id}",
+                worktree_path=resolved,
+                base_ref="fresh",
+            )
+
+        logger.info("bound session %s to worktree %s", session_id, resolved)
+        return bind_info
+
+    def unbind_session(self, session_id: str) -> Optional[SessionBindInfo]:
+        """Unbind a *session_id* without removing its worktree.
+
+        Unlike :meth:`cleanup` or :meth:`cleanup_fallback`, this only
+        removes the internal tracking. The filesystem is not touched.
+
+        Parameters
+        ----------
+        session_id:
+            Session identifier to unbind.
+
+        Returns
+        -------
+        The removed ``SessionBindInfo``, or ``None`` if the session was not
+        bound.
+        """
+        bind = self._session_binds.pop(session_id, None)
+        self._worktrees.pop(session_id, None)
+        if bind is not None:
+            logger.info("unbound session %s", session_id)
+        return bind
+
+    def get_bind(self, session_id: str) -> Optional[SessionBindInfo]:
+        """Look up the bind info for *session_id*.
+
+        Returns ``None`` if the session is not bound.
+        """
+        return self._session_binds.get(session_id)
+
+    def list_binds(self) -> list[SessionBindInfo]:
+        """Return all session-to-worktree bindings."""
+        return list(self._session_binds.values())
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -249,6 +512,52 @@ class WorktreeManager:
             return bool(result.stdout.decode().strip())
         except subprocess.CalledProcessError:
             return True  # assume dirty on error
+
+    def _populate_fallback(
+        self,
+        source: Path,
+        dest: Path,
+        inc: LyraInclude,
+    ) -> None:
+        """Populate *dest* as a snapshot of *source* using lyrainclude filtering.
+
+        When a ``.lyrainclude`` is present, only matching files are
+        snapshot.  Without it, all files are symlinked (respecting a basic
+        skip list for dot-directories).
+        """
+        skip_dirs: set[str] = {".git", "__pycache__", ".claude", ".lyra"}
+
+        for dirpath, dirnames, filenames in os.walk(source):
+            dirpath_p = Path(dirpath)
+            rel_dir = dirpath_p.relative_to(source)
+
+            # Skip directories we never want to duplicate
+            dirnames[:] = [d for d in dirnames if d not in skip_dirs]
+
+            for filename in filenames:
+                src_file = dirpath_p / filename
+                rel_path = rel_dir / filename
+
+                # When lyrainclude is active, skip non-matching files
+                if inc.include_spec is not None and not inc.should_include(rel_path):
+                    continue
+
+                dest_file = dest / rel_path
+                dest_file.parent.mkdir(parents=True, exist_ok=True)
+
+                try:
+                    os.symlink(src_file, dest_file)
+                except FileExistsError:
+                    # If the file already exists (e.g. from a parent run), skip
+                    pass
+                except OSError:
+                    # Symlink may fail across filesystems; fall back to copy
+                    shutil.copy2(src_file, dest_file)
+
+
+# ---------------------------------------------------------------------------
+# Utilities
+# ---------------------------------------------------------------------------
 
 
 def _sanitize_branch(name: str) -> str:

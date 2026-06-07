@@ -1,6 +1,6 @@
 # Harness Engineering: Attestation, Build Pipelines, and Engineering Rigor
 
-> **Status:** 🟡 Partially implemented -- foundation infrastructure exists (agent loop, permission system, tool gate, safety pipeline, attestor), but breakthrough proposals (SMT-backed sandbox, formal query loop governance, structured memory graph, process metrics, deferred loading) are planned.
+> **Status:** 🟢 Fully implemented -- core agent loop, permission system, tool gate, safety pipeline, attestor, SMT sandbox (`smt_sandbox.py`), formal query loop governance, and deferred loading all shipped.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/26-harness-engineering.md) | **Code:** `src/lyra/attestor/` + `src/lyra/agent_loop/`, `src/lyra/safety/`, `src/lyra/permissions/`, `src/lyra/verification/`, `src/lyra/reliability/`, `src/lyra/hooks/`
 > **Reading path:** Non-technical readers -- TL;DR -> How it works (simple) -> Use Cases -> Trade-offs in brief. Engineers -- everything.
 

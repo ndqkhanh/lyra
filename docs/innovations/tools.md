@@ -1,6 +1,6 @@
 # Tools: Agent Tool Protocol, Schema Validation, and Execution Sandbox
 
-> **Status:** 🟡 Partially implemented -- core registry, executor, sandbox, and 4 basic tools exist; deferred loading, multi-provider normalization, compound command parsing, tool search, and 6+ planned tools remain unbuilt.
+> **Status:** 🟢 Fully implemented -- core registry, executor, sandbox, 9 tools, deferred loading, compound execution chaining, multi-provider normalization, and dynamic tool search (`provider_normalizer.py`, `tool_search.py`) all shipped.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/06-tools.md) | **Code:** `src/lyra/tools/`
 > **Reading path:** Non-technical readers -- TL;DR -> How it works (simple) -> Use Cases -> Trade-offs in brief. Engineers -- everything.
 

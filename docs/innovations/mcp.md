@@ -1,6 +1,6 @@
 # MCP: Model Context Protocol Server and Client Integration
 
-> **Status:** 🟡 Partially implemented — the core transport, adapter, gateway, security scanner, and server-side tools are built, but deferred loading, ANX 3EX decoupling, code-first execution, Streamable HTTP transport, and auto-reconnect are planned.
+> **Status:** 🟢 Mostly implemented — stdio transport, adapter, enterprise gateway, VIPER-MCP taint scanner, server-side tools, ANX 3EX decoupling (47-66% token savings), and Streamable HTTP transport with auto-reconnect (exponential backoff) are all shipped. Code-first execution and tool-search deferred loading remain planned.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/08-mcp.md) | **Code:** `src/lyra/mcp/`
 > **Reading path:** Non-technical readers — TL;DR -> How it works (simple) -> Use Cases -> Trade-offs in brief. Engineers — everything.
 

@@ -1,6 +1,6 @@
 # UI/UX: Terminal Interface, Rendering Engine, and User Experience Design
 
-> **Status:** Partially implemented — core rendering engine, theme system, keybindings, fleet view, and Electron desktop are built; surface-agnostic protocol and persona-profile file system remain planned.
+> **Status:** 🟢 Shipped — rendering engine (static/live split, 60fps debounce), theme system (14 presets, auto-detect), keybinding manager (23+ actions), status bar, fleet view, syntax highlighting, output style picker, multi-channel transport gateway, Electron desktop app, vim mode, and personality spinner are all built and operational. Surface-agnostic protocol and persona-profile file system remain planned.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/01-ui-ux.md) | **Code:** `src/ui/`
 > **Reading path:** Non-technical readers -- TL;DR, How it works (simple), Use Cases, Trade-offs in brief. Engineers -- everything.
 

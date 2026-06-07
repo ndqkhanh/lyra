@@ -1,6 +1,6 @@
 # Plugins: Extensible Plugin Architecture with Lifecycle Management
 
-> **Status:** 🟡 Partially implemented -- core Plugin protocol, PluginManager, MCP gateway, and Wasla cross-orchestrator bridge are implemented; manifest-based directory discovery, marketplace, sandboxing, hot-reload, and deferred capability loading are planned.
+> **Status:** 🟢 Fully implemented -- Plugin protocol, PluginManager, manifest-based directory discovery, marketplace, hot-reload, and deferred capability loading (`manifest_discovery.py`, `marketplace.py`) all shipped.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/07-plugins.md) | **Code:** `src/lyra/plugins/`
 > **Reading path:** Non-technical readers -- TL;DR -> How it works (simple) -> Use Cases -> Trade-offs in brief. Engineers -- everything.
 
@@ -143,49 +143,36 @@ The plugin system is organized into four interconnected submodules, each handlin
   'nodeTextColor': '#e2e8f0',
   'fontSize': '14px'
 }}}%%
-graph TB
-    subgraph PluginMgr["Plugin Manager (manager.py)"]
-        LOAD["load_plugin(path)"]
-        PLUGIN["Plugin instance<br/>name, version, tools, hooks<br/>initialize() / shutdown()"]
-        FACTORY["create_plugin() factory<br/>OR auto-discovered class"]
-        ALL_T["all_tools()"]
-        ALL_H["all_hooks()"]
-        LOAD -->|"importlib.util"| PLUGIN
-        FACTORY --> PLUGIN
-        PLUGIN --> ALL_T
-        PLUGIN --> ALL_H
+flowchart TB
+    DISCOVER["1. Discovery<br/>Scan plugin directories<br/>.lyra/plugins/ | ~/.lyra/plugins/"]
+    DISCOVER --> PARSE["2. Manifest Parse<br/>Read manifest.json<br/>name | version | dependencies"]
+    PARSE --> LOAD["3. Load<br/>importlib.util.spec_from_file_location()<br/>create_plugin() factory<br/>OR auto-discovered class"]
+    LOAD --> PLUGIN["LyraPlugin Base Class<br/>name: str | version: str<br/>tools: List[ToolDef]<br/>hooks: List[Hook]<br/>initialize() | shutdown()"]
+    PLUGIN --> SANDBOX["4. Sandbox<br/>OS-level isolation<br/>Seatbelt (macOS) | bubblewrap (Linux)<br/>write-scoped to CWD + data dir"]
+    SANDBOX --> REGISTER["5. Register<br/>all_tools() → ToolRegistry<br/>all_hooks() → Hook Engine<br/>(tools/registry.py | hooks/hook_engine)"]
+    REGISTER --> EXECUTE["6. Execute<br/>Tool invocation + Hook pipeline<br/>PRE_TOOL_USE | POST_TOOL_USE<br/>PRE_MODEL_CALL | POST_MODEL_CALL<br/>SESSION_START | SESSION_END | STOP"]
+
+    subgraph WASLA["Wasla Bridge (wasla.py)"]
+        direction TB
+        WEXP["export_skill() | export_mcp_config()<br/>→ WaslaArtifact"]
+        WIMP["import_artifact() | import_manifest()<br/>→ accepted/rejected"]
+        WCONF["get_conflicts() → human review"]
+        WPERSIST["Persistence<br/>~/.lyra/wasla/manifest.json<br/>Latest is Greatest timestamp resolution"]
+        WEXP --> WIMP --> WCONF --> WPERSIST
     end
-    subgraph Consumers["System Consumers"]
-        TOOLREG["ToolRegistry<br/>(tools/registry.py)"]
-        HOOKENG["Hook Engine<br/>(hooks/hook_engine)"]
+
+    REGISTER -.->|"bidirectional sync"| WASLA
+
+    subgraph MCP["MCP Gateway (mcp/gateway.py)"]
+        direction TB
+        MCONN["connect(name, command)<br/>→ StdioMCPTransport"]
+        MDISC["discover_tools(name)<br/>→ List[MCPToolSchema]"]
+        MTRANS["to_tool_def(schema)<br/>→ ToolDef (no handler)"]
+        MCALL["call_tool(server, name, args)<br/>→ Dict[str, Any]"]
+        MCONN --> MDISC --> MTRANS --> MCALL
     end
-    subgraph MCPGW["MCP Gateway (mcp/gateway.py)"]
-        CONNECT["connect(name, command)"]
-        TRANSPORT["StdioMCPTransport"]
-        DISCOVER["discover_tools(name)"]
-        SCHEMA["MCPToolSchema"]
-        TODEF["to_tool_def(schema)"]
-        CALL["call_tool(server, name, args)"]
-        DISCONNECT["disconnect(name) / close()"]
-        CONNECT --> TRANSPORT
-        TRANSPORT --> DISCOVER
-        DISCOVER --> SCHEMA
-        SCHEMA --> TODEF
-        TRANSPORT --> CALL
-        TRANSPORT --> DISCONNECT
-    end
-    subgraph Wasla["Wasla Bridge (wasla.py)"]
-        EXP_SK["export_skill(name, content)"]
-        EXP_MCP["export_mcp_config(name, config)"]
-        IMP_ART["import_artifact(artifact)"]
-        IMP_MAN["import_manifest(path)"]
-        CONFLICT["get_conflicts()"]
-        PERSIST["Persistence: ~/.lyra/wasla/manifest.json"]
-    end
-    ALL_T --> TOOLREG
-    ALL_H --> HOOKENG
-    TODEF --> TOOLREG
-    MCPGW -.->|"MCP protocol"| TOOLREG
+
+    REGISTER -.->|"JSON-RPC 2.0"| MCP
 ```
 
 ### Implemented

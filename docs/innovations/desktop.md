@@ -1,6 +1,6 @@
 # Desktop: Native Application Shell with System Integration
 
-> **Status:** 🟡 Partially implemented -- Electron + React shell, SSE streaming proxy, and chat/fleet/skills UI built (18 files). Multimodal input/output, voice, CER experience replay, accept-sequence dispatch, and agent-core API backend are deferred.
+> **Status:** 🟢 Mostly implemented -- Electron + React shell, agent-core API server (aiohttp, SSE streaming, session CRUD, provider discovery), multimodal input pipeline, fleet dashboard, skills hub, voice surface, and Python-side config tools are built. CER experience replay and accept-sequence dispatch remain deferred.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/28-desktop.md) | **Code:** `src/lyra/desktop/`, `src/ui/desktop/`
 > **Reading path:** Non-technical readers -- TL;DR -> How it works (simple) -> Use Cases -> Trade-offs in brief. Engineers -- everything.
 
@@ -121,47 +121,44 @@ Lyra Desktop follows a three-process Electron model with a separate agent-core A
   'nodeTextColor': '#e2e8f0',
   'fontSize': '14px'
 }}}%%
-graph TB
-    subgraph Electron["Electron Process Model"]
-        subgraph Renderer["Renderer (React 18.3)"]
-            APP["App.tsx"]
-            CHAT["ChatView.tsx"]
-            FLEET["FleetView.tsx"]
-            INPUT["InputBar.tsx"]
-            SKILLS["SkillsHub.tsx"]
-            SIDEBAR["Sidebar.tsx"]
-            STATBAR["StatusBar.tsx"]
-        end
-        subgraph Main["Main Process (Node.js)"]
-            MAIN_TS["main.ts"]
-            FETCH_H["lyra:fetch handler"]
-            SSE_H["lyra:sse-connect handler"]
-            WIN_MGR["BrowserWindow mgmt"]
-        end
-        subgraph Bridge["Bridge Layer"]
-            PRELOAD["Preload Bridge<br/>(preload.ts)<br/>window.lyraAPI"]
-            PROXY["HTTP/SSE Proxy<br/>POST /chat/*/stream<br/>SSE reader + forwarding"]
-        end
+flowchart TB
+    subgraph AGENT["Lyra Agent Core (Python)"]
+        direction LR
+        CORE["Core Services<br/>Orchestrator | Memory | Skills<br/>Tools | Model Router"]
     end
-    subgraph AgentCore["Agent Core API (Python)"]
-        FASTAPI["FastAPI / Starlette server<br/>localhost:8580"]
-        HEALTH["/health"]
-        PROVIDERS["/providers"]
-        SESSIONS["/sessions"]
-        STREAM["/chat/{id}/stream → SSE"]
-        subgraph Services["Core Services (in-process)"]
-            ORCH["Orchestrator"]
-            MEM["Memory"]
-            SK["Skills"]
-            TOOLS["Tools"]
-            ROUTER["Model Router"]
+
+    AGENT <-->|"HTTP / SSE"| API["Local API Server<br/>FastAPI / Starlette :8580<br/>/health | /providers | /sessions<br/>/chat/{id}/stream (SSE)"]
+
+    subgraph SHELL["Electron Shell (React + TS)"]
+        direction TB
+        MAIN["Main Process (Node.js)<br/>main.ts<br/>lyra:fetch handler<br/>lyra:sse-connect handler<br/>BrowserWindow lifecycle"]
+        PRELOAD["Preload Bridge (preload.ts)<br/>window.lyraAPI<br/>.fetch() | .connectSSE()"]
+
+        subgraph RENDERER["Renderer Process (React 18.3)"]
+            direction LR
+            subgraph CV["Chat View"]
+                CHAT["ChatView.tsx<br/>ReactMarkdown<br/>Streaming + Cost"]
+            end
+            subgraph FV["Fleet View"]
+                FLEET["FleetView.tsx<br/>Two-axis Badges<br/>Live Token Counters"]
+            end
+            subgraph SH["Skills Hub"]
+                SKHUB["SkillsHub.tsx<br/>Quality Scores<br/>Security Scan"]
+            end
+            subgraph VO["Voice Surface"]
+                VOICE["Voice I/O<br/>Push-to-Talk<br/>TTS + Waveform"]
+            end
+            subgraph MM["Multimodal I/O"]
+                MULTI["Image / Audio / PDF<br/>Drag-drop + Paste<br/>Inline Rendering"]
+            end
         end
+
+        MAIN <-->|"IPC invoke/on/send"| RENDERER
+        PRELOAD --- MAIN
+        PRELOAD --- RENDERER
     end
-    Renderer -->|"IPC invoke/on/send"| Main
-    PRELOAD --> Main
-    Main -->|"HTTP/SSE"| PROXY
-    PROXY -->|"localhost:8580"| FASTAPI
-    FASTAPI --> Services
+
+    API <-->|"SSE streaming | POST + GET"| MAIN
 ```
 
 ### Data Flow for a Chat Message

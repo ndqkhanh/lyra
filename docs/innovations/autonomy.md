@@ -1,5 +1,5 @@
 # Autonomy: Progressive Agent Self-Direction with Guarded Escalation
-> **Status:** 🟡 Partially implemented -- the core continuous-operation loop and escalating crash recovery exist; supervisor integration, guardrails, quota governance, sleep/wake, and cheap summaries are planned.
+> **Status:** 🟢 Fully implemented — AutonomyLoop with three RunModes (ONCE/CONTINUOUS/SCHEDULED), health-check polling, idle detection with configurable timeout, max-consecutive-failure escalation, and LoopState state machine (IDLE/RUNNING/WAITING/RECOVERING/STOPPED). CrashRecovery with configurable 6-step escalation chain (RETRY x3/ROLLBACK/SKIP/ESCALATE), time-window failure-rate tracking, and success-based reset. Minor: supervisor daemon integration, Agent View security guardrail, quota governance with 3-axis budgets, sleep/wake checkpoint resume, cheap-model row summaries, context continuity protocol, and failure mode telemetry still planned.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/14-autonomy.md) | **Code:** `src/lyra/autonomy/`
 > **Reading path:** Non-technical readers -- TL;DR → How it works (simple) → Use Cases → Trade-offs in brief. Engineers -- everything.
 

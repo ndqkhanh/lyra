@@ -1,5 +1,5 @@
 # Dreaming: Idle-Time Memory Consolidation and Self-Organization
-> **Status:** 🟡 Partially implemented -- core DreamEngine and FieldMemory exist; deep dream observer, Memory Files integration, warm-up scheduling, and Conway-like cycle remain planned.
+> **Status:** 🟢 Fully implemented -- DreamEngine, FieldMemory, DeepDreamObserver, Memory Files integration, WarmUpScheduler, and ConwayCycle (`deep_dream.py`) all shipped.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/24-dreaming.md) | **Code:** `src/lyra/memory/`
 > **Reading path:** Non-technical readers -- TL;DR -> How it works (simple) -> Use Cases -> Trade-offs in brief. Engineers -- everything.
 

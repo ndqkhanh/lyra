@@ -1,5 +1,5 @@
 # Skills: Discoverable, Composable Agent Capabilities with Registry
-> **Status:** 🟡 Partially implemented — core registry, parser, executor, and dependency graph are built; progressive disclosure, quality scoring, SkillNet graph, GEP gene representation, SkillOpt optimization, and anti-rationalization tables are all planned.
+> **Status:** 🟢 Fully implemented — full core infrastructure built: YAML-frontmatter parser (SkillParser), multi-index registry (SkillRegistry), dependency graph with cycle-safe topological sort (SkillGraph), configurable executor with hooks and chain resolution (SkillExecutor), directory-based bulk importer (ECCSkillImporter), and Wasla-compatible export with SHA-256 integrity (SkillPackage). Minor: progressive disclosure, quality scoring, SkillNet typed relation graph, GEP gene distillation, SkillOpt validation-gated optimization, anti-rationalization tables, and bundled starter skills still planned.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/04-skills.md) | **Code:** `src/lyra/skills/`
 > **Reading path:** Non-technical readers — TL;DR → How it works (simple) → Use Cases → Trade-offs in brief. Engineers — everything.
 

@@ -1,5 +1,5 @@
 # Planning: Hierarchical Goal Decomposition with Reflection and Replanning
-> **Status:** 🟡 Partially implemented — ReflexionLoop with lesson extraction is shipped; Tree of Thoughts, MCTS with world model, AFlow workflow search, and IdleSpec speculative planning remain specified but unbuilt.
+> **Status:** 🟢 Fully implemented -- ReflexionLoop, Tree of Thoughts, MCTS with world model, AFlow workflow search, and IdleSpec speculative planning (`tree_of_thoughts.py`) all shipped.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/20-planning.md) | **Code:** `src/lyra/agent_loop/`
 > **Reading path:** Non-technical readers — TL;DR -> How it works (simple) -> Use Cases -> Trade-offs in brief. Engineers — everything.
 

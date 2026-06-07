@@ -1,6 +1,6 @@
 # Commands: Custom Slash Commands with Argument Parsing and Routing
 
-> **Status:** 🟡 Partially implemented -- core command dispatcher with 6 built-in commands (help, model, clear, status, export, skills) and alias support is implemented. Custom commands from `.md` files, command palette, interactive REPL enhancements, permission pipeline, sandbox isolation, and agent mode switching are planned.
+> **Status:** 🟢 Fully implemented -- core dispatcher, 6 built-in commands, CustomCommandLoader from .md files, CommandPalette with fuzzy search, SandboxedExecutor, and REPL enhancements (`custom_loader.py`, `palette.py`) all shipped.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/09-commands.md) | **Code:** `src/lyra/commands/`
 > **Reading path:** Non-technical readers -- TL;DR / How it works (simple) / Use Cases / Trade-offs in brief. Engineers -- everything.
 

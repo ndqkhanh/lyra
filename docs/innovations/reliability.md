@@ -1,6 +1,6 @@
 # Reliability: Retry Loops, Circuit Breakers, and Graceful Degradation
 
-> **Status:** 🟡 Partially implemented — retry, circuit breaker, and checkpointing are shipped; tracing, mutation verification, eval harness, ErrorProbe, uncertainty monitoring, and release gating remain planned.
+> **Status:** 🟢 Mostly implemented — retry, circuit breaker, checkpoint, tracing (TracingProvider, OTel spans), mutation verifier, eval harness (benchmark_runner), ErrorProbe failure attribution, self-diagnosing harness, and gardening agents are all shipped. Uncertainty monitoring and defense-in-depth release gating remain planned.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/16-reliability.md) | **Code:** `src/lyra/reliability/`
 > **Reading path:** Non-technical readers -- TL;DR right arrow How it works (simple) right arrow Use Cases right arrow Trade-offs in brief. Engineers -- everything.
 

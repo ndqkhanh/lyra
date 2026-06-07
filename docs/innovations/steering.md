@@ -1,6 +1,6 @@
 # Steering: Runtime Agent Behavior Modulation via Constitutional Principles
 
-> **Status:** 🟡 Partially implemented -- SteerPanel, ApprovalGate, and InterruptHandler exist; preference learning, trust calibration, identity-anonymized steering, proactive elicitation, and decoupled rewind are planned.
+> **Status:** 🟢 Fully implemented -- SteerPanel, ApprovalGate, InterruptHandler, PreferenceLearner, TrustCalibrator, identity-anonymized steering, proactive elicitation, and decoupled rewind (`preference_learner.py`, `trust_calibrator.py`) all shipped.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/22-steering.md) | **Code:** `src/lyra/steering/`
 > **Reading path:** Non-technical readers -- TL;DR to How it works (simple) to Use Cases to Trade-offs in brief. Engineers -- everything.
 

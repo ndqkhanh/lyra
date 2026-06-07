@@ -33,7 +33,7 @@
 
   <!-- Stats line -->
   <text x="360" y="162" text-anchor="middle" font-size="11" font-weight="400"
-        fill="#64748b" letter-spacing="1">MIT · Python · TypeScript · 47 modules · 99 tests · 329 papers · 40 books · 83 repos · AUDITED</text>
+        fill="#64748b" letter-spacing="1">MIT · Python · TypeScript · 47 modules · 99 tests · 330 papers · 40 books · 88 repos · AUDITED</text>
 
   <!-- Terminal cursor -->
   <rect x="500" y="80" width="8" height="14" rx="1" fill="#38bdf8" opacity="0.8">

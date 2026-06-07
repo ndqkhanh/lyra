@@ -1,5 +1,5 @@
 """
-Agents Mesh — Bridge for external agent protocol integration.
+Agents Mesh — Bridge and protocol for external agent integration.
 """
 
 from lyra.agents_mesh.bridge import (
@@ -9,6 +9,23 @@ from lyra.agents_mesh.bridge import (
     MeshNode,
     MeshNodeStatus,
 )
+from lyra.agents_mesh.protocol import (
+    AccessLevel,
+    AccessRule,
+    AgentDiscovery,
+    AuthMethod,
+    DiscoveryMethod,
+    EncryptionScheme,
+    MeshEncryption,
+    MeshEnvelope,
+    MeshIdentity,
+    MeshProtocol,
+    MeshProtocolState,
+    MeshRouter,
+    MeshSecurity,
+    RouteEntry,
+    RoutingStrategy,
+)
 
 __all__ = [
     "AgentsMeshBridge",
@@ -16,4 +33,19 @@ __all__ = [
     "MeshMessageType",
     "MeshNode",
     "MeshNodeStatus",
+    "AccessLevel",
+    "AccessRule",
+    "AgentDiscovery",
+    "AuthMethod",
+    "DiscoveryMethod",
+    "EncryptionScheme",
+    "MeshEncryption",
+    "MeshEnvelope",
+    "MeshIdentity",
+    "MeshProtocol",
+    "MeshProtocolState",
+    "MeshRouter",
+    "MeshSecurity",
+    "RouteEntry",
+    "RoutingStrategy",
 ]

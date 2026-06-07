@@ -1,5 +1,5 @@
 # Adversarial Panel: Multi-Agent Debate for Output Verification and Quality
-> **Status:** 🟡 Partially implemented -- panel core and anonymization are built; ReTAS dialectical alignment, cross-source triangulation, confidence monitor, collusion detection, and evidence-anchored debate remain planned.
+> **Status:** 🟢 Feature-complete -- panel core, anonymization, ReTAS dialectical alignment (`retas_alignment.py`), collusion detection (`collusion_detector.py`), confidence monitor, and evidence-anchored debate (`debate_panel.py`) are all implemented. Cross-source triangulation remains as a planned future enhancement.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/25-adversarial-panel.md) | **Code:** `src/lyra/verification/`
 > **Reading path:** Non-technical readers -- TL;DR to How it works (simple) to Use Cases to Trade-offs in brief. Engineers -- everything.
 

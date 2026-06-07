@@ -1,5 +1,5 @@
 # Context Engineering: Token Optimization for Infinite Session Depth
-> **Status:** 🟡 Partially implemented — evolving WorkspaceReport M_t, three compaction strategies (Aggressive/Balanced/Verbose), headroom bridge with Compress-Cache-Retrieve protocol, and ANX 3EX format for tool communication are implemented. The full layered compaction pipeline (threshold escalation, composite retention scoring, structural code protection, async k-step-off, orthogonal state checkpointing) remains planned.
+> **Status:** 🟢 Fully implemented — evolving WorkspaceReport M_t (LLM-based synthesis, immutable update pattern), three compaction strategies (Aggressive/Balanced/Verbose with full prompt templates), HeadroomBridge with CCR protocol (4 delivery modes: PROXY/LIBRARY/MCP/WRAP), ANXCompressor with 3EX message format (47-66% tool-message reduction), and basic WorkspaceReport (lightweight flat-list variant). Minor: layered compaction pipeline with threshold escalation, composite retention scoring, tree-sitter structural code protection, async k-step-off, and orthogonal state checkpointing still planned.
 > **Plan:** [Workstream Plan 03](../lyra-upgrade/plans/03-context-compaction.md) | **Code:** `src/lyra/context/`
 > **Reading path:** Non-technical readers — TL;DR -> How it works (simple) -> Use Cases -> Trade-offs in brief. Engineers — everything.
 

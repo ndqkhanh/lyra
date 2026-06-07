@@ -1,5 +1,5 @@
 # RMUX: Remote Multiplexer for Distributed Agent Communication
-> **Status:** 🟡 Partially implemented — data model and stub integration exist; core PTY hosting, IPC protocol, and TUI rendering are planned.
+> **Status:** 🟢 Fully implemented -- data model, core PTY hosting, IPC protocol, TUI rendering, and session multiplexer (`pty_host.py`) all shipped.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/51-rmux.md) | **Code:** `src/lyra/rmux/`
 > **Reading path:** Non-technical readers — TL;DR -> How it works (simple) -> Use Cases -> Trade-offs in brief. Engineers -- everything.
 

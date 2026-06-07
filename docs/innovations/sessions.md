@@ -1,6 +1,6 @@
 # Sessions: Persistent Session Management with Checkpointing and Resume
 
-> **Status:** 🟡 Partially implemented -- basic SQLite-backed persistence layer exists (SessionManager with full CRUD, SessionReplay with turn recording and checkpointing); CLI management, session search, forking, backgrounding, context compression on resume, and orthogonal state dimensions are planned.
+> **Status:** 🟢 Most features shipped -- SQLite-backed persistence, CLI management (list/kill/resume/fork/search/background/export/import), checkpointing, R-KV redundancy-aware pruning, and layered context compression are all implemented. Orthogonal state dimensions remain planned.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/11-sessions.md) | **Code:** `src/lyra/sessions/`
 > **Reading path:** Non-technical readers -- TL;DR -> How it works (simple) -> Use Cases -> Trade-offs in brief. Engineers -- everything.
 

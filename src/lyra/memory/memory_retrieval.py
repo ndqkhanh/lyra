@@ -1,10 +1,16 @@
 """
-Memory Retrieval - Intelligent memory search and retrieval.
+Memory Retrieval - Intelligent memory search and retrieval with 3-signal
+fusion (semantic + temporal + behavioral).
 """
 
+from __future__ import annotations
+
+import statistics
 import time
-from dataclasses import dataclass
+from collections import defaultdict
+from dataclasses import dataclass, field
 from enum import Enum
+from typing import Any
 
 from lyra.memory.long_term_memory import LongTermMemory
 from lyra.memory.memory_store import Memory
@@ -17,6 +23,7 @@ class RetrievalStrategy(Enum):
     TEMPORAL = "temporal"          # Time-based
     IMPORTANCE = "importance"      # Importance-weighted
     HYBRID = "hybrid"              # Combine multiple strategies
+    FUSION = "fusion"              # 3-signal fusion (semantic+temporal+behavioral)
 
 
 @dataclass
@@ -38,6 +45,296 @@ class RetrievalResult:
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
+
+
+@dataclass
+class FusionWeights:
+    """Learnable weights for the 3-signal fusion retriever.
+
+    Attributes:
+        semantic: Weight for the semantic (embedding) signal.
+        temporal: Weight for the temporal (recency) signal.
+        behavioral: Weight for the behavioral (cluster) signal.
+    """
+
+    semantic: float = 0.40
+    temporal: float = 0.35
+    behavioral: float = 0.25
+
+    def normalize(self) -> FusionWeights:
+        """Return a new FusionWeights with weights that sum to 1.0."""
+        total = self.semantic + self.temporal + self.behavioral
+        if total <= 0.0:
+            return FusionWeights()
+        return FusionWeights(
+            semantic=self.semantic / total,
+            temporal=self.temporal / total,
+            behavioral=self.behavioral / total,
+        )
+
+    def to_dict(self) -> dict[str, float]:
+        return {
+            "semantic": round(self.semantic, 4),
+            "temporal": round(self.temporal, 4),
+            "behavioral": round(self.behavioral, 4),
+        }
+
+
+# =============================================================================
+# Fusion Retriever — 3-signal fusion (semantic + temporal + behavioral)
+# =============================================================================
+
+
+class FusionRetriever:
+    """3-signal fusion retrieval that combines semantic (embedding), temporal
+    (recency), and behavioral (cluster) signals into a single relevance score.
+
+    Signal weights are learnable via feedback: after each retrieval call,
+    ``record_feedback(retrieved_items, clicked_item)`` adjusts the weights
+    to increase the weight of the signal that correctly predicted the
+    user-preferred item.
+
+    Usage::
+
+        retriever = FusionRetriever(memory_store)
+        results = retriever.retrieve_fused("user query", top_k=5)
+        # Feedback loop
+        retriever.record_feedback(results, preferred_result)
+        print(retriever.get_weights())
+    """
+
+    def __init__(
+        self,
+        memory_store: MemoryStore | LongTermMemory,
+        weights: FusionWeights | None = None,
+        learning_rate: float = 0.05,
+        cluster_lookup: dict[str, int] | None = None,
+    ):
+        """
+        Args:
+            memory_store: Memory store or long-term memory to search.
+            weights: Initial signal weights. Auto-normalized.
+            learning_rate: Step size for weight updates from feedback.
+            cluster_lookup: Optional mapping from memory_id (str) to
+                cluster_id (int) from behavioral clustering. If provided,
+                items in the same cluster as the query's nearest neighbors
+                get a behavioral boost.
+        """
+        self.store = memory_store
+        self.weights = (weights or FusionWeights()).normalize()
+        self.learning_rate = learning_rate
+        self.cluster_lookup = cluster_lookup or {}
+
+        # Tracking for weight adaptation
+        self._feedback_history: list[dict[str, Any]] = []
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+
+    def retrieve_fused(
+        self,
+        query: str,
+        top_k: int = 10,
+        min_score: float = 0.0,
+    ) -> list[RetrievalResult]:
+        """Run 3-signal fusion retrieval.
+
+        Args:
+            query: The search query.
+            top_k: Maximum number of results to return.
+            min_score: Minimum combined score to include a result.
+
+        Returns:
+            Ranked list of RetrievalResult with scores from the fusion.
+        """
+        # Get all candidate memories
+        if hasattr(self.store, "get_all"):
+            candidates = self.store.get_all()
+        elif hasattr(self.store, "store") and hasattr(self.store.store, "get_all"):
+            candidates = self.store.store.get_all()
+        else:
+            candidates = []
+
+        if not candidates:
+            return []
+
+        # Compute per-memory signal scores
+        scored: list[tuple[Memory, float, float, float, float]] = []
+        for mem in candidates:
+            sem_score = self._semantic_signal(mem, query)
+            temp_score = self._temporal_signal(mem)
+            beh_score = self._behavioral_signal(mem, query)
+
+            combined = (
+                self.weights.semantic * sem_score
+                + self.weights.temporal * temp_score
+                + self.weights.behavioral * beh_score
+            )
+
+            if combined < min_score:
+                continue
+
+            scored.append((mem, combined, sem_score, temp_score, beh_score))
+
+        # Sort by combined score descending
+        scored.sort(key=lambda x: x[1], reverse=True)
+
+        results: list[RetrievalResult] = []
+        for mem, combined, sem, temp, beh in scored[:top_k]:
+            results.append(RetrievalResult(
+                memory=mem,
+                score=combined,
+                strategy="fusion",
+                metadata={
+                    "semantic_score": round(sem, 4),
+                    "temporal_score": round(temp, 4),
+                    "behavioral_score": round(beh, 4),
+                    "fusion_weights": self.weights.to_dict(),
+                },
+            ))
+
+        return results
+
+    # ------------------------------------------------------------------
+    # Signal computation
+    # ------------------------------------------------------------------
+
+    def _semantic_signal(self, memory: Memory, query: str) -> float:
+        """Semantic similarity between memory content and query.
+
+        Uses Jaccard word overlap as a lightweight stand-in for embedding
+        cosine similarity.
+        """
+        query_words = set(query.lower().split())
+        content_words = set(memory.content.lower().split())
+        if not query_words or not content_words:
+            return 0.0
+        intersection = query_words & content_words
+        union = query_words | content_words
+        jaccard = len(intersection) / max(len(union), 1)
+        # Blend with importance
+        return jaccard * (0.5 + 0.5 * memory.importance)
+
+    def _temporal_signal(self, memory: Memory) -> float:
+        """Recency-based temporal signal.
+
+        Returns 1.0 for memories created just now, decaying exponentially
+        over a 30-day window.
+        """
+        age_days = (time.time() - memory.timestamp) / 86400.0
+        return max(0.0, 1.0 - (age_days / 30.0))
+
+    def _behavioral_signal(self, memory: Memory, query: str) -> float:
+        """Behavioral (cluster) signal.
+
+        If cluster_lookup is available, items whose cluster matches the
+        query's nearest-cluster receive a boost. Otherwise, normalized
+        access frequency is used as a behavioral proxy.
+        """
+        if self.cluster_lookup:
+            # Use the memory's cluster membership
+            mem_cluster = self.cluster_lookup.get(memory.memory_id, -1)
+            if mem_cluster >= 0:
+                # Boost based on cluster size (popular clusters = stronger signal)
+                cluster_size = sum(
+                    1 for c in self.cluster_lookup.values() if c == mem_cluster
+                )
+                return min(1.0, cluster_size / 20.0)
+
+        # Fallback: normalized access frequency
+        return min(1.0, memory.access_count / 10.0)
+
+    # ------------------------------------------------------------------
+    # Feedback-driven weight adaptation
+    # ------------------------------------------------------------------
+
+    def record_feedback(
+        self,
+        retrieved: list[RetrievalResult],
+        selected_index: int,
+    ) -> FusionWeights:
+        """Update signal weights based on which result the user selected.
+
+        The weight of each signal is adjusted proportionally to how well
+        that signal predicted the selected item vs. the average.
+
+        Args:
+            retrieved: The list of results from a ``retrieve_fused`` call.
+            selected_index: Index (in ``retrieved``) of the item the user
+                selected / found most relevant.
+
+        Returns:
+            The updated (normalized) FusionWeights.
+        """
+        if not retrieved or selected_index < 0 or selected_index >= len(retrieved):
+            return self.weights
+
+        selected = retrieved[selected_index]
+        sem_scores = [r.metadata.get("semantic_score", 0.0) for r in retrieved]
+        temp_scores = [r.metadata.get("temporal_score", 0.0) for r in retrieved]
+        beh_scores = [r.metadata.get("behavioral_score", 0.0) for r in retrieved]
+
+        # How much better/worse each signal predicted the selected item
+        avg_sem = statistics.mean(sem_scores) if sem_scores else 0.0
+        avg_temp = statistics.mean(temp_scores) if temp_scores else 0.0
+        avg_beh = statistics.mean(beh_scores) if beh_scores else 0.0
+
+        sem_error = selected.metadata.get("semantic_score", 0.0) - avg_sem
+        temp_error = selected.metadata.get("temporal_score", 0.0) - avg_temp
+        beh_error = selected.metadata.get("behavioral_score", 0.0) - avg_beh
+
+        # Update weights: increase weight of the signal that best predicted
+        # the selection
+        self.weights = FusionWeights(
+            semantic=self.weights.semantic + self.learning_rate * sem_error,
+            temporal=self.weights.temporal + self.learning_rate * temp_error,
+            behavioral=self.weights.behavioral + self.learning_rate * beh_error,
+        ).normalize()
+
+        # Log feedback
+        self._feedback_history.append({
+            "query": "",
+            "selected_index": selected_index,
+            "selected_score": selected.score,
+            "weights_before": {
+                "semantic": round(self.weights.semantic - self.learning_rate * sem_error, 4),
+                "temporal": round(self.weights.temporal - self.learning_rate * temp_error, 4),
+                "behavioral": round(self.weights.behavioral - self.learning_rate * beh_error, 4),
+            },
+            "weights_after": self.weights.to_dict(),
+        })
+
+        return self.weights
+
+    def get_weights(self) -> FusionWeights:
+        """Return the current signal weights."""
+        return FusionWeights(
+            semantic=self.weights.semantic,
+            temporal=self.weights.temporal,
+            behavioral=self.weights.behavioral,
+        )
+
+    def get_feedback_history(
+        self, limit: int = 10
+    ) -> list[dict[str, Any]]:
+        """Return recent feedback events for observability."""
+        return self._feedback_history[-limit:]
+
+    def reset_weights(self, weights: FusionWeights | None = None):
+        """Reset signal weights to defaults or a specific set.
+
+        Args:
+            weights: New weights (auto-normalized). If None, resets to
+                ``FusionWeights()`` defaults.
+        """
+        self.weights = (weights or FusionWeights()).normalize()
+        self._feedback_history.clear()
+
+
+# =============================================================================
+# Legacy RelevanceScorer (unchanged)
+# =============================================================================
 
 
 class RelevanceScorer:
@@ -148,6 +445,11 @@ class RelevanceScorer:
         return len(intersection) / len(union)
 
 
+# =============================================================================
+# Legacy MemoryRetriever (unchanged)
+# =============================================================================
+
+
 class MemoryRetriever:
     """
     Intelligent memory retrieval system.
@@ -203,6 +505,8 @@ class MemoryRetriever:
             return self._retrieve_temporal(query, limit, min_score, filters)
         elif strategy == RetrievalStrategy.IMPORTANCE:
             return self._retrieve_importance(query, limit, min_score, filters)
+        elif strategy == RetrievalStrategy.FUSION:
+            return self._retrieve_fusion(query, limit, min_score, filters)
         elif strategy == RetrievalStrategy.HYBRID:
             return self._retrieve_hybrid(query, limit, min_score, filters)
         else:
@@ -301,6 +605,60 @@ class MemoryRetriever:
         results.sort(key=lambda r: r.score, reverse=True)
 
         return results[:limit]
+
+    def _retrieve_fusion(
+        self,
+        query: str,
+        limit: int,
+        min_score: float,
+        filters: dict | None,
+    ) -> list[RetrievalResult]:
+        """Retrieve using 3-signal fusion (semantic + temporal + behavioral).
+
+        Falls back to the MemoryRetriever's own scorer with an additional
+        behavioral boost from normalized access frequency.
+        """
+        # Get candidate memories
+        candidates = self._get_candidates(filters)
+        if not candidates:
+            return []
+
+        current_time = time.time()
+
+        scored: list[tuple[Memory, float]] = []
+        for memory in candidates:
+            # Semantic: use existing content scorer
+            sem_score = self.scorer._calculate_content_similarity(memory.content, query)
+
+            # Temporal: recency score
+            age_days = (current_time - memory.timestamp) / 86400
+            temp_score = max(0.0, 1.0 - (age_days / 30))
+
+            # Behavioral: normalized access frequency as proxy
+            beh_score = min(1.0, memory.access_count / 10)
+
+            # Equal-weight fusion
+            combined = (sem_score + temp_score + beh_score) / 3.0
+
+            if combined >= min_score:
+                scored.append((memory, combined, sem_score, temp_score, beh_score))
+
+        scored.sort(key=lambda x: x[1], reverse=True)
+
+        results: list[RetrievalResult] = []
+        for mem, combined, sem, temp, beh in scored[:limit]:
+            results.append(RetrievalResult(
+                memory=mem,
+                score=combined,
+                strategy="fusion",
+                metadata={
+                    "semantic_score": round(sem, 4),
+                    "temporal_score": round(temp, 4),
+                    "behavioral_score": round(beh, 4),
+                },
+            ))
+
+        return results
 
     def _retrieve_hybrid(
         self,

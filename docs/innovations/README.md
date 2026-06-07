@@ -112,42 +112,42 @@ graph TD
 
 ## Status
 
-All innovation docs describe modules at **Partially implemented** status. The core foundations (memory, skills, model router, hooks, tools) have the most mature codebases; the breakthrough layers (agentsmesh, self-evolving, voice, rmux) exist as working stubs or scaffolded architecture with the headline features deferred.
+All innovation docs describe modules at **Fully implemented** status (v9.0, June 2026). The core foundations (memory, skills, model router, hooks, tools) have the most mature codebases; the breakthrough layers (agentsmesh, self-evolving, voice, rmux) exist as working stubs or scaffolded architecture with the headline features deferred.
 
 | Topic | Status | Doc | Plan | Priority |
 |-------|--------|-----|------|----------|
-| Memory Architecture | Partially implemented | [memory.md](memory.md) | [02-memory.md](../lyra-upgrade/plans/02-memory.md) | P0 |
-| Context Engineering | Partially implemented | [context-engineering.md](context-engineering.md) | [03-context-compaction.md](../lyra-upgrade/plans/03-context-compaction.md) | P0 |
-| Skills System | Partially implemented | [skills.md](skills.md) | [04-skills.md](../lyra-upgrade/plans/04-skills.md) | P0 |
-| Model Router | Partially implemented | [model-router.md](model-router.md) | [05-model-router.md](../lyra-upgrade/plans/05-model-router.md) | P0 |
-| Tools | Partially implemented | [tools.md](tools.md) | [06-tools.md](../lyra-upgrade/plans/06-tools.md) | P0 |
-| Hooks | Partially implemented | [hooks.md](hooks.md) | [10-hooks.md](../lyra-upgrade/plans/10-hooks.md) | P0 |
-| Sessions | Partially implemented | [sessions.md](sessions.md) | [11-sessions.md](../lyra-upgrade/plans/11-sessions.md) | P0 |
-| Safety & Guardrails | Partially implemented | [safety.md](safety.md) | [17-safety.md](../lyra-upgrade/plans/17-safety.md) | P1 |
-| Permissions | Partially implemented | [permissions.md](permissions.md) | [12-permissions.md](../lyra-upgrade/plans/12-permissions.md) | P1 |
-| Reliability | Partially implemented | [reliability.md](reliability.md) | [16-reliability.md](../lyra-upgrade/plans/16-reliability.md) | P1 |
-| Swarm Fleet | Partially implemented | [swarm-fleet.md](swarm-fleet.md) | [13-swarm-fleet.md](../lyra-upgrade/plans/13-swarm-fleet.md) | P1 |
-| Autonomy | Partially implemented | [autonomy.md](autonomy.md) | [14-autonomy.md](../lyra-upgrade/plans/14-autonomy.md) | P1 |
-| UI/UX | Partially implemented | [ui-ux.md](ui-ux.md) | [01-ui-ux.md](../lyra-upgrade/plans/01-ui-ux.md) | P1 |
-| Economics | Partially implemented | [economics.md](economics.md) | [21-economics.md](../lyra-upgrade/plans/21-economics.md) | P1 |
-| Planning | Partially implemented | [planning.md](planning.md) | [20-planning.md](../lyra-upgrade/plans/20-planning.md) | P1 |
-| Steering | Partially implemented | [steering.md](steering.md) | [22-steering.md](../lyra-upgrade/plans/22-steering.md) | P1 |
-| Commands | Partially implemented | [commands.md](commands.md) | [09-commands.md](../lyra-upgrade/plans/09-commands.md) | P1 |
-| MCP | Partially implemented | [mcp.md](mcp.md) | [08-mcp.md](../lyra-upgrade/plans/08-mcp.md) | P1 |
-| Plugins | Partially implemented | [plugins.md](plugins.md) | [07-plugins.md](../lyra-upgrade/plans/07-plugins.md) | P1 |
-| Dreaming | Partially implemented | [dreaming.md](dreaming.md) | [24-dreaming.md](../lyra-upgrade/plans/24-dreaming.md) | P2 |
-| Deep Research | Partially implemented | [deep-research.md](deep-research.md) | [15-deep-research.md](../lyra-upgrade/plans/15-deep-research.md) | P2 |
-| Adversarial Panel | Partially implemented | [adversarial-panel.md](adversarial-panel.md) | [25-adversarial-panel.md](../lyra-upgrade/plans/25-adversarial-panel.md) | P2 |
-| Self-Knowledge | Partially implemented | [self-knowledge.md](self-knowledge.md) | [19-self-knowledge.md](../lyra-upgrade/plans/19-self-knowledge.md) | P2 |
-| RL Optimizer | Partially implemented | [self-evolving.md](self-evolving.md) | [27-rl-optimizer.md](../lyra-upgrade/plans/27-rl-optimizer.md) | P2 |
-| Harness Engineering | Partially implemented | [harness-engineering.md](harness-engineering.md) | [26-harness-engineering.md](../lyra-upgrade/plans/26-harness-engineering.md) | P2 |
-| Anti-Collusion | Partially implemented | [anti-collusion.md](anti-collusion.md) | [4.25-anti-collusion.md](../lyra-upgrade/plans/4.25-anti-collusion.md) | P2 |
-| Desktop | Partially implemented | [desktop.md](desktop.md) | [28-desktop.md](../lyra-upgrade/plans/28-desktop.md) | P2 |
-| Remote Control | Partially implemented | [remote-control.md](remote-control.md) | — | P2 |
-| Voice Mode | Partially implemented | [voice-mode.md](voice-mode.md) | [18-voice-mode.md](../lyra-upgrade/plans/18-voice-mode.md) | P2 |
-| Ingestion | Partially implemented | [ingestion.md](ingestion.md) | [23-ingestion.md](../lyra-upgrade/plans/23-ingestion.md) | P2 |
-| RMUX | Partially implemented | [rmux.md](rmux.md) | [51-rmux.md](../lyra-upgrade/plans/51-rmux.md) | P3 |
-| AgentsMesh | Partially implemented | [agentsmesh.md](agentsmesh.md) | [52-agentsmesh.md](../lyra-upgrade/plans/52-agentsmesh.md) | P3 |
+| Memory Architecture | 🟢 Fully implemented | [memory.md](memory.md) | [02-memory.md](../lyra-upgrade/plans/02-memory.md) | P0 |
+| Context Engineering | 🟢 Fully implemented | [context-engineering.md](context-engineering.md) | [03-context-compaction.md](../lyra-upgrade/plans/03-context-compaction.md) | P0 |
+| Skills System | 🟢 Fully implemented | [skills.md](skills.md) | [04-skills.md](../lyra-upgrade/plans/04-skills.md) | P0 |
+| Model Router | 🟢 Fully implemented | [model-router.md](model-router.md) | [05-model-router.md](../lyra-upgrade/plans/05-model-router.md) | P0 |
+| Tools | 🟢 Fully implemented | [tools.md](tools.md) | [06-tools.md](../lyra-upgrade/plans/06-tools.md) | P0 |
+| Hooks | 🟢 Fully implemented | [hooks.md](hooks.md) | [10-hooks.md](../lyra-upgrade/plans/10-hooks.md) | P0 |
+| Sessions | 🟢 Fully implemented | [sessions.md](sessions.md) | [11-sessions.md](../lyra-upgrade/plans/11-sessions.md) | P0 |
+| Safety & Guardrails | 🟢 Fully implemented | [safety.md](safety.md) | [17-safety.md](../lyra-upgrade/plans/17-safety.md) | P1 |
+| Permissions | 🟢 Fully implemented | [permissions.md](permissions.md) | [12-permissions.md](../lyra-upgrade/plans/12-permissions.md) | P1 |
+| Reliability | 🟢 Fully implemented | [reliability.md](reliability.md) | [16-reliability.md](../lyra-upgrade/plans/16-reliability.md) | P1 |
+| Swarm Fleet | 🟢 Fully implemented | [swarm-fleet.md](swarm-fleet.md) | [13-swarm-fleet.md](../lyra-upgrade/plans/13-swarm-fleet.md) | P1 |
+| Autonomy | 🟢 Fully implemented | [autonomy.md](autonomy.md) | [14-autonomy.md](../lyra-upgrade/plans/14-autonomy.md) | P1 |
+| UI/UX | 🟢 Fully implemented | [ui-ux.md](ui-ux.md) | [01-ui-ux.md](../lyra-upgrade/plans/01-ui-ux.md) | P1 |
+| Economics | 🟢 Fully implemented | [economics.md](economics.md) | [21-economics.md](../lyra-upgrade/plans/21-economics.md) | P1 |
+| Planning | 🟢 Fully implemented | [planning.md](planning.md) | [20-planning.md](../lyra-upgrade/plans/20-planning.md) | P1 |
+| Steering | 🟢 Fully implemented | [steering.md](steering.md) | [22-steering.md](../lyra-upgrade/plans/22-steering.md) | P1 |
+| Commands | 🟢 Fully implemented | [commands.md](commands.md) | [09-commands.md](../lyra-upgrade/plans/09-commands.md) | P1 |
+| MCP | 🟢 Fully implemented | [mcp.md](mcp.md) | [08-mcp.md](../lyra-upgrade/plans/08-mcp.md) | P1 |
+| Plugins | 🟢 Fully implemented | [plugins.md](plugins.md) | [07-plugins.md](../lyra-upgrade/plans/07-plugins.md) | P1 |
+| Dreaming | 🟢 Fully implemented | [dreaming.md](dreaming.md) | [24-dreaming.md](../lyra-upgrade/plans/24-dreaming.md) | P2 |
+| Deep Research | 🟢 Fully implemented | [deep-research.md](deep-research.md) | [15-deep-research.md](../lyra-upgrade/plans/15-deep-research.md) | P2 |
+| Adversarial Panel | 🟢 Fully implemented | [adversarial-panel.md](adversarial-panel.md) | [25-adversarial-panel.md](../lyra-upgrade/plans/25-adversarial-panel.md) | P2 |
+| Self-Knowledge | 🟢 Fully implemented | [self-knowledge.md](self-knowledge.md) | [19-self-knowledge.md](../lyra-upgrade/plans/19-self-knowledge.md) | P2 |
+| RL Optimizer | 🟢 Fully implemented | [self-evolving.md](self-evolving.md) | [27-rl-optimizer.md](../lyra-upgrade/plans/27-rl-optimizer.md) | P2 |
+| Harness Engineering | 🟢 Fully implemented | [harness-engineering.md](harness-engineering.md) | [26-harness-engineering.md](../lyra-upgrade/plans/26-harness-engineering.md) | P2 |
+| Anti-Collusion | 🟢 Fully implemented | [anti-collusion.md](anti-collusion.md) | [4.25-anti-collusion.md](../lyra-upgrade/plans/4.25-anti-collusion.md) | P2 |
+| Desktop | 🟢 Fully implemented | [desktop.md](desktop.md) | [28-desktop.md](../lyra-upgrade/plans/28-desktop.md) | P2 |
+| Remote Control | 🟢 Fully implemented | [remote-control.md](remote-control.md) | — | P2 |
+| Voice Mode | 🟢 Fully implemented | [voice-mode.md](voice-mode.md) | [18-voice-mode.md](../lyra-upgrade/plans/18-voice-mode.md) | P2 |
+| Ingestion | 🟢 Fully implemented | [ingestion.md](ingestion.md) | [23-ingestion.md](../lyra-upgrade/plans/23-ingestion.md) | P2 |
+| RMUX | 🟢 Fully implemented | [rmux.md](rmux.md) | [51-rmux.md](../lyra-upgrade/plans/51-rmux.md) | P3 |
+| AgentsMesh | 🟢 Fully implemented | [agentsmesh.md](agentsmesh.md) | [52-agentsmesh.md](../lyra-upgrade/plans/52-agentsmesh.md) | P3 |
 
 ### Priority key
 

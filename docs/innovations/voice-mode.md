@@ -1,6 +1,6 @@
 # Voice Mode: Cascaded STT-LLM-TTS Pipeline to Full-Duplex Speech-to-Speech
 
-> **Status:** 🟡 Partially implemented -- Tier A cascaded pipeline core and Tier B architecture exist in code, but critical components (self-correction buffer, task router classifier, safety gates, Orpheus TTS integration, real AEC) remain stubs or planned items.
+> **Status:** 🟢 Mostly implemented -- Tier A cascaded pipeline, Tier B full-duplex engine with real AEC (EchoCancellation with adaptive NLMS), self-correction buffer, task router classifier, bilingual VI+EN routing, inner monologue, and fleet voice commander are all shipped. Safety gates and Orpheus TTS integration remain planned.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/18-voice-mode.md) | **Code:** `src/lyra/voice/`
 > **Reading path:** Non-technical readers -- TL;DR to How it works (simple version) to Use Cases to Trade-offs in brief. Engineers -- everything.
 

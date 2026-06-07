@@ -96,6 +96,59 @@ from lyra.memory.quarantine import (
     QuarantinePool,
 )
 
+# --- New in 7.5.0: Cascade Memory ---
+from lyra.memory.cascade_memory import (
+    CascadeMemory,
+    CascadeRetrievalResult,
+    MemoryItem,
+    MemoryTier,
+    TierAccessStats,
+)
+
+# --- New in 8.1.0: Behavioral Clustering ---
+from lyra.memory.behavioral_clustering import (
+    BehavioralClusterEngine,
+    BehavioralClusteringResult,
+    BehavioralFeatureExtractor,
+    ClusterLabel,
+    ClusterLabelGenerator,
+    cluster_memory_items,
+)
+
+# --- New in 8.1.0: Fusion Retrieval ---
+from lyra.memory.memory_retrieval import (
+    FusionRetriever,
+    FusionWeights,
+)
+
+# --- New in 8.1.0: R-KV Pruning ---
+from lyra.memory.rkv_pruning import (
+    RKVPruner,
+    PrunedCache,
+    RedundancyAssessor,
+    RedundancyScore,
+    prune_redundant_keys,
+)
+
+# --- New in 8.1.0: Auto-Consolidation ---
+from lyra.memory.memory_consolidation import (
+    AutoConsolidationScheduler,
+    BackgroundConsolidationDaemon,
+    ConsolidationStats,
+)
+
+# --- New in 8.2.0: Deep Dream Engine ---
+from lyra.memory.deep_dream import (
+    ConwayCycle,
+    ConwayMemory,
+    ConwayState,
+    DeepDreamObserver,
+    DreamObservation,
+    DreamQuality,
+    MemoryFilesIntegration,
+    WarmUpScheduler,
+)
+
 __all__ = [
     # Core
     "Memory",
@@ -158,4 +211,39 @@ __all__ = [
     # Quarantine
     "QuarantineItem",
     "QuarantinePool",
+    # Cascade Memory
+    "CascadeMemory",
+    "CascadeRetrievalResult",
+    "MemoryItem",
+    "MemoryTier",
+    "TierAccessStats",
+    # Behavioral Clustering (8.1)
+    "BehavioralClusterEngine",
+    "BehavioralClusteringResult",
+    "BehavioralFeatureExtractor",
+    "ClusterLabel",
+    "ClusterLabelGenerator",
+    "cluster_memory_items",
+    # Fusion Retrieval (8.1)
+    "FusionRetriever",
+    "FusionWeights",
+    # R-KV Pruning (8.1)
+    "RKVPruner",
+    "PrunedCache",
+    "RedundancyAssessor",
+    "RedundancyScore",
+    "prune_redundant_keys",
+    # Auto-Consolidation (8.1)
+    "AutoConsolidationScheduler",
+    "BackgroundConsolidationDaemon",
+    "ConsolidationStats",
+    # Deep Dream (8.2)
+    "ConwayCycle",
+    "ConwayMemory",
+    "ConwayState",
+    "DeepDreamObserver",
+    "DreamObservation",
+    "DreamQuality",
+    "MemoryFilesIntegration",
+    "WarmUpScheduler",
 ]

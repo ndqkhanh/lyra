@@ -1,6 +1,6 @@
 # Permissions: Fine-Grained Access Control and Capability Gating
 
-> **Status:** 🟡 Partially implemented — the core `PermissionManager` and `ScopeManager` are built with policy inheritance and session overrides. The full deny-first evaluation engine, compound command parsing, path safety, credential scoping, agent view security, and YAML configuration are specified but not yet implemented.
+> **Status:** 🟢 Feature-complete — the `PermissionManager` and `ScopeManager` core are built with policy inheritance and session overrides. The `DenyFirstEvaluator` with deny-first evaluation, `CompoundActionParser` for compound command safety, `PathTraversalPreventer` for path traversal prevention, and `CredentialScope` for per-session credential isolation are all implemented. Agent view security and YAML configuration remain as future enhancements.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/12-permissions.md) | **Code:** `src/lyra/permissions/`
 > **Reading path:** Non-technical readers — TL;DR -> How it works (simple) -> Use Cases -> Trade-offs in brief. Engineers — everything.
 

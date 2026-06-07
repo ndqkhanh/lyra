@@ -11,27 +11,45 @@ The routing system has three strategies:
    routing with cache-hit awareness: verbatim turn-pair storage,
    hybrid BM25+cosine retrieval, confidence-gated cheap-model execution
    (Knowledge Access paper, Phase 2).
+
+v8.1 additions:
+- ConfidenceEstimator: multi-signal confidence detection (length anomaly,
+  refusal patterns, inconsistency heuristics).
+- EscalationDecision: encapsulates cascade escalation metadata.
+- CascadeStats: aggregate cascade routing statistics.
+- auto_tune(): adjusts confidence thresholds per model from outcome data.
+- CostDashboard / CostBreakdown / CompletionRecord: real-time cost tracking
+  with budget alerts and optimization suggestions.
 """
 
-from lyra.routing.provider.router import ModelRouter
+from lyra.routing.cascade import (
+    CascadeConfig,
+    CascadeRouter,
+    CascadeStats,
+    ConfidenceEstimator,
+    EscalationDecision,
+    OutcomeStats,
+)
+from lyra.routing.cost_dashboard import CompletionRecord, CostBreakdown, CostDashboard
 from lyra.routing.learned_router import (
     LearnedRouter,
     LearnedRouterState,
     ProxyRewardModel,
+    SamplingDepth,
     ScoredCandidate,
     TripleCandidate,
-    SamplingDepth,
     create_learned_router,
 )
 from lyra.routing.memory_router import (
     MemoryAugmentedRouter,
     MemoryEntry,
-    MemorySearchResult,
-    MemoryStore,
     MemoryRouterLayer,
     MemoryRouterMetrics,
+    MemorySearchResult,
+    MemoryStore,
     confidence_gate,
 )
+from lyra.routing.provider.router import ModelRouter
 
 __all__ = [
     # Static router
@@ -52,4 +70,16 @@ __all__ = [
     "MemoryRouterLayer",
     "MemoryRouterMetrics",
     "confidence_gate",
+    # Cascade (original)
+    "CascadeConfig",
+    "CascadeRouter",
+    "OutcomeStats",
+    # v8.1 cascade
+    "CascadeStats",
+    "ConfidenceEstimator",
+    "EscalationDecision",
+    # v8.1 cost dashboard
+    "CostDashboard",
+    "CostBreakdown",
+    "CompletionRecord",
 ]

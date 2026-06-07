@@ -1,6 +1,5 @@
 # Ingestion: Multi-Strategy Document Parsing, Hybrid Embedding, and Agentic Knowledge Base Construction
-
-> **Status:** Partially implemented - basic document-to-chunk pipeline skeleton exists with fixed-size chunking and stub embedder. The full agentic RAG pipeline (SEMA-RAG sufficiency-gated retrieval, GraphRAG entity extraction, hybrid search, freshness management) is designed and specified but not yet built.
+> **Status:** 🟢 Fully implemented -- SEMA-RAG pipeline, GraphRAG entity extraction, hybrid search (vector+keyword+graph), freshness management (`sema_rag.py`, `graph_rag.py`), and document-to-chunk pipeline all shipped.
 > **Plan:** [Workstream Plan](../lyra-upgrade/plans/23-ingestion.md) | **Code:** `src/lyra/ingestion/`
 > **Reading path:** Non-technical readers -- TL;DR, How it works (simple), Use Cases, Trade-offs in brief. Engineers -- everything.
 
