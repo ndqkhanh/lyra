@@ -7,11 +7,14 @@ Strategies:
 - Context compression (intelligent compaction)
 - Strategic compaction (compact at logical breakpoints)
 - Output limiting (cap max_tokens appropriately)
+- Workspace report injection (iterative compressed context via S4)
 """
 
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
+
+from src.context.workspace_report import WorkspaceReport
 
 
 class TaskType(Enum):
@@ -307,6 +310,7 @@ class TokenOptimizer:
     - Prompt caching
     - Context compression
     - Output limiting
+    - Workspace report injection (S4 Iterative Workspace Reconstruction)
     """
 
     def __init__(self):
@@ -315,6 +319,18 @@ class TokenOptimizer:
         self.compressor = ContextCompressor()
         self.cache_manager = PromptCacheManager()
         self.metrics = CostMetrics()
+        self.workspace_report: WorkspaceReport | None = None
+
+    def set_workspace_report(self, report: WorkspaceReport) -> None:
+        """Attach a workspace report for context injection.
+
+        When set, the report's ``to_prompt_context()`` output will be
+        prepended to the request context before any further compression.
+
+        Args:
+            report: The current workspace report.
+        """
+        self.workspace_report = report
 
     def optimize_request(self, request: LLMRequest) -> OptimizedRequest:
         """
@@ -329,20 +345,28 @@ class TokenOptimizer:
         # 1. Select appropriate model
         model = self.model_selector.select_model(request.task_type)
 
-        # 2. Compress context if needed
+        # 2. Inject workspace report as context source (S4 Breakthrough #1)
         context = request.context
-        if self.compressor.should_compress(request.context_size):
-            context = self.compressor.compress(request.context)
+        if self.workspace_report is not None:
+            report_context = self.workspace_report.to_prompt_context()
+            if context:
+                context = report_context + "\n\n" + context
+            else:
+                context = report_context
 
-        # 3. Enable caching if beneficial
+        # 3. Compress context if needed
+        if self.compressor.should_compress(request.context_size):
+            context = self.compressor.compress(context)
+
+        # 4. Enable caching if beneficial
         cache_enabled = self.cache_manager.should_cache(request)
         if cache_enabled:
             self.cache_manager.cache_prompt(request.prompt)
 
-        # 4. Set appropriate max_tokens
+        # 5. Set appropriate max_tokens
         max_tokens = self._estimate_tokens_needed(request)
 
-        # 5. Calculate cost and savings
+        # 6. Calculate cost and savings
         estimated_cost = self.model_selector.estimate_cost(
             model,
             input_tokens=len(context.split()) + len(request.prompt.split()),

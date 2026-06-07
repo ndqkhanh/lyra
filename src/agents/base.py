@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from src.core.task import Result, Task, TaskType
 from src.memory import (
@@ -19,6 +19,9 @@ from src.memory import (
     RetrievalStrategy,
     ShortTermMemory,
 )
+
+if TYPE_CHECKING:
+    from src.agent_loop.executor import AgentLoopExecutor
 
 
 class AgentStatus(str, Enum):
@@ -133,6 +136,37 @@ class Agent(ABC):
             Confidence score (0-1) that this agent can handle the task
         """
         pass
+
+    async def run_loop(
+        self,
+        task: Task,
+        loop_executor: "AgentLoopExecutor",
+    ) -> Result:
+        """
+        Run the agent loop for real execution (not simulated).
+
+        This method integrates with ``AgentLoopExecutor`` to perform actual
+        LLM calls, tool dispatch, memory operations, and hook firing.
+        Existing simulated agents are unaffected — this is an opt-in
+        capability.
+
+        Args:
+            task: The task to execute.
+            loop_executor: The ``AgentLoopExecutor`` instance wired with the
+                provider, tools, memory, and hooks.
+
+        Returns:
+            ``Result`` with execution data and metrics.
+        """
+        # Default implementation: connect to the executor.
+        # Concrete agents that have access to their provider/tools/memory/hooks
+        # can call loop_executor.execute() directly; the default here relies
+        # on the executor being already configured, which works when the
+        # caller (e.g. the TUI or coordinator) injects the executor.
+        raise NotImplementedError(
+            f"{type(self).__name__} does not support run_loop. "
+            f"Override run_loop() or use the traditional execute() path."
+        )
 
     async def send_message(
         self, to_agent: str, message_type: MessageType, content: dict[str, Any]

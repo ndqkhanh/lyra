@@ -48,6 +48,7 @@ class Skill:
     framework: str | None = None
     version: str = "1.0.0"
     source: str = "lyra"  # "lyra" or "ecc"
+    dependencies: list[str] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
     created_at: float = field(default_factory=lambda: datetime.now().timestamp())
     updated_at: float = field(default_factory=lambda: datetime.now().timestamp())
@@ -87,6 +88,7 @@ class Skill:
             "trigger_patterns": self.trigger_patterns,
             "tags": self.tags,
             "language": self.language,
+            "dependencies": self.dependencies,
             "framework": self.framework,
             "version": self.version,
             "source": self.source,
@@ -109,6 +111,7 @@ class Skill:
             framework=data.get("framework"),
             version=data.get("version", "1.0.0"),
             source=data.get("source", "lyra"),
+            dependencies=data.get("dependencies", []),
             metadata=data.get("metadata", {}),
             created_at=data.get("created_at", datetime.now().timestamp()),
             updated_at=data.get("updated_at", datetime.now().timestamp()),

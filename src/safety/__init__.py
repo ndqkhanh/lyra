@@ -1,12 +1,69 @@
 """
 Safety module for Lyra.
 
-This module is reserved for future safety features.
-Currently empty - safety features will be added as needed.
+Provides deterministic tool-call gating (P2: Breakthrough #3), a Policy
+data model, the ToolGate class for intercepting and enforcing
+least-privilege tool permissions, a defense-in-depth safety pipeline
+(P3), and a self-evolving guardrails subsystem (P8).
 
-Note: Security features are in the 'security' module.
+Sub-modules
+-----------
+policy:
+    ``Policy`` dataclass and ``GateDecision`` enum.
+tool_gate:
+    ``ToolGate`` — LLM-assisted policy generation + deterministic enforcement.
+pipeline:
+    ``SafetyPipeline`` — defense-in-depth safety pipeline orchestrating 5 layers.
+evolution:
+    ``EvolutionGuard`` — gated promotion system, ``FrozenEvaluator``,
+    and ``HumanApprovalGate`` for self-evolving safety rules.
 """
 
-__all__ = []
+from src.safety.evolution import (
+    EvalCase,
+    EvolutionGuard,
+    FrozenEvaluator,
+    HumanApprovalGate,
+    RuleEvaluation,
+    RuleMode,
+    SafetyRule,
+)
+from src.safety.policy import GateDecision, Policy
+from src.safety.tool_gate import ToolGate, _DEFAULT_POLICY as DEFAULT_POLICY
 
-__version__ = "1.0.0"
+from src.safety.pipeline import (
+    AlignmentCheck,
+    ContinuousEval,
+    DataFlowTracker,
+    LayerDecision,
+    LayerResult,
+    LexicalGate,
+    SafetyContext,
+    SafetyPipeline,
+    ToolCallGateLayer,
+)
+
+__all__ = [
+    "Policy",
+    "GateDecision",
+    "ToolGate",
+    "DEFAULT_POLICY",
+    "SafetyPipeline",
+    "SafetyContext",
+    "LayerResult",
+    "LayerDecision",
+    "LexicalGate",
+    "ToolCallGateLayer",
+    "AlignmentCheck",
+    "DataFlowTracker",
+    "ContinuousEval",
+    "SafetyRule",
+    "RuleMode",
+    "RuleEvaluation",
+    "EvalCase",
+    "EvolutionGuard",
+    "FrozenEvaluator",
+    "HumanApprovalGate",
+]
+
+__version__ = "3.1.0"

@@ -1,11 +1,185 @@
 """
 Skill registry for managing and retrieving skills.
+
+Includes SkillGraph for dependency-based topological execution ordering.
 """
 
 import json
+from collections import deque
+from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 from .skill import Skill, SkillCategory, SkillSearchResult
+
+
+class CycleError(Exception):
+    """Raised when a cycle is detected in skill dependencies."""
+
+    def __init__(self, cycle: list[str]):
+        self.cycle = cycle
+        super().__init__(f"Cycle detected in skill dependencies: {' → '.join(cycle)}")
+
+
+@dataclass
+class SkillGraph:
+    """
+    Directed graph of skill dependencies.
+
+    An edge ``skill_a -> skill_b`` means **skill_a depends on skill_b**,
+    i.e. skill_b must execute before skill_a.
+    """
+
+    _edges: dict[str, set[str]] = field(default_factory=dict)
+    _reverse: dict[str, set[str]] = field(default_factory=dict)
+
+    # ------------------------------------------------------------------
+    # Mutation
+    # ------------------------------------------------------------------
+
+    def add_dependency(self, skill_name: str, depends_on: str) -> None:
+        """Record that ``skill_name`` depends on ``depends_on``."""
+        if skill_name not in self._edges:
+            self._edges[skill_name] = set()
+        self._edges[skill_name].add(depends_on)
+
+        if depends_on not in self._reverse:
+            self._reverse[depends_on] = set()
+        self._reverse[depends_on].add(skill_name)
+
+    def add_node(self, skill_name: str) -> None:
+        """Ensure a node exists in the graph (no-op if already present)."""
+        self._edges.setdefault(skill_name, set())
+        self._reverse.setdefault(skill_name, set())
+
+    def remove_node(self, skill_name: str) -> None:
+        """Remove a node and all incident edges."""
+        self._edges.pop(skill_name, None)
+        self._reverse.pop(skill_name, None)
+        for deps in self._edges.values():
+            deps.discard(skill_name)
+        for rev in self._reverse.values():
+            rev.discard(skill_name)
+
+    # ------------------------------------------------------------------
+    # Queries
+    # ------------------------------------------------------------------
+
+    def dependencies(self, skill_name: str) -> set[str]:
+        """Return the set of skills ``skill_name`` directly depends on."""
+        return self._edges.get(skill_name, set())
+
+    def dependents(self, skill_name: str) -> set[str]:
+        """Return the set of skills that directly depend on ``skill_name``."""
+        return self._reverse.get(skill_name, set())
+
+    def has_cycle(self) -> bool:
+        """Return True if the graph contains any cycle."""
+        try:
+            self._topological_sort()
+            return False
+        except CycleError:
+            return True
+
+    def detect_cycles(self) -> list[list[str]]:
+        """Return a list of all cycles found in the graph (each as a node path)."""
+        WHITE, GRAY, BLACK = 0, 1, 2
+        colour: dict[str, int] = {n: WHITE for n in self._edges}
+        parent: dict[str, str | None] = {}
+        cycles: list[list[str]] = []
+
+        def _dfs(node: str) -> None:
+            colour[node] = GRAY
+            for neighbour in self._edges.get(node, set()):
+                if colour.get(neighbour, WHITE) == GRAY:
+                    # Found a back-edge → reconstruct cycle
+                    cycle: list[str] = [neighbour, node]
+                    cur: str | None = node
+                    while cur is not None and cur != neighbour:
+                        cur = parent.get(cur)
+                        if cur is not None:
+                            cycle.append(cur)
+                    cycle.reverse()
+                    cycles.append(cycle)
+                elif colour.get(neighbour, WHITE) == BLACK:
+                    continue
+                else:
+                    parent[neighbour] = node
+                    _dfs(neighbour)
+            colour[node] = BLACK
+
+        for n in list(colour):
+            if colour[n] == WHITE:
+                _dfs(n)
+        return cycles
+
+    # ------------------------------------------------------------------
+    # Topological ordering
+    # ------------------------------------------------------------------
+
+    def get_execution_order(self) -> list[str]:
+        """
+        Return skills in topological order (dependencies first).
+
+        Raises ``CycleError`` if a cycle is present.
+        """
+        return self._topological_sort()
+
+    def _topological_sort(self) -> list[str]:
+        """Kahn's algorithm."""
+        # in-degree = how many skills this skill depends on
+        in_degree: dict[str, int] = {}
+        all_nodes: set[str] = set(self._edges.keys()) | set(self._reverse.keys())
+        for n in all_nodes:
+            in_degree[n] = len(self._edges.get(n, set()))
+
+        queue: deque[str] = deque(n for n in all_nodes if in_degree[n] == 0)
+        ordered: list[str] = []
+
+        while queue:
+            node = queue.popleft()
+            ordered.append(node)
+            for dependent in self._reverse.get(node, set()):
+                in_degree[dependent] -= 1
+                if in_degree[dependent] == 0:
+                    queue.append(dependent)
+
+        if len(ordered) != len(all_nodes):
+            remaining = all_nodes - set(ordered)
+            # Reconstruct a cycle for the error message
+            cycle_path = self._find_cycle_path(list(remaining))
+            raise CycleError(cycle_path)
+
+        return ordered
+
+    @staticmethod
+    def _find_cycle_path(remaining: list[str]) -> list[str]:
+        """Heuristic: walk from the first remaining node following edges to reconstruct a cycle."""
+        if not remaining:
+            return []
+        # Simple heuristic — just return the remaining nodes as the "cycle"
+        return remaining
+
+    # ------------------------------------------------------------------
+    # Serialisation
+    # ------------------------------------------------------------------
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize graph as adjacency dict."""
+        return {
+            name: sorted(deps)
+            for name, deps in self._edges.items()
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, list[str]]) -> "SkillGraph":
+        """Build graph from adjacency dict."""
+        g = cls()
+        for name, deps in data.items():
+            g.add_node(name)
+            for dep in deps:
+                g.add_dependency(name, dep)
+        return g
 
 
 class SkillRegistry:
@@ -21,6 +195,7 @@ class SkillRegistry:
         self._category_index: dict[SkillCategory, set[str]] = {}
         self._tag_index: dict[str, set[str]] = {}
         self._language_index: dict[str, set[str]] = {}
+        self._graph: SkillGraph = SkillGraph()
 
     def register(self, skill: Skill) -> None:
         """
@@ -47,6 +222,11 @@ class SkillRegistry:
             if skill.language not in self._language_index:
                 self._language_index[skill.language] = set()
             self._language_index[skill.language].add(skill.name)
+
+        # Update dependency graph
+        self._graph.add_node(skill.name)
+        for dep in skill.dependencies:
+            self._graph.add_dependency(skill.name, dep)
 
     def unregister(self, skill_name: str) -> bool:
         """
@@ -76,6 +256,7 @@ class SkillRegistry:
         if skill.language and skill.language in self._language_index:
             self._language_index[skill.language].discard(skill_name)
 
+        self._graph.remove_node(skill_name)
         del self.skills[skill_name]
         return True
 
@@ -303,9 +484,24 @@ class SkillRegistry:
 
         return count
 
+    @property
+    def graph(self) -> SkillGraph:
+        """Return the internal dependency graph."""
+        return self._graph
+
+    def get_execution_order(self) -> list[str]:
+        """
+        Return skill names in topological order based on dependencies.
+
+        Skills that are depended upon come first. Raises ``CycleError``
+        if a dependency cycle is detected.
+        """
+        return self._graph.get_execution_order()
+
     def clear(self) -> None:
         """Clear all skills from registry."""
         self.skills.clear()
         self._category_index.clear()
         self._tag_index.clear()
         self._language_index.clear()
+        self._graph = SkillGraph()
