@@ -2,7 +2,7 @@
 
 from datetime import datetime, timezone
 
-from src.supervisor.state import ProcessState, SessionInfo, SessionState
+from lyra.supervisor.state import ProcessState, SessionInfo, SessionState
 
 
 class TestSessionState:

@@ -4,7 +4,7 @@ Tests for EvalHarness with tau-bench and SWE-bench integration.
 
 import pytest
 
-from src.verification.eval_harness import (
+from lyra.verification.eval_harness import (
     BenchmarkScoreboard,
     EvalHarness,
     EvalResults,

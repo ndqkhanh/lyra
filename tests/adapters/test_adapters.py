@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 
-from src.adapters.base import (
+from lyra.adapters.base import (
     AdapterFactory,
     ClaudeCodeAdapter,
     CursorAdapter,

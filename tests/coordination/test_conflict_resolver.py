@@ -2,8 +2,8 @@
 Tests for Conflict Resolver.
 """
 
-from src.coordination import ConflictResolver, ResolutionStrategy
-from src.core.task import Task, TaskPriority, TaskType
+from lyra.coordination import ConflictResolver, ResolutionStrategy
+from lyra.core.task import Task, TaskPriority, TaskType
 
 
 class TestConflictResolver:

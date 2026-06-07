@@ -6,7 +6,7 @@ from datetime import datetime
 
 import pytest
 
-from src.verification.error_probe import (
+from lyra.verification.error_probe import (
     AnomalyDetector,
     BackwardTracer,
     ErrorProbe,

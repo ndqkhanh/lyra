@@ -4,7 +4,7 @@ Tests for the command dispatcher module.
 
 import pytest
 
-from src.commands.dispatcher import Command, CommandContext, CommandDispatcher
+from lyra.commands.dispatcher import Command, CommandContext, CommandDispatcher
 
 
 @pytest.fixture

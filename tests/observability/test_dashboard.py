@@ -5,7 +5,7 @@ Tests for the observability dashboard module.
 import pytest
 from datetime import datetime, timezone
 
-from src.observability.dashboard import (
+from lyra.observability.dashboard import (
     MetricsDashboard,
     SessionMetrics,
     MetricSnapshot,

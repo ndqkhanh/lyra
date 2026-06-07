@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from src.worktree.manager import (
+from lyra.worktree.manager import (
     WorktreeCleanupError,
     WorktreeCreateError,
     WorktreeManager,

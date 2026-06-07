@@ -22,16 +22,16 @@ from unittest.mock import AsyncMock, MagicMock, PropertyMock, patch
 
 import pytest
 
-from src.agent_loop.executor import (
+from lyra.agent_loop.executor import (
     AgentLoopExecutor,
     HookBlockedError,
     MaxRetriesExceeded,
 )
-from src.core.task import Result, Task, TaskStatus, TaskType
-from src.hooks.hook import HookAction, HookContext, HookResult, HookType
-from src.memory.short_term_memory import ConversationTurn, SQLiteShortTermMemory
-from src.routing.provider.base import ProviderBackend
-from src.routing.provider.types import (
+from lyra.core.task import Result, Task, TaskStatus, TaskType
+from lyra.hooks.hook import HookAction, HookContext, HookResult, HookType
+from lyra.memory.short_term_memory import ConversationTurn, SQLiteShortTermMemory
+from lyra.routing.provider.base import ProviderBackend
+from lyra.routing.provider.types import (
     Capability,
     CompletionChunk,
     CompletionRequest,
@@ -40,8 +40,8 @@ from src.routing.provider.types import (
     ToolCall,
     TokenUsage,
 )
-from src.tools.executor import ToolExecutor
-from src.tools.registry import ToolDef, ToolRegistry, ToolResult
+from lyra.tools.executor import ToolExecutor
+from lyra.tools.registry import ToolDef, ToolRegistry, ToolResult
 
 
 # ======================================================================
@@ -1019,7 +1019,7 @@ class TestAgentBaseIntegration:
         executor: AgentLoopExecutor,
     ) -> None:
         """Default run_loop() raises NotImplementedError."""
-        from src.agents.base import Agent
+        from lyra.agents.base import Agent
 
         class MinimalAgent(Agent):
             async def execute(self, task: Task) -> Result:
@@ -1036,7 +1036,7 @@ class TestAgentBaseIntegration:
         task: Task,
     ) -> None:
         """Existing agents with execute() are unaffected by run_loop addition."""
-        from src.agents.base import Agent
+        from lyra.agents.base import Agent
 
         class ExistingAgent(Agent):
             async def execute(self, task: Task) -> Result:
@@ -1058,7 +1058,7 @@ class TestAgentBaseIntegration:
         mock_hooks: MagicMock,
     ) -> None:
         """Result from AgentLoopExecutor includes the agent's ID."""
-        from src.agents.base import Agent
+        from lyra.agents.base import Agent
 
         class LoopCapableAgent(Agent):
             async def execute(self, task: Task) -> Result:

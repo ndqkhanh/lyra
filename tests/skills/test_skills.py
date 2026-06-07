@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from src.skills import (
+from lyra.skills import (
     ECCSkillImporter,
     Skill,
     SkillCategory,

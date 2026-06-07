@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.economics.budget import BudgetAlertLevel, BudgetController, ProviderCostRecord
+from lyra.economics.budget import BudgetAlertLevel, BudgetController, ProviderCostRecord
 
 
 class TestProviderCostRecord:

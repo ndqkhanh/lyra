@@ -4,7 +4,7 @@ Tests for hooks system.
 
 import pytest
 
-from src.hooks import (
+from lyra.hooks import (
     Hook,
     HookContext,
     HookEngine,

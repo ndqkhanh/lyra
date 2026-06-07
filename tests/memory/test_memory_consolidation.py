@@ -4,14 +4,14 @@ Tests for Memory Consolidation.
 
 import time
 
-from src.memory.long_term_memory import LongTermMemory
-from src.memory.memory_consolidation import (
+from lyra.memory.long_term_memory import LongTermMemory
+from lyra.memory.memory_consolidation import (
     ConsolidationPolicy,
     ConsolidationResult,
     MemoryConsolidator,
 )
-from src.memory.memory_store import MemoryType
-from src.memory.short_term_memory import ConversationTurn, ShortTermMemory
+from lyra.memory.memory_store import MemoryType
+from lyra.memory.short_term_memory import ConversationTurn, ShortTermMemory
 
 
 class TestConsolidationResult:
@@ -148,7 +148,7 @@ class TestMemoryConsolidator:
 
     def test_find_repeated_patterns(self):
         """Test finding repeated patterns."""
-        from src.memory.memory_store import Memory
+        from lyra.memory.memory_store import Memory
 
         stm = ShortTermMemory()
         ltm = LongTermMemory()

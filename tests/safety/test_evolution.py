@@ -17,7 +17,7 @@ from typing import Any, Dict
 
 import pytest
 
-from src.safety.evolution import (
+from lyra.safety.evolution import (
     EvalCase,
     EvolutionGuard,
     FrozenEvaluator,
@@ -27,8 +27,8 @@ from src.safety.evolution import (
     SafetyRule,
     _dangerous_bash_evaluator,
 )
-from src.safety.policy import GateDecision, Policy
-from src.safety.tool_gate import ToolGate
+from lyra.safety.policy import GateDecision, Policy
+from lyra.safety.tool_gate import ToolGate
 
 
 # ======================================================================

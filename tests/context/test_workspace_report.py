@@ -13,8 +13,8 @@ from datetime import datetime, timezone
 
 import pytest
 
-from src.context.compaction import CompactionStrategy
-from src.context.workspace_report import WorkspaceReport, _estimate_tokens
+from lyra.context.compaction import CompactionStrategy
+from lyra.context.workspace_report import WorkspaceReport, _estimate_tokens
 
 # ---------------------------------------------------------------------------
 # Helpers

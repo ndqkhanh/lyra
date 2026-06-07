@@ -10,10 +10,10 @@ from pathlib import Path
 
 import pytest
 
-from src.tools.builtins import register_builtins
-from src.tools.executor import ToolExecutor
-from src.tools.registry import ToolDef, ToolRegistry
-from src.tools.sandbox import SandboxConfig, check_command_safety, check_domain_safety, check_path_safety
+from lyra.tools.builtins import register_builtins
+from lyra.tools.executor import ToolExecutor
+from lyra.tools.registry import ToolDef, ToolRegistry
+from lyra.tools.sandbox import SandboxConfig, check_command_safety, check_domain_safety, check_path_safety
 
 
 # ---------------------------------------------------------------------------
@@ -335,7 +335,7 @@ class TestDomainSafety:
 
 class TestToolResult:
     def test_to_dict(self) -> None:
-        from src.tools.registry import ToolResult
+        from lyra.tools.registry import ToolResult
 
         r = ToolResult(success=True, output="hello", execution_time_ms=12.5)
         d = r.to_dict()

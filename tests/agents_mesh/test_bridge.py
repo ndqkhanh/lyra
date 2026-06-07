@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.agents_mesh.bridge import (
+from lyra.agents_mesh.bridge import (
     AgentsMeshBridge,
     MeshMessage,
     MeshMessageType,

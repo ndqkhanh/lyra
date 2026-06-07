@@ -5,7 +5,7 @@ Tests for core task and result types.
 
 import pytest
 
-from src.core.task import (
+from lyra.core.task import (
     AgentPerformance,
     ExecutionMetrics,
     Result,

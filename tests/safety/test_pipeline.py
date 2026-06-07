@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.safety.pipeline import (
+from lyra.safety.pipeline import (
     AlignmentCheck,
     ContinuousEval,
     DataFlowTracker,
@@ -27,8 +27,8 @@ from src.safety.pipeline import (
     SafetyPipeline,
     ToolCallGateLayer,
 )
-from src.safety.policy import GateDecision, Policy
-from src.safety.tool_gate import ToolGate
+from lyra.safety.policy import GateDecision, Policy
+from lyra.safety.tool_gate import ToolGate
 
 
 # ======================================================================

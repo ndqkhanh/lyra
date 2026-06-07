@@ -11,8 +11,8 @@ from typing import Any, Dict, List
 
 import pytest
 
-from src.plugins.mcp.gateway import MCPGateway, MCPToolSchema, _normalise_mcp_tools
-from src.tools.registry import ToolDef
+from lyra.plugins.mcp.gateway import MCPGateway, MCPToolSchema, _normalise_mcp_tools
+from lyra.tools.registry import ToolDef
 
 
 # ---------------------------------------------------------------------------

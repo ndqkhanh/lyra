@@ -4,8 +4,8 @@ Tests for PrimaryAgent orchestration.
 
 import pytest
 
-from src.agents import CodeAgent, PrimaryAgent, ResearchAgent
-from src.core.task import Task, TaskType
+from lyra.agents import CodeAgent, PrimaryAgent, ResearchAgent
+from lyra.core.task import Task, TaskType
 
 
 class TestPrimaryAgent:

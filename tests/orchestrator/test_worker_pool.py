@@ -4,8 +4,8 @@ import asyncio
 
 import pytest
 
-from src.orchestrator.artifact import Artifact
-from src.orchestrator.worker_pool import WorkerConfig, WorkerPool, WorkerSession
+from lyra.orchestrator.artifact import Artifact
+from lyra.orchestrator.worker_pool import WorkerConfig, WorkerPool, WorkerSession
 
 
 @pytest.fixture

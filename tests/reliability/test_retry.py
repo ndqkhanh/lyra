@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from src.reliability.retry import RetryExhaustedError, RetryPolicy, retry
+from lyra.reliability.retry import RetryExhaustedError, RetryPolicy, retry
 
 
 # ------------------------------------------------------------------

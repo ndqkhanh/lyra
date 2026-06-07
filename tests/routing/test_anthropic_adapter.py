@@ -12,8 +12,8 @@ import os
 import pytest
 from pytest import FixtureRequest
 
-from src.routing.provider.adapters.anthropic import AnthropicAdapter
-from src.routing.provider.types import (
+from lyra.routing.provider.adapters.anthropic import AnthropicAdapter
+from lyra.routing.provider.types import (
     Capability,
     CompletionRequest,
     EffortLevel,

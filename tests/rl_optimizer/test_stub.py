@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.rl_optimizer.stub import OptimizerStatus, RLOptimizer, RLOptimizerConfig
+from lyra.rl_optimizer.stub import OptimizerStatus, RLOptimizer, RLOptimizerConfig
 
 
 class TestRLOptimizerConfig:

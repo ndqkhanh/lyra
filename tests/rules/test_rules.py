@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from src.rules import (
+from lyra.rules import (
     Rule,
     RuleCategory,
     RuleEngine,

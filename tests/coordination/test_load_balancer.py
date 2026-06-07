@@ -2,9 +2,9 @@
 Tests for Load Balancer.
 """
 
-from src.agents import CodeAgent, ResearchAgent, TestAgent
-from src.coordination import LoadBalancer
-from src.core.task import Task, TaskType
+from lyra.agents import CodeAgent, ResearchAgent, TestAgent
+from lyra.coordination import LoadBalancer
+from lyra.core.task import Task, TaskType
 
 
 class TestLoadBalancer:

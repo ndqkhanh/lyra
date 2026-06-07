@@ -4,8 +4,8 @@ Tests for agent base classes.
 
 import pytest
 
-from src.agents.base import Agent, AgentCapability, AgentStatus, Message, MessageType
-from src.core.task import Result, Task, TaskType
+from lyra.agents.base import Agent, AgentCapability, AgentStatus, Message, MessageType
+from lyra.core.task import Result, Task, TaskType
 
 
 class MockAgent(Agent):

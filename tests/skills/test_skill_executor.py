@@ -8,7 +8,7 @@ from typing import Any
 
 import pytest
 
-from src.skills import (
+from lyra.skills import (
     CycleError,
     ExecutionStatus,
     Skill,

@@ -4,7 +4,7 @@ Tests for TracingProvider with Langfuse/Phoenix backends.
 
 import pytest
 
-from src.verification.tracing_provider import (
+from lyra.verification.tracing_provider import (
     AutoInstrumentor,
     LangfuseBackend,
     OTelBackend,

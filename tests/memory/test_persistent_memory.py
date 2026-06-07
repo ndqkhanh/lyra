@@ -16,14 +16,14 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from src.memory.memory_store import (
+from lyra.memory.memory_store import (
     ConversationRecord,
     LongTermRecord,
     SQLiteStore,
 )
-from src.memory.short_term_memory import SQLiteShortTermMemory
-from src.memory.long_term_memory import SQLiteLongTermMemory
-from src.memory.vector_search import TfidfEncoder, VectorSearcher
+from lyra.memory.short_term_memory import SQLiteShortTermMemory
+from lyra.memory.long_term_memory import SQLiteLongTermMemory
+from lyra.memory.vector_search import TfidfEncoder, VectorSearcher
 
 
 # =============================================================================

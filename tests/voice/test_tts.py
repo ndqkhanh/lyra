@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.voice.tts import (
+from lyra.voice.tts import (
     ElevenLabsTTS,
     OpenAITTS,
     TTSProviderLocal,

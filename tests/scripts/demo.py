@@ -4,8 +4,8 @@ Demo script showing Lyra multi-agent orchestration in action.
 
 import asyncio
 
-from src.agents import CodeAgent, PrimaryAgent, ResearchAgent, ReviewAgent, TestAgent
-from src.core.task import Task, TaskType
+from lyra.agents import CodeAgent, PrimaryAgent, ResearchAgent, ReviewAgent, TestAgent
+from lyra.core.task import Task, TaskType
 
 
 async def demo_basic_orchestration():

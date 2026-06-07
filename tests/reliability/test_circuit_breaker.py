@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from src.reliability.circuit_breaker import (
+from lyra.reliability.circuit_breaker import (
     CircuitBreaker,
     CircuitBreakerError,
     CircuitState,

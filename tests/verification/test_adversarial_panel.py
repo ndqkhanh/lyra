@@ -13,7 +13,7 @@ Covers:
 
 import pytest
 
-from src.verification.panel import (
+from lyra.verification.panel import (
     AdversarialPanel,
     Lens,
     LENS_DESCRIPTIONS,

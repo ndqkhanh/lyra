@@ -11,8 +11,8 @@ import os
 
 import pytest
 
-from src.routing.provider.adapters.deepseek import DeepSeekAdapter
-from src.routing.provider.types import (
+from lyra.routing.provider.adapters.deepseek import DeepSeekAdapter
+from lyra.routing.provider.types import (
     Capability,
     CompletionRequest,
     EffortLevel,

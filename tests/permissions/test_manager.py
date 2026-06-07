@@ -4,7 +4,7 @@ Tests for the permission manager module.
 
 import pytest
 
-from src.permissions.manager import (
+from lyra.permissions.manager import (
     AccessLevel,
     PermissionManager,
     PermissionOverride,

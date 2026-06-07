@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from src.supervisor.daemon import SupervisorDaemon
-from src.supervisor.state import ProcessState, SessionState
+from lyra.supervisor.daemon import SupervisorDaemon
+from lyra.supervisor.state import ProcessState, SessionState
 
 
 # ------------------------------------------------------------------

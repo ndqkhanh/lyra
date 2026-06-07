@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.routing.provider.types import (
+from lyra.routing.provider.types import (
     Capability,
     CompletionChunk,
     CompletionRequest,

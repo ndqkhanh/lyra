@@ -4,8 +4,8 @@ Tests for Short-Term Memory.
 
 import time
 
-from src.memory.memory_store import MemoryStore
-from src.memory.short_term_memory import ConversationTurn, ShortTermMemory
+from lyra.memory.memory_store import MemoryStore
+from lyra.memory.short_term_memory import ConversationTurn, ShortTermMemory
 
 
 class TestConversationTurn:

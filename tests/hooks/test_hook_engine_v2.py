@@ -17,7 +17,7 @@ import re
 
 import pytest
 
-from src.hooks import (
+from lyra.hooks import (
     CommandGuard,
     CostTracker,
     Hook,
@@ -616,7 +616,7 @@ class TestCostTracker:
     """p2 observability handler."""
 
     def test_tracks_token_usage(self) -> None:
-        from src.routing.provider.types import TokenUsage
+        from lyra.routing.provider.types import TokenUsage
 
         tracker = CostTracker()
         usage = TokenUsage(input_tokens=100, output_tokens=50)
@@ -636,7 +636,7 @@ class TestCostTracker:
         assert metrics["total_calls"] == 1
 
     def test_accumulates(self) -> None:
-        from src.routing.provider.types import TokenUsage
+        from lyra.routing.provider.types import TokenUsage
 
         tracker = CostTracker()
         usage = TokenUsage(input_tokens=10, output_tokens=5)
@@ -655,7 +655,7 @@ class TestCostTracker:
         assert metrics["total_calls"] == 3
 
     def test_multiple_sessions(self) -> None:
-        from src.routing.provider.types import TokenUsage
+        from lyra.routing.provider.types import TokenUsage
 
         tracker = CostTracker()
         usage = TokenUsage(input_tokens=50, output_tokens=25)
@@ -674,7 +674,7 @@ class TestCostTracker:
         assert all_metrics["s2"]["total_calls"] == 1
 
     def test_reset(self) -> None:
-        from src.routing.provider.types import TokenUsage
+        from lyra.routing.provider.types import TokenUsage
 
         tracker = CostTracker()
         usage = TokenUsage(input_tokens=10, output_tokens=5)

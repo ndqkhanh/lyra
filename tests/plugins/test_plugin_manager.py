@@ -10,9 +10,9 @@ from typing import Any, Dict, List
 
 import pytest
 
-from src.hooks.hook import Hook, HookType
-from src.plugins.manager import Plugin, PluginManager, _is_protocol_class
-from src.tools.registry import ToolDef
+from lyra.hooks.hook import Hook, HookType
+from lyra.plugins.manager import Plugin, PluginManager, _is_protocol_class
+from lyra.tools.registry import ToolDef
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -32,9 +32,9 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from src.hooks.hook import Hook, HookType
-from src.plugins.manager import Plugin
-from src.tools.registry import ToolDef
+from lyra.hooks.hook import Hook, HookType
+from lyra.plugins.manager import Plugin
+from lyra.tools.registry import ToolDef
 
 
 class MyTestPlugin:
@@ -71,9 +71,9 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from src.hooks.hook import Hook, HookType
-from src.plugins.manager import Plugin
-from src.tools.registry import ToolDef
+from lyra.hooks.hook import Hook, HookType
+from lyra.plugins.manager import Plugin
+from lyra.tools.registry import ToolDef
 
 
 class _FactoryPlugin:

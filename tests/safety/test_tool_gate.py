@@ -13,9 +13,9 @@ from __future__ import annotations
 
 import pytest
 
-from src.hooks.hook import HookAction, HookContext, HookResult, HookType
-from src.safety.policy import GateDecision, Policy
-from src.safety.tool_gate import ToolGate
+from lyra.hooks.hook import HookAction, HookContext, HookResult, HookType
+from lyra.safety.policy import GateDecision, Policy
+from lyra.safety.tool_gate import ToolGate
 
 
 # ======================================================================

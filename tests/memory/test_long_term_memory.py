@@ -6,8 +6,8 @@ import os
 import tempfile
 import time
 
-from src.memory.long_term_memory import LongTermMemory, MemoryIndex
-from src.memory.memory_store import MemoryType
+from lyra.memory.long_term_memory import LongTermMemory, MemoryIndex
+from lyra.memory.memory_store import MemoryType
 
 
 class TestMemoryIndex:
@@ -23,7 +23,7 @@ class TestMemoryIndex:
 
     def test_add_memory_to_index(self):
         """Test adding a memory to index."""
-        from src.memory.memory_store import Memory
+        from lyra.memory.memory_store import Memory
 
         index = MemoryIndex()
         memory = Memory(
@@ -42,7 +42,7 @@ class TestMemoryIndex:
 
     def test_remove_memory_from_index(self):
         """Test removing a memory from index."""
-        from src.memory.memory_store import Memory
+        from lyra.memory.memory_store import Memory
 
         index = MemoryIndex()
         memory = Memory(
@@ -61,7 +61,7 @@ class TestMemoryIndex:
 
     def test_find_by_tags_any(self):
         """Test finding by tags (any match)."""
-        from src.memory.memory_store import Memory
+        from lyra.memory.memory_store import Memory
 
         index = MemoryIndex()
 
@@ -79,7 +79,7 @@ class TestMemoryIndex:
 
     def test_find_by_tags_all(self):
         """Test finding by tags (all match)."""
-        from src.memory.memory_store import Memory
+        from lyra.memory.memory_store import Memory
 
         index = MemoryIndex()
 
@@ -98,7 +98,7 @@ class TestMemoryIndex:
 
     def test_find_by_type(self):
         """Test finding by type."""
-        from src.memory.memory_store import Memory
+        from lyra.memory.memory_store import Memory
 
         index = MemoryIndex()
 
@@ -116,7 +116,7 @@ class TestMemoryIndex:
 
     def test_find_by_time_range(self):
         """Test finding by time range."""
-        from src.memory.memory_store import Memory
+        from lyra.memory.memory_store import Memory
 
         index = MemoryIndex()
 
@@ -135,7 +135,7 @@ class TestMemoryIndex:
 
     def test_clear_index(self):
         """Test clearing index."""
-        from src.memory.memory_store import Memory
+        from lyra.memory.memory_store import Memory
 
         index = MemoryIndex()
         memory = Memory("m1", "Test", MemoryType.EPISODIC, time.time(), tags=["tag1"])

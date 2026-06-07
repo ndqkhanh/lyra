@@ -6,7 +6,7 @@ import os
 import tempfile
 import time
 
-from src.memory.memory_store import Memory, MemoryStore, MemoryType
+from lyra.memory.memory_store import Memory, MemoryStore, MemoryType
 
 
 class TestMemory:

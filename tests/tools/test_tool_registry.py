@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.tools.registry import ToolDef, ToolRegistry, validate_parameters
+from lyra.tools.registry import ToolDef, ToolRegistry, validate_parameters
 
 
 # ---------------------------------------------------------------------------

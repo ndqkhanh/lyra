@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from src.ingestion.pipeline import (
+from lyra.ingestion.pipeline import (
     Chunk,
     DictMemoryStore,
     Document,

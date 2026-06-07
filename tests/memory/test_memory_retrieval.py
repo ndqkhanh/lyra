@@ -4,14 +4,14 @@ Tests for Memory Retrieval.
 
 import time
 
-from src.memory.long_term_memory import LongTermMemory
-from src.memory.memory_retrieval import (
+from lyra.memory.long_term_memory import LongTermMemory
+from lyra.memory.memory_retrieval import (
     MemoryRetriever,
     RelevanceScorer,
     RetrievalResult,
     RetrievalStrategy,
 )
-from src.memory.memory_store import MemoryType
+from lyra.memory.memory_store import MemoryType
 
 
 class TestRelevanceScorer:
@@ -28,7 +28,7 @@ class TestRelevanceScorer:
 
     def test_score_calculation(self):
         """Test calculating relevance score."""
-        from src.memory.memory_store import Memory
+        from lyra.memory.memory_store import Memory
 
         scorer = RelevanceScorer()
         memory = Memory(
@@ -45,7 +45,7 @@ class TestRelevanceScorer:
 
     def test_score_with_high_importance(self):
         """Test scoring with high importance."""
-        from src.memory.memory_store import Memory
+        from lyra.memory.memory_store import Memory
 
         scorer = RelevanceScorer(
             importance_weight=1.0, recency_weight=0.0, frequency_weight=0.0, content_weight=0.0
@@ -65,7 +65,7 @@ class TestRelevanceScorer:
 
     def test_score_with_recency(self):
         """Test scoring with recency."""
-        from src.memory.memory_store import Memory
+        from lyra.memory.memory_store import Memory
 
         scorer = RelevanceScorer(
             importance_weight=0.0, recency_weight=1.0, frequency_weight=0.0, content_weight=0.0
@@ -81,7 +81,7 @@ class TestRelevanceScorer:
 
     def test_score_with_frequency(self):
         """Test scoring with access frequency."""
-        from src.memory.memory_store import Memory
+        from lyra.memory.memory_store import Memory
 
         scorer = RelevanceScorer(
             importance_weight=0.0, recency_weight=0.0, frequency_weight=1.0, content_weight=0.0
@@ -277,7 +277,7 @@ class TestRetrievalResult:
 
     def test_result_creation(self):
         """Test creating a retrieval result."""
-        from src.memory.memory_store import Memory
+        from lyra.memory.memory_store import Memory
 
         memory = Memory(
             memory_id="test-1",
@@ -299,7 +299,7 @@ class TestRetrievalResult:
 
     def test_result_with_metadata(self):
         """Test creating a result with metadata."""
-        from src.memory.memory_store import Memory
+        from lyra.memory.memory_store import Memory
 
         memory = Memory(
             memory_id="test-1",

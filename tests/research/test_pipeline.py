@@ -14,9 +14,9 @@ Covers:
 
 import pytest
 
-from src.context.compaction import CompactionStrategy
-from src.context.workspace_report import WorkspaceReport
-from src.research.pipeline import (
+from lyra.context.compaction import CompactionStrategy
+from lyra.context.workspace_report import WorkspaceReport
+from lyra.research.pipeline import (
     Citation,
     DeepResearchPipeline,
     ResearchReport,

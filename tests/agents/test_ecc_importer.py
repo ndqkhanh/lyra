@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from src.agents.ecc_importer import (
+from lyra.agents.ecc_importer import (
     ECCAgent,
     ECCAgentDefinition,
     ECCAgentImporter,
@@ -15,8 +15,8 @@ from src.agents.ecc_importer import (
     ImportResult,
     create_sample_ecc_agents,
 )
-from src.agents.unified_registry import UnifiedAgentRegistry
-from src.core.task import Task, TaskType
+from lyra.agents.unified_registry import UnifiedAgentRegistry
+from lyra.core.task import Task, TaskType
 
 
 class TestECCAgentDefinition:

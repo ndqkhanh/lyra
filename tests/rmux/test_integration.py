@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.rmux.integration import RmuxIntegration, TerminalSession, TerminalSessionStatus
+from lyra.rmux.integration import RmuxIntegration, TerminalSession, TerminalSessionStatus
 
 
 class TestTerminalSession:

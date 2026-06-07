@@ -5,8 +5,8 @@ from unittest.mock import patch
 
 import pytest
 
-from src.orchestrator.artifact import Artifact
-from src.orchestrator.orchestrator import (
+from lyra.orchestrator.artifact import Artifact
+from lyra.orchestrator.orchestrator import (
     EffortLevel,
     OrchestrationResult,
     OrchestratorAgent,

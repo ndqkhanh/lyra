@@ -4,13 +4,13 @@ Tests for unified agent registry.
 
 import pytest
 
-from src.agents.base import Agent, AgentCapability
-from src.agents.unified_registry import (
+from lyra.agents.base import Agent, AgentCapability
+from lyra.agents.unified_registry import (
     AgentMetadata,
     AgentSource,
     UnifiedAgentRegistry,
 )
-from src.core.task import Result, Task, TaskType
+from lyra.core.task import Result, Task, TaskType
 
 
 class MockAgent(Agent):

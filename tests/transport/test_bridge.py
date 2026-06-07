@@ -6,7 +6,7 @@ import json
 import pytest
 from datetime import datetime, timezone
 
-from src.transport.bridge import (
+from lyra.transport.bridge import (
     BridgeMessage,
     BridgeMessageType,
     HeartbeatMessage,

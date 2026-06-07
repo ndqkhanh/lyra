@@ -10,8 +10,8 @@ from typing import Any
 import pytest
 from pytest import FixtureRequest
 
-from src.routing.provider.base import ProviderBackend
-from src.routing.provider.types import (
+from lyra.routing.provider.base import ProviderBackend
+from lyra.routing.provider.types import (
     Capability,
     CompletionChunk,
     CompletionRequest,

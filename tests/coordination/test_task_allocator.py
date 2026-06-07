@@ -2,9 +2,9 @@
 Tests for Task Allocator.
 """
 
-from src.agents import CodeAgent, ResearchAgent, TestAgent
-from src.coordination import AllocationStrategy, TaskAllocator
-from src.core.task import Task, TaskPriority, TaskType
+from lyra.agents import CodeAgent, ResearchAgent, TestAgent
+from lyra.coordination import AllocationStrategy, TaskAllocator
+from lyra.core.task import Task, TaskPriority, TaskType
 
 
 class TestTaskAllocator:

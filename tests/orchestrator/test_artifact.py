@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from src.orchestrator.artifact import (
+from lyra.orchestrator.artifact import (
     Artifact,
     CompressionLevel,
     compress_artifact,

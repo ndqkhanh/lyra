@@ -4,7 +4,7 @@ Tests for MutationVerifier (SABER pattern).
 
 import pytest
 
-from src.verification.mutation_verifier import (
+from lyra.verification.mutation_verifier import (
     CodeMutator,
     MutationType,
     MutationVerifier,

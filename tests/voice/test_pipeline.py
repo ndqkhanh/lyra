@@ -3,21 +3,21 @@ from __future__ import annotations
 
 import pytest
 
-from src.voice.capture import (
+from lyra.voice.capture import (
     AudioCapture,
     AudioCaptureError,
     record_utterance,
 )
-from src.voice.pipeline import (
+from lyra.voice.pipeline import (
     BargeInMode,
     BargeInEvent,
     PipelineError,
     PipelineStats,
     VoicePipeline,
 )
-from src.voice.router import RouterResponse, VoiceAgentRouter
-from src.voice.stt import TranscriptionResult
-from src.voice.tts import TTSResult
+from lyra.voice.router import RouterResponse, VoiceAgentRouter
+from lyra.voice.stt import TranscriptionResult
+from lyra.voice.tts import TTSResult
 
 
 # ---------------------------------------------------------------------------
@@ -172,13 +172,13 @@ class TestVoicePipeline:
     @pytest.mark.asyncio
     async def test_stt_provider_protocol_check(self) -> None:
         """Verify that the STTProvider protocol is importable."""
-        from src.voice.stt import STTProvider
+        from lyra.voice.stt import STTProvider
         assert STTProvider is not None
 
     @pytest.mark.asyncio
     async def test_tts_provider_protocol_check(self) -> None:
         """Verify that the TTSProvider protocol is importable."""
-        from src.voice.tts import TTSProvider
+        from lyra.voice.tts import TTSProvider
         assert TTSProvider is not None
 
     @pytest.mark.asyncio

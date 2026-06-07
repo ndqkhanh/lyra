@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from src.self_knowledge.introspect import IntrospectionEngine, KnowledgeSource
+from lyra.self_knowledge.introspect import IntrospectionEngine, KnowledgeSource
 
 
 class TestKnowledgeSource:

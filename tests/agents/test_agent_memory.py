@@ -9,9 +9,9 @@ from pathlib import Path
 
 import pytest
 
-from src.agents.base import Agent, AgentCapability, AgentStatus
-from src.core.task import Result, Task, TaskType
-from src.memory import MemoryType, RetrievalStrategy
+from lyra.agents.base import Agent, AgentCapability, AgentStatus
+from lyra.core.task import Result, Task, TaskType
+from lyra.memory import MemoryType, RetrievalStrategy
 
 
 class TestAgent(Agent):

@@ -2,8 +2,8 @@
 Tests for Dependency Manager.
 """
 
-from src.coordination import DependencyManager
-from src.core.task import Task, TaskStatus, TaskType
+from lyra.coordination import DependencyManager
+from lyra.core.task import Task, TaskStatus, TaskType
 
 
 class TestDependencyManager:
