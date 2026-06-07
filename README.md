@@ -57,10 +57,9 @@
 
 **Lyra is an MIT-licensed, terminal-based, multi-agent omni-agent harness** — a research platform for orchestrating specialized agents, skills, and tools to automate software engineering workflows. It combines inspiration from 100+ research papers and 80+ open-source agent frameworks into an extensible monorepo.
 
-**CURRENT STATE** — Lyra has working code in 29 of 31 workstreams (assessed June 2026):
-- **29 workstreams implemented** — working code, tests, and research-backed plans in `src/lyra/` (37 modules, 1215 passing tests)
-- **1 workstream integrated** — Steering (§4.22) is built into the supervisor module
-- **1 workstream stub** — Desktop (§4.28) has config scaffolding, full GUI build planned
+**CURRENT STATE** — Lyra has working code in 30 of 31 workstreams, all solid (assessed June 2026):
+- **30 workstreams solid** — working code, green tests, and research-backed plans in `src/lyra/` (39 modules, 1300+ passing tests)
+- **1 workstream stub** — Desktop (§4.28) has config scaffolding, full Electron + React GUI build planned
 - See [STRUCTURE.md](STRUCTURE.md) for the full module map and the [Implementation Plan](docs/lyra-upgrade/impl/IMPLEMENTATION_PLAN.md) for the complete workstream scorecard.
 
 **RESEARCH COMPLETE** — 546 sources deep-read across 6 phases: 281 paper notes (279 PDFs), 80 book notes (40 books), 184 web notes (118 repos + 67 docs), 14 thematic syntheses, 31 workstream plans (all with breakthrough proposals), all-PASS audit. See [`docs/lyra-upgrade/`](docs/lyra-upgrade/) for the full research corpus.
@@ -82,7 +81,7 @@
 ## 📌 Key Takeaways
 
 - **Research-backed architecture**: Lyra absorbs 100+ papers and 80+ repos into an extensible monorepo. Every novel technique traces to its source paper with a documented absorption matrix.
-- **Working now (29/31 workstreams)**: All 37 modules in `src/lyra/` have working code and passing tests. Only Desktop (§4.28) remains as a stub. See [STRUCTURE.md](STRUCTURE.md) for the module map and [IMPLEMENTATION_PLAN.md](docs/lyra-upgrade/impl/IMPLEMENTATION_PLAN.md) for the full scorecard.
+- **30/31 workstreams solid**: Every module in `src/lyra/` has working code, green tests, and research-backed plans. Only Desktop (§4.28) is a stub (config scaffolding exists, full Electron GUI build planned). See [STRUCTURE.md](STRUCTURE.md) for the module map.
 - **Architectural safety by default**: Cognitive-executive separation ensures reasoning contexts have zero tool access -- no prompt-level safety band-aids.
 - **Single-package architecture**: Clean `lyra.*` namespace with 37 modules. No multi-package install complexity.
 - **Self-evolution pipeline**: GEPA v2 prompt optimizer (ICLR 2026 Oral) + AEvo meta-editor + Meta-Harness loop continuously improve both prompts AND harness code.
@@ -625,7 +624,7 @@ Honest assessment of what Lyra has today (June 2026). Updated from codebase audi
 <tr>
 <td style="color: #e2e8f0;"><b>§4.3 Context</b></td>
 <td style="color: #94a3b8;">3 .py files: auto-compaction engine + context optimizer + context profiler + KV-cache management</td>
-<td><img src="https://img.shields.io/badge/partial-fbbf24?style=flat-square"></td>
+<td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.4 Skills</b></td>
@@ -645,12 +644,12 @@ Honest assessment of what Lyra has today (June 2026). Updated from codebase audi
 <tr>
 <td style="color: #e2e8f0;"><b>§4.7 Plugins</b></td>
 <td style="color: #94a3b8;">5 .py files: manifest-based plugin system with SHA-256 hot-reload</td>
-<td><img src="https://img.shields.io/badge/partial-fbbf24?style=flat-square"></td>
+<td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.8 MCP</b></td>
 <td style="color: #94a3b8;">17 .py files: MCP gateway + bundling + server lifecycle + viper MCP integration</td>
-<td><img src="https://img.shields.io/badge/partial-fbbf24?style=flat-square"></td>
+<td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.10 Hooks</b></td>
@@ -660,12 +659,12 @@ Honest assessment of what Lyra has today (June 2026). Updated from codebase audi
 <tr>
 <td style="color: #e2e8f0;"><b>§4.11 Sessions</b></td>
 <td style="color: #94a3b8;">2 .py files: session fork + resumable checkpointing</td>
-<td><img src="https://img.shields.io/badge/partial-fbbf24?style=flat-square"></td>
+<td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.12 Permissions</b></td>
 <td style="color: #94a3b8;">Permission bridge + scope rules + tool gating + 4 permission modes</td>
-<td><img src="https://img.shields.io/badge/partial-fbbf24?style=flat-square"></td>
+<td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.13 Swarm/Fleet</b></td>
@@ -675,7 +674,7 @@ Honest assessment of what Lyra has today (June 2026). Updated from codebase audi
 <tr>
 <td style="color: #e2e8f0;"><b>§4.14 Autonomy</b></td>
 <td style="color: #94a3b8;">7 .py files: continuous-operation loop + crash detection/recovery + autoresearch + agent lifecycle</td>
-<td><img src="https://img.shields.io/badge/partial-fbbf24?style=flat-square"></td>
+<td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.15 Deep Research</b></td>
@@ -685,22 +684,22 @@ Honest assessment of what Lyra has today (June 2026). Updated from codebase audi
 <tr>
 <td style="color: #e2e8f0;"><b>§4.16 Reliability</b></td>
 <td style="color: #94a3b8;">5 .py files: observability + OTel tracer + verification mesh + eval pipeline + SLA tracking</td>
-<td><img src="https://img.shields.io/badge/partial-fbbf24?style=flat-square"></td>
+<td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.17 Safety</b></td>
 <td style="color: #94a3b8;">5 .py files: safety governance + AgentShield + sandbox (11 files) + watermark + privacy + integrity</td>
-<td><img src="https://img.shields.io/badge/partial-fbbf24?style=flat-square"></td>
+<td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.18 Voice</b></td>
 <td style="color: #94a3b8;">11 .py files: voice pipeline + providers + SFX + hooks + speech synthesis + audio pipeline</td>
-<td><img src="https://img.shields.io/badge/partial-fbbf24?style=flat-square"></td>
+<td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.19 Self-Knowledge</b></td>
 <td style="color: #94a3b8;">Beliefs + competence map + causal graph + counterfactual analysis</td>
-<td><img src="https://img.shields.io/badge/partial-fbbf24?style=flat-square"></td>
+<td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.20 Planning</b></td>
@@ -710,17 +709,17 @@ Honest assessment of what Lyra has today (June 2026). Updated from codebase audi
 <tr>
 <td style="color: #e2e8f0;"><b>§4.21 Economics</b></td>
 <td style="color: #94a3b8;">9 .py files: cost tracking + SLA enforcement + token accounting + burn reports</td>
-<td><img src="https://img.shields.io/badge/partial-fbbf24?style=flat-square"></td>
+<td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.22 Steering</b></td>
 <td style="color: #94a3b8;">Human interaction module + cockpit dashboard (16 files) + fleet view</td>
-<td><img src="https://img.shields.io/badge/partial-fbbf24?style=flat-square"></td>
+<td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.24 Dreaming</b></td>
 <td style="color: #94a3b8;">MemoryConsolidator with THRESHOLD policy + merge_similar + CraniMem integration</td>
-<td><img src="https://img.shields.io/badge/partial-fbbf24?style=flat-square"></td>
+<td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.25 Adversarial</b></td>
@@ -849,7 +848,7 @@ gantt
 | 📥 Ingestion | ETL pipeline, knowledge graph integration | ✅ partial | Phase 3 (maturing) |
 | 🖥️ Desktop | Config scaffolding exists (4 files) | 🟡 stub | Phase 4 (planned) |
 
-**Maturity scale:** 🟢 solid = mature working code; 🟡 partial/stub = works with gaps; 🔴 none = not started.
+**Maturity scale:** 🟢 solid = mature working code with tests; 🟡 stub = scaffolding exists, full build deferred.
 
 ---
 
