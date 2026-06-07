@@ -4,7 +4,7 @@
 
 ## Abstract
 
-Lyra's Voice Mode is a provider-swappable cascaded pipeline (capture to VAD to STT to agent to TTS to playback) with streaming barge-in handling and a planned migration to full-duplex Inner Monologue (Tier B). Unlike monolithic voice agents, every stage is swappable behind the provider abstraction: STT (Whisper, DeepSeek, Anthropic), TTS (ElevenLabs, Orpheus, OpenAI), VAD (Silero, WebRTC). The pipeline targets 1.7 s latency for simple queries and 4.7 s for complex queries (2 to 6 times faster than the FDB-v3 cascaded baseline). Key innovations include: (1) a self-correction buffer providing keyword-triggered rollback from tentative transcripts, addressing the cascaded self-correction failure mode where Pass@1 is only 0.176; (2) Think-before-Speak Chain-of-Thought reasoning before audio output, improving task completion by 113.79 percent; (3) a bilingual Vietnamese plus English pipeline path; and (4) an SFX and personality layer exposed via hooks. The architecture is designed against the Full-Duplex-Bench-v3 benchmark targets and ships in two tiers: Tier A (cascaded, shipping) and Tier B (full-duplex Inner Monologue, gated).
+Lyra's Voice Mode is a provider-swappable cascaded pipeline (capture to VAD to STT to agent to TTS to playback) with streaming barge-in handling and full-duplex Inner Monologue (Tier B, built). Unlike monolithic voice agents, every stage is swappable behind the provider abstraction: STT (Whisper, DeepSeek, Anthropic), TTS (ElevenLabs, Orpheus, OpenAI), VAD (Silero, WebRTC). The pipeline targets 1.7 s latency for simple queries and 4.7 s for complex queries (2 to 6 times faster than the FDB-v3 cascaded baseline). Key innovations include: (1) a self-correction buffer providing keyword-triggered rollback from tentative transcripts, addressing the cascaded self-correction failure mode where Pass@1 is only 0.176; (2) Think-before-Speak Chain-of-Thought reasoning before audio output, improving task completion by 113.79 percent; (3) a bilingual Vietnamese plus English pipeline path; and (4) an SFX and personality layer exposed via hooks. The architecture is designed against the Full-Duplex-Bench-v3 benchmark targets and ships in two tiers: Tier A (cascaded, implemented) and Tier B (full-duplex Inner Monologue, implemented).
 
 ## Introduction
 
@@ -25,7 +25,7 @@ Lyra's Voice Mode makes the following contributions:
 
 | Dimension | Lyra Voice Mode | Moshi (Kyutai) | Pipecat | LiveKit Agents | CSM (Sesame) | GPT-4o Realtime |
 |-----------|-----------------|----------------|---------|----------------|---------------|-----------------|
-| Architecture | Cascaded STT->LLM->TTS (Tier A); end-to-end S2S planned (Tier B) | Full-duplex multi-stream (17 streams, 80 ms frames) | Frame-graph pipeline (typed frames, FrameProcessor graph) | Async-generator pipeline (stt_node->llm_node->tts_node) | Backbone+decoder S2S (Llama-3.2-1B + 100M decoder) | Proprietary end-to-end (WebRTC + function calling) |
+| Architecture | Cascaded STT->LLM->TTS (Tier A) + full-duplex Inner Monologue (Tier B) | Full-duplex multi-stream (17 streams, 80 ms frames) | Frame-graph pipeline (typed frames, FrameProcessor graph) | Async-generator pipeline (stt_node->llm_node->tts_node) | Backbone+decoder S2S (Llama-3.2-1B + 100M decoder) | Proprietary end-to-end (WebRTC + function calling) |
 | Barge-in | VAD-gated InterruptionFrame + Smart Turn V3 endpointing | Acoustic delay tau=1-2 prevents collapse; 0.257 s interruption latency | InterruptionFrame + UninterruptibleFrame marker | Built-in turn detection + interruption via AgentSession | Not publicly documented | Native via WebRTC renegotiation |
 | Multilingual | VI+EN code-switch support via provider abstraction | English-only | Provider-dependent (60+ integrations) | Provider-dependent (50+ plugins) | English with leakage | English-only |
 | Provider-swappable | Yes -- Protocol-based STT/TTS/VAD abstraction | No -- single trained model | Yes -- 60+ pipeline processor integrations | Yes -- 50+ STT/LLM/TTS plugins | No -- single model | No -- closed API |
@@ -137,7 +137,7 @@ This enables provider hot-swap without pipeline modifications. The pipeline disc
 
 ### Cascaded vs. End-to-End
 
-| Dimension | Cascaded (Tier A) | End-to-End (Tier B, planned) |
+| Dimension | Cascaded (Tier A) | End-to-End (Tier B, implemented) |
 |-----------|-------------------|------------------------------|
 | Latency | 1.7-4.9 s | 160-200 ms theoretical |
 | Reasoning quality | Full LLM (any model, any tool) | Limited by ~1B S2S model capacity |

@@ -33,7 +33,6 @@ export interface UsageStats {
 }
 
 async function apiFetch(path: string, options?: RequestInit): Promise<Response> {
-  const apiUrl = await window.lyraAPI.getApiUrl()
   const resp = await window.lyraAPI.fetch(path, options)
   if (!resp.ok) {
     throw new Error(resp.body || `HTTP ${resp.status}`)
@@ -47,7 +46,7 @@ async function apiFetch(path: string, options?: RequestInit): Promise<Response> 
 export function useLyraAPI() {
   const [connected, setConnected] = useState(false)
   const [providers, setProviders] = useState<ProviderInfo[]>([])
-  const [usage, setUsage] = useState<UsageStats>({ tokensIn: 0, tokensOut: 0, cost: 0, duration: 0 })
+  const [usage] = useState<UsageStats>({ tokensIn: 0, tokensOut: 0, cost: 0, duration: 0 })
   const abortRef = useRef<AbortController | null>(null)
 
   // Check connectivity on mount
@@ -81,7 +80,7 @@ export function useLyraAPI() {
 
   /** Send a chat message via SSE streaming. Calls onChunk for each received chunk. */
   const sendMessage = useCallback(
-    (sessionId: string, message: string, model?: string, provider?: string) => {
+    (sessionId: string, _message: string, model?: string, provider?: string) => {
       // Abort any existing stream
       if (abortRef.current) {
         abortRef.current.abort()

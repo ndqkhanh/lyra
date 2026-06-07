@@ -507,7 +507,7 @@ class LatentMemory:
         self,
         weaver: MemoryWeaver | None = None,
         trigger: MemoryTrigger | None = None,
-        store: MemoryStore | None = None,
+        memory_store: MemoryStore | None = None,
         max_total_tokens: int = DEFAULT_MAX_MEMORY_TOKENS,
         token_weight_decay: float = DEFAULT_TOKEN_WEIGHT_DECAY,
     ):
@@ -517,13 +517,13 @@ class LatentMemory:
         Args:
             weaver: MemoryWeaver instance for encoding.
             trigger: MemoryTrigger instance for gating.
-            store: Optional MemoryStore for persistence.
+            memory_store: Optional MemoryStore for persistence.
             max_total_tokens: Maximum total latent tokens across all sequences.
             token_weight_decay: Decay rate for token weights (forgetting).
         """
         self.weaver = weaver or MemoryWeaver()
         self.trigger = trigger or MemoryTrigger()
-        self.store = store
+        self._persist_store = memory_store
         self.max_total_tokens = max_total_tokens
         self.token_weight_decay = token_weight_decay
 
@@ -565,9 +565,9 @@ class LatentMemory:
         self._total_latent_tokens += new_token_count
 
         # Optionally persist source memory
-        if self.store:
+        if self._persist_store:
             if isinstance(memory, Memory):
-                self.store.add(
+                self._persist_store.add(
                     content=memory.content,
                     memory_type=memory.memory_type,
                     importance=memory.importance,
@@ -575,7 +575,7 @@ class LatentMemory:
                     context={**memory.context, "latent_sequence_id": sequence.sequence_id},
                 )
             else:
-                self.store.add(
+                self._persist_store.add(
                     content=content,
                     memory_type=MemoryType.SEMANTIC,
                     importance=0.5,
@@ -763,7 +763,7 @@ class LatentMemory:
             "token_weight_decay": self.token_weight_decay,
             "weaver": self.weaver.get_statistics(),
             "trigger": self.trigger.get_statistics(),
-            "has_persistence": self.store is not None,
+            "has_persistence": self._persist_store is not None,
             "performance_targets": {
                 "improvement_over_expel": f"+{TARGET_IMPROVEMENT_OVER_EXPEL * 100:.2f}%",
                 "no_external_db": TARGET_EXTERNAL_DB_ELIMINATION,

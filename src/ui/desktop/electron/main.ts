@@ -1,8 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
-import { join, dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
-
-const __dirname = dirname(fileURLToPath(import.meta.url))
+import { join } from 'node:path'
 
 let mainWindow: BrowserWindow | null = null
 

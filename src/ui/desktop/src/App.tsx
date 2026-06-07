@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { theme } from './styles/theme'
 import { ChatView } from './components/ChatView'
 import { Sidebar } from './components/Sidebar'
@@ -20,7 +20,6 @@ export function App() {
     connected,
     providers,
     usage,
-    sendMessage,
     cancelStream,
     checkConnection,
   } = useLyraAPI()
@@ -36,7 +35,6 @@ export function App() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isStreaming, setIsStreaming] = useState(false)
   const [sidebarVisible, setSidebarVisible] = useState(true)
-  const [currentChunk, setCurrentChunk] = useState('')
   const currentChunkRef = useRef('')
 
   // Add a system message explaining connection status

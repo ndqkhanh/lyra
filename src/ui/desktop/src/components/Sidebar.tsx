@@ -1,4 +1,3 @@
-import React from 'react'
 import { theme } from '../styles/theme'
 import { FleetView } from './FleetView'
 import type { Session, ProviderInfo } from '../hooks/useLyraAPI'

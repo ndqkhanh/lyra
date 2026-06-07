@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react'
+import { useCallback, useRef, useState, type KeyboardEvent } from 'react'
 import { theme } from '../styles/theme'
 import type { ProviderInfo } from '../hooks/useLyraAPI'
 
@@ -17,9 +17,6 @@ export function InputBar({ onSend, onCancel, isStreaming, providers, disabled }:
   const [showModelPicker, setShowModelPicker] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const currentProvider = providers.find((p) => p.name === selectedProvider)
-  const models = currentProvider?.models ?? []
-
   const handleSend = useCallback(() => {
     const text = input.trim()
     if (!text) return
@@ -31,7 +28,7 @@ export function InputBar({ onSend, onCancel, isStreaming, providers, disabled }:
   }, [input, onSend, selectedModel, selectedProvider])
 
   const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
+    (e: KeyboardEvent) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault()
         handleSend()

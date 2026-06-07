@@ -1,4 +1,3 @@
-import React from 'react'
 import { theme } from '../styles/theme'
 import type { Session } from '../hooks/useLyraAPI'
 

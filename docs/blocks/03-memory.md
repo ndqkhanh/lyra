@@ -1,6 +1,6 @@
 # Memory -- How It Works
 
-> A 6-tier memory fabric with AMAC admission (5-factor scoring), Dream consolidation pipeline (Orient/Gather/Consolidate/Prune), and hybrid BM25+Vector retrieval fused by Reciprocal Rank Fusion.
+> A 3-tier memory architecture (STM/LTM/Consolidation) with field-theoretic dreaming, FORGE population broadcast, and hybrid BM25+Vector retrieval fused by Reciprocal Rank Fusion.
 > **Block:** 03 | **Phase:** 3 (Multi-Agent & Memory) | **Depends on:** Context Engine, Agent Loop
 
 ## The 6-Tier Architecture
