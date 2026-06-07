@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"timeout 20 python -m pytest tests/evolution/test_fast_evolution.py::TestCacheHitRate::test_incremental_mutations_improve_cache_hits -v --tb=short\",\"timeout\":25000,\"description\":\"Run specif...",
-  "error": "Exit code 127\n(eval):1: command not found: timeout",
-  "timestamp": "2026-05-17T07:58:08.584Z",
-  "retry_count": 1
-}

@@ -1,7 +1,0 @@
-{
-  "tool_name": "Read",
-  "tool_input_preview": "{\"file_path\":\"/Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/.omc/state/sessions/e60fca02-080c-4373-8d2c-c66e5890e74a/prd.json\"}",
-  "error": "File does not exist. Note: your current working directory is /Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-core.",
-  "timestamp": "2026-05-30T02:49:57.599Z",
-  "retry_count": 2
-}

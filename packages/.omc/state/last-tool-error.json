@@ -1,7 +1,0 @@
-{
-  "tool_name": "Read",
-  "tool_input_preview": "{\"file_path\":\"/Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/packages/ui-terminal/src/components/Header.tsx\"}",
-  "error": "File does not exist. Note: your current working directory is /Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages.",
-  "timestamp": "2026-05-25T01:40:27.460Z",
-  "retry_count": 1
-}

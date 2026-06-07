@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"cd packages/lyra-ui && python -m pytest tests/ -v --tb=short 2>&1 | tail -20\",\"description\":\"Run lyra-ui tests\"}",
-  "error": "Exit code 1\n(eval):cd:1: no such file or directory: packages/lyra-ui",
-  "timestamp": "2026-05-21T16:36:49.706Z",
-  "retry_count": 1
-}

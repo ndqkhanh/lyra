@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"git commit -m \\\"feat: Phase 2 - Bypass Mode Implementation\\n\\n- Added BypassMode for auto-accepting permissions\\n- Added AuditLogger for tracking all permission decisions\\n- Added SafetyGu...",
-  "error": "Exit code 1\nOn branch main\nYour branch is up to date with 'origin/main'.\n\nChanges not staged for commit:\n  (use \"git add <file>...\" to update what will be committed)\n  (use \"git restore <file>...\" to discard changes in working directory)\n  (commit or discard the untracked or modified content in submodules)\n\tmodified:   ../../.omc/project-memory.json\n\tmodified:   ../.omc/state/last-tool-error.json\n\tmodified:   ../lyra-pentest (modified content, untracked content)\n\tmodified:   .omc/state/last-tool...",
-  "timestamp": "2026-05-19T16:14:49.992Z",
-  "retry_count": 2
-}

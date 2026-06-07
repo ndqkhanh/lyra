@@ -1,2 +1,0 @@
-{"ts": "2026-05-23T07:12:01.384143+00:00", "kind": "session.start", "session_turn": 0, "data": {"repo_root": "/Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-cli", "model": "auto", "mode": "edit_automatically"}}
-{"ts": "2026-05-23T07:12:27.394251+00:00", "kind": "session.end", "session_turn": 0, "data": {"turns": 0, "cost_usd": 0.0, "tokens": 0}}

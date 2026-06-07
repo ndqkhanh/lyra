@@ -1,7 +1,0 @@
-{
-  "tool_name": "Read",
-  "tool_input_preview": "{\"file_path\":\"/Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/docs/research/phase3-progress-summary.md\"}",
-  "error": "File does not exist. Note: your current working directory is /Users/khanhnguyen/Downloads/MyCV/research/harness-engineering/projects/lyra/packages/lyra-research.",
-  "timestamp": "2026-05-30T03:52:35.514Z",
-  "retry_count": 1
-}

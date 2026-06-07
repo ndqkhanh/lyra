@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"git add packages/lyra-core/src/lyra_core/memory/mcp_tools.py packages/lyra-mcp/src/lyra_mcp/server/app.py\",\"description\":\"Stage Phase 5.3 files\"}",
-  "error": "Exit code 128\nwarning: could not open directory 'packages/lyra-skills/packages/': No such file or directory\nfatal: pathspec 'packages/lyra-core/src/lyra_core/memory/mcp_tools.py' did not match any files",
-  "timestamp": "2026-05-27T03:29:46.459Z",
-  "retry_count": 1
-}
