@@ -50,6 +50,23 @@ The planned systems add: a logbook that records every single action with timesta
 **(b) Mermaid diagram.**
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#7c3aed',
+  'primaryTextColor': '#e2e8f0',
+  'primaryBorderColor': '#a78bfa',
+  'lineColor': '#818cf8',
+  'secondaryColor': '#1e293b',
+  'tertiaryColor': '#0f172a',
+  'background': '#0d0d1a',
+  'mainBkg': '#1e293b',
+  'nodeBorder': '#6366f1',
+  'clusterBkg': '#111827',
+  'clusterBorder': '#4f46e5',
+  'titleColor': '#c084fc',
+  'edgeLabelBackground': '#1e293b',
+  'nodeTextColor': '#e2e8f0',
+  'fontSize': '14px'
+}}}%%
 graph LR
     AGENT[Agent makes a tool call]
     RETRY{Retry policy}
@@ -140,6 +157,23 @@ Claude Code (Harness Engineering, Ch. 6, via `docs/lyra-upgrade/notes/books/harn
 The reliability module lives at `src/lyra/reliability/` and exports three components through `__init__.py`: `RetryPolicy` and `retry` (async callable wrapper), `CircuitBreaker` and `CircuitState` (three-state state machine), and `CheckpointManager` (JSON-based save/restore). All three are standalone Python dataclasses with no external dependencies beyond the standard library (except `logging`). They are designed to be composed: a tool call can pass through retry, whose exhaustion feeds the circuit breaker's failure count, while the checkpoint manager saves state before every significant step boundary.
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#7c3aed',
+  'primaryTextColor': '#e2e8f0',
+  'primaryBorderColor': '#a78bfa',
+  'lineColor': '#818cf8',
+  'secondaryColor': '#1e293b',
+  'tertiaryColor': '#0f172a',
+  'background': '#0d0d1a',
+  'mainBkg': '#1e293b',
+  'nodeBorder': '#6366f1',
+  'clusterBkg': '#111827',
+  'clusterBorder': '#4f46e5',
+  'titleColor': '#c084fc',
+  'edgeLabelBackground': '#1e293b',
+  'nodeTextColor': '#e2e8f0',
+  'fontSize': '14px'
+}}}%%
 graph TB
     subgraph "src/lyra/reliability/ (Shipped)"
         RETRY[retry.py<br/>RetryPolicy + async retry()]
@@ -200,6 +234,23 @@ Error handling: three distinct exception classes -- `RetryExhaustedError` (all a
 The `CircuitBreaker` generic dataclass implements a three-state state machine:
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#7c3aed',
+  'primaryTextColor': '#e2e8f0',
+  'primaryBorderColor': '#a78bfa',
+  'lineColor': '#818cf8',
+  'secondaryColor': '#1e293b',
+  'tertiaryColor': '#0f172a',
+  'background': '#0d0d1a',
+  'mainBkg': '#1e293b',
+  'nodeBorder': '#6366f1',
+  'clusterBkg': '#111827',
+  'clusterBorder': '#4f46e5',
+  'titleColor': '#c084fc',
+  'edgeLabelBackground': '#1e293b',
+  'nodeTextColor': '#e2e8f0',
+  'fontSize': '14px'
+}}}%%
 graph LR
     CLOSED -->|failure_count >= failure_threshold| OPEN
     OPEN -->|recovery_timeout elapsed| HALF_OPEN

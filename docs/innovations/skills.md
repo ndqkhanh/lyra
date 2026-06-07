@@ -32,6 +32,23 @@ Existing approaches fall into three camps. Provider-specific skills APIs (Claude
 **Everyday analogy.** Imagine a chef’s kitchen with a corkboard of recipe cards. Each card shows only the name and a one-line description pinned to the board — that is the catalog. When the chef decides to cook that dish, she pulls the full card off the board, which has the complete ingredient list and step-by-step instructions. If the recipe says “see sauce card”, she pulls that second card only when she reaches that step. When a new cook joins the kitchen, she brings her own set of cards, and the board keeps them organized by category: desserts, sauces, main courses.
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#7c3aed',
+  'primaryTextColor': '#e2e8f0',
+  'primaryBorderColor': '#a78bfa',
+  'lineColor': '#818cf8',
+  'secondaryColor': '#1e293b',
+  'tertiaryColor': '#0f172a',
+  'background': '#0d0d1a',
+  'mainBkg': '#1e293b',
+  'nodeBorder': '#6366f1',
+  'clusterBkg': '#111827',
+  'clusterBorder': '#4f46e5',
+  'titleColor': '#c084fc',
+  'edgeLabelBackground': '#1e293b',
+  'nodeTextColor': '#e2e8f0',
+  'fontSize': '14px'
+}}}%%
 flowchart LR
     CATALOG[Skill catalog<br/>name + description] --> MATCH{Matches task?}
     MATCH -->|Yes| LOAD[Load full body +<br/>resolve dependencies]
@@ -127,6 +144,23 @@ The executor accepts an optional `execute_skill_fn` callable that actually runs 
 **Export** (`export.py`). Provides cross-orchestrator compatibility via the Wasla universal sync format (v2.0.1). `SkillPackage` dataclass wraps a skill with `integrity_sha256` computed deterministically from name, version, content, category, trigger patterns, tags, and dependencies. `sign()` / `verify()` methods enforce integrity on serialization round-trips. `from_skill()` / `to_skill()` converters bridge between `SkillPackage` and the native `Skill` dataclass. `SkillRegistryExport` supports bulk export of multiple skills in Wasla-compatible JSON format with metadata (registry name, version, export timestamp).
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#7c3aed',
+  'primaryTextColor': '#e2e8f0',
+  'primaryBorderColor': '#a78bfa',
+  'lineColor': '#818cf8',
+  'secondaryColor': '#1e293b',
+  'tertiaryColor': '#0f172a',
+  'background': '#0d0d1a',
+  'mainBkg': '#1e293b',
+  'nodeBorder': '#6366f1',
+  'clusterBkg': '#111827',
+  'clusterBorder': '#4f46e5',
+  'titleColor': '#c084fc',
+  'edgeLabelBackground': '#1e293b',
+  'nodeTextColor': '#e2e8f0',
+  'fontSize': '14px'
+}}}%%
 flowchart TB
     subgraph Filesystem
         SKILL_MD[skill.md<br/>---<br/>name: security-review<br/>category: security<br/>tags: [review, audit]<br/>---<br/>## Instructions...]

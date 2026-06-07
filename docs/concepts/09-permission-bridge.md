@@ -14,6 +14,23 @@ There are four modes:
 4. **Bypass** — All tools auto-approved with minimal logging (only tool name and timestamp, no arguments). Only available in non-interactive mode (pipelines, automated scripts). Never available for interactive sessions. Requires explicit configuration flag. No session with bypass mode can be resumed interactively.
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#7c3aed',
+  'primaryTextColor': '#e2e8f0',
+  'primaryBorderColor': '#a78bfa',
+  'lineColor': '#818cf8',
+  'secondaryColor': '#1e293b',
+  'tertiaryColor': '#0f172a',
+  'background': '#0d0d1a',
+  'mainBkg': '#1e293b',
+  'nodeBorder': '#6366f1',
+  'clusterBkg': '#111827',
+  'clusterBorder': '#4f46e5',
+  'titleColor': '#c084fc',
+  'edgeLabelBackground': '#1e293b',
+  'nodeTextColor': '#e2e8f0',
+  'fontSize': '14px'
+}}}%%
 flowchart TD
     Tool["Tool Call"] --> Mode{"Mode?"}
     Mode -->|Plan| PlanMode["Allow planning tools only<br/>Ask for execution tools"]

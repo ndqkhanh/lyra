@@ -37,6 +37,23 @@ Contributions:
 Think of Lyra's command system like a smart TV remote. The built-in buttons (commands) are already labeled and do what you expect: `/help` is the info button, `/model` changes the input channel, `/clear` resets the picture. If you want a custom button, you write it down on a sticker (a markdown file) and stick it on the remote -- the remote automatically picks it up. Before the TV executes any button press, a safety check runs: is this button allowed in the current room (permission)? Could pressing it break something (security check)? Should I ask the user first (ask gate)?
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#7c3aed',
+  'primaryTextColor': '#e2e8f0',
+  'primaryBorderColor': '#a78bfa',
+  'lineColor': '#818cf8',
+  'secondaryColor': '#1e293b',
+  'tertiaryColor': '#0f172a',
+  'background': '#0d0d1a',
+  'mainBkg': '#1e293b',
+  'nodeBorder': '#6366f1',
+  'clusterBkg': '#111827',
+  'clusterBorder': '#4f46e5',
+  'titleColor': '#c084fc',
+  'edgeLabelBackground': '#1e293b',
+  'nodeTextColor': '#e2e8f0',
+  'fontSize': '14px'
+}}}%%
 graph TD
     A["You type /command"] --> B["Detect the '/' prefix"]
     B --> C{"Is it a known command?"}

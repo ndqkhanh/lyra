@@ -11,6 +11,23 @@ The Verifier is Lyra's trust layer — the gate that every task completion must 
 3. **Phase 3 (Cross-Channel Reconciliation)** — Three independent evidence channels must agree: execution trace (HIR events recorded during execution — what did the agent actually do?), git diff (what files were actually changed on disk?), environment snapshot (what does the filesystem look like — content hashes of modified files, test exit codes, coverage metrics?). If the trace says "wrote helper.py with 50 lines" but the diff shows no changes to helper.py, the Verifier flags fabrication at maximum severity and the task is blocked from completion.
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#7c3aed',
+  'primaryTextColor': '#e2e8f0',
+  'primaryBorderColor': '#a78bfa',
+  'lineColor': '#818cf8',
+  'secondaryColor': '#1e293b',
+  'tertiaryColor': '#0f172a',
+  'background': '#0d0d1a',
+  'mainBkg': '#1e293b',
+  'nodeBorder': '#6366f1',
+  'clusterBkg': '#111827',
+  'clusterBorder': '#4f46e5',
+  'titleColor': '#c084fc',
+  'edgeLabelBackground': '#1e293b',
+  'nodeTextColor': '#e2e8f0',
+  'fontSize': '14px'
+}}}%%
 flowchart TD
     Task["Task Output"] --> P1["Phase 1: Objective Checks"]
     P1 -->|Pass| P2["Phase 2: Blind LLM Judge<br/>Different model family"]

@@ -40,6 +40,23 @@ Lyra solves this by giving every craftsperson their own dedicated workbench (a g
 ### Simple Mermaid diagram
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#7c3aed',
+  'primaryTextColor': '#e2e8f0',
+  'primaryBorderColor': '#a78bfa',
+  'lineColor': '#818cf8',
+  'secondaryColor': '#1e293b',
+  'tertiaryColor': '#0f172a',
+  'background': '#0d0d1a',
+  'mainBkg': '#1e293b',
+  'nodeBorder': '#6366f1',
+  'clusterBkg': '#111827',
+  'clusterBorder': '#4f46e5',
+  'titleColor': '#c084fc',
+  'edgeLabelBackground': '#1e293b',
+  'nodeTextColor': '#e2e8f0',
+  'fontSize': '14px'
+}}}%%
 flowchart LR
     U[You type a command] --> D[Supervisor Daemon\nstarts a session]
     D --> W[Isolated Worktree\none per session]
@@ -131,6 +148,23 @@ Lyra takes the following from each source and diverges where:
 The swarm fleet architecture comprises five modules forming a layered stack. The supervisor layer handles session lifecycle and persistence. The worktree layer provides file isolation. The orchestration layer manages task decomposition and parallel dispatch. The agent layer defines agent types and intelligent routing. The steering layer provides human-in-the-loop interaction.
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#7c3aed',
+  'primaryTextColor': '#e2e8f0',
+  'primaryBorderColor': '#a78bfa',
+  'lineColor': '#818cf8',
+  'secondaryColor': '#1e293b',
+  'tertiaryColor': '#0f172a',
+  'background': '#0d0d1a',
+  'mainBkg': '#1e293b',
+  'nodeBorder': '#6366f1',
+  'clusterBkg': '#111827',
+  'clusterBorder': '#4f46e5',
+  'titleColor': '#c084fc',
+  'edgeLabelBackground': '#1e293b',
+  'nodeTextColor': '#e2e8f0',
+  'fontSize': '14px'
+}}}%%
 flowchart TB
     subgraph FleetLayer["Fleet Management (partial)"]
         SP[Steer-by-Exception Panel\nApprovalGate\nsrc/lyra/steering/panel.py]

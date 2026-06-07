@@ -39,6 +39,23 @@ Contributions:
 Imagine a factory assembly line. Before each worker (the AI model) starts their task, a quality inspector checks that the right materials (context/memory) are available, that the worker has the correct tools allowed, and that safety guards are in place. After the worker takes an action, another inspector verifies the output is correct before it moves to the next station. If something goes wrong, a repair team (circuit breaker, retry logic, checkpoint restore) steps in. The entire factory floor is recorded by a documentarian (the Attestor) who logs every claim and its supporting evidence.
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#7c3aed',
+  'primaryTextColor': '#e2e8f0',
+  'primaryBorderColor': '#a78bfa',
+  'lineColor': '#818cf8',
+  'secondaryColor': '#1e293b',
+  'tertiaryColor': '#0f172a',
+  'background': '#0d0d1a',
+  'mainBkg': '#1e293b',
+  'nodeBorder': '#6366f1',
+  'clusterBkg': '#111827',
+  'clusterBorder': '#4f46e5',
+  'titleColor': '#c084fc',
+  'edgeLabelBackground': '#1e293b',
+  'nodeTextColor': '#e2e8f0',
+  'fontSize': '14px'
+}}}%%
 graph TD
     A[Task Input] --> B[Safety Scanner]
     B --> C[Permission Check: ALLOW/DENY/ASK]

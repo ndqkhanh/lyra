@@ -17,6 +17,23 @@ The five layers are assembled in fixed order, each separated by a structured del
 The assembly is deterministic: given the same state, the same context string is produced. This is critical for prompt caching — the cache key is computed from the first three layers (SOUL + project + state), and any change invalidates the cache.
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#7c3aed',
+  'primaryTextColor': '#e2e8f0',
+  'primaryBorderColor': '#a78bfa',
+  'lineColor': '#818cf8',
+  'secondaryColor': '#1e293b',
+  'tertiaryColor': '#0f172a',
+  'background': '#0d0d1a',
+  'mainBkg': '#1e293b',
+  'nodeBorder': '#6366f1',
+  'clusterBkg': '#111827',
+  'clusterBorder': '#4f46e5',
+  'titleColor': '#c084fc',
+  'edgeLabelBackground': '#1e293b',
+  'nodeTextColor': '#e2e8f0',
+  'fontSize': '14px'
+}}}%%
 flowchart LR
     SOUL["0. SOUL<br/>Inviolable, never compacted"] --> Proj["1. Project<br/>Context"]
     Proj --> State["2. Session<br/>State"]

@@ -9,6 +9,23 @@ Skills are the procedural tier of Lyra's memory hierarchy. A SKILL.md file lives
 The SkillRouter matches the `description` frontmatter field to user intent at session assembly time. Only names and descriptions appear in the working context (L2). The full body loads only on invocation — keeping L2 small and stable so prompt caching works. On invocation, the permission bridge narrows the tool allowlist to the skill's `allowed-tools` set, and the body is injected as a system-message addendum. On scope exit, the original tool list restores.
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#7c3aed',
+  'primaryTextColor': '#e2e8f0',
+  'primaryBorderColor': '#a78bfa',
+  'lineColor': '#818cf8',
+  'secondaryColor': '#1e293b',
+  'tertiaryColor': '#0f172a',
+  'background': '#0d0d1a',
+  'mainBkg': '#1e293b',
+  'nodeBorder': '#6366f1',
+  'clusterBkg': '#111827',
+  'clusterBorder': '#4f46e5',
+  'titleColor': '#c084fc',
+  'edgeLabelBackground': '#1e293b',
+  'nodeTextColor': '#e2e8f0',
+  'fontSize': '14px'
+}}}%%
 flowchart LR
     Loader["Loader<br/>(discovers + indexes)"] --> Index["Skill Index<br/>(name + description)"]
     Intent["User Intent"] --> Router["Router<br/>(match description)"]

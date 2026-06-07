@@ -13,6 +13,23 @@ The Model Router sits between the Agent Loop and the LLM provider, deciding whic
 The router uses a five-layer decision pipeline: Task Classification (15 categories), Complexity Estimation (score 1-10), Capability Matching (required reasoning depth, tool types, context size), Cost Optimization (budget constraint, per-turn cost), and Performance History Lookup (past success rates per category-model pair). If confidence < 0.75 at any layer, the request escalates to the next tier.
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#7c3aed',
+  'primaryTextColor': '#e2e8f0',
+  'primaryBorderColor': '#a78bfa',
+  'lineColor': '#818cf8',
+  'secondaryColor': '#1e293b',
+  'tertiaryColor': '#0f172a',
+  'background': '#0d0d1a',
+  'mainBkg': '#1e293b',
+  'nodeBorder': '#6366f1',
+  'clusterBkg': '#111827',
+  'clusterBorder': '#4f46e5',
+  'titleColor': '#c084fc',
+  'edgeLabelBackground': '#1e293b',
+  'nodeTextColor': '#e2e8f0',
+  'fontSize': '14px'
+}}}%%
 flowchart TD
     Task["Task Input"] --> Classify["1. Classify: 15 categories"]
     Classify --> Estimate["2. Estimate: Score 1-10"]

@@ -18,6 +18,23 @@ The hierarchy extends the canonical four-tier model (working, episodic, semantic
 The SOUL.md persona partition exists outside the hierarchy — it is never compacted, pruned, or consolidated. It occupies the first position in every context assembly.
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#7c3aed',
+  'primaryTextColor': '#e2e8f0',
+  'primaryBorderColor': '#a78bfa',
+  'lineColor': '#818cf8',
+  'secondaryColor': '#1e293b',
+  'tertiaryColor': '#0f172a',
+  'background': '#0d0d1a',
+  'mainBkg': '#1e293b',
+  'nodeBorder': '#6366f1',
+  'clusterBkg': '#111827',
+  'clusterBorder': '#4f46e5',
+  'titleColor': '#c084fc',
+  'edgeLabelBackground': '#1e293b',
+  'nodeTextColor': '#e2e8f0',
+  'fontSize': '14px'
+}}}%%
 flowchart TD
     subgraph Tiers["Six Memory Tiers"]
         L0["L0 Sensory<br/>~500 tokens, current turn"]

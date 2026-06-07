@@ -34,6 +34,23 @@ The gap is that no single system ties all these layers together: a protocol for 
 Think of Lyra's plugin system like **adding accessories to a power drill**. The drill itself (Lyra) has a standard chuck (the Plugin Protocol) that any compatible accessory bit can attach to. Some bits are simple Python scripts that add one specific tool -- like a screwdriver bit. Others are more complex: the MCP Gateway is like a flexible shaft adapter that connects the drill to a whole set of remote tools controlled by an external system. The Wasla bridge is like a universal joint that lets you swap bits with other brands of drills. What does not yet exist is a carrying case that organizes all the bits, a lock that prevents the drill from running with unsafe bits, and a catalog showing all available bits from the community.
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#7c3aed',
+  'primaryTextColor': '#e2e8f0',
+  'primaryBorderColor': '#a78bfa',
+  'lineColor': '#818cf8',
+  'secondaryColor': '#1e293b',
+  'tertiaryColor': '#0f172a',
+  'background': '#0d0d1a',
+  'mainBkg': '#1e293b',
+  'nodeBorder': '#6366f1',
+  'clusterBkg': '#111827',
+  'clusterBorder': '#4f46e5',
+  'titleColor': '#c084fc',
+  'edgeLabelBackground': '#1e293b',
+  'nodeTextColor': '#e2e8f0',
+  'fontSize': '14px'
+}}}%%
 flowchart TD
     PM[Plugin Manager] --> PA[Python Plugin A<br/>tools + hooks]
     PM --> PB[Python Plugin B<br/>tools + hooks]
