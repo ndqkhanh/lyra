@@ -985,81 +985,12 @@ Lyra works with 16+ providers through a unified interface. The intelligent route
 {
   "last_model": "anthropic:claude-sonnet-4-6",
   "fast_model": "deepseek-v4-flash",
-
-### <span style="color: #f472b6;">Retro & Synth</span>
-
-<table>
-<tr>
-<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#262335;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#ff7edb;">Synthwave 84</b></td>
-<td style="color:#94a3b8;">Neon 80s arcade</td>
-<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#222222;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#ff5370;">SpaceGray Eighties</b></td>
-<td style="color:#94a3b8;">Retro synthwave</td>
-</tr>
-<tr>
-<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#212337;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#04d1f9;">Eldritch</b></td>
-<td style="color:#94a3b8;">Cosmic horror dark</td>
-<td></td><td></td>
-</tr>
-</table>
-
-### <span style="color: #facc15;">Accessible & High Contrast</span> · <span style="color: #22d3ee;">SilkCircuit</span> · <span style="color: #e2e8f0;">PaperColor & Classic</span>
-
-Full theme gallery with all 25+ palettes and hex codes: `lyra theme list` or [`docs/themes.md`](docs/themes.md)
-
-Switch themes with `lyra theme set <name>` or via the interactive picker (`Ctrl+T`). Custom themes in `~/.lyra/themes/`.
-
----
-
-<table width="100%"><tr><td style="background: linear-gradient(135deg, #10b981, #34d399, #06b6d4); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
-
-## <span style="color: #34d399;">📦 Package Catalog</span>
-
-</td></tr></table></td></tr></table>
-
-Lyra is a single-package Python project with 40 modules under src/lyra/. See STRUCTURE.md for the full module map.
-
-<table>
-<tr style="background: #10b98120;">
-<th style="color: #34d399;">Tier</th><th style="color: #34d399;">Count</th><th style="color: #34d399;">Purpose</th><th style="color: #34d399;">Highlights</th>
-</tr>
-<tr>
-<td><img src="https://img.shields.io/badge/Foundation-8-3b82f6?style=flat-square"></td>
-<td style="color: #e2e8f0;">8</td>
-<td style="color: #94a3b8;">Core infrastructure</td>
-<td style="color: #94a3b8;">AgentLoop kernel, CLI commands, 3-tier memory, working skill registry, hooks system</td>
-</tr>
-<tr>
-<td><img src="https://img.shields.io/badge/Breakthrough-14-8b5cf6?style=flat-square"></td>
-<td style="color: #e2e8f0;">14</td>
-<td style="color: #94a3b8;">Advanced capabilities</td>
-<td style="color: #94a3b8;">Deep reasoning (MCTS), agent communication, Dream consolidation,  GEPA optimizer, evolution guard, safety guardrails</td>
-</tr>
-<tr>
-<td><img src="https://img.shields.io/badge/AGI_Ascent-21-ec4899?style=flat-square"></td>
-<td style="color: #e2e8f0;">21</td>
-<td style="color: #94a3b8;">Experimental / forward-looking</td>
-<td style="color: #94a3b8;">Multi-level verification, causal graphs, recursive self-improvement, constitutional AI</td>
-</tr>
-<tr>
-<td><img src="https://img.shields.io/badge/UI-3-f97316?style=flat-square"></td>
-<td style="color: #e2e8f0;">3</td>
-<td style="color: #94a3b8;">Terminal interface</td>
-<td style="color: #94a3b8;">Zustand state store, Ink/React 19 TUI, WebSocket + SSE transport</td>
-</tr>
-<tr>
-<td><img src="https://img.shields.io/badge/Providers-12-06b6d4?style=flat-square"></td>
-<td style="color: #e2e8f0;">12</td>
-<td style="color: #94a3b8;">LLM integrations</td>
-<td style="color: #94a3b8;">Anthropic, DeepSeek, OpenAI, Google, xAI, Mistral, Qwen, Bedrock, Ollama, Vertex, OpenRouter, Copilot</td>
-</tr>
-<tr>
-<td><img src="https://img.shields.io/badge/Skills-75-10b981?style=flat-square"></td>
-<td style="color: #e2e8f0;">75</td>
-<td style="color: #94a3b8;">Domain expertise</td>
-<td style="color: #94a3b8;">Engineering, debugging, design, data, devops, testing, security, SRE, AI-Research, Karpathy, and more</td>
-</tr>
-</table>
-
+  "providers": {
+    "anthropic": {"api_key": "${ANTHROPIC_API_KEY}"},
+    "deepseek": {"api_key": "${DEEPSEEK_API_KEY}"}
+  }
+}
+```
 
 ---
 
@@ -1071,20 +1002,21 @@ Lyra is a single-package Python project with 40 modules under src/lyra/. See STR
 
 ```bash
 # 1. Clone and install
-git clone https://github.com/lyra-ai/lyra.git && cd lyra
-
-# 2. Install Python dependencies
+git clone https://github.com/ndqkhanh/lyra.git && cd lyra
 pip install -e ".[dev]"
 
-# Themes
-lyra theme list                         # All 25 themes
-lyra theme set catppuccin-mocha         # Switch theme
-lyra theme preview tokyo-night          # Live preview
+# 2. Set API keys
+export ANTHROPIC_API_KEY="sk-ant-..."
+export DEEPSEEK_API_KEY="sk-..."
 
-# Development
-lyra evals                              # Run evaluation harness (pass@k)
-lyra evolve                             # Run prompt evolution (GEPA)
-lyra verify                             # Run adversarial cross-model verification
+# 3. Run tests
+make test                               # 1215 tests
+
+# 4. Start the HTTP server
+python -m lyra.server.app              # listens on port 8580
+
+# 5. Launch desktop GUI (optional)
+cd src/ui/desktop && npm install && npm run dev
 ```
 
 ---
@@ -1316,7 +1248,7 @@ The culmination of 11 deep research streams analyzing 150+ sources across 11,276
 
 <table width="100%"><tr><td style="background: linear-gradient(135deg, #7c3aed15, #ec489915); border-left: 4px solid #8b5cf6; padding: 12px 16px; border-radius: 0 8px 8px 0; color: #94a3b8;">
 
-**New color themes:** 25+ themes across 7 families — Dark & Modern (9), Warm & Cozy (6), Nature & Forest (2), Retro & Synth (3), Accessible & High Contrast (2), SilkCircuit (4), PaperColor & Classic (3)
+**New color themes:** 25 themes available.
 
 **Voice packs:** Warcraft III Peon, StarCraft Marine, Cyberpunk Netrunner + CESP v1.0 3-tier sound pack hierarchy
 
