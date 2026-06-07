@@ -17,14 +17,7 @@
 
 <br><br>
 
-```
-         ██╗   ██╗   ███████╗   ██████╗    █████╗
-         ██║   ╚██╗  ╚════██║   ██╔══██╗  ██╔══██╗
-         ██║    ╚██╗   █████╔╝   ██████╔╝  ███████║
-         ██║    ██╔╝   ╚═══██╗   ██╔══██╗  ██╔══██║
-         ██████╗██╔╝██╗██████╔╝██╗██║  ██║██╗██║  ██║██╗
-         ╚═════╝╚═╝ ╚═╝╚═════╝ ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚═╝
-```
+
 
 <b style="color: #cbd5e1; font-size: 14px;">
 Your Terminal, Supercharged with AI Agents.<br>
@@ -54,20 +47,7 @@ MIT-licensed, terminal-native, and backed by <b>333 papers, 40 books, 89 repos</
 
 > **Research platform, not finished product.** Lyra has 41 module directories, 213 Python source files, 79 test files, and green CI — but it is a research platform with working code and ambitious plans, not a polished consumer tool. The baseline assessment is honest about what works and what does not.
 
-### Stats Dashboard
 
-```
-┌───────────────────────────────────────────────────────────────┐
-│   MODULES       SOURCE FILES       TESTS       COVERAGE       │
-│     41             213              79+          >80%         │
-│                                                               │
-│   PAPERS          BOOKS            REPOS       SYNTHESES      │
-│    333              40              89+           14          │
-│                                                               │
-│   INNOVATION DOCS    PLANS          LANGUAGES    LICENSE       │
-│       30              31           Python + TS     MIT         │
-└───────────────────────────────────────────────────────────────┘
-```
 
 Lyra is organized into 41 module directories under `src/lyra/`, covering the full stack: agent kernel, memory, routing, tools, safety, multi-agent orchestration, voice I/O, desktop GUI, and research pipelines. See [STRUCTURE.md](STRUCTURE.md) for the full module map.
 
