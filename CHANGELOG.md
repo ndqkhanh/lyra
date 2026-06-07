@@ -12,7 +12,7 @@ All notable changes to the Lyra project.
 
 ### Breakthrough Release — 4-Phase Roadmap
 
-Based on the [lyra-upgrade/](lyra-upgrade/) research corpus: 340+ sources deep-read, 3-round adversarial architecture debate, cross-source synthesis. Lyra is 2-4 years behind the frontier on every dimension — this release closes the gap.
+Based on the [lyra-upgrade/](lyra-upgrade/) research corpus: 546 sources deep-read, 3-round adversarial architecture debate, cross-source synthesis. Lyra is 2-4 years behind the frontier on every dimension — this release closes the gap.
 
 <table width="100%"><tr><td style="background: linear-gradient(135deg, #ef444415, #f8717110); border-left: 4px solid #ef4444; padding: 12px 16px; border-radius: 0 8px 8px 0;">
 

@@ -11,7 +11,7 @@
 | Tier | Name | Status | Review | Key Deliverables |
 |------|------|--------|--------|------------------|
 | 1 | Provider & Reasoning | ✅ DONE | tier-1.md | 259+ tests. EffortBridge (ULTRACODE). 4 provider adapters. 3-tier router. |
-| 2 | Memory & Context | ✅ DONE | tier-2.md | 1054+ tests. 4-tier TKG. A-MAC admission. Provider-adaptive compaction. |
+| 2 | Memory & Context | ✅ DONE | tier-2.md | 1215 tests. 3-tier memory (STM/LTM/Consolidation). A-MAC admission. Provider-adaptive compaction. |
 | 3 | Orchestration & Fleet | ✅ DONE | tier-3.md | 257 tests. Fleet supervisor. Dynamic workflow engine. COW isolation. Fleet TUI (63 tests). Security gate. |
 | 4 | Capability Surface | ✅ DONE | tier-4.md | 257+ tests. Tools (9 models/4 providers). Hooks (9 integration). Permissions (78). Plugins. Commands. MCP. |
 | 5 | Skills System | ✅ DONE | tier-5.md | 147+ tests. Loader + weaver + generator (65 tests) + pipeline (82 tests). 77 SKILL.md files. |

@@ -181,7 +181,7 @@ Lyra is **far more mature** than initially assumed. The codebase already impleme
 
 ## Key Findings
 
-1. **Memory is the strongest domain** — 27 subpackages, 14K+ lines in lyra-memory alone. The 4-tier architecture with active retrieval is already implemented.
+1. **Memory is the strongest domain** — 27 subpackages, 14K+ lines in lyra-memory alone. The 3-tier architecture with active retrieval is already implemented.
 2. **Safety needs the most work** — Despite solid foundation (Parallax, 98.9% block rate), the approval gate routing, reasoning monitoring, and audit trail are incomplete.
 3. **Skills system is surprisingly mature** — Full lifecycle (curation, evolution, weaving, drift detection) already exists. SkillOpt and AEvo are integrated.
 4. **Compound AI coordination is the biggest orchestration gap** — No multi-model coordination protocol yet.

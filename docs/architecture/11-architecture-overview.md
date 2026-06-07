@@ -472,7 +472,7 @@ graph LR
         CMD["Commands<br/>(run · plan · doctor · goal · fleet · theme)"]
         PROV["Providers<br/>(Anthropic · OpenAI · DeepSeek · Google · OpenRouter · Open-Weights)"]
         SKILLS_L1["Skills Runtime<br/>(56 skills · curator · loader · evolver · compaction)"]
-        MEM_L1["Memory Runtime<br/>(4-tier · hybrid retrieval · consolidation)"]
+        MEM_L1["Memory Runtime<br/>(3-tier (STM/LTM/Consolidation))"]
     end
 
     subgraph L2["Layer 2: Kernel"]
@@ -591,7 +591,7 @@ graph TD
 | prompt_toolkit over Textual | Faster startup, better stdin/stdout compatibility, closer to Claude Code UX | Less rich TUI out of the box |
 | Optional Ink/React 19 TUI | React component model for complex UI (model picker, fleet panel, theme picker) | Requires Node.js runtime |
 | HIR JSONL as source of truth | All observability flows from one event stream | ~1MB/hour disk usage |
-| 4-tier memory (planned) | Working / Ingestion / Persistent (TKG+Field) / Graph tiers for multi-timescale agent learning | Consolidation needs hardening |
+| 3-tier memory (planned) | Working / Ingestion / Persistent (TKG+Field) / Graph tiers for multi-timescale agent learning | Consolidation needs hardening |
 | Dream 4-phase consolidation | ADD-only extraction prevents overwrite; Ebbinghaus forgetting mimics human memory | Background processing adds ~2s latency per session |
 | Hybrid BM25+vector retrieval | RRF fusion of keyword and semantic search; 96.6% R@5 without LLM | Slightly higher storage footprint |
 | 5-layer intelligent router | Confidence-thresholded escalation prevents over-spending on simple tasks | Adds ~50ms routing latency |

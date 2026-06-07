@@ -8,7 +8,7 @@ knowledge of past failures, no context about user preferences, no accumulation o
 domain expertise. In Lyra's architecture, memory serves as the persistent substrate
 that enables learning, adaptation, and multi-agent coordination.
 
-The system is built as a 4-tier Temporal Knowledge Graph (TKG) that spans from
+The system is built as a 3-tier architecture (STM/LTM/Consolidation) (TKG) that spans from
 microsecond in-memory caches to permanent archival storage. Each tier optimizes for
 a different trade-off between retrieval speed, storage cost, and retention duration.
 Between the tiers sits a 5-factor admission control gate (A-MAC) that decides what
@@ -1002,7 +1002,7 @@ graph TB
 
 - **Single-shot interactions with no continuity:** The memory overhead (A-MAC,
   Zettelkasten, MemGrad) provides no benefit if every session is isolated.
-- **Extremely low-latency requirements (<10ms p99):** The 4-tier cascade has too
+- **Extremely low-latency requirements (<10ms p99):** The 3-tier cascade has too
   many decision points for microsecond-critical paths.
 - **Resource-constrained environments:** The multi-graph store, dual encoders, and
   versioned graph consume significant memory. Not suitable for edge devices.

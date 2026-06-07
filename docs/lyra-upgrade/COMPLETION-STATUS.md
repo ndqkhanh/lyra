@@ -103,7 +103,7 @@ Lyra has TWO parallel implementations:
 
 ## Root Cause
 
-**The `packages/` ecosystem (100+ packages) contains comprehensive implementations NOT wired into the main `src/` agent loop.** `src/agents/primary.py:92-110` uses hardcoded keyword matching instead of the package router. The implementation task is:
+**The `packages/` ecosystem (40 modules) contains comprehensive implementations NOT wired into the main `src/` agent loop.** `src/agents/primary.py:92-110` uses hardcoded keyword matching instead of the package router. The implementation task is:
 
 1. **Wire packages → src/** (integrate existing implementations into the agent loop)
 2. **Build missing pieces** (supervisor daemon, worktree auto-isolation, ultracode toggle)

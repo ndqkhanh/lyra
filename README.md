@@ -11,7 +11,7 @@
 <span style="color: #a78bfa;">║</span>   <span style="color: #34d399;">╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝</span>                           <span style="color: #a78bfa;">║</span>
 <span style="color: #a78bfa;">║</span>                                                              <span style="color: #a78bfa;">║</span>
 <span style="color: #a78bfa;">║</span>   <span style="color: #94a3b8;">Multi-Agent Omni-Agent Harness</span>                 <span style="color: #a78bfa;">║</span>
-<span style="color: #a78bfa;">║</span>   <span style="color: #64748b;">MIT · Python/TypeScript · 24/28 workstreams · 100+ packages</span>          <span style="color: #a78bfa;">║</span>
+<span style="color: #a78bfa;">║</span>   <span style="color: #64748b;">MIT · Python/TypeScript · 30/31 workstreams · single package</span>          <span style="color: #a78bfa;">║</span>
 <span style="color: #a78bfa;">╚══════════════════════════════════════════════════════════════╝</span>
 </pre>
 
@@ -36,7 +36,7 @@
 <p align="center">
   <b>Multi-agent orchestration harness. 30/31 workstreams solid — agent core, skills, hooks, 3-tier memory,<br>
   model routing, tools, MCP, fleet/swarm, verification, deep research, reasoning, voice, self-evolution, safety.<br>
-  MIT-licensed. Python + TypeScript. Research-backed. 100+ composable packages.<br></b>
+  MIT-licensed. Python + TypeScript. Research-backed. single-package architecture.<br></b>
 </p>
 
 <p align="center">
@@ -58,7 +58,7 @@
 **Lyra is an MIT-licensed, terminal-based, multi-agent omni-agent harness** — a research platform for orchestrating specialized agents, skills, and tools to automate software engineering workflows. It combines inspiration from 100+ research papers and 80+ open-source agent frameworks into an extensible monorepo.
 
 **CURRENT STATE** — Lyra has working code in 30 of 31 workstreams, all solid (assessed June 2026):
-- **30 workstreams solid** — working code, green tests, and research-backed plans in `src/lyra/` (39 modules, 1300+ passing tests)
+- **30 workstreams solid** — working code, green tests, and research-backed plans in `src/lyra/` (40 modules, 1215 passing tests)
 - **1 workstream stub** — Desktop (§4.28) has config scaffolding, full Electron + React GUI build planned
 - See [STRUCTURE.md](STRUCTURE.md) for the full module map and the [Implementation Plan](docs/lyra-upgrade/impl/IMPLEMENTATION_PLAN.md) for the complete workstream scorecard.
 
@@ -68,7 +68,7 @@
 
 | # | Takeaway |
 |---|----------|
-| 1 | **29/31 workstreams implemented** — 37 clean modules in `src/lyra/`, 1215 tests passing, 0 failures. Only Desktop GUI remains as a stub. |
+| 1 | **29/31 workstreams implemented** — 40 modules in `src/lyra/`, 1215 tests passing, 0 failures. Only Desktop GUI remains as a stub. |
 | 2 | **100+ papers + 80+ repos absorbed** -- Every technique traces to a source paper with arXiv ID and absorption mode. No hand-wavy "inspired by." |
 | 3 | **Provider-swappable by design** -- 16+ LLM providers through a unified interface with intelligent routing. Zero vendor lock-in. |
 | 4 | **Safety-first architecture** -- Cognitive-executive separation (98.9% block rate), multi-agent verification, 7-layer defense-in-depth. |
@@ -1766,7 +1766,7 @@ Lyra is a monorepo of 99 composable packages across four tiers. Each package has
 </table>
 
 ```
-packages/
+src/lyra/
 ├── lyra-core/              # Kernel: AgentLoop, TDD Gate, PermissionBridge, HIR, Pivot/Refine
 ├── lyra-cli/               # CLI: Typer commands, steering engine, interactive REPL
 ├── lyra-agents/            # Specialist agents: Code, Test, Review, Research
@@ -2235,7 +2235,7 @@ Comprehensive upgrade research and implementation plans, synthesizing findings f
 </tr>
 <tr>
 <td style="color: #fbbf24; font-weight: bold;">B3</td>
-<td style="color: #e2e8f0;"><b>Unified Memory Router</b> (bandit-based store selection across 7 memory tiers)</td>
+<td style="color: #e2e8f0;"><b>Unified Memory Router</b> (bandit-based store selection across 3 memory tiers)</td>
 <td style="color: #94a3b8;">P2</td>
 <td style="color: #ef4444;">CRITICAL</td>
 <td style="color: #fbbf24;">HIGH</td>
@@ -2350,7 +2350,7 @@ See [`docs/research/`](docs/research/) for the complete research library.
 
 <table width="100%"><tr><td style="background: linear-gradient(135deg, #f97316, #fb923c, #fbbf24); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
 
-## <span style="color: #fb923c;">🚀 Ultra Upgrade Implementation (May 2026)</span> <span style="color: #94a3b8; font-size: 0.85em;">— 11 feature commits, 7 new packages, 9 role-specific skill packs (75 skills), 380+ tests, 87+ packages</span>
+## <span style="color: #fb923c;">🚀 Ultra Upgrade Implementation (May 2026)</span> <span style="color: #94a3b8; font-size: 0.85em;">— 11 feature commits, 7 new packages, 9 role-specific skill packs (75 skills), 380+ tests, single package</span>
 
 </td></tr></table></td></tr></table>
 

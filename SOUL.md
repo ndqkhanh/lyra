@@ -32,7 +32,7 @@
 
 ```
 src/                  # Core Python library (agents, memory, hooks, rules, skills, security)
-packages/             # 96 packages in 3 tiers (Foundation → Breakthrough → AGI Ascent)
+packages/             # 40 modules in src/lyra/ (Foundation → Breakthrough → AGI Ascent)
   lyra-core/          # Kernel: AgentLoop, TDD gate, permissions, HIR observability, Pivot/Refine
   lyra-cli/           # CLI application: Typer, prompt_toolkit REPL, 16 LLM providers
   lyra-*/             # Domain packages (reasoning, research, memory, evolution, safety, audio, etc.)

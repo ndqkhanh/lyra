@@ -7,7 +7,7 @@
 ```
 lyra/
 ├── src/
-│   ├── lyra/              # Python package (37 modules)
+│   ├── lyra/              # Python package (40 modules)
 │   └── ui/                # TypeScript UI packages (3)
 ├── tests/                 # Test suite (1215 passing, 0 failures)
 ├── docs/                  # Documentation tree
@@ -24,7 +24,7 @@ lyra/
 └── CHANGELOG.md           # Version history
 ```
 
-## src/lyra/ — 37 Modules
+## src/lyra/ — 40 Modules
 
 | Module | Purpose | Lines (approx) |
 |--------|---------|----------------|
