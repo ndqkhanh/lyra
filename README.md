@@ -680,37 +680,39 @@ Honest assessment of what Lyra has today (June 2026). Updated from codebase audi
 
 ### 📚 Family Docs — Every Workstream Has Deep Documentation
 
-Each capability has a **family** of docs at increasing depth:
+Each capability has a **family** of docs at increasing depth, plus a paper-style innovation doc:
 
-| Workstream | 💡 Concept | 🔧 Block | 📖 Guide | 🏗️ Architecture | 📋 Plan |
-|-----------|-----------|---------|---------|---------------|--------|
-| **Agent Loop** | [concept](docs/concepts/01-agent-loop.md) | [block](docs/blocks/01-agent-loop.md) | [guide](docs/guides/01-agent-execution.md) | — | [plan](docs/lyra-upgrade/plans/14-autonomy.md) |
-| **Memory** | [concept](docs/concepts/06-memory-tiers.md) | [block](docs/blocks/03-memory.md) | [guide](docs/guides/02-memory-and-context.md) | [arch](docs/architecture/02-memory-architecture.md) | [plan](docs/lyra-upgrade/memory-architecture.md) |
-| **Context** | [concept](docs/concepts/07-context-engine.md) | [block](docs/blocks/02-context-engine.md) | [guide](docs/guides/02-memory-and-context.md) | — | [plan](docs/lyra-upgrade/plans/03-context-compaction.md) |
-| **Skills** | [concept](docs/concepts/03-skills.md) | — | [guide](docs/guides/03-skills-and-evolution.md) | [arch](docs/architecture/06-skills-system.md) | [plan](docs/lyra-upgrade/brainstorm/04-skills.md) |
-| **Model Router** | [concept](docs/concepts/10-two-tier-routing.md) | — | [guide](docs/guides/06-model-routing.md) | [arch](docs/architecture/09-model-router.md) | [plan](docs/lyra-upgrade/plans/05-model-router.md) |
-| **Swarm/Fleet** | [concept](docs/concepts/04-subagents.md) | [block](docs/blocks/07-dag-teams.md) | [guide](docs/guides/04-fleet-orchestration.md) | [arch](docs/architecture/04-fleet-supervisor.md) | [plan](docs/lyra-upgrade/plans/13-swarm-fleet.md) |
-| **Workflows** | — | [block](docs/blocks/08-subagent-worktree.md) | [guide](docs/guides/04-fleet-orchestration.md) | [arch](docs/architecture/05-workflow-engine.md) | [plan](docs/lyra-upgrade/plans/13-swarm-fleet.md) |
-| **Safety** | [concept](docs/concepts/11-safety-monitor.md) | [block](docs/blocks/12-safety-monitor.md) | [guide](docs/guides/05-safety-and-permissions.md) | [arch](docs/architecture/08-safety-security.md) | [plan](docs/lyra-upgrade/plans/17-safety.md) |
-| **Permissions** | [concept](docs/concepts/09-permission-bridge.md) | [block](docs/blocks/05-permission-bridge.md) | [guide](docs/guides/05-safety-and-permissions.md) | — | [plan](docs/lyra-upgrade/plans/12-permissions.md) |
-| **Verifier** | [concept](docs/concepts/12-verifier.md) | [block](docs/blocks/10-verifier.md) | [guide](docs/guides/07-research-and-verification.md) | — | [plan](docs/lyra-upgrade/plans/25-adversarial-panel.md) |
-| **Observability** | [concept](docs/concepts/13-observability.md) | [block](docs/blocks/11-observability.md) | [guide](docs/guides/07-research-and-verification.md) | — | [plan](docs/lyra-upgrade/plans/16-reliability.md) |
-| **Voice** | — | — | [guide](docs/guides/08-voice-and-multimodal.md) | [arch](docs/architecture/07-voice-pipeline.md) | [plan](docs/lyra-upgrade/plans/18-voice-mode.md) |
-| **Desktop** | — | — | [guide](docs/guides/08-voice-and-multimodal.md) | — | [plan](docs/lyra-upgrade/plans/28-desktop.md) |
-| **Deep Research** | — | — | [guide](docs/guides/07-research-and-verification.md) | — | [plan](docs/lyra-upgrade/plans/15-deep-research.md) |
-| **Tools & MCP** | [concept](docs/concepts/02-tools-and-hooks.md) | [block](docs/blocks/09-mcp-adapter.md) | [guide](docs/guides/09-tools-and-integrations.md) | — | [plan](docs/lyra-upgrade/plans/06-tools.md) |
-| **Hooks & TDD** | [concept](docs/concepts/02-tools-and-hooks.md) | [block](docs/blocks/06-hooks-tdd.md) | — | — | [plan](docs/lyra-upgrade/plans/10-hooks.md) |
-| **Planning** | [concept](docs/concepts/05-plan-mode.md) | [block](docs/blocks/04-plan-mode.md) | — | — | [plan](docs/lyra-upgrade/plans/20-planning.md) |
-| **Sessions** | [concept](docs/concepts/08-sessions-and-state.md) | — | — | — | [plan](docs/lyra-upgrade/plans/14-autonomy.md) |
-| **Prompt Cache** | [concept](docs/concepts/14-prompt-cache-coordination.md) | — | — | — | — |
-| **ReasoningBank** | [concept](docs/concepts/15-reasoning-bank.md) | — | — | — | — |
-| **Worktree Isolation** | — | [block](docs/blocks/08-subagent-worktree.md) | — | [arch](docs/architecture/10-worktree-isolation.md) | — |
-| **Provider Abstraction** | — | — | — | [arch](docs/architecture/03-provider-abstraction.md) | [plan](docs/lyra-upgrade/plans/05-model-router.md) |
-| **Ultracode Replication** | — | — | — | [arch](docs/architecture/01-ultracode-replication.md) | [plan](docs/lyra-upgrade/plans/13-swarm-fleet.md) |
-| **Dreaming** | — | — | [guide](docs/guides/02-memory-and-context.md) | — | [plan](docs/lyra-upgrade/plans/24-dreaming.md) |
-| **Self-Evolution** | — | — | [guide](docs/guides/03-skills-and-evolution.md) | — | [plan](docs/lyra-upgrade/plans/27-rl-optimizer.md) |
+| Workstream | 💡 Concept | 🔧 Block | 📖 Guide | 🏗️ Architecture | 📋 Plan | 🎯 Innovation |
+|-----------|-----------|---------|---------|---------------|--------|-------------|
+| **Agent Loop** | [concept](docs/concepts/01-agent-loop.md) | [block](docs/blocks/01-agent-loop.md) | [guide](docs/guides/01-agent-execution.md) | [arch](docs/architecture/11-architecture-overview.md) | [plan](docs/lyra-upgrade/plans/14-autonomy.md) | — |
+| **Memory** | [concept](docs/concepts/06-memory-tiers.md) | [block](docs/blocks/03-memory.md) | [guide](docs/guides/02-memory-and-context.md) | [arch](docs/architecture/02-memory-architecture.md) | [plan](docs/lyra-upgrade/plans/02-memory.md) | [innov](docs/innovations/memory.md) |
+| **Dreaming** | [concept](docs/concepts/19-dreaming-consolidation.md) | [block](docs/blocks/03-memory.md) | [guide](docs/guides/02-memory-and-context.md) | [arch](docs/architecture/02-memory-architecture.md) | [plan](docs/lyra-upgrade/plans/24-dreaming.md) | [innov](docs/innovations/dreaming.md) |
+| **Context** | [concept](docs/concepts/07-context-engine.md) | [block](docs/blocks/02-context-engine.md) | [guide](docs/guides/02-memory-and-context.md) | [arch](docs/architecture/11-architecture-overview.md) | [plan](docs/lyra-upgrade/plans/03-context-compaction.md) | [innov](docs/innovations/context-engineering.md) |
+| **Skills** | [concept](docs/concepts/03-skills.md) | [block](docs/blocks/03-memory.md) | [guide](docs/guides/03-skills-and-evolution.md) | [arch](docs/architecture/06-skills-system.md) | [plan](docs/lyra-upgrade/plans/04-skills.md) | [innov](docs/innovations/skills.md) |
+| **Self-Evolution** | [concept](docs/concepts/03-skills.md) | [block](docs/blocks/03-memory.md) | [guide](docs/guides/03-skills-and-evolution.md) | [arch](docs/architecture/06-skills-system.md) | [plan](docs/lyra-upgrade/plans/27-rl-optimizer.md) | [innov](docs/innovations/self-evolving.md) |
+| **Model Router** | [concept](docs/concepts/10-two-tier-routing.md) | [block](docs/blocks/09-mcp-adapter.md) | [guide](docs/guides/06-model-routing.md) | [arch](docs/architecture/09-model-router.md) | [plan](docs/lyra-upgrade/plans/05-model-router.md) | [innov](docs/innovations/model-router.md) |
+| **Provider Abs.** | [concept](docs/concepts/10-two-tier-routing.md) | [block](docs/blocks/09-mcp-adapter.md) | [guide](docs/guides/06-model-routing.md) | [arch](docs/architecture/03-provider-abstraction.md) | [plan](docs/lyra-upgrade/plans/05-model-router.md) | [innov](docs/innovations/model-router.md) |
+| **Swarm/Fleet** | [concept](docs/concepts/04-subagents.md) | [block](docs/blocks/07-dag-teams.md) | [guide](docs/guides/04-fleet-orchestration.md) | [arch](docs/architecture/04-fleet-supervisor.md) | [plan](docs/lyra-upgrade/plans/13-swarm-fleet.md) | [innov](docs/innovations/swarm-fleet.md) |
+| **Autonomy** | [concept](docs/concepts/04-subagents.md) | [block](docs/blocks/07-dag-teams.md) | [guide](docs/guides/04-fleet-orchestration.md) | [arch](docs/architecture/04-fleet-supervisor.md) | [plan](docs/lyra-upgrade/plans/14-autonomy.md) | [innov](docs/innovations/autonomy.md) |
+| **Worktree** | [concept](docs/concepts/04-subagents.md) | [block](docs/blocks/08-subagent-worktree.md) | [guide](docs/guides/04-fleet-orchestration.md) | [arch](docs/architecture/10-worktree-isolation.md) | [plan](docs/lyra-upgrade/plans/13-swarm-fleet.md) | — |
+| **Safety** | [concept](docs/concepts/11-safety-monitor.md) | [block](docs/blocks/12-safety-monitor.md) | [guide](docs/guides/05-safety-and-permissions.md) | [arch](docs/architecture/08-safety-security.md) | [plan](docs/lyra-upgrade/plans/17-safety.md) | [innov](docs/innovations/safety.md) |
+| **Permissions** | [concept](docs/concepts/09-permission-bridge.md) | [block](docs/blocks/05-permission-bridge.md) | [guide](docs/guides/05-safety-and-permissions.md) | [arch](docs/architecture/08-safety-security.md) | [plan](docs/lyra-upgrade/plans/12-permissions.md) | — |
+| **Verifier** | [concept](docs/concepts/12-verifier.md) | [block](docs/blocks/10-verifier.md) | [guide](docs/guides/07-research-and-verification.md) | [arch](docs/architecture/11-architecture-overview.md) | [plan](docs/lyra-upgrade/plans/25-adversarial-panel.md) | [innov](docs/innovations/adversarial-panel.md) |
+| **Reliability** | [concept](docs/concepts/13-observability.md) | [block](docs/blocks/11-observability.md) | [guide](docs/guides/07-research-and-verification.md) | [arch](docs/architecture/11-architecture-overview.md) | [plan](docs/lyra-upgrade/plans/16-reliability.md) | [innov](docs/innovations/reliability.md) |
+| **Voice** | [concept](docs/concepts/16-voice-mode.md) | [block](docs/blocks/09-mcp-adapter.md) | [guide](docs/guides/08-voice-and-multimodal.md) | [arch](docs/architecture/07-voice-pipeline.md) | [plan](docs/lyra-upgrade/plans/18-voice-mode.md) | [innov](docs/innovations/voice-mode.md) |
+| **Desktop** | [concept](docs/concepts/17-desktop-gui.md) | [block](docs/blocks/09-mcp-adapter.md) | [guide](docs/guides/08-voice-and-multimodal.md) | [arch](docs/architecture/11-architecture-overview.md) | [plan](docs/lyra-upgrade/plans/28-desktop.md) | [innov](docs/innovations/desktop.md) |
+| **Deep Research** | [concept](docs/concepts/18-deep-research.md) | [block](docs/blocks/10-verifier.md) | [guide](docs/guides/07-research-and-verification.md) | [arch](docs/architecture/11-architecture-overview.md) | [plan](docs/lyra-upgrade/plans/15-deep-research.md) | [innov](docs/innovations/deep-research.md) |
+| **Tools & MCP** | [concept](docs/concepts/02-tools-and-hooks.md) | [block](docs/blocks/09-mcp-adapter.md) | [guide](docs/guides/09-tools-and-integrations.md) | [arch](docs/architecture/11-architecture-overview.md) | [plan](docs/lyra-upgrade/plans/06-tools.md) | — |
+| **Hooks** | [concept](docs/concepts/02-tools-and-hooks.md) | [block](docs/blocks/06-hooks-tdd.md) | [guide](docs/guides/09-tools-and-integrations.md) | [arch](docs/architecture/11-architecture-overview.md) | [plan](docs/lyra-upgrade/plans/10-hooks.md) | — |
+| **Planning** | [concept](docs/concepts/05-plan-mode.md) | [block](docs/blocks/04-plan-mode.md) | [guide](docs/guides/01-agent-execution.md) | [arch](docs/architecture/11-architecture-overview.md) | [plan](docs/lyra-upgrade/plans/20-planning.md) | [innov](docs/innovations/planning.md) |
+| **Economics** | [concept](docs/concepts/13-observability.md) | [block](docs/blocks/11-observability.md) | [guide](docs/guides/06-model-routing.md) | [arch](docs/architecture/09-model-router.md) | [plan](docs/lyra-upgrade/plans/21-economics.md) | [innov](docs/innovations/economics.md) |
+| **Steering** | [concept](docs/concepts/08-sessions-and-state.md) | [block](docs/blocks/07-dag-teams.md) | [guide](docs/guides/04-fleet-orchestration.md) | [arch](docs/architecture/04-fleet-supervisor.md) | [plan](docs/lyra-upgrade/plans/22-steering.md) | [innov](docs/innovations/steering.md) |
+| **Sessions** | [concept](docs/concepts/08-sessions-and-state.md) | [block](docs/blocks/01-agent-loop.md) | [guide](docs/guides/01-agent-execution.md) | [arch](docs/architecture/11-architecture-overview.md) | [plan](docs/lyra-upgrade/plans/14-autonomy.md) | — |
+| **Harness Eng.** | [concept](docs/concepts/01-agent-loop.md) | [block](docs/blocks/01-agent-loop.md) | [guide](docs/guides/01-agent-execution.md) | [arch](docs/architecture/01-ultracode-replication.md) | [plan](docs/lyra-upgrade/plans/26-harness-engineering.md) | [innov](docs/innovations/harness-engineering.md) |
 
-> **Reading path:** 💡 Concept (what/why) → 🔧 Block (how) → 📖 Guide (overview) → 🏗️ Architecture (deep ref) → 📋 Plan (build spec)
+> **Reading path:** 💡 Concept (what/why) → 🔧 Block (how) → 📖 Guide (overview) → 🏗️ Architecture (deep ref) → 📋 Plan (build spec) → 🎯 Innovation (paper-style deep dive)
+>
+> **26 workstreams** — every cell filled. All innovation docs in [docs/innovations/](docs/innovations/).
 
 ### 🗓️ Roadmap Timeline
 
