@@ -97,87 +97,76 @@
 ### System Topology
 
 ```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#7c3aed', 'primaryTextColor': '#e2e8f0', 'lineColor': '#6366f1', 'fontSize': '14px'}, 'flowchart': {'nodeSpacing': 30, 'rankSpacing': 50}}}%%
 graph TB
-    subgraph Interface["<b style='color:#c084fc;'>🎯 INTERFACE LAYER</b>"]
-        CLI["<b>lyra CLI</b><br/>Typer · prompt_toolkit"]
-        TUI["<b>Terminal UI</b><br/>Ink/React 19"]
-        ACP["<b>ACP Server</b><br/>Agent Client Protocol"]
-        Voice["<b>Voice System</b><br/>CESP v1.0 · 3-tier packs"]
+    subgraph Interface["Interface Layer"]
+        CLI["lyra CLI"]
+        TUI["Terminal UI"]
+        Server["HTTP Server<br/>port 8580"]
+        VoiceIO["Voice I/O"]
     end
 
-    subgraph Kernel["<b style='color:#fbbf24;'>⚙️ KERNEL (lyra-core)</b>"]
-        Loop["<b>AgentLoop</b><br/>plan → execute → verify"]
-        TDD["<b>TDD Gate</b><br/>RED → GREEN → REFACTOR"]
-        Perms["<b>PermissionBridge</b><br/>plan | auto-edit | bypass"]
-        HIR["<b>HIR Emitter</b><br/>JSONL event stream"]
-        Pivot["<b>Pivot/Refine</b><br/>failure recovery"]
+    subgraph Kernel["Kernel"]
+        Loop["Agent Loop<br/>think act observe reflect"]
+        Hooks["Hooks<br/>PreToolUse PostToolUse Stop"]
+        Perms["Permissions<br/>ALLOW DENY ASK"]
+        Sessions["Sessions<br/>SQLite persistence"]
     end
 
-    subgraph Intelligence["<b style='color:#60a5fa;'>🧠 INTELLIGENCE LAYER</b>"]
-        Reasoning["<b>Deep Reasoning</b><br/>CoT · Tree Search · MCTS"]
-        Research["<b>Research Pipeline</b><br/>10-step · 7+ sources · AutoScientists"]
-        Evolution["<b>Self-Evolution</b><br/>GEPA · SkillOpt · Guardrails"]
-        Memory["<b>3-Tier Memory</b><br/>STM/LTM/Consolidation · dreaming · FORGE"]
-        agent communication["<b>agent communication</b><br/>Latent-space · 75.6% reduction"]
-        Context["<b>5-Layer Context Engine</b><br/>FS-as-Context · Mermaid · L0-L3"]
+    subgraph Intelligence["Intelligence Layer"]
+        Reasoning["Planning<br/>CoT Tree-Search MCTS"]
+        Memory["3-Tier Memory<br/>STM LTM Consolidation"]
+        Skills["Skills<br/>registry parser executor"]
+        Evolution["Self-Evolution<br/>GEPA guardrails"]
     end
 
-    subgraph Coordination["<b style='color:#34d399;'>🔗 COORDINATION LAYER (V2 Ultra)</b>"]
-        Orchestrator["<b>Agent Orchestrator</b><br/>DAG-based teams · fleet"]
-        Subagents["<b>Subagent Runner</b><br/>worktree isolation"]
-        Skills["<b>Skill Registry V3</b><br/>67 skills · ReflACT · gates"]
-        Rules["<b>Rule Engine</b><br/>coding · security · testing"]
-        Swarm["<b>Agent Swarm V2</b><br/>Catfish · AdaptOrch · DAOEF"]
+    subgraph Coordination["Coordination Layer"]
+        Supervisor["Supervisor Daemon<br/>fleet orchestration"]
+        Worktree["Worktree Isolation<br/>git worktrees"]
+        Verification["Verification<br/>panel mutation tracing"]
+        Research["Research Pipeline<br/>Librarian Author"]
     end
 
-    subgraph Safety["<b style='color:#f87171;'>🛡️ SAFETY LAYER (7-Layer Ultra)</b>"]
-        CogExec["<b>Cognitive-Executive Split</b><br/>Defense-in-Depth · high block"]
-        Shield["<b>Safety Pipeline</b><br/>multi-layer · 102 rules"]
-        Observatory["<b>TokenObservatory</b><br/>13 categories · 7 wastes"]
-        Verifier["<b>Multi-Agent Verifier</b><br/>executor→validator→critic"]
-        IntentMon["<b>Intent Monitor</b><br/>anomaly pattern · anomaly detection"]
-        DriftDetect["<b>Eval Harness</b><br/>benchmark tracking · drift detection"]
-        BehFingerprint["<b>Behavioral Fingerprint</b><br/>regression detection · high detection"]
+    subgraph Safety["Safety Layer"]
+        SafetyPipe["Safety Pipeline<br/>5-layer defense-in-depth"]
+        ToolGate["Tool Gate<br/>deterministic gating"]
+        EvolutionGuard["Evolution Guard<br/>frozen evaluator"]
+        SelfKnowledge["Self-Knowledge<br/>introspection"]
     end
 
-    subgraph Providers["<b style='color:#f472b6;'>☁️ 16+ LLM PROVIDERS</b>"]
-        Router["<b>NeuralUCB V3 Router</b><br/>84% cost reduction · CARROT bound"]
-        Anthro["<b>Anthropic</b><br/>Opus · Sonnet · Haiku"]
-        DS["<b>DeepSeek</b><br/>V4 Pro · Flash"]
-        OAI["<b>OpenAI</b><br/>GPT-4o · O3"]
-        Gemini["<b>Google</b><br/>Gemini 2.5/3.1"]
-        Others["<b>xAI · Mistral · Qwen</b><br/>Kimi · Bedrock · Ollama"]
+    subgraph Providers["LLM Providers"]
+        Router["Model Router<br/>3-tier static"]
+        Anthropic["Anthropic<br/>Opus Sonnet Haiku"]
+        DeepSeek["DeepSeek<br/>V4 Pro Flash"]
+        OpenAI["OpenAI<br/>GPT-4o"]
+        Google["Google<br/>Gemini"]
     end
 
-    CLI & TUI & ACP & Voice --> Loop
-    Loop --> TDD & Perms & HIR & Pivot
-    Loop --> Reasoning & Research & Memory & agent communication
+    CLI --> Loop
+    TUI --> Loop
+    Server --> Loop
+    VoiceIO --> Loop
+    Loop --> Hooks
+    Loop --> Perms
+    Loop --> Sessions
+    Loop --> Reasoning
+    Loop --> Memory
+    Loop --> Skills
     Loop --> Evolution
-    Loop --> Orchestrator & Subagents & Skills & Rules
-    Loop --> CogExec & Shield & Observatory & Verifier & IntentMon & DriftDetect
-    Orchestrator & Reasoning & Research --> Anthro & DS & OAI & Gemini & Others
-
-    classDef interface fill:#7c3aed20,stroke:#c084fc,stroke-width:2px,color:#e2e8f0
-    classDef kernel fill:#f59e0b15,stroke:#fbbf24,stroke-width:2px,color:#e2e8f0
-    classDef intelligence fill:#3b82f615,stroke:#60a5fa,stroke-width:2px,color:#e2e8f0
-    classDef coordination fill:#10b98115,stroke:#34d399,stroke-width:2px,color:#e2e8f0
-    classDef safety fill:#ef444415,stroke:#f87171,stroke-width:2px,color:#e2e8f0
-    classDef providers fill:#ec489915,stroke:#f472b6,stroke-width:2px,color:#e2e8f0
-
-    class CLI,TUI,ACP,Voice interface
-    class Loop,TDD,Perms,HIR,Pivot kernel
-    class Reasoning,Research,Evolution,Memory,agent communication,Context intelligence
-    class Orchestrator,Subagents,Skills,Rules,Swarm coordination
-    class CogExec,Shield,Observatory,Verifier,IntentMon,DriftDetect,BehFingerprint safety
-    class Router,Anthro,DS,OAI,Gemini,Others providers
-
-    style Interface fill:#7c3aed10,stroke:#c084fc,stroke-width:2px
-    style Kernel fill:#f59e0b10,stroke:#fbbf24,stroke-width:2px
-    style Intelligence fill:#3b82f610,stroke:#60a5fa,stroke-width:2px
-    style Coordination fill:#10b98110,stroke:#34d399,stroke-width:2px
-    style Safety fill:#ef444410,stroke:#f87171,stroke-width:2px
-    style Providers fill:#ec489910,stroke:#f472b6,stroke-width:2px
+    Loop --> Supervisor
+    Loop --> Worktree
+    Loop --> Verification
+    Loop --> Research
+    Loop --> SafetyPipe
+    Loop --> ToolGate
+    Loop --> EvolutionGuard
+    Loop --> SelfKnowledge
+    Supervisor --> Router
+    Reasoning --> Router
+    Research --> Router
+    Router --> Anthropic
+    Router --> DeepSeek
+    Router --> OpenAI
+    Router --> Google
 ```
 
 ### Agent Execution Flow (with Safety Separation)
@@ -414,128 +403,48 @@ graph TB
 ### Self-Evolving Harness Pipeline
 
 ```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#8b5cf6', 'lineColor': '#a78bfa', 'fontSize': '13px'}, 'flowchart': {'nodeSpacing': 25, 'rankSpacing': 40}}}%%
 flowchart TB
-    subgraph Observe["<b style='color:#60a5fa;'>👁️ 1. OBSERVE</b>"]
-        Traces["<b>Execution Traces</b><br/>HIR events · tool calls · outcomes"]
-        Metrics["<b>Performance Metrics</b><br/>success rate · latency · tokens"]
-        Drift["<b>Drift Signals</b><br/>prompt degradation · pattern shifts"]
+    subgraph Observe["1. OBSERVE"]
+        Traces["Execution Traces"]
+        Metrics["Performance Metrics"]
+        Drift["Drift Signals"]
     end
 
-    subgraph Analyze["<b style='color:#fbbf24;'>🔍 2. ANALYZE</b>"]
-        Bottleneck["<b>Bottleneck Detection</b><br/>identify harness inefficiencies"]
-        Pattern["<b>Pattern Mining</b><br/>successful vs failed strategies"]
-        Gap["<b>Gap Analysis</b><br/>benchmark vs actual performance"]
+    subgraph Analyze["2. ANALYZE"]
+        Bottleneck["Bottleneck Detection"]
+        Pattern["Pattern Mining"]
+        Gap["Gap Analysis"]
     end
 
-    subgraph Propose["<b style='color:#a78bfa;'>🚀 3. PROPOSE (Meta-Agent)</b>"]
-        GEPA["<b>GEPA Optimizer</b><br/>prompt evolution · safety gates"]
-        evolution optimizer["<b>evolution optimizer Meta-Editor</b><br/>procedure code edits"]
-        Harness["<b>Evolution Guard</b><br/>regression gate · human approval"]
+    subgraph Propose["3. PROPOSE"]
+        GEPA["GEPA Optimizer<br/>prompt evolution"]
+        MetaEditor["Meta-Editor<br/>code edits"]
+        Guard["Evolution Guard<br/>regression gate"]
     end
 
-    subgraph Verify["<b style='color:#f87171;'>⚔️ 4. VERIFY (Adversarial)</b>"]
-        ARIS["<b>adversarial panel-Stage Review</b><br/>integrity → claim → audit"]
-        CrossModel["<b>Cross-Model Testing</b><br/>different provider families"]
-        Rollback["<b>Rollback Check</b><br/>performance regression test"]
+    subgraph Verify["4. VERIFY"]
+        Panel["Adversarial Panel<br/>3-verifier + Skeptic"]
+        CrossModel["Cross-Model Testing"]
+        Regression["Regression Check"]
     end
 
-    subgraph Deploy2["<b style='color:#34d399;'>📦 5. DEPLOY</b>"]
-        Canary["<b>Canary Release</b><br/>10% traffic"]
-        Monitor["<b>Continuous Monitoring</b><br/>drift detection · eval harness"]
-        FullDeploy["<b>Full Rollout</b><br/>on sustained improvement"]
+    subgraph Deploy2["5. DEPLOY"]
+        Canary["Canary Release"]
+        Monitor["Continuous Monitoring"]
+        FullDeploy["Full Rollout"]
     end
 
     Observe --> Analyze --> Propose --> Verify
-    Verify -->|"pass ✓"| Deploy2
-    Verify -->|"fail ✗"| Refine["<b>🔄 Refine & Retry</b>"]
+    Verify -->|pass| Deploy2
+    Verify -->|fail| Refine["Refine and Retry"]
     Refine --> Propose
-    Monitor -->|"regression"| Rollback2["<b>⏪ Auto-Rollback</b>"]
-    Monitor -->|"drift detected"| Refine
-
-    classDef observe fill:#3b82f620,stroke:#60a5fa,stroke-width:2px,color:#e2e8f0
-    classDef analyze fill:#f59e0b20,stroke:#fbbf24,stroke-width:2px,color:#e2e8f0
-    classDef propose fill:#7c3aed20,stroke:#a78bfa,stroke-width:2px,color:#e2e8f0
-    classDef verify fill:#ef444420,stroke:#f87171,stroke-width:2px,color:#e2e8f0
-    classDef deploy fill:#10b98120,stroke:#34d399,stroke-width:2px,color:#e2e8f0
-    classDef retry fill:#f9731620,stroke:#fb923c,stroke-width:2px,color:#e2e8f0
-
-    class Traces,Metrics,Drift observe
-    class Bottleneck,Pattern,Gap analyze
-    class GEPA,evolution optimizer,Harness propose
-    class ARIS,CrossModel,Rollback verify
-    class Canary,Monitor,FullDeploy deploy
-    class Refine,Rollback2 retry
-
-    style Observe fill:#3b82f608,stroke:#60a5fa,stroke-width:2px
-    style Analyze fill:#f59e0b08,stroke:#fbbf24,stroke-width:2px
-    style Propose fill:#7c3aed08,stroke:#a78bfa,stroke-width:2px
-    style Verify fill:#ef444408,stroke:#f87171,stroke-width:2px
-    style Deploy2 fill:#10b98108,stroke:#34d399,stroke-width:2px
+    Monitor -->|regression| Rollback2["Auto-Rollback"]
+    Monitor -->|drift| Refine
 ```
 
-### Package Dependency Graph
+### Module Map
 
-```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#3b82f6', 'lineColor': '#6366f1', 'fontSize': '12px'}, 'flowchart': {'nodeSpacing': 20, 'rankSpacing': 45}}}%%
-graph TB
-    subgraph Foundation["<b style='color:#3b82f6;'>🏗️ FOUNDATION (8 packages)</b>"]
-        core["<b>lyra-core</b><br/>Kernel · TDD · Permissions"]
-        agents["<b>lyra-agents</b><br/>Specialist agents"]
-        orchestration["<b>lyra-orchestration</b><br/>DAG teams"]
-        memory["<b>lyra-memory</b><br/>3-tier memory"]
-        skills["<b>lyra-skills</b><br/>150+ triggers"]
-        evals["<b>lyra-evals</b><br/>pass@k framework"]
-        mcp["<b>lyra-mcp</b><br/>MCP server · gateway"]
-        cli["<b>lyra-cli</b><br/>25+ commands"]
-    end
-
-    subgraph Breakthrough["<b style='color:#a78bfa;'>🚀 BREAKTHROUGH (14 packages)</b>"]
-        reasoning["<b>lyra-reasoning</b><br/>CoT · Tree Search · MCTS"]
-        research["<b>lyra-research</b><br/>10-step pipeline"]
-        evolution["<b>lyra-evolution</b><br/>prompt optimizer + guardrails"]
-        router["<b>lyra-router</b><br/>5-layer task-aware"]
-        cognitive["<b>lyra-cognitive</b><br/>Debate agents"]
-        streaming["<b>lyra-streaming</b><br/>Real-time output"]
-        cost["<b>lyra-cost</b><br/>Burn reports"]
-        personalization["<b>lyra-personalization</b><br/>User adaptation"]
-        continual["<b>lyra-continual</b><br/>Lifelong learning"]
-        safety["<b>lyra-safety</b><br/>Safety Pipeline · Defense-in-Depth"]
-        observability["<b>lyra-observability</b><br/>HIR · traces"]
-        verification["<b>lyra-verification</b><br/>multi-agent verifier"]
-        recursive_link["<b>lyra-recursive-link</b><br/>Latent-space comms"]
-        audio["<b>lyra-audio</b><br/>CESP v1.0 · voice"]
-    end
-
-    subgraph AGI["<b style='color:#f472b6;'>🌟 AGI ASCENT (21 packages)</b>"]
-        world["<b>lyra-world-model</b><br/>Causal graphs"]
-        meta["<b>lyra-meta-evolution</b><br/>self-improvement · safety"]
-        colony["<b>lyra-colony</b><br/>Agent swarms"]
-        auto["<b>lyra-auto-mode</b><br/>Full autonomy"]
-        constitutional["<b>lyra-constitutional</b><br/>Constitutional AI"]
-    end
-
-    cli --> core
-    core --> agents & orchestration & memory & skills & evals
-    agents --> reasoning & research & recursive_link
-    orchestration --> colony
-    memory --> cognitive & personalization & continual
-    skills --> evolution
-    reasoning --> world
-    evolution --> meta
-
-    classDef foundation fill:#3b82f620,stroke:#60a5fa,stroke-width:2px,color:#e2e8f0
-    classDef breakthrough fill:#7c3aed20,stroke:#a78bfa,stroke-width:2px,color:#e2e8f0
-    classDef agi fill:#ec489920,stroke:#f472b6,stroke-width:2px,color:#e2e8f0
-
-    class core,agents,orchestration,memory,skills,evals,mcp,cli foundation
-    class reasoning,research,evolution,router,cognitive,streaming,cost,personalization,continual,safety,observability,verification,recursive_link,audio breakthrough
-    class world,meta,colony,auto,constitutional agi
-
-    style Foundation fill:#3b82f608,stroke:#60a5fa,stroke-width:2px
-    style Breakthrough fill:#7c3aed08,stroke:#a78bfa,stroke-width:2px
-    style AGI fill:#ec489908,stroke:#f472b6,stroke-width:2px
-```
+See [STRUCTURE.md](STRUCTURE.md) for the full 40-module layout.
 
 <table width="100%"><tr><td style="background: linear-gradient(135deg, #f97316, #ef4444, #ec4899); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
 
@@ -543,7 +452,7 @@ graph TB
 
 </td></tr></table></td></tr></table>
 
-Honest assessment of what Lyra has today (June 2026). Updated from codebase audit — **20 of 28 workstreams have working code**, not 5. Every gap is documented in the [Master Plan](docs/lyra-upgrade/MASTER-PLAN.md) with prioritized fixes.
+Honest assessment of what Lyra has today (June 2026). Updated from codebase audit — **30 of 31 workstreams are solid**, not 5. Every gap is documented in the [Master Plan](docs/lyra-upgrade/MASTER-PLAN.md) with prioritized fixes.
 
 <table>
 <tr style="background: #f9731620;">
