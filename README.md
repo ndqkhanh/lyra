@@ -470,42 +470,42 @@ Honest assessment of what Lyra has today (June 2026). Updated from codebase audi
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.3 Context</b></td>
-<td style="color: #94a3b8;">3 .py files: auto-compaction engine + context optimizer + context profiler + KV-cache management</td>
+<td style="color: #94a3b8;">working module — compaction, workspace report (M_t)
 <td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.4 Skills</b></td>
-<td style="color: #94a3b8;">49 .py files — skill loader + curator + generator + weaver + evolution + SLA optimizer + format parser</td>
+<td style="color: #94a3b8;">working module — skill registry, parser, executor, importer
 <td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.5 Router</b></td>
-<td style="color: #94a3b8;">13 .py files: effort router + phase router + unified memory router + context router + model-router package + cost tracking</td>
+<td style="color: #94a3b8;">working module — provider adapters, effort mapping, cost tracking
 <td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.6 Tools</b></td>
-<td style="color: #94a3b8;">23 .py files — built-in tools + tool runtime engine + tool masking + tool gating + function-calling support</td>
+<td style="color: #94a3b8;">working module — tool registry, executor, sandbox, builtins
 <td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.7 Plugins</b></td>
-<td style="color: #94a3b8;">5 .py files: manifest-based plugin system with SHA-256 hot-reload</td>
+<td style="color: #94a3b8;">working module — plugin protocol, PluginManager
 <td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.8 MCP</b></td>
-<td style="color: #94a3b8;">17 .py files: MCP gateway + bundling + server lifecycle + viper MCP integration</td>
+<td style="color: #94a3b8;">working module — MCP gateway, bundling, server lifecycle
 <td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.10 Hooks</b></td>
-<td style="color: #94a3b8;">3 .py files: HookEngine + HookRegistry + 27+ lifecycle events + critical-hook abort</td>
+<td style="color: #94a3b8;">working module — HookEngine, HookRegistry, handlers
 <td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.11 Sessions</b></td>
-<td style="color: #94a3b8;">2 .py files: session fork + resumable checkpointing</td>
+<td style="color: #94a3b8;">working module — SQLite-backed session persistence
 <td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
@@ -515,32 +515,32 @@ Honest assessment of what Lyra has today (June 2026). Updated from codebase audi
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.13 Swarm/Fleet</b></td>
-<td style="color: #94a3b8;">13 .py files: DAG orchestration + agent-swarm + colony + fleet TUI (5 files) + workflow engine + channels</td>
+<td style="color: #94a3b8;">working module — supervisor daemon, state machine, fleet orchestration
 <td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.14 Autonomy</b></td>
-<td style="color: #94a3b8;">7 .py files: continuous-operation loop + crash detection/recovery + autoresearch + agent lifecycle</td>
+<td style="color: #94a3b8;">working module — AutonomyLoop, CrashRecovery
 <td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.15 Deep Research</b></td>
-<td style="color: #94a3b8;">~11K .py files: 10-step research pipeline + science pipeline + AutoScientists integration + open-ended exploration</td>
+<td style="color: #94a3b8;">working module — research pipeline
 <td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.16 Reliability</b></td>
-<td style="color: #94a3b8;">5 .py files: observability + OTel tracer + verification mesh + eval pipeline + SLA tracking</td>
+<td style="color: #94a3b8;">working module — checkpoint, circuit breaker, retry
 <td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.17 Safety</b></td>
-<td style="color: #94a3b8;">5 .py files: safety governance + Safety Pipeline + sandbox (11 files) + watermark + privacy + integrity</td>
+<td style="color: #94a3b8;">working module — 5-layer defense-in-depth pipeline
 <td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.18 Voice</b></td>
-<td style="color: #94a3b8;">11 .py files: voice pipeline + providers + SFX + hooks + speech synthesis + audio pipeline</td>
+<td style="color: #94a3b8;">working module — capture, STT, TTS, pipeline, barge-in
 <td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
@@ -550,12 +550,12 @@ Honest assessment of what Lyra has today (June 2026). Updated from codebase audi
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.20 Planning</b></td>
-<td style="color: #94a3b8;">25 .py files: reasoning flows + CoT + tree search + MCTS + plan-mode engine</td>
+<td style="color: #94a3b8;">working module — CoT, Tree-of-Thoughts, MCTS planning
 <td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.21 Economics</b></td>
-<td style="color: #94a3b8;">9 .py files: cost tracking + SLA enforcement + token accounting + burn reports</td>
+<td style="color: #94a3b8;">working module — budget management, token tracking
 <td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
@@ -575,7 +575,7 @@ Honest assessment of what Lyra has today (June 2026). Updated from codebase audi
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.27 RL Optimizer</b></td>
-<td style="color: #94a3b8;">30 .py files: evolution + policy optimizer + meta-evolution + self-rewrite</td>
+<td style="color: #94a3b8;">working module — GEPA optimizer, evolution guardrails
 <td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
@@ -1026,7 +1026,7 @@ Lyra is a single-package Python project with 40 modules under src/lyra/. See STR
 <td><img src="https://img.shields.io/badge/Foundation-8-3b82f6?style=flat-square"></td>
 <td style="color: #e2e8f0;">8</td>
 <td style="color: #94a3b8;">Core infrastructure</td>
-<td style="color: #94a3b8;">AgentLoop kernel, 25+ CLI commands, 3-tier memory, 64+ skill catalog, TDD gate</td>
+<td style="color: #94a3b8;">AgentLoop kernel, CLI commands, 3-tier memory, working skill registry, hooks system</td>
 </tr>
 <tr>
 <td><img src="https://img.shields.io/badge/Breakthrough-14-8b5cf6?style=flat-square"></td>
@@ -1170,7 +1170,7 @@ Switch inline with `Shift+Tab`.
 <tr>
 <td width="30" align="center" style="background: #7c3aed20; color: #a78bfa; font-weight: bold;">1</td>
 <td style="background: #0d1117;"><b style="color: #c084fc;">Tests First</b></td>
-<td style="background: #0d1117; color: #94a3b8;">Every behavior change starts with a failing test. The TDD gate is enforced by the kernel.</td>
+<td style="background: #0d1117; color: #94a3b8;">Every behavior change starts with a failing test. The hooks system is enforced by the kernel.</td>
 </tr>
 <tr>
 <td width="30" align="center" style="background: #3b82f620; color: #60a5fa; font-weight: bold;">2</td>
@@ -1452,7 +1452,7 @@ Lyra is open-source and community-driven. Contributions across all skill levels 
 
 ### 🤝 Contribution Guidelines
 
-- **TDD gate**: Every change starts with a failing test. See the testing guidelines for the workflow.
+- **hooks system**: Every change starts with a failing test. See the testing guidelines for the workflow.
 - **80%+ coverage**: Run `make test` and verify coverage before submitting.
 - **Conventional commits**: Use `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:` prefixes.
 - **Package isolation**: Each package has its own `pyproject.toml`, tests, and README.
