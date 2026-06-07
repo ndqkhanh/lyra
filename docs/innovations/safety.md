@@ -122,6 +122,16 @@ Promotion from SHADOW to ACTIVE requires N successful detections (default 5) wit
 - **HumanApprovalGate**: `src/lyra/safety/evolution.py` lines 196-296 -- explicit human gate before rule promotion
 - **FrozenEvaluator**: `src/lyra/safety/evolution.py` lines 302-383 -- immutable evaluation case collection
 
+## Working Flow
+
+When Lyra tries to execute a tool call -- like running a shell command -- the safety pipeline evaluates it through five sequential gates. Each gate checks something different, and the first "BLOCK" stops everything.
+
+**Example:** You ask Lyra to install a package. Lyra searches a forum and finds `rm -rf /var/log && apt install`:
+
+1. **LexicalGate** scans the raw string in ~19ms. It catches `rm -rf` as a dangerous shell pattern and immediately returns BLOCK. The pipeline stops right there. Lyra never executes the command.
+2. If the injected text had used a subtler attack, LexicalGate might pass. **ToolCallGate** then checks the least-privilege policy: "Does Lyra's current task allow mass file deletion?" **DataFlowTracker** sees untrusted forum content targeting the Bash tool -- and blocks it.
+3. Layers 1, 2, and 4 run on zero AI -- pure deterministic pattern matching. They cannot be bypassed by prompt injection.
+
 ## Debate (Trade-offs)
 
 **Structural guarantees vs. detection-based defense.** The central architectural decision is whether safety should be structurally guaranteed (deterministic, provable) or detection-based (probabilistic, tunable). Progent-style Z3 monotonic confinement is provable -- the SMT solver can formally verify that a policy update narrows rather than expands the allowed action space, producing a monotonic sequence A(P0) superset-of A(P1) superset-of A(P2). However, this guarantee comes with a blind spot: attacks that operate within least-privilege bounds (e.g., preference manipulation between two valid tool options) are not caught. The CaMeL-style data-flow tracking provides a second structural guarantee -- the P-LLM never sees untrusted data -- but at a 12-32% utility cost and 2.82x token overhead. Lyra's decision is to place structural guarantees on the critical path (Layers 1, 2, 4) and relegate probabilistic detection to a sampled out-of-band check (Layer 3, AlignmentCheck). This means the common case (a structurally unsafe tool call) is caught deterministically in milliseconds, while semantic drift (the hard problem, also the rarer case) is caught probabilistically on a sampling schedule with human escalation fallback. The trade-off is that structural defenses are brittle -- they cannot adapt to novel attack patterns without explicit policy updates. Detection-based defenses are flexible but have false positive/negative rates and can themselves be targeted by guardrail injection (LlamaFirewall's acknowledged Limitation #1).

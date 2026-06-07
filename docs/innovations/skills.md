@@ -39,6 +39,17 @@ flowchart LR
     LOADREF --> EXEC
 ```
 
+## Working Flow
+
+Skills work like pop-up instruction manuals. You keep a catalog of titles in your pocket (~50 tokens each) and pull out the full manual only when you need one.
+
+**Example:** You type "review the current diff" or run the /code-review command:
+
+1. Lyra checks its **skill catalog** (frontmatter only, ~50 tokens per skill). It matches "code-review" against your request.
+2. The **loader** reads the full `src/lyra/skills/code-review.md` (~800 tokens) and injects it into the next LLM call. The catalog stub is replaced with the full body.
+3. If the skill references other files, those load **on demand** -- not until you actually need them. This keeps context lean.
+4. If the skill has dependencies (e.g., code-review depends on a git-diff skill), the **SkillGraph** resolves them in order, with cycle detection preventing infinite loops.
+
 ## Debate
 **Skeptic:** "Progressive disclosure adds latency — each level load is a separate filesystem read."
 **Resolution:** Filesystem reads are sub-millisecond. The alternative (always loading all skills) costs 50K+ context tokens. The trade-off is worth it for all but the smallest sessions.

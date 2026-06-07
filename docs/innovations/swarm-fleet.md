@@ -184,6 +184,14 @@ A polynomial ridge classifier ($d \in [1, 5]$) trained on labeled Lyra trajector
 | `SessionState`, `ProcessState`, `SessionInfo` | `src/lyra/supervisor/state.py` | Two-axis state enumerations and immutable frozen dataclass |
 | `WorktreeManager` | `src/lyra/worktree/manager.py` | Git worktree lifecycle (create, switch, cleanup, list) |
 
+## Working Flow
+
+You type `lyra fleet agents --task "Audit our API endpoints"`. The command calls `SupervisorDaemon.start_session()` in `src/lyra/supervisor/daemon.py`. The daemon writes a `SessionInfo` record to `SessionStore` (`src/lyra/supervisor/store.py`, SQLite with WAL mode), and transitions to WORKING + ALIVE. `WorktreeManager.create()` in `src/lyra/worktree/manager.py` provisions a dedicated git worktree on an isolated branch.
+
+The daemon spawns a subprocess running Lyra inside that worktree, polling its pid every few seconds. If the process goes silent for 60 minutes, `stop_idle_sessions()` fires and transitions to STOPPED + EXITED. The SQLite record survives, so `lyra fleet respawn <session-id>` rehydrates and respawns. You don't need to watch -- the fleet TUI shows live rows with cheap-model summaries. Steer by exception via hotkey when a session hits NEEDS_INPUT or FAILED.
+
+**Example:** `lyra fleet agents --task "Scan for vulnerabilities"`. Daemon spawns 3 sessions. Agent 1 hits a missing config -- NEEDS_INPUT. You press `i`, fix the config, `Ctrl+D` back out. Agent 1 resumes.
+
 ## Debate (Trade-offs)
 
 Every architectural choice in the swarm and fleet system involves a trade-off between capability, reliability, and complexity.

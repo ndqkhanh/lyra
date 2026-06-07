@@ -20,5 +20,20 @@ stateDiagram-v2
     STOPPED --> [*]
 ```
 
+## Working Flow
+
+You start a long research task — "analyze all memory papers from 2024" — then close your laptop. Lyra's `AutonomyLoop` in `src/lyra/autonomy/loop.py` keeps running without supervision.
+
+It cycles through three modes: ONCE runs one task and stops. CONTINUOUS polls for new work. SCHEDULED runs on a timer. A health monitor checks every few seconds: is the process alive and progressing? When something fails, `CrashRecovery` in `src/lyra/autonomy/recovery.py` escalates through six steps: retry three times, then rollback, then skip, then alert a human. A confidence gate also blocks high-risk actions when the predicted success rate is too low.
+
+**Example:** You queue a 20-paper analysis and walk away.
+1. AutonomyLoop starts in CONTINUOUS mode.
+2. Paper 1 crashes → retry succeeds on the first retry.
+3. Paper 3 crashes three times → rollback to last checkpoint.
+4. Paper 7 has low confidence → skipped automatically.
+5. After all 20 papers, idle timer starts counting.
+6. Max idle reached → loop stops cleanly.
+7. You return to a completed analysis with a recovery log.
+
 ## Conclusion
 Implemented: AutonomyLoop, CrashRecovery, health monitoring. Future: learned recovery policies from trajectory data.

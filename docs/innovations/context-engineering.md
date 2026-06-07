@@ -66,6 +66,16 @@ stateDiagram-v2
 2. **Reactive compact**: Triggered at context threshold with `hasAttemptedReactiveCompact` flag to prevent retry loops.
 3. **Surface directly**: If all compaction fails, surface the issue to the user rather than silently truncating.
 
+## Working Flow
+
+Lyra's context system treats your conversation like a whiteboard that gets rewritten after every few turns. The key is `M_t` -- a structured workspace report summarizing where things stand: key findings, open questions, decisions made, and next steps.
+
+**Example:** You've been debugging a database issue for 25 turns. The conversation is nearing the context limit:
+
+1. Lyra detects the threshold is approaching. **Staged compaction** fires: first it collapses redundant tool outputs (trimming long file listings, removing raw JSON). If still over limit, it summarizes the older turns.
+2. If lighter compaction is not enough, Lyra does a **deep synthesis**: it reads the full history and produces a fresh `WorkspaceReport` in one page. The raw turn-by-turn history is discarded from context.
+3. After compaction, Lyra continues with the new `M_t` as its working memory. The full audit trail stays on disk, but the active context is compact and clean.
+
 ## Debate (Trade-offs)
 
 | Alternative | Pro | Con | Decisive Factor |

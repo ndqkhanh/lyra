@@ -133,6 +133,14 @@ class STTProvider(Protocol):
 
 This enables provider hot-swap without pipeline modifications. The pipeline discovers providers via Lyra's existing plugin registry (`src/lyra/voice/__init__.py` exposes all implementations through `__all__`).
 
+## Working Flow
+
+You press and hold the spacebar. The `Capture` stage in `src/lyra/voice/capture.py` records your audio at 16 kHz in 20 ms frames. Each frame hits `VAD` (`src/lyra/voice/vad.py`) which uses Silero VAD to detect speech. Frames then stream to `STT` (`src/lyra/voice/stt.py`) via Whisper, which returns partial transcripts every 80-200 ms. A `TentativeStateBuffer` holds these partials for rollback if you correct yourself mid-sentence.
+
+Release the spacebar. The finalized transcript goes to `VoiceAgentRouter` (`src/lyra/voice/router.py`). A classifier (Qwen2.5-0.5B) decides simple or complex -- complex queries get Chain-of-Thought reasoning. The response passes through a 3-layer safety gate (PromptGuard + AlignmentCheck + emotion policy), then hits `TTS` (`src/lyra/voice/tts.py`) for audio synthesis. The VAD keeps listening. Interrupt mid-speech? A `BargeInEvent` fires, the TTS queue flushes, and your new utterance captures immediately.
+
+**Example:** "What's the weather in Hanoi?" Capture, VAD, Whisper transcribe. Router: simple. Lyra answers "Sunny, 32 degrees." TTS streams it back -- roughly 2 seconds total.
+
 ## Debate (Trade-offs)
 
 ### Cascaded vs. End-to-End

@@ -17,5 +17,19 @@ stateDiagram-v2
     Reviewing --> Idle: human defers
 ```
 
+## Working Flow
+
+You finish a conversation with Lyra and step away. After a few minutes idle, the `MemoryConsolidator` in `src/lyra/memory/memory_consolidation.py` wakes up. It scans your recent session for important facts, merges similar ones, removes duplicates, and reorganizes everything into a clean memory bank.
+
+Here's the step sequence. `merge_similar` collapses memories with cosine similarity above 0.85 — like two variations of "API key is in .env". `deduplicate` strips exact repeats via MD5 hash. The output is a reviewable bank you can accept or reject next time you open Lyra.
+
+**Example:** After three sessions researching distributed consensus:
+1. Session 1 saves facts about Raft.
+2. Session 2 adds notes on Paxos.
+3. Lyra goes idle → THRESHOLD triggers.
+4. `merge_similar` groups all "leader election" notes together.
+5. `deduplicate` removes the Raft description saved twice.
+6. Next session you see the consolidated bank and approve it.
+
 ## Conclusion
 Implemented: MemoryConsolidator with THRESHOLD policy, merge_similar, deduplication. Future: field-theoretic PDE consolidation, GRPO-trained auto-dreamer.

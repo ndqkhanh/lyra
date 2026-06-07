@@ -21,5 +21,20 @@ flowchart TD
     SURVIVE -->|No| REJECT
 ```
 
+## Working Flow
+
+An agent finishes a task and says, "I fixed the SQL injection." Before Lyra acts on it, the adversarial panel in `src/lyra/verification/panel.py` processes the finding. It's anonymized first — no telling who wrote it.
+
+Three specialized verifiers check different angles. Correctness looks at the logic. Security checks for remaining holes. Reproducibility confirms the fix applies cleanly. If fewer than 2 of 3 agree, the finding is rejected. If it passes, an Adversarial Skeptic tries to tear it down — hunting for edge cases and misleading fragments. Only findings that survive both rounds are accepted.
+
+**Example:** An agent claims it patched a race condition.
+1. Finding is anonymized.
+2. Correctness verifier passes the synchronization logic.
+3. Security verifier spots a new deadlock — flags it.
+4. Reproducibility verifier confirms the patch applies.
+5. Vote is 2/3 → forwarded to the Skeptic.
+6. Skeptic confirms the deadlock is plausible → finding REJECTED.
+7. Agent revises and resubmits.
+
 ## Conclusion
 Implemented: 3-verifier panel, Skeptic role, anonymization, voting threshold. Core: `src/lyra/verification/panel.py`. Future: collusion detection automation, dynamic panel sizing based on finding criticality.

@@ -71,6 +71,17 @@ flowchart TD
 | Non-destructive default | git stash, not reset --hard | Irreversible corruption |
 | Execution-bias detector | Integrated gradients causal attribution | Benign experience increasing attack surface |
 
+## Working Flow
+
+After every task, Lyra reflects: did it succeed or fail? The lesson gets extracted as a compact "gene" -- about 230 tokens capturing the context, the mistake, and the fix.
+
+**Example:** Lyra keeps failing because it writes files without checking if the parent directory exists:
+
+1. Lyra completes a session and the classifier flags it as a **failure**. Extracted memory: "tried to write /etc/nginx/sites-enabled/default but the directory didn't exist."
+2. The extractor produces a gene: signal = "file write to missing directory," strategy = "always run `ls` on parent path first," AVOID = "don't assume directories exist."
+3. The **frozen evaluator** checks this gene against a held-out test suite. If performance drops more than 1%, the gene is discarded. If it passes, it enters SHADOW mode.
+4. After N shadow trials with zero false positives, the gene requests **human approval**. Only then does it become Lyra's default behavior.
+
 ## Debate (Trade-offs)
 
 | Alternative | Pro | Con | Decisive Factor |

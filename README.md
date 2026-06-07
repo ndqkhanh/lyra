@@ -28,7 +28,7 @@
 
 <p align="center">
   <a href="docs/lyra-upgrade/BASELINE.md"><img src="https://img.shields.io/badge/Baseline-24_/_28_workstreams-22c55e?style=for-the-badge&labelColor=1e1e2e" alt="Baseline" /></a>
-  <a href="docs/lyra-upgrade/MASTER-PLAN.md"><img src="https://img.shields.io/badge/Roadmap-4_Phases_·_9_Months-8b5cf6?style=for-the-badge&labelColor=1e1e2e" alt="Roadmap" /></a>
+  
   <a href="docs/research/papers/"><img src="https://img.shields.io/badge/Research-100%2B_papers_|_80%2B_repos-10b981?style=for-the-badge&labelColor=1e1e2e" alt="Research" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge&labelColor=1e1e2e" alt="License" /></a>
 </p>
@@ -43,7 +43,7 @@
   <a href="#what-is-lyra"><b>What Lyra Is</b></a> ·
   <a href="#architecture"><b>Architecture</b></a> ·
   <a href="#current-capabilities"><b>Capabilities</b></a> ·
-  <a href="#roadmap--4-phases-9-months"><b>Roadmap</b></a> ·
+  
   <a href="#innovations"><b>Innovations</b></a> ·
   <a href="#quickstart"><b>Quickstart</b></a> ·
   <a href="#documentation"><b>Docs</b></a>
@@ -713,101 +713,6 @@ Each capability has a **family** of docs at increasing depth, plus quickstart, t
 > **Reading path:** 💡 Concept (what/why) → 🔧 Block (how) → 📖 Guide (overview) → 🏗️ Architecture (deep ref) → 📋 Plan (build spec) → ⚡ Quickstart (5-min code) → 🧪 Tests (verify) → 🎯 Innovation (paper-style deep dive)
 >
 > **26 workstreams** — zero blank cells across 8 columns. All docs in [docs/](docs/).
-
-## <span style="color: #22d3ee;">🗺️ Roadmap — 4 Phases, 9 Months</span>
-
-</td></tr></table></td></tr></table>
-
-Based on the [Master Plan](docs/lyra-upgrade/MASTER-PLAN.md) (June 2026). Each phase builds on the previous.
-
-### Phase 1 — Foundation (Months 1-2): "Useful Single-Session Lyra"
-
-| Priority | Workstream | Deliverable |
-|----------|-----------|-------------|
-| 1 | §4.5 Router | Provider abstraction layer + 3-tier task-type router |
-| 2 | §4.2 Memory | Embedding search + hybrid BM25/vector retrieval |
-| 3 | §4.4 Skills | Port skill library + progressive disclosure loader |
-| 4 | §4.13 Fleet | EnterWorktree tool (standalone isolation) |
-| 5 | §4.6 Tools | Core tools (Bash, Read, Write, Edit, Glob, Grep) |
-| 6 | §4.10 Hooks | Extend hook events (25+ lifecycle) |
-| 7 | §4.12 Permissions | Deny-first permission model |
-
-> **Outcome:** Lyra works as a capable single-session agent with model routing, semantic memory, 330+ skills, worktree isolation, and proper tools + hooks + permissions.
-
-### Phase 2 — Graph + Workflows (Months 3-4): "Multi-Agent Lyra"
-
-| Priority | Workstream | Deliverable |
-|----------|-----------|-------------|
-| 8 | §4.2 Memory | Graph memory (Zettelkasten) + LP-RAG link prediction + cost-sensitive routing |
-| 9 | §4.13 Fleet | Dynamic workflow engine: agent/parallel/pipeline primitives |
-| 10 | §4.3 Context | Auto-compaction + 3-strategy framework + output compression |
-| 11 | §4.16 Reliability | Langfuse/Phoenix tracing + token observatory + eval harness |
-| 12 | §4.20 Planning | MCTS planning layer (AFlow + SWE-Search pattern) |
-| 13 | §4.15 Research | Bundled deep-research workflow (fan-out to cross-check to cited report) |
-
-> **Outcome:** Lyra fans out sub-agents with structured workflows, graph memory, context management, and deep research.
-
-### Phase 3 — Fleet + Voice (Months 5-7): "Unattended Fleet Lyra"
-
-| Priority | Workstream | Deliverable |
-|----------|-----------|-------------|
-| 14 | §4.13 Fleet | Supervisor daemon + fleet view TUI + background sessions |
-| 15 | §4.14 Autonomy | Continuous-operation loop (unattended sessions, cheap row summaries) |
-| 16 | §4.18 Voice | Push-to-talk voice mode (provider-swappable STT/TTS) |
-| 17 | §4.24 Dreaming | LLM-based dreaming engine (review to dedup to reorganize) |
-| 18 | §4.22 Steering | Steer-by-exception: peek/reply/attach from fleet view |
-| 19 | §4.8 MCP | MCP server integration + top-10 MCP servers bundled |
-| 20 | §4.11 Sessions | Checkpointing + session resume |
-
-> **Outcome:** Lyra runs unattended fleets, speaks voice, consolidates memories during idle, and steers by exception — the "ultracode" milestone.
-
-### Phase 4 — Self-Evolution + Desktop + Safety (Months 8-9): "Self-Improving Omni-Agent"
-
-| Priority | Workstream | Deliverable |
-|----------|-----------|-------------|
-| 21 | §4.25 Adversarial | Anonymized bias-corrected verification panel (3 verifiers + skeptic) |
-| 22 | §4.27 RL Optimizer | GEPA-style skill evolution + safety validator |
-| 23 | §4.4 Skills | Self-evolving skills (trajectory to pattern to skill) |
-| 24 | §4.28 Desktop | lyra-desktop (Electron/React GUI + multimodal I/O) |
-| 25 | §4.17 Safety | 5-layer defense-in-depth (LlamaFirewall + NeMo + sandboxing + Progent) |
-| 26 | §4.2 Memory | Field-theoretic dreaming (PDE consolidation) — gated behind bake-off |
-| 27 | §4.18 Voice | Full-duplex voice (barge-in, streaming TTS, emotion) |
-
-> **Outcome:** Lyra is a self-improving, safety-gated, desktop-capable omni-agent with full-duplex voice, adversarial verification, and RL-optimized skills.
-
-Full details in [`lyra-upgrade/MASTER-PLAN.md`](docs/lyra-upgrade/MASTER-PLAN.md).
-
-### 📅 Project Timeline
-
-```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#8b5cf6', 'primaryTextColor': '#e2e8f0', 'lineColor': '#6366f1', 'fontSize': '13px'}}}%%
-gantt
-    title Lyra Ultra Upgrade — 9-Month Roadmap
-    dateFormat  YYYY-MM
-    axisFormat  %b
-
-    section Phase 1: Foundation
-    Provider Router (1-2)      :p1_router, 2026-07, 60d
-    Memory + Skills (1-2)      :p1_mem, 2026-07, 60d
-    Core Tools + Hooks (1-2)   :p1_tools, 2026-07, 60d
-
-    section Phase 2: Multi-Agent
-    Graph Memory + Context (3-4) :p2_mem, after p1_mem, 60d
-    Workflow Engine (3-4)        :p2_flow, after p1_tools, 60d
-    Planning + Research (3-4)    :p2_plan, after p1_router, 60d
-
-    section Phase 3: Fleet + Voice
-    Supervisor Daemon (5-7)    :p3_sup, after p2_flow, 90d
-    Voice Pipeline (5-7)       :p3_voice, after p2_plan, 90d
-    MCP + Steering (5-7)       :p3_mcp, after p2_mem, 90d
-
-    section Phase 4: Self-Evolution
-    Adversarial Safety (8-9)   :p4_safe, after p3_sup, 60d
-    Self-Evolving Skills (8-9) :p4_evo, after p3_voice, 60d
-    Desktop + Full-Duplex (8-9):p4_desk, after p3_mcp, 60d
-```
-
-See the [full master plan](docs/lyra-upgrade/MASTER-PLAN.md) for week-by-week itemization with effort ratings and impact estimates.
 
 ---
 

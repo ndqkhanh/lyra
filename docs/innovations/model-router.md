@@ -88,6 +88,14 @@ The compound strategy from [2603.23013v1] works in three layers:
 
 **Expected savings**: 35% novel (full routing), 47% similar (memory-injected cheap path), 18% exact duplicates (cached cheap path). At 10:1 cheap:mid cost ratio → ~58.5% total cost reduction.
 
+## Working Flow
+
+You send a message. The `Router` in `src/lyra/routing/` checks the memory-augmented cache first: a hybrid BM25 + cosine search against stored (query, response, success) pairs from prior sessions. A 95%+ match routes to a cheap model (Haiku or DeepSeek-Flash) for confidence-gated verification -- 69% of large-model quality at 96% cost reduction.
+
+Cache miss. The static three-tier router kicks in. Every provider (Anthropic, OpenAI, DeepSeek, open-weights) implements `ProviderBackend` in `src/lyra/routing/provider/` with the same interface. The router maps your query's effort level (low/mid/high/max) and picks the cheapest capable model. A status check lands on Haiku. A code review lands on Sonnet. An architecture debate reaches Opus. Cost tracks per call. If a provider returns a 429 or auth error, the fallback chain auto-escalates transparently.
+
+**Example:** "Summarize yesterday's logs." No cache hit. Effort = low. Routes to Haiku via `AnthropicProvider.chat()`. Cost: ~0.01 cents. If Haiku 429s, fallback reroutes to Sonnet.
+
 ## Debate (Trade-offs)
 
 | Alternative | Pro | Con | Decisive Factor |

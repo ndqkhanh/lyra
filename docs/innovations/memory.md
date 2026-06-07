@@ -169,6 +169,14 @@ The offline consolidation (detailed in Breakthroughs 2 and 4 of the [plan](../ly
 4. Prunes redundant entries via R-KV scoring: `Z = lambda * importance - (1-lambda) * redundancy`, where redundancy is pairwise cosine similarity in embedding space (90% reduction target).
 5. Writes enriched entries back to long-term storage with full provenance metadata.
 
+## Working Flow
+
+You tell Lyra: "Remember, the auth strategy is JWT." Lyra calls `ShortTermMemory.add_turn()` in `src/lyra/memory/short_term_memory.py` to store it in the working buffer. The `MemoryConsolidator` in `src/lyra/memory/memory_consolidation.py` checks if this turn clears the importance threshold (0.5). If yes, it writes a `Memory` record to SQLite via `SQLiteLongTermMemory` in `src/lyra/memory/long_term_memory.py` with an importance score, timestamp, and tag "auth."
+
+A week later you ask "What was our auth strategy?" The `MemoryRetriever` in `src/lyra/memory/memory_retrieval.py` runs a hybrid search: vector embedding + BM25 keyword match, boosted by access frequency. The `RelevanceScorer` fuses these signals (30% importance, 30% recency, 20% content, 20% frequency). The old JWT surfaces despite Ebbinghaus decay.
+
+**Example:** New session, you ask "What's our auth strategy?" `MemoryRetriever.search()` finds nothing in short-term memory, queries long-term via `SQLiteLongTermMemory.search()` (hybrid vector+keyword), retrieves "We chose JWT on May 10," injects it into the system prompt before responding.
+
 ## Debate (Trade-offs)
 
 The following trade-offs were identified during architectural review, synthesizing the breakthrough proposals' cost-benefit analyses. Each entry records the objection and resolution.
