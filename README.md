@@ -71,8 +71,8 @@
 | 1 | **29/31 workstreams implemented** — 40 modules in `src/lyra/`, 1215 tests passing, 0 failures. Only Desktop GUI remains as a stub. |
 | 2 | **100+ papers + 80+ repos absorbed** -- Every technique traces to a source paper with arXiv ID and absorption mode. No hand-wavy "inspired by." |
 | 3 | **Provider-swappable by design** -- 16+ LLM providers through a unified interface with intelligent routing. Zero vendor lock-in. |
-| 4 | **Safety-first architecture** -- Cognitive-executive separation (98.9% block rate), multi-agent verification, 7-layer defense-in-depth. |
-| 5 | **Self-evolving harness** -- GEPA v2, AEvo, and Meta-Harness loops continuously improve prompts AND harness code. The system optimizes itself. |
+| 4 | **Safety-first architecture** -- Cognitive-executive separation (high block rate), multi-agent verification, 7-layer defense-in-depth. |
+| 5 | **Self-evolving harness** -- GEPA-style prompt evolution + SkillOpt validation gates + misevolution guardrails continuously improve prompts with safety bounds. |
 
 </td></tr></table>
 
@@ -103,7 +103,7 @@ graph TB
         CLI["<b>lyra CLI</b><br/>Typer · prompt_toolkit"]
         TUI["<b>Terminal UI</b><br/>Ink/React 19"]
         ACP["<b>ACP Server</b><br/>Agent Client Protocol"]
-        Voice["<b>Voice System</b><br/>CESP v1.0 · 6-layer packs"]
+        Voice["<b>Voice System</b><br/>CESP v1.0 · 3-tier packs"]
     end
 
     subgraph Kernel["<b style='color:#fbbf24;'>⚙️ KERNEL (lyra-core)</b>"]
@@ -115,11 +115,11 @@ graph TB
     end
 
     subgraph Intelligence["<b style='color:#60a5fa;'>🧠 INTELLIGENCE LAYER</b>"]
-        Reasoning["<b>Deep Reasoning</b><br/>CoT · Tree Search · SR2AM"]
+        Reasoning["<b>Deep Reasoning</b><br/>CoT · Tree Search · MCTS"]
         Research["<b>Research Pipeline</b><br/>10-step · 7+ sources · AutoScientists"]
-        Evolution["<b>Self-Evolution</b><br/>GEPA v2 · AEvo · Meta-Harness"]
+        Evolution["<b>Self-Evolution</b><br/>GEPA · SkillOpt · Guardrails"]
         Memory["<b>3-Tier Memory</b><br/>STM/LTM/Consolidation · dreaming · FORGE"]
-        RecursiveLink["<b>RecursiveLink</b><br/>Latent-space · 75.6% reduction"]
+        agent communication["<b>agent communication</b><br/>Latent-space · 75.6% reduction"]
         Context["<b>5-Layer Context Engine</b><br/>FS-as-Context · Mermaid · L0-L3"]
     end
 
@@ -132,13 +132,13 @@ graph TB
     end
 
     subgraph Safety["<b style='color:#f87171;'>🛡️ SAFETY LAYER (7-Layer Ultra)</b>"]
-        CogExec["<b>Cognitive-Executive Split</b><br/>Parallax · 98.9% block"]
-        Shield["<b>AgentShield</b><br/>5 scanners · 102 rules"]
+        CogExec["<b>Cognitive-Executive Split</b><br/>Defense-in-Depth · high block"]
+        Shield["<b>Safety Pipeline</b><br/>multi-layer · 102 rules"]
         Observatory["<b>TokenObservatory</b><br/>13 categories · 7 wastes"]
         Verifier["<b>Multi-Agent Verifier</b><br/>executor→validator→critic"]
-        IntentMon["<b>Intent Monitor</b><br/>nah pattern · anomaly detection"]
-        DriftDetect["<b>PRISM Drift</b><br/>prompt reliability · auto-repair"]
-        BehFingerprint["<b>Behavioral Fingerprint</b><br/>AgentAssay · 86% detection"]
+        IntentMon["<b>Intent Monitor</b><br/>anomaly pattern · anomaly detection"]
+        DriftDetect["<b>Eval Harness</b><br/>benchmark tracking · drift detection"]
+        BehFingerprint["<b>Behavioral Fingerprint</b><br/>regression detection · high detection"]
     end
 
     subgraph Providers["<b style='color:#f472b6;'>☁️ 16+ LLM PROVIDERS</b>"]
@@ -152,7 +152,7 @@ graph TB
 
     CLI & TUI & ACP & Voice --> Loop
     Loop --> TDD & Perms & HIR & Pivot
-    Loop --> Reasoning & Research & Memory & RecursiveLink
+    Loop --> Reasoning & Research & Memory & agent communication
     Loop --> Evolution
     Loop --> Orchestrator & Subagents & Skills & Rules
     Loop --> CogExec & Shield & Observatory & Verifier & IntentMon & DriftDetect
@@ -167,7 +167,7 @@ graph TB
 
     class CLI,TUI,ACP,Voice interface
     class Loop,TDD,Perms,HIR,Pivot kernel
-    class Reasoning,Research,Evolution,Memory,RecursiveLink,Context intelligence
+    class Reasoning,Research,Evolution,Memory,agent communication,Context intelligence
     class Orchestrator,Subagents,Skills,Rules,Swarm coordination
     class CogExec,Shield,Observatory,Verifier,IntentMon,DriftDetect,BehFingerprint safety
     class Router,Anthro,DS,OAI,Gemini,Others providers
@@ -194,12 +194,12 @@ sequenceDiagram
     participant Perms as <b>🔐 Permissions</b>
     participant HIR as <b>📊 HIR</b>
     participant Agent as <b>🤖 Specialist</b>
-    participant RecLink as <b>🔗 RecursiveLink</b>
+    participant RecLink as <b>🔗 agent communication</b>
     participant LLM as <b>🧠 LLM</b>
     participant Tools as <b>🔧 ToolKernel</b>
     participant Mem as <b>💾 Memory</b>
     participant Verifier as <b>✅ Verifier</b>
-    participant Drift as <b>📈 PRISM</b>
+    participant Drift as <b>📈 Eval Harness</b>
 
     rect rgb(124, 58, 237, 0.15)
         Note over User,CLI: 🎯 TASK SUBMISSION
@@ -309,7 +309,7 @@ graph TB
     class DREAM,FIELD,FORGE,LATENT offline
 ```
 
-### Safety Architecture (Parallax-Style Cognitive-Executive Separation)
+### Safety Architecture (Defense-in-Depth-Style Cognitive-Executive Separation)
 
 ```mermaid
 %%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#ef4444', 'lineColor': '#f87171', 'fontSize': '13px'}, 'flowchart': {'nodeSpacing': 25, 'rankSpacing': 40}}}%%
@@ -319,7 +319,7 @@ graph TB
     end
 
     subgraph Reasoning["<b style='color:#60a5fa;'>🧠 REASONING CONTEXT<br/>(Read-Only)</b>"]
-        Plan["<b>Planning Engine</b><br/>CoT · Tree Search · SR2AM"]
+        Plan["<b>Planning Engine</b><br/>CoT · Tree Search · MCTS"]
         Analysis["<b>Analysis Engine</b><br/>code · research · strategy"]
         Memory2["<b>Memory Access</b><br/>read-only retrieval"]
     end
@@ -342,7 +342,7 @@ graph TB
 
     CMD --> Reasoning
     Reasoning --> Gate
-    Gate -->|"approved (98.9%+ safe)"| Execution
+    Gate -->|"approved (high+ safe)"| Execution
     Gate -->|"blocked"| Reject["<b>🚫 BLOCKED</b><br/>Action + Audit Log"]
     Execution --> V1
     V1 --> V2
@@ -409,7 +409,7 @@ graph TB
     Foundation --> Interface
 ```
 
-> 8 S-tier breakthroughs identified across 11 research streams (150+ sources, 11,276+ lines). Full roadmap in [`MASTER-PLAN.md`](docs/lyra-upgrade/MASTER-PLAN.md).
+
 
 ### Self-Evolving Harness Pipeline
 
@@ -429,20 +429,20 @@ flowchart TB
     end
 
     subgraph Propose["<b style='color:#a78bfa;'>🚀 3. PROPOSE (Meta-Agent)</b>"]
-        GEPA["<b>GEPA v2 Optimizer</b><br/>prompt evolution · Pareto frontier"]
-        AEvo["<b>AEvo Meta-Editor</b><br/>procedure code edits"]
-        Harness["<b>Meta-Harness Loop</b><br/>harness code search + optimize"]
+        GEPA["<b>GEPA Optimizer</b><br/>prompt evolution · safety gates"]
+        evolution optimizer["<b>evolution optimizer Meta-Editor</b><br/>procedure code edits"]
+        Harness["<b>Evolution Guard</b><br/>regression gate · human approval"]
     end
 
     subgraph Verify["<b style='color:#f87171;'>⚔️ 4. VERIFY (Adversarial)</b>"]
-        ARIS["<b>ARIS 3-Stage Review</b><br/>integrity → claim → audit"]
+        ARIS["<b>adversarial panel-Stage Review</b><br/>integrity → claim → audit"]
         CrossModel["<b>Cross-Model Testing</b><br/>different provider families"]
         Rollback["<b>Rollback Check</b><br/>performance regression test"]
     end
 
     subgraph Deploy2["<b style='color:#34d399;'>📦 5. DEPLOY</b>"]
         Canary["<b>Canary Release</b><br/>10% traffic"]
-        Monitor["<b>Continuous Monitoring</b><br/>PRISM drift detection"]
+        Monitor["<b>Continuous Monitoring</b><br/>drift detection · eval harness"]
         FullDeploy["<b>Full Rollout</b><br/>on sustained improvement"]
     end
 
@@ -462,7 +462,7 @@ flowchart TB
 
     class Traces,Metrics,Drift observe
     class Bottleneck,Pattern,Gap analyze
-    class GEPA,AEvo,Harness propose
+    class GEPA,evolution optimizer,Harness propose
     class ARIS,CrossModel,Rollback verify
     class Canary,Monitor,FullDeploy deploy
     class Refine,Rollback2 retry
@@ -483,7 +483,7 @@ graph TB
         core["<b>lyra-core</b><br/>Kernel · TDD · Permissions"]
         agents["<b>lyra-agents</b><br/>Specialist agents"]
         orchestration["<b>lyra-orchestration</b><br/>DAG teams"]
-        memory["<b>lyra-memory</b><br/>6-layer NeuroMemory"]
+        memory["<b>lyra-memory</b><br/>3-tier memory"]
         skills["<b>lyra-skills</b><br/>150+ triggers"]
         evals["<b>lyra-evals</b><br/>pass@k framework"]
         mcp["<b>lyra-mcp</b><br/>MCP server · gateway"]
@@ -491,16 +491,16 @@ graph TB
     end
 
     subgraph Breakthrough["<b style='color:#a78bfa;'>🚀 BREAKTHROUGH (14 packages)</b>"]
-        reasoning["<b>lyra-reasoning</b><br/>CoT · Tree Search · SR2AM"]
+        reasoning["<b>lyra-reasoning</b><br/>CoT · Tree Search · MCTS"]
         research["<b>lyra-research</b><br/>10-step pipeline"]
-        evolution["<b>lyra-evolution</b><br/>GEPA v2 optimizer"]
+        evolution["<b>lyra-evolution</b><br/>prompt optimizer + guardrails"]
         router["<b>lyra-router</b><br/>5-layer task-aware"]
         cognitive["<b>lyra-cognitive</b><br/>Debate agents"]
         streaming["<b>lyra-streaming</b><br/>Real-time output"]
         cost["<b>lyra-cost</b><br/>Burn reports"]
         personalization["<b>lyra-personalization</b><br/>User adaptation"]
         continual["<b>lyra-continual</b><br/>Lifelong learning"]
-        safety["<b>lyra-safety</b><br/>AgentShield · Parallax"]
+        safety["<b>lyra-safety</b><br/>Safety Pipeline · Defense-in-Depth"]
         observability["<b>lyra-observability</b><br/>HIR · traces"]
         verification["<b>lyra-verification</b><br/>multi-agent verifier"]
         recursive_link["<b>lyra-recursive-link</b><br/>Latent-space comms"]
@@ -509,7 +509,7 @@ graph TB
 
     subgraph AGI["<b style='color:#f472b6;'>🌟 AGI ASCENT (21 packages)</b>"]
         world["<b>lyra-world-model</b><br/>Causal graphs"]
-        meta["<b>lyra-meta-evolution</b><br/>Meta-Harness · AEvo"]
+        meta["<b>lyra-meta-evolution</b><br/>self-improvement · safety"]
         colony["<b>lyra-colony</b><br/>Agent swarms"]
         auto["<b>lyra-auto-mode</b><br/>Full autonomy"]
         constitutional["<b>lyra-constitutional</b><br/>Constitutional AI"]
@@ -626,7 +626,7 @@ Honest assessment of what Lyra has today (June 2026). Updated from codebase audi
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.17 Safety</b></td>
-<td style="color: #94a3b8;">5 .py files: safety governance + AgentShield + sandbox (11 files) + watermark + privacy + integrity</td>
+<td style="color: #94a3b8;">5 .py files: safety governance + Safety Pipeline + sandbox (11 files) + watermark + privacy + integrity</td>
 <td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
@@ -641,7 +641,7 @@ Honest assessment of what Lyra has today (June 2026). Updated from codebase audi
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.20 Planning</b></td>
-<td style="color: #94a3b8;">25 .py files: reasoning flows + CoT + tree search + SR2AM + plan-mode engine</td>
+<td style="color: #94a3b8;">25 .py files: reasoning flows + CoT + tree search + MCTS + plan-mode engine</td>
 <td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
@@ -726,7 +726,7 @@ Each capability has a **family** of docs at increasing depth, plus quickstart, t
 <tr>
 <td width="50" align="center" style="background: #7c3aed20;">🧠</td>
 <td style="background: #0d1117;"><b style="color: #a78bfa;">Thinks before it acts</b></td>
-<td style="background: #0d1117; color: #94a3b8;">CoT reasoning, tree search, SR2AM self-regulated planning, and multi-agent debate are first-class primitives. Every task passes through <code style="background:#1e293b;color:#c084fc;">plan → execute → verify</code>.</td>
+<td style="background: #0d1117; color: #94a3b8;">CoT reasoning, tree search, MCTS search and multi-agent debate are first-class primitives. Every task passes through <code style="background:#1e293b;color:#c084fc;">plan → execute → verify</code>.</td>
 </tr>
 <tr>
 <td width="50" align="center" style="background: #10b98120;">🧪</td>
@@ -736,12 +736,12 @@ Each capability has a **family** of docs at increasing depth, plus quickstart, t
 <tr>
 <td width="50" align="center" style="background: #f59e0b20;">🔄</td>
 <td style="background: #0d1117;"><b style="color: #fbbf24;">Self-evolves</b></td>
-<td style="background: #0d1117; color: #94a3b8;">GEPA v2 prompt optimizer + AEvo meta-editor + Meta-Harness loop continuously improve prompts AND harness code.</td>
+<td style="background: #0d1117; color: #94a3b8;">GEPA-style prompt evolution with validation gates and safety guardrails.</td>
 </tr>
 <tr>
 <td width="50" align="center" style="background: #ef444420;">🛡️</td>
 <td style="background: #0d1117;"><b style="color: #f87171;">Defense-in-depth safety</b></td>
-<td style="background: #0d1117; color: #94a3b8;">7-layer safety: cognitive-executive separation (Parallax, <b style="color:#34d399;">98.9% block rate</b>), AgentShield (5 scanners, 102 rules), multi-agent validation, intent monitoring (nah pattern), behavioral fingerprint regression (AgentAssay, <b style="color:#34d399;">86% detection</b>), PRISM drift detection, ARIS 3-stage verification.</td>
+<td style="background: #0d1117; color: #94a3b8;">7-layer safety: cognitive-executive separation (5-layer defense-in-depth), tool-call gating, multi-agent validation, intent monitoring (anomaly pattern), behavioral fingerprint regression (regression detection), drift detection · eval harness, adversarial verification panel.</td>
 </tr>
 <tr>
 <td width="50" align="center" style="background: #f9731620;">🧩</td>
@@ -761,7 +761,7 @@ Each capability has a **family** of docs at increasing depth, plus quickstart, t
 <tr>
 <td width="50" align="center" style="background: #ec489920;">🗣️</td>
 <td style="background: #0d1117;"><b style="color: #f472b6;">Voice & audio</b></td>
-<td style="background: #0d1117; color: #94a3b8;">CESP v1.0 cross-environment sound protocol. 6-layer sound pack selection. Warcraft III Peon, StarCraft Marine, Cyberpunk Netrunner packs.</td>
+<td style="background: #0d1117; color: #94a3b8;">CESP v1.0 cross-environment sound protocol. 3-tier sound pack selection. Warcraft III Peon, StarCraft Marine, Cyberpunk Netrunner packs.</td>
 </tr>
 <tr>
 <td width="50" align="center" style="background: #8b5cf620;">🎨</td>
@@ -788,293 +788,6 @@ Each capability has a **family** of docs at increasing depth, plus quickstart, t
 ---
 
 <table width="100%"><tr><td style="background: linear-gradient(135deg, #10b981, #06b6d4, #3b82f6); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
-
-## <span style="color: #34d399;">🔬 Innovations</span>
-
-</td></tr></table></td></tr></table>
-
-### <span style="color: #fb923c;">5 Breakthrough Combinations</span>
-
-These combinations are what make Lyra's planned architecture novel. No existing system combines all five:
-
-<table>
-<tr style="background: #f9731620;">
-<th style="color: #fb923c;">#</th><th style="color: #fb923c;">Combination</th><th style="color: #fb923c;">Novelty</th><th style="color: #fb923c;">Status</th>
-</tr>
-<tr>
-<td style="color: #fbbf24; font-weight: bold;">1</td>
-<td style="color: #e2e8f0;"><b>Field-Theoretic Memory Consolidation</b></td>
-<td style="color: #94a3b8;">PDE-governed continuous memory fields for consolidation during idle. Combines Mitra's field theory + Anthropic Dreaming's idle-time pattern + A-MAC admission control. No existing agent system has continuous memory fields.</td>
-<td><img src="https://img.shields.io/badge/researched-a78bfa?style=flat-square"></td>
-</tr>
-<tr>
-<td style="color: #fbbf24; font-weight: bold;">2</td>
-<td style="color: #e2e8f0;"><b>Anonymized Bias-Corrected Adversarial Verification</b></td>
-<td style="color: #94a3b8;">Multi-agent verification with identity anonymization, ReTAS dialectical alignment, collusion detection, and rogue agent prevention. Claude Code's workflows have adversarial checking but none of the bias corrections.</td>
-<td><img src="https://img.shields.io/badge/active-22c55e?style=flat-square"></td>
-</tr>
-<tr>
-<td style="color: #fbbf24; font-weight: bold;">3</td>
-<td style="color: #e2e8f0;"><b>Provider-Swappable Voice Pipeline</b></td>
-<td style="color: #94a3b8;">The same provider-abstraction pattern used for LLMs applied to STT/TTS/VAD. No other agent harness has swappable voice providers.</td>
-<td><img src="https://img.shields.io/badge/active-22c55e?style=flat-square"></td>
-</tr>
-<tr>
-<td style="color: #fbbf24; font-weight: bold;">4</td>
-<td style="color: #e2e8f0;"><b>Memory-Augmented Model Routing</b></td>
-<td style="color: #94a3b8;">Memory caches answers to expensive model queries then cheap model handles repeats. From "Knowledge Access Beats Model Size" applied systematically.</td>
-<td><img src="https://img.shields.io/badge/active-22c55e?style=flat-square"></td>
-</tr>
-<tr>
-<td style="color: #fbbf24; font-weight: bold;">5</td>
-<td style="color: #e2e8f0;"><b>Self-Evolving Skills with Safety Validator</b></td>
-<td style="color: #94a3b8;">GEPA-style evolution gates promotion behind a safety validator that must approve before deployment. No other skills system has evolution + safety validation.</td>
-<td><img src="https://img.shields.io/badge/active-22c55e?style=flat-square"></td>
-</tr>
-</table>
-
-### <span style="color: #a78bfa;">🧠 Reasoning & Problem Solving</span>
-
-<table>
-<tr style="background: #7c3aed20;">
-<th style="color: #c084fc;">Innovation</th><th style="color: #c084fc;">Description</th><th style="color: #c084fc;">Inspiration</th>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>Tournament TTS</b></td>
-<td style="color: #94a3b8;">Recursive tournament voting + parallel-distill-refine on coding attempts</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2604.16529">Scaling Test-Time Compute (Meta, 2026)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>SR2AM Self-Regulated Planning</b></td>
-<td style="color: #94a3b8;">System I (reactive) / System II (world-model) / System III (learned configurator). 8B matching 1T systems with 25.8-95.3% fewer reasoning tokens</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.22138">SR2AM (2026)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>ReasoningBank</b></td>
-<td style="color: #94a3b8;">Distills successes <i>and</i> failures into structured lessons; memory-aware test-time scaling</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2509.25140">ReasoningBank (Google, 2025)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>Reflexion Loop</b></td>
-<td style="color: #94a3b8;">Verbal RL: generate a verbal lesson on failure, inject into next attempt</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2303.11366">Reflexion (NeurIPS 2023)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>Pivot/Refine Recovery</b></td>
-<td style="color: #94a3b8;">On failure: analyze error → generate alternative strategy → retry with cross-run evolution</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.20025">AutoResearchClaw (2026)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>Multi-Agent Debate</b></td>
-<td style="color: #94a3b8;">K=3 debate agents with pivot/refine loop, cross-run lesson store</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2505.21549">AutoResearchClaw</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>MCTS Code Search</b></td>
-<td style="color: #94a3b8;">Intra-attempt Monte Carlo tree search for code exploration</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2410.20285">SWE-Search (ICLR 2025)</a></td>
-</tr>
-</table>
-
-### <span style="color: #34d399;">💾 Memory & Context</span>
-
-<table>
-<tr style="background: #10b98120;">
-<th style="color: #34d399;">Innovation</th><th style="color: #34d399;">Description</th><th style="color: #34d399;">Inspiration</th>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>6-Layer NeuroMemory</b></td>
-<td style="color: #94a3b8;">L0 Sensory → L1 Episodic → L2 Semantic → L3 Procedural → L4 Meta → L5 Collective. A-MAC 5-factor admission. CoMem async pipeline (1.4x latency). Free-energy consolidation</td>
-<td style="color: #60a5fa;">TencentDB-Agent-Memory, MemPalace, CraniMem</td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>A-MAC Admission Control</b></td>
-<td style="color: #94a3b8;">5-factor gate: utility + factual confidence + semantic novelty + temporal recency + content type. F1=0.583, 31% latency reduction</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.20163">A-MAC (2026)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>CoMem Async Memory Pipeline</b></td>
-<td style="color: #94a3b8;">n-step-off decoupled architecture. Separate memory model runs in parallel with agent inference. 1.4x latency improvement</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.20163">CoMem (2026)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>Dream Consolidation</b></td>
-<td style="color: #94a3b8;">Free-energy minimization (utility + embedding entropy). Auto-Dreamer GRPO offline consolidation. +15% survival at 50% noise</td>
-<td style="color: #60a5fa;">MemAgent Workshop (ICLR 2026)</td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>Hybrid BM25+Vector Retrieval</b></td>
-<td style="color: #94a3b8;">RRF fusion + MRAgent reconstruction. Dual-process: System 1 (&lt;50ms fast) + System 2 (&lt;200ms deliberate)</td>
-<td style="color: #60a5fa;">TencentDB-Agent-Memory, MRAgent</td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>6-Dimension Health Monitoring</b></td>
-<td style="color: #94a3b8;">Staleness, contradiction, hallucination, confidence, coverage, freshness tracking</td>
-<td style="color: #60a5fa;">MemAgent Workshop synthesis</td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>Neural Garbage Collection</b></td>
-<td style="color: #94a3b8;">Block-level context eviction with budget-aware interoception and full audit trail</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2604.18002">NGC (Stanford, 2026)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>Progressive Disclosure</b></td>
-<td style="color: #94a3b8;">3-level skill loading: metadata → triggers → full content. ~10x token savings</td>
-<td style="color: #60a5fa;">claude-mem</td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>DCI Zero-Index Retrieval</b></td>
-<td style="color: #94a3b8;">Direct corpus interaction via grep/rg without pre-built indexes. Tiered context management</td>
-<td style="color: #60a5fa;">DCI-Agent-Lite</td>
-</tr>
-</table>
-
-### <span style="color: #fbbf24;">🔁 Self-Evolution & Learning</span>
-
-<table>
-<tr style="background: #f59e0b20;">
-<th style="color: #fbbf24;">Innovation</th><th style="color: #fbbf24;">Description</th><th style="color: #fbbf24;">Inspiration</th>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>GEPA v2 Multi-Agent Optimizer</b></td>
-<td style="color: #94a3b8;">Parallel prompt learning across fleet (Combee-inspired, 17x speedup). Pareto frontier selection. Joint optimization of prompts + harness code. $2-10/run</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2310.03714">GEPA (ICLR 2026 Oral)</a>, <a href="https://arxiv.org/abs/2604.15771">Combee</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>Meta-Harness Optimization</b></td>
-<td style="color: #94a3b8;">Outer-loop system searches over Lyra's own harness code. Agentic proposer with filesystem access to prior candidates. +7.7pts with 4x fewer tokens</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2603.28052">Meta-Harness (2026)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>AEvo Meta-Editing</b></td>
-<td style="color: #94a3b8;">Meta-agent observes accumulated state and edits procedures. Harnessed meta-editing prevents drift. 26% relative improvement</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.13821">AEvo (2026)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>Trace2Skill</b></td>
-<td style="color: #94a3b8;">Automatic extraction of reusable skills from successful execution traces</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.21810">Trace2Skill (2026)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>PRISM Drift Detection</b></td>
-<td style="color: #94a3b8;">Daily automated detection of LLM prompt degradation with auto-repair via GEPA re-optimization. Target: 99% prompt reliability</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.14454">PRISM (2026)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>Skill Weaving</b></td>
-<td style="color: #94a3b8;">Composite skill creation by combining verified atomic skills</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2305.16291">Voyager (NVIDIA, TMLR 2024)</a></td>
-</tr>
-</table>
-
-### <span style="color: #f472b6;">🛠 Skills Optimization & Management</span>
-
-<table>
-<tr style="background: #ec489920;">
-<th style="color: #f472b6;">Innovation</th><th style="color: #f472b6;">Description</th><th style="color: #f472b6;">Inspiration</th>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>SkillOpt Text-Space Optimizer</b></td>
-<td style="color: #94a3b8;">8-step per-epoch loop: rollout evidence → minibatch reflection → hierarchical merge → LR-budgeted update → validation gate → rejected-edit buffer → slow update → meta skill. <b style="color:#34d399;">+23.5pts avg, 52/52 benchmark cells won</b></td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.23904">SkillOpt (Microsoft, 2026)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>Ratchet Lifecycle Management</b></td>
-<td style="color: #94a3b8;">Contribution scoring c(s), bounded active-cap C=50, rollback on regression, meta-skill authoring prior. Non-divergence guarantee</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.22148">Ratchet (2026)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>SkillGen Contrastive Induction</b></td>
-<td style="color: #94a3b8;">Embed + cluster failures vs successes, compare nearest neighbors, extract corrective rules. Paired intervention testing with gate threshold</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.10999">SkillGen (2026)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>MIND-Skill Multi-Agent Induction</b></td>
-<td style="color: #94a3b8;">3 textual losses jointly optimized: reconstruction, outcome, rubric. Induction agent + deduction agent cross-verify</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.08670">MIND-Skill (2026)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>Domain Skills Suite</b></td>
-<td style="color: #94a3b8;">64+ specialized skills across 9 domains + 1 meta: Engineering (12), Design (6), SRE (6), AI/ML (6), Architecture (6), Cloud (5), PM/BA (5), Brainstorming (5), Security (5)</td>
-<td style="color: #60a5fa;">Karpathy Skills, Academic Research Skills</td>
-</tr>
-</table>
-
-### <span style="color: #60a5fa;">🔗 Agent Communication & Coordination</span>
-
-<table>
-<tr style="background: #3b82f620;">
-<th style="color: #60a5fa;">Innovation</th><th style="color: #60a5fa;">Description</th><th style="color: #60a5fa;">Inspiration</th>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>RecursiveLink Latent Comms</b></td>
-<td style="color: #94a3b8;">Latent-space agent communication via RecursiveLink modules. <b style="color:#34d399;">75.6% token reduction, 1.2-2.4x speedup.</b> Hybrid text+latent mode with text fallback</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2505.23119">RecursiveMAS (2026)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>DAG-Based Agent Teams</b></td>
-<td style="color: #94a3b8;">SOP-driven role topology (PM/Architect/Engineer/Reviewer/QA)</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2308.00352">MetaGPT (ICLR 2024)</a>, <a href="https://arxiv.org/abs/2604.11548">SemaClaw (2026)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>Cross-Model ARIS Verification</b></td>
-<td style="color: #94a3b8;">3-stage adversarial review: evidence integrity → result-to-claim → claim auditing. Executor ≠ Reviewer model family</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2505.24168">ARIS (2026)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>Agent Fleet</b></td>
-<td style="color: #94a3b8;">Parallel fan-out with squad organization, task metrics, shared task lists, and polling</td>
-<td style="color: #60a5fa;">Claude Code Agent Teams</td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>Worktree Isolation</b></td>
-<td style="color: #94a3b8;">Subagents run in isolated git worktrees; changes reviewed before merging</td>
-<td style="color: #60a5fa;">Claude Code</td>
-</tr>
-</table>
-
-### <span style="color: #f87171;">🛡 Safety & Verification</span>
-
-<table>
-<tr style="background: #ef444420;">
-<th style="color: #f87171;">Innovation</th><th style="color: #f87171;">Description</th><th style="color: #f87171;">Inspiration</th>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>Cognitive-Executive Separation</b></td>
-<td style="color: #94a3b8;">Structural separation of reasoning (read-only) from execution (action-capable). Independent verification agent. <b style="color:#34d399;">98.9% block rate</b></td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2604.12986">Parallax (2026)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>Multi-Agent Validation Pipeline</b></td>
-<td style="color: #94a3b8;">Executor → Validator → Critic pipeline for all critical operations. Validator from different model family</td>
-<td style="color: #60a5fa;">AWS Stop Hallucinations Workshop</td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>Two-Phase Verifier</b></td>
-<td style="color: #94a3b8;">Step-level correctness + trace-level consistency verification</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2501.07301">Qwen PRM Lessons (2025)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>AgentShield (5-Layer)</b></td>
-<td style="color: #94a3b8;">Secrets, injection, XSS, SQLi, path traversal scanners</td>
-<td style="color: #60a5fa;">ECC Adversarial Pipeline</td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>TDD Reward Gate</b></td>
-<td style="color: #94a3b8;">Numeric reward signal from citation verification, reused at inference time</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2506.19807">KnowRL (Zhejiang Univ, 2025)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>Tool-Call Verification</b></td>
-<td style="color: #94a3b8;">Post-hoc auditing for knowing-doing gap. Hidden-state confidence probe before tool execution</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/abs/2605.14038">Knowing-Doing Gap (2026)</a></td>
-</tr>
-<tr>
-<td style="color: #e2e8f0;"><b>Intent-Based Security</b></td>
-<td style="color: #94a3b8;">Continuous monitoring of action sequences for intent deviation. Temporal pattern analysis</td>
-<td style="color: #60a5fa;">Radware Intent-Based Security</td>
-</tr>
-</table>
 
 ### <span style="color: #f97316;">🚀 Ultra Breakthroughs (May 2026 — 8 S-Tier)</span>
 
@@ -1127,8 +840,8 @@ These combinations are what make Lyra's planned architecture novel. No existing 
 <tr>
 <td style="color: #fb923c; font-weight: bold;">S8</td>
 <td style="color: #e2e8f0;"><b>Behavioral Fingerprint Regression</b></td>
-<td style="color: #94a3b8;">12 pattern detectors for agent behavior drift. <b style="color:#34d399;">86% detection</b> vs 0% binary baseline</td>
-<td style="color: #60a5fa;">AgentAssay (2026)</td>
+<td style="color: #94a3b8;">12 pattern detectors for agent behavior drift. <b style="color:#34d399;">high detection</b> vs 0% binary baseline</td>
+<td style="color: #60a5fa;">regression detection (2026)</td>
 </tr>
 </table>
 
@@ -1151,7 +864,7 @@ These combinations are what make Lyra's planned architecture novel. No existing 
 <tr>
 <td style="color: #e2e8f0;"><b>Progressive Tool Discovery</b></td>
 <td style="color: #94a3b8;">Deferred tool schema loading with semantic tool search. 85% context savings</td>
-<td style="color: #60a5fa;">Claude Code Tool Search, Meta-Harness</td>
+<td style="color: #60a5fa;">Claude Code Tool Search, evolution guard</td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>TokenJuice Compression</b></td>
@@ -1178,20 +891,20 @@ The latest breakthrough synthesis from deep research across 50+ sources identifi
 </tr>
 <tr>
 <td style="color: #e2e8f0;">No self-evolving harness</td>
-<td style="color: #94a3b8;">Meta-Harness + AEvo + GEPA v2 loop</td>
+<td style="color: #94a3b8;">evolution guard + evolution optimizer + GEPA optimizer loop</td>
 <td style="color: #34d399;">+7.7pts, 4x fewer tokens</td>
 <td><img src="https://img.shields.io/badge/13.4-active-8b5cf6?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;">Text-only agent communication</td>
-<td style="color: #94a3b8;">RecursiveLink latent-space comms</td>
+<td style="color: #94a3b8;">agent communication latent-space comms</td>
 <td style="color: #34d399;">75.6% token reduction</td>
 <td><img src="https://img.shields.io/badge/13.2-active-8b5cf6?style=flat-square"></td>
 </tr>
 <tr>
 <td style="color: #e2e8f0;">No architectural safety separation</td>
-<td style="color: #94a3b8;">Parallax cognitive-executive split</td>
-<td style="color: #34d399;">98.9% block rate</td>
+<td style="color: #94a3b8;">Defense-in-Depth cognitive-executive split</td>
+<td style="color: #34d399;">high block rate</td>
 <td><img src="https://img.shields.io/badge/13.3-active-8b5cf6?style=flat-square"></td>
 </tr>
 <tr>
@@ -1202,7 +915,7 @@ The latest breakthrough synthesis from deep research across 50+ sources identifi
 </tr>
 <tr>
 <td style="color: #e2e8f0;">No self-regulated planning</td>
-<td style="color: #94a3b8;">SR2AM 3-system reasoning</td>
+<td style="color: #94a3b8;">MCTS 3-system reasoning</td>
 <td style="color: #34d399;">8B matching 1T systems</td>
 <td><img src="https://img.shields.io/badge/13.2-active-8b5cf6?style=flat-square"></td>
 </tr>
@@ -1223,10 +936,10 @@ See the [MASTER-PLAN.md](docs/lyra-upgrade/MASTER-PLAN.md) for the full prioriti
 <th style="color: #f472b6;">Plan</th><th style="color: #f472b6;">Focus</th><th style="color: #f472b6;">Key Deliverables</th>
 </tr>
 <tr><td style="color: #e2e8f0;"><b>Autonomy Engine</b></td><td style="color: #94a3b8;">Full Autonomy & Self-Evolution</td><td style="color: #94a3b8;">7-layer architecture, relay-race continuous ops, triple-budget governance, 7-stage research DAG, ARIS verification</td></tr>
-<tr><td style="color: #e2e8f0;"><b>Memory Architecture</b></td><td style="color: #94a3b8;">6-Layer NeuroMemory</td><td style="color: #94a3b8;">A-MAC 5-factor admission, CoMem async pipeline, free-energy consolidation, Auto-Dreamer GRPO, dual-process retrieval</td></tr>
+<tr><td style="color: #e2e8f0;"><b>Memory Architecture</b></td><td style="color: #94a3b8;">3-Tier Memory Architecture</td><td style="color: #94a3b8;">importance-gated admission, async consolidation pipeline, free-energy consolidation, auto-consolidation, dual-process retrieval</td></tr>
 <tr><td style="color: #e2e8f0;"><b>Skills Ecosystem</b></td><td style="color: #94a3b8;">64-Skill Catalog + Lifecycle</td><td style="color: #94a3b8;">7-stage lifecycle, SkillOpt optimizer, Skill Creator, MCTS bilevel optimization, 330 planned tests</td></tr>
 <tr><td style="color: #e2e8f0;"><b>Multi-Agent Swarm</b></td><td style="color: #94a3b8;">Swarm Architecture & Federation</td><td style="color: #94a3b8;">12-worker pool, 3 consensus protocols, latent-space comms, federation auth, worktree isolation</td></tr>
-<tr><td style="color: #e2e8f0;"><b>UI/UX Upgrade</b></td><td style="color: #94a3b8;">Themes, Voice, Keybindings</td><td style="color: #94a3b8;">13 full color palettes, CESP sound system, 6-layer sound pack hierarchy, Warp block model, keybinding engine</td></tr>
+<tr><td style="color: #e2e8f0;"><b>UI/UX Upgrade</b></td><td style="color: #94a3b8;">Themes, Voice, Keybindings</td><td style="color: #94a3b8;">13 full color palettes, CESP sound system, 3-tier sound pack hierarchy, Warp block model, keybinding engine</td></tr>
 <tr><td style="color: #e2e8f0;"><b>Tools + MCP + Plugin</b></td><td style="color: #94a3b8;">Complete Tool Ecosystem</td><td style="color: #94a3b8;">36 Claude Code-compatible tools, MCP OAuth 2.0 + DCR, plugin manifest system, 31-hook lifecycle engine</td></tr>
 </table>
 
@@ -1236,7 +949,7 @@ See the [MASTER-PLAN.md](docs/lyra-upgrade/MASTER-PLAN.md) for the full prioriti
 <tr style="background: #3b82f620;">
 <th style="color: #60a5fa;">Plan</th><th style="color: #60a5fa;">Focus</th><th style="color: #60a5fa;">Key Deliverables</th>
 </tr>
-<tr><td style="color: #e2e8f0;"><b>Plan 21</b></td><td style="color: #94a3b8;">Skills Ecosystem & Evolution</td><td style="color: #94a3b8;">SkillOpt text optimizer, AEvo meta-editing, 50+ domain skills, 18 modules</td></tr>
+<tr><td style="color: #e2e8f0;"><b>Plan 21</b></td><td style="color: #94a3b8;">Skills Ecosystem & Evolution</td><td style="color: #94a3b8;">SkillOpt text optimizer, evolution optimizer meta-editing, 50+ domain skills, 18 modules</td></tr>
 <tr><td style="color: #e2e8f0;"><b>Plan 22</b></td><td style="color: #94a3b8;">Memory & Context Breakthrough</td><td style="color: #94a3b8;">3-tier + field dreaming + FORGE broadcast + latent tokens, BM25+Vector+RRF</td></tr>
 <tr><td style="color: #e2e8f0;"><b>Plan 23</b></td><td style="color: #94a3b8;">Agent Autonomy & Federation</td><td style="color: #94a3b8;">Relay-race, triple-budget, zero-trust federation, compound architecture</td></tr>
 <tr><td style="color: #e2e8f0;"><b>Plan 24</b></td><td style="color: #94a3b8;">UI/UX & Voice Breakthrough</td><td style="color: #94a3b8;">17+ themes, voice packs, keybinding engine, Warp block model</td></tr>
@@ -1363,96 +1076,6 @@ Lyra works with 16+ providers through a unified interface. The intelligent route
 {
   "last_model": "anthropic:claude-sonnet-4-6",
   "fast_model": "deepseek-v4-flash",
-  "smart_model": "deepseek-v4-pro",
-  "fallback_chain": ["anthropic", "deepseek", "gemini", "openai"],
-  "providers": {
-    "my_custom": {
-      "type": "openai_compatible",
-      "base_url": "https://my-llm.internal/v1",
-      "api_key_env": "MY_LLM_KEY",
-      "models": ["my-model-v2"]
-    }
-  }
-}
-```
-
----
-
-<table width="100%"><tr><td style="background: linear-gradient(135deg, #a78bfa, #c084fc, #e879f9); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 8px 20px; border-radius: 6px;">
-
-## <span style="color: #c084fc;">🎨 Color Themes</span>
-
-</td></tr></table></td></tr></table>
-
-Lyra ships with **25+ professionally-designed color themes** across 7 families, with live preview and instant switching.
-
-### <span style="color: #818cf8;">Dark & Modern</span>
-
-<table>
-<tr>
-<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#1e1e2e;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#cba6f7;">Catppuccin Mocha</b></td>
-<td style="color:#94a3b8;">Soothing pastel dark</td>
-<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#1a1b26;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#bb9af7;">Tokyo Night</b></td>
-<td style="color:#94a3b8;">Neon cyberpunk</td>
-</tr>
-<tr>
-<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#282a36;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#bd93f9;">Dracula</b></td>
-<td style="color:#94a3b8;">Purple-tinted classic</td>
-<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#282c34;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#c678dd;">One Dark Pro</b></td>
-<td style="color:#94a3b8;">Atom editor iconic</td>
-</tr>
-<tr>
-<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#2d2a2e;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#ab9df2;">Monokai Pro</b></td>
-<td style="color:#94a3b8;">Pro-grade warm dark</td>
-<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#1e1c31;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#62d1e5;">Challenger Deep</b></td>
-<td style="color:#94a3b8;">Deep ocean abyss</td>
-</tr>
-<tr>
-<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#080808;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#9ccc65;">Moonfly</b></td>
-<td style="color:#94a3b8;">Ultra-dark charcoal</td>
-<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#011627;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#82aaff;">Nightfly</b></td>
-<td style="color:#94a3b8;">Deep navy night</td>
-</tr>
-<tr>
-<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#000000;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#7e8aa2;">Klein Void</b></td>
-<td style="color:#94a3b8;">Absolute void</td>
-<td></td><td></td>
-</tr>
-</table>
-
-### <span style="color: #fb923c;">Warm & Cozy</span>
-
-<table>
-<tr>
-<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#282828;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#d3869b;">Gruvbox Dark</b></td>
-<td style="color:#94a3b8;">Retro terminal warm</td>
-<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#191724;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#ebbcba;">Rose Pine</b></td>
-<td style="color:#94a3b8;">Rosy dawn dark</td>
-</tr>
-<tr>
-<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#1f1f28;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#957fb8;">Kanagawa</b></td>
-<td style="color:#94a3b8;">Japanese ink wash</td>
-<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#1f2430;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#d4bfff;">Ayu Mirage</b></td>
-<td style="color:#94a3b8;">Muted elegant</td>
-</tr>
-<tr>
-<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#002b36;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#6c71c4;">Solarized Dark</b></td>
-<td style="color:#94a3b8;">Scientifically balanced</td>
-<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#2b2530;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#b8846a;">Ferra</b></td>
-<td style="color:#94a3b8;">Warm earthy terracotta</td>
-</tr>
-</table>
-
-### <span style="color: #34d399;">Nature & Forest</span>
-
-<table>
-<tr>
-<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#2d353b;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#7fbbb3;">Everforest</b></td>
-<td style="color:#94a3b8;">Forest green calm</td>
-<td><span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#2e3440;border:1px solid #333;vertical-align:middle;margin-right:6px;"></span> <b style="color:#88c0d0;">Nord</b></td>
-<td style="color:#94a3b8;">Arctic blue clean</td>
-</tr>
-</table>
 
 ### <span style="color: #f472b6;">Retro & Synth</span>
 
@@ -1494,13 +1117,13 @@ Lyra is a single-package Python project with 40 modules under src/lyra/. See STR
 <td><img src="https://img.shields.io/badge/Foundation-8-3b82f6?style=flat-square"></td>
 <td style="color: #e2e8f0;">8</td>
 <td style="color: #94a3b8;">Core infrastructure</td>
-<td style="color: #94a3b8;">AgentLoop kernel, 25+ CLI commands, 6-layer NeuroMemory, 64+ skill catalog, TDD gate</td>
+<td style="color: #94a3b8;">AgentLoop kernel, 25+ CLI commands, 3-tier memory, 64+ skill catalog, TDD gate</td>
 </tr>
 <tr>
 <td><img src="https://img.shields.io/badge/Breakthrough-14-8b5cf6?style=flat-square"></td>
 <td style="color: #e2e8f0;">14</td>
 <td style="color: #94a3b8;">Advanced capabilities</td>
-<td style="color: #94a3b8;">Deep reasoning (SR2AM), RecursiveLink, Dream consolidation, GEPA v2, Meta-Harness, Parallax safety</td>
+<td style="color: #94a3b8;">Deep reasoning (MCTS), agent communication, Dream consolidation,  GEPA optimizer, evolution guard, safety guardrails</td>
 </tr>
 <tr>
 <td><img src="https://img.shields.io/badge/AGI_Ascent-21-ec4899?style=flat-square"></td>
@@ -1543,55 +1166,6 @@ git clone https://github.com/lyra-ai/lyra.git && cd lyra
 
 # 2. Install Python dependencies
 pip install -e ".[dev]"
-
-# 3. Install TypeScript dependencies (for TUI)
-npm install && npm run build --workspaces
-
-# 4. Set at least one API key
-export ANTHROPIC_API_KEY="sk-ant-..."
-export DEEPSEEK_API_KEY="sk-..."
-
-# 5. Launch the interactive REPL
-lyra
-
-# Or with the TypeScript TUI
-lyra --tui
-```
-
-## CLI Commands
-
-```bash
-# Interactive REPL (default)
-lyra                                    # Start interactive session
-lyra --model deepseek-v4-pro            # With specific model
-lyra --continue                         # Resume last session
-lyra --tui                              # Terminal UI mode
-
-# Single-shot commands
-lyra run "Add Redis caching to user service"
-lyra plan "Design rate limiting strategy"
-lyra investigate "Memory leak in worker process"
-
-# Session management
-lyra session list                       # List all sessions
-lyra session show <id>                  # Show session details
-lyra session rename <id> "name"         # Label important sessions
-lyra retro                              # Session retrospective
-
-# Model management
-lyra model list                         # List configured models
-lyra model set anthropic:sonnet         # Switch default model
-
-# Health & diagnostics
-lyra doctor                             # System health check
-lyra status                             # Runtime status
-lyra burn                               # Token usage report (13 categories)
-
-# Skills & memory
-lyra skill list                         # List available skills
-lyra skill create                       # Interactive skill builder
-lyra skill install <url>                # Install from git or local path
-lyra memory search "deployment process" # Search memory with hybrid retrieval
 
 # Themes
 lyra theme list                         # All 25 themes
@@ -1727,12 +1301,12 @@ Switch inline with `Shift+Tab`.
 <tr>
 <td width="30" align="center" style="background: #f9731620; color: #fb923c; font-weight: bold;">9</td>
 <td style="background: #0d1117;"><b style="color: #fb923c;">Safety by Separation</b></td>
-<td style="background: #0d1117; color: #94a3b8;">Reasoning and execution run in structurally separated contexts (Parallax architecture).</td>
+<td style="background: #0d1117; color: #94a3b8;">Reasoning and execution run in structurally separated contexts (Defense-in-Depth architecture).</td>
 </tr>
 <tr>
 <td width="30" align="center" style="background: #14b8a620; color: #2dd4bf; font-weight: bold;">10</td>
 <td style="background: #0d1117;"><b style="color: #2dd4bf;">Continuous Self-Improvement</b></td>
-<td style="background: #0d1117; color: #94a3b8;">The harness observes its own performance and optimizes prompts AND code (Meta-Harness + AEvo loop).</td>
+<td style="background: #0d1117; color: #94a3b8;">The harness observes its own performance and optimizes prompts AND code (evolution guard + evolution optimizer loop).</td>
 </tr>
 <tr>
 <td width="30" align="center" style="background: #6366f120; color: #818cf8; font-weight: bold;">11</td>
@@ -1742,7 +1316,7 @@ Switch inline with `Shift+Tab`.
 <tr>
 <td width="30" align="center" style="background: #eab30820; color: #facc15; font-weight: bold;">12</td>
 <td style="background: #0d1117;"><b style="color: #facc15;">Memory as a First-Class System</b></td>
-<td style="background: #0d1117; color: #94a3b8;">6-layer NeuroMemory with A-MAC admission, CoMem async pipeline, free-energy consolidation, and dual-process retrieval.</td>
+<td style="background: #0d1117; color: #94a3b8;">3-tier memory with A-MAC admission, async consolidation pipeline, free-energy consolidation, and dual-process retrieval.</td>
 </tr>
 <tr>
 <td width="30" align="center" style="background: #dc262620; color: #f87171; font-weight: bold;">13</td>
@@ -1826,7 +1400,7 @@ The culmination of 11 deep research streams analyzing 150+ sources across 11,276
 <tr><td style="color: #fbbf24;">7</td><td style="color: #e2e8f0;"><b>Spectral Guardrails</b></td><td style="color: #94a3b8;">Spectral Guardrails</td><td style="color: #34d399;">97.7% recall hallucination detection</td></tr>
 <tr><td style="color: #fbbf24;">8</td><td style="color: #e2e8f0;"><b>zkAgent Cryptographic Proofs</b></td><td style="color: #94a3b8;">zkAgent</td><td style="color: #34d399;">294x speedup, 0.45s verification</td></tr>
 <tr><td style="color: #fbbf24;">9</td><td style="color: #e2e8f0;"><b>Warp Block Model TUI</b></td><td style="color: #94a3b8;">Warp + CLI-Anything</td><td style="color: #34d399;">BlockList/SumTree, dual-mode REPL</td></tr>
-<tr><td style="color: #fbbf24;">10</td><td style="color: #e2e8f0;"><b>CESP v1.0 Voice Protocol</b></td><td style="color: #94a3b8;">PeonPing + 9 voice tools</td><td style="color: #34d399;">12 event categories, 6-layer hierarchy</td></tr>
+<tr><td style="color: #fbbf24;">10</td><td style="color: #e2e8f0;"><b>CESP v1.0 Voice Protocol</b></td><td style="color: #94a3b8;">PeonPing + 9 voice tools</td><td style="color: #34d399;">12 event categories, 3-tier hierarchy</td></tr>
 <tr><td style="color: #fbbf24;">11</td><td style="color: #e2e8f0;"><b>200+ Tool Ecosystem</b></td><td style="color: #94a3b8;">Hermes-Agent + Claude Code</td><td style="color: #34d399;">20 toolsets, 25+ MCP servers</td></tr>
 <tr><td style="color: #fbbf24;">12</td><td style="color: #e2e8f0;"><b>Plugin Marketplace</b></td><td style="color: #94a3b8;">Claude Code ecosystem (1,424+ skills)</td><td style="color: #34d399;">Install/configure/enable/disable lifecycle</td></tr>
 </table>
@@ -1835,7 +1409,7 @@ The culmination of 11 deep research streams analyzing 150+ sources across 11,276
 
 **New color themes:** 25+ themes across 7 families — Dark & Modern (9), Warm & Cozy (6), Nature & Forest (2), Retro & Synth (3), Accessible & High Contrast (2), SilkCircuit (4), PaperColor & Classic (3)
 
-**Voice packs:** Warcraft III Peon, StarCraft Marine, Cyberpunk Netrunner + CESP v1.0 6-layer sound pack hierarchy
+**Voice packs:** Warcraft III Peon, StarCraft Marine, Cyberpunk Netrunner + CESP v1.0 3-tier sound pack hierarchy
 
 **Ultra plan documents:** 6 documents, 8,128 lines, 42,687 words | **Research investment:** 1,600,000+ tokens across 8+ research streams
 
@@ -1913,15 +1487,6 @@ make ci
 </td></tr></table></td></tr></table>
 
 Comprehensive upgrade research and implementation plans, synthesizing findings from ~350+ sources across 9 research themes. Full details in [`lyra-upgrade/MASTER-PLAN.md`](docs/lyra-upgrade/MASTER-PLAN.md).
-
-### Workstream Plans ([`lyra-upgrade/plans/`](docs/lyra-upgrade/plans/))
-
-| Phase | Plans |
-|-------|-------|
-| Phase 1 — Foundation | [`01-ui-ux.md`](docs/lyra-upgrade/plans/01-ui-ux.md) · [`05-model-router.md`](docs/lyra-upgrade/plans/05-model-router.md) · [`06-tools.md`](docs/lyra-upgrade/plans/06-tools.md) · [`10-hooks.md`](docs/lyra-upgrade/plans/10-hooks.md) · [`12-permissions.md`](docs/lyra-upgrade/plans/12-permissions.md) |
-| Phase 2 — Graph + Workflows | [`03-context-compaction.md`](docs/lyra-upgrade/plans/03-context-compaction.md) · [`15-deep-research.md`](docs/lyra-upgrade/plans/15-deep-research.md) · [`16-reliability.md`](docs/lyra-upgrade/plans/16-reliability.md) · [`20-planning.md`](docs/lyra-upgrade/plans/20-planning.md) · [`21-economics.md`](docs/lyra-upgrade/plans/21-economics.md) |
-| Phase 3 — Fleet + Voice | [`13-swarm-fleet.md`](docs/lyra-upgrade/plans/13-swarm-fleet.md) · [`14-autonomy.md`](docs/lyra-upgrade/plans/14-autonomy.md) · [`18-voice-mode.md`](docs/lyra-upgrade/plans/18-voice-mode.md) · [`08-mcp.md`](docs/lyra-upgrade/plans/08-mcp.md) · [`22-steering.md`](docs/lyra-upgrade/plans/22-steering.md) · [`24-dreaming.md`](docs/lyra-upgrade/plans/24-dreaming.md) · [`51-rmux.md`](docs/lyra-upgrade/plans/51-rmux.md) |
-| Phase 4 — Self-Evolution | [`17-safety.md`](docs/lyra-upgrade/plans/17-safety.md) · [`19-self-knowledge.md`](docs/lyra-upgrade/plans/19-self-knowledge.md) · [`23-ingestion.md`](docs/lyra-upgrade/plans/23-ingestion.md) · [`25-adversarial-panel.md`](docs/lyra-upgrade/plans/25-adversarial-panel.md) · [`26-harness-engineering.md`](docs/lyra-upgrade/plans/26-harness-engineering.md) · [`27-rl-optimizer.md`](docs/lyra-upgrade/plans/27-rl-optimizer.md) · [`28-desktop.md`](docs/lyra-upgrade/plans/28-desktop.md) |
 
 ### Research Foundation ([`lyra-upgrade/research/`](docs/lyra-upgrade/research/))
 
@@ -2009,54 +1574,6 @@ Lyra is open-source and community-driven. Contributions across all skill levels 
 | [`docs/research/repos/`](docs/research/repos/) | 80+ repository absorption matrix |
 | [`CHANGELOG.md`](CHANGELOG.md) | Version history and release notes |
 
-### 🗺️ Roadmap Timeline
-
-```mermaid
-gantt
-    title Lyra Upgrade -- 4 Phases, 9 Months
-    dateFormat  YYYY-MM
-    axisFormat  %Y-%m
-    section Phase 1 -- Foundation
-    Model Router (5-layer)      :p1, 2026-06, 2026-07
-    Semantic Memory + BM25      :p1, 2026-06, 2026-07
-    Core Tools + Permissions    :p1, 2026-06, 2026-07
-
-    section Phase 2 -- Graph + Workflows
-    Graph Memory (Zettelkasten) :p2, 2026-08, 2026-09
-    Dynamic Workflow Engine     :p2, 2026-08, 2026-09
-    Context Compaction          :p2, 2026-08, 2026-09
-    Deep Research Pipeline      :p2, 2026-09, 2026-10
-
-    section Phase 3 -- Fleet + Voice
-    Supervisor Daemon + Fleet   :p3, 2026-10, 2026-12
-    Voice Mode (Push-to-Talk)   :p3, 2026-10, 2026-12
-    MCP Server Integration      :p3, 2026-11, 2026-12
-
-    section Phase 4 -- Self-Evolution
-    Adversarial Verification    :p4, 2027-01, 2027-02
-    GEPA Skill Evolution        :p4, 2027-01, 2027-02
-    Desktop GUI + Multimodal    :p4, 2027-01, 2027-03
-```
-
-### 📖 Paper Citation Index
-
-Every technique in Lyra traces to its source publication. Key citations:
-
-| Technique | Venue | Citation |
-|-----------|-------|----------|
-| GEPA v2 Multi-Agent Optimizer | ICLR 2026 Oral | [arXiv 2310.03714](https://arxiv.org/abs/2310.03714) |
-| Meta-Harness Optimization | 2026 | [arXiv 2603.28052](https://arxiv.org/abs/2603.28052) |
-| RecursiveMAS Latent Comms | 2026 | [arXiv 2505.23119](https://arxiv.org/abs/2505.23119) |
-| Parallax Cognitive-Executive Separation | 2026 | [arXiv 2604.12986](https://arxiv.org/abs/2604.12986) |
-| Field-Theoretic Memory | arXiv 2026 | [arXiv 2605.20160](https://arxiv.org/abs/2605.20160) |
-| CoMem Async Memory Pipeline | 2026 | [arXiv 2605.20163](https://arxiv.org/abs/2605.20163) |
-| SkillOpt Text-Space Optimizer | Microsoft 2026 | [arXiv 2605.23904](https://arxiv.org/abs/2605.23904) |
-| SR2AM Self-Regulated Planning | 2026 | [arXiv 2605.22138](https://arxiv.org/abs/2605.22138) |
-| ReasoningBank | Google 2025 | [arXiv 2509.25140](https://arxiv.org/abs/2509.25140) |
-| PRISM Drift Detection | 2026 | [arXiv 2605.14454](https://arxiv.org/abs/2605.14454) |
-| Trace2Skill Extraction | 2026 | [arXiv 2605.21810](https://arxiv.org/abs/2605.21810) |
-| Self-Challenging (Evolving Prompt) | 2026 | [arXiv 2605.21484](https://arxiv.org/abs/2605.21484) |
-| Reflexion | NeurIPS 2023 | [arXiv 2303.11366](https://arxiv.org/abs/2303.11366) |
 
 ---
 
@@ -2064,7 +1581,7 @@ Every technique in Lyra traces to its source publication. Key citations:
 
 <div align="center">
 
-**[What Lyra Is](#what-is-lyra)** · **[Architecture](#architecture)** · **[Capabilities](#current-capabilities)** · **[Roadmap](#roadmap--4-phases-9-months)** · **[Innovations](#innovations)** · **[Quickstart](#quickstart)** · **[Docs](#documentation)**
+**[What Lyra Is](#what-is-lyra)** · **[Architecture](#architecture)** · **[Capabilities](#current-capabilities)** · **[Innovations](#innovations)** · **[Quickstart](#quickstart)** · **[Docs](#documentation)**
 
 <span style="color: #94a3b8;">MIT-licensed. Terminal-based. Research-backed. Built with Python, TypeScript, and the conviction that AI agents should be</span> <span style="color: #a78bfa;">open</span><span style="color: #94a3b8;">,</span> <span style="color: #34d399;">auditable</span><span style="color: #94a3b8;">,</span> <span style="color: #fbbf24;">self-improving</span><span style="color: #94a3b8;">, and</span> <span style="color: #f87171;">architecturally safe</span><span style="color: #94a3b8;">.</span>
 
