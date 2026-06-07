@@ -8,6 +8,30 @@ All notable changes to the Lyra project.
 
 ---
 
+## <img src="https://img.shields.io/badge/8.0-2026.06.07-8b5cf6?style=for-the-badge&labelColor=1e1e2e">
+
+### Deep Research Complete + Breakthrough Build — 10 New Modules, 90 Tests, 475 Artifacts
+
+**Research:** 323 papers deep-read (306 read + 17 failed honestly) · 40 AI-agent books · 81 repos cloned · 11 web deep-dives · 13 thematic syntheses · 16 workstream plans · Phase 6 audit PASS
+
+**New Production Modules:**
+- `memory/admission_control.py` — A-MAC 5-factor memory gate (MemAgent ICLR 2026)
+- `verification/anonymizer.py` — Identity stripping for adversarial panel (UW-Madison 2510.07517)
+- `context/anx_protocol.py` — 47-66% MCP token compression (ANX Protocol 2604.04820)
+- `worktree/lyrainclude.py` — Gitignored env file propagation to worktrees
+- `voice/sound_effects.py` — 4 bundled voice packs (Warcraft Peon, JARVIS, Samantha, Minimal)
+- `safety/mutation_gate.py` — SABER mutation-gated verification (+28% Airline)
+- `research/auto_research_loop.py` — Karpathy Loop: propose→eval→gate→log
+- `server/relay.py` — Self-hostable outbound-only relay (beats Claude Code)
+- `ui/terminal/components/FleetView.tsx` — Agent View TUI port
+- `ui/desktop/components/SkillsHub.tsx` — Browse/install/create/evaluate skills
+
+**Key Docs:** BEST-PRACTICES-PLAYBOOK.md (40-book synthesis) · AUDIT.md (independent PASS) · FINAL_REPORT.md (8 breakthroughs) · PROGRESS.md (reconciled) · RESEARCH_LOG.md (full audit trail)
+
+**Tests:** 90/90 new tests passing (unit + integration)
+
+---
+
 ## <img src="https://img.shields.io/badge/3.0-UPCOMING-ef4444?style=for-the-badge&labelColor=1e1e2e">
 
 ### Breakthrough Release — 4-Phase Roadmap

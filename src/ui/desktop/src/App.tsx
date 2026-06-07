@@ -4,8 +4,12 @@ import { ChatView } from './components/ChatView'
 import { Sidebar } from './components/Sidebar'
 import { InputBar } from './components/InputBar'
 import { StatusBar } from './components/StatusBar'
+import { FleetView } from './components/FleetView'
+import { SkillsHub } from './components/SkillsHub'
 import { useLyraAPI, type StreamChunk } from './hooks/useLyraAPI'
 import { useSessions } from './hooks/useSessions'
+
+type AppTab = 'chat' | 'fleet' | 'skills'
 
 interface Message {
   id: string
@@ -36,6 +40,7 @@ export function App() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isStreaming, setIsStreaming] = useState(false)
   const [sidebarVisible, setSidebarVisible] = useState(true)
+  const [activeTab, setActiveTab] = useState<AppTab>('chat')
   const currentChunkRef = useRef('')
 
   // Add a system message explaining connection status
@@ -217,6 +222,28 @@ export function App() {
               flexShrink: 0,
             }}
           >
+            {/* Tab navigation */}
+            <div style={{ display: 'flex', gap: 4, marginRight: 16 }}>
+              {(['chat', 'fleet', 'skills'] as AppTab[]).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  style={{
+                    padding: '4px 16px',
+                    fontSize: theme.fontSize.sm,
+                    fontWeight: activeTab === tab ? 'bold' : 'normal',
+                    color: activeTab === tab ? theme.colors.fg : theme.colors.fgMuted,
+                    backgroundColor: activeTab === tab ? theme.colors.surface : 'transparent',
+                    border: `1px solid ${activeTab === tab ? theme.colors.accent : 'transparent'}`,
+                    borderRadius: 4,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {tab === 'chat' ? '💬 Chat' : tab === 'fleet' ? '🚀 Fleet' : '🧩 Skills'}
+                </button>
+              ))}
+            </div>
+
             <button
               onClick={toggleSidebar}
               style={{
@@ -232,7 +259,40 @@ export function App() {
           </div>
 
           {/* Messages */}
-          <ChatView messages={messages} sessionId={activeId} />
+          {activeTab === 'chat' && (
+            <ChatView messages={messages} sessionId={activeId} />
+          )}
+          {activeTab === 'fleet' && (
+            <FleetView
+              sessions={sessions.map((s) => ({
+                sessionId: s.id,
+                name: s.name || s.id.slice(0, 8),
+                taskState: (s.taskState as any) || 'IDLE',
+                processState: (s.processAlive ? 'ALIVE' : 'EXITED') as any,
+                summary: s.summary || '',
+                workingDir: s.workingDir || '',
+                modelName: s.modelName || '',
+                lastActive: s.lastActive || new Date().toISOString(),
+              }))}
+              onAttach={(id) => switchSession(id)}
+              onStop={(id) => deleteSession(id)}
+              onDispatch={async (cmd) => {
+                const newId = await createSession(cmd)
+                if (newId) switchSession(newId)
+              }}
+              onRefresh={checkConnection}
+            />
+          )}
+          {activeTab === 'skills' && (
+            <SkillsHub
+              installedSkills={[]}
+              availableSkills={[]}
+              onInstall={() => {}}
+              onUninstall={() => {}}
+              onCreate={() => {}}
+              onRefresh={() => {}}
+            />
+          )}
 
           {/* Input bar */}
           <InputBar

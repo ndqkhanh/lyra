@@ -11,7 +11,7 @@
 | [`guides/`](guides/) | How-to guides for developers and users |
 | [`systems/`](systems/) | Deep-dives into specific subsystems |
 | [`blocks/`](blocks/) | Design blocks and component specifications |
-| [`lyra-upgrade/`](lyra-upgrade/) | Research corpus — 546 sources, 31 plans, 14 syntheses |
+| [`lyra-upgrade/`](lyra-upgrade/) | Research corpus — 476 artifacts, 323 papers, 40 books, 81 repos, 16 plans, 13 syntheses (AUDITED) |
 | [`innovations/`](innovations/) | Paper-style docs per breakthrough module |
 | [`assets/`](assets/) | Images, diagrams, and static assets |
 | [`research/`](research/) | Research notes and architecture explorations |

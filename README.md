@@ -1,19 +1,80 @@
 <div align="center">
 
-<pre style="background: transparent; line-height: 1.1;">
-<span style="color: #a78bfa;">╔══════════════════════════════════════════════════════════════╗</span>
-<span style="color: #a78bfa;">║</span>                                                              <span style="color: #a78bfa;">║</span>
-<span style="color: #a78bfa;">║</span>   <span style="color: #c084fc;">██╗     ██╗   ██╗██████╗  █████╗ </span>                           <span style="color: #a78bfa;">║</span>
-<span style="color: #a78bfa;">║</span>   <span style="color: #a78bfa;">██║     ╚██╗ ██╔╝██╔══██╗██╔══██╗</span>                           <span style="color: #a78bfa;">║</span>
-<span style="color: #a78bfa;">║</span>   <span style="color: #818cf8;">██║      ╚████╔╝ ██████╔╝███████║</span>                           <span style="color: #a78bfa;">║</span>
-<span style="color: #a78bfa;">║</span>   <span style="color: #60a5fa;">██║       ╚██╔╝  ██╔══██╗██╔══██║</span>                           <span style="color: #a78bfa;">║</span>
-<span style="color: #a78bfa;">║</span>   <span style="color: #38bdf8;">███████╗   ██║   ██║  ██║██║  ██║</span>                           <span style="color: #a78bfa;">║</span>
-<span style="color: #a78bfa;">║</span>   <span style="color: #34d399;">╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝</span>                           <span style="color: #a78bfa;">║</span>
-<span style="color: #a78bfa;">║</span>                                                              <span style="color: #a78bfa;">║</span>
-<span style="color: #a78bfa;">║</span>   <span style="color: #94a3b8;">Multi-Agent Omni-Agent Harness</span>                 <span style="color: #a78bfa;">║</span>
-<span style="color: #a78bfa;">║</span>   <span style="color: #64748b;">MIT · Python/TypeScript · 30/31 workstreams · single package</span>          <span style="color: #a78bfa;">║</span>
-<span style="color: #a78bfa;">╚══════════════════════════════════════════════════════════════╝</span>
-</pre>
+<!--
+  Responsive SVG banner — scales from mobile (320px) to ultrawide.
+  Dark card anchors visually on both light & dark GitHub themes.
+  Inline SVG: readable, editable, zero external dependencies.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" width="100%" fill="none"
+     style="font-family:system-ui,-apple-system,sans-serif;max-width:720px">
+  <defs>
+    <!-- Purple → violet → blue → sky → cyan gradient for LYRA + accent -->
+    <linearGradient id="lyra-g" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#c084fc"/>
+      <stop offset="25%"  stop-color="#a78bfa"/>
+      <stop offset="50%"  stop-color="#818cf8"/>
+      <stop offset="75%"  stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+    <!-- Card background: near-black with subtle warmth -->
+    <linearGradient id="card-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#1e192f"/>
+    </linearGradient>
+    <!-- Card border: matching gradient, semi-transparent -->
+    <linearGradient id="card-border" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#c084fc" stop-opacity="0.35"/>
+      <stop offset="50%"  stop-color="#818cf8" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.35"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Card -->
+  <rect x="0" y="0" width="720" height="200" rx="12" fill="url(#card-bg)"/>
+  <rect x="0" y="0" width="720" height="200" rx="12" stroke="url(#card-border)" stroke-width="1.5"/>
+
+  <!-- Top accent bar -->
+  <rect x="0" y="0" width="720" height="3" rx="12" fill="url(#lyra-g)"/>
+
+  <!-- Subtle geometric decoration — constellation dots (left) -->
+  <circle cx="60" cy="60" r="2"   fill="#a78bfa" fill-opacity="0.30"/>
+  <circle cx="85" cy="45" r="1.5" fill="#818cf8" fill-opacity="0.25"/>
+  <circle cx="50" cy="85" r="1.2" fill="#60a5fa" fill-opacity="0.20"/>
+  <line x1="60" y1="60" x2="85" y2="45" stroke="#a78bfa" stroke-width="0.5" stroke-opacity="0.15"/>
+  <line x1="60" y1="60" x2="50" y2="85" stroke="#a78bfa" stroke-width="0.5" stroke-opacity="0.10"/>
+
+  <!-- Subtle geometric decoration — constellation dots (right) -->
+  <circle cx="670" cy="55" r="2"   fill="#60a5fa" fill-opacity="0.30"/>
+  <circle cx="645" cy="40" r="1.5" fill="#818cf8" fill-opacity="0.25"/>
+  <circle cx="660" cy="80" r="1.2" fill="#38bdf8" fill-opacity="0.20"/>
+  <line x1="670" y1="55" x2="645" y2="40" stroke="#60a5fa" stroke-width="0.5" stroke-opacity="0.15"/>
+  <line x1="670" y1="55" x2="660" y2="80" stroke="#60a5fa" stroke-width="0.5" stroke-opacity="0.12"/>
+
+  <!-- LYRA — large gradient wordmark -->
+  <text x="360" y="108" text-anchor="middle"
+        font-size="68" font-weight="800" letter-spacing="14"
+        fill="url(#lyra-g)">LYRA</text>
+
+  <!-- Subtle ambient glow behind LYRA -->
+  <circle cx="360" cy="100" r="80" fill="#a78bfa" fill-opacity="0.04"/>
+
+  <!-- Tagline -->
+  <text x="360" y="150" text-anchor="middle"
+        font-size="16" font-weight="500" fill="#94a3b8">
+    Multi-Agent Omni-Agent Harness
+  </text>
+
+  <!-- Tech line — key facts color-coded -->
+  <text x="360" y="175" text-anchor="middle"
+        font-size="12" font-weight="400" fill="#64748b">
+    <tspan fill="#c084fc">MIT</tspan> · <tspan fill="#94a3b8">Python</tspan> / <tspan fill="#94a3b8">TypeScript</tspan> · <tspan fill="#a78bfa">30</tspan>/31 workstreams · single package
+  </text>
+
+  <!-- Version badge (top-right) -->
+  <rect x="610" y="28" rx="6" width="70" height="22" fill="#c084fc" fill-opacity="0.15"/>
+  <text x="645" y="43" text-anchor="middle"
+        font-size="11" font-weight="600" fill="#c084fc">v7.2.1</text>
+</svg>
 
 </div>
 
@@ -23,7 +84,7 @@
   <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-v7.2.1-8b5cf6?style=for-the-badge&labelColor=1e1e2e" alt="Version" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge&labelColor=1e1e2e" alt="License" /></a>
   <a href="docs/"><img src="https://img.shields.io/badge/docs-180%2B_files-22c55e?style=for-the-badge&labelColor=1e1e2e" alt="Docs" /></a>
-  <a href="docs/lyra-upgrade/research/"><img src="https://img.shields.io/badge/research-340%2B_sources-10b981?style=for-the-badge&labelColor=1e1e2e" alt="Research" /></a>
+  <a href="docs/lyra-upgrade/"><img src="https://img.shields.io/badge/research-323_papers_|_40_books_|_81_repos-10b981?style=for-the-badge&labelColor=1e1e2e" alt="Research" /></a>
 </p>
 
 <p align="center">
@@ -85,6 +146,30 @@
 - **Architectural safety by default**: Cognitive-executive separation ensures reasoning contexts have zero tool access -- no prompt-level safety band-aids.
 - **Single-package architecture**: Clean `lyra.*` namespace with 37 modules. No multi-package install complexity.
 - **Self-evolution pipeline**: GEPA-style prompt evolution + SkillOpt validation gates + misevolution guardrails continuously improve prompts with safety bounds.
+
+---
+
+<table width="100%"><tr><td style="background: linear-gradient(135deg, #8b5cf6, #a78bfa, #c084fc); padding: 2px; border-radius: 8px;"><table width="100%"><tr><td style="background: #0d1117; padding: 12px 20px; border-radius: 6px;">
+
+## <span style="color: #c084fc;">🆚 How Lyra Compares</span>
+
+</td></tr></table></td></tr></table>
+
+<table width="100%">
+<tr style="background: #1e293b;"><th style="color: #e2e8f0; padding: 8px 12px; text-align: left;">Feature</th><th style="color: #a78bfa; padding: 8px 12px; text-align: center;">Lyra</th><th style="padding: 8px 12px; text-align: center;">Claude Code</th><th style="padding: 8px 12px; text-align: center;">Codex CLI</th><th style="padding: 8px 12px; text-align: center;">Aider</th><th style="padding: 8px 12px; text-align: center;">OpenCode</th><th style="padding: 8px 12px; text-align: center;">Goose</th></tr>
+<tr><td style="color: #e2e8f0; padding: 6px 12px;">License</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">MIT</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">Proprietary</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">Proprietary</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">Apache 2.0</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">MIT</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">Apache 2.0</td></tr>
+<tr style="background: #1e293b;"><td style="color: #e2e8f0; padding: 6px 12px;">Provider-Agnostic</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">✅ Any</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">Anthropic only</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">OpenAI only</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">✅ Any</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">75+ providers</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">55+ providers</td></tr>
+<tr><td style="color: #e2e8f0; padding: 6px 12px;">Multi-Agent Swarm</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">✅ Fleet+Debate</td><td style="color: #eab308; text-align: center; padding: 6px 12px;">Sub-agents only</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">❌</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">❌</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">Plan+Build</td><td style="color: #eab308; text-align: center; padding: 6px 12px;">Extensions</td></tr>
+<tr style="background: #1e293b;"><td style="color: #e2e8f0; padding: 6px 12px;">3-Tier Memory</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">✅ Graph+Vector</td><td style="color: #eab308; text-align: center; padding: 6px 12px;">Checkpoints</td><td style="color: #eab308; text-align: center; padding: 6px 12px;">Sessions</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">Repo map</td><td style="color: #eab308; text-align: center; padding: 6px 12px;">Context files</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">Memory Bank</td></tr>
+<tr><td style="color: #e2e8f0; padding: 6px 12px;">Self-Evolving Skills</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">✅ GEPA+FORGE</td><td style="color: #eab308; text-align: center; padding: 6px 12px;">Static skills</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">❌</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">❌</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">❌</td><td style="color: #eab308; text-align: center; padding: 6px 12px;">Recipes</td></tr>
+<tr style="background: #1e293b;"><td style="color: #e2e8f0; padding: 6px 12px;">Voice Mode</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">✅ VI+EN</td><td style="color: #eab308; text-align: center; padding: 6px 12px;">Dictation only</td><td style="color: #eab308; text-align: center; padding: 6px 12px;">Voice input</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">❌</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">❌</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">❌</td></tr>
+<tr><td style="color: #e2e8f0; padding: 6px 12px;">Worktree Isolation</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">✅ .lyrainclude</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">✅ Built-in</td><td style="color: #eab308; text-align: center; padding: 6px 12px;">Sandbox</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">✅ Git worktree</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">❌</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">❌</td></tr>
+<tr style="background: #1e293b;"><td style="color: #e2e8f0; padding: 6px 12px;">Desktop GUI</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">✅ Fleet+Skills</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">✅ Desktop app</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">CLI only</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">CLI only</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">Desktop</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">Desktop+CLI</td></tr>
+<tr><td style="color: #e2e8f0; padding: 6px 12px;">Remote Access</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">✅ Self-hosted</td><td style="color: #eab308; text-align: center; padding: 6px 12px;">Cloud relay</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">❌</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">❌</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">❌</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">❌</td></tr>
+<tr style="background: #1e293b;"><td style="color: #e2e8f0; padding: 6px 12px;">Adversarial Verification</td><td style="color: #22c55e; text-align: center; padding: 6px 12px;">✅ 5-lens panel</td><td style="color: #eab308; text-align: center; padding: 6px 12px;">Workflows</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">❌</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">❌</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">❌</td><td style="color: #ef4444; text-align: center; padding: 6px 12px;">❌</td></tr>
+</table>
+
+> **Lyra is the only open-source harness with ALL of: provider-agnostic routing, multi-agent swarm, 3-tier memory, self-evolving skills, voice mode, worktree isolation, desktop GUI, self-hosted remote access, AND adversarial verification.** Research-backed: 323 papers, 40 books, 81 repos deep-read. Phase 6 audited: PASS.
 
 ---
 
