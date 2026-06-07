@@ -34,7 +34,7 @@
 </p>
 
 <p align="center">
-  <b>Multi-agent orchestration harness. 24 of 28 workstreams live — agent core, skills, hooks, 6-tier memory,<br>
+  <b>Multi-agent orchestration harness. 30/31 workstreams solid — agent core, skills, hooks, 3-tier memory,<br>
   model routing, tools, MCP, fleet/swarm, verification, deep research, reasoning, voice, self-evolution, safety.<br>
   MIT-licensed. Python + TypeScript. Research-backed. 100+ composable packages.<br></b>
 </p>
@@ -618,7 +618,7 @@ Honest assessment of what Lyra has today (June 2026). Updated from codebase audi
 </tr>
 <tr>
 <td style="color: #e2e8f0;"><b>§4.2 Memory</b></td>
-<td style="color: #94a3b8;">140 .py files — CraniMem gated memory + 6-tier NeuroMemory + unified router + knowledge graph + gossip memory + memory-stack + active reconstruction + vericache</td>
+<td style="color: #94a3b8;">3-tier architecture (STM/LTM/Consolidation) + field-theoretic dreaming + FORGE broadcast + latent tokens — 10 .py files, 6 test files</td>
 <td><img src="https://img.shields.io/badge/solid-22c55e?style=flat-square"></td>
 </tr>
 <tr>
@@ -822,7 +822,7 @@ gantt
 |---|---|---|---|
 | 🎨 UI/UX | 25+ themes, fleet TUI (5 files), cockpit (16 files) | ✅ solid | Foundation (live) |
 | 🧠 Agent orchestration | AgentLoop, TDD gate, HIR, Pivot/Refine | ✅ solid | Foundation (live) |
-| 💾 Memory | 140+ files: 6-tier, CraniMem, unified router, knowledge graph | ✅ solid | Foundation (live) |
+| 💾 Memory | 3-tier (STM/LTM/Consolidation) + field-theoretic + dreaming + FORGE + latent tokens | ✅ solid | Foundation (live) |
 | 🛠️ Skills | 49 files: loader, curator, generator, evolution, SLA | ✅ solid | Foundation (live) |
 | 🌐 Router | 13 files: effort router, phase router, model-router, cost | ✅ solid | Foundation (live) |
 | 🔧 Tools | 23 files: built-in tools, runtime engine, masking, gating | ✅ solid | Foundation (live) |
@@ -1474,7 +1474,7 @@ See the [MASTER-PLAN.md](docs/lyra-upgrade/MASTER-PLAN.md) for the full prioriti
 <th style="color: #60a5fa;">Plan</th><th style="color: #60a5fa;">Focus</th><th style="color: #60a5fa;">Key Deliverables</th>
 </tr>
 <tr><td style="color: #e2e8f0;"><b>Plan 21</b></td><td style="color: #94a3b8;">Skills Ecosystem & Evolution</td><td style="color: #94a3b8;">SkillOpt text optimizer, AEvo meta-editing, 50+ domain skills, 18 modules</td></tr>
-<tr><td style="color: #e2e8f0;"><b>Plan 22</b></td><td style="color: #94a3b8;">Memory & Context Breakthrough</td><td style="color: #94a3b8;">5-tier hierarchy, Dream upgrade, BM25+Vector+RRF, temporal KGs</td></tr>
+<tr><td style="color: #e2e8f0;"><b>Plan 22</b></td><td style="color: #94a3b8;">Memory & Context Breakthrough</td><td style="color: #94a3b8;">3-tier + field dreaming + FORGE broadcast + latent tokens, BM25+Vector+RRF</td></tr>
 <tr><td style="color: #e2e8f0;"><b>Plan 23</b></td><td style="color: #94a3b8;">Agent Autonomy & Federation</td><td style="color: #94a3b8;">Relay-race, triple-budget, zero-trust federation, compound architecture</td></tr>
 <tr><td style="color: #e2e8f0;"><b>Plan 24</b></td><td style="color: #94a3b8;">UI/UX & Voice Breakthrough</td><td style="color: #94a3b8;">17+ themes, voice packs, keybinding engine, Warp block model</td></tr>
 <tr><td style="color: #e2e8f0;"><b>Plan 25</b></td><td style="color: #94a3b8;">Safety & Verification Upgrade</td><td style="color: #94a3b8;">MAVEN, spectral guardrails, zkAgent proofs, 10 benchmarks</td></tr>
