@@ -111,6 +111,14 @@ Cache miss. The static three-tier router kicks in. Every provider (Anthropic, Op
 
 **When it loses:** Temporal reasoning queries (verbatim turn-pairs are flat snapshots, -3.8 F1 in the paper). Cold-start: first 1K queries get zero memory benefit. Low-diversity workloads with no repeats.
 
+## Use Cases
+
+**Scenario 1: Cost-optimized CI/CD agent.** A CI pipeline runs on every pull request -- linting, type-checking, test triage, and summary messages. Without routing, every step bills at the most expensive model tier. With Lyra's model router, the CI agent runs lint analysis and test triage through Haiku or DeepSeek-Flash (cheap tier), code review summaries through Sonnet (standard tier), and only escalates to Opus when the cheap model's confidence gate fails. Result: 40-60% lower CI costs with no regression in output quality.
+
+**Scenario 2: Multi-provider failover for a production assistant.** A production chatbot powered by Lyra uses OpenAI as its primary provider. When OpenAI hits rate limits during peak traffic, the router's fallback chain auto-escalates to Anthropic (Sonnet) transparently -- no dropped requests, no error pages. The user sees the same quality response with a 300ms delay they never notice. Meanwhile, the router logs the failover event for the ops team to investigate.
+
+**Scenario 3: Smart cost allocation for a team using Lyra.** A team of 10 engineers shares one Lyra instance. Junior engineers ask "What does this function do?" type questions -- routed to Haiku at minimal cost. Senior engineers debug production incidents -- their prompts land on Sonnet or Opus automatically, triggered by the effort-level mapping. The router's per-call cost tracking produces a weekly breakdown: team lead sees exactly who spent what, and where costs could shift to a cheaper tier.
+
 ## Conclusion
 
 **Implemented**: `ProviderBackend` protocol with Anthropic, OpenAI, DeepSeek, and open-weights backends. Three-tier static router with cost tracking. Effort-level mapping across providers. Fallback chain with automatic escalation. Core module: `src/lyra/routing/` with provider adapters, config, types, and effort subsystem.

@@ -168,6 +168,14 @@ Barge-in is implemented via `BargeInEvent` (a raised exception in the pipeline) 
 
 Abstracting every stage behind a Protocol enables hot-swap but prevents end-to-end optimization (pipeline-wide batching, shared GPU memory, fused inference). This is acceptable because the latency bottleneck is LLM reasoning (500-4000 ms), not ASR or TTS inference (80-200 ms each). When Tier B becomes viable, the S2S model replaces the entire pipeline graph with a single inference call, and provider abstraction applies at the model level rather than the stage level.
 
+## Use Cases
+
+**Scenario 1: Hands-free coding while commuting.** A developer on a train opens Lyra in voice mode, presses and holds the spacebar, and says "Create a new migration for the users table with name and email fields." Lyra routes this as a simple task, generates the migration file, and reads back the confirmation. The developer never touches the keyboard. The cascaded pipeline delivers the response in roughly 2 seconds, and if the train noise triggers a false transcription, the self-correction buffer catches and fixes it.
+
+**Scenario 2: Accessibility for developers with RSI or visual impairments.** For a developer who cannot use a keyboard or screen for extended periods, Lyra's voice mode becomes their primary interface. They navigate the codebase by voice ("Open the auth module, find the login function"), run tests verbally ("Run tests in the api directory"), and listen to results read back. The full-duplex Inner Monologue path in Tier B handles interruptions naturally -- when the developer cuts in mid-response to correct a direction, the barge-in system catches it and adjusts.
+
+**Scenario 3: Rapid brainstorming and note-taking.** During an architecture discussion, an engineer speaks ideas faster than they can type. Lyra's voice pipeline transcribes as they talk, routes each idea through the LLM for structuring, and outputs organized notes in real time. When the engineer says "Actually, keep that thought and add a cost estimate," the tentative-state buffer rolls back the last partial transcript and merges the correction seamlessly.
+
 ## Conclusion
 
 Lyra's Voice Mode ships as Tier A: an optimized cascaded pipeline with provider-swappable STT, TTS, and VAD; a tentative-state self-correction buffer that addresses the single largest cascaded failure mode; a tiered reasoning router that applies Think-before-Speak CoT only where it matters; bilingual VI plus EN support; and VAD-gated barge-in with Smart Turn V3 endpointing. The latency budget targets 1.7 s for simple queries and 4.7 s for complex queries -- a 2-6x improvement over the FDB-v3 cascaded baseline.

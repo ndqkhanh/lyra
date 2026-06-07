@@ -18,5 +18,13 @@ Every time Lyra is about to run a tool or generate a response, the harness runs 
 3. Lyra calls a Python tool to query the database. **Evaluation Infrastructure** (Pillar 2) logs the tool input/output as an eval sample for regression testing later.
 4. The result comes back. **Methodology** (Pillar 4) requires the debate ledger check: was this design debated? If not, the harness flags it for review.
 
+## Use Cases
+
+**Scenario 1: Building a new agent from scratch with governance.** A platform team is creating a custom agent for internal code review. Instead of bolting on safety and evaluation after the fact, they use Lyra's harness as their starting template. The safety pillar gives them PermissionGuard for file access and SecretScanner for credential leaks out of the box. The evaluation pillar records every review session as a regression test case. The methodology pillar enforces spec-first design through the debate ledger. Result: a production-ready agent in days, not months, with governance baked in from day one.
+
+**Scenario 2: Enterprise compliance audit trail.** A regulated company needs to prove that its AI agents never access PII or modify production data without approval. Harness Engineering's 5-pillar architecture makes this auditable. The safety pillar logs every denied permission request. The context engineering pillar shows exactly what data each prompt saw. The CI/CD pillar provides a deploy-time attestation that every agent version passed safety checks. An auditor can trace a single agent action back to its pillar-level decision — without reading source code.
+
+**Scenario 3: Regression-proofing an agent after a model upgrade.** A team swaps their underlying LLM from Sonnet to a fine-tuned model and sees quality drops in 30% of test cases. They run the harness evaluation suite, which compares old vs. new eval results side-by-side. The methodology pillar flags which spec violations caused the regressions. They fix the prompt templates, re-run the suite, and ship with confidence — knowing that the harness will catch the same regressions on the next upgrade.
+
 ## Conclusion
 All 5 pillars active. The harness is the product. Future: automated harness-quality scoring (pinchbench-style), continuous harness regression testing.

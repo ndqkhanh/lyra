@@ -19,5 +19,13 @@ You install the Lyra desktop app and launch it. Behind the scenes, Electron wake
 4. The ChatView renders each token as it arrives — no waiting for the full reply.
 5. If Lyra generates a Mermaid diagram or rich diff in its answer, the desktop renders it visually inline (something a terminal cannot do).
 
+## Use Cases
+
+**Scenario 1: Non-technical PM using Lyra via GUI.** A product manager who is uncomfortable with terminals opens the Lyra desktop app, types "summarize the last 20 customer support tickets about the new onboarding flow," and drags a CSV export from Zendesk into the chat. The SSE stream shows Lyra's response token by token. The PM sees a table of themes, sentiment scores, and suggested fixes — rendered as a formatted table in the chat window, not raw JSON.
+
+**Scenario 2: Design review with drag-drop mockups.** A designer drags three Figma mockups into the Lyra chat and asks, "Which layout has the best information hierarchy for mobile users?" The desktop app sends the images to Lyra's core, which analyzes each mockup. The response includes a side-by-side visual comparison with annotated screenshots and a Mermaid diagram of the suggested navigation flow. The designer sees everything rendered inline — no terminal-based image viewer needed.
+
+**Scenario 3: Managing multiple agent sessions from one window.** A team lead has three Lyra agents running in parallel: one researching customer churn, one reviewing a pull request, and one generating release notes. They open FleetView in the desktop app and see all three sessions as tiles with status indicators. Without touching a terminal, they pause the release notes agent to adjust the version number, then resume it. The sidebar shows token costs for each session in real time.
+
 ## Conclusion
 Config scaffolding exists (`src/lyra/desktop/`). Full build deferred — requires §4.5 provider abstraction and §4.13 fleet core as dependencies.

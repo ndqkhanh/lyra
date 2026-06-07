@@ -32,5 +32,13 @@ First, the Context Builder (Librarian) browses the web, reads papers, and writes
 5. Every citation checked against 4 academic indexes.
 6. You receive a cited, verified report.
 
+## Use Cases
+
+**Scenario 1: Market research for a startup.** A founder asks Lyra, "What are the top five competitors in the AI code assistant space and what unique features does each offer?" The research pipeline launches a Context Builder agent that scours Crunchbase, G2 reviews, product docs, and recent funding announcements. It builds a knowledge base with 30 sources, the Evidence DAG flags two claims about "real-time collaboration" that have only one weak source each, and the verification agent fills those gaps. The founder gets a 10-page report where every claim has citations verified across four academic indexes.
+
+**Scenario 2: Academic literature review for a paper.** A PhD student needs to understand the landscape of "differential privacy in federated learning over the last three years." The deep research system reads 80 papers, builds a citation graph, and the Evidence DAG automatically surfaces a contradiction: three papers claim DP costs 5% accuracy, two newer papers claim it costs only 2%. The verification agent tracks down the discrepancy — different epsilon budgets. The student gets a literature review with the debate captured clearly, not just a summary.
+
+**Scenario 3: Competitive technical analysis for an engineering team.** An engineering lead asks, "What database engine should we pick for our new analytics platform — ClickHouse, DuckDB, or StarRocks?" The research system fetches benchmarks, reads release notes, scrapes Hacker News discussions, and builds a comparison table with trade-offs per use case. Each benchmark number is cross-checked against at least two independent sources. The final report includes a decision matrix the team can use in their next sprint planning meeting.
+
 ## Conclusion
 Implemented: dual-agent separation with shared workspace. Future: GRPO-trained search strategies, AutoScientists-style self-organizing teams.

@@ -7,6 +7,14 @@ Lyra's terminal layer integrates with rmux (async-Rust PTY multiplexer) for deta
 ## Method
 `src/lyra/rmux/integration.py`: daemon-based client-server model, cross-platform (macOS/Linux/Windows via ConPTY). SDK-first design with `lyra-sdk` for programmatic control.
 
+## Use Cases
+
+**Scenario 1: Long-running training job on remote server.** A machine learning engineer kicks off a multi-hour model fine-tuning job on a remote GPU server via SSH. They start Lyra with `lyra --detach "Monitor training run ft-2026-001, restart on loss spike, log metrics"` and close their laptop. The supervisor daemon keeps the rmux session alive. The agent watches training logs, detects a NaN loss spike at hour 3, kills the run, adjusts the learning rate, and restarts. The engineer reconnects the next morning with `lyra attach training-ft-001` — rmux replays the full log from last night. Training is 60% done, and the agent has already logged 3 parameter adjustments to the experiment tracker. Zero time watching a progress bar.
+
+**Scenario 2: Pair programming across time zones.** A developer in New York starts a complex database migration on Lyra before leaving the office. They use `lyra --detach` and go home. The agent runs independently for hours, writing migration scripts and running them against a staging database. A colleague in Berlin picks up the session the next morning with `lyra attach migration-002`. They review the agent's progress, fix a column type the agent got wrong, and hand it back to the agent to continue. The developer in New York wakes up to a nearly finished migration with a detailed change log. Neither developer was at their desk for more than 30 minutes, yet the migration advanced all night.
+
+**Scenario 3: Remote server administration with audit trail.** A sysadmin deploys critical security patches across 50 servers. They use Lyra in detach mode to run the playbook: `lyra --detach "Apply CVE-2026-1234 patch to fleet us-east-1, rollback on failure."` The agent connects to each server via SSH, applies the patch, and waits 60 seconds for health checks. One server fails — the agent rolls back that server and logs the failure with full diagnostic output. The sysadmin checks in later, attaches the session, and reads the full replay including which server failed and why. The rmux session itself becomes the audit record: every command, every output, every error is captured in the replay buffer.
+
 ## Conclusion
 Implemented: rmux integration with supervisor + worktree. Future: post-quantum E2EE for remote session sharing.
 

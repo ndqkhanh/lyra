@@ -35,5 +35,13 @@ It cycles through three modes: ONCE runs one task and stops. CONTINUOUS polls fo
 6. Max idle reached → loop stops cleanly.
 7. You return to a completed analysis with a recovery log.
 
+## Use Cases
+
+**Scenario 1: Overnight CI monitoring agent.** A DevOps engineer sets Lyra to watch the team's CI pipeline overnight. When a build fails on a flaky integration test, the autonomy loop retries it automatically. If the same test fails three times, it rolls back to the previous passing commit and reruns. By morning, the engineer finds a report: "Build 4721 failed, rolled back to 4720, all tests green." The engineer never had to wake up.
+
+**Scenario 2: Weekend-long research task.** A product researcher queues Lyra to analyze 50 competitor landing pages, extract pricing models, and summarize positioning strategies. They close their laptop on Friday. Lyra runs in CONTINUOUS mode all weekend: scraping pages, handling rate limits with retries, skipping pages that return too little data, and checkpointing progress every 10 pages. Monday morning, the full analysis is ready with a recovery log showing exactly which pages had issues.
+
+**Scenario 3: Automated data pipeline with error recovery.** A data engineer schedules Lyra to run a nightly ETL job that ingests CSV files, transforms them, and writes to a database. Midway through, the source API goes down. The circuit breaker trips, Lyra retries three times, then pauses and sends an alert. When the API comes back 20 minutes later, Lyra resumes from the last checkpoint without losing any data. No manual intervention needed.
+
 ## Conclusion
 Implemented: AutonomyLoop, CrashRecovery, health monitoring. Future: learned recovery policies from trajectory data.

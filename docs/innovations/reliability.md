@@ -19,5 +19,13 @@ Lyra's reliability layer sits between every tool call and the agent, watching fo
 4. A checkpoint (`src/lyra/reliability/checkpoint.py`) was saved before the tool call. Lyra rolls back to that checkpoint and tells you: "web_search is temporarily unavailable, here is what I had before the failures."
 5. You review the OTel trace and see exactly which three requests failed, with timing and error details.
 
+## Use Cases
+
+**Scenario 1: Production deployment with automatic rollback.** An engineering team uses Lyra to automate deployments to staging and production. During a deployment, the health check endpoint returns 503 errors after the new container starts. The circuit breaker detects MAX_CONSECUTIVE failures, snaps open, and triggers a rollback to the previous known-good deployment. The team gets an alert with an OTel trace showing exactly which step failed and how long each retry took. No on-call engineer had to SSH into a box.
+
+**Scenario 2: Flaky API dependency handling.** Lyra is running a daily report that pulls data from a third-party analytics API. That API occasionally returns 429 rate-limit errors and 502 gateway timeouts. Without the reliability layer, a single timeout would crash the whole report. With retry (tenacity with exponential backoff), Lyra waits 1s, 2s, then 4s before giving up. If the API stays broken for 10 minutes, the circuit breaker trips and Lyra runs the report with cached data instead, annotating the output: "Analytics API was unavailable — used cached data from 1 hour ago."
+
+**Scenario 3: Debugging multi-agent failures with tracing.** A senior engineer notices that a complex multi-agent pipeline — context builder, researcher, writer, verifier — sometimes produces reports with gaps. They open the OTel trace for a failed run and see that the context builder agent's web_search call timed out, the researcher agent received incomplete context, and the writer agent silently produced a thin report. Instead of guessing, the engineer sees the exact failure chain in one view: "Context builder failed → researcher never got proper sources → writer output was weak." They fix the context builder's timeout settings and verify the next run passes.
+
 ## Conclusion
 Implemented: checkpointing, circuit breakers, retry, OTel tracing. Future: automated root-cause analysis from traces.

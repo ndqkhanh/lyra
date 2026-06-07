@@ -191,6 +191,14 @@ The following trade-offs were identified during architectural review, synthesizi
 | **Provenance tracking on all writes** | Traceability for contradiction resolution; collusion defense via trust hierarchy | Adds metadata overhead per memory; Lying with Truths attacks exploit provenance gaps | Required for safety; metadata size is negligible compared to content |
 | **Skeptic objection: Do we need the field layer?** | Evolution engine alone (A-MEM co-evolution) achieves +79-445% multi-hop F1 | Field layer adds JAX dependency, CFL stability constraints, and 9.4x overhead without guarantee of improvement | Go/No-Go gate at Phase 3: if evolution engine achieves >=30% cross-session F1 improvement, field is optional; otherwise activated as fallback |
 
+## Use Cases
+
+**Scenario 1: Cross-session recall for your personal AI assistant.** You chat with Lyra over weeks about different projects. In session 1, you tell it "I prefer FastAPI over Flask for new microservices." Sessions later, you ask "What should I use for the auth service?" Lyra's 3-tier memory retrieves that preference from long-term storage via hybrid search (vector + keyword), surfaces it in context, and the answer already accounts for your style -- even though you never mentioned it in the current conversation.
+
+**Scenario 2: Multi-agent shared knowledge base on a large codebase.** A team runs several Lyra instances in parallel -- one reviewing PRs, one writing docs, one triaging issues. When the triage agent discovers that a dependency is deprecated, that fact propagates through shared long-term memory. The PR reviewer's next scan automatically flags outdated imports. No agent needs to be told; the memory system connects the dots.
+
+**Scenario 3: Research continuity across days of deep investigation.** An engineer researching an incident runs dozens of queries across multiple sessions. Each new finding -- a faulty config, a timing correlation, a related commit -- gets consolidated into long-term memory. The offline observer runs overnight, linking these atomic facts into a pattern the engineer hadn't noticed: three separate config changes that together caused the outage. The linked memory surfaces in tomorrow's session as a pre-built hypothesis.
+
 ## Conclusion
 
 Lyra's memory architecture implements a 3-tier system with graph-augmented linking and field-theoretic consolidation, grounded in 48 papers, 4 books, and 6 production systems. The current codebase (`src/lyra/memory/`) provides the runtime foundation -- short-term buffering, long-term persistence with Ebbinghaus decay, hybrid retrieval with configurable scoring weights, and consolidation policies that bridge the tiers. The offline observer pipeline (field-theoretic PDE diffusion, Zettelkasten evolution, R-KV pruning) extends this into a self-organizing knowledge network that surfaces cross-session patterns without degrading interactive latency.

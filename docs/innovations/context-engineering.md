@@ -90,6 +90,14 @@ Lyra's context system treats your conversation like a whiteboard that gets rewri
 
 **Open question:** How to measure "good enough" compression? The token budget tracking provides a quantitative signal, but quality measurement (did we lose critical info?) requires eval harness integration (§4.16).
 
+## Use Cases
+
+**Scenario 1: Multi-hour debugging sessions.** A developer has been hunting a memory leak in production for three hours, running queries, reviewing logs, and tweaking hypotheses. Without context engineering, the conversation would hit the context limit after 20 minutes and the agent would forget the early findings about the connection pool config. With Lyra's workspace report, the agent keeps a running summary of what's been ruled out, what the current theory is, and what to try next -- even after 200 turns.
+
+**Scenario 2: Long document Q&A that overflows context.** A legal analyst feeds a 300-page contract into the agent and starts asking detailed questions. Each answer builds on the previous one. Without compaction, the context fills up with the entire contract text plus all prior Q&A turns. Lyra's staged compaction automatically collapses the raw contract text into a structured extraction of key clauses, then keeps only the essential findings and open questions from the Q&A thread. The analyst keeps asking questions without ever hitting the wall.
+
+**Scenario 3: Research assistant synthesizing across many sources.** A PhD student pastes ten papers into the session and asks the agent to identify contradictions in methodology across all of them. Each paper's method section alone is thousands of tokens. Lyra's workspace report synthesizes each paper into a compact summary, flags open questions about methodology mismatches, and tracks which files have been discussed. The student can jump between papers and the whiteboard stays coherent.
+
 ## Conclusion
 
 **Implemented**: WorkspaceReport with structured update function. Staged auto-compaction with circuit breakers. Token budget tracking. Core module: `src/lyra/context/` (compaction.py, workspace_report.py, workspace.py).

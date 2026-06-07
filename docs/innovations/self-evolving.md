@@ -95,6 +95,14 @@ After every task, Lyra reflects: did it succeed or fail? The lesson gets extract
 
 **Resolution:** Add distribution-shift detection (KL divergence of task embeddings over time) as a Phase 2 guardrail. For now, the human-approval gate and periodic full-eval-suite runs catch cumulative drift.
 
+## Use Cases
+
+**Scenario 1: Agent learns from repeated mistakes.** A developer uses Lyra daily to deploy infrastructure changes. Three times this week, Lyra edited an Nginx config without checking if the target site file exists first, causing a 502 error. After each session, the self-evolving optimizer extracts a gene: "always run `ls` on the sites-enabled path before writing." On the fourth attempt, the gene passes validation and becomes default behavior. The 502s stop without the developer ever writing a rule.
+
+**Scenario 2: Skill improvement from user feedback over weeks.** A QA engineer corrects Lyra's test generation patterns every few days -- "don't mock the database, use a real test container" or "assert on the response body, not the status code only." Each correction produces a compact gene that modifies how Lyra writes tests. Over a month, dozens of small corrections accumulate into a finely tuned testing style that matches the engineer's preferences. New sessions start generating tests that pass review on the first try.
+
+**Scenario 3: Safety alignment maintained during long-running autonomous agents.** A research assistant agent runs experiments unattended for days, writing code and modifying its own prompts to improve. Without guardrails, these self-modifications could silently degrade safety -- the agent might start taking shortcuts or ignoring security checks. Lyra's frozen evaluator and human-approval gate catch every modification before it becomes default. The researcher returns to find 12 candidate improvements queued for review, each one verified against the held-out safety suite.
+
 ## Conclusion
 
 **Implemented**: Post-session classification, dual-source extraction, compact gene format, 3 mandatory guardrails (gated promotion, frozen evaluator, human-approval gate). Core: `src/lyra/rl_optimizer/` and `src/lyra/safety/evolution.py`.

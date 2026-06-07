@@ -19,5 +19,13 @@ You are watching a Lyra agent research a coding problem, but you notice it's goi
 4. The agent picks up from the checkpoint but now targets the correct libraries.
 5. Two steps later, the agent wants to install a package — the ApprovalGate intercepts it with ASK status. You get a popup: "Allow `npm install jotai`?" You click Approve and the agent continues.
 
+## Use Cases
+
+**Scenario 1: Real-time code review correction.** A developer watches Lyra review a pull request on their team's codebase. Lyra starts suggesting a refactor that would introduce a security anti-pattern — it wants to store API keys in a config file checked into git. The developer spots this in the SteerPanel tool log, clicks the session, and calls `redirect("Flag this as a security concern instead — API keys must use environment variables or a vault.")`. The InterruptHandler pauses Lyra mid-thought, injects the redirect, and Lyra resumes writing the correct review comment. The PR author never sees the wrong suggestion.
+
+**Scenario 2: Redirecting a wandering research agent.** A product manager launches Lyra to research "what analytics features our competitors launched this quarter." Half an hour later, they peek at the SteerPanel and see Lyra has drifted into exploring "data warehouse migration strategies" — interesting but off-topic. The PM types a redirect, Lyra checkpoints its current state, and picks up on the right topic. No progress is lost, and the off-topic branch is still in the checkpoint log if needed later.
+
+**Scenario 3: Approving or rejecting agent-initiated actions.** Lyra is automating a deployment task. It wants to run `kubectl apply -f production.yaml` on the production cluster. The ApprovalGate intercepts this as an ASK-level action. A popup appears: "Allow kubectl apply to production? (Will update 3 deployments.)" The engineer clicks Approve and the agent proceeds. Later, Lyra wants to delete a database table — the engineer clicks Deny. The agent logs the rejection and asks for alternative instructions instead of blindly proceeding.
+
 ## Conclusion
 Implemented: SteerPanel, ApprovalGate, InterruptHandler with barge-in detection. Future: preference-learning from steering decisions.

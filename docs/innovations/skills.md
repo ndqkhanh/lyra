@@ -54,5 +54,13 @@ Skills work like pop-up instruction manuals. You keep a catalog of titles in you
 **Skeptic:** "Progressive disclosure adds latency — each level load is a separate filesystem read."
 **Resolution:** Filesystem reads are sub-millisecond. The alternative (always loading all skills) costs 50K+ context tokens. The trade-off is worth it for all but the smallest sessions.
 
+## Use Cases
+
+**Scenario 1: Onboarding new team members with standardized skills.** A team lead maintains a repository of 20 skills: how to write migration scripts, how to deploy to staging, how to run the integration test suite, how to format commit messages. A new engineer clones the repo and opens Lyra. Every skill is immediately available as a slash command or auto-triggered by keywords. The engineer runs "/deploy-to-staging" on day one and follows the skill's step-by-step instructions without asking for help. No documentation wiki needed.
+
+**Scenario 2: Domain-specific agent customization.** A data science team works with Lyra on pandas pipelines, but the general-purpose agent doesn't know their internal column naming conventions or preferred plotting library. They write a single "data-science-team" skill that captures these conventions: use snake_case columns, always call df.pipe() not chained mutations, use seaborn for exploration and plotly for dashboards. When any team member asks Lyra to "visualize the distribution," the skill triggers, loads the conventions, and the generated code matches the team's standards exactly.
+
+**Scenario 3: Multi-skill workflows that compose complex tasks.** A developer wants to "create a new microservice." This involves generating boilerplate, setting up CI, writing the Dockerfile, and creating a database migration. Instead of one monolithic skill, four individual skills declare dependencies: "create-microservice" depends on "boilerplate-gen" and "docker-setup," which in turn depends on "ci-config." Lyra's SkillGraph resolves the dependency order, loads each skill sequentially, and executes them as a pipeline. The developer gets a fully scaffolded service from a single command.
+
 ## Conclusion
 Implemented: registry, parser, executor, importer, SkillGraph with CycleError detection. Provider × skill compatibility matrix. Core module: `src/lyra/skills/`. Future: SkillNet-style auto-creation from execution trajectories.

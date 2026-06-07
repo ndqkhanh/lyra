@@ -15,6 +15,14 @@ Lyra's economics module tracks token usage and cost as first-class metrics per s
 | Tools & Memory | Retrieval calls × embedding cost | Two-stage retrieval, caching |
 | Learning | Optimization runs × eval cost | Bounded-edit, amortized teacher cost |
 
+## Use Cases
+
+**Scenario 1: Startup optimizing LLM costs.** A bootstrapped startup runs an AI-powered customer support agent that handles 10,000 conversations per month. Each call goes through Opus by default — costing $4,000/month. They plug in Lyra's economics module. The BudgetManager tracks spend in real time. The model router automatically downgrades simple queries (password reset, store hours) to Haiku, saving 20x on those turns. Complex troubleshooting stays on Sonnet. Only edge-case escalations use Opus. Monthly bill drops to $1,200. The startup ships the same quality at 70% lower cost.
+
+**Scenario 2: Enterprise budget allocation across teams.** An organization has 5 product teams sharing a $50,000/month LLM budget. Each team has different usage patterns: the documentation team mostly generates text (high output tokens), the data team does heavy analysis (large input context), and the engineering team runs agent loops (many small calls). The economics module tracks cost per team, per primitive (intelligence, engine, agents, tools, learning). At month-end, the burn report shows engineering is overspending on agent loops — each loop iteration costs $0.02 in engine overhead. They optimize by consolidating tool calls, and the following month's report confirms the fix.
+
+**Scenario 3: Cost-aware feature rollout.** A product manager wants to add "AI commit message generation" to the development workflow. Before writing any code, they use the economics module to estimate the cost impact: 100 developers x 5 commits/day x 50 tokens/output = 7,500 tokens/day at Haiku rates = $7.50/day. The prompt cache hit-rate monitor confirms that the commit-message system prompt can be cached at 95% hit rate, bringing effective cost to $2/day. The PM greenlights the feature with a hard monthly budget of $60. The BudgetManager enforces it automatically.
+
 ## Conclusion
 Implemented: token tracking, budget limits, cost per agent/workflow. Future: prompt-cache hit-rate optimization, speculative decoding for agent workloads.
 

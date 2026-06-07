@@ -210,6 +210,14 @@ Every architectural choice in the swarm and fleet system involves a trade-off be
 | Pre-execution confidence gating | Prevents error cascades (+12.4% documented gain) | 1.6-1.9x task length increase from false positives | Conservative default threshold; per-provider calibration; user override via peek panel |
 | In-memory + SQLite dual state | Fast reads + crash survival | Write latency on every state transition | Async writes with WAL commit interval tuning |
 
+## Use Cases
+
+**Scenario 1: Parallel security audit across multiple repos.** A security engineer dispatches a fleet of Lyra sessions -- one per repository -- with the task "Scan for hardcoded API keys and dependency vulnerabilities." Each session runs in its own git worktree, so scans proceed in parallel without file collisions. The supervisor daemon monitors all sessions from a single dashboard. Two sessions hit NEEDS_INPUT (a false positive that needs confirmation, a config file that needs a path). The engineer steers by exception: presses the hotkey for each, resolves it in seconds, and the scans continue without ever attaching to a full session.
+
+**Scenario 2: Overnight batch research tasks.** Before logging off, an engineer dispatches "Research the trade-offs between Redis and Dragonfly for our caching layer" as a fleet task. The supervisor spawns a session, isolates it in a worktree, and runs it through the night. By morning, the session state shows COMPLETED with a full research doc saved in the worktree. The engineer glances at the 15-second cheap-model summary in the fleet dashboard, decides the results are worth reading, and opens the full output -- no wasted morning setup time.
+
+**Scenario 3: Multi-dimensional code review for a large PR.** A pull request touches 40 files across backend, frontend, and infra. The engineer dispatches three fleet agents: one for security scanning, one for performance regression, one for API contract changes. All three run in parallel on isolated worktrees. The supervisor tracks progress -- security finishes in 2 minutes (PASS), performance finds a slow query (NEEDS_INPUT, filed as a separate issue), API contracts finds a breaking change (FAILED, with diff attached). The engineer reviews only the exceptions, not the full logs of every agent.
+
 ## Conclusion
 
 Lyra's swarm and fleet architecture exists as running code across four modules: the supervisor daemon (190 lines), the state model (40 lines), the SQLite store (140 lines), and the worktree manager (265 lines). Together they implement the core lifecycle management, two-axis state tracking, and file isolation needed for a production-grade multi-agent fleet.
