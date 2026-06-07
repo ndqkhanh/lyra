@@ -118,7 +118,7 @@ graph TB
         Reasoning["<b>Deep Reasoning</b><br/>CoT · Tree Search · SR2AM"]
         Research["<b>Research Pipeline</b><br/>10-step · 7+ sources · AutoScientists"]
         Evolution["<b>Self-Evolution</b><br/>GEPA v2 · AEvo · Meta-Harness"]
-        Memory["<b>6-Tier Memory V4</b><br/>MAGMA 4-graph · RecMem · RRF"]
+        Memory["<b>3-Tier Memory</b><br/>STM/LTM/Consolidation · dreaming · FORGE"]
         RecursiveLink["<b>RecursiveLink</b><br/>Latent-space · 75.6% reduction"]
         Context["<b>5-Layer Context Engine</b><br/>FS-as-Context · Mermaid · L0-L3"]
     end
