@@ -47,6 +47,7 @@ graph TD
         PERM["Permissions<br/>Access Control"]
         RELI["Reliability<br/>Retry + CB + Ckpt"]
         HARN["Harness Engineering<br/>Governance Framework"]
+        ANTICOL["Anti-Collusion<br/>7-Threat Detection"]
     end
 
     subgraph Intelligence["Intelligence"]
@@ -65,6 +66,7 @@ graph TD
         ING["Ingestion<br/>Doc Pipeline"]
         AMESH["AgentsMesh<br/>P2P Networking"]
         RMX["RMUX<br/>Terminal Mux"]
+        RCTL["Remote Control<br/>Session Relay"]
     end
 
     subgraph Interface["Interface & UX"]
@@ -139,7 +141,9 @@ All innovation docs describe modules at **Partially implemented** status. The co
 | Self-Knowledge | Partially implemented | [self-knowledge.md](self-knowledge.md) | [19-self-knowledge.md](../lyra-upgrade/plans/19-self-knowledge.md) | P2 |
 | RL Optimizer | Partially implemented | [self-evolving.md](self-evolving.md) | [27-rl-optimizer.md](../lyra-upgrade/plans/27-rl-optimizer.md) | P2 |
 | Harness Engineering | Partially implemented | [harness-engineering.md](harness-engineering.md) | [26-harness-engineering.md](../lyra-upgrade/plans/26-harness-engineering.md) | P2 |
+| Anti-Collusion | Partially implemented | [anti-collusion.md](anti-collusion.md) | [4.25-anti-collusion.md](../lyra-upgrade/plans/4.25-anti-collusion.md) | P2 |
 | Desktop | Partially implemented | [desktop.md](desktop.md) | [28-desktop.md](../lyra-upgrade/plans/28-desktop.md) | P2 |
+| Remote Control | Partially implemented | [remote-control.md](remote-control.md) | — | P2 |
 | Voice Mode | Partially implemented | [voice-mode.md](voice-mode.md) | [18-voice-mode.md](../lyra-upgrade/plans/18-voice-mode.md) | P2 |
 | Ingestion | Partially implemented | [ingestion.md](ingestion.md) | [23-ingestion.md](../lyra-upgrade/plans/23-ingestion.md) | P2 |
 | RMUX | Partially implemented | [rmux.md](rmux.md) | [51-rmux.md](../lyra-upgrade/plans/51-rmux.md) | P3 |
@@ -172,37 +176,40 @@ Start with the foundation, then follow the dependency chain for your area of int
 9. **[permissions.md](permissions.md)** -- The deny-first permission manager and scope system. How tool access is controlled per session.
 10. **[reliability.md](reliability.md)** -- Retry with jitter, circuit breaker, and checkpoint-based recovery. How Lyra handles failures gracefully.
 11. **[harness-engineering.md](harness-engineering.md)** -- The attestation system, SABER mutation gate, and eval harness. Meta-discipline of the governance architecture.
+12. **[anti-collusion.md](anti-collusion.md)** -- The 7-threat detection framework and Adversarial Topology with built-in distrust. How Lyra defends against collusion attacks.
 
 ### Multi-agent path (after Core + Safety)
 
-12. **[swarm-fleet.md](swarm-fleet.md)** -- The supervisor daemon, worktree isolation, orchestrator-worker pattern, and agent registry. How Lyra runs many sessions in parallel.
-13. **[autonomy.md](autonomy.md)** -- The autonomy loop and escalating crash recovery. How sessions run unattended.
-14. **[steering.md](steering.md)** -- The SteerPanel, ApprovalGate, and InterruptHandler. How humans guide agents by exception.
-15. **[adversarial-panel.md](adversarial-panel.md)** -- The 5-lens verification panel and identity anonymizer. How outputs are debated before acceptance.
-16. **[dreaming.md](dreaming.md)** -- Idle-time consolidation, field-theoretic memory, and the DreamBank. How memory stays clean and connected.
+13. **[swarm-fleet.md](swarm-fleet.md)** -- The supervisor daemon, worktree isolation, orchestrator-worker pattern, and agent registry. How Lyra runs many sessions in parallel.
+14. **[autonomy.md](autonomy.md)** -- The autonomy loop and escalating crash recovery. How sessions run unattended.
+15. **[steering.md](steering.md)** -- The SteerPanel, ApprovalGate, and InterruptHandler. How humans guide agents by exception.
+16. **[remote-control.md](remote-control.md)** -- Outbound-only relay and self-hosted server for session control. How Lyra enables remote access without inbound exposure.
+17. **[adversarial-panel.md](adversarial-panel.md)** -- The 5-lens verification panel and identity anonymizer. How outputs are debated before acceptance.
+18. **[dreaming.md](dreaming.md)** -- Idle-time consolidation, field-theoretic memory, and the DreamBank. How memory stays clean and connected.
 
 ### Intelligence path (after Core)
 
-17. **[planning.md](planning.md)** -- The ReflexionLoop with lesson extraction. How Lyra learns from experience and plans ahead.
-18. **[deep-research.md](deep-research.md)** -- The 5-phase research pipeline and Karpathy-style auto-research loop. How Lyra conducts multi-source research.
-19. **[self-knowledge.md](self-knowledge.md)** -- The IntrospectionEngine for capability awareness. How Lyra knows what it knows.
-20. **[self-evolving.md](self-evolving.md)** -- The GEPA gradient-free evolution loop and misevolution guardrails. How Lyra improves its own skills.
-21. **[economics.md](economics.md)** -- The BudgetController, tier router, and effort manager. How Lyra tracks and optimizes costs.
+19. **[planning.md](planning.md)** -- The ReflexionLoop with lesson extraction. How Lyra learns from experience and plans ahead.
+20. **[deep-research.md](deep-research.md)** -- The 5-phase research pipeline and Karpathy-style auto-research loop. How Lyra conducts multi-source research.
+21. **[self-knowledge.md](self-knowledge.md)** -- The IntrospectionEngine for capability awareness. How Lyra knows what it knows.
+22. **[self-evolving.md](self-evolving.md)** -- The GEPA gradient-free evolution loop and misevolution guardrails. How Lyra improves its own skills.
+23. **[economics.md](economics.md)** -- The BudgetController, tier router, and effort manager. How Lyra tracks and optimizes costs.
 
 ### Interface path (after Core)
 
-22. **[ui-ux.md](ui-ux.md)** -- The theme system, keybinding manager, status bar, fleet view, and rendering pipeline. How the terminal interface works.
-23. **[commands.md](commands.md)** -- The slash command dispatcher and built-in commands. How `/model`, `/help`, and custom commands route.
-24. **[desktop.md](desktop.md)** -- The Electron GUI shell, chat view, fleet view, and skills hub. How Lyra works outside the terminal.
-25. **[voice-mode.md](voice-mode.md)** -- The cascaded STT-LLM-TTS pipeline and full-duplex state machine. How Lyra listens and speaks.
-26. **[rmux.md](rmux.md)** -- The terminal multiplexer data model and stub integration. How sessions survive terminal detachment.
+24. **[ui-ux.md](ui-ux.md)** -- The theme system, keybinding manager, status bar, fleet view, and rendering pipeline. How the terminal interface works.
+25. **[commands.md](commands.md)** -- The slash command dispatcher and built-in commands. How `/model`, `/help`, and custom commands route.
+26. **[desktop.md](desktop.md)** -- The Electron GUI shell, chat view, fleet view, and skills hub. How Lyra works outside the terminal.
+27. **[remote-control.md](remote-control.md)** -- Outbound-only relay and self-hosted server for session control. How Lyra enables remote access without inbound exposure.
+28. **[voice-mode.md](voice-mode.md)** -- The cascaded STT-LLM-TTS pipeline and full-duplex state machine. How Lyra listens and speaks.
+29. **[rmux.md](rmux.md)** -- The terminal multiplexer data model and stub integration. How sessions survive terminal detachment.
 
 ### Infrastructure path (after Multi-agent)
 
-27. **[plugins.md](plugins.md)** -- The Plugin protocol, PluginManager, MCP gateway, and Wasla bridge. How Lyra is extended.
-28. **[mcp.md](mcp.md)** -- The stdio transport, enterprise gateway, security scanner, and server-side tools. How Lyra consumes and exposes MCP tools.
-29. **[agentsmesh.md](agentsmesh.md)** -- The bridge stub for peer-to-peer agent networking. How agents discover each other (v2).
-30. **[ingestion.md](ingestion.md)** -- The document pipeline, chunker, and embedding protocols. How Lyra processes knowledge base documents.
+30. **[plugins.md](plugins.md)** -- The Plugin protocol, PluginManager, MCP gateway, and Wasla bridge. How Lyra is extended.
+31. **[mcp.md](mcp.md)** -- The stdio transport, enterprise gateway, security scanner, and server-side tools. How Lyra consumes and exposes MCP tools.
+32. **[agentsmesh.md](agentsmesh.md)** -- The bridge stub for peer-to-peer agent networking. How agents discover each other (v2).
+33. **[ingestion.md](ingestion.md)** -- The document pipeline, chunker, and embedding protocols. How Lyra processes knowledge base documents.
 
 ## Cross-References
 
@@ -233,6 +240,7 @@ Start with the foundation, then follow the dependency chain for your area of int
 - `src/lyra/reliability/` -- Retry, circuit breaker, checkpoint manager
 - `src/lyra/attestor/` -- Claim attestation system
 - `src/lyra/verification/` -- Adversarial panel, anonymizer, eval harness
+- `src/lyra/anti_collusion/` -- Anti-collusion detection, adversarial topology (planned)
 - `src/lyra/supervisor/` -- Supervisor daemon, session store
 - `src/lyra/worktree/` -- Worktree manager, lyrainclude
 - `src/lyra/orchestrator/` -- Orchestrator agent, worker pool
@@ -250,6 +258,7 @@ Start with the foundation, then follow the dependency chain for your area of int
 - `src/lyra/voice/` -- Voice pipeline, duplex handler, STT/TTS, bilingual
 - `src/lyra/ingestion/` -- Document pipeline, chunker
 - `src/lyra/desktop/` -- Desktop config, window management stubs
+- `src/lyra/remote/` -- Remote control relay, self-hosted server (planned)
 - `src/lyra/rmux/` -- RMUX integration stub
 - `src/lyra/agents_mesh/` -- AgentsMesh bridge stub
 - `src/ui/` -- Terminal UI (Ink), Desktop UI (Electron), transport gateway

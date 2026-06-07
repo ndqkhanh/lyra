@@ -118,19 +118,65 @@ Lyra is currently the only architecture that combines a 5-layer pipeline with ga
 
 Lyra's safety system is organized into three subsystems that work together. The **SafetyPipeline** orchestrates five sequential defense layers, each independently evaluating every tool call and short-circuiting on the first BLOCK. The **EvolutionGuard** manages safety rules through a shadow-promote-demote lifecycle with frozen evaluation baselines. The **MutationGate** classifies tool calls by mutation potential and gates write/execute operations behind verification.
 
-```
-                   SafetyPipeline (pipeline.py)
-                   ============================
-Tool Call --> LexicalGate --> ToolCallGateLayer --> AlignmentCheck --> DataFlowTracker --> ContinuousEval --> Result
-              (regex scan)    (deterministic       (LLM auditor,       (taint tracking)    (self-evolving
-                               policy enforcement)  sampled)                               eval stub)
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#7c3aed',
+  'primaryTextColor': '#e2e8f0',
+  'primaryBorderColor': '#a78bfa',
+  'lineColor': '#818cf8',
+  'secondaryColor': '#1e293b',
+  'tertiaryColor': '#0f172a',
+  'background': '#0d0d1a',
+  'mainBkg': '#1e293b',
+  'nodeBorder': '#6366f1',
+  'clusterBkg': '#111827',
+  'clusterBorder': '#4f46e5',
+  'titleColor': '#c084fc',
+  'edgeLabelBackground': '#1e293b',
+  'nodeTextColor': '#e2e8f0',
+  'fontSize': '14px'
+}}}%%
+flowchart TD
+    TC[Tool Call] --> L1["Layer 1: LexicalGate
+    Regex scan (11 categories)
+    Shell / eval / path traversal"]
+    L1 --> L2["Layer 2: ToolCallGateLayer
+    Deterministic policy enforcement
+    Four gating levels: ALLOW /
+    ALLOW_WITH_SANDBOX / ASK_USER / BLOCK"]
+    L2 --> L3["Layer 3: AlignmentCheck
+    LLM auditor, sampling-scheduled
+    Semantic goal-drift detection"]
+    L3 --> L4["Layer 4: DataFlowTracker
+    Untrusted data taint matching
+    Sensitive sink detection"]
+    L4 --> L5["Layer 5: ContinuousEval
+    Self-evolving evaluation stub
+    Misevolve-aware regression gating"]
+    L5 --> RESULT[Pipeline Result: ALLOW / BLOCK / ESCALATE]
 
-                   EvolutionGuard (evolution.py)         MutationGate (mutation_gate.py)
-                   =============================         ================================
-SafetyRule --> SHADOW --> ACTIVE --> DISABLED        Tool call --> classify(ActionClass)
-              (log only)   (enforce)   (skip)                        READ --> auto-approve
-FrozenEvaluator: immutable test cases                                WRITE --> verify required
-HumanApprovalGate: human must approve promotion                      EXECUTE --> verify required
+    subgraph EG["EvolutionGuard (evolution.py)"]
+        SR[SafetyRule] --> SHADOW["SHADOW (log only)"]
+        SHADOW -->|"N detections,
+        zero false positives"| ACTIVE["ACTIVE (enforce)"]
+        ACTIVE -->|"M false positives"| SHADOW
+        ACTIVE -->|"2M false positives"| DISABLED["DISABLED (skip)"]
+        FE[FrozenEvaluator: immutable test cases] -.-> ACTIVE
+        HAG[HumanApprovalGate: human must approve promotion] -.-> SHADOW
+    end
+
+    subgraph MG["MutationGate (mutation_gate.py)"]
+        TC2[Tool Call] --> CLASSIFY[classify ActionClass]
+        CLASSIFY --> READ["READ / SEARCH / COMPUTE
+        → auto-approve"]
+        CLASSIFY --> WRITE["WRITE / EXECUTE /
+        NETWORK_WRITE
+        → verify required"]
+        CLASSIFY --> NET["NETWORK_READ
+        → logged"]
+        CLASSIFY --> UNK["UNKNOWN
+        → treated as mutating"]
+    end
 ```
 
 ### Implemented

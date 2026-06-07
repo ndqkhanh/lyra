@@ -125,57 +125,67 @@ The plugin system is organized into four interconnected submodules, each handlin
 
 **Data flow diagram:**
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                     Plugin Manager (manager.py)                   │
-│                                                                   │
-│  load_plugin(path) ──────► Plugin instance                        │
-│       │                       │ name: str                         │
-│       │                       │ version: str                      │
-│       ▼                       │ tools: List[ToolDef]              │
-│  importlib.util               │ hooks: List[Hook]                 │
-│  .spec_from_file_location     │ initialize()                      │
-│       │                       │ shutdown()                        │
-│       ▼                       │                                   │
-│  [create_plugin() factory     └───────┬───────────────────────┐   │
-│   OR auto-discovered class]           │                       │   │
-│                                       ▼                       ▼   │
-│                                 all_tools()             all_hooks()│
-│                                       │                       │   │
-└───────────────────────────────────────┼───────────────────────┼───┘
-                                        │                       │
-                                        ▼                       ▼
-                                ┌─────────────────┐    ┌──────────────┐
-                                │  ToolRegistry    │    │ Hook Engine  │
-                                │  (tools/         │    │ (hooks/      │
-                                │   registry.py)   │    │  hook_engine)│
-                                └─────────────────┘    └──────────────┘
-
-┌──────────────────────────────────────────────────────────────────┐
-│                     MCP Gateway (mcp/gateway.py)                  │
-│                                                                   │
-│  connect(name, command, ...) ──────► StdioMCPTransport            │
-│       │                                                           │
-│       ├── discover_tools(name) ────► List[MCPToolSchema]          │
-│       │       │                                                   │
-│       │       └── to_tool_def(schema) ──► ToolDef (no handler)    │
-│       │                                                           │
-│       ├── call_tool(server, name, args) ──► Dict[str, Any]        │
-│       │                                                           │
-│       └── disconnect(name) / close()                              │
-└──────────────────────────────────────────────────────────────────┘
-
-┌──────────────────────────────────────────────────────────────────┐
-│                    Wasla Bridge (wasla.py)                        │
-│                                                                   │
-│  export_skill(name, content) ──► WaslaArtifact                    │
-│  export_mcp_config(name, config) ──► WaslaArtifact                │
-│  import_artifact(artifact) ──► bool (accepted/rejected)           │
-│  import_manifest(path) ──► int (imported count)                   │
-│  get_conflicts() ──► list of conflicting artifact pairs           │
-│                                                                   │
-│  Persistence: sync_dir (default: ~/.lyra/wasla/manifest.json)     │
-└──────────────────────────────────────────────────────────────────┘
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#7c3aed',
+  'primaryTextColor': '#e2e8f0',
+  'primaryBorderColor': '#a78bfa',
+  'lineColor': '#818cf8',
+  'secondaryColor': '#1e293b',
+  'tertiaryColor': '#0f172a',
+  'background': '#0d0d1a',
+  'mainBkg': '#1e293b',
+  'nodeBorder': '#6366f1',
+  'clusterBkg': '#111827',
+  'clusterBorder': '#4f46e5',
+  'titleColor': '#c084fc',
+  'edgeLabelBackground': '#1e293b',
+  'nodeTextColor': '#e2e8f0',
+  'fontSize': '14px'
+}}}%%
+graph TB
+    subgraph PluginMgr["Plugin Manager (manager.py)"]
+        LOAD["load_plugin(path)"]
+        PLUGIN["Plugin instance<br/>name, version, tools, hooks<br/>initialize() / shutdown()"]
+        FACTORY["create_plugin() factory<br/>OR auto-discovered class"]
+        ALL_T["all_tools()"]
+        ALL_H["all_hooks()"]
+        LOAD -->|"importlib.util"| PLUGIN
+        FACTORY --> PLUGIN
+        PLUGIN --> ALL_T
+        PLUGIN --> ALL_H
+    end
+    subgraph Consumers["System Consumers"]
+        TOOLREG["ToolRegistry<br/>(tools/registry.py)"]
+        HOOKENG["Hook Engine<br/>(hooks/hook_engine)"]
+    end
+    subgraph MCPGW["MCP Gateway (mcp/gateway.py)"]
+        CONNECT["connect(name, command)"]
+        TRANSPORT["StdioMCPTransport"]
+        DISCOVER["discover_tools(name)"]
+        SCHEMA["MCPToolSchema"]
+        TODEF["to_tool_def(schema)"]
+        CALL["call_tool(server, name, args)"]
+        DISCONNECT["disconnect(name) / close()"]
+        CONNECT --> TRANSPORT
+        TRANSPORT --> DISCOVER
+        DISCOVER --> SCHEMA
+        SCHEMA --> TODEF
+        TRANSPORT --> CALL
+        TRANSPORT --> DISCONNECT
+    end
+    subgraph Wasla["Wasla Bridge (wasla.py)"]
+        EXP_SK["export_skill(name, content)"]
+        EXP_MCP["export_mcp_config(name, config)"]
+        IMP_ART["import_artifact(artifact)"]
+        IMP_MAN["import_manifest(path)"]
+        CONFLICT["get_conflicts()"]
+        PERSIST["Persistence: ~/.lyra/wasla/manifest.json"]
+    end
+    ALL_T --> TOOLREG
+    ALL_H --> HOOKENG
+    TODEF --> TOOLREG
+    MCPGW -.->|"MCP protocol"| TOOLREG
 ```
 
 ### Implemented

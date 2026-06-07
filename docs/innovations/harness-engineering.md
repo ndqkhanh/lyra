@@ -114,49 +114,70 @@ All citations trace to specific note files under `docs/lyra-upgrade/notes/`: Har
 
 Lyra's harness is organized as a pipeline of governance stages wrapped around the agent execution loop. Each stage is implemented as a separate module in `src/lyra/` and integrates via the common hook interface (`src/lyra/hooks/hook.py`, `HookType`, `HookEngine`).
 
-```
-                    +--------------------+
-                    |   Task Definition  |
-                    |  (src/lyra/tools/) |
-                    +---------+----------+
-                              |
-                    +---------v----------+
-                    |  Safety Pipeline   |   src/lyra/safety/pipeline.py
-                    |  5 defense layers  |   SafetyPipeline.evaluate()
-                    +---------+----------+
-                              |
-                    +---------v----------+
-                    |  Permission Gate   |   src/lyra/permissions/manager.py
-                    |  ALLOW/DENY/ASK    |   PermissionManager.check()
-                    +---------+----------+
-                              |
-                    +---------v----------+
-                    |  Agent Loop        |   src/lyra/agent_loop/executor.py
-                    |  Think-Act-Observe |   AgentLoopExecutor.execute()
-                    |  -Reflect          |
-                    +---------+----------+
-                              |
-                    +---------v----------+
-                    |  Tool Executor     |   src/lyra/tools/executor.py
-                    |  ToolGate enforce  |   ToolGate.validate() PRE_TOOL_USE
-                    +---------+----------+
-                              |
-                    +---------v----------+
-                    |  Memory Persist    |   src/lyra/memory/
-                    |  Short-term + Long |   SQLiteShortTermMemory.add_turn()
-                    +---------+----------+
-                              |
-                    +---------v----------+
-                    |  Verification      |   src/lyra/verification/
-                    |  Attestor Graph    |   Attestor.verify_claim()
-                    |  Adversarial Panel |   AdversarialPanel.judge()
-                    +---------+----------+
-                              |
-                    +---------v----------+
-                    |  Reliability       |   src/lyra/reliability/
-                    |  Circuit Breaker   |   CircuitBreaker.call()
-                    |  Checkpoint/Retry  |   RetryPolicy, CheckpointManager
-                    +--------------------+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#7c3aed',
+  'primaryTextColor': '#e2e8f0',
+  'primaryBorderColor': '#a78bfa',
+  'lineColor': '#818cf8',
+  'secondaryColor': '#1e293b',
+  'tertiaryColor': '#0f172a',
+  'background': '#0d0d1a',
+  'mainBkg': '#1e293b',
+  'nodeBorder': '#6366f1',
+  'clusterBkg': '#111827',
+  'clusterBorder': '#4f46e5',
+  'titleColor': '#c084fc',
+  'edgeLabelBackground': '#1e293b',
+  'nodeTextColor': '#e2e8f0',
+  'fontSize': '14px'
+}}}%%
+flowchart TD
+    TASK["Pillar 1: Context Engineering
+    Task Definition (src/lyra/tools/)
+    Message building, memory prefetch,
+    tool result budget, history snip"] --> SAFETY["Pillar 2: Safety Architecture
+    Safety Pipeline (src/lyra/safety/pipeline.py)
+    5 defense layers: LexicalGate →
+    ToolCallGateLayer → AlignmentCheck →
+    DataFlowTracker → ContinuousEval"]
+
+    SAFETY --> PERM["Permission Gate
+    (src/lyra/permissions/manager.py)
+    Three-valued: ALLOW / DENY / ASK
+    Policy inheritance, per-session overrides"]
+
+    PERM --> LOOP["Pillar 3: Methodology
+    Agent Loop (src/lyra/agent_loop/executor.py)
+    Think-Act-Observe-Reflect cycle
+    Max 10 iterations, 3 retries with
+    exponential backoff (1s–30s)"]
+
+    LOOP --> TOOLS["Tool Executor
+    (src/lyra/tools/executor.py)
+    ToolGate.validate() via PRE_TOOL_USE hook
+    Deterministic policy enforcement
+    Four gating levels: ALLOW /
+    ALLOW_WITH_SANDBOX / ASK_USER / BLOCK"]
+
+    TOOLS --> MEM["Memory Persist
+    (src/lyra/memory/)
+    SQLiteShortTermMemory.add_turn()
+    Short-term + long-term storage"]
+
+    MEM --> VERIFY["Pillar 4: Evaluation Infrastructure
+    Verification (src/lyra/verification/)
+    Attestor Graph: Attestor.verify_claim()
+    AdversarialPanel: 5-lens judge
+    (Correctness, Security, Performance,
+    Style, Consistency)"]
+
+    VERIFY --> RELIABLE["Pillar 5: Platform Prerequisites
+    Reliability (src/lyra/reliability/)
+    CircuitBreaker: CLOSED → OPEN →
+    HALF_OPEN after recovery_timeout
+    RetryPolicy, CheckpointManager,
+    Reflexion loop for lesson extraction"]
 ```
 
 ### Data Flow -- Key Interfaces

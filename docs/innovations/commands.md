@@ -109,28 +109,59 @@ Lyra diverges by prioritizing zero-friction authoring (flat files, no plugin man
 
 The command system is organized as a lightweight dispatcher with registered handlers. The current implementation focuses on the core dispatch logic; the planned extensions add custom command loading, interactive REPL, permission pipeline, and sandbox integration.
 
-```
-                    +--------------------+
-                    |   User Input:      |
-                    |   "/model sonnet"  |
-                    +---------+----------+
-                              |
-                    +---------v----------+
-                    |  CommandParser     |   src/lyra/commands/dispatcher.py
-                    |  / prefix detect   |   CommandDispatcher.dispatch()
-                    |  shlex.split()     |
-                    +---------+----------+
-                              |
-                    +---------v----------+
-                    |  Alias Resolution  |   _resolve_name()
-                    |  name -> canonical |
-                    +---------+----------+
-                              |
-                    +---------v----------+
-                    |  Handler Dispatch  |   await command.handler(ctx)
-                    |  CommandContext    |   builtins: help, model, clear,
-                    |  built or reused   |   status, export, skills
-                    +--------------------+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#7c3aed',
+  'primaryTextColor': '#e2e8f0',
+  'primaryBorderColor': '#a78bfa',
+  'lineColor': '#818cf8',
+  'secondaryColor': '#1e293b',
+  'tertiaryColor': '#0f172a',
+  'background': '#0d0d1a',
+  'mainBkg': '#1e293b',
+  'nodeBorder': '#6366f1',
+  'clusterBkg': '#111827',
+  'clusterBorder': '#4f46e5',
+  'titleColor': '#c084fc',
+  'edgeLabelBackground': '#1e293b',
+  'nodeTextColor': '#e2e8f0',
+  'fontSize': '14px'
+}}}%%
+flowchart TD
+    UI["User Input
+    '/model sonnet'"] --> DETECT["Parser / Tokenizer
+    '/' prefix detection
+    shlex.split() tokenization"]
+    DETECT --> RESOLVE["Alias Resolution
+    _resolve_name()
+    name → canonical"]
+    RESOLVE --> DISPATCH["CommandDispatcher
+    Lookup in command registry
+    Unknown → show available commands"]
+    DISPATCH --> HANDLER["Handler Resolution
+    Resolve CommandHandler
+    Build CommandContext with args"]
+    HANDLER --> EXEC["Handler Execution
+    await command.handler(ctx)
+    Builtins: help, model, clear,
+    status, export, skills"]
+    EXEC --> RESPONSE["Response
+    Formatted output string
+    or stub for planned commands"]
+
+    subgraph PLANNED["Planned Pipeline (pre-execution)"]
+        SEC["SecurityInspector
+        Path traversal, shell injection"]
+        EGRESS["EgressInspector
+        Block unauthorized network"]
+        ADV["AdversaryInspector
+        LLM-based prompt injection detection"]
+        PERM["PermissionInspector
+        Three-valued: ALLOW / DENY / ASK"]
+        REP["RepetitionInspector
+        Detect and block command loops"]
+        SEC --> EGRESS --> ADV --> PERM --> REP
+    end
 ```
 
 ### Data Model

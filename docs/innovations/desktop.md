@@ -103,48 +103,65 @@ Lyra Desktop builds on and diverges from six reference systems. Every citation t
 
 Lyra Desktop follows a three-process Electron model with a separate agent-core API backend. The agent core is a Python FastAPI/Starlette server that owns all agent logic (orchestration, memory, model routing, skills, tools, fleet management). The desktop is a thin presentation layer.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     Electron Process Model                    │
-│                                                              │
-│  ┌──────────────────┐    IPC    ┌────────────────────────┐  │
-│  │   Renderer        │◄────────►│    Main Process         │  │
-│  │   (React 18.3)   │  invoke   │    (Node.js)            │  │
-│  │                  │  on/send  │                         │  │
-│  │  App.tsx         │          │  main.ts                │  │
-│  │  ChatView.tsx    │          │  lyra:fetch handler     │  │
-│  │  FleetView.tsx   │          │  lyra:sse-connect       │  │
-│  │  InputBar.tsx    │          │  handler                │  │
-│  │  SkillsHub.tsx   │          │  BrowserWindow mgmt     │  │
-│  │  Sidebar.tsx     │          │  window lifecycle       │  │
-│  │  StatusBar.tsx   │          │                         │  │
-│  └────────┬─────────┘          └──────────┬──────────────┘  │
-│           │                               │                  │
-│  ┌────────▼─────────┐          ┌──────────▼──────────────┐  │
-│  │   Preload Bridge  │          │   HTTP/SSE Proxy         │  │
-│  │   (preload.ts)   │          │   fetch(url)              │  │
-│  │                   │          │   POST /chat/*/stream    │  │
-│  │  window.lyraAPI  │          │   GET /health, /providers │  │
-│  │  .fetch()        │          │   GET /sessions           │  │
-│  │  .connectSSE()   │          │   SSE reader + forwarding │  │
-│  └──────────────────┘          └──────────────────────────┘  │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                    HTTP/SSE │ localhost:8580
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│               Agent Core API (Python)                        │
-│                                                              │
-│  FastAPI / Starlette server                                  │
-│  /health → OK                                               │
-│  /providers → provider + model list                         │
-│  /sessions → CRUD                                            │
-│  /chat/{id}/stream → SSE streaming                           │
-│                                                              │
-│  Core services (in-process):                                 │
-│  Orchestrator | Memory | Skills | Tools | Model Router      │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#7c3aed',
+  'primaryTextColor': '#e2e8f0',
+  'primaryBorderColor': '#a78bfa',
+  'lineColor': '#818cf8',
+  'secondaryColor': '#1e293b',
+  'tertiaryColor': '#0f172a',
+  'background': '#0d0d1a',
+  'mainBkg': '#1e293b',
+  'nodeBorder': '#6366f1',
+  'clusterBkg': '#111827',
+  'clusterBorder': '#4f46e5',
+  'titleColor': '#c084fc',
+  'edgeLabelBackground': '#1e293b',
+  'nodeTextColor': '#e2e8f0',
+  'fontSize': '14px'
+}}}%%
+graph TB
+    subgraph Electron["Electron Process Model"]
+        subgraph Renderer["Renderer (React 18.3)"]
+            APP["App.tsx"]
+            CHAT["ChatView.tsx"]
+            FLEET["FleetView.tsx"]
+            INPUT["InputBar.tsx"]
+            SKILLS["SkillsHub.tsx"]
+            SIDEBAR["Sidebar.tsx"]
+            STATBAR["StatusBar.tsx"]
+        end
+        subgraph Main["Main Process (Node.js)"]
+            MAIN_TS["main.ts"]
+            FETCH_H["lyra:fetch handler"]
+            SSE_H["lyra:sse-connect handler"]
+            WIN_MGR["BrowserWindow mgmt"]
+        end
+        subgraph Bridge["Bridge Layer"]
+            PRELOAD["Preload Bridge<br/>(preload.ts)<br/>window.lyraAPI"]
+            PROXY["HTTP/SSE Proxy<br/>POST /chat/*/stream<br/>SSE reader + forwarding"]
+        end
+    end
+    subgraph AgentCore["Agent Core API (Python)"]
+        FASTAPI["FastAPI / Starlette server<br/>localhost:8580"]
+        HEALTH["/health"]
+        PROVIDERS["/providers"]
+        SESSIONS["/sessions"]
+        STREAM["/chat/{id}/stream → SSE"]
+        subgraph Services["Core Services (in-process)"]
+            ORCH["Orchestrator"]
+            MEM["Memory"]
+            SK["Skills"]
+            TOOLS["Tools"]
+            ROUTER["Model Router"]
+        end
+    end
+    Renderer -->|"IPC invoke/on/send"| Main
+    PRELOAD --> Main
+    Main -->|"HTTP/SSE"| PROXY
+    PROXY -->|"localhost:8580"| FASTAPI
+    FASTAPI --> Services
 ```
 
 ### Data Flow for a Chat Message
