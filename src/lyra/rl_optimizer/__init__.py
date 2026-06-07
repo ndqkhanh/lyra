@@ -37,6 +37,12 @@ from lyra.rl_optimizer.evolution_guard import (
     HumanApprovalGate,
     ExecutionBiasDetector,
 )
+from lyra.rl_optimizer.maker_checker import (
+    MakerChecker,
+    Proposal,
+    CheckResult,
+    ProposalStatus,
+)
 
 __all__ = [
     # Optimizer
@@ -55,4 +61,9 @@ __all__ = [
     "FrozenEvaluatorGate",
     "HumanApprovalGate",
     "ExecutionBiasDetector",
+    # Maker-Checker
+    "MakerChecker",
+    "Proposal",
+    "CheckResult",
+    "ProposalStatus",
 ]

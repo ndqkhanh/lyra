@@ -84,6 +84,18 @@ from lyra.memory.latent_tokens import (
     MemoryTrigger,
 )
 
+# --- New in 7.4.0: Trust Scoring ---
+from lyra.memory.trust import (
+    TrustScore,
+    TrustWeightedBroadcast,
+)
+
+# --- New in 7.4.0: Quarantine ---
+from lyra.memory.quarantine import (
+    QuarantineItem,
+    QuarantinePool,
+)
+
 __all__ = [
     # Core
     "Memory",
@@ -140,4 +152,10 @@ __all__ = [
     "MemSequence",
     "MemoryWeaver",
     "MemoryTrigger",
+    # Trust scoring
+    "TrustScore",
+    "TrustWeightedBroadcast",
+    # Quarantine
+    "QuarantineItem",
+    "QuarantinePool",
 ]
