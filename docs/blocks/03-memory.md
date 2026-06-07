@@ -3,7 +3,7 @@
 > A 3-tier memory architecture (STM/LTM/Consolidation) with field-theoretic dreaming, FORGE population broadcast, and hybrid BM25+Vector retrieval fused by Reciprocal Rank Fusion.
 > **Block:** 03 | **Phase:** 3 (Multi-Agent & Memory) | **Depends on:** Context Engine, Agent Loop
 
-## The 6-Tier Architecture
+## The 3-Tier Architecture
 
 Memory is organized into six tiers, each with distinct retention policy, storage backend, and query semantics:
 

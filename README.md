@@ -114,7 +114,7 @@ graph TB
         Pivot["<b>Pivot/Refine</b><br/>failure recovery"]
     end
 
-    subgraph Intelligence["<b style='color:#60a5fa;'>🧠 INTELLIGENCE LAYER (V4 Ultra)</b>"]
+    subgraph Intelligence["<b style='color:#60a5fa;'>🧠 INTELLIGENCE LAYER</b>"]
         Reasoning["<b>Deep Reasoning</b><br/>CoT · Tree Search · SR2AM"]
         Research["<b>Research Pipeline</b><br/>10-step · 7+ sources · AutoScientists"]
         Evolution["<b>Self-Evolution</b><br/>GEPA v2 · AEvo · Meta-Harness"]
@@ -267,71 +267,46 @@ sequenceDiagram
     CLI-->>User: "Done. 3 files changed ✓"
 ```
 
-### Memory Hierarchy (6-Tier Ultra Memory V4 with MAGMA 4-Graph)
+### Memory Architecture (3-Tier with Consolidation Strategies)
 
 ```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#7c3aed', 'lineColor': '#6366f1', 'fontSize': '13px'}, 'flowchart': {'nodeSpacing': 20, 'rankSpacing': 40}}}%%
-graph LR
-    subgraph L0["<b style='color:#fbbf24;'>🔵 L0: Sensory Buffer</b>"]
-        STM["<b>Sensory Buffer</b><br/>~500 tokens · ephemeral"]
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#7c3aed', 'lineColor': '#6366f1', 'fontSize': '13px'}}}%%
+graph TB
+    subgraph Runtime["Runtime (3-Tier)"]
+        STM["<b>Short-Term Memory</b><br/>Recent turns · SQLite-backed"]
+        LTM["<b>Long-Term Memory</b><br/>Persistent knowledge · importance decay"]
+        CONSOL["<b>Consolidation</b><br/>STM→LTM bridge · Ebbinghaus decay"]
     end
 
-    subgraph L12["<b style='color:#60a5fa;'>💠 L1-L2: Associative</b>"]
-        WM["<b>L1: Episodic</b><br/>Session traces · temporal"]
-        SM["<b>L2: Semantic</b><br/>Facts · JSON indexed"]
+    subgraph Retrieval["Retrieval"]
+        BM25["<b>BM25 + Vector</b><br/>Hybrid search"]
+        RERANK["<b>Cross-Encoder</b><br/>Two-stage reranking"]
     end
 
-    subgraph L34["<b style='color:#a78bfa;'>🧠 L3-L4: Meta-Cognitive</b>"]
-        PM["<b>L3: Procedural</b><br/>Skills · action patterns"]
-        MM["<b>L4: Meta-Memory</b><br/>Learning traces · strategy"]
+    subgraph Offline["Offline Consolidation"]
+        DREAM["<b>Dream Engine</b><br/>Idle-time dedup · resolve · trim"]
+        FIELD["<b>Field-Theoretic</b><br/>PDE-governed semantic diffusion"]
+        FORGE["<b>FORGE Broadcast</b><br/>Population memory propagation"]
+        LATENT["<b>Latent Tokens</b><br/>MemGen-style · no external DB"]
     end
 
-    subgraph L5["<b style='color:#f472b6;'>🌐 L5: Collective</b>"]
-        CM["<b>L5: Collective</b><br/>Fleet knowledge · cross-session"]
-    end
+    STM --> CONSOL
+    CONSOL --> LTM
+    LTM --> BM25
+    BM25 --> RERANK
+    STM -.-> DREAM
+    LTM -.-> DREAM
+    DREAM --> FIELD
+    DREAM --> FORGE
+    FIELD --> LATENT
 
-    subgraph Consolidation["<b style='color:#34d399;'>🔄 ADMISSION & CONSOLIDATION</b>"]
-        AMAC["<b>A-MAC 5-Factor Gate</b><br/>utility · confidence · novelty"]
-        DC1["<b>CoMem Async Pipeline</b><br/>n-step-off decoupled"]
-        DC2["<b>Free-Energy Consolidation</b><br/>utility + entropy dual objective"]
-        DC3["<b>Auto-Dreamer GRPO</b><br/>offline consolidation"]
-        DC4["<b>Dual-Process Retrieval</b><br/>System 1 fast · System 2 deliberate"]
-    end
+    classDef runtime fill:#7c3aed20,stroke:#a78bfa,stroke-width:2px,color:#e2e8f0
+    classDef retrieval fill:#3b82f620,stroke:#60a5fa,stroke-width:2px,color:#e2e8f0
+    classDef offline fill:#10b98120,stroke:#34d399,stroke-width:2px,color:#e2e8f0
 
-    STM -->|"A-MAC gate"| WM
-    WM -->|"consolidation"| SM
-    SM --> PM
-    PM --> MM
-    MM --> CM
-
-    WM & SM & PM --> AMAC
-    AMAC --> DC1 --> DC2 --> DC3
-    DC3 -->|"enriched memories"| SM & PM
-
-    MR["<b>🔍 MemoryRetriever</b><br/>BM25 + Vector · RRF · MRAgent"]
-    SM -.-> MR
-    PM -.-> MR
-    CM -.-> MR
-
-    classDef sensory fill:#f59e0b20,stroke:#fbbf24,stroke-width:2px,color:#e2e8f0
-    classDef associative fill:#3b82f620,stroke:#60a5fa,stroke-width:2px,color:#e2e8f0
-    classDef meta fill:#7c3aed20,stroke:#a78bfa,stroke-width:2px,color:#e2e8f0
-    classDef collective fill:#ec489920,stroke:#f472b6,stroke-width:2px,color:#e2e8f0
-    classDef cons fill:#10b98120,stroke:#34d399,stroke-width:2px,color:#e2e8f0
-    classDef retriever fill:#06b6d420,stroke:#22d3ee,stroke-width:2px,color:#e2e8f0
-
-    class STM sensory
-    class WM,SM associative
-    class PM,MM meta
-    class CM collective
-    class AMAC,DC1,DC2,DC3,DC4 cons
-    class MR retriever
-
-    style L0 fill:#f59e0b08,stroke:#fbbf24,stroke-width:2px
-    style L12 fill:#3b82f608,stroke:#60a5fa,stroke-width:2px
-    style L34 fill:#7c3aed08,stroke:#a78bfa,stroke-width:2px
-    style L5 fill:#ec489908,stroke:#f472b6,stroke-width:2px
-    style Consolidation fill:#10b98108,stroke:#34d399,stroke-width:2px
+    class STM,LTM,CONSOL runtime
+    class BM25,RERANK retrieval
+    class DREAM,FIELD,FORGE,LATENT offline
 ```
 
 ### Safety Architecture (Parallax-Style Cognitive-Executive Separation)
@@ -398,77 +373,40 @@ graph TB
     style Validation fill:#10b98108,stroke:#34d399,stroke-width:2px
 ```
 
-### Ultra Enhancement Stack (10/11 Research Streams Complete)
+### Breakthrough Research Stack (14 Syntheses from 546 Sources)
 
 ```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#f97316', 'lineColor': '#fb923c', 'fontSize': '13px'}, 'flowchart': {'nodeSpacing': 25, 'rankSpacing': 35}}}%%
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#f97316', 'lineColor': '#fb923c', 'fontSize': '13px'}}}%%
 graph TB
-    subgraph S1["<b style='color:#fbbf24;'>📂 S1: Filesystem-as-Context</b>"]
-        FS["<b>FS-as-Context</b><br/>45→75% improvement · Azure SRE proven"]
+    subgraph Foundation["Foundations"]
+        MEM["<b>3-Tier Memory</b><br/>STM/LTM/Consolidation"]
+        CTX["<b>Context Engineering</b><br/>WorkspaceReport M_t"]
+        SKL["<b>Skills System</b><br/>Progressive disclosure"]
+        RTR["<b>Model Router</b><br/>Multi-provider"]
     end
 
-    subgraph S2["<b style='color:#60a5fa;'>💠 S2: MAGMA 4-Graph Memory</b>"]
-        MAGMA["<b>MAGMA 4-Graph</b><br/>Temporal · Causal · Entity · Semantic"]
+    subgraph Intelligence["Intelligence"]
+        PLAN["<b>Planning</b><br/>CoT · ToT · MCTS"]
+        EVOL["<b>Self-Evolving</b><br/>GEPA optimizer · guardrails"]
+        SELF["<b>Self-Knowledge</b><br/>Calibrated confidence"]
     end
 
-    subgraph S3["<b style='color:#a78bfa;'>🔄 S3: RecMem Subconscious</b>"]
-        RecMem["<b>RecMem Monitor</b><br/>87% token savings · recurrence detection"]
+    subgraph Fleet["Multi-Agent"]
+        SWRM["<b>Swarm/Fleet</b><br/>Supervisor daemon"]
+        ADV["<b>Adversarial Panel</b><br/>3-verifier + Skeptic"]
+        AUTO["<b>Autonomy</b><br/>Unattended loop"]
     end
 
-    subgraph S4["<b style='color:#34d399;'>📊 S4: Mermaid Compression</b>"]
-        Mermaid["<b>Mermaid Symbolic</b><br/>61% token reduction · TencentDB"]
+    subgraph Interface["Interface"]
+        VOICE["<b>Voice Mode</b><br/>Tier A+B · VI+EN"]
+        DESK["<b>Desktop GUI</b><br/>Electron + React"]
+        STEER["<b>Steering</b><br/>Interrupt · approve"]
     end
 
-    subgraph S5["<b style='color:#22d3ee;'>🔍 S5: RRF Hybrid Search</b>"]
-        RRF["<b>RRF Hybrid</b><br/>96.6% R@5 · zero API calls · BM25+Vector"]
-    end
-
-    subgraph S6["<b style='color:#f472b6;'>🐟 S6: Catfish Contrarian</b>"]
-        Catfish["<b>Catfish Agent</b><br/>81.9% wrong-consensus interception"]
-    end
-
-    subgraph S7["<b style='color:#f87171;'>🌐 S7: AdaptOrch Topology</b>"]
-        Adapt["<b>AdaptOrch</b><br/>12-23% improvement · DAOEF scaling"]
-    end
-
-    subgraph S8["<b style='color:#fb923c;'>🔬 S8: Behavioral Fingerprint</b>"]
-        Fingerprint["<b>AgentAssay</b><br/>86% regression detection vs 0% binary"]
-    end
-
-    FS --> MAGMA
-    MAGMA --> RecMem
-    RecMem --> Mermaid
-    Mermaid --> RRF
-    RRF --> Catfish
-    Catfish --> Adapt
-    Adapt --> Fingerprint
-
-    classDef s1 fill:#f59e0b20,stroke:#fbbf24,stroke-width:2px,color:#e2e8f0
-    classDef s2 fill:#3b82f620,stroke:#60a5fa,stroke-width:2px,color:#e2e8f0
-    classDef s3 fill:#7c3aed20,stroke:#a78bfa,stroke-width:2px,color:#e2e8f0
-    classDef s4 fill:#10b98120,stroke:#34d399,stroke-width:2px,color:#e2e8f0
-    classDef s5 fill:#06b6d420,stroke:#22d3ee,stroke-width:2px,color:#e2e8f0
-    classDef s6 fill:#ec489920,stroke:#f472b6,stroke-width:2px,color:#e2e8f0
-    classDef s7 fill:#ef444420,stroke:#f87171,stroke-width:2px,color:#e2e8f0
-    classDef s8 fill:#f9731620,stroke:#fb923c,stroke-width:2px,color:#e2e8f0
-
-    class FS s1
-    class MAGMA s2
-    class RecMem s3
-    class Mermaid s4
-    class RRF s5
-    class Catfish s6
-    class Adapt s7
-    class Fingerprint s8
-
-    style S1 fill:#f59e0b08,stroke:#fbbf24,stroke-width:2px
-    style S2 fill:#3b82f608,stroke:#60a5fa,stroke-width:2px
-    style S3 fill:#7c3aed08,stroke:#a78bfa,stroke-width:2px
-    style S4 fill:#10b98108,stroke:#34d399,stroke-width:2px
-    style S5 fill:#06b6d408,stroke:#22d3ee,stroke-width:2px
-    style S6 fill:#ec489908,stroke:#f472b6,stroke-width:2px
-    style S7 fill:#ef444408,stroke:#f87171,stroke-width:2px
-    style S8 fill:#f9731608,stroke:#fb923c,stroke-width:2px
+    Foundation --> Intelligence
+    Intelligence --> Fleet
+    Fleet --> Interface
+    Foundation --> Interface
 ```
 
 > 8 S-tier breakthroughs identified across 11 research streams (150+ sources, 11,276+ lines). Full roadmap in [`MASTER-PLAN.md`](docs/lyra-upgrade/MASTER-PLAN.md).
@@ -1327,9 +1265,9 @@ These combinations are what make Lyra's planned architecture novel. No existing 
 </tr>
 <tr>
 <td style="color: #fb923c; font-weight: bold;">S2</td>
-<td style="color: #e2e8f0;"><b>MAGMA 4-Graph Memory</b></td>
+<td style="color: #e2e8f0;"><b>3-Tier Memory + Consolidation</b></td>
 <td style="color: #94a3b8;">Semantic, temporal, causal, and entity graphs in a unified query-adaptive architecture</td>
-<td style="color: #60a5fa;"><a href="https://arxiv.org/html/2601.03236">MAGMA (2026)</a>, MemAgent Workshop (ICLR 2026)</td>
+<td style="color: #60a5fa;">Mem0 V3, Letta/MemGPT, TencentDB, Field-Theoretic (Mitra 2026), FORGE (2026)</td>
 </tr>
 <tr>
 <td style="color: #fb923c; font-weight: bold;">S3</td>
@@ -2091,7 +2029,7 @@ The culmination of 11 deep research streams analyzing 150+ sources across 11,276
 </tr>
 <tr><td style="color: #fbbf24;">1</td><td style="color: #e2e8f0;"><b>SkillOpt Text-Space Skill Optimizer</b></td><td style="color: #94a3b8;">Microsoft · arXiv 2605.23904</td><td style="color: #34d399;">+23.5pts, 52/52 cells won</td></tr>
 <tr><td style="color: #fbbf24;">2</td><td style="color: #e2e8f0;"><b>Ratchet Lifecycle Management</b></td><td style="color: #94a3b8;">arXiv 2605.22148</td><td style="color: #34d399;">Non-divergence guarantee, C=50 cap</td></tr>
-<tr><td style="color: #fbbf24;">3</td><td style="color: #e2e8f0;"><b>5-Tier Memory Hierarchy</b></td><td style="color: #94a3b8;">TencentDB + MemPalace + CodeGraph</td><td style="color: #34d399;">BM25+vector+RRF, temporal KGs</td></tr>
+<tr><td style="color: #fbbf24;">3</td><td style="color: #e2e8f0;"><b>3-Tier Memory Architecture</b></td><td style="color: #94a3b8;">TencentDB + MemPalace + CodeGraph</td><td style="color: #34d399;">BM25+vector+RRF, temporal KGs</td></tr>
 <tr><td style="color: #fbbf24;">4</td><td style="color: #e2e8f0;"><b>Continuous Relay-Race Autonomy</b></td><td style="color: #94a3b8;">Continuous Claude</td><td style="color: #34d399;">Triple-budget governance, checkpoint handoff</td></tr>
 <tr><td style="color: #fbbf24;">5</td><td style="color: #e2e8f0;"><b>Zero-Trust Agent Federation</b></td><td style="color: #94a3b8;">Ruflo</td><td style="color: #34d399;">mTLS + behavioral trust scoring</td></tr>
 <tr><td style="color: #fbbf24;">6</td><td style="color: #e2e8f0;"><b>MAVEN Adversarial Verification</b></td><td style="color: #94a3b8;">ARIS + MAVEN</td><td style="color: #34d399;">Skeptic-Researcher-Judge, cross-model</td></tr>
