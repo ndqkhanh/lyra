@@ -208,7 +208,7 @@ Lyra's swarm and fleet architecture exists as running code across four modules: 
 
 What exists today: the supervisor daemon can spawn, monitor, stop, list, and idle-reap sessions with full SQLite persistence. The two-axis state model (6 task-states x 3 process-states) captures the full session lifecycle. The worktree manager provisions isolated git worktrees with configurable base-ref policies and non-destructive cleanup. Sessions survive daemon restart via disk rehydration.
 
-What is planned but not yet built: the fleet TUI with peek panel and steer-by-exception hotkeys; the cheap-model row summary pipeline integrated with the model router; the pre-execution confidence circuit breaker and its polynomial ridge classifier; and the shell commands (`lyra fleet [agents|attach|logs|stop|respawn|rm|daemon status]`).
+What is deferred to Phase 2: the full fleet TUI with peek panel and steer-by-exception hotkeys; the cheap-model row summary pipeline integrated with the model router; the pre-execution confidence circuit breaker and its polynomial ridge classifier; and the shell commands (`lyra fleet [agents|attach|logs|stop|respawn|rm|daemon status]`).
 
 Scaling limits are defined by the threading model: Python's GIL limits in-process concurrency, making the current threading-based lock management a bottleneck beyond ~20 concurrent sessions. A future async-based rewrite (using `asyncio` with `TaskHandler` futures, as described in the plan) would lift this ceiling to hundreds of concurrent sessions. The SQLite store with WAL journaling supports concurrent reads well but serializes writes, making it suitable for infrequent state transitions (seconds between transitions) rather than high-frequency logging.
 
