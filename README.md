@@ -1,47 +1,10 @@
 <div align="center">
 
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" width="100%" fill="none"
-     style="font-family:system-ui,-apple-system,sans-serif;max-width:720px" role="img" aria-label="LYRA banner">
-  <defs>
-    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%"   stop-color="#c084fc"/>
-      <stop offset="25%"  stop-color="#a78bfa"/>
-      <stop offset="50%"  stop-color="#818cf8"/>
-      <stop offset="75%"  stop-color="#60a5fa"/>
-      <stop offset="100%" stop-color="#38bdf8"/>
-    </linearGradient>
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="3" result="blur"/>
-      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-  </defs>
-
-  <!-- Card -->
-  <rect x="2" y="2" width="716" height="196" rx="10" fill="#0d0d1a" stroke="#1e293b" stroke-width="1"/>
-
-  <!-- Subtle grid pattern (terminal feel) -->
-  <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-    <circle cx="10" cy="10" r="0.5" fill="#1e293b"/>
-  </pattern>
-  <rect x="2" y="2" width="716" height="196" rx="10" fill="url(#grid)" opacity="0.5"/>
-
-  <!-- LYRA — gradient word with glow -->
-  <text x="360" y="95" text-anchor="middle" font-size="72" font-weight="900" letter-spacing="16"
-        fill="url(#g)" filter="url(#glow)">LYRA</text>
-
-  <!-- Subtitle -->
-  <text x="360" y="135" text-anchor="middle" font-size="15" font-weight="500"
-        fill="#94a3b8" letter-spacing="3">THE OPEN-SOURCE OMNI-AGENT HARNESS</text>
-
-  <!-- Stats line -->
-  <text x="360" y="162" text-anchor="middle" font-size="11" font-weight="400"
-        fill="#64748b" letter-spacing="1">MIT · Python · TypeScript · 47 modules · 99 tests · 325 papers · 40 books · AUDITED</text>
-
-  <!-- Terminal cursor -->
-  <rect x="500" y="80" width="8" height="14" rx="1" fill="#38bdf8" opacity="0.8">
-    <animate attributeName="opacity" values="0.8;0;0.8" dur="1s" repeatCount="indefinite"/>
-  </rect>
-</svg>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/banner.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/assets/banner.svg">
+  <img alt="LYRA — The Open-Source Omni-Agent Harness" src="docs/assets/banner.svg" width="100%" style="max-width:720px">
+</picture>
 
 <br>
 
