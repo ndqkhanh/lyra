@@ -257,9 +257,9 @@ The pipeline's three-stage orchestration in `process_document` is: (1) chunk the
 
 **File type detection** (method `detect_type`) maps 20+ file extensions to five `DocumentType` values. This is a simple dictionary lookup -- O(1) per file -- and does not attempt content-based detection (e.g., sniffing PDF magic bytes). Unknown extensions return `DocumentType.UNKNOWN`.
 
-### Implemented vs Planned Split
+### Implemented
 
-**Implemented** (`src/lyra/ingestion/pipeline.py`):
+**Core components** (`src/lyra/ingestion/pipeline.py`):
 
 | Component | Lines | Functionality |
 |-----------|-------|---------------|
@@ -273,7 +273,9 @@ The pipeline's three-stage orchestration in `process_document` is: (1) chunk the
 | `DictMemoryStore` | 208-239 | In-memory dictionary store with get/count |
 | `IngestionPipeline` | 242-372 | Three-stage orchestrator (chunk, embed, store) with file-type detection |
 
-**Planned** (specified in plan, no code):
+### Planned
+
+**Components** (specified in plan, no code):
 
 | Component | Source | Priority |
 |-----------|--------|----------|
