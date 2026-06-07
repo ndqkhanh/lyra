@@ -9,6 +9,10 @@ This module provides:
 - Memory consolidation (STM -> LTM)
 - Vector search (embedding-based semantic search)
 - SQLite-backed persistence
+- Field-theoretic memory (PDE-governed continuous fields)
+- Dream engine (idle-time background consolidation)
+- Population broadcast (FORGE-style cross-agent memory)
+- Latent memory tokens (MemGen-style generative tokens)
 """
 
 from lyra.memory.long_term_memory import LongTermMemory, MemoryIndex, SQLiteLongTermMemory
@@ -43,6 +47,43 @@ from lyra.memory.vector_search import (
     VectorSearcher,
 )
 
+# --- New in 7.3.0: Field-Theoretic Memory ---
+from lyra.memory.field_theoretic import (
+    FieldMemory,
+    FieldPoint,
+    FieldState,
+    free_energy,
+    couple_agent_fields,
+    create_field_memory,
+)
+
+# --- New in 7.3.0: Dream Engine ---
+from lyra.memory.dream_engine import (
+    DreamEngine,
+    DreamBank,
+    DreamEntry,
+    DreamAction,
+)
+
+# --- New in 7.3.0: Population Broadcast ---
+from lyra.memory.population_broadcast import (
+    PopulationBroadcast,
+    ReflectionAgent,
+    SynthesizedMemory,
+    MemoryTypeCategory,
+    AgentProfile,
+    BroadcastEvent,
+)
+
+# --- New in 7.3.0: Latent Memory Tokens ---
+from lyra.memory.latent_tokens import (
+    LatentMemory,
+    LatentToken,
+    MemSequence,
+    MemoryWeaver,
+    MemoryTrigger,
+)
+
 __all__ = [
     # Core
     "Memory",
@@ -74,4 +115,29 @@ __all__ = [
     "SentenceTransformerEncoder",
     "TfidfEncoder",
     "VectorSearcher",
+    # Field-theoretic memory
+    "FieldMemory",
+    "FieldPoint",
+    "FieldState",
+    "free_energy",
+    "couple_agent_fields",
+    "create_field_memory",
+    # Dream engine
+    "DreamEngine",
+    "DreamBank",
+    "DreamEntry",
+    "DreamAction",
+    # Population broadcast
+    "PopulationBroadcast",
+    "ReflectionAgent",
+    "SynthesizedMemory",
+    "MemoryTypeCategory",
+    "AgentProfile",
+    "BroadcastEvent",
+    # Latent memory tokens
+    "LatentMemory",
+    "LatentToken",
+    "MemSequence",
+    "MemoryWeaver",
+    "MemoryTrigger",
 ]
