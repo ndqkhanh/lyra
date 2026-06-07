@@ -88,3 +88,4 @@ packages/lyra-pentest
 ProRL-Agent-Server/
 keys.log
 .ruff-errors.txt
+src/ui/desktop/node_modules/
