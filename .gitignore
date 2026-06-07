@@ -79,6 +79,7 @@ docs/*.pdf
 docs/research/*-repo
 docs/research/*-repo/
 docs/research/repos/
+docs/lyra-upgrade/repos/
 
 # Dead package
 packages/lyra-pentest
