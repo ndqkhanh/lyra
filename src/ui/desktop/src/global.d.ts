@@ -10,6 +10,7 @@ interface LyraAPI {
       onEvent?: (path: string, event: string) => void
       onError?: (path: string, error: string) => void
     },
+    body?: string,
   ) => () => void
 }
 

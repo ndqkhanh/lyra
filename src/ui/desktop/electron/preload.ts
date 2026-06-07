@@ -22,6 +22,7 @@ const api = {
       onEvent?: (path: string, event: string) => void
       onError?: (path: string, error: string) => void
     },
+    body?: string,
   ): (() => void) => {
     const dataHandler = (_event: Electron.IpcRendererEvent, path: string, data: string) => {
       if (path === ssePath) callbacks.onData?.(path, data)
@@ -37,7 +38,7 @@ const api = {
     ipcRenderer.on('sse:event', eventHandler)
     ipcRenderer.on('sse:error', errorHandler)
 
-    ipcRenderer.invoke('lyra:sse-connect', ssePath)
+    ipcRenderer.invoke('lyra:sse-connect', ssePath, body)
 
     return () => {
       ipcRenderer.removeListener('sse:data', dataHandler)

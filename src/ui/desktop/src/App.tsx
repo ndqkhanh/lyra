@@ -20,6 +20,7 @@ export function App() {
     connected,
     providers,
     usage,
+    sendMessage,
     cancelStream,
     checkConnection,
   } = useLyraAPI()
@@ -105,65 +106,29 @@ export function App() {
       setMessages((prev) => [...prev, userMsg, assistantMsg])
       setIsStreaming(true)
 
-      // Create a simple streaming simulation via the hook's sendMessage
-      // In production, the main process SSE handler pushes chunks
-      // For now, we use a direct fetch approach:
       try {
-        const apiUrl = await window.lyraAPI.getApiUrl()
-        const resp = await fetch(`${apiUrl}/chat/${activeId}/stream`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: text,
-            model: model || undefined,
-            provider: provider || undefined,
-          }),
-        })
-
-        if (!resp.ok) {
-          throw new Error(`HTTP ${resp.status}`)
-        }
-
-        const reader = resp.body?.getReader()
-        if (!reader) throw new Error('No response body')
-
-        const decoder = new TextDecoder()
-        let buffer = ''
-
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-
-          buffer += decoder.decode(value, { stream: true })
-          const lines = buffer.split('\n')
-          buffer = lines.pop() ?? ''
-
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const data = line.slice(6)
-              try {
-                const chunk = JSON.parse(data) as StreamChunk
-                if (chunk.content) {
-                  currentChunkRef.current += chunk.content
-                  setMessages((prev) => {
-                    const last = prev[prev.length - 1]
-                    if (last && last.isStreaming) {
-                      return prev.map((m) =>
-                        m.id === last.id ? { ...m, content: currentChunkRef.current } : m,
-                      )
-                    }
-                    return prev
-                  })
-                }
-                if (chunk.done) {
-                  break
-                }
-              } catch {
-                currentChunkRef.current += line
-              }
+        // Use the IPC proxy via connectSSE instead of direct fetch.
+        // The main process handles TLS and proxy settings.
+        await sendMessage(
+          activeId,
+          text,
+          (chunk: StreamChunk) => {
+            if (chunk.content) {
+              currentChunkRef.current += chunk.content
             }
-          }
-        }
+            setMessages((prev) => {
+              const last = prev[prev.length - 1]
+              if (last && last.isStreaming) {
+                return prev.map((m) =>
+                  m.id === last.id ? { ...m, content: currentChunkRef.current } : m,
+                )
+              }
+              return prev
+            })
+          },
+          model,
+          provider,
+        )
 
         // Finalize the assistant message
         setMessages((prev) => {
@@ -192,7 +157,7 @@ export function App() {
         currentChunkRef.current = ''
       }
     },
-    [activeId],
+    [activeId, sendMessage],
   )
 
   const handleCancel = useCallback(() => {

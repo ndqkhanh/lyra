@@ -32,12 +32,14 @@ export interface UsageStats {
   duration: number
 }
 
+/** Callback invoked for each SSE chunk received during streaming. */
+export type OnChunkCallback = (chunk: StreamChunk) => void
+
 async function apiFetch(path: string, options?: RequestInit): Promise<Response> {
   const resp = await window.lyraAPI.fetch(path, options)
   if (!resp.ok) {
     throw new Error(resp.body || `HTTP ${resp.status}`)
   }
-  // The IPC response body is a string — parse it
   return { ok: resp.ok, status: resp.status, json: async () => JSON.parse(resp.body) } as Response
 }
 
@@ -78,9 +80,27 @@ export function useLyraAPI() {
     }
   }, [])
 
-  /** Send a chat message via SSE streaming. Calls onChunk for each received chunk. */
+  /** Send a chat message via SSE streaming.
+   *
+   * Uses the Electron IPC proxy (``window.lyraAPI.connectSSE``) rather than
+   * direct ``fetch``, so the request goes through the main process where
+   * TLS certs and proxy settings are properly handled.
+   *
+   * @param sessionId  Target session ID.
+   * @param message    User message text.
+   * @param onChunk    Called for every SSE event received.
+   * @param model      Optional model override.
+   * @param provider   Optional provider override.
+   * @returns          Promise that resolves when the stream ends.
+   */
   const sendMessage = useCallback(
-    (sessionId: string, _message: string, model?: string, provider?: string) => {
+    (
+      sessionId: string,
+      message: string,
+      onChunk: OnChunkCallback,
+      model?: string,
+      provider?: string,
+    ) => {
       // Abort any existing stream
       if (abortRef.current) {
         abortRef.current.abort()
@@ -93,10 +113,13 @@ export function useLyraAPI() {
 
         const ssePath = `/chat/${sessionId}/stream?${params.toString()}`
 
+        const body = JSON.stringify({ message, model, provider })
+
         const unsubscribe = window.lyraAPI.connectSSE(ssePath, {
           onData: (_path, data) => {
             try {
               const chunk = JSON.parse(data) as StreamChunk
+              onChunk(chunk)
               if (chunk.done) {
                 resolve()
               }
@@ -107,13 +130,11 @@ export function useLyraAPI() {
           onError: (_path, error) => {
             reject(new Error(error))
           },
-        })
+        }, body)
 
         // Store unsubscribe as cleanup
-        const origAbort = abortRef.current?.abort
         abortRef.current = {
           abort: () => {
-            origAbort?.()
             unsubscribe()
             reject(new Error('Aborted'))
           },

@@ -72,7 +72,7 @@ ipcMain.handle('lyra:fetch', async (_event, urlPath: string, options?: RequestIn
 })
 
 // SSE stream proxy: main process fetches SSE, forwards chunks to renderer
-ipcMain.handle('lyra:sse-connect', async (event, ssePath: string) => {
+ipcMain.handle('lyra:sse-connect', async (event, ssePath: string, body?: string) => {
   const url = `${API_BASE_URL}${ssePath}`
   const abortController = new AbortController()
   const win = BrowserWindow.fromWebContents(event.sender)
@@ -87,7 +87,7 @@ ipcMain.handle('lyra:sse-connect', async (event, ssePath: string) => {
     const resp = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({}),
+      body: body || '{}',
       signal: abortController.signal,
     })
 

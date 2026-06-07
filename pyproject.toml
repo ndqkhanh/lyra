@@ -75,6 +75,9 @@ Documentation = "https://docs.lyra.ai"
 Repository = "https://github.com/lyra-ai/lyra"
 Issues = "https://github.com/lyra-ai/lyra/issues"
 
+[project.scripts]
+lyra-server = "lyra.server.app:run_server"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["lyra", "lyra.*"]
