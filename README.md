@@ -1,114 +1,75 @@
 <div align="center">
 
-<!--
-  Responsive SVG banner — scales from mobile (320px) to ultrawide.
-  Dark card anchors visually on both light & dark GitHub themes.
-  Inline SVG: readable, editable, zero external dependencies.
--->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" width="100%" fill="none"
-     style="font-family:system-ui,-apple-system,sans-serif;max-width:720px">
+     style="font-family:system-ui,-apple-system,sans-serif;max-width:720px" role="img" aria-label="LYRA banner">
   <defs>
-    <!-- Purple → violet → blue → sky → cyan gradient for LYRA + accent -->
-    <linearGradient id="lyra-g" x1="0%" y1="0%" x2="100%" y2="0%">
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%"   stop-color="#c084fc"/>
       <stop offset="25%"  stop-color="#a78bfa"/>
       <stop offset="50%"  stop-color="#818cf8"/>
       <stop offset="75%"  stop-color="#60a5fa"/>
       <stop offset="100%" stop-color="#38bdf8"/>
     </linearGradient>
-    <!-- Card background: near-black with subtle warmth -->
-    <linearGradient id="card-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%"   stop-color="#1a1a2e"/>
-      <stop offset="100%" stop-color="#1e192f"/>
-    </linearGradient>
-    <!-- Card border: matching gradient, semi-transparent -->
-    <linearGradient id="card-border" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%"   stop-color="#c084fc" stop-opacity="0.35"/>
-      <stop offset="50%"  stop-color="#818cf8" stop-opacity="0.35"/>
-      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.35"/>
-    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
   </defs>
 
   <!-- Card -->
-  <rect x="0" y="0" width="720" height="200" rx="12" fill="url(#card-bg)"/>
-  <rect x="0" y="0" width="720" height="200" rx="12" stroke="url(#card-border)" stroke-width="1.5"/>
+  <rect x="2" y="2" width="716" height="196" rx="10" fill="#0d0d1a" stroke="#1e293b" stroke-width="1"/>
 
-  <!-- Top accent bar -->
-  <rect x="0" y="0" width="720" height="3" rx="12" fill="url(#lyra-g)"/>
+  <!-- Subtle grid pattern (terminal feel) -->
+  <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+    <circle cx="10" cy="10" r="0.5" fill="#1e293b"/>
+  </pattern>
+  <rect x="2" y="2" width="716" height="196" rx="10" fill="url(#grid)" opacity="0.5"/>
 
-  <!-- Subtle geometric decoration — constellation dots (left) -->
-  <circle cx="60" cy="60" r="2"   fill="#a78bfa" fill-opacity="0.30"/>
-  <circle cx="85" cy="45" r="1.5" fill="#818cf8" fill-opacity="0.25"/>
-  <circle cx="50" cy="85" r="1.2" fill="#60a5fa" fill-opacity="0.20"/>
-  <line x1="60" y1="60" x2="85" y2="45" stroke="#a78bfa" stroke-width="0.5" stroke-opacity="0.15"/>
-  <line x1="60" y1="60" x2="50" y2="85" stroke="#a78bfa" stroke-width="0.5" stroke-opacity="0.10"/>
+  <!-- LYRA — gradient word with glow -->
+  <text x="360" y="95" text-anchor="middle" font-size="72" font-weight="900" letter-spacing="16"
+        fill="url(#g)" filter="url(#glow)">LYRA</text>
 
-  <!-- Subtle geometric decoration — constellation dots (right) -->
-  <circle cx="670" cy="55" r="2"   fill="#60a5fa" fill-opacity="0.30"/>
-  <circle cx="645" cy="40" r="1.5" fill="#818cf8" fill-opacity="0.25"/>
-  <circle cx="660" cy="80" r="1.2" fill="#38bdf8" fill-opacity="0.20"/>
-  <line x1="670" y1="55" x2="645" y2="40" stroke="#60a5fa" stroke-width="0.5" stroke-opacity="0.15"/>
-  <line x1="670" y1="55" x2="660" y2="80" stroke="#60a5fa" stroke-width="0.5" stroke-opacity="0.12"/>
+  <!-- Subtitle -->
+  <text x="360" y="135" text-anchor="middle" font-size="15" font-weight="500"
+        fill="#94a3b8" letter-spacing="3">THE OPEN-SOURCE OMNI-AGENT HARNESS</text>
 
-  <!-- LYRA — large gradient wordmark -->
-  <text x="360" y="108" text-anchor="middle"
-        font-size="68" font-weight="800" letter-spacing="14"
-        fill="url(#lyra-g)">LYRA</text>
+  <!-- Stats line -->
+  <text x="360" y="162" text-anchor="middle" font-size="11" font-weight="400"
+        fill="#64748b" letter-spacing="1">MIT · Python · TypeScript · 47 modules · 99 tests · 325 papers · 40 books · AUDITED</text>
 
-  <!-- Subtle ambient glow behind LYRA -->
-  <circle cx="360" cy="100" r="80" fill="#a78bfa" fill-opacity="0.04"/>
-
-  <!-- Tagline -->
-  <text x="360" y="150" text-anchor="middle"
-        font-size="16" font-weight="500" fill="#94a3b8">
-    Multi-Agent Omni-Agent Harness
-  </text>
-
-  <!-- Tech line — key facts color-coded -->
-  <text x="360" y="175" text-anchor="middle"
-        font-size="12" font-weight="400" fill="#64748b">
-    <tspan fill="#c084fc">MIT</tspan> · <tspan fill="#94a3b8">Python</tspan> / <tspan fill="#94a3b8">TypeScript</tspan> · <tspan fill="#a78bfa">30</tspan>/31 workstreams · single package
-  </text>
-
-  <!-- Version badge (top-right) -->
-  <rect x="610" y="28" rx="6" width="70" height="22" fill="#c084fc" fill-opacity="0.15"/>
-  <text x="645" y="43" text-anchor="middle"
-        font-size="11" font-weight="600" fill="#c084fc">v7.2.1</text>
+  <!-- Terminal cursor -->
+  <rect x="500" y="80" width="8" height="14" rx="1" fill="#38bdf8" opacity="0.8">
+    <animate attributeName="opacity" values="0.8;0;0.8" dur="1s" repeatCount="indefinite"/>
+  </rect>
 </svg>
 
+<br>
+
+<a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white&labelColor=111827" /></a>
+<a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.3%2B-3178C6?style=flat-square&logo=typescript&logoColor=white&labelColor=111827" /></a>
+<a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-v8.0-8b5cf6?style=flat-square&labelColor=111827" /></a>
+<a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-22c55e?style=flat-square&labelColor=111827" /></a>
+<a href="docs/lyra-upgrade/AUDIT.md"><img src="https://img.shields.io/badge/audit-PASS-22c55e?style=flat-square&labelColor=111827" /></a>
+<a href="docs/lyra-upgrade/"><img src="https://img.shields.io/badge/research-325_papers_|_40_books_|_83_repos-8b5cf6?style=flat-square&labelColor=111827" /></a>
+
+<br><br>
+
+<b style="color: #cbd5e1; font-size: 14px;">
+Multi-agent orchestration harness with fleet supervisor, 3-tier memory, model routing,<br>
+skills ecosystem, voice mode, adversarial verification &amp; self-evolving architecture.<br>
+Backed by <b>325 papers, 40 books, 83 repos</b>. Independently audited.
+</b>
+
+<br>
+
+<a href="#what-is-lyra">What Lyra Is</a> ·
+<a href="#how-lyra-compares">Comparisons</a> ·
+<a href="#architecture">Architecture</a> ·
+<a href="#innovations">Innovations</a> ·
+<a href="#quickstart">Quickstart</a> ·
+<a href="#documentation">Docs</a>
+
 </div>
-
-<p align="center">
-  <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=1e1e2e" alt="Python" /></a>
-  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.3%2B-3178C6?style=for-the-badge&logo=typescript&logoColor=white&labelColor=1e1e2e" alt="TypeScript" /></a>
-  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-v7.2.1-8b5cf6?style=for-the-badge&labelColor=1e1e2e" alt="Version" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge&labelColor=1e1e2e" alt="License" /></a>
-  <a href="docs/"><img src="https://img.shields.io/badge/docs-180%2B_files-22c55e?style=for-the-badge&labelColor=1e1e2e" alt="Docs" /></a>
-  <a href="docs/lyra-upgrade/"><img src="https://img.shields.io/badge/research-323_papers_|_40_books_|_81_repos-10b981?style=for-the-badge&labelColor=1e1e2e" alt="Research" /></a>
-</p>
-
-<p align="center">
-  <a href="docs/lyra-upgrade/BASELINE.md"><img src="https://img.shields.io/badge/Baseline-24_/_28_workstreams-22c55e?style=for-the-badge&labelColor=1e1e2e" alt="Baseline" /></a>
-  
-  <a href="docs/research/papers/"><img src="https://img.shields.io/badge/Research-100%2B_papers_|_80%2B_repos-10b981?style=for-the-badge&labelColor=1e1e2e" alt="Research" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge&labelColor=1e1e2e" alt="License" /></a>
-</p>
-
-<p align="center">
-  <b>Multi-agent orchestration harness. 30/31 workstreams solid — agent core, skills, hooks, 3-tier memory,<br>
-  model routing, tools, MCP, fleet/swarm, verification, deep research, reasoning, voice, self-evolution, safety.<br>
-  MIT-licensed. Python + TypeScript. Research-backed. single-package architecture.<br></b>
-</p>
-
-<p align="center">
-  <a href="#what-is-lyra"><b>What Lyra Is</b></a> ·
-  <a href="#architecture"><b>Architecture</b></a> ·
-  <a href="#current-capabilities"><b>Capabilities</b></a> ·
-  
-  <a href="#innovations"><b>Innovations</b></a> ·
-  <a href="#quickstart"><b>Quickstart</b></a> ·
-  <a href="#documentation"><b>Docs</b></a>
-</p>
 
 ---
 
