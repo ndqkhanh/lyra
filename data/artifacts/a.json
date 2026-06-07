@@ -1,0 +1,10 @@
+{
+  "task_id": "a",
+  "content": "result A",
+  "summary": "",
+  "confidence": 1.0,
+  "sources": [],
+  "worker_id": "w_a",
+  "created_at": "2026-06-07T11:25:21.734588",
+  "metadata": {}
+}

@@ -1,0 +1,12 @@
+{
+  "task_id": "st_2",
+  "content": "content",
+  "summary": "summary",
+  "confidence": 0.9,
+  "sources": [
+    "https://source-st_2.com"
+  ],
+  "worker_id": "w_st_2",
+  "created_at": "2026-06-07T11:25:21.708933",
+  "metadata": {}
+}

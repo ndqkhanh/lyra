@@ -1,0 +1,10 @@
+{
+  "task_id": "flaky",
+  "content": "success after retry",
+  "summary": "",
+  "confidence": 1.0,
+  "sources": [],
+  "worker_id": "w_flaky",
+  "created_at": "2026-06-07T11:25:21.931706",
+  "metadata": {}
+}
