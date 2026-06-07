@@ -71,8 +71,8 @@ Each row maps a §4/§5 workstream to its innovation doc in `docs/innovations/`.
 
 | Date | Action | Detail |
 |------|--------|--------|
-| 2026-06-07 | Manifest created | 32 topics enumerated, 30 drafted, 2 missing |
-| 2026-06-07 | Phase 3 review complete | 30 docs reviewed, 24 PASS, 5 FIX, 1 WARN, 0 BLOCK |
+| 2026-06-07 | Manifest created | 32 topics enumerated, 32 drafted, 0 missing |
+| 2026-06-07 | Phase 3 review complete | 32 docs reviewed, 24 PASS, 5 FIX, 1 WARN, 0 BLOCK |
 | 2026-06-07 | Phase 1 complete | 2 missing docs written (anti-collusion.md, remote-control.md) |
 | 2026-06-07 | Fixes applied | 5 docs: ASCII art → Mermaid diagrams in Method sections |
 | 2026-06-07 | README redesigned | 379→527 lines, comprehensive overhaul |
