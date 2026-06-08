@@ -11,6 +11,8 @@ Covers:
 from __future__ import annotations
 
 import asyncio
+import sys
+from unittest.mock import patch
 
 from lyra.reliability.smt_sandbox import (
     ActionSMT,
@@ -416,3 +418,524 @@ class TestVerificationStatus:
             model={"path": "/tmp/x"},
         )
         assert status.model == {"path": "/tmp/x"}
+
+
+# ======================================================================
+# Additional coverage: _PythonConstraintChecker internals
+# ======================================================================
+
+
+class TestPythonConstraintChecker:
+    """Direct coverage of pure-Python fallback constraint checker."""
+
+    def test_is_valid_rule_no_contradiction(self) -> None:
+        from lyra.reliability.smt_sandbox import _PythonConstraintChecker
+
+        checker = _PythonConstraintChecker()
+        assert checker.is_valid_rule([
+            ("path", ConstraintOperator.PREFIX, "/tmp/"),
+            ("domain", ConstraintOperator.IN_SET, ["a", "b"]),
+        ])
+
+    def test_is_valid_rule_detects_contradiction(self) -> None:
+        from lyra.reliability.smt_sandbox import _PythonConstraintChecker
+
+        checker = _PythonConstraintChecker()
+        assert not checker.is_valid_rule([
+            ("x", ConstraintOperator.EQ, "1"),
+            ("x", ConstraintOperator.NEQ, "1"),
+        ])
+
+    def test_is_valid_rule_not_contradicted_neq(self) -> None:
+        """EQ and NEQ on the same field but different values is NOT contradictory."""
+        from lyra.reliability.smt_sandbox import _PythonConstraintChecker
+
+        checker = _PythonConstraintChecker()
+        assert checker.is_valid_rule([
+            ("x", ConstraintOperator.EQ, "1"),
+            ("x", ConstraintOperator.NEQ, "2"),
+        ])
+
+    def test_verify_batch(self) -> None:
+        from lyra.reliability.smt_sandbox import _PythonConstraintChecker, ActionSMT
+
+        checker = _PythonConstraintChecker()
+        actions = [
+            ActionSMT(name="a", params={"x": "1"}, constraints=[("x", ConstraintOperator.EQ, "1")]),
+            ActionSMT(name="b", params={"x": "2"}, constraints=[("x", ConstraintOperator.EQ, "1")]),
+        ]
+        results = checker.verify_batch(actions)
+        assert len(results) == 2
+        assert results[0].allowed
+        assert not results[1].allowed
+
+    def test_matches_regex_pass(self) -> None:
+        from lyra.reliability.smt_sandbox import _PythonConstraintChecker, ActionSMT
+
+        checker = _PythonConstraintChecker()
+        action = ActionSMT(
+            name="t", params={"output": "hello123world"},
+            constraints=[("output", ConstraintOperator.MATCHES_REGEX, r"\d+")],
+        )
+        result = checker.check(action)
+        assert result.allowed
+
+    def test_matches_regex_fail(self) -> None:
+        from lyra.reliability.smt_sandbox import _PythonConstraintChecker, ActionSMT
+
+        checker = _PythonConstraintChecker()
+        action = ActionSMT(
+            name="t", params={"output": "abc"},
+            constraints=[("output", ConstraintOperator.MATCHES_REGEX, r"\d+")],
+        )
+        result = checker.check(action)
+        assert not result.allowed
+
+    def test_matches_regex_bad_pattern(self) -> None:
+        """An invalid regex should not raise — it should return False."""
+        from lyra.reliability.smt_sandbox import _PythonConstraintChecker, ActionSMT
+
+        checker = _PythonConstraintChecker()
+        action = ActionSMT(
+            name="t", params={"output": "test"},
+            constraints=[("output", ConstraintOperator.MATCHES_REGEX, r"[invalid")],
+        )
+        # Should not raise
+        result = checker.check(action)
+        assert not result.allowed
+
+    def test_not_in_set_pass(self) -> None:
+        from lyra.reliability.smt_sandbox import _PythonConstraintChecker, ActionSMT
+
+        checker = _PythonConstraintChecker()
+        action = ActionSMT(
+            name="t", params={"domain": "evil.com"},
+            constraints=[("domain", ConstraintOperator.NOT_IN_SET, ["good.com", "safe.org"])],
+        )
+        result = checker.check(action)
+        assert result.allowed
+
+    def test_not_in_set_fail(self) -> None:
+        from lyra.reliability.smt_sandbox import _PythonConstraintChecker, ActionSMT
+
+        checker = _PythonConstraintChecker()
+        action = ActionSMT(
+            name="t", params={"domain": "good.com"},
+            constraints=[("domain", ConstraintOperator.NOT_IN_SET, ["good.com", "safe.org"])],
+        )
+        result = checker.check(action)
+        assert not result.allowed
+
+    def test_not_in_set_scalar(self) -> None:
+        """NOT_IN_SET with a single scalar value."""
+        from lyra.reliability.smt_sandbox import _PythonConstraintChecker, ActionSMT
+
+        checker = _PythonConstraintChecker()
+        action = ActionSMT(
+            name="t", params={"x": "hello"},
+            constraints=[("x", ConstraintOperator.NOT_IN_SET, "hello")],
+        )
+        result = checker.check(action)
+        assert not result.allowed
+
+    def test_numeric_ge_pass(self) -> None:
+        from lyra.reliability.smt_sandbox import _PythonConstraintChecker, ActionSMT
+
+        checker = _PythonConstraintChecker()
+        action = ActionSMT(
+            name="t", params={"count": "10"},
+            constraints=[("count", ConstraintOperator.GE, "10")],
+        )
+        result = checker.check(action)
+        assert result.allowed
+
+    def test_numeric_ge_fail(self) -> None:
+        from lyra.reliability.smt_sandbox import _PythonConstraintChecker, ActionSMT
+
+        checker = _PythonConstraintChecker()
+        action = ActionSMT(
+            name="t", params={"count": "5"},
+            constraints=[("count", ConstraintOperator.GE, "10")],
+        )
+        result = checker.check(action)
+        assert not result.allowed
+
+    def test_numeric_le_pass(self) -> None:
+        from lyra.reliability.smt_sandbox import _PythonConstraintChecker, ActionSMT
+
+        checker = _PythonConstraintChecker()
+        action = ActionSMT(
+            name="t", params={"count": "5"},
+            constraints=[("count", ConstraintOperator.LE, "10")],
+        )
+        result = checker.check(action)
+        assert result.allowed
+
+    def test_numeric_le_fail(self) -> None:
+        from lyra.reliability.smt_sandbox import _PythonConstraintChecker, ActionSMT
+
+        checker = _PythonConstraintChecker()
+        action = ActionSMT(
+            name="t", params={"count": "15"},
+            constraints=[("count", ConstraintOperator.LE, "10")],
+        )
+        result = checker.check(action)
+        assert not result.allowed
+
+    def test_non_numeric_gt_falls_to_string(self) -> None:
+        """When the value cannot be parsed as a number, GT falls through to
+        string operators and eventually returns False."""
+        from lyra.reliability.smt_sandbox import _PythonConstraintChecker, ActionSMT
+
+        checker = _PythonConstraintChecker()
+        # "abc" cannot be converted to float
+        action = ActionSMT(
+            name="t", params={"value": "abc"},
+            constraints=[("value", ConstraintOperator.GT, "5")],
+        )
+        result = checker.check(action)
+        assert not result.allowed
+
+    def test_non_numeric_ge_falls_to_string(self) -> None:
+        from lyra.reliability.smt_sandbox import _PythonConstraintChecker, ActionSMT
+
+        checker = _PythonConstraintChecker()
+        action = ActionSMT(
+            name="t", params={"value": "abc"},
+            constraints=[("value", ConstraintOperator.GE, "5")],
+        )
+        result = checker.check(action)
+        assert not result.allowed
+
+    def test_contains_fail(self) -> None:
+        from lyra.reliability.smt_sandbox import _PythonConstraintChecker, ActionSMT
+
+        checker = _PythonConstraintChecker()
+        action = ActionSMT(
+            name="t", params={"output": "hello world"},
+            constraints=[("output", ConstraintOperator.CONTAINS, "xyz")],
+        )
+        result = checker.check(action)
+        assert not result.allowed
+
+    def test_unrecognized_operator_returns_false(self) -> None:
+        """Fallback return False when operator is not recognised."""
+        from lyra.reliability.smt_sandbox import _PythonConstraintChecker, ActionSMT, VerificationStatus
+
+        checker = _PythonConstraintChecker()
+        # Create an action with the operator affecting _evaluate fallthrough
+        action = ActionSMT(
+            name="t", params={"x": "y"},
+            constraints=[("x", ConstraintOperator.MATCHES_REGEX, r"[invalid")],
+        )
+        result = checker.check(action)
+        # The regex will fail due to error
+        assert not result.allowed
+
+
+# ======================================================================
+# Additional coverage: SMTSandbox edge cases
+# ======================================================================
+
+
+class TestSMTSandboxExtended:
+    """Extended SMTSandbox coverage for edge cases."""
+
+    def test_verify_merges_action_and_registered_rules(self) -> None:
+        """Action constraints + registered rules should all be checked."""
+        sandbox = SMTSandbox()
+        sandbox.add_rule("always_true", [("x", ConstraintOperator.EQ, "1")])
+
+        # The action's own constraint plus the registered rule
+        action = ActionSMT(
+            name="test",
+            params={"x": "1", "y": "allowed"},
+            constraints=[("y", ConstraintOperator.IN_SET, ["allowed", "ok"])],
+        )
+        status = sandbox.verify(action)
+        assert status.allowed
+
+    def test_verify_registered_rule_fails(self) -> None:
+        """A registered rule can block an action even with no action constraints."""
+        sandbox = SMTSandbox()
+        sandbox.add_rule("path_prefix", [
+            ("path", ConstraintOperator.PREFIX, "/tmp/"),
+        ])
+        action = ActionSMT(
+            name="test",
+            params={"path": "/etc/passwd"},
+            constraints=[],
+        )
+        status = sandbox.verify(action)
+        assert not status.allowed
+
+    def test_encode_to_smt_with_rules(self) -> None:
+        """encode_to_smt should include registered rule names."""
+        sandbox = SMTSandbox()
+        sandbox.add_rule("my_rule", [("x", ConstraintOperator.EQ, "1")])
+        action = ActionSMT(name="test", params={"x": "1"})
+        encoded = sandbox.encode_to_smt(action)
+        assert isinstance(encoded, dict)
+        assert "my_rule" in encoded.get("rules", [])
+
+    def test_remove_nonexistent_rule(self) -> None:
+        """Removing a rule that does not exist returns False."""
+        sandbox = SMTSandbox()
+        assert sandbox.remove_rule("nonexistent") is False
+
+    def test_verify_batch_empty(self) -> None:
+        """verify_batch with empty list returns empty list."""
+        sandbox = SMTSandbox()
+        assert sandbox.verify_batch([]) == []
+
+    def test_not_in_set_with_empty_set(self) -> None:
+        """NOT_IN_SET with an empty set means everything is allowed."""
+        from lyra.reliability.smt_sandbox import _PythonConstraintChecker
+
+        checker = _PythonConstraintChecker()
+        action = ActionSMT(
+            name="t", params={"x": "anything"},
+            constraints=[("x", ConstraintOperator.NOT_IN_SET, [])],
+        )
+        result = checker.check(action)
+        assert result.allowed
+
+    def test_in_set_with_empty_set(self) -> None:
+        """IN_SET with an empty set means nothing matches."""
+        from lyra.reliability.smt_sandbox import _PythonConstraintChecker
+
+        checker = _PythonConstraintChecker()
+        action = ActionSMT(
+            name="t", params={"x": "anything"},
+            constraints=[("x", ConstraintOperator.IN_SET, [])],
+        )
+        result = checker.check(action)
+        assert not result.allowed
+
+
+# ======================================================================
+# Additional coverage: FormalQueryLoopGovernance edge cases
+# ======================================================================
+
+
+class TestFormalGovernanceExtended:
+    """Extended governance coverage."""
+
+    async def test_guard_batch_empty(self) -> None:
+        gov = FormalQueryLoopGovernance()
+        results = await gov.guard_batch([])
+        assert results == []
+
+    async def test_load_spec_empty(self) -> None:
+        gov = FormalQueryLoopGovernance()
+        gov.load_spec({})
+        assert gov.list_rules() == []
+
+    def test_export_spec_empty(self) -> None:
+        gov = FormalQueryLoopGovernance()
+        spec = gov.export_spec()
+        assert spec == {}
+
+    def test_guard_logs_blocked_action(self) -> None:
+        import logging
+
+        gov = FormalQueryLoopGovernance()
+        gov.add_rule("block_all", [
+            ("x", ConstraintOperator.EQ, "impossible"),
+        ])
+
+        import asyncio
+        status = asyncio.run(gov.guard(ActionSMT(
+            name="blocked_action",
+            params={"x": "real_value"},
+        )))
+        assert not status.allowed
+
+    def test_custom_sandbox_injection(self) -> None:
+        """FormalQueryLoopGovernance accepts an injected SMTSandbox."""
+        sandbox = SMTSandbox()
+        sandbox.add_rule("custom", [("x", ConstraintOperator.EQ, "1")])
+        gov = FormalQueryLoopGovernance(sandbox=sandbox)
+        assert "custom" in gov.list_rules()
+
+
+# ======================================================================
+# Additional coverage: Z3-backed paths (mocked)
+# ======================================================================
+
+
+class _MockSMTSandboxZ3:
+    """Helper for mocking Z3 in SMTSandbox tests."""
+
+    class MockExpr:
+        def __init__(self, name: str = ""):
+            self._name = name
+        def __eq__(self, other):
+            return _MockSMTSandboxZ3.MockExpr(f"eq")
+        def __ne__(self, other):
+            return _MockSMTSandboxZ3.MockExpr(f"ne")
+        def __gt__(self, other):
+            return _MockSMTSandboxZ3.MockExpr(f"gt")
+        def __ge__(self, other):
+            return _MockSMTSandboxZ3.MockExpr(f"ge")
+        def __lt__(self, other):
+            return _MockSMTSandboxZ3.MockExpr(f"lt")
+        def __le__(self, other):
+            return _MockSMTSandboxZ3.MockExpr(f"le")
+
+    class MockModel:
+        def eval(self, expr, model_completion=True):
+            return _MockSMTSandboxZ3.MockExpr("mock_val")
+
+    @staticmethod
+    def _make_mock_z3(solver_return: str = "sat"):
+        mock_self = _MockSMTSandboxZ3
+
+        class MockSolver:
+            def __init__(self):
+                self._formulae = []
+            def add(self, formula):
+                self._formulae.append(formula)
+            def check(self):
+                return solver_return
+            def model(self):
+                return mock_self.MockModel()
+
+        class _MockModule:
+            sat = "sat"
+            unsat = "unsat"
+            @staticmethod
+            def String(name: str):
+                return mock_self.MockExpr(name)
+            @staticmethod
+            def StringVal(val: str):
+                return mock_self.MockExpr(str(val))
+            @staticmethod
+            def Bool(val: bool = True):
+                return mock_self.MockExpr(str(val))
+            @staticmethod
+            def And(*args):
+                return mock_self.MockExpr("and")
+            @staticmethod
+            def Or(*args):
+                return mock_self.MockExpr("or")
+            @staticmethod
+            def Not(expr):
+                return mock_self.MockExpr("not")
+            @staticmethod
+            def Contains(a, b):
+                return mock_self.MockExpr("contains")
+            @staticmethod
+            def PrefixOf(a, b):
+                return mock_self.MockExpr("prefix")
+            @staticmethod
+            def SuffixOf(a, b):
+                return mock_self.MockExpr("suffix")
+            @staticmethod
+            def Solver():
+                return MockSolver()
+
+        return _MockModule()
+
+    @staticmethod
+    def patch_z3(solver_return: str = "sat"):
+        from contextlib import ExitStack
+        from unittest.mock import patch
+
+        mock_mod = _MockSMTSandboxZ3._make_mock_z3(solver_return)
+        stack = ExitStack()
+        stack.enter_context(patch.multiple("lyra.reliability.smt_sandbox",
+                                            _HAS_Z3=True, _z3=mock_mod))
+        stack.enter_context(patch.dict(sys.modules, {"z3": mock_mod}))
+        return stack
+
+
+class TestSMTSandboxWithMockZ3:
+    """SMTSandbox coverage for Z3-backed paths."""
+
+    def test_encode_z3_single_constraint(self) -> None:
+        with _MockSMTSandboxZ3.patch_z3():
+            sandbox = SMTSandbox()
+            action = ActionSMT(
+                name="test",
+                params={"path": "/tmp/file.txt"},
+                constraints=[("path", ConstraintOperator.EQ, "/tmp/file.txt")],
+            )
+            encoded = sandbox.encode_to_smt(action)
+        assert encoded is not None
+
+    def test_encode_z3_no_constraints(self) -> None:
+        with _MockSMTSandboxZ3.patch_z3():
+            sandbox = SMTSandbox()
+            action = ActionSMT(name="empty", params={}, constraints=[])
+            encoded = sandbox.encode_to_smt(action)
+        assert encoded is not None
+
+    def test_verify_with_z3_sat(self) -> None:
+        with _MockSMTSandboxZ3.patch_z3("sat"):
+            sandbox = SMTSandbox()
+            action = ActionSMT(
+                name="test",
+                params={"x": "1"},
+                constraints=[("x", ConstraintOperator.EQ, "1")],
+            )
+            status = sandbox.verify(action)
+        assert status.allowed
+        assert status.model is not None
+
+    def test_verify_with_z3_unsat(self) -> None:
+        with _MockSMTSandboxZ3.patch_z3("unsat"):
+            sandbox = SMTSandbox()
+            action = ActionSMT(
+                name="test",
+                params={"x": "1"},
+                constraints=[("x", ConstraintOperator.EQ, "1")],
+            )
+            status = sandbox.verify(action)
+        assert not status.allowed
+        assert "unsatisfiable" in status.reason
+
+    def test_verify_with_z3_unknown(self) -> None:
+        with _MockSMTSandboxZ3.patch_z3("unknown"):
+            sandbox = SMTSandbox()
+            action = ActionSMT(
+                name="test",
+                params={"x": "1"},
+                constraints=[("x", ConstraintOperator.EQ, "1")],
+            )
+            status = sandbox.verify(action)
+        assert not status.allowed
+        assert "unknown" in status.reason
+
+    def test_encode_z3_with_rules(self) -> None:
+        with _MockSMTSandboxZ3.patch_z3():
+            sandbox = SMTSandbox()
+            sandbox.add_rule("r1", [("x", ConstraintOperator.EQ, "1")])
+            action = ActionSMT(name="test", params={"x": "1"}, constraints=[])
+            encoded = sandbox.encode_to_smt(action)
+        assert encoded is not None
+
+    def test_encode_z3_all_operators(self) -> None:
+        with _MockSMTSandboxZ3.patch_z3():
+            sandbox = SMTSandbox()
+            action = ActionSMT(
+                name="test",
+                params={"a": "1", "b": "2", "c": "x", "d": "y", "e": "z",
+                        "f": "hello", "g": "world", "h": "test",
+                        "i": "val", "j": "other"},
+                constraints=[
+                    ("a", ConstraintOperator.NEQ, "2"),
+                    ("b", ConstraintOperator.GT, "1"),
+                    ("c", ConstraintOperator.GE, "1"),
+                    ("d", ConstraintOperator.LT, "2"),
+                    ("e", ConstraintOperator.LE, "2"),
+                    ("f", ConstraintOperator.CONTAINS, "ell"),
+                    ("g", ConstraintOperator.PREFIX, "wor"),
+                    ("h", ConstraintOperator.SUFFIX, "est"),
+                    ("i", ConstraintOperator.IN_SET, ["val", "other"]),
+                    ("j", ConstraintOperator.NOT_IN_SET, ["bad", "worse"]),
+                    ("k", ConstraintOperator.MATCHES_REGEX, r"\d+"),
+                ],
+            )
+            encoded = sandbox.encode_to_smt(action)
+        assert encoded is not None

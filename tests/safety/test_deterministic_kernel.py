@@ -14,7 +14,9 @@ Covers:
 from __future__ import annotations
 
 import json
+import sys
 from typing import Any, Dict
+from unittest.mock import patch
 
 import pytest
 
@@ -26,6 +28,14 @@ from lyra.safety.deterministic_kernel import (
     GateResult,
     SafetyConfig,
     build_default_kernel,
+)
+from lyra.safety.z3_verifier import (
+    RuleOptimizer,
+    SafetyRuleType,
+    SymbolicCondition,
+    SymbolicSafetyRule,
+    VerificationResult,
+    Z3SMTVerifier,
 )
 from lyra.safety.misevolution_guard import (
     AntiLeakageLoop,
@@ -1092,3 +1102,805 @@ class TestValidationCheck:
         assert len(result.warnings) == 1  # c3
         assert result.passed_checks == 1
         assert result.failed_checks == 2
+
+
+# ======================================================================
+# SafetyRuleType enum
+# ======================================================================
+
+
+class TestSafetyRuleType:
+    """SafetyRuleType enum coverage."""
+
+    def test_values(self):
+        assert SafetyRuleType.TOOL_GATE.value == "tool_gate"
+        assert SafetyRuleType.FILESYSTEM_GATE.value == "filesystem_gate"
+        assert SafetyRuleType.NETWORK_GATE.value == "network_gate"
+        assert SafetyRuleType.PROCESS_GATE.value == "process_gate"
+
+
+# ======================================================================
+# SymbolicSafetyRule and VerificationResult
+# ======================================================================
+
+
+class TestSymbolicSafetyRule:
+    """SymbolicSafetyRule data model and serialization."""
+
+    def test_minimal(self):
+        rule = SymbolicSafetyRule(name="test", description="desc")
+        assert rule.name == "test"
+        assert rule.rule_type == SafetyRuleType.TOOL_GATE
+        assert rule.conditions == []
+        assert rule.negated is False
+
+    def test_to_dict(self):
+        rule = SymbolicSafetyRule(
+            name="rule_1",
+            description="My rule",
+            rule_type=SafetyRuleType.FILESYSTEM_GATE,
+            conditions=[
+                SymbolicCondition(field="path", operator="prefix", value="/tmp/"),
+                SymbolicCondition(field="name", operator="neq", value="/etc/passwd"),
+            ],
+            negated=True,
+        )
+        d = rule.to_dict()
+        assert d["name"] == "rule_1"
+        assert d["rule_type"] == "filesystem_gate"
+        assert len(d["conditions"]) == 2
+        assert d["negated"] is True
+        assert d["conditions"][0]["field"] == "path"
+        assert d["conditions"][0]["operator"] == "prefix"
+
+    def test_frozen(self):
+        rule = SymbolicSafetyRule(name="r", description="d")
+        with pytest.raises(AttributeError):
+            rule.name = "changed"
+
+    def test_in_operator_in_to_dict(self):
+        """The 'in' operator should be serialized correctly."""
+        rule = SymbolicSafetyRule(
+            name="in_rule",
+            description="in test",
+            conditions=[
+                SymbolicCondition(field="tool", operator="in", value="read,write"),
+            ],
+        )
+        d = rule.to_dict()
+        assert d["conditions"][0]["operator"] == "in"
+
+
+class TestVerificationResult:
+    """VerificationResult invariants."""
+
+    def test_minimal(self):
+        r = VerificationResult(
+            rule_name="r", rule_type=SafetyRuleType.TOOL_GATE,
+            valid=True, satisfiable=True,
+        )
+        assert r.rule_name == "r"
+        assert r.valid is True
+        assert r.satisfiable is True
+        assert r.counterexample is None
+        assert r.details == ""
+
+    def test_with_counterexample(self):
+        r = VerificationResult(
+            rule_name="r", rule_type=SafetyRuleType.NETWORK_GATE,
+            valid=False, satisfiable=True,
+            counterexample={"domain": "evil.com"},
+            details="Counterexample found",
+        )
+        assert r.counterexample == {"domain": "evil.com"}
+        assert r.details == "Counterexample found"
+
+
+class TestSymbolicCondition:
+    """SymbolicCondition data model."""
+
+    def test_minimal(self):
+        c = SymbolicCondition(field="path", operator="eq", value="/tmp")
+        assert c.field == "path"
+        assert c.operator == "eq"
+        assert c.value == "/tmp"
+
+    def test_frozen(self):
+        c = SymbolicCondition(field="x", operator="eq", value="y")
+        with pytest.raises(AttributeError):
+            c.field = "z"
+
+
+# ======================================================================
+# PurePythonVerifier — direct coverage
+# ======================================================================
+
+
+class TestPurePythonVerifier:
+    """Direct tests for _PurePythonVerifier."""
+
+    def test_verify_empty_rule(self):
+        from lyra.safety.z3_verifier import _PurePythonVerifier
+
+        verifier = _PurePythonVerifier()
+        rule = SymbolicSafetyRule(name="empty", description="")
+        result = verifier.verify(rule)
+        assert result.valid is True
+        assert result.satisfiable is True
+
+    def test_verify_contradiction_eq_neq(self):
+        from lyra.safety.z3_verifier import _PurePythonVerifier
+
+        verifier = _PurePythonVerifier()
+        rule = SymbolicSafetyRule(
+            name="contradictory",
+            description="",
+            conditions=[
+                SymbolicCondition(field="x", operator="eq", value="1"),
+                SymbolicCondition(field="x", operator="neq", value="1"),
+            ],
+        )
+        result = verifier.verify(rule)
+        assert result.valid is False
+        assert result.satisfiable is False
+        assert "contradictory" in result.details.lower()
+
+    def test_verify_satisfiable(self):
+        from lyra.safety.z3_verifier import _PurePythonVerifier
+
+        verifier = _PurePythonVerifier()
+        rule = SymbolicSafetyRule(
+            name="satisfiable",
+            description="",
+            conditions=[
+                SymbolicCondition(field="tool", operator="eq", value="read"),
+            ],
+        )
+        result = verifier.verify(rule)
+        assert result.valid is False
+        assert result.satisfiable is True
+
+    def test_find_contradictions_no_conflict(self):
+        from lyra.safety.z3_verifier import _PurePythonVerifier
+
+        verifier = _PurePythonVerifier()
+        rule = SymbolicSafetyRule(
+            name="no_conflict",
+            description="",
+            conditions=[
+                SymbolicCondition(field="x", operator="eq", value="1"),
+                SymbolicCondition(field="x", operator="neq", value="2"),
+            ],
+        )
+        contradictions = verifier._find_contradictions(rule)
+        assert contradictions == []
+
+    def test_find_contradictions_finds_it(self):
+        from lyra.safety.z3_verifier import _PurePythonVerifier
+
+        verifier = _PurePythonVerifier()
+        rule = SymbolicSafetyRule(
+            name="conflict",
+            description="",
+            conditions=[
+                SymbolicCondition(field="x", operator="eq", value="1"),
+                SymbolicCondition(field="x", operator="neq", value="1"),
+            ],
+        )
+        contradictions = verifier._find_contradictions(rule)
+        assert len(contradictions) == 1
+        assert "eq" in contradictions[0] and "neq" in contradictions[0]
+
+    def test_generate_example(self):
+        from lyra.safety.z3_verifier import _PurePythonVerifier
+
+        example = _PurePythonVerifier._generate_example(
+            SymbolicSafetyRule(
+                name="ex",
+                description="",
+                conditions=[
+                    SymbolicCondition(field="tool", operator="eq", value="read"),
+                    SymbolicCondition(field="path", operator="prefix", value="/tmp/"),
+                    SymbolicCondition(field="domain", operator="suffix", value=".com"),
+                    SymbolicCondition(field="cmd", operator="contains", value="exec"),
+                    SymbolicCondition(field="ip", operator="neq", value="10.0.0.1"),
+                    SymbolicCondition(field="scope", operator="in", value="local"),
+                    SymbolicCondition(field="misc", operator="glob", value="*.py"),
+                ],
+            )
+        )
+        assert example["tool"] == "read"
+        assert "/tmp/" in example["path"]
+        assert ".com" in example["domain"]
+        assert "exec" in example["cmd"]
+        assert "not" in example["ip"]
+        assert example["scope"] == "local"
+        assert "glob" in example["misc"]
+
+    def test_check_equivalence_same(self):
+        from lyra.safety.z3_verifier import _PurePythonVerifier
+
+        verifier = _PurePythonVerifier()
+        rule_a = SymbolicSafetyRule(
+            name="a",
+            description="",
+            conditions=[
+                SymbolicCondition(field="x", operator="eq", value="1"),
+            ],
+        )
+        rule_b = SymbolicSafetyRule(
+            name="b",
+            description="",
+            conditions=[
+                SymbolicCondition(field="x", operator="eq", value="1"),
+            ],
+        )
+        assert verifier.check_equivalence(rule_a, rule_b) is True
+
+    def test_check_equivalence_different_negated(self):
+        from lyra.safety.z3_verifier import _PurePythonVerifier
+
+        verifier = _PurePythonVerifier()
+        a = SymbolicSafetyRule(name="a", description="", negated=False)
+        b = SymbolicSafetyRule(name="b", description="", negated=True)
+        assert verifier.check_equivalence(a, b) is False
+
+    def test_check_equivalence_different_conditions(self):
+        from lyra.safety.z3_verifier import _PurePythonVerifier
+
+        verifier = _PurePythonVerifier()
+        a = SymbolicSafetyRule(
+            name="a", description="",
+            conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+        )
+        b = SymbolicSafetyRule(
+            name="b", description="",
+            conditions=[SymbolicCondition(field="x", operator="eq", value="2")],
+        )
+        assert verifier.check_equivalence(a, b) is False
+
+    def test_check_equivalence_different_lengths(self):
+        from lyra.safety.z3_verifier import _PurePythonVerifier
+
+        verifier = _PurePythonVerifier()
+        a = SymbolicSafetyRule(
+            name="a", description="",
+            conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+        )
+        b = SymbolicSafetyRule(name="b", description="", conditions=[])
+        assert verifier.check_equivalence(a, b) is False
+
+    def test_check_contradiction_true(self):
+        from lyra.safety.z3_verifier import _PurePythonVerifier
+
+        verifier = _PurePythonVerifier()
+        a = SymbolicSafetyRule(
+            name="a", description="",
+            conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+        )
+        b = SymbolicSafetyRule(
+            name="b", description="",
+            conditions=[SymbolicCondition(field="x", operator="neq", value="1")],
+        )
+        assert verifier.check_contradiction(a, b) is True
+
+    def test_check_contradiction_negation_detection(self):
+        """A negated rule with same conditions contradicts."""
+        from lyra.safety.z3_verifier import _PurePythonVerifier
+
+        verifier = _PurePythonVerifier()
+        a = SymbolicSafetyRule(
+            name="a", description="", negated=True,
+            conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+        )
+        b = SymbolicSafetyRule(
+            name="b", description="", negated=False,
+            conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+        )
+        assert verifier.check_contradiction(a, b) is True
+
+    def test_check_contradiction_false(self):
+        from lyra.safety.z3_verifier import _PurePythonVerifier
+
+        verifier = _PurePythonVerifier()
+        a = SymbolicSafetyRule(
+            name="a", description="",
+            conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+        )
+        b = SymbolicSafetyRule(
+            name="b", description="",
+            conditions=[SymbolicCondition(field="y", operator="eq", value="2")],
+        )
+        assert verifier.check_contradiction(a, b) is False
+
+
+# ======================================================================
+# Z3SMTVerifier — fallback path (no Z3) and encode_to_smt
+# ======================================================================
+
+
+class TestZ3SMTVerifier:
+    """Z3SMTVerifier coverage (fallback path when Z3 not available)."""
+
+    def test_no_z3_uses_fallback(self):
+        verifier = Z3SMTVerifier()
+        rule = SymbolicSafetyRule(
+            name="test",
+            description="",
+            conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+        )
+        result = verifier.verify(rule)
+        # Should use fallback verifier
+        assert result.rule_name == "test"
+        assert result.satisfiable is True
+
+    def test_verify_batch(self):
+        verifier = Z3SMTVerifier()
+        rules = [
+            SymbolicSafetyRule(name="a", description=""),
+            SymbolicSafetyRule(
+                name="b", description="",
+                conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+            ),
+        ]
+        results = verifier.verify_batch(rules)
+        assert len(results) == 2
+        assert results[0].rule_name == "a"
+        assert results[1].rule_name == "b"
+
+
+# ======================================================================
+# RuleOptimizer — fallback path (no Z3)
+# ======================================================================
+
+
+class TestRuleOptimizer:
+    """RuleOptimizer fallback path coverage."""
+
+    def test_are_equivalent_no_z3(self):
+        optimizer = RuleOptimizer()
+        a = SymbolicSafetyRule(
+            name="a", description="",
+            conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+        )
+        b = SymbolicSafetyRule(
+            name="b", description="",
+            conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+        )
+        assert optimizer.are_equivalent(a, b) is True
+
+    def test_are_equivalent_different_no_z3(self):
+        optimizer = RuleOptimizer()
+        a = SymbolicSafetyRule(
+            name="a", description="",
+            conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+        )
+        b = SymbolicSafetyRule(
+            name="b", description="",
+            conditions=[SymbolicCondition(field="x", operator="eq", value="2")],
+        )
+        assert optimizer.are_equivalent(a, b) is False
+
+    def test_are_contradictory_no_z3(self):
+        optimizer = RuleOptimizer()
+        a = SymbolicSafetyRule(
+            name="a", description="",
+            conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+        )
+        b = SymbolicSafetyRule(
+            name="b", description="",
+            conditions=[SymbolicCondition(field="x", operator="neq", value="1")],
+        )
+        assert optimizer.are_contradictory(a, b) is True
+
+    def test_are_contradictory_false_no_z3(self):
+        optimizer = RuleOptimizer()
+        a = SymbolicSafetyRule(
+            name="a", description="",
+            conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+        )
+        b = SymbolicSafetyRule(
+            name="b", description="",
+            conditions=[SymbolicCondition(field="x", operator="eq", value="2")],
+        )
+        assert optimizer.are_contradictory(a, b) is False
+
+    def test_is_subsumed_no_z3(self):
+        optimizer = RuleOptimizer()
+        a = SymbolicSafetyRule(name="a", description="")
+        b = SymbolicSafetyRule(name="b", description="")
+        # Without Z3, is_subsumed always returns False
+        assert optimizer.is_subsumed(a, b) is False
+
+    def test_find_redundant_rules(self):
+        optimizer = RuleOptimizer()
+        rules = [
+            SymbolicSafetyRule(
+                name="eq1", description="",
+                conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+            ),
+            SymbolicSafetyRule(
+                name="eq2", description="",
+                conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+            ),
+            SymbolicSafetyRule(
+                name="contradict", description="",
+                conditions=[SymbolicCondition(field="x", operator="neq", value="1")],
+            ),
+        ]
+        redundancies = optimizer.find_redundant_rules(rules)
+        assert len(redundancies) >= 1
+        found = {(a, b, rel) for a, b, rel in redundancies}
+        assert ("eq1", "eq2", "equivalent") in found
+
+    def test_find_redundant_no_redundancies(self):
+        optimizer = RuleOptimizer()
+        rules = [
+            SymbolicSafetyRule(
+                name="a", description="",
+                conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+            ),
+            SymbolicSafetyRule(
+                name="b", description="",
+                conditions=[SymbolicCondition(field="x", operator="eq", value="2")],
+            ),
+        ]
+        redundancies = optimizer.find_redundant_rules(rules)
+        assert len(redundancies) == 0
+
+    def test_reduce_rules_removes_equivalent(self):
+        optimizer = RuleOptimizer()
+        rules = [
+            SymbolicSafetyRule(
+                name="a", description="",
+                conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+            ),
+            SymbolicSafetyRule(
+                name="b", description="",
+                conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+            ),
+            SymbolicSafetyRule(
+                name="c", description="",
+                conditions=[SymbolicCondition(field="y", operator="eq", value="2")],
+            ),
+        ]
+        reduced = optimizer.reduce_rules(rules)
+        assert len(reduced) == 2
+        names = {r.name for r in reduced}
+        assert "a" in names
+        assert "b" not in names  # b removed as equivalent to a
+        assert "c" in names
+
+    def test_reduce_rules_contradictory_kept(self):
+        """Contradictory rules are kept (user decides)."""
+        optimizer = RuleOptimizer()
+        rules = [
+            SymbolicSafetyRule(
+                name="a", description="",
+                conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+            ),
+            SymbolicSafetyRule(
+                name="b", description="",
+                conditions=[SymbolicCondition(field="x", operator="neq", value="1")],
+            ),
+        ]
+        reduced = optimizer.reduce_rules(rules)
+        assert len(reduced) == 2
+        assert all(r.name in {"a", "b"} for r in reduced)
+
+
+# ======================================================================
+# Z3SMTVerifier -- Z3-backed paths (mocked)
+# ======================================================================
+
+
+class _MockZ3Base:
+    """Shared mock Z3 module for testing Z3-backed paths."""
+
+    class MockExpr:
+        def __init__(self, name: str = ""):
+            self._name = name
+        def __eq__(self, other):
+            return _MockZ3Base.MockExpr("expr_eq")
+        def __ne__(self, other):
+            return _MockZ3Base.MockExpr("expr_ne")
+        def __gt__(self, other):
+            return _MockZ3Base.MockExpr("expr_gt")
+        def __ge__(self, other):
+            return _MockZ3Base.MockExpr("expr_ge")
+        def __lt__(self, other):
+            return _MockZ3Base.MockExpr("expr_lt")
+        def __le__(self, other):
+            return _MockZ3Base.MockExpr("expr_le")
+
+    class MockModel:
+        def eval(self, expr, model_completion=True):
+            return _MockZ3Base.MockExpr("mock_val")
+
+    @staticmethod
+    def _make_mock_z3_module(solver_return_value: str = "sat"):
+        mock_z3_self = _MockZ3Base
+
+        class MockSolver:
+            def __init__(self):
+                self._formulae = []
+            def add(self, formula):
+                self._formulae.append(formula)
+            def check(self):
+                return solver_return_value
+            def model(self):
+                return mock_z3_self.MockModel()
+
+        class _MockModule:
+            sat = "sat"
+            unsat = "unsat"
+            @staticmethod
+            def String(name: str):
+                return mock_z3_self.MockExpr(name)
+            @staticmethod
+            def StringVal(val: str):
+                return mock_z3_self.MockExpr(str(val))
+            @staticmethod
+            def Bool(val: bool = True):
+                return mock_z3_self.MockExpr(str(val))
+            @staticmethod
+            def And(*args):
+                return mock_z3_self.MockExpr("and")
+            @staticmethod
+            def Or(*args):
+                return mock_z3_self.MockExpr("or")
+            @staticmethod
+            def Not(expr):
+                return mock_z3_self.MockExpr("not")
+            @staticmethod
+            def Contains(a, b):
+                return mock_z3_self.MockExpr("contains")
+            @staticmethod
+            def PrefixOf(a, b):
+                return mock_z3_self.MockExpr("prefix")
+            @staticmethod
+            def SuffixOf(a, b):
+                return mock_z3_self.MockExpr("suffix")
+            @staticmethod
+            def Solver():
+                return MockSolver()
+            @staticmethod
+            def ExprRef():
+                return mock_z3_self.MockExpr("expr")
+
+        return _MockModule()
+
+    @staticmethod
+    def _patch_z3(solver_return: str = "sat"):
+        """Create a mock z3 module with the given solver return value.
+        
+        Usage in tests:
+            mock_mod = _MockZ3Base._patch_z3("sat")
+            with patch.multiple("lyra.safety.z3_verifier", _HAS_Z3=True, _z3=mock_mod), \
+                 patch.dict(sys.modules, {"z3": mock_mod}):
+                ...
+        """
+        return _MockZ3Base._make_mock_z3_module(solver_return)
+
+
+class TestZ3SMTVerifierMocked:
+    """Z3SMTVerifier coverage with mocked Z3."""
+
+    def test_verify_z3_sat(self):
+        # get mock module
+        mock_mod = _MockZ3Base._patch_z3("sat")
+        with patch.multiple("lyra.safety.z3_verifier", _HAS_Z3=True, _z3=mock_mod), \
+             patch.dict(sys.modules, {"z3": mock_mod}):
+            verifier = Z3SMTVerifier()
+            rule = SymbolicSafetyRule(
+                name="test", description="",
+                conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+            )
+            result = verifier.verify(rule)
+        assert result.satisfiable is True
+        assert result.valid is False
+        assert result.counterexample is not None
+
+    def test_verify_z3_unsat(self):
+        mock_mod = _MockZ3Base._patch_z3("unsat")
+        with patch.multiple("lyra.safety.z3_verifier", _HAS_Z3=True, _z3=mock_mod), \
+             patch.dict(sys.modules, {"z3": mock_mod}):
+            verifier = Z3SMTVerifier()
+            rule = SymbolicSafetyRule(name="valid", description="")
+            result = verifier.verify(rule)
+        assert result.valid is True
+        assert result.satisfiable is True
+        assert result.counterexample is None
+
+    def test_verify_z3_unknown(self):
+        mock_mod = _MockZ3Base._patch_z3("unknown")
+        with patch.multiple("lyra.safety.z3_verifier", _HAS_Z3=True, _z3=mock_mod), \
+             patch.dict(sys.modules, {"z3": mock_mod}):
+            verifier = Z3SMTVerifier()
+            rule = SymbolicSafetyRule(name="unknown", description="")
+            result = verifier.verify(rule)
+        assert result.valid is False
+        assert result.satisfiable is False
+
+    def test_encode_to_smt_all_operators(self):
+        # get mock module
+        mock_mod = _MockZ3Base._patch_z3("sat")
+        with patch.multiple("lyra.safety.z3_verifier", _HAS_Z3=True, _z3=mock_mod), \
+             patch.dict(sys.modules, {"z3": mock_mod}):
+            verifier = Z3SMTVerifier()
+            rule = SymbolicSafetyRule(
+                name="all_ops", description="", negated=True,
+                conditions=[
+                    SymbolicCondition(field="tool_name", operator="eq", value="read"),
+                    SymbolicCondition(field="file_path", operator="neq", value="/etc"),
+                    SymbolicCondition(field="domain", operator="prefix", value="api."),
+                    SymbolicCondition(field="command", operator="suffix", value=".sh"),
+                    SymbolicCondition(field="any_field", operator="contains", value="sub"),
+                    SymbolicCondition(field="tools", operator="in", value="read,write"),
+                    SymbolicCondition(field="blocked", operator="not_in", value="rm,dd"),
+                    SymbolicCondition(field="unknown", operator="glob", value="*.py"),
+                ],
+            )
+            result = verifier.verify(rule)
+        assert result is not None
+
+    def test_encode_to_smt_empty_conditions(self):
+        # get mock module
+        mock_mod = _MockZ3Base._patch_z3("sat")
+        with patch.multiple("lyra.safety.z3_verifier", _HAS_Z3=True, _z3=mock_mod), \
+             patch.dict(sys.modules, {"z3": mock_mod}):
+            verifier = Z3SMTVerifier()
+            rule = SymbolicSafetyRule(name="empty", description="", conditions=[], negated=True)
+            result = verifier.verify(rule)
+        assert result is not None
+
+    def test_encode_to_smt_single_condition(self):
+        # get mock module
+        mock_mod = _MockZ3Base._patch_z3("sat")
+        with patch.multiple("lyra.safety.z3_verifier", _HAS_Z3=True, _z3=mock_mod), \
+             patch.dict(sys.modules, {"z3": mock_mod}):
+            verifier = Z3SMTVerifier()
+            rule = SymbolicSafetyRule(
+                name="single", description="",
+                conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+            )
+            result = verifier.verify(rule)
+        assert result is not None
+
+    def test_encode_to_smt_in_empty(self):
+        # get mock module
+        mock_mod = _MockZ3Base._patch_z3("sat")
+        with patch.multiple("lyra.safety.z3_verifier", _HAS_Z3=True, _z3=mock_mod), \
+             patch.dict(sys.modules, {"z3": mock_mod}):
+            verifier = Z3SMTVerifier()
+            rule = SymbolicSafetyRule(
+                name="in_empty", description="",
+                conditions=[SymbolicCondition(field="x", operator="in", value="")],
+            )
+            result = verifier.verify(rule)
+        assert result is not None
+
+    def test_encode_to_smt_not_in_empty(self):
+        # get mock module
+        mock_mod = _MockZ3Base._patch_z3("sat")
+        with patch.multiple("lyra.safety.z3_verifier", _HAS_Z3=True, _z3=mock_mod), \
+             patch.dict(sys.modules, {"z3": mock_mod}):
+            verifier = Z3SMTVerifier()
+            rule = SymbolicSafetyRule(
+                name="notin_empty", description="",
+                conditions=[SymbolicCondition(field="x", operator="not_in", value="")],
+            )
+            result = verifier.verify(rule)
+        assert result is not None
+
+    def test_verify_batch_with_z3(self):
+        # get mock module
+        mock_mod = _MockZ3Base._patch_z3("sat")
+        with patch.multiple("lyra.safety.z3_verifier", _HAS_Z3=True, _z3=mock_mod), \
+             patch.dict(sys.modules, {"z3": mock_mod}):
+            verifier = Z3SMTVerifier()
+            rules = [
+                SymbolicSafetyRule(name="a", description=""),
+                SymbolicSafetyRule(
+                    name="b", description="",
+                    conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+                ),
+            ]
+            results = verifier.verify_batch(rules)
+        assert len(results) == 2
+
+    def test_model_to_dict(self):
+        mock_mod = _MockZ3Base._patch_z3("sat")
+        with patch.multiple("lyra.safety.z3_verifier", _HAS_Z3=True, _z3=mock_mod), \
+             patch.dict(sys.modules, {"z3": mock_mod}):
+            model = mock_mod.Solver().model()
+            rule = SymbolicSafetyRule(
+                name="test", description="",
+                conditions=[SymbolicCondition(field="x", operator="eq", value="1")],
+            )
+            d = Z3SMTVerifier._model_to_dict(model, rule)
+        assert isinstance(d, dict)
+        assert "x" in d
+
+
+# ======================================================================
+# RuleOptimizer -- Z3-backed paths (mocked)
+# ======================================================================
+
+
+class TestRuleOptimizerMocked:
+    """RuleOptimizer Z3-backed path coverage."""
+
+    def test_are_equivalent_with_z3_true(self):
+        mock_mod = _MockZ3Base._patch_z3("unsat")
+        with patch.multiple("lyra.safety.z3_verifier", _HAS_Z3=True, _z3=mock_mod), \
+             patch.dict(sys.modules, {"z3": mock_mod}):
+            optimizer = RuleOptimizer()
+            a = SymbolicSafetyRule(name="a", description="")
+            b = SymbolicSafetyRule(name="b", description="")
+            result = optimizer.are_equivalent(a, b)
+        assert result is True
+
+    def test_are_equivalent_with_z3_false(self):
+        mock_mod = _MockZ3Base._patch_z3("sat")
+        with patch.multiple("lyra.safety.z3_verifier", _HAS_Z3=True, _z3=mock_mod), \
+             patch.dict(sys.modules, {"z3": mock_mod}):
+            optimizer = RuleOptimizer()
+            a = SymbolicSafetyRule(name="a", description="")
+            b = SymbolicSafetyRule(name="b", description="")
+            result = optimizer.are_equivalent(a, b)
+        assert result is False
+
+    def test_are_contradictory_with_z3_true(self):
+        mock_mod = _MockZ3Base._patch_z3("unsat")
+        with patch.multiple("lyra.safety.z3_verifier", _HAS_Z3=True, _z3=mock_mod), \
+             patch.dict(sys.modules, {"z3": mock_mod}):
+            optimizer = RuleOptimizer()
+            a = SymbolicSafetyRule(name="a", description="")
+            b = SymbolicSafetyRule(name="b", description="")
+            result = optimizer.are_contradictory(a, b)
+        assert result is True
+
+    def test_are_contradictory_with_z3_false(self):
+        mock_mod = _MockZ3Base._patch_z3("sat")
+        with patch.multiple("lyra.safety.z3_verifier", _HAS_Z3=True, _z3=mock_mod), \
+             patch.dict(sys.modules, {"z3": mock_mod}):
+            optimizer = RuleOptimizer()
+            a = SymbolicSafetyRule(name="a", description="")
+            b = SymbolicSafetyRule(name="b", description="")
+            result = optimizer.are_contradictory(a, b)
+        assert result is False
+
+    def test_is_subsumed_with_z3_true(self):
+        mock_mod = _MockZ3Base._patch_z3("unsat")
+        with patch.multiple("lyra.safety.z3_verifier", _HAS_Z3=True, _z3=mock_mod), \
+             patch.dict(sys.modules, {"z3": mock_mod}):
+            optimizer = RuleOptimizer()
+            a = SymbolicSafetyRule(name="a", description="")
+            b = SymbolicSafetyRule(name="b", description="")
+            result = optimizer.is_subsumed(a, b)
+        assert result is True
+
+    def test_is_subsumed_with_z3_false(self):
+        mock_mod = _MockZ3Base._patch_z3("sat")
+        with patch.multiple("lyra.safety.z3_verifier", _HAS_Z3=True, _z3=mock_mod), \
+             patch.dict(sys.modules, {"z3": mock_mod}):
+            optimizer = RuleOptimizer()
+            a = SymbolicSafetyRule(name="a", description="")
+            b = SymbolicSafetyRule(name="b", description="")
+            result = optimizer.is_subsumed(a, b)
+        assert result is False
+
+    def test_find_redundant_with_z3(self):
+        mock_mod = _MockZ3Base._patch_z3("unsat")
+        with patch.multiple("lyra.safety.z3_verifier", _HAS_Z3=True, _z3=mock_mod), \
+             patch.dict(sys.modules, {"z3": mock_mod}):
+            optimizer = RuleOptimizer()
+            rules = [
+                SymbolicSafetyRule(name="a", description=""),
+                SymbolicSafetyRule(name="b", description=""),
+            ]
+            redundancies = optimizer.find_redundant_rules(rules)
+        assert len(redundancies) >= 1
+
+
