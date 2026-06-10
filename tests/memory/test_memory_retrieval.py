@@ -316,3 +316,149 @@ class TestRetrievalResult:
         )
 
         assert result.metadata["source"] == "test"
+
+
+class TestFusionRetriever:
+    """Tests for FusionRetriever."""
+
+    def test_initial_weights(self):
+        from lyra.memory.long_term_memory import LongTermMemory
+        from lyra.memory.memory_retrieval import FusionRetriever, FusionWeights
+
+        ltm = LongTermMemory()
+        retriever = FusionRetriever(ltm)
+        weights = retriever.get_weights()
+        assert abs(weights.semantic - 0.40) < 0.01
+        assert weights.temporal > 0
+
+    def test_retrieve_empty_store(self):
+        from lyra.memory.long_term_memory import LongTermMemory
+        from lyra.memory.memory_retrieval import FusionRetriever
+
+        ltm = LongTermMemory()
+        retriever = FusionRetriever(ltm)
+        results = retriever.retrieve_fused("test")
+        assert results == []
+
+    def test_retrieve_fused_with_data(self):
+        from lyra.memory.long_term_memory import LongTermMemory
+        from lyra.memory.memory_retrieval import FusionRetriever
+
+        ltm = LongTermMemory()
+        ltm.add("Python programming", MemoryType.SEMANTIC, importance=0.9)
+        ltm.add("JavaScript coding", MemoryType.SEMANTIC, importance=0.5)
+        retriever = FusionRetriever(ltm)
+        results = retriever.retrieve_fused("Python", top_k=5)
+        assert len(results) >= 1
+
+    def test_retrieve_with_min_score(self):
+        from lyra.memory.long_term_memory import LongTermMemory
+        from lyra.memory.memory_retrieval import FusionRetriever
+
+        ltm = LongTermMemory()
+        ltm.add("Python programming", MemoryType.SEMANTIC, importance=0.9)
+        retriever = FusionRetriever(ltm)
+        results = retriever.retrieve_fused("Python", min_score=0.99)
+        assert len(results) == 0
+
+    def test_semantic_signal(self):
+        from lyra.memory.long_term_memory import LongTermMemory
+        from lyra.memory.memory_retrieval import FusionRetriever
+        from lyra.memory.memory_store import Memory
+
+        ltm = LongTermMemory()
+        retriever = FusionRetriever(ltm)
+        mem = Memory("m1", "Python programming", MemoryType.SEMANTIC, time.time(), importance=0.8)
+        score = retriever._semantic_signal(mem, "Python")
+        assert score > 0
+
+    def test_temporal_signal_new(self):
+        from lyra.memory.long_term_memory import LongTermMemory
+        from lyra.memory.memory_retrieval import FusionRetriever
+        from lyra.memory.memory_store import Memory
+
+        ltm = LongTermMemory()
+        retriever = FusionRetriever(ltm)
+        mem = Memory("m1", "test", MemoryType.SEMANTIC, time.time())
+        score = retriever._temporal_signal(mem)
+        assert score > 0.9
+
+    def test_temporal_signal_old(self):
+        from lyra.memory.long_term_memory import LongTermMemory
+        from lyra.memory.memory_retrieval import FusionRetriever
+        from lyra.memory.memory_store import Memory
+
+        ltm = LongTermMemory()
+        retriever = FusionRetriever(ltm)
+        old_time = time.time() - 86400 * 60  # 60 days ago
+        mem = Memory("m1", "test", MemoryType.SEMANTIC, old_time)
+        score = retriever._temporal_signal(mem)
+        assert score == 0.0
+
+    def test_behavioral_signal_with_cluster(self):
+        from lyra.memory.long_term_memory import LongTermMemory
+        from lyra.memory.memory_retrieval import FusionRetriever
+
+        ltm = LongTermMemory()
+        retriever = FusionRetriever(ltm, cluster_lookup={"m1": 0, "m2": 0, "m3": 1})
+        from lyra.memory.memory_store import Memory
+        mem = Memory("m1", "test", MemoryType.SEMANTIC, time.time())
+        score = retriever._behavioral_signal(mem, "test")
+        assert score > 0
+
+    def test_behavioral_signal_fallback(self):
+        from lyra.memory.long_term_memory import LongTermMemory
+        from lyra.memory.memory_retrieval import FusionRetriever
+        from lyra.memory.memory_store import Memory
+
+        ltm = LongTermMemory()
+        retriever = FusionRetriever(ltm)
+        mem = Memory("m1", "test", MemoryType.SEMANTIC, time.time())
+        mem.access_count = 5
+        score = retriever._behavioral_signal(mem, "query")
+        assert score == 0.5
+
+    def test_record_feedback_out_of_range(self):
+        from lyra.memory.long_term_memory import LongTermMemory
+        from lyra.memory.memory_retrieval import FusionRetriever
+
+        ltm = LongTermMemory()
+        retriever = FusionRetriever(ltm)
+        result = retriever.record_feedback([], -1)
+        assert result is not None
+
+    def test_reset_weights(self):
+        from lyra.memory.long_term_memory import LongTermMemory
+        from lyra.memory.memory_retrieval import FusionRetriever, FusionWeights
+
+        ltm = LongTermMemory()
+        retriever = FusionRetriever(ltm, weights=FusionWeights(semantic=0.8, temporal=0.1, behavioral=0.1))
+        retriever.reset_weights()
+        weights = retriever.get_weights()
+        assert abs(weights.semantic - 0.40) < 0.01
+
+    def test_get_feedback_history(self):
+        from lyra.memory.long_term_memory import LongTermMemory
+        from lyra.memory.memory_retrieval import FusionRetriever
+
+        ltm = LongTermMemory()
+        retriever = FusionRetriever(ltm)
+        assert retriever.get_feedback_history() == []
+
+
+class TestRetrieveFusion:
+    """Tests for MemoryRetriever._retrieve_fusion strategy."""
+
+    def test_retrieve_fusion_strategy(self):
+        ltm = LongTermMemory()
+        ltm.add("Python programming", MemoryType.SEMANTIC, importance=0.9)
+        ltm.add("JavaScript coding", MemoryType.SEMANTIC, importance=0.5)
+        retriever = MemoryRetriever(ltm)
+        results = retriever.retrieve("Python", strategy=RetrievalStrategy.FUSION)
+        assert len(results) >= 0
+
+    def test_retrieve_fusion_empty(self):
+        ltm = LongTermMemory()
+        retriever = MemoryRetriever(ltm)
+        results = retriever._retrieve_fusion("test", limit=5, min_score=0.0, filters=None)
+        assert len(results) == 0

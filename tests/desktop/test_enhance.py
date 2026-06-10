@@ -115,3 +115,29 @@ class TestVirtualDesktopManager:
         assert vdm.assign_window(d1, "win-1") is True
         desktops = vdm.list_desktops()
         assert "win-1" in desktops[0]["windows"]
+
+
+class TestWindowEnums:
+    """Tests for WindowPosition and WindowState enums."""
+
+    def test_window_position_values(self):
+        from lyra.desktop.enhance import WindowPosition
+        assert WindowPosition.TOP_LEFT.value == "top_left"
+        assert WindowPosition.BOTTOM_LEFT.value == "bottom_left"
+        assert WindowPosition.BOTTOM_RIGHT.value == "bottom_right"
+        assert WindowPosition.CENTER.value == "center"
+        assert WindowPosition.FULLSCREEN.value == "fullscreen"
+
+    def test_window_state_values(self):
+        from lyra.desktop.enhance import WindowState
+        assert WindowState.NORMAL.value == "normal"
+        assert WindowState.MINIMIZED.value == "minimized"
+        assert WindowState.MAXIMIZED.value == "maximized"
+        assert WindowState.HIDDEN.value == "hidden"
+
+    def test_merge_preserves_custom_extra(self):
+        """merge creates new DesktopConfig with custom extra keys."""
+        config = DesktopConfig(extra={"existing": 1})
+        merged = config.merge({"extra": {"new": 2}})
+        assert "new" in merged.extra
+        assert merged.extra.get("new") == 2

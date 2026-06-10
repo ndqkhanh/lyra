@@ -226,6 +226,157 @@ class TestFleetDashboard:
         assert len(d["cards"]) == 1
         assert d["cards"][0]["session_id"] == "sess-1"
 
+    def test_sort_by_tokens(self):
+        """_sort_cards sorts correctly by tokens."""
+        cards = [
+            SessionCard(session_id="a", total_tokens=100),
+            SessionCard(session_id="b", total_tokens=500),
+            SessionCard(session_id="c", total_tokens=50),
+        ]
+        sorted_cards = FleetDashboard._sort_cards(cards, SortBy.TOKENS)
+        assert sorted_cards[0].total_tokens == 500
+        assert sorted_cards[2].total_tokens == 50
+
+    def test_sort_by_model(self):
+        """_sort_cards sorts correctly by model."""
+        cards = [
+            SessionCard(session_id="b", model="haiku"),
+            SessionCard(session_id="a", model="sonnet"),
+        ]
+        sorted_cards = FleetDashboard._sort_cards(cards, SortBy.MODEL)
+        assert sorted_cards[0].model == "haiku"
+
+    def test_sort_by_recent(self):
+        """_sort_cards sorts by recency."""
+        cards = [
+            SessionCard(session_id="a", updated_at="2026-01-01T00:00:00"),
+            SessionCard(session_id="b", updated_at="2026-01-02T00:00:00"),
+        ]
+        sorted_cards = FleetDashboard._sort_cards(cards, SortBy.RECENT)
+        assert sorted_cards[0].session_id == "b"
+
+    def test_unregister_ws_client(self):
+        """WebSocket client unregistration works."""
+        dashboard = FleetDashboard()
+        dashboard.update_config({"enable_websocket": True})
+
+        def cb(payload):
+            pass
+
+        dashboard.register_ws_client(cb)
+        dashboard.unregister_ws_client(cb)
+        assert len(dashboard._ws_clients) == 0
+
+    def test_push_update_disabled(self):
+        """push_update returns early when websocket disabled."""
+        dashboard = FleetDashboard()
+        dashboard.push_update()  # should not raise
+
+    def test_session_card_exists(self):
+        """session_card returns card for known sessions."""
+        dashboard = FleetDashboard()
+        card = dashboard.session_card("nonexistent")
+        assert card is None
+
+    def test_peek_session_with_data(self):
+        """peek_session returns formatted messages for sessions with steps."""
+        from unittest.mock import MagicMock
+        dashboard = FleetDashboard()
+        mock_mgr = MagicMock()
+        mock_mgr.get_steps.return_value = [{"content": "Hello"}, {"content": "World"}]
+        dashboard._session_manager = mock_mgr
+        result = dashboard.peek_session("test-session")
+        assert "Hello" in result
+
+    def test_peek_session_custom_count(self):
+        dashboard = FleetDashboard()
+        from unittest.mock import MagicMock
+        mock_mgr = MagicMock()
+        mock_mgr.get_steps.return_value = [{"content": f"Msg {i}"} for i in range(10)]
+        dashboard._session_manager = mock_mgr
+        result = dashboard.peek_session("test", n=3)
+        assert result.count("Msg") <= 3
+
+    def test_reply_session_success(self):
+        """reply_session returns True when append succeeds."""
+        from unittest.mock import MagicMock
+        dashboard = FleetDashboard()
+        mock_mgr = MagicMock()
+        mock_mgr.append_step.return_value = True
+        dashboard._session_manager = mock_mgr
+        result = dashboard.reply_session("test-session", "Hello")
+        assert result is True
+
+    def test_cost_summary_empty(self):
+        from unittest.mock import MagicMock
+        dashboard = FleetDashboard()
+        mock_mgr = MagicMock()
+        mock_mgr.list_sessions.return_value = []
+        dashboard._session_manager = mock_mgr
+        summary = dashboard.cost_summary()
+        assert "total_cost" in summary
+
+    def test_config_sort_by_string(self):
+        """Config.merge handles string sort_by values."""
+        config = DashboardConfig()
+        merged = config.merge({"sort_by": "cost"})
+        assert merged.sort_by == SortBy.COST
+
+    def test_config_to_dict_full(self):
+        config = DashboardConfig(
+            refresh_interval=10, max_cards=25,
+            sort_by=SortBy.STATUS, enable_websocket=True,
+            websocket_url="ws://test", peek_message_count=50,
+        )
+        d = config.to_dict()
+        assert d["refresh_interval"] == 10
+
+    def test_config_from_dict_roundtrip(self):
+        data = {
+            "refresh_interval": 15, "max_cards": 30,
+            "sort_by": "cost", "enable_websocket": True,
+        }
+        config = DashboardConfig.from_dict(data)
+        assert config.refresh_interval == 15
+        assert config.sort_by == SortBy.COST
+
+    def test_session_card_to_dict_full(self):
+        card = SessionCard(
+            session_id="sess-99", status="failed",
+            agent_id="agent-x", model="haiku",
+            total_cost=5.5, total_tokens=5000,
+            tool_calls=50, errors=2, latency=3.5,
+            last_message="last msg", started_at="t1",
+            updated_at="t2", expanded=True,
+            metadata={"key": "val"},
+        )
+        d = card.to_dict()
+        assert d["total_cost"] == 5.5
+
+    def test_session_card_from_dict_minimal(self):
+        card = SessionCard.from_dict({"session_id": "sess-1"})
+        assert card.session_id == "sess-1"
+
+    def test_sort_cards_status_none(self):
+        """_sort_cards handles cards with None status."""
+        cards = [
+            SessionCard(session_id="a", status=None),  # type: ignore
+        ]
+        FleetDashboard._sort_cards(cards, SortBy.STATUS)
+
+    def test_peek_session_formatted_with_dict_steps(self):
+        """peek_session formats dict steps correctly."""
+        from unittest.mock import MagicMock
+        dashboard = FleetDashboard()
+        mock_mgr = MagicMock()
+        mock_mgr.get_steps.return_value = [
+            {"type": "user_reply", "content": "Hello world", "timestamp": "2026-01-01"},
+            "Plain string step",
+        ]
+        dashboard._session_manager = mock_mgr
+        result = dashboard.peek_session("test")
+        assert "Hello world" in result or "Plain" in result
+
 
 # ======================================================================
 # SkillsHub tests

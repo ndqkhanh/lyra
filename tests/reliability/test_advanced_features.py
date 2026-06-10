@@ -18,13 +18,16 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from lyra.reliability.benchmark_runner import (
+    BaselineEntry,
     BaselineManager,
     BenchmarkConfig,
     BenchmarkResult,
     BenchmarkRunner,
     BenchmarkSuiteResult,
     CIBreakdown,
+    HumanEvalRunner,
     RegressionAlert,
+    TerminalBenchRunner,
     TrendPoint,
     cron_matches,
     parse_cron,
@@ -940,3 +943,225 @@ class TestEndToEnd:
         assert len(mutants) == 3
         for m in mutants:
             assert m.input_data != original
+
+
+# ---------------------------------------------------------------------------
+# Additional BenchmarkRunner coverage
+# ---------------------------------------------------------------------------
+
+
+class TestBenchmarkRunnerEdgeCases:
+    """Edge case tests for BenchmarkRunner."""
+
+    def test_summary_no_results(self):
+        runner = BenchmarkRunner()
+        summary = runner.summary()
+        assert "No benchmark results available." in summary
+
+    def test_result_nonexistent(self):
+        runner = BenchmarkRunner()
+        assert runner.result("nonexistent") is None
+
+    def test_history_empty(self):
+        runner = BenchmarkRunner()
+        assert runner.history == []
+
+    def test_ci_breakdown_no_history(self):
+        runner = BenchmarkRunner()
+        ci = runner.ci_breakdown(None)
+        assert ci.passed is True
+        assert ci.exit_code == 0
+
+    def test_report_empty(self):
+        """report() returns empty report when no history."""
+        runner = BenchmarkRunner()
+        report = runner.report()
+        assert len(report.suite_result.results) == 0
+
+    def test_benchmark_config_validation(self):
+        """BenchmarkConfig validates frequency and threshold."""
+        config = BenchmarkConfig(frequency="daily")
+        assert config.frequency == "daily"
+
+        with pytest.raises(ValueError, match="frequency must be one of"):
+            BenchmarkConfig(frequency="monthly")
+
+        with pytest.raises(ValueError, match="regression_threshold must be in"):
+            BenchmarkConfig(regression_threshold=1.5)
+
+    def test_run_benchmark_stub(self):
+        """run_benchmark with a known name returns a result."""
+        runner = BenchmarkRunner(config=BenchmarkConfig(tasks=1, k=1))
+        import asyncio
+        result = asyncio.run(runner.run_benchmark("tau-bench"))
+        assert result is not None
+        assert result.benchmark_name.startswith("tau-bench")
+
+    def test_run_benchmark_with_runner(self):
+        """run_benchmark with a runner instance works."""
+        runner = BenchmarkRunner(config=BenchmarkConfig(tasks=1, k=1))
+        bench_runner = TerminalBenchRunner()
+        import asyncio
+        result = asyncio.run(runner.run_benchmark(bench_runner))
+        assert result is not None
+        assert "terminal" in result.benchmark_name
+
+    def test_run_benchmark_unknown(self):
+        """run_benchmark with unknown name raises ValueError."""
+        runner = BenchmarkRunner()
+        import asyncio
+        with pytest.raises(ValueError, match="Unknown benchmark"):
+            asyncio.run(runner.run_benchmark("nonexistent_benchmark"))
+
+    @pytest.mark.asyncio
+    async def test_run_suite_handles_errors(self):
+        """run_suite gracefully handles runner errors."""
+        runner = BenchmarkRunner(config=BenchmarkConfig(tasks=1, k=1))
+        suite = await runner.run_suite()
+        assert len(suite.results) > 0
+        # Some results might have errors if the dummy agent doesn't work
+        # but the suite itself should complete
+
+    def test_persist_to_output_dir(self, tmp_path):
+        """Persist writes suite results to output directory."""
+        runner = BenchmarkRunner(
+            config=BenchmarkConfig(output_dir=str(tmp_path))
+        )
+        result = BenchmarkResult(
+            benchmark_name="test-bench",
+            pass_at_1=0.9, pass_at_k=0.85, k=5, n_tasks=50,
+            avg_cost_per_task=0.01, avg_tokens_per_task=200,
+            total_duration_seconds=10.0,
+        )
+        suite = BenchmarkSuiteResult(
+            results=[result],
+            run_id="test-run-001",
+        )
+        runner._history.append(suite)
+        runner._persist(suite)
+        suite_file = tmp_path / "suite_test-run-001.json"
+        assert suite_file.exists()
+
+    def test_resolve_benchmarks_list(self):
+        """_resolve_benchmarks returns list when config.which is a list."""
+        runner = BenchmarkRunner(config=BenchmarkConfig(which=["tau-bench", "humaneval"]))
+        benchmarks = runner._resolve_benchmarks()
+        assert benchmarks == ["tau-bench", "humaneval"]
+
+    def test_resolve_benchmarks_wildcard(self):
+        """_resolve_benchmarks returns all when which='*'."""
+        runner = BenchmarkRunner(config=BenchmarkConfig(which="*"))
+        benchmarks = runner._resolve_benchmarks()
+        assert len(benchmarks) >= 3
+
+    def test_stub_agent_runs(self):
+        """_stub_agent returns an agent that produces output."""
+        agent = BenchmarkRunner._stub_agent()
+        import asyncio
+        result = asyncio.run(agent.run("hello"))
+        assert "output" in result
+
+    def test_baseline_entry_is_regression(self):
+        entry = BaselineEntry(
+            benchmark_name="test",
+            score=0.9,
+            timestamp=datetime.now(),
+        )
+        assert entry.is_regression(0.7, threshold=0.05) is True
+        assert entry.is_regression(0.88, threshold=0.05) is False
+
+    def test_baseline_clear(self):
+        """clear() removes all baselines."""
+        mgr = BaselineManager()
+        mgr.update(BenchmarkResult(
+            benchmark_name="test", pass_at_1=0.9, pass_at_k=0.9, k=1,
+            n_tasks=10, avg_cost_per_task=0.0, avg_tokens_per_task=0,
+            total_duration_seconds=1.0,
+        ))
+        mgr.clear()
+        assert mgr.get("test") is None
+
+    def test_baseline_update_persists(self, tmp_path):
+        """BaselineManager.update writes to file."""
+        baseline_file = tmp_path / "bl.json"
+        mgr = BaselineManager(str(baseline_file))
+        mgr.update(BenchmarkResult(
+            benchmark_name="test", pass_at_1=0.8, pass_at_k=0.8, k=1,
+            n_tasks=10, avg_cost_per_task=0.0, avg_tokens_per_task=0,
+            total_duration_seconds=1.0,
+        ))
+        assert baseline_file.exists()
+
+    def test_parse_cron_step_syntax(self):
+        parsed = parse_cron("*/30 */2 * * *")
+        assert parsed == (-30, -2, -1, -1, -1)
+
+    def test_cron_matches_with_step(self):
+        parsed = parse_cron("*/15 * * * *")
+        dt = datetime(2026, 1, 1, 10, 0)
+        assert cron_matches(parsed, dt)
+        dt2 = datetime(2026, 1, 1, 10, 7)
+        assert not cron_matches(parsed, dt2)
+
+    def test_benchmark_result_score(self):
+        """score property returns pass@k for k>1, pass@1 otherwise."""
+        r1 = BenchmarkResult("test", 0.8, 0.9, 5, 10, 0.0, 0, 1.0)
+        assert r1.score == 0.9  # k=5, use pass_at_k
+        r2 = BenchmarkResult("test", 0.8, 0.8, 1, 10, 0.0, 0, 1.0)
+        assert r2.score == 0.8  # k=1, use pass_at_1
+
+    def test_benchmark_suite_result_by_name(self):
+        suite = BenchmarkSuiteResult(results=[
+            BenchmarkResult("bench-a", 0.9, 0.9, 1, 10, 0.0, 0, 1.0),
+            BenchmarkResult("bench-b", 0.8, 0.8, 1, 10, 0.0, 0, 1.0),
+        ])
+        assert suite.by_name("bench-a") is not None
+        assert suite.by_name("bench-c") is None
+
+    def test_benchmark_report_with_ci(self):
+        """BenchmarkReport includes CI breakdown when provided."""
+        from lyra.reliability.benchmark_runner import BenchmarkReport
+
+        suite = BenchmarkSuiteResult(results=[])
+        ci = CIBreakdown(
+            passed=True, total_benchmarks=0, passed_benchmarks=0,
+            failed_benchmarks=0, errored_benchmarks=0, exit_code=0,
+        )
+        report = BenchmarkReport(suite_result=suite, ci=ci)
+        md = report.to_markdown()
+        assert "CI Integration" in md
+
+    def test_humaneval_runner_get_name(self):
+        runner = HumanEvalRunner()
+        assert runner.get_name() == "humaneval"
+
+    def test_terminal_bench_runner_get_name(self):
+        runner = TerminalBenchRunner()
+        assert "terminal-bench" in runner.get_name()
+
+    def test_resolve_benchmarks_single(self):
+        runner = BenchmarkRunner(config=BenchmarkConfig(which="tau-bench"))
+        benchmarks = runner._resolve_benchmarks()
+        assert benchmarks == ["tau-bench"]
+
+    def test_baseline_manager_save_no_path(self):
+        """_save does not crash when path is None."""
+        mgr = BaselineManager()
+        mgr._save()  # should not raise
+
+    def test_terminal_bench_runner_has_tasks(self):
+        runner = TerminalBenchRunner()
+        tasks = runner.get_tasks(5)
+        assert len(tasks) == 5
+
+    def test_humaneval_runner_has_tasks(self):
+        runner = HumanEvalRunner()
+        tasks = runner.get_tasks(3)
+        assert len(tasks) == 3
+
+    @pytest.mark.asyncio
+    async def test_terminal_bench_check(self):
+        runner = TerminalBenchRunner()
+        task = runner.get_tasks(1)[0]
+        result = await runner.check(task, "$ ls -la\noutput here")
+        assert result is True

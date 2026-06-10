@@ -226,6 +226,103 @@ class TestEffortRegulator:
         assert EffortLevel.AGGRESSIVE.value == "aggressive"
         assert EffortLevel.ADAPTIVE.value == "adaptive"
 
+    def test_calibrate_with_history_no_match(self):
+        """calibrate returns BALANCED when history exists but nothing matches."""
+        regulator = EffortRegulator()
+        # History with steps too large for conservative but low confidence
+        history = [
+            TaskHistoryEntry(
+                task_type="code", steps_taken=2, final_confidence=0.1,
+                improvement_sequence=[], wall_time_seconds=1, tokens_consumed=100,
+            ),
+        ]
+        level = regulator.calibrate("code", history=history)
+        assert isinstance(level, EffortLevel)
+
+    def test_diminishing_returns_fewer_than_patience(self):
+        """Not enough improvements for patience threshold returns False."""
+        regulator = EffortRegulator()
+        assert regulator.diminishing_returns_check([0.1, 0.05], patience=3) is False
+
+    def test_profile_for_steps_aggressive(self):
+        """_profile_for_steps returns AGGRESSIVE for high step counts."""
+        regulator = EffortRegulator()
+        profile = regulator._profile_for_steps(50)
+        # 50 > balanced(30) => aggressive
+        assert profile.confidence_threshold >= 0.8
+
+    def test_profile_for_steps_conservative(self):
+        regulator = EffortRegulator()
+        profile = regulator._profile_for_steps(5)
+        assert profile.max_steps == 10  # CONSERVATIVE max_steps
+
+    def test_custom_profiles(self):
+        """Custom profiles override defaults."""
+        profiles = {"custom": EffortProfile(max_steps=100, confidence_threshold=0.99, early_stop_patience=10)}
+        regulator = EffortRegulator(profiles=profiles)
+        assert regulator.profile("custom").max_steps == 100
+        assert regulator.profile("custom").confidence_threshold == 0.99
+
+    def test_calibration_stats_with_data(self):
+        regulator = EffortRegulator()
+        regulator.record_outcome(TaskHistoryEntry(
+            task_type="code", steps_taken=5, final_confidence=0.9,
+            improvement_sequence=[0.5, 0.3], wall_time_seconds=30, tokens_consumed=2000,
+        ))
+        stats = regulator.calibration_stats("code")
+        assert stats["average_steps"] == 5.0
+        assert stats["average_confidence"] == pytest.approx(0.9, rel=0.1)
+
+    def test_best_profile_for_no_history(self):
+        """_CalibrationDB.best_profile_for returns None when no history."""
+        reg = EffortRegulator()
+        result = reg._db.best_profile_for("unknown_type", reg.all_profiles())
+        assert result is None
+
+    def test_calibrate_empty_history_via_public_api(self):
+        """calibrate with no history at all returns default."""
+        regulator = EffortRegulator()
+        level = regulator.calibrate("code", history=[])
+        assert level == EffortLevel.AGGRESSIVE
+
+    def test_best_profile_for_with_history(self):
+        """_CalibrationDB.best_profile_for finds best profile from history."""
+        reg = EffortRegulator()
+        entry = TaskHistoryEntry(
+            task_type="code", steps_taken=5, final_confidence=0.9,
+            improvement_sequence=[], wall_time_seconds=10, tokens_consumed=500,
+        )
+        reg._db.record(entry)
+        result = reg._db.best_profile_for("code", reg.all_profiles())
+        assert result is not None
+
+    def test_best_profile_for_steps_zero_skip(self):
+        """Entries with steps_taken=0 are skipped."""
+        reg = EffortRegulator()
+        entry = TaskHistoryEntry(
+            task_type="code", steps_taken=0, final_confidence=0.9,
+            improvement_sequence=[], wall_time_seconds=10, tokens_consumed=500,
+        )
+        reg._db.record(entry)
+        result = reg._db.best_profile_for("code", reg.all_profiles())
+        assert result is None
+
+    def test_profile_for_steps_aggressive_path(self):
+        """_profile_for_steps with high step count returns AGGRESSIVE."""
+        reg = EffortRegulator()
+        profile = reg._profile_for_steps(50)
+        assert profile.max_steps == 80  # AGGRESSIVE
+
+    def test_should_continue_with_confidence_met_via_conservative(self):
+        """Confidence check uses appropriate profile."""
+        regulator = EffortRegulator()
+        state = SessionState(
+            step=5, confidence=0.95,
+            improvements=[0.5, 0.3, 0.1],
+        )
+        budget = Budget(max_steps=100)
+        assert regulator.should_continue(state, budget) is False
+
 
 # ====================================================================
 # AutonomousAgent tests
@@ -413,6 +510,58 @@ class TestAutonomousAgent:
         assert len(idle_issues) >= 1
         assert idle_issues[0].severity == "info"
 
+    def test_self_diagnose_high_token_burn(self):
+        """Token burn rate > 100k triggers warning."""
+        agent = AutonomousAgent()
+        agent._total_tokens = 500000
+        with patch.object(agent, "_start_time", time.time() - 60):
+            issues = agent.self_diagnose()
+        token_issues = [i for i in issues if i.component == "tokens"]
+        assert len(token_issues) >= 1
+        assert token_issues[0].severity == "warning"
+
+    def test_self_diagnose_frequent_restarts_warning(self):
+        """Restart count > 3 but <= 10 triggers warning."""
+        agent = AutonomousAgent()
+        agent._restart_count = 5
+        issues = agent.self_diagnose()
+        restart_issues = [i for i in issues if i.component == "restarts"]
+        assert len(restart_issues) >= 1
+        assert restart_issues[0].severity == "warning"
+
+    def test_self_diagnose_elevated_error_rate(self):
+        """Error rate > 1 but <= 5 triggers warning."""
+        agent = AutonomousAgent()
+        now = time.time()
+        agent._error_timestamps = [now - i * 20 for i in range(10)]
+        issues = agent.self_diagnose()
+        error_issues = [i for i in issues if i.component == "errors"]
+        assert len(error_issues) >= 1
+        assert error_issues[0].severity == "warning"
+
+    def test_get_cpu_percent(self):
+        """_get_cpu_percent returns a float between 0 and 100."""
+        agent = AutonomousAgent()
+        cpu = agent._get_cpu_percent()
+        assert isinstance(cpu, float)
+        assert 0.0 <= cpu <= 100.0
+
+    def test_compute_token_burn_rate_zero_uptime(self):
+        """_compute_token_burn_rate returns 0 when uptime < 1s."""
+        agent = AutonomousAgent()
+        agent._total_tokens = 5000
+        with patch.object(agent, "_start_time", time.time()):
+            rate = agent._compute_token_burn_rate()
+            assert rate == 0.0
+
+    def test_elevated_memory_warning_in_diagnose(self):
+        """Memory between 512-1024 MB triggers warning."""
+        agent = AutonomousAgent()
+        with patch.object(AutonomousAgent, "_get_memory_mb", return_value=700.0):
+            issues = agent.self_diagnose()
+        mem_issues = [i for i in issues if i.component == "memory"]
+        assert any(i.severity == "warning" for i in mem_issues)
+
 
 # ====================================================================
 # Integration tests (EffortRegulator + AutonomyLoop)
@@ -529,3 +678,101 @@ async def test_agent_checkpoint_save():
     args = cm.save.call_args[0]
     assert args[0] == "test-cp-save"
     assert args[1]["tasks_completed"] == 7
+
+
+def test_checkpoint_save_exception():
+    """_save_checkpoint handles exceptions from checkpoint manager."""
+    cm = MagicMock()
+    cm.save.side_effect = RuntimeError("save error")
+    agent = AutonomousAgent(agent_id="test", checkpoint_manager=cm)
+    agent._save_checkpoint()  # should not raise
+
+
+def test_checkpoint_restore_exception():
+    """_restore_from_checkpoint handles exceptions."""
+    cm = MagicMock()
+    cm.restore.side_effect = RuntimeError("restore error")
+    agent = AutonomousAgent(agent_id="test", checkpoint_manager=cm)
+    agent._restore_from_checkpoint()  # should not raise
+
+
+@pytest.mark.asyncio
+async def test_autonomy_loop_start_with_failures():
+    """Loop transitions to RECOVERING after max failures."""
+    loop = AutonomyLoop(run_mode=RunMode.ONCE, max_consecutive_failures=2, max_idle_seconds=0)
+    # Set failure count to trigger health check failure in _execute_task
+    loop._failure_count = 2
+    with pytest.raises(RuntimeError, match="Health check failed"):
+        await loop._execute_task("test")
+
+
+def test_autonomy_loop_stats():
+    """stats() returns a valid dict."""
+    loop = AutonomyLoop()
+    stats = loop.stats()
+    assert "state" in stats
+    assert "tasks_completed" in stats
+    assert "failure_count" in stats
+    assert "idle_seconds" in stats
+    assert "uptime_seconds" in stats
+
+
+def test_autonomy_loop_health_ok():
+    """_health_ok returns True when failures below max."""
+    loop = AutonomyLoop(max_consecutive_failures=5)
+    assert loop._health_ok() is True
+    loop._failure_count = 5
+    assert loop._health_ok() is False
+
+
+def test_autonomy_loop_is_idle():
+    """is_idle returns True when idle time exceeds max."""
+    loop = AutonomyLoop(max_idle_seconds=0)
+    assert loop.is_idle is True
+
+
+@pytest.mark.asyncio
+async def test_agent_daemon_mode_cancelled_direct():
+    """Daemon mode handles CancelledError from loop.start."""
+    loop = AutonomyLoop(run_mode=RunMode.CONTINUOUS, max_idle_seconds=0)
+    agent = AutonomousAgent(agent_id="test-cancel-direct", loop=loop)
+    queue: asyncio.Queue = asyncio.Queue()
+
+    # Simulate loop.start raising CancelledError
+    original_start = loop.start
+
+    async def raising_start(*args):
+        raise asyncio.CancelledError()
+
+    loop.start = raising_start  # type: ignore
+    with pytest.raises(asyncio.CancelledError):
+        await agent.daemon_mode(queue)
+
+
+@pytest.mark.asyncio
+async def test_agent_daemon_mode_exception_and_restart():
+    """Daemon mode handles exception and restarts when recovering."""
+    cm = MagicMock()
+    loop = AutonomyLoop(run_mode=RunMode.CONTINUOUS, max_idle_seconds=99)
+    agent = AutonomousAgent(
+        agent_id="test-restart-2",
+        loop=loop,
+        checkpoint_manager=cm,
+    )
+    queue: asyncio.Queue = asyncio.Queue()
+
+    # Mock start to leave state as RECOVERING
+    original_start = agent.loop.start
+
+    async def mock_start(task_queue):
+        agent.loop._state = LoopState.RECOVERING
+
+    agent.loop.start = mock_start  # type: ignore
+
+    async def stop_later():
+        await asyncio.sleep(0.1)
+        agent.loop.stop()
+
+    asyncio.create_task(stop_later())
+    await agent.daemon_mode(queue)
+    assert agent._restart_count >= 1

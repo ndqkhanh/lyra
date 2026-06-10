@@ -514,3 +514,214 @@ class TestScheduler:
         zero_types = {"strategy", "workflow", "skill"}
         for zt in zero_types:
             assert zt in budget, f"Type {zt} should be in budget"
+
+
+# ---------------------------------------------------------------------------
+# Cost-per-token tracking tests
+# ---------------------------------------------------------------------------
+
+
+class TestCostPerTokenTracker:
+    """Verify CostPerTokenTracker records and aggregates cost data."""
+
+    def test_record_and_stats(self):
+        from lyra.context.adaptive_fabric import CostPerTokenTracker
+        from lyra.context.compaction import CompactionStrategy
+
+        tracker = CostPerTokenTracker()
+        tracker.record(CompactionStrategy.BALANCED, 1000, 500, 0.001, "code")
+        stats = tracker.stats_by_strategy()
+        assert stats["total_ops"] == 1
+        assert stats["avg_compression_ratio"] > 0
+
+    def test_stats_by_strategy_filtered(self):
+        from lyra.context.adaptive_fabric import CostPerTokenTracker
+        from lyra.context.compaction import CompactionStrategy
+
+        tracker = CostPerTokenTracker()
+        tracker.record(CompactionStrategy.BALANCED, 1000, 500, 0.001, "code")
+        tracker.record(CompactionStrategy.AGGRESSIVE, 2000, 300, 0.002, "code")
+        stats = tracker.stats_by_strategy(CompactionStrategy.BALANCED)
+        assert stats["total_ops"] == 1
+
+    def test_stats_by_strategy_empty(self):
+        from lyra.context.adaptive_fabric import CostPerTokenTracker
+        from lyra.context.compaction import CompactionStrategy
+
+        tracker = CostPerTokenTracker()
+        stats = tracker.stats_by_strategy(CompactionStrategy.AGGRESSIVE)
+        assert stats["total_ops"] == 0
+
+    def test_best_strategy(self):
+        from lyra.context.adaptive_fabric import CostPerTokenTracker
+        from lyra.context.compaction import CompactionStrategy
+
+        tracker = CostPerTokenTracker()
+        tracker.record(CompactionStrategy.BALANCED, 1000, 500, 0.001, "code")
+        best, cost = tracker.best_strategy_by_cost_efficiency()
+        assert best == "balanced"
+
+    def test_best_strategy_empty(self):
+        from lyra.context.adaptive_fabric import CostPerTokenTracker
+
+        tracker = CostPerTokenTracker()
+        best, cost = tracker.best_strategy_by_cost_efficiency()
+        assert best == "unknown"
+        assert cost == 0.0
+
+
+# ---------------------------------------------------------------------------
+# TaskTypeProfiles tests
+# ---------------------------------------------------------------------------
+
+
+class TestTaskTypeProfiles:
+    """Verify TaskTypeProfiles registry."""
+
+    def test_get_by_task_type_code(self):
+        from lyra.context.adaptive_fabric import ProfileType, TaskTypeProfiles
+        profiles = TaskTypeProfiles()
+        profile = profiles.get_by_task_type("code_review")
+        assert profile.profile_type == ProfileType.CODE
+
+    def test_get_by_task_type_chat(self):
+        from lyra.context.adaptive_fabric import ProfileType, TaskTypeProfiles
+        profiles = TaskTypeProfiles()
+        profile = profiles.get_by_task_type("chat")
+        assert profile.profile_type == ProfileType.CHAT
+
+    def test_get_by_task_type_unknown(self):
+        from lyra.context.adaptive_fabric import ProfileType, TaskTypeProfiles
+        profiles = TaskTypeProfiles()
+        profile = profiles.get_by_task_type("nonexistent")
+        assert profile.profile_type == ProfileType.GENERAL
+
+    def test_get_by_profile_type_code(self):
+        from lyra.context.adaptive_fabric import ProfileType, TaskTypeProfiles
+        profiles = TaskTypeProfiles()
+        p = profiles.get_by_profile_type(ProfileType.CODE)
+        assert p.protect_code is True
+
+    def test_get_by_profile_type_unknown(self):
+        from lyra.context.adaptive_fabric import ProfileType, TaskTypeProfiles
+        profiles = TaskTypeProfiles()
+        p = profiles.get_by_profile_type(ProfileType.GENERAL)
+        assert p.description == "Default balanced profile."
+
+    def test_all_profiles_count(self):
+        from lyra.context.adaptive_fabric import TaskTypeProfiles
+        profiles = TaskTypeProfiles()
+        assert len(profiles.all_profiles) == 4
+
+    def test_update_profile(self):
+        from lyra.context.adaptive_fabric import ProfileType, TaskTypeProfile, TaskTypeProfiles
+        profiles = TaskTypeProfiles()
+        updated = TaskTypeProfile(
+            profile_type=ProfileType.CHAT,
+            protect_code=False,
+            summarization_aggressiveness=0.9,
+            keep_citations=True,
+            default_target_ratio=0.3,
+            description="Updated chat",
+        )
+        profiles.update_profile(updated)
+        assert profiles.get_by_profile_type(ProfileType.CHAT).summarization_aggressiveness == 0.9
+
+
+# ---------------------------------------------------------------------------
+# Profile learning tests
+# ---------------------------------------------------------------------------
+
+
+class TestProfileLearning:
+    """Verify learn_profile_from_feedback adapts profiles."""
+
+    def test_good_quality_increases_agg(self):
+        fabric = AdaptiveContextFabric()
+        profile = fabric.learn_profile_from_feedback(
+            "code_review", {"compaction_quality": 0.9}
+        )
+        assert profile.summarization_aggressiveness > 0.4
+
+    def test_poor_quality_decreases_agg(self):
+        fabric = AdaptiveContextFabric()
+        profile = fabric.learn_profile_from_feedback(
+            "code_review", {"compaction_quality": 0.2}
+        )
+        assert profile.summarization_aggressiveness < 0.5
+
+    def test_poor_quality_enables_code_protection(self):
+        fabric = AdaptiveContextFabric()
+        profile = fabric.learn_profile_from_feedback(
+            "code_review", {"compaction_quality": 0.3}
+        )
+        assert profile.protect_code is True
+
+    def test_get_compaction_quality_scores(self):
+        fabric = AdaptiveContextFabric()
+        scores = fabric.get_compaction_quality_scores("test_task")
+        assert isinstance(scores, list)
+
+    def test_has_citation(self):
+        fabric = AdaptiveContextFabric()
+        assert fabric._has_citation("see [1] for details")
+        assert fabric._has_citation("see arxiv paper")
+        assert fabric._has_citation("see doi.org/abc")
+        assert not fabric._has_citation("plain text without citations")
+
+    def test_compress_with_model(self):
+        """Compression records cost and tracks profiled protections."""
+        fabric = AdaptiveContextFabric()
+        messages = [
+            {"role": "system", "content": "You are a coding assistant."},
+            {"role": "user", "content": "Write Python code to sort a list: ```python\ndef sort_list(items):\n    return sorted(items)\n```"},
+            {"role": "assistant", "content": "Here is the code."},
+            {"role": "user", "content": "Thanks!"},
+        ]
+        compressed = fabric.compress(messages, task_type="code_review")
+        # System message preserved
+        assert any(m["role"] == "system" for m in compressed)
+        # Cost was recorded
+        assert fabric.cost_tracker.stats_by_strategy()["total_ops"] >= 1
+
+    def test_learn_profile_from_feedback_non_code(self):
+        """Non-code task with poor quality does not enable code protection."""
+        fabric = AdaptiveContextFabric()
+        profile = fabric.learn_profile_from_feedback(
+            "chat", {"compaction_quality": 0.3}
+        )
+        assert profile.protect_code is False
+
+    def test_update_task_type_profile_no_feedback_key(self):
+        """_update_task_type_profile returns early with empty feedback."""
+        fabric = AdaptiveContextFabric()
+        fabric._update_task_type_profile("test_task", {})
+        # Should not crash
+
+    def test_update_task_type_profile_with_success(self):
+        """_update_task_type_profile uses success as quality proxy."""
+        fabric = AdaptiveContextFabric()
+        fabric._update_task_type_profile("testing", {"success": True})
+        profile = fabric.task_type_profiles.get_by_task_type("testing")
+        assert profile is not None
+
+    def test_speculate_cache_eviction(self):
+        """Speculation cache evicts oldest when exceeding 200 entries."""
+        fabric = AdaptiveContextFabric()
+        for i in range(250):
+            fabric.speculate(f"tool_{i}", {"param": i})
+        stats = fabric.speculation_stats()
+        assert stats["cache_size"] <= 200
+
+    def test_policy_default_for_unknown_task_type(self):
+        """_get_policy returns default ContextPolicy for None."""
+        fabric = AdaptiveContextFabric()
+        policy = fabric._get_policy(None)
+        assert policy.target_ratio == 0.6
+
+    def test_get_policy_stores_new_policy(self):
+        """_get_policy creates and stores a new policy for unknown types."""
+        fabric = AdaptiveContextFabric()
+        policy = fabric._get_policy("new_task_type")
+        assert "new_task_type" in fabric.policies
+        assert policy.target_ratio == 0.6

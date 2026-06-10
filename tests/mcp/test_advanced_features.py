@@ -412,3 +412,60 @@ class TestPoolConfig:
         config = PoolConfig(max_connections=10, max_total_connections=50)
         assert config.max_connections == 10
         assert config.max_total_connections == 50
+
+
+class TestStreamableHTTPTransportAdvanced:
+    """Advanced tests for StreamableHTTPTransport."""
+
+    def test_unregister_nonexistent(self):
+        transport = StreamableHTTPTransport()
+        transport.unregister_server("nonexistent")
+
+    def test_event_callback_exception(self):
+        transport = StreamableHTTPTransport()
+        results = []
+
+        def failing_cb(event):
+            raise ValueError("expected")
+
+        def good_cb(event):
+            results.append(event)
+
+        transport.on_event(failing_cb)
+        transport.on_event(good_cb)
+        transport.generate_event(SSEEventType.HEARTBEAT, {}, server_id="s")
+        assert len(results) == 1
+
+    def test_pool_acquire_exceeds_total(self):
+        pool = ConnectionPool(PoolConfig(max_total_connections=1))
+        pool.acquire("srv1", "http://localhost:1")
+        with pytest.raises(RuntimeError, match="Max"):
+            pool.acquire("srv2", "http://localhost:2")
+
+    def test_pool_server_count(self):
+        pool = ConnectionPool()
+        assert pool.server_count == 0
+        pool.acquire("srv1", "http://localhost:1")
+        assert pool.server_count == 1
+
+    def test_stream_general_exception(self):
+        import asyncio
+
+        transport = StreamableHTTPTransport()
+        transport.register_server("test-srv", "http://localhost:1")
+
+        async def raising_execute(*args):
+            raise RuntimeError("execution failed")
+
+        transport._execute_stream = raising_execute
+        events = asyncio.run(
+            transport.stream_tool_execution("test-srv", "tool"),
+        )
+        error_events = [e for e in events if e.event_type == SSEEventType.TOOL_ERROR]
+        assert len(error_events) >= 1
+
+    def test_connection_not_idle_recently_used(self):
+        import time
+        conn = Connection(server_id="s", url="http://localhost")
+        conn.last_used_at = time.time()
+        assert conn.is_idle is False

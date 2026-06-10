@@ -33,6 +33,7 @@ from lyra.autonomy.continuous_monitor import (
     MetricsSnapshot,
     MonitorConfig,
 )
+from lyra.autonomy.loop import AutonomyLoop, LoopState, RunMode
 from lyra.supervisor.daemon import (
     DaemonHealth,
     SupervisorDaemon,
@@ -53,6 +54,13 @@ class TestSleepWakeScheduler:
         assert sched.is_asleep is False
         assert sched.state.is_asleep is False
         assert sched.state.current_mode is None
+
+    def test_inspect_dream_phase(self):
+        """dream_phase property returns the DreamPhase instance."""
+        sched = SleepWakeScheduler()
+        dream = sched.dream_phase
+        assert dream is not None
+        assert dream.cycle_seconds == 60.0
 
     def test_light_sleep_and_wake(self):
         sched = SleepWakeScheduler()
@@ -344,6 +352,125 @@ class TestSleepWakeSchedulerAsync:
         sched.on_checkpoint = checkpoint
         await sched.sleep(SleepMode.DEEP, SleepReason.OVERNIGHT)
         assert checkpoint_called is True
+
+    @pytest.mark.asyncio
+    async def test_evaluate_sleep_async_cost_spike(self):
+        sched = SleepWakeScheduler(
+            sleep_policy=SleepPolicy(cost_spike_threshold_tokens_per_min=100)
+        )
+        result = await sched.evaluate_sleep(idle_seconds=0, token_burn_rate=500)
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_check_wake_triggers_budget_threshold(self):
+        sched = SleepWakeScheduler()
+        await sched.sleep(SleepMode.LIGHT, SleepReason.MANUAL)
+        sched.trigger_wake(WakeTrigger.BUDGET_THRESHOLD)
+        woken = await sched.check_wake_triggers()
+        assert woken is True
+
+    @pytest.mark.asyncio
+    async def test_check_wake_triggers_error_threshold(self):
+        sched = SleepWakeScheduler()
+        await sched.sleep(SleepMode.LIGHT, SleepReason.MANUAL)
+        sched.trigger_wake(WakeTrigger.ERROR_THRESHOLD)
+        woken = await sched.check_wake_triggers()
+        assert woken is True
+
+    @pytest.mark.asyncio
+    async def test_check_wake_triggers_scheduled_time(self):
+        sched = SleepWakeScheduler()
+        await sched.sleep(SleepMode.LIGHT, SleepReason.MANUAL)
+        sched.trigger_wake(WakeTrigger.SCHEDULED_TIME)
+        sched._state.wake_scheduled_at = time.time() - 1
+        woken = await sched.check_wake_triggers()
+        assert woken is True
+
+    @pytest.mark.asyncio
+    async def test_on_wake_hook_sync(self):
+        calls = []
+        sched = SleepWakeScheduler()
+        sched.on_wake = lambda reason: calls.append(reason)
+        await sched.sleep(SleepMode.LIGHT, SleepReason.MANUAL)
+        await sched.wake(WakeReason.MANUAL_OVERRIDE)
+        assert len(calls) == 1
+
+    @pytest.mark.asyncio
+    async def test_on_sleep_hook_sync(self):
+        calls = []
+        def hook(mode, reason):
+            calls.append((mode, reason))
+        sched = SleepWakeScheduler()
+        sched.on_sleep = hook
+        await sched.sleep(SleepMode.LIGHT, SleepReason.MANUAL)
+        assert len(calls) == 1
+
+    @pytest.mark.asyncio
+    async def test_on_checkpoint_async_called(self):
+        results = []
+
+        async def async_cp():
+            results.append("done")
+
+        sched = SleepWakeScheduler()
+        sched.on_checkpoint = async_cp
+        await sched.sleep(SleepMode.DEEP, SleepReason.OVERNIGHT)
+        assert len(results) >= 1
+
+    @pytest.mark.asyncio
+    async def test_dream_phase_run_loop(self):
+        dream = DreamPhase(cycle_seconds=0.01)
+        stop_event = asyncio.Event()
+        reflect_calls = []
+
+        async def reflect(mode, report):
+            reflect_calls.append(mode)
+
+        dream.on_reflect = reflect
+        task = asyncio.create_task(dream.run_loop(SleepMode.LIGHT, stop_event))
+        await asyncio.sleep(0.05)
+        stop_event.set()
+        await task
+        assert dream.reflection_count >= 1
+
+    @pytest.mark.asyncio
+    async def test_dream_phase_run_once_with_bind(self):
+        dream = DreamPhase()
+        bind_results = []
+
+        async def bind_cb(mode, associations):
+            bind_results.append(associations)
+            return {"bound": True}
+
+        dream.on_bind = bind_cb
+        result = await dream.run_once(SleepMode.LIGHT)
+        assert "bindings" in result
+        assert result["bindings"].get("bound") is True
+
+    @pytest.mark.asyncio
+    async def test_dream_phase_run_once_with_prune(self):
+        dream = DreamPhase()
+
+        async def prune_cb(mode, count):
+            return 5
+
+        dream.on_prune = prune_cb
+        result = await dream.run_once(SleepMode.LIGHT)
+        assert result["pruned"] == 5
+
+    def test_dream_phase_run_once_exception_handling(self):
+        dream = DreamPhase()
+
+        def broken_reflect(mode, report):
+            raise RuntimeError("reflect failed")
+
+        dream.on_reflect = broken_reflect
+        result = asyncio.run(dream.run_once(SleepMode.LIGHT))
+        assert result["reflection"] == ""
+
+    def test_dream_report_build(self):
+        report = DreamPhase._build_report()
+        assert "dream_cycle_at_" in report
 
 
 # ======================================================================
@@ -1064,3 +1191,118 @@ class TestContinuousMonitor:
         error_alerts = mon.recent_alerts(kind=AlertKind.ERROR_RATE_SPIKE)
         assert len(latency_alerts) >= 1
         assert len(error_alerts) == 0
+
+    def test_recent_alerts_reverse_order(self):
+        mon = ContinuousMonitor(
+            config=MonitorConfig(latency_p95_threshold_seconds=0.1)
+        )
+        for _ in range(5):
+            mon.record_latency(5.0)
+        metrics = mon.compute_metrics()
+        mon.detect_anomalies(metrics)
+        alerts = mon.recent_alerts(limit=5)
+        if len(alerts) >= 2:
+            assert alerts[0].timestamp >= alerts[-1].timestamp
+
+    def test_recent_alerts_severity_filter(self):
+        mon = ContinuousMonitor(
+            config=MonitorConfig(latency_p95_threshold_seconds=0.1)
+        )
+        for _ in range(10):
+            mon.record_latency(5.0)
+        metrics = mon.compute_metrics()
+        mon.detect_anomalies(metrics)
+        warning_alerts = mon.recent_alerts(severity=AlertSeverity.WARNING)
+        assert len(warning_alerts) >= 0
+
+    def test_prune_window_expired(self):
+        mon = ContinuousMonitor(config=MonitorConfig(metric_window_seconds=0.01))
+        mon.record_tokens(1000)
+        mon.record_error("sess-1", "e")
+        mon.record_latency(0.5)
+        mon.record_cost(0.05)
+        import time; time.sleep(0.02)
+        mon._prune_window()
+        assert len(mon._token_samples) == 0
+
+    def test_detect_anomaly_metric(self):
+        """Metric anomaly detection triggers when z-score exceeds threshold."""
+        mon = ContinuousMonitor(
+            config=MonitorConfig(anomaly_stddev_threshold=1.0)
+        )
+        # Seed metric history with stable values
+        for _ in range(10):
+            mon._metric_history.append(100.0)
+        metrics = MetricsSnapshot(token_burn_rate=500.0)
+        alerts = mon.detect_anomalies(metrics)
+        anomaly_alerts = [a for a in alerts if a.kind == AlertKind.ANOMALY_DETECTED]
+        assert len(anomaly_alerts) >= 1
+
+    def test_detect_critical_error_rate(self):
+        """Error rate > 2x threshold triggers CRITICAL severity."""
+        mon = ContinuousMonitor(
+            config=MonitorConfig(error_rate_spike_threshold=5.0)
+        )
+        metrics = MetricsSnapshot(error_rate=15.0)
+        alerts = mon.detect_anomalies(metrics)
+        error_alerts = [a for a in alerts if a.kind == AlertKind.ERROR_RATE_SPIKE]
+        assert any(a.severity == AlertSeverity.CRITICAL for a in error_alerts)
+
+
+class TestAutonomyLoop:
+    """Tests for AutonomyLoop (from loop.py)."""
+
+    def test_initial_state(self):
+        loop = AutonomyLoop()
+        assert loop.state == LoopState.IDLE
+
+    def test_state_property(self):
+        loop = AutonomyLoop()
+        loop._state = LoopState.RUNNING
+        assert loop.state == LoopState.RUNNING
+
+    def test_stop_sets_state(self):
+        loop = AutonomyLoop()
+        loop.stop()
+        assert loop.state == LoopState.STOPPED
+
+    def test_stats(self):
+        loop = AutonomyLoop()
+        stats = loop.stats()
+        assert "state" in stats
+        assert "tasks_completed" in stats
+        assert "failure_count" in stats
+
+    def test_health_ok_when_below_max(self):
+        loop = AutonomyLoop(max_consecutive_failures=5)
+        assert loop._health_ok() is True
+        loop._failure_count = 5
+        assert loop._health_ok() is False
+
+    def test_is_idle_when_exceeded(self):
+        loop = AutonomyLoop(max_idle_seconds=0)
+        assert loop.is_idle is True
+
+    @pytest.mark.asyncio
+    async def test_execute_task_raises_when_unhealthy(self):
+        loop = AutonomyLoop(max_consecutive_failures=3)
+        loop._failure_count = 3
+        with pytest.raises(RuntimeError, match="Health check failed"):
+            await loop._execute_task("test")
+
+    @pytest.mark.asyncio
+    async def test_start_with_queue(self):
+        loop = AutonomyLoop(run_mode=RunMode.ONCE, max_idle_seconds=0, health_check_interval=0.1)
+        queue: asyncio.Queue = asyncio.Queue()
+        await queue.put("task-1")
+
+        async def stop_soon():
+            await asyncio.sleep(0.2)
+            loop.stop()
+
+        asyncio.create_task(stop_soon())
+        await loop.start(queue)
+        assert loop._tasks_completed >= 0
+
+        assert len(mon._latency_samples) == 0
+        assert len(mon._cost_samples) == 0

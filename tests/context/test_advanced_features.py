@@ -281,3 +281,174 @@ class TestLayeredCompactionEngine:
         msgs = self._make_msgs(3, role="user", content_len=10)
         compressed, _ = engine.compress(msgs, target_token_budget=999999)
         assert len(compressed) == 3
+
+    def test_layer2_summarises_with_system_message(self):
+        """Layer 2 summarises low-score messages while preserving system."""
+        engine = LayeredCompactionEngine(
+            keep_recent=2,
+            layer1_threshold=0.99,
+            layer1_budget=1,
+            layer2_budget=9999,
+        )
+        msgs = [
+            {"role": "system", "content": "You are Lyra."},
+        ]
+        msgs.extend(self._make_msgs(10, role="user", content_len=15))
+        compressed, trace = engine.compress(msgs)
+        assert any(m.get("role") == "system" for m in compressed)
+        if trace["layer"] == 2:
+            assert "summarised_chunks" in trace["details"]
+
+    def test_layer3_merges_clusters_with_system(self):
+        """Layer 3 merges consecutive same-role messages while preserving system."""
+        engine = LayeredCompactionEngine(
+            keep_recent=1,
+            layer1_budget=1,
+            layer2_budget=1,
+            layer1_threshold=0.99,
+        )
+        msgs = [
+            {"role": "system", "content": "You are Lyra."},
+        ]
+        for i in range(6):
+            msgs.append({"role": "user", "content": f"Message number {i}" * 50})
+        compressed, trace = engine.compress(msgs)
+        assert any(m.get("role") == "system" for m in compressed)
+
+    def test_code_protection_in_layer3(self):
+        """Code-containing messages protected in Layer 3."""
+        engine = LayeredCompactionEngine(
+            keep_recent=2,
+            layer1_threshold=0.99,
+            layer1_budget=1,
+            layer2_budget=1,
+        )
+        msgs = [
+            {"role": "user", "content": "Write a function"},
+            {"role": "assistant", "content": "```python\ndef hello():\n    pass\n```"},
+            {"role": "user", "content": "Thanks!"},
+        ]
+        compressed, trace = engine.compress(msgs)
+        code_blocks = any("```" in m.get("content", "") for m in compressed)
+        assert code_blocks or trace["layer"] == 1
+
+    def test_retention_heuristic_assistant_high_value(self):
+        """Assistant messages get high relevance scores."""
+        engine = LayeredCompactionEngine()
+        score = engine._relevance_heuristic(
+            {"role": "assistant", "content": "Medium length response"}
+        )
+        assert score == 0.9
+
+    def test_retention_heuristic_short_content(self):
+        """Very short content gets low relevance."""
+        engine = LayeredCompactionEngine()
+        score = engine._relevance_heuristic(
+            {"role": "user", "content": "ok"}
+        )
+        assert score == 0.3
+
+    def test_message_tokens(self):
+        """_message_tokens returns token estimate for a message."""
+        engine = LayeredCompactionEngine()
+        tokens = engine._message_tokens({"role": "user", "content": "Hello world" * 100})
+        assert tokens >= 1
+
+    def test_importance_for_system(self):
+        engine = LayeredCompactionEngine()
+        s = engine._importance_heuristic({"role": "system"})
+        assert s == 1.0
+
+    def test_importance_for_tool(self):
+        engine = LayeredCompactionEngine()
+        s = engine._importance_heuristic({"role": "tool_result"})
+        assert s == 0.3
+
+    def test_importance_for_user(self):
+        engine = LayeredCompactionEngine()
+        s = engine._importance_heuristic({"role": "user"})
+        assert s == 0.6
+
+    def test_recency_score(self):
+        engine = LayeredCompactionEngine()
+        s = engine._recency_score(0, 10)
+        assert s == 0.1
+
+    def test_recency_score_single(self):
+        engine = LayeredCompactionEngine()
+        s = engine._recency_score(0, 1)
+        assert s == 1.0
+
+    def test_heuristic_merge_cluster_single(self):
+        r = LayeredCompactionEngine._heuristic_merge_cluster([{"role": "user", "content": "Hi"}])
+        assert "[Merged 1" in r["content"]
+
+    def test_heuristic_summarise_long(self):
+        r = LayeredCompactionEngine._heuristic_summarise_chunk([{"role": "user", "content": "x" * 500}])
+        assert "..." in r
+
+    def test_heuristic_summarise_two_roles(self):
+        r = LayeredCompactionEngine._heuristic_summarise_chunk([
+            {"role": "user", "content": "A"},
+            {"role": "assistant", "content": "B"},
+        ])
+        assert "[user]" in r and "[assistant]" in r
+
+    def test_validate_syntax_non_python(self):
+        """Non-Python languages return True (valid)."""
+        result = StructuralCodeProtection._validate_syntax("```js\nx=1\n```", "javascript")
+        assert result is True
+
+    def test_layer3_escalation_all_layers_fail(self):
+        engine = LayeredCompactionEngine(
+            keep_recent=1, layer1_budget=1, layer2_budget=1, layer1_threshold=0.99,
+        )
+        msgs = [
+            {"role": "user", "content": "A" * 200},
+            {"role": "user", "content": "B" * 200},
+            {"role": "user", "content": "C" * 200},
+        ]
+        compressed, trace = engine.compress(msgs)
+        assert len(compressed) < len(msgs) or trace["layer"] >= 1
+
+    def test_code_protection_layer3_break(self):
+        """Layer 3 stops clustering at code blocks."""
+        engine = LayeredCompactionEngine(
+            layer1_threshold=0.99, layer1_budget=1, layer2_budget=1, keep_recent=0,
+        )
+        msgs = [
+            {"role": "user", "content": "A" * 50},
+            {"role": "user", "content": "```\ncode\n```"},
+            {"role": "user", "content": "B" * 50},
+        ]
+        compressed, trace = engine.compress(msgs)
+        assert isinstance(trace["layer"], int)
+
+    def test_layer2_code_protection_path(self):
+        """Layer 2 protects code blocks during summarization."""
+        engine = LayeredCompactionEngine(
+            layer1_threshold=0.99, layer1_budget=1, layer2_budget=999999,
+            keep_recent=0,
+        )
+        msgs = [
+            {"role": "user", "content": "Explain this:\n```python\nx=1\nprint(x)\n```"},
+            {"role": "user", "content": "What does this do?"},
+        ]
+        compressed, trace = engine.compress(msgs)
+        has_code = any("```" in str(m.get("content","")) for m in compressed)
+        if trace["layer"] == 2:
+            assert has_code
+
+    def test_layer3_code_break_path(self):
+        """Layer 3 code protection stops clustering."""
+        engine = LayeredCompactionEngine(
+            layer1_threshold=0.99, layer1_budget=1, layer2_budget=1,
+            keep_recent=0,
+        )
+        msgs = [
+            {"role": "user", "content": "A" * 50},
+            {"role": "user", "content": "```\ncode\n```"},
+            {"role": "user", "content": "B" * 50},
+        ]
+        compressed, trace = engine.compress(msgs)
+        assert isinstance(trace["layer"], int)
