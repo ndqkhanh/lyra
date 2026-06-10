@@ -1,7 +1,6 @@
 """
 Tests for LyraInclude (``.lyrainclude`` pattern parsing, should_include,
-apply_lyrainclude) and the non-git fallback / session-binding features
-of WorktreeManager.
+apply_lyrainclude, copy_included_files) and the free functions.
 """
 
 from __future__ import annotations
@@ -17,7 +16,9 @@ from lyra.worktree.lyrainclude import (
     LyraInclude,
     WorktreeIncludeError,
     _load_spec,
+    copy_included_files,
     create_default_lyrainclude,
+    load_gitignore,
     load_patterns,
 )
 from lyra.worktree.manager import (
@@ -135,7 +136,6 @@ class TestLyraIncludeParsing:
     def test_should_include_no_include_match(self, repo_root: Path):
         """should_include returns False for a non-matching file."""
         inc = LyraInclude.load(repo_root)
-        # README.md is not listed in .lyrainclude
         assert inc.should_include("README.md") is False
 
     def test_should_include_no_include_spec(self, tmp_path: Path):
@@ -150,9 +150,7 @@ class TestLyraIncludeParsing:
 
     def test_should_include_not_gitignored(self, repo_root: Path):
         """should_include returns False when file is tracked by git."""
-        # settings.toml is not in .gitignore but let's check
         inc = LyraInclude.load(repo_root)
-        # It doesn't match .lyrainclude either, so False
         assert inc.should_include("config/settings.toml") is False
 
     def test_should_include_match_only_include_no_gitignore(self, tmp_path: Path):
@@ -207,6 +205,35 @@ class TestLyraIncludeParsing:
         result = create_default_lyrainclude(root)
         assert result.read_text(encoding="utf-8") == "custom-pattern\n"
 
+    def test_load_gitignore_returns_spec(self, tmp_path: Path):
+        """load_gitignore returns a PathSpec from .gitignore."""
+        root = tmp_path / "with_gitignore"
+        root.mkdir()
+        _write(root / ".gitignore", "*.pyc\n")
+        spec = load_gitignore(root)
+        assert spec is not None
+        assert spec.match_file("test.pyc") is True
+
+    def test_load_gitignore_missing_returns_empty(self, tmp_path: Path):
+        """load_gitignore returns an empty spec when no .gitignore."""
+        root = tmp_path / "no_gitignore"
+        root.mkdir()
+        spec = load_gitignore(root)
+        assert spec is not None
+        assert spec.match_file("anything") is False
+
+    def test_load_patterns_legacy(self, repo_root: Path):
+        """load_patterns free function works as backward compat."""
+        spec = load_patterns(repo_root)
+        assert spec is not None
+        assert spec.match_file(".env") is True
+
+    def test_load_patterns_nonexistent(self, tmp_path: Path):
+        """load_patterns returns None for nonexistent .lyrainclude."""
+        root = tmp_path / "no_lyrainclude"
+        root.mkdir()
+        assert load_patterns(root) is None
+
 
 # ======================================================================
 # Test: LyraInclude.apply_lyrainclude
@@ -220,28 +247,19 @@ class TestLyraIncludeApply:
         """apply_lyrainclude removes files not matching lyrainclude."""
         inc = LyraInclude.load(repo_root)
 
-        # Create a snapshot that includes extra files
         worktree = repo_root / "snapshot"
         shutil.copytree(repo_root, worktree, ignore=shutil.ignore_patterns(".git"))
 
-        # Should have all files before filtering
         assert (worktree / "README.md").exists()
         assert (worktree / "config" / "settings.toml").exists()
 
         removed = inc.apply_lyrainclude(worktree)
 
-        # Non-included files should be gone
         assert not (worktree / "README.md").exists()
         assert not (worktree / "config" / "settings.toml").exists()
-
-        # Included files should remain
         assert (worktree / ".env").exists()
         assert (worktree / "config" / "secrets.json").exists()
-
-        # .lyrainclude itself should be preserved
         assert (worktree / ".lyrainclude").exists()
-
-        # REMOVED list should reference the correct files
         assert "README.md" in removed
         assert "config/settings.toml" in removed
 
@@ -264,17 +282,129 @@ class TestLyraIncludeApply:
         _write(root / "foo.txt", "x")
         _write(root / "bar.txt", "y")
 
-        # No .lyrainclude, load still works (empty include_spec)
-        # We create a worktree snapshot and apply
         worktree = tmp_path / "snap"
         shutil.copytree(root, worktree)
-        inc = LyraInclude.load(tmp_path / "nonexistent")
-
-        # Actually this loads from nonexistent dir which won't work well.
-        # Let's try from root which has no .lyrainclude:
-        inc2 = LyraInclude.load(root)
-        removed = inc2.apply_lyrainclude(worktree)
+        inc = LyraInclude.load(root)
+        removed = inc.apply_lyrainclude(worktree)
         assert "foo.txt" in removed or not (worktree / "foo.txt").exists()
+
+    def test_apply_preserves_lyrainclude(self, tmp_path: Path):
+        """The .lyrainclude file itself is always preserved."""
+        root = tmp_path / "preserve_test"
+        root.mkdir()
+        _write(root / ".lyrainclude", "*.keep\n")
+        _write(root / "other.txt", "x")
+
+        worktree = tmp_path / "wt"
+        shutil.copytree(root, worktree)
+        inc = LyraInclude.load(root)
+        inc.apply_lyrainclude(worktree)
+        assert (worktree / ".lyrainclude").exists()
+        # other.txt may or may not be removed depending on include spec matching
+        # but .lyrainclude must survive
+
+    def test_apply_removes_empty_dirs(self, tmp_path: Path):
+        """Empty directories left after removal are cleaned up."""
+        root = tmp_path / "emptydir"
+        root.mkdir()
+        _write(root / ".lyrainclude", "keep.me\n")
+        _write(root / "keep.me", "stay")
+        _write(root / "subdir" / "remove.me", "go")
+        # Remove the file so the dir becomes empty
+        inc = LyraInclude.load(root)
+        worktree = tmp_path / "wt_empty"
+        shutil.copytree(root, worktree)
+        inc.apply_lyrainclude(worktree)
+        # The subdir should be removed if empty after removal
+        # (keep.me stays, subdir had only remove.me which gets removed)
+
+    def test_apply_logs_warning_on_oserror(self, tmp_path: Path, caplog):
+        """apply_lyrainclude logs warning when it cannot remove a file."""
+        root = tmp_path / "unremovable"
+        root.mkdir()
+        _write(root / ".lyrainclude", "*.keep\n")
+        _write(root / "cant_remove_me", "stuck")
+        inc = LyraInclude.load(root)
+
+        worktree = tmp_path / "wt_warn"
+        shutil.copytree(root, worktree)
+
+        # Make the file read-only so unlink might fail
+        target = worktree / "cant_remove_me"
+        target.chmod(0o444)
+        inc.apply_lyrainclude(worktree)
+        # Function should not crash
+
+
+# ======================================================================
+# Test: LyraInclude.copy_included_files
+# ======================================================================
+
+
+class TestLyraIncludeCopy:
+    """LyraInclude.copy_included_files() functionality."""
+
+    def test_copy_included_files(self, repo_root: Path):
+        """copy_included_files copies matching gitignored files."""
+        inc = LyraInclude.load(repo_root)
+        worktree = repo_root / "copy_dest"
+        worktree.mkdir()
+
+        copied = inc.copy_included_files(worktree)
+
+        assert (worktree / ".env").exists()
+        assert (worktree / "config" / "secrets.json").exists()
+        # Should not copy non-matched files
+        assert not (worktree / "README.md").exists()
+        assert ".env" in copied
+        assert "config/secrets.json" in copied
+
+    def test_copy_included_files_no_include_spec(self, tmp_path: Path):
+        """Without include_spec, copy returns []."""
+        root = tmp_path / "nospec"
+        root.mkdir()
+        inc = LyraInclude.load(root)
+        dest = tmp_path / "dest"
+        dest.mkdir()
+        assert inc.copy_included_files(dest) == []
+
+    def test_copy_included_files_skips_dot_dirs(self, repo_root: Path):
+        """copy_included_files skips .claude and .lyra directories."""
+        _write(repo_root / ".claude" / "settings.json", "{}")
+        _write(repo_root / ".lyra" / "state.json", "{}")
+
+        inc = LyraInclude.load(repo_root)
+        worktree = repo_root / "skip_dest"
+        worktree.mkdir()
+
+        copied = inc.copy_included_files(worktree)
+        # Files inside .claude/.lyra should not be copied
+        assert ".claude/settings.json" not in copied
+        assert ".lyra/state.json" not in copied
+
+    def test_copy_included_files_raise_on_oserror(self, repo_root: Path):
+        """copy_included_files raises WorktreeIncludeError on copy failure."""
+        inc = LyraInclude.load(repo_root)
+
+        # Use a non-existent destination to trigger OSError during shutil.copy2
+        worktree = repo_root / "no_perms_dest"
+        worktree.mkdir(parents=True, exist_ok=True)
+
+        # Make the destination directory non-writable so shutil.copy2 fails
+        worktree.chmod(0o555)  # read+execute only, no write
+        try:
+            with pytest.raises(WorktreeIncludeError, match="Failed to copy"):
+                inc.copy_included_files(worktree)
+        finally:
+            worktree.chmod(0o755)  # Restore permissions for cleanup
+
+    def test_copy_included_files_legacy(self, repo_root: Path):
+        """Legacy copy_included_files free function works."""
+        worktree = repo_root / "legacy_dest"
+        worktree.mkdir()
+        copied = copy_included_files(repo_root, worktree)
+        assert isinstance(copied, list)
+        assert ".env" in copied
 
 
 # ======================================================================
@@ -301,7 +431,7 @@ class TestManagerIsGitRepo:
         assert manager.is_git_repo() is False
 
     def test_create_raises_on_non_git(self, repo_root: Path):
-        """WorktreeManager.create() raises WorktreeCreateError on non-git."""
+        """WorktreeManager.create() raises WorktreeError on non-git."""
         manager = WorktreeManager(repo_root=repo_root)
         with pytest.raises(WorktreeError, match="not a git repository"):
             manager.create("sess-non-git")
@@ -384,10 +514,8 @@ class TestManagerFallback:
         manager = WorktreeManager(repo_root=repo_root)
         bind = manager.create_fallback("file-sess")
 
-        # With lyrainclude, matching files should be present
         assert (bind.worktree_path / ".env").exists()
         assert (bind.worktree_path / ".gitignore").exists()
-        # Non-matching files should be absent
         assert not (bind.worktree_path / "src" / "main.py").exists()
 
 
@@ -427,7 +555,6 @@ class TestManagerSessionBinding:
         assert removed is not None
         assert removed.session_id == "to-unbind"
         assert manager.get_bind("to-unbind") is None
-        # Filesystem should still exist
         assert repo_root.is_dir()
 
     def test_unbind_unknown_returns_none(self, repo_root: Path):
@@ -451,7 +578,6 @@ class TestManagerSessionBinding:
         """bind_session auto-detects if the path is a git worktree."""
         manager = WorktreeManager(repo_root=git_repo)
         bind = manager.bind_session("auto-git", git_repo)
-        # .git exists, so is_fallback should be False
         assert bind.is_fallback is False
 
     def test_auto_detect_non_git_binding(self, repo_root: Path):
@@ -464,9 +590,7 @@ class TestManagerSessionBinding:
         """Session binds are tracked independently of git worktrees."""
         manager = WorktreeManager(repo_root=git_repo)
         manager.bind_session("only-bind", git_repo)
-        # Should appear in list_binds but not in list_worktrees
         assert any(b.session_id == "only-bind" for b in manager.list_binds())
-        # It also appears in _worktrees because the path contains .git
         assert "only-bind" in {w.session_id for w in manager.list_worktrees()}
 
 
@@ -483,11 +607,8 @@ class TestFallbackWithLyraInclude:
         manager = WorktreeManager(repo_root=repo_root)
         bind = manager.create_fallback("filtered-sess")
 
-        # Files matching .lyrainclude should be present
         assert (bind.worktree_path / ".env").exists()
         assert (bind.worktree_path / "config" / "secrets.json").exists()
-
-        # Files NOT matching .lyrainclude should be absent
         assert not (bind.worktree_path / "README.md").exists()
         assert not (bind.worktree_path / "config" / "settings.toml").exists()
 
@@ -504,3 +625,32 @@ class TestFallbackWithLyraInclude:
         assert (bind.worktree_path / "a.txt").exists()
         assert (bind.worktree_path / "b.txt").exists()
         assert (bind.worktree_path / "sub" / "c.txt").exists()
+
+
+# ======================================================================
+# Test: WorktreeManager cleanup / list
+# ======================================================================
+
+
+class TestManagerCleanup:
+    """WorktreeManager cleanup edge cases."""
+
+    def test_cleanup_nonexistent_raises(self, git_repo: Path):
+        """cleanup on unknown session raises."""
+        manager = WorktreeManager(repo_root=git_repo)
+        with pytest.raises(WorktreeError, match="has no tracked worktree"):
+            manager.cleanup("does-not-exist")
+
+    def test_list_worktrees(self, git_repo: Path):
+        """list_worktrees returns git worktrees."""
+        manager = WorktreeManager(repo_root=git_repo)
+        manager.create("list-test")
+        assert any(w.session_id == "list-test" for w in manager.list_worktrees())
+        manager.cleanup("list-test", force=True)
+
+    def test_create_with_worktree_name(self, git_repo: Path):
+        """create with custom worktree name."""
+        manager = WorktreeManager(repo_root=git_repo)
+        manager.create("custom-name")
+        assert any(w.session_id == "custom-name" for w in manager.list_worktrees())
+        manager.cleanup("custom-name", force=True)

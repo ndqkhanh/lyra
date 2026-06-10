@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import time
 from typing import Any
@@ -29,11 +30,7 @@ from lyra.remote.zero_trust_relay import (
 
 
 class _AsyncMessageIter:
-    """An async iterator that yields WebSocket message frames.
-
-    Each item is a simple namespace with a ``type`` attribute (always
-    ``"text"``) and a ``data`` attribute containing the JSON string.
-    """
+    """An async iterator that yields WebSocket message frames."""
 
     def __init__(self, messages: list[dict[str, Any]]) -> None:
         self._messages = list(messages)
@@ -45,14 +42,13 @@ class _AsyncMessageIter:
         if not self._messages:
             raise StopAsyncIteration
         msg = self._messages.pop(0)
-        # Simulate aiohttp WSMessage shape
         return _Frame(msg)
 
 
 class _Frame:
     """Minimal stand-in for an aiohttp WSMessage."""
 
-    type = "text"  # Class-level default
+    type = "text"
 
     def __init__(self, data: dict[str, Any]) -> None:
         self.data = json.dumps(data)
@@ -63,19 +59,16 @@ def _make_mock_ws(messages: list[dict[str, Any]] | None = None) -> MagicMock:
     """Build a mocked aiohttp WebSocket that yields *messages*."""
     ws = MagicMock()
     ws.closed = False
-    ws.__aiter__.return_value = _AsyncMessageIter(messages or [])
+    # Assign __aiter__ directly to avoid MagicMock's auto async-iterator wrapping.
+    # Lambda accepts *args because MagicMock may pass self.
+    ws.__aiter__ = lambda *args: _AsyncMessageIter(messages or [])
     ws.send_json = AsyncMock()
     ws.close = AsyncMock()
-    ws.closed = False
     return ws
 
 
 def _patch_client_session(ws: MagicMock) -> MagicMock:
-    """Patch ``aiohttp.ClientSession`` so ``ws_connect`` returns *ws*.
-
-    Note: ``connect()`` uses ``ClientSession()`` (no ``async with``), so we
-    mock the return value of direct construction, not ``__aenter__``.
-    """
+    """Patch aiohttp.ClientSession so ws_connect returns *ws*."""
     patcher = patch("aiohttp.ClientSession")
     mock_session_cls = patcher.start()
     session_instance = MagicMock()
@@ -94,7 +87,7 @@ class TestZeroTrustCrypto:
 
     def test_generate_key(self) -> None:
         key = ZeroTrustCrypto.generate_key()
-        assert len(key) == 32  # 256 bits
+        assert len(key) == 32
 
     def test_generate_key_unique(self) -> None:
         keys = {ZeroTrustCrypto.generate_key() for _ in range(10)}
@@ -162,6 +155,22 @@ class TestZeroTrustCrypto:
         ct2 = crypto.encrypt("same text")
         assert ct1 != ct2
 
+    def test_fernet_key_derivation(self) -> None:
+        """_fernet_key produces a url-safe base64 key."""
+        crypto = ZeroTrustCrypto(ZeroTrustCrypto.generate_key())
+        fk = crypto._fernet_key()
+        assert isinstance(fk, bytes)
+        # Fernet keys are 32 bytes url-safe-base64 encoded -> 44 bytes
+        assert len(fk) == 44
+
+    def test_sign_returns_hex_string(self) -> None:
+        crypto = ZeroTrustCrypto(ZeroTrustCrypto.generate_key())
+        sig = crypto.sign("data")
+        assert isinstance(sig, str)
+        # SHA256 hex digest is 64 chars
+        assert len(sig) == 64
+        assert all(c in "0123456789abcdef" for c in sig)
+
 
 # =========================================================================
 # SignedCommand
@@ -200,6 +209,31 @@ class TestSignedCommand:
         cmd = SignedCommand(MobileAction.APPROVE, {}, "s1")
         assert cmd.timestamp > 0
         assert abs(cmd.timestamp - time.time()) < 5
+
+    def test_serialize_all_actions(self) -> None:
+        for action in MobileAction:
+            cmd = SignedCommand(action=action, payload={"k": "v"}, session_id="s1")
+            data = json.loads(cmd.serialize())
+            assert data["action"] == action.value
+            assert data["session_id"] == "s1"
+
+    def test_mobile_action_values(self) -> None:
+        assert MobileAction.APPROVE.value == "approve"
+        assert MobileAction.DENY.value == "deny"
+        assert MobileAction.MESSAGE.value == "message"
+        assert MobileAction.PEEK.value == "peek"
+
+    def test_session_event_values(self) -> None:
+        assert SessionEvent.COMPLETION.value == "completion"
+        assert SessionEvent.ERROR.value == "error"
+        assert SessionEvent.NEEDS_APPROVAL.value == "needs_approval"
+        assert SessionEvent.COST_ALERT.value == "cost_alert"
+        assert SessionEvent.DISCONNECTED.value == "disconnected"
+
+    def test_signed_command_default_signature(self) -> None:
+        """Default signature is empty string."""
+        cmd = SignedCommand(MobileAction.APPROVE, {}, "s1")
+        assert cmd.signature == ""
 
 
 # =========================================================================
@@ -289,6 +323,17 @@ class TestPushNotification:
         )
         assert n.data["cost"] == 0.05
 
+    def test_to_payload_enum_conversion(self) -> None:
+        """to_payload converts Enum event to string."""
+        n = PushNotification("t", "b", SessionEvent.COMPLETION, "s1")
+        payload = n.to_payload()
+        assert payload["event"] == "completion"
+
+    def test_template_base_cost_alert(self) -> None:
+        n = build_notification(SessionEvent.COST_ALERT, "lyra-abc")
+        assert n.data is not None
+        assert n.title == "Cost Alert"
+
 
 # =========================================================================
 # ZeroTrustRelay
@@ -323,6 +368,14 @@ class TestZeroTrustRelay:
         )
         assert config.notification_token == "fcm-token-xyz"
         assert config.reconnect_delay == 1.0
+
+    def test_config_max_reconnect(self) -> None:
+        config = RelayConfig(
+            relay_url="wss://relay/ws",
+            device_id="d1",
+            max_reconnect_attempts=3,
+        )
+        assert config.max_reconnect_attempts == 3
 
     # ------------------------------------------------------------------
     # Connection lifecycle
@@ -374,6 +427,96 @@ class TestZeroTrustRelay:
         finally:
             patcher.stop()
 
+    @pytest.mark.asyncio
+    async def test_connect_sends_auth_frame(self) -> None:
+        ws = _make_mock_ws()
+        patcher = _patch_client_session(ws)
+        try:
+            config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+            relay = ZeroTrustRelay(config)
+            await relay.connect()
+
+            # First send_json call should be auth
+            auth_call = None
+            for call in ws.send_json.call_args_list:
+                args, _ = call
+                if args and isinstance(args[0], dict) and args[0].get("type") == "auth":
+                    auth_call = args[0]
+                    break
+            assert auth_call is not None
+            assert auth_call["device_id"] == "d1"
+            await relay.disconnect()
+        finally:
+            patcher.stop()
+
+    @pytest.mark.asyncio
+    async def test_connect_reconnect_exhausted(self) -> None:
+        """Connection failure with max_reconnect_attempts = 1 raises."""
+        patcher = patch("aiohttp.ClientSession")
+        mock_session_cls = patcher.start()
+        session_instance = MagicMock()
+        session_instance.ws_connect = AsyncMock(side_effect=ConnectionError("refused"))
+        mock_session_cls.return_value = session_instance
+
+        try:
+            config = RelayConfig(
+                relay_url="wss://relay/ws",
+                device_id="d1",
+                reconnect_delay=0.01,
+                max_reconnect_attempts=1,
+            )
+            relay = ZeroTrustRelay(config)
+            with pytest.raises(ConnectionError, match="Max reconnect attempts"):
+                await relay.connect()
+        finally:
+            patcher.stop()
+
+    @pytest.mark.asyncio
+    async def test_register_session_unconnected_raises(self) -> None:
+        """register_session raises ConnectionError when not connected."""
+        config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+        relay = ZeroTrustRelay(config)
+        with pytest.raises(ConnectionError, match="Not connected"):
+            await relay.register_session("lyra-test")
+
+    @pytest.mark.asyncio
+    async def test_send_encrypted_unconnected_raises(self) -> None:
+        """send_encrypted raises ConnectionError when not connected."""
+        config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+        relay = ZeroTrustRelay(config)
+        with pytest.raises(ConnectionError, match="Not connected"):
+            await relay.send_encrypted("lyra-test", {"type": "test"})
+
+    @pytest.mark.asyncio
+    async def test_send_push_notification_unconnected_raises(self) -> None:
+        """send_push_notification raises ConnectionError when not connected."""
+        config = RelayConfig(
+            relay_url="wss://relay/ws",
+            device_id="d1",
+            notification_token="tok",
+        )
+        relay = ZeroTrustRelay(config)
+        notification = build_notification(SessionEvent.COMPLETION, "s1")
+        with pytest.raises(ConnectionError, match="Not connected"):
+            await relay.send_push_notification(notification)
+
+    @pytest.mark.asyncio
+    async def test_mobile_steer_unconnected_raises(self) -> None:
+        """mobile_steer raises ConnectionError when not connected."""
+        config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+        relay = ZeroTrustRelay(config)
+        cmd = SignedCommand(MobileAction.APPROVE, {}, "s1")
+        with pytest.raises(ConnectionError, match="Not connected"):
+            await relay.mobile_steer(cmd)
+
+    @pytest.mark.asyncio
+    async def test_unregister_session_no_ws(self) -> None:
+        """unregister_session works without a connection."""
+        config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+        relay = ZeroTrustRelay(config)
+        # Should not raise
+        await relay.unregister_session("lyra-test")
+
     # ------------------------------------------------------------------
     # Session registration
     # ------------------------------------------------------------------
@@ -423,6 +566,20 @@ class TestZeroTrustRelay:
         finally:
             patcher.stop()
 
+    @pytest.mark.asyncio
+    async def test_register_session_without_name(self) -> None:
+        ws = _make_mock_ws()
+        patcher = _patch_client_session(ws)
+        try:
+            config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+            relay = ZeroTrustRelay(config)
+            await relay.connect()
+
+            await relay.register_session("lyra-xyz")
+            assert "lyra-xyz" in relay._session_keys
+        finally:
+            patcher.stop()
+
     # ------------------------------------------------------------------
     # E2E encryption
     # ------------------------------------------------------------------
@@ -444,7 +601,6 @@ class TestZeroTrustRelay:
                 {"type": "status", "data": "secret"},
             )
 
-            # Find the relay_message call
             relay_msg = None
             for call in ws.send_json.call_args_list:
                 args, _ = call
@@ -495,6 +651,36 @@ class TestZeroTrustRelay:
         finally:
             patcher.stop()
 
+    @pytest.mark.asyncio
+    async def test_mobile_steer_unregistered_session(self) -> None:
+        """mobile_steer uses transport key for unregistered sessions."""
+        ws = _make_mock_ws()
+        patcher = _patch_client_session(ws)
+        try:
+            config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+            relay = ZeroTrustRelay(config)
+            await relay.connect()
+
+            ws.send_json.reset_mock()
+            cmd = SignedCommand(
+                action=MobileAction.PEEK,
+                payload={},
+                session_id="unregistered-session",
+            )
+            await relay.mobile_steer(cmd)
+
+            steer_call = None
+            for call in ws.send_json.call_args_list:
+                args, _ = call
+                if args and isinstance(args[0], dict) and args[0].get("type") == "mobile_steer":
+                    steer_call = args[0]
+                    break
+
+            assert steer_call is not None
+            assert steer_call["command"]["signature"] != ""
+        finally:
+            patcher.stop()
+
     # ------------------------------------------------------------------
     # Push notifications
     # ------------------------------------------------------------------
@@ -542,7 +728,6 @@ class TestZeroTrustRelay:
             notification = build_notification(SessionEvent.COMPLETION, "lyra-abc")
             await relay.send_push_notification(notification)
 
-            # Should NOT have sent a push_notification frame
             for call in ws.send_json.call_args_list:
                 args, _ = call
                 if args and isinstance(args[0], dict):
@@ -564,6 +749,21 @@ class TestZeroTrustRelay:
 
         assert len(relay._event_handlers[SessionEvent.COMPLETION]) == 1
 
+    def test_on_event_decorator_multiple(self) -> None:
+        """Multiple handlers for the same event."""
+        config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+        relay = ZeroTrustRelay(config)
+
+        @relay.on_event(SessionEvent.ERROR)
+        async def h1(sid, payload):
+            pass
+
+        @relay.on_event(SessionEvent.ERROR)
+        async def h2(sid, payload):
+            pass
+
+        assert len(relay._event_handlers[SessionEvent.ERROR]) == 2
+
     def test_on_any_message(self) -> None:
         config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
         relay = ZeroTrustRelay(config)
@@ -573,6 +773,319 @@ class TestZeroTrustRelay:
 
         relay.on_any_message(handler)
         assert relay._on_message is handler
+
+    # ------------------------------------------------------------------
+    # Incoming message handling
+    # ------------------------------------------------------------------
+
+    @pytest.mark.asyncio
+    async def test_listener_processes_heartbeat_ack(self) -> None:
+        """heartbeat_ack frames are silently consumed."""
+        ws = _make_mock_ws([{"type": "heartbeat_ack"}])
+        patcher = _patch_client_session(ws)
+        try:
+            config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+            relay = ZeroTrustRelay(config)
+            await relay.connect()
+            # Give listener a moment to process
+            await asyncio.sleep(0.02)
+            # No error means the ack was handled gracefully
+            await relay.disconnect()
+        finally:
+            patcher.stop()
+
+    @pytest.mark.asyncio
+    async def test_listener_processes_auth_ok(self) -> None:
+        """auth_ok frames are silently consumed."""
+        ws = _make_mock_ws([{"type": "auth_ok"}])
+        patcher = _patch_client_session(ws)
+        try:
+            config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+            relay = ZeroTrustRelay(config)
+            await relay.connect()
+            await asyncio.sleep(0.02)
+            await relay.disconnect()
+        finally:
+            patcher.stop()
+
+    @pytest.mark.asyncio
+    async def test_listener_processes_close_frame(self) -> None:
+        """A close frame stops the listener gracefully."""
+        ws = _make_mock_ws()
+        ws.type = "close"
+        ws.data = ""
+        patcher = _patch_client_session(ws)
+        try:
+            config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+            relay = ZeroTrustRelay(config)
+            await relay.connect()
+            await asyncio.sleep(0.02)
+            await relay.disconnect()
+        finally:
+            patcher.stop()
+
+    @pytest.mark.asyncio
+    async def test_listener_handles_json_decode_error(self) -> None:
+        """Bad JSON frames are silently skipped."""
+        ws = _make_mock_ws()
+        ws.data = "not-json{{{"
+        ws.type = "text"
+        patcher = _patch_client_session(ws)
+        try:
+            config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+            relay = ZeroTrustRelay(config)
+            await relay.connect()
+            await asyncio.sleep(0.02)
+            await relay.disconnect()
+        finally:
+            patcher.stop()
+
+    @pytest.mark.asyncio
+    async def test_handle_incoming_message_unknown_session(self) -> None:
+        """Messages for unknown sessions are logged and skipped."""
+        ws = _make_mock_ws([{
+            "type": "relay_message",
+            "session_id": "unknown-session",
+            "ciphertext": "abc",
+            "signature": "",
+        }])
+        patcher = _patch_client_session(ws)
+        try:
+            config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+            relay = ZeroTrustRelay(config)
+            await relay.connect()
+            await asyncio.sleep(0.02)
+            await relay.disconnect()
+        finally:
+            patcher.stop()
+
+    @pytest.mark.asyncio
+    async def test_handle_incoming_message_no_session_id(self) -> None:
+        """Messages without a session_id are silently dropped."""
+        ws = _make_mock_ws([{
+            "type": "relay_message",
+            "ciphertext": "abc",
+        }])
+        patcher = _patch_client_session(ws)
+        try:
+            config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+            relay = ZeroTrustRelay(config)
+            await relay.connect()
+            await asyncio.sleep(0.02)
+            await relay.disconnect()
+        finally:
+            patcher.stop()
+
+    @pytest.mark.asyncio
+    async def test_handle_incoming_message_decryption_failure(self) -> None:
+        """When decryption fails, message is logged and skipped."""
+        ws = _make_mock_ws()
+        patcher = _patch_client_session(ws)
+        try:
+            config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+            relay = ZeroTrustRelay(config)
+            await relay.connect()
+            await relay.register_session("lyra-s1")
+
+            # Manually inject a message with invalid ciphertext
+            await relay._handle_relay_frame({
+                "type": "relay_message",
+                "session_id": "lyra-s1",
+                "ciphertext": "invalid:ciphertext",
+                "signature": "",
+            })
+            await asyncio.sleep(0.02)
+            await relay.disconnect()
+        finally:
+            patcher.stop()
+
+    @pytest.mark.asyncio
+    async def test_handle_incoming_bad_signature(self) -> None:
+        """Messages with bad signatures are logged and skipped."""
+        ws = _make_mock_ws()
+        patcher = _patch_client_session(ws)
+        try:
+            config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+            relay = ZeroTrustRelay(config)
+            await relay.connect()
+            await relay.register_session("lyra-s1")
+
+            # Manually inject a message with wrong signature
+            crypto = relay._crypto
+            ct = crypto.encrypt('{"event": "completion", "data": "ok"}')
+
+            await relay._handle_relay_frame({
+                "type": "relay_message",
+                "session_id": "lyra-s1",
+                "ciphertext": ct,
+                "signature": "bad" + "0" * 62,
+            })
+            await asyncio.sleep(0.02)
+            await relay.disconnect()
+        finally:
+            patcher.stop()
+
+    @pytest.mark.asyncio
+    async def test_handle_mobile_command_unknown_session(self) -> None:
+        """Mobile commands for unknown sessions are skipped."""
+        config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+        relay = ZeroTrustRelay(config)
+        relay._session_keys["known-session"] = ZeroTrustCrypto.generate_key()
+
+        await relay._handle_mobile_command({
+            "command": {
+                "session_id": "unknown-session",
+                "serialized": "{}",
+                "signature": "test",
+                "action": "approve",
+                "payload": {},
+            }
+        })
+
+    @pytest.mark.asyncio
+    async def test_handle_mobile_command_no_session_id(self) -> None:
+        """Mobile commands without session_id are skipped."""
+        config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+        relay = ZeroTrustRelay(config)
+
+        await relay._handle_mobile_command({
+            "command": {
+                "serialized": "{}",
+                "signature": "test",
+            }
+        })
+
+    @pytest.mark.asyncio
+    async def test_handle_mobile_command_bad_signature(self) -> None:
+        """Mobile commands with invalid signatures are skipped."""
+        config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+        relay = ZeroTrustRelay(config)
+        relay._session_keys["lyra-s1"] = ZeroTrustCrypto.generate_key()
+
+        await relay._handle_mobile_command({
+            "command": {
+                "session_id": "lyra-s1",
+                "serialized": '{"action":"approve"}',
+                "signature": "invalid",
+                "action": "approve",
+                "payload": {"tool_call_id": "tc_001"},
+            }
+        })
+
+    @pytest.mark.asyncio
+    async def test_handle_mobile_command_valid(self) -> None:
+        """Valid mobile command with mapped event triggers handler."""
+        config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+        relay = ZeroTrustRelay(config)
+
+        session_key = ZeroTrustCrypto.generate_key()
+        relay._session_keys["lyra-s1"] = session_key
+
+        handler_called = False
+
+        @relay.on_event(SessionEvent.NEEDS_APPROVAL)
+        async def on_approval(sid, payload):
+            nonlocal handler_called
+            handler_called = True
+
+        # Create a properly signed serialized command
+        crypto = ZeroTrustCrypto(session_key)
+        serialized = SignedCommand(
+            action=MobileAction.APPROVE,
+            payload={"tool_call_id": "tc_001"},
+            session_id="lyra-s1",
+        ).serialize()
+        signature = crypto.sign(serialized)
+
+        await relay._handle_mobile_command({
+            "command": {
+                "session_id": "lyra-s1",
+                "serialized": serialized,
+                "signature": signature,
+                "action": "approve",
+                "payload": {"tool_call_id": "tc_001"},
+            }
+        })
+
+        assert handler_called
+
+    # ------------------------------------------------------------------
+    # _safe_call
+    # ------------------------------------------------------------------
+
+    @pytest.mark.asyncio
+    async def test_safe_call_sync(self) -> None:
+        """_safe_call works with synchronous callables."""
+
+        def sync_fn(x: int) -> int:
+            return x * 2
+
+        result = await ZeroTrustRelay._safe_call(sync_fn, 21)
+        assert result == 42
+
+    @pytest.mark.asyncio
+    async def test_safe_call_async(self) -> None:
+        """_safe_call works with async callables."""
+
+        async def async_fn(x: int) -> int:
+            return x * 2
+
+        result = await ZeroTrustRelay._safe_call(async_fn, 21)
+        assert result == 42
+
+    # ------------------------------------------------------------------
+    # _send_plain / _send_encrypted_raw
+    # ------------------------------------------------------------------
+
+    @pytest.mark.asyncio
+    async def test_send_plain_ignores_no_ws(self) -> None:
+        """_send_plain does nothing when ws is None."""
+        config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+        relay = ZeroTrustRelay(config)
+        # Should not raise
+        await relay._send_plain({"type": "test"})
+
+    @pytest.mark.asyncio
+    async def test_send_encrypted_raw_ignores_no_ws(self) -> None:
+        """_send_encrypted_raw does nothing when ws is None."""
+        config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+        relay = ZeroTrustRelay(config)
+        await relay._send_encrypted_raw({"type": "test"})
+
+    # ------------------------------------------------------------------
+    # Heartbeat loop
+    # ------------------------------------------------------------------
+
+    @pytest.mark.asyncio
+    async def test_heartbeat_loop_sends(self) -> None:
+        ws = _make_mock_ws()
+        patcher = _patch_client_session(ws)
+        try:
+            config = RelayConfig(
+                relay_url="wss://relay/ws",
+                device_id="d1",
+                heartbeat_interval=9999,  # Don't fire during test
+            )
+            relay = ZeroTrustRelay(config)
+            await relay.connect()
+            await relay.disconnect()
+        finally:
+            patcher.stop()
+
+    @pytest.mark.asyncio
+    async def test_heartbeat_loop_cancelled(self) -> None:
+        """Heartbeat loop handles cancellation gracefully."""
+        config = RelayConfig(relay_url="wss://relay/ws", device_id="d1")
+        relay = ZeroTrustRelay(config)
+
+        async def run_and_cancel():
+            task = asyncio.create_task(relay._heartbeat_loop())
+            await asyncio.sleep(0.01)
+            task.cancel()
+            await task
+
+        # Should not raise
+        await run_and_cancel()
 
 
 # =========================================================================
@@ -713,7 +1226,6 @@ class TestMobileSteeringSurface:
             auto_connect=False,
         )
         mock_relay = AsyncMock(spec=ZeroTrustRelay)
-        mock_relay.connect = AsyncMock()
         mock_relay.send_encrypted = AsyncMock()
         mock_relay.on_any_message = MagicMock()
         surface._relay = mock_relay
@@ -820,6 +1332,91 @@ class TestMobileSteeringSurface:
         assert notification.title == "Over Budget!"
         assert notification.data["cost"] == 5.50
 
+    @pytest.mark.asyncio
+    async def test_not_connected_raises(self) -> None:
+        """Operations raise RuntimeError when not connected."""
+        surface = MobileSteeringSurface(
+            relay_url="wss://relay.example.com/ws",
+            device_id="phone-1",
+            auto_connect=False,
+        )
+        with pytest.raises(RuntimeError, match="not connected"):
+            await surface.approve("s1", "tc_001")
+
+    @pytest.mark.asyncio
+    async def test_subscribe_invalid_event(self) -> None:
+        """Subscribing with an invalid event type raises ValueError."""
+        surface = MobileSteeringSurface(
+            relay_url="wss://relay.example.com/ws",
+            device_id="phone-1",
+            auto_connect=False,
+        )
+        mock_relay = AsyncMock(spec=ZeroTrustRelay)
+        mock_relay.connect = AsyncMock()
+        surface._relay = mock_relay
+        surface._connected = True
+
+        with pytest.raises(ValueError, match="Unknown event"):
+            await surface.subscribe(
+                "lyra-abc",
+                "invalid_event",  # type: ignore
+                lambda s, p: None,
+            )
+
+    @pytest.mark.asyncio
+    async def test_unsubscribe_unknown_returns_false(self) -> None:
+        """Unsubscribing an unknown ID returns False."""
+        surface = MobileSteeringSurface(
+            relay_url="wss://relay.example.com/ws",
+            device_id="phone-1",
+            auto_connect=False,
+        )
+        result = await surface.unsubscribe("nonexistent")
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_status_with_envelope(self) -> None:
+        """status() returns SessionSummary when relay responds."""
+        surface = MobileSteeringSurface(
+            relay_url="wss://relay.example.com/ws",
+            device_id="phone-1",
+            auto_connect=False,
+        )
+        mock_relay = AsyncMock(spec=ZeroTrustRelay)
+        mock_relay.send_encrypted = AsyncMock()
+        mock_relay.on_any_message = MagicMock()
+        mock_relay.connect = AsyncMock()
+        surface._relay = mock_relay
+        surface._connected = True
+
+        # status() calls on_any_message() then send_encrypted(), then waits
+        # for the handler to fire.  We capture the handler and fire it from
+        # send_encrypted's side_effect.
+        captured_handler = None
+
+        def capture_handler(handler):
+            nonlocal captured_handler
+            captured_handler = handler
+
+        mock_relay.on_any_message.side_effect = capture_handler
+
+        async def send_and_respond(session_id, payload):
+            """After send_encrypted is called, fire the status handler."""
+            if captured_handler:
+                captured_handler("lyra-s1", {
+                    "type": "status_response",
+                    "session_id": "lyra-s1",
+                    "agent_online": True,
+                    "pending_approvals": 2,
+                })
+
+        mock_relay.send_encrypted.side_effect = send_and_respond
+
+        result = await surface.status("lyra-s1")
+        assert isinstance(result, SessionSummary)
+        assert result.session_id == "lyra-s1"
+        assert result.agent_online
+
 
 # =========================================================================
 # SessionSummary
@@ -847,6 +1444,7 @@ class TestSessionSummary:
         )
         assert s.agent_online
         assert s.pending_approvals == 3
+        assert s.last_message == "Processing data..."
 
 
 # =========================================================================

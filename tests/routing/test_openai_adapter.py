@@ -1,6 +1,5 @@
 """
-Unit tests for the OpenAI provider adapter.
-
+Unit tests for the OpenAI provider adapter (enhanced).
 Mocks all external API calls (OpenAI SDK) to test public methods,
 error paths, and edge cases without a real API key.
 """
@@ -48,13 +47,28 @@ class TestGetPricing:
         assert inp == 10.00
         assert out == 40.00
 
+    def test_o4_mini(self) -> None:
+        inp, out = _get_pricing("o4-mini")
+        assert inp == 1.10
+        assert out == 4.40
+
+    def test_gpt_4_1(self) -> None:
+        inp, out = _get_pricing("gpt-4-1")
+        assert inp == 2.00
+        assert out == 8.00
+
     def test_unknown_model(self) -> None:
         inp, out = _get_pricing("weird-model-v1")
-        assert inp == 2.50  # _DEFAULT_INPUT_PRICE
-        assert out == 10.00  # _DEFAULT_OUTPUT_PRICE
+        assert inp == 2.50
+        assert out == 10.00
 
     def test_empty_string(self) -> None:
         inp, out = _get_pricing("")
+        assert inp == 2.50
+        assert out == 10.00
+
+    def test_audio_preview(self) -> None:
+        inp, out = _get_pricing("gpt-4o-audio-preview")
         assert inp == 2.50
         assert out == 10.00
 
@@ -161,6 +175,7 @@ class TestOpenAIAdapterComplete:
         assert response.model == "gpt-4o"
         assert response.usage.input_tokens == 15
         assert response.usage.output_tokens == 5
+        assert response.latency_ms > 0
 
     async def test_with_tools(self, adapter, mock_client, sample_request):
         req = CompletionRequest(
@@ -178,7 +193,6 @@ class TestOpenAIAdapterComplete:
         assert "tools" in call_kwargs
 
     async def test_reasoning_effort_low(self, adapter, mock_client, sample_request):
-        """Low effort maps to reasoning_effort='low'."""
         req = CompletionRequest(
             messages=sample_request.messages, model="o3",
             max_tokens=100, temperature=0.0, effort=EffortLevel.LOW,
@@ -191,7 +205,6 @@ class TestOpenAIAdapterComplete:
         assert call_kwargs.get("reasoning_effort") == "low"
 
     async def test_reasoning_effort_high(self, adapter, mock_client, sample_request):
-        """High effort maps to reasoning_effort='medium'."""
         req = CompletionRequest(
             messages=sample_request.messages, model="o3",
             max_tokens=100, temperature=0.0, effort=EffortLevel.HIGH,
@@ -204,7 +217,6 @@ class TestOpenAIAdapterComplete:
         assert call_kwargs.get("reasoning_effort") == "medium"
 
     async def test_reasoning_effort_xhigh(self, adapter, mock_client, sample_request):
-        """XHIGH and MAX effort map to reasoning_effort='high'."""
         req = CompletionRequest(
             messages=sample_request.messages, model="o3",
             max_tokens=100, temperature=0.0, effort=EffortLevel.XHIGH,
@@ -229,11 +241,10 @@ class TestOpenAIAdapterComplete:
         assert call_kwargs.get("reasoning_effort") == "high"
 
     async def test_reasoning_effort_medium_no_param(self, adapter, mock_client, sample_request):
-        """Medium effort does not pass reasoning_effort."""
         mock_client.chat.completions.create = AsyncMock(
             return_value=await self._mock_completion(content="answer"),
         )
-        await adapter.complete(sample_request)  # sample_request is MEDIUM
+        await adapter.complete(sample_request)
         call_kwargs = mock_client.chat.completions.create.call_args.kwargs
         assert "reasoning_effort" not in call_kwargs
 
@@ -321,9 +332,10 @@ class TestOpenAIAdapterCompleteStream:
             chunks.append(ch)
         assert len(chunks) == 1
         assert chunks[0].tool_call_delta is not None
+        tc_data = json.loads(chunks[0].tool_call_delta)
+        assert tc_data["function"]["name"] == "get_weather"
 
     async def test_stream_reasoning_effort(self, adapter, mock_client, sample_request):
-        """Streaming also passes reasoning_effort for o-series."""
         req = CompletionRequest(
             messages=sample_request.messages, model="o3",
             max_tokens=100, temperature=0.0, effort=EffortLevel.XHIGH,
@@ -381,8 +393,9 @@ class TestOpenAIAdapterSupports:
         assert adapter.supports(Capability.AUDIO_OUTPUT)
 
     def test_unsupported(self, adapter):
-        # No unsupported capabilities in the current set (all are supported)
-        pass
+        # All capabilities currently supported; verify count
+        supported_count = sum(1 for c in Capability if adapter.supports(c))
+        assert supported_count == 8
 
 
 class TestOpenAIAdapterCostEstimate:
@@ -402,6 +415,21 @@ class TestOpenAIAdapterCostEstimate:
             messages=(Message(role="user", content="Hi"),),
             model="some-random-model",
             max_tokens=50,
+        )
+        cost = adapter.cost_estimate(request)
+        assert cost.total_max_cost > 0
+
+    def test_cost_estimate_zero_messages(self, adapter):
+        request = CompletionRequest(
+            messages=(), model="gpt-4o", max_tokens=100,
+        )
+        cost = adapter.cost_estimate(request)
+        assert cost.total_max_cost > 0
+
+    def test_cost_estimate_with_cache(self, adapter):
+        request = CompletionRequest(
+            messages=(Message(role="system", content="X" * 1000),),
+            model="gpt-4o", max_tokens=200,
         )
         cost = adapter.cost_estimate(request)
         assert cost.total_max_cost > 0
@@ -426,4 +454,10 @@ class TestOpenAIAdapterClose:
 
     def test_close_runtime_error(self, adapter, mock_client):
         with patch("asyncio.get_event_loop", side_effect=RuntimeError("no loop")):
-            adapter.close()  # should not raise
+            adapter.close()
+
+    def test_close_missing_key_pricing_fallback(self):
+        """Verify no-key adapter cannot be created, but _get_pricing works without adapter."""
+        with patch.dict(os.environ, {}, clear=True):
+            with pytest.raises(ValueError):
+                OpenAIAdapter()
